@@ -1,21 +1,20 @@
 #!/usr/bin/env python
+
+""" jtlvint.py --- Interface to the JTLV implementation of GR1 game
+
+About JTLV, see http://jtlv.ysaar.net/
+
+Nok Wongpiromsarn (nok@cds.caltech.edu)
+August 3, 2010
+"""
+
 import re, os, subprocess, sys
-from numpy import *
 from polyhedron import Vrep, Hrep
 from prop2part_ex1 import Region, PropPreservingPartition
-
-def warn(text):
-    class bcolors:
-        HEADER = '\033[95m'
-        OKBLUE = '\033[94m'
-        OKGREEN = '\033[92m'
-        WARNING = '\033[93m'
-        FAIL = '\033[91m'
-        ENDC = '\033[0m'
-    print bcolors.FAIL + text + bcolors.ENDC
+from errorprint import printWarning, printError
 
 
-def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='spec.smv', spc_file='spec.spc', verbose=0):
+def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
 
     - env_vars is a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
@@ -62,7 +61,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
                     reg = reg + val
                 env_vars[var] = '{' + reg + '}'
             else:
-                warn("WARNING: Unknown possible values for environment variable " + var)
+                printWarning("WARNING: Unknown possible values for environment variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
             for val in reg:
@@ -71,7 +70,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
                 all_values = all_values + str(val)
             env_vars[var] = '{' + all_values + '}'
         else:
-            warn("WARNING: Unknown possible values for environment variable " + var)
+            printWarning("WARNING: Unknown possible values for environment variable " + var)
                 
 
     # Replace '...' in the range of possible values of disc_sys_vars to the actual values and
@@ -94,7 +93,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
                     reg = reg + val
                 disc_sys_vars[var] = '{' + reg + '}'
             else:
-                warn("WARNING: Unknown possible values for discrete system variable " + var)
+                printWarning("WARNING: Unknown possible values for discrete system variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
             for val in reg:
@@ -103,7 +102,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
                 all_values = all_values + str(val)
             disc_sys_vars[var] = '{' + all_values + '}'
         else:
-            warn("WARNING: Unknown possible values for discrete system variable " + var)
+            printWarning("WARNING: Unknown possible values for discrete system variable " + var)
 
     # Write smv file
     f = open(smv_file, 'w')
@@ -133,7 +132,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
         newvarname = 'c' + newvarname
 
     if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
-        warn("WARNING: disc_dynamics.num_regions != len(disc_dynamics.list_regions)")
+        printWarning("WARNING: disc_dynamics.num_regions != len(disc_dynamics.list_regions)")
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
     
     newvar_values = range(0,disc_dynamics.num_regions)
@@ -176,10 +175,10 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
         # Determine which regions satisfy this prop
         propInd = [j for j in range(0,disc_dynamics.num_prop) if disc_dynamics.list_prop_symbol[j]==propSymbol]
         if (len(propInd) == 0):
-            warn('WARNING: Proposition' + propSymbol + ' is not defined in disc_dynamics.list_prop_symbol!')
+            printWarning('WARNING: Proposition' + propSymbol + ' is not defined in disc_dynamics.list_prop_symbol!')
             continue
         elif (len(propInd) > 1):
-            warn('WARNING: Proposition' + propSymbol + ' is not unique in disc_dynamics.list_prop_symbol!')
+            printWarning('WARNING: Proposition' + propSymbol + ' is not unique in disc_dynamics.list_prop_symbol!')
 
         propInd = propInd[0]
         reg = [j for j in range(0,disc_dynamics.num_regions) if disc_dynamics.list_region[j].list_prop[propInd]]
@@ -263,7 +262,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
 #        assumption = assumption + '\t[]((' + env_values_formula + ') -> next(' + env_values_formula + '))'
 
     f = open(spc_file, 'w')
-#   The use of 'with' below is a better statement but is not supported in my version of python
+#   The use of 'with' below is a better statement but is not supported in my version of python (2.5)
 #   with open(spc_file, 'w') as f:
 
     # Assumption
@@ -323,7 +322,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
 ###################################################################
 
 # Part of the following function is extracted and modified from the ltlmop toolbox
-def checkRealizability(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=0):
+def checkRealizability(smv_file='', spc_file='', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=0):
     """Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.
 
     - smv_file is a string containing the name of the smv file.
@@ -343,7 +342,7 @@ def checkRealizability(smv_file='test.smv', spc_file='test.spc', aut_file='', jt
 ###################################################################
 
 # Part of the following function is extracted and modified from the ltlmop toolbox
-def computeStrategy(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=0):
+def computeStrategy(smv_file='', spc_file='', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=0):
     """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file, return the realizability of the spec.
 
     - smv_file is a string containing the name of the smv file.
@@ -371,7 +370,6 @@ def computeStrategy(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_
     # Get the right aut_file in case it's not specified.
     if (len(aut_file) == 0 or aut_file.isspace()):
         aut_file = re.sub(r'\.'+'[^'+r'\.'+']+$', '', spc_file)
-        #aut_file = re.sub('\\.[^\\.]+$', '.aut', spc_file)
         aut_file = aut_file + '.aut'
     # Get the right jtlv_path in case it's not specified.
     if (len(jtlv_path) == 0 or jtlv_path.isspace()):
@@ -419,6 +417,10 @@ def computeStrategy(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_
 
 # Test case
 if __name__ == "__main__":
+    testfile = 'specs/test'
+    smvfile = testfile + '.smv'
+    spcfile = testfile + '.spc'
+    autfile = testfile + '.aut'
     print('Testing generateJTLVInput')
 #    env_vars = {'park' : 'boolean', 'cellID' : '{0,...,3,4,5}'}
     env_vars = {'park' : 'boolean', 'cellID' : [0,1,2,3,4,5]}
@@ -433,25 +435,30 @@ if __name__ == "__main__":
     region5 = Region('p5', [1, 1, 1, 1, 1])
     disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
     disc_dynamics.num_regions = len(disc_dynamics.list_region)
-    #disc_dynamics.region_prop = [[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0, 1, 0], [0, 0, 0, 0, 1], [1, 1, 1, 1, 1]]
     disc_dynamics.adj = [[1, 1, 0, 1, 0, 0], [1, 1, 1, 0, 1, 0], [0, 1, 1, 0, 0, 1], [1, 0, 0, 1, 1, 0], [0, 1, 0, 1, 1, 1], [0, 0, 1, 0, 1, 1]]
     disc_dynamics.list_prop_symbol = cont_props
     disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
     disc_props = {'Park' : 'park', 'X0d' : 'cellID=0', 'X1d' : 'cellID=1', 'X2d' : 'cellID=2', 'X3d' : 'cellID=3', 'X4d' : 'gear = 0', 'X5d' : 'gear = 1'}
-    assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  # For realizable spec
-#    assumption = ''  # For unrealizable spec
+    assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  # For realizable spec (default case)
+
+    if ('2' in sys.argv): # For unrealizable spec
+        assumption = ''  
+
     guarantee = '[]<>(X0d -> X0) & []<>X1 & []<>(Park -> X4)'
     spec = [assumption, guarantee]
-    newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=cont_props, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file='test.smv', spc_file='test.spc', verbose=2)
-#    spec[1] = '[]<>(X0d -> X5d)'  # For spec with no dynamics
-#    newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=[], disc_props=disc_props, disc_dynamics=PropPreservingPartition(), smv_file='test.smv', spc_file='test.spc', verbose=2)
+
+    if ('3' in sys.argv): # For spec with no dynamics
+        spec[1] = '[]<>(X0d -> X5d)'  
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=[], disc_props=disc_props, disc_dynamics=PropPreservingPartition(), smv_file=smvfile, spc_file=spcfile, verbose=2)
+    else:
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=cont_props, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
     print('DONE')
     print('================================\n')
 
     ####################################
 
     print('Testing checkRealizability')
-    realizability = checkRealizability(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=3)
+    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
@@ -459,7 +466,7 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing computeStrategy')
-    realizability = computeStrategy(smv_file='test.smv', spc_file='test.spc', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=3)
+    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
