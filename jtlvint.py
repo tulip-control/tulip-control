@@ -13,6 +13,23 @@ from polyhedron import Vrep, Hrep
 from prop2part_ex1 import Region, PropPreservingPartition
 from errorprint import printWarning, printError
 
+# Get jtlv_path
+JTLV_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
+JTLV_EXE = 'jtlv_grgame.jar'
+
+def setJTLVPath(jtlv_path):
+    """Set path to jtlv_grgame.jar.
+
+    - jtlv_path is a string indicating the full path to the JTLV folder
+    """
+    globals()["JTLV_PATH"] = jtlv_path
+
+def setJTLVExe(jtlv_exe):
+    """Set the name of the jtlv executable.
+
+    - jtlv_exe is a string indicating the name of the fatjar containing the jtlv GR1 game implementation
+    """
+    globals()["JTLV_EXE"] = jtlv_exe
 
 def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
@@ -322,7 +339,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
 ###################################################################
 
 # Part of the following function is extracted and modified from the ltlmop toolbox
-def checkRealizability(smv_file='', spc_file='', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=0):
+def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', verbose=0):
     """Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.
 
     - smv_file is a string containing the name of the smv file.
@@ -333,26 +350,23 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', jtlv_path='', heap
     - heap_size is a string that specifies java heap size. 
     - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
-    - jtlv_grgame is a string indicating the name of the fatjar containing the jtlv GR1 game implementation
     """
-    realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, aut_file=aut_file, jtlv_path=jtlv_path, heap_size=heap_size, jtlv_grgame=jtlv_grgame, priority_kind=-1, verbose=verbose)
+    realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, aut_file=aut_file, heap_size=heap_size, priority_kind=-1, verbose=verbose)
     return realizable
 
 
 ###################################################################
 
 # Part of the following function is extracted and modified from the ltlmop toolbox
-def computeStrategy(smv_file='', spc_file='', aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=0):
+def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=0):
     """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file, return the realizability of the spec.
 
     - smv_file is a string containing the name of the smv file.
     - spc_file is a string containing the name of the spc file.
     - aut_file is a string containing the name of the file containing the resulting automaton.
-    - jtlv_path is a string containing the full path to the JTLV folder.
     - heap_size is a string that specifies java heap size. 
     - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
-    - jtlv_grgame is a string indicating the name of the fatjar containing the jtlv GR1 game implementation
     - priority_kind is an integer that specifies the type of priority used in extracting the automaton. 
       Possible priorities are: 
         * 3 - Z Y X
@@ -371,25 +385,26 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', jtlv_path='', heap_si
     if (len(aut_file) == 0 or aut_file.isspace()):
         aut_file = re.sub(r'\.'+'[^'+r'\.'+']+$', '', spc_file)
         aut_file = aut_file + '.aut'
-    # Get the right jtlv_path in case it's not specified.
-    if (len(jtlv_path) == 0 or jtlv_path.isspace()):
-        jtlv_path = os.path.abspath(os.path.dirname(sys.argv[0]))
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
         print '  heap size: ' + heap_size
         print '  smv file: ' + smv_file
         print '  spc file: ' + spc_file
         print '  aut file: ' + aut_file
-        print '  jtlv path: ' + jtlv_path
+        print '  jtlv path: ' + JTLV_PATH
         print '  priority_kind: ' + str(priority_kind)
 
-    if (len(jtlv_grgame) > 0):
-        jtlv_grgame = jtlv_path + '/' + jtlv_grgame
+    if (len(JTLV_EXE) > 0): # Use fatjar
+        if (verbose > 0):
+            print "Using fatjar"
+        jtlv_grgame = JTLV_PATH + '/' + JTLV_EXE
         cmd = subprocess.Popen(["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)
     else:
-        classpath = os.path.join(jtlv_path, "JTLV") + ":" + os.path.join(jtlv_path, "JTLV", "jtlv-prompt1.4.1.jar")
+        if (verbose > 0):
+            print "NOT using fatjar"
+        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
             print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)
         cmd = subprocess.Popen(["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
@@ -458,7 +473,7 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing checkRealizability')
-    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', verbose=3)
+    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
@@ -466,7 +481,7 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing computeStrategy')
-    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', jtlv_path='', heap_size='-Xmx128m', jtlv_grgame='jtlv_grgame.jar', priority_kind=3, verbose=3)
+    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
