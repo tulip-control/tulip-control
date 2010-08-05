@@ -10,7 +10,7 @@ August 3, 2010
 
 import re, os, subprocess, sys
 from polyhedron import Vrep, Hrep
-from prop2part_ex1 import Region, PropPreservingPartition
+from prop2part import Region, PropPreservingPartition
 from errorprint import printWarning, printError
 
 # Get jtlv_path
@@ -31,7 +31,7 @@ def setJTLVExe(jtlv_exe):
     """
     globals()["JTLV_EXE"] = jtlv_exe
 
-def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
+def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
 
     - env_vars is a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
@@ -40,7 +40,6 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
       variables and whose values are their possible values.
     - spec is a list of two strings that represents system specification of the form: assumption -> guarantee; 
       the first string is the assumption and the second string is the guarantee.
-    - cont_props is a list of string representing symbols for propositions on continuous variables.
     - disc_props is a dictionary {str : str} whose keys are the symbols for propositions on discrete variables
       and whose values are the actual propositions on discrete variables.
     - disc_dynamics is of type PropPreservingPartition and represents the transition system obtained 
@@ -54,6 +53,13 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
         smv_file = smv_file + '.smv'
     if (spc_file[-4:] != '.spc'):
         spc_file = spc_file + '.spc'
+
+    if (not os.path.exists(os.path.dirname(smv_file))):
+        printWarning('Folder for smv_file ' + smv_file + ' does not exist. Creating...')
+        os.mkdir(os.path.dirname(smv_file))
+    if (not os.path.exists(os.path.dirname(spc_file))):
+        printWarning('Folder for spc_file ' + spc_file + ' does not exist. Creating...')
+        os.mkdir(os.path.dirname(spc_file))
 
     ##################################################################################################
     # Generate smv file
@@ -188,16 +194,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
 
     # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where P1, ..., Pn are cells 
     # in disc_dynamics that satisfy XC
-    for propSymbol in cont_props:
-        # Determine which regions satisfy this prop
-        propInd = [j for j in range(0,disc_dynamics.num_prop) if disc_dynamics.list_prop_symbol[j]==propSymbol]
-        if (len(propInd) == 0):
-            printWarning('WARNING: Proposition' + propSymbol + ' is not defined in disc_dynamics.list_prop_symbol!')
-            continue
-        elif (len(propInd) > 1):
-            printWarning('WARNING: Proposition' + propSymbol + ' is not unique in disc_dynamics.list_prop_symbol!')
-
-        propInd = propInd[0]
+    for propInd, propSymbol in enumerate(disc_dynamics.list_prop_symbol):
         reg = [j for j in range(0,disc_dynamics.num_regions) if disc_dynamics.list_region[j].list_prop[propInd]]
         newprop = 'FALSE'
         if (len(reg) > 0):
@@ -205,7 +202,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
             for i, regID in enumerate(reg):
                 if (i > 0):
                     newprop = newprop + ' | '
-                newprop = newprop + 's.' + newvarname + '=' + str(newvar_values[regID])
+                newprop = newprop + '(s.' + newvarname + ' = ' + str(newvar_values[regID]) + ')'
             newprop = newprop + ')'
         if (verbose > 1):
             print '\t' + propSymbol + ' -> ' + newprop
@@ -255,7 +252,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
     for val in newvar_values:
         if (len(newvar_values_formula) > 0):
             newvar_values_formula = newvar_values_formula + ' | '
-        newvar_values_formula = newvar_values_formula + 's.' + newvarname + '=' + str(val)
+        newvar_values_formula = newvar_values_formula + '(s.' + newvarname + ' = ' + str(val) + ')'
 
     addAnd = False
     if (len(env_values_formula) > 0 or len(disc_sys_values_formula) > 0 or len(newvar_values_formula) > 0):
@@ -302,13 +299,13 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', cont_props=[], dis
             f.write(' &\n')
         if (from_region == 0):
             f.write('-- transition relations for continuous dynamics\n')
-        f.write('\t[]((' + 's.' + newvarname + '=' + str(newvar_values[from_region]) + ') -> next(')
+        f.write('\t[]((' + 's.' + newvarname + ' = ' + str(newvar_values[from_region]) + ') -> next(')
         if (len(to_regions) == 0):
             f.write('FALSE')
         for i, to_region in enumerate(to_regions):
             if (i > 0):
                 f.write(' | ')
-            f.write('s.' + newvarname + '=' + str(newvar_values[to_region]))
+            f.write('(s.' + newvarname + ' = ' + str(newvar_values[to_region]) + ')')
         f.write('))')
         formula_added = True
 
@@ -379,12 +376,16 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
     """
+
     if (verbose > 0):
         print 'Creating automaton...\n'
     # Get the right aut_file in case it's not specified.
     if (len(aut_file) == 0 or aut_file.isspace()):
         aut_file = re.sub(r'\.'+'[^'+r'\.'+']+$', '', spc_file)
         aut_file = aut_file + '.aut'
+    if (not os.path.exists(os.path.dirname(aut_file))):
+        printWarning('Folder for aut_file ' + aut_file + ' does not exist. Creating...')
+        os.mkdir(os.path.dirname(aut_file))
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
         print '  heap size: ' + heap_size
@@ -397,7 +398,7 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     if (len(JTLV_EXE) > 0): # Use fatjar
         if (verbose > 0):
             print "Using fatjar"
-        jtlv_grgame = JTLV_PATH + '/' + JTLV_EXE
+        jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         cmd = subprocess.Popen(["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)
@@ -463,10 +464,12 @@ if __name__ == "__main__":
     spec = [assumption, guarantee]
 
     if ('3' in sys.argv): # For spec with no dynamics
+        disc_dynamics=PropPreservingPartition()
+        disc_dynamics.list_prop_symbol = []
         spec[1] = '[]<>(X0d -> X5d)'  
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=[], disc_props=disc_props, disc_dynamics=PropPreservingPartition(), smv_file=smvfile, spc_file=spcfile, verbose=2)
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
     else:
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, cont_props=cont_props, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
     print('DONE')
     print('================================\n')
 
