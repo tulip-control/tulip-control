@@ -14,7 +14,7 @@ from prop2part import Region, PropPreservingPartition
 from errorprint import printWarning, printError
 
 # Get jtlv_path
-JTLV_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
+JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
 def setJTLVPath(jtlv_path):
@@ -27,7 +27,7 @@ def setJTLVPath(jtlv_path):
 def setJTLVExe(jtlv_exe):
     """Set the name of the jtlv executable.
 
-    - jtlv_exe is a string indicating the name of the fatjar containing the jtlv GR1 game implementation
+    - jtlv_exe is a string indicating the name of the executable jar containing the jtlv GR1 game implementation
     """
     globals()["JTLV_EXE"] = jtlv_exe
 
@@ -68,12 +68,12 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
     if (spc_file[-4:] != '.spc'):
         spc_file = spc_file + '.spc'
 
-    if (not os.path.exists(os.path.dirname(smv_file))):
+    if (not os.path.exists(os.path.abspath(os.path.dirname(smv_file)))):
         printWarning('Folder for smv_file ' + smv_file + ' does not exist. Creating...')
-        os.mkdir(os.path.dirname(smv_file))
-    if (not os.path.exists(os.path.dirname(spc_file))):
+        os.mkdir(os.path.abspath(os.path.dirname(smv_file)))
+    if (not os.path.exists(os.path.abspath(os.path.dirname(spc_file)))):
         printWarning('Folder for spc_file ' + spc_file + ' does not exist. Creating...')
-        os.mkdir(os.path.dirname(spc_file))
+        os.mkdir(os.path.abspath(os.path.dirname(spc_file)))
 
     ##################################################################################################
     # Generate smv file
@@ -349,7 +349,6 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
 
 ###################################################################
 
-# Part of the following function is extracted and modified from the ltlmop toolbox
 def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', verbose=0):
     """Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.
 
@@ -368,7 +367,6 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
 
 ###################################################################
 
-# Part of the following function is extracted and modified from the ltlmop toolbox
 def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=0):
     """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file, return the realizability of the spec.
 
@@ -403,9 +401,9 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     if (len(aut_file) == 0 or aut_file.isspace()):
         aut_file = re.sub(r'\.'+'[^'+r'\.'+']+$', '', spc_file)
         aut_file = aut_file + '.aut'
-    if (not os.path.exists(os.path.dirname(aut_file))):
+    if (not os.path.exists(os.path.abspath(os.path.dirname(aut_file)))):
         printWarning('Folder for aut_file ' + aut_file + ' does not exist. Creating...')
-        os.mkdir(os.path.dirname(aut_file))
+        os.mkdir(os.path.abspath(os.path.dirname(aut_file)))
 
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
@@ -417,8 +415,6 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         print '  priority_kind: ' + str(priority_kind)
 
     if (len(JTLV_EXE) > 0): # Use fatjar
-        if (verbose > 0):
-            print "Using fatjar"
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         cmd = subprocess.Popen( \
             ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], \
@@ -426,8 +422,6 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)
     else:
-        if (verbose > 0):
-            print "NOT using fatjar"
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
             print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)
