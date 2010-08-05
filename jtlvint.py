@@ -48,6 +48,20 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
       print anything on the screen.
     """
 
+    # Check that the input is valid
+    if (not isinstance(env_vars, dict)):
+        printError("The input env_vars is expected to be a dictionary {str : str} or {str : list}")
+    if (not isinstance(disc_sys_vars, dict)):
+        printError("The input disc_sys_vars is expected to be a dictionary {str : str} or {str : list}")
+    if (not isinstance(spec, list) and len(spec) != 2):
+        printError("The input spec is expected to be a list of two strings [assumption, guarantee]")
+    if (not isinstance(disc_dynamics, PropPreservingPartition)):
+        printError("The type of input spec is expected to be PropPreservingPartition")
+    if (not isinstance(smv_file, str)):
+        printError("The input smv_file is expected to be a string")
+    if (not isinstance(spc_file, str)):
+        printError("The input spc_file is expected to be a string")
+
     # Figure out the names of the smv and spc files
     if (smv_file[-4:] != '.smv'):
         smv_file = smv_file + '.smv'
@@ -376,9 +390,15 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
     """
+    # Check that the input is valid
+    if (not os.path.isfile(smv_file)):
+        printError("The smv file " + smv_file + " does not exist.")
+    if (not os.path.isfile(spc_file)):
+        printError("The spc file " + spc_file + " does not exist.")
 
     if (verbose > 0):
         print 'Creating automaton...\n'
+
     # Get the right aut_file in case it's not specified.
     if (len(aut_file) == 0 or aut_file.isspace()):
         aut_file = re.sub(r'\.'+'[^'+r'\.'+']+$', '', spc_file)
@@ -386,6 +406,7 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     if (not os.path.exists(os.path.dirname(aut_file))):
         printWarning('Folder for aut_file ' + aut_file + ' does not exist. Creating...')
         os.mkdir(os.path.dirname(aut_file))
+
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
         print '  heap size: ' + heap_size
@@ -399,7 +420,9 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         if (verbose > 0):
             print "Using fatjar"
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-        cmd = subprocess.Popen(["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+        cmd = subprocess.Popen( \
+            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], \
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)
     else:
@@ -408,7 +431,9 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
             print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)
-        cmd = subprocess.Popen(["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+        cmd = subprocess.Popen( \
+            ["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)], \
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
     for line in cmd.stdout:
@@ -433,7 +458,7 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
 
 # Test case
 if __name__ == "__main__":
-    testfile = 'specs/test'
+    testfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'specs', 'test')
     smvfile = testfile + '.smv'
     spcfile = testfile + '.spc'
     autfile = testfile + '.aut'
@@ -451,10 +476,21 @@ if __name__ == "__main__":
     region5 = Region('p5', [1, 1, 1, 1, 1])
     disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
     disc_dynamics.num_regions = len(disc_dynamics.list_region)
-    disc_dynamics.adj = [[1, 1, 0, 1, 0, 0], [1, 1, 1, 0, 1, 0], [0, 1, 1, 0, 0, 1], [1, 0, 0, 1, 1, 0], [0, 1, 0, 1, 1, 1], [0, 0, 1, 0, 1, 1]]
+    disc_dynamics.adj = [[1, 1, 0, 1, 0, 0], \
+                         [1, 1, 1, 0, 1, 0], \
+                         [0, 1, 1, 0, 0, 1], \
+                         [1, 0, 0, 1, 1, 0], \
+                         [0, 1, 0, 1, 1, 1], \
+                         [0, 0, 1, 0, 1, 1]]
     disc_dynamics.list_prop_symbol = cont_props
     disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
-    disc_props = {'Park' : 'park', 'X0d' : 'cellID=0', 'X1d' : 'cellID=1', 'X2d' : 'cellID=2', 'X3d' : 'cellID=3', 'X4d' : 'gear = 0', 'X5d' : 'gear = 1'}
+    disc_props = {'Park' : 'park', \
+                      'X0d' : 'cellID=0', \
+                      'X1d' : 'cellID=1', \
+                      'X2d' : 'cellID=2', \
+                      'X3d' : 'cellID=3', \
+                      'X4d' : 'gear = 0', \
+                      'X5d' : 'gear = 1'}
     assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  # For realizable spec (default case)
 
     if ('2' in sys.argv): # For unrealizable spec
