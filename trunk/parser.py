@@ -1,4 +1,5 @@
 ########################################################
+#add comment
 def create_dict(prompt, vars):
     """Takes line and puts keys/vars into dictionary"""
     a = prompt.partition(':')
