@@ -376,14 +376,15 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     - heap_size is a string that specifies java heap size. 
     - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
-    - priority_kind is an integer that specifies the type of priority used in extracting the automaton. 
+    - priority_kind is a string of length 3 or an integer that specifies the type of priority used in 
+      extracting the automaton. 
       Possible priorities are: 
-        * 3 - Z Y X
-        * 7 - Z X Y
-        * 11 - Y Z X
-        * 15 - Y X Z
-        * 19 - X Z Y
-        * 23 - X Y Z
+        * 3 - 'ZYX'
+        * 7 - 'ZXY'
+        * 11 - 'YZX'
+        * 15 - 'YXZ'
+        * 19 - 'XZY'
+        * 23 - 'XYZ'
       Here X means that the controller tries to disqualify one of the environment assumptions, 
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
@@ -404,6 +405,27 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     if (not os.path.exists(os.path.abspath(os.path.dirname(aut_file)))):
         printWarning('Folder for aut_file ' + aut_file + ' does not exist. Creating...')
         os.mkdir(os.path.abspath(os.path.dirname(aut_file)))
+
+    # Convert the priority_kind to the corresponding integer
+    if (isinstance(priority_kind, str)):
+        if (priority_kind == 'ZYX'):
+            priority_kind = 3
+        elif (priority_kind == 'ZXY'):
+            priority_kind = 7
+        elif (priority_kind == 'YZX'):
+            priority_kind = 11
+        elif (priority_kind == 'YXZ'):
+            priority_kind = 15
+        elif (priority_kind == 'XZY'):
+            priority_kind = 19
+        elif (priority_kind == 'XYZ'):
+            priority_kind = 23
+        else:
+            printWarning("Unknown priority_kind. Setting to the default (ZYX)")
+            priority_kind = 3
+    elif (not isinstance(priority_kind, int)):
+        printWarning("Unknown priority_kind. Setting to the default (ZYX)")
+        priority_kind = 3
 
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
@@ -514,7 +536,7 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing computeStrategy')
-    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=3)
+    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', priority_kind='ZYX', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
