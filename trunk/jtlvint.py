@@ -292,7 +292,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
             current_disc_sys_values_formula = ''
             for val in all_values:
                 if (len(current_disc_sys_values_formula) > 0):
-                    current_disc_sys_values_formula = current_disc_sys_values_formula +  ' | '
+                    current_disc_sys_values_formula = current_disc_sys_values_formula + \
+                        ' | '
                 current_disc_sys_values_formula = current_disc_sys_values_formula + \
                     's.' + var + '=' + val
             disc_sys_values_formula = disc_sys_values_formula + '(' + \
