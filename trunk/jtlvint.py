@@ -25,7 +25,7 @@ def setJTLVPath(jtlv_path):
 
     Input:
 
-    - `jtlv_path`: a string indicating the full path to the JTLV folder
+    - `jtlv_path`: a string indicating the full path to the JTLV folder.
     """
     globals()["JTLV_PATH"] = jtlv_path
 
@@ -34,36 +34,46 @@ def setJTLVExe(jtlv_exe):
 
     Input:
 
-    - `jtlv_exe`: a string indicating the name of the executable jar containing the jtlv GR1 game implementation
+    - `jtlv_exe`: a string indicating the name of the executable jar containing the 
+      jtlv GR1 game implementation.
     """
     globals()["JTLV_EXE"] = jtlv_exe
 
-def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
+def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
+                          disc_dynamics=PropPreservingPartition(), \
+                          smv_file='specs/spec.smv', spc_file='specs/spec.spc', \
+                          verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
 
     Input:
 
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
-      and whose values are their possible values, e.g., boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `disc_sys_vars`: a dictionary {str : str} or {str : list} whose keys are the names of discrete system  
-      variables and whose values are their possible values.
-    - `spec`: a list of two strings that represents system specification of the form: assumption -> guarantee; 
-      the first string is the assumption and the second string is the guarantee.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for propositions on discrete variables
-      and whose values are the actual propositions on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the transition system obtained 
-      from the discretization procedure.
-    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
-      print anything on the screen.
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
+      of environment variables and whose values are their possible values, e.g., 
+      boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
+    - `disc_sys_vars`: a dictionary {str : str} or {str : list} whose keys are the 
+      names of discrete system variables and whose values are their possible values.
+    - `spec`: a list of two strings that represents system specification of the form
+      assumption -> guarantee; the first string is the assumption and the second 
+      string is the guarantee.
+    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
+      propositions on discrete variables and whose values are the actual propositions
+      on discrete variables.
+    - `disc_dynamics`: a PropPreservingPartition object that represents the 
+      transition system obtained from the discretization procedure.
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,
+      this function will not print anything on the screen.
     """
 
     # Check that the input is valid
     if (not isinstance(env_vars, dict)):
-        printError("The input env_vars is expected to be a dictionary {str : str} or {str : list}")
+        printError("The input env_vars is expected to be a dictionary {str : str} " +
+                   "or {str : list}")
     if (not isinstance(disc_sys_vars, dict)):
-        printError("The input disc_sys_vars is expected to be a dictionary {str : str} or {str : list}")
+        printError("The input disc_sys_vars is expected to be a dictionary " + \
+                       "{str : str} or {str : list}")
     if (not isinstance(spec, list) and len(spec) != 2):
-        printError("The input spec is expected to be a list of two strings [assumption, guarantee]")
+        printError("The input spec is expected to be a list of two strings " + \
+                       "[assumption, guarantee]")
     if (not isinstance(disc_dynamics, PropPreservingPartition)):
         printError("The type of input spec is expected to be PropPreservingPartition")
     if (not isinstance(smv_file, str)):
@@ -84,16 +94,17 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
         printWarning('Folder for spc_file ' + spc_file + ' does not exist. Creating...')
         os.mkdir(os.path.abspath(os.path.dirname(spc_file)))
 
-    ##################################################################################################
+    ###################################################################################
     # Generate smv file
-    ##################################################################################################
-    # Replace '...' in the range of possible values of env_vars to the actual values and
-    # convert a list representation of the range of possible values to a string
+    ###################################################################################
+    # Replace '...' in the range of possible values of env_vars to the actual values 
+    # and convert a list representation of the range of possible values to a string
     for var, reg in env_vars.iteritems():
         if ('boolean' in reg):
             continue
         elif (isinstance(reg, str)):
-            dots_values = re.findall('([-+]?\d+)\s*?,?\s*?'+r'\.\.\.'+'\s*?,?\s*?([-+]?\d+)', reg)
+            dots_values = re.findall('([-+]?\d+)\s*?,?\s*?' + r'\.\.\.' + \
+                                         '\s*?,?\s*?([-+]?\d+)', reg)
             all_values = list(set(re.findall('[-+]?\d+', reg)))
             if (len(all_values) > 0):
                 for dots_pair in dots_values:
@@ -107,7 +118,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
                     reg = reg + val
                 env_vars[var] = '{' + reg + '}'
             else:
-                printWarning("WARNING: Unknown possible values for environment variable " + var)
+                printWarning("WARNING: Unknown possible values for environment " + \
+                                 "variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
             for val in reg:
@@ -116,16 +128,19 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
                 all_values = all_values + str(val)
             env_vars[var] = '{' + all_values + '}'
         else:
-            printWarning("WARNING: Unknown possible values for environment variable " + var)
+            printWarning("WARNING: Unknown possible values for environment " + \
+                             "variable "+ var)
                 
 
-    # Replace '...' in the range of possible values of disc_sys_vars to the actual values and
-    # convert a list representation of the range of possible values to a string
+    # Replace '...' in the range of possible values of disc_sys_vars to the actual 
+    # values and convert a list representation of the range of possible values to a 
+    # string
     for var, reg in disc_sys_vars.iteritems():
         if ('boolean' in reg):
             continue
         elif (isinstance(reg, str)):
-            dots_values = re.findall('([-+]?\d+)\s*?,?\s*?'+r'\.\.\.'+'\s*?,?\s*?([-+]?\d+)', reg)
+            dots_values = re.findall('([-+]?\d+)\s*?,?\s*?' + r'\.\.\.' + \
+                                         '\s*?,?\s*?([-+]?\d+)', reg)
             all_values = list(set(re.findall('[-+]?\d+', reg)))
             if (len(all_values) > 0):
                 for dots_pair in dots_values:
@@ -139,7 +154,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
                     reg = reg + val
                 disc_sys_vars[var] = '{' + reg + '}'
             else:
-                printWarning("WARNING: Unknown possible values for discrete system variable " + var)
+                printWarning("WARNING: Unknown possible values for discrete system " + \
+                                 "variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
             for val in reg:
@@ -148,11 +164,13 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
                 all_values = all_values + str(val)
             disc_sys_vars[var] = '{' + all_values + '}'
         else:
-            printWarning("WARNING: Unknown possible values for discrete system variable " + var)
+            printWarning("WARNING: Unknown possible values for discrete system " + \
+                             "variable " + var)
 
     # Write smv file
     f = open(smv_file, 'w')
-#   The use of 'with' below is a better statement but is not supported in my version of python
+#   The use of 'with' below is a better statement but is not supported in my 
+#   version of python
 #   with open(smv_file, 'w') as f: 
     if (verbose > 0):
         print 'Generating smv file...'
@@ -171,14 +189,16 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
     f.write('\nMODULE sys \n')
     f.write('\tVAR\n')
     
-    newvarname = 'cellID' # New variable that identifies in which cell the continuous state is
+    newvarname = 'cellID' # New variable that identifies in which cell the continuous 
+                          # state is
 
     # Make sure that the new variable name does not appear in env_vars or disc_sys_vars
     while (newvarname in env_vars) | (newvarname in disc_sys_vars):
         newvarname = 'c' + newvarname
 
     if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
-        printWarning("WARNING: disc_dynamics.num_regions != len(disc_dynamics.list_regions)")
+        printWarning('WARNING: disc_dynamics.num_regions != ' + \
+                         "len(disc_dynamics.list_regions)")
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
     
     newvar_values = range(0,disc_dynamics.num_regions)
@@ -197,17 +217,17 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
 
     f.close()
 
-    ##################################################################################################
+    ###################################################################################
     # Generate spc file
-    ##################################################################################################
+    ###################################################################################
     assumption = spec[0]
     guarantee = spec[1]
 
     if (verbose > 0):
         print 'Generating spc file...'
 
-    # Replace any environment variable var in spec with e.var and replace any discrete system
-    # variable var with s.var
+    # Replace any environment variable var in spec with e.var and replace any discrete 
+    # system variable var with s.var
     for var in env_vars.keys():
         assumption = re.sub(r'\b'+var+r'\b', 'e.'+var, assumption)
         guarantee = re.sub(r'\b'+var+r'\b', 'e.'+var, guarantee)
@@ -215,24 +235,27 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
         assumption = re.sub(r'\b'+var+r'\b', 's.'+var, assumption)
         guarantee = re.sub(r'\b'+var+r'\b', 's.'+var, guarantee)
 
-    # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where P1, ..., Pn are cells 
-    # in disc_dynamics that satisfy XC
+    # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where 
+    # P1, ..., Pn are cells in disc_dynamics that satisfy XC
     for propInd, propSymbol in enumerate(disc_dynamics.list_prop_symbol):
-        reg = [j for j in range(0,disc_dynamics.num_regions) if disc_dynamics.list_region[j].list_prop[propInd]]
+        reg = [j for j in range(0,disc_dynamics.num_regions) if \
+                   disc_dynamics.list_region[j].list_prop[propInd]]
         newprop = 'FALSE'
         if (len(reg) > 0):
             newprop = '('
             for i, regID in enumerate(reg):
                 if (i > 0):
                     newprop = newprop + ' | '
-                newprop = newprop + '(s.' + newvarname + ' = ' + str(newvar_values[regID]) + ')'
+                newprop = newprop + '(s.' + newvarname + ' = ' + \
+                    str(newvar_values[regID]) + ')'
             newprop = newprop + ')'
         if (verbose > 1):
             print '\t' + propSymbol + ' -> ' + newprop
         assumption = re.sub(r'\b'+propSymbol+r'\b', newprop, assumption)
         guarantee = re.sub(r'\b'+propSymbol+r'\b', newprop, guarantee)
 
-    # Replace symbols for propositions on discrete variables with the actual propositions
+    # Replace symbols for propositions on discrete variables with the actual 
+    # propositions
     for propSymbol, prop in disc_props.iteritems():
         for var in env_vars.keys():
             prop = re.sub(r'\b'+var+r'\b', 'e.'+var, prop)
@@ -243,8 +266,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
         assumption = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', assumption)
         guarantee = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', guarantee)
 
-    # Add assumption on the possible initial state of the system and all the possible values of
-    # the environment
+    # Add assumption on the possible initial state of the system and all the possible 
+    # values of the environment
     env_values_formula = ''
     for var, reg in env_vars.iteritems():
         all_values = re.findall('[-+]?\d+', reg)
@@ -255,8 +278,10 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
             for val in all_values:
                 if (len(current_env_values_formula) > 0):
                     current_env_values_formula = current_env_values_formula + ' | '
-                current_env_values_formula = current_env_values_formula + 'e.' + var + '=' + val
-            env_values_formula = env_values_formula + '(' + current_env_values_formula + ')'
+                current_env_values_formula = current_env_values_formula + 'e.' + \
+                    var + '=' + val
+            env_values_formula = env_values_formula + '(' + \
+                current_env_values_formula + ')'
 
     disc_sys_values_formula = ''
     for var, reg in disc_sys_vars.iteritems():
@@ -267,18 +292,22 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
             current_disc_sys_values_formula = ''
             for val in all_values:
                 if (len(current_disc_sys_values_formula) > 0):
-                    current_disc_sys_values_formula = current_disc_sys_values_formula + ' | '
-                current_disc_sys_values_formula = current_disc_sys_values_formula + 's.' + var + '=' + val
-            disc_sys_values_formula = disc_sys_values_formula + '(' + current_disc_sys_values_formula + ')'
+                    current_disc_sys_values_formula = current_disc_sys_values_formula +  ' | '
+                current_disc_sys_values_formula = current_disc_sys_values_formula + \
+                    's.' + var + '=' + val
+            disc_sys_values_formula = disc_sys_values_formula + '(' + \
+                current_disc_sys_values_formula + ')'
 
     newvar_values_formula = ''
     for val in newvar_values:
         if (len(newvar_values_formula) > 0):
             newvar_values_formula = newvar_values_formula + ' | '
-        newvar_values_formula = newvar_values_formula + '(s.' + newvarname + ' = ' + str(val) + ')'
+        newvar_values_formula = newvar_values_formula + '(s.' + newvarname + ' = ' + \
+            str(val) + ')'
 
     addAnd = False
-    if (len(env_values_formula) > 0 or len(disc_sys_values_formula) > 0 or len(newvar_values_formula) > 0):
+    if (len(env_values_formula) > 0 or len(disc_sys_values_formula) > 0 or \
+            len(newvar_values_formula) > 0):
         if (len(assumption) > 0):
             assumption = '-- original assumptions\n\t' + assumption + ' &\n'
         assumption = assumption + '-- initial states\n'
@@ -296,11 +325,10 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
         assumption = assumption + '\t(' + env_values_formula + ')'
         assumption = assumption + ' &\n-- possible values of environment variables\n'
         assumption = assumption + '\t[](next(' + env_values_formula + '))'
-#        assumption = assumption + '\t[]((' + env_values_formula + ') -> next(' + env_values_formula + '))'
+#        assumption = assumption + '\t[]((' + env_values_formula + ') -> next(' + \
+#            env_values_formula + '))'
 
     f = open(spc_file, 'w')
-#   The use of 'with' below is a better statement but is not supported in my version of python (2.5)
-#   with open(spc_file, 'w') as f:
 
     # Assumption
     f.write('LTLSPEC\n')
@@ -317,12 +345,14 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
     # Transitions
     # For continuous dynamics
     for from_region in range(0,disc_dynamics.num_regions):
-        to_regions = [j for j in range(0,disc_dynamics.num_regions) if disc_dynamics.adj[j][from_region]]
+        to_regions = [j for j in range(0,disc_dynamics.num_regions) if \
+                          disc_dynamics.adj[j][from_region]]
         if (formula_added):
             f.write(' &\n')
         if (from_region == 0):
             f.write('-- transition relations for continuous dynamics\n')
-        f.write('\t[]((' + 's.' + newvarname + ' = ' + str(newvar_values[from_region]) + ') -> next(')
+        f.write('\t[]((' + 's.' + newvarname + ' = ' + \
+                    str(newvar_values[from_region]) + ') -> next(')
         if (len(to_regions) == 0):
             f.write('FALSE')
         for i, to_region in enumerate(to_regions):
@@ -358,8 +388,10 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
 
 ###################################################################
 
-def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', verbose=0):
-    """Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.
+def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', \
+                           verbose=0):
+    """Determine whether the spec in smv_file and spc_file is realizable without 
+    extracting an automaton.
 
     Input:
 
@@ -369,8 +401,8 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
       (e.g. an initial state starting from which the spec is cannot be satisfied).
     - `jtlv_path`: a string containing the full path to the JTLV folder.
     - `heap_size`: a string that specifies java heap size. 
-    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
-      print anything on the screen.
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, 
+      this function will not print anything on the screen.
     """
 
     realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, aut_file=aut_file, heap_size=heap_size, priority_kind=-1, verbose=verbose)
@@ -379,20 +411,22 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
 
 ###################################################################
 
-def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=0):
-    """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file.
-    Return the realizability of the spec.
+def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', \
+                        priority_kind=3, verbose=0):
+    """Compute an automaton satisfying the spec in smv_file and spc_file and store in 
+    aut_file. Return the realizability of the spec.
 
     Input:
 
     - `smv_file`: a string containing the name of the smv file.
     - `spc_file`: a string containing the name of the spc file.
-    - `aut_file`: a string containing the name of the file containing the resulting automaton.
+    - `aut_file`: a string containing the name of the file containing the resulting 
+      automaton.
     - `heap_size`: a string that specifies java heap size. 
-    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
-      print anything on the screen.
-    - `priority_kind`: a string of length 3 or an integer that specifies the type of priority used in 
-      extracting the automaton. Possible priorities are: 
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, 
+      this function will not print anything on the screen.
+    - `priority_kind`: a string of length 3 or an integer that specifies the type of 
+      priority used in extracting the automaton. Possible priorities are: 
 
         * 3 - 'ZYX'
         * 7 - 'ZXY'
@@ -401,7 +435,8 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         * 19 - 'XZY'
         * 23 - 'XYZ'
 
-      Here X means that the controller tries to disqualify one of the environment assumptions, 
+      Here X means that the controller tries to disqualify one of the environment 
+      assumptions, 
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
     """
@@ -455,16 +490,21 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     if (len(JTLV_EXE) > 0): # Use fatjar
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         cmd = subprocess.Popen( \
-            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)], \
+            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                 str(priority_kind)], \
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
-            print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, str(priority_kind)
+            print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, \
+                aut_file, str(priority_kind)
     else:
-        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
+        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
+            os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
-            print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)
+            print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, \
+                spc_file, aut_file, str(priority_kind)
         cmd = subprocess.Popen( \
-            ["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, aut_file, str(priority_kind)], \
+            ["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, \
+                 aut_file, str(priority_kind)], \
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
@@ -490,7 +530,8 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
 
 # Test case
 if __name__ == "__main__":
-    testfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'specs', 'test')
+    testfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'specs', \
+                                'test')
     smvfile = testfile + '.smv'
     spcfile = testfile + '.spc'
     autfile = testfile + '.aut'
@@ -523,7 +564,9 @@ if __name__ == "__main__":
                       'X3d' : 'cellID=3', \
                       'X4d' : 'gear = 0', \
                       'X5d' : 'gear = 1'}
-    assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  # For realizable spec (default case)
+
+    # For realizable spec (default case)
+    assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  
 
     if ('2' in sys.argv): # For unrealizable spec
         assumption = ''  
@@ -535,12 +578,14 @@ if __name__ == "__main__":
         disc_dynamics=PropPreservingPartition()
         disc_dynamics.list_prop_symbol = []
         spec[1] = '[]<>(X0d -> X5d)'  
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, \
-                                           disc_props=disc_props, disc_dynamics=disc_dynamics, \
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, \
+                                           spec=spec, disc_props=disc_props, \
+                                           disc_dynamics=disc_dynamics, \
                                            smv_file=smvfile, spc_file=spcfile, verbose=2)
     else:
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, \
-                                           disc_props=disc_props, disc_dynamics=disc_dynamics, \
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, \
+                                           spec=spec, disc_props=disc_props, \
+                                           disc_dynamics=disc_dynamics, \
                                            smv_file=smvfile, spc_file=spcfile, verbose=2)
     print('DONE')
     print('================================\n')
@@ -548,8 +593,8 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing checkRealizability')
-    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', \
-                                           heap_size='-Xmx128m', verbose=3)
+    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, \
+                                           aut_file='', heap_size='-Xmx128m', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
@@ -558,7 +603,8 @@ if __name__ == "__main__":
 
     print('Testing computeStrategy')
     realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', \
-                                        heap_size='-Xmx128m', priority_kind='ZYX', verbose=3)
+                                        heap_size='-Xmx128m', priority_kind='ZYX', \
+                                        verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
