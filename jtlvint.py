@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-""" jtlvint.py --- Interface to the JTLV implementation of GR1 game
+""" 
+-------------------------------------------------------------------
+Jtlvint Module --- Interface to the JTLV implementation of GR1 game
+-------------------------------------------------------------------
 
 About JTLV, see http://jtlv.ysaar.net/
 
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-August 3, 2010
+:Date: August 3, 2010
+:Version: 0.1.0
+:Authors: Nok Wongpiromsarn
+:Contact: nok@cds.caltech.edu
+:Copyright: Copyright (c) 2010
 """
 
 import re, os, subprocess, sys
@@ -20,31 +26,37 @@ JTLV_EXE = 'jtlv_grgame.jar'
 def setJTLVPath(jtlv_path):
     """Set path to jtlv_grgame.jar.
 
-    - jtlv_path is a string indicating the full path to the JTLV folder
+    Input:
+
+    - `jtlv_path`: a string indicating the full path to the JTLV folder
     """
     globals()["JTLV_PATH"] = jtlv_path
 
 def setJTLVExe(jtlv_exe):
     """Set the name of the jtlv executable.
 
-    - jtlv_exe is a string indicating the name of the executable jar containing the jtlv GR1 game implementation
+    Input:
+
+    - `jtlv_exe`: a string indicating the name of the executable jar containing the jtlv GR1 game implementation
     """
     globals()["JTLV_EXE"] = jtlv_exe
 
 def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, disc_dynamics=PropPreservingPartition(), smv_file='specs/spec.smv', spc_file='specs/spec.spc', verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
 
-    - env_vars is a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
+    Input:
+
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
       and whose values are their possible values, e.g., boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - disc_sys_vars is a dictionary {str : str} or {str : list} whose keys are the names of discrete system  
+    - `disc_sys_vars`: a dictionary {str : str} or {str : list} whose keys are the names of discrete system  
       variables and whose values are their possible values.
-    - spec is a list of two strings that represents system specification of the form: assumption -> guarantee; 
+    - `spec`: a list of two strings that represents system specification of the form: assumption -> guarantee; 
       the first string is the assumption and the second string is the guarantee.
-    - disc_props is a dictionary {str : str} whose keys are the symbols for propositions on discrete variables
+    - `disc_props`: a dictionary {str : str} whose keys are the symbols for propositions on discrete variables
       and whose values are the actual propositions on discrete variables.
-    - disc_dynamics is of type PropPreservingPartition and represents the transition system obtained 
+    - `disc_dynamics`: a PropPreservingPartition object that represents the transition system obtained 
       from the discretization procedure.
-    - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
     """
 
@@ -352,15 +364,18 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, dis
 def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', verbose=0):
     """Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.
 
-    - smv_file is a string containing the name of the smv file.
-    - spc_file is a string containing the name of the spc file.
-    - aut_file is a string containing the name of the file containing the output of JTLV
+    Input:
+
+    - `smv_file`: a string containing the name of the smv file.
+    - `spc_file`: a string containing the name of the spc file.
+    - `aut_file`: a string containing the name of the file containing the output of JTLV
       (e.g. an initial state starting from which the spec is cannot be satisfied).
-    - jtlv_path is a string containing the full path to the JTLV folder.
-    - heap_size is a string that specifies java heap size. 
-    - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
+    - `jtlv_path`: a string containing the full path to the JTLV folder.
+    - `heap_size`: a string that specifies java heap size. 
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
     """
+
     realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, aut_file=aut_file, heap_size=heap_size, priority_kind=-1, verbose=verbose)
     return realizable
 
@@ -368,23 +383,27 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
 ###################################################################
 
 def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', priority_kind=3, verbose=0):
-    """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file, return the realizability of the spec.
+    """Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file.
+    Return the realizability of the spec.
 
-    - smv_file is a string containing the name of the smv file.
-    - spc_file is a string containing the name of the spc file.
-    - aut_file is a string containing the name of the file containing the resulting automaton.
-    - heap_size is a string that specifies java heap size. 
-    - verbose is an integer that specifies the verbose level. If verbose is set to 0, this function will not
+    Input:
+
+    - `smv_file`: a string containing the name of the smv file.
+    - `spc_file`: a string containing the name of the spc file.
+    - `aut_file`: a string containing the name of the file containing the resulting automaton.
+    - `heap_size`: a string that specifies java heap size. 
+    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, this function will not
       print anything on the screen.
-    - priority_kind is a string of length 3 or an integer that specifies the type of priority used in 
-      extracting the automaton. 
-      Possible priorities are: 
+    - `priority_kind`: a string of length 3 or an integer that specifies the type of priority used in 
+      extracting the automaton. Possible priorities are: 
+
         * 3 - 'ZYX'
         * 7 - 'ZXY'
         * 11 - 'YZX'
         * 15 - 'YXZ'
         * 19 - 'XZY'
         * 23 - 'XYZ'
+
       Here X means that the controller tries to disqualify one of the environment assumptions, 
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
@@ -519,16 +538,21 @@ if __name__ == "__main__":
         disc_dynamics=PropPreservingPartition()
         disc_dynamics.list_prop_symbol = []
         spec[1] = '[]<>(X0d -> X5d)'  
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, \
+                                           disc_props=disc_props, disc_dynamics=disc_dynamics, \
+                                           smv_file=smvfile, spc_file=spcfile, verbose=2)
     else:
-        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, disc_props=disc_props, disc_dynamics=disc_dynamics, smv_file=smvfile, spc_file=spcfile, verbose=2)
+        newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, spec=spec, \
+                                           disc_props=disc_props, disc_dynamics=disc_dynamics, \
+                                           smv_file=smvfile, spc_file=spcfile, verbose=2)
     print('DONE')
     print('================================\n')
 
     ####################################
 
     print('Testing checkRealizability')
-    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', verbose=3)
+    realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, aut_file='', \
+                                           heap_size='-Xmx128m', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
@@ -536,7 +560,8 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing computeStrategy')
-    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', heap_size='-Xmx128m', priority_kind='ZYX', verbose=3)
+    realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', \
+                                        heap_size='-Xmx128m', priority_kind='ZYX', verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
