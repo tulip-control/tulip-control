@@ -9,9 +9,6 @@ About JTLV, see http://jtlv.ysaar.net/
 
 :Date: August 3, 2010
 :Version: 0.1.0
-:Authors: Nok Wongpiromsarn
-:Contact: nok@cds.caltech.edu
-:Copyright: Copyright (c) 2010
 """
 
 import re, os, subprocess, sys

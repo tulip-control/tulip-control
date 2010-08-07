@@ -7,9 +7,6 @@ Automaton module
 
 :Date: August 3, 2010
 :Version: 0.1.0
-:Authors: Nok Wongpiromsarn
-:Contact: nok@cds.caltech.edu
-:Copyright: Copyright (c) 2010
 """
 
 import re, copy
@@ -43,9 +40,71 @@ class Automaton:
     An Automaton object contains the following field:
 
     - `states`: a list of AutomatonState objects
+
+    Automaton([states_or_file, varname, verbose]) constructs an Automaton object based
+    on the following input:
+
+    - `states_or_file`: a string containing the name of the aut file to be loaded or
+      a list of AutomatonState objects to be assigned to the `states` of this Automaton object.
+    - `varname`: a list of all the variable names. If it is not empty and states_or_file is
+      a string representing the name of the aut file to be loaded, then this function will
+      also check whether the variables in aut_file are in varnames.
     """
-    def __init__(self, states=[]):
-        self.states = copy.deepcopy(states)
+    def __init__(self, states_or_file=[], varnames=[], verbose=0):
+        # Construct this automaton from a list of AutomatonState objects
+        if (isinstance(states_or_file, list)): 
+            self.states = copy.deepcopy(states_or_file)
+        # Construct this automaton from file
+        if (isinstance(states_or_file, str)):
+            if (len(states_or_file) == 0):
+                self.states = []
+            else:
+                self.loadFile(states_or_file, varnames=varnames, verbose=verbose)
+    
+    def loadFile(self, aut_file, varnames=[], verbose=0):
+        """
+        Construct an automation from aut_file.
+
+        Input:
+
+        - `aut_file`: the name of the text file containing the automaton.
+        - `varnames`: a list of all the variable names. If it is not empty, then this function will
+           also check whether the variables in aut_file are in varnames.
+        """
+        self.states = []
+        f = open(aut_file, 'r')
+        stateID = -1
+        for line in f:
+            # parse states
+            if (line.find('State ') >= 0):
+                stateID = re.search('State (\d+)', line)
+                stateID = int(stateID.group(1))
+                state = dict(re.findall('(\w+):([-+]?\d+)', line))
+                for var, val in state.iteritems():
+                    state[var] = int(val)
+                    if (len(varnames) > 0):
+                        var_found = False
+                        for var2 in varnames:
+                            if (var == var2):
+                                var_found = True
+                        if (not var_found):
+                            printWarning('WARNING: Unknown variable ' + var)
+                if (len(state.keys()) < len(varnames)):
+                    for var in varnames:
+                        var_found = False
+                        for var2 in state.keys():
+                            if (var == var2):
+                                var_found = True
+                        if (not var_found):
+                            printWarning('WARNING: Variable ' + var + ' not assigned')
+                self.setAutStateState(stateID, state, verbose)
+
+            # parse transitions
+            if (line.find('successors') >= 0):
+                transition = re.findall(' (\d+)', line)
+                for i in range(0,len(transition)):
+                    transition[i] = int(transition[i])
+                self.setAutStateTransition(stateID, list(set(transition)), verbose)
 
     def size(self):
         """
@@ -55,7 +114,7 @@ class Automaton:
 
     def addAutState(self, aut_state):
         """
-        Add an AutomatonState object to this automaton
+        Add an AutomatonState object to this automaton.
         
         Input:
 
@@ -75,7 +134,7 @@ class Automaton:
         Input:
 
         - `aut_state_id`: an integer specifying the id of the AutomatonState object
-          to be returned by this function
+          to be returned by this function.
         """
         aut_state_index = self.size() - 1
         while (aut_state_index >= 0 and aut_state_id != self.states[aut_state_index].id):
@@ -93,8 +152,8 @@ class Automaton:
 
         Input:
 
-        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set
-        - `aut_state_state`: a dictionary that represents the new state of the AutomatonState object
+        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.
+        - `aut_state_state`: a dictionary that represents the new state of the AutomatonState object.
         """
         aut_state = self.getAutState(aut_state_id)
         if (isinstance(aut_state, AutomatonState)):
@@ -115,9 +174,9 @@ class Automaton:
 
         Input:
 
-        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set
+        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.
         - `aut_state_transition`: a list of id's of the AutomatonState objects to which 
-          the AutomatonState object with id `aut_state_id` can transition
+          the AutomatonState object with id `aut_state_id` can transition.
         """
         aut_state = self.getAutState(aut_state_id)
         if (isinstance(aut_state, AutomatonState)):
@@ -137,7 +196,7 @@ class Automaton:
         Input:
 
         - `state`: a dictionary whose keys are the names of the variables
-          and whose values are the values of the variables 
+          and whose values are the values of the variables.
         """
         all_aut_states = []
         for aut_state in self.states:
@@ -167,9 +226,9 @@ class Automaton:
 
         Input:
 
-        - `current_aut_state`: the current AutomatonState
+        - `current_aut_state`: the current AutomatonState.
         - `env_state`: a dictionary whose keys are the names of the environment variables
-          and whose values are the values of the variables
+          and whose values are the values of the variables.
         """
         for next_aut_state_id in current_aut_state.transition:
             is_env = True
@@ -193,41 +252,7 @@ def createAut(aut_file, varnames=[], verbose=0):
     - `varnames`: a list of all the variable names. If it is not empty, then this function will
       also check whether the variables in aut_file are in varnames.
     """
-    automaton = Automaton(states=[])
-    f = open(aut_file, 'r')
-    stateID = -1
-    for line in f:
-        # parse states
-        if (line.find('State ') >= 0):
-            stateID = re.search('State (\d+)', line)
-            stateID = int(stateID.group(1))
-            state = dict(re.findall('(\w+):([-+]?\d+)', line))
-            for var, val in state.iteritems():
-                state[var] = int(val)
-                if (len(varnames) > 0):
-                    var_found = False
-                    for var2 in varnames:
-                        if (var == var2):
-                            var_found = True
-                    if (not var_found):
-                        printWarning('WARNING: Unknown variable ' + var)
-            if (len(state.keys()) < len(varnames)):
-                for var in varnames:
-                    var_found = False
-                    for var2 in state.keys():
-                        if (var == var2):
-                            var_found = True
-                    if (not var_found):
-                        printWarning('WARNING: Variable ' + var + ' not assigned')
-            automaton.setAutStateState(stateID, state, verbose)
-
-        # parse transitions
-        if (line.find('successors') >= 0):
-            transition = re.findall(' (\d+)', line)
-            for i in range(0,len(transition)):
-                transition[i] = int(transition[i])
-            automaton.setAutStateTransition(stateID, list(set(transition)), verbose)
-
+    automaton = Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
     return automaton
 
 
@@ -241,7 +266,7 @@ if __name__ == "__main__":
     disc_sys_vars = {'gear' : '{-1,0,1}'}
     newvarname = 'ccellID'
     varnames = env_vars.keys() + disc_sys_vars.keys() + [newvarname]
-    aut = createAut(aut_file='specs/test.aut', varnames=varnames, verbose=1)
+    aut = Automaton(states_or_file='specs/test.aut', varnames=varnames, verbose=1)
     print('DONE')
     print('================================\n')
 
