@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Planner Synthesis &mdash; rhtlp v0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rhtlp v0.1.0 documentation" href="index.html" />
+    <link rel="prev" title="Finite State Abstraction of LTI Systems" href="abstraction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="abstraction.html" title="Finite State Abstraction of LTI Systems"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rhtlp v0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-jtlvint">
+<span id="planner-synthesis"></span><h1>Planner Synthesis<a class="headerlink" href="#module-jtlvint" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="jtlvint-module-interface-to-the-jtlv-implementation-of-gr1-game">
+<h2>Jtlvint Module &#8212; Interface to the JTLV implementation of GR1 game<a class="headerlink" href="#jtlvint-module-interface-to-the-jtlv-implementation-of-gr1-game" title="Permalink to this headline">¶</a></h2>
+<p>About JTLV, see <a class="reference external" href="http://jtlv.ysaar.net/">http://jtlv.ysaar.net/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">August 3, 2010</td>
+</tr>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.1.0</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="jtlvint.checkRealizability">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">checkRealizability</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#checkRealizability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.checkRealizability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether the spec in smv_file and spc_file is realizable without extracting an automaton.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>smv_file</cite>: a string containing the name of the smv file.</li>
+<li><cite>spc_file</cite>: a string containing the name of the spc file.</li>
+<li><cite>aut_file</cite>: a string containing the name of the file containing the output of JTLV
+(e.g. an initial state starting from which the spec is cannot be satisfied).</li>
+<li><cite>jtlv_path</cite>: a string containing the full path to the JTLV folder.</li>
+<li><cite>heap_size</cite>: a string that specifies java heap size.</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, this function will not
+print anything on the screen.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="jtlvint.computeStrategy">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.computeStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an automaton satisfying the spec in smv_file and spc_file and store in aut_file.
+Return the realizability of the spec.</p>
+<p>Input:</p>
+<ul>
+<li><p class="first"><cite>smv_file</cite>: a string containing the name of the smv file.</p>
+</li>
+<li><p class="first"><cite>spc_file</cite>: a string containing the name of the spc file.</p>
+</li>
+<li><p class="first"><cite>aut_file</cite>: a string containing the name of the file containing the resulting automaton.</p>
+</li>
+<li><p class="first"><cite>heap_size</cite>: a string that specifies java heap size.</p>
+</li>
+<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, this function will not
+print anything on the screen.</p>
+</li>
+<li><p class="first"><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of priority used in 
+extracting the automaton. Possible priorities are:</p>
+<blockquote>
+<ul class="simple">
+<li>3 - &#8216;ZYX&#8217;</li>
+<li>7 - &#8216;ZXY&#8217;</li>
+<li>11 - &#8216;YZX&#8217;</li>
+<li>15 - &#8216;YXZ&#8217;</li>
+<li>19 - &#8216;XZY&#8217;</li>
+<li>23 - &#8216;XYZ&#8217;</li>
+</ul>
+</blockquote>
+<p>Here X means that the controller tries to disqualify one of the environment assumptions, 
+Y means that the controller tries to advance with a finite path to somewhere, and
+Z means that the controller tries to satisfy one of his guarantees.</p>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="jtlvint.generateJTLVInput">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a2d198&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate JTLV input files: smv_file and spc_file.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names of environment variables 
+and whose values are their possible values, e.g., boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names of discrete system  
+variables and whose values are their possible values.</li>
+<li><cite>spec</cite>: a list of two strings that represents system specification of the form: assumption -&gt; guarantee; 
+the first string is the assumption and the second string is the guarantee.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for propositions on discrete variables
+and whose values are the actual propositions on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the transition system obtained 
+from the discretization procedure.</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, this function will not
+print anything on the screen.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="jtlvint.setJTLVExe">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">setJTLVExe</tt><big>(</big><em>jtlv_exe</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#setJTLVExe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.setJTLVExe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of the jtlv executable.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>jtlv_exe</cite>: a string indicating the name of the executable jar containing the jtlv GR1 game implementation</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="jtlvint.setJTLVPath">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">setJTLVPath</tt><big>(</big><em>jtlv_path</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#setJTLVPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.setJTLVPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set path to jtlv_grgame.jar.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>jtlv_path</cite>: a string indicating the full path to the JTLV folder</li>
+</ul>
+</dd></dl>
+
+</div>
+<span class="target" id="module-automaton"></span><div class="section" id="automaton-module">
+<h2>Automaton module<a class="headerlink" href="#automaton-module" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">August 3, 2010</td>
+</tr>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.1.0</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="automaton.Automaton">
+<em class="property">class </em><tt class="descclassname">automaton.</tt><tt class="descname">Automaton</tt><big>(</big><em>states_or_file=</em><span class="optional">[</span><span class="optional">]</span>, <em>varnames=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automaton class for representing a finite state automaton.
+An Automaton object contains the following field:</p>
+<ul class="simple">
+<li><cite>states</cite>: a list of AutomatonState objects</li>
+</ul>
+<p>Automaton([states_or_file, varname, verbose]) constructs an Automaton object based
+on the following input:</p>
+<ul class="simple">
+<li><cite>states_or_file</cite>: a string containing the name of the aut file to be loaded or
+a list of AutomatonState objects to be assigned to the <cite>states</cite> of this Automaton object.</li>
+<li><cite>varname</cite>: a list of all the variable names. If it is not empty and states_or_file is
+a string representing the name of the aut file to be loaded, then this function will
+also check whether the variables in aut_file are in varnames.</li>
+</ul>
+<dl class="method">
+<dt id="automaton.Automaton.addAutState">
+<tt class="descname">addAutState</tt><big>(</big><em>aut_state</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.addAutState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.addAutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an AutomatonState object to this automaton.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>aut_state</cite>: an AutomatonState object to be added to this Automaton object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.findAllAutState">
+<tt class="descname">findAllAutState</tt><big>(</big><em>state</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.findAllAutState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.findAllAutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the AutomatonState objects stored in this automaton whose state matches <cite>state</cite>.
+Return -1 if such an AutomatonState objects is not found.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>state</cite>: a dictionary whose keys are the names of the variables
+and whose values are the values of the variables.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.findAutState">
+<tt class="descname">findAutState</tt><big>(</big><em>state</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.findAutState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.findAutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first AutomatonState object stored in this automaton whose state matches <cite>state</cite>.
+Return -1 if such an AutomatonState objects is not found.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>state</cite>: a dictionary whose keys are the names of the variables
+and whose values are the values of the variables</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.findNextAutState">
+<tt class="descname">findNextAutState</tt><big>(</big><em>current_aut_state</em>, <em>env_state</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.findNextAutState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.findNextAutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next AutomatonState object based on <cite>env_state</cite>.
+Return -1 if such an AutomatonState object is not found.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>current_aut_state</cite>: the current AutomatonState.</li>
+<li><cite>env_state</cite>: a dictionary whose keys are the names of the environment variables
+and whose values are the values of the variables.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.getAutState">
+<tt class="descname">getAutState</tt><big>(</big><em>aut_state_id</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.getAutState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.getAutState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an AutomatonState object stored in this Automaton object 
+whose id is <cite>aut_state_id</cite>. 
+Return -1 if such AutomatonState object does not exist.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>aut_state_id</cite>: an integer specifying the id of the AutomatonState object
+to be returned by this function.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.loadFile">
+<tt class="descname">loadFile</tt><big>(</big><em>aut_file</em>, <em>varnames=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.loadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an automation from aut_file.</p>
+<p>Input:</p>
+<ul>
+<li><p class="first"><cite>aut_file</cite>: the name of the text file containing the automaton.</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>varnames</cite>: a list of all the variable names. If it is not empty, then this function will</dt>
+<dd><p class="first last">also check whether the variables in aut_file are in varnames.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.setAutStateState">
+<tt class="descname">setAutStateState</tt><big>(</big><em>aut_state_id</em>, <em>aut_state_state</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.setAutStateState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.setAutStateState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the state of the AutomatonState object whose id is <cite>aut_state_id</cite> to <cite>aut_state_state</cite>.
+If such an AutomatoSstate object does not exist, an AutomatonState object whose id is 
+<cite>aut_state_id</cite> and whose state is <cite>aut_state_state</cite> will be added.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>aut_state_id</cite>: an integer that specifies the id of the AutomatonState object to be set.</li>
+<li><cite>aut_state_state</cite>: a dictionary that represents the new state of the AutomatonState object.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.setAutStateTransition">
+<tt class="descname">setAutStateTransition</tt><big>(</big><em>aut_state_id</em>, <em>aut_state_transition</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.setAutStateTransition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.setAutStateTransition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the transition of the AutomatonState object whose id is <cite>aut_state_id</cite> to 
+<cite>aut_state_transition</cite>. If such automaton state does not exist, an AutomatonState 
+whose id is aut_state_id and whose transition is aut_state_transition will be added.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>aut_state_id</cite>: an integer that specifies the id of the AutomatonState object to be set.</li>
+<li><cite>aut_state_transition</cite>: a list of id&#8217;s of the AutomatonState objects to which 
+the AutomatonState object with id <cite>aut_state_id</cite> can transition.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="automaton.Automaton.size">
+<tt class="descname">size</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.Automaton.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of states in this Automaton object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="automaton.AutomatonState">
+<em class="property">class </em><tt class="descclassname">automaton.</tt><tt class="descname">AutomatonState</tt><big>(</big><em>id=-1</em>, <em>state={}</em>, <em>transition=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/automaton.html#AutomatonState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.AutomatonState" title="Permalink to this definition">¶</a></dt>
+<dd><p>AutomatonState class for representing a state in a finite state automaton.
+An AutomatonState object contains following fields:</p>
+<ul class="simple">
+<li><cite>id</cite>: an integer specifying the id of this AutomatonState object.</li>
+<li><cite>state</cite>: a dictionary whose keys are the names of the variables
+and whose values are the values of the variables.</li>
+<li><cite>transition</cite>: a list of id&#8217;s of the AutomatonState objects to which this 
+AutomatonState object can transition.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="automaton.createAut">
+<tt class="descclassname">automaton.</tt><tt class="descname">createAut</tt><big>(</big><em>aut_file</em>, <em>varnames=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#createAut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automaton.createAut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an automation from aut_file.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>aut_file</cite>: the name of the text file containing the automaton.</li>
+<li><cite>varnames</cite>: a list of all the variable names. If it is not empty, then this function will
+also check whether the variables in aut_file are in varnames.</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Planner Synthesis</a><ul>
+<li><a class="reference internal" href="#jtlvint-module-interface-to-the-jtlv-implementation-of-gr1-game">Jtlvint Module &#8212; Interface to the JTLV implementation of GR1 game</a></li>
+<li><a class="reference internal" href="#automaton-module">Automaton module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="abstraction.html"
+                        title="previous chapter">Finite State Abstraction of LTI Systems</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="abstraction.html" title="Finite State Abstraction of LTI Systems"
+             >previous</a> |</li>
+        <li><a href="index.html">rhtlp v0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
