@@ -405,7 +405,9 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
       this function will not print anything on the screen.
     """
 
-    realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, aut_file=aut_file, heap_size=heap_size, priority_kind=-1, verbose=verbose)
+    realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, \
+                                     aut_file=aut_file, heap_size=heap_size, \
+                                     priority_kind=-1, verbose=verbose)
     return realizable
 
 
