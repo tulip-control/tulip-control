@@ -7,9 +7,9 @@ August 3, 2010
 """
 
 class bcolors:
-    OKGREEN = '\033[92m'
-    WARNING = '\033[95m'
-    FAIL = '\033[91m'
+    OKGREEN = '\033[1;92m'
+    WARNING = '\033[1;95m'
+    FAIL = '\033[1;91m'
     ENDC = '\033[0m'
 def printWarning(text):
     print bcolors.WARNING + text + bcolors.ENDC

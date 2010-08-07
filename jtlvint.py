@@ -67,19 +67,25 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
     # Check that the input is valid
     if (not isinstance(env_vars, dict)):
         printError("The input env_vars is expected to be a dictionary {str : str} " +
-                   "or {str : list}")
+                   "or {str : list}.")
+        raise TypeError("Invalid env_vars.")
     if (not isinstance(disc_sys_vars, dict)):
         printError("The input disc_sys_vars is expected to be a dictionary " + \
                        "{str : str} or {str : list}")
+        raise TypeError("Invalid disc_sys_vars.")
     if (not isinstance(spec, list) and len(spec) != 2):
         printError("The input spec is expected to be a list of two strings " + \
                        "[assumption, guarantee]")
+        raise TypeError("Invalid spec.")
     if (not isinstance(disc_dynamics, PropPreservingPartition)):
         printError("The type of input spec is expected to be PropPreservingPartition")
+        raise TypeError("Invalid disc_dynamics.")
     if (not isinstance(smv_file, str)):
         printError("The input smv_file is expected to be a string")
+        raise TypeError("Invalid smv_file.")
     if (not isinstance(spc_file, str)):
         printError("The input spc_file is expected to be a string")
+        raise TypeError("Invalid spc_file.")
 
     # Figure out the names of the smv and spc files
     if (smv_file[-4:] != '.smv'):
