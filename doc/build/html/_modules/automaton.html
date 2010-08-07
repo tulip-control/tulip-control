@@ -87,16 +87,18 @@
 <span class="sd">    Automaton class for representing a finite state automaton.</span>
 <span class="sd">    An Automaton object contains the following field:</span>
 
-<span class="sd">    - `states`: a list of AutomatonState objects</span>
+<span class="sd">    - `states`: a list of AutomatonState objects.</span>
 
 <span class="sd">    Automaton([states_or_file, varname, verbose]) constructs an Automaton object based</span>
 <span class="sd">    on the following input:</span>
 
 <span class="sd">    - `states_or_file`: a string containing the name of the aut file to be loaded or</span>
-<span class="sd">      a list of AutomatonState objects to be assigned to the `states` of this Automaton object.</span>
-<span class="sd">    - `varname`: a list of all the variable names. If it is not empty and states_or_file is</span>
-<span class="sd">      a string representing the name of the aut file to be loaded, then this function will</span>
-<span class="sd">      also check whether the variables in aut_file are in varnames.</span>
+<span class="sd">      a list of AutomatonState objects to be assigned to the `states` of this </span>
+<span class="sd">      Automaton object.</span>
+<span class="sd">    - `varname`: a list of all the variable names. If it is not empty and </span>
+<span class="sd">      states_or_file is a string representing the name of the aut file to be loaded, </span>
+<span class="sd">      then this function will also check whether the variables in aut_file are in </span>
+<span class="sd">      varnames.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states_or_file</span><span class="o">=</span><span class="p">[],</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="c"># Construct this automaton from a list of AutomatonState objects</span>
@@ -116,8 +118,8 @@
 <span class="sd">        Input:</span>
 
 <span class="sd">        - `aut_file`: the name of the text file containing the automaton.</span>
-<span class="sd">        - `varnames`: a list of all the variable names. If it is not empty, then this function will</span>
-<span class="sd">           also check whether the variables in aut_file are in varnames.</span>
+<span class="sd">        - `varnames`: a list of all the variable names. If it is not empty, then this </span>
+<span class="sd">          function will also check whether the variables in aut_file are in varnames.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
@@ -194,14 +196,17 @@
     </div>
 <div class="viewcode-block" id="Automaton.setAutStateState"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.setAutStateState">[docs]</a>    <span class="k">def</span> <span class="nf">setAutStateState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aut_state_id</span><span class="p">,</span> <span class="n">aut_state_state</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">        Set the state of the AutomatonState object whose id is `aut_state_id` to `aut_state_state`.</span>
-<span class="sd">        If such an AutomatoSstate object does not exist, an AutomatonState object whose id is </span>
-<span class="sd">        `aut_state_id` and whose state is `aut_state_state` will be added.</span>
+<span class="sd">        Set the state of the AutomatonState object whose id is `aut_state_id` to </span>
+<span class="sd">        `aut_state_state`.</span>
+<span class="sd">        If such an AutomatoSstate object does not exist, an AutomatonState object </span>
+<span class="sd">        whose id is `aut_state_id` and whose state is `aut_state_state` will be added.</span>
 
 <span class="sd">        Input:</span>
 
-<span class="sd">        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.</span>
-<span class="sd">        - `aut_state_state`: a dictionary that represents the new state of the AutomatonState object.</span>
+<span class="sd">        - `aut_state_id`: an integer that specifies the id of the AutomatonState </span>
+<span class="sd">          object to be set.</span>
+<span class="sd">        - `aut_state_state`: a dictionary that represents the new state of the </span>
+<span class="sd">          AutomatonState object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">aut_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAutState</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">aut_state</span><span class="p">,</span> <span class="n">AutomatonState</span><span class="p">)):</span>
@@ -210,19 +215,22 @@
                 <span class="k">print</span> <span class="s">&#39;Setting state of AutomatonState &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> \
                     <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_state</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addAutState</span><span class="p">(</span><span class="n">AutomatonState</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">aut_state_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">aut_state_state</span><span class="p">,</span> <span class="n">transition</span><span class="o">=</span><span class="p">[]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addAutState</span><span class="p">(</span><span class="n">AutomatonState</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">aut_state_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">aut_state_state</span><span class="p">,</span> \
+                                                <span class="n">transition</span><span class="o">=</span><span class="p">[]))</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Adding state &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_state</span><span class="p">)</span>
     </div>
 <div class="viewcode-block" id="Automaton.setAutStateTransition"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.setAutStateTransition">[docs]</a>    <span class="k">def</span> <span class="nf">setAutStateTransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aut_state_id</span><span class="p">,</span> <span class="n">aut_state_transition</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the transition of the AutomatonState object whose id is `aut_state_id` to </span>
-<span class="sd">        `aut_state_transition`. If such automaton state does not exist, an AutomatonState </span>
-<span class="sd">        whose id is aut_state_id and whose transition is aut_state_transition will be added.</span>
+<span class="sd">        `aut_state_transition`. If such automaton state does not exist, an </span>
+<span class="sd">        AutomatonState whose id is aut_state_id and whose transition is </span>
+<span class="sd">        aut_state_transition will be added.</span>
 
 <span class="sd">        Input:</span>
 
-<span class="sd">        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.</span>
+<span class="sd">        - `aut_state_id`: an integer that specifies the id of the AutomatonState </span>
+<span class="sd">          object to be set.</span>
 <span class="sd">        - `aut_state_transition`: a list of id&#39;s of the AutomatonState objects to which </span>
 <span class="sd">          the AutomatonState object with id `aut_state_id` can transition.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -230,15 +238,19 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">aut_state</span><span class="p">,</span> <span class="n">AutomatonState</span><span class="p">)):</span>
             <span class="n">aut_state</span><span class="o">.</span><span class="n">transition</span> <span class="o">=</span> <span class="n">aut_state_transition</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="k">print</span> <span class="s">&#39;Setting transition of AutomatonState &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_transition</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&#39;Setting transition of AutomatonState &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_transition</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">addAutState</span><span class="p">(</span><span class="n">AutomatonState</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">aut_state_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">{},</span> <span class="n">transition</span><span class="o">=</span><span class="n">aut_state_transition</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addAutState</span><span class="p">(</span><span class="n">AutomatonState</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">aut_state_id</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">{},</span> \
+                                                <span class="n">transition</span><span class="o">=</span><span class="n">aut_state_transition</span><span class="p">))</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="k">print</span> <span class="s">&#39;Adding AutomatonState &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; with transition &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_transition</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&#39;Adding AutomatonState &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_id</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="s">&#39; with transition &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">aut_state_transition</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Automaton.findAllAutState"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.findAllAutState">[docs]</a>    <span class="k">def</span> <span class="nf">findAllAutState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return all the AutomatonState objects stored in this automaton whose state matches `state`.</span>
+<span class="sd">        Return all the AutomatonState objects stored in this automaton whose state </span>
+<span class="sd">        matches `state`.</span>
 <span class="sd">        Return -1 if such an AutomatonState objects is not found.</span>
 
 <span class="sd">        Input:</span>
@@ -254,13 +266,14 @@
 </div>
 <div class="viewcode-block" id="Automaton.findAutState"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.findAutState">[docs]</a>    <span class="k">def</span> <span class="nf">findAutState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the first AutomatonState object stored in this automaton whose state matches `state`.</span>
+<span class="sd">        Return the first AutomatonState object stored in this automaton whose state </span>
+<span class="sd">        matches `state`.</span>
 <span class="sd">        Return -1 if such an AutomatonState objects is not found.</span>
 
 <span class="sd">        Input:</span>
 
 <span class="sd">        - `state`: a dictionary whose keys are the names of the variables</span>
-<span class="sd">          and whose values are the values of the variables </span>
+<span class="sd">          and whose values are the values of the variables.</span>
 <span class="sd">          &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">aut_state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">aut_state</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">state</span><span class="p">):</span>
@@ -275,8 +288,8 @@
 <span class="sd">        Input:</span>
 
 <span class="sd">        - `current_aut_state`: the current AutomatonState.</span>
-<span class="sd">        - `env_state`: a dictionary whose keys are the names of the environment variables</span>
-<span class="sd">          and whose values are the values of the variables.</span>
+<span class="sd">        - `env_state`: a dictionary whose keys are the names of the environment </span>
+<span class="sd">          variables and whose values are the values of the variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">next_aut_state_id</span> <span class="ow">in</span> <span class="n">current_aut_state</span><span class="o">.</span><span class="n">transition</span><span class="p">:</span>
             <span class="n">is_env</span> <span class="o">=</span> <span class="bp">True</span>
@@ -297,8 +310,8 @@
 <span class="sd">    Input:</span>
 
 <span class="sd">    - `aut_file`: the name of the text file containing the automaton.</span>
-<span class="sd">    - `varnames`: a list of all the variable names. If it is not empty, then this function will</span>
-<span class="sd">      also check whether the variables in aut_file are in varnames.</span>
+<span class="sd">    - `varnames`: a list of all the variable names. If it is not empty, then this </span>
+<span class="sd">      function will also check whether the variables in aut_file are in varnames.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">automaton</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[],</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">automaton</span>
