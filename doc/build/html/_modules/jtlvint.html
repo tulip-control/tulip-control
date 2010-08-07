@@ -340,7 +340,8 @@
             <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
             <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span>  <span class="s">&#39; | &#39;</span>
+                    <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span> \
+                        <span class="s">&#39; | &#39;</span>
                 <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span> \
                     <span class="s">&#39;s.&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span> <span class="o">+</span> <span class="n">val</span>
             <span class="n">disc_sys_values_formula</span> <span class="o">=</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> \
