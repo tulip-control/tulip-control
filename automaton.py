@@ -39,16 +39,18 @@ class Automaton:
     Automaton class for representing a finite state automaton.
     An Automaton object contains the following field:
 
-    - `states`: a list of AutomatonState objects
+    - `states`: a list of AutomatonState objects.
 
     Automaton([states_or_file, varname, verbose]) constructs an Automaton object based
     on the following input:
 
     - `states_or_file`: a string containing the name of the aut file to be loaded or
-      a list of AutomatonState objects to be assigned to the `states` of this Automaton object.
-    - `varname`: a list of all the variable names. If it is not empty and states_or_file is
-      a string representing the name of the aut file to be loaded, then this function will
-      also check whether the variables in aut_file are in varnames.
+      a list of AutomatonState objects to be assigned to the `states` of this 
+      Automaton object.
+    - `varname`: a list of all the variable names. If it is not empty and 
+      states_or_file is a string representing the name of the aut file to be loaded, 
+      then this function will also check whether the variables in aut_file are in 
+      varnames.
     """
     def __init__(self, states_or_file=[], varnames=[], verbose=0):
         # Construct this automaton from a list of AutomatonState objects
@@ -68,8 +70,8 @@ class Automaton:
         Input:
 
         - `aut_file`: the name of the text file containing the automaton.
-        - `varnames`: a list of all the variable names. If it is not empty, then this function will
-           also check whether the variables in aut_file are in varnames.
+        - `varnames`: a list of all the variable names. If it is not empty, then this 
+          function will also check whether the variables in aut_file are in varnames.
         """
         self.states = []
         f = open(aut_file, 'r')
@@ -146,14 +148,17 @@ class Automaton:
     
     def setAutStateState(self, aut_state_id, aut_state_state, verbose=0):
         """ 
-        Set the state of the AutomatonState object whose id is `aut_state_id` to `aut_state_state`.
-        If such an AutomatoSstate object does not exist, an AutomatonState object whose id is 
-        `aut_state_id` and whose state is `aut_state_state` will be added.
+        Set the state of the AutomatonState object whose id is `aut_state_id` to 
+        `aut_state_state`.
+        If such an AutomatoSstate object does not exist, an AutomatonState object 
+        whose id is `aut_state_id` and whose state is `aut_state_state` will be added.
 
         Input:
 
-        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.
-        - `aut_state_state`: a dictionary that represents the new state of the AutomatonState object.
+        - `aut_state_id`: an integer that specifies the id of the AutomatonState 
+          object to be set.
+        - `aut_state_state`: a dictionary that represents the new state of the 
+          AutomatonState object.
         """
         aut_state = self.getAutState(aut_state_id)
         if (isinstance(aut_state, AutomatonState)):
@@ -162,19 +167,22 @@ class Automaton:
                 print 'Setting state of AutomatonState ' + str(aut_state_id) + \
                     ': ' + str(aut_state_state)
         else:
-            self.addAutState(AutomatonState(id=aut_state_id, state=aut_state_state, transition=[]))
+            self.addAutState(AutomatonState(id=aut_state_id, state=aut_state_state, \
+                                                transition=[]))
             if (verbose > 0):
                 print 'Adding state ' + str(aut_state_id) + ': ' + str(aut_state_state)
     
     def setAutStateTransition(self, aut_state_id, aut_state_transition, verbose=0):
         """
         Set the transition of the AutomatonState object whose id is `aut_state_id` to 
-        `aut_state_transition`. If such automaton state does not exist, an AutomatonState 
-        whose id is aut_state_id and whose transition is aut_state_transition will be added.
+        `aut_state_transition`. If such automaton state does not exist, an 
+        AutomatonState whose id is aut_state_id and whose transition is 
+        aut_state_transition will be added.
 
         Input:
 
-        - `aut_state_id`: an integer that specifies the id of the AutomatonState object to be set.
+        - `aut_state_id`: an integer that specifies the id of the AutomatonState 
+          object to be set.
         - `aut_state_transition`: a list of id's of the AutomatonState objects to which 
           the AutomatonState object with id `aut_state_id` can transition.
         """
@@ -182,15 +190,19 @@ class Automaton:
         if (isinstance(aut_state, AutomatonState)):
             aut_state.transition = aut_state_transition
             if (verbose > 0):
-                print 'Setting transition of AutomatonState ' + str(aut_state_id) + ': ' + str(aut_state_transition)
+                print 'Setting transition of AutomatonState ' + str(aut_state_id) + \
+                    ': ' + str(aut_state_transition)
         else:
-            self.addAutState(AutomatonState(id=aut_state_id, state={}, transition=aut_state_transition))
+            self.addAutState(AutomatonState(id=aut_state_id, state={}, \
+                                                transition=aut_state_transition))
             if (verbose > 0):
-                print 'Adding AutomatonState ' + str(aut_state_id) + ' with transition ' + str(aut_state_transition)
+                print 'Adding AutomatonState ' + str(aut_state_id) + \
+                    ' with transition ' + str(aut_state_transition)
 
     def findAllAutState(self, state):
         """
-        Return all the AutomatonState objects stored in this automaton whose state matches `state`.
+        Return all the AutomatonState objects stored in this automaton whose state 
+        matches `state`.
         Return -1 if such an AutomatonState objects is not found.
 
         Input:
@@ -206,13 +218,14 @@ class Automaton:
 
     def findAutState(self, state):
         """
-        Return the first AutomatonState object stored in this automaton whose state matches `state`.
+        Return the first AutomatonState object stored in this automaton whose state 
+        matches `state`.
         Return -1 if such an AutomatonState objects is not found.
 
         Input:
 
         - `state`: a dictionary whose keys are the names of the variables
-          and whose values are the values of the variables 
+          and whose values are the values of the variables.
           """
         for aut_state in self.states:
             if (aut_state.state == state):
@@ -227,8 +240,8 @@ class Automaton:
         Input:
 
         - `current_aut_state`: the current AutomatonState.
-        - `env_state`: a dictionary whose keys are the names of the environment variables
-          and whose values are the values of the variables.
+        - `env_state`: a dictionary whose keys are the names of the environment 
+          variables and whose values are the values of the variables.
         """
         for next_aut_state_id in current_aut_state.transition:
             is_env = True
@@ -249,8 +262,8 @@ def createAut(aut_file, varnames=[], verbose=0):
     Input:
 
     - `aut_file`: the name of the text file containing the automaton.
-    - `varnames`: a list of all the variable names. If it is not empty, then this function will
-      also check whether the variables in aut_file are in varnames.
+    - `varnames`: a list of all the variable names. If it is not empty, then this 
+      function will also check whether the variables in aut_file are in varnames.
     """
     automaton = Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
     return automaton
