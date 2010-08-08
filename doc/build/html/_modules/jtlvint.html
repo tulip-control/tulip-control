@@ -87,7 +87,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;JTLV_EXE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jtlv_exe</span>
 </div>
-<div class="viewcode-block" id="generateJTLVInput"><a class="viewcode-back" href="../synthesis.html#jtlvint.generateJTLVInput">[docs]</a><span class="k">def</span> <span class="nf">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+<div class="viewcode-block" id="generateJTLVInput"><a class="viewcode-back" href="../tutorial.html#jtlvint.generateJTLVInput">[docs]</a><span class="k">def</span> <span class="nf">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
                           <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
                           <span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;specs/spec.smv&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;specs/spec.spc&#39;</span><span class="p">,</span> \
                           <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -115,19 +115,25 @@
     <span class="c"># Check that the input is valid</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input env_vars is expected to be a dictionary {str : str} &quot;</span> <span class="o">+</span>
-                   <span class="s">&quot;or {str : list}&quot;</span><span class="p">)</span>
+                   <span class="s">&quot;or {str : list}.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid env_vars.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_sys_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input disc_sys_vars is expected to be a dictionary &quot;</span> <span class="o">+</span> \
                        <span class="s">&quot;{str : str} or {str : list}&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_sys_vars.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input spec is expected to be a list of two strings &quot;</span> <span class="o">+</span> \
                        <span class="s">&quot;[assumption, guarantee]&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spec.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="p">,</span> <span class="n">PropPreservingPartition</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The type of input spec is expected to be PropPreservingPartition&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_dynamics.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input smv_file is expected to be a string&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid smv_file.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input spc_file is expected to be a string&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spc_file.&quot;</span><span class="p">)</span>
 
     <span class="c"># Figure out the names of the smv and spc files</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">smv_file</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.smv&#39;</span><span class="p">):</span>
@@ -462,7 +468,7 @@
 
 <span class="c">###################################################################</span>
 </div>
-<div class="viewcode-block" id="computeStrategy"><a class="viewcode-back" href="../synthesis.html#jtlvint.computeStrategy">[docs]</a><span class="k">def</span> <span class="nf">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
+<div class="viewcode-block" id="computeStrategy"><a class="viewcode-back" href="../tutorial.html#jtlvint.computeStrategy">[docs]</a><span class="k">def</span> <span class="nf">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
                         <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute an automaton satisfying the spec in smv_file and spc_file and store in </span>
 <span class="sd">    aut_file. Return the realizability of the spec.</span>

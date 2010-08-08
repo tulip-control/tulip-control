@@ -53,94 +53,237 @@
             
   <div class="section" id="tutorial-and-examples">
 <h1>Tutorial and Examples<a class="headerlink" href="#tutorial-and-examples" title="Permalink to this headline">¶</a></h1>
+<p>The rhtlp is developed for synthesis of embedded control systems,
+allowing the planning to be done in a receding horizon manner.</p>
+<div class="section" id="synthesis-of-embedded-control-systems">
+<h2>Synthesis of Embedded Control Systems<a class="headerlink" href="#synthesis-of-embedded-control-systems" title="Permalink to this headline">¶</a></h2>
+<p>We consider a system that comprises the physical component, which we refer to as
+the plant, and the (potentially dynamic and not a priori known) environment in
+which the plant operates.
+The system may contain both continuous (physical) and discrete (computational)
+components.</p>
+<p>Suppose the continuous component of the system evolves according to the
+following discrete-time linear time-invariant state space model:
+for <img class="math" src="_images/math/25c3702d367cd2c02c77ad61e439f3dac1799047.png" alt="t \in \{0,1,2,...\}"/></p>
+<div class="math">
+<p><img src="_images/math/7b31621b503ae7f9849e680db79923acf0cef0b3.png" alt="s[t+1]  &amp;=   As[t] + Bu[t] + Ed[t] \\
+u[t]    &amp;\in U\\
+d[t]    &amp;\in D\\
+s[0]    &amp;\in S" /></p>
+</div><p>where <img class="math" src="_images/math/317298ee9221eff0481453e9ac62815081b151cd.png" alt="S \subseteq \mathbb{R}^n"/> is the state space of the continuous
+component of the system,
+<img class="math" src="_images/math/fc6460508d02c81caf49307ac42384b43f4a89c7.png" alt="U \subseteq \mathbb{R}^m"/> is the set of admissible control inputs,
+<img class="math" src="_images/math/b44f78abaffbddc7b2ac475bf6a95affb1a96dcc.png" alt="D \subseteq \mathbb{R}^p"/> is the set of exogenous disturbances and
+<img class="math" src="_images/math/1c7a315650e2379262eb5bee0f997d7ab5a6e95a.png" alt="s[t], u[t], d[t]"/> are the continuous state, the control signal and
+the exogenous disturbance, respectively, at time <img class="math" src="_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t"/>.</p>
+<p>We consider the case where the sets <img class="math" src="_images/math/d1e2e2a0f2601b2ac74356133ba564a081a61d78.png" alt="S, U, D"/> are bounded polytopes.</p>
+<p>Let <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/> be a finite set of atomic propositions of system variables.
+Each of the atomic propositions in <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/> essentially captures the
+states of interest.
+We consider the specification of the form</p>
+<div class="math">
+<p><img src="_images/math/1a70bc0795ec80a9f18a054288dfb11fda3c38a1.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s." /></p>
+</div><p>Here, the assumption <img class="math" src="_images/math/b61609b6700e21c53c4b382101cf000539ad2d22.png" alt="\varphi_{init}"/> on the initial condition of the system
+is a propositional formula built from <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/>.
+The assumption <img class="math" src="_images/math/a083a57c95393bde438cc281148de64143326583.png" alt="\varphi_e"/> on the environment and the desired behavior
+<img class="math" src="_images/math/8e4478eaa04cebf3657c2e00c0bef97ce62440d5.png" alt="\varphi_s"/> are LTL formulas built from <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/>.
+See our <a class="reference external" href="http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)">wiki</a> for more details on the form of <img class="math" src="_images/math/a1bd9c588c681f5241c603c770ef650ef4ecbe6e.png" alt="\varphi_e, \varphi_s"/>.</p>
+<img alt="_images/ecssyn.png" src="_images/ecssyn.png" />
+<p>As illustrated in the figure above, our approach to this embedded control
+system synthesis consists of the following main steps:</p>
+<blockquote>
+<ol class="arabic">
+<li><p class="first">Continuous state space partition: Given the continuous state space
+<img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> of the system and the set <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/> of propositions on the
+continuous state of the system, we partition <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> into a finite number
+of cells such that all the continuous states in each cell satisfy
+exactly the same set of propositions in <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/>.
+This can be done using the following function call:</p>
+<dl class="function">
+<dt id="prop2part.prop2part2">
+<tt class="descclassname">prop2part.</tt><tt class="descname">prop2part2</tt><big>(</big><em>state_space</em>, <em>cont_props</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#prop2part2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.prop2part2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</li>
+<li><p class="first">Continuous state space discretization</p>
+</li>
+<li><p class="first">Digital design synthesis:</p>
+<ul>
+<li><p class="first">Generate input to JTLV</p>
+<dl class="function">
+<dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a2e288&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generate JTLV input files: smv_file and spc_file.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>spec</cite>: a list of two strings that represents system specification of the form
+assumption -&gt; guarantee; the first string is the assumption and the second 
+string is the guarantee.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
+this function will not print anything on the screen.</li>
+</ul>
+</dd></dl>
+
+</li>
+<li><p class="first">Synthesize the discrete planner</p>
+<dl class="function">
+<dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute an automaton satisfying the spec in smv_file and spc_file and store in 
+aut_file. Return the realizability of the spec.</p>
+<p>Input:</p>
+<ul>
+<li><p class="first"><cite>smv_file</cite>: a string containing the name of the smv file.</p>
+</li>
+<li><p class="first"><cite>spc_file</cite>: a string containing the name of the spc file.</p>
+</li>
+<li><p class="first"><cite>aut_file</cite>: a string containing the name of the file containing the resulting 
+automaton.</p>
+</li>
+<li><p class="first"><cite>heap_size</cite>: a string that specifies java heap size.</p>
+</li>
+<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, 
+this function will not print anything on the screen.</p>
+</li>
+<li><p class="first"><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
+priority used in extracting the automaton. Possible priorities are:</p>
+<blockquote>
+<ul class="simple">
+<li>3 - &#8216;ZYX&#8217;</li>
+<li>7 - &#8216;ZXY&#8217;</li>
+<li>11 - &#8216;YZX&#8217;</li>
+<li>15 - &#8216;YXZ&#8217;</li>
+<li>19 - &#8216;XZY&#8217;</li>
+<li>23 - &#8216;XYZ&#8217;</li>
+</ul>
+</blockquote>
+<p>Here X means that the controller tries to disqualify one of the environment 
+assumptions, 
+Y means that the controller tries to advance with a finite path to somewhere, and
+Z means that the controller tries to satisfy one of his guarantees.</p>
+</li>
+</ul>
+</dd></dl>
+
+</li>
+<li><p class="first">Construct the automaton</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">automaton.</tt><tt class="descname">Automaton</tt><big>(</big><em>states_or_file=</em><span class="optional">[</span><span class="optional">]</span>, <em>varnames=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Automaton class for representing a finite state automaton.
+An Automaton object contains the following field:</p>
+<ul class="simple">
+<li><cite>states</cite>: a list of AutomatonState objects.</li>
+</ul>
+<p>Automaton([states_or_file, varname, verbose]) constructs an Automaton object based
+on the following input:</p>
+<ul class="simple">
+<li><cite>states_or_file</cite>: a string containing the name of the aut file to be loaded or
+a list of AutomatonState objects to be assigned to the <cite>states</cite> of this 
+Automaton object.</li>
+<li><cite>varname</cite>: a list of all the variable names. If it is not empty and 
+states_or_file is a string representing the name of the aut file to be loaded, 
+then this function will also check whether the variables in aut_file are in 
+varnames.</li>
+</ul>
+</dd></dl>
+
+</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<div class="section" id="specification-file-and-parser">
+<h3>Specification File and Parser<a class="headerlink" href="#specification-file-and-parser" title="Permalink to this headline">¶</a></h3>
+</div>
 <div class="section" id="robot-motion-planning-with-only-discrete-decisions">
-<h2>Robot Motion Planning with only Discrete Decisions<a class="headerlink" href="#robot-motion-planning-with-only-discrete-decisions" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-rst"><div class="highlight"><pre>#!/usr/bin/env python
-
-&quot;&quot;&quot;
-The example presented at the MURI review, illustrating the use of jtlvint 
-<span class="gh">and automaton modules </span>
-<span class="gh">&quot;&quot;&quot;</span>
-
-import sys, os
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), &#39;..&#39;))
-
-from prop2part import Region, PropPreservingPartition
+<h3>Robot Motion Planning with only Discrete Decisions<a class="headerlink" href="#robot-motion-planning-with-only-discrete-decisions" title="Permalink to this headline">¶</a></h3>
+<p>Import the necessary modules.</p>
+<div class="highlight-rst"><div class="highlight"><pre>from prop2part import Region, PropPreservingPartition
 from jtlvint import *
 from automaton import *
-from errorprint import printWarning, printError
-
-# Specify where the smv file, spc file and aut file will go
-testfile = &#39;robot_discrete_simple2&#39;
+</pre></div>
+</div>
+<p>Specify the smv file, spc file and aut file.</p>
+<div class="highlight-rst"><div class="highlight"><pre>testfile = &#39;robot_discrete_simple&#39;
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 smvfile = os.path.join(path, &#39;specs&#39;, testfile+&#39;.smv&#39;)
 spcfile = os.path.join(path, &#39;specs&#39;, testfile+&#39;.spc&#39;)
 autfile = os.path.join(path, &#39;specs&#39;, testfile+&#39;.aut&#39;)
-#setJTLVPath(os.path.join(path, &#39;..&#39;))
-
-# Specify the environment variables
-env_vars = {&#39;park&#39; : &#39;boolean&#39;, &#39;cellID&#39; : [0,1,2,3,4,5]}
-# Another way to specify this is: env_vars = {&#39;park&#39; : &#39;boolean&#39;, &#39;cellID&#39; : &#39;{0,...,5}&#39;}
-
-# Specify the discrete system variable
-disc_sys_vars = {&#39;gear&#39; : &#39;{-1...1}&#39;}
-
-# Propositions on environment and discrete system variables
-disc_props = {&#39;Park&#39; : &#39;park&#39;, \
-                  &#39;X0d&#39; : &#39;cellID=0&#39;, \
-                  &#39;X1d&#39; : &#39;cellID=1&#39;, \
-                  &#39;X2d&#39; : &#39;cellID=2&#39;, \
-                  &#39;X3d&#39; : &#39;cellID=3&#39;, \
-                  &#39;X4d&#39; : &#39;gear = 0&#39;, \
-                  &#39;X5d&#39; : &#39;gear = 1&#39;}
-
-# Specify the transition system representing the continuous dynamics
-disc_dynamics = PropPreservingPartition(list_region=[], list_prop_symbol=[])
-
-# Propositions for the continuous system variables
-disc_dynamics.list_prop_symbol = [&#39;X0&#39;, &#39;X1&#39;, &#39;X2&#39;, &#39;X3&#39;, &#39;X4&#39;] 
+</pre></div>
+</div>
+<p>Specify the environment variables.</p>
+<div class="highlight-rst"><div class="highlight"><pre>env_vars = {&#39;park&#39; : &#39;boolean&#39;}
+</pre></div>
+</div>
+<p>Specify the discrete system variable.</p>
+<div class="highlight-rst"><div class="highlight"><pre>disc_sys_vars = {&#39;X0reach&#39; : &#39;boolean&#39;}
+</pre></div>
+</div>
+<p>Specify the transition system representing the continuous dynamics.
+First, we list the propositions on the continuous states.
+Here, these propositions specify in which cell the robot is,
+i.e., Xi means that the robot is in cell Ci.
+Then, we specify the regions.
+Note that the first argument of Region(poly, prop) should be a list of
+polytopes. But since we are not dealing with the actual controller, we will
+just fill it with a string (think of it as a name of the region).
+The second argument of Region(poly, prop) is a list that specifies which
+propositions in cont_props above is satisfied. As specified below, regioni
+satisfies proposition Xi.
+Finally, we specify the adjacency between regions.
+disc_dynamics.adj[i][j] = 1 if starting from region j,
+the robot can move to region i while only staying in the union of region i
+and region j.</p>
+<div class="highlight-rst"><div class="highlight"><pre>disc_dynamics = PropPreservingPartition(list_region=[], list_prop_symbol=[])
+disc_dynamics.list_prop_symbol = [&#39;X0&#39;, &#39;X1&#39;, &#39;X2&#39;, &#39;X3&#39;, &#39;X4&#39;, &#39;X5&#39;] 
 disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
-
-# Regions. Note that the first argument of Region(poly, prop) should be a list of 
-# polytopes. But since we are not dealing with the actual controller, we will just 
-# fill it with a string (think of it as a name of the region).
-# The second argument of Region(poly, prop) is a list that specifies which propositions
-# in cont_props above is satisfied.
-region0 = Region(&#39;C0&#39;, [1, 0, 0, 0, 0])
-region1 = Region(&#39;C1&#39;, [0, 1, 0, 0, 0])
-region2 = Region(&#39;C2&#39;, [0, 0, 1, 0, 0])
-region3 = Region(&#39;C3&#39;, [0, 0, 0, 1, 0])
-region4 = Region(&#39;C4&#39;, [0, 0, 0, 0, 1])
-region5 = Region(&#39;C5&#39;, [1, 1, 1, 1, 1])
+region0 = Region(&#39;C0&#39;, [1, 0, 0, 0, 0, 0])
+region1 = Region(&#39;C1&#39;, [0, 1, 0, 0, 0, 0])
+region2 = Region(&#39;C2&#39;, [0, 0, 1, 0, 0, 0])
+region3 = Region(&#39;C3&#39;, [0, 0, 0, 1, 0, 0])
+region4 = Region(&#39;C4&#39;, [0, 0, 0, 0, 1, 0])
+region5 = Region(&#39;C5&#39;, [0, 0, 0, 0, 0, 1])
 disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
 disc_dynamics.num_regions = len(disc_dynamics.list_region)
-
-# The adjacency between regions. disc_dynamics.adj[i][j] = 1 if starting from region j,
-# the robot can move to region i while only staying in the union of region i
-# and region j.
 disc_dynamics.adj =     [[1, 1, 0, 1, 0, 0], \
                          [1, 1, 1, 0, 1, 0], \
                          [0, 1, 1, 0, 0, 1], \
                          [1, 0, 0, 1, 1, 0], \
                          [0, 1, 0, 1, 1, 1], \
                          [0, 0, 1, 0, 1, 1]]
-
-# Spec
-assumption = &#39;[]&lt;&gt;(!park) &amp; []&lt;&gt;(!X0d) &amp; []&lt;&gt;(Park -&gt; !X0d)&#39;
-guarantee = &#39;[]&lt;&gt;(X0d -&gt; X0) &amp; []&lt;&gt;X1 &amp; []&lt;&gt;(Park -&gt; X4)&#39;
-spec = [assumption, guarantee]
-
-# Generate input to JTLV
-newvarname = generateJTLVInput(env_vars, disc_sys_vars, spec, disc_props, \
-                               disc_dynamics, smvfile, spcfile, 2)
-
-# Check realizability
-realizability = checkRealizability(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 3)
-
-# Compute an automaton
-realizability = computeStrategy(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 3, 3)
+</pre></div>
+</div>
+<p>Specification.</p>
+<div class="highlight-rst"><div class="highlight"><pre>assumption = &#39;X0reach &amp; []&lt;&gt;(!park)&#39;
+guarantee = &#39;[]&lt;&gt;X5&#39;
+guarantee += &#39; &amp;\n\t[](next(X0reach) = ((X0 | X0reach) &amp; !park))&#39;
+</pre></div>
+</div>
+<p>Generate input to JTLV.</p>
+<div class="highlight-rst"><div class="highlight"><pre>newvarname = generateJTLVInput(env_vars, disc_sys_vars, [assumption, guarantee], \
+                                   {}, disc_dynamics, smvfile, spcfile, 2)
+</pre></div>
+</div>
+<p>Check realizability.</p>
+<div class="highlight-rst"><div class="highlight"><pre>realizability = checkRealizability(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 11)
+</pre></div>
+</div>
+<p>Construct an automaton.</p>
+<div class="highlight-rst"><div class="highlight"><pre>computeStrategy(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 11, 3)
 aut = Automaton(autfile, [], 3)
 </pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -154,7 +297,11 @@ aut = Automaton(autfile, [], 3)
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tutorial and Examples</a><ul>
+<li><a class="reference internal" href="#synthesis-of-embedded-control-systems">Synthesis of Embedded Control Systems</a><ul>
+<li><a class="reference internal" href="#specification-file-and-parser">Specification File and Parser</a></li>
 <li><a class="reference internal" href="#robot-motion-planning-with-only-discrete-decisions">Robot Motion Planning with only Discrete Decisions</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
