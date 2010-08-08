@@ -3,7 +3,152 @@
 Tutorial and Examples
 =======================
 
-Robot Motion Planning with only Discrete Decisions
---------------------------------------------------
+The rhtlp is developed for synthesis of embedded control systems,
+allowing the planning to be done in a receding horizon manner.
 
-.. literalinclude:: ../../examples/robot_discrete_simple2.py
+
+Synthesis of Embedded Control Systems
+-------------------------------------
+We consider a system that comprises the physical component, which we refer to as 
+the plant, and the (potentially dynamic and not a priori known) environment in 
+which the plant operates. 
+The system may contain both continuous (physical) and discrete (computational)
+components.
+
+Suppose the continuous component of the system evolves according to the
+following discrete-time linear time-invariant state space model:
+for :math:`t \in \{0,1,2,...\}`
+
+.. math::
+
+   s[t+1]  &=   As[t] + Bu[t] + Ed[t] \\
+   u[t]    &\in U\\
+   d[t]    &\in D\\
+   s[0]	   &\in S
+
+where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous 
+component of the system, 
+:math:`U \subseteq \mathbb{R}^m` is the set of admissible control inputs, 
+:math:`D \subseteq \mathbb{R}^p` is the set of exogenous disturbances and
+:math:`s[t], u[t], d[t]` are the continuous state, the control signal and
+the exogenous disturbance, respectively, at time :math:`t`.
+
+We consider the case where the sets :math:`S, U, D` are bounded polytopes.
+
+Let :math:`\Pi` be a finite set of atomic propositions of system variables.
+Each of the atomic propositions in :math:`\Pi` essentially captures the
+states of interest.
+We consider the specification of the form
+
+.. math::
+   \varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s.
+
+Here, the assumption :math:`\varphi_{init}` on the initial condition of the system
+is a propositional formula built from :math:`\Pi`.
+The assumption :math:`\varphi_e` on the environment and the desired behavior 
+:math:`\varphi_s` are LTL formulas built from :math:`\Pi`.
+See our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
+
+
+.. image:: ecssyn.*
+
+As illustrated in the figure above, our approach to this embedded control 
+system synthesis consists of the following main steps:
+
+   1. Continuous state space partition: Given the continuous state space 
+      :math:`S` of the system and the set :math:`\Pi_c` of propositions on the
+      continuous state of the system, we partition :math:`S` into a finite number
+      of cells such that all the continuous states in each cell satisfy
+      exactly the same set of propositions in :math:`\Pi_c`.
+      This can be done using the following function call:
+
+      .. autofunction:: prop2part.prop2part2
+
+   2. Continuous state space discretization
+
+   3. Digital design synthesis:
+
+      - Generate input to JTLV
+
+        .. autofunction:: jtlvint.generateJTLVInput
+	   :noindex:
+
+      - Synthesize the discrete planner
+
+        .. autofunction:: jtlvint.computeStrategy
+	   :noindex:
+
+      - Construct the automaton
+
+        .. autoclass:: automaton.Automaton
+	   :noindex:
+
+
+
+
+
+Specification File and Parser
+`````````````````````````````
+
+
+Robot Motion Planning with only Discrete Decisions
+``````````````````````````````````````````````````
+
+Import the necessary modules.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 12-14
+
+Specify the smv file, spc file and aut file.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 18-22
+
+Specify the environment variables.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 25
+
+Specify the discrete system variable.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 31
+
+Specify the transition system representing the continuous dynamics.
+First, we list the propositions on the continuous states.
+Here, these propositions specify in which cell the robot is, 
+i.e., Xi means that the robot is in cell Ci.
+Then, we specify the regions.
+Note that the first argument of Region(poly, prop) should be a list of 
+polytopes. But since we are not dealing with the actual controller, we will 
+just fill it with a string (think of it as a name of the region).
+The second argument of Region(poly, prop) is a list that specifies which 
+propositions in cont_props above is satisfied. As specified below, regioni 
+satisfies proposition Xi.
+Finally, we specify the adjacency between regions. 
+disc_dynamics.adj[i][j] = 1 if starting from region j,
+the robot can move to region i while only staying in the union of region i 
+and region j.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 34, 38-39, 47-54, 58-63
+
+Specification.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 66-68
+
+Generate input to JTLV.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 71-72
+
+Check realizability.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 75
+
+Construct an automaton.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 78-79
