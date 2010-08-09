@@ -570,9 +570,9 @@
         <span class="k">print</span> <span class="s">&#39;  spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span>
         <span class="k">print</span> <span class="s">&#39;  aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span>
         <span class="k">print</span> <span class="s">&#39;  jtlv path: &#39;</span> <span class="o">+</span> <span class="n">JTLV_PATH</span>
-        <span class="k">print</span> <span class="s">&#39;  priority_kind: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;  priority_kind: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">JTLV_EXE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> <span class="c"># Use fatjar</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">JTLV_EXE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">jtlv_grgame</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="n">JTLV_EXE</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
             <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
@@ -581,7 +581,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># For debugging purpose</span>
         <span class="n">classpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> \
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">,</span> <span class="s">&quot;jtlv-prompt1.4.1.jar&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
@@ -594,16 +594,16 @@
 
     <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="o">+</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">line</span><span class="p">,</span>
         <span class="k">if</span> <span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
             <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">realizable</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Automaton successfully synthesized.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Automaton successfully synthesized.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;ERROR: Specification was unrealizable.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">ERROR: Specification was unrealizable.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
@@ -612,11 +612,40 @@
 
 
 <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="getCounterExamples"><a class="viewcode-back" href="../synthesis.html#jtlvint.getCounterExamples">[docs]</a><span class="k">def</span> <span class="nf">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a list of dictionary, each representing a counter example.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `aut_file`: a string containing the name of the file containing the</span>
+<span class="sd">      counter examples generated by JTLV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">counter_examples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;The env player can win from states&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span><span class="p">):</span>
+            <span class="n">counter_ex</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;(\w+):([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">counter_ex</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">counter_ex</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">counter_examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counter_ex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span> <span class="n">counter_ex</span>
+    <span class="k">return</span> <span class="n">counter_examples</span>
+
+<span class="c">###################################################################</span>
 
 <span class="c"># Test case</span>
 <span class="c">#  * Default: Use init_option=1 with dynamics</span>
 <span class="c">#  * 1: Use init_option=2 with dynamics</span>
-<span class="c">#  * 2: Use init_option=0 with dynamics</span>
+<span class="c">#  * 2: Use init_option=0 with dynamics. This makes the spec unrealizable.</span>
 <span class="c">#  * 3: Use init_option=1 with no dynamics</span></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">testfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="s">&#39;specs&#39;</span><span class="p">,</span> \
@@ -699,6 +728,12 @@
     <span class="k">print</span> <span class="n">realizability</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c">####################################</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing getCounterExamples&#39;</span><span class="p">)</span>
+        <span class="n">counter_examples</span> <span class="o">=</span> <span class="n">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="o">=</span><span class="n">autfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
           </div>
