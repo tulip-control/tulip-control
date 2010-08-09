@@ -103,6 +103,12 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
     ###################################################################################
     # Generate smv file
     ###################################################################################
+    # Check that the number of regions in disc_dynamics is correct.
+    if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
+        printWarning('WARNING: disc_dynamics.num_regions != ' + \
+                         "len(disc_dynamics.list_regions)")
+        disc_dynamics.num_regions = len(disc_dynamics.list_region)
+
     # Replace '...' in the range of possible values of env_vars to the actual values 
     # and convert a list representation of the range of possible values to a string
     for var, reg in env_vars.iteritems():
@@ -137,7 +143,6 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
             printWarning("WARNING: Unknown possible values for environment " + \
                              "variable "+ var)
                 
-
     # Replace '...' in the range of possible values of disc_sys_vars to the actual 
     # values and convert a list representation of the range of possible values to a 
     # string
@@ -194,21 +199,18 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
     # System
     f.write('\nMODULE sys \n')
     f.write('\tVAR\n')
-    
-    newvarname = 'cellID' # New variable that identifies in which cell the continuous 
-                          # state is
 
-    # Make sure that the new variable name does not appear in env_vars or disc_sys_vars
-    while (newvarname in env_vars) | (newvarname in disc_sys_vars):
-        newvarname = 'c' + newvarname
+    # New variable that identifies in which cell the continuous state is
+    newvarname = ''
+    newvar_values = []
+    if (disc_dynamics.num_regions > 0):
+        newvarname = 'cellID' 
 
-    if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
-        printWarning('WARNING: disc_dynamics.num_regions != ' + \
-                         "len(disc_dynamics.list_regions)")
-        disc_dynamics.num_regions = len(disc_dynamics.list_region)
+        # Make sure that the new variable name does not appear in env_vars or disc_sys_vars
+        while (newvarname in env_vars) | (newvarname in disc_sys_vars):
+            newvarname = 'c' + newvarname
     
-    newvar_values = range(0,disc_dynamics.num_regions)
-    if (len(newvar_values) > 0):
+        newvar_values = range(0,disc_dynamics.num_regions)
         newvar = '{'
         for i in newvar_values:
             if (i > 0):
@@ -218,6 +220,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
         newvar = newvarname + ' : ' + newvar + '}'
         f.write('\t\t' + newvar + ';\n')
 
+    # Discrete system variables
     for var, reg in disc_sys_vars.iteritems():
         f.write('\t\t' + var + ' : ' + reg + ';\n')
 
@@ -313,27 +316,16 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
             str(val) + ')'
 
     addAnd = False
-    if (len(env_values_formula) > 0 or len(disc_sys_values_formula) > 0 or \
-            len(newvar_values_formula) > 0):
-        if (len(assumption) > 0):
-            assumption = '-- original assumptions\n\t' + assumption + ' &\n'
-        assumption = assumption + '-- initial states\n'
-    if (len(newvar_values_formula) > 0):
-        assumption = assumption + '\t(' + newvar_values_formula + ')'
-        addAnd = True
-    if (len(disc_sys_values_formula) > 0):
-        if (addAnd):
-            assumption = assumption + ' &\n'
-        assumption = assumption + '\t(' + disc_sys_values_formula + ')'
+    if (len(assumption) > 0 and not(assumption.isspace())):
+        assumption = '-- original assumptions\n\t' + assumption 
         addAnd = True
     if (len(env_values_formula) > 0):
         if (addAnd):
             assumption = assumption + ' &\n'
+        assumption = assumption + '-- initial env states\n'
         assumption = assumption + '\t(' + env_values_formula + ')'
         assumption = assumption + ' &\n-- possible values of environment variables\n'
         assumption = assumption + '\t[](next(' + env_values_formula + '))'
-#        assumption = assumption + '\t[]((' + env_values_formula + ') -> next(' + \
-#            env_values_formula + '))'
 
     f = open(spc_file, 'w')
 
@@ -344,17 +336,29 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
 
     # Guarantee
     f.write('\nLTLSPEC\n')
-    formula_added = False
+    addAnd = False
     if (len(guarantee) > 0 and not(guarantee.isspace())):
         f.write('-- original requirements\n\t' + guarantee)
-        formula_added = True
+        addAnd = True
+    if (len(newvar_values_formula) > 0):
+        if (addAnd):
+            f.write(' &\n')
+        f.write('-- initial continuous sys states\n')
+        f.write('\t(' + newvar_values_formula + ')')
+        addAnd = True
+    if (len(disc_sys_values_formula) > 0):
+        if (addAnd):
+            f.write(' &\n')
+        f.write('-- initial discrete sys states\n')
+        f.write('\t(' + disc_sys_values_formula + ')')
+        addAnd = True
 
     # Transitions
     # For continuous dynamics
     for from_region in range(0,disc_dynamics.num_regions):
         to_regions = [j for j in range(0,disc_dynamics.num_regions) if \
                           disc_dynamics.adj[j][from_region]]
-        if (formula_added):
+        if (addAnd):
             f.write(' &\n')
         if (from_region == 0):
             f.write('-- transition relations for continuous dynamics\n')
@@ -367,25 +371,14 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                 f.write(' | ')
             f.write('(s.' + newvarname + ' = ' + str(newvar_values[to_region]) + ')')
         f.write('))')
-        formula_added = True
+        addAnd = True
 
     # For discrete transitions
     if (len(disc_sys_values_formula) > 0):
-        if (formula_added):
+        if (addAnd):
             f.write(' &\n')
-        f.write('-- transition relations for discrete system state\n');
+        f.write('-- transition relations for discrete sys states\n');
         f.write('\t[](next(' + disc_sys_values_formula + '))')
-        
-#    add_desc = True
-#    disc_sys_values_formula
-#    for prop in new_disc_props.values():
-#        if (formula_added):
-#            f.write(' &\n')
-#        if (add_desc):
-#            f.write('-- transition relations for discrete system state\n');
-#            add_desc = False
-#        f.write('\t[](next((' + prop + ') | !(' + prop + ')))')
-#        formula_added = True
     
     f.write('\n;')
     f.close()
@@ -396,7 +389,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
 ###################################################################
 
 def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', \
-                           verbose=0):
+                           pick_sys_init=True, verbose=0):
     """Determine whether the spec in smv_file and spc_file is realizable without 
     extracting an automaton.
 
@@ -410,18 +403,24 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
     - `heap_size`: a string that specifies java heap size. 
     - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, 
       this function will not print anything on the screen.
+    - `pick_sys_init` is a boolean indicating whether the system can pick 
+      its initial state (in response to the initial environment state).
     """
 
+    init_option = 1
+    if (not pick_sys_init):
+        init_option = 0
     realizable = computeStrategy(smv_file=smv_file, spc_file=spc_file, \
                                      aut_file=aut_file, heap_size=heap_size, \
-                                     priority_kind=-1, verbose=verbose)
+                                     priority_kind=-1, verbose=verbose, \
+                                     init_option=init_option)
     return realizable
 
 
 ###################################################################
 
 def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', \
-                        priority_kind=3, verbose=0):
+                        priority_kind=3, init_option=1, verbose=0):
     """Compute an automaton satisfying the spec in smv_file and spc_file and store in 
     aut_file. Return the realizability of the spec.
 
@@ -435,7 +434,7 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
     - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, 
       this function will not print anything on the screen.
     - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-      priority used in extracting the automaton. Possible priorities are: 
+      priority used in extracting the automaton. Possible values of `priority_kind` are: 
 
         * 3 - 'ZYX'
         * 7 - 'ZXY'
@@ -448,7 +447,21 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
       assumptions, 
       Y means that the controller tries to advance with a finite path to somewhere, and
       Z means that the controller tries to satisfy one of his guarantees.
+    - `init_option`: an integer in that specifies how to handle the initial state of 
+      the system. Possible values of `init_option` are
+
+        * 0 - The system has to be able to handle all the possible initial system
+          states specified on the guarantee side of the specification.
+        * 1 (default) - The system can choose its initial state, in response to the initial
+          environment state. For each initial environment state, the resulting
+          automaton contains exactly one initial system state, starting from which
+          the system can satisfy the specification.
+        * 2 - The system can choose its initial state, in response to the initial
+          environment state. For each initial environment state, the resulting
+          automaton contain all the possible initial system states, starting from which
+          the system can satisfy the specification.
     """
+
     # Check that the input is valid
     if (not os.path.isfile(smv_file)):
         printError("The smv file " + smv_file + " does not exist.")
@@ -481,11 +494,26 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         elif (priority_kind == 'XYZ'):
             priority_kind = 23
         else:
-            printWarning("Unknown priority_kind. Setting to the default (ZYX)")
+            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
             priority_kind = 3
-    elif (not isinstance(priority_kind, int)):
-        printWarning("Unknown priority_kind. Setting to the default (ZYX)")
+    elif (isinstance(priority_kind, int)):
+        if (priority_kind > 0 and priority_kind != 3 and priority_kind != 7 and \
+                priority_kind != 11 and priority_kind != 15 and priority_kind != 19 and \
+                priority_kind != 23):
+            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+            priority_kind = 3
+    else:
+        printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
         priority_kind = 3
+
+    # init_option
+    if (isinstance(init_option, int)):
+        if (init_option < 0 or init_option > 2):
+            printWarning("Unknown init_option. Setting it to the default (1)")
+            init_option = 1
+    else:
+        printWarning("Unknown init_option. Setting it to the default (1)")
+        init_option = 1
 
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
@@ -500,20 +528,20 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         cmd = subprocess.Popen( \
             ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-                 str(priority_kind)], \
+                 str(priority_kind), str(init_option)], \
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, \
-                aut_file, str(priority_kind)
+                aut_file, str(priority_kind), str(init_option)
     else:
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
             print "  java", heap_size, "-cp", classpath, "GRMain", smv_file, \
-                spc_file, aut_file, str(priority_kind)
+                spc_file, aut_file, str(priority_kind), str(init_option)
         cmd = subprocess.Popen( \
             ["java", heap_size, "-cp", classpath, "GRMain", smv_file, spc_file, \
-                 aut_file, str(priority_kind)], \
+                 aut_file, str(priority_kind), str(init_option)], \
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
@@ -538,6 +566,10 @@ def computeStrategy(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m',
 ###################################################################
 
 # Test case
+#  * Default: Use init_option=1 with dynamics
+#  * 1: Use init_option=2 with dynamics
+#  * 2: Use init_option=0 with dynamics
+#  * 3: Use init_option=1 with no dynamics
 if __name__ == "__main__":
     testfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'specs', \
                                 'test')
@@ -552,10 +584,10 @@ if __name__ == "__main__":
     disc_dynamics = PropPreservingPartition()
     region0 = Region('p0', [1, 0, 0, 0, 0])
     region1 = Region('p1', [0, 1, 0, 0, 0])
-    region2 = Region('p2', [0, 0, 1, 0, 0])
+    region2 = Region('p2', [1, 0, 1, 0, 0])
     region3 = Region('p3', [0, 0, 0, 1, 0])
     region4 = Region('p4', [0, 0, 0, 0, 1])
-    region5 = Region('p5', [1, 1, 1, 1, 1])
+    region5 = Region('p5', [1, 0, 0, 1, 1])
     disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
     disc_dynamics.num_regions = len(disc_dynamics.list_region)
     disc_dynamics.adj = [[1, 1, 0, 1, 0, 0], \
@@ -571,16 +603,11 @@ if __name__ == "__main__":
                       'X1d' : 'cellID=1', \
                       'X2d' : 'cellID=2', \
                       'X3d' : 'cellID=3', \
-                      'X4d' : 'gear = 0', \
+                      'X4d' : 'cellID=4', \
                       'X5d' : 'gear = 1'}
 
-    # For realizable spec (default case)
-    assumption = '[]<>(!park) & []<>(!X0d) & []<>(Park -> !X0d)'  
-
-    if ('2' in sys.argv): # For unrealizable spec
-        assumption = ''  
-
-    guarantee = '[]<>(X0d -> X0) & []<>X1 & []<>(Park -> X4)'
+    assumption = '[]<>(!park) & []<>(!X4d)'
+    guarantee = '[]<>(X4d -> X4) & []<>X1 & [](Park -> X0)'
     spec = [assumption, guarantee]
 
     if ('3' in sys.argv): # For spec with no dynamics
@@ -602,8 +629,10 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing checkRealizability')
+    pick_sys_init = (not ('2' in sys.argv))
     realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, \
-                                           aut_file='', heap_size='-Xmx128m', verbose=3)
+                                           aut_file='', heap_size='-Xmx128m', \
+                                           pick_sys_init=pick_sys_init, verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
@@ -611,9 +640,14 @@ if __name__ == "__main__":
     ####################################
 
     print('Testing computeStrategy')
+    init_option = 1
+    if ('1' in sys.argv):
+        init_option = 2
+    elif ('2' in sys.argv):
+        init_option = 0
     realizability = computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file='', \
                                         heap_size='-Xmx128m', priority_kind='ZYX', \
-                                        verbose=3)
+                                        init_option=init_option, verbose=3)
     print realizability
     print('DONE')
     print('================================\n')
