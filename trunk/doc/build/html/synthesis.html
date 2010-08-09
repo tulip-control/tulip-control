@@ -64,7 +64,7 @@
 </table>
 <dl class="function">
 <dt id="jtlvint.checkRealizability">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">checkRealizability</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#checkRealizability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.checkRealizability" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">checkRealizability</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#checkRealizability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.checkRealizability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine whether the spec in smv_file and spc_file is realizable without 
 extracting an automaton.</p>
 <p>Input:</p>
@@ -77,12 +77,14 @@ extracting an automaton.</p>
 <li><cite>heap_size</cite>: a string that specifies java heap size.</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, 
 this function will not print anything on the screen.</li>
+<li><cite>pick_sys_init</cite> is a boolean indicating whether the system can pick 
+its initial state (in response to the initial environment state).</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="jtlvint.computeStrategy">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.computeStrategy" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.computeStrategy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an automaton satisfying the spec in smv_file and spc_file and store in 
 aut_file. Return the realizability of the spec.</p>
 <p>Input:</p>
@@ -100,7 +102,7 @@ automaton.</p>
 this function will not print anything on the screen.</p>
 </li>
 <li><p class="first"><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
-priority used in extracting the automaton. Possible priorities are:</p>
+priority used in extracting the automaton. Possible values of <cite>priority_kind</cite> are:</p>
 <blockquote>
 <ul class="simple">
 <li>3 - &#8216;ZYX&#8217;</li>
@@ -116,12 +118,29 @@ assumptions,
 Y means that the controller tries to advance with a finite path to somewhere, and
 Z means that the controller tries to satisfy one of his guarantees.</p>
 </li>
+<li><p class="first"><cite>init_option</cite>: an integer in that specifies how to handle the initial state of 
+the system. Possible values of <cite>init_option</cite> are</p>
+<blockquote>
+<ul class="simple">
+<li>0 - The system has to be able to handle all the possible initial system
+states specified on the guarantee side of the specification.</li>
+<li>1 (default) - The system can choose its initial state, in response to the initial
+environment state. For each initial environment state, the resulting
+automaton contains exactly one initial system state, starting from which
+the system can satisfy the specification.</li>
+<li>2 - The system can choose its initial state, in response to the initial
+environment state. For each initial environment state, the resulting
+automaton contain all the possible initial system states, starting from which
+the system can satisfy the specification.</li>
+</ul>
+</blockquote>
+</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="jtlvint.generateJTLVInput">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a2e288&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a27210&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">

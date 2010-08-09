@@ -151,6 +151,12 @@
     <span class="c">###################################################################################</span>
     <span class="c"># Generate smv file</span>
     <span class="c">###################################################################################</span>
+    <span class="c"># Check that the number of regions in disc_dynamics is correct.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)):</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING: disc_dynamics.num_regions != &#39;</span> <span class="o">+</span> \
+                         <span class="s">&quot;len(disc_dynamics.list_regions)&quot;</span><span class="p">)</span>
+        <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
+
     <span class="c"># Replace &#39;...&#39; in the range of possible values of env_vars to the actual values </span>
     <span class="c"># and convert a list representation of the range of possible values to a string</span>
     <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -185,7 +191,6 @@
             <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING: Unknown possible values for environment &quot;</span> <span class="o">+</span> \
                              <span class="s">&quot;variable &quot;</span><span class="o">+</span> <span class="n">var</span><span class="p">)</span>
                 
-
     <span class="c"># Replace &#39;...&#39; in the range of possible values of disc_sys_vars to the actual </span>
     <span class="c"># values and convert a list representation of the range of possible values to a </span>
     <span class="c"># string</span>
@@ -242,21 +247,18 @@
     <span class="c"># System</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">MODULE sys </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    
-    <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;cellID&#39;</span> <span class="c"># New variable that identifies in which cell the continuous </span>
-                          <span class="c"># state is</span>
 
-    <span class="c"># Make sure that the new variable name does not appear in env_vars or disc_sys_vars</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="p">):</span>
-        <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;c&#39;</span> <span class="o">+</span> <span class="n">newvarname</span>
+    <span class="c"># New variable that identifies in which cell the continuous state is</span>
+    <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">newvar_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;cellID&#39;</span> 
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING: disc_dynamics.num_regions != &#39;</span> <span class="o">+</span> \
-                         <span class="s">&quot;len(disc_dynamics.list_regions)&quot;</span><span class="p">)</span>
-        <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
+        <span class="c"># Make sure that the new variable name does not appear in env_vars or disc_sys_vars</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="p">):</span>
+            <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;c&#39;</span> <span class="o">+</span> <span class="n">newvarname</span>
     
-    <span class="n">newvar_values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newvar_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">newvar_values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span>
         <span class="n">newvar</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">newvar_values</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -266,6 +268,7 @@
         <span class="n">newvar</span> <span class="o">=</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">newvar</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">newvar</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
+    <span class="c"># Discrete system variables</span>
     <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
@@ -361,27 +364,16 @@
             <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
 
     <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> \
-            <span class="nb">len</span><span class="p">(</span><span class="n">newvar_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;-- original assumptions</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;-- initial states</span><span class="se">\n</span><span class="s">&#39;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newvar_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">newvar_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">assumption</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;-- original assumptions</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">assumption</span> 
         <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
             <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;-- initial env states</span><span class="se">\n</span><span class="s">&#39;</span>
         <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
         <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">-- possible values of environment variables</span><span class="se">\n</span><span class="s">&#39;</span>
         <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span>
-<span class="c">#        assumption = assumption + &#39;\t[]((&#39; + env_values_formula + &#39;) -&gt; next(&#39; + \</span>
-<span class="c">#            env_values_formula + &#39;))&#39;</span>
 
     <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
 
@@ -392,17 +384,29 @@
 
     <span class="c"># Guarantee</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">LTLSPEC</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">formula_added</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">guarantee</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- original requirements</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">guarantee</span><span class="p">)</span>
-        <span class="n">formula_added</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newvar_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- initial continuous sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">newvar_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- initial discrete sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="c"># Transitions</span>
     <span class="c"># For continuous dynamics</span>
     <span class="k">for</span> <span class="n">from_region</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
         <span class="n">to_regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
                           <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">adj</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">from_region</span><span class="p">]]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">formula_added</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">from_region</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for continuous dynamics</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
@@ -415,25 +419,14 @@
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; | &#39;</span><span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">newvar_values</span><span class="p">[</span><span class="n">to_region</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;))&#39;</span><span class="p">)</span>
-        <span class="n">formula_added</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="c"># For discrete transitions</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">formula_added</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for discrete system state</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">);</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for discrete sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">);</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span><span class="p">)</span>
-        
-<span class="c">#    add_desc = True</span>
-<span class="c">#    disc_sys_values_formula</span>
-<span class="c">#    for prop in new_disc_props.values():</span>
-<span class="c">#        if (formula_added):</span>
-<span class="c">#            f.write(&#39; &amp;\n&#39;)</span>
-<span class="c">#        if (add_desc):</span>
-<span class="c">#            f.write(&#39;-- transition relations for discrete system state\n&#39;);</span>
-<span class="c">#            add_desc = False</span>
-<span class="c">#        f.write(&#39;\t[](next((&#39; + prop + &#39;) | !(&#39; + prop + &#39;)))&#39;)</span>
-<span class="c">#        formula_added = True</span>
     
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">;&#39;</span><span class="p">)</span>
     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -444,7 +437,7 @@
 <span class="c">###################################################################</span>
 </div>
 <div class="viewcode-block" id="checkRealizability"><a class="viewcode-back" href="../synthesis.html#jtlvint.checkRealizability">[docs]</a><span class="k">def</span> <span class="nf">checkRealizability</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
-                           <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                           <span class="n">pick_sys_init</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Determine whether the spec in smv_file and spc_file is realizable without </span>
 <span class="sd">    extracting an automaton.</span>
 
@@ -458,18 +451,24 @@
 <span class="sd">    - `heap_size`: a string that specifies java heap size. </span>
 <span class="sd">    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, </span>
 <span class="sd">      this function will not print anything on the screen.</span>
+<span class="sd">    - `pick_sys_init` is a boolean indicating whether the system can pick </span>
+<span class="sd">      its initial state (in response to the initial environment state).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pick_sys_init</span><span class="p">):</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">realizable</span> <span class="o">=</span> <span class="n">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
                                      <span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> \
-                                     <span class="n">priority_kind</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                                     <span class="n">priority_kind</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> \
+                                     <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">realizable</span>
 
 
 <span class="c">###################################################################</span>
 </div>
 <div class="viewcode-block" id="computeStrategy"><a class="viewcode-back" href="../tutorial.html#jtlvint.computeStrategy">[docs]</a><span class="k">def</span> <span class="nf">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
-                        <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">init_option</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute an automaton satisfying the spec in smv_file and spc_file and store in </span>
 <span class="sd">    aut_file. Return the realizability of the spec.</span>
 
@@ -483,7 +482,7 @@
 <span class="sd">    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, </span>
 <span class="sd">      this function will not print anything on the screen.</span>
 <span class="sd">    - `priority_kind`: a string of length 3 or an integer that specifies the type of </span>
-<span class="sd">      priority used in extracting the automaton. Possible priorities are: </span>
+<span class="sd">      priority used in extracting the automaton. Possible values of `priority_kind` are: </span>
 
 <span class="sd">        * 3 - &#39;ZYX&#39;</span>
 <span class="sd">        * 7 - &#39;ZXY&#39;</span>
@@ -496,7 +495,21 @@
 <span class="sd">      assumptions, </span>
 <span class="sd">      Y means that the controller tries to advance with a finite path to somewhere, and</span>
 <span class="sd">      Z means that the controller tries to satisfy one of his guarantees.</span>
+<span class="sd">    - `init_option`: an integer in that specifies how to handle the initial state of </span>
+<span class="sd">      the system. Possible values of `init_option` are</span>
+
+<span class="sd">        * 0 - The system has to be able to handle all the possible initial system</span>
+<span class="sd">          states specified on the guarantee side of the specification.</span>
+<span class="sd">        * 1 (default) - The system can choose its initial state, in response to the initial</span>
+<span class="sd">          environment state. For each initial environment state, the resulting</span>
+<span class="sd">          automaton contains exactly one initial system state, starting from which</span>
+<span class="sd">          the system can satisfy the specification.</span>
+<span class="sd">        * 2 - The system can choose its initial state, in response to the initial</span>
+<span class="sd">          environment state. For each initial environment state, the resulting</span>
+<span class="sd">          automaton contain all the possible initial system states, starting from which</span>
+<span class="sd">          the system can satisfy the specification.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c"># Check that the input is valid</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The smv file &quot;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
@@ -529,11 +542,26 @@
         <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XYZ&#39;</span><span class="p">):</span>
             <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">23</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
             <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting to the default (ZYX)&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">7</span> <span class="ow">and</span> \
+                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">15</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">19</span> <span class="ow">and</span> \
+                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">23</span><span class="p">):</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
         <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c"># init_option</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">init_option</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">init_option</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">init_option</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+            <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">print</span> <span class="s">&#39;Calling jtlv with the following arguments:&#39;</span>
@@ -548,20 +576,20 @@
         <span class="n">jtlv_grgame</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="n">JTLV_EXE</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
             <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
-                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)],</span> \
+                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
                 <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
-                <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span>
+                <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">classpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> \
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">,</span> <span class="s">&quot;jtlv-prompt1.4.1.jar&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> \
-                <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span>
+                <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
             <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
-                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)],</span> \
+                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
                 <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
@@ -585,7 +613,11 @@
 
 <span class="c">###################################################################</span>
 
-<span class="c"># Test case</span></div>
+<span class="c"># Test case</span>
+<span class="c">#  * Default: Use init_option=1 with dynamics</span>
+<span class="c">#  * 1: Use init_option=2 with dynamics</span>
+<span class="c">#  * 2: Use init_option=0 with dynamics</span>
+<span class="c">#  * 3: Use init_option=1 with no dynamics</span></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">testfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="s">&#39;specs&#39;</span><span class="p">,</span> \
                                 <span class="s">&#39;test&#39;</span><span class="p">)</span>
@@ -600,10 +632,10 @@
     <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">()</span>
     <span class="n">region0</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p0&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">region1</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p1&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">region2</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p2&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">region2</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p2&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">region3</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p3&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">region4</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p4&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">region5</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p5&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">region5</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p5&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span> <span class="o">=</span> <span class="p">[</span><span class="n">region0</span><span class="p">,</span> <span class="n">region1</span><span class="p">,</span> <span class="n">region2</span><span class="p">,</span> <span class="n">region3</span><span class="p">,</span> <span class="n">region4</span><span class="p">,</span> <span class="n">region5</span><span class="p">]</span>
     <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
     <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> \
@@ -619,16 +651,11 @@
                       <span class="s">&#39;X1d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=1&#39;</span><span class="p">,</span> \
                       <span class="s">&#39;X2d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=2&#39;</span><span class="p">,</span> \
                       <span class="s">&#39;X3d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=3&#39;</span><span class="p">,</span> \
-                      <span class="s">&#39;X4d&#39;</span> <span class="p">:</span> <span class="s">&#39;gear = 0&#39;</span><span class="p">,</span> \
+                      <span class="s">&#39;X4d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=4&#39;</span><span class="p">,</span> \
                       <span class="s">&#39;X5d&#39;</span> <span class="p">:</span> <span class="s">&#39;gear = 1&#39;</span><span class="p">}</span>
 
-    <span class="c"># For realizable spec (default case)</span>
-    <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(!park) &amp; []&lt;&gt;(!X0d) &amp; []&lt;&gt;(Park -&gt; !X0d)&#39;</span>  
-
-    <span class="k">if</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span> <span class="c"># For unrealizable spec</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>  
-
-    <span class="n">guarantee</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(X0d -&gt; X0) &amp; []&lt;&gt;X1 &amp; []&lt;&gt;(Park -&gt; X4)&#39;</span>
+    <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(!park) &amp; []&lt;&gt;(!X4d)&#39;</span>
+    <span class="n">guarantee</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(X4d -&gt; X4) &amp; []&lt;&gt;X1 &amp; [](Park -&gt; X0)&#39;</span>
     <span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">assumption</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="s">&#39;3&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span> <span class="c"># For spec with no dynamics</span>
@@ -650,8 +677,10 @@
     <span class="c">####################################</span>
 
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing checkRealizability&#39;</span><span class="p">)</span>
+    <span class="n">pick_sys_init</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">))</span>
     <span class="n">realizability</span> <span class="o">=</span> <span class="n">checkRealizability</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smvfile</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spcfile</span><span class="p">,</span> \
-                                           <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                                           <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
+                                           <span class="n">pick_sys_init</span><span class="o">=</span><span class="n">pick_sys_init</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">print</span> <span class="n">realizability</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
@@ -659,9 +688,14 @@
     <span class="c">####################################</span>
 
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing computeStrategy&#39;</span><span class="p">)</span>
+    <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s">&#39;1&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">realizability</span> <span class="o">=</span> <span class="n">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smvfile</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spcfile</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
                                         <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">priority_kind</span><span class="o">=</span><span class="s">&#39;ZYX&#39;</span><span class="p">,</span> \
-                                        <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                                        <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">print</span> <span class="n">realizability</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
