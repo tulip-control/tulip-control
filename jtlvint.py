@@ -357,7 +357,7 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
     # For continuous dynamics
     for from_region in range(0,disc_dynamics.num_regions):
         to_regions = [j for j in range(0,disc_dynamics.num_regions) if \
-                          disc_dynamics.adj[j][from_region]]
+                          disc_dynamics.trans[j][from_region]]
         if (addAnd):
             f.write(' &\n')
         if (from_region == 0):
@@ -619,7 +619,7 @@ if __name__ == "__main__":
     region5 = Region('p5', [1, 0, 0, 1, 1])
     disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
     disc_dynamics.num_regions = len(disc_dynamics.list_region)
-    disc_dynamics.adj = [[1, 1, 0, 1, 0, 0], \
+    disc_dynamics.trans = [[1, 1, 0, 1, 0, 0], \
                          [1, 1, 1, 0, 1, 0], \
                          [0, 1, 1, 0, 0, 1], \
                          [1, 0, 0, 1, 1, 0], \
