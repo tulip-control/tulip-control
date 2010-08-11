@@ -55,48 +55,77 @@
 <h1>Finite State Abstraction of LTI Systems<a class="headerlink" href="#finite-state-abstraction-of-lti-systems" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-prop2part">
 <span id="prop2part-module"></span><h2>Prop2part Module<a class="headerlink" href="#module-prop2part" title="Permalink to this headline">¶</a></h2>
+<p>prop2part.py &#8212; Proposition preserving partition module</p>
+<p>Necmiye Ozay (<a class="reference external" href="mailto:necmiye&#37;&#52;&#48;cds&#46;caltech&#46;edu">necmiye<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)
+August 7, 2010</p>
 <dl class="class">
 <dt id="prop2part.PropPreservingPartition">
-<em class="property">class </em><tt class="descclassname">prop2part.</tt><tt class="descname">PropPreservingPartition</tt><big>(</big><em>domain=None</em>, <em>num_prop=0</em>, <em>list_region=</em><span class="optional">[</span><span class="optional">]</span>, <em>num_regions=0</em>, <em>adj=0</em>, <em>list_prop_symbol=None</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#PropPreservingPartition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.PropPreservingPartition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Partition class with following fields
--domain: the domain we want to partition, type: polytope
+<em class="property">class </em><tt class="descclassname">prop2part.</tt><tt class="descname">PropPreservingPartition</tt><big>(</big><em>domain=None</em>, <em>num_prop=0</em>, <em>list_region=</em><span class="optional">[</span><span class="optional">]</span>, <em>num_regions=0</em>, <em>adj=0</em>, <em>trans=0</em>, <em>list_prop_symbol=None</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#PropPreservingPartition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.PropPreservingPartition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partition class with following fields</p>
+<p>-domain: the domain we want to partition, type: polytope
 -num_prop: number of propositions
 -list_region: proposition preserving regions, type: list of Region
 -num_regions: length of the above list
--adjacency list: list of each regions neighbors
+-adj: a matrix showing which regions are adjacent
+-trans: a matrix showing which region is reachable from which region
 -list_prop_symbol: list of symbols of propositions</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="prop2part.Region">
 <em class="property">class </em><tt class="descclassname">prop2part.</tt><tt class="descname">Region</tt><big>(</big><em>list_poly=</em><span class="optional">[</span><span class="optional">]</span>, <em>list_prop=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/prop2part.html#Region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.Region" title="Permalink to this definition">¶</a></dt>
-<dd><p>Region class with following fields
--list_poly: proposition preserving regions
+<dd><p>Region class with following fields</p>
+<p>-list_poly: proposition preserving regions      
 -list of propositions: binary vector that show which prop holds in which region</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="prop2part.findBoundingBox">
+<tt class="descclassname">prop2part.</tt><tt class="descname">findBoundingBox</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#findBoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.findBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the bounding box of the input polytope</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="prop2part.isAdjacentRegion">
+<tt class="descclassname">prop2part.</tt><tt class="descname">isAdjacentRegion</tt><big>(</big><em>reg1</em>, <em>reg2</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isAdjacentRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isAdjacentRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if two regions share a face</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="prop2part.isNonEmptyInterior">
-<tt class="descclassname">prop2part.</tt><tt class="descname">isNonEmptyInterior</tt><big>(</big><em>poly1</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isNonEmptyInterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isNonEmptyInterior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to check if the polytope is degenerate</p>
+<tt class="descclassname">prop2part.</tt><tt class="descname">isNonEmptyInterior</tt><big>(</big><em>poly1</em>, <em>tol=1.0000000000000001e-05</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isNonEmptyInterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isNonEmptyInterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the radius of the Chebyshev ball to decide polytope degenaracy</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="prop2part.matrixRank">
+<tt class="descclassname">prop2part.</tt><tt class="descname">matrixRank</tt><big>(</big><em>matIn</em>, <em>tol=9.9999999999999994e-12</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#matrixRank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.matrixRank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the rank of the matrix (by thresholding singular values)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="prop2part.polySimplify">
 <tt class="descclassname">prop2part.</tt><tt class="descname">polySimplify</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#polySimplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.polySimplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes redundant inequalities in the hyperplane representation of the polytope with the algorithm described at <a class="reference external" href="http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html">http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html</a> by solving one LP for each facet</p>
+<p>Warning:Should be used for bounded polytopes with nonempty interior</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="prop2part.polySimplify2">
+<tt class="descclassname">prop2part.</tt><tt class="descname">polySimplify2</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#polySimplify2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.polySimplify2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Warning:Should be used for polytopes with nonempty interior</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="prop2part.regionDiffPoly">
 <tt class="descclassname">prop2part.</tt><tt class="descname">regionDiffPoly</tt><big>(</big><em>region1</em>, <em>poly1</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#regionDiffPoly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.regionDiffPoly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to perform set difference</p>
+<dd><p>Performs set difference</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="prop2part.regionIntersectPoly">
 <tt class="descclassname">prop2part.</tt><tt class="descname">regionIntersectPoly</tt><big>(</big><em>region1</em>, <em>poly1</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#regionIntersectPoly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.regionIntersectPoly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to perform set intersection</p>
+<dd><p>Performs set intersection</p>
 </dd></dl>
 
 </div>

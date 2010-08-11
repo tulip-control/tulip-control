@@ -4,7 +4,7 @@ Tutorial and Examples
 =======================
 
 The rhtlp is developed for synthesis of embedded control systems,
-allowing the planning to be done in a receding horizon manner.
+allowing planning to be done in a receding horizon manner.
 
 
 Synthesis of Embedded Control Systems
@@ -42,6 +42,7 @@ We consider the specification of the form
 
 .. math::
    \varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s.
+   :label: GR1
 
 Here, the assumption :math:`\varphi_{init}` on the initial condition of the system
 is a propositional formula built from :math:`\Pi`.
@@ -55,30 +56,71 @@ See our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Tem
 As illustrated in the figure above, our approach to this embedded control 
 system synthesis consists of the following main steps:
 
-   1. Continuous state space partition: Given the continuous state space 
-      :math:`S` of the system and the set :math:`\Pi_c` of propositions on the
-      continuous state of the system, we partition :math:`S` into a finite number
-      of cells such that all the continuous states in each cell satisfy
-      exactly the same set of propositions in :math:`\Pi_c`.
-      This can be done using the following function call:
+   1. Continuous state space partition
+   2. Continuous state space discretization
+   3. Digital design synthesis
+
+
+Continuous state space partition
+````````````````````````````````
+Given the continuous state space :math:`S` of the system and the set :math:`\Pi_c` of 
+propositions on the continuous state of the system, we partition :math:`S` into a finite 
+number of cells such that all the continuous states in each cell satisfy exactly the 
+same set of propositions in :math:`\Pi_c`. 
+
+This can be done using the following function call:
 
       .. autofunction:: prop2part.prop2part2
 
-   2. Continuous state space discretization
 
-   3. Digital design synthesis:
+Continuous state space discretization
+`````````````````````````````````````
 
-      - Generate input to JTLV
+
+Digital design synthesis
+````````````````````````
+
+The continuous state space discretization generates a finite state abstraction
+of the continuous dynamics, represented by a finite transition system.
+Each state in this finite transition system corresponds to a cell in the continuous
+domain.
+A transition :math:`c_i \to c_j` in this finite state system indicates that 
+from any continuous state :math:`s_0` that belongs to cell :math:`c_i`, 
+there exists a sequence of control inputs :math:`u_0, u_1, \ldots, u_{N-1}` 
+that takes the system to another continuous state :math:`s_{N}` in cell :math:`c_j`.
+Hence, under the assumption that the specification is stutter invariant,
+we can describe the continuous dynamics by an LTL formula of the form
+
+.. math::
+   (v = c_i) \implies next(\bigvee_{j \textit{s.t.} c_i \to c_j} v = c_j),
+
+where :math:`v` is a new discrete variable that describes in which cell
+the continuous state is.
+
+Since the partition is proposition preserving, all the continuous states that belong
+to the same cell satisfy exactly the same set of propositions on the continuous
+state. By the abuse of notation, we write :math:`c_j \models X_i` if all the continuous
+states in cell :math:`c_j` satisfy proposition :math:`X_i`.
+Then, we can replace any proposition :math:`X_i` on the continuous state variables
+by the formula :math:`\displaystyle{\bigvee_{j \textit{s.t.} c_j \models X_i} v = c_j}`.
+
+Putting everything together, we now obtain a specification of the form in :eq:`GR1`.
+We can then use the GR(1) Game implementation in `JTLV <http://jtlv.ysaar.net/>`_ to 
+automatically synthesize a planner that ensures the satisfaction of the specification,
+taking into account all the possible behaviors of the environment.
+This can be done using the following steps.
+
+    1. Generate input to JTLV
 
         .. autofunction:: jtlvint.generateJTLVInput
 	   :noindex:
 
-      - Synthesize the discrete planner
+    2. Synthesize the discrete planner
 
         .. autofunction:: jtlvint.computeStrategy
 	   :noindex:
 
-      - Construct the automaton
+    3. Construct the automaton
 
         .. autoclass:: automaton.Automaton
 	   :noindex:
@@ -91,8 +133,12 @@ Specification File and Parser
 `````````````````````````````
 
 
-Robot Motion Planning with only Discrete Decisions
-``````````````````````````````````````````````````
+Example 1: Robot Motion Planning with only Discrete Decisions
+`````````````````````````````````````````````````````````````
+
+This example is provided in examples/robot_discrete_simple.py.
+It illustrates the use of the jtlvint module in synthesizing a planner
+for a robot that only needs to make discrete decision.
 
 Import the necessary modules.
 
@@ -131,24 +177,29 @@ the robot can move to region i while only staying in the union of region i
 and region j.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 34, 38-39, 47-54, 58-63
+   :lines: 34, 38-39, 47-54, 59-64
 
 Specification.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 66-68
+   :lines: 67-69
 
 Generate input to JTLV.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 71-72
+   :lines: 72-73
 
 Check realizability.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 75
+   :lines: 76
 
 Construct an automaton.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 78-79
+   :lines: 79-80
+
+
+
+Receding Horizon Temporal Logic Planning
+----------------------------------------
