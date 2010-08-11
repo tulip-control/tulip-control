@@ -9,6 +9,7 @@ from numpy import *
 import numpy
 from polyhedron import Vrep, Hrep
 from time import time
+import copy
 import sys
 from cvxopt import blas, lapack, solvers
 from cvxopt import matrix
@@ -39,6 +40,28 @@ def num_bin(N, places=8):
 		bits.append(bit_at_p(N, x))
 	return bits
 
+def findBoundingBox(poly):
+	"""Returns the bounding box of the input polytope"""
+	A_arr = poly.A.copy()
+	b_arr = poly.b.copy()
+	neq, nx = A_arr.shape
+	A = matrix(A_arr)
+	b = matrix(b_arr)
+	#In = matrix(eye(nx))
+	l_bounds = zeros((nx,1))
+	u_bounds = zeros((nx,1))
+	for i in range(nx):
+		c = zeros((nx,1))
+		c[i] = 1
+		c = matrix(c)
+		sol=solvers.lp(c,A,b)
+		l_bounds[i] = sol['primal objective']
+		c = zeros((nx,1))
+		c[i] = -1
+		c = matrix(c)
+		sol=solvers.lp(c,A,b)
+		u_bounds[i] = -sol['primal objective']
+	return l_bounds, u_bounds
 
 def isAdjacentPoly(poly1,poly2):
 	#start_time = time()
@@ -78,37 +101,39 @@ def isAdjacentPoly2(poly1,poly2):
 		return 0
 
 
-def polySimplify(poly): #check if there is a better way of eliminating redundancy
+def polySimplify2(poly): #check if there is a better way of eliminating redundancy
 	'''Warning:Should be used for polytopes with nonempty interior'''
 	dummy = Vrep(poly.generators)
 	poly = Hrep(dummy.A,dummy.b)
 	return poly
 	
-def polySimplify2(poly): #check if there is a better way of eliminating redundancy
+def polySimplify(poly):
 	"""
 	Removes redundant inequalities in the hyperplane representation of the polytope with the algorithm described at http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html by solving one LP for each facet
 	
 	Warning:Should be used for bounded polytopes with nonempty interior
 	"""
 	
-	A_arr = poly.A
-	b_arr = poly.b
-	ne, nx = A_arr.shape
+	A_arr = poly.A.copy()
+	b_arr = poly.b.copy()
+	neq, nx = A_arr.shape
 	#print ne
-	if ne<=nx+1:
+	if neq<=nx+1:
 		return poly
-	else:
-		keep_row = []
-		for i in range(ne):
-			A = matrix(A_arr)
-			s = -matrix(A_arr[i])
-			t = b_arr[i]
-			b = matrix(b_arr)
-			b[i] += 1
-			sol=solvers.lp(s,A,b)
-			#print sol['primal objective']
-			if -sol['primal objective']>t:
-				keep_row.append(i)
+	elif neq>3*nx:
+		lb, ub = findBoundingBox(poly)
+		cand = -(dot((A_arr>0)*A_arr,-ub-lb)-(b_arr-dot(A_arr,lb).T).T<-1e-4)
+	keep_row = []
+	for i in range(neq):
+		A = matrix(A_arr)
+		s = -matrix(A_arr[i])
+		t = b_arr[i]
+		b = matrix(b_arr)
+		b[i] += 1
+		sol=solvers.lp(s,A,b)
+		#print sol['primal objective']
+		if -sol['primal objective']>t:
+			keep_row.append(i)
 	polyOut = Hrep(A_arr[keep_row],b_arr[keep_row])
 	return polyOut
 			
@@ -119,7 +144,7 @@ def polySimplify2(poly): #check if there is a better way of eliminating redundan
 def isNonEmptyInteriorOld(poly1):
 	#Function to check if the polytope is degenerate
 	num_var = poly1.A.shape[1]
-	dummy = poly1.generators[:]
+	dummy = poly1.generators.copy()
 	num_gen = dummy.shape[0]
 	if num_gen<=num_var:
 		return False
@@ -137,7 +162,7 @@ def isNonEmptyInteriorOld(poly1):
 
 def isNonEmptyInterior(poly1,tol=10.0e-6):
 	"""Checks the radius of the Chebyshev ball to decide polytope degenaracy"""
-	A = poly1.A
+	A = poly1.A.copy()
 	nx = A.shape[1]
 	A = matrix(c_[A,-sqrt(sum(A*A,1))])
 	b = matrix(poly1.b)
@@ -169,20 +194,20 @@ def regionDiffPoly(region1, poly1):
 	"""Performs set difference"""
 	result_region = Region()
 	for j in range(len(region1.list_poly)):
-		A_poly = poly1.A
-		b_poly = poly1.b
+		A_poly = poly1.A.copy()
+		b_poly = poly1.b.copy()
 		num_halfspace = A_poly.shape[0]
 		for k in range(pow(2,num_halfspace)-1): #loop to keep polytopes of the region disjoint
 			signs = num_bin(k,places=num_halfspace)
-			A_now = A_poly*1
-			b_now = b_poly*1
+			A_now = A_poly.copy()
+			b_now = b_poly.copy()
 			for l in range(len(signs)): 
 				if signs[l]==0:
 					A_now[l] = -A_now[l]
 					b_now[l] = -b_now[l]
 			dummy = (Hrep(concatenate((region1.list_poly[j].A, A_now)),concatenate((region1.list_poly[j].b, 				b_now))))
 			if isNonEmptyInterior(dummy):
-				dummy = polySimplify(dummy)
+				dummy = polySimplify2(dummy)
 				result_region.list_poly.append(dummy)
 	return result_region
 							
@@ -197,7 +222,7 @@ def prop2part2(state_space, cont_props):
 	first_poly = [] #Initial Region's list_poly atribute 
 	first_poly.append(state_space)
 	list_regions.append(Region(list_poly=first_poly))
-	mypartition = PropPreservingPartition(domain=state_space, num_prop=num_props, list_region=list_regions)
+	mypartition = PropPreservingPartition(domain=copy.deepcopy(state_space), num_prop=num_props, list_region=list_regions)
 	for prop_count in range(num_props):
 		num_reg = mypartition.num_regions
 		prop_holds_reg = []
@@ -214,8 +239,8 @@ def prop2part2(state_space, cont_props):
 				dummy = (Hrep(concatenate((region_now[j].A, cont_props[prop_count].A)),
 					concatenate((region_now[j].b,cont_props[prop_count].b))))
 				if isNonEmptyInterior(dummy):
-					dummy = polySimplify(dummy)
-					mypartition.list_region[i].list_poly[j] = dummy
+					#dummy = polySimplify(dummy)
+					mypartition.list_region[i].list_poly[j] = polySimplify2(dummy)
 					prop_holds_reg[-1] = 1
 					prop_holds_poly[-1] = 1
 			count = 0
@@ -229,21 +254,21 @@ def prop2part2(state_space, cont_props):
 			mypartition.list_region.append(Region(list_poly=[],list_prop=list_prop_now))
 			for j in range(len(region_now)):
 				valid_props = cont_props[prop_count] #eliminateRedundantProps(region_now[j],cont_props[prop_count])
-				A_prop = valid_props.A
-				b_prop = valid_props.b
+				A_prop = valid_props.A.copy()
+				b_prop = valid_props.b.copy()
 				num_halfspace = A_prop.shape[0]
 				for k in range(pow(2,num_halfspace)-1):
 					signs = num_bin(k,places=num_halfspace)
-					A_now = A_prop*1
-					b_now = b_prop*1
+					A_now = A_prop.copy()
+					b_now = b_prop.copy()
 					for l in range(len(signs)): 
 						if signs[l]==0:
 							A_now[l] = -A_now[l]
 							b_now[l] = -b_now[l]
 					dummy = (Hrep(concatenate((region_now[j].A, A_now)),concatenate((region_now[j].b, 							b_now))))
 					if isNonEmptyInterior(dummy):
-						dummy = polySimplify(dummy)
-						mypartition.list_region[-1].list_poly.append(dummy)
+						#dummy = polySimplify(dummy)
+						mypartition.list_region[-1].list_poly.append(polySimplify2(dummy))
 			if len(mypartition.list_region[-1].list_poly)>0:
 				mypartition.list_region[-1].list_prop.append(0)
 			else:
@@ -267,7 +292,9 @@ def prop2part2(state_space, cont_props):
 	for i in range(num_reg):
 		for j in range(i+1,num_reg):
 			adj[i,j] = isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
-	mypartition.adj=adj+adj.T
+	adj =  adj+adj.T
+	mypartition.adj = adj.copy()
+	print sys.getrefcount(numpy.dtype('float64'))
 	return mypartition
 
 
@@ -303,67 +330,100 @@ class PropPreservingPartition:
 		self.adj = adj
 		self.trans = trans
 		self.list_prop_symbol = list_prop_symbol
+		
+class Polytope:
+	def __init__(self):
+		self.A = A
+		self.b = b
 
 
-if __name__ == "__main__":
- 	
+def test():
+#if __name__ == "__main__":
 	start_time = time()
 	domain = array([[0., 2.],[0., 2.]])
 
-	domain_poly_A = mat(vstack([eye(2),-eye(2)]))
-	domain_poly_b = mat(r_[domain[:,1],-domain[:,0]])
+	domain_poly_A = array(vstack([eye(2),-eye(2)]))
+	domain_poly_b = array(r_[domain[:,1],-domain[:,0]])
 	state_space = Hrep(domain_poly_A, domain_poly_b)
 
 	cont_props = []
 	
-	A0 = [[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]
-	b0 = [1., 0., 1., 0.]
-	#A0 = [[1., 0.], [-1., 0.]]
-	#b0 = [1., 0.]
+	A0 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b0 = array([1., 0., 1., 0.])
+	#A0 = array([[1., 0.], [-1., 0.]])
+	#b0 = array([1., 0.])
 	cont_props.append(Hrep(A0, b0))
 	p1 = polySimplify2(Hrep(A0, b0))
 	
-	A1 = [[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]
-	b1 = [1., 0., 2., -1.]
-	#A1 = [[-1., 0.]]
-	#b1 = [-1.5]
+	A1 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b1 = array([1., 0., 2., -1.])
+	#A1 = array([[-1., 0.]])
+	#b1 = array([-1.5])
 	cont_props.append(Hrep(A1, b1))
 	
-	#A1 = [[-1., 0.]]
-	#b1 = [-1.7]
+	#A1 = array([[-1., 0.]])
+	#b1 = array([-1.7])
 	#cont_props.append(Hrep(A1, b1))
 	
-	#A1 = [[-1., 0.]]
-	#b1 = [-1.9]
+	#A1 = array([[-1., 0.]])
+	#b1 = array([-1.9])
 	#cont_props.append(Hrep(A1, b1))
 	
-	#A1 = [[-1., 0.]]
-	#b1 = [-0.5]
+	#A1 = array([[-1., 0.]])
+	#b1 = array([-0.5])
 	#cont_props.append(Hrep(A1, b1))
 	
-	#A1 = [[-1., 0.]]
-	#b1 = [-1.8]
+	#A1 = array([[-1., 0.]])
+	#b1 = array([-1.8])
 	#cont_props.append(Hrep(A1, b1))
 
-	A2 = [[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]
-	b2 = [2., -1., 1., 0.]
+	A2 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b2 = array([2., -1., 1., 0.])
 	cont_props.append(Hrep(A2, b2))
 
-	A3 = [[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]
-	b3 = [2., -1., 2., -1.]
+	A3 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b3 = array([2., -1., 2., -1.])
 	cont_props.append(Hrep(A3, b3))
 	
 	mypartition = prop2part2(state_space, cont_props)
+	
+	#print len(mypartition.list_region)
+	A4 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b4 = array([0.5, 0., 0.5, 0.])
+	poly1 = Hrep(A4,b4)
 
+	r1 = regionDiffPoly(mypartition.list_region[3],poly1)
+	
+	verbose = 0
+	if verbose:
+		for j in range(len(r1.list_poly)):
+			x = r1.list_poly[j].generators
+			print x
+		#	print'\n generators of polytope',j, 'of resulting region'
+		#	for row in x:
+		#		print row
+	
+	xx = mypartition.adj
+	print xx
 	time_elapsed = time()-start_time
-	print 'time', time_elapsed
 	
-	print '\nAdjacency matrix:\n', mypartition.adj
+	if verbose:
+		print 'time', time_elapsed
+		#print sys.getrefcount(numpy.dtype('float64'))
+		print '\nAdjacency matrix:\n', mypartition.adj
 	
-	for i in range(mypartition.num_regions):
-		print i+1,"th region has the following generators"
-		for j in range(len(mypartition.list_region[i].list_poly)):
-			print 'polytope',j,'in region',i+1
-			print mypartition.list_region[i].list_poly[j].generators
-		print 'region',i+1,'proposition list is',mypartition.list_region[i].list_prop,'\n'
+		for i in range(mypartition.num_regions):
+			print i+1,"th region has the following generators"
+			for j in range(len(mypartition.list_region[i].list_poly)):
+				print 'polytope',j,'in region',i+1
+				print mypartition.list_region[i].list_poly[j].generators
+			print 'region',i+1,'proposition list is',mypartition.list_region[i].list_prop,'\n'
+
+#def test2():
+if __name__ == "__main__":
+	count =1
+	for i in range(10):
+		test()
+		count +=1
+		print count
 	
