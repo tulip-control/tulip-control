@@ -246,22 +246,23 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
 
     # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where 
     # P1, ..., Pn are cells in disc_dynamics that satisfy XC
-    for propInd, propSymbol in enumerate(disc_dynamics.list_prop_symbol):
-        reg = [j for j in range(0,disc_dynamics.num_regions) if \
-                   disc_dynamics.list_region[j].list_prop[propInd]]
-        newprop = 'FALSE'
-        if (len(reg) > 0):
-            newprop = '('
-            for i, regID in enumerate(reg):
-                if (i > 0):
-                    newprop = newprop + ' | '
-                newprop = newprop + '(s.' + newvarname + ' = ' + \
-                    str(newvar_values[regID]) + ')'
-            newprop = newprop + ')'
-        if (verbose > 1):
-            print '\t' + propSymbol + ' -> ' + newprop
-        assumption = re.sub(r'\b'+propSymbol+r'\b', newprop, assumption)
-        guarantee = re.sub(r'\b'+propSymbol+r'\b', newprop, guarantee)
+    if (disc_dynamics.list_prop_symbol is not None):
+        for propInd, propSymbol in enumerate(disc_dynamics.list_prop_symbol):
+            reg = [j for j in range(0,disc_dynamics.num_regions) if \
+                       disc_dynamics.list_region[j].list_prop[propInd]]
+            newprop = 'FALSE'
+            if (len(reg) > 0):
+                newprop = '('
+                for i, regID in enumerate(reg):
+                    if (i > 0):
+                        newprop = newprop + ' | '
+                    newprop = newprop + '(s.' + newvarname + ' = ' + \
+                        str(newvar_values[regID]) + ')'
+                newprop = newprop + ')'
+            if (verbose > 1):
+                print '\t' + propSymbol + ' -> ' + newprop
+            assumption = re.sub(r'\b'+propSymbol+r'\b', newprop, assumption)
+            guarantee = re.sub(r'\b'+propSymbol+r'\b', newprop, guarantee)
 
     # Replace symbols for propositions on discrete variables with the actual 
     # propositions
@@ -641,7 +642,6 @@ if __name__ == "__main__":
 
     if ('3' in sys.argv): # For spec with no dynamics
         disc_dynamics=PropPreservingPartition()
-        disc_dynamics.list_prop_symbol = []
         spec[1] = '[]<>(X0d -> X5d)'  
         newvarname = generateJTLVInput(env_vars=env_vars, disc_sys_vars=disc_sys_vars, \
                                            spec=spec, disc_props=disc_props, \
