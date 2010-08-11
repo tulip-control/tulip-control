@@ -54,7 +54,7 @@
   <div class="section" id="tutorial-and-examples">
 <h1>Tutorial and Examples<a class="headerlink" href="#tutorial-and-examples" title="Permalink to this headline">¶</a></h1>
 <p>The rhtlp is developed for synthesis of embedded control systems,
-allowing the planning to be done in a receding horizon manner.</p>
+allowing planning to be done in a receding horizon manner.</p>
 <div class="section" id="synthesis-of-embedded-control-systems">
 <h2>Synthesis of Embedded Control Systems<a class="headerlink" href="#synthesis-of-embedded-control-systems" title="Permalink to this headline">¶</a></h2>
 <p>We consider a system that comprises the physical component, which we refer to as
@@ -81,8 +81,8 @@ the exogenous disturbance, respectively, at time <img class="math" src="_images/
 Each of the atomic propositions in <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/> essentially captures the
 states of interest.
 We consider the specification of the form</p>
-<div class="math">
-<p><img src="_images/math/1a70bc0795ec80a9f18a054288dfb11fda3c38a1.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s." /></p>
+<div class="math" id="equation-GR1">
+<p><span class="eqno">(1)</span><img src="_images/math/1a70bc0795ec80a9f18a054288dfb11fda3c38a1.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s." /></p>
 </div><p>Here, the assumption <img class="math" src="_images/math/b61609b6700e21c53c4b382101cf000539ad2d22.png" alt="\varphi_{init}"/> on the initial condition of the system
 is a propositional formula built from <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/>.
 The assumption <img class="math" src="_images/math/a083a57c95393bde438cc281148de64143326583.png" alt="\varphi_e"/> on the environment and the desired behavior
@@ -92,27 +92,64 @@ See our <a class="reference external" href="http://www.cds.caltech.edu/~utopcu/i
 <p>As illustrated in the figure above, our approach to this embedded control
 system synthesis consists of the following main steps:</p>
 <blockquote>
-<ol class="arabic">
-<li><p class="first">Continuous state space partition: Given the continuous state space
-<img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> of the system and the set <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/> of propositions on the
-continuous state of the system, we partition <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> into a finite number
-of cells such that all the continuous states in each cell satisfy
-exactly the same set of propositions in <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/>.
-This can be done using the following function call:</p>
+<ol class="arabic simple">
+<li>Continuous state space partition</li>
+<li>Continuous state space discretization</li>
+<li>Digital design synthesis</li>
+</ol>
+</blockquote>
+<div class="section" id="continuous-state-space-partition">
+<h3>Continuous state space partition<a class="headerlink" href="#continuous-state-space-partition" title="Permalink to this headline">¶</a></h3>
+<p>Given the continuous state space <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> of the system and the set <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/> of
+propositions on the continuous state of the system, we partition <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> into a finite
+number of cells such that all the continuous states in each cell satisfy exactly the
+same set of propositions in <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/>.</p>
+<p>This can be done using the following function call:</p>
+<blockquote>
 <dl class="function">
 <dt id="prop2part.prop2part2">
 <tt class="descclassname">prop2part.</tt><tt class="descname">prop2part2</tt><big>(</big><em>state_space</em>, <em>cont_props</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#prop2part2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.prop2part2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-</li>
-<li><p class="first">Continuous state space discretization</p>
-</li>
-<li><p class="first">Digital design synthesis:</p>
-<ul>
+</blockquote>
+</div>
+<div class="section" id="continuous-state-space-discretization">
+<h3>Continuous state space discretization<a class="headerlink" href="#continuous-state-space-discretization" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="digital-design-synthesis">
+<h3>Digital design synthesis<a class="headerlink" href="#digital-design-synthesis" title="Permalink to this headline">¶</a></h3>
+<p>The continuous state space discretization generates a finite state abstraction
+of the continuous dynamics, represented by a finite transition system.
+Each state in this finite transition system corresponds to a cell in the continuous
+domain.
+A transition <img class="math" src="_images/math/b973745a4e4aa10751e09d75093a0cdb499ad6e9.png" alt="c_i \to c_j"/> in this finite state system indicates that
+from any continuous state <img class="math" src="_images/math/058418cc5858eeab7f1ceb92f70b1c00fe7fe5d6.png" alt="s_0"/> that belongs to cell <img class="math" src="_images/math/1e95be43c04d6869c67861aae1e3e69123fedd8c.png" alt="c_i"/>,
+there exists a sequence of control inputs <img class="math" src="_images/math/ada5ca63358e53658cbc8abb13da29105c0ff2a2.png" alt="u_0, u_1, \ldots, u_{N-1}"/>
+that takes the system to another continuous state <img class="math" src="_images/math/8f7bb52379015c473901c36dad1c1e3b7ade04a0.png" alt="s_{N}"/> in cell <img class="math" src="_images/math/88d143238ae2718841dfd3ec099cbea395db77a4.png" alt="c_j"/>.
+Hence, under the assumption that the specification is stutter invariant,
+we can describe the continuous dynamics by an LTL formula of the form</p>
+<div class="math">
+<p><img src="_images/math/3cb2fa1819521899a24902611143aca2c8ed11c7.png" alt="(v = c_i) \implies next(\bigvee_{j \textit{s.t.} c_i \to c_j} v = c_j)," /></p>
+</div><p>where <img class="math" src="_images/math/a9f23bf124b6b2b2a993eb313c72e678664ac74a.png" alt="v"/> is a new discrete variable that describes in which cell
+the continuous state is.</p>
+<p>Since the partition is proposition preserving, all the continuous states that belong
+to the same cell satisfy exactly the same set of propositions on the continuous
+state. By the abuse of notation, we write <img class="math" src="_images/math/e7fd60e5129d117276dcebc9600e5632ea06251a.png" alt="c_j \models X_i"/> if all the continuous
+states in cell <img class="math" src="_images/math/88d143238ae2718841dfd3ec099cbea395db77a4.png" alt="c_j"/> satisfy proposition <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i"/>.
+Then, we can replace any proposition <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i"/> on the continuous state variables
+by the formula <img class="math" src="_images/math/573282916fac460a8bfb3102f269e6a7717f4c3b.png" alt="\displaystyle{\bigvee_{j \textit{s.t.} c_j \models X_i} v = c_j}"/>.</p>
+<p>Putting everything together, we now obtain a specification of the form in <a href="#equation-GR1">(1)</a>.
+We can then use the GR(1) Game implementation in <a class="reference external" href="http://jtlv.ysaar.net/">JTLV</a> to
+automatically synthesize a planner that ensures the satisfaction of the specification,
+taking into account all the possible behaviors of the environment.
+This can be done using the following steps.</p>
+<blockquote>
+<ol class="arabic">
 <li><p class="first">Generate input to JTLV</p>
+<blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a27210&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac98f0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -134,8 +171,10 @@ this function will not print anything on the screen.</li>
 </ul>
 </dd></dl>
 
+</blockquote>
 </li>
 <li><p class="first">Synthesize the discrete planner</p>
+<blockquote>
 <dl class="function">
 <dt>
 <tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a></dt>
@@ -192,8 +231,10 @@ the system can satisfy the specification.</li>
 </ul>
 </dd></dl>
 
+</blockquote>
 </li>
 <li><p class="first">Construct the automaton</p>
+<blockquote>
 <dl class="class">
 <dt>
 <em class="property">class </em><tt class="descclassname">automaton.</tt><tt class="descname">Automaton</tt><big>(</big><em>states_or_file=</em><span class="optional">[</span><span class="optional">]</span>, <em>varnames=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/automaton.html#Automaton"><span class="viewcode-link">[source]</span></a></dt>
@@ -215,16 +256,19 @@ varnames.</li>
 </ul>
 </dd></dl>
 
-</li>
-</ul>
+</blockquote>
 </li>
 </ol>
 </blockquote>
+</div>
 <div class="section" id="specification-file-and-parser">
 <h3>Specification File and Parser<a class="headerlink" href="#specification-file-and-parser" title="Permalink to this headline">¶</a></h3>
 </div>
-<div class="section" id="robot-motion-planning-with-only-discrete-decisions">
-<h3>Robot Motion Planning with only Discrete Decisions<a class="headerlink" href="#robot-motion-planning-with-only-discrete-decisions" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="example-1-robot-motion-planning-with-only-discrete-decisions">
+<h3>Example 1: Robot Motion Planning with only Discrete Decisions<a class="headerlink" href="#example-1-robot-motion-planning-with-only-discrete-decisions" title="Permalink to this headline">¶</a></h3>
+<p>This example is provided in examples/robot_discrete_simple.py.
+It illustrates the use of the jtlvint module in synthesizing a planner
+for a robot that only needs to make discrete decision.</p>
 <p>Import the necessary modules.</p>
 <div class="highlight-rst"><div class="highlight"><pre>from prop2part import Region, PropPreservingPartition
 from jtlvint import *
@@ -273,7 +317,7 @@ region4 = Region(&#39;C4&#39;, [0, 0, 0, 0, 1, 0])
 region5 = Region(&#39;C5&#39;, [0, 0, 0, 0, 0, 1])
 disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
 disc_dynamics.num_regions = len(disc_dynamics.list_region)
-disc_dynamics.adj =     [[1, 1, 0, 1, 0, 0], \
+disc_dynamics.trans =   [[1, 1, 0, 1, 0, 0], \
                          [1, 1, 1, 0, 1, 0], \
                          [0, 1, 1, 0, 0, 1], \
                          [1, 0, 0, 1, 1, 0], \
@@ -303,6 +347,9 @@ aut = Automaton(autfile, [], 3)
 </div>
 </div>
 </div>
+<div class="section" id="receding-horizon-temporal-logic-planning">
+<h2>Receding Horizon Temporal Logic Planning<a class="headerlink" href="#receding-horizon-temporal-logic-planning" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -315,10 +362,14 @@ aut = Automaton(autfile, [], 3)
   <ul>
 <li><a class="reference internal" href="#">Tutorial and Examples</a><ul>
 <li><a class="reference internal" href="#synthesis-of-embedded-control-systems">Synthesis of Embedded Control Systems</a><ul>
+<li><a class="reference internal" href="#continuous-state-space-partition">Continuous state space partition</a></li>
+<li><a class="reference internal" href="#continuous-state-space-discretization">Continuous state space discretization</a></li>
+<li><a class="reference internal" href="#digital-design-synthesis">Digital design synthesis</a></li>
 <li><a class="reference internal" href="#specification-file-and-parser">Specification File and Parser</a></li>
-<li><a class="reference internal" href="#robot-motion-planning-with-only-discrete-decisions">Robot Motion Planning with only Discrete Decisions</a></li>
+<li><a class="reference internal" href="#example-1-robot-motion-planning-with-only-discrete-decisions">Example 1: Robot Motion Planning with only Discrete Decisions</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#receding-horizon-temporal-logic-planning">Receding Horizon Temporal Logic Planning</a></li>
 </ul>
 </li>
 </ul>
