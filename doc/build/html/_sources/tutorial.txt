@@ -5,6 +5,8 @@ Tutorial and Examples
 
 The rhtlp is developed for synthesis of embedded control systems,
 allowing planning to be done in a receding horizon manner.
+For more information regarding the theory behind this, please visit
+our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)>`_.
 
 
 Synthesis of Embedded Control Systems
@@ -14,17 +16,36 @@ the plant, and the (potentially dynamic and not a priori known) environment in
 which the plant operates. 
 The system may contain both continuous (physical) and discrete (computational)
 components.
+In summary, the problem we are interested in consists of
 
-Suppose the continuous component of the system evolves according to the
+  - discrete system state,
+  - continuous system state,
+  - (discrete) environment state, and
+  - specification.
+
+Here, `discrete` state refer to the state that can take only a finite number
+of possible values while
+`continuous` state refer to the state that can take an infinite number
+of possible values, e.g., the position of the car.
+The `environment` state is related to factors over which the system does not 
+have control such as the position of an obstacle and the outside temperature.
+At any given time, the controller regulates the `system` (or `controlled`) 
+state such that the specification is satisfied, given the current value of the 
+environment variables and the previous system states.
+We say that the specification is `realizable` if for any possible behavior
+of the environment, such a controller exists, i.e., there exists a strategy
+for the system to satisfy the specification.
+
+Suppose the continuous state of the system evolves according to the
 following discrete-time linear time-invariant state space model:
 for :math:`t \in \{0,1,2,...\}`
 
 .. math::
-
    s[t+1]  &=   As[t] + Bu[t] + Ed[t] \\
    u[t]    &\in U\\
    d[t]    &\in D\\
    s[0]	   &\in S
+   :label: dynamics
 
 where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous 
 component of the system, 
@@ -42,12 +63,12 @@ We consider the specification of the form
 
 .. math::
    \varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s.
-   :label: GR1
+   :label: spec
 
 Here, the assumption :math:`\varphi_{init}` on the initial condition of the system
-is a propositional formula built from :math:`\Pi`.
+is a propositional formula built from :math:`\Pi.`
 The assumption :math:`\varphi_e` on the environment and the desired behavior 
-:math:`\varphi_s` are LTL formulas built from :math:`\Pi`.
+:math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
 See our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
 
 
@@ -56,13 +77,15 @@ See our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Tem
 As illustrated in the figure above, our approach to this embedded control 
 system synthesis consists of the following main steps:
 
-   1. Continuous state space partition
-   2. Continuous state space discretization
-   3. Digital design synthesis
+   1. :ref:`Generate a proposition preserving partition of the continuous state space. <ssec:prop-part>`
+   2. :ref:`Discretize the continuous state space based on the evolution of the continuous state. <ssec:disc>`
+   3. :ref:`Digital design synthesis. <ssec:syn>`
 
 
-Continuous state space partition
-````````````````````````````````
+.. _ssec:prop-part:
+
+Proposition Preserving Partition of Continuous State Space
+``````````````````````````````````````````````````````````
 Given the continuous state space :math:`S` of the system and the set :math:`\Pi_c` of 
 propositions on the continuous state of the system, we partition :math:`S` into a finite 
 number of cells such that all the continuous states in each cell satisfy exactly the 
@@ -73,15 +96,26 @@ This can be done using the following function call:
       .. autofunction:: prop2part.prop2part2
 
 
+.. _ssec:disc:
+
 Continuous state space discretization
 `````````````````````````````````````
+Given a propositional preserving partition of the continuous state space and
+the evolution of the continuous state as in :eq:`dynamics`,
+we refine the partition based on the reachability relation between cells
+and obtain a finite state abstraction of the evolution of the continuous state, 
+represented by a finite transition system.
 
+This can be done using the following function call:
+
+
+.. _ssec:syn:
 
 Digital design synthesis
 ````````````````````````
 
 The continuous state space discretization generates a finite state abstraction
-of the continuous dynamics, represented by a finite transition system.
+of the continuous state, represented by a finite transition system.
 Each state in this finite transition system corresponds to a cell in the continuous
 domain.
 A transition :math:`c_i \to c_j` in this finite state system indicates that 
@@ -92,7 +126,7 @@ Hence, under the assumption that the specification is stutter invariant,
 we can describe the continuous dynamics by an LTL formula of the form
 
 .. math::
-   (v = c_i) \implies next(\bigvee_{j \textit{s.t.} c_i \to c_j} v = c_j),
+   (v = c_i) \implies next(\bigvee_{j \text{ s.t. } c_i \to c_j} v = c_j),
 
 where :math:`v` is a new discrete variable that describes in which cell
 the continuous state is.
@@ -102,9 +136,9 @@ to the same cell satisfy exactly the same set of propositions on the continuous
 state. By the abuse of notation, we write :math:`c_j \models X_i` if all the continuous
 states in cell :math:`c_j` satisfy proposition :math:`X_i`.
 Then, we can replace any proposition :math:`X_i` on the continuous state variables
-by the formula :math:`\displaystyle{\bigvee_{j \textit{s.t.} c_j \models X_i} v = c_j}`.
+by the formula :math:`\displaystyle{\bigvee_{j \text{ s.t. } c_j \models X_i} v = c_j}`.
 
-Putting everything together, we now obtain a specification of the form in :eq:`GR1`.
+Putting everything together, we now obtain a specification of the form in :eq:`spec`.
 We can then use the GR(1) Game implementation in `JTLV <http://jtlv.ysaar.net/>`_ to 
 automatically synthesize a planner that ensures the satisfaction of the specification,
 taking into account all the possible behaviors of the environment.
@@ -126,7 +160,9 @@ This can be done using the following steps.
 	   :noindex:
 
 
-
+Step 1 and 2 above can be combined using the following function:
+        .. autofunction:: jtlvint.synthesize
+	   :noindex:
 
 
 Specification File and Parser
@@ -135,12 +171,29 @@ Specification File and Parser
 
 Example 1: Robot Motion Planning with only Discrete Decisions
 `````````````````````````````````````````````````````````````
-
 This example is provided in examples/robot_discrete_simple.py.
 It illustrates the use of the jtlvint module in synthesizing a planner
 for a robot that only needs to make discrete decision.
 
-Import the necessary modules.
+.. image:: robot_discrete_simple.*
+   :align: center
+
+We consider the robot moving around the regions as shown in the above figure
+while receiving externally triggered park signal.
+The specification of the robot is
+
+.. math::
+   \varphi = \square \diamond(\neg park) \implies (\square \diamond(s \in C_5)
+   \wedge \square(park \implies \diamond(s \in C_0))).
+
+We cannot, however, deal with this specification directly since it is not in the form of 
+GR[1].
+An equivalent GR[1] specification of the above specification can be obtained
+by introducing an auxiliary discretey system variable :math:`X0reach,` initialized to 
+`True`. The transition relation of :math:`X0reach,` is given by
+:math:`\square(\text{next}(X0reach) = ((s \in C_0 \vee X0reach) \wedge \neg park)).`
+
+To automatically synthesize a planner for this robot, we first import the necessary modules.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
    :lines: 12-14
