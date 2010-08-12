@@ -54,19 +54,42 @@
   <div class="section" id="tutorial-and-examples">
 <h1>Tutorial and Examples<a class="headerlink" href="#tutorial-and-examples" title="Permalink to this headline">¶</a></h1>
 <p>The rhtlp is developed for synthesis of embedded control systems,
-allowing planning to be done in a receding horizon manner.</p>
+allowing planning to be done in a receding horizon manner.
+For more information regarding the theory behind this, please visit
+our <a class="reference external" href="http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)">wiki</a>.</p>
 <div class="section" id="synthesis-of-embedded-control-systems">
 <h2>Synthesis of Embedded Control Systems<a class="headerlink" href="#synthesis-of-embedded-control-systems" title="Permalink to this headline">¶</a></h2>
 <p>We consider a system that comprises the physical component, which we refer to as
 the plant, and the (potentially dynamic and not a priori known) environment in
 which the plant operates.
 The system may contain both continuous (physical) and discrete (computational)
-components.</p>
-<p>Suppose the continuous component of the system evolves according to the
+components.
+In summary, the problem we are interested in consists of</p>
+<blockquote>
+<ul class="simple">
+<li>discrete system state,</li>
+<li>continuous system state,</li>
+<li>(discrete) environment state, and</li>
+<li>specification.</li>
+</ul>
+</blockquote>
+<p>Here, <cite>discrete</cite> state refer to the state that can take only a finite number
+of possible values while
+<cite>continuous</cite> state refer to the state that can take an infinite number
+of possible values, e.g., the position of the car.
+The <cite>environment</cite> state is related to factors over which the system does not
+have control such as the position of an obstacle and the outside temperature.
+At any given time, the controller regulates the <cite>system</cite> (or <cite>controlled</cite>)
+state such that the specification is satisfied, given the current value of the
+environment variables and the previous system states.
+We say that the specification is <cite>realizable</cite> if for any possible behavior
+of the environment, such a controller exists, i.e., there exists a strategy
+for the system to satisfy the specification.</p>
+<p>Suppose the continuous state of the system evolves according to the
 following discrete-time linear time-invariant state space model:
 for <img class="math" src="_images/math/25c3702d367cd2c02c77ad61e439f3dac1799047.png" alt="t \in \{0,1,2,...\}"/></p>
-<div class="math">
-<p><img src="_images/math/7b31621b503ae7f9849e680db79923acf0cef0b3.png" alt="s[t+1]  &amp;=   As[t] + Bu[t] + Ed[t] \\
+<div class="math" id="equation-dynamics">
+<p><span class="eqno">(1)</span><img src="_images/math/b1f10b70baff2f628915be231ca1541d0a25539b.png" alt="s[t+1]  &amp;=   As[t] + Bu[t] + Ed[t] \\
 u[t]    &amp;\in U\\
 d[t]    &amp;\in D\\
 s[0]    &amp;\in S" /></p>
@@ -81,25 +104,25 @@ the exogenous disturbance, respectively, at time <img class="math" src="_images/
 Each of the atomic propositions in <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/> essentially captures the
 states of interest.
 We consider the specification of the form</p>
-<div class="math" id="equation-GR1">
-<p><span class="eqno">(1)</span><img src="_images/math/1a70bc0795ec80a9f18a054288dfb11fda3c38a1.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s." /></p>
+<div class="math" id="equation-spec">
+<p><span class="eqno">(2)</span><img src="_images/math/1a70bc0795ec80a9f18a054288dfb11fda3c38a1.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s." /></p>
 </div><p>Here, the assumption <img class="math" src="_images/math/b61609b6700e21c53c4b382101cf000539ad2d22.png" alt="\varphi_{init}"/> on the initial condition of the system
-is a propositional formula built from <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/>.
+is a propositional formula built from <img class="math" src="_images/math/1a5deef5cb28b0e3cbff3c3c17037341fdeb55cb.png" alt="\Pi."/>
 The assumption <img class="math" src="_images/math/a083a57c95393bde438cc281148de64143326583.png" alt="\varphi_e"/> on the environment and the desired behavior
-<img class="math" src="_images/math/8e4478eaa04cebf3657c2e00c0bef97ce62440d5.png" alt="\varphi_s"/> are LTL formulas built from <img class="math" src="_images/math/c3e77f8dac39bd44cff4ca15469c871bab27c02e.png" alt="\Pi"/>.
+<img class="math" src="_images/math/8e4478eaa04cebf3657c2e00c0bef97ce62440d5.png" alt="\varphi_s"/> are LTL formulas built from <img class="math" src="_images/math/1a5deef5cb28b0e3cbff3c3c17037341fdeb55cb.png" alt="\Pi."/>
 See our <a class="reference external" href="http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)">wiki</a> for more details on the form of <img class="math" src="_images/math/a1bd9c588c681f5241c603c770ef650ef4ecbe6e.png" alt="\varphi_e, \varphi_s"/>.</p>
 <img alt="_images/ecssyn.png" src="_images/ecssyn.png" />
 <p>As illustrated in the figure above, our approach to this embedded control
 system synthesis consists of the following main steps:</p>
 <blockquote>
 <ol class="arabic simple">
-<li>Continuous state space partition</li>
-<li>Continuous state space discretization</li>
-<li>Digital design synthesis</li>
+<li><a class="reference internal" href="#ssec-prop-part"><em>Generate a proposition preserving partition of the continuous state space.</em></a></li>
+<li><a class="reference internal" href="#ssec-disc"><em>Discretize the continuous state space based on the evolution of the continuous state.</em></a></li>
+<li><a class="reference internal" href="#ssec-syn"><em>Digital design synthesis.</em></a></li>
 </ol>
 </blockquote>
-<div class="section" id="continuous-state-space-partition">
-<h3>Continuous state space partition<a class="headerlink" href="#continuous-state-space-partition" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="proposition-preserving-partition-of-continuous-state-space">
+<span id="ssec-prop-part"></span><h3>Proposition Preserving Partition of Continuous State Space<a class="headerlink" href="#proposition-preserving-partition-of-continuous-state-space" title="Permalink to this headline">¶</a></h3>
 <p>Given the continuous state space <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> of the system and the set <img class="math" src="_images/math/4cacf873292b07ee905dcb1b5ddb682d0f11fafa.png" alt="\Pi_c"/> of
 propositions on the continuous state of the system, we partition <img class="math" src="_images/math/ad28c83c99a8fd0dd2e2e594c9d02ee532765a0a.png" alt="S"/> into a finite
 number of cells such that all the continuous states in each cell satisfy exactly the
@@ -114,12 +137,18 @@ same set of propositions in <img class="math" src="_images/math/4cacf873292b07ee
 </blockquote>
 </div>
 <div class="section" id="continuous-state-space-discretization">
-<h3>Continuous state space discretization<a class="headerlink" href="#continuous-state-space-discretization" title="Permalink to this headline">¶</a></h3>
+<span id="ssec-disc"></span><h3>Continuous state space discretization<a class="headerlink" href="#continuous-state-space-discretization" title="Permalink to this headline">¶</a></h3>
+<p>Given a propositional preserving partition of the continuous state space and
+the evolution of the continuous state as in <a href="#equation-dynamics">(1)</a>,
+we refine the partition based on the reachability relation between cells
+and obtain a finite state abstraction of the evolution of the continuous state,
+represented by a finite transition system.</p>
+<p>This can be done using the following function call:</p>
 </div>
 <div class="section" id="digital-design-synthesis">
-<h3>Digital design synthesis<a class="headerlink" href="#digital-design-synthesis" title="Permalink to this headline">¶</a></h3>
+<span id="ssec-syn"></span><h3>Digital design synthesis<a class="headerlink" href="#digital-design-synthesis" title="Permalink to this headline">¶</a></h3>
 <p>The continuous state space discretization generates a finite state abstraction
-of the continuous dynamics, represented by a finite transition system.
+of the continuous state, represented by a finite transition system.
 Each state in this finite transition system corresponds to a cell in the continuous
 domain.
 A transition <img class="math" src="_images/math/b973745a4e4aa10751e09d75093a0cdb499ad6e9.png" alt="c_i \to c_j"/> in this finite state system indicates that
@@ -129,7 +158,7 @@ that takes the system to another continuous state <img class="math" src="_images
 Hence, under the assumption that the specification is stutter invariant,
 we can describe the continuous dynamics by an LTL formula of the form</p>
 <div class="math">
-<p><img src="_images/math/3cb2fa1819521899a24902611143aca2c8ed11c7.png" alt="(v = c_i) \implies next(\bigvee_{j \textit{s.t.} c_i \to c_j} v = c_j)," /></p>
+<p><img src="_images/math/d4fcc021d52b36d535d15869a9fcbe7ad4d78af6.png" alt="(v = c_i) \implies next(\bigvee_{j \text{ s.t. } c_i \to c_j} v = c_j)," /></p>
 </div><p>where <img class="math" src="_images/math/a9f23bf124b6b2b2a993eb313c72e678664ac74a.png" alt="v"/> is a new discrete variable that describes in which cell
 the continuous state is.</p>
 <p>Since the partition is proposition preserving, all the continuous states that belong
@@ -137,8 +166,8 @@ to the same cell satisfy exactly the same set of propositions on the continuous
 state. By the abuse of notation, we write <img class="math" src="_images/math/e7fd60e5129d117276dcebc9600e5632ea06251a.png" alt="c_j \models X_i"/> if all the continuous
 states in cell <img class="math" src="_images/math/88d143238ae2718841dfd3ec099cbea395db77a4.png" alt="c_j"/> satisfy proposition <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i"/>.
 Then, we can replace any proposition <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i"/> on the continuous state variables
-by the formula <img class="math" src="_images/math/573282916fac460a8bfb3102f269e6a7717f4c3b.png" alt="\displaystyle{\bigvee_{j \textit{s.t.} c_j \models X_i} v = c_j}"/>.</p>
-<p>Putting everything together, we now obtain a specification of the form in <a href="#equation-GR1">(1)</a>.
+by the formula <img class="math" src="_images/math/d6535b57faa547bb2d28ffc2008b060acb78e4a9.png" alt="\displaystyle{\bigvee_{j \text{ s.t. } c_j \models X_i} v = c_j}"/>.</p>
+<p>Putting everything together, we now obtain a specification of the form in <a href="#equation-spec">(2)</a>.
 We can then use the GR(1) Game implementation in <a class="reference external" href="http://jtlv.ysaar.net/">JTLV</a> to
 automatically synthesize a planner that ensures the satisfaction of the specification,
 taking into account all the possible behaviors of the environment.
@@ -149,7 +178,7 @@ This can be done using the following steps.</p>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac98f0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac03a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -166,6 +195,11 @@ propositions on discrete variables and whose values are the actual propositions
 on discrete variables.</li>
 <li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
 transition system obtained from the discretization procedure.</li>
+<li><cite>smv_file</cite>: a string that specifies the name of the resulting smv file.</li>
+<li><cite>spc_file</cite>: a string that specifies the name of the resulting spc file.</li>
+<li><cite>file_exist_option</cite>: a string that indicate what to do when the specified smv_file 
+or spc_file exists. Possible values are: &#8216;a&#8217; (ask whether to replace or
+create a new file), &#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
 this function will not print anything on the screen.</li>
 </ul>
@@ -177,22 +211,19 @@ this function will not print anything on the screen.</li>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file</em>, <em>spc_file</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute an automaton satisfying the spec in smv_file and spc_file and store in 
 aut_file. Return the realizability of the spec.</p>
 <p>Input:</p>
 <ul>
-<li><p class="first"><cite>smv_file</cite>: a string containing the name of the smv file.</p>
+<li><p class="first"><cite>smv_file</cite>: a string that specifies the name of the smv file.</p>
 </li>
-<li><p class="first"><cite>spc_file</cite>: a string containing the name of the spc file.</p>
+<li><p class="first"><cite>spc_file</cite>: a string that specifies the name of the spc file.</p>
 </li>
-<li><p class="first"><cite>aut_file</cite>: a string containing the name of the file containing the resulting 
+<li><p class="first"><cite>aut_file</cite>: a string that specifies the name of the file containing the resulting 
 automaton.</p>
 </li>
 <li><p class="first"><cite>heap_size</cite>: a string that specifies java heap size.</p>
-</li>
-<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, 
-this function will not print anything on the screen.</p>
 </li>
 <li><p class="first"><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
 priority used in extracting the automaton. Possible values of <cite>priority_kind</cite> are:</p>
@@ -228,6 +259,12 @@ the system can satisfy the specification.</li>
 </ul>
 </blockquote>
 </li>
+<li><p class="first"><cite>file_exist_option</cite>: a string that indicate what to do when the specified aut_file 
+exists. Possible values are: &#8216;a&#8217; (ask whether to replace or create a new file), 
+&#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</p>
+</li>
+<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level.</p>
+</li>
 </ul>
 </dd></dl>
 
@@ -260,6 +297,51 @@ varnames.</li>
 </li>
 </ol>
 </blockquote>
+<dl class="docutils">
+<dt>Step 1 and 2 above can be combined using the following function:</dt>
+<dd><dl class="first last function">
+<dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac0288&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
+If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
+<cite>aut_file</cite>. Otherwise, the counter examples will be stored.
+This function essentially combines <tt class="docutils literal"><span class="pre">generateJTLVInput</span></tt> and <tt class="docutils literal"><span class="pre">computeStrategy</span></tt></p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>spec</cite>: a list of two strings that represents system specification of the form
+assumption -&gt; guarantee; the first string is the assumption and the second 
+string is the guarantee.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.</li>
+<li><cite>smv_file</cite>: a string that specifies the name of the resulting smv file.</li>
+<li><cite>spc_file</cite>: a string that specifies the name of the resulting spc file.</li>
+<li><cite>aut_file</cite>: a string that specifies the name of the file containing the resulting 
+automaton.</li>
+<li><cite>heap_size</cite>: a string that specifies java heap size.</li>
+<li><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
+priority used in extracting the automaton. See the documentation of the 
+<tt class="docutils literal"><span class="pre">computeStrategy</span></tt> function for the possible values of <cite>priority_kind</cite>.</li>
+<li><cite>init_option</cite>: an integer in that specifies how to handle the initial state of 
+the system. See the documentation of the <tt class="docutils literal"><span class="pre">computeStrategy</span></tt> function for the 
+possible values of <cite>init_option</cite>.</li>
+<li><cite>file_exist_option</cite>: a string that indicate what to do when the specified smv_file 
+or spc_file exists. Possible values are: &#8216;a&#8217; (ask whether to replace or
+create a new file), &#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
+this function will not print anything on the screen.</li>
+</ul>
+</dd></dl>
+
+</dd>
+</dl>
 </div>
 <div class="section" id="specification-file-and-parser">
 <h3>Specification File and Parser<a class="headerlink" href="#specification-file-and-parser" title="Permalink to this headline">¶</a></h3>
@@ -269,7 +351,20 @@ varnames.</li>
 <p>This example is provided in examples/robot_discrete_simple.py.
 It illustrates the use of the jtlvint module in synthesizing a planner
 for a robot that only needs to make discrete decision.</p>
-<p>Import the necessary modules.</p>
+<img alt="_images/robot_discrete_simple.png" class="align-center" src="_images/robot_discrete_simple.png" />
+<p>We consider the robot moving around the regions as shown in the above figure
+while receiving externally triggered park signal.
+The specification of the robot is</p>
+<div class="math">
+<p><img src="_images/math/85215bbd9909bf6eab7c19862eea6fb2ddf0b7db.png" alt="\varphi = \square \diamond(\neg park) \implies (\square \diamond(s \in C_5)
+\wedge \square(park \implies \diamond(s \in C_0)))." /></p>
+</div><p>We cannot, however, deal with this specification directly since it is not in the form of
+GR[1].
+An equivalent GR[1] specification of the above specification can be obtained
+by introducing an auxiliary discretey system variable <img class="math" src="_images/math/690964dcdace4b821563dcd325aa63d28671294b.png" alt="X0reach,"/> initialized to
+<cite>True</cite>. The transition relation of <img class="math" src="_images/math/690964dcdace4b821563dcd325aa63d28671294b.png" alt="X0reach,"/> is given by
+<img class="math" src="_images/math/f8ee251715395c66d357f5331eeb4c7b9a51571e.png" alt="\square(\text{next}(X0reach) = ((s \in C_0 \vee X0reach) \wedge \neg park))."/></p>
+<p>To automatically synthesize a planner for this robot, we first import the necessary modules.</p>
 <div class="highlight-rst"><div class="highlight"><pre>from prop2part import Region, PropPreservingPartition
 from jtlvint import *
 from automaton import *
@@ -362,7 +457,7 @@ aut = Automaton(autfile, [], 3)
   <ul>
 <li><a class="reference internal" href="#">Tutorial and Examples</a><ul>
 <li><a class="reference internal" href="#synthesis-of-embedded-control-systems">Synthesis of Embedded Control Systems</a><ul>
-<li><a class="reference internal" href="#continuous-state-space-partition">Continuous state space partition</a></li>
+<li><a class="reference internal" href="#proposition-preserving-partition-of-continuous-state-space">Proposition Preserving Partition of Continuous State Space</a></li>
 <li><a class="reference internal" href="#continuous-state-space-discretization">Continuous state space discretization</a></li>
 <li><a class="reference internal" href="#digital-design-synthesis">Digital design synthesis</a></li>
 <li><a class="reference internal" href="#specification-file-and-parser">Specification File and Parser</a></li>

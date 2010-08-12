@@ -64,14 +64,14 @@
 </table>
 <dl class="function">
 <dt id="jtlvint.checkRealizability">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">checkRealizability</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#checkRealizability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.checkRealizability" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">checkRealizability</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#checkRealizability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.checkRealizability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine whether the spec in smv_file and spc_file is realizable without 
 extracting an automaton.</p>
 <p>Input:</p>
 <ul class="simple">
-<li><cite>smv_file</cite>: a string containing the name of the smv file.</li>
-<li><cite>spc_file</cite>: a string containing the name of the spc file.</li>
-<li><cite>aut_file</cite>: a string containing the name of the file containing the output of JTLV
+<li><cite>smv_file</cite>: a string that specifies the name of the smv file.</li>
+<li><cite>spc_file</cite>: a string that specifies the name of the spc file.</li>
+<li><cite>aut_file</cite>: a string that specifies the name of the file containing the output of JTLV
 (e.g. an initial state starting from which the spec is cannot be satisfied).</li>
 <li><cite>jtlv_path</cite>: a string containing the full path to the JTLV folder.</li>
 <li><cite>heap_size</cite>: a string that specifies java heap size.</li>
@@ -79,27 +79,28 @@ extracting an automaton.</p>
 this function will not print anything on the screen.</li>
 <li><cite>pick_sys_init</cite> is a boolean indicating whether the system can pick 
 its initial state (in response to the initial environment state).</li>
+<li><cite>file_exist_option</cite>: a string that indicate what to do when the specified aut_file 
+exists. Possible values are: &#8216;a&#8217; (ask whether to replace or create a new file), 
+&#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="jtlvint.computeStrategy">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file=''</em>, <em>spc_file=''</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.computeStrategy" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">computeStrategy</tt><big>(</big><em>smv_file</em>, <em>spc_file</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#computeStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.computeStrategy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an automaton satisfying the spec in smv_file and spc_file and store in 
 aut_file. Return the realizability of the spec.</p>
 <p>Input:</p>
 <ul>
-<li><p class="first"><cite>smv_file</cite>: a string containing the name of the smv file.</p>
+<li><p class="first"><cite>smv_file</cite>: a string that specifies the name of the smv file.</p>
 </li>
-<li><p class="first"><cite>spc_file</cite>: a string containing the name of the spc file.</p>
+<li><p class="first"><cite>spc_file</cite>: a string that specifies the name of the spc file.</p>
 </li>
-<li><p class="first"><cite>aut_file</cite>: a string containing the name of the file containing the resulting 
+<li><p class="first"><cite>aut_file</cite>: a string that specifies the name of the file containing the resulting 
 automaton.</p>
 </li>
 <li><p class="first"><cite>heap_size</cite>: a string that specifies java heap size.</p>
-</li>
-<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0, 
-this function will not print anything on the screen.</p>
 </li>
 <li><p class="first"><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
 priority used in extracting the automaton. Possible values of <cite>priority_kind</cite> are:</p>
@@ -135,12 +136,18 @@ the system can satisfy the specification.</li>
 </ul>
 </blockquote>
 </li>
+<li><p class="first"><cite>file_exist_option</cite>: a string that indicate what to do when the specified aut_file 
+exists. Possible values are: &#8216;a&#8217; (ask whether to replace or create a new file), 
+&#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</p>
+</li>
+<li><p class="first"><cite>verbose</cite>: an integer that specifies the verbose level.</p>
+</li>
 </ul>
 </dd></dl>
 
 <dl class="function">
 <dt id="jtlvint.generateJTLVInput">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac98f0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac03a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -157,6 +164,11 @@ propositions on discrete variables and whose values are the actual propositions
 on discrete variables.</li>
 <li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
 transition system obtained from the discretization procedure.</li>
+<li><cite>smv_file</cite>: a string that specifies the name of the resulting smv file.</li>
+<li><cite>spc_file</cite>: a string that specifies the name of the resulting spc file.</li>
+<li><cite>file_exist_option</cite>: a string that indicate what to do when the specified smv_file 
+or spc_file exists. Possible values are: &#8216;a&#8217; (ask whether to replace or
+create a new file), &#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
 this function will not print anything on the screen.</li>
 </ul>
@@ -191,6 +203,47 @@ jtlv GR1 game implementation.</li>
 <p>Input:</p>
 <ul class="simple">
 <li><cite>jtlv_path</cite>: a string indicating the full path to the JTLV folder.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="jtlvint.synthesize">
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac0288&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.synthesize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
+If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
+<cite>aut_file</cite>. Otherwise, the counter examples will be stored.
+This function essentially combines <tt class="docutils literal"><span class="pre">generateJTLVInput</span></tt> and <tt class="docutils literal"><span class="pre">computeStrategy</span></tt></p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>spec</cite>: a list of two strings that represents system specification of the form
+assumption -&gt; guarantee; the first string is the assumption and the second 
+string is the guarantee.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.</li>
+<li><cite>smv_file</cite>: a string that specifies the name of the resulting smv file.</li>
+<li><cite>spc_file</cite>: a string that specifies the name of the resulting spc file.</li>
+<li><cite>aut_file</cite>: a string that specifies the name of the file containing the resulting 
+automaton.</li>
+<li><cite>heap_size</cite>: a string that specifies java heap size.</li>
+<li><cite>priority_kind</cite>: a string of length 3 or an integer that specifies the type of 
+priority used in extracting the automaton. See the documentation of the 
+<tt class="docutils literal"><span class="pre">computeStrategy</span></tt> function for the possible values of <cite>priority_kind</cite>.</li>
+<li><cite>init_option</cite>: an integer in that specifies how to handle the initial state of 
+the system. See the documentation of the <tt class="docutils literal"><span class="pre">computeStrategy</span></tt> function for the 
+possible values of <cite>init_option</cite>.</li>
+<li><cite>file_exist_option</cite>: a string that indicate what to do when the specified smv_file 
+or spc_file exists. Possible values are: &#8216;a&#8217; (ask whether to replace or
+create a new file), &#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
+this function will not print anything on the screen.</li>
 </ul>
 </dd></dl>
 
