@@ -239,11 +239,17 @@ class Automaton:
 
         Input:
 
-        - `current_aut_state`: the current AutomatonState.
+        - `current_aut_state`: the current AutomatonState. Use current_aut_state = None
+          for unknown current or initial automaton state.
         - `env_state`: a dictionary whose keys are the names of the environment 
           variables and whose values are the values of the variables.
         """
-        for next_aut_state_id in current_aut_state.transition:
+        transition = []
+        if (current_aut_state is None):
+            transition = range(0, self.size())
+        else:
+            transition = current_aut_state.transition
+        for next_aut_state_id in transition:
             is_env = True
             for var in env_state.keys():
                 if (self.states[next_aut_state_id].state[var] != env_state[var]):

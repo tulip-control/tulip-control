@@ -80,12 +80,6 @@ August 7, 2010</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="prop2part.findBoundingBox">
-<tt class="descclassname">prop2part.</tt><tt class="descname">findBoundingBox</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#findBoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.findBoundingBox" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the bounding box of the input polytope</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="prop2part.isAdjacentRegion">
 <tt class="descclassname">prop2part.</tt><tt class="descname">isAdjacentRegion</tt><big>(</big><em>reg1</em>, <em>reg2</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isAdjacentRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isAdjacentRegion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if two regions share a face</p>
@@ -93,7 +87,7 @@ August 7, 2010</p>
 
 <dl class="function">
 <dt id="prop2part.isNonEmptyInterior">
-<tt class="descclassname">prop2part.</tt><tt class="descname">isNonEmptyInterior</tt><big>(</big><em>poly1</em>, <em>tol=1.0000000000000001e-05</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isNonEmptyInterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isNonEmptyInterior" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">prop2part.</tt><tt class="descname">isNonEmptyInterior</tt><big>(</big><em>poly1</em>, <em>tol=9.9999999999999995e-07</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#isNonEmptyInterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.isNonEmptyInterior" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks the radius of the Chebyshev ball to decide polytope degenaracy</p>
 </dd></dl>
 
@@ -105,15 +99,16 @@ August 7, 2010</p>
 
 <dl class="function">
 <dt id="prop2part.polySimplify">
-<tt class="descclassname">prop2part.</tt><tt class="descname">polySimplify</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#polySimplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.polySimplify" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">prop2part.</tt><tt class="descname">polySimplify</tt><big>(</big><em>poly</em>, <em>nonEmptyBounded=1</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#polySimplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.polySimplify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes redundant inequalities in the hyperplane representation of the polytope with the algorithm described at <a class="reference external" href="http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html">http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html</a> by solving one LP for each facet</p>
 <p>Warning:Should be used for bounded polytopes with nonempty interior</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="prop2part.polySimplify2">
-<tt class="descclassname">prop2part.</tt><tt class="descname">polySimplify2</tt><big>(</big><em>poly</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#polySimplify2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.polySimplify2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Warning:Should be used for polytopes with nonempty interior</p>
+<dt id="prop2part.prop2part2">
+<tt class="descclassname">prop2part.</tt><tt class="descname">prop2part2</tt><big>(</big><em>state_space</em>, <em>cont_props</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#prop2part2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.prop2part2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function that takes a domain (state_space) and a list of propositions (cont_props), and
+returns a proposition preserving partition of the state space</p>
 </dd></dl>
 
 <dl class="function">
