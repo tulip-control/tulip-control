@@ -132,7 +132,9 @@ same set of propositions in <img class="math" src="_images/math/4cacf873292b07ee
 <dl class="function">
 <dt id="prop2part.prop2part2">
 <tt class="descclassname">prop2part.</tt><tt class="descname">prop2part2</tt><big>(</big><em>state_space</em>, <em>cont_props</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#prop2part2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.prop2part2" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Main function that takes a domain (state_space) and a list of propositions (cont_props), and
+returns a proposition preserving partition of the state space</p>
+</dd></dl>
 
 </blockquote>
 </div>
@@ -178,7 +180,7 @@ This can be done using the following steps.</p>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac03a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x18778a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -301,7 +303,7 @@ varnames.</li>
 <dt>Step 1 and 2 above can be combined using the following function:</dt>
 <dd><dl class="first last function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ac0288&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1877800&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.

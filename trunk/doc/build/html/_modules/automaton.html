@@ -287,11 +287,17 @@
 
 <span class="sd">        Input:</span>
 
-<span class="sd">        - `current_aut_state`: the current AutomatonState.</span>
+<span class="sd">        - `current_aut_state`: the current AutomatonState. Use current_aut_state = None</span>
+<span class="sd">          for unknown current or initial automaton state.</span>
 <span class="sd">        - `env_state`: a dictionary whose keys are the names of the environment </span>
 <span class="sd">          variables and whose values are the values of the variables.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">next_aut_state_id</span> <span class="ow">in</span> <span class="n">current_aut_state</span><span class="o">.</span><span class="n">transition</span><span class="p">:</span>
+        <span class="n">transition</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current_aut_state</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">transition</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">transition</span> <span class="o">=</span> <span class="n">current_aut_state</span><span class="o">.</span><span class="n">transition</span>
+        <span class="k">for</span> <span class="n">next_aut_state_id</span> <span class="ow">in</span> <span class="n">transition</span><span class="p">:</span>
             <span class="n">is_env</span> <span class="o">=</span> <span class="bp">True</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">env_state</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">next_aut_state_id</span><span class="p">]</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">!=</span> <span class="n">env_state</span><span class="p">[</span><span class="n">var</span><span class="p">]):</span>
