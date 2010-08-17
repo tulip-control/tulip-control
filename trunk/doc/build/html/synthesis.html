@@ -52,6 +52,7 @@
 <div class="section" id="jtlvint-module-interface-to-the-jtlv-implementation-of-gr1-game">
 <h2>Jtlvint Module &#8212; Interface to the JTLV implementation of GR1 game<a class="headerlink" href="#jtlvint-module-interface-to-the-jtlv-implementation-of-gr1-game" title="Permalink to this headline">¶</a></h2>
 <p>About JTLV, see <a class="reference external" href="http://jtlv.ysaar.net/">http://jtlv.ysaar.net/</a></p>
+<p>Nok Wongpiromsarn (<a class="reference external" href="mailto:nok&#37;&#52;&#48;cds&#46;caltech&#46;edu">nok<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -147,7 +148,7 @@ exists. Possible values are: &#8216;a&#8217; (ask whether to replace or create a
 
 <dl class="function">
 <dt id="jtlvint.generateJTLVInput">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a23710&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x186db70&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -208,7 +209,7 @@ jtlv GR1 game implementation.</li>
 
 <dl class="function">
 <dt id="jtlvint.synthesize">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a23670&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.synthesize" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x186dbc0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.synthesize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.
@@ -250,6 +251,7 @@ this function will not print anything on the screen.</li>
 </div>
 <span class="target" id="module-automaton"></span><div class="section" id="automaton-module">
 <h2>Automaton module<a class="headerlink" href="#automaton-module" title="Permalink to this headline">¶</a></h2>
+<p>Nok Wongpiromsarn (<a class="reference external" href="mailto:nok&#37;&#52;&#48;cds&#46;caltech&#46;edu">nok<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

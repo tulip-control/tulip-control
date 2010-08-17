@@ -5,6 +5,8 @@
 Automaton module
 ----------------
 
+Nok Wongpiromsarn (nok@cds.caltech.edu)
+
 :Date: August 3, 2010
 :Version: 0.1.0
 """

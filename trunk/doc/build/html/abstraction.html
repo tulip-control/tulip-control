@@ -53,11 +53,8 @@
             
   <div class="section" id="finite-state-abstraction-of-lti-systems">
 <h1>Finite State Abstraction of LTI Systems<a class="headerlink" href="#finite-state-abstraction-of-lti-systems" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-prop2part">
-<span id="prop2part-module"></span><h2>Prop2part Module<a class="headerlink" href="#module-prop2part" title="Permalink to this headline">¶</a></h2>
-<p>prop2part.py &#8212; Proposition preserving partition module</p>
-<p>Necmiye Ozay (<a class="reference external" href="mailto:necmiye&#37;&#52;&#48;cds&#46;caltech&#46;edu">necmiye<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)
-August 7, 2010</p>
+<div class="section" id="prop2part-py-proposition-preserving-partition-module">
+<h2>prop2part.py &#8212; Proposition preserving partition module<a class="headerlink" href="#prop2part-py-proposition-preserving-partition-module" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="prop2part.PropPreservingPartition">
 <em class="property">class </em><tt class="descclassname">prop2part.</tt><tt class="descname">PropPreservingPartition</tt><big>(</big><em>domain=None</em>, <em>num_prop=0</em>, <em>list_region=</em><span class="optional">[</span><span class="optional">]</span>, <em>num_regions=0</em>, <em>adj=0</em>, <em>trans=0</em>, <em>list_prop_symbol=None</em><big>)</big><a class="reference internal" href="_modules/prop2part.html#PropPreservingPartition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#prop2part.PropPreservingPartition" title="Permalink to this definition">¶</a></dt>
@@ -80,73 +77,6 @@ August 7, 2010</p>
 returns a proposition preserving partition of the state space</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="prop2part.rand">
-<tt class="descclassname">prop2part.</tt><tt class="descname">rand</tt><big>(</big><big>)</big><a class="headerlink" href="#prop2part.rand" title="Permalink to this definition">¶</a></dt>
-<dd><p>rand(d0, d1, ..., dn)</p>
-<p>Random values in a given shape.</p>
-<p>Create an array of the given shape and propagate it with
-random samples from a uniform distribution
-over <tt class="docutils literal"><span class="pre">[0,</span> <span class="pre">1)</span></tt>.</p>
-<dl class="docutils">
-<dt>d0, d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Shape of the output.</dd>
-</dl>
-<dl class="docutils">
-<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, shape <tt class="docutils literal"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt></span></dt>
-<dd>Random values.</dd>
-</dl>
-<p>random</p>
-<p>This is a convenience function. If you want an interface that
-takes a shape-tuple as the first argument, refer to
-<cite>random</cite>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">array([[ 0.14022471,  0.96360618],  #random</span>
-<span class="go">       [ 0.37601032,  0.25528411],  #random</span>
-<span class="go">       [ 0.49313049,  0.94909878]]) #random</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="prop2part.randn">
-<tt class="descclassname">prop2part.</tt><tt class="descname">randn</tt><big>(</big><big>)</big><a class="headerlink" href="#prop2part.randn" title="Permalink to this definition">¶</a></dt>
-<dd><p>randn([d1, ..., dn])</p>
-<p>Return a sample (or samples) from the &#8220;standard normal&#8221; distribution.</p>
-<p>If positive, int_like or int-convertible arguments are provided,
-<cite>randn</cite> generates an array of shape <tt class="docutils literal"><span class="pre">(d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>, filled
-with random floats sampled from a univariate &#8220;normal&#8221; (Gaussian)
-distribution of mean 0 and variance 1 (if any of the <img class="math" src="_images/math/f1544d77330dc5a289ad6a42beeb236b8dd70a9a.png" alt="d_i"/> are
-floats, they are first converted to integers by truncation). A single
-float randomly sampled from the distribution is returned if no
-argument is provided.</p>
-<p>This is a convenience function.  If you want an interface that takes a
-tuple as the first argument, use <cite>numpy.random.standard_normal</cite> instead.</p>
-<dl class="docutils">
-<dt>d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier"><cite>n</cite> ints, optional</span></dt>
-<dd>The dimensions of the returned array, should be all positive.</dd>
-</dl>
-<dl class="docutils">
-<dt>Z <span class="classifier-delimiter">:</span> <span class="classifier">ndarray or float</span></dt>
-<dd>A <tt class="docutils literal"><span class="pre">(d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>-shaped array of floating-point samples from
-the standard normal distribution, or a single such float if
-no parameters were supplied.</dd>
-</dl>
-<p>random.standard_normal : Similar, but takes a tuple as its argument.</p>
-<p>For random samples from <img class="math" src="_images/math/adbb4ce441cd7277f61353fde37bbd8150e05a55.png" alt="N(\mu, \sigma^2)"/>, use:</p>
-<p><tt class="docutils literal"><span class="pre">sigma</span> <span class="pre">*</span> <span class="pre">np.random.randn(...)</span> <span class="pre">+</span> <span class="pre">mu</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
-<span class="go">2.1923875335537315 #random</span>
-</pre></div>
-</div>
-<p>Two-by-four array of samples from N(3, 6.25):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
-<span class="go">array([[-4.49401501,  4.00950034, -1.81814867,  7.29718677],  #random</span>
-<span class="go">       [ 0.39924804,  4.68456316,  4.99394529,  4.84057254]]) #random</span>
-</pre></div>
-</div>
-</dd></dl>
-
 </div>
 <div class="section" id="discretize-module">
 <h2>Discretize Module<a class="headerlink" href="#discretize-module" title="Permalink to this headline">¶</a></h2>
@@ -162,7 +92,7 @@ no parameters were supplied.</dd>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Finite State Abstraction of LTI Systems</a><ul>
-<li><a class="reference internal" href="#module-prop2part">Prop2part Module</a></li>
+<li><a class="reference internal" href="#prop2part-py-proposition-preserving-partition-module">prop2part.py &#8212; Proposition preserving partition module</a></li>
 <li><a class="reference internal" href="#discretize-module">Discretize Module</a></li>
 </ul>
 </li>
