@@ -147,7 +147,7 @@ exists. Possible values are: &#8216;a&#8217; (ask whether to replace or create a
 
 <dl class="function">
 <dt id="jtlvint.generateJTLVInput">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x18778a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a23710&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.generateJTLVInput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -208,7 +208,7 @@ jtlv GR1 game implementation.</li>
 
 <dl class="function">
 <dt id="jtlvint.synthesize">
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1877800&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.synthesize" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1a23670&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jtlvint.synthesize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.

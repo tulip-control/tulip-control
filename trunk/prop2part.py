@@ -1,4 +1,3 @@
-
 """ prop2part.py --- Proposition preserving partition module
 
 Necmiye Ozay (necmiye@cds.caltech.edu)
@@ -91,13 +90,13 @@ def prop2part2(state_space, cont_props_dict):
 class PropPreservingPartition:
 	"""Partition class with following fields
 	
-	-domain: the domain we want to partition, type: polytope
-	-num_prop: number of propositions
-	-list_region: proposition preserving regions, type: list of Region
-	-num_regions: length of the above list
-	-adj: a matrix showing which regions are adjacent
-	-trans: a matrix showing which region is reachable from which region
-	-list_prop_symbol: list of symbols of propositions
+	- domain: the domain we want to partition, type: polytope
+	- num_prop: number of propositions
+	- list_region: proposition preserving regions, type: list of Region
+	- num_regions: length of the above list
+	- adj: a matrix showing which regions are adjacent
+	- trans: a matrix showing which region is reachable from which region
+	- list_prop_symbol: list of symbols of propositions
 	"""
 	
 	def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None):
