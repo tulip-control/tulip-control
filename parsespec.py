@@ -82,10 +82,10 @@ def parseContRange(list):
             exit(1)
         else:
             minmax = minmax[0]
-            A = A + [[0 for j in range(0,i)] + [1] + [0 for j in range(0, numvars-i-1)]]
-            A = A + [[0 for j in range(0,i)] + [-1] + [0 for j in range(0, numvars-i-1)]]
-            b = b + [[minmax[1]]]
-            b = b + [[minmax[0]]]
+            A = A + [[0. for j in range(0,i)] + [1.] + [0. for j in range(0, numvars-i-1)]]
+            A = A + [[0. for j in range(0,i)] + [-1.] + [0. for j in range(0, numvars-i-1)]]
+            b = b + [[float(minmax[1])]]
+            b = b + [[float(minmax[0])]]
     A = array(A)
     b = array(b)
     return Polytope(A,b)

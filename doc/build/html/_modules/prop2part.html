@@ -52,284 +52,23 @@
 <span class="sd">August 7, 2010</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">polytope_computations</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">polyhedron</span> <span class="kn">import</span> <span class="n">Vrep</span><span class="p">,</span> <span class="n">Hrep</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">cvxopt</span> <span class="kn">import</span> <span class="n">blas</span><span class="p">,</span> <span class="n">lapack</span><span class="p">,</span> <span class="n">solvers</span>
-<span class="kn">from</span> <span class="nn">cvxopt</span> <span class="kn">import</span> <span class="n">matrix</span>
-
-<span class="n">solvers</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s">&#39;show_progress&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
 
 
-<span class="k">def</span> <span class="nf">matrixRank</span><span class="p">(</span><span class="n">matIn</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">10.0e-12</span><span class="p">):</span>
-<div class="viewcode-block" id="matrixRank"><a class="viewcode-back" href="../abstraction.html#prop2part.matrixRank">[docs]</a>	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Finds the rank of the matrix (by thresholding singular values)</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">u</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">matIn</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="o">&gt;=</span><span class="n">tol</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">num_bin</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">places</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span></div>
-	<span class="k">def</span> <span class="nf">bit_at_p</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39; find the bit at place p for number n &#39;&#39;&#39;</span>
-		<span class="n">two_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">p</span>   <span class="c"># 2 ^ p, using bitshift, will have exactly one</span>
-				<span class="c"># bit set, at place p</span>
-		<span class="n">x</span> <span class="o">=</span> <span class="n">N</span> <span class="o">&amp;</span> <span class="n">two_p</span>    <span class="c"># binary composition, will be one where *both* numbers</span>
-				<span class="c"># have a 1 at that bit.  this can only happen </span>
-				<span class="c"># at position p.  will yield  two_p if  N has a 1 at </span>
-				<span class="c"># bit p</span>
-		<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="n">bits</span> <span class="o">=</span> <span class="p">[]</span>
-	<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">places</span><span class="p">):</span>
-		<span class="n">bits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bit_at_p</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-	<span class="k">return</span> <span class="n">bits</span>
-	
-
-<span class="k">def</span> <span class="nf">__findBoundingBox__</span><span class="p">(</span><span class="n">poly</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Returns the bounding box of the input polytope&quot;&quot;&quot;</span>
-	<span class="n">A_arr</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">b_arr</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">neq</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">A_arr</span><span class="o">.</span><span class="n">shape</span>
-	<span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">A_arr</span><span class="p">)</span>
-	<span class="n">b</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">b_arr</span><span class="p">)</span>
-	<span class="c">#In = matrix(eye(nx))</span>
-	<span class="n">l_bounds</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-	<span class="n">u_bounds</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
-		<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-		<span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-		<span class="n">c</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-		<span class="n">sol</span><span class="o">=</span><span class="n">solvers</span><span class="o">.</span><span class="n">lp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-		<span class="n">l_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[</span><span class="s">&#39;primal objective&#39;</span><span class="p">]</span>
-		<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-		<span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-		<span class="n">c</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-		<span class="n">sol</span><span class="o">=</span><span class="n">solvers</span><span class="o">.</span><span class="n">lp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-		<span class="n">u_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">sol</span><span class="p">[</span><span class="s">&#39;primal objective&#39;</span><span class="p">]</span>
-	<span class="k">return</span> <span class="n">l_bounds</span><span class="p">,</span> <span class="n">u_bounds</span>
-	
-
-<span class="k">def</span> <span class="nf">__isAdjacentPolyOld__</span><span class="p">(</span><span class="n">poly1</span><span class="p">,</span><span class="n">poly2</span><span class="p">,</span><span class="n">M1n</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">M2n</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Checks adjacency of two polytopes&quot;&quot;&quot;</span>
-	<span class="c">#start_time = time()</span>
-	<span class="n">dummy</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="p">,</span><span class="n">poly2</span><span class="o">.</span><span class="n">A</span><span class="p">)),</span><span class="n">concatenate</span><span class="p">((</span><span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="p">,</span><span class="n">poly2</span><span class="o">.</span><span class="n">b</span><span class="p">)))</span>
-	<span class="k">if</span> <span class="n">dummy</span><span class="o">.</span><span class="n">generators</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>		
-		<span class="c">#time_elapsed = time()-start_time</span>
-		<span class="c">#print &#39;feasibility&#39;, time_elapsed</span>
-		<span class="k">return</span> <span class="mi">1</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="mi">0</span>
-		
-		
-<span class="k">def</span> <span class="nf">__isAdjacentPoly2__</span><span class="p">(</span><span class="n">poly1</span><span class="p">,</span><span class="n">poly2</span><span class="p">,</span><span class="n">M1n</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">M2n</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">10.0e-6</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Checks adjacency of two polytopes&quot;&quot;&quot;</span>
-	
-	<span class="sd">&#39;&#39;&#39;Warning: Chebyshev ball radius is at least tol/2 for adjacents, if you want to change</span>
-<span class="sd">	the tol here, make sure you have a compatible tol in isNonEmptyInterior function&#39;&#39;&#39;</span>
-	
-	<span class="n">A1_arr</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">A2_arr</span> <span class="o">=</span> <span class="n">poly2</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">b1_arr</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">b2_arr</span> <span class="o">=</span> <span class="n">poly2</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="c"># Find the candidate facets parameters</span>
-	<span class="n">neq1</span> <span class="o">=</span> <span class="n">M1n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-	<span class="n">neq2</span> <span class="o">=</span> <span class="n">M2n</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-	<span class="n">dummy</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">M1n</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">M2n</span><span class="p">)</span>
-	<span class="c">#print &#39;minimum is&#39;,dummy.min()</span>
-	<span class="n">cand</span> <span class="o">=</span> <span class="p">(</span><span class="n">dummy</span><span class="o">==</span><span class="n">dummy</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">neq1</span><span class="p">):</span>
-		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">neq2</span><span class="p">):</span>
-			<span class="k">if</span> <span class="n">cand</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]:</span> <span class="k">break</span>
-		<span class="k">if</span> <span class="n">cand</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]:</span> <span class="k">break</span>
-
-	<span class="n">b1_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tol</span>
-	<span class="n">b2_arr</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tol</span>	
-	<span class="n">dummy</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">A1_arr</span><span class="p">,</span><span class="n">A2_arr</span><span class="p">)),</span><span class="n">concatenate</span><span class="p">((</span><span class="n">b1_arr</span><span class="p">,</span><span class="n">b2_arr</span><span class="p">)))</span>
-	<span class="k">if</span> <span class="n">isNonEmptyInterior</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
-		<span class="k">return</span> <span class="mi">1</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="mi">0</span>
-
-		
-<span class="k">def</span> <span class="nf">isAdjacentRegion</span><span class="p">(</span><span class="n">reg1</span><span class="p">,</span><span class="n">reg2</span><span class="p">):</span>
-<div class="viewcode-block" id="isAdjacentRegion"><a class="viewcode-back" href="../abstraction.html#prop2part.isAdjacentRegion">[docs]</a>	<span class="sd">&quot;&quot;&quot;Checks if two regions share a face&quot;&quot;&quot;</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">reg1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">:</span>
-		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">reg2</span><span class="o">.</span><span class="n">list_poly</span><span class="p">:</span>
-			<span class="n">adj</span> <span class="o">=</span> <span class="n">__isAdjacentPolyOuter__</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
-			<span class="k">if</span> <span class="n">adj</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
-				<span class="k">return</span> <span class="mi">1</span>
-	<span class="k">return</span> <span class="mi">0</span>
-	
-	
-<span class="k">def</span> <span class="nf">__isAdjacentPolyOuter__</span><span class="p">(</span><span class="n">poly1</span><span class="p">,</span><span class="n">poly2</span><span class="p">):</span></div>
-	<span class="sd">&quot;&quot;&quot;Eliminates a non-adjacent pair by checking hyperplane normals&quot;&quot;&quot;</span>
-	<span class="c">#start_time = time()</span>
-	<span class="n">M1</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="p">])</span> <span class="c">#stack A and b</span>
-	<span class="n">M1row</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">M1</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-	<span class="n">M1n</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span><span class="n">diag</span><span class="p">(</span><span class="n">M1row</span><span class="p">))</span> <span class="c">#normalize the magnitude</span>
-	<span class="n">M2</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="n">poly2</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">poly2</span><span class="o">.</span><span class="n">b</span><span class="p">])</span>
-	<span class="n">M2row</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">M2</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-	<span class="n">M2n</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">M2</span><span class="p">,</span><span class="n">diag</span><span class="p">(</span><span class="n">M2row</span><span class="p">))</span>
-	<span class="c">#time_elapsed = time()-start_time</span>
-	<span class="c">#print &#39;normal test&#39;, time_elapsed</span>
-	<span class="c">#print dot(M1n.T,M2n)</span>
-	<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">M1n</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">M2n</span><span class="p">)</span><span class="o">&lt;-</span><span class="mf">0.99</span><span class="p">):</span>
-		<span class="c">#print &#39;here&#39;</span>
-		<span class="k">return</span> <span class="n">__isAdjacentPoly2__</span><span class="p">(</span><span class="n">poly1</span><span class="p">,</span><span class="n">poly2</span><span class="p">,</span><span class="n">M1n</span><span class="p">,</span><span class="n">M2n</span><span class="p">)</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="k">return</span> <span class="mi">0</span>
-
-
-<span class="k">def</span> <span class="nf">__polySimplifyOld</span><span class="p">(</span><span class="n">poly</span><span class="p">):</span> <span class="c">#check if there is a better way of eliminating redundancy</span>
-	<span class="sd">&#39;&#39;&#39;Warning:Should be used for polytopes with nonempty interior&#39;&#39;&#39;</span>
-	<span class="n">dummy</span> <span class="o">=</span> <span class="n">Vrep</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">generators</span><span class="p">)</span>
-	<span class="n">poly</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">dummy</span><span class="o">.</span><span class="n">A</span><span class="p">,</span><span class="n">dummy</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
-	<span class="k">return</span> <span class="n">poly</span>
-	
-	
-<span class="k">def</span> <span class="nf">polySimplify</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span><span class="n">nonEmptyBounded</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<div class="viewcode-block" id="polySimplify"><a class="viewcode-back" href="../abstraction.html#prop2part.polySimplify">[docs]</a>	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Removes redundant inequalities in the hyperplane representation of the polytope with the algorithm described at http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html by solving one LP for each facet</span>
-<span class="sd">	</span>
-<span class="sd">	Warning:Should be used for bounded polytopes with nonempty interior</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	 
-	<span class="n">A_arr</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">b_arr</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">neq</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">A_arr</span><span class="o">.</span><span class="n">shape</span>
-	
-	<span class="c"># first eliminate the linearly dependent rows corresponding to the same hyperplane</span>
-	<span class="n">M1</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">([</span><span class="n">poly</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">poly</span><span class="o">.</span><span class="n">b</span><span class="p">])</span> <span class="c">#stack A and b</span>
-	<span class="n">M1row</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">M1</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-	<span class="n">M1n</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span><span class="n">diag</span><span class="p">(</span><span class="n">M1row</span><span class="p">))</span> 
-	<span class="n">M1n</span> <span class="o">=</span> <span class="n">M1n</span><span class="o">.</span><span class="n">T</span>
-	<span class="n">keep_row</span> <span class="o">=</span> <span class="p">[]</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">neq</span><span class="p">):</span>
-		<span class="n">keep_i</span> <span class="o">=</span> <span class="mi">1</span>
-		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">neq</span><span class="p">):</span>
-			<span class="k">if</span> <span class="n">dot</span><span class="p">(</span><span class="n">M1n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">M1n</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">&gt;</span><span class="mf">0.999999</span><span class="p">:</span>
-				<span class="n">keep_i</span> <span class="o">=</span> <span class="mi">0</span>
-		<span class="k">if</span> <span class="n">keep_i</span><span class="p">:</span>
-			<span class="n">keep_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-	
-	<span class="n">A_arr</span> <span class="o">=</span> <span class="n">A_arr</span><span class="p">[</span><span class="n">keep_row</span><span class="p">]</span>
-	<span class="n">b_arr</span> <span class="o">=</span> <span class="n">b_arr</span><span class="p">[</span><span class="n">keep_row</span><span class="p">]</span>
-	<span class="n">neq</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">A_arr</span><span class="o">.</span><span class="n">shape</span>
-	
-	<span class="k">if</span> <span class="n">nonEmptyBounded</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">neq</span><span class="o">&lt;=</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">A_arr</span><span class="p">,</span><span class="n">b_arr</span><span class="p">)</span>
-	
-	<span class="c"># Now eliminate hyperplanes outside the bounding box</span>
-	<span class="k">if</span> <span class="n">neq</span><span class="o">&gt;</span><span class="mi">3</span><span class="o">*</span><span class="n">nx</span><span class="p">:</span>
-		<span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">__findBoundingBox__</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
-		<span class="n">cand</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">dot</span><span class="p">((</span><span class="n">A_arr</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">A_arr</span><span class="p">,</span><span class="n">ub</span><span class="o">-</span><span class="n">lb</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="n">b_arr</span><span class="o">-</span><span class="n">dot</span><span class="p">(</span><span class="n">A_arr</span><span class="p">,</span><span class="n">lb</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">&lt;-</span><span class="mf">1e-4</span><span class="p">)</span>
-		<span class="n">A_arr</span> <span class="o">=</span> <span class="n">A_arr</span><span class="p">[</span><span class="n">cand</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()]</span>
-		<span class="n">b_arr</span> <span class="o">=</span> <span class="n">b_arr</span><span class="p">[</span><span class="n">cand</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()]</span>
-	
-	<span class="n">neq</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">A_arr</span><span class="o">.</span><span class="n">shape</span>
-	<span class="k">if</span> <span class="n">nonEmptyBounded</span><span class="p">:</span>
-		<span class="k">if</span> <span class="n">neq</span><span class="o">&lt;=</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">A_arr</span><span class="p">,</span><span class="n">b_arr</span><span class="p">)</span>
-	
-	<span class="c"># Finally eliminate the rest of the redundancies</span>
-	<span class="k">del</span> <span class="n">keep_row</span><span class="p">[:]</span> <span class="c">#empty list</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">neq</span><span class="p">):</span>
-		<span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">A_arr</span><span class="p">)</span>
-		<span class="n">s</span> <span class="o">=</span> <span class="o">-</span><span class="n">matrix</span><span class="p">(</span><span class="n">A_arr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-		<span class="n">t</span> <span class="o">=</span> <span class="n">b_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-		<span class="n">b</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">b_arr</span><span class="p">)</span>
-		<span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-		<span class="n">sol</span><span class="o">=</span><span class="n">solvers</span><span class="o">.</span><span class="n">lp</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-		<span class="k">if</span> <span class="o">-</span><span class="n">sol</span><span class="p">[</span><span class="s">&#39;primal objective&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="n">t</span><span class="p">:</span>
-			<span class="n">keep_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-	<span class="n">polyOut</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">A_arr</span><span class="p">[</span><span class="n">keep_row</span><span class="p">],</span><span class="n">b_arr</span><span class="p">[</span><span class="n">keep_row</span><span class="p">])</span>
-	<span class="k">return</span> <span class="n">polyOut</span>
-	
-
-<span class="k">def</span> <span class="nf">__isNonEmptyInteriorOld</span><span class="p">(</span><span class="n">poly1</span><span class="p">):</span></div>
-	<span class="c">#Function to check if the polytope is degenerate</span>
-	<span class="n">num_var</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-	<span class="n">dummy</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">generators</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">num_gen</span> <span class="o">=</span> <span class="n">dummy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="k">if</span> <span class="n">num_gen</span><span class="o">&lt;=</span><span class="n">num_var</span><span class="p">:</span>
-		<span class="k">return</span> <span class="bp">False</span>
-	<span class="k">elif</span> <span class="n">num_var</span><span class="o">&lt;=</span><span class="mi">2</span><span class="p">:</span> <span class="c">#number of generators&gt;2 in 2d is sufficient for non-emptiness</span>
-		<span class="k">return</span> <span class="bp">True</span>
-	<span class="k">else</span><span class="p">:</span> <span class="c">#check rank</span>
-		<span class="c">#print &#39;HERE&#39;</span>
-		<span class="n">moveOrigin</span> <span class="o">=</span> <span class="n">dummy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-		<span class="n">points</span> <span class="o">=</span> <span class="n">dummy</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-		<span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">-</span><span class="n">tile</span><span class="p">(</span><span class="n">moveOrigin</span><span class="p">,(</span><span class="n">num_gen</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-		<span class="k">if</span> <span class="n">matrixRank</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">&lt;</span><span class="n">num_var</span><span class="p">:</span>
-			<span class="k">return</span> <span class="bp">False</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span> <span class="bp">True</span>
-			
-
-<span class="k">def</span> <span class="nf">isNonEmptyInterior</span><span class="p">(</span><span class="n">poly1</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">10.0e-7</span><span class="p">):</span>
-<div class="viewcode-block" id="isNonEmptyInterior"><a class="viewcode-back" href="../abstraction.html#prop2part.isNonEmptyInterior">[docs]</a>	<span class="sd">&quot;&quot;&quot;Checks the radius of the Chebyshev ball to decide polytope degenaracy&quot;&quot;&quot;</span>
-	<span class="n">A</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-	<span class="n">nx</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-	<span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">c_</span><span class="p">[</span><span class="n">A</span><span class="p">,</span><span class="o">-</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">A</span><span class="p">,</span><span class="mi">1</span><span class="p">))])</span>
-	<span class="n">b</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
-	<span class="n">c</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span> <span class="n">r_</span><span class="p">[</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="mi">1</span><span class="p">)),[[</span><span class="mi">1</span><span class="p">]]])</span>
-	<span class="n">sol</span><span class="o">=</span><span class="n">solvers</span><span class="o">.</span><span class="n">lp</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-	<span class="k">if</span> <span class="n">sol</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;primal infeasible&#39;</span><span class="p">:</span>
-		<span class="k">return</span> <span class="bp">False</span>
-	<span class="k">elif</span> <span class="o">-</span><span class="n">sol</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">][</span><span class="n">nx</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">tol</span><span class="p">:</span>
-		<span class="c">#print &#39;radius&#39;,-sol[&#39;x&#39;][nx]</span>
-		<span class="k">return</span> <span class="bp">False</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="c">#print &#39;radius&#39;,-sol[&#39;x&#39;][nx]</span>
-		<span class="k">return</span> <span class="bp">True</span>
-		
-
-<span class="k">def</span> <span class="nf">regionIntersectPoly</span><span class="p">(</span><span class="n">region1</span><span class="p">,</span> <span class="n">poly1</span><span class="p">):</span></div>
-<div class="viewcode-block" id="regionIntersectPoly"><a class="viewcode-back" href="../abstraction.html#prop2part.regionIntersectPoly">[docs]</a>	<span class="sd">&quot;&quot;&quot;Performs set intersection&quot;&quot;&quot;</span>
-	<span class="n">result_region</span> <span class="o">=</span> <span class="n">Region</span><span class="p">()</span>
-	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span> <span class="c">#j polytope counter</span>
-		<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="p">)),</span>
-			<span class="n">concatenate</span><span class="p">((</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">,</span><span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="p">))))</span>
-		<span class="k">if</span> <span class="n">isNonEmptyInterior</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span> <span class="c">#non-empty interior</span>
-			<span class="n">dummy</span> <span class="o">=</span> <span class="n">polySimplify</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span>
-			<span class="n">result_region</span><span class="o">.</span><span class="n">list_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span>
-	<span class="k">return</span> <span class="n">result_region</span>
-
-
-<span class="k">def</span> <span class="nf">regionDiffPoly</span><span class="p">(</span><span class="n">region1</span><span class="p">,</span> <span class="n">poly1</span><span class="p">):</span></div>
-<div class="viewcode-block" id="regionDiffPoly"><a class="viewcode-back" href="../abstraction.html#prop2part.regionDiffPoly">[docs]</a>	<span class="sd">&quot;&quot;&quot;Performs set difference&quot;&quot;&quot;</span>
-	<span class="n">result_region</span> <span class="o">=</span> <span class="n">Region</span><span class="p">()</span>
-	<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
-		<span class="n">A_poly</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-		<span class="n">b_poly</span> <span class="o">=</span> <span class="n">poly1</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-		<span class="n">num_halfspace</span> <span class="o">=</span> <span class="n">A_poly</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">num_halfspace</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c">#loop to keep polytopes of the region disjoint</span>
-			<span class="n">signs</span> <span class="o">=</span> <span class="n">num_bin</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">places</span><span class="o">=</span><span class="n">num_halfspace</span><span class="p">)</span>
-			<span class="n">A_now</span> <span class="o">=</span> <span class="n">A_poly</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-			<span class="n">b_now</span> <span class="o">=</span> <span class="n">b_poly</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-			<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signs</span><span class="p">)):</span> 
-				<span class="k">if</span> <span class="n">signs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-					<span class="n">A_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-					<span class="n">b_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">b_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-			<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">A_now</span><span class="p">)),</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> 				<span class="n">b_now</span><span class="p">))))</span>
-			<span class="k">if</span> <span class="n">isNonEmptyInterior</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
-				<span class="n">dummy</span> <span class="o">=</span> <span class="n">polySimplify</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span>
-				<span class="n">result_region</span><span class="o">.</span><span class="n">list_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span>
-	<span class="k">return</span> <span class="n">result_region</span>
-
-
-<span class="k">def</span> <span class="nf">prop2part2</span><span class="p">(</span><span class="n">state_space</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">):</span></div>
-<div class="viewcode-block" id="prop2part2"><a class="viewcode-back" href="../tutorial.html#prop2part.prop2part2">[docs]</a>	<span class="sd">&quot;&quot;&quot;Main function that takes a domain (state_space) and a list of propositions (cont_props), and</span>
+<div class="viewcode-block" id="prop2part2"><a class="viewcode-back" href="../tutorial.html#prop2part.prop2part2">[docs]</a><span class="k">def</span> <span class="nf">prop2part2</span><span class="p">(</span><span class="n">state_space</span><span class="p">,</span> <span class="n">cont_props_dict</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Main function that takes a domain (state_space) and a list of propositions (cont_props), and</span>
 <span class="sd">	returns a proposition preserving partition of the state space&quot;&quot;&quot;</span>
+	<span class="n">cont_props</span> <span class="o">=</span> <span class="n">cont_props_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 	<span class="n">num_props</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cont_props</span><span class="p">)</span>
 	<span class="n">list_regions</span> <span class="o">=</span> <span class="p">[]</span>
 	<span class="n">first_poly</span> <span class="o">=</span> <span class="p">[]</span> <span class="c">#Initial Region&#39;s list_poly atribute </span>
 	<span class="n">first_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_space</span><span class="p">)</span>
 	<span class="n">list_regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Region</span><span class="p">(</span><span class="n">list_poly</span><span class="o">=</span><span class="n">first_poly</span><span class="p">))</span>
-	<span class="n">mypartition</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">state_space</span><span class="p">),</span> <span class="n">num_prop</span><span class="o">=</span><span class="n">num_props</span><span class="p">,</span> <span class="n">list_region</span><span class="o">=</span><span class="n">list_regions</span><span class="p">)</span>
+	<span class="n">mypartition</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">state_space</span><span class="p">),</span> <span class="n">num_prop</span><span class="o">=</span><span class="n">num_props</span><span class="p">,</span> <span class="n">list_region</span><span class="o">=</span><span class="n">list_regions</span><span class="p">,</span> <span class="n">list_prop_symbol</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cont_props_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 	<span class="k">for</span> <span class="n">prop_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_props</span><span class="p">):</span>
 		<span class="n">num_reg</span> <span class="o">=</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">num_regions</span>
 		<span class="n">prop_holds_reg</span> <span class="o">=</span> <span class="p">[]</span>
@@ -343,7 +82,7 @@
 			<span class="n">list_prop_now</span> <span class="o">=</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_prop</span><span class="p">[:]</span>
 			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region_now</span><span class="p">)):</span> <span class="c">#j polytope counter</span>
 				<span class="n">prop_holds_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-				<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">[</span><span class="n">prop_count</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">)),</span>
+				<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">[</span><span class="n">prop_count</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">)),</span>
 					<span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">,</span><span class="n">cont_props</span><span class="p">[</span><span class="n">prop_count</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">))))</span>
 				<span class="k">if</span> <span class="n">isNonEmptyInterior</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
 					<span class="c">#dummy = polySimplify(dummy)</span>
@@ -372,7 +111,7 @@
 						<span class="k">if</span> <span class="n">signs</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
 							<span class="n">A_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
 							<span class="n">b_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">b_now</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
-					<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">A_now</span><span class="p">)),</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> 							<span class="n">b_now</span><span class="p">))))</span>
+					<span class="n">dummy</span> <span class="o">=</span> <span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">A_now</span><span class="p">)),</span><span class="n">concatenate</span><span class="p">((</span><span class="n">region_now</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">b_now</span><span class="p">))))</span>
 					<span class="k">if</span> <span class="n">isNonEmptyInterior</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
 						<span class="c">#dummy = polySimplify(dummy)</span>
 						<span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polySimplify</span><span class="p">(</span><span class="n">dummy</span><span class="p">))</span>
@@ -395,29 +134,17 @@
 	<span class="n">mypartition</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="n">adj</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 	<span class="k">return</span> <span class="n">mypartition</span>
 
-
-<span class="k">class</span> <span class="nc">Region</span><span class="p">:</span></div>
-<div class="viewcode-block" id="Region"><a class="viewcode-back" href="../abstraction.html#prop2part.Region">[docs]</a>	<span class="sd">&quot;&quot;&quot;Region class with following fields</span>
-
-<span class="sd">	-list_poly: proposition preserving regions	</span>
-<span class="sd">	-list of propositions: binary vector that show which prop holds in which region</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_poly</span><span class="o">=</span><span class="p">[],</span> <span class="n">list_prop</span><span class="o">=</span><span class="p">[]):</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">list_poly</span> <span class="o">=</span> <span class="n">list_poly</span><span class="p">[:]</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">list_prop</span> <span class="o">=</span> <span class="n">list_prop</span><span class="p">[:]</span>
-
-
-<span class="k">class</span> <span class="nc">PropPreservingPartition</span><span class="p">:</span></div>
-<div class="viewcode-block" id="PropPreservingPartition"><a class="viewcode-back" href="../abstraction.html#prop2part.PropPreservingPartition">[docs]</a>	<span class="sd">&quot;&quot;&quot;Partition class with following fields</span>
+</div>
+<div class="viewcode-block" id="PropPreservingPartition"><a class="viewcode-back" href="../abstraction.html#prop2part.PropPreservingPartition">[docs]</a><span class="k">class</span> <span class="nc">PropPreservingPartition</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Partition class with following fields</span>
 <span class="sd">	</span>
-<span class="sd">	-domain: the domain we want to partition, type: polytope</span>
-<span class="sd">	-num_prop: number of propositions</span>
-<span class="sd">	-list_region: proposition preserving regions, type: list of Region</span>
-<span class="sd">	-num_regions: length of the above list</span>
-<span class="sd">	-adj: a matrix showing which regions are adjacent</span>
-<span class="sd">	-trans: a matrix showing which region is reachable from which region</span>
-<span class="sd">	-list_prop_symbol: list of symbols of propositions</span>
+<span class="sd">	- domain: the domain we want to partition, type: polytope</span>
+<span class="sd">	- num_prop: number of propositions</span>
+<span class="sd">	- list_region: proposition preserving regions, type: list of Region</span>
+<span class="sd">	- num_regions: length of the above list</span>
+<span class="sd">	- adj: a matrix showing which regions are adjacent</span>
+<span class="sd">	- trans: a matrix showing which region is reachable from which region</span>
+<span class="sd">	- list_prop_symbol: list of symbols of propositions</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_prop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">list_region</span><span class="o">=</span><span class="p">[],</span> <span class="n">num_regions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adj</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">list_prop_symbol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -429,83 +156,51 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">trans</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">list_prop_symbol</span> <span class="o">=</span> <span class="n">list_prop_symbol</span>
 		
-<span class="c">#class Polytope:</span>
-<span class="c">#	def __init__(self):</span>
-<span class="c">#		self.A = A</span>
-<span class="c">#		self.b = b</span>
-
-
-<span class="c">#def test():</span>
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span></div>
+<span class="c">#def test():</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 	<span class="n">domain</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]])</span>
 
 	<span class="n">domain_poly_A</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">vstack</span><span class="p">([</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="o">-</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)]))</span>
-	<span class="n">domain_poly_b</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">r_</span><span class="p">[</span><span class="n">domain</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="o">-</span><span class="n">domain</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]])</span>
-	<span class="n">state_space</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">domain_poly_A</span><span class="p">,</span> <span class="n">domain_poly_b</span><span class="p">)</span>
+	<span class="n">domain_poly_b</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">r_</span><span class="p">[</span><span class="n">domain</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="o">-</span><span class="n">domain</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">state_space</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">domain_poly_A</span><span class="p">,</span> <span class="n">domain_poly_b</span><span class="p">)</span>
 
 	<span class="n">cont_props</span> <span class="o">=</span> <span class="p">[]</span>
 	
-	<span class="n">A0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.</span><span class="p">])</span>
-	<span class="c">#A0 = array([[1., 0.], [-1., 0.]])</span>
-	<span class="c">#b0 = array([1., 0.])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">))</span>
-	<span class="c">#p1 = polySimplify(Hrep(A0, b0))</span>
+	<span class="n">A0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
+	<span class="n">b0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">))</span>
 	
 	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">])</span>
-	<span class="c">#A1 = array([[-1., 0.]])</span>
-	<span class="c">#b1 = array([-1.5])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
+	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
 	
-	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.7</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
-	
-	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.9</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
-	
-	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
-	
-	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.8</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
-
-	<span class="n">A1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b1</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">))</span>
 	
 	<span class="n">A2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A2</span><span class="p">,</span> <span class="n">b2</span><span class="p">))</span>
+	<span class="n">b2</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A2</span><span class="p">,</span> <span class="n">b2</span><span class="p">))</span>
 
 	<span class="n">A3</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b3</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">])</span>
-	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hrep</span><span class="p">(</span><span class="n">A3</span><span class="p">,</span> <span class="n">b3</span><span class="p">))</span>
+	<span class="n">b3</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">cont_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A3</span><span class="p">,</span> <span class="n">b3</span><span class="p">))</span>
 	
-	<span class="n">mypartition</span> <span class="o">=</span> <span class="n">prop2part2</span><span class="p">(</span><span class="n">state_space</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">)</span>
+	<span class="n">cont_props_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">({</span><span class="s">&#39;C0&#39;</span><span class="p">:</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">),</span><span class="s">&#39;C1&#39;</span><span class="p">:</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span> <span class="n">b1</span><span class="p">),</span><span class="s">&#39;C2&#39;</span><span class="p">:</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A2</span><span class="p">,</span> <span class="n">b2</span><span class="p">),</span><span class="s">&#39;C3&#39;</span><span class="p">:</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A3</span><span class="p">,</span> <span class="n">b3</span><span class="p">)</span> <span class="p">})</span>
+	
+	<span class="n">mypartition</span> <span class="o">=</span> <span class="n">prop2part2</span><span class="p">(</span><span class="n">state_space</span><span class="p">,</span> <span class="n">cont_props_dict</span><span class="p">)</span>
 	
 	<span class="c">#print len(mypartition.list_region)</span>
 	<span class="n">A4</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]])</span>
-	<span class="n">b4</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
-	<span class="n">poly1</span> <span class="o">=</span> <span class="n">Hrep</span><span class="p">(</span><span class="n">A4</span><span class="p">,</span><span class="n">b4</span><span class="p">)</span>
+	<span class="n">b4</span> <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">poly1</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">A4</span><span class="p">,</span><span class="n">b4</span><span class="p">)</span>
 
 	<span class="n">r1</span> <span class="o">=</span> <span class="n">regionDiffPoly</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">poly1</span><span class="p">)</span>
 	
-	<span class="n">verbose</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
-			<span class="n">x</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">generators</span>
-			<span class="k">print</span> <span class="n">x</span>
+	<span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
 	
 	<span class="n">xx</span> <span class="o">=</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">adj</span>
 	<span class="k">print</span> <span class="n">xx</span>
 	<span class="n">time_elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start_time</span>
-	
+	<span class="k">print</span> <span class="n">time_elapsed</span>
 	<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
 		<span class="k">print</span> <span class="s">&#39;time&#39;</span><span class="p">,</span> <span class="n">time_elapsed</span>
 		<span class="c">#print sys.getrefcount(numpy.dtype(&#39;float64&#39;))</span>
@@ -515,52 +210,9 @@
 			<span class="k">print</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;th region has the following generators&quot;</span>
 			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
 				<span class="k">print</span> <span class="s">&#39;polytope&#39;</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="s">&#39;in region&#39;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
-				<span class="k">print</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">generators</span>
+				<span class="c">#print mypartition.list_region[i].list_poly[j].generators</span>
 			<span class="k">print</span> <span class="s">&#39;region&#39;</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s">&#39;proposition list is&#39;</span><span class="p">,</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_prop</span><span class="p">,</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
-			
-	<span class="n">visualization</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="k">if</span> <span class="n">visualization</span><span class="p">:</span>
-		<span class="n">nx</span> <span class="o">=</span> <span class="n">domain_poly_A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-		<span class="k">if</span> <span class="n">nx</span><span class="o">!=</span><span class="mi">2</span><span class="p">:</span>
-			<span class="k">print</span> <span class="s">&quot;Can only plot 2D partitions!&quot;</span>
-		<span class="k">elif</span> <span class="mi">0</span><span class="p">:</span>
-			<span class="kn">import</span> <span class="nn">pylab</span>
-			<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;bo&#39;</span><span class="p">,</span><span class="s">&#39;go&#39;</span><span class="p">,</span><span class="s">&#39;ro&#39;</span><span class="p">,</span><span class="s">&#39;mo&#39;</span><span class="p">,</span><span class="s">&#39;co&#39;</span><span class="p">,</span><span class="s">&#39;ko&#39;</span><span class="p">,</span><span class="s">&#39;yo&#39;</span><span class="p">]</span>
-			<span class="n">num_pnt</span> <span class="o">=</span> <span class="mi">1000</span>
-			<span class="n">points</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="n">num_pnt</span><span class="p">))</span>
-			<span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
-			<span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_pnt</span><span class="p">):</span>
-				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
-					<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
-						<span class="n">p</span> <span class="o">=</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-						<span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">A</span><span class="p">,</span><span class="n">points</span><span class="p">[:,</span><span class="n">num</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">p</span><span class="o">.</span><span class="n">b</span><span class="p">):</span>
-							<span class="n">pylab</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">num</span><span class="p">],</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">num</span><span class="p">],</span><span class="n">colors</span><span class="p">[(</span><span class="n">i</span><span class="o">%</span><span class="mi">7</span><span class="p">)])</span>
-			<span class="c">#for i in range(100):</span>
-			<span class="c">#	pylab.text(x_coord[i], y_coord[i], i)</span>
-			<span class="n">pylab</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;My Proposition Preserving Partition&#39;</span><span class="p">)</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="kn">import</span> <span class="nn">pylab</span>
-			<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="s">&#39;g&#39;</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">,</span><span class="s">&#39;m&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="s">&#39;0.8&#39;</span><span class="p">,</span><span class="s">&#39;0.3&#39;</span><span class="p">]</span>
-			<span class="n">no_c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
-			<span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
-			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
-				<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
-					<span class="n">xx</span> <span class="o">=</span> <span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">generators</span>
-					<span class="n">pylab</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xx</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">xx</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">colors</span><span class="p">[(</span><span class="n">i</span><span class="o">%</span><span class="n">no_c</span><span class="p">)],</span><span class="n">edgecolor</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">)</span>
-					<span class="n">xx</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">((</span><span class="n">xx</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),:],</span><span class="n">xx</span><span class="p">[</span><span class="mi">2</span><span class="p">:,:]))</span>
-					<span class="n">pylab</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">xx</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">xx</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">colors</span><span class="p">[(</span><span class="n">i</span><span class="o">%</span><span class="n">no_c</span><span class="p">)],</span><span class="n">edgecolor</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">)</span>
-					<span class="n">cntr</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">xx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-					<span class="n">pylab</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">cntr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">cntr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-			<span class="n">pylab</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;My Proposition Preserving Partition&#39;</span><span class="p">)</span>
-			
-			
-<span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
-<span class="c">#if __name__ == &quot;__main__&quot;:</span>
-	<span class="n">count</span> <span class="o">=</span><span class="mi">1</span>
-	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
-		<span class="n">test</span><span class="p">()</span>
-		<span class="n">count</span> <span class="o">+=</span><span class="mi">1</span>
-	<span class="k">print</span> <span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;repeated tests&#39;</span>
+
 	
 </pre></div>
 
