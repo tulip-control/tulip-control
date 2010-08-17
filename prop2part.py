@@ -12,15 +12,16 @@ from time import time
 import copy
 
 
-def prop2part2(state_space, cont_props):
+def prop2part2(state_space, cont_props_dict):
 	"""Main function that takes a domain (state_space) and a list of propositions (cont_props), and
 	returns a proposition preserving partition of the state space"""
+	cont_props = cont_props_dict.values()
 	num_props = len(cont_props)
 	list_regions = []
 	first_poly = [] #Initial Region's list_poly atribute 
 	first_poly.append(state_space)
 	list_regions.append(Region(list_poly=first_poly))
-	mypartition = PropPreservingPartition(domain=copy.deepcopy(state_space), num_prop=num_props, list_region=list_regions)
+	mypartition = PropPreservingPartition(domain=copy.deepcopy(state_space), num_prop=num_props, list_region=list_regions, list_prop_symbol=copy.deepcopy(cont_props_dict.keys()))
 	for prop_count in range(num_props):
 		num_reg = mypartition.num_regions
 		prop_holds_reg = []
@@ -78,11 +79,11 @@ def prop2part2(state_space, cont_props):
 				count+=1
 		num_reg = len(mypartition.list_region)
 		mypartition.num_regions = num_reg
-	adj = eye(num_reg,dtype=int8)
+	adj = numpy.zeros((num_reg,num_reg),int8)
 	for i in range(num_reg):
 		for j in range(i+1,num_reg):
 			adj[i,j] = isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
-	adj =  adj+adj.T-eye(num_reg,dtype=int8)
+	adj =  adj+adj.T
 	mypartition.adj = adj.copy()
 	return mypartition
 
@@ -119,41 +120,14 @@ if __name__ == "__main__":
 
 	cont_props = []
 	
-	A0 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.], [0.,-1.]])
-	b0 = array([[1., 0., 1., 0., -0.]]).T
+	A0 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b0 = array([[1., 0., 1., 0.]]).T
 	cont_props.append(Polytope(A0, b0))
 	
 	A1 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
 	b1 = array([[1., 0., 2., -1.]]).T
 	cont_props.append(Polytope(A1, b1))
 	
-	A1 = array([[-1., 0.]])
-	b1 = array([[-1.7]])
-	cont_props.append(Polytope(A1, b1))
-	
-	A1 = array([[-1., 0.]])
-	b1 = array([[-1.9]])
-	cont_props.append(Polytope(A1, b1))
-	
-	A1 = array([[-1., 0.]])
-	b1 = array([[-0.5]])
-	cont_props.append(Polytope(A1, b1))
-	
-	A1 = array([[-1., 0.]])
-	b1 = array([[-1.8]])
-	cont_props.append(Polytope(A1, b1))
-
-	A1 = array([[1., 1.]])
-	b1 = array([[2]])
-	cont_props.append(Polytope(A1, b1))
-	
-	A1 = array([[1., -1.]])
-	b1 = array([[-1.3]])
-	cont_props.append(Polytope(A1, b1))
-	
-	A1 = array([[1., -1.]])
-	b1 = array([[-1.1]])
-	cont_props.append(Polytope(A1, b1))
 	
 	A2 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
 	b2 = array([[2., -1., 1., 0.]]).T
@@ -163,7 +137,9 @@ if __name__ == "__main__":
 	b3 = array([[2., -1., 2., -1.]]).T
 	cont_props.append(Polytope(A3, b3))
 	
-	mypartition = prop2part2(state_space, cont_props)
+	cont_props_dict = dict({'C0':Polytope(A0, b0),'C1':Polytope(A1, b1),'C2':Polytope(A2, b2),'C3':Polytope(A3, b3) })
+	
+	mypartition = prop2part2(state_space, cont_props_dict)
 	
 	#print len(mypartition.list_region)
 	A4 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
