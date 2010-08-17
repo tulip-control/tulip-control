@@ -93,8 +93,9 @@ same set of propositions in :math:`\Pi_c`.
 
 This can be done using the following function call:
 
-      .. autofunction:: prop2part.prop2part2
-
+     .. autofunction:: prop2part.prop2part2
+	:noindex:
+      
 
 .. _ssec:disc:
 

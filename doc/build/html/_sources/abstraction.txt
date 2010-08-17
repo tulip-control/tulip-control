@@ -1,11 +1,13 @@
 Finite State Abstraction of LTI Systems
 =======================================
 
-Prop2part Module
-----------------
+--------------------------------------------------------
+prop2part.py --- Proposition preserving partition module
+--------------------------------------------------------
 
-.. automodule:: prop2part
-   :members:
+.. autoclass:: prop2part.PropPreservingPartition
+.. autofunction:: prop2part.prop2part2
 
+-----------------
 Discretize Module
 -----------------
