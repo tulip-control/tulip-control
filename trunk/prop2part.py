@@ -63,7 +63,7 @@ def prop2part2(state_space, cont_props):
 						if signs[l]==0:
 							A_now[l] = -A_now[l]
 							b_now[l] = -b_now[l]
-					dummy = (Polytope(concatenate((region_now[j].A, A_now)),concatenate((region_now[j].b, 							b_now))))
+					dummy = (Polytope(concatenate((region_now[j].A, A_now)),concatenate((region_now[j].b, b_now))))
 					if isNonEmptyInterior(dummy):
 						#dummy = polySimplify(dummy)
 						mypartition.list_region[-1].list_poly.append(polySimplify(dummy))
@@ -78,11 +78,11 @@ def prop2part2(state_space, cont_props):
 				count+=1
 		num_reg = len(mypartition.list_region)
 		mypartition.num_regions = num_reg
-	adj = numpy.zeros((num_reg,num_reg),int8)
+	adj = eye(num_reg,dtype=int8)
 	for i in range(num_reg):
 		for j in range(i+1,num_reg):
 			adj[i,j] = isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
-	adj =  adj+adj.T
+	adj =  adj+adj.T-eye(num_reg,dtype=int8)
 	mypartition.adj = adj.copy()
 	return mypartition
 
@@ -114,61 +114,60 @@ if __name__ == "__main__":
 	domain = array([[0., 2.],[0., 2.]])
 
 	domain_poly_A = array(vstack([eye(2),-eye(2)]))
-	domain_poly_b = array(r_[domain[:,1],-domain[:,0]])
+	domain_poly_b = array([r_[domain[:,1],-domain[:,0]]]).T
 	state_space = Polytope(domain_poly_A, domain_poly_b)
 
 	cont_props = []
 	
 	A0 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.], [0.,-1.]])
-	b0 = array([1., 0., 1., 0., -0.])
-	#A0 = array([[1., 0.], [-1., 0.]])
-	#b0 = array([1., 0.])
+	b0 = array([[1., 0., 1., 0., -0.]]).T
 	cont_props.append(Polytope(A0, b0))
-	#p1 = polySimplify(Polytope(A0, b0))
 	
 	A1 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b1 = array([1., 0., 2., -1.])
-	#A1 = array([[-1., 0.]])
-	#b1 = array([-1.5])
+	b1 = array([[1., 0., 2., -1.]]).T
 	cont_props.append(Polytope(A1, b1))
 	
 	A1 = array([[-1., 0.]])
-	b1 = array([-1.7])
+	b1 = array([[-1.7]])
 	cont_props.append(Polytope(A1, b1))
 	
 	A1 = array([[-1., 0.]])
-	b1 = array([-1.9])
+	b1 = array([[-1.9]])
 	cont_props.append(Polytope(A1, b1))
 	
 	A1 = array([[-1., 0.]])
-	b1 = array([-0.5])
+	b1 = array([[-0.5]])
 	cont_props.append(Polytope(A1, b1))
 	
 	A1 = array([[-1., 0.]])
-	b1 = array([-1.8])
+	b1 = array([[-1.8]])
 	cont_props.append(Polytope(A1, b1))
 
 	A1 = array([[1., 1.]])
-	b1 = array([2])
+	b1 = array([[2]])
 	cont_props.append(Polytope(A1, b1))
 	
 	A1 = array([[1., -1.]])
-	b1 = array([-1.3])
+	b1 = array([[-1.3]])
+	cont_props.append(Polytope(A1, b1))
+	
+	A1 = array([[1., -1.]])
+	b1 = array([[-1.1]])
 	cont_props.append(Polytope(A1, b1))
 	
 	A2 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b2 = array([2., -1., 1., 0.])
+	b2 = array([[2., -1., 1., 0.]]).T
 	cont_props.append(Polytope(A2, b2))
 
 	A3 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b3 = array([2., -1., 2., -1.])
+	b3 = array([[2., -1., 2., -1.]]).T
 	cont_props.append(Polytope(A3, b3))
 	
 	mypartition = prop2part2(state_space, cont_props)
 	
 	#print len(mypartition.list_region)
 	A4 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b4 = array([0.5, 0., 0.5, 0.])
+	b4 = array([[0.5, 0., 0.5, 0.]]).T
 	poly1 = Polytope(A4,b4)
 
 	r1 = regionDiffPoly(mypartition.list_region[3],poly1)
@@ -190,14 +189,5 @@ if __name__ == "__main__":
 				print 'polytope',j,'in region',i+1
 				#print mypartition.list_region[i].list_poly[j].generators
 			print 'region',i+1,'proposition list is',mypartition.list_region[i].list_prop,'\n'
-			
-			
-			
-def test2():
-#if __name__ == "__main__":
-	count =1
-	for i in range(1):
-		test()
-		count +=1
-	print count-1, 'repeated tests'
+
 	
