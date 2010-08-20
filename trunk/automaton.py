@@ -140,13 +140,16 @@ class Automaton:
         - `aut_state_id`: an integer specifying the id of the AutomatonState object
           to be returned by this function.
         """
-        aut_state_index = self.size() - 1
-        while (aut_state_index >= 0 and aut_state_id != self.states[aut_state_index].id):
-            aut_state_index -= 1
-        if (aut_state_index >= 0):
-            return self.states[aut_state_index]
+        if (aut_state_id < self.size() and self.states[aut_state_id].id == aut_state_id):
+            return self.states[aut_state_id]
         else:
-            return -1
+            aut_state_index = self.size() - 1
+            while (aut_state_index >= 0 and aut_state_id != self.states[aut_state_index].id):
+                aut_state_index -= 1
+            if (aut_state_index >= 0):
+                return self.states[aut_state_index]
+            else:
+                return -1
     
     def setAutStateState(self, aut_state_id, aut_state_state, verbose=0):
         """ 

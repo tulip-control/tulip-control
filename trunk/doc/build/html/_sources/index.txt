@@ -16,6 +16,7 @@ Contents:
    parser
    abstraction
    synthesis
+   simulation
    
 
 Indices and tables

@@ -188,13 +188,16 @@
 <span class="sd">        - `aut_state_id`: an integer specifying the id of the AutomatonState object</span>
 <span class="sd">          to be returned by this function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">aut_state_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">aut_state_index</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">aut_state_id</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_index</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
-            <span class="n">aut_state_index</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">aut_state_index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">aut_state_id</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_id</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">aut_state_id</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_id</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">aut_state_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">aut_state_index</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">aut_state_id</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_index</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+                <span class="n">aut_state_index</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">aut_state_index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">aut_state_index</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
     </div>
 <div class="viewcode-block" id="Automaton.setAutStateState"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.setAutStateState">[docs]</a>    <span class="k">def</span> <span class="nf">setAutStateState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aut_state_id</span><span class="p">,</span> <span class="n">aut_state_state</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
