@@ -41,7 +41,7 @@ def setJTLVExe(jtlv_exe):
     """
     globals()["JTLV_EXE"] = jtlv_exe
 
-def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
+def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec=[], disc_props={}, \
                           disc_dynamics=PropPreservingPartition(), \
                           smv_file='specs/spec.smv', spc_file='specs/spec.spc', \
                           file_exist_option='a', verbose=0):
@@ -73,25 +73,31 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
 
     # Check that the input is valid
     if (not isinstance(env_vars, dict)):
-        printError("The input env_vars is expected to be a dictionary {str : str} " +
-                   "or {str : list}.")
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The input env_vars is expected to be a dictionary {str : str} " + \
+                       "or {str : list}.")
         raise TypeError("Invalid env_vars.")
     if (not isinstance(disc_sys_vars, dict)):
-        printError("The input disc_sys_vars is expected to be a dictionary " + \
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The input disc_sys_vars is expected to be a dictionary " + \
                        "{str : str} or {str : list}")
         raise TypeError("Invalid disc_sys_vars.")
     if (not isinstance(spec, list) and len(spec) != 2):
-        printError("The input spec is expected to be a list of two strings " + \
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The input spec is expected to be a list of two strings " + \
                        "[assumption, guarantee]")
         raise TypeError("Invalid spec.")
     if (not isinstance(disc_dynamics, PropPreservingPartition)):
-        printError("The type of input spec is expected to be PropPreservingPartition")
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The type of input spec is expected to be PropPreservingPartition")
         raise TypeError("Invalid disc_dynamics.")
     if (not isinstance(smv_file, str)):
-        printError("The input smv_file is expected to be a string")
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The input smv_file is expected to be a string")
         raise TypeError("Invalid smv_file.")
     if (not isinstance(spc_file, str)):
-        printError("The input spc_file is expected to be a string")
+        printError("ERROR jtlvint.generateJTLVInput: " + \
+                       "The input spc_file is expected to be a string")
         raise TypeError("Invalid spc_file.")
 
 #    # Figure out the names of the smv and spc files
@@ -101,16 +107,19 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
 #         spc_file = spc_file + '.spc'
 
     if (not os.path.exists(os.path.abspath(os.path.dirname(smv_file)))):
-        printWarning('Folder for smv_file ' + smv_file + ' does not exist. Creating...')
+        printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                         'Folder for smv_file ' + smv_file + ' does not exist. Creating...')
         os.mkdir(os.path.abspath(os.path.dirname(smv_file)))
     if (not os.path.exists(os.path.abspath(os.path.dirname(spc_file)))):
-        printWarning('Folder for spc_file ' + spc_file + ' does not exist. Creating...')
+        printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                         'Folder for spc_file ' + spc_file + ' does not exist. Creating...')
         os.mkdir(os.path.abspath(os.path.dirname(spc_file)))
 
     # Check whether the smv or spc file exists
     if (file_exist_option != 'r'):
         if (os.path.exists(smv_file)):
-            printWarning('smv file: ' + smv_file + ' exists.')
+            printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                             'smv file: ' + smv_file + ' exists.')
             smv_file_exist_option = file_exist_option
             while (smv_file_exist_option.lower() != 'r' and \
                        smv_file_exist_option.lower() != 'n'):
@@ -127,7 +136,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                 print('smv file: ' + smv_file)
 
         if (os.path.exists(spc_file)):
-            printWarning('spc file: ' + spc_file + ' exists.')
+            printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                             'spc file: ' + spc_file + ' exists.')
             spc_file_exist_option = file_exist_option
             while (spc_file_exist_option.lower() != 'r' and \
                        spc_file_exist_option.lower() != 'n'):
@@ -149,8 +159,9 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
     ###################################################################################
     # Check that the number of regions in disc_dynamics is correct.
     if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
-        printWarning('WARNING: disc_dynamics.num_regions != ' + \
-                         "len(disc_dynamics.list_regions)")
+        printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                         'disc_dynamics.num_regions != ' + \
+                         'len(disc_dynamics.list_regions)')
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
 
     # Replace '...' in the range of possible values of env_vars to the actual values 
@@ -174,7 +185,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                     reg = reg + val
                 env_vars[var] = '{' + reg + '}'
             else:
-                printWarning("WARNING: Unknown possible values for environment " + \
+                printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                                 "Unknown possible values for environment " + \
                                  "variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
@@ -184,7 +196,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                 all_values = all_values + str(val)
             env_vars[var] = '{' + all_values + '}'
         else:
-            printWarning("WARNING: Unknown possible values for environment " + \
+            printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                             "Unknown possible values for environment " + \
                              "variable "+ var)
                 
     # Replace '...' in the range of possible values of disc_sys_vars to the actual 
@@ -209,7 +222,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                     reg = reg + val
                 disc_sys_vars[var] = '{' + reg + '}'
             else:
-                printWarning("WARNING: Unknown possible values for discrete system " + \
+                printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                                 "Unknown possible values for discrete system " + \
                                  "variable " + var)
         elif (isinstance(reg, list)):
             all_values = ''
@@ -219,7 +233,8 @@ def generateJTLVInput(env_vars={}, disc_sys_vars={}, spec='', disc_props={}, \
                 all_values = all_values + str(val)
             disc_sys_vars[var] = '{' + all_values + '}'
         else:
-            printWarning("WARNING: Unknown possible values for discrete system " + \
+            printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                             "Unknown possible values for discrete system " + \
                              "variable " + var)
 
     # Write smv file
@@ -573,9 +588,11 @@ def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
 
     # Check that the input is valid
     if (not os.path.isfile(smv_file)):
-        printError("The smv file " + smv_file + " does not exist.")
+        printError("ERROR jtlvint.computeStrategy: " + \
+                       "The smv file " + smv_file + " does not exist.")
     if (not os.path.isfile(spc_file)):
-        printError("The spc file " + spc_file + " does not exist.")
+        printError("ERROR jtlvint.computeStrategy: " + \
+                       "The spc file " + spc_file + " does not exist.")
 
     if (verbose > 0):
         print 'Creating automaton...\n'
@@ -586,13 +603,15 @@ def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         aut_file = aut_file + '.aut'
         print('aut file: ' + aut_file)
     if (not os.path.exists(os.path.abspath(os.path.dirname(aut_file)))):
-        printWarning('Folder for aut_file ' + aut_file + ' does not exist. Creating...')
+        printWarning('WARNING jtlvint.computeStrategy: ' + \
+                         'Folder for aut_file ' + aut_file + ' does not exist. Creating...')
         os.mkdir(os.path.abspath(os.path.dirname(aut_file)))
 
     # Check whether the aut file exists
     if (file_exist_option != 'r'):
         if (os.path.exists(aut_file)):
-            printWarning('aut file: ' + aut_file + ' exists.')
+            printWarning('WARNING jtlvint.computeStrategy: ' + \
+                             'aut file: ' + aut_file + ' exists.')
             aut_file_exist_option = file_exist_option
             while (aut_file_exist_option.lower() != 'r' and \
                        aut_file_exist_option.lower() != 'n'):
@@ -623,25 +642,30 @@ def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         elif (priority_kind == 'XYZ'):
             priority_kind = 23
         else:
-            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+            printWarning('WARNING jtlvint.computeStrategy: ' + \
+                             "Unknown priority_kind. Setting it to the default (ZYX)")
             priority_kind = 3
     elif (isinstance(priority_kind, int)):
         if (priority_kind > 0 and priority_kind != 3 and priority_kind != 7 and \
                 priority_kind != 11 and priority_kind != 15 and priority_kind != 19 and \
                 priority_kind != 23):
-            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+            printWarning('WARNING jtlvint.computeStrategy: ' + \
+                             "Unknown priority_kind. Setting it to the default (ZYX)")
             priority_kind = 3
     else:
-        printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+        printWarning('WARNING jtlvint.computeStrategy: ' + \
+                         "Unknown priority_kind. Setting it to the default (ZYX)")
         priority_kind = 3
 
     # init_option
     if (isinstance(init_option, int)):
         if (init_option < 0 or init_option > 2):
-            printWarning("Unknown init_option. Setting it to the default (1)")
+            printWarning('WARNING jtlvint.computeStrategy: ' + \
+                             "Unknown init_option. Setting it to the default (1)")
             init_option = 1
     else:
-        printWarning("Unknown init_option. Setting it to the default (1)")
+        printWarning('WARNING jtlvint.computeStrategy: ' + \
+                         "Unknown init_option. Setting it to the default (1)")
         init_option = 1
 
     if (verbose > 0):
