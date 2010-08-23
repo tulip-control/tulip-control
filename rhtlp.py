@@ -23,7 +23,7 @@ import grgameint
 
 class GRSpec:
     def __init__(self, env_init='', sys_init='', env_safety='', sys_safety='', \
-                     env_prog='', sys_prog=''):
+                     env_prog=[], sys_prog=[]):
         self.env_init = env_init
         self.sys_init = sys_init
         self.env_safety = env_safety
@@ -37,21 +37,23 @@ class GRSpec:
         if (len(self.env_safety) > 0):
             if (len(spec[0]) > 0):
                 spec[0] += ' & '
-            spec[0] += self.env_safety
-        if (len(self.env_prog) > 0):
-            if (len(spec[0]) > 0):
-                spec[0] += ' & '
-            spec[0] += self.env_prog
+            spec[0] += '[](' + self.env_safety + ')'
+        for prog in self.env_prog:
+            if (len(prog) > 0):
+                if (len(spec[0]) > 0):
+                    spec[0] += ' & '
+                spec[0] += '[]<>(' + prog + ')'
 
         spec[1] += self.sys_init
         if (len(self.sys_safety) > 0):
             if (len(spec[1]) > 0):
                 spec[1] += ' & '
-            spec[1] += self.sys_safety
-        if (len(self.sys_prog) > 0):
-            if (len(spec[1]) > 0):
-                spec[1] += ' & '
-            spec[1] += self.sys_prog
+            spec[1] +='[](' + self.sys_safety + ')'
+        for prog in self.sys_prog:
+            if (len(prog) > 0):
+                if (len(spec[1]) > 0):
+                    spec[1] += ' & '
+                spec[1] += '[]<>(' + prog + ')'
         return spec
 
 
@@ -87,12 +89,13 @@ class SynthesisProb:
         self.spec = ['','']
         self.disc_cont_var = ''
         self.disc_dynamics = None
+        self.__realizable = None
         self.jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
                                          'tmpspec', 'tmp')
         if (file is not None and isinstance(file,str) and \
             len(file) > 0 and not file.isspace()):
             if (not compute_disc_dynamics):
-                printWarning("WARNING SynthesisProb: Discretized dynamics will be " + \
+                printWarning("WARNING rhtlp.SynthesisProb(): Discretized dynamics will be " + \
                                  "computed since a spec file is given.")
                 compute_disc_dynamics = True
 
@@ -148,26 +151,26 @@ class SynthesisProb:
 
         # Check that the input is valid
         if (not isinstance(file, str) and file is not None):
-            printError("ERROR rhtlp.createProb: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromContDynamics: " + \
                            "The input file is expected to be a string")
             raise TypeError("Invalid file.")
         if (not isinstance(sys_cont_vars, list) and sys_cont_vars is not None):
-            printError("ERROR rhtlp.createProb: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromContDynamics: " + \
                            "The input sys_cont_vars is expected to be a list")
             raise TypeError("Invalid disc_props.")
         if (not isinstance(cont_state_space, Polytope) and \
                 cont_state_space is not None):
-            printError("ERROR rhtlp.createProb: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromContDynamics: " + \
                            "The type of input cont_state_space is expected to be " + \
                            "Polytope")
             raise TypeError("Invalid cont_state_space.")
         if (not isinstance(cont_props, dict) and cont_props is not None):
-            printError("ERROR rhtlp.createProb: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromContDynamics: " + \
                            "The input cont_props is expected to be a dictionary " + \
                            "{str : Polytope}")
             raise TypeError("Invalid disc_props.")
         if (not isinstance(sys_dyn, CtsSysDyn) and sys_dyn is not None):
-            printError("ERROR rhtlp.createProb: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromContDynamics: " + \
                            "The type of input sys_dyn is expected to be CtsSysDyn")
             raise TypeError("Invalid sys_dyn.")
 
@@ -183,7 +186,7 @@ class SynthesisProb:
             cont_partition = prop2part2(cont_state_space, cont_props)
             disc_dynamics = copy.deepcopy(cont_partition)
             disc_dynamics.trans = disc_dynamics.adj
-            for fromcell in range(0,len(disc_dynamics.trans)):
+            for fromcell in xrange(0,len(disc_dynamics.trans)):
                 disc_dynamics.trans[fromcell][fromcell] = 1
             if (sys_dyn is not None):
                 # TODO: Use Ufuk's function instead of below
@@ -229,30 +232,33 @@ class SynthesisProb:
         - `verbose`: an integer that specifies the verbose level.
         """
 
+        if (isinstance(spec, GRSpec)):
+            spec = spec.toSpec()
+
         # Check that the input is valid
         if (not isinstance(env_vars, dict) and env_vars is not None):
-            printError("ERROR rhtlp.createProbFromDiscDynamics: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromDiscDynamics: " + \
                            "The input env_vars is expected to be a dictionary " + \
                            "{str : str} or {str : list}.")
             raise TypeError("Invalid env_vars.")
         if (not isinstance(sys_disc_vars, dict) and sys_disc_vars is not None):
-            printError("ERROR rhtlp.createProbFromDiscDynamics: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromDiscDynamics: " + \
                            "The input sys_disc_vars is expected to be a dictionary " + \
                            "{str : str} or {str : list}")
             raise TypeError("Invalid sys_disc_vars.")
         if (not isinstance(disc_props, dict) and disc_props is not None):
-            printError("ERROR rhtlp.createProbFromDiscDynamics: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromDiscDynamics: " + \
                            "The input disc_props is expected to be a dictionary " + \
                            "{str : str}")
             raise TypeError("Invalid disc_props.")
         if (not isinstance(disc_dynamics, PropPreservingPartition) and \
                 disc_dynamics is not None):
-            printError("ERROR rhtlp.createProbFromDiscDynamics: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromDiscDynamics: " + \
                            "The type of input disc_dynamics is expected to be " + \
                            "PropPreservingPartition")
             raise TypeError("Invalid disc_dynamics.")
         if (not isinstance(spec, list) or len(spec) != 2):
-            printError("ERROR rhtlp.createProbFromDiscDynamics: " + \
+            printError("ERROR rhtlp.SynthesisProb.createProbFromDiscDynamics: " + \
                            "The input spec is expected to be a list of two strings " + \
                            "[assumption, guarantee]")
             raise TypeError("Invalid spec.")
@@ -262,7 +268,7 @@ class SynthesisProb:
             if (disc_dynamics.list_region is None):
                 disc_dynamics.list_region = []
             if (disc_dynamics.num_regions != len(disc_dynamics.list_region)):
-                printWarning('WARNING rhtlp.createProb: ' + \
+                printWarning('WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: ' + \
                                  'disc_dynamics.num_regions != ' + \
                                  'len(disc_dynamics.list_regions)')
                 disc_dynamics.num_regions = len(disc_dynamics.list_region)
@@ -279,12 +285,12 @@ class SynthesisProb:
                 if ('boolean' in reg):
                     continue
                 elif (isinstance(reg, str)):
-                    dots_values = re.findall('([-+]?\d+)\s*?,?\s*?' + r'\.\.\.' + \
-                                                 '\s*?,?\s*?([-+]?\d+)', reg)
                     all_values = list(set(re.findall('[-+]?\d+', reg)))
                     if (len(all_values) > 0):
+                        dots_values = re.findall('([-+]?\d+)\s*?,?\s*?' + r'\.\.\.' + \
+                                                     '\s*?,?\s*?([-+]?\d+)', reg)
                         for dots_pair in dots_values:
-                            for val in range(int(dots_pair[0])+1, int(dots_pair[1])):
+                            for val in xrange(int(dots_pair[0])+1, int(dots_pair[1])):
                                 if (str(val) not in all_values):
                                     all_values.append(str(val))
                         reg = ''
@@ -294,7 +300,7 @@ class SynthesisProb:
                             reg += val
                         self.env_vars[var] = '{' + reg + '}'
                     else:
-                        printWarning('WARNING rhtlpmain.createProb: ' + \
+                        printWarning('WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: ' + \
                                          "Unknown possible values for environment " + \
                                          "variable " + var)
                 elif (isinstance(reg, list)):
@@ -305,7 +311,7 @@ class SynthesisProb:
                         all_values += str(val)
                     self.env_vars[var] = '{' + all_values + '}'
                 else:
-                    printWarning('WARNING rhtlpmain.createProb: ' + \
+                    printWarning('WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: ' + \
                                      "Unknown possible values for environment " + \
                                      "variable "+ var)
 
@@ -317,12 +323,12 @@ class SynthesisProb:
                 if ('boolean' in reg):
                     continue
                 elif (isinstance(reg, str)):
-                    dots_values = re.findall('([-+]?\d+)\s*,?\s*' + r'\.\.\.' + \
-                                                 '\s*,?\s*([-+]?\d+)', reg)
                     all_values = list(set(re.findall('[-+]?\d+', reg)))
                     if (len(all_values) > 0):
+                        dots_values = re.findall('([-+]?\d+)\s*,?\s*' + r'\.\.\.' + \
+                                                     '\s*,?\s*([-+]?\d+)', reg)
                         for dots_pair in dots_values:
-                            for val in range(int(dots_pair[0])+1, int(dots_pair[1])):
+                            for val in xrange(int(dots_pair[0])+1, int(dots_pair[1])):
                                 if (str(val) not in all_values):
                                     all_values.append(str(val))
                         reg = ''
@@ -332,7 +338,7 @@ class SynthesisProb:
                             reg += val
                         self.sys_vars[var] = '{' + reg + '}'
                     else:
-                        printWarning('WARNING rhtlpmain.createProb: ' + \
+                        printWarning('WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: ' + \
                                          "Unknown possible values for discrete " + \
                                          "system variable " + var)
                 elif (isinstance(reg, list)):
@@ -343,7 +349,7 @@ class SynthesisProb:
                         all_values += str(val)
                     self.sys_vars[var] = '{' + all_values + '}'
                 else:
-                    printWarning('WARNING rhtlpmain.createProb: ' + \
+                    printWarning('WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: ' + \
                                      "Unknown possible values for discrete system " + \
                                      "variable " + var)
 
@@ -360,7 +366,7 @@ class SynthesisProb:
                 cont_varname = 'c' + cont_varname
 
             contvar_values = '{'
-            for i in range(0,disc_dynamics.num_regions):
+            for i in xrange(0,disc_dynamics.num_regions):
                 if (i > 0):
                     contvar_values += ', ' + str(i)
                 else:
@@ -409,7 +415,7 @@ class SynthesisProb:
             addAnd = True
 
         if (disc_dynamics is not None):
-            for from_region in range(0,disc_dynamics.num_regions):
+            for from_region in xrange(0,disc_dynamics.num_regions):
                 to_regions = [j for j in range(0,disc_dynamics.num_regions) if \
                                   disc_dynamics.trans[j][from_region]]
                 if (addAnd):
@@ -459,8 +465,29 @@ class SynthesisProb:
                                          priority_kind=-1, \
                                          init_option=init_option, \
                                          file_exist_option='r', verbose=verbose)
-
+        self.__realizable = realizable
         return realizable
+
+    ###################################################################
+
+    def getCounterExamples(self, recompute=False, heap_size='-Xmx128m', \
+                               pick_sys_init=True, verbose=0):
+        """Return a list of dictionary representing a state starting from
+        which the system cannot satisfy the spec.
+
+        """
+        if (recompute or self.__realizable is None or self.__realizable):
+            if (verbose > 0):
+                print "Checking realizability"
+            realizable = self.checkRealizability(heap_size=heap_size, \
+                                                     pick_sys_init=pick_sys_init, \
+                                                     verbose = verbose)
+            self.__realizable = realizable
+        ce = []
+        if (not self.__realizable):
+            aut_file = self.jtlvfile + '.aut'
+            ce = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)        
+        return ce
 
 
     ###################################################################
@@ -495,8 +522,9 @@ class SynthesisProb:
                                          priority_kind=priority_kind, \
                                          init_option=init_option, \
                                          file_exist_option='r', verbose=verbose)
+        self.__realizable = realizable
         if (not realizable):
-            printError('ERROR rhtlp.synthesizePlannerAut: spec not realizable')
+            printError('ERROR rhtlp.SynthesisProb.synthesizePlannerAut: spec not realizable')
             counter_examples = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)
             return counter_examples
         else:
@@ -522,11 +550,11 @@ class SynthesisProb:
 
         # Check that the input is valid
         if (not isinstance(smv_file, str)):
-            printError("ERROR rhtlp.toJTLVInput: " + \
+            printError("ERROR rhtlp.SynthesisProb.toJTLVInput: " + \
                            "The input smv_file is expected to be a string")
             raise TypeError("Invalid smv_file.")
         if (not isinstance(spc_file, str)):
-            printError("ERROR rhtlp.toJTLVInput: " + \
+            printError("ERROR rhtlp.SynthesisProb.toJTLVInput: " + \
                            "The input spc_file is expected to be a string")
             raise TypeError("Invalid spc_file.")
         
@@ -537,13 +565,13 @@ class SynthesisProb:
 
         if (not os.path.exists(os.path.abspath(os.path.dirname(smv_file)))):
             if (verbose > 0):
-                printWarning('WARNING rhtlp.toJTLVInput: ' + \
+                printWarning('WARNING rhtlp.SynthesisProb.toJTLVInput: ' + \
                                  'Folder for smv_file ' + smv_file + \
                                  ' does not exist. Creating...')
             os.mkdir(os.path.abspath(os.path.dirname(smv_file)))
         if (not os.path.exists(os.path.abspath(os.path.dirname(spc_file)))):
             if (verbose > 0):
-                printWarning('WARNING rhtlp.toJTLVInput: ' + \
+                printWarning('WARNING rhtlp.SynthesisProb.toJTLVInput: ' + \
                                  'Folder for spc_file ' + spc_file + \
                                  ' does not exist. Creating...')
             os.mkdir(os.path.abspath(os.path.dirname(spc_file)))
@@ -551,7 +579,7 @@ class SynthesisProb:
         # Check whether the smv or spc file exists
         if (file_exist_option != 'r'):
             if (os.path.exists(smv_file)):
-                printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                printWarning('WARNING rhtlp.SynthesisProb.toJTLVInput: ' + \
                                  'smv file: ' + smv_file + ' exists.')
                 smv_file_exist_option = file_exist_option
                 while (smv_file_exist_option.lower() != 'r' and \
@@ -569,7 +597,7 @@ class SynthesisProb:
                     print('smv file: ' + smv_file)
 
             if (os.path.exists(spc_file)):
-                printWarning('WARNING jtlvint.generateJTLVInput: ' + \
+                printWarning('WARNING rhtlp.SynthesisProb.toJTLVInput: ' + \
                                  'spc file: ' + spc_file + ' exists.')
                 spc_file_exist_option = file_exist_option
                 while (spc_file_exist_option.lower() != 'r' and \
@@ -711,19 +739,17 @@ class SynthesisProb:
 
 
 
-
 ###################################################################
 
 class ShortHorizonProb(SynthesisProb):
     """
-    Wset class for specifying a set W_i in the receding horizon temporal logic
-    planning problem.
-    A Wset object contains a list of states (a dictionary whose key is the variable
-    name and whose value is the value of the corresponding variable).
+    ShortHorizonProb class for specifying a short horizon problem for receding horizon 
+    temporal logic planning.
+    A ShortHorizonProb object contains the following fields:
 
-    - `W`: a proposition that specifies a set W of states
-    - `F`: a ShortHorizonProb object
-    - `Phi`: a proposition that specifies the receding horizon invariant
+    - `W`: a proposition that specifies a set W of states.
+    - `FW`: a list of ShortHorizonProb object that specifies a set F(W).
+    - `Phi`: a proposition that specifies the receding horizon invariant.
     """
     def __init__(self, W='', FW=[], Phi='', file='', \
                      env_vars={}, sys_disc_vars={}, disc_props={}, \
@@ -733,19 +759,10 @@ class ShortHorizonProb(SynthesisProb):
                      spec=GRSpec(), verbose=0):
         self.W = W
         self.FW = FW
-        self.Phi = ''
-        spec = copy.deepcopy(spec)
-        if (len(spec.env_init) > 0 and len(W) > 0):
-            spec.env_init += ' & '
-        spec.env_init += '(' + W + ')'
-        spec.sys_prog = ''
-        if (FW is not None):
-            for sys_prog in FW:
-                if (len(sys_prog.W) > 0):
-                    if (len(spec.sys_prog) > 0):
-                        spec.sys_prog += ' & '
-                    spec.sys_prog += '[]<>(' + sys_prog.W + ')'
-
+        self.Phi = Phi
+        self.__global_spec = copy.deepcopy(spec)
+        self.__disc_props = disc_props
+        spec = self.__computeLocalSpec()
         SynthesisProb.__init__(self, file=file, env_vars=env_vars, \
                                    sys_disc_vars=sys_disc_vars, \
                                    disc_props=disc_props, \
@@ -754,23 +771,125 @@ class ShortHorizonProb(SynthesisProb):
                                    cont_props=cont_props, sys_dyn=sys_dyn, \
                                    compute_disc_dynamics=compute_disc_dynamics, \
                                    disc_dynamics=disc_dynamics, \
-                                   spec=spec.toSpec, verbose=verbose)
+                                   spec=spec, verbose=verbose)
 
-    def addState(self, state):
-        if (isinstance(state, dict)):
-            self.W.append(state)
+    def getPhi(self):
+        """
+        Return the local Phi for this ShortHorizonProb object.
+        """
+        return self.Phi
+
+    def updateLocalSpec(self, verbose=0):
+        """
+        Update the short horizon specification based on the current W, FW and Phi.
+        """
+        localspec = self.__computeLocalSpec()
+        sys_disc_vars = copy.deepcopy(self.sys_vars)
+        if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
+                self.disc_cont_var in sys_disc_vars):
+            del sys_disc_vars[self.disc_cont_var]
+            
+        self.createProbFromDiscDynamics(env_vars=self.env_vars, sys_disc_vars=sys_disc_vars, \
+                       disc_props=self.__disc_props, disc_dynamics=self.disc_dynamics, \
+                       spec=localspec, verbose=verbose)
+
+    def __computeLocalSpec(self):
+        spec = copy.deepcopy(self.__global_spec)
+        if (len(self.W) > 0):
+            if (len(spec.env_init) > 0):
+                spec.env_init += ' & '
+            spec.env_init += '(' + self.W + ')'
+
+        if (len(self.Phi) > 0):
+            if (len(spec.env_init) > 0):
+                spec.env_init += ' & '
+            spec.env_init += '(' + self.Phi + ')'
+            if (len(spec.sys_safety) > 0):
+                spec.sys_safety += ' & '
+            spec.sys_safety += '(' + self.Phi + ')'
+
+        spec.sys_prog = []
+        if (self.FW is not None and len(self.FW) > 0):
+            for fw in self.FW:
+                if (len(fw.W) == 0):
+                    continue
+                if (len(spec.sys_prog) == 0):
+                    spec.sys_prog += [fw.W]
+                else:
+                    if (len(spec.sys_prog[0]) > 0):
+                        spec.sys_prog[0] += ' & '
+                    spec.sys_prog[0] += fw.W
+        specStr = spec.toSpec()
+        return specStr
+
+    def computeLocalPhi(self, verbose=0):
+        """
+        Compute the local Phi for this ShortHorizonProb object.
+        Return a boolean that indicates whether the local Phi gets updated.
+        If the current prob is realizable, then the local Phi is not updated and this
+        function will return True.
+        Otherwise, the local Phi will get updated and this function wil return False.
+        """
+        self.updateLocalSpec(verbose=verbose)
+        aut_file = self.jtlvfile + '.aut'
+        counter_examples = self.getCounterExamples(recompute=True, pick_sys_init=False, \
+                                                       verbose=verbose)
+        if (len(counter_examples) == 0):
+            return True
         else:
-            printError("ERROR rhtlp.ShortHorizonProb.addState: state has to be a " + \
-                           "a dictionary")
+            self.Phi = '(' + self.Phi + ')'
+            for ce in counter_examples:
+                ce_formula = ''
+                for var, val in ce.iteritems():
+                    if (len(ce_formula) > 0):
+                        ce_formula += ' & '
+                    ce_formula += var + ' = ' + str(val)
+                if (len(self.Phi) > 0):
+                    self.Phi += ' & '
+                self.Phi += '!(' + ce_formula + ')'
+            return False
 
-    def addFW(self, FW):
-        if (isinstance(FW, ShortHorizonProb)):
-            self.FW.append(FW)
+
+
+###################################################################
+
+class RHTLPProb:
+    """
+    RHTLPProb class for specifying a receding horizon temporal logic planning problem.
+    A RHTLPProb object contains the following fields:
+
+    - `shprobs`: a list of ShortHorizonProb objects
+    - `global_spec`: a GRSpec object that specifies the global specification
+    """
+    def __init__(self, global_spec=GRSpec(), shprobs=[], verbose=0):
+        if (isinstance(shprobs, list)):
+            self.shprobs = shprobs
+        elif (shprobs is None):
+            self.shprobs = []
         else:
-            printError("ERROR rhtlp.ShortHorizonProb.addFW: FW has to be a " + \
-                           "ShortHorizonProb object")
+            self.shprobs = []
+            printError("ERROR rhtlp.RHTLPProb(shprobs): the input shprobs must be " + \
+                           "a list of ShortHorizonProb objects.")
 
-    def computeLocalPhi(self):
+        if (isinstance(global_spec, GRSpec)):
+            self.global_spec = global_spec
+        else:
+            printError("ERROR rhtlp.RHTLPProb(shprobs): the input global_spec must be " + \
+                           "a GRSpec objects.")
+        
+
+    def addSHProb(self, shprob):
+        if (isinstance(shprob), ShortHorizonProb):
+            shprobs.append(shprob)
+        else:
+            printError("ERROR rhtlp.RHTLPProb.addSHProb: the input shprob must be " + \
+                           "a ShortHorizonProb object.")
+
+    def validate(self):
+        """
+        Check whether the list of ShortHorizonProb objects satisfies the sufficient
+        conditions for receding horizon temporal logic planning
+        """
         pass
 
 
@@ -885,3 +1004,34 @@ if __name__ == "__main__":
     aut = prob.synthesizePlannerAut()
     print('DONE')
     print('================================\n')
+
+    ####################################
+
+    if ('2' in sys.argv or '3' in sys.argv or '4' in sys.argv or '5' in sys.argv):
+        print('Testing ShortHorizonProb')
+        grspec = GRSpec()
+        grspec.env_prog=['!park', '!X4d']
+        grspec.sys_prog=['X4d -> (X4 | X5)', 'X1']
+        grspec.sys_safety='Park -> (X0 | X2 | X5)'
+        shprob = ShortHorizonProb(W='', FW=[], Phi='', file='', \
+                                      env_vars=prob.env_vars, \
+                                      sys_disc_vars=sys_disc_vars, \
+                                      disc_props=disc_props, \
+                                      sys_cont_vars=[], \
+                                      cont_state_space=None, \
+                                      cont_props={}, sys_dyn=None, \
+                                      compute_disc_dynamics=False, \
+                                      disc_dynamics=prob.disc_dynamics, \
+                                      spec=grspec)
+        shprob.W = 'X2'
+        shprob2 = copy.deepcopy(shprob)
+        shprob2.W = 'X4'
+        shprob.FW = [shprob2]
+        shprob.Phi = 'X2 | X4'
+        shprob.updateLocalSpec()
+        shprob.computeLocalPhi()
+        print shprob.Phi
+        print('DONE')
+        print('================================\n')
+    
+
