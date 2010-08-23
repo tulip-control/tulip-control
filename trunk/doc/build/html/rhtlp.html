@@ -67,17 +67,56 @@
 </tbody>
 </table>
 <dl class="class">
-<dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>file=''</em>, <em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>sys_cont_vars=</em><span class="optional">[</span><span class="optional">]</span>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>compute_disc_dynamics=True</em>, <em>disc_dynamics=None</em>, <em>spec=&lt;rhtlp.GRSpec instance at 0x1869a80&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wset class for specifying a set W_i in the receding horizon temporal logic
-planning problem.
-A Wset object contains a list of states (a dictionary whose key is the variable
-name and whose value is the value of the corresponding variable).</p>
+<dt id="rhtlp.RHTLPProb">
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">RHTLPProb</tt><big>(</big><em>global_spec=&lt;rhtlp.GRSpec instance at 0x1869058&gt;</em>, <em>shprobs=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>RHTLPProb class for specifying a receding horizon temporal logic planning problem.
+A RHTLPProb object contains the following fields:</p>
 <ul class="simple">
-<li><cite>W</cite>: a proposition that specifies a set W of states</li>
-<li><cite>F</cite>: a ShortHorizonProb object</li>
-<li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant</li>
+<li><cite>shprobs</cite>: a list of ShortHorizonProb objects</li>
+<li><cite>global_spec</cite>: a GRSpec object that specifies the global specification</li>
 </ul>
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.validate">
+<tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the list of ShortHorizonProb objects satisfies the sufficient
+conditions for receding horizon temporal logic planning</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rhtlp.ShortHorizonProb">
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>file=''</em>, <em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>sys_cont_vars=</em><span class="optional">[</span><span class="optional">]</span>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>compute_disc_dynamics=True</em>, <em>disc_dynamics=None</em>, <em>spec=&lt;rhtlp.GRSpec instance at 0x1869030&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
+temporal logic planning.
+A ShortHorizonProb object contains the following fields:</p>
+<ul class="simple">
+<li><cite>W</cite>: a proposition that specifies a set W of states.</li>
+<li><cite>FW</cite>: a list of ShortHorizonProb object that specifies a set F(W).</li>
+<li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant.</li>
+</ul>
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.computeLocalPhi">
+<tt class="descname">computeLocalPhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.computeLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.computeLocalPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the local Phi for this ShortHorizonProb object.
+Return a boolean that indicates whether the local Phi gets updated.
+If the current prob is realizable, then the local Phi is not updated and this
+function will return True.
+Otherwise, the local Phi will get updated and this function wil return False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.getPhi">
+<tt class="descname">getPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the local Phi for this ShortHorizonProb object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.updateLocalSpec">
+<tt class="descname">updateLocalSpec</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.updateLocalSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.updateLocalSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the short horizon specification based on the current W, FW and Phi.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -145,7 +184,7 @@ string is the guarantee.</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1869990&gt;</em>, <em>spec=</em><span class="optional">[</span>, <em>''</em>, <em>''</em><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1878fa8&gt;</em>, <em>spec=</em><span class="optional">[</span>, <em>''</em>, <em>''</em><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -164,6 +203,13 @@ assumption -&gt; guarantee; the first string is the assumption and the second
 string is the guarantee.</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
 </ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getCounterExamples">
+<tt class="descname">getCounterExamples</tt><big>(</big><em>recompute=False</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getCounterExamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getCounterExamples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of dictionary representing a state starting from
+which the system cannot satisfy the spec.</p>
 </dd></dl>
 
 <dl class="method">
