@@ -2,7 +2,7 @@
 
 """ 
 ----------------
-Automaton module
+Automaton Module
 ----------------
 
 Nok Wongpiromsarn (nok@cds.caltech.edu)
@@ -20,7 +20,7 @@ from errorprint import printWarning, printError
 class AutomatonState:
     """
     AutomatonState class for representing a state in a finite state automaton.
-    An AutomatonState object contains following fields:
+    An AutomatonState object contains the following fields:
 
     - `id`: an integer specifying the id of this AutomatonState object.
     - `state`: a dictionary whose keys are the names of the variables
@@ -59,7 +59,7 @@ class Automaton:
         if (isinstance(states_or_file, list)): 
             self.states = copy.deepcopy(states_or_file)
         # Construct this automaton from file
-        if (isinstance(states_or_file, str)):
+        elif (isinstance(states_or_file, str)):
             if (len(states_or_file) == 0):
                 self.states = []
             else:
@@ -92,7 +92,8 @@ class Automaton:
                             if (var == var2):
                                 var_found = True
                         if (not var_found):
-                            printWarning('WARNING: Unknown variable ' + var)
+                            printWarning('WARNING automaton.Automaton.loadFile: ' + \
+                                             'Unknown variable ' + var)
                 if (len(state.keys()) < len(varnames)):
                     for var in varnames:
                         var_found = False
@@ -100,7 +101,8 @@ class Automaton:
                             if (var == var2):
                                 var_found = True
                         if (not var_found):
-                            printWarning('WARNING: Variable ' + var + ' not assigned')
+                            printWarning('WARNING automaton.Automaton.loadFile: ' + \
+                                             'Variable ' + var + ' not assigned')
                 self.setAutStateState(stateID, state, verbose)
 
             # parse transitions
@@ -127,7 +129,8 @@ class Automaton:
         if (isinstance(aut_state, AutomatonState)):
             self.states.append(aut_state)
         else:
-            printError("Input to addAutState must be of type AutomatonState")
+            printError("ERROR automaton.Automaton.addAutState: " + \
+                           "Input to addAutState must be of type AutomatonState")
 
     def getAutState(self, aut_state_id):
         """
