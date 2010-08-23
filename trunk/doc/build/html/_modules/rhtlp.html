@@ -1,0 +1,978 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rhtlp &mdash; rhtlp v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="rhtlp v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for rhtlp</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">-----------------------------------------------</span>
+<span class="sd">Receding horizon Temporal Logic Planning Module</span>
+<span class="sd">-----------------------------------------------</span>
+
+<span class="sd">Nok Wongpiromsarn (nok@cds.caltech.edu)</span>
+
+<span class="sd">:Date: August 20, 2010</span>
+<span class="sd">:Version: 0.1.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span>
+<span class="kn">from</span> <span class="nn">parsespec</span> <span class="kn">import</span> <span class="n">parseSpec</span>
+<span class="kn">from</span> <span class="nn">polytope_computations</span> <span class="kn">import</span> <span class="n">Polytope</span><span class="p">,</span> <span class="n">Region</span>
+<span class="kn">from</span> <span class="nn">ufm</span> <span class="kn">import</span> <span class="n">CtsSysDyn</span>
+<span class="kn">from</span> <span class="nn">prop2part</span> <span class="kn">import</span> <span class="n">PropPreservingPartition</span><span class="p">,</span> <span class="n">prop2part2</span>
+<span class="kn">from</span> <span class="nn">automaton</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">grgameint</span>
+
+
+<span class="k">class</span> <span class="nc">GRSpec</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                     <span class="n">env_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span> <span class="o">=</span> <span class="n">env_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span> <span class="o">=</span> <span class="n">sys_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span> <span class="o">=</span> <span class="n">env_safety</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">=</span> <span class="n">sys_safety</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span> <span class="o">=</span> <span class="n">env_prog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="n">sys_prog</span>
+    
+    <span class="k">def</span> <span class="nf">toSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">]</span>
+        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+            <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+            <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span>
+
+        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+            <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+            <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span>
+        <span class="k">return</span> <span class="n">spec</span>
+
+
+<span class="c">###################################################################</span>
+
+<div class="viewcode-block" id="SynthesisProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb">[docs]</a><span class="k">class</span> <span class="nc">SynthesisProb</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SynthesisProb class for specifying the receding horizon temporal logic planning</span>
+<span class="sd">    problem.</span>
+<span class="sd">    An SynthesisProb object contains the following fields:</span>
+
+<span class="sd">    - `env_vars`: a dictionary {str : str} whose keys are the names </span>
+<span class="sd">      of environment variables and whose values are their possible values, e.g., </span>
+<span class="sd">      boolean or {0, 2, 3, 4, 5}</span>
+<span class="sd">    - `sys_vars`: a dictionary {str : str} whose keys are the </span>
+<span class="sd">      names of system variables and whose values are their possible values.</span>
+<span class="sd">    - `spec`: a list of two strings that represents system specification of the form</span>
+<span class="sd">      assumption -&gt; guarantee; the first string is the assumption and the second </span>
+<span class="sd">      string is the guarantee.</span>
+<span class="sd">    - `disc_cont_var`: the name of the continuous variable after the discretization</span>
+<span class="sd">    - `disc_dynamics`: a list of Region objects corresponding to the partition of the</span>
+<span class="sd">      continuous state space</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+                     <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">compute_disc_dynamics</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">spec</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+                                         <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="nb">len</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">file</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">compute_disc_dynamics</span><span class="p">):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING SynthesisProb: Discretized dynamics will be &quot;</span> <span class="o">+</span> \
+                                 <span class="s">&quot;computed since a spec file is given.&quot;</span><span class="p">)</span>
+                <span class="n">compute_disc_dynamics</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">compute_disc_dynamics</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromContDynamics</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                            <span class="n">sys_cont_vars</span><span class="o">=</span><span class="n">sys_cont_vars</span><span class="p">,</span> \
+                                            <span class="n">cont_state_space</span><span class="o">=</span><span class="n">cont_state_space</span><span class="p">,</span> \
+                                            <span class="n">cont_props</span><span class="o">=</span><span class="n">cont_props</span><span class="p">,</span> \
+                                            <span class="n">sys_dyn</span><span class="o">=</span><span class="n">sys_dyn</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+
+<div class="viewcode-block" id="SynthesisProb.createProbFromContDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.createProbFromContDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">createProbFromContDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+                       <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                       <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct SynthesisProb from continuous dynamics.</span>
+
+<span class="sd">        Input:</span>
+
+<span class="sd">        - `file`: the name of the rhtlp file to be parsed. If `file` is not an empty string,</span>
+<span class="sd">          the rest of the inputs to this function will be ignored.</span>
+<span class="sd">        - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
+<span class="sd">          of environment variables and whose values are their possible values, e.g., </span>
+<span class="sd">          boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
+<span class="sd">        - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
+<span class="sd">          names of discrete system variables and whose values are their possible values.</span>
+<span class="sd">        - `disc_props`: a dictionary {str : str} whose keys are the symbols for </span>
+<span class="sd">          propositions on discrete variables and whose values are the actual propositions</span>
+<span class="sd">          on discrete variables.</span>
+<span class="sd">        - `sys_cont_vars`: a list of strings representing the name of continuous variables</span>
+<span class="sd">        - `cont_state_space`: a Polytope object that represent the state space of the</span>
+<span class="sd">          continuous variables</span>
+<span class="sd">        - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for </span>
+<span class="sd">          propositions on continuous variables and whose values are polytopes that represent</span>
+<span class="sd">          the region in the state space in which the corresponding proposition hold.</span>
+<span class="sd">        - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables</span>
+<span class="sd">        - `spec`: a list of two strings that represents system specification of the form</span>
+<span class="sd">          assumption -&gt; guarantee; the first string is the assumption and the second </span>
+<span class="sd">          string is the guarantee.</span>
+<span class="sd">        - `verbose`: an integer that specifies the verbose level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check that the input is valid</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProb: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input file is expected to be a string&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid file.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sys_cont_vars</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sys_cont_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProb: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input sys_cont_vars is expected to be a list&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_props.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cont_state_space</span><span class="p">,</span> <span class="n">Polytope</span><span class="p">)</span> <span class="ow">and</span> \
+                <span class="n">cont_state_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProb: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The type of input cont_state_space is expected to be &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;Polytope&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid cont_state_space.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cont_props</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cont_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProb: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input cont_props is expected to be a dictionary &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;{str : Polytope}&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_props.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sys_dyn</span><span class="p">,</span> <span class="n">CtsSysDyn</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sys_dyn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProb: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The type of input sys_dyn is expected to be CtsSysDyn&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid sys_dyn.&quot;</span><span class="p">)</span>
+
+        <span class="c"># Parse spec file</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">file</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+            <span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="p">,</span> <span class="n">disc_props</span><span class="p">,</span> <span class="n">sys_cont_vars</span><span class="p">,</span> <span class="n">cont_state_space</span><span class="p">,</span> \
+                 <span class="n">cont_props</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="o">=</span> <span class="n">parseSpec</span><span class="p">(</span><span class="n">spec_file</span><span class="o">=</span><span class="nb">file</span><span class="p">)</span>
+
+        <span class="c"># Process the continuous component</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cont_state_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">cont_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">cont_props</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">cont_partition</span> <span class="o">=</span> <span class="n">prop2part2</span><span class="p">(</span><span class="n">cont_state_space</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">)</span>
+            <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cont_partition</span><span class="p">)</span>
+            <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">adj</span>
+            <span class="k">for</span> <span class="n">fromcell</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">)):</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">[</span><span class="n">fromcell</span><span class="p">][</span><span class="n">fromcell</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">sys_dyn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="c"># TODO: Use Ufuk&#39;s function instead of below</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;No continuous component&quot;</span><span class="p">)</span>
+            <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_prop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                                                        <span class="n">list_region</span><span class="o">=</span><span class="p">[],</span> <span class="n">num_regions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                                                        <span class="n">adj</span><span class="o">=</span><span class="p">[],</span> <span class="n">trans</span><span class="o">=</span><span class="p">[],</span> \
+                                                        <span class="n">list_prop_symbol</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.createProbFromDiscDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.createProbFromDiscDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">createProbFromDiscDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> \
+                       <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
+                       <span class="n">spec</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct SynthesisProb from discretized continuous dynamics.</span>
+
+<span class="sd">        Input:</span>
+<span class="sd">        </span>
+<span class="sd">        - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
+<span class="sd">          of environment variables and whose values are their possible values, e.g., </span>
+<span class="sd">          boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
+<span class="sd">        - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
+<span class="sd">          names of discrete system variables and whose values are their possible values.</span>
+<span class="sd">        - `disc_props`: a dictionary {str : str} whose keys are the symbols for </span>
+<span class="sd">          propositions on discrete variables and whose values are the actual propositions</span>
+<span class="sd">          on discrete variables.</span>
+<span class="sd">        - `disc_dynamics`: a PropPreservingPartition object that represents the </span>
+<span class="sd">          transition system obtained from the discretization procedure.</span>
+<span class="sd">        - `spec`: a list of two strings that represents system specification of the form</span>
+<span class="sd">          assumption -&gt; guarantee; the first string is the assumption and the second </span>
+<span class="sd">          string is the guarantee.</span>
+<span class="sd">        - `verbose`: an integer that specifies the verbose level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check that the input is valid</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">env_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProbFromDiscDynamics: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input env_vars is expected to be a dictionary &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;{str : str} or {str : list}.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid env_vars.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sys_disc_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProbFromDiscDynamics: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input sys_disc_vars is expected to be a dictionary &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;{str : str} or {str : list}&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid sys_disc_vars.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_props</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProbFromDiscDynamics: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input disc_props is expected to be a dictionary &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;{str : str}&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_props.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="p">,</span> <span class="n">PropPreservingPartition</span><span class="p">)</span> <span class="ow">and</span> \
+                <span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProbFromDiscDynamics: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The type of input disc_dynamics is expected to be &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;PropPreservingPartition&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_dynamics.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.createProbFromDiscDynamics: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input spec is expected to be a list of two strings &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;[assumption, guarantee]&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spec.&quot;</span><span class="p">)</span>
+
+        <span class="c"># Check that the number of regions in disc_dynamics is correct.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.createProb: &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;disc_dynamics.num_regions != &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;len(disc_dynamics.list_regions)&#39;</span><span class="p">)</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
+
+        <span class="c"># Construct this object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
+
+        <span class="c"># Replace &#39;...&#39; in the range of possible values of env_vars to the actual  </span>
+        <span class="c"># values and convert a list representation of the range of possible values </span>
+        <span class="c"># to a string</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">env_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="n">dots_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;([-+]?\d+)\s*?,?\s*?&#39;</span> <span class="o">+</span> <span class="s">r&#39;\.\.\.&#39;</span> <span class="o">+</span> \
+                                                 <span class="s">&#39;\s*?,?\s*?([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+                    <span class="n">all_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">dots_pair</span> <span class="ow">in</span> <span class="n">dots_values</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">):</span>
+                                    <span class="n">all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+                        <span class="n">reg</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                                <span class="n">reg</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
+                            <span class="n">reg</span> <span class="o">+=</span> <span class="n">val</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlpmain.createProb: &#39;</span> <span class="o">+</span> \
+                                         <span class="s">&quot;Unknown possible values for environment &quot;</span> <span class="o">+</span> \
+                                         <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                    <span class="n">all_values</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">all_values</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
+                        <span class="n">all_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlpmain.createProb: &#39;</span> <span class="o">+</span> \
+                                     <span class="s">&quot;Unknown possible values for environment &quot;</span> <span class="o">+</span> \
+                                     <span class="s">&quot;variable &quot;</span><span class="o">+</span> <span class="n">var</span><span class="p">)</span>
+
+        <span class="c"># Replace &#39;...&#39; in the range of possible values of sys_disc_vars to the actual </span>
+        <span class="c"># values and convert a list representation of the range of possible values to a </span>
+        <span class="c"># string</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sys_disc_vars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="n">dots_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;([-+]?\d+)\s*,?\s*&#39;</span> <span class="o">+</span> <span class="s">r&#39;\.\.\.&#39;</span> <span class="o">+</span> \
+                                                 <span class="s">&#39;\s*,?\s*([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+                    <span class="n">all_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">dots_pair</span> <span class="ow">in</span> <span class="n">dots_values</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">):</span>
+                                    <span class="n">all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+                        <span class="n">reg</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                                <span class="n">reg</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
+                            <span class="n">reg</span> <span class="o">+=</span> <span class="n">val</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlpmain.createProb: &#39;</span> <span class="o">+</span> \
+                                         <span class="s">&quot;Unknown possible values for discrete &quot;</span> <span class="o">+</span> \
+                                         <span class="s">&quot;system variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                    <span class="n">all_values</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">all_values</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
+                        <span class="n">all_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlpmain.createProb: &#39;</span> <span class="o">+</span> \
+                                     <span class="s">&quot;Unknown possible values for discrete system &quot;</span> <span class="o">+</span> \
+                                     <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
+
+        <span class="c"># New variable that identifies in which cell the continuous state is</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">cont_varname</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">cont_varname</span> <span class="o">=</span> <span class="s">&#39;cellID&#39;</span> 
+
+            <span class="c"># Make sure that the new variable name does not appear in env_vars </span>
+            <span class="c"># or sys_disc_vars</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">cont_varname</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">cont_varname</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
+                <span class="n">cont_varname</span> <span class="o">=</span> <span class="s">&#39;c&#39;</span> <span class="o">+</span> <span class="n">cont_varname</span>
+
+            <span class="n">contvar_values</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">contvar_values</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">contvar_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">contvar_values</span> <span class="o">+=</span> <span class="s">&#39;}&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">cont_varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">contvar_values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="n">cont_varname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">disc_dynamics</span>
+
+        <span class="c"># Process the spec</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c"># Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where </span>
+        <span class="c"># P1, ..., Pn are cells in disc_dynamics that satisfy XC</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">propInd</span><span class="p">,</span> <span class="n">propSymbol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">):</span>
+                <span class="n">reg</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
+                           <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">list_prop</span><span class="p">[</span><span class="n">propInd</span><span class="p">]]</span>
+                <span class="n">newprop</span> <span class="o">=</span> <span class="s">&#39;FALSE&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">newprop</span> <span class="o">=</span> <span class="s">&#39;(&#39;</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">regID</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reg</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39; | &#39;</span>
+                        <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">cont_varname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
+                            <span class="nb">str</span><span class="p">(</span><span class="n">regID</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+                    <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">newprop</span>
+                <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newprop</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
+                <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newprop</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
+
+        <span class="c"># Replace symbols for propositions on discrete variables with the actual </span>
+        <span class="c"># propositions</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
+                <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
+                <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
+
+        <span class="c"># Transitions for continuous dynamics</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">guarantee</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+            <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">from_region</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
+                <span class="n">to_regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
+                                  <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">from_region</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+                    <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">from_region</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39;-- transition relations for continuous dynamics</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[]((&#39;</span> <span class="o">+</span> <span class="n">cont_varname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
+                                  <span class="nb">str</span><span class="p">(</span><span class="n">from_region</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;) -&gt; next(&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_regions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39;FALSE&#39;</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">to_regions</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39; | &#39;</span>
+                    <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">cont_varname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_region</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+                <span class="n">guarantee</span> <span class="o">+=</span> <span class="s">&#39;))&#39;</span>
+                <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">assumption</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">]</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.checkRealizability"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.checkRealizability">[docs]</a>    <span class="k">def</span> <span class="nf">checkRealizability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">pick_sys_init</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine whether this SynthesisProb is realizable without </span>
+<span class="sd">        extracting an automaton.</span>
+
+<span class="sd">        Input:</span>
+
+<span class="sd">        - `heap_size`: a string that specifies java heap size. </span>
+<span class="sd">        - `pick_sys_init` is a boolean indicating whether the system can pick </span>
+<span class="sd">          its initial state (in response to the initial environment state).</span>
+<span class="sd">        - `verbose`: an integer that specifies the verbose level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toJTLVInput</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                          <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">pick_sys_init</span><span class="p">):</span>
+            <span class="n">init_option</span> <span class="o">=</span> <span class="mi">0</span>
+
+            
+        <span class="n">realizable</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">solveGame</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                                         <span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> \
+                                         <span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> \
+                                         <span class="n">priority_kind</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> \
+                                         <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">,</span> \
+                                         <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">realizable</span>
+
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.synthesizePlannerAut"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.synthesizePlannerAut">[docs]</a>    <span class="k">def</span> <span class="nf">synthesizePlannerAut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">init_option</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> \
+                                 <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute a planner automaton for this SynthesisProb. </span>
+<span class="sd">        If this SynthesisProb is realizable, this function returns an Automaton object.</span>
+<span class="sd">        Otherwise, it returns a list of dictionary that represents the state</span>
+<span class="sd">        starting from which there exists no strategy for the system to satisfy the spec.</span>
+
+<span class="sd">        Input:</span>
+
+<span class="sd">        - `heap_size`: a string that specifies java heap size. </span>
+<span class="sd">        - `priority_kind`: a string of length 3 or an integer that specifies the type of </span>
+<span class="sd">          priority used in extracting the automaton. See the documentation of the </span>
+<span class="sd">          ``computeStrategy`` function for the possible values of `priority_kind`.</span>
+<span class="sd">        - `init_option`: an integer in that specifies how to handle the initial state of </span>
+<span class="sd">          the system. See the documentation of the ``computeStrategy`` function for the </span>
+<span class="sd">          possible values of `init_option`.</span>
+<span class="sd">        - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,</span>
+<span class="sd">          this function will not print anything on the screen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toJTLVInput</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                          <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">realizable</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">solveGame</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                                         <span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> \
+                                         <span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> \
+                                         <span class="n">priority_kind</span><span class="o">=</span><span class="n">priority_kind</span><span class="p">,</span> \
+                                         <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">,</span> \
+                                         <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">realizable</span><span class="p">):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.synthesizePlannerAut: spec not realizable&#39;</span><span class="p">)</span>
+            <span class="n">counter_examples</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">counter_examples</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">aut</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="p">[],</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">aut</span>
+
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.toJTLVInput"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.toJTLVInput">[docs]</a>    <span class="k">def</span> <span class="nf">toJTLVInput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate JTLV input files: smv_file and spc_file for this SynthesisProb.</span>
+
+<span class="sd">        Input:</span>
+
+<span class="sd">        - `smv_file`: a string that specifies the name of the resulting smv file.</span>
+<span class="sd">        - `spc_file`: a string that specifies the name of the resulting spc file.</span>
+<span class="sd">        - `file_exist_option`: a string that indicate what to do when the specified smv_file </span>
+<span class="sd">          or spc_file exists. Possible values are: &#39;a&#39; (ask whether to replace or</span>
+<span class="sd">          create a new file), &#39;r&#39; (replace the existing file), &#39;n&#39; (create a new file).</span>
+<span class="sd">        - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,</span>
+<span class="sd">          this function will not print anything on the screen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Check that the input is valid</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.toJTLVInput: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input smv_file is expected to be a string&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid smv_file.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.toJTLVInput: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;The input spc_file is expected to be a string&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spc_file.&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)))):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.toJTLVInput: &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;Folder for smv_file &#39;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> \
+                                 <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)))):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.toJTLVInput: &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;Folder for spc_file &#39;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> \
+                                 <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)))</span>
+
+        <span class="c"># Check whether the smv or spc file exists</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">file_exist_option</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.generateJTLVInput: &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
+                <span class="n">smv_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
+                           <span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                    <span class="n">smv_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new smv file [n]: &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">smv_file_part</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">smv_file</span> <span class="o">=</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                        <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">smv_file</span> <span class="o">=</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                            <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.generateJTLVInput: &#39;</span> <span class="o">+</span> \
+                                 <span class="s">&#39;spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
+                <span class="n">spc_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
+                           <span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                    <span class="n">spc_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new spc file [n]: &#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">spc_file_part</span> <span class="o">=</span> <span class="n">spc_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">spc_file</span> <span class="o">=</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                        <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
+                        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">spc_file</span> <span class="o">=</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                            <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span><span class="p">)</span>
+
+
+        <span class="c">###################################################################################</span>
+        <span class="c"># Generate smv file</span>
+        <span class="c">###################################################################################</span>
+        <span class="n">env_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span>
+        <span class="n">sys_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+
+        <span class="c"># Write smv file</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+    <span class="c">#   The use of &#39;with&#39; below is a better statement but is not supported in my </span>
+    <span class="c">#   version of python</span>
+    <span class="c">#   with open(smv_file, &#39;w&#39;) as f: </span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&#39;Generating smv file...&#39;</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;MODULE main </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">e : env();</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">s : sys();</span><span class="se">\n\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c"># Environment</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;MODULE env </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">val</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c"># System</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">MODULE sys </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">val</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c">###################################################################################</span>
+        <span class="c"># Generate spc file</span>
+        <span class="c">###################################################################################</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&#39;Generating spc file...&#39;</span>
+
+        <span class="c"># Replace any environment variable var in spec with e.var and replace any </span>
+        <span class="c"># system variable var with s.var</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;e.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
+            <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;e.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">sys_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;s.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
+            <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;s.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
+
+        <span class="c"># Add assumption on the possible initial state of the system and all the possible </span>
+        <span class="c"># values of the environment</span>
+        <span class="n">env_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">all_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">env_values_formula</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                <span class="n">current_env_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">current_env_values_formula</span> <span class="o">+=</span> <span class="s">&#39; | &#39;</span>
+                    <span class="n">current_env_values_formula</span> <span class="o">+=</span> <span class="s">&#39;e.&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span> <span class="o">+</span> <span class="n">val</span>
+                <span class="n">env_values_formula</span> <span class="o">+=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">current_env_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="n">sys_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">all_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">sys_values_formula</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                <span class="n">current_sys_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">current_sys_values_formula</span> <span class="o">+=</span> <span class="s">&#39; | &#39;</span>
+                    <span class="n">current_sys_values_formula</span> <span class="o">+=</span> <span class="s">&#39;s.&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span> <span class="o">+</span> <span class="n">val</span>
+                <span class="n">sys_values_formula</span> <span class="o">+=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">current_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">assumption</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;-- original assumptions</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">assumption</span> 
+            <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+                <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;-- initial env states</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">-- possible values of environment variables</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="c"># Assumption</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;LTLSPEC</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c"># Guarantee</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">LTLSPEC</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">guarantee</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- original requirements</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">guarantee</span><span class="p">)</span>
+            <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- initial sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
+            <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># Transitions</span>
+        <span class="c"># For discrete transitions</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for discrete sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">);</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span><span class="p">)</span>
+
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">;&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+
+
+<span class="c">###################################################################</span>
+</div></div>
+<div class="viewcode-block" id="ShortHorizonProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb">[docs]</a><span class="k">class</span> <span class="nc">ShortHorizonProb</span><span class="p">(</span><span class="n">SynthesisProb</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wset class for specifying a set W_i in the receding horizon temporal logic</span>
+<span class="sd">    planning problem.</span>
+<span class="sd">    A Wset object contains a list of states (a dictionary whose key is the variable</span>
+<span class="sd">    name and whose value is the value of the corresponding variable).</span>
+
+<span class="sd">    - `W`: a proposition that specifies a set W of states</span>
+<span class="sd">    - `F`: a ShortHorizonProb object</span>
+<span class="sd">    - `Phi`: a proposition that specifies the receding horizon invariant</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">FW</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                     <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+                     <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">compute_disc_dynamics</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                     <span class="n">spec</span><span class="o">=</span><span class="n">GRSpec</span><span class="p">(),</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">W</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FW</span> <span class="o">=</span> <span class="n">FW</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">W</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+        <span class="n">spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">W</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">FW</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">sys_prog</span> <span class="ow">in</span> <span class="n">FW</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_prog</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                    <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">+=</span> <span class="s">&#39;[]&lt;&gt;(&#39;</span> <span class="o">+</span> <span class="n">sys_prog</span><span class="o">.</span><span class="n">W</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="n">SynthesisProb</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                   <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                   <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                   <span class="n">sys_cont_vars</span><span class="o">=</span><span class="n">sys_cont_vars</span><span class="p">,</span> \
+                                   <span class="n">cont_state_space</span><span class="o">=</span><span class="n">cont_state_space</span><span class="p">,</span> \
+                                   <span class="n">cont_props</span><span class="o">=</span><span class="n">cont_props</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="n">sys_dyn</span><span class="p">,</span> \
+                                   <span class="n">compute_disc_dynamics</span><span class="o">=</span><span class="n">compute_disc_dynamics</span><span class="p">,</span> \
+                                   <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                   <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">toSpec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">addState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb.addState: state has to be a &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;a dictionary&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">addFW</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FW</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">FW</span><span class="p">,</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FW</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FW</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb.addFW: FW has to be a &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;ShortHorizonProb object&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">computeLocalPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<span class="c">###################################################################</span>
+
+<span class="c"># Test case</span>
+<span class="c">#  * 1: load from rhtlp file</span>
+<span class="c">#  * 2: with dynamics, start from continuous dynamics</span>
+<span class="c">#  * 3: with dynamics, start from discretized continuous dynamics</span>
+<span class="c">#  * 4: no dynamics, start from continuous dynamics</span>
+<span class="c">#  * 5: no dynamics, start from discretized continuous dynamics</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">polytope_computations</span> <span class="kn">import</span> <span class="n">Polytope</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing createProb&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s">&#39;3&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">and</span> \
+            <span class="ow">not</span> <span class="s">&#39;5&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="s">&#39;examples&#39;</span><span class="p">,</span> \
+                                <span class="s">&#39;example.rhtlp&#39;</span><span class="p">)</span>
+        <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">env_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;park&#39;</span> <span class="p">:</span> <span class="s">&#39;boolean&#39;</span><span class="p">,</span> <span class="s">&#39;cellID&#39;</span> <span class="p">:</span> <span class="s">&#39;{0,...,3,4,5}&#39;</span><span class="p">}</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;gear&#39;</span> <span class="p">:</span> <span class="s">&#39;{-1...1}&#39;</span><span class="p">}</span>
+        <span class="n">disc_props</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Park&#39;</span> <span class="p">:</span> <span class="s">&#39;park&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X0d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=0&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X1d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=1&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X2d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=2&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X3d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=3&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X4d&#39;</span> <span class="p">:</span> <span class="s">&#39;cellID=4&#39;</span><span class="p">,</span> \
+                          <span class="s">&#39;X5d&#39;</span> <span class="p">:</span> <span class="s">&#39;gear = 1&#39;</span><span class="p">}</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(!park) &amp; []&lt;&gt;(!X4d)&#39;</span>
+        <span class="n">guarantee</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(X4d -&gt; (X4 | X5)) &amp; []&lt;&gt;X1 &amp; [](Park -&gt; (X0 | X2 | X5))&#39;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">assumption</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;5&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span> <span class="c"># For spec with no dynamics</span>
+            <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(X0d -&gt; X5d)&#39;</span>  
+            <span class="k">if</span> <span class="p">(</span><span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                         <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                         <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                                         <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">()</span>
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">()</span>
+                <span class="n">prob</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                                    <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                                    <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                                    <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
+                                                    <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cont_state_space</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">]]))</span>
+            <span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> \
+                                            <span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">2.</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.</span><span class="p">]]))</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                         <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                         <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="n">cont_state_space</span><span class="p">,</span> \
+                                         <span class="n">cont_props</span><span class="o">=</span><span class="n">cont_props</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">()</span>
+                <span class="n">region0</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X0&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">region1</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X1&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">region2</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X2&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">region3</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X3&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">region4</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X4&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">region5</span> <span class="o">=</span> <span class="n">Region</span><span class="p">([</span><span class="n">cont_props</span><span class="p">[</span><span class="s">&#39;X5&#39;</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span> <span class="o">=</span> <span class="p">[</span><span class="n">region0</span><span class="p">,</span> <span class="n">region1</span><span class="p">,</span> <span class="n">region2</span><span class="p">,</span> <span class="n">region3</span><span class="p">,</span> <span class="n">region4</span><span class="p">,</span> <span class="n">region5</span><span class="p">]</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> \
+                                     <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> \
+                                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> \
+                                     <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> \
+                                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> \
+                                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;X0&#39;</span><span class="p">,</span> <span class="s">&#39;X1&#39;</span><span class="p">,</span> <span class="s">&#39;X2&#39;</span><span class="p">,</span> <span class="s">&#39;X3&#39;</span><span class="p">,</span> <span class="s">&#39;X4&#39;</span><span class="p">,</span> <span class="s">&#39;X5&#39;</span><span class="p">]</span>
+                <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_prop</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">)</span>
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">()</span>
+                <span class="n">prob</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                                    <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                                    <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                                    <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                                    <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c">####################################</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing checkRealizability&#39;</span><span class="p">)</span>
+    <span class="n">realizable</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">checkRealizability</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">realizable</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="c">####################################</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing synthesizePlannerAut&#39;</span><span class="p">)</span>
+    <span class="n">aut</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">synthesizePlannerAut</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

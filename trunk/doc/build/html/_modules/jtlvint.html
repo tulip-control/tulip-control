@@ -64,32 +64,11 @@
 <span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">polyhedron</span> <span class="kn">import</span> <span class="n">Vrep</span><span class="p">,</span> <span class="n">Hrep</span>
 <span class="kn">from</span> <span class="nn">prop2part</span> <span class="kn">import</span> <span class="n">Region</span><span class="p">,</span> <span class="n">PropPreservingPartition</span>
-<span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span>
+<span class="kn">from</span> <span class="nn">rhtlp</span> <span class="kn">import</span> <span class="n">SynthesisProb</span>
+<span class="kn">import</span> <span class="nn">grgameint</span>
 
-<span class="c"># Get jtlv_path</span>
-<span class="n">JTLV_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
-<span class="n">JTLV_EXE</span> <span class="o">=</span> <span class="s">&#39;jtlv_grgame.jar&#39;</span>
 
-<div class="viewcode-block" id="setJTLVPath"><a class="viewcode-back" href="../synthesis.html#jtlvint.setJTLVPath">[docs]</a><span class="k">def</span> <span class="nf">setJTLVPath</span><span class="p">(</span><span class="n">jtlv_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set path to jtlv_grgame.jar.</span>
-
-<span class="sd">    Input:</span>
-
-<span class="sd">    - `jtlv_path`: a string indicating the full path to the JTLV folder.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;JTLV_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jtlv_path</span>
-</div>
-<div class="viewcode-block" id="setJTLVExe"><a class="viewcode-back" href="../synthesis.html#jtlvint.setJTLVExe">[docs]</a><span class="k">def</span> <span class="nf">setJTLVExe</span><span class="p">(</span><span class="n">jtlv_exe</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set the name of the jtlv executable.</span>
-
-<span class="sd">    Input:</span>
-
-<span class="sd">    - `jtlv_exe`: a string indicating the name of the executable jar containing the </span>
-<span class="sd">      jtlv GR1 game implementation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;JTLV_EXE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jtlv_exe</span>
-</div>
-<div class="viewcode-block" id="generateJTLVInput"><a class="viewcode-back" href="../tutorial.html#jtlvint.generateJTLVInput">[docs]</a><span class="k">def</span> <span class="nf">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+<div class="viewcode-block" id="generateJTLVInput"><a class="viewcode-back" href="../tutorial.html#jtlvint.generateJTLVInput">[docs]</a><span class="k">def</span> <span class="nf">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="p">[],</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
                           <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
                           <span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;specs/spec.smv&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;specs/spec.spc&#39;</span><span class="p">,</span> \
                           <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -100,7 +79,7 @@
 <span class="sd">    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
 <span class="sd">      of environment variables and whose values are their possible values, e.g., </span>
 <span class="sd">      boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
-<span class="sd">    - `disc_sys_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
+<span class="sd">    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
 <span class="sd">      names of discrete system variables and whose values are their possible values.</span>
 <span class="sd">    - `spec`: a list of two strings that represents system specification of the form</span>
 <span class="sd">      assumption -&gt; guarantee; the first string is the assumption and the second </span>
@@ -118,365 +97,16 @@
 <span class="sd">    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,</span>
 <span class="sd">      this function will not print anything on the screen.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c"># Check that the input is valid</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input env_vars is expected to be a dictionary {str : str} &quot;</span> <span class="o">+</span>
-                   <span class="s">&quot;or {str : list}.&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid env_vars.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_sys_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input disc_sys_vars is expected to be a dictionary &quot;</span> <span class="o">+</span> \
-                       <span class="s">&quot;{str : str} or {str : list}&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_sys_vars.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input spec is expected to be a list of two strings &quot;</span> <span class="o">+</span> \
-                       <span class="s">&quot;[assumption, guarantee]&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spec.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="p">,</span> <span class="n">PropPreservingPartition</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The type of input spec is expected to be PropPreservingPartition&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid disc_dynamics.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input smv_file is expected to be a string&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid smv_file.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The input spc_file is expected to be a string&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spc_file.&quot;</span><span class="p">)</span>
-
-<span class="c">#    # Figure out the names of the smv and spc files</span>
-<span class="c">#     if (smv_file[-4:] != &#39;.smv&#39;):</span>
-<span class="c">#         smv_file = smv_file + &#39;.smv&#39;</span>
-<span class="c">#     if (spc_file[-4:] != &#39;.spc&#39;):</span>
-<span class="c">#         spc_file = spc_file + &#39;.spc&#39;</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)))):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;Folder for smv_file &#39;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)))</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)))):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;Folder for spc_file &#39;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)))</span>
-
-    <span class="c"># Check whether the smv or spc file exists</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">file_exist_option</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
-            <span class="n">smv_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
-            <span class="k">while</span> <span class="p">(</span><span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
-                       <span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">smv_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new smv file [n]: &#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">smv_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">smv_file_part</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
-                <span class="n">smv_file</span> <span class="o">=</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                    <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-                    <span class="n">smv_file</span> <span class="o">=</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                        <span class="n">smv_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">print</span><span class="p">(</span><span class="s">&#39;smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
-            <span class="n">spc_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
-            <span class="k">while</span> <span class="p">(</span><span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
-                       <span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">spc_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new spc file [n]: &#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">spc_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">spc_file_part</span> <span class="o">=</span> <span class="n">spc_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
-                <span class="n">spc_file</span> <span class="o">=</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                    <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-                    <span class="n">spc_file</span> <span class="o">=</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                        <span class="n">spc_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">print</span><span class="p">(</span><span class="s">&#39;spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span><span class="p">)</span>
-            
-
-    <span class="c">###################################################################################</span>
-    <span class="c"># Generate smv file</span>
-    <span class="c">###################################################################################</span>
-    <span class="c"># Check that the number of regions in disc_dynamics is correct.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING: disc_dynamics.num_regions != &#39;</span> <span class="o">+</span> \
-                         <span class="s">&quot;len(disc_dynamics.list_regions)&quot;</span><span class="p">)</span>
-        <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
-
-    <span class="c"># Replace &#39;...&#39; in the range of possible values of env_vars to the actual values </span>
-    <span class="c"># and convert a list representation of the range of possible values to a string</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="n">dots_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;([-+]?\d+)\s*?,?\s*?&#39;</span> <span class="o">+</span> <span class="s">r&#39;\.\.\.&#39;</span> <span class="o">+</span> \
-                                         <span class="s">&#39;\s*?,?\s*?([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
-            <span class="n">all_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">dots_pair</span> <span class="ow">in</span> <span class="n">dots_values</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">):</span>
-                            <span class="n">all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
-                <span class="n">reg</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-                <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                        <span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span>
-                    <span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span> <span class="o">+</span> <span class="n">val</span>
-                <span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING: Unknown possible values for environment &quot;</span> <span class="o">+</span> \
-                                 <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="n">all_values</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">all_values</span> <span class="o">=</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span>
-                <span class="n">all_values</span> <span class="o">=</span> <span class="n">all_values</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-            <span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING: Unknown possible values for environment &quot;</span> <span class="o">+</span> \
-                             <span class="s">&quot;variable &quot;</span><span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-                
-    <span class="c"># Replace &#39;...&#39; in the range of possible values of disc_sys_vars to the actual </span>
-    <span class="c"># values and convert a list representation of the range of possible values to a </span>
-    <span class="c"># string</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="n">dots_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;([-+]?\d+)\s*,?\s*&#39;</span> <span class="o">+</span> <span class="s">r&#39;\.\.\.&#39;</span> <span class="o">+</span> \
-                                         <span class="s">&#39;\s*,?\s*([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
-            <span class="n">all_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">dots_pair</span> <span class="ow">in</span> <span class="n">dots_values</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dots_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">):</span>
-                            <span class="n">all_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
-                <span class="n">reg</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-                <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                        <span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span>
-                    <span class="n">reg</span> <span class="o">=</span> <span class="n">reg</span> <span class="o">+</span> <span class="n">val</span>
-                <span class="n">disc_sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING: Unknown possible values for discrete system &quot;</span> <span class="o">+</span> \
-                                 <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="n">all_values</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">all_values</span> <span class="o">=</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span>
-                <span class="n">all_values</span> <span class="o">=</span> <span class="n">all_values</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-            <span class="n">disc_sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;WARNING: Unknown possible values for discrete system &quot;</span> <span class="o">+</span> \
-                             <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-
-    <span class="c"># Write smv file</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
-<span class="c">#   The use of &#39;with&#39; below is a better statement but is not supported in my </span>
-<span class="c">#   version of python</span>
-<span class="c">#   with open(smv_file, &#39;w&#39;) as f: </span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s">&#39;Generating smv file...&#39;</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;MODULE main </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">e : env();</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">s : sys();</span><span class="se">\n\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="c"># Environment</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;MODULE env </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">val</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="c"># System</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">MODULE sys </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">VAR</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="c"># New variable that identifies in which cell the continuous state is</span>
-    <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-    <span class="n">newvar_values</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;cellID&#39;</span> 
-
-        <span class="c"># Make sure that the new variable name does not appear in env_vars or disc_sys_vars</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">newvarname</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="p">):</span>
-            <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;c&#39;</span> <span class="o">+</span> <span class="n">newvarname</span>
-    
-        <span class="n">newvar_values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span>
-        <span class="n">newvar</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">newvar_values</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">newvar</span> <span class="o">=</span> <span class="n">newvar</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">newvar</span> <span class="o">=</span> <span class="n">newvar</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="n">newvar</span> <span class="o">=</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">newvar</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">newvar</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="c"># Discrete system variables</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; : &#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="c">###################################################################################</span>
-    <span class="c"># Generate spc file</span>
-    <span class="c">###################################################################################</span>
-    <span class="n">assumption</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">guarantee</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s">&#39;Generating spc file...&#39;</span>
-
-    <span class="c"># Replace any environment variable var in spec with e.var and replace any discrete </span>
-    <span class="c"># system variable var with s.var</span>
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;e.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
-        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;e.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;s.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
-        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;s.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
-
-    <span class="c"># Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where </span>
-    <span class="c"># P1, ..., Pn are cells in disc_dynamics that satisfy XC</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">propInd</span><span class="p">,</span> <span class="n">propSymbol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">):</span>
-            <span class="n">reg</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
-                       <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">list_prop</span><span class="p">[</span><span class="n">propInd</span><span class="p">]]</span>
-            <span class="n">newprop</span> <span class="o">=</span> <span class="s">&#39;FALSE&#39;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">newprop</span> <span class="o">=</span> <span class="s">&#39;(&#39;</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">regID</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reg</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                        <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39; | &#39;</span>
-                    <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
-                        <span class="nb">str</span><span class="p">(</span><span class="n">newvar_values</span><span class="p">[</span><span class="n">regID</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-                <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">newprop</span>
-            <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newprop</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
-            <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newprop</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
-
-    <span class="c"># Replace symbols for propositions on discrete variables with the actual </span>
-    <span class="c"># propositions</span>
-    <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;e.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">var</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;s.&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">assumption</span><span class="p">)</span>
-        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">guarantee</span><span class="p">)</span>
-
-    <span class="c"># Add assumption on the possible initial state of the system and all the possible </span>
-    <span class="c"># values of the environment</span>
-    <span class="n">env_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="n">all_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">env_values_formula</span> <span class="o">=</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39; &amp; &#39;</span>
-            <span class="n">current_env_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">current_env_values_formula</span> <span class="o">=</span> <span class="n">current_env_values_formula</span> <span class="o">+</span> <span class="s">&#39; | &#39;</span>
-                <span class="n">current_env_values_formula</span> <span class="o">=</span> <span class="n">current_env_values_formula</span> <span class="o">+</span> <span class="s">&#39;e.&#39;</span> <span class="o">+</span> \
-                    <span class="n">var</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span> <span class="o">+</span> <span class="n">val</span>
-            <span class="n">env_values_formula</span> <span class="o">=</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> \
-                <span class="n">current_env_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-
-    <span class="n">disc_sys_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-        <span class="n">all_values</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;[-+]?\d+&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">disc_sys_values_formula</span> <span class="o">=</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39; &amp; &#39;</span>
-            <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">all_values</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span> \
-                        <span class="s">&#39; | &#39;</span>
-                <span class="n">current_disc_sys_values_formula</span> <span class="o">=</span> <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span> \
-                    <span class="s">&#39;s.&#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39;=&#39;</span> <span class="o">+</span> <span class="n">val</span>
-            <span class="n">disc_sys_values_formula</span> <span class="o">=</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> \
-                <span class="n">current_disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-
-    <span class="n">newvar_values_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">newvar_values</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newvar_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">newvar_values_formula</span> <span class="o">=</span> <span class="n">newvar_values_formula</span> <span class="o">+</span> <span class="s">&#39; | &#39;</span>
-        <span class="n">newvar_values_formula</span> <span class="o">=</span> <span class="n">newvar_values_formula</span> <span class="o">+</span> <span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
-            <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-
-    <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">assumption</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="s">&#39;-- original assumptions</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">assumption</span> 
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;-- initial env states</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">-- possible values of environment variables</span><span class="se">\n</span><span class="s">&#39;</span>
-        <span class="n">assumption</span> <span class="o">=</span> <span class="n">assumption</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">env_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span>
-
-    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">spc_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
-
-    <span class="c"># Assumption</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;LTLSPEC</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-
-    <span class="c"># Guarantee</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">LTLSPEC</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">guarantee</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- original requirements</span><span class="se">\n\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">guarantee</span><span class="p">)</span>
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newvar_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- initial continuous sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">newvar_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- initial discrete sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-
-    <span class="c"># Transitions</span>
-    <span class="c"># For continuous dynamics</span>
-    <span class="k">for</span> <span class="n">from_region</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
-        <span class="n">to_regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
-                          <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">from_region</span><span class="p">]]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">from_region</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for continuous dynamics</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[]((&#39;</span> <span class="o">+</span> <span class="s">&#39;s.&#39;</span> <span class="o">+</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
-                    <span class="nb">str</span><span class="p">(</span><span class="n">newvar_values</span><span class="p">[</span><span class="n">from_region</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;) -&gt; next(&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_regions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;FALSE&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">to_regions</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; | &#39;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="n">newvarname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">newvar_values</span><span class="p">[</span><span class="n">to_region</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;))&#39;</span><span class="p">)</span>
-        <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
-
-    <span class="c"># For discrete transitions</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">disc_sys_values_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for discrete sys states</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">);</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[](next(&#39;</span> <span class="o">+</span> <span class="n">disc_sys_values_formula</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span><span class="p">)</span>
-    
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">;&#39;</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">newvarname</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">SynthesisProb</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+                       <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                       <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                         <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                         <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                         <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">toJTLVInput</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                          <span class="n">file_exist_option</span><span class="o">=</span><span class="n">file_exist_option</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">prob</span>
 
 
 <span class="c">###################################################################</span>
@@ -492,10 +122,7 @@
 <span class="sd">    - `spc_file`: a string that specifies the name of the spc file.</span>
 <span class="sd">    - `aut_file`: a string that specifies the name of the file containing the output of JTLV</span>
 <span class="sd">      (e.g. an initial state starting from which the spec is cannot be satisfied).</span>
-<span class="sd">    - `jtlv_path`: a string containing the full path to the JTLV folder.</span>
 <span class="sd">    - `heap_size`: a string that specifies java heap size. </span>
-<span class="sd">    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0, </span>
-<span class="sd">      this function will not print anything on the screen.</span>
 <span class="sd">    - `pick_sys_init` is a boolean indicating whether the system can pick </span>
 <span class="sd">      its initial state (in response to the initial environment state).</span>
 <span class="sd">    - `file_exist_option`: a string that indicate what to do when the specified aut_file </span>
@@ -517,9 +144,9 @@
 
 <span class="c">###################################################################</span>
 </div>
-<div class="viewcode-block" id="synthesize"><a class="viewcode-back" href="../tutorial.html#jtlvint.synthesize">[docs]</a><span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
+<div class="viewcode-block" id="synthesize"><a class="viewcode-back" href="../tutorial.html#jtlvint.synthesize">[docs]</a><span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">spec</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
                    <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
-                   <span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;specs/spec.smv&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;specs/spec.spc&#39;</span><span class="p">,</span> \
+                   <span class="n">smv_file</span><span class="o">=</span><span class="s">&#39;tmpspec/tmp.smv&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="s">&#39;tmpspec/tmp.spc&#39;</span><span class="p">,</span> \
                    <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">init_option</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> \
                    <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute an automaton satisfying `spec`. Return the realizability of `spec`.</span>
@@ -532,7 +159,7 @@
 <span class="sd">    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
 <span class="sd">      of environment variables and whose values are their possible values, e.g., </span>
 <span class="sd">      boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
-<span class="sd">    - `disc_sys_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
+<span class="sd">    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
 <span class="sd">      names of discrete system variables and whose values are their possible values.</span>
 <span class="sd">    - `spec`: a list of two strings that represents system specification of the form</span>
 <span class="sd">      assumption -&gt; guarantee; the first string is the assumption and the second </span>
@@ -559,17 +186,17 @@
 <span class="sd">    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,</span>
 <span class="sd">      this function will not print anything on the screen.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="n">disc_sys_vars</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+    <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
                           <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
                           <span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
                           <span class="n">file_exist_option</span><span class="o">=</span><span class="n">file_exist_option</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-    <span class="n">realizability</span> <span class="o">=</span> <span class="n">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+    <span class="n">realizable</span> <span class="o">=</span> <span class="n">computeStrategy</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
                                         <span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> \
                                         <span class="n">priority_kind</span><span class="o">=</span><span class="n">priority_kind</span><span class="p">,</span> \
                                         <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">,</span> \
                                         <span class="n">file_exist_option</span><span class="o">=</span><span class="n">file_exist_option</span><span class="p">,</span> \
                                         <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">realizability</span>
+    <span class="k">return</span> <span class="n">realizable</span>
 
 
 <span class="c">###################################################################</span>
@@ -618,124 +245,14 @@
 <span class="sd">      &#39;r&#39; (replace the existing file), &#39;n&#39; (create a new file).</span>
 <span class="sd">    - `verbose`: an integer that specifies the verbose level.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c"># Check that the input is valid</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The smv file &quot;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The spc file &quot;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s">&#39;Creating automaton...</span><span class="se">\n</span><span class="s">&#39;</span>
-
-    <span class="c"># Get the right aut_file in case it&#39;s not specified.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">aut_file</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
-        <span class="n">aut_file</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\.&#39;</span><span class="o">+</span><span class="s">&#39;[^&#39;</span><span class="o">+</span><span class="s">r&#39;\.&#39;</span><span class="o">+</span><span class="s">&#39;]+$&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">)</span>
-        <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;Folder for aut_file &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))</span>
-
-    <span class="c"># Check whether the aut file exists</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">file_exist_option</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
-            <span class="n">aut_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
-            <span class="k">while</span> <span class="p">(</span><span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
-                       <span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">aut_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new aut file [n]: &#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">aut_file_part</span> <span class="o">=</span> <span class="n">aut_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
-                <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                    <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
-                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-                    <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                        <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">print</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span><span class="p">)</span>
-
-    <span class="c"># Convert the priority_kind to the corresponding integer</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;ZYX&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;ZXY&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">7</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;YZX&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">11</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;YXZ&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">15</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XZY&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">19</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XYZ&#39;</span><span class="p">):</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">23</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">7</span> <span class="ow">and</span> \
-                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">15</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">19</span> <span class="ow">and</span> \
-                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">23</span><span class="p">):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
-            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
-        <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
-
-    <span class="c"># init_option</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">init_option</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">init_option</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">init_option</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
-            <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
-        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span> <span class="s">&#39;Calling jtlv with the following arguments:&#39;</span>
-        <span class="k">print</span> <span class="s">&#39;  heap size: &#39;</span> <span class="o">+</span> <span class="n">heap_size</span>
-        <span class="k">print</span> <span class="s">&#39;  smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span>
-        <span class="k">print</span> <span class="s">&#39;  spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span>
-        <span class="k">print</span> <span class="s">&#39;  aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span>
-        <span class="k">print</span> <span class="s">&#39;  jtlv path: &#39;</span> <span class="o">+</span> <span class="n">JTLV_PATH</span>
-        <span class="k">print</span> <span class="s">&#39;  priority_kind: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">JTLV_EXE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="n">jtlv_grgame</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="n">JTLV_EXE</span><span class="p">)</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
-            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
-                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
-                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
-                <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span> <span class="c"># For debugging purpose</span>
-        <span class="n">classpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> \
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">,</span> <span class="s">&quot;jtlv-prompt1.4.1.jar&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> \
-                <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
-            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
-                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
-                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-
-    <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
-        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">line</span><span class="p">,</span>
-        <span class="k">if</span> <span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-            <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
-
-    <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="n">realizable</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Automaton successfully synthesized.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">ERROR: Specification was unrealizable.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
+    <span class="n">realizable</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">solveGame</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> \
+                                         <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
+                                         <span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> \
+                                         <span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> \
+                                         <span class="n">priority_kind</span><span class="o">=</span><span class="n">priority_kind</span><span class="p">,</span> \
+                                         <span class="n">init_option</span><span class="o">=</span><span class="n">init_option</span><span class="p">,</span> \
+                                         <span class="n">file_exist_option</span><span class="o">=</span><span class="n">file_exist_option</span><span class="p">,</span> \
+                                         <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">realizable</span>
 
@@ -751,23 +268,9 @@
 <span class="sd">      counter examples generated by JTLV.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">counter_examples</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;The env player can win from states&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="k">continue</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
-            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span><span class="p">):</span>
-            <span class="n">counter_ex</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;(\w+):([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">counter_ex</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                <span class="n">counter_ex</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-            <span class="n">counter_examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counter_ex</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="k">print</span> <span class="n">counter_ex</span>
+    <span class="n">counter_examples</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">counter_examples</span>
+
 
 <span class="c">###################################################################</span>
 
@@ -777,15 +280,15 @@
 <span class="c">#  * 2: Use init_option=0 with dynamics. This makes the spec unrealizable.</span>
 <span class="c">#  * 3: Use init_option=1 with no dynamics</span></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">testfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="s">&#39;specs&#39;</span><span class="p">,</span> \
-                                <span class="s">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">testfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> \
+                                <span class="s">&#39;testjtlvint&#39;</span><span class="p">)</span>
     <span class="n">smvfile</span> <span class="o">=</span> <span class="n">testfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
     <span class="n">spcfile</span> <span class="o">=</span> <span class="n">testfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
     <span class="n">autfile</span> <span class="o">=</span> <span class="n">testfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing generateJTLVInput&#39;</span><span class="p">)</span>
 <span class="c">#    env_vars = {&#39;park&#39; : &#39;boolean&#39;, &#39;cellID&#39; : &#39;{0,...,3,4,5}&#39;}</span>
     <span class="n">env_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;park&#39;</span> <span class="p">:</span> <span class="s">&#39;boolean&#39;</span><span class="p">,</span> <span class="s">&#39;cellID&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]}</span>
-    <span class="n">disc_sys_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;gear&#39;</span> <span class="p">:</span> <span class="s">&#39;{-1...1}&#39;</span><span class="p">}</span>
+    <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;gear&#39;</span> <span class="p">:</span> <span class="s">&#39;{-1...1}&#39;</span><span class="p">}</span>
     <span class="n">cont_props</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;X0&#39;</span><span class="p">,</span> <span class="s">&#39;X1&#39;</span><span class="p">,</span> <span class="s">&#39;X2&#39;</span><span class="p">,</span> <span class="s">&#39;X3&#39;</span><span class="p">,</span> <span class="s">&#39;X4&#39;</span><span class="p">]</span>
     <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">()</span>
     <span class="n">region0</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="s">&#39;p0&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -819,12 +322,12 @@
     <span class="k">if</span> <span class="p">(</span><span class="s">&#39;3&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span> <span class="c"># For spec with no dynamics</span>
         <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">()</span>
         <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;[]&lt;&gt;(X0d -&gt; X5d)&#39;</span>  
-        <span class="n">newvarname</span> <span class="o">=</span> <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="n">disc_sys_vars</span><span class="p">,</span> \
+        <span class="n">newvarname</span> <span class="o">=</span> <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                            <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
                                            <span class="n">smv_file</span><span class="o">=</span><span class="n">smvfile</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spcfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">newvarname</span> <span class="o">=</span> <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="n">disc_sys_vars</span><span class="p">,</span> \
+        <span class="n">newvarname</span> <span class="o">=</span> <span class="n">generateJTLVInput</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                            <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
                                            <span class="n">smv_file</span><span class="o">=</span><span class="n">smvfile</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spcfile</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -863,7 +366,7 @@
 
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing synthesize&#39;</span><span class="p">)</span>
 
-    <span class="n">realizability</span> <span class="o">=</span> <span class="n">synthesize</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">disc_sys_vars</span><span class="o">=</span><span class="n">disc_sys_vars</span><span class="p">,</span> \
+    <span class="n">realizability</span> <span class="o">=</span> <span class="n">synthesize</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                    <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
                                    <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
                                    <span class="n">smv_file</span><span class="o">=</span><span class="n">smvfile</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spcfile</span><span class="p">,</span> \

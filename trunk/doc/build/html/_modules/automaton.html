@@ -50,7 +50,7 @@
 
 <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">----------------</span>
-<span class="sd">Automaton module</span>
+<span class="sd">Automaton Module</span>
 <span class="sd">----------------</span>
 
 <span class="sd">Nok Wongpiromsarn (nok@cds.caltech.edu)</span>
@@ -68,7 +68,7 @@
 <div class="viewcode-block" id="AutomatonState"><a class="viewcode-back" href="../synthesis.html#automaton.AutomatonState">[docs]</a><span class="k">class</span> <span class="nc">AutomatonState</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    AutomatonState class for representing a state in a finite state automaton.</span>
-<span class="sd">    An AutomatonState object contains following fields:</span>
+<span class="sd">    An AutomatonState object contains the following fields:</span>
 
 <span class="sd">    - `id`: an integer specifying the id of this AutomatonState object.</span>
 <span class="sd">    - `state`: a dictionary whose keys are the names of the variables</span>
@@ -107,7 +107,7 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">states_or_file</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span> 
             <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">states_or_file</span><span class="p">)</span>
         <span class="c"># Construct this automaton from file</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">states_or_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">states_or_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">states_or_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -140,7 +140,8 @@
                             <span class="k">if</span> <span class="p">(</span><span class="n">var</span> <span class="o">==</span> <span class="n">var2</span><span class="p">):</span>
                                 <span class="n">var_found</span> <span class="o">=</span> <span class="bp">True</span>
                         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">var_found</span><span class="p">):</span>
-                            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING: Unknown variable &#39;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
+                            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING automaton.Automaton.loadFile: &#39;</span> <span class="o">+</span> \
+                                             <span class="s">&#39;Unknown variable &#39;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">varnames</span><span class="p">)):</span>
                     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">varnames</span><span class="p">:</span>
                         <span class="n">var_found</span> <span class="o">=</span> <span class="bp">False</span>
@@ -148,7 +149,8 @@
                             <span class="k">if</span> <span class="p">(</span><span class="n">var</span> <span class="o">==</span> <span class="n">var2</span><span class="p">):</span>
                                 <span class="n">var_found</span> <span class="o">=</span> <span class="bp">True</span>
                         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">var_found</span><span class="p">):</span>
-                            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING: Variable &#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; not assigned&#39;</span><span class="p">)</span>
+                            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING automaton.Automaton.loadFile: &#39;</span> <span class="o">+</span> \
+                                             <span class="s">&#39;Variable &#39;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; not assigned&#39;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">setAutStateState</span><span class="p">(</span><span class="n">stateID</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
             <span class="c"># parse transitions</span>
@@ -175,7 +177,8 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">aut_state</span><span class="p">,</span> <span class="n">AutomatonState</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aut_state</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;Input to addAutState must be of type AutomatonState&quot;</span><span class="p">)</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR automaton.Automaton.addAutState: &quot;</span> <span class="o">+</span> \
+                           <span class="s">&quot;Input to addAutState must be of type AutomatonState&quot;</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Automaton.getAutState"><a class="viewcode-back" href="../synthesis.html#automaton.Automaton.getAutState">[docs]</a>    <span class="k">def</span> <span class="nf">getAutState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aut_state_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

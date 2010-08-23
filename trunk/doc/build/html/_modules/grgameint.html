@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>grgameint &mdash; rhtlp v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="rhtlp v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for grgameint</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">--------------------------------------------------------------</span>
+<span class="sd">Grgameint --- Interface to the JTLV implementation of GR1 game</span>
+<span class="sd">--------------------------------------------------------------</span>
+
+<span class="sd">About JTLV, see http://jtlv.ysaar.net/</span>
+
+<span class="sd">Nok Wongpiromsarn (nok@cds.caltech.edu)</span>
+
+<span class="sd">:Date: August 20, 2010</span>
+<span class="sd">:Version: 0.1.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span>
+
+<span class="c"># Get jtlv_path</span>
+<span class="n">JTLV_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="n">JTLV_EXE</span> <span class="o">=</span> <span class="s">&#39;jtlv_grgame.jar&#39;</span>
+
+<div class="viewcode-block" id="setJTLVPath"><a class="viewcode-back" href="../synthesis.html#grgameint.setJTLVPath">[docs]</a><span class="k">def</span> <span class="nf">setJTLVPath</span><span class="p">(</span><span class="n">jtlv_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set path to jtlv_grgame.jar.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `jtlv_path`: a string indicating the full path to the JTLV folder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;JTLV_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jtlv_path</span>
+
+<span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="setJTLVExe"><a class="viewcode-back" href="../synthesis.html#grgameint.setJTLVExe">[docs]</a><span class="k">def</span> <span class="nf">setJTLVExe</span><span class="p">(</span><span class="n">jtlv_exe</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the name of the jtlv executable.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `jtlv_exe`: a string indicating the name of the executable jar containing the </span>
+<span class="sd">      jtlv GR1 game implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;JTLV_EXE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jtlv_exe</span>
+
+<span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="solveGame"><a class="viewcode-back" href="../synthesis.html#grgameint.solveGame">[docs]</a><span class="k">def</span> <span class="nf">solveGame</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> \
+                  <span class="n">priority_kind</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">init_option</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute an automaton satisfying the spec in smv_file and spc_file and store in </span>
+<span class="sd">    aut_file. Return the realizability of the spec.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `smv_file`: a string that specifies the name of the smv file.</span>
+<span class="sd">    - `spc_file`: a string that specifies the name of the spc file.</span>
+<span class="sd">    - `aut_file`: a string that specifies the name of the file containing the resulting </span>
+<span class="sd">      automaton.</span>
+<span class="sd">    - `heap_size`: a string that specifies java heap size. </span>
+<span class="sd">    - `priority_kind`: a string of length 3 or an integer that specifies the type of </span>
+<span class="sd">      priority used in extracting the automaton. Possible values of `priority_kind` are: </span>
+
+<span class="sd">        * 3 - &#39;ZYX&#39;</span>
+<span class="sd">        * 7 - &#39;ZXY&#39;</span>
+<span class="sd">        * 11 - &#39;YZX&#39;</span>
+<span class="sd">        * 15 - &#39;YXZ&#39;</span>
+<span class="sd">        * 19 - &#39;XZY&#39;</span>
+<span class="sd">        * 23 - &#39;XYZ&#39;</span>
+
+<span class="sd">      Here X means that the controller tries to disqualify one of the environment </span>
+<span class="sd">      assumptions, </span>
+<span class="sd">      Y means that the controller tries to advance with a finite path to somewhere, and</span>
+<span class="sd">      Z means that the controller tries to satisfy one of his guarantees.</span>
+<span class="sd">    - `init_option`: an integer in that specifies how to handle the initial state of </span>
+<span class="sd">      the system. Possible values of `init_option` are</span>
+
+<span class="sd">        * 0 - The system has to be able to handle all the possible initial system</span>
+<span class="sd">          states specified on the guarantee side of the specification.</span>
+<span class="sd">        * 1 (default) - The system can choose its initial state, in response to the initial</span>
+<span class="sd">          environment state. For each initial environment state, the resulting</span>
+<span class="sd">          automaton contains exactly one initial system state, starting from which</span>
+<span class="sd">          the system can satisfy the specification.</span>
+<span class="sd">        * 2 - The system can choose its initial state, in response to the initial</span>
+<span class="sd">          environment state. For each initial environment state, the resulting</span>
+<span class="sd">          automaton contain all the possible initial system states, starting from which</span>
+<span class="sd">          the system can satisfy the specification.</span>
+<span class="sd">    - `file_exist_option`: a string that indicate what to do when the specified aut_file </span>
+<span class="sd">      exists. Possible values are: &#39;a&#39; (ask whether to replace or create a new file), </span>
+<span class="sd">      &#39;r&#39; (replace the existing file), &#39;n&#39; (create a new file).</span>
+<span class="sd">    - `verbose`: an integer that specifies the verbose level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Check that the input is valid</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
+        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR jtlvint.computeStrategy: &quot;</span> <span class="o">+</span> \
+                       <span class="s">&quot;The smv file &quot;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
+        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR jtlvint.computeStrategy: &quot;</span> <span class="o">+</span> \
+                       <span class="s">&quot;The spc file &quot;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Creating automaton...</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="c"># Get the right aut_file in case it&#39;s not specified.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">aut_file</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\.&#39;</span><span class="o">+</span><span class="s">&#39;[^&#39;</span><span class="o">+</span><span class="s">r&#39;\.&#39;</span><span class="o">+</span><span class="s">&#39;]+$&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">)</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))):</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                         <span class="s">&#39;Folder for aut_file &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))</span>
+
+    <span class="c"># Check whether the aut file exists</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">file_exist_option</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                             <span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
+            <span class="n">aut_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
+                       <span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                <span class="n">aut_file_exist_option</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Replace [r] or create a new aut file [n]: &#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">aut_file_part</span> <span class="o">=</span> <span class="n">aut_file</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                    <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                        <span class="n">aut_file_part</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span><span class="p">)</span>
+
+    <span class="c"># Convert the priority_kind to the corresponding integer</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;ZYX&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;ZXY&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;YZX&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">11</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;YXZ&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XZY&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">19</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XYZ&#39;</span><span class="p">):</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">23</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                             <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">7</span> <span class="ow">and</span> \
+                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">15</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">19</span> <span class="ow">and</span> \
+                <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">23</span><span class="p">):</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                             <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                         <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+        <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c"># init_option</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">init_option</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">init_option</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">init_option</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                             <span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+            <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING jtlvint.computeStrategy: &#39;</span> <span class="o">+</span> \
+                         <span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+        <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&#39;Calling jtlv with the following arguments:&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;  heap size: &#39;</span> <span class="o">+</span> <span class="n">heap_size</span>
+        <span class="k">print</span> <span class="s">&#39;  smv file: &#39;</span> <span class="o">+</span> <span class="n">smv_file</span>
+        <span class="k">print</span> <span class="s">&#39;  spc file: &#39;</span> <span class="o">+</span> <span class="n">spc_file</span>
+        <span class="k">print</span> <span class="s">&#39;  aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span>
+        <span class="k">print</span> <span class="s">&#39;  jtlv path: &#39;</span> <span class="o">+</span> <span class="n">JTLV_PATH</span>
+        <span class="k">print</span> <span class="s">&#39;  priority_kind: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">JTLV_EXE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">jtlv_grgame</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="n">JTLV_EXE</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
+            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
+                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
+                <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># For debugging purpose</span>
+        <span class="n">classpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> \
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">,</span> <span class="s">&quot;jtlv-prompt1.4.1.jar&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> \
+                <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
+            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
+                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">line</span><span class="p">,</span>
+        <span class="k">if</span> <span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">realizable</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Automaton successfully synthesized.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">ERROR: Specification was unrealizable.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
+
+    <span class="k">return</span> <span class="n">realizable</span>
+
+
+<span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="getCounterExamples"><a class="viewcode-back" href="../synthesis.html#grgameint.getCounterExamples">[docs]</a><span class="k">def</span> <span class="nf">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a list of dictionary, each representing a counter example.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `aut_file`: a string containing the name of the file containing the</span>
+<span class="sd">      counter examples generated by JTLV.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">counter_examples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;The env player can win from states&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">isspace</span><span class="p">())):</span>
+            <span class="n">line_found</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">line_found</span><span class="p">):</span>
+            <span class="n">counter_ex</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;(\w+):([-+]?\d+)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">counter_ex</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">counter_ex</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">counter_examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counter_ex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span> <span class="n">counter_ex</span>
+    <span class="k">return</span> <span class="n">counter_examples</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

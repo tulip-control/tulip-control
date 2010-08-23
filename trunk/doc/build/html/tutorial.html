@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rhtlp v0.1.0 documentation" href="index.html" />
-    <link rel="next" title="Spec File Parser" href="parser.html" />
+    <link rel="next" title="Receding horizon Temporal Logic Planning" href="rhtlp.html" />
     <link rel="prev" title="Introduction" href="intro.html" /> 
   </head>
   <body>
@@ -37,7 +37,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="parser.html" title="Spec File Parser"
+          <a href="rhtlp.html" title="Receding horizon Temporal Logic Planning"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="intro.html" title="Introduction"
@@ -180,14 +180,14 @@ This can be done using the following steps.</p>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x183ff58&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=</em><span class="optional">[</span><span class="optional">]</span>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1f343a0&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
 <li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
 of environment variables and whose values are their possible values, e.g., 
 boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
-<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+<li><cite>sys_disc_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
 names of discrete system variables and whose values are their possible values.</li>
 <li><cite>spec</cite>: a list of two strings that represents system specification of the form
 assumption -&gt; guarantee; the first string is the assumption and the second 
@@ -303,7 +303,7 @@ varnames.</li>
 <dt>Step 1 and 2 above can be combined using the following function:</dt>
 <dd><dl class="first last function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>disc_sys_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x183fc10&gt;</em>, <em>smv_file='specs/spec.smv'</em>, <em>spc_file='specs/spec.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1f343c8&gt;</em>, <em>smv_file='tmpspec/tmp.smv'</em>, <em>spc_file='tmpspec/tmp.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.
@@ -313,7 +313,7 @@ This function essentially combines <tt class="docutils literal"><span class="pre
 <li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
 of environment variables and whose values are their possible values, e.g., 
 boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
-<li><cite>disc_sys_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+<li><cite>sys_disc_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
 names of discrete system variables and whose values are their possible values.</li>
 <li><cite>spec</cite>: a list of two strings that represents system specification of the form
 assumption -&gt; guarantee; the first string is the assumption and the second 
@@ -475,8 +475,8 @@ aut = Automaton(autfile, [], 3)
   <p class="topless"><a href="intro.html"
                         title="previous chapter">Introduction</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="parser.html"
-                        title="next chapter">Spec File Parser</a></p>
+  <p class="topless"><a href="rhtlp.html"
+                        title="next chapter">Receding horizon Temporal Logic Planning</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -504,7 +504,7 @@ aut = Automaton(autfile, [], 3)
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="parser.html" title="Spec File Parser"
+          <a href="rhtlp.html" title="Receding horizon Temporal Logic Planning"
              >next</a> |</li>
         <li class="right" >
           <a href="intro.html" title="Introduction"

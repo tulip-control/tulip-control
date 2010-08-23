@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """ 
-------------------------------
-grsim.py --- Simulation module
-------------------------------
+-----------------
+Simulation Module
+-----------------
 
 Nok Wongpiromsarn (nok@cds.caltech.edu)
 
@@ -41,9 +41,10 @@ def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True
             aut_state = aut.findNextAutState(current_aut_state=aut_state, \
                                                  env_state=env_states[i])
             if (not isinstance(aut_state, AutomatonState)):
-                printError('The specified sequence of environment states ' + \
-                           'does not satisfy the environment assumption.')
-                exit(1)
+                printError('ERROR grsim.grsim: ' + \
+                               'The specified sequence of environment states ' + \
+                               'does not satisfy the environment assumption.')
+                return states
         else:
             transition = aut_state.transition[:]
             for trans in aut_state.transition:
@@ -51,7 +52,8 @@ def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True
                 if (len(tmp_aut_state.transition) == 0):
                     transition.remove(trans)
             if (len(transition) == 0):
-                printWarning('Environment cannot satisfy its assumption')
+                printWarning('WARNING grsim.grsim: ' + \
+                                 'Environment cannot satisfy its assumption')
                 return states
             elif (deterministic_env):
                 aut_state = aut.getAutState(transition[0])
