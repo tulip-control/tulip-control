@@ -97,4 +97,5 @@ def product(*args, **kwds):
 
 ###################################################################
 
-def findCycle(graph=[], root, verbose=0):
+def findCycle(graph, root, verbose=0):
+    pass
