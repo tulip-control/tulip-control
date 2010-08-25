@@ -11,7 +11,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 :Version: 0.1.0
 """
 
-import re, copy
+import re, copy, os
 from errorprint import printWarning, printError
     
 
