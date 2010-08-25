@@ -293,7 +293,7 @@ if __name__ == "__main__":
     disc_sys_vars = {'gear' : '{-1,0,1}'}
     newvarname = 'ccellID'
     varnames = env_vars.keys() + disc_sys_vars.keys() + [newvarname]
-    aut = Automaton(states_or_file='tmpspec/testjtlvint.aut', varnames=varnames, verbose=1)
+    aut = Automaton(states_or_file=os.path.join('tmpspec', 'testjtlvint.aut'), varnames=varnames, verbose=1)
     print('DONE')
     print('================================\n')
 
