@@ -22,7 +22,7 @@ import grgameint
 
 def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
                           disc_dynamics=PropPreservingPartition(), \
-                          smv_file='specs/spec.smv', spc_file='specs/spec.spc', \
+                          smv_file='tmp.smv', spc_file='tmp.spc', \
                           file_exist_option='a', verbose=0):
     """Generate JTLV input files: smv_file and spc_file.
 
@@ -49,7 +49,7 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
     - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,
       this function will not print anything on the screen.
     """
-    prob = SynthesisProb(file='', env_vars={}, sys_disc_vars={}, disc_props={}, \
+    prob = SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
                        sys_cont_vars=[], cont_state_space=None, \
                        cont_props={}, sys_dyn=None, spec=['',''], verbose=verbose)
     prob.createProbFromDiscDynamics(env_vars=env_vars, sys_disc_vars=sys_disc_vars, \
@@ -98,7 +98,7 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
 
 def synthesize(env_vars={}, sys_disc_vars={}, spec='', disc_props={}, \
                    disc_dynamics=PropPreservingPartition(), \
-                   smv_file='tmpspec/tmp.smv', spc_file='tmpspec/tmp.spc', \
+                   smv_file='tmp.smv', spc_file='tmp.spc', \
                    aut_file='', heap_size='-Xmx128m', priority_kind=3, init_option=1, \
                    file_exist_option='a', verbose=0):
     """Compute an automaton satisfying `spec`. Return the realizability of `spec`.
