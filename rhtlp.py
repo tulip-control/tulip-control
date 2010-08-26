@@ -786,7 +786,7 @@ class ShortHorizonProb(SynthesisProb):
     def __init__(self, W='', FW=[], Phi='', global_spec=GRSpec(), **args):
         self.setW(W=W, update=False, verbose=0)
         self.setFW(FW=FW, update=False, verbose=0)
-        self.setPhi(Phi=Phi, update=False, verbose=0)
+        self.setLocalPhi(Phi=Phi, update=False, verbose=0)
         
         self.__disc_props = {}
         if ('disc_props' in args.keys()):
@@ -825,7 +825,7 @@ class ShortHorizonProb(SynthesisProb):
         if (update):
             self.updateLocalSpec(verbose=verbose)
 
-    def setPhi(self, Phi, update=True, verbose=0):
+    def setLocalPhi(self, Phi, update=True, verbose=0):
         if (not isinstance(Phi, str)):
             printError("ERROR rhtlp.ShortHorizonProb: the input Phi must be " + \
                            "a string.")
@@ -834,7 +834,7 @@ class ShortHorizonProb(SynthesisProb):
         if (update):
             self.updateLocalSpec(verbose=verbose)
 
-    def getPhi(self):
+    def getLocalPhi(self):
         """
         Return the local Phi for this ShortHorizonProb object.
         """
@@ -895,7 +895,6 @@ class ShortHorizonProb(SynthesisProb):
         Otherwise, the local Phi will get updated and this function wil return True.
         """
         self.updateLocalSpec(verbose=verbose)
-        aut_file = self.jtlvfile + '.aut'
         counter_examples = self.getCounterExamples(recompute=True, pick_sys_init=False, \
                                                        verbose=verbose)
         if (len(counter_examples) == 0):
@@ -926,8 +925,9 @@ class RHTLPProb(SynthesisProb):
     - `shprobs`: a list of ShortHorizonProb objects
     - `spec`: a GRSpec object that specifies the global specification
     """
-    def __init__(self, shprobs=[], discretize=False, **args):
+    def __init__(self, shprobs=[], Phi='True', discretize=False, **args):
         self.shprobs = []
+        self.Phi = 'True'
         self.__disc_props = {}
         self.__cont_props = []
         self.env_vars = {}
@@ -939,11 +939,30 @@ class RHTLPProb(SynthesisProb):
         self.jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
                                          'tmpspec', 'tmp')
         self.__realizable = None
-        self.__sys_prog = True
+        self.__sys_prog = 'True'
+        self.__all_init = 'True'
+
+        if (isinstance(shprobs, list)):
+            for shprob in shprobs:
+                if (isinstance(shprob, ShortHorizonProb)):
+                    self.shprobs.append(shprob)
+                else:
+                    printError("ERROR rhtlp.RHTLPProb: the input shprobs must be " + \
+                                   "a list of ShortHorizonProb objects.")
+        elif (shprobs is not None):
+            printError("ERROR rhtlp.RHTLPProb: the input shprobs must be " + \
+                           "a list of ShortHorizonProb objects.")
+
+        if (isinstance(Phi, str)):
+            self.Phi = Phi
+        else:
+            printError("ERROR rhtlp.RHTLPProb: the input Phi must be a string.")
+        
         
         verbose = args.get('verbose', 0)
         if ('disc_props' in args.keys()):
             self.__disc_props = copy.deepcopy(args['disc_props'])
+
         cont_props = args.get('cont_props', {})
         if (isinstance(cont_props, dict)):
             self.__cont_props = copy.deepcopy(cont_props.keys())
@@ -953,7 +972,7 @@ class RHTLPProb(SynthesisProb):
             printError("ERROR rhtlp.RHTLPProb: " + \
                            "The input cont_props is expected to be a dictionary " + \
                            "{str : Polytope}")
-            raise TypeError("Invalid disc_props.")
+            raise TypeError("Invalid cont_props.")
                 
         if ('spec' in args.keys()):
             if (not isinstance(args['spec'], GRSpec)):
@@ -970,17 +989,18 @@ class RHTLPProb(SynthesisProb):
             elif (isinstance(self.spec.sys_prog, list) and len(self.spec.sys_prog) == 1 and \
                       len(self.spec.sys_prog[0]) > 0 and not self.spec.sys_prog[0].isspace()):
                 self.__sys_prog = self.spec.sys_prog[0]
-
-        if (isinstance(shprobs, list)):
-            for shprob in shprobs:
-                if (isinstance(shprob, ShortHorizonProb)):
-                    self.shprobs.append(shprob)
-                else:
-                    printError("ERROR rhtlp.RHTLPProb: the input shprobs must be " + \
-                                   "a list of ShortHorizonProb objects.")
-        elif (shprobs is not None):
-            printError("ERROR rhtlp.RHTLPProb: the input shprobs must be " + \
-                           "a list of ShortHorizonProb objects.")
+            if (isinstance(self.spec.sys_init, str) and len(self.spec.sys_init) > 0):
+                self.__all_init += ' & ' + self.spec.sys_init
+            elif (isinstance(self.spec.sys_init, list)):
+                for init_cond in self.spec.sys_init:
+                    if (len(init_cond) > 0):
+                        self.__all_init += ' & ' + init_cond
+            if (isinstance(self.spec.env_init, str) and len(self.spec.env_init) > 0):
+                self.__all_init += ' & ' + self.spec.env_init
+            elif (isinstance(self.spec.env_init, list)):
+                for init_cond in self.spec.env_init:
+                    if (len(init_cond) > 0):
+                        self.__all_init += ' & ' + init_cond
 
         env_vars = args.get('env_vars', {})
         sys_disc_vars = args.get('sys_disc_vars', {})
@@ -1050,20 +1070,7 @@ class RHTLPProb(SynthesisProb):
                            "a ShortHorizonProb object.")
 
 
-    def __checkcovering(self, verbose=0):
-        allW_formula = 'False'
-        for shprob in self.shprobs:
-            allW_formula += ' | (' + shprob.W + ')'
-
-#         if (self.__disc_props is not None):
-#             for propSymbol, prop in self.__disc_props.iteritems():
-#                 if (verbose > 1):
-#                     print '\t' + propSymbol + ' -> ' + prop
-#                 allW_formula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', allW_formula)
-
-        if (verbose > 0):
-            print 'W = ' + allW_formula
-        
+    def __getAllVars(self, verbose=0):        
         allvars = copy.deepcopy(self.env_vars)
         sys_disc_vars = copy.deepcopy(self.sys_vars)
         if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
@@ -1082,6 +1089,44 @@ class RHTLPProb(SynthesisProb):
                 tmp = [int(i) for i in tmp]
             allvars_values += tmp,
             allvars_variables.append(var)
+
+        return allvars_variables, allvars_values
+
+
+    def __checkcovering(self, verbose=0):
+        allW_formula = 'False'
+        for shprob in self.shprobs:
+            allW_formula += ' | (' + shprob.W + ')'
+
+#         if (self.__disc_props is not None):
+#             for propSymbol, prop in self.__disc_props.iteritems():
+#                 if (verbose > 1):
+#                     print '\t' + propSymbol + ' -> ' + prop
+#                 allW_formula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', allW_formula)
+
+        if (verbose > 0):
+            print 'W = ' + allW_formula
+
+        (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+        
+#         allvars = copy.deepcopy(self.env_vars)
+#         sys_disc_vars = copy.deepcopy(self.sys_vars)
+#         if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
+#                 self.disc_cont_var in sys_disc_vars):
+#             del sys_disc_vars[self.disc_cont_var]
+#         allvars.update(sys_disc_vars)
+#         for var in self.__cont_props:
+#             allvars[var] = 'boolean'
+
+#         allvars_values = ()
+#         allvars_variables = []
+#         for var, val in allvars.iteritems():
+#             tmp = [0,1]
+#             if (not 'boolean' in val):
+#                 tmp = re.findall('[-+]?\d+', val)
+#                 tmp = [int(i) for i in tmp]
+#             allvars_values += tmp,
+#             allvars_variables.append(var)
 
         allvars_values_iter = rhtlputil.product(*allvars_values)
         vardict = {}
@@ -1157,37 +1202,40 @@ class RHTLPProb(SynthesisProb):
             ind += 1
         return -1
 
+
     def __findW0Ind(self, verbose=0):
         W0ind = range(0, len(self.shprobs))
 
         if (self.__sys_prog == True):
             return W0ind
-        
-        allvars = copy.deepcopy(self.env_vars)
-        sys_disc_vars = copy.deepcopy(self.sys_vars)
-        if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
-                self.disc_cont_var in sys_disc_vars):
-            del sys_disc_vars[self.disc_cont_var]
-        allvars.update(sys_disc_vars)
-        for var in self.__cont_props:
-            allvars[var] = 'boolean'
 
-        allvars_values = ()
-        allvars_variables = []
-        for var, val in allvars.iteritems():
-            tmp = [0,1]
-            if (not 'boolean' in val):
-                tmp = re.findall('[-+]?\d+', val)
-                tmp = [int(i) for i in tmp]
-            allvars_values += tmp,
-            allvars_variables.append(var)
+        (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+        
+#         allvars = copy.deepcopy(self.env_vars)
+#         sys_disc_vars = copy.deepcopy(self.sys_vars)
+#         if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
+#                 self.disc_cont_var in sys_disc_vars):
+#             del sys_disc_vars[self.disc_cont_var]
+#         allvars.update(sys_disc_vars)
+#         for var in self.__cont_props:
+#             allvars[var] = 'boolean'
+
+#         allvars_values = ()
+#         allvars_variables = []
+#         for var, val in allvars.iteritems():
+#             tmp = [0,1]
+#             if (not 'boolean' in val):
+#                 tmp = re.findall('[-+]?\d+', val)
+#                 tmp = [int(i) for i in tmp]
+#             allvars_values += tmp,
+#             allvars_variables.append(var)
 
         allvars_values_iter = rhtlputil.product(*allvars_values)
         vardict = {}
         for val in allvars_values_iter:
             vardict = dict(zip(allvars_variables, val))
             try:
-                ret = rhtlputil.evalExpr(sys_prog, vardict, verbose)
+                ret = rhtlputil.evalExpr(self.__sys_prog, vardict, verbose)
             except:
                 printError('ERROR rhtlp.RHTLPProb.validate: ' + \
                                'invalid W')
@@ -1207,7 +1255,63 @@ class RHTLPProb(SynthesisProb):
         return W0ind
 
 
-    def validate(self, verbose=0):
+    def computePhi(self, verbose=0):
+        """
+        Compute Phi for this RHTLPProb object.
+        Return a boolean that indicates whether a valid Phi exists.
+        """
+        if (len(self.Phi) == 0 or self.Phi.isspace()):
+            self.Phi = 'True'
+
+        for shprob in self.shprobs:
+            localPhi = shprob.getLocalPhi()
+            if (len(localPhi) > 0 and not localPhi.isspace()):
+                self.Phi += ' & ' + localPhi
+
+        if (self.__disc_props is not None):
+            for propSymbol, prop in self.__disc_props.iteritems():
+                if (verbose > 1):
+                    print '\t' + propSymbol + ' -> ' + prop
+                self.__all_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__all_init)
+                self.Phi = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.Phi)
+
+        done = False
+        while (not done):
+            done = True
+            for shprob in self.shprobs:
+                # Check whether self.__all_init -> Phi is a tautology
+                (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+                allvars_values_iter = rhtlputil.product(*allvars_values)
+                vardict = {}
+                for val in allvars_values_iter:
+                    vardict = dict(zip(allvars_variables, val))
+                    try:
+                        ret = rhtlputil.evalExpr(self.__all_init, vardict, verbose)
+                    except:
+                        printError('ERROR rhtlp.RHTLPProb.computePhi: ' + \
+                                       'invalid initial condition')
+                        raise Exception("Invalid initial conditionW")
+                    if (ret):
+                        try:
+                            ret = rhtlputil.evalExpr(self.Phi, vardict, verbose)
+                        except:
+                            printError('ERROR rhtlp.RHTLPProb.computePhi: ' + \
+                                           'invalid Phi')
+                            raise Exception("Invalid Phi")
+                        if (not ret):
+                            printInfo('sys_init -> Phi is not a tautology')
+                            print 'counter example: ', vardict
+                            return False
+
+                shprob.setLocalPhi(Phi=self.Phi, update=True, verbose=verbose)
+                phi_updated = shprob.computeLocalPhi(verbose=verbose)
+                if (phi_updated):
+                    done = False
+                    self.Phi = shprob.getLocalPhi()
+        return True
+
+
+    def validate(self, heap_size='-Xmx128m', verbose=0):
         """
         Check whether the list of ShortHorizonProb objects satisfies the sufficient
         conditions for receding horizon temporal logic planning
@@ -1229,6 +1333,8 @@ class RHTLPProb(SynthesisProb):
                                 
 
         # First, make sure that the union of W's covers the entire state space
+        if (verbose > 0):
+            print 'Checking that the union of W covers the entire state space...'
         vardict = self.__checkcovering(verbose=verbose)
         if (isinstance(vardict, dict)):                
             printInfo('state ' + str(vardict) + ' is not in any W')
@@ -1236,6 +1342,10 @@ class RHTLPProb(SynthesisProb):
 
         # Check the partial order condition
         # No cycle
+        if (verbose > 0):
+            print 'Checking that the partial order condition is satisfied...'
+            if (verbose > 1):
+                print 'Checking that there is no cycle...'
         wgraph = self.__constructWGraph(verbose=verbose)
         cycle = rhtlputil.findCycle(wgraph, verbose=verbose)
         if (len(cycle) != 0):
@@ -1248,6 +1358,8 @@ class RHTLPProb(SynthesisProb):
             return False
 
         # Path to W0
+        if (verbose > 1):
+            print 'Checking that there is a path to W0...'
         W0ind = self.__findW0Ind(verbose=verbose)
         if (len(W0ind) == 0):
             printInfo('Partial order condition violated. ' + \
@@ -1276,11 +1388,16 @@ class RHTLPProb(SynthesisProb):
                     return False
                 
         # Check that all the short horizon specs are realizable
+        if (verbose > 0):
+            print 'Checking that all the short horizon specs are realizable...'
+
+        for i, shprob in shprobs.enumerate():
+            realizable = shprob.checkRealizability(heap_size=heap_size, pick_sys_init=False, \
+                                                       verbose=verbose)
+            if (not realizable):
+                printInfo('shprob[' + str(i) + '] is not realizable')
+                return False
         return True
-
-
-
-
 
 
 

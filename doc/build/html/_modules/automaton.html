@@ -59,7 +59,7 @@
 <span class="sd">:Version: 0.1.0</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span>
     
 
@@ -341,7 +341,7 @@
     <span class="n">disc_sys_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;gear&#39;</span> <span class="p">:</span> <span class="s">&#39;{-1,0,1}&#39;</span><span class="p">}</span>
     <span class="n">newvarname</span> <span class="o">=</span> <span class="s">&#39;ccellID&#39;</span>
     <span class="n">varnames</span> <span class="o">=</span> <span class="n">env_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="n">disc_sys_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="n">newvarname</span><span class="p">]</span>
-    <span class="n">aut</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="s">&#39;tmpspec/testjtlvint.aut&#39;</span><span class="p">,</span> <span class="n">varnames</span><span class="o">=</span><span class="n">varnames</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">aut</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;testjtlvint.aut&#39;</span><span class="p">),</span> <span class="n">varnames</span><span class="o">=</span><span class="n">varnames</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
     <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
