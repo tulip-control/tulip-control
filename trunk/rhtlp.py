@@ -7,210 +7,21 @@ Receding horizon Temporal Logic Planning Module
 
 Nok Wongpiromsarn (nok@cds.caltech.edu)
 
-:Date: August 20, 2010
+:Date: August 25, 2010
 :Version: 0.1.0
 """
 
 import sys, os, re, subprocess, copy
-from errorprint import printWarning, printError
+from errorprint import printWarning, printError, printInfo
 from parsespec import parseSpec
 from polytope_computations import Polytope, Region
 from ufm import CtsSysDyn
 from prop2part import PropPreservingPartition, prop2part2
-from automaton import *
-from rhtlputil import *
+from automaton import Automaton
+from spec import GRSpec
+import rhtlputil
 import grgameint
 
-
-class GRSpec:
-    """
-    GRSpec class for specifying a GR[1] specification of the form
-
-        (env_init & []env_safety & []<>env_prog) -> (sys_init & []sys_safety & []<>sys_prog).
-
-    A GRSpec object contains the following fields:
-
-    - `env_init`: a string or a list of string that specifies the assumption about 
-      the initial state of the environment.
-    - `env_safety`: a string or a list of string that specifies the assumption about 
-      the evolution of the environment state.
-    - `env_prog`: a string or a list of string that specifies the justice assumption on 
-      the environment.
-    - `sys_init`: a string or a list of string that specifies the requirement on the 
-      initial state of the system.
-    - `sys_safety`: a string or a list of string that specifies the safety requirement.
-    - `sys_prog`: a string or a list of string that specifies the progress requirement.
-    """
-    def __init__(self, env_init='', sys_init='', env_safety='', sys_safety='', \
-                     env_prog='', sys_prog=''):
-        self.env_init = copy.deepcopy(env_init)
-        self.sys_init = copy.deepcopy(sys_init)
-        self.env_safety = copy.deepcopy(env_safety)
-        self.sys_safety = copy.deepcopy(sys_safety)
-        self.env_prog = copy.deepcopy(env_prog)
-        self.sys_prog = copy.deepcopy(sys_prog)
-    
-    def sym2prop(self, props, verbose=0):
-        """Replace the symbols of propositions in this spec with the actual propositions"""
-        # Replace symbols for propositions on discrete variables with the actual 
-        # propositions
-        if (props is not None):
-            for propSymbol, prop in props.iteritems():
-                if (verbose > 1):
-                    print '\t' + propSymbol + ' -> ' + prop
-                if (isinstance(self.env_init, str)):
-                    self.env_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_init)
-                else:
-                    for i in xrange(0, len(self.env_init)):
-                        self.env_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.env_init[i])
-                    
-                if (isinstance(self.sys_init, str)):
-                    self.sys_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_init)
-                else:
-                    for i in xrange(0, len(self.sys_init)):
-                        self.sys_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.sys_init[i])
-
-                if (isinstance(self.env_safety, str)):
-                    self.env_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_safety)
-                else:
-                    for i in xrange(0, len(self.env_safety)):
-                        self.env_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.env_safety[i])
-
-                if (isinstance(self.sys_safety, str)):
-                    self.sys_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_safety)
-                else:
-                    for i in xrange(0, len(self.sys_safety)):
-                        self.sys_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.sys_safety[i])
-                
-                if (isinstance(self.env_prog, str)):
-                    self.env_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_prog)
-                else:
-                    for i in xrange(0, len(self.env_prog)):
-                        self.env_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                      self.env_prog[i])
-
-                if (isinstance(self.sys_prog, str)):
-                    self.sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_prog)
-                else:
-                    for i in xrange(0, len(self.sys_prog)):
-                        self.sys_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                      self.sys_prog[i])
-
-    def toJTLVSpec(self):
-        """Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
-        specification."""
-        spec = ['', '']
-        # env init
-        if (isinstance(self.env_init, str)):
-            if (len(self.env_init) > 0 and not self.env_init.isspace()):
-                spec[0] += '-- valid initial env states\n'
-                spec[0] += '\t' + self.env_init
-        else:
-            desc_added = False
-            for env_init in self.env_init:
-                if (len(env_init) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- valid initial env states\n'
-                        desc_added = True
-                    spec[0] += '\t' + env_init
-        
-        # env safety
-        if (isinstance(self.env_safety, str)):
-            if (len(self.env_safety) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' & \n'
-                spec[0] += '-- safety assumption on environment\n'
-                spec[0] += '\t[](' + self.env_safety + ')'
-        else:
-            desc_added = False
-            for env_safety in self.env_safety:
-                if (len(env_safety) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- safety assumption on environment\n'
-                        desc_added = True
-                    spec[0] += '\t[](' + env_safety + ')'
-
-        # env progress
-        if (isinstance(self.env_prog, str)):
-            if (len(self.env_prog) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' & \n'
-                spec[0] += '-- justice assumption on environment\n'
-                spec[0] += '\t[]<>(' + self.env_prog + ')'
-        else:
-            desc_added = False
-            for prog in self.env_prog:
-                if (len(prog) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- justice assumption on environment\n'
-                        desc_added = True
-                    spec[0] += '\t[]<>(' + prog + ')'
-
-        # sys init
-        if (isinstance(self.sys_init, str)):
-            if (len(self.sys_init) > 0 and not self.sys_init.isspace()):
-                spec[1] += '-- valid initial system states\n'
-                spec[1] += '\t' + self.sys_init
-        else:
-            desc_added = False
-            for sys_init in self.sys_init:
-                if (len(sys_init) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- valid initial system states\n'
-                        desc_added = True
-                    spec[1] += '\t' + sys_init
-
-        # sys safety
-        if (isinstance(self.sys_safety, str)):
-            if (len(self.sys_safety) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' & '
-                spec[1] += '-- safety requirement on system\n'
-                spec[1] +='\t[](' + self.sys_safety + ')'
-        else:
-            desc_added = False
-            for sys_safety in self.sys_safety:
-                if (len(sys_safety) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- safety requirement on system\n'
-                        desc_added = True
-                    spec[1] += '\t[](' + sys_safety + ')'
-
-        # sys progress
-        if (isinstance(self.sys_prog, str)):
-            if (len(self.sys_prog) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' & \n'
-                spec[1] += '-- progress requirement on system\n'
-                spec[1] += '\t[]<>(' + self.sys_prog + ')'
-        else:
-            desc_added = False
-            for prog in self.sys_prog:
-                if (len(prog) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- progress requirement on system\n'
-                        desc_added = True
-                    spec[1] += '\t[]<>(' + prog + ')'
-        return spec
-
-
-###################################################################
 
 class SynthesisProb:
     """
@@ -274,21 +85,10 @@ class SynthesisProb:
                                          'tmpspec', 'tmp')
         self.__realizable = None
 
-        verbose = 0
-        if ('verbose' in args.keys()):
-            verbose = args['verbose']
-
-        env_vars = {}
-        if ('env_vars' in args.keys()):
-            env_vars = args['env_vars']
-
-        sys_disc_vars = {}
-        if ('sys_disc_vars' in args.keys()):
-            sys_disc_vars = args['sys_disc_vars']
-
-        disc_props = {}
-        if ('disc_props' in args.keys()):
-            disc_props = args['disc_props']
+        verbose = args.get('verbose', 0)
+        env_vars = args.get('env_vars', {})
+        sys_disc_vars = args.get('sys_disc_vars', {})
+        disc_props = args.get('disc_props', {})
 
         spec = GRSpec(env_init='', sys_init='', env_safety='', sys_safety='', \
                                env_prog='', sys_prog='')
@@ -979,20 +779,20 @@ class ShortHorizonProb(SynthesisProb):
     A ShortHorizonProb object contains the following fields:
 
     - `W`: a proposition that specifies a set W of states.
-    - `FW`: a list of ShortHorizonProb object that specifies a set F(W).
+    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
+      the set F(W).
     - `Phi`: a proposition that specifies the receding horizon invariant.
     """
     def __init__(self, W='', FW=[], Phi='', global_spec=GRSpec(), **args):
-        self.W = W
-        self.FW = FW
-        self.Phi = Phi
-        self.__disc_props = {}
+        self.setW(W=W, update=False, verbose=0)
+        self.setFW(FW=FW, update=False, verbose=0)
+        self.setPhi(Phi=Phi, update=False, verbose=0)
         
-        verbose = 0
-        if ('verbose' in args.keys()):
-            verbose = args['verbose']
+        self.__disc_props = {}
         if ('disc_props' in args.keys()):
             self.__disc_props = copy.deepcopy(args['disc_props'])
+        
+        verbose = args.get('verbose', 0)
 
         if (not isinstance(global_spec, GRSpec)):
             printError("ERROR rhtlp.ShortHorizonProb: the input global_spec must be " + \
@@ -1003,6 +803,36 @@ class ShortHorizonProb(SynthesisProb):
 
         args['spec'] = self.__computeLocalSpec()
         SynthesisProb.__init__(self, **args)
+
+    def setW(self, W, update=True, verbose=0):
+        if (not isinstance(W, str)):
+            printError("ERROR rhtlp.ShortHorizonProb.setW: the input W must be " + \
+                           "a string.")
+            raise TypeError("Invalid W.")
+        self.W = W
+        if (update):
+            self.updateLocalSpec(verbose=verbose)
+
+    def setFW(self, FW, update=True, verbose=0):
+        if (not isinstance(FW, list) and not isinstance(FW, ShortHorizonProb)):
+            printError("ERROR rhtlp.ShortHorizonProb: the input FW must be " + \
+                           "a ShortHorizonProb object or a list of ShortHorizonProb object.")
+            raise TypeError("Invalid W.")
+        if (isinstance(FW, list)):
+            self.FW = copy.copy(FW)
+        else:
+            self.FW = FW
+        if (update):
+            self.updateLocalSpec(verbose=verbose)
+
+    def setPhi(self, Phi, update=True, verbose=0):
+        if (not isinstance(Phi, str)):
+            printError("ERROR rhtlp.ShortHorizonProb: the input Phi must be " + \
+                           "a string.")
+            raise TypeError("Invalid Phi.")
+        self.Phi = Phi
+        if (update):
+            self.updateLocalSpec(verbose=verbose)
 
     def getPhi(self):
         """
@@ -1109,31 +939,37 @@ class RHTLPProb(SynthesisProb):
         self.jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
                                          'tmpspec', 'tmp')
         self.__realizable = None
+        self.__sys_prog = True
         
-        verbose = 0
-        cont_props = {}
-        if ('verbose' in args.keys()):
-            verbose = args['verbose']
+        verbose = args.get('verbose', 0)
         if ('disc_props' in args.keys()):
             self.__disc_props = copy.deepcopy(args['disc_props'])
-        if ('cont_props' in args.keys()):
-            cont_props = args['cont_props']
-            if (isinstance(cont_props, dict)):
-                self.__cont_props = copy.deepcopy(cont_props.keys())
-            elif (isinstance(cont_props, list)):
-                self.__cont_props = copy.deepcopy(cont_props)
-            else:
-                printError("ERROR rhtlp.RHTLPProb: " + \
-                               "The input cont_props is expected to be a dictionary " + \
-                               "{str : Polytope}")
-                raise TypeError("Invalid disc_props.")
+        cont_props = args.get('cont_props', {})
+        if (isinstance(cont_props, dict)):
+            self.__cont_props = copy.deepcopy(cont_props.keys())
+        elif (isinstance(cont_props, list)):
+            self.__cont_props = copy.deepcopy(cont_props)
+        else:
+            printError("ERROR rhtlp.RHTLPProb: " + \
+                           "The input cont_props is expected to be a dictionary " + \
+                           "{str : Polytope}")
+            raise TypeError("Invalid disc_props.")
                 
         if ('spec' in args.keys()):
             if (not isinstance(args['spec'], GRSpec)):
-                printError("ERROR rhtlp.RHTLPProb: the input global_spec must be " + \
+                printError("ERROR rhtlp.RHTLPProb: The input spec must be " + \
                            "a GRSpec objects.")
                 raise TypeError("Invalid spec.")
+            if (isinstance(spec.sys_prog, list) and len(spec.sys_prog) > 1):
+                printError("ERROR rhtlp.RHTLPProb: The input spec can have " + \
+                               "at most one system progress formula.")
+                raise TypeError("Invalid spec.")
             self.spec = copy.deepcopy(args['spec'])
+            if (isinstance(self.spec.sys_prog, str)):
+                self.__sys_prog = self.spec.sys_prog
+            elif (isinstance(self.spec.sys_prog, list) and len(self.spec.sys_prog) == 1 and \
+                      len(self.spec.sys_prog[0]) > 0 and not self.spec.sys_prog[0].isspace()):
+                self.__sys_prog = self.spec.sys_prog[0]
 
         if (isinstance(shprobs, list)):
             for shprob in shprobs:
@@ -1146,12 +982,8 @@ class RHTLPProb(SynthesisProb):
             printError("ERROR rhtlp.RHTLPProb: the input shprobs must be " + \
                            "a list of ShortHorizonProb objects.")
 
-        env_vars = {}
-        if ('env_vars' in args.keys()):
-            env_vars = args['env_vars']
-        sys_disc_vars = {}
-        if ('sys_disc_vars' in args.keys()):
-            sys_disc_vars = args['sys_disc_vars']
+        env_vars = args.get('env_vars', {})
+        sys_disc_vars = args.get('sys_disc_vars', {})
         cont_state_space = None
         sys_dyn = None
         disc_dynamics = None
@@ -1174,7 +1006,8 @@ class RHTLPProb(SynthesisProb):
 
         elif ('disc_dynamics' in args.keys()):
             if (discretize):
-                printWarning('Discretized dynamics is already given.')
+                printWarning('WARNING rhtlp.RHTLPProb ' + \
+                                 'Discretized dynamics is already given.')
             discretize = False
             disc_dynamics = args['disc_dynamics']
             if (len(self.__cont_props) == 0):
@@ -1182,7 +1015,7 @@ class RHTLPProb(SynthesisProb):
             else:
                 if (disc_dynamics is None or \
                         not (set(self.__cont_props) == set(disc_dynamics.list_prop_symbol))):
-                    printWarning("WARNING: rhtlp.RHTLPProb: " + \
+                    printWarning("WARNING rhtlp.RHTLPProb: " + \
                                      "The given cont_prop does not match the propositions" + \
                                      " in the given disc_dynamics")
         else:        
@@ -1208,17 +1041,25 @@ class RHTLPProb(SynthesisProb):
                                                 spec=self.spec, \
                                                 verbose=verbose)
 
+
     def addSHProb(self, shprob):
         if (isinstance(shprob), ShortHorizonProb):
-            shprobs.append(shprob)
+            self.shprobs.append(shprob)
         else:
             printError("ERROR rhtlp.RHTLPProb.addSHProb: the input shprob must be " + \
                            "a ShortHorizonProb object.")
+
 
     def __checkcovering(self, verbose=0):
         allW_formula = 'False'
         for shprob in self.shprobs:
             allW_formula += ' | (' + shprob.W + ')'
+
+#         if (self.__disc_props is not None):
+#             for propSymbol, prop in self.__disc_props.iteritems():
+#                 if (verbose > 1):
+#                     print '\t' + propSymbol + ' -> ' + prop
+#                 allW_formula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', allW_formula)
 
         if (verbose > 0):
             print 'W = ' + allW_formula
@@ -1238,45 +1079,204 @@ class RHTLPProb(SynthesisProb):
             tmp = [0,1]
             if (not 'boolean' in val):
                 tmp = re.findall('[-+]?\d+', val)
+                tmp = [int(i) for i in tmp]
             allvars_values += tmp,
             allvars_variables.append(var)
 
-        allvars_values_iter = product(*allvars_values)
+        allvars_values_iter = rhtlputil.product(*allvars_values)
         vardict = {}
         for val in allvars_values_iter:
-            for i in xrange(0, len(allvars_variables)):
-                vardict[allvars_variables[i]] = int(val[i])
+            vardict = dict(zip(allvars_variables, val))
+#             for i in xrange(0, len(allvars_variables)):
+#                 vardict[allvars_variables[i]] = int(val[i])
             
             try:
-                ret = evalExpr(allW_formula, vardict, verbose)
+                ret = rhtlputil.evalExpr(allW_formula, vardict, verbose)
             except:
                 printError('ERROR rhtlp.RHTLPProb.validate: ' + \
                                'invalid W')
                 raise Exception("Invalid W")
             if (not ret):
-                state = ''
-                for i in xrange(0, len(allvars_variables)):
-                    if (len(state) > 0):
-                        state += ', '
-                    state += allvars_variables[i] + ':' + str(val[i])
-                printError('state <' + state + '> is not in any W')
-                return False
+#                 state = dict(zip(allvars_variables, val))
+#                 state = ''
+#                 for i in xrange(0, len(allvars_variables)):
+#                     if (len(state) > 0):
+#                         state += ', '
+#                     state += allvars_variables[i] + ':' + str(val[i])
+#                 printError('ERROR rhtlp.RHTLPProb.validate: ' + \
+#                                'state <' + state + '> is not in any W')
+                return vardict
         return True
+
+
+    def __constructWGraph(self, verbose=0):
+        graph = []
+        for wind, shprob in enumerate(self.shprobs):
+            if (isinstance(shprob.FW, list)):
+                fw_ind = []
+                for fw in shprob.FW:
+                    if (isinstance(fw, int)):
+                        fw_ind.append(fw)
+                    elif (isinstance(fw, ShortHorizonProb)):
+                        tmpind = self.__findWInd(fw, verbose=verbose)
+                        if (tmpind >= 0):
+                            fw_ind.append(tmpind)
+                        else:
+                            printError("ERROR rhtlp.RHTLPProb.__constructWGraph " + \
+                                           "FW for shprobs[" + str(wind) + "]" + \
+                                           " is not in this RHTLPProb.")
+                            raise Exception("Invalid FW.")
+                        graph.append(fw_ind)
+                    else:
+                        printError("ERROR rhtlp.RHTLPProb.__constructWGraph " + \
+                                       "Invalid FW")
+                        raise TypeError("Invalid FW.")
+            elif (isinstance(shprob.FW, int)):
+                graph.append([shprob.FW])
+            elif (isinstance(shprob.FW, ShortHorizonProb)):
+                fw_ind = self.__findWInd(fw, verbose=verbose)
+                if (tmpind >= 0):
+                    graph.append([fw_ind])
+                else:
+                    printError("ERROR rhtlp.RHTLPProb.__constructWGraph " + \
+                                   "FW for shprobs[" + str(wind) + "]" + \
+                                   " is not in this RHTLPProb.")
+                    raise Exception("Invalid FW.")
+            else:
+                printError("ERROR rhtlp.RHTLPProb.__constructWGraph " + \
+                               "Invalid FW for shprobs[" + str(wind) + "].")
+                raise TypeError("Invalid FW.")
+        return graph
+
+
+    def __findWInd(self, W, verbose=0):
+        ind = 0
+        while (ind < len(self.shprobs)):
+            if (W == self.shprobs[ind]):
+                return ind
+            ind += 1
+        return -1
+
+    def __findW0Ind(self, verbose=0):
+        W0ind = range(0, len(self.shprobs))
+
+        if (self.__sys_prog == True):
+            return W0ind
+        
+        allvars = copy.deepcopy(self.env_vars)
+        sys_disc_vars = copy.deepcopy(self.sys_vars)
+        if (self.disc_cont_var is not None and len(self.disc_cont_var) > 0 and \
+                self.disc_cont_var in sys_disc_vars):
+            del sys_disc_vars[self.disc_cont_var]
+        allvars.update(sys_disc_vars)
+        for var in self.__cont_props:
+            allvars[var] = 'boolean'
+
+        allvars_values = ()
+        allvars_variables = []
+        for var, val in allvars.iteritems():
+            tmp = [0,1]
+            if (not 'boolean' in val):
+                tmp = re.findall('[-+]?\d+', val)
+                tmp = [int(i) for i in tmp]
+            allvars_values += tmp,
+            allvars_variables.append(var)
+
+        allvars_values_iter = rhtlputil.product(*allvars_values)
+        vardict = {}
+        for val in allvars_values_iter:
+            vardict = dict(zip(allvars_variables, val))
+            try:
+                ret = rhtlputil.evalExpr(sys_prog, vardict, verbose)
+            except:
+                printError('ERROR rhtlp.RHTLPProb.validate: ' + \
+                               'invalid W')
+                raise Exception("Invalid W")
+            if (ret):
+                newW0ind = []
+                for ind in W0ind:
+                    ret = rhtlputil.evalExpr(self.shprobs[ind].W, vardict, verbose)
+                    if (ret):
+                        newW0ind.append(ind)
+                    elif (verbose > 0):
+                        print 'W[' + str(ind) + '] does not satisfy spec.sys_prog'
+                        print 'counter example: ', vardict
+                W0ind = newW0ind
+                if (len(W0ind) == 0):
+                    return W0ind
+        return W0ind
+
 
     def validate(self, verbose=0):
         """
         Check whether the list of ShortHorizonProb objects satisfies the sufficient
         conditions for receding horizon temporal logic planning
         """
+
+        if (self.__disc_props is not None):
+            for propSymbol, prop in self.__disc_props.iteritems():
+                if (verbose > 1):
+                    print '\t' + propSymbol + ' -> ' + prop
+                self.__sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__sys_prog)
+                for shprob in self.shprobs:
+                    shprob.W = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', shprob.W)
+#                     if (isinstance(shprob.FW, ShortHorizonProb)):
+#                         shprob.FW.W = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', shprob.FW.W)
+#                     elif (isinstance(shprob.FW, list)):
+#                         for fw in shprob.FW:
+#                             if (isinstance(fw, ShortHorizonProb)):
+#                                 fw.W = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', fw.W)
+                                
+
         # First, make sure that the union of W's covers the entire state space
-        cover = self.__checkcovering(verbose=verbose)
-        if (not cover):
+        vardict = self.__checkcovering(verbose=verbose)
+        if (isinstance(vardict, dict)):                
+            printInfo('state ' + str(vardict) + ' is not in any W')
             return False
 
         # Check the partial order condition
-        
-        # Check that all the short horizon specs are realizable
+        # No cycle
+        wgraph = self.__constructWGraph(verbose=verbose)
+        cycle = rhtlputil.findCycle(wgraph, verbose=verbose)
+        if (len(cycle) != 0):
+            cycleStr = ''
+            for i in cycle:
+                if (len(cycleStr) > 0):
+                    cycleStr += ' -> '
+                cycleStr += 'W[' + str(i) + ']'
+            printInfo('Partial order condition is violated due to the cycle ' + cycleStr)
+            return False
 
+        # Path to W0
+        W0ind = self.__findW0Ind(verbose=verbose)
+        if (len(W0ind) == 0):
+            printInfo('Partial order condition violated. ' + \
+                          'No W0 since all W do not satisfy spec.sys_prog')
+            return False
+        if (verbose > 0):
+            if (len(W0ind) > 0):
+                W0indStr = ''
+                for ind in W0ind:
+                    if (ind != W0ind[0]):
+                        W0indStr += ', '
+                    W0indStr += 'W[' + str(ind) + ']'
+                print W0indStr + ' satisfy spec.sys_prog.'
+        
+        for wind in xrange(0, len(self.shprobs)):
+            if (not wind in W0ind):
+                path_found = False
+                for w0ind in W0ind:
+                    path = rhtlputil.findPath(wgraph, wind, w0ind, verbose=verbose)
+                    if (len(path) > 0):
+                        path_found = True
+                        break
+                if (not path_found):
+                    printInfo('Partial order condition violated. ' + \
+                                  'No path from W[' + str(wind) + ' to W0')
+                    return False
+                
+        # Check that all the short horizon specs are realizable
+        return True
 
 
 
@@ -1320,7 +1320,9 @@ if __name__ == "__main__":
         spec.sys_safety = 'Park -> (X0 | X2 | X5)'
 
         if ('4' in sys.argv or '5' in sys.argv): # For spec with no dynamics
-            spec[1] = '[]<>(X0d -> X5d)'  
+            spec.sys_prog = '[]<>(X0d -> X5d)'  
+            spec.sys_init = ''
+            spec.sys_safety = ''
             if ('4' in sys.argv):
                 prob = SynthesisProb(env_vars=env_vars, sys_disc_vars=sys_disc_vars, \
                                          disc_props=disc_props, \
@@ -1414,9 +1416,9 @@ if __name__ == "__main__":
                                       disc_props=disc_props, \
                                       disc_dynamics=prob.disc_dynamics, \
                                       verbose=3)
-        shprob.W = 'X2=1 -> X3 | X1 -> X4'
+        shprob.W = '(X2=1 -> X3 | X1 -> X4) & X2d'
         shprob2 = copy.deepcopy(shprob)
-        shprob2.W = 'X4'
+        shprob2.W = 'X1'
         shprob.FW = [shprob2]
         shprob2.FW = [shprob]
         shprob.Phi = 'X2 | X4'
@@ -1426,9 +1428,15 @@ if __name__ == "__main__":
         print shprob.Phi
         print('DONE')
         print('================================\n')
-    
 
+    ####################################
+
+        print('Testing ShortHorizonProb')
+        spec.sys_prog = 'X1'
         rhtlpprob = RHTLPProb(shprobs=[shprob, shprob2], discretize=False, \
                                   env_vars=prob.env_vars, sys_disc_vars=sys_disc_vars, \
                                   disc_props=disc_props, disc_dynamics=prob.disc_dynamics, \
                                   spec=spec, verbose=3)
+        rhtlpprob.validate(3)
+        print('DONE')
+        print('================================\n')
