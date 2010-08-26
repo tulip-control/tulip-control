@@ -73,8 +73,7 @@
 
 <div class="viewcode-block" id="SynthesisProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb">[docs]</a><span class="k">class</span> <span class="nc">SynthesisProb</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    SynthesisProb class for specifying the receding horizon temporal logic planning</span>
-<span class="sd">    problem.</span>
+<span class="sd">    SynthesisProb class for specifying a planner synthesis problem.</span>
 <span class="sd">    A SynthesisProb object contains the following fields:</span>
 
 <span class="sd">    - `env_vars`: a dictionary {str : str} whose keys are the names </span>
@@ -86,51 +85,53 @@
 <span class="sd">    - `disc_cont_var`: the name of the continuous variable after the discretization.</span>
 <span class="sd">    - `disc_dynamics`: a list of Region objects corresponding to the partition of the</span>
 <span class="sd">      continuous state space.</span>
+
+<span class="sd">    **Constructor**:</span>
+
+<span class="sd">    **SynthesisProb** ([ `file` = &#39;&#39;]): construct this SynthesisProb object from `file`</span>
+
+<span class="sd">    - `file`: the name of the rhtlp file to be parsed. If `file` is given,</span>
+<span class="sd">      the rest of the inputs to this function will be ignored.</span>
+
+<span class="sd">    **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, </span>
+<span class="sd">    `disc_dynamics` = None[, `spec` = GRSpec()]]]]])</span>
+
+<span class="sd">    **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, </span>
+<span class="sd">    `cont_state_space` = None[, `cont_props` = {}[, `sys_dyn` = None[, </span>
+<span class="sd">    `spec` = GRSpec()]]]]]]])</span>
+
+<span class="sd">    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
+<span class="sd">      of environment variables and whose values are their possible values, e.g., </span>
+<span class="sd">      boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
+<span class="sd">    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
+<span class="sd">      names of discrete system variables and whose values are their possible values.</span>
+<span class="sd">    - `disc_props`: a dictionary {str : str} whose keys are the symbols for </span>
+<span class="sd">      propositions on discrete variables and whose values are the actual propositions</span>
+<span class="sd">      on discrete variables.</span>
+<span class="sd">    - `disc_dynamics`: a PropPreservingPartition object that represents the </span>
+<span class="sd">      transition system obtained from the discretization procedure.</span>
+<span class="sd">      if `disc_dynamics` is given, `cont_state_space`, `cont_props` and `sys_dyn`</span>
+<span class="sd">      will be ignored.</span>
+<span class="sd">    - `cont_state_space`: a Polytope object that represent the state space of the</span>
+<span class="sd">      continuous variables</span>
+<span class="sd">    - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for </span>
+<span class="sd">      propositions on continuous variables and whose values are polytopes that represent</span>
+<span class="sd">      the region in the state space in which the corresponding proposition hold.</span>
+<span class="sd">    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables</span>
+<span class="sd">    - `spec`: a GRSpec object that specifies the specification of this synthesis problem</span>
+<span class="sd">    - `verbose`: an integer that specifies the verbose level.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        SynthesisProb(`file`=&#39;&#39;): construct this SynthesisProb object from `file`</span>
 
-<span class="sd">        - `file`: the name of the rhtlp file to be parsed. If `file` is given,</span>
-<span class="sd">          the rest of the inputs to this function will be ignored.</span>
-
-<span class="sd">        SynthesisProb(`env_vars`={}, `sys_disc_vars`={}, `disc_props`={}, </span>
-<span class="sd">        `disc_dynamics`=None, `spec`=GRSpec())</span>
-
-<span class="sd">        SynthesisProb(`env_vars`={}, `sys_disc_vars`={}, `disc_props`={}, </span>
-<span class="sd">        `cont_state_space`=None, `cont_props`={}, `sys_dyn`=None, `spec`=GRSpec())</span>
-
-<span class="sd">        - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
-<span class="sd">          of environment variables and whose values are their possible values, e.g., </span>
-<span class="sd">          boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</span>
-<span class="sd">        - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the </span>
-<span class="sd">          names of discrete system variables and whose values are their possible values.</span>
-<span class="sd">        - `disc_props`: a dictionary {str : str} whose keys are the symbols for </span>
-<span class="sd">          propositions on discrete variables and whose values are the actual propositions</span>
-<span class="sd">          on discrete variables.</span>
-<span class="sd">        - `disc_dynamics`: a PropPreservingPartition object that represents the </span>
-<span class="sd">          transition system obtained from the discretization procedure.</span>
-<span class="sd">          if `disc_dynamics` is given, `cont_state_space`, `cont_props` and `sys_dyn`</span>
-<span class="sd">          will be ignored.</span>
-<span class="sd">        - `cont_state_space`: a Polytope object that represent the state space of the</span>
-<span class="sd">          continuous variables</span>
-<span class="sd">        - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for </span>
-<span class="sd">          propositions on continuous variables and whose values are polytopes that represent</span>
-<span class="sd">          the region in the state space in which the corresponding proposition hold.</span>
-<span class="sd">        - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables</span>
-<span class="sd">        - `spec`: a GRSpec object that specifies the specification of this synthesis problem</span>
-<span class="sd">        - `verbose`: an integer that specifies the verbose level.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span><span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span><span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
                                <span class="n">env_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
-                                         <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+                                           <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="n">verbose</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;verbose&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -194,9 +195,66 @@
                                             <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
                                             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
-
     <span class="c">###################################################################</span>
 
+<div class="viewcode-block" id="SynthesisProb.getEnvVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getEnvVars">[docs]</a>    <span class="k">def</span> <span class="nf">getEnvVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the environment variables of this object as a dictionary </span>
+<span class="sd">        whose key is the name of the variable</span>
+<span class="sd">        and whose value is the possible values that the variable can take.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getSysVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getSysVars">[docs]</a>    <span class="k">def</span> <span class="nf">getSysVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the system (discrete and discretized continuous) variables of </span>
+<span class="sd">        this object as a dictionary whose key is the name of the variable</span>
+<span class="sd">        and whose value is the possible values that the variable can take.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getSpec"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getSpec">[docs]</a>    <span class="k">def</span> <span class="nf">getSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the specification of this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getDiscretizedContVar"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getDiscretizedContVar">[docs]</a>    <span class="k">def</span> <span class="nf">getDiscretizedContVar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the discretized continuous variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getDiscretizedDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getDiscretizedDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">getDiscretizedDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the discretized continuous variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.setJTLVFile"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setJTLVFile">[docs]</a>    <span class="k">def</span> <span class="nf">setJTLVFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jtlvfile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the temporary jtlv files (smv, spc, aut).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">jtlvfile</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">jtlvfile</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.SynthesisProb.setJTLVFile: &#39;</span> <span class="o">+</span> \
+                           <span class="s">&#39;The input jtlvfile must be a string indicating the name of the file.&#39;</span><span class="p">)</span>
+
+
+    <span class="c">###################################################################</span>
+</div>
 <div class="viewcode-block" id="SynthesisProb.createProbFromContDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.createProbFromContDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">createProbFromContDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="p">{},</span> <span class="n">disc_props</span><span class="o">=</span><span class="p">{},</span> \
                                        <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
                                        <span class="n">spec</span><span class="o">=</span><span class="n">GRSpec</span><span class="p">(),</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -329,8 +387,11 @@
                 <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_region</span><span class="p">)</span>
 
         <span class="c"># Construct this object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+                                           <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
 
         <span class="c"># Replace &#39;...&#39; in the range of possible values of env_vars to the actual  </span>
         <span class="c"># values and convert a list representation of the range of possible values </span>
@@ -353,7 +414,7 @@
                             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                                 <span class="n">reg</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
                             <span class="n">reg</span> <span class="o">+=</span> <span class="n">val</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: &#39;</span> <span class="o">+</span> \
                                          <span class="s">&quot;Unknown possible values for environment &quot;</span> <span class="o">+</span> \
@@ -364,7 +425,7 @@
                         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                             <span class="n">all_values</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
                         <span class="n">all_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: &#39;</span> <span class="o">+</span> \
                                      <span class="s">&quot;Unknown possible values for environment &quot;</span> <span class="o">+</span> \
@@ -391,7 +452,7 @@
                             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                                 <span class="n">reg</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
                             <span class="n">reg</span> <span class="o">+=</span> <span class="n">val</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: &#39;</span> <span class="o">+</span> \
                                          <span class="s">&quot;Unknown possible values for discrete &quot;</span> <span class="o">+</span> \
@@ -402,15 +463,15 @@
                         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                             <span class="n">all_values</span> <span class="o">+=</span> <span class="s">&#39;, &#39;</span>
                         <span class="n">all_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span> <span class="o">+</span> <span class="n">all_values</span> <span class="o">+</span> <span class="s">&#39;}&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING rhtlp.SynthesisProb.createProbFromDiscDynamics: &#39;</span> <span class="o">+</span> \
                                      <span class="s">&quot;Unknown possible values for discrete system &quot;</span> <span class="o">+</span> \
                                      <span class="s">&quot;variable &quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
 
         <span class="c"># New variable that identifies in which cell the continuous state is</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">cont_varname</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">cont_varname</span> <span class="o">=</span> <span class="s">&#39;cellID&#39;</span> 
@@ -427,12 +488,12 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">contvar_values</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">contvar_values</span> <span class="o">+=</span> <span class="s">&#39;}&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">cont_varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">contvar_values</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="n">cont_varname</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span><span class="p">[</span><span class="n">cont_varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">contvar_values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">=</span> <span class="n">cont_varname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="p">)</span>
 
         <span class="c"># Process the spec</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 
         <span class="c"># Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where </span>
         <span class="c"># P1, ..., Pn are cells in disc_dynamics that satisfy XC</span>
@@ -448,27 +509,29 @@
                             <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39; | &#39;</span>
                         <span class="n">newprop</span> <span class="o">=</span> <span class="n">newprop</span> <span class="o">+</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="n">cont_varname</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
                             <span class="nb">str</span><span class="p">(</span><span class="n">regID</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="n">props</span><span class="o">=</span><span class="p">{</span><span class="n">propSymbol</span><span class="p">:</span><span class="n">newprop</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="n">props</span><span class="o">=</span><span class="p">{</span><span class="n">propSymbol</span><span class="p">:</span><span class="n">newprop</span><span class="p">},</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">newprop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">newprop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">newprop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">newprop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="c"># Replace symbols for propositions on discrete variables with the actual </span>
         <span class="c"># propositions</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="n">props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="n">props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
 <span class="c">#         # Transitions for continuous dynamics</span>
 <span class="c">#         addAnd = False</span>
-<span class="c">#         if (len(self.spec.sys_safety) &gt; 0 and not(self.spec.sys_safety.isspace())):</span>
+<span class="c">#         if (len(self.__spec.sys_safety) &gt; 0 and not(self.__spec.sys_safety.isspace())):</span>
 <span class="c">#             addAnd = True</span>
 <span class="c">#</span>
 <span class="c">#         if (disc_dynamics is not None):</span>
@@ -476,18 +539,18 @@
 <span class="c">#                 to_regions = [j for j in range(0,disc_dynamics.num_regions) if \</span>
 <span class="c">#                                   disc_dynamics.trans[j][from_region]]</span>
 <span class="c">#                 if (addAnd):</span>
-<span class="c">#                     self.spec.sys_safety += &#39; &amp;\n&#39;</span>
+<span class="c">#                     self.__spec.sys_safety += &#39; &amp;\n&#39;</span>
 <span class="c">#                 if (from_region == 0):</span>
-<span class="c">#                     self.spec.sys_safety += &#39;-- transition relations for continuous dynamics\n&#39;</span>
-<span class="c">#                 self.spec.sys_safety += &#39;\t((&#39; + cont_varname + &#39; = &#39; + \</span>
+<span class="c">#                     self.__spec.sys_safety += &#39;-- transition relations for continuous dynamics\n&#39;</span>
+<span class="c">#                 self.__spec.sys_safety += &#39;\t((&#39; + cont_varname + &#39; = &#39; + \</span>
 <span class="c">#                                   str(from_region) + &#39;) -&gt; next(&#39;</span>
 <span class="c">#                 if (len(to_regions) == 0):</span>
-<span class="c">#                     self.spec.sys_safety += &#39;FALSE&#39;</span>
+<span class="c">#                     self.__spec.sys_safety += &#39;FALSE&#39;</span>
 <span class="c">#                 for i, to_region in enumerate(to_regions):</span>
 <span class="c">#                     if (i &gt; 0):</span>
-<span class="c">#                         self.spec.sys_safety += &#39; | &#39;</span>
-<span class="c">#                     self.spec.sys_safety += &#39;(&#39; + cont_varname + &#39; = &#39; + str(to_region) + &#39;)&#39;</span>
-<span class="c">#                 self.spec.sys_safety += &#39;))&#39;</span>
+<span class="c">#                         self.__spec.sys_safety += &#39; | &#39;</span>
+<span class="c">#                     self.__spec.sys_safety += &#39;(&#39; + cont_varname + &#39; = &#39; + str(to_region) + &#39;)&#39;</span>
+<span class="c">#                 self.__spec.sys_safety += &#39;))&#39;</span>
 <span class="c">#                 addAnd = True</span>
 
 
@@ -505,9 +568,9 @@
 <span class="sd">        - `verbose`: an integer that specifies the verbose level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
-        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
-        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toJTLVInput</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
                           <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
@@ -541,7 +604,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="n">realizable</span>
         <span class="n">ce</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span><span class="p">):</span>
-            <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+            <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
             <span class="n">ce</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">getCounterExamples</span><span class="p">(</span><span class="n">aut_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>        
         <span class="k">return</span> <span class="n">ce</span>
 
@@ -567,9 +630,9 @@
 <span class="sd">        - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,</span>
 <span class="sd">          this function will not print anything on the screen.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
-        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
-        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
+        <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+        <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+        <span class="n">aut_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toJTLVInput</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
                           <span class="n">file_exist_option</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">realizable</span> <span class="o">=</span> <span class="n">grgameint</span><span class="o">.</span><span class="n">solveGame</span><span class="p">(</span><span class="n">smv_file</span><span class="o">=</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="o">=</span><span class="n">spc_file</span><span class="p">,</span> \
@@ -615,9 +678,9 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spc_file.&quot;</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
+            <span class="n">smv_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.smv&#39;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
+            <span class="n">spc_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">+</span> <span class="s">&#39;.spc&#39;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)))):</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -674,8 +737,8 @@
         <span class="c">###################################################################################</span>
         <span class="c"># Generate smv file</span>
         <span class="c">###################################################################################</span>
-        <span class="n">env_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span>
-        <span class="n">sys_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span>
+        <span class="n">env_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span>
+        <span class="n">sys_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span>
 
         <span class="c"># Write smv file</span>
         <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
@@ -706,10 +769,10 @@
         <span class="c">###################################################################################</span>
         <span class="c"># Generate spc file</span>
         <span class="c">###################################################################################</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
-            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">toJTLVSpec</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">)):</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="o">.</span><span class="n">toJTLVSpec</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span>
         <span class="n">assumption</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">guarantee</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -786,22 +849,22 @@
             <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>        
 
         <span class="c"># Transitions for continuous dynamics</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">from_region</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
-                <span class="n">to_regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">from_region</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">from_region</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">):</span>
+                <span class="n">to_regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="o">.</span><span class="n">num_regions</span><span class="p">)</span> <span class="k">if</span> \
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="o">.</span><span class="n">trans</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">from_region</span><span class="p">]]</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">addAnd</span><span class="p">):</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &amp;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">from_region</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;-- transition relations for continuous dynamics</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[]((s.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[]((s.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> \
                             <span class="nb">str</span><span class="p">(</span><span class="n">from_region</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;) -&gt; next(&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_regions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;FALSE&#39;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">to_regions</span><span class="p">):</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; | &#39;</span><span class="p">)</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_region</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;(s.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_region</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;))&#39;</span><span class="p">)</span>
                 <span class="n">addAnd</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -830,13 +893,20 @@
 <span class="sd">    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies </span>
 <span class="sd">      the set F(W).</span>
 <span class="sd">    - `Phi`: a proposition that specifies the receding horizon invariant.</span>
+<span class="sd">    - `global_spec`: the global specification of the system</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">FW</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">global_spec</span><span class="o">=</span><span class="n">GRSpec</span><span class="p">(),</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__W</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__FW</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_spec</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span><span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                     <span class="n">env_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">setW</span><span class="p">(</span><span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setFW</span><span class="p">(</span><span class="n">FW</span><span class="o">=</span><span class="n">FW</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLocalPhi</span><span class="p">(</span><span class="n">Phi</span><span class="o">=</span><span class="n">Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="p">(</span><span class="s">&#39;disc_props&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;disc_props&#39;</span><span class="p">])</span>
         
@@ -846,91 +916,112 @@
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb: the input global_spec must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a GRSpec objects.&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid global_spec.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">global_spec</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">global_spec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__global_spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
         <span class="n">args</span><span class="p">[</span><span class="s">&#39;spec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__computeLocalSpec</span><span class="p">()</span>
         <span class="n">SynthesisProb</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">setW</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="ShortHorizonProb.getGlobalSpec"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.getGlobalSpec">[docs]</a>    <span class="k">def</span> <span class="nf">getGlobalSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the global specification of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_spec</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShortHorizonProb.setW"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.setW">[docs]</a>    <span class="k">def</span> <span class="nf">setW</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the set W of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb.setW: the input W must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a string.&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid W.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">W</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__W</span> <span class="o">=</span> <span class="n">W</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">update</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updateLocalSpec</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">setFW</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FW</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShortHorizonProb.getW"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.getW">[docs]</a>    <span class="k">def</span> <span class="nf">getW</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the set W of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__W</span>
+</div>
+<div class="viewcode-block" id="ShortHorizonProb.setFW"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.setFW">[docs]</a>    <span class="k">def</span> <span class="nf">setFW</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FW</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the set F(W) of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">FW</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">FW</span><span class="p">,</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb: the input FW must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a ShortHorizonProb object or a list of ShortHorizonProb object.&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid W.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">FW</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">FW</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">FW</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__FW</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">FW</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">FW</span> <span class="o">=</span> <span class="n">FW</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__FW</span> <span class="o">=</span> <span class="n">FW</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">update</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updateLocalSpec</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">setLocalPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="ShortHorizonProb.getFW"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.getFW">[docs]</a>    <span class="k">def</span> <span class="nf">getFW</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the set F(W) of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__FW</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ShortHorizonProb.setLocalPhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.setLocalPhi">[docs]</a>    <span class="k">def</span> <span class="nf">setLocalPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the local invariant Phi of this short horizon problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.ShortHorizonProb: the input Phi must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a string.&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid Phi.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">Phi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="n">Phi</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">update</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updateLocalSpec</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-
+</div>
 <div class="viewcode-block" id="ShortHorizonProb.getLocalPhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.getLocalPhi">[docs]</a>    <span class="k">def</span> <span class="nf">getLocalPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the local Phi for this ShortHorizonProb object.</span>
+        <span class="sd">&quot;&quot;&quot; Return the local invariant Phi of this short horizon problem.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span>
 </div>
 <div class="viewcode-block" id="ShortHorizonProb.updateLocalSpec"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb.updateLocalSpec">[docs]</a>    <span class="k">def</span> <span class="nf">updateLocalSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the short horizon specification based on the current W, FW and Phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">local_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__computeLocalSpec</span><span class="p">()</span>
-        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
-            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span><span class="p">]</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()]</span>
             
-        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
-                       <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                       <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedDynamics</span><span class="p">(),</span> \
                        <span class="n">spec</span><span class="o">=</span><span class="n">local_spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 </div>
     <span class="k">def</span> <span class="nf">__computeLocalSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="n">local_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_spec</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">local_spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__global_spec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__W</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
             <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;-- W</span><span class="se">\n</span><span class="s">&#39;</span>
-            <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__W</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
             <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;-- Phi</span><span class="se">\n</span><span class="s">&#39;</span>
-            <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">local_spec</span><span class="o">.</span><span class="n">env_init</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local_spec</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
             <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">+=</span> <span class="s">&#39;-- Phi</span><span class="se">\n</span><span class="s">&#39;</span>
-            <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
 
         <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FW</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FW</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">fw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FW</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fw</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__FW</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__FW</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">fw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__FW</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fw</span><span class="o">.</span><span class="n">getW</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">+=</span> <span class="p">[</span><span class="n">fw</span><span class="o">.</span><span class="n">W</span><span class="p">]</span>
+                    <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">+=</span> <span class="p">[</span><span class="n">fw</span><span class="o">.</span><span class="n">getW</span><span class="p">()]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                         <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
-                    <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">fw</span><span class="o">.</span><span class="n">W</span>
+                    <span class="n">local_spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">fw</span><span class="o">.</span><span class="n">getW</span><span class="p">()</span>
 <span class="c">#         local_spec.sym2prop(self.__disc_props, verbose=verbose)</span>
         <span class="k">return</span> <span class="n">local_spec</span>
 
@@ -948,16 +1039,16 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counter_examples</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="s">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
             <span class="k">for</span> <span class="n">ce</span> <span class="ow">in</span> <span class="n">counter_examples</span><span class="p">:</span>
                 <span class="n">ce_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
                 <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">ce</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ce_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                         <span class="n">ce_formula</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
                     <span class="n">ce_formula</span> <span class="o">+=</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+=</span> <span class="s">&#39;!(&#39;</span> <span class="o">+</span> <span class="n">ce_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+=</span> <span class="s">&#39;!(&#39;</span> <span class="o">+</span> <span class="n">ce_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
             <span class="k">return</span> <span class="bp">True</span>
 
 
@@ -971,22 +1062,14 @@
 <span class="sd">    A RHTLPProb object contains the following fields:</span>
 
 <span class="sd">    - `shprobs`: a list of ShortHorizonProb objects</span>
-<span class="sd">    - `spec`: a GRSpec object that specifies the global specification</span>
+<span class="sd">    - `Phi`: the invariant for the RHTLP problem</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shprobs</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;True&#39;</span><span class="p">,</span> <span class="n">discretize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span><span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
-                               <span class="n">env_prog</span><span class="o">=</span><span class="p">[],</span> <span class="n">sys_prog</span><span class="o">=</span><span class="p">[])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
-                                         <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
 
@@ -1002,7 +1085,7 @@
                            <span class="s">&quot;a list of ShortHorizonProb objects.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">Phi</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="n">Phi</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.RHTLPProb: the input Phi must be a string.&quot;</span><span class="p">)</span>
         
@@ -1027,26 +1110,26 @@
                 <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.RHTLPProb: The input spec must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a GRSpec objects.&quot;</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spec.&quot;</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;spec&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.RHTLPProb: The input spec can have &quot;</span> <span class="o">+</span> \
                                <span class="s">&quot;at most one system progress formula.&quot;</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid spec.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;spec&#39;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> \
-                      <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">init_cond</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> \
+                      <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">init_cond</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">sys_init</span><span class="p">:</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">init_cond</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">init_cond</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-                <span class="k">for</span> <span class="n">init_cond</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">spec</span><span class="o">.</span><span class="n">env_init</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">init_cond</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">env_init</span><span class="p">:</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">init_cond</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">init_cond</span>
 
@@ -1069,7 +1152,7 @@
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid file.&quot;</span><span class="p">)</span>
 
             <span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> <span class="n">sys_cont_vars</span><span class="p">,</span> <span class="n">cont_state_space</span><span class="p">,</span> \
-                 <span class="n">cont_props</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="o">=</span> <span class="n">parseSpec</span><span class="p">(</span><span class="n">spec_file</span><span class="o">=</span><span class="nb">file</span><span class="p">)</span>
+                 <span class="n">cont_props</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span> <span class="o">=</span> <span class="n">parseSpec</span><span class="p">(</span><span class="n">spec_file</span><span class="o">=</span><span class="nb">file</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="n">cont_props</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="p">(</span><span class="s">&#39;disc_dynamics&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1079,7 +1162,8 @@
             <span class="n">discretize</span> <span class="o">=</span> <span class="bp">False</span>
             <span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;disc_dynamics&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">disc_dynamics</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> \
                         <span class="ow">not</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">))):</span>
@@ -1099,34 +1183,42 @@
                                                 <span class="n">cont_state_space</span><span class="o">=</span><span class="n">cont_state_space</span><span class="p">,</span> \
                                                 <span class="n">cont_props</span><span class="o">=</span><span class="n">cont_props</span><span class="p">,</span> \
                                                 <span class="n">sys_dyn</span><span class="o">=</span><span class="n">sys_dyn</span><span class="p">,</span> \
-                                                <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> \
+                                                <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
                                                 <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
                                                 <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                                 <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> \
                                                 <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
-                                                <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">,</span> \
+                                                <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
                                                 <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
 
-    <span class="k">def</span> <span class="nf">addSHProb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shprob</span><span class="p">):</span>
+<div class="viewcode-block" id="RHTLPProb.addSHProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.addSHProb">[docs]</a>    <span class="k">def</span> <span class="nf">addSHProb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shprob</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add a short horizon problem to this RHTLP problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="p">),</span> <span class="n">ShortHorizonProb</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shprob</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.RHTLPProb.addSHProb: the input shprob must be &quot;</span> <span class="o">+</span> \
                            <span class="s">&quot;a ShortHorizonProb object.&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RHTLPProb.getPhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.getPhi">[docs]</a>    <span class="k">def</span> <span class="nf">getPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the global invariant Phi for this RHTLP problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span>
 
-
-    <span class="k">def</span> <span class="nf">__getAllVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>        
-        <span class="n">allvars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span>
-        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
-            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_cont_var</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">__getAllVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span> 
+        <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">()</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span><span class="p">]</span>
         <span class="n">allvars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span><span class="p">:</span>
-            <span class="n">allvars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;boolean&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span><span class="p">:</span>
+                <span class="n">allvars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;boolean&#39;</span>
 
         <span class="n">allvars_values</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">allvars_variables</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1144,7 +1236,7 @@
     <span class="k">def</span> <span class="nf">__checkcovering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">allW_formula</span> <span class="o">=</span> <span class="s">&#39;False&#39;</span>
         <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">:</span>
-            <span class="n">allW_formula</span> <span class="o">+=</span> <span class="s">&#39; | (&#39;</span> <span class="o">+</span> <span class="n">shprob</span><span class="o">.</span><span class="n">W</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">allW_formula</span> <span class="o">+=</span> <span class="s">&#39; | (&#39;</span> <span class="o">+</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getW</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
 
 <span class="c">#         if (self.__disc_props is not None):</span>
 <span class="c">#             for propSymbol, prop in self.__disc_props.iteritems():</span>
@@ -1157,11 +1249,11 @@
 
         <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         
-<span class="c">#         allvars = copy.deepcopy(self.env_vars)</span>
-<span class="c">#         sys_disc_vars = copy.deepcopy(self.sys_vars)</span>
-<span class="c">#         if (self.disc_cont_var is not None and len(self.disc_cont_var) &gt; 0 and \</span>
-<span class="c">#                 self.disc_cont_var in sys_disc_vars):</span>
-<span class="c">#             del sys_disc_vars[self.disc_cont_var]</span>
+<span class="c">#         allvars = self.getEnvVars()</span>
+<span class="c">#         sys_disc_vars = self.getSysVars()</span>
+<span class="c">#         if (self.__disc_cont_var is not None and len(self.__disc_cont_var) &gt; 0 and \</span>
+<span class="c">#                 self.__disc_cont_var in sys_disc_vars):</span>
+<span class="c">#             del sys_disc_vars[self.__disc_cont_var]</span>
 <span class="c">#         allvars.update(sys_disc_vars)</span>
 <span class="c">#         for var in self.__cont_props:</span>
 <span class="c">#             allvars[var] = &#39;boolean&#39;</span>
@@ -1186,6 +1278,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="n">allW_formula</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">vardict</span>
+                <span class="k">print</span> <span class="n">allvars_variables</span>
+                <span class="k">print</span> <span class="n">allvars_values</span>
                 <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.validate: &#39;</span> <span class="o">+</span> \
                                <span class="s">&#39;invalid W&#39;</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid W&quot;</span><span class="p">)</span>
@@ -1205,9 +1300,9 @@
     <span class="k">def</span> <span class="nf">__constructWGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">graph</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">wind</span><span class="p">,</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">FW</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="nb">list</span><span class="p">)):</span>
                 <span class="n">fw_ind</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">fw</span> <span class="ow">in</span> <span class="n">shprob</span><span class="o">.</span><span class="n">FW</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fw</span> <span class="ow">in</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">():</span>
                     <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fw</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
                         <span class="n">fw_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fw</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fw</span><span class="p">,</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
@@ -1224,9 +1319,9 @@
                         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR rhtlp.RHTLPProb.__constructWGraph &quot;</span> <span class="o">+</span> \
                                        <span class="s">&quot;Invalid FW&quot;</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid FW.&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">FW</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-                <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">shprob</span><span class="o">.</span><span class="n">FW</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">FW</span><span class="p">,</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="nb">int</span><span class="p">)):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">()])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
                 <span class="n">fw_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWInd</span><span class="p">(</span><span class="n">fw</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">tmpind</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fw_ind</span><span class="p">])</span>
@@ -1259,11 +1354,11 @@
 
         <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         
-<span class="c">#         allvars = copy.deepcopy(self.env_vars)</span>
-<span class="c">#         sys_disc_vars = copy.deepcopy(self.sys_vars)</span>
-<span class="c">#         if (self.disc_cont_var is not None and len(self.disc_cont_var) &gt; 0 and \</span>
-<span class="c">#                 self.disc_cont_var in sys_disc_vars):</span>
-<span class="c">#             del sys_disc_vars[self.disc_cont_var]</span>
+<span class="c">#         allvars = self.getEnvVars()</span>
+<span class="c">#         sys_disc_vars = self.getSysVars()</span>
+<span class="c">#         if (self.__disc_cont_var is not None and len(self.__disc_cont_var) &gt; 0 and \</span>
+<span class="c">#                 self.__disc_cont_var in sys_disc_vars):</span>
+<span class="c">#             del sys_disc_vars[self.__disc_cont_var]</span>
 <span class="c">#         allvars.update(sys_disc_vars)</span>
 <span class="c">#         for var in self.__cont_props:</span>
 <span class="c">#             allvars[var] = &#39;boolean&#39;</span>
@@ -1291,7 +1386,7 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                 <span class="n">newW0ind</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">W0ind</span><span class="p">:</span>
-                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">getW</span><span class="p">(),</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                         <span class="n">newW0ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -1308,20 +1403,20 @@
 <span class="sd">        Compute Phi for this RHTLPProb object.</span>
 <span class="sd">        Return a boolean that indicates whether a valid Phi exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
 
         <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">:</span>
             <span class="n">localPhi</span> <span class="o">=</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getLocalPhi</span><span class="p">()</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">localPhi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">localPhi</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">localPhi</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">localPhi</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">)</span>
 
         <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">done</span><span class="p">):</span>
@@ -1341,7 +1436,7 @@
                         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid initial conditionW&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                            <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.computePhi: &#39;</span> <span class="o">+</span> \
                                            <span class="s">&#39;invalid Phi&#39;</span><span class="p">)</span>
@@ -1351,11 +1446,11 @@
                             <span class="k">print</span> <span class="s">&#39;counter example: &#39;</span><span class="p">,</span> <span class="n">vardict</span>
                             <span class="k">return</span> <span class="bp">False</span>
 
-                <span class="n">shprob</span><span class="o">.</span><span class="n">setLocalPhi</span><span class="p">(</span><span class="n">Phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="n">shprob</span><span class="o">.</span><span class="n">setLocalPhi</span><span class="p">(</span><span class="n">Phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                 <span class="n">phi_updated</span> <span class="o">=</span> <span class="n">shprob</span><span class="o">.</span><span class="n">computeLocalPhi</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">phi_updated</span><span class="p">):</span>
                     <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getLocalPhi</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getLocalPhi</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">True</span>
 
 </div>
@@ -1371,13 +1466,16 @@
                     <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">:</span>
-                    <span class="n">shprob</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">shprob</span><span class="o">.</span><span class="n">W</span><span class="p">)</span>
-<span class="c">#                     if (isinstance(shprob.FW, ShortHorizonProb)):</span>
-<span class="c">#                         shprob.FW.W = re.sub(r&#39;\b&#39;+propSymbol+r&#39;\b&#39;, &#39;(&#39;+prop+&#39;)&#39;, shprob.FW.W)</span>
-<span class="c">#                     elif (isinstance(shprob.FW, list)):</span>
+                    <span class="n">shprob</span><span class="o">.</span><span class="n">setW</span><span class="p">(</span><span class="n">W</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getW</span><span class="p">()),</span> \
+                                    <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+<span class="c">#                     if (isinstance(shprob.getFW(), ShortHorizonProb)):</span>
+<span class="c">#                         shprob.FW.W() = re.sub(r&#39;\b&#39;+propSymbol+r&#39;\b&#39;, &#39;(&#39;+prop+&#39;)&#39;, \</span>
+<span class="c">#                                                     shprob.FW.W())</span>
+<span class="c">#                     elif (isinstance(shprob.getFW(), list)):</span>
 <span class="c">#                         for fw in shprob.FW:</span>
 <span class="c">#                             if (isinstance(fw, ShortHorizonProb)):</span>
-<span class="c">#                                 fw.W = re.sub(r&#39;\b&#39;+propSymbol+r&#39;\b&#39;, &#39;(&#39;+prop+&#39;)&#39;, fw.W)</span>
+<span class="c">#                                 fw.W = re.sub(r&#39;\b&#39;+propSymbol+r&#39;\b&#39;, &#39;(&#39;+prop+&#39;)&#39;, \</span>
+<span class="c">#                                                 fw.W)</span>
                                 
 
         <span class="c"># First, make sure that the union of W&#39;s covers the entire state space</span>
@@ -1568,7 +1666,7 @@
 
     <span class="c">####################################</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;3&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;5&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s">&#39;2&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;3&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing ShortHorizonProb&#39;</span><span class="p">)</span>
         <span class="n">grspec</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">()</span>
         <span class="n">grspec</span><span class="o">.</span><span class="n">env_prog</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;!park&#39;</span><span class="p">,</span> <span class="s">&#39;!X4d&#39;</span><span class="p">]</span>
@@ -1576,31 +1674,70 @@
         <span class="n">grspec</span><span class="o">.</span><span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;Park -&gt; (X0 | X2 | X5)&#39;</span>
         <span class="n">shprob</span> <span class="o">=</span> <span class="n">ShortHorizonProb</span><span class="p">(</span><span class="n">W</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">FW</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
                                       <span class="n">global_spec</span><span class="o">=</span><span class="n">grspec</span><span class="p">,</span> \
-                                      <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">env_vars</span><span class="p">,</span> \
+                                      <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> \
                                       <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                       <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
-                                      <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                      <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getDiscretizedDynamics</span><span class="p">(),</span> \
                                       <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">shprob</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="s">&#39;(X2=1 -&gt; X3 | X1 -&gt; X4) &amp; X2d&#39;</span>
+        <span class="n">shprob</span><span class="o">.</span><span class="n">setW</span><span class="p">(</span><span class="s">&#39;(X2=1 -&gt; X3 | X1 -&gt; X4) &amp; X2d&#39;</span><span class="p">)</span>
         <span class="n">shprob2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">shprob</span><span class="p">)</span>
-        <span class="n">shprob2</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="s">&#39;X1&#39;</span>
-        <span class="n">shprob</span><span class="o">.</span><span class="n">FW</span> <span class="o">=</span> <span class="p">[</span><span class="n">shprob2</span><span class="p">]</span>
-        <span class="n">shprob2</span><span class="o">.</span><span class="n">FW</span> <span class="o">=</span> <span class="p">[</span><span class="n">shprob</span><span class="p">]</span>
-        <span class="n">shprob</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="s">&#39;X2 | X4&#39;</span>
+        <span class="n">shprob2</span><span class="o">.</span><span class="n">setW</span><span class="p">(</span><span class="s">&#39;X1&#39;</span><span class="p">)</span>
+        <span class="n">shprob</span><span class="o">.</span><span class="n">setFW</span><span class="p">([</span><span class="n">shprob2</span><span class="p">])</span>
+        <span class="n">shprob2</span><span class="o">.</span><span class="n">setFW</span><span class="p">([</span><span class="n">shprob</span><span class="p">])</span>
+        <span class="n">shprob</span><span class="o">.</span><span class="n">setLocalPhi</span><span class="p">(</span><span class="s">&#39;X2 | X4&#39;</span><span class="p">)</span>
         <span class="n">shprob</span><span class="o">.</span><span class="n">updateLocalSpec</span><span class="p">()</span>
         <span class="n">shprob</span><span class="o">.</span><span class="n">computeLocalPhi</span><span class="p">()</span>
         <span class="n">shprob2</span><span class="o">.</span><span class="n">updateLocalSpec</span><span class="p">()</span>
-        <span class="k">print</span> <span class="n">shprob</span><span class="o">.</span><span class="n">Phi</span>
+        <span class="k">print</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getLocalPhi</span><span class="p">()</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 
-    <span class="c">####################################</span>
-
-        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing ShortHorizonProb&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing RHTLPProb&#39;</span><span class="p">)</span>
         <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="s">&#39;X1&#39;</span>
         <span class="n">rhtlpprob</span> <span class="o">=</span> <span class="n">RHTLPProb</span><span class="p">(</span><span class="n">shprobs</span><span class="o">=</span><span class="p">[</span><span class="n">shprob</span><span class="p">,</span> <span class="n">shprob2</span><span class="p">],</span> <span class="n">discretize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> \
-                                  <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
-                                  <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                  <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                  <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                  <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getDiscretizedDynamics</span><span class="p">(),</span> \
+                                  <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">rhtlpprob</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;5&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing ShortHorizonProb&#39;</span><span class="p">)</span>
+        <span class="n">W</span><span class="o">=</span><span class="s">&#39;X2d&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s">&#39;4&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">):</span>
+            <span class="n">shprob</span> <span class="o">=</span> <span class="n">ShortHorizonProb</span><span class="p">(</span><span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">FW</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                                          <span class="n">global_spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                          <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> \
+                                          <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                          <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                          <span class="n">sys_cont_vars</span><span class="o">=</span><span class="p">[],</span> <span class="n">cont_state_space</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+                                          <span class="n">cont_props</span><span class="o">=</span><span class="p">{},</span> <span class="n">sys_dyn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shprob</span> <span class="o">=</span> <span class="n">ShortHorizonProb</span><span class="p">(</span><span class="n">W</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">FW</span><span class="o">=</span><span class="p">[],</span> <span class="n">Phi</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                                          <span class="n">global_spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                          <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> \
+                                          <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                          <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                          <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
+                                          <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            
+        <span class="n">shprob2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">shprob</span><span class="p">)</span>
+        <span class="n">shprob2</span><span class="o">.</span><span class="n">setW</span><span class="p">(</span><span class="s">&#39;X1d&#39;</span><span class="p">)</span>
+        <span class="n">shprob</span><span class="o">.</span><span class="n">setFW</span><span class="p">([</span><span class="n">shprob2</span><span class="p">])</span>
+        <span class="n">shprob2</span><span class="o">.</span><span class="n">setFW</span><span class="p">([</span><span class="n">shprob</span><span class="p">])</span>
+        <span class="n">shprob</span><span class="o">.</span><span class="n">computeLocalPhi</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getLocalPhi</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Testing RHTLPProb&#39;</span><span class="p">)</span>
+        <span class="n">spec</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="s">&#39;X1&#39;</span>
+        <span class="n">rhtlpprob</span> <span class="o">=</span> <span class="n">RHTLPProb</span><span class="p">(</span><span class="n">shprobs</span><span class="o">=</span><span class="p">[</span><span class="n">shprob</span><span class="p">,</span> <span class="n">shprob2</span><span class="p">],</span> <span class="n">discretize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> \
+                                  <span class="n">env_vars</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                  <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                  <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">PropPreservingPartition</span><span class="p">(),</span> \
                                   <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">rhtlpprob</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>

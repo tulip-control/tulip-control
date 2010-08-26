@@ -53,6 +53,7 @@
 <table width="100%" class="indextable genindextable"><tr>
   <td width="33%" valign="top"><dl>
     <dt><a href="synthesis.html#automaton.Automaton.addAutState">addAutState() (automaton.Automaton method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.RHTLPProb.addSHProb">addSHProb() (rhtlp.RHTLPProb method)</a></dt>
     <dt><a href="synthesis.html#automaton.Automaton">Automaton (class in automaton)</a></dt>
 </dl></td>
   <td width="33%" valign="top"><dl>
@@ -100,12 +101,22 @@
       <dt><a href="synthesis.html#jtlvint.getCounterExamples">(in module jtlvint)</a></dt>
       <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getCounterExamples">(rhtlp.SynthesisProb method)</a></dt>
   </dl></dd>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getDiscretizedContVar">getDiscretizedContVar() (rhtlp.SynthesisProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getDiscretizedDynamics">getDiscretizedDynamics() (rhtlp.SynthesisProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getEnvVars">getEnvVars() (rhtlp.SynthesisProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.getFW">getFW() (rhtlp.ShortHorizonProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.getGlobalSpec">getGlobalSpec() (rhtlp.ShortHorizonProb method)</a></dt>
     <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.getLocalPhi">getLocalPhi() (rhtlp.ShortHorizonProb method)</a></dt>
 </dl></td>
   <td width="33%" valign="top"><dl>
+    <dt><a href="rhtlp.html#rhtlp.RHTLPProb.getPhi">getPhi() (rhtlp.RHTLPProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getSpec">getSpec() (rhtlp.SynthesisProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.getSysVars">getSysVars() (rhtlp.SynthesisProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.getW">getW() (rhtlp.ShortHorizonProb method)</a></dt>
     <dt><a href="synthesis.html#module-grgameint">grgameint (module)</a></dt>
     <dt><a href="simulation.html#module-grsim">grsim (module)</a></dt>
     <dt><a href="simulation.html#grsim.grsim">grsim() (in module grsim)</a></dt>
+    <dt><a href="rhtlp.html#spec.GRSpec">GRSpec (class in spec)</a></dt>
 </dl></td>
 </tr></table>
 
@@ -148,13 +159,19 @@
   <td width="33%" valign="top"><dl>
     <dt><a href="synthesis.html#automaton.Automaton.setAutStateState">setAutStateState() (automaton.Automaton method)</a></dt>
     <dt><a href="synthesis.html#automaton.Automaton.setAutStateTransition">setAutStateTransition() (automaton.Automaton method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.setFW">setFW() (rhtlp.ShortHorizonProb method)</a></dt>
     <dt><a href="synthesis.html#grgameint.setJTLVExe">setJTLVExe() (in module grgameint)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.SynthesisProb.setJTLVFile">setJTLVFile() (rhtlp.SynthesisProb method)</a></dt>
     <dt><a href="synthesis.html#grgameint.setJTLVPath">setJTLVPath() (in module grgameint)</a></dt>
-    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb">ShortHorizonProb (class in rhtlp)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.setLocalPhi">setLocalPhi() (rhtlp.ShortHorizonProb method)</a></dt>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb.setW">setW() (rhtlp.ShortHorizonProb method)</a></dt>
 </dl></td>
   <td width="33%" valign="top"><dl>
+    <dt><a href="rhtlp.html#rhtlp.ShortHorizonProb">ShortHorizonProb (class in rhtlp)</a></dt>
     <dt><a href="synthesis.html#automaton.Automaton.size">size() (automaton.Automaton method)</a></dt>
     <dt><a href="synthesis.html#grgameint.solveGame">solveGame() (in module grgameint)</a></dt>
+    <dt><a href="rhtlp.html#module-spec">spec (module)</a></dt>
+    <dt><a href="rhtlp.html#spec.GRSpec.sym2prop">sym2prop() (spec.GRSpec method)</a></dt>
     <dt><a href="rhtlp.html#rhtlp.SynthesisProb">SynthesisProb (class in rhtlp)</a></dt>
     <dt><a href="synthesis.html#jtlvint.synthesize">synthesize() (in module jtlvint)</a></dt>
     <dt><a href="rhtlp.html#rhtlp.SynthesisProb.synthesizePlannerAut">synthesizePlannerAut() (rhtlp.SynthesisProb method)</a></dt>
@@ -165,6 +182,9 @@
 <table width="100%" class="indextable genindextable"><tr>
   <td width="33%" valign="top"><dl>
     <dt><a href="rhtlp.html#rhtlp.SynthesisProb.toJTLVInput">toJTLVInput() (rhtlp.SynthesisProb method)</a></dt>
+</dl></td>
+  <td width="33%" valign="top"><dl>
+    <dt><a href="rhtlp.html#spec.GRSpec.toJTLVSpec">toJTLVSpec() (spec.GRSpec method)</a></dt>
 </dl></td>
 </tr></table>
 

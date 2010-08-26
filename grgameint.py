@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """ 
---------------------------------------------------------------
-Grgameint --- Interface to the JTLV implementation of GR1 game
---------------------------------------------------------------
+---------------------------------------------------------------------
+Grgameint Module --- Interface to the JTLV implementation of GR1 game
+---------------------------------------------------------------------
 
 About JTLV, see http://jtlv.ysaar.net/
 

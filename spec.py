@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """ 
------------
-Spec Module
------------
+--------------------
+Specification Module
+--------------------
 
 Nok Wongpiromsarn (nok@cds.caltech.edu)
 
