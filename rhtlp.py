@@ -1230,11 +1230,9 @@ class RHTLPProb(SynthesisProb):
             try:
                 ret = rhtlputil.evalExpr(allW_formula, vardict, verbose)
             except:
-                print vardict
-                print allvars_variables
-                print allvars_values
                 printError('ERROR rhtlp.RHTLPProb.validate: ' + \
                                'invalid W')
+                print sys.exc_info()[0], sys.exc_info()[1]
                 raise Exception("Invalid W")
             if (not ret):
 #                 state = dict(zip(allvars_variables, val))
@@ -1334,6 +1332,7 @@ class RHTLPProb(SynthesisProb):
             except:
                 printError('ERROR rhtlp.RHTLPProb.validate: ' + \
                                'invalid W')
+                print sys.exc_info()[0], sys.exc_info()[1]
                 raise Exception("Invalid W")
             if (ret):
                 newW0ind = []
@@ -1385,6 +1384,7 @@ class RHTLPProb(SynthesisProb):
                     except:
                         printError('ERROR rhtlp.RHTLPProb.computePhi: ' + \
                                        'invalid initial condition')
+                        print sys.exc_info()[0], sys.exc_info()[1]
                         raise Exception("Invalid initial conditionW")
                     if (ret):
                         try:
@@ -1392,6 +1392,7 @@ class RHTLPProb(SynthesisProb):
                         except:
                             printError('ERROR rhtlp.RHTLPProb.computePhi: ' + \
                                            'invalid Phi')
+                            print sys.exc_info()[0], sys.exc_info()[1]
                             raise Exception("Invalid Phi")
                         if (not ret):
                             printInfo('sys_init -> Phi is not a tautology')
