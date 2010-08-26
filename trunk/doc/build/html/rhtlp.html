@@ -60,7 +60,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Date:</th><td class="field-body">August 20, 2010</td>
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">August 25, 2010</td>
 </tr>
 <tr class="field"><th class="field-name">Version:</th><td class="field-body">0.1.0</td>
 </tr>
@@ -68,16 +68,23 @@
 </table>
 <dl class="class">
 <dt id="rhtlp.RHTLPProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">RHTLPProb</tt><big>(</big><em>global_spec=&lt;rhtlp.GRSpec instance at 0x1869058&gt;</em>, <em>shprobs=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">RHTLPProb</tt><big>(</big><em>shprobs=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi='True'</em>, <em>discretize=False</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>RHTLPProb class for specifying a receding horizon temporal logic planning problem.
 A RHTLPProb object contains the following fields:</p>
 <ul class="simple">
 <li><cite>shprobs</cite>: a list of ShortHorizonProb objects</li>
-<li><cite>global_spec</cite>: a GRSpec object that specifies the global specification</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the global specification</li>
 </ul>
 <dl class="method">
+<dt id="rhtlp.RHTLPProb.computePhi">
+<tt class="descname">computePhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.computePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.computePhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute Phi for this RHTLPProb object.
+Return a boolean that indicates whether a valid Phi exists.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.RHTLPProb.validate">
-<tt class="descname">validate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">validate</tt><big>(</big><em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the list of ShortHorizonProb objects satisfies the sufficient
 conditions for receding horizon temporal logic planning</p>
 </dd></dl>
@@ -86,13 +93,14 @@ conditions for receding horizon temporal logic planning</p>
 
 <dl class="class">
 <dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>file=''</em>, <em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>sys_cont_vars=</em><span class="optional">[</span><span class="optional">]</span>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>compute_disc_dynamics=True</em>, <em>disc_dynamics=None</em>, <em>spec=&lt;rhtlp.GRSpec instance at 0x1869030&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_spec=&lt;spec.GRSpec instance at 0x188d878&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
 <ul class="simple">
 <li><cite>W</cite>: a proposition that specifies a set W of states.</li>
-<li><cite>FW</cite>: a list of ShortHorizonProb object that specifies a set F(W).</li>
+<li><cite>FW</cite>: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
+the set F(W).</li>
 <li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant.</li>
 </ul>
 <dl class="method">
@@ -101,13 +109,13 @@ A ShortHorizonProb object contains the following fields:</p>
 <dd><p>Compute the local Phi for this ShortHorizonProb object.
 Return a boolean that indicates whether the local Phi gets updated.
 If the current prob is realizable, then the local Phi is not updated and this
-function will return True.
-Otherwise, the local Phi will get updated and this function wil return False.</p>
+function will return False.
+Otherwise, the local Phi will get updated and this function wil return True.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="rhtlp.ShortHorizonProb.getPhi">
-<tt class="descname">getPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getPhi" title="Permalink to this definition">¶</a></dt>
+<dt id="rhtlp.ShortHorizonProb.getLocalPhi">
+<tt class="descname">getLocalPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getLocalPhi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the local Phi for this ShortHorizonProb object.</p>
 </dd></dl>
 
@@ -121,22 +129,20 @@ Otherwise, the local Phi will get updated and this function wil return False.</p
 
 <dl class="class">
 <dt id="rhtlp.SynthesisProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">SynthesisProb</tt><big>(</big><em>file=''</em>, <em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>sys_cont_vars=</em><span class="optional">[</span><span class="optional">]</span>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>compute_disc_dynamics=True</em>, <em>disc_dynamics=None</em>, <em>spec=</em><span class="optional">[</span>, <em>''</em>, <em>''</em><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">SynthesisProb</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>SynthesisProb class for specifying the receding horizon temporal logic planning
 problem.
-An SynthesisProb object contains the following fields:</p>
+A SynthesisProb object contains the following fields:</p>
 <ul class="simple">
 <li><cite>env_vars</cite>: a dictionary {str : str} whose keys are the names 
 of environment variables and whose values are their possible values, e.g., 
-boolean or {0, 2, 3, 4, 5}</li>
+boolean or {0, 2, 3, 4, 5}.</li>
 <li><cite>sys_vars</cite>: a dictionary {str : str} whose keys are the 
 names of system variables and whose values are their possible values.</li>
-<li><cite>spec</cite>: a list of two strings that represents system specification of the form
-assumption -&gt; guarantee; the first string is the assumption and the second 
-string is the guarantee.</li>
-<li><cite>disc_cont_var</cite>: the name of the continuous variable after the discretization</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem.</li>
+<li><cite>disc_cont_var</cite>: the name of the continuous variable after the discretization.</li>
 <li><cite>disc_dynamics</cite>: a list of Region objects corresponding to the partition of the
-continuous state space</li>
+continuous state space.</li>
 </ul>
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.checkRealizability">
@@ -154,12 +160,10 @@ its initial state (in response to the initial environment state).</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromContDynamics">
-<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>file</em>, <em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>sys_cont_vars=</em><span class="optional">[</span><span class="optional">]</span>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=</em><span class="optional">[</span>, <em>''</em>, <em>''</em><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x18750d0&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
-<li><cite>file</cite>: the name of the rhtlp file to be parsed. If <cite>file</cite> is not an empty string,
-the rest of the inputs to this function will be ignored.</li>
 <li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
 of environment variables and whose values are their possible values, e.g., 
 boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
@@ -168,23 +172,20 @@ names of discrete system variables and whose values are their possible values.</
 <li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
 propositions on discrete variables and whose values are the actual propositions
 on discrete variables.</li>
-<li><cite>sys_cont_vars</cite>: a list of strings representing the name of continuous variables</li>
 <li><cite>cont_state_space</cite>: a Polytope object that represent the state space of the
 continuous variables</li>
 <li><cite>cont_props</cite>: a dictionary {str : Polytope} whose keys are the symbols for 
 propositions on continuous variables and whose values are polytopes that represent
 the region in the state space in which the corresponding proposition hold.</li>
 <li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables</li>
-<li><cite>spec</cite>: a list of two strings that represents system specification of the form
-assumption -&gt; guarantee; the first string is the assumption and the second 
-string is the guarantee.</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem.</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
 </ul>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1878fa8&gt;</em>, <em>spec=</em><span class="optional">[</span>, <em>''</em>, <em>''</em><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x188db98&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x188da08&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -198,9 +199,7 @@ propositions on discrete variables and whose values are the actual propositions
 on discrete variables.</li>
 <li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
 transition system obtained from the discretization procedure.</li>
-<li><cite>spec</cite>: a list of two strings that represents system specification of the form
-assumption -&gt; guarantee; the first string is the assumption and the second 
-string is the guarantee.</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem.</li>
 <li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
 </ul>
 </dd></dl>
