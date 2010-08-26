@@ -10,8 +10,11 @@ class bcolors:
     OKGREEN = '\033[1;92m'
     WARNING = '\033[1;95m'
     FAIL = '\033[1;91m'
+    INFO = '\033[1;94m'
     ENDC = '\033[0m'
 def printWarning(text):
     print bcolors.WARNING + text + bcolors.ENDC
 def printError(text):
     print bcolors.FAIL + text + bcolors.ENDC
+def printInfo(text):
+    print bcolors.INFO + text + bcolors.ENDC
