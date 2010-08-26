@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spec &mdash; rhtlp v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="rhtlp v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for spec</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">--------------------</span>
+<span class="sd">Specification Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">Nok Wongpiromsarn (nok@cds.caltech.edu)</span>
+
+<span class="sd">:Date: August 25, 2010</span>
+<span class="sd">:Version: 0.1.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">copy</span>
+
+<div class="viewcode-block" id="GRSpec"><a class="viewcode-back" href="../rhtlp.html#spec.GRSpec">[docs]</a><span class="k">class</span> <span class="nc">GRSpec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GRSpec class for specifying a GR[1] specification of the form</span>
+
+<span class="sd">        (env_init &amp; []env_safety &amp; []&lt;&gt;env_prog) -&gt; (sys_init &amp; []sys_safety &amp; []&lt;&gt;sys_prog).</span>
+
+<span class="sd">    A GRSpec object contains the following fields:</span>
+
+<span class="sd">    - `env_init`: a string or a list of string that specifies the assumption about </span>
+<span class="sd">      the initial state of the environment.</span>
+<span class="sd">    - `env_safety`: a string or a list of string that specifies the assumption about </span>
+<span class="sd">      the evolution of the environment state.</span>
+<span class="sd">    - `env_prog`: a string or a list of string that specifies the justice assumption on </span>
+<span class="sd">      the environment.</span>
+<span class="sd">    - `sys_init`: a string or a list of string that specifies the requirement on the </span>
+<span class="sd">      initial state of the system.</span>
+<span class="sd">    - `sys_safety`: a string or a list of string that specifies the safety requirement.</span>
+<span class="sd">    - `sys_prog`: a string or a list of string that specifies the progress requirement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_init</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">env_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_safety</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> \
+                     <span class="n">env_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_safety</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_safety</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_prog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_prog</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="GRSpec.sym2prop"><a class="viewcode-back" href="../rhtlp.html#spec.GRSpec.sym2prop">[docs]</a>    <span class="k">def</span> <span class="nf">sym2prop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace the symbols of propositions in this spec with the actual propositions&quot;&quot;&quot;</span>
+        <span class="c"># Replace symbols for propositions on discrete variables with the actual </span>
+        <span class="c"># propositions</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="GRSpec.toJTLVSpec"><a class="viewcode-back" href="../rhtlp.html#spec.GRSpec.toJTLVSpec">[docs]</a>    <span class="k">def</span> <span class="nf">toJTLVSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of two strings [assumption, guarantee] corresponding to this GR[1]</span>
+<span class="sd">        specification.&quot;&quot;&quot;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">]</span>
+        <span class="c"># env init</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- valid initial env states</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">env_init</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- valid initial env states</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">env_init</span>
+        
+        <span class="c"># env safety</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- safety assumption on environment</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">env_safety</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">env_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- safety assumption on environment</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](&#39;</span> <span class="o">+</span> <span class="n">env_safety</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="c"># env progress</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- justice assumption on environment</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[]&lt;&gt;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">prog</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- justice assumption on environment</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[]&lt;&gt;(&#39;</span> <span class="o">+</span> <span class="n">prog</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="c"># sys init</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- valid initial system states</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">sys_init</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_init</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- valid initial system states</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">sys_init</span>
+
+        <span class="c"># sys safety</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- safety requirement on system</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">[](&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">sys_safety</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sys_safety</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- safety requirement on system</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[](&#39;</span> <span class="o">+</span> <span class="n">sys_safety</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="c"># sys progress</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- progress requirement on system</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[]&lt;&gt;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">prog</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39; &amp; </span><span class="se">\n</span><span class="s">&#39;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">desc_added</span><span class="p">):</span>
+                        <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;-- progress requirement on system</span><span class="se">\n</span><span class="s">&#39;</span>
+                        <span class="n">desc_added</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">[]&lt;&gt;(&#39;</span> <span class="o">+</span> <span class="n">prog</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">return</span> <span class="n">spec</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

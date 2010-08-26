@@ -51,9 +51,57 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-rhtlp">
-<span id="receding-horizon-temporal-logic-planning"></span><h1>Receding horizon Temporal Logic Planning<a class="headerlink" href="#module-rhtlp" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="receding-horizon-temporal-logic-planning-module">
+  <div class="section" id="module-spec">
+<span id="receding-horizon-temporal-logic-planning"></span><h1>Receding horizon Temporal Logic Planning<a class="headerlink" href="#module-spec" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="specification-module">
+<h2>Specification Module<a class="headerlink" href="#specification-module" title="Permalink to this headline">¶</a></h2>
+<p>Nok Wongpiromsarn (<a class="reference external" href="mailto:nok&#37;&#52;&#48;cds&#46;caltech&#46;edu">nok<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">August 25, 2010</td>
+</tr>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.1.0</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="spec.GRSpec">
+<em class="property">class </em><tt class="descclassname">spec.</tt><tt class="descname">GRSpec</tt><big>(</big><em>env_init=''</em>, <em>sys_init=''</em>, <em>env_safety=''</em>, <em>sys_safety=''</em>, <em>env_prog=''</em>, <em>sys_prog=''</em><big>)</big><a class="reference internal" href="_modules/spec.html#GRSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spec.GRSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>GRSpec class for specifying a GR[1] specification of the form</p>
+<blockquote>
+(env_init &amp; []env_safety &amp; []&lt;&gt;env_prog) -&gt; (sys_init &amp; []sys_safety &amp; []&lt;&gt;sys_prog).</blockquote>
+<p>A GRSpec object contains the following fields:</p>
+<ul class="simple">
+<li><cite>env_init</cite>: a string or a list of string that specifies the assumption about 
+the initial state of the environment.</li>
+<li><cite>env_safety</cite>: a string or a list of string that specifies the assumption about 
+the evolution of the environment state.</li>
+<li><cite>env_prog</cite>: a string or a list of string that specifies the justice assumption on 
+the environment.</li>
+<li><cite>sys_init</cite>: a string or a list of string that specifies the requirement on the 
+initial state of the system.</li>
+<li><cite>sys_safety</cite>: a string or a list of string that specifies the safety requirement.</li>
+<li><cite>sys_prog</cite>: a string or a list of string that specifies the progress requirement.</li>
+</ul>
+<dl class="method">
+<dt id="spec.GRSpec.sym2prop">
+<tt class="descname">sym2prop</tt><big>(</big><em>props</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/spec.html#GRSpec.sym2prop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spec.GRSpec.sym2prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the symbols of propositions in this spec with the actual propositions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spec.GRSpec.toJTLVSpec">
+<tt class="descname">toJTLVSpec</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/spec.html#GRSpec.toJTLVSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spec.GRSpec.toJTLVSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
+specification.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-rhtlp"></span><div class="section" id="receding-horizon-temporal-logic-planning-module">
 <h2>Receding horizon Temporal Logic Planning Module<a class="headerlink" href="#receding-horizon-temporal-logic-planning-module" title="Permalink to this headline">¶</a></h2>
 <p>Nok Wongpiromsarn (<a class="reference external" href="mailto:nok&#37;&#52;&#48;cds&#46;caltech&#46;edu">nok<span>&#64;</span>cds<span>&#46;</span>caltech<span>&#46;</span>edu</a>)</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -73,13 +121,25 @@
 A RHTLPProb object contains the following fields:</p>
 <ul class="simple">
 <li><cite>shprobs</cite>: a list of ShortHorizonProb objects</li>
-<li><cite>spec</cite>: a GRSpec object that specifies the global specification</li>
+<li><cite>Phi</cite>: the invariant for the RHTLP problem</li>
 </ul>
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.addSHProb">
+<tt class="descname">addSHProb</tt><big>(</big><em>shprob</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.addSHProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.addSHProb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a short horizon problem to this RHTLP problem.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="rhtlp.RHTLPProb.computePhi">
 <tt class="descname">computePhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.computePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.computePhi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Phi for this RHTLPProb object.
 Return a boolean that indicates whether a valid Phi exists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.getPhi">
+<tt class="descname">getPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.getPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.getPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the global invariant Phi for this RHTLP problem.</p>
 </dd></dl>
 
 <dl class="method">
@@ -93,7 +153,7 @@ conditions for receding horizon temporal logic planning</p>
 
 <dl class="class">
 <dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_spec=&lt;spec.GRSpec instance at 0x188d878&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_spec=&lt;spec.GRSpec instance at 0x1882058&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
@@ -102,6 +162,7 @@ A ShortHorizonProb object contains the following fields:</p>
 <li><cite>FW</cite>: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
 the set F(W).</li>
 <li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant.</li>
+<li><cite>global_spec</cite>: the global specification of the system</li>
 </ul>
 <dl class="method">
 <dt id="rhtlp.ShortHorizonProb.computeLocalPhi">
@@ -114,9 +175,45 @@ Otherwise, the local Phi will get updated and this function wil return True.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhtlp.ShortHorizonProb.getFW">
+<tt class="descname">getFW</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getFW"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getFW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the set F(W) of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.getGlobalSpec">
+<tt class="descname">getGlobalSpec</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getGlobalSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getGlobalSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the global specification of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.ShortHorizonProb.getLocalPhi">
 <tt class="descname">getLocalPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getLocalPhi" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the local Phi for this ShortHorizonProb object.</p>
+<dd><p>Return the local invariant Phi of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.getW">
+<tt class="descname">getW</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getW"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the set W of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.setFW">
+<tt class="descname">setFW</tt><big>(</big><em>FW</em>, <em>update=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.setFW"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.setFW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the set F(W) of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.setLocalPhi">
+<tt class="descname">setLocalPhi</tt><big>(</big><em>Phi</em>, <em>update=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.setLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.setLocalPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the local invariant Phi of this short horizon problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.ShortHorizonProb.setW">
+<tt class="descname">setW</tt><big>(</big><em>W</em>, <em>update=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.setW"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.setW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the set W of this short horizon problem.</p>
 </dd></dl>
 
 <dl class="method">
@@ -130,8 +227,7 @@ Otherwise, the local Phi will get updated and this function wil return True.</p>
 <dl class="class">
 <dt id="rhtlp.SynthesisProb">
 <em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">SynthesisProb</tt><big>(</big><em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb" title="Permalink to this definition">¶</a></dt>
-<dd><p>SynthesisProb class for specifying the receding horizon temporal logic planning
-problem.
+<dd><p>SynthesisProb class for specifying a planner synthesis problem.
 A SynthesisProb object contains the following fields:</p>
 <ul class="simple">
 <li><cite>env_vars</cite>: a dictionary {str : str} whose keys are the names 
@@ -143,6 +239,39 @@ names of system variables and whose values are their possible values.</li>
 <li><cite>disc_cont_var</cite>: the name of the continuous variable after the discretization.</li>
 <li><cite>disc_dynamics</cite>: a list of Region objects corresponding to the partition of the
 continuous state space.</li>
+</ul>
+<p><strong>Constructor</strong>:</p>
+<p><strong>SynthesisProb</strong> ([ <cite>file</cite> = &#8216;&#8217;]): construct this SynthesisProb object from <cite>file</cite></p>
+<ul class="simple">
+<li><cite>file</cite>: the name of the rhtlp file to be parsed. If <cite>file</cite> is given,
+the rest of the inputs to this function will be ignored.</li>
+</ul>
+<p><strong>SynthesisProb</strong> ([ <cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, 
+<cite>disc_dynamics</cite> = None[, <cite>spec</cite> = GRSpec()]]]]])</p>
+<p><strong>SynthesisProb</strong> ([ <cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, 
+<cite>cont_state_space</cite> = None[, <cite>cont_props</cite> = {}[, <cite>sys_dyn</cite> = None[, 
+<cite>spec</cite> = GRSpec()]]]]]]])</p>
+<ul class="simple">
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>sys_disc_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.
+if <cite>disc_dynamics</cite> is given, <cite>cont_state_space</cite>, <cite>cont_props</cite> and <cite>sys_dyn</cite>
+will be ignored.</li>
+<li><cite>cont_state_space</cite>: a Polytope object that represent the state space of the
+continuous variables</li>
+<li><cite>cont_props</cite>: a dictionary {str : Polytope} whose keys are the symbols for 
+propositions on continuous variables and whose values are polytopes that represent
+the region in the state space in which the corresponding proposition hold.</li>
+<li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem</li>
+<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
 </ul>
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.checkRealizability">
@@ -160,7 +289,7 @@ its initial state (in response to the initial environment state).</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromContDynamics">
-<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x18750d0&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x18d3328&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -185,7 +314,7 @@ the region in the state space in which the corresponding proposition hold.</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x188db98&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x188da08&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x18d3210&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x18d3620&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -209,6 +338,46 @@ transition system obtained from the discretization procedure.</li>
 <tt class="descname">getCounterExamples</tt><big>(</big><em>recompute=False</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getCounterExamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getCounterExamples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of dictionary representing a state starting from
 which the system cannot satisfy the spec.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getDiscretizedContVar">
+<tt class="descname">getDiscretizedContVar</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getDiscretizedContVar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getDiscretizedContVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of the discretized continuous variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getDiscretizedDynamics">
+<tt class="descname">getDiscretizedDynamics</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getDiscretizedDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getDiscretizedDynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of the discretized continuous variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getEnvVars">
+<tt class="descname">getEnvVars</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getEnvVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getEnvVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the environment variables of this object as a dictionary 
+whose key is the name of the variable
+and whose value is the possible values that the variable can take.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getSpec">
+<tt class="descname">getSpec</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the specification of this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getSysVars">
+<tt class="descname">getSysVars</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getSysVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getSysVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the system (discrete and discretized continuous) variables of 
+this object as a dictionary whose key is the name of the variable
+and whose value is the possible values that the variable can take.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.setJTLVFile">
+<tt class="descname">setJTLVFile</tt><big>(</big><em>jtlvfile</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setJTLVFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setJTLVFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the temporary jtlv files (smv, spc, aut).</p>
 </dd></dl>
 
 <dl class="method">
@@ -262,6 +431,7 @@ this function will not print anything on the screen.</li>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Receding horizon Temporal Logic Planning</a><ul>
+<li><a class="reference internal" href="#specification-module">Specification Module</a></li>
 <li><a class="reference internal" href="#receding-horizon-temporal-logic-planning-module">Receding horizon Temporal Logic Planning Module</a></li>
 </ul>
 </li>
