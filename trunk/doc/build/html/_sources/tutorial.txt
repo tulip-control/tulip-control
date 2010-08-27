@@ -246,12 +246,12 @@ Generate input to JTLV.
 Check realizability.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 76
+   :lines: 76-77
 
 Construct an automaton.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 79-80
+   :lines: 80-81
 
 
 

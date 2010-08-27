@@ -1278,11 +1278,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="n">allW_formula</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="k">print</span> <span class="n">vardict</span>
-                <span class="k">print</span> <span class="n">allvars_variables</span>
-                <span class="k">print</span> <span class="n">allvars_values</span>
                 <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.validate: &#39;</span> <span class="o">+</span> \
                                <span class="s">&#39;invalid W&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid W&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
 <span class="c">#                 state = dict(zip(allvars_variables, val))</span>
@@ -1382,6 +1380,7 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.validate: &#39;</span> <span class="o">+</span> \
                                <span class="s">&#39;invalid W&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid W&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                 <span class="n">newW0ind</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1433,6 +1432,7 @@
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.computePhi: &#39;</span> <span class="o">+</span> \
                                        <span class="s">&#39;invalid initial condition&#39;</span><span class="p">)</span>
+                        <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid initial conditionW&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
@@ -1440,6 +1440,7 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR rhtlp.RHTLPProb.computePhi: &#39;</span> <span class="o">+</span> \
                                            <span class="s">&#39;invalid Phi&#39;</span><span class="p">)</span>
+                            <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
                             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid Phi&quot;</span><span class="p">)</span>
                         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
                             <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;sys_init -&gt; Phi is not a tautology&#39;</span><span class="p">)</span>
