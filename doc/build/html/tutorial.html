@@ -180,7 +180,7 @@ This can be done using the following steps.</p>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=</em><span class="optional">[</span><span class="optional">]</span>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x233e0f8&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=</em><span class="optional">[</span><span class="optional">]</span>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x233c2d8&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -303,7 +303,7 @@ varnames.</li>
 <dt>Step 1 and 2 above can be combined using the following function:</dt>
 <dd><dl class="first last function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x233eb70&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x233c300&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.
@@ -429,17 +429,18 @@ guarantee += &#39; &amp;\n\t[](next(X0reach) = ((X0 | X0reach) &amp; !park))&#39
 </pre></div>
 </div>
 <p>Generate input to JTLV.</p>
-<div class="highlight-rst"><div class="highlight"><pre>newvarname = generateJTLVInput(env_vars, disc_sys_vars, [assumption, guarantee], \
-                                   {}, disc_dynamics, smvfile, spcfile, 2)
+<div class="highlight-rst"><div class="highlight"><pre>prob = generateJTLVInput(env_vars, disc_sys_vars, [assumption, guarantee], \
+                                   {}, disc_dynamics, smvfile, spcfile, verbose=2)
 </pre></div>
 </div>
 <p>Check realizability.</p>
-<div class="highlight-rst"><div class="highlight"><pre>realizability = checkRealizability(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 11)
+<div class="highlight-rst"><div class="highlight"><pre>realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, \
+                                       aut_file=autfile, verbose=3)
 </pre></div>
 </div>
 <p>Construct an automaton.</p>
-<div class="highlight-rst"><div class="highlight"><pre>computeStrategy(smvfile, spcfile, autfile, &#39;-Xmx128m&#39;, 11, 3)
-aut = Automaton(autfile, [], 3)
+<div class="highlight-rst"><div class="highlight"><pre>computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile, \
+                                    priority_kind=3, verbose=3)
 </pre></div>
 </div>
 </div>
