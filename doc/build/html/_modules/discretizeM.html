@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>discretizeM &mdash; rhtlp v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="rhtlp v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for discretizeM</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">-------------------------------------------------------------------</span>
+<span class="sd">discretizeM.py --- Interface to MATLAB implementation of discretize</span>
+<span class="sd">-------------------------------------------------------------------</span>
+
+<span class="sd">Ufuk Topcu</span>
+
+<span class="sd">:Date: September 1, 2010</span>
+<span class="sd">:Version: 0.1.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pickle</span> 
+<span class="kn">import</span> <span class="nn">pdb</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">polytope_computations</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">polyhedron</span> <span class="kn">import</span> <span class="n">Vrep</span><span class="p">,</span> <span class="n">Hrep</span>
+<span class="kn">from</span> <span class="nn">prop2part</span> <span class="kn">import</span> <span class="n">PropPreservingPartition</span>
+<span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span><span class="p">,</span> <span class="n">printInfo</span>
+
+<span class="n">matfile_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+                               <span class="s">&#39;matlab&#39;</span><span class="p">,</span> <span class="s">&#39;tmpmat&#39;</span><span class="p">)</span>
+<span class="n">to_matfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matfile_dir</span><span class="p">,</span> <span class="s">&#39;dataToMatlab.mat&#39;</span><span class="p">)</span>
+<span class="n">from_matfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matfile_dir</span><span class="p">,</span> <span class="s">&#39;dataFromMatlab.mat&#39;</span><span class="p">)</span>
+<span class="n">donefile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matfile_dir</span><span class="p">,</span> <span class="s">&#39;done.txt&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CtsSysDyn"><a class="viewcode-back" href="../abstraction.html#discretizeM.CtsSysDyn">[docs]</a><span class="k">class</span> <span class="nc">CtsSysDyn</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CtsSysDyn class for specifying the continuous dynamics:</span>
+
+<span class="sd">        s[t+1] = A*s[t] + B*u[t] + E*w[t]</span>
+<span class="sd">        u[t] \in Uset - polytope object</span>
+<span class="sd">        d[t] \in Wset - polytope object</span>
+
+<span class="sd">    A CtsSysDyn object contains the fields A, B, E, Uset and Wset as defined above.</span>
+<span class="sd">    </span>
+<span class="sd">    **Constructor**:</span>
+<span class="sd">    </span>
+<span class="sd">    **CtsSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `Uset` = [][, `Wset` = []]]]]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="p">[],</span> <span class="n">B</span><span class="o">=</span><span class="p">[],</span> <span class="n">E</span><span class="o">=</span><span class="p">[],</span> <span class="n">Uset</span><span class="o">=</span><span class="p">[],</span> <span class="n">Wset</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E</span> <span class="o">=</span> <span class="n">E</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Uset</span> <span class="o">=</span> <span class="n">Uset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wset</span> <span class="o">=</span> <span class="n">Wset</span>
+</div>
+<div class="viewcode-block" id="discretizeM"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeM">[docs]</a><span class="k">def</span> <span class="nf">discretizeM</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">matfile</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
+                    <span class="n">maxNumIterations</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                    <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                    <span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxNumPoly</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discretize the continuous state space using MATLAB implementation.</span>
+<span class="sd">    </span>
+<span class="sd">    Input:</span>
+<span class="sd">    </span>
+<span class="sd">    - `part`: a PropPreservingPartition object</span>
+<span class="sd">    - `ssys`: a CtsSysDyn object</span>
+<span class="sd">    - `N`: horizon length</span>
+<span class="sd">    - `minCellVolume`: the minimum volume of cells in the resulting partition</span>
+<span class="sd">    - `maxNumIterations`: the maximum number of iterations</span>
+<span class="sd">    - `useClosedLoopAlg`: a boolean that indicates whether to use the closed loop algorithm.</span>
+<span class="sd">      For the difference between the closed loop and the open loop algorithm, </span>
+<span class="sd">      see Borrelli, F. Constrained Optimal Control of Linear and Hybrid Systems, </span>
+<span class="sd">      volume 290 of Lecture Notes in Control and Information Sciences. Springer. 2003.</span>
+<span class="sd">    - `useAllHorizonLength`: a boolean that indicates whether all the horizon length up</span>
+<span class="sd">      to probStruct.N can be used. This option is relevant only when the closed </span>
+<span class="sd">      loop algorithm is used.</span>
+<span class="sd">    - `useLargeSset`: a boolean that indicates whether when solving the reachability</span>
+<span class="sd">      problem between subcells of the original partition, the cell of the</span>
+<span class="sd">      original partition should be used for the safe set.</span>
+<span class="sd">    - `timeout`: timeout (in seconds) for polytope union operation. </span>
+<span class="sd">      If negative, the timeout won&#39;t be used. Note that using timeout requires MATLAB</span>
+<span class="sd">      parallel computing toolbox.</span>
+<span class="sd">    - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.</span>
+<span class="sd">    - `verbose`: level of verbosity of</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;from_matfile&quot;</span><span class="p">])):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;from_matfile&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span>
+    
+    <span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">matfile</span><span class="p">,</span> <span class="n">minCellVolume</span><span class="p">,</span> \
+                           <span class="n">maxNumIterations</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span><span class="p">,</span> \
+                           <span class="n">useAllHorizonLength</span><span class="p">,</span> <span class="n">useLargeSset</span><span class="p">,</span> \
+                           <span class="n">timeout</span><span class="p">,</span> <span class="n">maxNumPoly</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+    <span class="n">printInfo</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Please run &#39;runDiscretizeMatlab&#39; in the &#39;matlab&#39; folder.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="ow">or</span> \
+               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> \
+               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
+	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">dyn</span> <span class="o">=</span> <span class="n">discretizeFromMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dyn</span>
+	 </div>
+<div class="viewcode-block" id="discretizeToMatlab"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeToMatlab">[docs]</a><span class="k">def</span> <span class="nf">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">matfile</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
+                           <span class="n">maxNumIterations</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                           <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                           <span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxNumPoly</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate an input file for MATLAB implementation of discretize.</span>
+<span class="sd">    </span>
+<span class="sd">    Input:</span>
+<span class="sd">    </span>
+<span class="sd">    - `part`: a PropPreservingPartition object</span>
+<span class="sd">    - `ssys`: a CtsSysDyn object</span>
+<span class="sd">    - `N`: horizon length</span>
+<span class="sd">    - `minCellVolume`: the minimum volume of cells in the resulting partition</span>
+<span class="sd">    - `maxNumIterations`: the maximum number of iterations</span>
+<span class="sd">    - `useClosedLoopAlg`: a boolean that indicates whether to use the closed loop algorithm.</span>
+<span class="sd">      For the difference between the closed loop and the open loop algorithm, </span>
+<span class="sd">      see Borrelli, F. Constrained Optimal Control of Linear and Hybrid Systems, </span>
+<span class="sd">      volume 290 of Lecture Notes in Control and Information Sciences. Springer. 2003.</span>
+<span class="sd">    - `useAllHorizonLength`: a boolean that indicates whether all the horizon length up</span>
+<span class="sd">      to probStruct.N can be used. This option is relevant only when the closed </span>
+<span class="sd">      loop algorithm is used.</span>
+<span class="sd">    - `useLargeSset`: a boolean that indicates whether when solving the reachability</span>
+<span class="sd">      problem between subcells of the original partition, the cell of the</span>
+<span class="sd">      original partition should be used for the safe set.</span>
+<span class="sd">    - `timeout`: timeout (in seconds) for polytope union operation. </span>
+<span class="sd">      If negative, the timeout won&#39;t be used. Note that using timeout requires MATLAB</span>
+<span class="sd">      parallel computing toolbox.</span>
+<span class="sd">    - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.</span>
+<span class="sd">    - `verbose`: level of verbosity of</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">scipy.io</span> <span class="kn">as</span> <span class="nn">sio</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;adj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">adj</span><span class="p">;</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;minCellVolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">minCellVolume</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;maxNumIterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxNumIterations</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;useClosedLoopAlg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useClosedLoopAlg</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;useAllHorizonLength&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useAllHorizonLength</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;useLargeSset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useLargeSset</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeout</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;maxNumPoly&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxNumPoly</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssys</span><span class="o">.</span><span class="n">A</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssys</span><span class="o">.</span><span class="n">B</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssys</span><span class="o">.</span><span class="n">E</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Uset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssys</span><span class="o">.</span><span class="n">Uset</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Wset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssys</span><span class="o">.</span><span class="n">Wset</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;N&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span>
+    <span class="n">numpolyvec</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">den</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">list_region</span><span class="p">)):</span>
+        <span class="n">numpolyvec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">)):</span>
+            <span class="n">pp</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">.</span><span class="n">list_poly</span><span class="p">[</span><span class="n">i2</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s">&#39;Reg&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;Poly&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;Ab&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">((</span><span class="n">pp</span><span class="o">.</span><span class="n">A</span><span class="p">,</span><span class="n">pp</span><span class="o">.</span><span class="n">b</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;numpolyvec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpolyvec</span>
+    <span class="n">matfile</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">matfile</span><span class="p">)))):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">matfile</span><span class="p">)))</span>
+    <span class="n">sio</span><span class="o">.</span><span class="n">savemat</span><span class="p">(</span><span class="n">matfile</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;MATLAB input saved to &#39;</span> <span class="o">+</span> <span class="n">matfile</span><span class="p">)</span>
+	
+	</div>
+<div class="viewcode-block" id="discretizeFromMatlab"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeFromMatlab">[docs]</a><span class="k">def</span> <span class="nf">discretizeFromMatlab</span><span class="p">(</span><span class="n">origPart</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the data from MATLAB discretize implementation.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - origPart: a PropPreservingPartition object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">scipy.io</span> <span class="kn">as</span> <span class="nn">sio</span>
+    <span class="n">matfile</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;from_matfile&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">matfile</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;The MATLAB output file is older than the MATLAB input file.&quot;</span><span class="p">)</span>
+        <span class="n">cont</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;Continue [c]?: &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cont</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;c&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Loading MATLAB output from &#39;</span> <span class="o">+</span> <span class="n">matfile</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">matfile</span><span class="p">)</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;trans&#39;</span><span class="p">]</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;numNewCells&#39;</span><span class="p">]</span>
+    <span class="n">numNewCells</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">a1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">numNewCells</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">newCellVol</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;newCellVol&#39;</span><span class="p">]</span>
+    <span class="n">num_cells</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;num_cells&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;numpoly&#39;</span><span class="p">]</span>
+    <span class="n">numpoly</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">a2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">numpoly</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span><span class="mi">0</span><span class="p">:]</span> <span class="o">=</span> <span class="n">a2</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span><span class="mi">0</span><span class="p">:]</span>
+	
+    <span class="n">regs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">num_cells</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numNewCells</span><span class="p">[</span><span class="n">i1</span><span class="p">]):</span>
+            <span class="n">polys</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i3</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">numpoly</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span><span class="n">i2</span><span class="p">])):</span>
+                <span class="n">Ab</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;Cell&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i1</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;Reg&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i2</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;Poly&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i3</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;Ab&#39;</span><span class="p">]</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">Ab</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">Ab</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">polys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polytope</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">b</span><span class="p">))</span>
+
+            <span class="n">props</span> <span class="o">=</span> <span class="n">origPart</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span><span class="o">.</span><span class="n">list_prop</span>
+            <span class="n">regs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Region</span><span class="p">(</span><span class="n">polys</span><span class="p">,</span><span class="n">props</span><span class="p">))</span>	
+				
+    <span class="n">domain</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">origPart</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+    <span class="n">num_prop</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">origPart</span><span class="o">.</span><span class="n">num_prop</span><span class="p">)</span>
+    <span class="n">num_regions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regs</span><span class="p">)</span>
+    <span class="n">list_prop_symbol</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">origPart</span><span class="o">.</span><span class="n">list_prop_symbol</span><span class="p">)</span>
+    <span class="n">newPartition</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">num_prop</span><span class="p">,</span> <span class="n">regs</span><span class="p">,</span> <span class="n">num_regions</span><span class="p">,</span> <span class="p">[],</span> \
+                                               <span class="n">trans</span><span class="p">,</span> <span class="n">list_prop_symbol</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">newPartition</span>
+	
+	
+	
+		
+		
+	
+	
+	</div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">rhtlp v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

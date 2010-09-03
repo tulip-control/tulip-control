@@ -123,6 +123,45 @@ A RHTLPProb object contains the following fields:</p>
 <li><cite>shprobs</cite>: a list of ShortHorizonProb objects</li>
 <li><cite>Phi</cite>: the invariant for the RHTLP problem</li>
 </ul>
+<p><strong>Constructor</strong>:</p>
+<p><strong>RHTLPProb</strong> ([ <cite>shprobs</cite> = [][, <cite>Phi</cite> = &#8216;True&#8217;[, <cite>discretize</cite> = False[, <cite>file</cite> = &#8216;&#8217;]]]]): 
+construct this SynthesisProb object from <cite>file</cite>.</p>
+<p><strong>RHTLPProb</strong> ([ <cite>shprobs</cite> = [][, <cite>Phi</cite> = &#8216;True&#8217;[, <cite>discretize</cite> = False[, <cite>env_vars</cite> = {}[, `
+sys_disc_vars` = {}[, <cite>disc_props</cite> = {}[, <cite>disc_dynamics</cite> = None[, 
+<cite>spec</cite> = GRSpec()]]]]]]]])</p>
+<p><strong>RHTLPProb</strong> ([ <cite>shprobs</cite> = [][, <cite>Phi</cite> = &#8216;True&#8217;[, <cite>discretize</cite> = False[, <cite>env_vars</cite> = {}[, 
+<cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, <cite>cont_state_space</cite> = None[, 
+<cite>cont_props</cite> = {}[, <cite>sys_dyn</cite> = None[, <cite>spec</cite> = GRSpec()]]]]]]])</p>
+<ul class="simple">
+<li><cite>shprobs</cite>: a list of ShortHorizonProb objects.</li>
+<li><cite>Phi</cite>: a string specifying the invariant for the RHTLP problem.</li>
+<li><cite>discretize</cite>:  a boolean indicating whether to discretize the global problem.</li>
+<li><cite>file</cite>: the name of the rhtlp file to be parsed. If <cite>file</cite> is given,
+the rest of the inputs to this function will be ignored.</li>
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>sys_disc_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.
+if <cite>disc_dynamics</cite> is given, <cite>cont_state_space</cite>, <cite>cont_props</cite> and <cite>sys_dyn</cite>
+will be ignored.</li>
+<li><cite>cont_state_space</cite>: a Polytope object that represent the state space of the
+continuous variables. Needed only when <cite>discretize</cite> is True.</li>
+<li><cite>cont_props</cite>: a dictionary {str : Polytope} whose keys are the symbols for 
+propositions on continuous variables and whose values are polytopes that represent
+the region in the state space in which the corresponding proposition hold.
+if <cite>discretize</cite> is False, <cite>cont_props</cite> can be just a list of symbols for 
+propositions on continuous variables.</li>
+<li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables.
+Needed only when <cite>discretize</cite> is True.</li>
+<li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
+</ul>
 <dl class="method">
 <dt id="rhtlp.RHTLPProb.addSHProb">
 <tt class="descname">addSHProb</tt><big>(</big><em>shprob</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.addSHProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.addSHProb" title="Permalink to this definition">¶</a></dt>
@@ -131,7 +170,7 @@ A RHTLPProb object contains the following fields:</p>
 
 <dl class="method">
 <dt id="rhtlp.RHTLPProb.computePhi">
-<tt class="descname">computePhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.computePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.computePhi" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">computePhi</tt><big>(</big><em>checktautology=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.computePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.computePhi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Phi for this RHTLPProb object.
 Return a boolean that indicates whether a valid Phi exists.</p>
 </dd></dl>
@@ -143,8 +182,15 @@ Return a boolean that indicates whether a valid Phi exists.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhtlp.RHTLPProb.updatePhi">
+<tt class="descname">updatePhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.updatePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.updatePhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update Phi for this RHTLPProb object based on the local Phi
+in the short horizon problems.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.RHTLPProb.validate">
-<tt class="descname">validate</tt><big>(</big><em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">validate</tt><big>(</big><em>checkcovering=True</em>, <em>checkpartial_order=True</em>, <em>checktautology=True</em>, <em>checkrealizable=True</em>, <em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the list of ShortHorizonProb objects satisfies the sufficient
 conditions for receding horizon temporal logic planning</p>
 </dd></dl>
@@ -153,7 +199,7 @@ conditions for receding horizon temporal logic planning</p>
 
 <dl class="class">
 <dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_spec=&lt;spec.GRSpec instance at 0x18d3648&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1aca940&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
@@ -162,7 +208,46 @@ A ShortHorizonProb object contains the following fields:</p>
 <li><cite>FW</cite>: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
 the set F(W).</li>
 <li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant.</li>
-<li><cite>global_spec</cite>: the global specification of the system</li>
+<li><cite>global_prob</cite>: a SynthesisProb object that represents the global problem.</li>
+</ul>
+<p><strong>Constructor</strong>:</p>
+<p><strong>ShortHorizonProb</strong> ([ <cite>W</cite> = &#8216;&#8217;[, <cite>FW</cite> = [][, <cite>Phi</cite> = &#8216;&#8217;[, <cite>global_prob</cite> = SynthesisProb()[, 
+<cite>file</cite> = &#8216;&#8217;]]]]])</p>
+<p><strong>ShortHorizonProb</strong> ([ <cite>W</cite> = &#8216;&#8217;[, <cite>FW</cite> = [][, <cite>Phi</cite> = &#8216;&#8217;[, <cite>global_prob</cite> = SynthesisProb()[, 
+<cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, <cite>disc_dynamics</cite> = None]]]]]]]])</p>
+<p><strong>ShortHorizonProb</strong> ([ <cite>W</cite> = &#8216;&#8217;[, <cite>FW</cite> = [][, <cite>Phi</cite> = &#8216;&#8217;[, <cite>global_prob</cite> = SynthesisProb()[, 
+<cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, <cite>cont_state_space</cite> = None[, 
+<cite>cont_props</cite> = {}[, <cite>sys_dyn</cite> = None]]]]]]]]]])</p>
+<ul class="simple">
+<li><cite>W</cite>: a proposition that specifies a set W of states.</li>
+<li><cite>FW</cite>: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
+the set F(W).</li>
+<li><cite>Phi</cite>: a proposition that specifies the receding horizon invariant.</li>
+<li><cite>global_spec</cite>: the global specification of the system.</li>
+<li><cite>file</cite>: the name of the rhtlp file to be parsed. If <cite>file</cite> is given,
+the rest of the inputs to this function will be ignored.</li>
+<li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
+of environment variables and whose values are their possible values, e.g., 
+boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].</li>
+<li><cite>sys_disc_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the 
+names of discrete system variables and whose values are their possible values.</li>
+<li><cite>disc_props</cite>: a dictionary {str : str} whose keys are the symbols for 
+propositions on discrete variables and whose values are the actual propositions
+on discrete variables.</li>
+<li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
+transition system obtained from the discretization procedure.
+if <cite>disc_dynamics</cite> is given, <cite>cont_state_space</cite>, <cite>cont_props</cite> and <cite>sys_dyn</cite>
+will be ignored.</li>
+<li><cite>cont_state_space</cite>: a Polytope object that represent the state space of the
+continuous variables. Needed only when <cite>discretize</cite> is True.</li>
+<li><cite>cont_props</cite>: a dictionary {str : Polytope} whose keys are the symbols for 
+propositions on continuous variables and whose values are polytopes that represent
+the region in the state space in which the corresponding proposition hold.
+if <cite>discretize</cite> is False, <cite>cont_props</cite> can be just a list of symbols for 
+propositions on continuous variables.</li>
+<li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables.
+Needed only when <cite>discretize</cite> is True.</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
 </ul>
 <dl class="method">
 <dt id="rhtlp.ShortHorizonProb.computeLocalPhi">
@@ -188,7 +273,7 @@ Otherwise, the local Phi will get updated and this function wil return True.</p>
 
 <dl class="method">
 <dt id="rhtlp.ShortHorizonProb.getLocalPhi">
-<tt class="descname">getLocalPhi</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getLocalPhi" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getLocalPhi</tt><big>(</big><em>allow_disc_cont_var=True</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb.getLocalPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb.getLocalPhi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the local invariant Phi of this short horizon problem.</p>
 </dd></dl>
 
@@ -271,7 +356,7 @@ propositions on continuous variables and whose values are polytopes that represe
 the region in the state space in which the corresponding proposition hold.</li>
 <li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables</li>
 <li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
 </ul>
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.checkRealizability">
@@ -283,13 +368,13 @@ extracting an automaton.</p>
 <li><cite>heap_size</cite>: a string that specifies java heap size.</li>
 <li><cite>pick_sys_init</cite> is a boolean indicating whether the system can pick 
 its initial state (in response to the initial environment state).</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
 </ul>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromContDynamics">
-<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x18d35a8&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x1aca8a0&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -308,13 +393,13 @@ propositions on continuous variables and whose values are polytopes that represe
 the region in the state space in which the corresponding proposition hold.</li>
 <li><cite>sys_dyn</cite>: a CtsSysDyn object that specifies the dynamics of the continuous variables</li>
 <li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem.</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
 </ul>
 </dd></dl>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x18d3620&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x18d3738&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1aca8f0&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x1aca918&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -329,7 +414,7 @@ on discrete variables.</li>
 <li><cite>disc_dynamics</cite>: a PropPreservingPartition object that represents the 
 transition system obtained from the discretization procedure.</li>
 <li><cite>spec</cite>: a GRSpec object that specifies the specification of this synthesis problem.</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level.</li>
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity.</li>
 </ul>
 </dd></dl>
 
@@ -338,6 +423,14 @@ transition system obtained from the discretization procedure.</li>
 <tt class="descname">getCounterExamples</tt><big>(</big><em>recompute=False</em>, <em>heap_size='-Xmx128m'</em>, <em>pick_sys_init=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getCounterExamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getCounterExamples" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of dictionary representing a state starting from
 which the system cannot satisfy the spec.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getDiscProps">
+<tt class="descname">getDiscProps</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getDiscProps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getDiscProps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the discrete propositions as a dictionary whose key is the 
+symbol of the proposition and whose value is the actual formula of
+the proposition.</p>
 </dd></dl>
 
 <dl class="method">
@@ -396,7 +489,7 @@ priority used in extracting the automaton. See the documentation of the
 <li><cite>init_option</cite>: an integer in that specifies how to handle the initial state of 
 the system. See the documentation of the <tt class="docutils literal"><span class="pre">computeStrategy</span></tt> function for the 
 possible values of <cite>init_option</cite>.</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity. If verbose is set to 0,
 this function will not print anything on the screen.</li>
 </ul>
 </dd></dl>
@@ -412,7 +505,7 @@ this function will not print anything on the screen.</li>
 <li><cite>file_exist_option</cite>: a string that indicate what to do when the specified smv_file 
 or spc_file exists. Possible values are: &#8216;a&#8217; (ask whether to replace or
 create a new file), &#8216;r&#8217; (replace the existing file), &#8216;n&#8217; (create a new file).</li>
-<li><cite>verbose</cite>: an integer that specifies the verbose level. If verbose is set to 0,
+<li><cite>verbose</cite>: an integer that specifies the level of verbosity. If verbose is set to 0,
 this function will not print anything on the screen.</li>
 </ul>
 </dd></dl>

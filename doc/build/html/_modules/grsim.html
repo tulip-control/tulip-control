@@ -89,8 +89,7 @@
             <span class="n">aut_state</span> <span class="o">=</span> <span class="n">aut</span><span class="o">.</span><span class="n">findNextAutState</span><span class="p">(</span><span class="n">current_aut_state</span><span class="o">=</span><span class="n">aut_state</span><span class="p">,</span> \
                                                  <span class="n">env_state</span><span class="o">=</span><span class="n">env_states</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aut_state</span><span class="p">,</span> <span class="n">AutomatonState</span><span class="p">)):</span>
-                <span class="n">printError</span><span class="p">(</span><span class="s">&#39;ERROR grsim.grsim: &#39;</span> <span class="o">+</span> \
-                               <span class="s">&#39;The specified sequence of environment states &#39;</span> <span class="o">+</span> \
+                <span class="n">printError</span><span class="p">(</span><span class="s">&#39;The specified sequence of environment states &#39;</span> <span class="o">+</span> \
                                <span class="s">&#39;does not satisfy the environment assumption.&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">states</span>
         <span class="k">else</span><span class="p">:</span>
@@ -100,8 +99,7 @@
                 <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp_aut_state</span><span class="o">.</span><span class="n">transition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">transition</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">trans</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">transition</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grsim.grsim: &#39;</span> <span class="o">+</span> \
-                                 <span class="s">&#39;Environment cannot satisfy its assumption&#39;</span><span class="p">)</span>
+                <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;Environment cannot satisfy its assumption&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">states</span>
             <span class="k">elif</span> <span class="p">(</span><span class="n">deterministic_env</span><span class="p">):</span>
                 <span class="n">aut_state</span> <span class="o">=</span> <span class="n">aut</span><span class="o">.</span><span class="n">getAutState</span><span class="p">(</span><span class="n">transition</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>

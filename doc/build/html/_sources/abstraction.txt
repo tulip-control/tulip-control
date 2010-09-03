@@ -8,6 +8,11 @@ prop2part.py --- Proposition preserving partition module
 .. autoclass:: prop2part.PropPreservingPartition
 .. autofunction:: prop2part.prop2part2
 
------------------
-Discretize Module
------------------
+
+-------------------------------------------------------------------
+discretizeM.py --- Interface to MATLAB implementation of discretize
+-------------------------------------------------------------------
+.. autoclass:: discretizeM.CtsSysDyn
+.. autofunction:: discretizeM.discretizeM
+.. autofunction:: discretizeM.discretizeToMatlab
+.. autofunction:: discretizeM.discretizeFromMatlab

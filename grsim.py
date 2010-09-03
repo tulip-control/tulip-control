@@ -41,8 +41,7 @@ def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True
             aut_state = aut.findNextAutState(current_aut_state=aut_state, \
                                                  env_state=env_states[i])
             if (not isinstance(aut_state, AutomatonState)):
-                printError('ERROR grsim.grsim: ' + \
-                               'The specified sequence of environment states ' + \
+                printError('The specified sequence of environment states ' + \
                                'does not satisfy the environment assumption.')
                 return states
         else:
@@ -52,8 +51,7 @@ def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True
                 if (len(tmp_aut_state.transition) == 0):
                     transition.remove(trans)
             if (len(transition) == 0):
-                printWarning('WARNING grsim.grsim: ' + \
-                                 'Environment cannot satisfy its assumption')
+                printWarning('Environment cannot satisfy its assumption')
                 return states
             elif (deterministic_env):
                 aut_state = aut.getAutState(transition[0])

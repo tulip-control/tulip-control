@@ -133,16 +133,14 @@
 <span class="sd">    - `file_exist_option`: a string that indicate what to do when the specified aut_file </span>
 <span class="sd">      exists. Possible values are: &#39;a&#39; (ask whether to replace or create a new file), </span>
 <span class="sd">      &#39;r&#39; (replace the existing file), &#39;n&#39; (create a new file).</span>
-<span class="sd">    - `verbose`: an integer that specifies the verbose level.</span>
+<span class="sd">    - `verbose`: an integer that specifies the level of verbosity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c"># Check that the input is valid</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR grgameint.solveGame: &quot;</span> <span class="o">+</span> \
-                       <span class="s">&quot;The smv file &quot;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
+        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The smv file &quot;</span> <span class="o">+</span> <span class="n">smv_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">spc_file</span><span class="p">)):</span>
-        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;ERROR grgameint.solveGame: &quot;</span> <span class="o">+</span> \
-                       <span class="s">&quot;The spc file &quot;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
+        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;The spc file &quot;</span> <span class="o">+</span> <span class="n">spc_file</span> <span class="o">+</span> <span class="s">&quot; does not exist.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">print</span> <span class="s">&#39;Creating automaton...</span><span class="se">\n</span><span class="s">&#39;</span>
@@ -153,15 +151,13 @@
         <span class="n">aut_file</span> <span class="o">=</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39;.aut&#39;</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))):</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                         <span class="s">&#39;Folder for aut_file &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;Folder for aut_file &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; does not exist. Creating...&#39;</span><span class="p">)</span>
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)))</span>
 
     <span class="c"># Check whether the aut file exists</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">file_exist_option</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                             <span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;aut file: &#39;</span> <span class="o">+</span> <span class="n">aut_file</span> <span class="o">+</span> <span class="s">&#39; exists.&#39;</span><span class="p">)</span>
             <span class="n">aut_file_exist_option</span> <span class="o">=</span> <span class="n">file_exist_option</span>
             <span class="k">while</span> <span class="p">(</span><span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;r&#39;</span> <span class="ow">and</span> \
                        <span class="n">aut_file_exist_option</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;n&#39;</span><span class="p">):</span>
@@ -192,30 +188,25 @@
         <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">==</span> <span class="s">&#39;XYZ&#39;</span><span class="p">):</span>
             <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">23</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                             <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
             <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">7</span> <span class="ow">and</span> \
                 <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">15</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">19</span> <span class="ow">and</span> \
                 <span class="n">priority_kind</span> <span class="o">!=</span> <span class="mi">23</span><span class="p">):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                             <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
             <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                         <span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown priority_kind. Setting it to the default (ZYX)&quot;</span><span class="p">)</span>
         <span class="n">priority_kind</span> <span class="o">=</span> <span class="mi">3</span>
 
     <span class="c"># init_option</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">init_option</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">init_option</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">init_option</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
-            <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                             <span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+            <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
             <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">printWarning</span><span class="p">(</span><span class="s">&#39;WARNING grgameint.solveGame: &#39;</span> <span class="o">+</span> \
-                         <span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
+        <span class="n">printWarning</span><span class="p">(</span><span class="s">&quot;Unknown init_option. Setting it to the default (1)&quot;</span><span class="p">)</span>
         <span class="n">init_option</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>

@@ -46,7 +46,7 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
     - `file_exist_option`: a string that indicate what to do when the specified smv_file 
       or spc_file exists. Possible values are: 'a' (ask whether to replace or
       create a new file), 'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,
+    - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
       this function will not print anything on the screen.
     """
     prob = SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
@@ -80,7 +80,7 @@ def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128
     - `file_exist_option`: a string that indicate what to do when the specified aut_file 
       exists. Possible values are: 'a' (ask whether to replace or create a new file), 
       'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the verbose level.
+    - `verbose`: an integer that specifies the level of verbosity.
     """
 
     init_option = 1
@@ -135,7 +135,7 @@ def synthesize(env_vars={}, sys_disc_vars={}, spec='', disc_props={}, \
     - `file_exist_option`: a string that indicate what to do when the specified smv_file 
       or spc_file exists. Possible values are: 'a' (ask whether to replace or
       create a new file), 'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the verbose level. If verbose is set to 0,
+    - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
       this function will not print anything on the screen.
     """
     generateJTLVInput(env_vars=env_vars, sys_disc_vars=sys_disc_vars, spec=spec, \
@@ -195,7 +195,7 @@ def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
     - `file_exist_option`: a string that indicate what to do when the specified aut_file 
       exists. Possible values are: 'a' (ask whether to replace or create a new file), 
       'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the verbose level.
+    - `verbose`: an integer that specifies the level of verbosity.
     """
     realizable = grgameint.solveGame(smv_file=smv_file, \
                                          spc_file=spc_file, \
