@@ -1,4 +1,5 @@
-""" prop2part.py --- Proposition preserving partition module
+""" 
+prop2part.py --- Proposition preserving partition module
 
 Necmiye Ozay (necmiye@cds.caltech.edu)
 August 7, 2010

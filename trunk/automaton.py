@@ -92,8 +92,7 @@ class Automaton:
                             if (var == var2):
                                 var_found = True
                         if (not var_found):
-                            printWarning('WARNING automaton.Automaton.loadFile: ' + \
-                                             'Unknown variable ' + var)
+                            printWarning('Unknown variable ' + var, obj=self)
                 if (len(state.keys()) < len(varnames)):
                     for var in varnames:
                         var_found = False
@@ -101,8 +100,7 @@ class Automaton:
                             if (var == var2):
                                 var_found = True
                         if (not var_found):
-                            printWarning('WARNING automaton.Automaton.loadFile: ' + \
-                                             'Variable ' + var + ' not assigned')
+                            printWarning('Variable ' + var + ' not assigned', obj=self)
                 self.setAutStateState(stateID, state, verbose)
 
             # parse transitions
@@ -129,8 +127,7 @@ class Automaton:
         if (isinstance(aut_state, AutomatonState)):
             self.states.append(aut_state)
         else:
-            printError("ERROR automaton.Automaton.addAutState: " + \
-                           "Input to addAutState must be of type AutomatonState")
+            printError("Input to addAutState must be of type AutomatonState", obj=self)
 
     def getAutState(self, aut_state_id):
         """

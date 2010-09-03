@@ -78,8 +78,89 @@ returns a proposition preserving partition of the state space</p>
 </dd></dl>
 
 </div>
-<div class="section" id="discretize-module">
-<h2>Discretize Module<a class="headerlink" href="#discretize-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="discretizem-py-interface-to-matlab-implementation-of-discretize">
+<h2>discretizeM.py &#8212; Interface to MATLAB implementation of discretize<a class="headerlink" href="#discretizem-py-interface-to-matlab-implementation-of-discretize" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="discretizeM.CtsSysDyn">
+<em class="property">class </em><tt class="descclassname">discretizeM.</tt><tt class="descname">CtsSysDyn</tt><big>(</big><em>A=</em><span class="optional">[</span><span class="optional">]</span>, <em>B=</em><span class="optional">[</span><span class="optional">]</span>, <em>E=</em><span class="optional">[</span><span class="optional">]</span>, <em>Uset=</em><span class="optional">[</span><span class="optional">]</span>, <em>Wset=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/discretizeM.html#CtsSysDyn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#discretizeM.CtsSysDyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>CtsSysDyn class for specifying the continuous dynamics:</p>
+<blockquote>
+s[t+1] = A*s[t] + B*u[t] + E*w[t]
+u[t] in Uset - polytope object
+d[t] in Wset - polytope object</blockquote>
+<p>A CtsSysDyn object contains the fields A, B, E, Uset and Wset as defined above.</p>
+<p><strong>Constructor</strong>:</p>
+<p><strong>CtsSysDyn</strong> ([ <cite>A</cite> = [][, <cite>B</cite> = [][, <cite>E</cite> = [][, <cite>Uset</cite> = [][, <cite>Wset</cite> = []]]]]])</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="discretizeM.discretizeM">
+<tt class="descclassname">discretizeM.</tt><tt class="descname">discretizeM</tt><big>(</big><em>part</em>, <em>ssys</em>, <em>N=10</em>, <em>matfile=''</em>, <em>minCellVolume=0.10000000000000001</em>, <em>maxNumIterations=5</em>, <em>useClosedLoopAlg=True</em>, <em>useAllHorizonLength=True</em>, <em>useLargeSset=True</em>, <em>timeout=-1</em>, <em>maxNumPoly=5</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/discretizeM.html#discretizeM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#discretizeM.discretizeM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discretize the continuous state space using MATLAB implementation.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>part</cite>: a PropPreservingPartition object</li>
+<li><cite>ssys</cite>: a CtsSysDyn object</li>
+<li><cite>N</cite>: horizon length</li>
+<li><cite>minCellVolume</cite>: the minimum volume of cells in the resulting partition</li>
+<li><cite>maxNumIterations</cite>: the maximum number of iterations</li>
+<li><cite>useClosedLoopAlg</cite>: a boolean that indicates whether to use the closed loop algorithm.
+For the difference between the closed loop and the open loop algorithm, 
+see Borrelli, F. Constrained Optimal Control of Linear and Hybrid Systems, 
+volume 290 of Lecture Notes in Control and Information Sciences. Springer. 2003.</li>
+<li><cite>useAllHorizonLength</cite>: a boolean that indicates whether all the horizon length up
+to probStruct.N can be used. This option is relevant only when the closed 
+loop algorithm is used.</li>
+<li><cite>useLargeSset</cite>: a boolean that indicates whether when solving the reachability
+problem between subcells of the original partition, the cell of the
+original partition should be used for the safe set.</li>
+<li><cite>timeout</cite>: timeout (in seconds) for polytope union operation. 
+If negative, the timeout won&#8217;t be used. Note that using timeout requires MATLAB
+parallel computing toolbox.</li>
+<li><cite>maxNumPoly</cite>: the maximum number of polytopes in a region used in computing reachability.</li>
+<li><cite>verbose</cite>: level of verbosity of</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="discretizeM.discretizeToMatlab">
+<tt class="descclassname">discretizeM.</tt><tt class="descname">discretizeToMatlab</tt><big>(</big><em>part</em>, <em>ssys</em>, <em>N=10</em>, <em>matfile=''</em>, <em>minCellVolume=0.10000000000000001</em>, <em>maxNumIterations=5</em>, <em>useClosedLoopAlg=True</em>, <em>useAllHorizonLength=True</em>, <em>useLargeSset=True</em>, <em>timeout=-1</em>, <em>maxNumPoly=5</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/discretizeM.html#discretizeToMatlab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#discretizeM.discretizeToMatlab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an input file for MATLAB implementation of discretize.</p>
+<p>Input:</p>
+<ul class="simple">
+<li><cite>part</cite>: a PropPreservingPartition object</li>
+<li><cite>ssys</cite>: a CtsSysDyn object</li>
+<li><cite>N</cite>: horizon length</li>
+<li><cite>minCellVolume</cite>: the minimum volume of cells in the resulting partition</li>
+<li><cite>maxNumIterations</cite>: the maximum number of iterations</li>
+<li><cite>useClosedLoopAlg</cite>: a boolean that indicates whether to use the closed loop algorithm.
+For the difference between the closed loop and the open loop algorithm, 
+see Borrelli, F. Constrained Optimal Control of Linear and Hybrid Systems, 
+volume 290 of Lecture Notes in Control and Information Sciences. Springer. 2003.</li>
+<li><cite>useAllHorizonLength</cite>: a boolean that indicates whether all the horizon length up
+to probStruct.N can be used. This option is relevant only when the closed 
+loop algorithm is used.</li>
+<li><cite>useLargeSset</cite>: a boolean that indicates whether when solving the reachability
+problem between subcells of the original partition, the cell of the
+original partition should be used for the safe set.</li>
+<li><cite>timeout</cite>: timeout (in seconds) for polytope union operation. 
+If negative, the timeout won&#8217;t be used. Note that using timeout requires MATLAB
+parallel computing toolbox.</li>
+<li><cite>maxNumPoly</cite>: the maximum number of polytopes in a region used in computing reachability.</li>
+<li><cite>verbose</cite>: level of verbosity of</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="discretizeM.discretizeFromMatlab">
+<tt class="descclassname">discretizeM.</tt><tt class="descname">discretizeFromMatlab</tt><big>(</big><em>origPart</em><big>)</big><a class="reference internal" href="_modules/discretizeM.html#discretizeFromMatlab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#discretizeM.discretizeFromMatlab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the data from MATLAB discretize implementation.</p>
+<p>Input:</p>
+<ul class="simple">
+<li>origPart: a PropPreservingPartition object</li>
+</ul>
+</dd></dl>
+
 </div>
 </div>
 
@@ -93,7 +174,7 @@ returns a proposition preserving partition of the state space</p>
   <ul>
 <li><a class="reference internal" href="#">Finite State Abstraction of LTI Systems</a><ul>
 <li><a class="reference internal" href="#prop2part-py-proposition-preserving-partition-module">prop2part.py &#8212; Proposition preserving partition module</a></li>
-<li><a class="reference internal" href="#discretize-module">Discretize Module</a></li>
+<li><a class="reference internal" href="#discretizem-py-interface-to-matlab-implementation-of-discretize">discretizeM.py &#8212; Interface to MATLAB implementation of discretize</a></li>
 </ul>
 </li>
 </ul>
