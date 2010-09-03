@@ -100,8 +100,12 @@ def product(*args, **kwds):
 
 ###################################################################
 
-def findCycle(graph, verbose=0):
+def findCycle(graph, W0ind=[], verbose=0):
+# Find a cycle that does not go through any node in W0ind
     for root in xrange(0, len(graph)):
+        if (root in W0ind):
+            continue
+
         to_visit = [root]
         to_visit_path = [[root]]
         visited = []
@@ -111,6 +115,12 @@ def findCycle(graph, verbose=0):
             visited.append(v)
             path_to_v = to_visit_path.pop()
             neighbors = graph[v]
+            tmpneighbors = []
+            for ne in neighbors:
+                if (not ne in W0ind):
+                    tmpneighbors.append(ne)
+            neighbors = tmpneighbors
+
             if (verbose > 1):
                 print
                 print 'root = ', root
@@ -211,4 +221,6 @@ if __name__ == "__main__":
     print
     graph = [[2,3], [0], [0,1], [2]]
     path = findCycle(graph=graph, verbose=3)
+    print "path", path
+    path = findCycle(graph=graph, W0ind=[0], verbose=3)
     print "path", path
