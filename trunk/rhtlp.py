@@ -153,6 +153,9 @@ class SynthesisProb:
     ###################################################################
 
     def setEnvVars(self, env_vars, verbose=0):
+        """
+        Set the environment variables.
+        """
         sys_disc_vars = self.getSysDiscVars()
         self.createProbFromDiscDynamics(env_vars=env_vars, \
                                             sys_disc_vars=sys_disc_vars, \
@@ -164,6 +167,11 @@ class SynthesisProb:
     ###################################################################
 
     def getSysDiscVars(self):
+        """
+        Return the system discrete variables of 
+        this object as a dictionary whose key is the name of the variable
+        and whose value is the possible values that the variable can take.
+        """
         sys_disc_vars = self.getSysVars()
         if (self.getDiscretizedContVar() is not None and \
                 len(self.getDiscretizedContVar()) > 0 and \
@@ -174,6 +182,9 @@ class SynthesisProb:
     ###################################################################
 
     def setSysDiscVars(self, sys_disc_vars, verbose=0):
+        """
+        Set the system discrete variables.
+        """
         self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
                                             sys_disc_vars=sys_disc_vars, \
                                             disc_props=self.__disc_props, \
@@ -204,6 +215,9 @@ class SynthesisProb:
     ###################################################################
 
     def setDiscProps(self, disc_props, verbose=0):
+        """
+        Set the propositions on discrete variables.
+        """
         sys_disc_vars = self.getSysVars()
         self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
                                             sys_disc_vars=sys_disc_vars, \
@@ -223,6 +237,9 @@ class SynthesisProb:
     ###################################################################
 
     def setSpec(self, spec, verbose=0):
+        """
+        Set the specification.
+        """
         sys_disc_vars = self.getSysVars()
         self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
                                             sys_disc_vars=sys_disc_vars, \
@@ -243,13 +260,16 @@ class SynthesisProb:
 
     def getDiscretizedDynamics(self):
         """
-        Return the name of the discretized continuous variable.
+        Return the discretized dynamics.
         """
         return self.__disc_dynamics
 
     ###################################################################
 
     def setDiscretizedDynamics(self, disc_dynamics, verbose=0):
+        """
+        Set the discretized dynamics.
+        """
         sys_disc_vars = self.getSysVars()
         self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
                                             sys_disc_vars=sys_disc_vars, \
@@ -261,6 +281,10 @@ class SynthesisProb:
     ###################################################################
 
     def getJTLVFile(self):
+        """
+        Return the name of JTLV files. The smv, spc and aut files are appended
+        by .smv, .spc and .aut, respectively.
+        """
         return self.__jtlvfile
 
     ###################################################################
