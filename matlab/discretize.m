@@ -99,13 +99,13 @@ end
 
 if (verbose > 0)
     display('Options:');
-    display(['\tminCellVolume:       ' num2str(minCellVolume)]);
-    display(['\tmaxNumIterations:    ' num2str(maxNumIterations)]);
-    display(['\tuseClosedLoopAlg:    ' num2str(useClosedLoopAlg)]);
-    display(['\tuseAllHorizonLength: ' num2str(useAllHorizonLength)]);
-    display(['\tuseLargeSset:        ' num2str(useLargeSset)]);
-    display(['\ttimeout:             ' num2str(timeout)]);
-    display(['\tmaxNumPoly:          ' num2str(maxNumPoly)]);
+    display(['  minCellVolume:       ' num2str(minCellVolume)]);
+    display(['  maxNumIterations:    ' num2str(maxNumIterations)]);
+    display(['  useClosedLoopAlg:    ' num2str(useClosedLoopAlg)]);
+    display(['  useAllHorizonLength: ' num2str(useAllHorizonLength)]);
+    display(['  useLargeSset:        ' num2str(useLargeSset)]);
+    display(['  timeout:             ' num2str(timeout)]);
+    display(['  maxNumPoly:          ' num2str(maxNumPoly)]);
 end
 
 numOrigCells = length(origPartition);
