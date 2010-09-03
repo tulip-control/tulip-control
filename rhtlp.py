@@ -1578,6 +1578,7 @@ class RHTLPProb(SynthesisProb):
                 return False
 
         # Check the partial order condition
+        W0ind = self.__findW0Ind(verbose=verbose)
         if (checkpartial_order):
             # No cycle
             if (verbose > 0):
@@ -1585,7 +1586,7 @@ class RHTLPProb(SynthesisProb):
                 if (verbose > 1):
                     print 'Checking that there is no cycle...'
             wgraph = self.__constructWGraph(verbose=verbose)
-            cycle = rhtlputil.findCycle(wgraph, verbose=verbose)
+            cycle = rhtlputil.findCycle(wgraph, W0ind, verbose=verbose)
             if (len(cycle) != 0):
                 cycleStr = ''
                 for i in cycle:
@@ -1598,7 +1599,6 @@ class RHTLPProb(SynthesisProb):
             # Path to W0
             if (verbose > 1):
                 print 'Checking that there is a path to W0...'
-            W0ind = self.__findW0Ind(verbose=verbose)
             if (len(W0ind) == 0):
                 printInfo('Partial order condition violated. ' + \
                               'No W0 since all W do not satisfy spec.sys_prog')
