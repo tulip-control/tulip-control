@@ -88,17 +88,18 @@
 
 <span class="sd">    **Constructor**:</span>
 
-<span class="sd">    **SynthesisProb** ([ `file` = &#39;&#39;]): construct this SynthesisProb object from `file`</span>
+<span class="sd">    **SynthesisProb** ([ `file` = &#39;&#39;[, `verbose` = 0]]): </span>
+<span class="sd">    construct this SynthesisProb object from file</span>
 
 <span class="sd">    - `file`: the name of the rhtlp file to be parsed. If `file` is given,</span>
 <span class="sd">      the rest of the inputs to this function will be ignored.</span>
 
 <span class="sd">    **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, </span>
-<span class="sd">    `disc_dynamics` = None[, `spec` = GRSpec()]]]]])</span>
+<span class="sd">    `disc_dynamics` = None[, `spec` = GRSpec()[, `verbose` = 0]]]]]])</span>
 
 <span class="sd">    **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, </span>
 <span class="sd">    `cont_state_space` = None[, `cont_props` = {}[, `sys_dyn` = None[, </span>
-<span class="sd">    `spec` = GRSpec()]]]]]]])</span>
+<span class="sd">    `spec` = GRSpec()[, `verbose` = 0]]]]]]]])</span>
 
 <span class="sd">    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names </span>
 <span class="sd">      of environment variables and whose values are their possible values, e.g., </span>
@@ -199,6 +200,48 @@
 
     <span class="c">###################################################################</span>
 </div>
+<div class="viewcode-block" id="SynthesisProb.setEnvVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setEnvVars">[docs]</a>    <span class="k">def</span> <span class="nf">setEnvVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_vars</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the environment variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysDiscVars</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="n">env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getSysDiscVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getSysDiscVars">[docs]</a>    <span class="k">def</span> <span class="nf">getSysDiscVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the system discrete variables of </span>
+<span class="sd">        this object as a dictionary whose key is the name of the variable</span>
+<span class="sd">        and whose value is the possible values that the variable can take.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">sys_disc_vars</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.setSysDiscVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setSysDiscVars">[docs]</a>    <span class="k">def</span> <span class="nf">setSysDiscVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys_disc_vars</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the system discrete variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
 <div class="viewcode-block" id="SynthesisProb.getSysVars"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getSysVars">[docs]</a>    <span class="k">def</span> <span class="nf">getSysVars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the system (discrete and discretized continuous) variables of </span>
@@ -219,11 +262,39 @@
 
     <span class="c">###################################################################</span>
 </div>
+<div class="viewcode-block" id="SynthesisProb.setDiscProps"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setDiscProps">[docs]</a>    <span class="k">def</span> <span class="nf">setDiscProps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the propositions on discrete variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
 <div class="viewcode-block" id="SynthesisProb.getSpec"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getSpec">[docs]</a>    <span class="k">def</span> <span class="nf">getSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the specification of this object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.setSpec"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setSpec">[docs]</a>    <span class="k">def</span> <span class="nf">setSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the specification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="c">###################################################################</span>
 </div>
@@ -237,9 +308,32 @@
 </div>
 <div class="viewcode-block" id="SynthesisProb.getDiscretizedDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getDiscretizedDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">getDiscretizedDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the name of the discretized continuous variable.</span>
+<span class="sd">        Return the discretized dynamics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.setDiscretizedDynamics"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.setDiscretizedDynamics">[docs]</a>    <span class="k">def</span> <span class="nf">setDiscretizedDynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disc_dynamics</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the discretized dynamics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__env_vars</span><span class="p">,</span> \
+                                            <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
+                                            <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="p">,</span> \
+                                            <span class="n">disc_dynamics</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="p">,</span> \
+                                            <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">,</span> \
+                                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c">###################################################################</span>
+</div>
+<div class="viewcode-block" id="SynthesisProb.getJTLVFile"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb.getJTLVFile">[docs]</a>    <span class="k">def</span> <span class="nf">getJTLVFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of JTLV files. The smv, spc and aut files are appended</span>
+<span class="sd">        by .smv, .spc and .aut, respectively.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span>
 
     <span class="c">###################################################################</span>
 </div>
@@ -383,8 +477,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sys_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">disc_props</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
-                                           <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
+<span class="c">#         self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \</span>
+<span class="c">#                                            &#39;tmpspec&#39;, &#39;tmp&#39;)</span>
 
         <span class="c"># Replace &#39;...&#39; in the range of possible values of env_vars to the actual  </span>
         <span class="c"># values and convert a list representation of the range of possible values </span>
@@ -1050,11 +1144,7 @@
 <span class="sd">        Update the short horizon specification based on the current W, FW and Phi.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">local_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__computeLocalSpec</span><span class="p">()</span>
-        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
-                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">in</span> <span class="n">sys_disc_vars</span><span class="p">):</span>
-            <span class="k">del</span> <span class="n">sys_disc_vars</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()]</span>
+        <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysDiscVars</span><span class="p">()</span>
             
         <span class="bp">self</span><span class="o">.</span><span class="n">createProbFromDiscDynamics</span><span class="p">(</span><span class="n">env_vars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">(),</span> <span class="n">sys_disc_vars</span><span class="o">=</span><span class="n">sys_disc_vars</span><span class="p">,</span> \
                                             <span class="n">disc_props</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscProps</span><span class="p">(),</span> \
@@ -1372,10 +1462,6 @@
     <span class="k">def</span> <span class="nf">__getAllVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span> 
         <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">()</span>
         <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
-<span class="c">#         if (self.getDiscretizedContVar() is not None and \</span>
-<span class="c">#                 len(self.getDiscretizedContVar()) &gt; 0 and \</span>
-<span class="c">#                 self.getDiscretizedContVar() in sys_disc_vars):</span>
-<span class="c">#             del sys_disc_vars[self.getDiscretizedContVar()]</span>
         <span class="n">allvars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> \
                 <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDiscretizedContVar</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> \
@@ -1626,6 +1712,7 @@
                 <span class="k">return</span> <span class="bp">False</span>
 
         <span class="c"># Check the partial order condition</span>
+        <span class="n">W0ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findW0Ind</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">checkpartial_order</span><span class="p">):</span>
             <span class="c"># No cycle</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -1633,7 +1720,7 @@
                 <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="k">print</span> <span class="s">&#39;Checking that there is no cycle...&#39;</span>
             <span class="n">wgraph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constructWGraph</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-            <span class="n">cycle</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">findCycle</span><span class="p">(</span><span class="n">wgraph</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">cycle</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">findCycle</span><span class="p">(</span><span class="n">wgraph</span><span class="p">,</span> <span class="n">W0ind</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">cycleStr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cycle</span><span class="p">:</span>
@@ -1646,7 +1733,6 @@
             <span class="c"># Path to W0</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Checking that there is a path to W0...&#39;</span>
-            <span class="n">W0ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findW0Ind</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">W0ind</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;Partial order condition violated. &#39;</span> <span class="o">+</span> \
                               <span class="s">&#39;No W0 since all W do not satisfy spec.sys_prog&#39;</span><span class="p">)</span>

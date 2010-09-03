@@ -199,7 +199,7 @@ conditions for receding horizon temporal logic planning</p>
 
 <dl class="class">
 <dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1aca940&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1ae0fa8&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
@@ -326,16 +326,17 @@ names of system variables and whose values are their possible values.</li>
 continuous state space.</li>
 </ul>
 <p><strong>Constructor</strong>:</p>
-<p><strong>SynthesisProb</strong> ([ <cite>file</cite> = &#8216;&#8217;]): construct this SynthesisProb object from <cite>file</cite></p>
+<p><strong>SynthesisProb</strong> ([ <cite>file</cite> = &#8216;&#8217;[, <cite>verbose</cite> = 0]]): 
+construct this SynthesisProb object from file</p>
 <ul class="simple">
 <li><cite>file</cite>: the name of the rhtlp file to be parsed. If <cite>file</cite> is given,
 the rest of the inputs to this function will be ignored.</li>
 </ul>
 <p><strong>SynthesisProb</strong> ([ <cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, 
-<cite>disc_dynamics</cite> = None[, <cite>spec</cite> = GRSpec()]]]]])</p>
+<cite>disc_dynamics</cite> = None[, <cite>spec</cite> = GRSpec()[, <cite>verbose</cite> = 0]]]]]])</p>
 <p><strong>SynthesisProb</strong> ([ <cite>env_vars</cite> = {}[, <cite>sys_disc_vars</cite> = {}[, <cite>disc_props</cite> = {}[, 
 <cite>cont_state_space</cite> = None[, <cite>cont_props</cite> = {}[, <cite>sys_dyn</cite> = None[, 
-<cite>spec</cite> = GRSpec()]]]]]]])</p>
+<cite>spec</cite> = GRSpec()[, <cite>verbose</cite> = 0]]]]]]]])</p>
 <ul class="simple">
 <li><cite>env_vars</cite>: a dictionary {str : str} or {str : list} whose keys are the names 
 of environment variables and whose values are their possible values, e.g., 
@@ -374,7 +375,7 @@ its initial state (in response to the initial environment state).</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromContDynamics">
-<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x1aca8a0&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x1ae0f30&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -399,7 +400,7 @@ the region in the state space in which the corresponding proposition hold.</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1aca8f0&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x1aca918&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ae0f58&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x1ae0f80&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -442,7 +443,7 @@ the proposition.</p>
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.getDiscretizedDynamics">
 <tt class="descname">getDiscretizedDynamics</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getDiscretizedDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getDiscretizedDynamics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the name of the discretized continuous variable.</p>
+<dd><p>Return the discretized dynamics.</p>
 </dd></dl>
 
 <dl class="method">
@@ -454,9 +455,24 @@ and whose value is the possible values that the variable can take.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhtlp.SynthesisProb.getJTLVFile">
+<tt class="descname">getJTLVFile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getJTLVFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getJTLVFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of JTLV files. The smv, spc and aut files are appended
+by .smv, .spc and .aut, respectively.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.SynthesisProb.getSpec">
 <tt class="descname">getSpec</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getSpec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the specification of this object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.getSysDiscVars">
+<tt class="descname">getSysDiscVars</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.getSysDiscVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.getSysDiscVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the system discrete variables of 
+this object as a dictionary whose key is the name of the variable
+and whose value is the possible values that the variable can take.</p>
 </dd></dl>
 
 <dl class="method">
@@ -468,9 +484,39 @@ and whose value is the possible values that the variable can take.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhtlp.SynthesisProb.setDiscProps">
+<tt class="descname">setDiscProps</tt><big>(</big><em>disc_props</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setDiscProps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setDiscProps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the propositions on discrete variables.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.setDiscretizedDynamics">
+<tt class="descname">setDiscretizedDynamics</tt><big>(</big><em>disc_dynamics</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setDiscretizedDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setDiscretizedDynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the discretized dynamics.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.setEnvVars">
+<tt class="descname">setEnvVars</tt><big>(</big><em>env_vars</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setEnvVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setEnvVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the environment variables.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.SynthesisProb.setJTLVFile">
 <tt class="descname">setJTLVFile</tt><big>(</big><em>jtlvfile</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setJTLVFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setJTLVFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the temporary jtlv files (smv, spc, aut).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.setSpec">
+<tt class="descname">setSpec</tt><big>(</big><em>spec</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the specification.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.SynthesisProb.setSysDiscVars">
+<tt class="descname">setSysDiscVars</tt><big>(</big><em>sys_disc_vars</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.setSysDiscVars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.setSysDiscVars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the system discrete variables.</p>
 </dd></dl>
 
 <dl class="method">

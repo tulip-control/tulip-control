@@ -140,6 +140,7 @@
                            <span class="n">useAllHorizonLength</span><span class="p">,</span> <span class="n">useLargeSset</span><span class="p">,</span> \
                            <span class="n">timeout</span><span class="p">,</span> <span class="n">maxNumPoly</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
     <span class="n">printInfo</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Please run &#39;runDiscretizeMatlab&#39; in the &#39;matlab&#39; folder.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
 
     <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="ow">or</span> \
                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> \
@@ -184,7 +185,10 @@
 
     <span class="kn">import</span> <span class="nn">scipy.io</span> <span class="kn">as</span> <span class="nn">sio</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">data</span><span class="p">[</span><span class="s">&#39;adj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">adj</span><span class="p">;</span>
+    <span class="n">adj</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">adj</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">adj</span><span class="p">)):</span>
+        <span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;adj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adj</span>
     <span class="n">data</span><span class="p">[</span><span class="s">&#39;minCellVolume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">minCellVolume</span>
     <span class="n">data</span><span class="p">[</span><span class="s">&#39;maxNumIterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxNumIterations</span>
     <span class="n">data</span><span class="p">[</span><span class="s">&#39;useClosedLoopAlg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useClosedLoopAlg</span>
