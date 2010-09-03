@@ -92,6 +92,7 @@ def discretizeM(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
                            useAllHorizonLength, useLargeSset, \
                            timeout, maxNumPoly, verbose)
     printInfo("\nPlease run 'runDiscretizeMatlab' in the 'matlab' folder.\n")
+    print("Waiting for MATLAB output...")
 
     while (not os.path.isfile(globals()["donefile"]) or \
                os.path.getmtime(globals()["donefile"]) <= \
@@ -136,7 +137,10 @@ def discretizeToMatlab(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
 
     import scipy.io as sio
     data = {}
-    data['adj'] = part.adj;
+    adj = deepcopy(part.adj)
+    for i in xrange(0, len(adj)):
+        adj[i][i] = 1
+    data['adj'] = adj
     data['minCellVolume'] = minCellVolume
     data['maxNumIterations'] = maxNumIterations
     data['useClosedLoopAlg'] = useClosedLoopAlg

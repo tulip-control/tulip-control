@@ -40,17 +40,18 @@ class SynthesisProb:
 
     **Constructor**:
 
-    **SynthesisProb** ([ `file` = '']): construct this SynthesisProb object from `file`
+    **SynthesisProb** ([ `file` = ''[, `verbose` = 0]]): 
+    construct this SynthesisProb object from file
 
     - `file`: the name of the rhtlp file to be parsed. If `file` is given,
       the rest of the inputs to this function will be ignored.
 
     **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, 
-    `disc_dynamics` = None[, `spec` = GRSpec()]]]]])
+    `disc_dynamics` = None[, `spec` = GRSpec()[, `verbose` = 0]]]]]])
 
     **SynthesisProb** ([ `env_vars` = {}[, `sys_disc_vars` = {}[, `disc_props` = {}[, 
     `cont_state_space` = None[, `cont_props` = {}[, `sys_dyn` = None[, 
-    `spec` = GRSpec()]]]]]]])
+    `spec` = GRSpec()[, `verbose` = 0]]]]]]]])
 
     - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
       of environment variables and whose values are their possible values, e.g., 
@@ -151,6 +152,37 @@ class SynthesisProb:
 
     ###################################################################
 
+    def setEnvVars(self, env_vars, verbose=0):
+        sys_disc_vars = self.getSysDiscVars()
+        self.createProbFromDiscDynamics(env_vars=env_vars, \
+                                            sys_disc_vars=sys_disc_vars, \
+                                            disc_props=self.__disc_props, \
+                                            disc_dynamics=self.__disc_dynamics, \
+                                            spec=self.__spec, \
+                                            verbose=verbose)
+
+    ###################################################################
+
+    def getSysDiscVars(self):
+        sys_disc_vars = self.getSysVars()
+        if (self.getDiscretizedContVar() is not None and \
+                len(self.getDiscretizedContVar()) > 0 and \
+                self.getDiscretizedContVar() in sys_disc_vars):
+            del sys_disc_vars[self.getDiscretizedContVar()]
+        return sys_disc_vars
+
+    ###################################################################
+
+    def setSysDiscVars(self, sys_disc_vars, verbose=0):
+        self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
+                                            sys_disc_vars=sys_disc_vars, \
+                                            disc_props=self.__disc_props, \
+                                            disc_dynamics=self.__disc_dynamics, \
+                                            spec=self.__spec, \
+                                            verbose=verbose)
+
+    ###################################################################
+
     def getSysVars(self):
         """
         Return the system (discrete and discretized continuous) variables of 
@@ -171,11 +203,33 @@ class SynthesisProb:
 
     ###################################################################
 
+    def setDiscProps(self, disc_props, verbose=0):
+        sys_disc_vars = self.getSysVars()
+        self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
+                                            sys_disc_vars=sys_disc_vars, \
+                                            disc_props=disc_props, \
+                                            disc_dynamics=self.__disc_dynamics, \
+                                            spec=self.__spec, \
+                                            verbose=verbose)
+
+    ###################################################################
+
     def getSpec(self):
         """
         Return the specification of this object.
         """
         return copy.deepcopy(self.__spec)
+
+    ###################################################################
+
+    def setSpec(self, spec, verbose=0):
+        sys_disc_vars = self.getSysVars()
+        self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
+                                            sys_disc_vars=sys_disc_vars, \
+                                            disc_props=self.__disc_props, \
+                                            disc_dynamics=self.__disc_dynamics, \
+                                            spec=spec, \
+                                            verbose=verbose)
 
     ###################################################################
 
@@ -192,6 +246,22 @@ class SynthesisProb:
         Return the name of the discretized continuous variable.
         """
         return self.__disc_dynamics
+
+    ###################################################################
+
+    def setDiscretizedDynamics(self, disc_dynamics, verbose=0):
+        sys_disc_vars = self.getSysVars()
+        self.createProbFromDiscDynamics(env_vars=self.__env_vars, \
+                                            sys_disc_vars=sys_disc_vars, \
+                                            disc_props=self.__disc_props, \
+                                            disc_dynamics=disc_dynamics, \
+                                            spec=self.__spec, \
+                                            verbose=verbose)
+
+    ###################################################################
+
+    def getJTLVFile(self):
+        return self.__jtlvfile
 
     ###################################################################
 
@@ -335,8 +405,8 @@ class SynthesisProb:
         self.__sys_vars = copy.deepcopy(sys_disc_vars)
         self.__disc_props = copy.deepcopy(disc_props)
         self.__realizable = None
-        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-                                           'tmpspec', 'tmp')
+#         self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+#                                            'tmpspec', 'tmp')
 
         # Replace '...' in the range of possible values of env_vars to the actual  
         # values and convert a list representation of the range of possible values 
@@ -1002,11 +1072,7 @@ class ShortHorizonProb(SynthesisProb):
         Update the short horizon specification based on the current W, FW and Phi.
         """
         local_spec = self.__computeLocalSpec()
-        sys_disc_vars = self.getSysVars()
-        if (self.getDiscretizedContVar() is not None and \
-                len(self.getDiscretizedContVar()) > 0 and \
-                self.getDiscretizedContVar() in sys_disc_vars):
-            del sys_disc_vars[self.getDiscretizedContVar()]
+        sys_disc_vars = self.getSysDiscVars()
             
         self.createProbFromDiscDynamics(env_vars=self.getEnvVars(), sys_disc_vars=sys_disc_vars, \
                                             disc_props=self.getDiscProps(), \
@@ -1324,10 +1390,6 @@ class RHTLPProb(SynthesisProb):
     def __getAllVars(self, verbose=0): 
         allvars = self.getEnvVars()
         sys_disc_vars = self.getSysVars()
-#         if (self.getDiscretizedContVar() is not None and \
-#                 len(self.getDiscretizedContVar()) > 0 and \
-#                 self.getDiscretizedContVar() in sys_disc_vars):
-#             del sys_disc_vars[self.getDiscretizedContVar()]
         allvars.update(sys_disc_vars)
         if ((self.getDiscretizedContVar() is None or \
                 len(self.getDiscretizedContVar()) == 0 or \
