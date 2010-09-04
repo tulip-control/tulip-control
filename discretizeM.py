@@ -107,16 +107,16 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
             printError("Cannot run matlab. Please make sure that MATLAB is in your PATH.")
             auto = False
 
+        if (not os.path.isfile(globals()["donefile"]) or \
+                os.path.getmtime(globals()["donefile"]) <= \
+                os.path.getmtime(globals()["to_matfile"])):
+            printError("Discretization failed!")
+            auto = False
+
     if (not auto):
         printInfo("\nPlease run 'runDiscretizeMatlab' in the 'matlab' folder.\n")
         print("Waiting for MATLAB output...")
 
-    if (auto and (not os.path.isfile(globals()["donefile"]) or \
-                   os.path.getmtime(globals()["donefile"]) <= \
-                   os.path.getmtime(globals()["to_matfile"]))):
-        printError("Discretization failed!")
-        raise Exception("Discretization failed")
-    else:
         while (not os.path.isfile(globals()["donefile"]) or \
                    os.path.getmtime(globals()["donefile"]) <= \
                    os.path.getmtime(globals()["to_matfile"])):
@@ -126,6 +126,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
 
     dyn = discretizeFromMatlab(part)
     return dyn
+
 	 
 def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
                            maxNumIterations = 5, useClosedLoopAlg = True, \
