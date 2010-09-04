@@ -203,6 +203,7 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
                 realizable = False
                 break
     else:
+        printError("Cannot write to aut file. Running synthesis again...")
         cmd = subprocess.Popen( \
             ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
                  str(priority_kind), str(init_option)], \
