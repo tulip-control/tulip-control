@@ -13,7 +13,8 @@ class bcolors:
     FAIL = '\033[1;91m'
     INFO = '\033[1;94m'
     ENDC = '\033[0m'
-def printWarning(text):
+
+def printWarning(text, obj=None):
     tmp = "WARNING"
     modulename = str(inspect.getmodulename(inspect.getouterframes(inspect.currentframe())[1][1]))
     if (modulename != 'None'):
