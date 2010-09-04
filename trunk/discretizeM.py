@@ -5,12 +5,12 @@
 discretizeM.py --- Interface to MATLAB implementation of discretize
 -------------------------------------------------------------------
 
-Ufuk Topcu
+Created by Ufuk Topcu, 8/30/10
+Modified by Nok Wongpiromsarn, 9/3/10
 
-:Date: September 1, 2010
 :Version: 0.1.0
 """
-import os, time
+import os, time, subprocess
 import pickle 
 import pdb
 from numpy import *
@@ -49,7 +49,7 @@ class CtsSysDyn:
         self.Uset = Uset
         self.Wset = Wset
 
-def discretizeM(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
+def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
                     maxNumIterations = 5, useClosedLoopAlg = True, \
                     useAllHorizonLength = True, useLargeSset = True, \
                     timeout = -1, maxNumPoly = 5, verbose = 0):
@@ -61,6 +61,8 @@ def discretizeM(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
     - `part`: a PropPreservingPartition object
     - `ssys`: a CtsSysDyn object
     - `N`: horizon length
+    - `auto`: a boolean that indicates whether to automatically run the MATLAB  
+      implementation of discretize.
     - `minCellVolume`: the minimum volume of cells in the resulting partition
     - `maxNumIterations`: the maximum number of iterations
     - `useClosedLoopAlg`: a boolean that indicates whether to use the closed loop algorithm.
@@ -87,24 +89,45 @@ def discretizeM(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
         os.remove(globals()["donefile"])
     
     starttime = time.time()
-    discretizeToMatlab(part, ssys, N, matfile, minCellVolume, \
+    discretizeToMatlab(part, ssys, N, minCellVolume, \
                            maxNumIterations, useClosedLoopAlg, \
                            useAllHorizonLength, useLargeSset, \
                            timeout, maxNumPoly, verbose)
-    printInfo("\nPlease run 'runDiscretizeMatlab' in the 'matlab' folder.\n")
-    print("Waiting for MATLAB output...")
 
-    while (not os.path.isfile(globals()["donefile"]) or \
-               os.path.getmtime(globals()["donefile"]) <= \
-               os.path.getmtime(globals()["to_matfile"])):
-        if (verbose > 0):
-            print("Waiting for MATLAB output...")
-	time.sleep(10)
+    if (auto):
+        try:
+            mpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'matlab')
+            mcommand = "addpath('" + mpath + "');"
+            mcommand += "try, runDiscretizeMatlab; catch, disp(lasterr); quit; end;"
+            mcommand += "quit;"
+            cmd = subprocess.call( \
+                ["matlab", "-nojvm", "-nosplash", "-r", mcommand])
+            auto = True
+        except:
+            printError("Cannot run matlab. Please make sure that MATLAB is in your PATH.")
+            auto = False
+
+    if (not auto):
+        printInfo("\nPlease run 'runDiscretizeMatlab' in the 'matlab' folder.\n")
+        print("Waiting for MATLAB output...")
+
+    if (auto and (not os.path.isfile(globals()["donefile"]) or \
+                   os.path.getmtime(globals()["donefile"]) <= \
+                   os.path.getmtime(globals()["to_matfile"]))):
+        printError("Discretization failed!")
+        raise Exception("Discretization failed")
+    else:
+        while (not os.path.isfile(globals()["donefile"]) or \
+                   os.path.getmtime(globals()["donefile"]) <= \
+                   os.path.getmtime(globals()["to_matfile"])):
+            if (verbose > 0):
+                print("Waiting for MATLAB output...")
+            time.sleep(10)
 
     dyn = discretizeFromMatlab(part)
     return dyn
 	 
-def discretizeToMatlab(part, ssys, N = 10, matfile='', minCellVolume = 0.1, \
+def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
                            maxNumIterations = 5, useClosedLoopAlg = True, \
                            useAllHorizonLength = True, useLargeSset = True, \
                            timeout = -1, maxNumPoly = 5, verbose = 0):

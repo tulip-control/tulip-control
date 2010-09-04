@@ -1,10 +1,11 @@
 fname = 'runDiscretizeMatlab.m';
 p = which(fname);
 p = p(1:end-length(fname));
-matfile = [p 'tmpmat' filesep 'dataToMatlab.mat'];
+matfilein = [p 'tmpmat' filesep 'dataToMatlab.mat'];
+matfileout = [p 'tmpmat' filesep 'dataFromMatlab.mat'];
 donefile = [p 'tmpmat' filesep 'done.txt'];
 
-load(matfile)
+load(matfilein)
 
 % mpt_init('rescueLP', true, 'rescueQP', true, 'lpsolver', 'sedumi')
 
@@ -61,8 +62,7 @@ aux = [aux char(39) 'num_cells' char(39) ', '];
 aux = [aux char(39) 'numpoly' char(39) ', '];
 aux = [aux char(39) 'newCellVol' char(39)];
 
-matfile = ['tmpmat' filesep 'dataFromMatlab.mat'];
-aux = ['save(' char(39) matfile char(39) aux ');'];
+aux = ['save(' char(39) matfileout char(39) aux ');'];
 eval(aux);
         
 
