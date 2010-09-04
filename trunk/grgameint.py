@@ -172,16 +172,12 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
 
     if (len(JTLV_EXE) > 0):
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-        cmd = subprocess.call( \
-            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-                 str(priority_kind), str(init_option)])
-#         cmd = subprocess.Popen( \
-#             ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-#                  str(priority_kind), str(init_option)], \
-#                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, \
                 aut_file, str(priority_kind), str(init_option)
+        cmd = subprocess.call( \
+            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                 str(priority_kind), str(init_option)])
     else: # For debugging purpose
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
@@ -197,28 +193,32 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
 #                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
-    f = open(aut_file, 'r')
-    for line in f:
-        if ("Specification is realizable" in line):
-            realizable = True
-            break
-        elif ("Specification is unrealizable" in line):
-            realizable = False
-            break
-
-#     for line in cmd.stdout:
-#         print "\t" + line,
-#         if "Specification is realizable" in line:
-#             realizable = True
-#     cmd.stdout.close()
+    if (os.path.isfile(aut_file)):
+        f = open(aut_file, 'r')
+        for line in f:
+            if ("Specification is realizable" in line):
+                realizable = True
+                break
+            elif ("Specification is unrealizable" in line):
+                realizable = False
+                break
+    else:
+        cmd = subprocess.Popen( \
+            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                 str(priority_kind), str(init_option)], \
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+        for line in cmd.stdout:
+            print "\t" + line,
+            if "Specification is realizable" in line:
+                realizable = True
+        cmd.stdout.close()
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
 
     if (realizable and priority_kind > 0):
         print("\nAutomaton successfully synthesized.\n")
     elif (priority_kind > 0):
         print("\nERROR: Specification was unrealizable.\n")
-
-#     sys.stdout = sys.__stdout__
-#     sys.stderr = sys.__stderr__
 
     return realizable
 
