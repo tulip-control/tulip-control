@@ -1237,6 +1237,8 @@ class RHTLPProb(SynthesisProb):
         self.__cont_props = []
         self.__sys_prog = 'True'
         self.__all_init = 'True'
+        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+                                           'tmpspec', 'tmp'))
 
         if (isinstance(shprobs, list)):
             for shprob in shprobs:
@@ -1410,8 +1412,7 @@ class RHTLPProb(SynthesisProb):
                     newformula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', newformula)
         return newformula
 
-
-    def __getAllVars(self, verbose=0): 
+    def __getAllVarsRaw(self, verbose=0):
         allvars = self.getEnvVars()
         sys_disc_vars = self.getSysVars()
         allvars.update(sys_disc_vars)
@@ -1421,7 +1422,20 @@ class RHTLPProb(SynthesisProb):
                 self.__cont_props is not None):
             for var in self.__cont_props:
                 allvars[var] = 'boolean'
+        return allvars
 
+
+    def __getAllVars(self, verbose=0): 
+#         allvars = self.getEnvVars()
+#         sys_disc_vars = self.getSysVars()
+#         allvars.update(sys_disc_vars)
+#         if ((self.getDiscretizedContVar() is None or \
+#                 len(self.getDiscretizedContVar()) == 0 or \
+#                 not self.getDiscretizedContVar() in sys_disc_vars) and \
+#                 self.__cont_props is not None):
+#             for var in self.__cont_props:
+#                 allvars[var] = 'boolean'
+        allvars = self.__getAllVarsRaw()
         allvars_values = ()
         allvars_variables = []
         for var, val in allvars.iteritems():
@@ -1442,32 +1456,52 @@ class RHTLPProb(SynthesisProb):
 
         if (verbose > 0):
             print 'W = ' + allW_formula
-
-        (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
-
-        allvars_values_iter = rhtlputil.product(*allvars_values)
-        vardict = {}
-        for val in allvars_values_iter:
-            vardict = dict(zip(allvars_variables, val))
-#             for i in xrange(0, len(allvars_variables)):
-#                 vardict[allvars_variables[i]] = int(val[i])
             
-            try:
-                ret = rhtlputil.evalExpr(allW_formula, vardict, verbose)
-            except:
-                printError('Invalid W', obj=self)
-                print sys.exc_info()[0], sys.exc_info()[1]
-                return vardict
-            if (not ret):
-#                 state = dict(zip(allvars_variables, val))
-#                 state = ''
-#                 for i in xrange(0, len(allvars_variables)):
-#                     if (len(state) > 0):
-#                         state += ', '
-#                     state += allvars_variables[i] + ':' + str(val[i])
-#                 printError('state <' + state + '> is not in any W', obj=self)
-                return vardict
-        return True
+        use_yices = True
+        try:
+            if (verbose > 0):
+                print("Trying yices")
+            allvars = self.__getAllVarsRaw(verbose=verbose)
+            expr = '!(' + allW_formula + ')'
+            ysfile = os.path.dirname(self.getJTLVFile())
+            ysfile = os.path.join(ysfile, 'tmp.ys')
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
+                                              verbose=verbose)
+            if (ret is None):
+                use_yices = False
+            elif (ret[0]):
+                return ret[1]
+            else:
+                return True
+        except:
+            printError("yices failed!")
+            use_yices = False
+        
+        if (not use_yices):
+            print("yices failed. Enumerating states.")
+
+            (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+
+            allvars_values_iter = rhtlputil.product(*allvars_values)
+            vardict = {}
+            for val in allvars_values_iter:
+                vardict = dict(zip(allvars_variables, val))
+                try:
+                    ret = rhtlputil.evalExpr(allW_formula, vardict, verbose)
+                except:
+                    printError('Invalid W', obj=self)
+                    print sys.exc_info()[0], sys.exc_info()[1]
+                    return vardict
+                if (not ret):
+    #                 state = dict(zip(allvars_variables, val))
+    #                 state = ''
+    #                 for i in xrange(0, len(allvars_variables)):
+    #                     if (len(state) > 0):
+    #                         state += ', '
+    #                     state += allvars_variables[i] + ':' + str(val[i])
+    #                 printError('state <' + state + '> is not in any W', obj=self)
+                    return vardict
+            return True
 
 
     def __constructWGraph(self, verbose=0):
@@ -1521,31 +1555,61 @@ class RHTLPProb(SynthesisProb):
         if (self.__sys_prog == True):
             return W0ind
 
-        (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
-
-        allvars_values_iter = rhtlputil.product(*allvars_values)
-        vardict = {}
-        for val in allvars_values_iter:
-            vardict = dict(zip(allvars_variables, val))
-            try:
-                ret = rhtlputil.evalExpr(self.__sys_prog, vardict, verbose)
-            except:
-                printError('Invalid W', obj=self)
-                print sys.exc_info()[0], sys.exc_info()[1]
-                print vardict
-                ret = False
-            if (ret):
-                newW0ind = []
-                for ind in W0ind:
-                    ret = rhtlputil.evalExpr(self.shprobs[ind].getW(), vardict, verbose)
-                    if (ret):
-                        newW0ind.append(ind)
-                    elif (verbose > 0):
-                        print 'W[' + str(ind) + '] does not satisfy spec.sys_prog'
-                        print 'counter example: ', vardict
+        use_yices = True
+        try:
+            if (verbose > 0):
+                print("Trying yices")
+            allvars = self.__getAllVarsRaw(verbose=verbose)
+            ysfile = os.path.dirname(self.getJTLVFile())
+            ysfile = os.path.join(ysfile, 'tmp.ys')
+            newW0ind = []
+            for ind in W0ind:
+                expr = '!((' + self.shprobs[ind].getW() + ') -> (' + self.__sys_prog + '))'
+                ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
+                                                  verbose=verbose)
+                if (ret is None):
+                    use_yices = False
+                    break
+                elif (not ret[0]):
+                    newW0ind.append(ind)
+                elif (verbose > 0):
+                    print 'W[' + str(ind) + '] does not satisfy spec.sys_prog'
+                    print 'counter example: \n' + ret[1]
+            if (use_yices):
                 W0ind = newW0ind
-                if (len(W0ind) == 0):
-                    return W0ind
+        except:
+            printError("yices failed!")
+            use_yices = False
+        
+        if (not use_yices):
+            print("yices failed. Enumerating states.")
+
+            (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+
+            allvars_values_iter = rhtlputil.product(*allvars_values)
+            vardict = {}
+            for val in allvars_values_iter:
+                vardict = dict(zip(allvars_variables, val))
+                try:
+                    ret = rhtlputil.evalExpr(self.__sys_prog, vardict, verbose)
+                except:
+                    printError('Invalid W', obj=self)
+                    print sys.exc_info()[0], sys.exc_info()[1]
+                    print vardict
+                    ret = False
+                if (ret):
+                    newW0ind = []
+                    for ind in W0ind:
+                        ret = rhtlputil.evalExpr(self.shprobs[ind].getW(), vardict, verbose)
+                        if (ret):
+                            newW0ind.append(ind)
+                        elif (verbose > 0):
+                            print 'W[' + str(ind) + '] does not satisfy spec.sys_prog'
+                            print 'counter example: ', vardict
+                    W0ind = newW0ind
+                    if (len(W0ind) == 0):
+                        return W0ind
+
         return W0ind
 
 
@@ -1554,30 +1618,54 @@ class RHTLPProb(SynthesisProb):
         self.__Phi = self.__replacePropSymbols(formula = self.__Phi, verbose=verbose)
 
         # Check whether self.__all_init -> Phi is a tautology
-        (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
-        allvars_values_iter = rhtlputil.product(*allvars_values)
-        vardict = {}
-        for val in allvars_values_iter:
-            vardict = dict(zip(allvars_variables, val))
-            try:
-                ret = rhtlputil.evalExpr(self.__all_init, vardict, verbose)
-            except:
-                printError('Invalid initial condition', obj=self)
-                print sys.exc_info()[0], sys.exc_info()[1]
-                return False
-            if (ret):
+        use_yices = True
+        try:
+            if (verbose > 0):
+                print("Trying yices")
+            allvars = self.__getAllVarsRaw(verbose=verbose)
+            expr = '!((' + self.__all_init + ') -> (' + self.__Phi + '))'
+            ysfile = os.path.dirname(self.getJTLVFile())
+            ysfile = os.path.join(ysfile, 'tmp.ys')
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
+                                              verbose=verbose)
+            if (ret is None):
+                use_yices = False
+            elif (not ret[0]):
+                return True
+            elif (verbose > 0):
+                printInfo('sys_init -> Phi is not a tautology')
+                print 'counter example: \n' + ret[1]
+        except:
+            printError("yices failed!")
+            use_yices = False
+        
+        if (not use_yices):
+            print("yices failed. Enumerating states.")
+
+            (allvars_variables, allvars_values) = self.__getAllVars(verbose=verbose)
+            allvars_values_iter = rhtlputil.product(*allvars_values)
+            vardict = {}
+            for val in allvars_values_iter:
+                vardict = dict(zip(allvars_variables, val))
                 try:
-                    ret = rhtlputil.evalExpr(self.__Phi, vardict, verbose)
+                    ret = rhtlputil.evalExpr(self.__all_init, vardict, verbose)
                 except:
-                    printError('Invalid Phi', obj=self)
+                    printError('Invalid initial condition', obj=self)
                     print sys.exc_info()[0], sys.exc_info()[1]
                     return False
-                if (not ret):
-                    if (verbose > 0):
-                        printInfo('sys_init -> Phi is not a tautology')
-                        print 'counter example: ', vardict
-                    return False
-
+                if (ret):
+                    try:
+                        ret = rhtlputil.evalExpr(self.__Phi, vardict, verbose)
+                    except:
+                        printError('Invalid Phi', obj=self)
+                        print sys.exc_info()[0], sys.exc_info()[1]
+                        return False
+                    if (not ret):
+                        if (verbose > 0):
+                            printInfo('sys_init -> Phi is not a tautology')
+                            print 'counter example: ', vardict
+                        return False
+            return True
 
     def updatePhi(self, verbose=0):
         """
@@ -1662,9 +1750,15 @@ class RHTLPProb(SynthesisProb):
             if (isinstance(vardict, dict)):                
                 printInfo('state ' + str(vardict) + ' is not in any W')
                 return False
+            elif (isinstance(vardict, str)):               
+                printInfo('state \n' + vardict + ' is not in any W')
+                return False
+                
 
         # Check the partial order condition
         W0ind = self.__findW0Ind(verbose=verbose)
+        if (verbose > 1):
+            print('W0ind = ' + str(W0ind))
         if (checkpartial_order):
             # No cycle
             if (verbose > 0):
@@ -1718,7 +1812,7 @@ class RHTLPProb(SynthesisProb):
             self.updatePhi(verbose = verbose)
             tautology = self.__checkTautologyPhi(verbose=verbose)
             if (not tautology):
-                printInfo('init -> Phi is not a tautology.')
+                printInfo('sys_init -> Phi is not a tautology.')
                 return False
 
         # Check that all the short horizon specs are realizable
@@ -1897,7 +1991,7 @@ if __name__ == "__main__":
 #                                   disc_props=disc_props, \
 #                                   disc_dynamics=prob.getDiscretizedDynamics(), \
 #                                   spec=spec, verbose=3)
-        rhtlpprob.validate(checkcovering=True, checkpartial_order=True, checktautology=True, \
+        rhtlpprob.validate(checkcovering=False, checkpartial_order=True, checktautology=True, \
                      checkrealizable=True, verbose=3)
         print('DONE')
         print('================================\n')
