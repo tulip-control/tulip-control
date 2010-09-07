@@ -12,6 +12,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 """
 
 import re, copy
+from errorprint import printError
 
 def evalExpr(expr='', vardict={}, verbose=0):
     vardict = copy.deepcopy(vardict)
@@ -87,6 +88,356 @@ def evalExpr(expr='', vardict={}, verbose=0):
 
 
 ###################################################################
+def yicesSolveSat(expr='', allvars={}, ysfile='', verbose=0):
+    import subprocess, sys
+    cmd = subprocess.Popen(["which", "yices"], stdout=subprocess.PIPE, close_fds=True)
+    yices_exist = False
+    for line in cmd.stdout:
+        if (verbose > 0):
+            print line
+        if ('yices' in line):
+            yices_exist = True
+
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
+
+    if (not yices_exist):
+        return None
+
+    toYices(expr=expr, allvars=allvars, ysfile=ysfile, verbose=verbose)
+    cmd = subprocess.Popen(["yices", "-e", ysfile], \
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    sat = False
+    ce = ''
+    for line in cmd.stdout:
+        if (verbose > 0):
+            print line,
+        if ('Error' in line):
+            printError("yices error: ")
+            print line
+            return None
+        if ('unsat' in line):
+            sat = False
+            ce = ''
+            return sat, ce
+        elif ('sat' in line):
+            sat = True
+            continue
+
+        if (sat and not line.isspace()): # Examples
+            ce += line
+    
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
+    return sat, ce
+
+###################################################################
+def parseYices(ysfile, verbose=0):
+    sat = False
+    ce = ''
+    f = open(ysfile, 'r')
+    for line in f:
+        if ('unsat' in line):
+            sat = False
+            ce = ''
+            return sat, ce
+        elif ('sat' in line):
+            sat = True
+            continue
+
+        if (sat): # Examples
+            ce += line + '\n'
+
+###################################################################
+
+def toYices(expr='', allvars={}, ysfile='', verbose=0):
+    # Temporary variable for defining subtype
+    stvar = 'n'
+    while (stvar in allvars.keys()):
+        stvar += 'n'
+
+    f = open(ysfile, 'w')
+
+    # Declare the variables 
+    for var, val in allvars.iteritems():
+        if ('boolean' in val):
+            f.write('(define ' + var + '::bool)\n')
+        else:
+            if (isinstance(val, str)):
+                tmp = re.findall('[-+]?\d+', val)
+            elif (isinstance(val, list)):
+                tmp = tmp = [str(i) for i in val]
+            else:
+                printError('Unknown type of variable ' + var)
+                raise TypeError("Invalid variable type.")
+
+            tmpstr = ''
+            for tmpval in tmp:
+                tmpstr += ' (= ' + stvar + ' ' + tmpval + ')'
+
+            f.write('(define ' + var + '::(subtype (' + stvar + '::int) (or' + \
+                        tmpstr + ')))\n')
+
+    # Formula
+    f.write('(assert ' + expr2ysstr(expr=expr, verbose=verbose) + ')\n')
+    f.write('(check)\n')
+    f.close()
+
+
+###################################################################
+
+def expr2ysstr(expr='', verbose=0):
+    expr = re.sub(r'\b'+'True'+r'\b', 'true', expr)
+    expr = re.sub(r'\b'+'False'+r'\b', 'false', expr)
+
+    expr = expr.strip()
+    if (verbose > 2):
+        print('expr = ' +  expr)
+
+    if (len(expr) == 0):
+        retstr = ''
+        return retstr
+
+    numoparen = expr.count('(')
+    numcparen = expr.count(')')
+    if (numoparen != numcparen):
+        printError("Unbalanced parenthesis. " + str(numoparen) + " of '(' and " + \
+                       str(numcparen) + " of ')'")
+        raise Exception("Invalid formula")
+
+    # Deal with the parentheses
+    paren_tmp = {}
+    if (numoparen > 0):
+        oparen_ind = []
+        cparen_ind = []
+        num_paren = 0
+        for ind in xrange(0, len(expr)):
+            if (expr[ind] == '('):
+                    num_paren += 1
+                    if (num_paren == 1):
+                        oparen_ind.append(ind)
+            elif (expr[ind] == ')'):
+                if (num_paren <= 0):
+                    printError("Unbalanced parenthesis. Extra ')' at position " + str(ind))
+                    raise Exception("Invalid formula")
+                num_paren -= 1 
+                if (num_paren == 0):
+                    cparen_ind.append(ind)
+
+        if (len(oparen_ind) != len(cparen_ind)):
+            printError("Unbalanced parenthesis.")
+            raise Exception("Invalid formula")
+        if (verbose > 2):
+            print('oparen_ind = ' + str(oparen_ind))
+            print('cparen_ind = ' + str(cparen_ind))
+
+        if (len(oparen_ind) == 1 and oparen_ind[0] == 0 and \
+                len(cparen_ind) == 1 and cparen_ind[0] == len(expr)-1):
+            return expr2ysstr(expr=expr[1:-1], verbose = verbose)
+
+        paren_tmp_sym = 'paren_tmp_sym'
+        while (paren_tmp_sym in expr):
+            paren_tmp_sym += 'm'
+
+        for ind in xrange(len(cparen_ind)-1, -1, -1):
+            id = str(len(paren_tmp))
+            paren_tmp[paren_tmp_sym + id] = \
+                expr[oparen_ind[ind]:cparen_ind[ind]+1]
+            expr = expr[:oparen_ind[ind]] + ' ' + paren_tmp_sym + id + \
+                ' ' + expr[cparen_ind[ind]+1:]
+
+        if (verbose > 2):
+            print("After processing parentheses, expr = " + expr)
+            print(paren_tmp)
+            
+    # First split the formula by the temporal operator
+    sexpr = expr.rsplit('->', 1)
+    if (len(sexpr) > 1):
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=True, \
+                                                     checkleft=True, checkright=True, \
+                                                     verbose=verbose)
+        retstr = '(=> ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+
+    sexpr = expr.rsplit('|', 1)
+    if (len(sexpr) > 1):
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=True,  \
+                                                     checkleft=True, checkright=True, \
+                                                     verbose=verbose)
+        retstr = '(or ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+
+    sexpr = expr.rsplit('&', 1)
+    if (len(sexpr) > 1):
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=True, \
+                                                     checkleft=True, checkright=True, \
+                                                     verbose=verbose)
+        retstr = '(and ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+
+    sexpr = expr.rsplit('!', 1)
+    if (len(sexpr) > 1):
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=False, \
+                                                     checkleft=True, checkright=True, \
+                                                     verbose=verbose)
+        retstr = '(not ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+
+    # Next split the formula by =, >=, >, <=, <
+    indeq = expr.find('=')
+    indgr = expr.find('>')
+    indle = expr.find('<')
+    if (indeq > 0 or indgr > 0 or indle > 0):
+        numeq = expr.count('=')
+        if (numeq > 1):
+            printError("Too many '=' in " + expr)
+            raise Exception("Invalid formula")
+        numgr = expr.count('>')
+        if (numgr > 1):
+            printError("Too many '>' in " + expr)
+            raise Exception("Invalid formula")
+        numle = expr.count('<')
+        if (numle > 1):
+            printError("Too many '<' in " + expr)
+            raise Exception("Invalid formula")
+        if (numle == 1 and numgr == 1):
+            printError("The subformula " + expr + " contains both > and <")
+            raise Exception("Invalid formula")
+        if (numeq == 1 and numgr == 1 and indeq != indgr + 1):
+            printError("The subformula " + expr + " contains both > and =")
+            raise Exception("Invalid formula")
+        if (numeq == 1 and numle == 1 and indeq != indle + 1):
+            printError("The subformula " + expr + " contains both < and =")
+            raise Exception("Invalid formula")
+
+        if (numeq == 1 and numgr == 1): # >=
+            (leftexpr, rightexpr) = __toYicesSepExpr(expr[:indgr].strip(), \
+                                                         expr[indeq+1:].strip(), \
+                                                         paren_tmp, isbinary=True, \
+                                                         checkleft=True, checkright=True, \
+                                                         verbose=verbose)
+            retstr = '(>= ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+                expr2ysstr(rightexpr, verbose=verbose) + ')'
+            return retstr
+        if (numeq == 1 and numle == 1): # <=
+            (leftexpr, rightexpr) = __toYicesSepExpr(expr[:indle].strip(), \
+                                                         expr[indeq+1:].strip(), \
+                                                         paren_tmp, isbinary=True, \
+                                                         checkleft=True, checkright=True, \
+                                                         verbose=verbose)
+            retstr = '(<= ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+                expr2ysstr(rightexpr, verbose=verbose) + ')'
+            return retstr
+        if (numeq == 1): # =
+            (leftexpr, rightexpr) = __toYicesSepExpr(expr[:indeq].strip(), \
+                                                         expr[indeq+1:].strip(), \
+                                                         paren_tmp, isbinary=True, \
+                                                         checkleft=True, checkright=True, \
+                                                         verbose=verbose)
+            retstr = '(= ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+                expr2ysstr(rightexpr, verbose=verbose) + ')'
+            return retstr
+        if (numgr == 1): # >
+            (leftexpr, rightexpr) = __toYicesSepExpr(expr[:indgr].strip(), \
+                                                         expr[indgr+1:].strip(), \
+                                                         paren_tmp, isbinary=True, \
+                                                         checkleft=True, checkright=True, \
+                                                         verbose=verbose)
+            retstr = '(> ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+                expr2ysstr(rightexpr, verbose=verbose) + ')'
+            return retstr
+        if (numle == 1): # <
+            (leftexpr, rightexpr) = __toYicesSepExpr(expr[:indle].strip(), \
+                                                         expr[indle+1:].strip(), \
+                                                         paren_tmp, isbinary=True, \
+                                                         checkleft=True, checkright=True, \
+                                                         verbose=verbose)
+            retstr = '(< ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+                expr2ysstr(rightexpr, verbose=verbose) + ')'
+            return retstr
+
+    # Next split the formula by +, -, * and /
+    indpl = expr.rfind('+')
+    indmi = expr.rfind('-')
+    indmu = expr.rfind('*')
+    inddi = expr.rfind('/')
+
+    if (indpl > 0 or indmi > 0):
+        if (indpl > indmi):
+            op = '+'
+        else:
+            op = '-'
+        sexpr = expr.rsplit(op, 1)
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=True, \
+                                                     checkleft=False, checkright=True, \
+                                                     verbose=verbose)
+        if (len(leftexpr) == 0):
+            leftexpr = '0'
+        if (not (leftexpr[-1].isalnum() or leftexpr[-1] == ')')):
+            printError("Invalid subformula " + leftexpr)
+            raise Exception("Invalid formula")
+        retstr = '(' + op + ' ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+    if (indmu > 0 or inddi > 0):
+        if (indmu > inddi):
+            op = '*'
+        else:
+            op = '/'
+        sexpr = expr.rsplit(op, 1)
+        (leftexpr, rightexpr) = __toYicesSepExpr(sexpr[0].strip(), sexpr[1].strip(), \
+                                                     paren_tmp, isbinary=True, \
+                                                     checkleft=True, checkright=True, \
+                                                     verbose=verbose)
+        retstr = '(' + op + ' ' + expr2ysstr(leftexpr, verbose=verbose) + ' ' + \
+            expr2ysstr(rightexpr, verbose=verbose) + ')'
+        return retstr
+
+    # If none of the operators are found, then just return the expression
+
+    return expr.strip()
+
+
+
+###################################################################
+
+def __toYicesSepExpr(leftexpr, rightexpr, paren_tmp, isbinary=True, checkleft=True, \
+                         checkright=True, verbose=0):
+    for k, v in paren_tmp.iteritems():
+        leftexpr = leftexpr.replace(k, v)
+        rightexpr = rightexpr.replace(k, v)
+
+    leftexpr = leftexpr.strip()
+    if (checkleft):
+        if (isbinary):
+            if (len(leftexpr) == 0 or not (leftexpr[-1].isalnum() or leftexpr[-1] == ')')):
+                printError("Invalid subformula " + leftexpr)
+                raise Exception("Invalid formula")
+        elif (len(leftexpr) > 0): # The case where the operator is !
+            if((leftexpr[-1] != '(' and leftexpr[-1] != '&' and \
+                   leftexpr[-1] != '|') or (len(leftexpr) > 1 and leftexpr[-2:] != '->')):
+                printError("Invalid subformula " + leftexpr)
+                raise Exception("Invalid formula")
+
+    rightexpr = rightexpr.strip()
+    if (checkright):
+        if (len(rightexpr) == 0 or not (rightexpr[0].isalnum() or rightexpr[0] == '(')):
+            printError("Invalid subformula " + rightexpr)
+            raise Exception("Invalid formula")
+
+    return leftexpr, rightexpr
+
+
+###################################################################
 
 def product(*args, **kwds):
     # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
@@ -153,6 +504,7 @@ def findCycle(graph, W0ind=[], verbose=0):
 
     return []
 
+
 ###################################################################
 
 def findPath(graph, root, goal, verbose=0):
@@ -200,6 +552,7 @@ def findPath(graph, root, goal, verbose=0):
 
 # Test
 if __name__ == "__main__":
+    import os
     print('Testing evalExpr')
     vardict = {'x':1, 'y':0, 'z':1, 'w':0}
     expr = 'x=0 -> y < 1 & z >= 2 -> w'
@@ -224,3 +577,28 @@ if __name__ == "__main__":
     print "path", path
     path = findCycle(graph=graph, W0ind=[0], verbose=3)
     print "path", path
+    print('DONE')
+    print('================================\n')
+
+    ####################################
+    print('Testing expr2ysstr')
+    expr = 'x & (y+1 >= 1 | (z -> w))'
+    ret = expr2ysstr(expr=expr, verbose=3)
+    print('DONE')
+    print('================================\n')
+
+    ####################################
+    print('Testing toYices')
+    vars = {'a': 'boolean', 'b': '{0, 2, 3, -15}', 'x': [14, -3]}
+    expr='!a -> (!(b = 2) | b < 0 & x > 0)'
+    ysfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+                              'tmpspec', 'tmp.ys')
+    toYices(expr=expr, allvars=vars, ysfile=ysfile, verbose=0)
+    print('DONE')
+    print('================================\n')
+
+    ####################################
+    print('Testing yicesSolveSat')
+    vars = {'b': '{0, 2, 3, -15}', 'x': [14, -3]}
+    ret = yicesSolveSat(expr=expr, allvars=vars, ysfile=ysfile, verbose=3)
+
