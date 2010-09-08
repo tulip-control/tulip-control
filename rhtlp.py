@@ -1504,7 +1504,11 @@ class RHTLPProb(SynthesisProb):
             return True
 
 
-    def __constructWGraph(self, verbose=0):
+    def constructWGraph(self, verbose=0):
+        """
+        Construct the graph for W's. There is an edge in this graph from Wi to Wj
+        if F(Wi) = Wj.
+        """
         graph = []
         for wind, shprob in enumerate(self.shprobs):
             if (isinstance(shprob.getFW(), list)):
@@ -1520,15 +1524,15 @@ class RHTLPProb(SynthesisProb):
                             printError("FW for shprobs[" + str(wind) + "]" + \
                                            " is not in this RHTLPProb.", obj=self)
                             raise Exception("Invalid FW.")
-                        graph.append(fw_ind)
                     else:
                         printError("Invalid FW", obj=self)
                         raise TypeError("Invalid FW.")
+                graph.append(fw_ind)
             elif (isinstance(shprob.getFW(), int)):
                 graph.append([shprob.getFW()])
             elif (isinstance(shprob.getFW(), ShortHorizonProb)):
-                fw_ind = self.__findWInd(fw, verbose=verbose)
-                if (tmpind >= 0):
+                fw_ind = self.__findWInd(shprob.getFW(), verbose=verbose)
+                if (fw_ind >= 0):
                     graph.append([fw_ind])
                 else:
                     printError("FW for shprobs[" + str(wind) + "]" + \
@@ -1549,7 +1553,10 @@ class RHTLPProb(SynthesisProb):
         return -1
 
 
-    def __findW0Ind(self, verbose=0):
+    def findW0Ind(self, verbose=0):
+        """
+        Find the indices of W0 in shprobs
+        """
         W0ind = range(0, len(self.shprobs))
 
         if (self.__sys_prog == True):
@@ -1613,7 +1620,10 @@ class RHTLPProb(SynthesisProb):
         return W0ind
 
 
-    def __checkTautologyPhi(self, verbose=0):
+    def checkTautologyPhi(self, verbose=0):
+        """
+        Check whether sys_init -> Phi is a tautology.
+        """
         self.__all_init = self.__replacePropSymbols(formula = self.__all_init, verbose=verbose)
         self.__Phi = self.__replacePropSymbols(formula = self.__Phi, verbose=verbose)
 
@@ -1712,7 +1722,7 @@ class RHTLPProb(SynthesisProb):
                 if (checktautology):
                     if (verbose > 1):
                         print "Checking tautology of init -> Phi for shprob[" + str(i) + '].'
-                    tautology = self.__checkTautologyPhi(verbose = verbose)
+                    tautology = self.checkTautologyPhi(verbose = verbose)
                     if (not tautology):
                         return False
 
@@ -1756,7 +1766,7 @@ class RHTLPProb(SynthesisProb):
                 
 
         # Check the partial order condition
-        W0ind = self.__findW0Ind(verbose=verbose)
+        W0ind = self.findW0Ind(verbose=verbose)
         if (verbose > 1):
             print('W0ind = ' + str(W0ind))
         if (checkpartial_order):
@@ -1765,7 +1775,7 @@ class RHTLPProb(SynthesisProb):
                 print 'Checking that the partial order condition is satisfied...'
                 if (verbose > 1):
                     print 'Checking that there is no cycle...'
-            wgraph = self.__constructWGraph(verbose=verbose)
+            wgraph = self.constructWGraph(verbose=verbose)
             cycle = rhtlputil.findCycle(wgraph, W0ind, verbose=verbose)
             if (len(cycle) != 0):
                 cycleStr = ''
@@ -1810,7 +1820,7 @@ class RHTLPProb(SynthesisProb):
             if (verbose > 0):
                 print 'Checking that init -> Phi is a tautology...'
             self.updatePhi(verbose = verbose)
-            tautology = self.__checkTautologyPhi(verbose=verbose)
+            tautology = self.checkTautologyPhi(verbose=verbose)
             if (not tautology):
                 printInfo('sys_init -> Phi is not a tautology.')
                 return False

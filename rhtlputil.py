@@ -110,7 +110,7 @@ def yicesSolveSat(expr='', allvars={}, ysfile='', verbose=0):
     sat = False
     ce = ''
     for line in cmd.stdout:
-        if (verbose > 0):
+        if (verbose > 1):
             print line,
         if ('Error' in line):
             printError("yices error: ")
@@ -147,6 +147,7 @@ def parseYices(ysfile, verbose=0):
 
         if (sat): # Examples
             ce += line + '\n'
+    f.close()
 
 ###################################################################
 
@@ -191,7 +192,7 @@ def expr2ysstr(expr='', verbose=0):
     expr = re.sub(r'\b'+'False'+r'\b', 'false', expr)
 
     expr = expr.strip()
-    if (verbose > 2):
+    if (verbose > 3):
         print('expr = ' +  expr)
 
     if (len(expr) == 0):
@@ -227,7 +228,7 @@ def expr2ysstr(expr='', verbose=0):
         if (len(oparen_ind) != len(cparen_ind)):
             printError("Unbalanced parenthesis.")
             raise Exception("Invalid formula")
-        if (verbose > 2):
+        if (verbose > 3):
             print('oparen_ind = ' + str(oparen_ind))
             print('cparen_ind = ' + str(cparen_ind))
 
@@ -246,7 +247,7 @@ def expr2ysstr(expr='', verbose=0):
             expr = expr[:oparen_ind[ind]] + ' ' + paren_tmp_sym + id + \
                 ' ' + expr[cparen_ind[ind]+1:]
 
-        if (verbose > 2):
+        if (verbose > 3):
             print("After processing parentheses, expr = " + expr)
             print(paren_tmp)
             
@@ -430,7 +431,8 @@ def __toYicesSepExpr(leftexpr, rightexpr, paren_tmp, isbinary=True, checkleft=Tr
 
     rightexpr = rightexpr.strip()
     if (checkright):
-        if (len(rightexpr) == 0 or not (rightexpr[0].isalnum() or rightexpr[0] == '(')):
+        if (len(rightexpr) == 0 or not (rightexpr[0].isalnum() or rightexpr[0] == '(' \
+                                            or rightexpr[0] == '!')):
             printError("Invalid subformula " + rightexpr)
             raise Exception("Invalid formula")
 
@@ -472,7 +474,7 @@ def findCycle(graph, W0ind=[], verbose=0):
                     tmpneighbors.append(ne)
             neighbors = tmpneighbors
 
-            if (verbose > 1):
+            if (verbose > 2):
                 print
                 print 'root = ', root
                 print 'to_visit = ', to_visit
