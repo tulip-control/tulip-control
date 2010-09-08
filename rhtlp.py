@@ -1449,20 +1449,40 @@ class RHTLPProb(SynthesisProb):
         return allvars_variables, allvars_values
 
 
-    def __checkcovering(self, verbose=0):
+    def checkcovering(self, excluded_state=[], verbose=0):
         allW_formula = 'False'
         for shprob in self.shprobs:
             allW_formula += ' | (' + shprob.getW() + ')'
 
         if (verbose > 0):
             print 'W = ' + allW_formula
+
+        es_formula = 'False'
+        if (isinstance(excluded_state, list)):
+            for es in excluded_state:
+                curr_es_formula = ''
+                for var, val in es.iteritems():
+                    if (len(curr_es_formula) > 0):
+                        curr_es_formula += ' & '
+                    curr_es_formula += var + ' = ' + str(val)
+                es_formula += ' | (' + curr_es_formula + ')'
+        elif (isinstance(excluded_state, dict)):
+            curr_es_formula = ''
+            for var, val in excluded_state.iteritems():
+                if (len(curr_es_formula) > 0):
+                    curr_es_formula += ' & '
+                curr_es_formula += var + ' = ' + str(val)
+            es_formula += ' | (' + curr_es_formula + ')'
+        else:
+            printError('excluded_state has to be a list or a dictionary.')
+            raise TypeError("Invalid excluded_state.")
             
         use_yices = True
         try:
             if (verbose > 0):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
-            expr = '!(' + allW_formula + ')'
+            expr = '!(' + allW_formula + ') & !(' + es_formula + ')'
             ysfile = os.path.dirname(self.getJTLVFile())
             ysfile = os.path.join(ysfile, 'tmp.ys')
             ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
@@ -1475,6 +1495,7 @@ class RHTLPProb(SynthesisProb):
                 return True
         except:
             printError("yices failed!")
+            print sys.exc_info()[0], sys.exc_info()[1]
             use_yices = False
         
         if (not use_yices):
@@ -1586,6 +1607,7 @@ class RHTLPProb(SynthesisProb):
                 W0ind = newW0ind
         except:
             printError("yices failed!")
+            print sys.exc_info()[0], sys.exc_info()[1]
             use_yices = False
         
         if (not use_yices):
@@ -1647,6 +1669,7 @@ class RHTLPProb(SynthesisProb):
                 print 'counter example: \n' + ret[1]
         except:
             printError("yices failed!")
+            print sys.exc_info()[0], sys.exc_info()[1]
             use_yices = False
         
         if (not use_yices):
@@ -1740,7 +1763,8 @@ class RHTLPProb(SynthesisProb):
         return True
 
 
-    def validate(self, checkcovering=True, checkpartial_order=True, checktautology=True, \
+    def validate(self, checkcovering=True, excluded_state=[], \
+                     checkpartial_order=True, checktautology=True, \
                      checkrealizable=True, heap_size='-Xmx128m', verbose=0):
         """
         Check whether the list of ShortHorizonProb objects satisfies the sufficient
@@ -1756,7 +1780,7 @@ class RHTLPProb(SynthesisProb):
         if (checkcovering):
             if (verbose > 0):
                 print 'Checking that the union of W covers the entire state space...'
-            vardict = self.__checkcovering(verbose=verbose)
+            vardict = self.checkcovering(excluded_state=excluded_state, verbose=verbose)
             if (isinstance(vardict, dict)):                
                 printInfo('state ' + str(vardict) + ' is not in any W')
                 return False
@@ -1830,6 +1854,7 @@ class RHTLPProb(SynthesisProb):
             if (verbose > 0):
                 print 'Checking that all the short horizon specs are realizable...'
 
+            self.updatePhi(verbose = verbose)
             for i, shprob in enumerate(self.shprobs):
                 shprob.setLocalPhi(Phi=self.__Phi, update=True, verbose=verbose)
                 realizable = shprob.checkRealizability(heap_size=heap_size, pick_sys_init=False, \
