@@ -46,50 +46,79 @@ class GRSpec:
         # Replace symbols for propositions on discrete variables with the actual 
         # propositions
         if (props is not None):
-            for propSymbol, prop in props.iteritems():
-                if (verbose > 1):
-                    print '\t' + propSymbol + ' -> ' + prop
-                if (isinstance(self.env_init, str)):
-                    self.env_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_init)
-                else:
-                    for i in xrange(0, len(self.env_init)):
-                        self.env_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.env_init[i])
-                    
-                if (isinstance(self.sys_init, str)):
-                    self.sys_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_init)
-                else:
-                    for i in xrange(0, len(self.sys_init)):
-                        self.sys_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.sys_init[i])
+            symfound = True
+            while (symfound):
+                symfound = False
+                for propSymbol, prop in props.iteritems():
+                    if (verbose > 2):
+                        print '\t' + propSymbol + ' -> ' + prop
+                    if (isinstance(self.env_init, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init)) > 0):
+                            self.env_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_init)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.env_init)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init[i])) > 0):
+                                self.env_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                              self.env_init[i])
+                                symfound = True
 
-                if (isinstance(self.env_safety, str)):
-                    self.env_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_safety)
-                else:
-                    for i in xrange(0, len(self.env_safety)):
-                        self.env_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.env_safety[i])
+                    if (isinstance(self.sys_init, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init)) > 0):
+                            self.sys_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_init)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.sys_init)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init[i])) > 0):
+                                self.sys_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                              self.sys_init[i])
+                                symfound = True
 
-                if (isinstance(self.sys_safety, str)):
-                    self.sys_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_safety)
-                else:
-                    for i in xrange(0, len(self.sys_safety)):
-                        self.sys_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                        self.sys_safety[i])
-                
-                if (isinstance(self.env_prog, str)):
-                    self.env_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_prog)
-                else:
-                    for i in xrange(0, len(self.env_prog)):
-                        self.env_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                      self.env_prog[i])
+                    if (isinstance(self.env_safety, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety)) > 0):
+                            self.env_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_safety)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.env_safety)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety[i])) > 0):
+                                self.env_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                                self.env_safety[i])
+                                symfound = True
 
-                if (isinstance(self.sys_prog, str)):
-                    self.sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_prog)
-                else:
-                    for i in xrange(0, len(self.sys_prog)):
-                        self.sys_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                      self.sys_prog[i])
+                    if (isinstance(self.sys_safety, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety)) > 0):
+                            self.sys_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_safety)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.sys_safety)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety[i])) > 0):
+                                self.sys_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                                self.sys_safety[i])
+                                symfound = True
+
+                    if (isinstance(self.env_prog, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog)) > 0):
+                            self.env_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_prog)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.env_prog)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog[i])) > 0):
+                                self.env_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                              self.env_prog[i])
+                                symfound = True
+
+                    if (isinstance(self.sys_prog, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog)) > 0):
+                            self.sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_prog)
+                            symfound = True
+                    else:
+                        for i in xrange(0, len(self.sys_prog)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog[i])) > 0):
+                                self.sys_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                              self.sys_prog[i])
+                                symfound = True
+
+
 
     def toJTLVSpec(self):
         """Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
