@@ -558,11 +558,19 @@ class SynthesisProb:
             self.__spec.sym2prop(props=disc_props, verbose=verbose)
         else:
             if (disc_props is not None):
-                for propSymbol, prop in disc_props.iteritems():
-                    if (verbose > 1):
-                        print '\t' + propSymbol + ' -> ' + prop
-                    self.__spec[0] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__spec[0])
-                    self.__spec[1] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__spec[1])
+                symfound = True
+                while (symfound):
+                    symfound = False
+                    for propSymbol, prop in disc_props.iteritems():
+                        if (verbose > 2):
+                            print '\t' + propSymbol + ' -> ' + prop
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.__spec[0])) > 0):
+                            self.__spec[0] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__spec[0])
+                            symfound = True
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.__spec[1])) > 0):
+                            self.__spec[1] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.__spec[1])
+                            symfound = True
+                        
 
 #         # Transitions for continuous dynamics
 #         addAnd = False
@@ -1373,15 +1381,22 @@ class RHTLPProb(SynthesisProb):
         newformula = copy.deepcopy(formula)
         # disc_prop
         if (self.__disc_props is not None):
-            for propSymbol, prop in self.__disc_props.iteritems():
-                if (verbose > 1):
-                    print '\t' + propSymbol + ' -> ' + prop
-                if (isinstance(newformula, list)):
-                    for ind in xrange(0, len(newformula)):
-                        newformula[ind] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
-                                                     newformula[ind])
-                elif (isinstance(newformula, str)):
-                    newformula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', newformula)
+            symfound = True
+            while (symfound):
+                symfound = False
+                for propSymbol, prop in self.__disc_props.iteritems():
+                    if (verbose > 2):
+                        print '\t' + propSymbol + ' -> ' + prop
+                    if (isinstance(newformula, list)):
+                        for ind in xrange(0, len(newformula)):
+                            if (len(re.findall(r'\b'+propSymbol+r'\b', newformula[ind])) > 0):
+                                newformula[ind] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                                                             newformula[ind])
+                                symfound = True
+                    elif (isinstance(newformula, str)):
+                        if (len(re.findall(r'\b'+propSymbol+r'\b', newformula)) > 0):
+                            newformula = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', newformula)
+                            symfound = True
 
         # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where 
         # P1, ..., Pn are cells in disc_dynamics that satisfy XC
@@ -1450,6 +1465,9 @@ class RHTLPProb(SynthesisProb):
 
 
     def checkcovering(self, excluded_state=[], verbose=0):
+        """
+        Check whether the disjunction of all the W's covers the entire state space.
+        """
         allW_formula = 'False'
         for shprob in self.shprobs:
             allW_formula += ' | (' + shprob.getW() + ')'

@@ -79,7 +79,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
       If negative, the timeout won't be used. Note that using timeout requires MATLAB
       parallel computing toolbox.
     - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.
-    - `verbose`: level of verbosity of
+    - `verbose`: level of verbosity
     """
     if (os.path.isfile(globals()["to_matfile"])):
         os.remove(globals()["to_matfile"])
@@ -156,7 +156,7 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
       If negative, the timeout won't be used. Note that using timeout requires MATLAB
       parallel computing toolbox.
     - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.
-    - `verbose`: level of verbosity of
+    - `verbose`: level of verbosity
     """
 
     import scipy.io as sio
