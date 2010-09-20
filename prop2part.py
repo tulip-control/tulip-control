@@ -83,7 +83,7 @@ def prop2part2(state_space, cont_props_dict):
 	for i in range(num_reg):
 		for j in range(i+1,num_reg):
 			adj[i,j] = isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
-	adj =  adj+adj.T
+	adj =  adj+adj.T+numpy.eye(num_reg,dtype=int8)
 	mypartition.adj = adj.copy()
 	return mypartition
 
