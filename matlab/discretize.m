@@ -111,7 +111,9 @@ end
 numOrigCells = length(origPartition);
 origCellVol = zeros(length(origPartition),1);
 for i = 1:numOrigCells
-    origCellVol(i) = volumeN(origPartition{i});
+    for n = 1:length(origPartition{i})
+        origCellVol(i) = origCellVol(i) + volumeN(origPartition{i}(n));
+    end
 end
 
 
