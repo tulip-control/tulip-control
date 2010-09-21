@@ -53,12 +53,12 @@
 <span class="sd">discretizeM.py --- Interface to MATLAB implementation of discretize</span>
 <span class="sd">-------------------------------------------------------------------</span>
 
-<span class="sd">Ufuk Topcu</span>
+<span class="sd">Created by Ufuk Topcu, 8/30/10</span>
+<span class="sd">Modified by Nok Wongpiromsarn, 9/3/10</span>
 
-<span class="sd">:Date: September 1, 2010</span>
 <span class="sd">:Version: 0.1.0</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">pickle</span> 
 <span class="kn">import</span> <span class="nn">pdb</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
@@ -75,7 +75,7 @@
 <span class="n">from_matfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matfile_dir</span><span class="p">,</span> <span class="s">&#39;dataFromMatlab.mat&#39;</span><span class="p">)</span>
 <span class="n">donefile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">matfile_dir</span><span class="p">,</span> <span class="s">&#39;done.txt&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CtsSysDyn"><a class="viewcode-back" href="../abstraction.html#discretizeM.CtsSysDyn">[docs]</a><span class="k">class</span> <span class="nc">CtsSysDyn</span><span class="p">:</span>
+<div class="viewcode-block" id="CtsSysDyn"><a class="viewcode-back" href="../tutorial.html#discretizeM.CtsSysDyn">[docs]</a><span class="k">class</span> <span class="nc">CtsSysDyn</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    CtsSysDyn class for specifying the continuous dynamics:</span>
 
@@ -97,9 +97,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Uset</span> <span class="o">=</span> <span class="n">Uset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Wset</span> <span class="o">=</span> <span class="n">Wset</span>
 </div>
-<div class="viewcode-block" id="discretizeM"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeM">[docs]</a><span class="k">def</span> <span class="nf">discretizeM</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">matfile</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
+<div class="viewcode-block" id="discretizeM"><a class="viewcode-back" href="../tutorial.html#discretizeM.discretizeM">[docs]</a><span class="k">def</span> <span class="nf">discretizeM</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
                     <span class="n">maxNumIterations</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
-                    <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                    <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> \
                     <span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxNumPoly</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Discretize the continuous state space using MATLAB implementation.</span>
@@ -109,6 +109,8 @@
 <span class="sd">    - `part`: a PropPreservingPartition object</span>
 <span class="sd">    - `ssys`: a CtsSysDyn object</span>
 <span class="sd">    - `N`: horizon length</span>
+<span class="sd">    - `auto`: a boolean that indicates whether to automatically run the MATLAB  </span>
+<span class="sd">      implementation of discretize.</span>
 <span class="sd">    - `minCellVolume`: the minimum volume of cells in the resulting partition</span>
 <span class="sd">    - `maxNumIterations`: the maximum number of iterations</span>
 <span class="sd">    - `useClosedLoopAlg`: a boolean that indicates whether to use the closed loop algorithm.</span>
@@ -125,7 +127,7 @@
 <span class="sd">      If negative, the timeout won&#39;t be used. Note that using timeout requires MATLAB</span>
 <span class="sd">      parallel computing toolbox.</span>
 <span class="sd">    - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.</span>
-<span class="sd">    - `verbose`: level of verbosity of</span>
+<span class="sd">    - `verbose`: level of verbosity</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])</span>
@@ -135,26 +137,48 @@
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span>
     
     <span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">matfile</span><span class="p">,</span> <span class="n">minCellVolume</span><span class="p">,</span> \
+    <span class="n">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">minCellVolume</span><span class="p">,</span> \
                            <span class="n">maxNumIterations</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span><span class="p">,</span> \
                            <span class="n">useAllHorizonLength</span><span class="p">,</span> <span class="n">useLargeSset</span><span class="p">,</span> \
                            <span class="n">timeout</span><span class="p">,</span> <span class="n">maxNumPoly</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-    <span class="n">printInfo</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Please run &#39;runDiscretizeMatlab&#39; in the &#39;matlab&#39; folder.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
 
-    <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="ow">or</span> \
-               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> \
-               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
-	<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">auto</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="s">&#39;matlab&#39;</span><span class="p">)</span>
+            <span class="n">mcommand</span> <span class="o">=</span> <span class="s">&quot;addpath(&#39;&quot;</span> <span class="o">+</span> <span class="n">mpath</span> <span class="o">+</span> <span class="s">&quot;&#39;);&quot;</span>
+            <span class="n">mcommand</span> <span class="o">+=</span> <span class="s">&quot;try, runDiscretizeMatlab; catch, disp(lasterr); quit; end;&quot;</span>
+            <span class="n">mcommand</span> <span class="o">+=</span> <span class="s">&quot;quit;&quot;</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> \
+                <span class="p">[</span><span class="s">&quot;matlab&quot;</span><span class="p">,</span> <span class="s">&quot;-nojvm&quot;</span><span class="p">,</span> <span class="s">&quot;-nosplash&quot;</span><span class="p">,</span> <span class="s">&quot;-r&quot;</span><span class="p">,</span> <span class="n">mcommand</span><span class="p">])</span>
+            <span class="n">auto</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;Cannot run matlab. Please make sure that MATLAB is in your PATH.&quot;</span><span class="p">)</span>
+            <span class="n">auto</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="ow">or</span> \
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> \
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;Discretization failed!&quot;</span><span class="p">)</span>
+            <span class="n">auto</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">auto</span><span class="p">):</span>
+        <span class="n">printInfo</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Please run &#39;runDiscretizeMatlab&#39; in the &#39;matlab&#39; folder.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="ow">or</span> \
+                   <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;donefile&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> \
+                   <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="s">&quot;to_matfile&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Waiting for MATLAB output...&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
     <span class="n">dyn</span> <span class="o">=</span> <span class="n">discretizeFromMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dyn</span>
+
 	 </div>
-<div class="viewcode-block" id="discretizeToMatlab"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeToMatlab">[docs]</a><span class="k">def</span> <span class="nf">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">matfile</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
+<div class="viewcode-block" id="discretizeToMatlab"><a class="viewcode-back" href="../abstraction.html#discretizeM.discretizeToMatlab">[docs]</a><span class="k">def</span> <span class="nf">discretizeToMatlab</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">ssys</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">minCellVolume</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> \
                            <span class="n">maxNumIterations</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">useClosedLoopAlg</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
-                           <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> \
+                           <span class="n">useAllHorizonLength</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">useLargeSset</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> \
                            <span class="n">timeout</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxNumPoly</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate an input file for MATLAB implementation of discretize.</span>
@@ -180,7 +204,7 @@
 <span class="sd">      If negative, the timeout won&#39;t be used. Note that using timeout requires MATLAB</span>
 <span class="sd">      parallel computing toolbox.</span>
 <span class="sd">    - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.</span>
-<span class="sd">    - `verbose`: level of verbosity of</span>
+<span class="sd">    - `verbose`: level of verbosity</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">import</span> <span class="nn">scipy.io</span> <span class="kn">as</span> <span class="nn">sio</span>

@@ -169,10 +169,35 @@ Needed only when <cite>discretize</cite> is True.</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="rhtlp.RHTLPProb.checkTautologyPhi">
+<tt class="descname">checkTautologyPhi</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.checkTautologyPhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.checkTautologyPhi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether sys_init -&gt; Phi is a tautology.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.checkcovering">
+<tt class="descname">checkcovering</tt><big>(</big><em>excluded_state=</em><span class="optional">[</span><span class="optional">]</span>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.checkcovering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.checkcovering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the disjunction of all the W&#8217;s covers the entire state space.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="rhtlp.RHTLPProb.computePhi">
 <tt class="descname">computePhi</tt><big>(</big><em>checktautology=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.computePhi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.computePhi" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Phi for this RHTLPProb object.
 Return a boolean that indicates whether a valid Phi exists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.constructWGraph">
+<tt class="descname">constructWGraph</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.constructWGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.constructWGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the graph for W&#8217;s. There is an edge in this graph from Wi to Wj
+if F(Wi) = Wj.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rhtlp.RHTLPProb.findW0Ind">
+<tt class="descname">findW0Ind</tt><big>(</big><em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.findW0Ind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.findW0Ind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the indices of W0 in shprobs</p>
 </dd></dl>
 
 <dl class="method">
@@ -190,7 +215,7 @@ in the short horizon problems.</p>
 
 <dl class="method">
 <dt id="rhtlp.RHTLPProb.validate">
-<tt class="descname">validate</tt><big>(</big><em>checkcovering=True</em>, <em>checkpartial_order=True</em>, <em>checktautology=True</em>, <em>checkrealizable=True</em>, <em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">validate</tt><big>(</big><em>checkcovering=True</em>, <em>excluded_state=</em><span class="optional">[</span><span class="optional">]</span>, <em>checkpartial_order=True</em>, <em>checktautology=True</em>, <em>checkrealizable=True</em>, <em>heap_size='-Xmx128m'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#RHTLPProb.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.RHTLPProb.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the list of ShortHorizonProb objects satisfies the sufficient
 conditions for receding horizon temporal logic planning</p>
 </dd></dl>
@@ -199,7 +224,7 @@ conditions for receding horizon temporal logic planning</p>
 
 <dl class="class">
 <dt id="rhtlp.ShortHorizonProb">
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1ae0fa8&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1c04968&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.ShortHorizonProb" title="Permalink to this definition">¶</a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
@@ -375,7 +400,7 @@ its initial state (in response to the initial environment state).</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromContDynamics">
-<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x1ae0f30&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromContDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>cont_state_space=None</em>, <em>cont_props={}</em>, <em>sys_dyn=None</em>, <em>spec=&lt;spec.GRSpec instance at 0x1c048c8&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromContDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromContDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -400,7 +425,7 @@ the region in the state space in which the corresponding proposition hold.</li>
 
 <dl class="method">
 <dt id="rhtlp.SynthesisProb.createProbFromDiscDynamics">
-<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1ae0f58&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x1ae0f80&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">createProbFromDiscDynamics</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x1c04918&gt;</em>, <em>spec=&lt;spec.GRSpec instance at 0x1c04940&gt;</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#SynthesisProb.createProbFromDiscDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rhtlp.SynthesisProb.createProbFromDiscDynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct SynthesisProb from discretized continuous dynamics.</p>
 <p>Input:</p>
 <ul class="simple">

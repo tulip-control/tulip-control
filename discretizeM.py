@@ -51,7 +51,7 @@ class CtsSysDyn:
 
 def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
                     maxNumIterations = 5, useClosedLoopAlg = True, \
-                    useAllHorizonLength = True, useLargeSset = True, \
+                    useAllHorizonLength = True, useLargeSset = False, \
                     timeout = -1, maxNumPoly = 5, verbose = 0):
     """
     Discretize the continuous state space using MATLAB implementation.
@@ -130,7 +130,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
 	 
 def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
                            maxNumIterations = 5, useClosedLoopAlg = True, \
-                           useAllHorizonLength = True, useLargeSset = True, \
+                           useAllHorizonLength = True, useLargeSset = False, \
                            timeout = -1, maxNumPoly = 5, verbose = 0):
     """
     Generate an input file for MATLAB implementation of discretize.

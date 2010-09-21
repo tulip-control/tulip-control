@@ -71,7 +71,7 @@
 <span class="kn">import</span> <span class="nn">grgameint</span>
 
 
-<div class="viewcode-block" id="SynthesisProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.SynthesisProb">[docs]</a><span class="k">class</span> <span class="nc">SynthesisProb</span><span class="p">:</span>
+<div class="viewcode-block" id="SynthesisProb"><a class="viewcode-back" href="../tutorial.html#rhtlp.SynthesisProb">[docs]</a><span class="k">class</span> <span class="nc">SynthesisProb</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    SynthesisProb class for specifying a planner synthesis problem.</span>
 <span class="sd">    A SynthesisProb object contains the following fields:</span>
@@ -606,11 +606,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="o">.</span><span class="n">sym2prop</span><span class="p">(</span><span class="n">props</span><span class="o">=</span><span class="n">disc_props</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">symfound</span><span class="p">):</span>
+                    <span class="n">symfound</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
+                            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__spec</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
+                        
 
 <span class="c">#         # Transitions for continuous dynamics</span>
 <span class="c">#         addAnd = False</span>
@@ -965,7 +973,7 @@
 
 <span class="c">###################################################################</span>
 </div></div>
-<div class="viewcode-block" id="ShortHorizonProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.ShortHorizonProb">[docs]</a><span class="k">class</span> <span class="nc">ShortHorizonProb</span><span class="p">(</span><span class="n">SynthesisProb</span><span class="p">):</span>
+<div class="viewcode-block" id="ShortHorizonProb"><a class="viewcode-back" href="../tutorial.html#rhtlp.ShortHorizonProb">[docs]</a><span class="k">class</span> <span class="nc">ShortHorizonProb</span><span class="p">(</span><span class="n">SynthesisProb</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ShortHorizonProb class for specifying a short horizon problem for receding horizon </span>
 <span class="sd">    temporal logic planning.</span>
@@ -1228,7 +1236,7 @@
 <span class="c">###################################################################</span>
 
 </div></div>
-<div class="viewcode-block" id="RHTLPProb"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb">[docs]</a><span class="k">class</span> <span class="nc">RHTLPProb</span><span class="p">(</span><span class="n">SynthesisProb</span><span class="p">):</span>
+<div class="viewcode-block" id="RHTLPProb"><a class="viewcode-back" href="../tutorial.html#rhtlp.RHTLPProb">[docs]</a><span class="k">class</span> <span class="nc">RHTLPProb</span><span class="p">(</span><span class="n">SynthesisProb</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    RHTLPProb class for specifying a receding horizon temporal logic planning problem.</span>
 <span class="sd">    A RHTLPProb object contains the following fields:</span>
@@ -1285,6 +1293,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setJTLVFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+                                           <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprobs</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="n">shprobs</span><span class="p">:</span>
@@ -1419,15 +1429,22 @@
         <span class="n">newformula</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
         <span class="c"># disc_prop</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">newformula</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-                    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">newformula</span><span class="p">)):</span>
-                        <span class="n">newformula</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
-                                                     <span class="n">newformula</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">newformula</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
-                    <span class="n">newformula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">newformula</span><span class="p">)</span>
+            <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">symfound</span><span class="p">):</span>
+                <span class="n">symfound</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">for</span> <span class="n">propSymbol</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__disc_props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">):</span>
+                        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">propSymbol</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">prop</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">newformula</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+                        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">newformula</span><span class="p">)):</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newformula</span><span class="p">[</span><span class="n">ind</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                                <span class="n">newformula</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> \
+                                                             <span class="n">newformula</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                                <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">newformula</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="n">newformula</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">newformula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">newformula</span><span class="p">)</span>
+                            <span class="n">symfound</span> <span class="o">=</span> <span class="bp">True</span>
 
         <span class="c"># Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where </span>
         <span class="c"># P1, ..., Pn are cells in disc_dynamics that satisfy XC</span>
@@ -1458,8 +1475,7 @@
                     <span class="n">newformula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\b&#39;</span><span class="o">+</span><span class="n">propSymbol</span><span class="o">+</span><span class="s">r&#39;\b&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="n">prop</span><span class="o">+</span><span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">newformula</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">newformula</span>
 
-
-    <span class="k">def</span> <span class="nf">__getAllVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span> 
+    <span class="k">def</span> <span class="nf">__getAllVarsRaw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEnvVars</span><span class="p">()</span>
         <span class="n">sys_disc_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSysVars</span><span class="p">()</span>
         <span class="n">allvars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">sys_disc_vars</span><span class="p">)</span>
@@ -1469,7 +1485,20 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span><span class="p">:</span>
                 <span class="n">allvars</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;boolean&#39;</span>
+        <span class="k">return</span> <span class="n">allvars</span>
 
+
+    <span class="k">def</span> <span class="nf">__getAllVars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span> 
+<span class="c">#         allvars = self.getEnvVars()</span>
+<span class="c">#         sys_disc_vars = self.getSysVars()</span>
+<span class="c">#         allvars.update(sys_disc_vars)</span>
+<span class="c">#         if ((self.getDiscretizedContVar() is None or \</span>
+<span class="c">#                 len(self.getDiscretizedContVar()) == 0 or \</span>
+<span class="c">#                 not self.getDiscretizedContVar() in sys_disc_vars) and \</span>
+<span class="c">#                 self.__cont_props is not None):</span>
+<span class="c">#             for var in self.__cont_props:</span>
+<span class="c">#                 allvars[var] = &#39;boolean&#39;</span>
+        <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVarsRaw</span><span class="p">()</span>
         <span class="n">allvars_values</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">allvars_variables</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -1483,7 +1512,10 @@
         <span class="k">return</span> <span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span>
 
 
-    <span class="k">def</span> <span class="nf">__checkcovering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="RHTLPProb.checkcovering"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.checkcovering">[docs]</a>    <span class="k">def</span> <span class="nf">checkcovering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">excluded_state</span><span class="o">=</span><span class="p">[],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the disjunction of all the W&#39;s covers the entire state space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">allW_formula</span> <span class="o">=</span> <span class="s">&#39;False&#39;</span>
         <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">:</span>
             <span class="n">allW_formula</span> <span class="o">+=</span> <span class="s">&#39; | (&#39;</span> <span class="o">+</span> <span class="n">shprob</span><span class="o">.</span><span class="n">getW</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
@@ -1491,34 +1523,79 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&#39;W = &#39;</span> <span class="o">+</span> <span class="n">allW_formula</span>
 
-        <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-
-        <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
-        <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
-            <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
-<span class="c">#             for i in xrange(0, len(allvars_variables)):</span>
-<span class="c">#                 vardict[allvars_variables[i]] = int(val[i])</span>
+        <span class="n">es_formula</span> <span class="o">=</span> <span class="s">&#39;False&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">excluded_state</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">es</span> <span class="ow">in</span> <span class="n">excluded_state</span><span class="p">:</span>
+                <span class="n">curr_es_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">es</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">curr_es_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">curr_es_formula</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                    <span class="n">curr_es_formula</span> <span class="o">+=</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">es_formula</span> <span class="o">+=</span> <span class="s">&#39; | (&#39;</span> <span class="o">+</span> <span class="n">curr_es_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">excluded_state</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
+            <span class="n">curr_es_formula</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">excluded_state</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">curr_es_formula</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">curr_es_formula</span> <span class="o">+=</span> <span class="s">&#39; &amp; &#39;</span>
+                <span class="n">curr_es_formula</span> <span class="o">+=</span> <span class="n">var</span> <span class="o">+</span> <span class="s">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">es_formula</span> <span class="o">+=</span> <span class="s">&#39; | (&#39;</span> <span class="o">+</span> <span class="n">curr_es_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&#39;excluded_state has to be a list or a dictionary.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid excluded_state.&quot;</span><span class="p">)</span>
             
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="n">allW_formula</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid W&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">return</span> <span class="n">vardict</span>
-            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
-<span class="c">#                 state = dict(zip(allvars_variables, val))</span>
-<span class="c">#                 state = &#39;&#39;</span>
-<span class="c">#                 for i in xrange(0, len(allvars_variables)):</span>
-<span class="c">#                     if (len(state) &gt; 0):</span>
-<span class="c">#                         state += &#39;, &#39;</span>
-<span class="c">#                     state += allvars_variables[i] + &#39;:&#39; + str(val[i])</span>
-<span class="c">#                 printError(&#39;state &lt;&#39; + state + &#39;&gt; is not in any W&#39;, obj=self)</span>
-                <span class="k">return</span> <span class="n">vardict</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Trying yices&quot;</span><span class="p">)</span>
+            <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVarsRaw</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="s">&#39;!(&#39;</span> <span class="o">+</span> <span class="n">allW_formula</span> <span class="o">+</span> <span class="s">&#39;) &amp; !(&#39;</span> <span class="o">+</span> <span class="n">es_formula</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getJTLVFile</span><span class="p">())</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ysfile</span><span class="p">,</span> <span class="s">&#39;tmp.ys&#39;</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">yicesSolveSat</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">allvars</span><span class="o">=</span><span class="n">allvars</span><span class="p">,</span> <span class="n">ysfile</span><span class="o">=</span><span class="n">ysfile</span><span class="p">,</span> \
+                                              <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;yices failed!&quot;</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">use_yices</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;yices failed. Enumerating states.&quot;</span><span class="p">)</span>
 
+            <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__constructWGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
+            <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
+                <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="n">allW_formula</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid W&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="n">vardict</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
+    <span class="c">#                 state = dict(zip(allvars_variables, val))</span>
+    <span class="c">#                 state = &#39;&#39;</span>
+    <span class="c">#                 for i in xrange(0, len(allvars_variables)):</span>
+    <span class="c">#                     if (len(state) &gt; 0):</span>
+    <span class="c">#                         state += &#39;, &#39;</span>
+    <span class="c">#                     state += allvars_variables[i] + &#39;:&#39; + str(val[i])</span>
+    <span class="c">#                 printError(&#39;state &lt;&#39; + state + &#39;&gt; is not in any W&#39;, obj=self)</span>
+                    <span class="k">return</span> <span class="n">vardict</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+</div>
+<div class="viewcode-block" id="RHTLPProb.constructWGraph"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.constructWGraph">[docs]</a>    <span class="k">def</span> <span class="nf">constructWGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the graph for W&#39;s. There is an edge in this graph from Wi to Wj</span>
+<span class="sd">        if F(Wi) = Wj.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">graph</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">wind</span><span class="p">,</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="nb">list</span><span class="p">)):</span>
@@ -1534,15 +1611,15 @@
                             <span class="n">printError</span><span class="p">(</span><span class="s">&quot;FW for shprobs[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">wind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;]&quot;</span> <span class="o">+</span> \
                                            <span class="s">&quot; is not in this RHTLPProb.&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Invalid FW.&quot;</span><span class="p">)</span>
-                        <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fw_ind</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">printError</span><span class="p">(</span><span class="s">&quot;Invalid FW&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid FW.&quot;</span><span class="p">)</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fw_ind</span><span class="p">)</span>
             <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="nb">int</span><span class="p">)):</span>
                 <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">()])</span>
             <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="n">ShortHorizonProb</span><span class="p">)):</span>
-                <span class="n">fw_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWInd</span><span class="p">(</span><span class="n">fw</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">tmpind</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">fw_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWInd</span><span class="p">(</span><span class="n">shprob</span><span class="o">.</span><span class="n">getFW</span><span class="p">(),</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">fw_ind</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">graph</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fw_ind</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">printError</span><span class="p">(</span><span class="s">&quot;FW for shprobs[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">wind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;]&quot;</span> <span class="o">+</span> \
@@ -1553,7 +1630,7 @@
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Invalid FW.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">graph</span>
 
-
+</div>
     <span class="k">def</span> <span class="nf">__findWInd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="p">(</span><span class="n">ind</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">)):</span>
@@ -1563,70 +1640,132 @@
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
 
-    <span class="k">def</span> <span class="nf">__findW0Ind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="RHTLPProb.findW0Ind"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.findW0Ind">[docs]</a>    <span class="k">def</span> <span class="nf">findW0Ind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the indices of W0 in shprobs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">W0ind</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">==</span> <span class="bp">True</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">W0ind</span>
 
-        <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-
-        <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
-        <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
-            <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid W&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">print</span> <span class="n">vardict</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
-                <span class="n">newW0ind</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">W0ind</span><span class="p">:</span>
-                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">getW</span><span class="p">(),</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
-                        <span class="n">newW0ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                        <span class="k">print</span> <span class="s">&#39;W[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;] does not satisfy spec.sys_prog&#39;</span>
-                        <span class="k">print</span> <span class="s">&#39;counter example: &#39;</span><span class="p">,</span> <span class="n">vardict</span>
+        <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Trying yices&quot;</span><span class="p">)</span>
+            <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVarsRaw</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getJTLVFile</span><span class="p">())</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ysfile</span><span class="p">,</span> <span class="s">&#39;tmp.ys&#39;</span><span class="p">)</span>
+            <span class="n">newW0ind</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">W0ind</span><span class="p">:</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="s">&#39;!((&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">getW</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;) -&gt; (&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">yicesSolveSat</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">allvars</span><span class="o">=</span><span class="n">allvars</span><span class="p">,</span> <span class="n">ysfile</span><span class="o">=</span><span class="n">ysfile</span><span class="p">,</span> \
+                                                  <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="n">newW0ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">print</span> <span class="s">&#39;W[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;] does not satisfy spec.sys_prog&#39;</span>
+                    <span class="k">print</span> <span class="s">&#39;counter example: </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">use_yices</span><span class="p">):</span>
                 <span class="n">W0ind</span> <span class="o">=</span> <span class="n">newW0ind</span>
-                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">W0ind</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="n">W0ind</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;yices failed!&quot;</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">use_yices</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;yices failed. Enumerating states.&quot;</span><span class="p">)</span>
+
+            <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+            <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
+            <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
+                <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid W&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">print</span> <span class="n">vardict</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+                    <span class="n">newW0ind</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">W0ind</span><span class="p">:</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">getW</span><span class="p">(),</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+                            <span class="n">newW0ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="k">print</span> <span class="s">&#39;W[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;] does not satisfy spec.sys_prog&#39;</span>
+                            <span class="k">print</span> <span class="s">&#39;counter example: &#39;</span><span class="p">,</span> <span class="n">vardict</span>
+                    <span class="n">W0ind</span> <span class="o">=</span> <span class="n">newW0ind</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">W0ind</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">W0ind</span>
+
         <span class="k">return</span> <span class="n">W0ind</span>
 
-
-    <span class="k">def</span> <span class="nf">__checkTautologyPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="RHTLPProb.checkTautologyPhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.checkTautologyPhi">[docs]</a>    <span class="k">def</span> <span class="nf">checkTautologyPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether sys_init -&gt; Phi is a tautology.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__replacePropSymbols</span><span class="p">(</span><span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__replacePropSymbols</span><span class="p">(</span><span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
         <span class="c"># Check whether self.__all_init -&gt; Phi is a tautology</span>
-        <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-        <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
-        <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
-            <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid initial condition&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-                <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">return</span> <span class="bp">False</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+        <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&quot;Trying yices&quot;</span><span class="p">)</span>
+            <span class="n">allvars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVarsRaw</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="s">&#39;!((&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">+</span> <span class="s">&#39;) -&gt; (&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">+</span> <span class="s">&#39;))&#39;</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getJTLVFile</span><span class="p">())</span>
+            <span class="n">ysfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ysfile</span><span class="p">,</span> <span class="s">&#39;tmp.ys&#39;</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">yicesSolveSat</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="n">expr</span><span class="p">,</span> <span class="n">allvars</span><span class="o">=</span><span class="n">allvars</span><span class="p">,</span> <span class="n">ysfile</span><span class="o">=</span><span class="n">ysfile</span><span class="p">,</span> \
+                                              <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ret</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;sys_init -&gt; Phi is not a tautology&#39;</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">&#39;counter example: </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">printError</span><span class="p">(</span><span class="s">&quot;yices failed!&quot;</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">use_yices</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">use_yices</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;yices failed. Enumerating states.&quot;</span><span class="p">)</span>
+
+            <span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">allvars_values</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAllVars</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">allvars_values_iter</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">allvars_values</span><span class="p">)</span>
+            <span class="n">vardict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">allvars_values_iter</span><span class="p">:</span>
+                <span class="n">vardict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">allvars_variables</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid Phi&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid initial condition&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
                     <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="k">return</span> <span class="bp">False</span>
-                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                        <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;sys_init -&gt; Phi is not a tautology&#39;</span><span class="p">)</span>
-                        <span class="k">print</span> <span class="s">&#39;counter example: &#39;</span><span class="p">,</span> <span class="n">vardict</span>
-                    <span class="k">return</span> <span class="bp">False</span>
-
-
+                <span class="k">if</span> <span class="p">(</span><span class="n">ret</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">evalExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">vardict</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">printError</span><span class="p">(</span><span class="s">&#39;Invalid Phi&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="k">print</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ret</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;sys_init -&gt; Phi is not a tautology&#39;</span><span class="p">)</span>
+                            <span class="k">print</span> <span class="s">&#39;counter example: &#39;</span><span class="p">,</span> <span class="n">vardict</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
 <div class="viewcode-block" id="RHTLPProb.updatePhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.updatePhi">[docs]</a>    <span class="k">def</span> <span class="nf">updatePhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update Phi for this RHTLPProb object based on the local Phi</span>
@@ -1651,7 +1790,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__replacePropSymbols</span><span class="p">(</span><span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="RHTLPProb.computePhi"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.computePhi">[docs]</a>    <span class="k">def</span> <span class="nf">computePhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="RHTLPProb.computePhi"><a class="viewcode-back" href="../tutorial.html#rhtlp.RHTLPProb.computePhi">[docs]</a>    <span class="k">def</span> <span class="nf">computePhi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute Phi for this RHTLPProb object.</span>
 <span class="sd">        Return a boolean that indicates whether a valid Phi exists.</span>
@@ -1672,7 +1811,7 @@
                 <span class="k">if</span> <span class="p">(</span><span class="n">checktautology</span><span class="p">):</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="k">print</span> <span class="s">&quot;Checking tautology of init -&gt; Phi for shprob[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;].&#39;</span>
-                    <span class="n">tautology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkTautologyPhi</span><span class="p">(</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">)</span>
+                    <span class="n">tautology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkTautologyPhi</span><span class="p">(</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">)</span>
                     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">tautology</span><span class="p">):</span>
                         <span class="k">return</span> <span class="bp">False</span>
 
@@ -1690,7 +1829,8 @@
         <span class="k">return</span> <span class="bp">True</span>
 
 </div>
-<div class="viewcode-block" id="RHTLPProb.validate"><a class="viewcode-back" href="../rhtlp.html#rhtlp.RHTLPProb.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkcovering</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checkpartial_order</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
+<div class="viewcode-block" id="RHTLPProb.validate"><a class="viewcode-back" href="../tutorial.html#rhtlp.RHTLPProb.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkcovering</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">excluded_state</span><span class="o">=</span><span class="p">[],</span> \
+                     <span class="n">checkpartial_order</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
                      <span class="n">checkrealizable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">heap_size</span><span class="o">=</span><span class="s">&#39;-Xmx128m&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the list of ShortHorizonProb objects satisfies the sufficient</span>
@@ -1706,20 +1846,26 @@
         <span class="k">if</span> <span class="p">(</span><span class="n">checkcovering</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Checking that the union of W covers the entire state space...&#39;</span>
-            <span class="n">vardict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkcovering</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">vardict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkcovering</span><span class="p">(</span><span class="n">excluded_state</span><span class="o">=</span><span class="n">excluded_state</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">vardict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>                
                 <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;state &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vardict</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; is not in any W&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">vardict</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>               
+                <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;state </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">vardict</span> <span class="o">+</span> <span class="s">&#39; is not in any W&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+                
 
         <span class="c"># Check the partial order condition</span>
-        <span class="n">W0ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findW0Ind</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">W0ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findW0Ind</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;W0ind = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">W0ind</span><span class="p">))</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">checkpartial_order</span><span class="p">):</span>
             <span class="c"># No cycle</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Checking that the partial order condition is satisfied...&#39;</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="k">print</span> <span class="s">&#39;Checking that there is no cycle...&#39;</span>
-            <span class="n">wgraph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__constructWGraph</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">wgraph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructWGraph</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="n">cycle</span> <span class="o">=</span> <span class="n">rhtlputil</span><span class="o">.</span><span class="n">findCycle</span><span class="p">(</span><span class="n">wgraph</span><span class="p">,</span> <span class="n">W0ind</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">cycleStr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
@@ -1764,9 +1910,9 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Checking that init -&gt; Phi is a tautology...&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">updatePhi</span><span class="p">(</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">)</span>
-            <span class="n">tautology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__checkTautologyPhi</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">tautology</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkTautologyPhi</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">tautology</span><span class="p">):</span>
-                <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;init -&gt; Phi is not a tautology.&#39;</span><span class="p">)</span>
+                <span class="n">printInfo</span><span class="p">(</span><span class="s">&#39;sys_init -&gt; Phi is not a tautology.&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">False</span>
 
         <span class="c"># Check that all the short horizon specs are realizable</span>
@@ -1774,6 +1920,7 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="k">print</span> <span class="s">&#39;Checking that all the short horizon specs are realizable...&#39;</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">updatePhi</span><span class="p">(</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shprobs</span><span class="p">):</span>
                 <span class="n">shprob</span><span class="o">.</span><span class="n">setLocalPhi</span><span class="p">(</span><span class="n">Phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__Phi</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                 <span class="n">realizable</span> <span class="o">=</span> <span class="n">shprob</span><span class="o">.</span><span class="n">checkRealizability</span><span class="p">(</span><span class="n">heap_size</span><span class="o">=</span><span class="n">heap_size</span><span class="p">,</span> <span class="n">pick_sys_init</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> \
@@ -1945,7 +2092,7 @@
 <span class="c">#                                   disc_props=disc_props, \</span>
 <span class="c">#                                   disc_dynamics=prob.getDiscretizedDynamics(), \</span>
 <span class="c">#                                   spec=spec, verbose=3)</span>
-        <span class="n">rhtlpprob</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">checkcovering</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checkpartial_order</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
+        <span class="n">rhtlpprob</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">checkcovering</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">checkpartial_order</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checktautology</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> \
                      <span class="n">checkrealizable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;DONE&#39;</span><span class="p">)</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;================================</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>

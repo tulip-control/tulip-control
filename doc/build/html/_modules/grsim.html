@@ -63,13 +63,13 @@
 <span class="kn">from</span> <span class="nn">automaton</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">errorprint</span> <span class="kn">import</span> <span class="n">printWarning</span><span class="p">,</span> <span class="n">printError</span>
 
-<div class="viewcode-block" id="grsim"><a class="viewcode-back" href="../simulation.html#grsim.grsim">[docs]</a><span class="k">def</span> <span class="nf">grsim</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="n">init_state</span><span class="p">,</span> <span class="n">env_states</span><span class="o">=</span><span class="p">[],</span> <span class="n">num_it</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">deterministic_env</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="grsim"><a class="viewcode-back" href="../simulation.html#grsim.grsim">[docs]</a><span class="k">def</span> <span class="nf">grsim</span><span class="p">(</span><span class="n">aut</span><span class="p">,</span> <span class="n">init_state</span><span class="p">,</span> <span class="n">env_states</span><span class="o">=</span><span class="p">[],</span> <span class="n">num_it</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">deterministic_env</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simulate an execution of the given automaton and return a sequence of states.</span>
 
 <span class="sd">    Input:</span>
 
-<span class="sd">    - `aut_file`: the name of the text file containing the automaton generated from</span>
+<span class="sd">    - `aut`: an Automaon object or the name of the text file containing the automaton generated from</span>
 <span class="sd">      jtlvint.synthesize or jtlv.computeStrategy function.</span>
 <span class="sd">    - `init_state`: a dictionary that (partially) specifies the initial state. </span>
 <span class="sd">    - `env_states`: a list of dictionary of environment state, specifying the sequence of</span>
@@ -80,7 +80,8 @@
 <span class="sd">    - `deterministic_env`: If len(env_states) &lt; num_it, then `deterministic_env` specifies</span>
 <span class="sd">      whether this function will choose the environment state deterministically.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">aut</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="n">aut_file</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">aut</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+        <span class="n">aut</span> <span class="o">=</span> <span class="n">Automaton</span><span class="p">(</span><span class="n">states_or_file</span><span class="o">=</span><span class="n">aut</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
     <span class="n">aut_state</span> <span class="o">=</span> <span class="n">aut</span><span class="o">.</span><span class="n">findNextAutState</span><span class="p">(</span><span class="n">current_aut_state</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">env_state</span><span class="o">=</span><span class="n">init_state</span><span class="p">)</span>
     <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">aut_state</span><span class="o">.</span><span class="n">state</span><span class="p">]</span>
 

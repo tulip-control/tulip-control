@@ -64,11 +64,11 @@
 </table>
 <dl class="function">
 <dt id="grsim.grsim">
-<tt class="descclassname">grsim.</tt><tt class="descname">grsim</tt><big>(</big><em>aut_file</em>, <em>init_state</em>, <em>env_states=</em><span class="optional">[</span><span class="optional">]</span>, <em>num_it=20</em>, <em>deterministic_env=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/grsim.html#grsim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grsim.grsim" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">grsim.</tt><tt class="descname">grsim</tt><big>(</big><em>aut</em>, <em>init_state</em>, <em>env_states=</em><span class="optional">[</span><span class="optional">]</span>, <em>num_it=20</em>, <em>deterministic_env=True</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/grsim.html#grsim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#grsim.grsim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulate an execution of the given automaton and return a sequence of states.</p>
 <p>Input:</p>
 <ul class="simple">
-<li><cite>aut_file</cite>: the name of the text file containing the automaton generated from
+<li><cite>aut</cite>: an Automaon object or the name of the text file containing the automaton generated from
 jtlvint.synthesize or jtlv.computeStrategy function.</li>
 <li><cite>init_state</cite>: a dictionary that (partially) specifies the initial state.</li>
 <li><cite>env_states</cite>: a list of dictionary of environment state, specifying the sequence of
