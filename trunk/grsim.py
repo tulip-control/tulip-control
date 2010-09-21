@@ -15,13 +15,13 @@ import random
 from automaton import *
 from errorprint import printWarning, printError
 
-def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
+def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
     """
     Simulate an execution of the given automaton and return a sequence of states.
 
     Input:
 
-    - `aut_file`: the name of the text file containing the automaton generated from
+    - `aut`: an Automaon object or the name of the text file containing the automaton generated from
       jtlvint.synthesize or jtlv.computeStrategy function.
     - `init_state`: a dictionary that (partially) specifies the initial state. 
     - `env_states`: a list of dictionary of environment state, specifying the sequence of
@@ -32,7 +32,8 @@ def grsim(aut_file, init_state, env_states=[], num_it=20, deterministic_env=True
     - `deterministic_env`: If len(env_states) < num_it, then `deterministic_env` specifies
       whether this function will choose the environment state deterministically.
     """
-    aut = Automaton(states_or_file=aut_file,verbose=verbose)
+    if (isinstance(aut, str)):
+        aut = Automaton(states_or_file=aut,verbose=verbose)
     aut_state = aut.findNextAutState(current_aut_state=None, env_state=init_state)
     states = [aut_state.state]
 

@@ -220,39 +220,54 @@
 
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">JTLV_EXE</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">jtlv_grgame</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="n">JTLV_EXE</span><span class="p">)</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
-            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
-                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
-                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> \
+            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
+                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)])</span>
     <span class="k">else</span><span class="p">:</span> <span class="c"># For debugging purpose</span>
         <span class="n">classpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> \
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JTLV_PATH</span><span class="p">,</span> <span class="s">&quot;JTLV&quot;</span><span class="p">,</span> <span class="s">&quot;jtlv-prompt1.4.1.jar&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">print</span> <span class="s">&quot;  java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> \
                 <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> \
             <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-cp&quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">,</span> <span class="s">&quot;GRMain&quot;</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> \
-                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
-                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                 <span class="n">aut_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)])</span>
+<span class="c">#         cmd = subprocess.Popen( \</span>
+<span class="c">#             [&quot;java&quot;, heap_size, &quot;-cp&quot;, classpath, &quot;GRMain&quot;, smv_file, spc_file, \</span>
+<span class="c">#                  aut_file, str(priority_kind), str(init_option)], \</span>
+<span class="c">#                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)</span>
 
     <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
-        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">line</span><span class="p">,</span>
-        <span class="k">if</span> <span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-            <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
-
-    <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">aut_file</span><span class="p">)):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">aut_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">):</span>
+                <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="s">&quot;Specification is unrealizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">):</span>
+                <span class="n">realizable</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">printError</span><span class="p">(</span><span class="s">&quot;Cannot write to aut file. Running synthesis again...&quot;</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> \
+            <span class="p">[</span><span class="s">&quot;java&quot;</span><span class="p">,</span> <span class="n">heap_size</span><span class="p">,</span> <span class="s">&quot;-jar&quot;</span><span class="p">,</span> <span class="n">jtlv_grgame</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">,</span> <span class="n">spc_file</span><span class="p">,</span> <span class="n">aut_file</span><span class="p">,</span> \
+                 <span class="nb">str</span><span class="p">(</span><span class="n">priority_kind</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_option</span><span class="p">)],</span> \
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">line</span><span class="p">,</span>
+            <span class="k">if</span> <span class="s">&quot;Specification is realizable&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">realizable</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">realizable</span> <span class="ow">and</span> <span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Automaton successfully synthesized.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">priority_kind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">ERROR: Specification was unrealizable.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout__</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stderr__</span>
 
     <span class="k">return</span> <span class="n">realizable</span>
 

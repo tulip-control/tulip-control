@@ -95,19 +95,34 @@ This can be done using the following function call:
 
      .. autofunction:: prop2part.prop2part2
 	:noindex:
-      
+
+The above function returns a proposition preserving partition as a PropPreservingPartition object.
+
+     .. autoclass:: prop2part.PropPreservingPartition
+	:noindex:
+
 
 .. _ssec:disc:
 
-Continuous state space discretization
+Continuous State Space Discretization
 `````````````````````````````````````
-Given a propositional preserving partition of the continuous state space and
+Given a proposition preserving partition of the continuous state space and
 the evolution of the continuous state as in :eq:`dynamics`,
 we refine the partition based on the reachability relation between cells
 and obtain a finite state abstraction of the evolution of the continuous state, 
 represented by a finite transition system.
 
-This can be done using the following function call:
+CtsSysDyn class is used to define continuous dynamics.
+
+     .. autoclass:: discretizeM.CtsSysDyn
+	:noindex:
+
+
+Once we have the proposition preserving partition and the continuous dynamics,
+continuous state space discretization can be done using the following function call:
+
+     .. autofunction:: discretizeM.discretizeM
+	:noindex:
 
 
 .. _ssec:syn:
@@ -166,9 +181,7 @@ Step 1 and 2 above can be combined using the following function:
 	   :noindex:
 
 
-Specification File and Parser
-`````````````````````````````
-
+.. _ssec:ex1:
 
 Example 1: Robot Motion Planning with only Discrete Decisions
 `````````````````````````````````````````````````````````````
@@ -197,7 +210,7 @@ by introducing an auxiliary discretey system variable :math:`X0reach,` initializ
 To automatically synthesize a planner for this robot, we first import the necessary modules.
 
 .. literalinclude:: ../../examples/robot_discrete_simple.py
-   :lines: 12-14
+   :lines: 12-15
 
 Specify the smv file, spc file and aut file.
 
@@ -253,7 +266,236 @@ Construct an automaton.
 .. literalinclude:: ../../examples/robot_discrete_simple.py
    :lines: 80-81
 
+Run simulation.
+
+.. literalinclude:: ../../examples/robot_discrete_simple.py
+   :lines: 85-95
+
+
+.. _ssec:ex2:
+
+Example 2: Robot Motion Planning
+````````````````````````````````
+This example is provided in examples/robot_simple.py.
+It is an extension of the previous example by including continuous dynamics.
+
+First, we import the necessary modules, 
+specify the smv file, spc file and aut file,
+and specify the environment and the discrete system variables
+as in the previous example.
+
+.. literalinclude:: ../../examples/robot_simple.py
+   :lines: 11-17, 19-24, 26, 32
+
+Next, we specify the continuous dynamics.
+This includes specifying the continuous state space, propositions on continuous variables,
+and the dynamics.
+The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y} = u_y.`
+
+.. literalinclude:: ../../examples/robot_simple.py
+   :lines: 35-37, 39-45, 47-50
+
+Now, we can construct the proposition preserving partition of the continuous state space
+and discretize the continuous state space based on the dynamics.
+
+.. literalinclude:: ../../examples/robot_simple.py
+   :lines: 53, 56
+
+The rest is the same as in the previous example. 
+We specify system specification, 
+generate input to JTLV,
+check realizability,
+construct an automaton,
+and run simulation.
+
+.. literalinclude:: ../../examples/robot_simple.py
+   :lines: 64-66, 68-70, 72-75, 77-87
+
+
+
+Defining a Synthesis Problem
+````````````````````````````
+
+SynthesisProb class provides a self-contained structure for defining 
+an embedded control software synthesis problem.
+It contains several useful functions that allow the problem to be solved in one shot,
+combining the 3 steps as previously described.
+
+     .. autoclass:: rhtlp.SynthesisProb
+	:noindex:
+
+
+Example 3: Robot Motion Planning using SynthesisProb
+````````````````````````````````````````````````````
+This example is provided in examples/robot_simple2.py.
+It is exactly the same problem as :ref:`Example 2 <ssec:ex2>`
+but solved using SynthesisProb, instead of the jtlvint module.
+
+First, we import the necessary modules
+and specify the environment and the discrete system variables and
+the continuous dynamics.
+Note that we don't have to specify the smv file, spc file and aut file
+as in the previous examples.
+
+.. literalinclude:: ../../examples/robot_simple2.py
+   :lines: 11-17, 19, 25-26, 29-31, 33-39, 41-44
+
+Next, we specify system specification. Here, specification is a GRSpec object,
+instead of a list of length 2 as in the previous examples.
+
+.. literalinclude:: ../../examples/robot_simple2.py
+   :lines: 47-51
+
+Now, we have all the necessary elements to construct a synthesis problem.
+
+.. literalinclude:: ../../examples/robot_simple2.py
+   :lines: 54-56
+
+Once a SynthesisProb object is constructed, we can check the realizability of this problem
+and construct the automaton.
+
+.. literalinclude:: ../../examples/robot_simple2.py
+   :lines: 59-60, 62
+
+Finally, we can run the simulation as before.
+
+.. literalinclude:: ../../examples/robot_simple2.py
+   :lines: 65-75
 
 
 Receding Horizon Temporal Logic Planning
 ----------------------------------------
+
+For systems with a certain structure, the computational complexity of
+the planner synthesis can be alleviated by solving the planning problems
+in a receding horizon fashion, i.e., compute the plan or strategy over
+a "shorter" horizon, starting from the current state,
+implement the initial portion of hte plan,
+move the horizon one step ahead, and recompute.
+This approach essentially reduces the planner synthesis problem
+into a set of smaller problems.
+To ensure that this "receding horizon" framework preserves
+the desired system-level temporal properties, certain sufficient conditions
+need to be satisfied.
+
+We consider a specification of the form
+
+.. math::
+   \varphi = \big(\psi_{init} \wedge \square \psi_e^e \wedge 
+   \bigwedge_{i \in I_f} \square\diamond \psi_{f,i}\big) \implies
+   \big(\square \psi_s \wedge \bigwedge_{i \in I_g} \psi_{g,i}\big).
+   :label: GR1Spec
+
+Given a specification of this form, we first construct a finite state abstraction
+of the physical system.
+Then, for each :math:`i \in I_g`, we organize the system states
+into a partially ordered set :math:`\mathcal{P}^i = (\{\mathcal{W}_j^i\}, \preceq_{\psi_{g,i}})`
+where :math:`\mathcal{W}_0^i` are the set of states satisfying
+:math:`\psi_{g,i}.`
+For each :math:`j`, we define a short-horizon specification :math:`\Psi_j^i`
+associated with :math:`\mathcal{W}_j^i` as
+
+.. math::
+   \Psi_j^i = \big((\nu \in \mathcal{W}_j^i) \wedge \Phi \wedge \square \psi_e^e \wedge 
+   \bigwedge_{k \in I_f} \square\diamond \psi_{f,k}\big) \implies
+   \big(\square \psi_s \wedge \square\diamond(\nu \in \mathcal{F}^i(\mathcal{W}_j^i)) \big).
+
+Here, :math:`\Phi` describes receding horizon invariants.
+:math:`\Phi` needs to be defined such that :math:`\psi_{init} \implies \Phi` is a tautology.
+:math:`\mathcal{F}^i : \{\mathcal{W}_j^i\} \to \{\mathcal{W}_j^i\}` is a mapping
+such that :math:`\mathcal{F}^i(\mathcal{W}_j^i) \prec_{\psi_{g,i}} \mathcal{W}_j^i, \forall j \not= 0.`
+:math:`\mathcal{F}^i(\mathcal{W}_j^i)` essentially defines intermediate goal for starting in
+:math:`\mathcal{W}^i_j.`
+
+.. image:: rhtlp_strategy.*
+
+The above figure provides a graphical description of the receding horizon strategy 
+for a special case where for each 
+:math:`i \in I_g, \mathcal{W}^i_j \prec_{\psi_{g,i}} \mathcal{W}^i_k, \forall j < k`,
+:math:`\mathcal{F}^i(\mathcal{W}^i_j) = \mathcal{W}^i_{j-1}, \forall j > 0` 
+and :math:`F^i(\mathcal{W}^i_0) = \mathcal{W}^i_0.`
+Please refer to our `paper <http://www.cds.caltech.edu/~nok/doc/tac10.pdf>`_ for more details.
+
+
+Short-Horizon Problem
+`````````````````````
+
+A short-horizon problem can be defined using the ShortHorizonProb class.
+
+     .. autoclass:: rhtlp.ShortHorizonProb
+	:noindex:
+
+
+Receding Horizon Temporal Logic Planning Problem
+````````````````````````````````````````````````
+
+A receding horizon temporal logic planning problem contains a collection of
+short-horizon problems. It can be defined using the RHTLPProb class, which
+contains many functions such as ``computePhi()`` and ``validate()``.   
+
+     .. autoclass:: rhtlp.RHTLPProb
+	:members: computePhi, validate
+	:noindex:
+
+
+
+Example 4: Autonomous Vehicle
+`````````````````````````````
+This example is provided in examples/autonomous_car_road.py.
+It is a simplified version of the problem presented in our
+`CDC paper <http://www.cds.caltech.edu/~nok/doc/cdc09.pdf>`_
+
+We first import the necessary modules.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 13-18
+
+Specify the road configuration and the problem setup.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 22-23, 26-28
+
+Continuous dynamics.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 32-34
+
+Variables and propositions.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 38-47
+
+Specification.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 50-194
+
+Now, we construct the RHTLPProb object.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 196-198
+
+Add ShortHorizonProb objects to the RHTLPProb object.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 204-269
+
+For each :math:`\mathcal{W}_j`, set :math:`\mathcal{F}(\mathcal{W}_j).`
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 271-273
+
+Now, we can validate whether the RHTLPProb object satisfies all the sufficient conditions.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 276
+
+The result of the above ``validate()`` call is that the state in which
+:math:`X_i = 0, \forall i \in \{0, \ldots, 29\}` is not in any :math:`\mathcal{W}_j,` 
+i.e., the sufficient condition that the union of all :math:`\mathcal{W}_j`
+covers the entire state space is not satisfied.
+Since we know that we don't have to deal with the above state, we will exclude it.
+
+.. literalinclude:: ../../examples/autonomous_car_road.py
+   :lines: 312-316
+

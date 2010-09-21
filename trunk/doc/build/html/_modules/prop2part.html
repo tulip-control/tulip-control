@@ -131,12 +131,12 @@
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_reg</span><span class="p">):</span>
 		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">num_reg</span><span class="p">):</span>
 			<span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">isAdjacentRegion</span><span class="p">(</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mypartition</span><span class="o">.</span><span class="n">list_region</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-	<span class="n">adj</span> <span class="o">=</span>  <span class="n">adj</span><span class="o">+</span><span class="n">adj</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">adj</span> <span class="o">=</span>  <span class="n">adj</span><span class="o">+</span><span class="n">adj</span><span class="o">.</span><span class="n">T</span><span class="o">+</span><span class="n">numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">num_reg</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">int8</span><span class="p">)</span>
 	<span class="n">mypartition</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="n">adj</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 	<span class="k">return</span> <span class="n">mypartition</span>
 
 </div>
-<div class="viewcode-block" id="PropPreservingPartition"><a class="viewcode-back" href="../abstraction.html#prop2part.PropPreservingPartition">[docs]</a><span class="k">class</span> <span class="nc">PropPreservingPartition</span><span class="p">:</span>
+<div class="viewcode-block" id="PropPreservingPartition"><a class="viewcode-back" href="../tutorial.html#prop2part.PropPreservingPartition">[docs]</a><span class="k">class</span> <span class="nc">PropPreservingPartition</span><span class="p">:</span>
 	<span class="sd">&quot;&quot;&quot;Partition class with following fields</span>
 <span class="sd">	</span>
 <span class="sd">	- domain: the domain we want to partition, type: polytope</span>
