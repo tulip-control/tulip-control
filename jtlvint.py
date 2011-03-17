@@ -14,7 +14,6 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 """
 
 import re, os, subprocess, sys
-from polyhedron import Vrep, Hrep
 from prop2part import Region, PropPreservingPartition
 from rhtlp import SynthesisProb
 import grgameint

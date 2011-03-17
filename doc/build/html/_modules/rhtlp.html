@@ -132,8 +132,10 @@
                                <span class="n">env_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">sys_prog</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__disc_cont_var</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__disc_dynamics</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">__jtlvfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> \
                                            <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">)</span>
+<span class="c">#        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \</span>
+<span class="c">#                                           &#39;tmpspec&#39;, &#39;tmp&#39;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__realizable</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="n">verbose</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;verbose&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -1293,8 +1295,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__cont_props</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sys_prog</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__all_init</span> <span class="o">=</span> <span class="s">&#39;True&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setJTLVFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> \
+        <span class="bp">self</span><span class="o">.</span><span class="n">setJTLVFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> \
                                            <span class="s">&#39;tmpspec&#39;</span><span class="p">,</span> <span class="s">&#39;tmp&#39;</span><span class="p">))</span>
+<span class="c">#        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \</span>
+<span class="c">#                                           &#39;tmpspec&#39;, &#39;tmp&#39;))</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">shprobs</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">shprob</span> <span class="ow">in</span> <span class="n">shprobs</span><span class="p">:</span>
@@ -2184,7 +2188,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
     </div>
   </body>
 </html>

@@ -84,8 +84,10 @@ class SynthesisProb:
                                env_prog='', sys_prog='')
         self.__disc_cont_var = ''
         self.__disc_dynamics = None
-        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
                                            'tmpspec', 'tmp')
+#        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+#                                           'tmpspec', 'tmp')
         self.__realizable = None
 
         verbose = args.get('verbose', 0)
@@ -1245,8 +1247,10 @@ class RHTLPProb(SynthesisProb):
         self.__cont_props = []
         self.__sys_prog = 'True'
         self.__all_init = 'True'
-        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
                                            'tmpspec', 'tmp'))
+#        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+#                                           'tmpspec', 'tmp'))
 
         if (isinstance(shprobs, list)):
             for shprob in shprobs:
