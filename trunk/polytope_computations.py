@@ -28,7 +28,7 @@ from cvxopt import matrix
 import cvxopt
 import pdb
 from copy import deepcopy
-from polyhedron import Vrep, Hrep
+#from polyhedron import Vrep, Hrep
 
 
 

@@ -17,7 +17,6 @@ from numpy import *
 from scipy import *
 from polytope_computations import *
 from copy import deepcopy
-from polyhedron import Vrep, Hrep
 from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
 

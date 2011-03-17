@@ -248,7 +248,7 @@ This can be done using the following steps.</p>
 <blockquote>
 <dl class="function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=</em><span class="optional">[</span><span class="optional">]</span>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x26a8288&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">generateJTLVInput</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=</em><span class="optional">[</span><span class="optional">]</span>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x103ad4710&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#generateJTLVInput"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Generate JTLV input files: smv_file and spc_file.</p>
 <p>Input:</p>
 <ul class="simple">
@@ -371,7 +371,7 @@ varnames.</li>
 <dt>Step 1 and 2 above can be combined using the following function:</dt>
 <dd><dl class="first last function">
 <dt>
-<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x26a8eb8&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
+<tt class="descclassname">jtlvint.</tt><tt class="descname">synthesize</tt><big>(</big><em>env_vars={}</em>, <em>sys_disc_vars={}</em>, <em>spec=''</em>, <em>disc_props={}</em>, <em>disc_dynamics=&lt;prop2part.PropPreservingPartition instance at 0x103ad4440&gt;</em>, <em>smv_file='tmp.smv'</em>, <em>spc_file='tmp.spc'</em>, <em>aut_file=''</em>, <em>heap_size='-Xmx128m'</em>, <em>priority_kind=3</em>, <em>init_option=1</em>, <em>file_exist_option='a'</em>, <em>verbose=0</em><big>)</big><a class="reference internal" href="_modules/jtlvint.html#synthesize"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Compute an automaton satisfying <cite>spec</cite>. Return the realizability of <cite>spec</cite>.
 If <cite>spec</cite> is realizable, the resulting automaton will be stored in the
 <cite>aut_file</cite>. Otherwise, the counter examples will be stored.
@@ -789,7 +789,7 @@ Please refer to our <a class="reference external" href="http://www.cds.caltech.e
 <blockquote>
 <dl class="class">
 <dt>
-<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1c04968&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><tt class="descclassname">rhtlp.</tt><tt class="descname">ShortHorizonProb</tt><big>(</big><em>W=''</em>, <em>FW=</em><span class="optional">[</span><span class="optional">]</span>, <em>Phi=''</em>, <em>global_prob=&lt;rhtlp.SynthesisProb instance at 0x1027433b0&gt;</em>, <em>**args</em><big>)</big><a class="reference internal" href="_modules/rhtlp.html#ShortHorizonProb"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>ShortHorizonProb class for specifying a short horizon problem for receding horizon 
 temporal logic planning.
 A ShortHorizonProb object contains the following fields:</p>
@@ -1277,7 +1277,7 @@ ret = rhtlpprob.validate(excluded_state=excluded_state)
     </div>
     <div class="footer">
         &copy; Copyright 2010, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
     </div>
   </body>
 </html>
