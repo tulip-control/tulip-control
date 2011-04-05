@@ -13,7 +13,7 @@ from discretizeM import CtsSysDyn, discretizeM
 from jtlvint import *
 from automaton import *
 from numpy import array
-from grsim import grsim
+from grsim import grsim, writeStatesToFile
 
 # Specify where the smv file, spc file and aut file will go
 testfile = 'robot_simple'
@@ -77,11 +77,12 @@ aut = Automaton(autfile, [], 3)
 num_it = 30
 init_state = {}
 init_state['X0reach'] = True
-env_states = []
-for i in xrange(0,num_it):
-    if (i%3 == 0):
-        env_states.append({'park':True})
-    else:
-        env_states.append({'park':False})
+states = grsim(aut, init_state, num_it=num_it, deterministic_env=False)
+writeStatesToFile(states, 'robot_sim.txt')
 
-states = grsim(aut, init_state, env_states, num_it)
+f = open('robot_disc_dynamics.txt', 'w')
+f.write(str(disc_dynamics.list_prop_symbol) + '\n')
+for i in xrange(0, len(disc_dynamics.list_region)):
+    f.write(str(disc_dynamics.list_region[i].list_prop))
+    f.write('\n')
+f.close()

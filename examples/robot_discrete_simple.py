@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '..'
 from prop2part import Region, PropPreservingPartition
 from jtlvint import *
 from automaton import *
-from grsim import grsim
+from grsim import grsim, writeStatesToFile
 
 # Specify where the smv file, spc file and aut file will go
 testfile = 'robot_discrete_simple'
@@ -93,3 +93,4 @@ for i in xrange(0,num_it):
         env_states.append({'park':False})
 
 states = grsim(aut, init_state, env_states, num_it)
+writeStatesToFile(states, 'robot_sim.txt')

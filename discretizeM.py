@@ -10,7 +10,7 @@ Modified by Nok Wongpiromsarn, 9/3/10
 
 :Version: 0.1.0
 """
-import os, time, subprocess
+import sys, os, time, subprocess
 import pickle 
 import pdb
 from numpy import *
@@ -20,8 +20,11 @@ from copy import deepcopy
 from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
 
-matfile_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-                               'matlab', 'tmpmat')
+
+matfile_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
+                               'tmpmat')
+#matfile_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
+#                               'matlab', 'tmpmat')
 to_matfile = os.path.join(matfile_dir, 'dataToMatlab.mat')
 from_matfile = os.path.join(matfile_dir, 'dataFromMatlab.mat')
 donefile = os.path.join(matfile_dir, 'done.txt')
@@ -96,7 +99,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
     if (auto):
         try:
             mpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'matlab')
-            mcommand = "addpath('" + mpath + "');"
+            mcommand = "addpath('" + mpath + "'); p = '" + matfile_dir + "';"
             mcommand += "try, runDiscretizeMatlab; catch, disp(lasterr); quit; end;"
             mcommand += "quit;"
             cmd = subprocess.call( \
@@ -175,8 +178,16 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
     data['A'] = ssys.A
     data['B'] = ssys.B
     data['E'] = ssys.E
-    data['Uset'] = ssys.Uset
-    data['Wset'] = ssys.Wset
+    data['UsetA'] = ssys.Uset.A
+    data['Usetb'] = ssys.Uset.b
+#    data['Uset'] = ssys.Uset
+    if (isinstance(ssys.Wset, Polytope)):
+        data['WsetA'] = ssys.Wset.A
+        data['Wsetb'] = ssys.Wset.b
+    else:
+        data['WsetA'] = []
+        data['Wsetb'] = []
+#    data['Wset'] = ssys.Wset
     data['N'] = N
     numpolyvec = []
     den = []
