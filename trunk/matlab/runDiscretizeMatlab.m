@@ -1,9 +1,12 @@
-fname = 'runDiscretizeMatlab.m';
-p = which(fname);
-p = p(1:end-length(fname));
-matfilein = [p 'tmpmat' filesep 'dataToMatlab.mat'];
-matfileout = [p 'tmpmat' filesep 'dataFromMatlab.mat'];
-donefile = [p 'tmpmat' filesep 'done.txt'];
+%fname = 'runDiscretizeMatlab.m';
+%p = which(fname);
+%p = p(1:end-length(fname));
+%matfilein = [p 'tmpmat' filesep 'dataToMatlab.mat'];
+%matfileout = [p 'tmpmat' filesep 'dataFromMatlab.mat'];
+%donefile = [p 'tmpmat' filesep 'done.txt'];
+matfilein = [p filesep 'dataToMatlab.mat'];
+matfileout = [p filesep 'dataFromMatlab.mat'];
+donefile = [p filesep 'done.txt'];
 
 load(matfilein)
 
@@ -22,9 +25,10 @@ probStruct.A = double(A);
 probStruct.B = double(B);
 probStruct.E = double(E);
 probStruct.N = double(N);
-probStruct.Uset = polytope(double(Uset.A),double(Uset.b));
-if (~isempty(Wset))
-    probStruct.Wset = polytope(double(Wset.A),double(Wset.b));
+probStruct.Uset = polytope(double(UsetA),double(Usetb));
+% probStruct.Uset = polytope(double(Uset.A),double(Uset.b));
+if (~isempty(WsetA) && ~isempty(Wsetb))
+    probStruct.Wset = polytope(double(WsetA),double(Wsetb));
 else
     probStruct.Wset = [];
 end

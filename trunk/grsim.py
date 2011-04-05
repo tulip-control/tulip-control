@@ -60,3 +60,15 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
                 aut_state = aut.getAutState(random.choice(transition))
         states.append(aut_state.state)
     return states
+
+###################################################################
+def writeStatesToFile(states, file, verbose=0):
+    f = open(file, 'w')
+    if (verbose > 0):
+        print 'Writing simulation result to ' + file
+    for state in states:
+        for var in state.keys():
+            f.write(var + ':')
+            f.write(str(state[var]) + ', ')
+        f.write('\n')
+    f.close()

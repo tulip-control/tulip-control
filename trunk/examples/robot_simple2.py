@@ -13,7 +13,7 @@ from discretizeM import CtsSysDyn, discretizeM
 from spec import GRSpec
 from rhtlp import SynthesisProb
 from numpy import array
-from grsim import grsim
+from grsim import grsim, writeStatesToFile
 
 # Environment variables
 env_vars = {'park' : 'boolean'}
@@ -73,3 +73,12 @@ for i in xrange(0,num_it):
         env_states.append({'park':False})
 
 states = grsim(aut, init_state, env_states, num_it)
+writeStatesToFile(states, 'robot_sim.txt')
+
+f = open('robot_disc_dynamics.txt', 'w')
+disc_dynamics = prob.getDiscretizedDynamics()
+f.write(str(disc_dynamics.list_prop_symbol) + '\n')
+for i in xrange(0, len(disc_dynamics.list_region)):
+    f.write(str(disc_dynamics.list_region[i].list_prop))
+    f.write('\n')
+f.close()
