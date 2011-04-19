@@ -7,7 +7,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 3, 2010
 """
 import sys, os
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '..'))
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '../tulip'))
 
 from prop2part import Region, PropPreservingPartition
 from jtlvint import *
