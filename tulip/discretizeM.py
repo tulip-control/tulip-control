@@ -132,7 +132,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
 
     if (auto):
         try:
-            mpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'matlab')
+            mpath = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../matlab')
             mcommand = "addpath('" + mpath + "'); p = '" + matfile_dir + "';"
             mcommand += "try, runDiscretizeMatlab; catch, disp(lasterr); quit; end;"
             mcommand += "quit;"

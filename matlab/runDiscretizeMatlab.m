@@ -34,6 +34,7 @@ else
 end
 numpolyvec = double(numpolyvec);
 
+HK = 0;				% initialize for MATLAB parser
 for i1 = 1:length(numpolyvec)
     for i2 = 1:numpolyvec(i1)
         eval(['HK = double(Reg' int2str(i1) 'Poly' int2str(i2) 'Ab);']);

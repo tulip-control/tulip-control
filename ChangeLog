@@ -1,0 +1,10 @@
+2011-04-19  Richard Murray  <murray@malabar.local>
+
+	* tulip/discretizeM.py (discretizeM): updated path for matlab files
+	from .. to ../matlab (reflecting new source code location)
+
+	* examples/*.py: updated path for tulip files from .. to ../tulip
+
+	* matlab/runDiscretizeMatlab.m (HK): add initialization of variable
+	HK to stop MATLAB 2010a error message
+
