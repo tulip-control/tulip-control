@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name = 'tulip',
-      version = '0.1a',
+      version = '0.1b',
       description = 'Temporal Logic Planning (TuLiP) Toobox',
       author = 'Nok Wongpiromsarn',
       author_email = 'murray@cds.caltech.edu',

@@ -1,3 +1,5 @@
+--- Version 0.1a released ----
+	
 2011-04-19  Richard Murray  <murray@malabar.local>
 
 	* setup.py: Added matlab files to setup, to make sure they get
