@@ -1,4 +1,3 @@
 include tulip/jtlv_grgame.jar
+include tulip/matlab/*.m
 include examples/*.py
-include matlab/*.m
-

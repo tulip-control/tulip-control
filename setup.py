@@ -9,6 +9,7 @@ setup(name = 'tulip',
       author_email = 'murray@cds.caltech.edu',
       url = 'http://tulip-control.sourceforge.net',
       requires = ['scipy'],
-      package_dir = {'tulip' : 'tulip'},
       packages = ['tulip'],
+      package_dir = {'tulip' : 'tulip'},
+      package_data={'tulip': ['matlab/*.m']},
      )
