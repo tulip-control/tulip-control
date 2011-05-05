@@ -144,6 +144,51 @@ class Automaton:
                     transition[i] = int(transition[i])
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
 
+    def writeDotFile(self, fname):
+        """Write automaton to Graphviz DOT file.
+
+        In each state, nonzero variables and their value (in that
+        state) are listed.  This style is motivated by Boolean
+        variables, but applies to all variables, including those
+        taking arbitrary integer values.
+
+        Return False on failure; True otherwise (success).
+        """
+        try:
+            f = open(fname, "w")
+        except:
+            printWarning("Failed to open "+fname+" for writing.", obj=self)
+            return False
+
+        try:
+            f.write("digraph A {\n")
+
+            # Prebuild sane state names
+            state_labels = dict()
+            for state in self.states:
+                state_labels[state.id] = ''
+                for (k,v) in state.state.items():
+                    if v != 0:  # i.e., not False (but not applicable for general variables).
+                        if len(state_labels[state.id]) == 0:
+                            state_labels[state.id] += k+": "+str(v)
+                        else:
+                            state_labels[state.id] += ", "+k+": "+str(v)
+                if len(state_labels[state.id]) == 0:
+                    state_labels[state.id] = "{}"
+
+            for state in self.states:
+                for trans in state.transition:
+                    f.write("    \""+ state_labels[state.id] +"\" -> \"" \
+                                + state_labels[self.states[trans].id] +"\";\n")
+            f.write("\n}\n")
+        except:
+            f.close()
+            printWarning("Error occurred while generating DOT code for automaton.", obj=self)
+            return False
+
+        f.close()
+        return True
+
     def size(self):
         """
         Return the number of states in this Automaton object.

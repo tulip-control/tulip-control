@@ -11,6 +11,7 @@ minor refactoring by SCL <slivingston@caltech.edu>
 """
 
 import sys, os
+from subprocess import call
 
 from tulip import *
 from tulip import polytope_computations as pc
@@ -82,6 +83,13 @@ realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile, \
 jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile, \
                                     priority_kind=3, verbose=3)
 aut = automaton.Automaton(autfile, [], 3)
+if not aut.writeDotFile("rdsimple.dot"):
+    print "Error occurred while generating DOT file."
+else:
+    try:
+        call("dot rdsimple.dot -Tpng -o rdsimple.png".split())
+    except:
+        print "Failed to create image from DOT file. To do so, try\n\ndot rdsimple.dot -Tpng -o rdsimple.png\n"
 
 # Simulate
 num_it = 30
