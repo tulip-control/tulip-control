@@ -35,22 +35,24 @@
 # $Id$
 
 """ 
--------------------------------------------------------------------
-discretizeM.py --- Interface to MATLAB implementation of discretize
--------------------------------------------------------------------
+Interface to MATLAB implementation of discretize
 
 Created by Ufuk Topcu, 8/30/10
 Modified by Nok Wongpiromsarn, 9/3/10
 
 :Version: 0.1.0
+
+minor refactoring by SCL <slivingston@caltech.edu>
+3 May 2011.
 """
+
 import sys, os, time, subprocess
 import pickle 
-import pdb
-from numpy import *
-from scipy import *
-from polytope_computations import *
 from copy import deepcopy
+import numpy as np
+from scipy import io as sio
+
+import polytope_computations as pc
 from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
 
@@ -64,8 +66,7 @@ from_matfile = os.path.join(matfile_dir, 'dataFromMatlab.mat')
 donefile = os.path.join(matfile_dir, 'done.txt')
 
 class CtsSysDyn:
-    """
-    CtsSysDyn class for specifying the continuous dynamics:
+    """CtsSysDyn class for specifying the continuous dynamics:
 
         s[t+1] = A*s[t] + B*u[t] + E*w[t]
         u[t] \in Uset - polytope object
@@ -89,8 +90,7 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
                     maxNumIterations = 5, useClosedLoopAlg = True, \
                     useAllHorizonLength = True, useLargeSset = False, \
                     timeout = -1, maxNumPoly = 5, verbose = 0):
-    """
-    Discretize the continuous state space using MATLAB implementation.
+    """Discretize the continuous state space using MATLAB implementation.
     
     Input:
     
@@ -168,8 +168,7 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
                            maxNumIterations = 5, useClosedLoopAlg = True, \
                            useAllHorizonLength = True, useLargeSset = False, \
                            timeout = -1, maxNumPoly = 5, verbose = 0):
-    """
-    Generate an input file for MATLAB implementation of discretize.
+    """Generate an input file for MATLAB implementation of discretize.
     
     Input:
     
@@ -195,7 +194,6 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
     - `verbose`: level of verbosity
     """
 
-    import scipy.io as sio
     data = {}
     adj = deepcopy(part.adj)
     for i in xrange(0, len(adj)):
@@ -215,7 +213,7 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
     data['UsetA'] = ssys.Uset.A
     data['Usetb'] = ssys.Uset.b
 #    data['Uset'] = ssys.Uset
-    if (isinstance(ssys.Wset, Polytope)):
+    if (isinstance(ssys.Wset, pc.Polytope)):
         data['WsetA'] = ssys.Wset.A
         data['Wsetb'] = ssys.Wset.b
     else:
@@ -229,7 +227,7 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
         numpolyvec.append(len(part.list_region[i1].list_poly))
         for i2 in range(0,len(part.list_region[i1].list_poly)):
             pp = part.list_region[i1].list_poly[i2]
-            data['Reg'+str(i1+1)+'Poly'+str(i2+1)+'Ab'] = concatenate((pp.A,pp.b),1)
+            data['Reg'+str(i1+1)+'Poly'+str(i2+1)+'Ab'] = np.concatenate((pp.A,pp.b),1)
     data['numpolyvec'] = numpolyvec
     matfile = globals()["to_matfile"]
     if (not os.path.exists(os.path.abspath(os.path.dirname(matfile)))):
@@ -239,14 +237,12 @@ def discretizeToMatlab(part, ssys, N = 10, minCellVolume = 0.1, \
 	
 	
 def discretizeFromMatlab(origPart):
-    """
-    Load the data from MATLAB discretize implementation.
+    """Load the data from MATLAB discretize implementation.
 
     Input:
 
     - origPart: a PropPreservingPartition object
     """
-    import scipy.io as sio
     matfile = globals()["from_matfile"]
     if (os.path.getmtime(matfile) <= os.path.getmtime(globals()["to_matfile"])):
         printWarning("The MATLAB output file is older than the MATLAB input file.")
@@ -258,12 +254,12 @@ def discretizeFromMatlab(origPart):
     data = sio.loadmat(matfile)
     trans = data['trans']
     a1 = data['numNewCells']
-    numNewCells = zeros((a1.shape[0],1))
+    numNewCells = np.zeros((a1.shape[0],1))
     numNewCells[0:,0] = a1[:,0]
     newCellVol = data['newCellVol']
     num_cells = data['num_cells'][0][0]
     a2 = data['numpoly']
-    numpoly = zeros(a2.shape)
+    numpoly = np.zeros(a2.shape)
     numpoly[0:,0:] = a2[0:,0:]
 	
     regs = []
@@ -274,12 +270,12 @@ def discretizeFromMatlab(origPart):
             for i3 in range(0,int(numpoly[i1,i2])):
                 Ab = data['Cell'+str(i1)+'Reg'+str(i2)+'Poly'+str(i3)+'Ab']
                 A = deepcopy(Ab[:,0:-1])
-                b = zeros((A.shape[0],1))
+                b = np.zeros((A.shape[0],1))
                 b[0:,0] = deepcopy(Ab[:,-1])
-                polys.append(Polytope(A,b))
+                polys.append(pc.Polytope(A,b))
 
             props = origPart.list_region[i1].list_prop
-            regs.append(Region(polys,props))	
+            regs.append(pc.Region(polys,props))	
 				
     domain = deepcopy(origPart.domain)
     num_prop = deepcopy(origPart.num_prop)
@@ -288,11 +284,3 @@ def discretizeFromMatlab(origPart):
     newPartition = PropPreservingPartition(domain, num_prop, regs, num_regions, [], \
                                                trans, list_prop_symbol)
     return newPartition
-	
-	
-	
-		
-		
-	
-	
-	

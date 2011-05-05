@@ -33,7 +33,8 @@
 # 
 # $Id$
 
-""" polytope_computations.py --- A computational geometry module for polytope computations
+"""
+A computational geometry module for polytope computations.
 
 Functions: 
 	- __boundingBoxRegion__, __findBoundingBox__
@@ -53,21 +54,20 @@ Classes:
 
 Created by N. Ozay, 8/15/10 (necmiye@cds.caltech.edu)
 Modified by U. Topcu, 8/16/10
+
+minor refactoring by SCL <slivingston@caltech.edu>
+1 May 2011.
 """
 
-from numpy import *
-from scipy import *
-from cvxopt import blas, lapack, solvers
-from cvxopt import matrix
-import cvxopt
-import pdb
+import numpy as np
+from scipy import rand
+from scipy import io as sio
+from cvxopt import blas, lapack, solvers, matrix
 from copy import deepcopy
 #from polyhedron import Vrep, Hrep
 
 
-
 solvers.options['show_progress'] = False
-
 
 
 def projectionV(polyIn,dimToElim): 
@@ -116,16 +116,16 @@ def __findBoundingBox__(poly):
 	neq, nx = A_arr.shape
 	A = matrix(A_arr)
 	b = matrix(b_arr)
-	#In = matrix(eye(nx))
-	l_bounds = zeros((nx,1))
-	u_bounds = zeros((nx,1))
+	#In = matrix(np.eye(nx))
+	l_bounds = np.zeros((nx,1))
+	u_bounds = np.zeros((nx,1))
 	for i in range(nx):
-		c = zeros((nx,1))
+		c = np.zeros((nx,1))
 		c[i] = 1
 		c = matrix(c)
 		sol=solvers.lp(c,A,b)
 		l_bounds[i] = sol['primal objective']
-		c = zeros((nx,1))
+		c = np.zeros((nx,1))
 		c[i] = -1
 		c = matrix(c)
 		sol=solvers.lp(c,A,b)
@@ -147,7 +147,7 @@ def __isAdjacentPoly2__(poly1,poly2,M1n=None,M2n=None, tol=10.0e-6):
 	# Find the candidate facets parameters
 	neq1 = M1n.shape[1]
 	neq2 = M2n.shape[1]
-	dummy = dot(M1n.T,M2n)
+	dummy = np.dot(M1n.T,M2n)
 	#print 'minimum is',dummy.min()
 	cand = (dummy==dummy.min())
 	for i in range(neq1):
@@ -157,7 +157,7 @@ def __isAdjacentPoly2__(poly1,poly2,M1n=None,M2n=None, tol=10.0e-6):
 
 	b1_arr[i] += tol
 	b2_arr[j] += tol	
-	dummy = Polytope(concatenate((A1_arr,A2_arr)),concatenate((b1_arr,b2_arr)))
+	dummy = Polytope(np.concatenate((A1_arr,A2_arr)),np.concatenate((b1_arr,b2_arr)))
 	if isNonEmptyInterior(dummy):
 		return 1
 	else:
@@ -177,18 +177,18 @@ def isAdjacentRegion(reg1,reg2):
 def __isAdjacentPolyOuter__(poly1,poly2):
 	"""Eliminates a non-adjacent pair by checking hyperplane normals"""
 	#start_time = time()
-	M1 = concatenate((poly1.A,poly1.b),1).T
+	M1 = np.concatenate((poly1.A,poly1.b),1).T
 	#M1 = vstack([poly1.A.T,poly1.b]) #stack A and b
-	M1row = 1/sqrt(sum(M1**2,0))
-	M1n = dot(M1,diag(M1row)) #normalize the magnitude
-	M2 = concatenate((poly2.A,poly2.b),1).T
+	M1row = 1/np.sqrt(np.sum(M1**2,0))
+	M1n = np.dot(M1,np.diag(M1row)) #normalize the magnitude
+	M2 = np.concatenate((poly2.A,poly2.b),1).T
 	#M2 = vstack([poly2.A.T,poly2.b])
-	M2row = 1/sqrt(sum(M2**2,0))
-	M2n = dot(M2,diag(M2row))
+	M2row = 1/np.sqrt(np.sum(M2**2,0))
+	M2n = np.dot(M2,np.diag(M2row))
 	#time_elapsed = time()-start_time
 	#print 'normal test', time_elapsed
-	#print dot(M1n.T,M2n)
-	if any(dot(M1n.T,M2n)<-0.99):
+	#print np.dot(M1n.T,M2n)
+	if np.any(np.dot(M1n.T,M2n)<-0.99):
 		#print 'here'
 		return __isAdjacentPoly2__(poly1,poly2,M1n,M2n)
 	else:
@@ -206,15 +206,15 @@ def polySimplify(poly,nonEmptyBounded=1):
 	b_arr = poly.b.copy()
 	neq, nx = A_arr.shape
 	# first eliminate the linearly dependent rows corresponding to the same hyperplane
-	M1 = concatenate((poly.A,poly.b),1).T
-	M1row = 1/sqrt(sum(M1**2,0))
-	M1n = dot(M1,diag(M1row)) 
+	M1 = np.concatenate((poly.A,poly.b),1).T
+	M1row = 1/np.sqrt(np.sum(M1**2,0))
+	M1n = np.dot(M1,np.diag(M1row)) 
 	M1n = M1n.T
 	keep_row = []
 	for i in range(neq):
 		keep_i = 1
 		for j in range(i+1,neq):
-			if dot(M1n[i].T,M1n[j])>0.999999:
+			if np.dot(M1n[i].T,M1n[j])>0.999999:
 				keep_i = 0
 		if keep_i:
 			keep_row.append(i)
@@ -231,8 +231,8 @@ def polySimplify(poly,nonEmptyBounded=1):
 	if neq>3*nx:
 		lb, ub = __findBoundingBox__(poly)
 		#print lb.shape,ub.shape
-		#cand = -(dot((A_arr>0)*A_arr,ub-lb)-(b_arr-dot(A_arr,lb).T).T<-1e-4)
-		cand = -(dot((A_arr>0)*A_arr,ub-lb)-(b_arr-dot(A_arr,lb))<-1e-4)
+		#cand = -(np.dot((A_arr>0)*A_arr,ub-lb)-(b_arr-np.dot(A_arr,lb).T).T<-1e-4)
+		cand = -(np.dot((A_arr>0)*A_arr,ub-lb)-(b_arr-np.dot(A_arr,lb))<-1e-4)
 		A_arr = A_arr[cand.squeeze()]
 		b_arr = b_arr[cand.squeeze()]
 	
@@ -257,12 +257,12 @@ def polySimplify(poly,nonEmptyBounded=1):
 			
 
 def isNonEmptyInterior(poly1,tol=10.0e-7):
-	"""Checks the radius of the Chebyshev ball to decide polytope degenaracy"""
+	"""Checks the radius of the Chebyshev ball to decide polytope degeneracy"""
 	A = poly1.A.copy()
 	nx = A.shape[1]
-	A = matrix(c_[A,-sqrt(sum(A*A,1))])
+	A = matrix(np.c_[A,-np.sqrt(np.sum(A*A,1))])
 	b = matrix(poly1.b)
-	c = matrix( r_[zeros((nx,1)),[[1]]])
+	c = matrix(np.r_[np.zeros((nx,1)),[[1]]])
 	sol=solvers.lp(c,A,b)
 	if sol['status']=='primal infeasible':
 		return False
@@ -299,8 +299,8 @@ def regionIntersectPoly(region1, poly1):
 	"""Performs set intersection"""
 	result_region = Region()
 	for j in range(len(region1.list_poly)): #j polytope counter
-		dummy = (Polytope(concatenate((region1.list_poly[j].A, poly1.A)),
-			concatenate((region1.list_poly[j].b,poly1.b))))
+		dummy = (Polytope(np.concatenate((region1.list_poly[j].A, poly1.A)),
+			np.concatenate((region1.list_poly[j].b,poly1.b))))
 		if isNonEmptyInterior(dummy): #non-empty interior
 			dummy = polySimplify(dummy)
 			result_region.list_poly.append(dummy)
@@ -312,7 +312,7 @@ def regionDiffPoly(region1, poly1):
 	A_poly = poly1.A.copy()
 	b_poly = poly1.b.copy()
 	for j in range(len(region1.list_poly)):
-		dummy = (Polytope(concatenate((region1.list_poly[j].A,A_poly)),concatenate((region1.list_poly[j].b, b_poly))))
+		dummy = (Polytope(np.concatenate((region1.list_poly[j].A,A_poly)),np.concatenate((region1.list_poly[j].b, b_poly))))
 		if isNonEmptyInterior(dummy):
 			num_halfspace = A_poly.shape[0]
 			for k in range(pow(2,num_halfspace)-1): #loop to keep polytopes ofthe region disjoint
@@ -323,7 +323,7 @@ def regionDiffPoly(region1, poly1):
 					if signs[l]==0:
 						A_now[l] = -A_now[l]
 						b_now[l] = -b_now[l]
-				dummy = (Polytope(concatenate((region1.list_poly[j].A,A_now)),concatenate((region1.list_poly[j].b, b_now))))
+				dummy = (Polytope(np.concatenate((region1.list_poly[j].A,A_now)),np.concatenate((region1.list_poly[j].b, b_now))))
 				if isNonEmptyInterior(dummy):
 					dummy = polySimplify(dummy)
 					result_region.list_poly.append(dummy)
@@ -347,7 +347,7 @@ def regionDiffPoly(region1, poly1):
 				if signs[l]==0:
 					A_now[l] = -A_now[l]
 					b_now[l] = -b_now[l]
-			dummy = (Polytope(concatenate((region1.list_poly[j].A, A_now)),concatenate((region1.list_poly[j].b, 				b_now))))
+			dummy = (Polytope(np.concatenate((region1.list_poly[j].A, A_now)),np.concatenate((region1.list_poly[j].b, 				b_now))))
 			if isNonEmptyInterior(dummy):
 				dummy = polySimplify(dummy)
 				result_region.list_poly.append(dummy)
@@ -357,9 +357,9 @@ def ChebyBallRad(poly1):
 	radius = 0
 	A = poly1.A
 	nx = A.shape[1]
-	H = cvxopt.matrix(c_[A,-sqrt(sum(A*A,1))])
-	K = cvxopt.matrix(poly1.b)
-	C = cvxopt.matrix( r_[zeros((nx,1)),[[1]]])
+	H = matrix(np.c_[A,-np.sqrt(np.sum(A*A,1))])
+	K = matrix(poly1.b)
+	C = matrix(np.r_[np.zeros((nx,1)),[[1]]])
 	solvers.options['show_progress'] = False
 	sol=solvers.lp(C,H,K)
 	if (sol['status'] !='primal infeasible'):
@@ -406,14 +406,13 @@ def __volumePoly__(poly1):
 	
 	l_b, u_b = __findBoundingBox__(poly1)
 	x = tile(l_b,(1,N)) + rand(n,N)*tile(u_b-l_b,(1,N))
-	aux = dot(poly1.A,x)-tile(poly1.b,(1,N))
-	aux = nonzero(all(((aux < 0)==True),0))[0].shape[0]
+	aux = np.dot(poly1.A,x)-tile(poly1.b,(1,N))
+	aux = nonzero(np.all(((aux < 0)==True),0))[0].shape[0]
 	vol = prod(u_b-l_b)*aux/N
 	return vol
 
 	
 def saveListRegMat(Xlist,fn):
-	import scipy.io as sio
 	data = {}
 	data['k'] = len(Xlist)
 	for k in range(0,len(Xlist)):
@@ -425,7 +424,6 @@ def saveListRegMat(Xlist,fn):
 	sio.savemat(fn,data)
 
 def saveMat(A,b):
-	import scipy.io as sio
 	data = {}
 	data['A'] = A
 	data['b'] = b
@@ -436,7 +434,7 @@ def projection(polyIn,dimToElim):
 	'''OrigPoly1 = Hrep(polyIn.A,polyIn.b)
 	ddd = Vrep(OrigPoly1.generators)
 	ReachFrom1 = Hrep(ddd.A,ddd.b)
-	auxx = zeros((ReachFrom1.A.shape[0],1))
+	auxx = np.zeros((ReachFrom1.A.shape[0],1))
 	auxx[0:,0] = ReachFrom1.b
 	polyIn = Polytope(ReachFrom1.A,auxx)'''
 	polyIn = polySimplify(polyIn)
@@ -444,7 +442,6 @@ def projection(polyIn,dimToElim):
 	baux = polyIn.b
 	ind = []
 	for i1 in dimToElim:  
-		#pdb.set_trace()
 		#print i1, Aaux.shape
 		a = Aaux[:,i1]
 		nc = Aaux.shape[0]
@@ -454,7 +451,7 @@ def projection(polyIn,dimToElim):
 					
 		nr = len(null) + len(positive)*len(negative)
 		nc = Aaux.shape[0]
-		C = zeros((nr,nc))
+		C = np.zeros((nr,nc))
 	   
 		row = 0
 		for j in positive:
@@ -466,16 +463,13 @@ def projection(polyIn,dimToElim):
 		for j in null:
 			C[row,j] = 1
 			row += 1
-		#pdb.set_trace()
-		Aaux = dot(C,Aaux)
-		baux = dot(C,baux)
+		Aaux = np.dot(C,Aaux)
+		baux = np.dot(C,baux)
 		ind.append(i1)
 		indK = [i4 for i4 in range(0,Aaux.shape[1]) if (i4 in ind)==False]
-		#pdb.set_trace()
 		auxP = Polytope(Aaux[:,indK],baux)
 		auxP = polySimplify(auxP)
-		#pdb.set_trace()
-		Aaux = zeros((auxP.A.shape[0],Aaux.shape[1]))
+		Aaux = np.zeros((auxP.A.shape[0],Aaux.shape[1]))
 		Aaux[:,indK] = deepcopy(auxP.A)
 		baux = deepcopy(auxP.b)
 	
@@ -483,9 +477,7 @@ def projection(polyIn,dimToElim):
 	indK = [i5 for i5 in range(0,Aaux.shape[1]) if (i5 in dimToElim)==False]
 	Aaux = Aaux[:,indK]	
 	auxP = Polytope(Aaux,baux)
-	#pdb.set_trace()
 	auxP = polySimplify(auxP)
-	#pdb.set_trace()
 	return auxP
 
 

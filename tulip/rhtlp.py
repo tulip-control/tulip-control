@@ -43,9 +43,13 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 
 :Date: August 25, 2010
 :Version: 0.1.0
+
+minor refactoring by SCL <slivingston@caltech.edu>
+3 May 2011.
 """
 
 import sys, os, re, subprocess, copy
+
 from errorprint import printWarning, printError, printInfo
 from parsespec import parseSpec
 from polytope_computations import Polytope, Region
@@ -58,8 +62,8 @@ import grgameint
 
 
 class SynthesisProb:
-    """
-    SynthesisProb class for specifying a planner synthesis problem.
+    """SynthesisProb class for specifying a planner synthesis problem.
+    
     A SynthesisProb object contains the following fields:
 
     - `env_vars`: a dictionary {str : str} whose keys are the names 
@@ -189,8 +193,7 @@ class SynthesisProb:
     ###################################################################
 
     def setEnvVars(self, env_vars, verbose=0):
-        """
-        Set the environment variables.
+        """Set the environment variables.
         """
         sys_disc_vars = self.getSysDiscVars()
         self.createProbFromDiscDynamics(env_vars=env_vars, \
@@ -1931,7 +1934,6 @@ class RHTLPProb(SynthesisProb):
 #  * 4: no dynamics, start from continuous dynamics
 #  * 5: no dynamics, start from discretized continuous dynamics
 if __name__ == "__main__":
-    from polytope_computations import Polytope
     from numpy import array
 
     print('Testing createProb')

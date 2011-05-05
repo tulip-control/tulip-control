@@ -8,8 +8,8 @@ setup(name = 'tulip',
       author = 'Nok Wongpiromsarn',
       author_email = 'murray@cds.caltech.edu',
       url = 'http://tulip-control.sourceforge.net',
-      requires = ['scipy'],
+      requires = ['scipy', 'numpy', 'cvxopt'],
       packages = ['tulip'],
       package_dir = {'tulip' : 'tulip'},
-      package_data={'tulip': ['matlab/*.m']},
-     )
+      package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar']},
+      )

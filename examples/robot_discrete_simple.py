@@ -1,18 +1,20 @@
 #!/usr/bin/env python
-
-""" The example presented at the MURI review, illustrating the use of jtlvint 
-and automaton modules 
+"""
+The example presented at the MURI review, illustrating the use of
+jtlvint and automaton modules
 
 Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 3, 2010
-"""
-import sys, os
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '../tulip'))
 
-from prop2part import Region, PropPreservingPartition
-from jtlvint import *
-from automaton import *
-from grsim import grsim, writeStatesToFile
+minor refactoring by SCL <slivingston@caltech.edu>
+1 May 2011.
+"""
+
+import sys, os
+
+from tulip import *
+from tulip import polytope_computations as pc
+
 
 # Specify where the smv file, spc file and aut file will go
 testfile = 'robot_discrete_simple'
@@ -31,7 +33,7 @@ env_vars = {'park' : 'boolean'}
 sys_disc_vars = {'X0reach' : 'boolean'}
 
 # Specify the transition system representing the continuous dynamics
-disc_dynamics = PropPreservingPartition(list_region=[], list_prop_symbol=[])
+disc_dynamics = prop2part.PropPreservingPartition(list_region=[], list_prop_symbol=[])
 
 # These following propositions specify in which cell the robot is, i.e., 
 # Xi means that the robot is in cell Ci
@@ -44,12 +46,12 @@ disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
 # The second argument of Region(poly, prop) is a list that specifies which 
 # propositions in cont_props above is satisfied. As specified below, regioni 
 # satisfies proposition Xi.
-region0 = Region('C0', [1, 0, 0, 0, 0, 0])
-region1 = Region('C1', [0, 1, 0, 0, 0, 0])
-region2 = Region('C2', [0, 0, 1, 0, 0, 0])
-region3 = Region('C3', [0, 0, 0, 1, 0, 0])
-region4 = Region('C4', [0, 0, 0, 0, 1, 0])
-region5 = Region('C5', [0, 0, 0, 0, 0, 1])
+region0 = pc.Region('C0', [1, 0, 0, 0, 0, 0])
+region1 = pc.Region('C1', [0, 1, 0, 0, 0, 0])
+region2 = pc.Region('C2', [0, 0, 1, 0, 0, 0])
+region3 = pc.Region('C3', [0, 0, 0, 1, 0, 0])
+region4 = pc.Region('C4', [0, 0, 0, 0, 1, 0])
+region5 = pc.Region('C5', [0, 0, 0, 0, 0, 1])
 disc_dynamics.list_region = [region0, region1, region2, region3, region4, region5]
 disc_dynamics.num_regions = len(disc_dynamics.list_region)
 
@@ -69,17 +71,17 @@ guarantee = '[]<>X5 & []<>(X0reach)'
 guarantee += ' & [](next(X0reach) = ((X0 | X0reach) & !park))'
 
 # Generate input to JTLV
-prob = generateJTLVInput(env_vars, sys_disc_vars, [assumption, guarantee], \
+prob = jtlvint.generateJTLVInput(env_vars, sys_disc_vars, [assumption, guarantee], \
                                    {}, disc_dynamics, smvfile, spcfile, verbose=2)
 
 # Check realizability
-realizability = checkRealizability(smv_file=smvfile, spc_file=spcfile, \
+realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile, \
                                        aut_file=autfile, verbose=3)
 
 # Compute an automaton
-computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile, \
+jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile, \
                                     priority_kind=3, verbose=3)
-aut = Automaton(autfile, [], 3)
+aut = automaton.Automaton(autfile, [], 3)
 
 # Simulate
 num_it = 30
@@ -92,5 +94,5 @@ for i in xrange(0,num_it):
     else:
         env_states.append({'park':False})
 
-states = grsim(aut, init_state, env_states, num_it)
-writeStatesToFile(states, 'robot_sim.txt')
+states = grsim.grsim(aut, init_state, env_states, num_it)
+grsim.writeStatesToFile(states, 'robot_sim.txt')

@@ -34,17 +34,21 @@
 # $Id$
 
 """ 
-prop2part.py --- Proposition preserving partition module
+Proposition preserving partition module.
 
 Necmiye Ozay (necmiye@cds.caltech.edu)
 August 7, 2010
+
+minor refactoring by SCL <slivingston@caltech.edu>
+1 May 2011.
 """
 
-from polytope_computations import *
-from numpy import *
-import numpy
+
+import numpy as np
 from time import time
 import copy
+
+import polytope_computations as pc
 
 
 def prop2part2(state_space, cont_props_dict):
@@ -55,7 +59,7 @@ def prop2part2(state_space, cont_props_dict):
 	list_regions = []
 	first_poly = [] #Initial Region's list_poly atribute 
 	first_poly.append(state_space)
-	list_regions.append(Region(list_poly=first_poly))
+	list_regions.append(pc.Region(list_poly=first_poly))
 	mypartition = PropPreservingPartition(domain=copy.deepcopy(state_space), num_prop=num_props, list_region=list_regions, list_prop_symbol=copy.deepcopy(cont_props_dict.keys()))
 	for prop_count in range(num_props):
 		num_reg = mypartition.num_regions
@@ -70,11 +74,11 @@ def prop2part2(state_space, cont_props_dict):
 			list_prop_now = mypartition.list_region[i].list_prop[:]
 			for j in range(len(region_now)): #j polytope counter
 				prop_holds_poly.append(0)
-				dummy = (Polytope(concatenate((region_now[j].A, cont_props[prop_count].A)),
-					concatenate((region_now[j].b,cont_props[prop_count].b))))
-				if isNonEmptyInterior(dummy):
-					#dummy = polySimplify(dummy)
-					mypartition.list_region[i].list_poly[j] = polySimplify(dummy)
+				dummy = (pc.Polytope(np.concatenate((region_now[j].A, cont_props[prop_count].A)),
+					np.concatenate((region_now[j].b,cont_props[prop_count].b))))
+				if pc.isNonEmptyInterior(dummy):
+					#dummy = pc.polySimplify(dummy)
+					mypartition.list_region[i].list_poly[j] = pc.polySimplify(dummy)
 					prop_holds_reg[-1] = 1
 					prop_holds_poly[-1] = 1
 			count = 0
@@ -85,24 +89,24 @@ def prop2part2(state_space, cont_props_dict):
 			if len(mypartition.list_region[i].list_poly)>0:
 				mypartition.list_region[i].list_prop.append(1)
 			#loop for prop does not hold
-			mypartition.list_region.append(Region(list_poly=[],list_prop=list_prop_now))
+			mypartition.list_region.append(pc.Region(list_poly=[],list_prop=list_prop_now))
 			for j in range(len(region_now)):
 				valid_props = cont_props[prop_count] #eliminateRedundantProps(region_now[j],cont_props[prop_count])
 				A_prop = valid_props.A.copy()
 				b_prop = valid_props.b.copy()
 				num_halfspace = A_prop.shape[0]
 				for k in range(pow(2,num_halfspace)-1):
-					signs = num_bin(k,places=num_halfspace)
+					signs = pc.num_bin(k,places=num_halfspace)
 					A_now = A_prop.copy()
 					b_now = b_prop.copy()
 					for l in range(len(signs)): 
 						if signs[l]==0:
 							A_now[l] = -A_now[l]
 							b_now[l] = -b_now[l]
-					dummy = (Polytope(concatenate((region_now[j].A, A_now)),concatenate((region_now[j].b, b_now))))
-					if isNonEmptyInterior(dummy):
-						#dummy = polySimplify(dummy)
-						mypartition.list_region[-1].list_poly.append(polySimplify(dummy))
+					dummy = (pc.Polytope(np.concatenate((region_now[j].A, A_now)),np.concatenate((region_now[j].b, b_now))))
+					if pc.isNonEmptyInterior(dummy):
+						#dummy = pc.polySimplify(dummy)
+						mypartition.list_region[-1].list_poly.append(pc.polySimplify(dummy))
 			if len(mypartition.list_region[-1].list_poly)>0:
 				mypartition.list_region[-1].list_prop.append(0)
 			else:
@@ -114,11 +118,11 @@ def prop2part2(state_space, cont_props_dict):
 				count+=1
 		num_reg = len(mypartition.list_region)
 		mypartition.num_regions = num_reg
-	adj = numpy.zeros((num_reg,num_reg),int8)
+	adj = np.zeros((num_reg,num_reg), dtype=np.int8)
 	for i in range(num_reg):
 		for j in range(i+1,num_reg):
-			adj[i,j] = isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
-	adj =  adj+adj.T+numpy.eye(num_reg,dtype=int8)
+			adj[i,j] = pc.isAdjacentRegion(mypartition.list_region[i],mypartition.list_region[j])
+	adj =  adj+adj.T+np.eye(num_reg, dtype=np.int8)
 	mypartition.adj = adj.copy()
 	return mypartition
 
@@ -147,41 +151,41 @@ class PropPreservingPartition:
 #def test():
 if __name__ == "__main__":
 	start_time = time()
-	domain = array([[0., 2.],[0., 2.]])
+	domain = np.array([[0., 2.],[0., 2.]])
 
-	domain_poly_A = array(vstack([eye(2),-eye(2)]))
-	domain_poly_b = array([r_[domain[:,1],-domain[:,0]]]).T
-	state_space = Polytope(domain_poly_A, domain_poly_b)
+	domain_poly_A = np.array(np.vstack([np.eye(2),-np.eye(2)]))
+	domain_poly_b = np.array([np.r_[domain[:,1],-domain[:,0]]]).T
+	state_space = pc.Polytope(domain_poly_A, domain_poly_b)
 
 	cont_props = []
 	
-	A0 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b0 = array([[1., 0., 1., 0.]]).T
-	cont_props.append(Polytope(A0, b0))
+	A0 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b0 = np.array([[1., 0., 1., 0.]]).T
+	cont_props.append(pc.Polytope(A0, b0))
 	
-	A1 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b1 = array([[1., 0., 2., -1.]]).T
-	cont_props.append(Polytope(A1, b1))
+	A1 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b1 = np.array([[1., 0., 2., -1.]]).T
+	cont_props.append(pc.Polytope(A1, b1))
 	
 	
-	A2 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b2 = array([[2., -1., 1., 0.]]).T
-	cont_props.append(Polytope(A2, b2))
+	A2 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b2 = np.array([[2., -1., 1., 0.]]).T
+	cont_props.append(pc.Polytope(A2, b2))
 
-	A3 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b3 = array([[2., -1., 2., -1.]]).T
-	cont_props.append(Polytope(A3, b3))
+	A3 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b3 = np.array([[2., -1., 2., -1.]]).T
+	cont_props.append(pc.Polytope(A3, b3))
 	
-	cont_props_dict = dict({'C0':Polytope(A0, b0),'C1':Polytope(A1, b1),'C2':Polytope(A2, b2),'C3':Polytope(A3, b3) })
+	cont_props_dict = dict({'C0':pc.Polytope(A0, b0),'C1':pc.Polytope(A1, b1),'C2':pc.Polytope(A2, b2),'C3':pc.Polytope(A3, b3) })
 	
 	mypartition = prop2part2(state_space, cont_props_dict)
 	
 	#print len(mypartition.list_region)
-	A4 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-	b4 = array([[0.5, 0., 0.5, 0.]]).T
-	poly1 = Polytope(A4,b4)
+	A4 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
+	b4 = np.array([[0.5, 0., 0.5, 0.]]).T
+	poly1 = pc.Polytope(A4,b4)
 
-	r1 = regionDiffPoly(mypartition.list_region[3],poly1)
+	r1 = pc.regionDiffPoly(mypartition.list_region[3],poly1)
 	
 	verbose = 0
 	
@@ -191,7 +195,7 @@ if __name__ == "__main__":
 	print time_elapsed
 	if verbose:
 		print 'time', time_elapsed
-		#print sys.getrefcount(numpy.dtype('float64'))
+		#print sys.getrefcount(np.dtype('float64'))
 		print '\nAdjacency matrix:\n', mypartition.adj
 	
 		for i in range(mypartition.num_regions):

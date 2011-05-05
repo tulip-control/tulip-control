@@ -45,6 +45,10 @@ The Temporal Logic Planning (TuLiP) Toolbox provides functions
 for verifying and constructing control protocols.
 """
 
-# Import functions from within the tulip library
-#! TODO: add relevant functions
+__all__ = ["prop2part", "grsim", "jtlvint", "automaton", "rhtlp", "spec", "discretizeM"]
 
+import prop2part
+import grsim
+import jtlvint
+import automaton
+from spec import GRSpec
