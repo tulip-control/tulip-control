@@ -1,0 +1,18 @@
+Finite State Abstraction of LTI Systems
+=======================================
+
+--------------------------------------------------------
+prop2part.py --- Proposition preserving partition module
+--------------------------------------------------------
+
+.. autoclass:: prop2part.PropPreservingPartition
+.. autofunction:: prop2part.prop2part2
+
+
+-------------------------------------------------------------------
+discretizeM.py --- Interface to MATLAB implementation of discretize
+-------------------------------------------------------------------
+.. autoclass:: discretizeM.CtsSysDyn
+.. autofunction:: discretizeM.discretizeM
+.. autofunction:: discretizeM.discretizeToMatlab
+.. autofunction:: discretizeM.discretizeFromMatlab
