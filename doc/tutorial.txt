@@ -6,7 +6,7 @@ Tutorial and Examples
 The rhtlp is developed for synthesis of embedded control systems,
 allowing planning to be done in a receding horizon manner.
 For more information regarding the theory behind this, please visit
-our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)>`_.
+our `wiki <http://tulip-control.sourceforge.net>`_.
 
 
 Synthesis of Embedded Control Systems
@@ -69,7 +69,7 @@ Here, the assumption :math:`\varphi_{init}` on the initial condition of the syst
 is a propositional formula built from :math:`\Pi.`
 The assumption :math:`\varphi_e` on the environment and the desired behavior 
 :math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
-See our `wiki <http://www.cds.caltech.edu/~utopcu/index.php/Receding_Horizon_Temporal_Logic_Planning_Toolbox_(RHTLP)>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
+See our `wiki <http://tulip-control.sourceforge.net>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
 
 
 .. image:: ecssyn.*
