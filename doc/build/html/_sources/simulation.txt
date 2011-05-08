@@ -1,5 +1,0 @@
-Simulation
-==========
-
-.. automodule:: grsim
-   :members:
