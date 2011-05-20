@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """ The autonomous car example presented in the CDC/HSCC paper, illustrating the use of 
 rhtlp module.
 
@@ -7,15 +6,15 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
 """
 
-import sys, os
-sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '../tulip'))
 
-from numpy import array
-from polytope_computations import Polytope
-from discretizeM import CtsSysDyn
-from spec import GRSpec
-from rhtlp import RHTLPProb, ShortHorizonProb
+import sys, os
 import math
+from numpy import array
+
+from tulip.polytope_computations import Polytope
+from tulip.discretizeM import CtsSysDyn
+from tulip.spec import GRSpec
+from tulip.rhtlp import RHTLPProb, ShortHorizonProb
 
 
 # Road configuration
