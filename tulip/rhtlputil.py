@@ -45,8 +45,8 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 :Version: 0.1.0
 """
 
-import re, copy
-from errorprint import printError
+import re, copy, os
+from errorprint import printError, printWarning
 
 def evalExpr(expr='', vardict={}, verbose=0):
     vardict = copy.deepcopy(vardict)
@@ -191,6 +191,10 @@ def toYices(expr='', allvars={}, ysfile='', verbose=0):
     while (stvar in allvars.keys()):
         stvar += 'n'
 
+    if not os.path.exists(os.path.abspath(os.path.dirname(ysfile))):
+        if verbose > 0:
+            printWarning("Folder for ysfile " + ysfile + " does not exist. Creating...", obj=None)
+        os.mkdir(os.path.abspath(os.path.dirname(ysfile)))
     f = open(ysfile, 'w')
 
     # Declare the variables 
