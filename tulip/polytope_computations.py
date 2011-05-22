@@ -85,19 +85,11 @@ def projectionV(polyIn,dimToElim):
 
 
 def num_bin(N, places=8):
-    def bit_at_p(N, p):
-        ''' find the bit at place p for number n '''
-        two_p = 1 << p   # 2 ^ p, using bitshift, will have exactly one
-                # bit set, at place p
-        x = N & two_p    # binary composition, will be one where *both* numbers
-                # have a 1 at that bit.  this can only happen 
-                # at position p.  will yield  two_p if  N has a 1 at 
-                # bit p
-        return int(x > 0)
-    bits = []
-    for x in xrange(places):
-        bits.append(bit_at_p(N, x))
-    return bits
+    """Return N as list of bits, zero-filled to places.
+
+E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
+"""
+    return [(N>>k)&0x1  for k in range(places)]
     
 def __boundingBoxRegion__(reg1):
     l_bounds = inf*ones((reg1.list_poly[0].A.shape[1],1))
