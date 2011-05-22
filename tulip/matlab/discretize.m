@@ -12,44 +12,59 @@ function [newPartition, trans, numNewCells, newCellVol] = ...
 %
 % INPUT:
 % * origParition: a cell array of MPT polytope objects that represents the  
-%   proposition preserving partition of the state space.
+%       proposition preserving partition of the state space.
+%
 % * adj: the adjacency between cells in origParition. Use adj = [] if
-%   the adjacency matrix is not known. 
+%       the adjacency matrix is not known. 
+%
 % * probStruct contains the following fields: A, B, E, Uset, Wset, N.
+%
 % * Options.minCellVolume specifies the minimum volume of cells in the 
-%   resulting partition. The default value is 0.1.
+%       resulting partition. The default value is 0.1.
+%
 % * Options.maxNumIterations specifies the maximum number of iterations.
-%   The default value is 5.
+%       The default value is 5.
+%
 % * Options.useClosedLoopAlg specifies whether to use the closed loop algorithm.
-%   The default value is true.
-% * Options.useAllHorizonLength specifies whether all the horizon length up
-%   to probStruct.N can be used. This option is relevant only when the closed 
-%   loop algorithm is used, The default value is true.
-% * Options.useLargeSset specifies whether when solving the reachability
-%   problem between subcells of the original partition, the cell of the
-%   original partition should be used for the safe set. The default value
-%   is true.
-% * Options.timeout specifies the timeout (in seconds) for polytope union 
-%   operation. If negative, the timeout won't be used. Note that using timeout 
-%   requires MATLAB parallel computing toolbox. The default value is -1.
+%       The default value is true.
+%
+% * Options.useAllHorizonLength specifies whether all the horizon
+%       length up to probStruct.N can be used. This option is relevant
+%       only when the closed loop algorithm is used, The default value
+%       is true.
+%
+% * Options.useLargeSset specifies whether when solving the
+%       reachability problem between subcells of the original
+%       partition, the cell of the original partition should be used
+%       for the safe set. The default value is true.
+%
+% * Options.timeout specifies the timeout (in seconds) for polytope
+%       union operation. If negative, the timeout won't be used. Note
+%       that using timeout requires MATLAB parallel computing
+%       toolbox. The default value is -1.
+%
 % * Options.maxNumPoly specifies the maximum number of polytopes in a
-%   region used in computing reachability. The default value is 5.
+%       region used in computing reachability. The default value is 5.
+%
 % * Options.verbose: level of verbosity of the algorithms. The default
-%   value is 0.
+%       value is 0.
 % 
 % OUTPUT:
 % * newPartition: a 2d cell array of MPT polytope objects that represents 
-%   the new partition. 
+%       the new partition.
 %   newPartition{i, 1:numNewCells(i)} are the new cells that contain in 
 %   the i^{th} cell of the original partition.
+%
 % * trans: the transition matrix. trans(i,j) specifies whether subcell i is
-%   reachable from subcell j.
-% * numNewCells: a vector that specifies the number of new cells in the 
-%   original partition. numNewCells(i) is the number of new cells in the
-%   i^{th} cell of the original partition.
-% * newCellVol: a matrix that specifies the volume of the new cell. 
-%   newCellVol(i,j) is the volume of j^{th} subcell of the i^{th} cell 
-%   in the original partition.
+%       reachable from subcell j.
+%
+% * numNewCells: a vector that specifies the number of new cells in
+%       the original partition. numNewCells(i) is the number of new
+%       cells in the i^{th} cell of the original partition.
+%
+% * newCellVol: a matrix that specifies the volume of the new cell.
+%       newCellVol(i,j) is the volume of j^{th} subcell of the i^{th}
+%       cell in the original partition.
 
 if (nargin < 3)
     error('origPartition, adj and probStruct need to be specified')
