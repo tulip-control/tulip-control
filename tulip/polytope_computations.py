@@ -499,3 +499,26 @@ class Polytope:
     def __init__(self,A,b):
         self.A = A.copy()
         self.b = b.copy()
+
+    def __str__(self):
+        """Return pretty-formatted Hx <= K representation of polytope.
+        """
+        A_rows = str(self.A).split('\n')
+        b_rows = str(self.b).split('\n')
+        mid_ind = (len(A_rows)-1)/2
+        spacer = ' |    '
+        if mid_ind > 1:
+            output = '\n'.join([A_rows[k]+spacer+b_rows[k] for k in range(mid_ind)]) + '\n'
+        elif mid_ind == 1:
+            output = A_rows[0]+spacer+b_rows[0] + '\n'
+        else:
+            output = ''
+        output += A_rows[mid_ind]+' x <= '+b_rows[mid_ind]
+        if mid_ind+1 < len(A_rows)-2:
+            output += '\n' + '\n'.join([A_rows[k]+spacer+b_rows[k] \
+                                            for k in range(mid_ind+1, len(A_rows)-1)])
+        elif mid_ind+1 == len(A_rows)-2:
+            output += '\n' + A_rows[mid_ind+1]+spacer+b_rows[mid_ind+1]
+        if len(A_rows) > 1:
+            output += '\n'+A_rows[-1]+spacer[1:]+b_rows[-1]
+        return output
