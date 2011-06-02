@@ -46,21 +46,24 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 """
 
 import re, copy, os
+import xml.etree.ElementTree as ET
+
 from errorprint import printWarning, printError
+import conxml
     
 
 ###################################################################
 
 class AutomatonState:
-    """
-    AutomatonState class for representing a state in a finite state automaton.
-    An AutomatonState object contains the following fields:
+    """AutomatonState class for representing a state in a finite state
+    automaton.  An AutomatonState object contains the following
+    fields:
 
     - `id`: an integer specifying the id of this AutomatonState object.
     - `state`: a dictionary whose keys are the names of the variables
       and whose values are the values of the variables.
-    - `transition`: a list of id's of the AutomatonState objects to which this 
-      AutomatonState object can transition.
+    - `transition`: a list of id's of the AutomatonState objects to
+      which this AutomatonState object can transition.
     """
     def __init__(self, id=-1, state={}, transition=[]):
         self.id = id
@@ -71,22 +74,22 @@ class AutomatonState:
 ###################################################################
 
 class Automaton:
-    """
-    Automaton class for representing a finite state automaton.
+    """Automaton class for representing a finite state automaton.
     An Automaton object contains the following field:
 
     - `states`: a list of AutomatonState objects.
 
-    Automaton([states_or_file, varname, verbose]) constructs an Automaton object based
-    on the following input:
+    Automaton([states_or_file, varname, verbose]) constructs an
+    Automaton object based on the following input:
 
-    - `states_or_file`: a string containing the name of the aut file to be loaded or
-      a list of AutomatonState objects to be assigned to the `states` of this 
-      Automaton object.
-    - `varname`: a list of all the variable names. If it is not empty and 
-      states_or_file is a string representing the name of the aut file to be loaded, 
-      then this function will also check whether the variables in aut_file are in 
-      varnames.
+    - `states_or_file`: a string containing the name of the aut file
+      to be loaded or a list of AutomatonState objects to be assigned
+      to the `states` of this Automaton object.
+
+    - `varname`: a list of all the variable names. If it is not empty
+      and states_or_file is a string representing the name of the aut
+      file to be loaded, then this function will also check whether
+      the variables in aut_file are in varnames.
     """
     def __init__(self, states_or_file=[], varnames=[], verbose=0):
         # Construct this automaton from a list of AutomatonState objects
@@ -187,6 +190,102 @@ class Automaton:
             return False
 
         f.close()
+        return True
+    
+    def dumpXML(self, pretty=True, use_pickling=False, idt_level=0):
+        """Return string of automaton conforming to tulipcon XML.
+
+        If pretty is True, then use indentation and newlines to make
+        the resulting XML string more visually appealing.  idt_level
+        is the base indentation level on which to create automaton
+        string.  This level is only relevant if pretty=True.
+
+        Note that name subtags within aut tag are left blank.
+        """
+        if pretty:
+            nl = "\n"  # Newline
+            idt = "  "  # Indentation
+        else:
+            nl = ""
+            idt = ""
+        output = idt_level*idt+'<aut>'+nl
+        idt_level += 1
+        for node in self.states:
+            output += idt_level*idt+'<node>'+nl
+            idt_level += 1
+            output += idt_level*idt+'<id>' + str(node.id) + '</id><name></name>'+nl
+            output += idt_level*idt+conxml.taglist("child_list", node.transition,
+                                                   use_pickling=use_pickling)+nl
+            output += idt_level*idt+conxml.tagdict("state", node.state,
+                                                   use_pickling=use_pickling)+nl
+            idt_level -= 1
+            output += idt_level*idt+'</node>'+nl
+        idt_level -= 1
+        output += idt_level*idt+'</aut>'+nl
+        return output
+
+    def loadXML(self, x, use_pickling=False):
+        """Read an automaton from given string conforming to tulipcon XML.
+        
+        N.B., on a successful processing of the given string, the
+        original Automaton instance to which this method is attached
+        is replaced with the new structure.  On failure, however, the
+        original Automaton is untouched.
+
+        The argument x can also be an instance of
+        xml.etree.ElementTree._ElementInterface ; this is mainly for
+        internal use, e.g. by the function untagpolytope and some
+        load/dumpXML methods elsewhere.
+        
+        Return True on success; on failure, return False or raise
+        exception.
+        """
+        if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
+            raise ValueError("given automaton XML must be a string or ElementTree._ElementInterface.")
+        
+        if isinstance(x, str):
+            etf = ET.fromstring(x)
+        else:
+            etf = x
+        if etf.tag != "aut":
+            return False
+
+        node_list = etf.findall("node")
+        states = []
+        id_list = []  # For more convenient searching, and to catch redundancy
+        for node in node_list:
+            this_id = int(node.find("id").text)
+            this_name = node.find("name").text
+            (tag_name, this_child_list) = conxml.untaglist(node.find("child_list"),
+                                                           cast_f=int)
+            if tag_name != "child_list":
+                # This really should never happen and may not even be
+                # worth checking.
+                raise ValueError("failure of consistency check while processing aut XML string.")
+            (tag_name, this_state) = conxml.untagdict(node.find("state"),
+                                                      cast_f_values=int)
+            if tag_name != "state":
+                raise ValueError("failure of consistency check while processing aut XML string.")
+            if this_id in id_list:
+                printWarning("duplicate nodes found: "+str(this_id)+"; ignoring...")
+                continue
+            id_list.append(this_id)
+            states.append(AutomatonState(id=this_id,
+                                         state=copy.copy(this_state),
+                                         transition=copy.copy(this_child_list)))
+        
+        # Sort the mess
+        ordered_states = []
+        num_states = len(states)
+        for this_id in range(num_states):
+            ind = 0
+            while (ind < len(states)) and (states[ind].id != this_id):
+                ind += 1
+            if ind >= len(states):
+                raise ValueError("missing states in automaton.")
+            ordered_states.append(states.pop(ind))
+
+        self.states = ordered_states  # Finally, commit.
         return True
 
     def size(self):

@@ -50,7 +50,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 import re, os, subprocess, sys
 from prop2part import PropPreservingPartition
 from polytope_computations import Region
-from rhtlp import SynthesisProb
+import rhtlp
 import grgameint
 
 
@@ -83,7 +83,7 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
     - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
       this function will not print anything on the screen.
     """
-    prob = SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
+    prob = rhtlp.SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
                        sys_cont_vars=[], cont_state_space=None, \
                        cont_props={}, sys_dyn=None, spec=['',''], verbose=verbose)
     prob.createProbFromDiscDynamics(env_vars=env_vars, sys_disc_vars=sys_disc_vars, \

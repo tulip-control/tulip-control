@@ -55,7 +55,7 @@ from parsespec import parseSpec
 from polytope_computations import Polytope, Region
 from discretizeM import CtsSysDyn, discretizeM
 from prop2part import PropPreservingPartition, prop2part2
-from automaton import Automaton
+import automaton
 from spec import GRSpec
 import rhtlputil
 import grgameint
@@ -729,7 +729,7 @@ class SynthesisProb:
             counter_examples = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)
             return counter_examples
         else:
-            aut = Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
+            aut = automaton.Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
             return aut
 
 

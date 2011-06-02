@@ -1,0 +1,171 @@
+SCL; 2011-06-01
+
+Version 0 notes below are incomplete, and the current implementation
+includes some points from the ``version 1'' draft (also below) and
+some details not yet in the documentation!  Anyway, the system is
+volatile and still being tested, implemented and experimented with in
+new applications.  Once it stabilizes a little more, I will be more
+careful to document it.
+
+Versioning here is distinct from --and simplified compared to-- that
+of TuLiP itself.  Versions are specified with a natural number (and no
+minor nor text appended).
+
+
+######################################################################
+
+
+Version 0 (no pickling!)
+---------------------------------------------
+
+xml format for saving controller:
+
+Notes:
+
+* Polytopes are defined in H-representation, i.e. system of
+  inequalities, Hx <= K.
+
+* some tags can take a "type" attribute.  However, for this first
+  draft, this will largely be ignored as we assume the simplest case.
+  E.g. finite linear continuous dynamics implies the use of matrices,
+  so why require type="matrix"?
+
+* for brevity, a general numpy nd-array is represented by ``narr''.
+  This is to avoid rewriting "string rep of numpy array" a lot.  See
+  sample <A> tag for what the contents of other such matrix tags
+  should look like.
+
+* N.B., matrices are assumed to be listed row-wise.  E.g.,
+  A = [[1, 2, 3],
+       [4, 5, 6]]
+  would be saved as
+  <A type="matrix" r="2" c="3">1, 2, 3, 4, 5, 6</A>
+
+
+<tulipcon version="0">
+  <c_dyn>
+    <A type="matrix" r="3" c="3">...</A>
+    <B type="matrix" r="3" c="1">...</B>
+    <E>...same format as A and B...</E>
+    <sample_period></sample_period>
+    <U_set type="polytope"><H type="matrix" r="3" c="3">...</H><K>...</K></U_set>
+    <W_set>...same format as U_set...</W_set>
+  </c_dyn>
+  <env_vars><item key="" value="" /></env_vars>
+  <con_vars><item key="" value="" /></con_vars>
+  <spec><assume>...assumption string...</assume>
+        <guarantee>...guarantee string...</guarantee></spec>
+  <d_dyn>
+    <domain type="polytope">...</domain>
+    <trans type="matrix">...</trans>
+    <prop_symbols>...comma-separated list...</prop_symbols>
+    <regions>
+      <item type="region">
+        <list_prop>...comma-separated list...</list_prop>
+        <reg_item type="polytope">...</reg_item>
+      </item>
+    </regions>
+    <adj> ??? </adj>
+  </d_dyn>
+  <aut>
+    <node>
+      <id>a unique identifier number</id>
+      <name>a string name or description (may be empty, or the <name> tag may be omitted)</name>
+      <child_list>descendent nodes; comma-separated list of node ID numbers</child_list>
+      <variable name="" value="" />
+        ... omitted variables are assumed to take value 0 at this node.
+    </node>
+    ... more nodes ...
+  </aut>
+  <smv_file>
+...verbatim copy of corresponding SMV file...
+  </smv_file>
+  <spec_file>
+...verbatim copy of corresponding specification (*.spc) file...
+  </spec_file>
+  <extra>
+    Anything below here is arbitrary and ignored by tulip.  It is
+    included as a convenience and to facilitate keeping
+    application-specific notes with the synthesis results.  Please be
+    careful to *not* include non-printing characters or arbitrary
+    binary data; instead try base64 or similar, or include a reference
+    to an external data file, e.g. HDF5.
+  </extra>
+</tulipcon>
+
+
+######################################################################
+
+
+Version 1
+---------
+
+Notes:
+
+* Polytopes are defined in H-representation, i.e. system of
+  inequalities, Hx <= K.
+
+* N.B., for some of the lists, order matters!  That is, while in terms
+  of theory and general understanding of the approach order usually
+  does not matter (dealing with sets, etc.), the implementation may
+  contain separate lists which are assumed to keep their order
+  (e.g. a[5] may correspond to b[5]).  You've been warned.  (I need to
+  make such dependencies explicit at some point...)
+
+* Some abbreviations used below:
+  * ``nda'' is a pickled NumPy ndarray.
+  * ``pd'' is a pickled dictionary object.
+
+<tulipcon version="1">
+  <c_dyn>
+    <A type="matrix">nda</A>
+    <B type="matrix">nda</B>
+    <E>...same as A...</E>
+    <sample_period></sample_period>
+    <U_set type="polytope"><H type="matrix"></H><K>...</K></U_set>
+    <W_set>...same format as U_set...</W_set>
+  </c_dyn>
+  <env_vars>pd</env_vars>
+  <con_vars>pd</con_vars>
+  <spec><assume>...assumption string...</assume>
+        <guarantee>...guarantee string...</guarantee></spec>
+  <d_dyn>
+    <domain type="polytope">...</domain>
+    <trans type="matrix">...</trans>
+    <prop_symbols>...comma-separated list...</prop_symbols>
+    <regions>
+      <item type="region">
+        <list_prop>...comma-separated list...</list_prop>
+        <reg_item type="polytope">...</reg_item>
+      </item>
+    </regions>
+    <adj> ??? </adj>
+  </d_dyn>
+  <aut>
+    <node>
+      <id>a unique identifier number</id>
+      <name>a string name or description (may be empty, or the <name> tag may be omitted)</name>
+      <child_list>descendent nodes; comma-separated list of node ID numbers</child_list>
+      <state>pd... of variables and the values they take at this state</state>
+    </node>
+    ... more nodes ...
+  </aut>
+  <smv_file>
+...verbatim copy of corresponding SMV file...
+  </smv_file>
+  <spec_file>
+...verbatim copy of corresponding specification (*.spc) file...
+  </spec_file>
+  <extra>
+    Anything below here is arbitrary and ignored by tulip.  It is
+    included as a convenience and to facilitate keeping
+    application-specific notes with the synthesis results.  Please be
+    careful to *not* include non-printing characters or arbitrary
+    binary data; instead try base64 or similar, or include a reference
+    to an external data file, e.g. HDF5, or pickle data as a string
+    (in Python).
+  </extra>
+</tulipcon>
+
+
+
