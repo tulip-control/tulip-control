@@ -124,6 +124,8 @@ class SynthesisProb:
         self.__disc_dynamics = None
         self.__jtlvfile = args.get('sp_name',
                                    os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'tmpspec', 'tmp'))
+        self.__ysfile = args.get('sp_name',
+                                 os.path.join(os.path.dirname(self.__jtlvfile), 'tmp')) + '.ys'
         self.__realizable = None
 
         verbose = args.get('verbose', 0)
@@ -337,6 +339,22 @@ class SynthesisProb:
             printError('The input jtlvfile must be a string indicating the name of the file.', \
                            obj=self)
 
+    ###################################################################
+
+    def getYsFile(self):
+        """Return the name of the (temporary) Yices file."""
+        return self.__ysfile
+
+    ###################################################################
+
+    def setYsFile(self, ysfile):
+        """Set the temporary Yices file (*.ys)."""
+        if isinstance(ysfile, str):
+            self.__ysfile = ysfile
+            self.__realizable = None
+        else:
+            printError('The argument ysfile must be a string (name of the file).',
+                       obj=self)
 
     ###################################################################
 
@@ -1282,10 +1300,10 @@ class RHTLPProb(SynthesisProb):
         self.__cont_props = []
         self.__sys_prog = 'True'
         self.__all_init = 'True'
-        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
-                                           'tmpspec', 'tmp'))
-#        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-#                                           'tmpspec', 'tmp'))
+        self.setJTLVFile(args.get('sp_name',
+                                  os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'tmpspec', 'tmp')))
+        self.setYsFile(args.get('sp_name',
+                                os.path.join(os.path.dirname(self.getJTLVFile()), 'tmp')) + '.ys')
 
         if (isinstance(shprobs, list)):
             for shprob in shprobs:
@@ -1540,10 +1558,9 @@ class RHTLPProb(SynthesisProb):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
             expr = '!(' + allW_formula + ') & !(' + es_formula + ')'
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
-            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                              verbose=verbose)
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                          ysfile=self.getYsFile(),
+                                          verbose=verbose)
             if (ret is None):
                 use_yices = False
             elif (ret[0]):
@@ -1645,13 +1662,12 @@ class RHTLPProb(SynthesisProb):
             if (verbose > 0):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
             newW0ind = []
             for ind in W0ind:
                 expr = '!((' + self.shprobs[ind].getW() + ') -> (' + self.__sys_prog + '))'
-                ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                                  verbose=verbose)
+                ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                              ysfile=self.getYsFile(),
+                                              verbose=verbose)
                 if (ret is None):
                     use_yices = False
                     break
@@ -1713,10 +1729,9 @@ class RHTLPProb(SynthesisProb):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
             expr = '!((' + self.__all_init + ') -> (' + self.__Phi + '))'
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
-            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                              verbose=verbose)
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                          ysfile=self.getYsFile(),
+                                          verbose=verbose)
             if (ret is None):
                 use_yices = False
             elif (not ret[0]):

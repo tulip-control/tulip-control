@@ -192,10 +192,10 @@ for fcell in final_cells:
     cell += 'X' + str(fcell)
 spec.sys_prog = '(' + cell + ')'
 
-rhtlpprob = RHTLPProb(shprobs=[], Phi='True', discretize=False, env_vars = env_vars, \
-                          sys_disc_vars = {}, disc_props = {}, cont_props = cont_props, \
-                          spec = spec)
-
+rhtlpprob = RHTLPProb(shprobs=[], Phi='True', discretize=False,
+                      env_vars = env_vars, sys_disc_vars = {},
+                      disc_props = {}, cont_props = cont_props, spec = spec,
+                      sp_name = os.path.join('tmpspec', 'a_car'))
 
 
 # Short Horizon Problems
