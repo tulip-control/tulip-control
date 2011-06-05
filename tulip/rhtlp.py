@@ -122,10 +122,8 @@ class SynthesisProb:
                                env_prog='', sys_prog='')
         self.__disc_cont_var = ''
         self.__disc_dynamics = None
-        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
-                                           'tmpspec', 'tmp')
-#        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-#                                           'tmpspec', 'tmp')
+        self.__jtlvfile = args.get('sp_name',
+                                   os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'tmpspec', 'tmp'))
         self.__realizable = None
 
         verbose = args.get('verbose', 0)
@@ -1822,12 +1820,12 @@ class RHTLPProb(SynthesisProb):
         return True
 
 
-    def validate(self, checkcovering=True, excluded_state=[], \
-                     checkpartial_order=True, checktautology=True, \
-                     checkrealizable=True, heap_size='-Xmx128m', verbose=0):
-        """
-        Check whether the list of ShortHorizonProb objects satisfies the sufficient
-        conditions for receding horizon temporal logic planning
+    def validate(self, checkcovering=True, excluded_state=[],
+                 checkpartial_order=True, checktautology=True,
+                 checkrealizable=True,
+                 heap_size='-Xmx128m', verbose=0):
+        """Check whether the list of ShortHorizonProb objects satisfies the sufficient
+        conditions for receding horizon temporal logic planning.
         """
         self.__sys_prog = self.__replacePropSymbols(formula = self.__sys_prog, verbose=verbose)
         for shprob in self.shprobs:
