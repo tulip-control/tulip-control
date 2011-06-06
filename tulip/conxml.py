@@ -401,13 +401,10 @@ def writeXMLfile(fname, prob, spec, sys_dyn=None, aut=None,
     Returns nothing.  (This is a convenience method, mostly only
     wrapping *dumpXML*.)
     """
-    try:
-        f = open(fname, "w")
+    with open(fname, "w") as f:
         f.write(dumpXML(prob=prob, spec=spec, sys_dyn=sys_dyn, aut=aut,
                         synthesize_aut=synthesize_aut, verbose=verbose,
                         pretty=pretty, use_pickling=use_pickling))
-    finally:
-        f.close()
     return
 
 def untaglist(x, cast_f=float, use_pickling=False):
