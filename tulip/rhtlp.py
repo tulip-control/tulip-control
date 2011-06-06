@@ -1297,7 +1297,7 @@ class RHTLPProb(SynthesisProb):
         self.shprobs = []
         self.__Phi = 'True'
         self.__disc_props = {}
-        self.__cont_props = []
+        self.__cont_props = {}
         self.__sys_prog = 'True'
         self.__all_init = 'True'
         self.setJTLVFile(args.get('sp_name',
@@ -1328,8 +1328,6 @@ class RHTLPProb(SynthesisProb):
 
         cont_props = args.get('cont_props', {})
         if (isinstance(cont_props, dict)):
-            self.__cont_props = copy.deepcopy(cont_props.keys())
-        elif (isinstance(cont_props, list)):
             self.__cont_props = copy.deepcopy(cont_props)
         else:
             printError("The input cont_props is expected to be a dictionary " + \
@@ -1383,7 +1381,7 @@ class RHTLPProb(SynthesisProb):
 
             (env_vars, sys_disc_vars, self.__disc_props, sys_cont_vars, cont_state_space, \
                  cont_props, sys_dyn, spec) = parseSpec(spec_file=file)
-            self.__cont_props = cont_props.keys()
+            self.__cont_props = copy.deepcopy(cont_props)
 
         elif ('disc_dynamics' in args.keys()):
             if (discretize):
@@ -1392,10 +1390,11 @@ class RHTLPProb(SynthesisProb):
             disc_dynamics = args['disc_dynamics']
             if (len(self.__cont_props) == 0):
                 if (disc_dynamics is not None and disc_dynamics.list_prop_symbol is not None):
-                    self.__cont_props = copy.deepcopy(disc_dynamics.list_prop_symbol)
+                    self.__cont_props = dict([(prop_sym, pc.Polytope()) \
+                                                  for prop_sym in disc_dynamics.list_prop_symbol[:]])
             else:
                 if (disc_dynamics is None or disc_dynamics.list_prop_symbol is None or \
-                        not (set(self.__cont_props) == set(disc_dynamics.list_prop_symbol))):
+                        not (set(self.__cont_props.keys()) == set(disc_dynamics.list_prop_symbol))):
                     printWarning("The given cont_prop does not match the propositions" + \
                                      " in the given disc_dynamics", obj=self)
         else:        
@@ -1433,6 +1432,10 @@ class RHTLPProb(SynthesisProb):
         """ Return the global invariant Phi for this RHTLP problem.
         """
         return self.__Phi
+
+    def getContProps(self):
+        """Return copy of cont_props attribute."""
+        return copy.deepcopy(self.__cont_props)
 
     def __replacePropSymbols(self, formula = '', verbose=0):
         newformula = copy.deepcopy(formula)
@@ -1492,21 +1495,12 @@ class RHTLPProb(SynthesisProb):
                 len(self.getDiscretizedContVar()) == 0 or \
                 not self.getDiscretizedContVar() in sys_disc_vars) and \
                 self.__cont_props is not None):
-            for var in self.__cont_props:
+            for var in self.__cont_props.keys():
                 allvars[var] = 'boolean'
         return allvars
 
 
     def __getAllVars(self, verbose=0): 
-#         allvars = self.getEnvVars()
-#         sys_disc_vars = self.getSysVars()
-#         allvars.update(sys_disc_vars)
-#         if ((self.getDiscretizedContVar() is None or \
-#                 len(self.getDiscretizedContVar()) == 0 or \
-#                 not self.getDiscretizedContVar() in sys_disc_vars) and \
-#                 self.__cont_props is not None):
-#             for var in self.__cont_props:
-#                 allvars[var] = 'boolean'
         allvars = self.__getAllVarsRaw()
         allvars_values = ()
         allvars_variables = []

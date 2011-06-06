@@ -54,6 +54,16 @@ import automaton
 import prop2part
 import polytope_computations as pc
 import jtlvint
+import errorprint as ep
+from spec import GRSpec
+
+
+#################
+# Problem Types #
+#################
+SYNTH_PROB = 0
+RHTLP_PROB = 1
+
 
 def readXMLfile(fname, verbose=0, use_pickling=False):
     """Read tulipcon XML string directly from a file.
@@ -93,74 +103,138 @@ def loadXML(x, verbose=0, use_pickling=False):
         raise ValueError("unversioned tulipcon XML string.")
     if int(elem.attrib["version"]) != 0:
         raise ValueError("unsupported tulipcon XML version: "+str(elem.attrib["version"]))
+
+    ptype_tag = elem.find("prob_type")
+    if ptype_tag is None:
+        ep.printWarning('tulipcon XML string is missing <prob_type> tag;\nassuming SynthesisProb')
+        ptype = SYNTH_PROB
+    elif ptype_tag.text == "synth":
+        ptype = SYNTH_PROB
+    elif ptype_tag.text == "rhtlp":
+        ptype = RHTLP_PROB
+    else:
+        raise ValueError("Unrecognized prob_type: "+str(ptype_tag.text))
     
     # Build CtsSysDyn, or set to None
     c_dyn = elem.find("c_dyn")
     if c_dyn is None:
         sys_dyn = None
     else:
-        A = untagmatrix(c_dyn.find("A"))
-        B = untagmatrix(c_dyn.find("B"))
-        E = untagmatrix(c_dyn.find("E"))
-        Uset = untagpolytope(c_dyn.find("U_set"))
-        Wset = untagpolytope(c_dyn.find("W_set"))
+        (tag_name, A) = untagmatrix(c_dyn.find("A"))
+        (tag_name, B) = untagmatrix(c_dyn.find("B"))
+        (tag_name, E) = untagmatrix(c_dyn.find("E"))
+        (tag_name, Uset) = untagpolytope(c_dyn.find("U_set"))
+        (tag_name, Wset) = untagpolytope(c_dyn.find("W_set"))
         sys_dyn = discretizeM.CtsSysDyn(A, B, E, Uset, Wset)
 
     # Extract LTL specification
     s_elem = elem.find("spec")
-    spec = ["", ""]
-    if s_elem.find("assume") is not None:
-        spec[0] = s_elem.find("assume").text
-    if s_elem.find("guarantee") is not None:
-        spec[1] = s_elem.find("guarantee").text
-    for k in [0, 1]:  # Undo special character encoding
-        spec[k] = spec[k].replace("&lt;", "<")
-        spec[k] = spec[k].replace("&gt;", ">")
-        spec[k] = spec[k].replace("&amp;", "&")
-    print spec
+    if s_elem.find("env_init") is not None:  # instance of GRSpec style
+        spec = GRSpec()
+        for spec_tag in ["env_init", "env_safety", "env_prog",
+                         "sys_init", "sys_safety", "sys_prog"]:
+            if (s_elem.find(spec_tag) is not None) \
+                    and (s_elem.find(spec_tag).text is not None):
+                setattr(spec, spec_tag, s_elem.find(spec_tag).text)
+                setattr(spec, spec_tag,
+                        getattr(spec, spec_tag).replace("&lt;", "<"))
+                setattr(spec, spec_tag,
+                        getattr(spec, spec_tag).replace("&gt;", ">"))
+                setattr(spec, spec_tag,
+                        getattr(spec, spec_tag).replace("&amp;", "&"))
+    else:  # assume, guarantee strings style
+        spec = ["", ""]
+        if s_elem.find("assume") is not None:
+            spec[0] = s_elem.find("assume").text
+        if s_elem.find("guarantee") is not None:
+            spec[1] = s_elem.find("guarantee").text
+        for k in [0, 1]:  # Undo special character encoding
+            spec[k] = spec[k].replace("&lt;", "<")
+            spec[k] = spec[k].replace("&gt;", ">")
+            spec[k] = spec[k].replace("&amp;", "&")
 
-    # Build SynthesisProb instance
+    # ``Continuous propositions'', if available
+    cp_tag = elem.find("cont_props")
+    if cp_tag is not None:
+        cont_props = dict()
+        for sym_tag in cp_tag.findall("item"):
+            if "key" not in sym_tag.attrib.keys():
+                ep.printWarning("mal-formed <cont_props> tag in given tulipcon XML string.")
+                cont_props = {}
+                break  # Give-up on this <cont_props> tag
+            sym_poly_tag = sym_tag.find("cont_prop_poly")
+            if sym_poly_tag is None:
+                cont_props[sym_tag.attrib["key"]] = None
+            else:
+                (tag_name, cont_props[sym_tag.attrib["key"]]) = untagpolytope(sym_poly_tag)
+    else:
+        cont_props = {}
+    
+    # Discrete dynamics, if available
     d_dyn = elem.find("d_dyn")
     if d_dyn is None:
         prob = None
     else:
         (tag_name, env_vars) = untagdict(elem.find("env_vars"))
         (tag_name, sys_disc_vars) = untagdict(elem.find("con_vars"))
-        (tag_name, domain) = untagpolytope(d_dyn.find("domain"))
-        (tag_name, trans) = untagmatrix(d_dyn.find("trans"), np_type=np.uint8)
-        (tag_name, prop_symbols) = untaglist(d_dyn.find("prop_symbols"), cast_f=str)
-        region_elem = d_dyn.find("regions")
-        list_region = []
-        if region_elem is not None:
-            region_items = d_dyn.find("regions").findall("item")
-            if region_items is not None and len(region_items) > 0:
-                for region_item in region_items:
-                    (tag_name, R) = untagregion(region_item, cast_f_list=int,
-                                                np_type_P=np.float64)
-                    list_region.append(R)
-        
-        disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
-                                                          num_prop=len(prop_symbols),
-                                                          list_region=list_region,
-                                                          num_regions=len(list_region),
-                                                          adj=0,
-                                                          trans=trans,
-                                                          list_prop_symbol=prop_symbols)
-        prob = jtlvint.generateJTLVInput(env_vars=env_vars,
-                                         sys_disc_vars=sys_disc_vars,
-                                         spec=spec,
-                                         disc_props={},
-                                         disc_dynamics=disc_dynamics,
-                                         smv_file="", spc_file="", verbose=2)
+        if (d_dyn.find("domain") is None) \
+                and (d_dyn.find("trans") is None) \
+                and (d_dyn.find("prop_symbols") is None):
+            disc_dynamics = None
+        else:
+            (tag_name, domain) = untagpolytope(d_dyn.find("domain"))
+            (tag_name, trans) = untagmatrix(d_dyn.find("trans"), np_type=np.uint8)
+            (tag_name, prop_symbols) = untaglist(d_dyn.find("prop_symbols"), cast_f=str)
+            region_elem = d_dyn.find("regions")
+            list_region = []
+            if region_elem is not None:
+                region_items = d_dyn.find("regions").findall("item")
+                if region_items is not None and len(region_items) > 0:
+                    for region_item in region_items:
+                        (tag_name, R) = untagregion(region_item, cast_f_list=int,
+                                                    np_type_P=np.float64)
+                        list_region.append(R)
+
+            disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
+                                                              num_prop=len(prop_symbols),
+                                                              list_region=list_region,
+                                                              num_regions=len(list_region),
+                                                              adj=0,
+                                                              trans=trans,
+                                                              list_prop_symbol=prop_symbols)
+
+        # Build appropriate ``problem'' instance
+        if ptype == SYNTH_PROB:
+            prob = jtlvint.generateJTLVInput(env_vars=env_vars,
+                                             sys_disc_vars=sys_disc_vars,
+                                             spec=spec,
+                                             disc_props={},
+                                             disc_dynamics=disc_dynamics,
+                                             smv_file="", spc_file="", verbose=2)
+        else:  # ptype == RHTLP_PROB
+            if disc_dynamics is not None:
+                prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
+                                       env_vars=env_vars,
+                                       sys_disc_vars=sys_disc_vars,
+                                       disc_dynamics=disc_dynamics,
+                                       cont_props=cont_props,
+                                       spec=spec)
+            else:
+                prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
+                                       env_vars=env_vars,
+                                       sys_disc_vars=sys_disc_vars,
+                                       cont_props=cont_props,
+                                       spec=spec)
 
     # Build Automaton
     aut_elem = elem.find("aut")
-    if aut_elem is None:
+    if aut_elem is None \
+            or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         aut = None
     else:
         aut = automaton.Automaton()
         if not aut.loadXML(aut_elem):
-            printError("failed to read Automaton from given tulipcon XML string.")
+            ep.printError("failed to read Automaton from given tulipcon XML string.")
             aut = None
 
     return (prob, sys_dyn, aut)
@@ -181,10 +255,12 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     aut is an instance of Automaton.  If None (rather than an
     instance), then an empty <aut> tag is written.
 
-    spec is list, first element of ``assume'' string, and second
-    element of ``guarantee'' string.  spec=None is also accepted, in
-    which case the specification is considered empty, but note that
-    this could cause problems later unless some content is introduced.
+    spec may be an instance of GRSpec or a list.  If of GRSPec, then
+    it is formed as expected.  If spec is a list, then first element
+    of ``assume'' string, and second element of ``guarantee'' string.
+    spec=None is also accepted, in which case the specification is
+    considered empty, but note that this could cause problems later
+    unless some content is introduced.
 
     ** synthesize_aut flag is IGNORED **
     If synthesize_aut is True, then if prob.__realizable is not None,
@@ -199,12 +275,14 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     To easily save the result here to a file, instead call the method
     *writeXMLfile*
     """
-    if not isinstance(prob, rhtlp.SynthesisProb):
+    if not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
         raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
     if sys_dyn is not None and not isinstance(sys_dyn, discretizeM.CtsSysDyn):
         raise TypeError("sys_dyn should be an instance of discretizeM.CtsSysDyn or None.")
     if aut is not None and not isinstance(aut, automaton.Automaton):
         raise TypeError("aut should be an instance of Automaton or None.")
+    if spec is not None and not isinstance(spec, (list, GRSpec)):
+        raise TypeError("spec should be an instance of list or GRSpec")
 
     if pretty:
         nl = "\n"  # Newline
@@ -216,6 +294,13 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
 
     output = '<tulipcon version="0">'+nl
     idt_level += 1
+    output += idt*idt_level+'<prob_type>'
+    if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
+        output += 'rhtlp'
+    elif isinstance(prob, rhtlp.SynthesisProb):
+        output += 'synth'
+    output += '</prob_type>'+nl
+
     output += idt*idt_level+'<c_dyn>'+nl
     idt_level += 1
     output += idt*idt_level+tagmatrix("A",sys_dyn.A)+nl
@@ -229,11 +314,31 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     output += idt*idt_level+tagpolytope("W_set", sys_dyn.Wset)+nl
     idt_level -= 1
     output += idt*idt_level+'</c_dyn>'+nl
-    output += idt*idt_level+tagdict("env_vars", prob.getEnvVars())+nl
-    output += idt*idt_level+tagdict("con_vars", prob.getSysVars())+nl
+
+    output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
+    output += tagdict("con_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
 
     if spec is None:
         output += idt*idt_level+'<spec><assume></assume><guarantee></guarantee></spec>'+nl
+    elif isinstance(spec, GRSpec):
+        # Copy out copies of GRSpec attributes
+        spec_dict = {"env_init": spec.env_init, "env_safety": spec.env_safety,
+                     "env_prog": spec.env_prog,
+                     "sys_init": spec.sys_init, "sys_safety": spec.sys_safety,
+                     "sys_prog": spec.sys_prog}
+
+        # Map special XML characters to safe forms
+        for k in spec_dict.keys():
+            spec_dict[k] = spec_dict[k].replace("<", "&lt;")
+            spec_dict[k] = spec_dict[k].replace(">", "&gt;")
+            spec_dict[k] = spec_dict[k].replace("&", "&amp;")
+        
+        # Finally, dump XML tags
+        output += idt*idt_level+'<spec>'+nl
+        for (k, v) in spec_dict.items():
+            output += idt*(idt_level+1)+ '<'+k+'>' + v + '</'+k+'>'+nl
+        output += idt*idt_level+'</spec>'+nl
+
     else:
         for k in [0,1]:
             spec[k] = spec[k].replace("<", "&lt;")
@@ -242,21 +347,38 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
         output += idt*idt_level+'<spec><assume>'+spec[0]+'</assume>'+nl
         output += idt*(idt_level+1)+'<guarantee>'+spec[1]+'</guarantee></spec>'+nl
 
-    output += idt*idt_level+'<d_dyn>'+nl
-    idt_level += 1
+    # Perhaps there is a cleaner way to do this, rather than by
+    # checking for method getContProps?
+    if hasattr(prob, "getContProps"):
+        output += idt*idt_level+'<cont_props>'+nl
+        idt_level += 1
+        for (prop_sym, prop_poly) in prob.getContProps().items():
+            output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
+            output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
+            output += idt*idt_level+'</item>'+nl
+        idt_level -= 1
+        output += idt*idt_level+'</cont_props>'+nl
+
     disc_dynamics = prob.getDiscretizedDynamics()
-    output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
-    output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
-    output += idt*idt_level+taglist("prop_symbols", disc_dynamics.list_prop_symbol)+nl
-    output += idt*idt_level+'<regions>'+nl
-    idt_level += 1
-    if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
-        for R in disc_dynamics.list_region:
-            output += tagregion("item", R, pretty=pretty, idt_level=idt_level+1)
-    idt_level -= 1
-    output += idt*idt_level+'</regions>'+nl
-    idt_level -= 1
-    output += idt*idt_level+'</d_dyn>'+nl
+    if disc_dynamics is None:
+        output += idt*idt_level+'<d_dyn></d_dyn>'+nl
+    else:
+        output += idt*idt_level+'<d_dyn>'+nl
+        idt_level += 1
+
+        output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
+        output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
+        output += idt*idt_level+taglist("prop_symbols",
+                                        disc_dynamics.list_prop_symbol)+nl
+        output += idt*idt_level+'<regions>'+nl
+        idt_level += 1
+        if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
+            for R in disc_dynamics.list_region:
+                output += tagregion("item", R, pretty=pretty, idt_level=idt_level)
+        idt_level -= 1
+        output += idt*idt_level+'</regions>'+nl
+        idt_level -= 1
+        output += idt*idt_level+'</d_dyn>'+nl
 
     if aut is None:
         output += idt*idt_level+'<aut></aut>'+nl
@@ -316,6 +438,8 @@ def untaglist(x, cast_f=float, use_pickling=False):
     # Extract list
     if use_pickling:
         li = pickle.loads(elem.text)
+    elif elem.text is None:
+        li = []
     else:
         if cast_f is None:
             cast_f = str
@@ -476,8 +600,13 @@ def untagregion(x, cast_f_list=str, np_type_P=np.float64, use_pickling=False):
 
     return (elem.tag, pc.Region(list_poly=list_poly, list_prop=list_prop))
 
-def tagdict(name, di, use_pickling=False):
+def tagdict(name, di, pretty=False, use_pickling=False, idt_level=0):
     """Create tag that basically stores a dictionary object.
+
+    If pretty is True, then use indentation and newlines to make the
+    resulting XML string more visually appealing.  idt_level is the
+    base indentation level on which to create automaton string.  This
+    level is only relevant if pretty=True.
 
     N.B., if you are *not* using pickling, then all keys and values
     are treated as strings (and frequently wrapped in str() to force
@@ -490,11 +619,19 @@ def tagdict(name, di, use_pickling=False):
         raise TypeError("tag name must be a string.")
     if use_pickling:
         return '<'+name+'>' + pickle.dumps(di) + '</'+name+'>'
+
+    if pretty:
+        nl = "\n"  # Newline
+        idt = "  "  # Indentation
+    else:
+        nl = ""
+        idt = ""
     
-    output = '<'+name+'>'
+    output = idt*idt_level+'<'+name+'>'+nl
     for (k, v) in di.items():
-        output += '<item key="' + str(k) + '" value="' + str(v) + '" />'
-    output += '</'+name+'>'
+        output += idt*(idt_level+1)+'<item key="' + str(k) \
+            + '" value="' + str(v) + '" />'+nl
+    output += idt*idt_level+'</'+name+'>'+nl
     return output
 
 def tagpolytope(name, P, use_pickling=False):
@@ -532,18 +669,17 @@ def taglist(name, li, use_pickling=False):
         return '<'+name+'>' + pickle.dumps(li) + '</'+name+'>'
 
     output = '<'+name+'>'
-    for i in range(len(li)-1):
-        output += str(li[i]) + ', '
-    output += str(li[-1]) + '</'+name+'>'
+    if li is not None:
+        for i in range(len(li)-1):
+            output += str(li[i]) + ', '
+        output += str(li[-1])
+    output += '</'+name+'>'
     return output
 
 def tagregion(name, R, pretty=False, use_pickling=False, idt_level=0):
     """Create tag of type ``Region'', with given name.
 
     Region is as defined in tulip.polytope_computations module.
-
-    If pretty is True, then use indentation and newlines to make the
-    resulting XML string more visually appealing.
 
     If pretty is True, then use indentation and newlines to make the
     resulting XML string more visually appealing.  idt_level is the
@@ -675,3 +811,4 @@ def conxml_test():
     # Check fringe cases
     assert tagmatrix("omfg", []) == '<omfg type="matrix" r="0" c="0"></omfg>'
     assert tagpolytope("rtfm", None) == '<rtfm type="polytope"><H type="matrix" r="0" c="0"></H><K type="matrix" r="0" c="0"></K></rtfm>'
+    assert untaglist(taglist("good_times", None)) == ("good_times", [])
