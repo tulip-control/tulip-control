@@ -1390,7 +1390,7 @@ class RHTLPProb(SynthesisProb):
             disc_dynamics = args['disc_dynamics']
             if (len(self.__cont_props) == 0):
                 if (disc_dynamics is not None and disc_dynamics.list_prop_symbol is not None):
-                    self.__cont_props = dict([(prop_sym, pc.Polytope()) \
+                    self.__cont_props = dict([(prop_sym, Polytope()) \
                                                   for prop_sym in disc_dynamics.list_prop_symbol[:]])
             else:
                 if (disc_dynamics is None or disc_dynamics.list_prop_symbol is None or \
