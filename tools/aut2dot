@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Emacs, this is -*-Python-*-
 """
 Convert an AUT file (from JTLV) to a DOT (in Graphviz) file.
 
