@@ -270,7 +270,7 @@ for x_init in xrange(0, roadLength):
                 Phi += ' & obs' + str(id - roadLength)
             Phi += '))'
 
-        # If started in the left lane, then there is an obstalce in the right lane.
+        # If started in the left lane, then there is an obstacle in the right lane.
         if (math.floor(id/roadLength) >= math.floor(roadWidth/2)):
             Phi += ' &\n\t'
             obs = ''
