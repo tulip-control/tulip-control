@@ -2,7 +2,7 @@
 """ The autonomous car example presented in the CDC/HSCC paper, illustrating the use of 
 rhtlp module.
 
-Nok Wongpiromsarn (nok@cds.caltech.edu)
+ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
 """
 
@@ -192,10 +192,10 @@ for fcell in final_cells:
     cell += 'X' + str(fcell)
 spec.sys_prog = '(' + cell + ')'
 
-rhtlpprob = RHTLPProb(shprobs=[], Phi='True', discretize=False, env_vars = env_vars, \
-                          sys_disc_vars = {}, disc_props = {}, cont_props = cont_props, \
-                          spec = spec)
-
+rhtlpprob = RHTLPProb(shprobs=[], Phi='True', discretize=False,
+                      env_vars = env_vars, sys_disc_vars = {},
+                      disc_props = {}, cont_props = cont_props, spec = spec,
+                      sp_name = os.path.join('tmpspec', 'a_car'))
 
 
 # Short Horizon Problems
@@ -258,14 +258,16 @@ for x_init in xrange(0, roadLength):
                     obs += 'obs' + str(obsy*roadLength + obsx)
             Phi += '(' + cell + ' -> (' + obs + '))'
 
-    rhtlpprob.addSHProb(ShortHorizonProb(W=W, FW=[], Phi=Phi, \
-                                             global_prob = rhtlpprob, \
-                                             env_vars = env_vars, \
-                                             sys_disc_vars = {}, \
-                                             disc_props = {}, \
-                                             cont_state_space=cont_state_space, \
-                                             cont_props = cont_props, \
-                                             sys_dyn = sys_dyn))
+    rhtlpprob.addSHProb(ShortHorizonProb(W=W, FW=[], Phi=Phi,
+                                         global_prob = rhtlpprob,
+                                         env_vars = env_vars,
+                                         sys_disc_vars = {},
+                                         disc_props = {},
+                                         cont_state_space=cont_state_space,
+                                         cont_props = cont_props,
+                                         sys_dyn = sys_dyn,
+                                         sp_name = os.path.join('tmpspec',
+                                                                'W'+str(x_init))))
 
 for x_init in xrange(0, roadLength):
     FWind = min([roadLength-1, x_init+horizon-1])

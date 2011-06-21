@@ -40,6 +40,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 3, 2010
 """
 import inspect
+import pdb
 
 class bcolors:
     OKGREEN = '\033[1;92m'
@@ -71,6 +72,7 @@ def printError(text, obj=None):
         tmp += str(inspect.getouterframes(inspect.currentframe())[1][3])
     tmp += ": " + text 
     print bcolors.FAIL + tmp + bcolors.ENDC
+    pdb.set_trace()  # If this really is an error, then we'd better break into pdb.
 
 def printInfo(text):
     print bcolors.INFO + text + bcolors.ENDC

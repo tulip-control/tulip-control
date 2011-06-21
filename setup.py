@@ -12,4 +12,5 @@ setup(name = 'tulip',
       packages = ['tulip'],
       package_dir = {'tulip' : 'tulip'},
       package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar']},
+      scripts = ['tools/aut2dot',]
       )

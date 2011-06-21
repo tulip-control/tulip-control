@@ -55,7 +55,7 @@ from parsespec import parseSpec
 from polytope_computations import Polytope, Region
 from discretizeM import CtsSysDyn, discretizeM
 from prop2part import PropPreservingPartition, prop2part2
-from automaton import Automaton
+import automaton
 from spec import GRSpec
 import rhtlputil
 import grgameint
@@ -122,10 +122,10 @@ class SynthesisProb:
                                env_prog='', sys_prog='')
         self.__disc_cont_var = ''
         self.__disc_dynamics = None
-        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
-                                           'tmpspec', 'tmp')
-#        self.__jtlvfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-#                                           'tmpspec', 'tmp')
+        self.__jtlvfile = args.get('sp_name',
+                                   os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'tmpspec', 'tmp'))
+        self.__ysfile = args.get('sp_name',
+                                 os.path.join(os.path.dirname(self.__jtlvfile), 'tmp')) + '.ys'
         self.__realizable = None
 
         verbose = args.get('verbose', 0)
@@ -339,6 +339,22 @@ class SynthesisProb:
             printError('The input jtlvfile must be a string indicating the name of the file.', \
                            obj=self)
 
+    ###################################################################
+
+    def getYsFile(self):
+        """Return the name of the (temporary) Yices file."""
+        return self.__ysfile
+
+    ###################################################################
+
+    def setYsFile(self, ysfile):
+        """Set the temporary Yices file (*.ys)."""
+        if isinstance(ysfile, str):
+            self.__ysfile = ysfile
+            self.__realizable = None
+        else:
+            printError('The argument ysfile must be a string (name of the file).',
+                       obj=self)
 
     ###################################################################
 
@@ -729,7 +745,7 @@ class SynthesisProb:
             counter_examples = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)
             return counter_examples
         else:
-            aut = Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
+            aut = automaton.Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
             return aut
 
 
@@ -1281,13 +1297,13 @@ class RHTLPProb(SynthesisProb):
         self.shprobs = []
         self.__Phi = 'True'
         self.__disc_props = {}
-        self.__cont_props = []
+        self.__cont_props = {}
         self.__sys_prog = 'True'
         self.__all_init = 'True'
-        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
-                                           'tmpspec', 'tmp'))
-#        self.setJTLVFile(os.path.join(os.path.abspath(os.path.dirname(__file__)), \
-#                                           'tmpspec', 'tmp'))
+        self.setJTLVFile(args.get('sp_name',
+                                  os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'tmpspec', 'tmp')))
+        self.setYsFile(args.get('sp_name',
+                                os.path.join(os.path.dirname(self.getJTLVFile()), 'tmp')) + '.ys')
 
         if (isinstance(shprobs, list)):
             for shprob in shprobs:
@@ -1312,8 +1328,6 @@ class RHTLPProb(SynthesisProb):
 
         cont_props = args.get('cont_props', {})
         if (isinstance(cont_props, dict)):
-            self.__cont_props = copy.deepcopy(cont_props.keys())
-        elif (isinstance(cont_props, list)):
             self.__cont_props = copy.deepcopy(cont_props)
         else:
             printError("The input cont_props is expected to be a dictionary " + \
@@ -1367,7 +1381,7 @@ class RHTLPProb(SynthesisProb):
 
             (env_vars, sys_disc_vars, self.__disc_props, sys_cont_vars, cont_state_space, \
                  cont_props, sys_dyn, spec) = parseSpec(spec_file=file)
-            self.__cont_props = cont_props.keys()
+            self.__cont_props = copy.deepcopy(cont_props)
 
         elif ('disc_dynamics' in args.keys()):
             if (discretize):
@@ -1376,10 +1390,11 @@ class RHTLPProb(SynthesisProb):
             disc_dynamics = args['disc_dynamics']
             if (len(self.__cont_props) == 0):
                 if (disc_dynamics is not None and disc_dynamics.list_prop_symbol is not None):
-                    self.__cont_props = copy.deepcopy(disc_dynamics.list_prop_symbol)
+                    self.__cont_props = dict([(prop_sym, Polytope()) \
+                                                  for prop_sym in disc_dynamics.list_prop_symbol[:]])
             else:
                 if (disc_dynamics is None or disc_dynamics.list_prop_symbol is None or \
-                        not (set(self.__cont_props) == set(disc_dynamics.list_prop_symbol))):
+                        not (set(self.__cont_props.keys()) == set(disc_dynamics.list_prop_symbol))):
                     printWarning("The given cont_prop does not match the propositions" + \
                                      " in the given disc_dynamics", obj=self)
         else:        
@@ -1417,6 +1432,10 @@ class RHTLPProb(SynthesisProb):
         """ Return the global invariant Phi for this RHTLP problem.
         """
         return self.__Phi
+
+    def getContProps(self):
+        """Return copy of cont_props attribute."""
+        return copy.deepcopy(self.__cont_props)
 
     def __replacePropSymbols(self, formula = '', verbose=0):
         newformula = copy.deepcopy(formula)
@@ -1476,21 +1495,12 @@ class RHTLPProb(SynthesisProb):
                 len(self.getDiscretizedContVar()) == 0 or \
                 not self.getDiscretizedContVar() in sys_disc_vars) and \
                 self.__cont_props is not None):
-            for var in self.__cont_props:
+            for var in self.__cont_props.keys():
                 allvars[var] = 'boolean'
         return allvars
 
 
     def __getAllVars(self, verbose=0): 
-#         allvars = self.getEnvVars()
-#         sys_disc_vars = self.getSysVars()
-#         allvars.update(sys_disc_vars)
-#         if ((self.getDiscretizedContVar() is None or \
-#                 len(self.getDiscretizedContVar()) == 0 or \
-#                 not self.getDiscretizedContVar() in sys_disc_vars) and \
-#                 self.__cont_props is not None):
-#             for var in self.__cont_props:
-#                 allvars[var] = 'boolean'
         allvars = self.__getAllVarsRaw()
         allvars_values = ()
         allvars_variables = []
@@ -1542,10 +1552,9 @@ class RHTLPProb(SynthesisProb):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
             expr = '!(' + allW_formula + ') & !(' + es_formula + ')'
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
-            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                              verbose=verbose)
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                          ysfile=self.getYsFile(),
+                                          verbose=verbose)
             if (ret is None):
                 use_yices = False
             elif (ret[0]):
@@ -1647,13 +1656,12 @@ class RHTLPProb(SynthesisProb):
             if (verbose > 0):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
             newW0ind = []
             for ind in W0ind:
                 expr = '!((' + self.shprobs[ind].getW() + ') -> (' + self.__sys_prog + '))'
-                ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                                  verbose=verbose)
+                ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                              ysfile=self.getYsFile(),
+                                              verbose=verbose)
                 if (ret is None):
                     use_yices = False
                     break
@@ -1715,10 +1723,9 @@ class RHTLPProb(SynthesisProb):
                 print("Trying yices")
             allvars = self.__getAllVarsRaw(verbose=verbose)
             expr = '!((' + self.__all_init + ') -> (' + self.__Phi + '))'
-            ysfile = os.path.dirname(self.getJTLVFile())
-            ysfile = os.path.join(ysfile, 'tmp.ys')
-            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars, ysfile=ysfile, \
-                                              verbose=verbose)
+            ret = rhtlputil.yicesSolveSat(expr=expr, allvars=allvars,
+                                          ysfile=self.getYsFile(),
+                                          verbose=verbose)
             if (ret is None):
                 use_yices = False
             elif (not ret[0]):
@@ -1822,12 +1829,12 @@ class RHTLPProb(SynthesisProb):
         return True
 
 
-    def validate(self, checkcovering=True, excluded_state=[], \
-                     checkpartial_order=True, checktautology=True, \
-                     checkrealizable=True, heap_size='-Xmx128m', verbose=0):
-        """
-        Check whether the list of ShortHorizonProb objects satisfies the sufficient
-        conditions for receding horizon temporal logic planning
+    def validate(self, checkcovering=True, excluded_state=[],
+                 checkpartial_order=True, checktautology=True,
+                 checkrealizable=True,
+                 heap_size='-Xmx128m', verbose=0):
+        """Check whether the list of ShortHorizonProb objects satisfies the sufficient
+        conditions for receding horizon temporal logic planning.
         """
         self.__sys_prog = self.__replacePropSymbols(formula = self.__sys_prog, verbose=verbose)
         for shprob in self.shprobs:

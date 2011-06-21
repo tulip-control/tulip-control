@@ -484,10 +484,18 @@ class Region:
     -list_poly: proposition preserving regions    
     -list of propositions: binary vector that show which prop holds in which region
     """
-    
     def __init__(self, list_poly=[], list_prop=[]):
         self.list_poly = list_poly[:]
         self.list_prop = list_prop[:]
+
+    def __copy__(self):
+        """Return copy of this Region."""
+        return Region(list_poly=self.list_poly[:],
+                      list_prop=self.list_prop[:])
+
+    def copy(self):
+        """Return copy of this Region."""
+        return self.__copy__()
 
         
 class Polytope:
@@ -496,9 +504,17 @@ class Polytope:
     -A: a numpy array for the hyperplane normals in hyperplane representation of a polytope
     -b:  a numpy array for the hyperplane offsets in hyperplane representation of a polytope
     """
-    def __init__(self,A,b):
+    def __init__(self, A=np.asarray([]), b=np.asarray([])):
         self.A = A.copy()
         self.b = b.copy()
+
+    def __copy__(self):
+        """Return copy of this Polytope."""
+        return Polytope(self.A.copy(), self.b.copy())
+
+    def copy(self):
+        """Return copy of this Polytope."""
+        return self.__copy__()
 
     def __str__(self):
         """Return pretty-formatted H-representation of polytope.
