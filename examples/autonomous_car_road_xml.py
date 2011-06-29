@@ -13,12 +13,14 @@ Small modifications by SCL <slivingston@caltech.edu>
 import sys, os
 import math
 from numpy import array
+from subprocess import call
 
 from tulip.polytope_computations import Polytope
 from tulip.discretizeM import CtsSysDyn
 from tulip.spec import GRSpec
 from tulip.rhtlp import RHTLPProb, ShortHorizonProb
 from tulip import conxml
+from tulip import congexf
 
 
 ##############################
@@ -341,6 +343,33 @@ for id in xrange(0, roadLength*roadWidth):
 
 ret = rhtlpprob.validate(excluded_state=excluded_state)
 print ret
+
+if ret:
+    # Synthesize automatons for each short horizon problem.
+    aut_list = []
+    for shprob in rhtlpprob.shprobs:
+        aut_list.append(shprob.synthesizePlannerAut())
+
+    # Generate graph of all automatons.
+    output = congexf.dumpGexf(aut_list)
+    destfile = 'acar_example.gexf'
+    try:
+        f = open(destfile, "w")
+        f.write(output)
+        f.close()
+    except IOError:
+        f.close()
+        print "Error: could not write " + destfile + " to file."
+    
+    # Display graph?
+    if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
+        try:
+            print "Opening GEXF file in Gephi."
+            call(["gephi", destfile])
+        except:
+            print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
+                  "gephi " + destfile + "\n\n"
+
 
 # if sp_auts is False:
 #     print 'Error: rhtlp prob instance failed validation check.'

@@ -46,15 +46,20 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 
 minor refactoring by SCL <slivingston@caltech.edu>
 3 May 2011.
+
+graph visualization added by Yuchen Lin
+23 June 2011
 """
 
 import random
 from automaton import Automaton, AutomatonState
 from errorprint import printWarning, printError
+from congexf import dumpGexf, changeGexfAttvalue
 
 def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
     """
-    Simulate an execution of the given automaton and return a sequence of states.
+    Simulate an execution of the given automaton and return a sequence of automaton
+    states.
 
     Input:
 
@@ -72,16 +77,16 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
     if (isinstance(aut, str)):
         aut = Automaton(states_or_file=aut,verbose=verbose)
     aut_state = aut.findNextAutState(current_aut_state=None, env_state=init_state)
-    states = [aut_state.state]
+    aut_states = [aut_state]
 
     for i in xrange(0, num_it):
-        if (len(env_states) >= i+1):
+        if (len(env_states) > i):
             aut_state = aut.findNextAutState(current_aut_state=aut_state, \
                                                  env_state=env_states[i])
             if (not isinstance(aut_state, AutomatonState)):
                 printError('The specified sequence of environment states ' + \
                                'does not satisfy the environment assumption.')
-                return states
+                return aut_states
         else:
             transition = aut_state.transition[:]
             for trans in aut_state.transition:
@@ -90,22 +95,22 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
                     transition.remove(trans)
             if (len(transition) == 0):
                 printWarning('Environment cannot satisfy its assumption')
-                return states
+                return aut_states
             elif (deterministic_env):
                 aut_state = aut.getAutState(transition[0])
             else:
                 aut_state = aut.getAutState(random.choice(transition))
-        states.append(aut_state.state)
-    return states
+        aut_states.append(aut_state)
+    return aut_states
 
 ###################################################################
-def writeStatesToFile(states, file, verbose=0):
-    f = open(file, 'w')
+def writeStatesToFile(aut, aut_states, destfile, verbose=0):
+    f = open(destfile, 'w')
+    output = dumpGexf([aut])
     if (verbose > 0):
-        print 'Writing simulation result to ' + file
-    for state in states:
-        for var in state.keys():
-            f.write(var + ':')
-            f.write(str(state[var]) + ', ')
-        f.write('\n')
+        print 'Writing simulation result to ' + destfile
+    for (i, aut_state) in enumerate(aut_states):
+        output = changeGexfAttvalue(output, "is_active", i + 1,
+                                    node_id='0.' + str(aut_state.id))
+    f.write(output)
     f.close()

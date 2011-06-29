@@ -10,14 +10,19 @@ Originally by Nok Wongpiromsarn (nok@cds.caltech.edu)
 September 2, 2010
 
 Small modifications by SCL <slivingston@caltech.edu>
+
+Small modifications by Yuchen Lin.
 """
 
 import sys, os
 from numpy import array
+from subprocess import call
 
 from tulip import *
 from tulip import polytope_computations as pc
 from tulip import conxml
+from tulip import congexf
+from tulip import grsim
 
 
 # Specify where the smv file, spc file and aut file will go
@@ -27,7 +32,7 @@ smvfile = os.path.join(path, 'specs', testfile+'.smv')
 spcfile = os.path.join(path, 'specs', testfile+'.spc')
 autfile = os.path.join(path, 'specs', testfile+'.aut')
 
-load_from_XML = False
+load_from_XML = True
 if not load_from_XML:
 
     # Environment variables
@@ -88,21 +93,24 @@ else:  # Read from tulipcon XML file
     (prob, sys_dyn, aut) = conxml.readXMLfile("rsimple_example.xml")
     disc_dynamics = prob.getDiscretizedDynamics()
 
-if not aut.writeDotFile("rdsimple.dot"):
-    print "Error occurred while generating DOT file."
-else:
-    try:
-        call("dot rdsimple.dot -Tpng -o rdsimple.png".split())
-    except:
-        print "Failed to create image from DOT file. To do so, try\n\ndot rdsimple.dot -Tpng -o rdsimple.png\n"
-
 
 # Simulate
 num_it = 30
 init_state = {}
 init_state['X0reach'] = True
-states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
-grsim.writeStatesToFile(states, 'robot_sim.txt')
+destfile = 'robot_sim.gexf'
+aut_states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
+grsim.writeStatesToFile(aut, aut_states, destfile)
+
+if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
+    try:
+        print "Opening GEXF file in Gephi."
+        call(["gephi", destfile])
+    except:
+        print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
+              "gephi " + destfile + "\n\n"
+
+
 
 f = open('robot_disc_dynamics.txt', 'w')
 f.write(str(disc_dynamics.list_prop_symbol) + '\n')
