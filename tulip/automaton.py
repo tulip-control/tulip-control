@@ -147,13 +147,72 @@ class Automaton:
                     transition[i] = int(transition[i])
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
 
-    def writeDotFile(self, fname):
+    def trimRedundantStates(self):
+        """Combine states whose valuation of variables is identical.
+
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+
+        Return False on failure; True otherwise (success).
+        """
+        if len(self.states) == 0:
+            return True  # Empty state set; do nothing
+        for current_id in range(len(self.states)):
+            # See if flag set, i.e. this state already processed as duplicate
+            if self.states[current_id].id == -1:
+                continue
+            # Look for duplicates
+            dup_list = []
+            for k in range(len(self.states)):
+                if k == current_id:
+                    continue
+                if self.states[k].state == self.states[current_id].state:
+                    dup_list.append(k)
+            # Trim the fat; mark duplicate states as such (to be
+            # deleted after search finishes).
+            if len(dup_list) != 0:
+                for state in self.states:
+                    for trans_ind in range(len(state.transition)):
+                        if state.transition[trans_ind] in dup_list:
+                            state.transition[trans_ind] = current_id
+                for k in dup_list:
+                    self.states[current_id].transition.extend(self.states[k].transition)
+                    self.states[k].id = -1  # Flag for deletion
+                self.states[current_id].transition = list(set(self.states[current_id].transition))
+        # Delete flagged (redundant) states
+        current_id = 0
+        while current_id < len(self.states):
+            if self.states[current_id].id == -1:
+                del self.states[current_id]
+            else:
+                current_id += 1
+        # Shift down other IDs, which are off-place due to the deletions
+        for current_id in range(len(self.states)):
+            if self.states[current_id].id == current_id:
+                continue
+            for state in self.states:
+                for trans_ind in range(len(state.transition)):
+                    if state.transition[trans_ind] == self.states[current_id].id:
+                        state.transition[trans_ind] = current_id
+            self.states[current_id].id = current_id
+        # Finally, remove any remaining redundant references in
+        # transition lists.
+        for current_id in range(len(self.states)):
+            self.states[current_id].transition = list(set(self.states[current_id].transition))
+        return True
+
+    def writeDotFile(self, fname, trimRedundant=True):
         """Write automaton to Graphviz DOT file.
 
         In each state, nonzero variables and their value (in that
         state) are listed.  This style is motivated by Boolean
         variables, but applies to all variables, including those
         taking arbitrary integer values.
+
+        N.B., if trimRedundant flag is set (as by default), then the
+        method trimRedundantStates is called, which may cause IDs to
+        change.
 
         Return False on failure; True otherwise (success).
         """
@@ -162,6 +221,9 @@ class Automaton:
         except:
             printWarning("Failed to open "+fname+" for writing.", obj=self)
             return False
+
+        if trimRedundant:
+            self.trimRedundantStates()
 
         try:
             f.write("digraph A {\n")
