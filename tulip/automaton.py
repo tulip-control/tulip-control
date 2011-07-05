@@ -148,7 +148,9 @@ class Automaton:
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
 
     def trimRedundantStates(self):
-        """Combine states whose valuation of variables is identical.
+        """DEFUNCT UNTIL FURTHER NOTICE!
+
+        Combine states whose valuation of variables is identical
 
         Merge and update transition listings as needed.  N.B., this
         method will change IDs after trimming to ensure indexing still
@@ -202,17 +204,18 @@ class Automaton:
             self.states[current_id].transition = list(set(self.states[current_id].transition))
         return True
 
-    def writeDotFile(self, fname, trimRedundant=True):
+    def writeDotFile(self, fname):
         """Write automaton to Graphviz DOT file.
 
-        In each state, nonzero variables and their value (in that
-        state) are listed.  This style is motivated by Boolean
-        variables, but applies to all variables, including those
-        taking arbitrary integer values.
+        In each state, the node ID and nonzero variables and their
+        value (in that state) are listed.  This style is motivated by
+        Boolean variables, but applies to all variables, including
+        those taking arbitrary integer values.
 
-        N.B., if trimRedundant flag is set (as by default), then the
-        method trimRedundantStates is called, which may cause IDs to
-        change.
+        N.B., to allow for trace memory (manifested as ``rank'' in
+        JTLV output), we include an ID for each node.  Thus, identical
+        valuation of variables does *not* imply state equivalency
+        (confusingly).
 
         Return False on failure; True otherwise (success).
         """
@@ -221,9 +224,6 @@ class Automaton:
         except:
             printWarning("Failed to open "+fname+" for writing.", obj=self)
             return False
-
-        if trimRedundant:
-            self.trimRedundantStates()
 
         try:
             f.write("digraph A {\n")
@@ -235,11 +235,11 @@ class Automaton:
                 for (k,v) in state.state.items():
                     if v != 0:  # i.e., not False (but not applicable for general variables).
                         if len(state_labels[state.id]) == 0:
-                            state_labels[state.id] += k+": "+str(v)
+                            state_labels[state.id] += str(state.id)+";\\n" + k+": "+str(v)
                         else:
                             state_labels[state.id] += ", "+k+": "+str(v)
                 if len(state_labels[state.id]) == 0:
-                    state_labels[state.id] = "{}"
+                    state_labels[state.id] = str(state.id)+"\\n; {}"
 
             for state in self.states:
                 for trans in state.transition:
