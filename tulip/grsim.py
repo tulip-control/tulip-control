@@ -104,13 +104,15 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
     return aut_states
 
 ###################################################################
-def writeStatesToFile(aut, aut_states, destfile, verbose=0):
-    f = open(destfile, 'w')
-    output = dumpGexf([aut])
+def writeStatesToFile(aut_list, aut_states_list, destfile,
+                      label_vars=None, verbose=0):
+    output = dumpGexf(aut_list, label_vars=label_vars)
     if (verbose > 0):
         print 'Writing simulation result to ' + destfile
-    for (i, aut_state) in enumerate(aut_states):
-        output = changeGexfAttvalue(output, "is_active", i + 1,
-                                    node_id='0.' + str(aut_state.id))
+    for (i, aut_states) in enumerate(aut_states_list):
+        for (j, aut_state) in enumerate(aut_states):
+            output = changeGexfAttvalue(output, "is_active", j + 1,
+                                        node_id=str(i) + '.' + str(aut_state.id))
+    f = open(destfile, 'w')
     f.write(output)
     f.close()
