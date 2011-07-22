@@ -34,22 +34,11 @@
 
 
 """
-Convert an AUT file (from JTLV) to a GEXF (in Gephi) file.
-
-Accepts a *.aut filename and, optionally, a destination filename. If no
-destination is given, default is to use input filename with new ending ".gexf"
-
-Also note that command-line arguments are handled manually, since they
-are so simple...
-
-Originally written by Scott Livingston for GraphViz DOT files.
-
-Modified by Yuchen Lin for Gephi GEXF files.
+Several functions that help in converting an AUT file (from JTLV)
+to a GEXF file (in Gephi).
 
 """
 
-import sys
-from subprocess import call
 import re
 
 from tulip.automaton import AutomatonState, Automaton
@@ -144,7 +133,7 @@ def tagGexfNode(w_id, state, label, idt_lvl=3):
 
     # Generate a line of XML for the node.
     node = idt * idt_lvl + '<node id="' + state_ID + \
-           '" label="' + label + '">' + nl
+           '" label="' + label + '" pid="' + str(w_id) + '">' + nl
     idt_lvl += 1
     node += idt * idt_lvl + '<attvalues>' + nl
 
@@ -304,27 +293,18 @@ def dumpGexf(aut_list, label_vars=None):
     idt_lvl += 1
     aut_id = 0  # Each automaton is numbered, starting from 0.
     for aut in aut_list:
-        # Open supernode (a single Automaton) and subnodes.
+        # Create supernode (a single Automaton) and subnodes.
         output += idt * idt_lvl + '<node id="' + str(aut_id) + \
                   '" label="W' + str(aut_id) + \
                   ': ' + str(label_vars) + \
-                  '">' + nl
-        idt_lvl += 1
-        output += idt * idt_lvl + '<nodes>' + nl
+                  '" />' + nl
 
         # Build gexf nodes from AutomatonState states.
-        idt_lvl += 1
         for state in aut.states:
             label = filter(lambda x: x in state.state.keys(), label_vars)
             label = str(map(lambda x: state.state[x], label))
             output += tagGexfNode(aut_id, state, label,
                                   idt_lvl=idt_lvl)
-        idt_lvl -= 1
-        
-        # Close subnodes and supernode.
-        output += idt * idt_lvl + '</nodes>' + nl
-        idt_lvl -= 1
-        output += idt * idt_lvl + '</node>' + nl
         
         aut_id += 1
     idt_lvl -= 1
@@ -430,18 +410,6 @@ def changeGexfAttvalue(gexf_string, att_name, att_val,
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print "Usage: aut_to_gexf.py INPUT.aut [OUTPUT.gexf]"
-        exit(1)
-
-    if len(sys.argv) == 3:
-        destfile = sys.argv[2]
-    else:
-        if len(sys.argv[1]) < 4:  # Handle weirdly short names
-            destfile = sys.argv[1] + ".gexf"
-        else:
-            destfile = sys.argv[1][:-4] + ".gexf"
-    
     testAutState0 = AutomatonState(id=0, state={'a':0, 'b':1}, transition=[1])
     testAutState1 = AutomatonState(id=1, state={'a':2, 'b':3}, transition=[0])
     testAut = Automaton([testAutState0, testAutState1])
@@ -453,13 +421,14 @@ if __name__ == "__main__":
            '          <attvalue for="a" value="0" />\n'
     print "Testing tagGexfNode..."
     assert tagGexfNode(0, testAutState0, 'foo', idt_lvl=3) == \
-           '      <node id="0.0" label="foo">\n' + \
+           '      <node id="0.0" label="foo" pid="0">\n' + \
            '        <attvalues>\n' + \
            '          <attvalue for="a" value="0" />\n' + \
            '          <attvalue for="b" value="1" />\n' + \
            '          <attvalue for="is_active" value="0" />\n' + \
            '        </attvalues>\n' + \
            '      </node>\n'
+    
     print "Testing tagGexfEdge..."
     assert tagGexfEdge(0, testAutState0, 0, testAutState1, 'bar', idt_lvl=3) == \
            '      <edge id="0.0-0.1" source="0.0" target="0.1" label="bar">\n' + \
@@ -485,23 +454,20 @@ if __name__ == "__main__":
            '      <attribute id="is_active" type="integer" />\n' + \
            '    </attributes>\n' + \
            '    <nodes>\n' + \
-           '      <node id="0" label="W0: [\'a\', \'b\']">\n' + \
-           '        <nodes>\n' + \
-           '          <node id="0.0" label="[0, 1]">\n' + \
-           '            <attvalues>\n' + \
-           '              <attvalue for="a" value="0" />\n' + \
-           '              <attvalue for="b" value="1" />\n' + \
-           '              <attvalue for="is_active" value="0" />\n' + \
-           '            </attvalues>\n' + \
-           '          </node>\n' + \
-           '          <node id="0.1" label="[2, 3]">\n' + \
-           '            <attvalues>\n' + \
-           '              <attvalue for="a" value="2" />\n' + \
-           '              <attvalue for="b" value="3" />\n' + \
-           '              <attvalue for="is_active" value="0" />\n' + \
-           '            </attvalues>\n' + \
-           '          </node>\n' + \
-           '        </nodes>\n' + \
+           '      <node id="0" label="W0: [\'a\', \'b\']" />\n' + \
+           '      <node id="0.0" label="[0, 1]" pid="0">\n' + \
+           '        <attvalues>\n' + \
+           '          <attvalue for="a" value="0" />\n' + \
+           '          <attvalue for="b" value="1" />\n' + \
+           '          <attvalue for="is_active" value="0" />\n' + \
+           '        </attvalues>\n' + \
+           '      </node>\n' + \
+           '      <node id="0.1" label="[2, 3]" pid="0">\n' + \
+           '        <attvalues>\n' + \
+           '          <attvalue for="a" value="2" />\n' + \
+           '          <attvalue for="b" value="3" />\n' + \
+           '          <attvalue for="is_active" value="0" />\n' + \
+           '        </attvalues>\n' + \
            '      </node>\n' + \
            '    </nodes>\n' + \
            '    <edges>\n' + \
@@ -539,23 +505,20 @@ if __name__ == "__main__":
            '      <attribute id="is_active" type="integer" />\n' + \
            '    </attributes>\n' + \
            '    <nodes>\n' + \
-           '      <node id="0" label="W0: [\'a\', \'b\']">\n' + \
-           '        <nodes>\n' + \
-           '          <node id="0.0" label="[0, 1]">\n' + \
-           '            <attvalues>\n' + \
-           '              <attvalue for="a" value="5" />\n' + \
-           '              <attvalue for="b" value="1" />\n' + \
-           '              <attvalue for="is_active" value="0" />\n' + \
-           '            </attvalues>\n' + \
-           '          </node>\n' + \
-           '          <node id="0.1" label="[2, 3]">\n' + \
-           '            <attvalues>\n' + \
-           '              <attvalue for="a" value="2" />\n' + \
-           '              <attvalue for="b" value="3" />\n' + \
-           '              <attvalue for="is_active" value="0" />\n' + \
-           '            </attvalues>\n' + \
-           '          </node>\n' + \
-           '        </nodes>\n' + \
+           '      <node id="0" label="W0: [\'a\', \'b\']" />\n' + \
+           '      <node id="0.0" label="[0, 1]" pid="0">\n' + \
+           '        <attvalues>\n' + \
+           '          <attvalue for="a" value="5" />\n' + \
+           '          <attvalue for="b" value="1" />\n' + \
+           '          <attvalue for="is_active" value="0" />\n' + \
+           '        </attvalues>\n' + \
+           '      </node>\n' + \
+           '      <node id="0.1" label="[2, 3]" pid="0">\n' + \
+           '        <attvalues>\n' + \
+           '          <attvalue for="a" value="2" />\n' + \
+           '          <attvalue for="b" value="3" />\n' + \
+           '          <attvalue for="is_active" value="0" />\n' + \
+           '        </attvalues>\n' + \
            '      </node>\n' + \
            '    </nodes>\n' + \
            '    <edges>\n' + \
@@ -577,25 +540,3 @@ if __name__ == "__main__":
            '  </graph>\n' + \
            '</gexf>\n'
     print "Tests done."
-
-
-
-    
-    aut = Automaton(sys.argv[1])
-    print "Generating GEXF file, " + destfile
-    try:
-        f = open(destfile, "w")
-        f.write(dumpGexf([aut, aut]))
-        f.close()
-    except IOError:
-        f.close()
-        print "Failed to create GEXF file, " + destfile
-        exit(-1)
-
-    if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
-        try:
-            print "Opening GEXF file in Gephi."
-            call(["gephi", destfile])
-        except:
-            print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
-                  "gephi " + destfile + "\n\n"

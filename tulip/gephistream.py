@@ -40,48 +40,103 @@ the automaton as a graph.
 Note that the Gephi Graph Streaming API plugin must be installed.
 """
 
-import threading
+import os
 import time
+from multiprocessing import Process, Manager
 from subprocess import call
-from urllib import *
+from urllib import urlopen
+from SocketServer import ThreadingMixIn, TCPServer
+from BaseHTTPServer import BaseHTTPRequestHandler
 
 from automaton import AutomatonState
-from errorprint import printWarning
+
+class GraphHandler(BaseHTTPRequestHandler):
+    """
+    Class for handling HTTP graph requests.
+    """
+    
+    def do_GET(self):
+        """
+        Accept only graph requests, then stream commands.
+
+        Arguments:
+        (none)
+
+        Return:
+        (nothing)
+        """
+        try:
+            if not self.path.endswith("?operation=getGraph"): raise IOError
+            # Accept GET request.
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            
+            # Send messages until the empty string is passed in msg_lst.
+            # The server must have a multiprocessing list named msg_list.
+            msg_list = self.server.msg_list
+            index = 0
+            msg = True
+            while msg:
+                for msg in msg_list[index:]:
+                    print 'send-to %s: %s' % (str(self.client_address), msg)
+                    self.wfile.write(msg)
+                    index += 1
+        except IOError:
+            self.send_error(404, "File not found: " + self.path)
+    
 
 class GephiStream:
     """
-    Class for reading, adding, changing, and deleting nodes and edges
+    Class for adding, changing, and deleting nodes and edges
     on a live Gephi graph workspace.
 
+    Note: The 'close()' function should be called when streaming is complete.
+
+    'mode' determines whether each instance is a client or a server.
+    In client mode, connects to an existing Gephi server.
+    In server mode, starts a graph streaming server.
+
+    Arguments:
+    mode -- is this gephistream a 'server' or 'client'?
+    host -- name of the server host.
+    port -- name of the server port.
+
     Fields:
-    url_in -- string representing the incoming URL from the Gephi server.
-    url_out -- string representing the outgoing URL to the Gephi server.
-    readThread -- asynchronous thread for printing graph changes to console.
+    mode -- see above.
+    host -- see above.
+    port -- see above.
+    url -- the server's streaming URL.
+    msg_list -- a list of all commands being streamed in 'server' mode.
+    streamthread -- an asynchronous Thread running the server/client.
     """
     
-    def __init__(self, url='http://localhost:8080/workspace',
-                 workspace=0, verbose=False):
-        if not (isinstance(url, str) and isinstance(workspace, int) and
-                isinstance(verbose, bool)):
+    def __init__(self, mode, host="localhost", port=8080, workspace=0):
+        if not ((mode == 'client' or mode == 'server') and
+                isinstance(host, str) and isinstance(port, int) and
+                isinstance(workspace, int)):
             raise TypeError("Invalid arguments to GephiStream.")
-        self.url_in = url + str(workspace) + '?operation=getGraph'
-        self.url_out = url + str(workspace) + '?operation=updateGraph'
-
-        self.readThread = False
-        if verbose:
-            self.readThread = threading.Thread(target=self.printGraph)
-            self.readThread.daemon = True
-            self.readThread.start()
+        self.mode = mode
+        self.host = host
+        self.port = port
+        self.url = 'http://%s:%d/workspace%d?operation=getGraph' % \
+                   (host, port, workspace)
+        self.msg_list = Manager().list()
+        self.streamthread = Process(target=self.stream)
+        self.streamthread.daemon = True
+        self.streamthread.start()
     
     
-    def __del__(self):
-        if self.readThread:
-            self.readThread.join()
+    def close(self):
+        # Sending an empty string should terminate all graph streams.
+        self.send('')
+        # Deleting self here forces the stream daemon thread to stop.
+        del self
     
     
-    def printGraph(self):
+    def stream(self):
         """
-        Prints a list of all updates to the current graph.
+        Streams graph to/from Gephi.
         
         Arguments:
         (none)
@@ -89,16 +144,45 @@ class GephiStream:
         Return:
         (nothing)
         """
+        print 'Graph streaming from:\n' + self.url + '\n'
+        if self.mode == 'client':
+            # Receive streamed graph changes from the server.
+            urlrecv = urlopen(self.url)
+            try:
+                msg = True
+                while msg:
+                    msg = urlrecv.readline()
+                    print "recv: " + msg
+                urlrecv.close()
+            except IOError:
+                urlrecv.close()
         
-        urlrecv = urlopen(self.url_in)
-        try:
-            msg = True
-            while msg:
-                msg = urlrecv.readline()
-                print "recv: " + msg
-            urlrecv.close()
-        except IOError:
-            urlrecv.close()
+        elif self.mode == 'server':
+            # Start a TCP server to stream graph changes.
+            # Server must be closed by deleting each instance.
+            class newTCPServer(ThreadingMixIn, TCPServer):
+                msg_list = self.msg_list
+            server = newTCPServer((self.host, self.port), GraphHandler)
+            server.serve_forever()
+    
+    
+    def send(self, msg):
+        """
+        Send the message to the current stream.
+
+        Arguments:
+        msg -- a string message to be sent.
+
+        Return:
+        (nothing)
+        """
+        print "send: " + msg
+        if self.mode == 'client':
+            urlsend = urlopen(self.url.replace('getGraph', 'updateGraph'), msg)
+            urlsend.close()
+            
+        elif self.mode == 'server':
+            self.msg_list.append(msg)
     
     
     def wrapJSON(self, command, target, attribute_dict={}):
@@ -138,7 +222,7 @@ class GephiStream:
                 output += ','
             # Delete the extra comma at the end.
             output = output[:-1]
-        output += '}}}'
+        output += '}}}\r\n'
         
         return output
     
@@ -162,10 +246,7 @@ class GephiStream:
         node_ID = str(w_id) + '.' + str(state.id)
         attribute_dict = state.state.copy()
         
-        msg = self.wrapJSON("an", node_ID, attribute_dict)
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("an", node_ID, attribute_dict))
     
     
     def changeNode(self, w_id, state, change_dict):
@@ -188,10 +269,7 @@ class GephiStream:
         
         node_ID = str(w_id) + '.' + str(state.id)
         
-        msg = self.wrapJSON("cn", node_ID, change_dict)
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("cn", node_ID, change_dict))
     
     
     def deleteNode(self, w_id, state):
@@ -212,10 +290,7 @@ class GephiStream:
         
         node_ID = str(w_id) + '.' + str(state.id)
         
-        msg = self.wrapJSON("dn", node_ID, {})
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("dn", node_ID, {}))
     
     
     def addEdge(self, sourcew_id, source, targetw_id, target):
@@ -246,10 +321,7 @@ class GephiStream:
         attribute_dict['source'] = source_ID
         attribute_dict['target'] = target_ID
         
-        msg = self.wrapJSON("ae", edge_ID, attribute_dict)
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("ae", edge_ID, attribute_dict))
     
     
     def changeEdge(self, sourcew_id, source, targetw_id, target, change_dict):
@@ -278,10 +350,7 @@ class GephiStream:
         target_ID = str(targetw_id) + '.' + str(target.id)
         edge_ID = source_ID + '-' + target_ID
         
-        msg = self.wrapJSON("ce", edge_ID, change_dict)
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("ce", edge_ID, change_dict))
     
     
     def deleteEdge(self, sourcew_id, source, targetw_id, target):
@@ -298,7 +367,7 @@ class GephiStream:
         (nothing)
         """
         print "Warning: 'deleteEdge' does not work with directed graphs. " + \
-              "It appears to delete an arbitrary edge" + \
+              "It appears to delete an arbitrary edge " + \
               "connecting the two nodes."
         
         if not (isinstance(sourcew_id, int) and
@@ -311,10 +380,7 @@ class GephiStream:
         target_ID = str(targetw_id) + '.' + str(target.id)
         edge_ID = source_ID + '-' + target_ID
         
-        msg = self.wrapJSON("de", edge_ID, {})
-        print "send: " + msg
-        urlsend = urlopen(self.url_out, msg)
-        urlsend.close()
+        self.send(self.wrapJSON("de", edge_ID, {}))
     
     
     
@@ -322,51 +388,80 @@ if __name__ == "__main__":
     # Number of seconds to pause between tests
     delay = 2
     
-    print "*** NOTE: Tests are still in development. When Gephi opens,\n" + \
-          "press ctrl-shift-n, then go to the 'Streaming' tab,\n" + \
-          "right-click on 'Master Server', and click 'Start'. ***\n\n" + \
-          "You have " + str(10 * delay) + " seconds."
+    print "*** NOTE: Tests are still in development. Manually open Gephi,\n" + \
+          "go to the 'Streaming' tab, and enter the streaming URL and\n" + \
+          "start the master server. ***\n\n"
     
     print "Running tests..."
     # 'call' must be wrapped in a lambda function to avoid starting early.
-    gephi_thread = threading.Thread(target=(lambda: call("gephi")))
+    gephi_thread = Process(target=(lambda: call("gephi")))
     gephi_thread.start()
     time.sleep(10 * delay)
     
-    print "Testing printGraph..."
+    print "Testing stream..."
     test_node = AutomatonState(id=1, state={'foo':1, 'bar':2})
-    gs = GephiStream(verbose=True)
-    time.sleep(delay)
+    gs_client = GephiStream('client', port=8080)
+    gs_server = GephiStream('server', port=8081)
+    
     print "Testing wrapJSON..."
-    assert gs.wrapJSON("an", "0." + str(test_node.id),
-                       attribute_dict=test_node.state) == \
-           '{"an":{"0.1":{"foo":1,"bar":2}}}'
+    assert gs_client.wrapJSON("an", "0." + str(test_node.id),
+                    attribute_dict=test_node.state) == \
+           '{"an":{"0.1":{"foo":1,"bar":2}}}\r\n'
     time.sleep(delay)
     
     print "Testing addNode..."
-    gs.addNode(0, test_node)
-    gs.addNode(1, test_node)
-    gs.addNode(2, test_node)
+    gs_client.addNode(0, test_node)
+    gs_server.addNode(0, test_node)
+    gs_client.addNode(1, test_node)
+    gs_server.addNode(1, test_node)
+    gs_client.addNode(2, test_node)
+    gs_server.addNode(2, test_node)
     time.sleep(delay)
     print "Testing changeNode..."
-    gs.changeNode(0, test_node, {'foo':3})
-    gs.changeNode(1, test_node, {'bar':4})
+    gs_client.changeNode(0, test_node, {'foo':3})
+    gs_server.changeNode(0, test_node, {'foo':3})
+    gs_client.changeNode(1, test_node, {'bar':4})
+    gs_server.changeNode(1, test_node, {'bar':4})
     time.sleep(delay)
     print "Testing deleteNode..."
-    gs.deleteNode(2, test_node)
+    gs_client.deleteNode(2, test_node)
+    gs_server.deleteNode(2, test_node)
     time.sleep(delay)
     
     print "Testing addEdge..."
-    gs.addEdge(0, test_node, 1, test_node)
-    gs.addEdge(1, test_node, 0, test_node)
+    gs_client.addEdge(0, test_node, 1, test_node)
+    gs_server.addEdge(0, test_node, 1, test_node)
+    gs_client.addEdge(1, test_node, 0, test_node)
+    gs_server.addEdge(1, test_node, 0, test_node)
     time.sleep(delay)
     print "Testing changeEdge..."
-    gs.changeEdge(1, test_node, 0, test_node, {'foo':5})
+    gs_client.changeEdge(1, test_node, 0, test_node, {'foo':5})
+    gs_server.changeEdge(1, test_node, 0, test_node, {'foo':5})
     time.sleep(delay)
     print "Testing deleteEdge..."
-    gs.deleteEdge(1, test_node, 0, test_node)
+    gs_client.deleteEdge(1, test_node, 0, test_node)
+    gs_server.deleteEdge(1, test_node, 0, test_node)
     time.sleep(delay)
     
+    s = urlopen(gs_server.url)
+    assertion_list = \
+                     ['{"an":{"0.1":{"foo":1,"bar":2}}}\r\n',
+                     '{"an":{"1.1":{"foo":1,"bar":2}}}\r\n',
+                     '{"an":{"2.1":{"foo":1,"bar":2}}}\r\n',
+                     '{"cn":{"0.1":{"foo":3}}}\r\n',
+                     '{"cn":{"1.1":{"bar":4}}}\r\n',
+                     '{"dn":{"2.1":{}}}\r\n',
+                     '{"ae":{"0.1-1.1":{"source":"0.1","foo":1,"bar":2,"target":"1.1"}}}\r\n',
+                     '{"ae":{"1.1-0.1":{"source":"1.1","foo":1,"bar":2,"target":"0.1"}}}\r\n',
+                     '{"ce":{"1.1-0.1":{"foo":5}}}\r\n',
+                     '{"de":{"1.1-0.1":{}}}\r\n']
+    for i in range(10):
+        assert s.readline() == assertion_list[i]
+    
+    print 'Closing streams...'
+    gs_client.close()
+    gs_server.close()
+    s.close()
     print "Close Gephi to conclude unit tests."
     gephi_thread.join()
     print "Tests done."

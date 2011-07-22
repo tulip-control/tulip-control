@@ -16,12 +16,10 @@ Small modifications by Yuchen Lin.
 
 import sys, os
 from numpy import array
-from subprocess import call
 
 from tulip import *
 from tulip import polytope_computations as pc
 from tulip import conxml
-from tulip import congexf
 from tulip import grsim
 
 
@@ -32,7 +30,7 @@ smvfile = os.path.join(path, 'specs', testfile+'.smv')
 spcfile = os.path.join(path, 'specs', testfile+'.spc')
 autfile = os.path.join(path, 'specs', testfile+'.aut')
 
-load_from_XML = False
+load_from_XML = True
 if not load_from_XML:
 
     # Environment variables
@@ -96,21 +94,12 @@ else:  # Read from tulipcon XML file
 
 # Simulate
 num_it = 30
-init_state = {}
-init_state['X0reach'] = True
+init_state = {'X0reach': True}
 destfile = 'rsimple_example.gexf'
 label_vars = ['park', 'cellID', 'X0reach']
 aut_states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
-grsim.writeStatesToFile([aut], [aut_states], destfile, label_vars=label_vars)
-
-if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
-    try:
-        print "Opening GEXF file in Gephi."
-        call(["gephi", destfile])
-    except:
-        print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
-              "gephi " + destfile + "\n\n"
-
+grsim.writeStatesToFile([aut], [], destfile, label_vars=label_vars)
+grsim.simulateGraph([aut_states], destfile)
 
 
 f = open('rsimple_example_disc_dynamics.txt', 'w')

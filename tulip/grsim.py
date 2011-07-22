@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 #
 # Copyright (c) 2011 by California Institute of Technology
 # All rights reserved.
@@ -51,10 +51,16 @@ graph visualization added by Yuchen Lin
 23 June 2011
 """
 
+import time
 import random
+from multiprocessing import Process
+from subprocess import call
+
 from automaton import Automaton, AutomatonState
 from errorprint import printWarning, printError
 from congexf import dumpGexf, changeGexfAttvalue
+from gephitools import openGexf
+from gephistream import GephiStream
 
 def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
     """
@@ -104,15 +110,52 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
     return aut_states
 
 ###################################################################
-def writeStatesToFile(aut_list, aut_states_list, destfile,
-                      label_vars=None, verbose=0):
+def writeStatesToFile(aut_list, aut_states_list, destfile, label_vars=None):
     output = dumpGexf(aut_list, label_vars=label_vars)
-    if (verbose > 0):
-        print 'Writing simulation result to ' + destfile
+    
+    # 'aut_states_list' is a list of lists of automaton states. Transitioning
+    # from one 'aut_states' to the next should correspond to changing
+    # automata in the receding horizon case.
+    iteration = 1
     for (i, aut_states) in enumerate(aut_states_list):
-        for (j, aut_state) in enumerate(aut_states):
-            output = changeGexfAttvalue(output, "is_active", j + 1,
-                                        node_id=str(i) + '.' + str(aut_state.id))
+        for state in aut_states:
+            output = changeGexfAttvalue(output, "is_active", iteration,
+                                        node_id=str(i) + '.' + str(state.id))
+            iteration += 1
+    print "Writing simulation result to " + destfile
     f = open(destfile, 'w')
     f.write(output)
     f.close()
+
+###################################################################
+def simulateGraph(aut_states_list, destfile):
+    # Number of seconds between each graph update.
+    delay = 2
+    long_delay = 8
+    
+    # Changes to the graph will be streamed from here.
+    gs = GephiStream('server')
+    
+    # Open Gephi in the background and configure for viewing.
+    gephi = openGexf(destfile)
+    
+    print '*** Note: simulateGraph is still in development. For now, ' + \
+          'initiate streaming manually. You have %d seconds.' % long_delay
+    time.sleep(long_delay)
+    
+    # 'aut_states_list' is a list of lists of automaton states. Transitioning
+    # from one 'aut_states' to the next should correspond to changing
+    # automata in the receding horizon case.
+    active_nodes = {}
+    iteration = 1
+    for (i, aut_states) in enumerate(aut_states_list):
+        for state in aut_states:
+            gs.changeNode(i, state, {'is_active': iteration})
+            active_nodes[state] = iteration  # useful for future extension?
+            iteration += 1
+            time.sleep(delay)
+    
+    # Close the graph streaming server and the Gephi thread.
+    gs.close()
+    print 'Close Gephi to exit.'
+    gephi.close()
