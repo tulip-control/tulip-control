@@ -83,7 +83,16 @@ realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile, \
 jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile, \
                                     priority_kind=3, verbose=3)
 aut = automaton.Automaton(autfile, [], 3)
-if not aut.writeDotFile("rdsimple.dot"):
+
+# Visualize automaton with DOT file
+
+# This example uses environment vs. system turn distinction.  To
+# disable it, just use (the default),
+# if not aut.writeDotFile("rdsimple.dot"):
+if not aut.writeDotFile("rdsimple.dot",
+                        distinguishTurns={"env": prob.getEnvVars().keys(),
+                                          "sys": prob.getSysVars().keys()},
+                        turnOrder=("env", "sys")):
     print "Error occurred while generating DOT file."
 else:
     try:

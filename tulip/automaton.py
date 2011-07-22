@@ -39,10 +39,8 @@
 Automaton Module
 ----------------
 
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 3, 2010
-:Version: 0.1.0
+ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
+ca. August 3, 2010
 """
 
 import re, copy, os
@@ -204,7 +202,7 @@ class Automaton:
             self.states[current_id].transition = list(set(self.states[current_id].transition))
         return True
 
-    def writeDotFile(self, fname):
+    def writeDotFile(self, fname, distinguishTurns=None, turnOrder=None):
         """Write automaton to Graphviz DOT file.
 
         In each state, the node ID and nonzero variables and their
@@ -217,41 +215,97 @@ class Automaton:
         valuation of variables does *not* imply state equivalency
         (confusingly).
 
+        It is possible to break states into a linear sequence of steps
+        for visualization purposes using the argument
+        distinguishTurns.  If not None, distinguishTurns should be a
+        dictionary with keys as strings indicating the agent
+        (e.g. "env" and "sys"), and values as lists of variable names
+        that belong to that agent.  These lists should be disjoint.
+        Note that variable names are case sensitive!
+
+        If distinguishTurns is not None, state labels (in the DOT
+        digraph) now have a preface of the form ID::agent, where ID is
+        the original state identifier and "agent" is a key from
+        distinguishTurns.
+
+        N.B., if distinguishTurns is not None and has length 1, it is
+        ignored (i.e. treated as None).
+
+        turnOrder is only applicable if distinguishTurns is not None.
+        In this case, if turnOrder is None, then use whatever order is
+        given by default when listing keys of distinguishTurns.
+        Otherwise, if turnOrder is a list (or list-like), then each
+        element is key into distinguishTurns and state decompositions
+        take that order.
+
         Return False on failure; True otherwise (success).
         """
-        try:
-            f = open(fname, "w")
-        except:
-            printWarning("Failed to open "+fname+" for writing.", obj=self)
-            return False
+        if (distinguishTurns is not None) and (len(distinguishTurns) <= 1):
+            # This is a fringe case and seemingly ok to ignore.
+            distinguishTurns = None
 
-        try:
-            f.write("digraph A {\n")
+        output = "digraph A {\n"
 
-            # Prebuild sane state names
-            state_labels = dict()
-            for state in self.states:
-                state_labels[state.id] = ''
-                for (k,v) in state.state.items():
-                    if v != 0:  # i.e., not False (but not applicable for general variables).
-                        if len(state_labels[state.id]) == 0:
-                            state_labels[state.id] += str(state.id)+";\\n" + k+": "+str(v)
+        # Prebuild sane state names
+        state_labels = dict()
+        for state in self.states:
+            if distinguishTurns is None:
+                state_labels[str(state.id)] = ''
+            else:
+                # If distinguishTurns is not a dictionary with
+                # items of the form string -> list, it should
+                # simulate that behavior.
+                for agent_name in distinguishTurns.keys():
+                    state_labels[str(state.id)+agent_name] = ''
+            for (k,v) in state.state.items():
+                if v != 0:  # i.e., not False (but not applicable for general variables).
+                    if distinguishTurns is None:
+                        agent_name = ''
+                    else:
+                        agent_name = None
+                        for agent_candidate in distinguishTurns.keys():
+                            if k in distinguishTurns[agent_candidate]:
+                                agent_name = agent_candidate
+                                break
+                        if agent_name is None:
+                            printWarning("variable \""+k+"\" does not belong to an agent in distinguishedTurns")
+                            return False
+
+                    if len(state_labels[str(state.id)+agent_name]) == 0:
+                        if len(agent_name) > 0:
+                            state_labels[str(state.id)+agent_name] += str(state.id)+"::"+agent_name+";\\n" + k+": "+str(v)
                         else:
-                            state_labels[state.id] += ", "+k+": "+str(v)
-                if len(state_labels[state.id]) == 0:
-                    state_labels[state.id] = str(state.id)+"\\n; {}"
+                            state_labels[str(state.id)+agent_name] += str(state.id)+";\\n" + k+": "+str(v)
+                    else:
+                        state_labels[str(state.id)+agent_name] += ", "+k+": "+str(v)
+            if distinguishTurns is None:
+                if len(state_labels[str(state.id)]) == 0:
+                    state_labels[str(state.id)] = str(state.id)+";\\n {}"
+            else:
+                for agent_name in distinguishTurns.keys():
+                    if len(state_labels[str(state.id)+agent_name]) == 0:
+                        state_labels[str(state.id)+agent_name] = str(state.id)+"::"+agent_name+";\\n {}"
 
-            for state in self.states:
-                for trans in state.transition:
-                    f.write("    \""+ state_labels[state.id] +"\" -> \"" \
-                                + state_labels[self.states[trans].id] +"\";\n")
-            f.write("\n}\n")
-        except:
-            f.close()
-            printWarning("Error occurred while generating DOT code for automaton.", obj=self)
-            return False
+        if turnOrder is None:
+            turnOrder = distinguishTurns.keys()
+        for state in self.states:
+            if distinguishTurns is not None:
+                output += "    \""+ state_labels[str(state.id)+turnOrder[0]] +"\" -> \"" \
+                    + state_labels[str(state.id)+turnOrder[1]] +"\";\n"
+                for agent_ind in range(1, len(turnOrder)-1):
+                    output += "    \""+ state_labels[str(state.id)+turnOrder[agent_ind]] +"\" -> \"" \
+                        + state_labels[str(state.id)+turnOrder[agent_ind+1]] +"\";\n"
+            for trans in state.transition:
+                if distinguishTurns is None:
+                    output += "    \""+ state_labels[str(state.id)] +"\" -> \"" \
+                        + state_labels[str(self.states[trans].id)] +"\";\n"
+                else:
+                    output += "    \""+ state_labels[str(state.id)+turnOrder[-1]] +"\" -> \"" \
+                        + state_labels[str(self.states[trans].id)+turnOrder[0]] +"\";\n"
 
-        f.close()
+        output += "\n}\n"
+        with open(fname, "w") as f:
+            f.write(output)
         return True
     
     def dumpXML(self, pretty=True, use_pickling=False, idt_level=0):
