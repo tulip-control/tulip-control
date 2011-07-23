@@ -8,6 +8,7 @@ minor refactoring by SCL <slivingston@caltech.edu>
 3 May 2011.
 """
 
+#@importvardyn@
 import sys, os
 from numpy import array
 
@@ -43,26 +44,33 @@ A = array([[1.1052, 0.],[ 0., 1.1052]])
 B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
 sys_dyn = discretizeM.CtsSysDyn(A,B,[],U,[])
+#@importvardyn_end@
 
-# Spec
+#@specification@
 spec = GRSpec()
 spec.env_prog = '!park'
 spec.sys_init = 'X0reach'
 spec.sys_safety = 'next(X0reach) = ((X0 | X0reach) & !park)'
 spec.sys_prog = ['X5', 'X0reach']
+#@specification_end@
 
 # Construct the SynthesisProb object
+#@synprob@
 prob = rhtlp.SynthesisProb(env_vars = env_vars, sys_disc_vars = sys_disc_vars,
                            disc_props = {}, cont_state_space = cont_state_space,
                            cont_props = cont_props, sys_dyn = sys_dyn, spec=spec, verbose=2)
+#@synprob_end@
 
+#@checkcomp@
 # Check realizability
 realizability = prob.checkRealizability(verbose=2)
 
 # Compute an automaton
 aut = prob.synthesizePlannerAut(verbose=2)
+#@checkcomp_end@
 
 # Simulate
+#@sim@
 num_it = 30
 init_state = {}
 init_state['X0reach'] = True
@@ -74,6 +82,7 @@ for i in xrange(0,num_it):
         env_states.append({'park':False})
 
 states = grsim.grsim(aut, init_state, env_states, num_it)
+#@sim_end@
 grsim.writeStatesToFile(states, 'robot_sim.txt')
 
 f = open('robot_disc_dynamics.txt', 'w')
