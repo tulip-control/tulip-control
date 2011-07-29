@@ -286,7 +286,7 @@ class Automaton:
                     if len(state_labels[str(state.id)+agent_name]) == 0:
                         state_labels[str(state.id)+agent_name] = str(state.id)+"::"+agent_name+";\\n {}"
 
-        if turnOrder is None:
+        if (distinguishTurns is not None) and (turnOrder is None):
             turnOrder = distinguishTurns.keys()
         for state in self.states:
             if distinguishTurns is not None:
