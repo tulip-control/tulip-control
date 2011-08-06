@@ -5,7 +5,7 @@ from distutils.core import setup
 setup(name = 'tulip',
       version = '0.1b',
       description = 'Temporal Logic Planning (TuLiP) Toobox',
-      author = 'Nok Wongpiromsarn',
+      author = 'Caltech Control and Dynamical Systems',
       author_email = 'murray@cds.caltech.edu',
       url = 'http://tulip-control.sourceforge.net',
       requires = ['scipy', 'numpy', 'cvxopt'],
