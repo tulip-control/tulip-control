@@ -118,9 +118,12 @@ class Automaton:
             if (line.find('State ') >= 0):
                 stateID = re.search('State (\d+)', line)
                 stateID = int(stateID.group(1))
-                state = dict(re.findall('(\w+):([-+]?\d+)', line))
+                state = dict(re.findall('(\w+):(\w+)', line))
                 for var, val in state.iteritems():
-                    state[var] = int(val)
+                    try:
+                        state[var] = int(val)
+                    except:
+                        state[var] = val
                     if (len(varnames) > 0):
                         var_found = False
                         for var2 in varnames:
@@ -258,7 +261,7 @@ class Automaton:
                 for agent_name in distinguishTurns.keys():
                     state_labels[str(state.id)+agent_name] = ''
             for (k,v) in state.state.items():
-                if v != 0:  # i.e., not False (but not applicable for general variables).
+                if v != -1:  # i.e., not False (but not applicable for general variables).
                     if distinguishTurns is None:
                         agent_name = ''
                     else:
@@ -287,7 +290,8 @@ class Automaton:
                         state_labels[str(state.id)+agent_name] = str(state.id)+"::"+agent_name+";\\n {}"
 
         if (distinguishTurns is not None) and (turnOrder is None):
-            turnOrder = distinguishTurns.keys()
+            if distinguishTurns is not None:
+                turnOrder = distinguishTurns.keys()
         for state in self.states:
             if distinguishTurns is not None:
                 output += "    \""+ state_labels[str(state.id)+turnOrder[0]] +"\" -> \"" \
