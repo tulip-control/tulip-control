@@ -42,7 +42,7 @@ doc-string goes here
 import re, copy
 from numpy import array
 from errorprint import printWarning, printError
-from polytope_computations import Polytope
+from polytope import Polytope
 
 ##############################################################
 def parseMatrix(matstr):

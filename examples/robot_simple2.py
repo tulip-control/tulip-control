@@ -13,7 +13,7 @@ import sys, os
 from numpy import array
 
 from tulip import *
-from tulip import polytope_computations as pc
+import tulip.polytope as pc
 from tulip.spec import GRSpec
 
 
@@ -43,7 +43,7 @@ for i in xrange(0, 3):
 A = array([[1.1052, 0.],[ 0., 1.1052]])
 B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-sys_dyn = discretizeM.CtsSysDyn(A,B,[],U,[])
+sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 #@importvardyn_end@
 
 #@specification@

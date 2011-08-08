@@ -48,8 +48,7 @@ import numpy as np
 from time import time
 import copy
 
-import polytope_computations as pc
-
+import polytope as pc
 
 def prop2part2(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of
@@ -81,9 +80,9 @@ def prop2part2(state_space, cont_props_dict):
                 prop_holds_poly.append(0)
                 dummy = pc.Polytope(np.concatenate((region_now[j].A, cont_props[prop_count].A)),
                                     np.concatenate((region_now[j].b, cont_props[prop_count].b)))
-                if pc.isNonEmptyInterior(dummy):
-                    #dummy = pc.polySimplify(dummy)
-                    mypartition.list_region[i].list_poly[j] = pc.polySimplify(dummy)
+                if pc.is_fulldim(dummy):
+                    #dummy = pc.reduce(dummy)
+                    mypartition.list_region[i].list_poly[j] = pc.reduce(dummy)
                     prop_holds_reg[-1] = 1
                     prop_holds_poly[-1] = 1
             count = 0
@@ -111,9 +110,9 @@ def prop2part2(state_space, cont_props_dict):
                             b_now[l] = -b_now[l]
                     dummy = pc.Polytope(np.concatenate((region_now[j].A, A_now)),
                                         np.concatenate((region_now[j].b, b_now)))
-                    if pc.isNonEmptyInterior(dummy):
-                        #dummy = pc.polySimplify(dummy)
-                        mypartition.list_region[-1].list_poly.append(pc.polySimplify(dummy))
+                    if pc.is_fulldim(dummy):
+                        #dummy = pc.reduce(dummy)
+                        mypartition.list_region[-1].list_poly.append(pc.reduce(dummy))
             if len(mypartition.list_region[-1].list_poly)>0:
                 mypartition.list_region[-1].list_prop.append(0)
             else:
@@ -128,12 +127,33 @@ def prop2part2(state_space, cont_props_dict):
     adj = np.zeros((num_reg,num_reg), dtype=np.int8)
     for i in range(num_reg):
         for j in range(i+1,num_reg):
-            adj[i,j] = pc.isAdjacentRegion(mypartition.list_region[i],
+            adj[i,j] = pc.is_adjacent(mypartition.list_region[i],
                                            mypartition.list_region[j])
     adj =  adj+adj.T+np.eye(num_reg, dtype=np.int8)
     mypartition.adj = adj.copy()
     return mypartition
-
+    
+def prop2partconvex(ppp):
+    """This function takes a proposition preserving partition and generates another proposition preserving partition     
+    such that each part in the new partition is a convex polytope"""
+    myconvexpartition = PropPreservingPartition(domain=copy.deepcopy(ppp.domain),
+                                          num_prop=ppp.num_prop,
+                                          list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol))
+    for i in range(ppp.num_regions):
+    	simplified_reg = pc.union(ppp.list_region[i],ppp.list_region[i],check_convex=True)
+        for j in range(len(simplified_reg)):
+            region_now = pc.Region([simplified_reg.list_poly[j]], ppp.list_region[i].list_prop)
+            myconvexpartition.list_region.append(region_now) 
+    num_reg = len(myconvexpartition.list_region)
+    myconvexpartition.num_regions = num_reg
+    adj = np.zeros((num_reg,num_reg), dtype=np.int8)
+    for i in range(num_reg):
+        for j in range(i+1,num_reg):
+            adj[i,j] = pc.is_adjacent(myconvexpartition.list_region[i],
+                                           myconvexpartition.list_region[j])
+    adj =  adj+adj.T+np.eye(num_reg, dtype=np.int8)
+    myconvexpartition.adj = adj.copy()
+    return myconvexpartition
 
 class PropPreservingPartition:
     """Partition class with following fields
@@ -145,9 +165,13 @@ class PropPreservingPartition:
     - adj: a matrix showing which regions are adjacent
     - trans: a matrix showing which region is reachable from which region
     - list_prop_symbol: list of symbols of propositions
+    - orig_list_region: original proposition preserving regions
+    - orig: list assigning an original proposition preserving region to each
+            new region
+
     """
     
-    def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None):
+    def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None, orig_list_region=None, orig=None):
         self.domain = domain
         self.num_prop = num_prop
         self.list_region = list_region[:]
@@ -155,6 +179,8 @@ class PropPreservingPartition:
         self.adj = adj
         self.trans = trans
         self.list_prop_symbol = list_prop_symbol
+        self.orig_list_region = orig_list_region
+        self.orig = orig
         
 #def test():
 if __name__ == "__main__":
@@ -193,7 +219,7 @@ if __name__ == "__main__":
     b4 = np.array([[0.5, 0., 0.5, 0.]]).T
     poly1 = pc.Polytope(A4,b4)
 
-    r1 = pc.regionDiffPoly(mypartition.list_region[3],poly1)
+    r1 = pc.mldivide(mypartition.list_region[3],poly1)
     
     verbose = 0
     

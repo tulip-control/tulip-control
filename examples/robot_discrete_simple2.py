@@ -10,7 +10,7 @@ minor refactoring by SCL <slivingston@caltech.edu>
 import sys, os
 
 from tulip import *
-from tulip import polytope_computations as pc
+import tulip.polytope as pc
 
 
 # Specify where the smv file, spc file and aut file will go

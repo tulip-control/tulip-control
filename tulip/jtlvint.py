@@ -49,7 +49,7 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 
 import re, os, subprocess, sys
 from prop2part import PropPreservingPartition
-from polytope_computations import Region
+from polytope import Region
 import rhtlp
 import grgameint
 

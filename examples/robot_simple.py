@@ -14,7 +14,7 @@ import sys, os
 from numpy import array
 
 from tulip import *
-from tulip import polytope_computations as pc
+import tulip.polytope as pc
 
 
 # Specify where the smv file, spc file and aut file will go
@@ -51,16 +51,21 @@ for i in xrange(0, 3):
 A = array([[1.1052, 0.],[ 0., 1.1052]])
 B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-sys_dyn = discretizeM.CtsSysDyn(A,B,[],U,[])
+sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 #@contdyn_end@
 
 #@discretize@
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part2(cont_state_space, cont_props)
 
+
 # Discretize the continuous state space
-disc_dynamics = discretizeM.discretizeM(cont_partition, sys_dyn, verbose=2)
+disc_dynamics = discretize.discretize(cont_partition, sys_dyn, use_mpt=True, verbose=2)
 #@discretize_end@
+
+# Optional: plot the discretized state space
+from tulip.polytope.plot import plot_partition
+plot_partition(disc_dynamics, plot_transitions=True)
 
 # Spec
 assumption = 'X0reach & []<>(!park)'

@@ -49,10 +49,10 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 import rhtlp
-import discretizeM
+import discretize
 import automaton
 import prop2part
-import polytope_computations as pc
+import polytope as pc
 import jtlvint
 import errorprint as ep
 from spec import GRSpec

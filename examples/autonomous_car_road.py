@@ -12,8 +12,8 @@ import sys, os
 import math
 from numpy import array
 
-from tulip.polytope_computations import Polytope
-from tulip.discretizeM import CtsSysDyn
+from tulip.polytope import Polytope
+from tulip.discretize import CtsSysDyn
 from tulip.spec import GRSpec
 from tulip.rhtlp import RHTLPProb, ShortHorizonProb
 #@import_section_end@
@@ -33,7 +33,7 @@ horizon = 3
 A = array([[1.1052, 0.],[ 0., 1.1052]])
 B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-sys_dyn = CtsSysDyn(A,B,[],U,[])
+sys_dyn = CtsSysDyn(A,B,[],[],U,[])
 #@contdyn_end@
 
 

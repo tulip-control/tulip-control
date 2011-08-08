@@ -15,7 +15,7 @@ import sys, os
 from subprocess import call
 
 from tulip import *
-from tulip import polytope_computations as pc
+import tulip.polytope as pc
 #@import_section_end@
 
 

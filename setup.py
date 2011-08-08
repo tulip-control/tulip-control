@@ -11,6 +11,6 @@ setup(name = 'tulip',
       requires = ['scipy', 'numpy', 'cvxopt'],
       packages = ['tulip'],
       package_dir = {'tulip' : 'tulip'},
-      package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar']},
+      package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar', 'polytope/*.py']},
       scripts = ['tools/aut2dot',]
       )

@@ -52,8 +52,8 @@ import sys, os, re, subprocess, copy
 
 from errorprint import printWarning, printError, printInfo
 from parsespec import parseSpec
-from polytope_computations import Polytope, Region
-from discretizeM import CtsSysDyn, discretizeM
+from polytope import Polytope, Region
+from discretize import CtsSysDyn, discretize
 from prop2part import PropPreservingPartition, prop2part2
 import automaton
 from spec import GRSpec
@@ -407,7 +407,7 @@ class SynthesisProb:
             for fromcell in xrange(0,len(disc_dynamics.trans)):
                 disc_dynamics.trans[fromcell][fromcell] = 1
             if (sys_dyn is not None):
-                disc_dynamics = discretizeM(cont_partition, sys_dyn, verbose=verbose)
+                disc_dynamics = discretize(cont_partition, sys_dyn, verbose=verbose)
         else:
             if (verbose > 0):
                 print("No continuous component")
