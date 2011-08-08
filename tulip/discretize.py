@@ -102,7 +102,7 @@ class CtsSysDyn:
         self.Uset = Uset
         self.Wset = Wset
 
-def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
+def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                use_mpt=True, conservative=False, max_num_poly=5, \
                use_all_horizon=False, remove_trans=False, abs_tol=1e-7, verbose=0):
 
@@ -168,9 +168,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
     
     # Initialize matrix for pairs to check
     IJ = part.adj.copy()
-    if verbose > 1:
-        print "\n Starting IJ: \n" + str(IJ)
-    
+
     # Initialize output
     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
     sol = deepcopy(part.list_region)
@@ -178,8 +176,9 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
 
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
-        i = ind[0][0]
-        j = ind[1][0]
+        i = ind[1][0]
+        j = ind[0][0]
+        IJ[j,i] = 0
         
         si = sol[i]
         sj = sol[j]
@@ -238,14 +237,14 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
             transitions = np.hstack([transitions, np.zeros([size-num_new, num_new], dtype=int) ])
             transitions = np.vstack([transitions, np.zeros([num_new, size], dtype=int) ])
             
-            transitions[:, i] = np.zeros(size)
+            transitions[i,:] = np.zeros(size)
             for kk in range(num_new):
             
-                transitions[size-1-kk,:] = transitions[i,:] # All sets reachable from start are reachable from both part's
-                transitions[size-1-kk,i] = 0                # except possibly the new part
-                transitions[size-1-kk,j] = 0            
+                transitions[:,size-1-kk] = transitions[:,i] # All sets reachable from start are reachable from both part's
+                transitions[i,size-1-kk] = 0                # except possibly the new part
+                transitions[j,size-1-kk] = 0            
 
-            transitions[i,j] = 1        # sol[j] is reachable from intersection of sol[i] and S0..
+            transitions[j,i] = 1        # sol[j] is reachable from intersection of sol[i] and S0..
     
             # Take care of adjacency
             old_adj = np.nonzero(adj[i,:])[0]
@@ -263,9 +262,9 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
             adj[i,i] = 1
                         
             if verbose > 1:
-                output = "\n Adding states " + output(i) + " and "
+                output = "\n Adding states " + str(i) + " and "
                 for kk in range(num_new):
-                    output += output(size-1-kk) + " and "
+                    output += str(size-1-kk) + " and "
                 print output + "\n"
                         
             for k in np.setdiff1d(old_adj,[i,size-1]):
@@ -307,17 +306,18 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,  \
         elif vol2 < abs_tol:
             if verbose > 1:
                 print "Transition found"
-            transitions[i,j] = 1
-            IJ[i,j] = 0
+            transitions[j,i] = 1
         
         else:
             if verbose > 1:
                 print "No transition found, diff vol: " + str(vol2) + \
                       ", intersect vol: " + str(vol1)
-            transitions[i,j] = 0
-            IJ[i,j] = 0
+            transitions[j,i] = 0
                   
-    new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, list_region=sol, num_regions=len(sol), adj=np.array([]), trans=transitions, list_prop_symbol=part.list_prop_symbol, orig_list_region=orig_list, orig=orig)                           
+    new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
+                    list_region=sol, num_regions=len(sol), adj=np.array([]), \
+                    trans=transitions, list_prop_symbol=part.list_prop_symbol, \
+                    orig_list_region=orig_list, orig=orig)                           
     return new_part
 
 def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
@@ -607,7 +607,7 @@ def get_input(x0, ssys, part, start, end, N, R, Q, conservative=False, \
     return low_u
 
 def solveFeasable(P1, P2, ssys, N, min_vol=0.1, max_cell=10, \
-                    closed_loop=False, use_all_horizon=False, trans_set=None, \
+                    closed_loop=True, use_all_horizon=False, trans_set=None, \
                     max_num_poly=5):
 
     '''Computes the subset x0 of `P1' from which `P2' is reachable

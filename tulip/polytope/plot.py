@@ -161,7 +161,7 @@ def plot_partition(part, dims=None, plot_transitions=False):
         else:
             rc,xc = cheby_ball(reg.list_poly[0])
         if plot_transitions:
-            for j in np.nonzero(trans[i,:])[0]:
+            for j in np.nonzero(trans[:,i])[0]:
                 reg1 = reg_list[j]
                 if len(reg1) == 0:
                     rc1,xc1 = cheby_ball(reg1)

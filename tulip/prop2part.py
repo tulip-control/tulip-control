@@ -163,7 +163,8 @@ class PropPreservingPartition:
     - list_region: proposition preserving regions, type: list of Region
     - num_regions: length of the above list
     - adj: a matrix showing which regions are adjacent
-    - trans: a matrix showing which region is reachable from which region
+    - trans: a matrix showing which region is reachable from which region.
+             trans[i,j] = 1 means state i is reachable from state j.
     - list_prop_symbol: list of symbols of propositions
     - orig_list_region: original proposition preserving regions
     - orig: list assigning an original proposition preserving region to each
