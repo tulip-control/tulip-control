@@ -104,7 +104,8 @@ class CtsSysDyn:
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                use_mpt=True, conservative=False, max_num_poly=5, \
-               use_all_horizon=False, remove_trans=False, abs_tol=1e-7, verbose=0):
+               use_all_horizon=False, trans_length=1, remove_trans=False, 
+               abs_tol=1e-7, verbose=0):
 
     """Refine the partition and establish transitions based on reachability
     analysis.
@@ -116,7 +117,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     - `N`: horizon length
     - `min_cell_volume`: the minimum volume of cells in the resulting partition 
     - `closed_loop`: boolean indicating whether the `closed loop` algorithm
-                     should be used. default False
+                     should be used. default True
     - `use_mpt`: if True, use MPT-based abstraction algorithm
     - `conservative`: if true, force sequence in reachability analysis to stay
                       inside starting cell. If false, safety is ensured by 
@@ -126,6 +127,9 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                       reachability analysis
     - `use_all_horizon`: in closed loop algorithm: if we should look for reach-
                          ability also in less than N steps
+    - `trans_length`: the number of polytopes allowed to cross in a transition.
+                      a value of 1 checks transitions only between neighbors,
+                      a value of 2 checks neighbors of neighbors and so on.
     - `remove_trans`: if True, remove found transitions between non-neighbors
     - `abs_tol`: maximum volume for an "empty" polytope
     - `verbose`: level of verbosity
@@ -134,31 +138,32 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     - A PropPreservingPartition object with transitions
     """
-    
+
     orig_list = []
     
     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
     
-    # We want to save original polytopes, require them to be convex 
-    for poly in part.list_region:
-        if len(poly) == 0:
-            orig_list.append(poly.copy())
-        elif len(poly) == 1:
-            orig_list.append(poly.list_poly[0].copy())
-        else:
-            if not conservative:
-                raise Exception("solveFeasible: original list contains non-convex \
-                            polytope regions")
-            else:
+    # Save original polytopes, require them to be convex 
+    if not conservative:
+        for poly in part.list_region:
+            if len(poly) == 0:
                 orig_list.append(poly.copy())
+            elif len(poly) == 1:
+                orig_list.append(poly.list_poly[0].copy())
+            else:
+                raise Exception("solveFeasible: original list contains non-convex \
+                                polytope regions")
+        orig = range(len(orig_list))
+    else:
+        orig_list = None
+        orig = 0
     
-    orig = range(len(orig_list))
-    
+    # Call MPT discretization
     if use_mpt:
-        return discretizeM(part, ssys, N = N, auto=True, minCellVolume = min_cell_volume, \
-                    maxNumIterations = 5, useClosedLoopAlg = closed_loop, \
-                    useAllHorizonLength=use_all_horizon, useLargeSset = False, \
-                    timeout = -1, maxNumPoly = max_num_poly, verbose = 0)
+        return discretizeM(part, ssys, N=N, auto=True, minCellVolume=min_cell_volume, \
+                    maxNumIterations=5, useClosedLoopAlg=closed_loop, \
+                    useAllHorizonLength=use_all_horizon, useLargeSset=False, \
+                    timeout=-1, maxNumPoly=max_num_poly, verbose=0)
     
     # Cheby radius of disturbance set
     if len(ssys.E) > 0:
@@ -168,12 +173,19 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     # Initialize matrix for pairs to check
     IJ = part.adj.copy()
-
+    if trans_length > 1:
+        k = 1
+        while k < trans_length:
+            IJ = np.dot(IJ, part.adj)
+            k += 1
+        IJ = (IJ > 0).astype(int)
+        
     # Initialize output
     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
     sol = deepcopy(part.list_region)
     adj = part.adj.copy()
 
+    # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
         i = ind[1][0]
@@ -188,10 +200,12 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                   + " with lengths " + str(len(si)) + " and " + str(len(sj))
         
         if conservative:
+            # Don't use trans_set
             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop, 
                         min_vol=min_cell_volume, max_num_poly=max_num_poly,\
                         use_all_horizon=use_all_horizon)
         else:
+            # Use original cell as trans_set
             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
                     min_vol=min_cell_volume, trans_set=orig_list[orig[i]], \
                     use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
@@ -227,13 +241,13 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         
             # Add new states
             sol[i] = isect
-            difflist = pc.separate(diff)    # Want only connected states
+            difflist = pc.separate(diff)    # Separate the difference
             num_new = len(difflist)
             for reg in difflist:
                 sol.append(reg)
             size = len(sol)
             
-            # Add transitions
+            # Update transition matrix
             transitions = np.hstack([transitions, np.zeros([size-num_new, num_new], dtype=int) ])
             transitions = np.vstack([transitions, np.zeros([num_new, size], dtype=int) ])
             
@@ -243,10 +257,11 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 transitions[:,size-1-kk] = transitions[:,i] # All sets reachable from start are reachable from both part's
                 transitions[i,size-1-kk] = 0                # except possibly the new part
                 transitions[j,size-1-kk] = 0            
-
-            transitions[j,i] = 1        # sol[j] is reachable from intersection of sol[i] and S0..
-    
-            # Take care of adjacency
+            
+            if i != j:
+                transitions[j,i] = 1        # sol[j] is reachable from intersection of sol[i] and S0..
+            
+            # Update adjacency matrix
             old_adj = np.nonzero(adj[i,:])[0]
             adj[i,:] = np.zeros([size-num_new])
             adj[:,i] = np.zeros([size-num_new])
@@ -272,7 +287,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 if pc.is_adjacent(sol[i],sol[k]):
                     adj[i,k] = 1
                     adj[k,i] = 1
-                elif remove_trans:
+                elif remove_trans & (trans_length == 1):
                     # Actively remove transitions between non-neighbors
                     transitions[i,k] = 0
                     transitions[k,i] = 0
@@ -280,21 +295,29 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                     if pc.is_adjacent(sol[size-1-kk],sol[k]):
                         adj[size-1-kk,k] = 1
                         adj[k, size-1-kk] = 1
-                    elif remove_trans:
+                    elif remove_trans & (trans_length == 1):
                         # Actively remove transitions between non-neighbors
                         transitions[size-1-kk,k] = 0
                         transitions[k,size-1-kk] = 0
             
-            # Just add adjacent cells for checking, unless transition already found            
+            # Update IJ matrix
             IJ = np.hstack([IJ, np.zeros([size-num_new, num_new], dtype=int) ])
             IJ = np.vstack([IJ, np.zeros([num_new, size], dtype=int) ])
-            horiz1 = adj[i,:] - transitions[i,:] > 0
-            verti1 = adj[:,i] - transitions[:,i] > 0
+            adj_k = adj
+            if trans_length > 1:
+                k = 1
+                while k < trans_length:
+                    adj_k = np.dot(adj_k, adj)
+                    k += 1
+                adj_k = (adj_k > 0).astype(int)
+            
+            horiz1 = adj_k[i,:] - transitions[i,:] > 0
+            verti1 = adj_k[:,i] - transitions[:,i] > 0
             IJ[i,:] = horiz1.astype(int)
             IJ[:,i] = verti1.astype(int)
             for kk in range(num_new):      
-                horiz2 = adj[size-1-kk,:] - transitions[size-1-kk,:] > 0
-                verti2 = adj[:,size-1-kk] - transitions[:,size-1-kk] > 0
+                horiz2 = adj_k[size-1-kk,:] - transitions[size-1-kk,:] > 0
+                verti2 = adj_k[:,size-1-kk] - transitions[:,size-1-kk] > 0
                 IJ[size-1-kk,:] = horiz2.astype(int)
                 IJ[:,size-1-kk] = verti2.astype(int)      
             
@@ -315,7 +338,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             transitions[j,i] = 0
                   
     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
-                    list_region=sol, num_regions=len(sol), adj=np.array([]), \
+                    list_region=sol, num_regions=len(sol), adj=adj, \
                     trans=transitions, list_prop_symbol=part.list_prop_symbol, \
                     orig_list_region=orig_list, orig=orig)                           
     return new_part
@@ -527,7 +550,7 @@ def get_input(x0, ssys, part, start, end, N, R, Q, conservative=False, \
     
     
     Note1: The same horizon length as in reachability analysis should be 
-           used in order to guarantee feasibility.
+    used in order to guarantee feasibility.
     
     Note2: If the closed loop algorithm has been used to compute reachability 
     the input needs to be recalculated for each time step (with decreasing 
@@ -552,7 +575,7 @@ def get_input(x0, ssys, part, start, end, N, R, Q, conservative=False, \
         raise Exception("get_input: Q must be square and have side \
                         N * dim(input space)")
     
-    if part.trans[start,end] != 1:
+    if part.trans[end,start] != 1:
         raise Exception("get_input: no transition from state " + str(start) + \
             " to state " + str(end))
     
@@ -620,7 +643,10 @@ def solveFeasable(P1, P2, ssys, N, min_vol=0.1, max_cell=10, \
     `P2`: A Polytope or Region object
     `ssys`: A CtsSysDyn object
     `N`: The horizon length
-    `closed_loop`: If true, take 1 step at the time to keep dimension down
+    `closed_loop`: If true, take 1 step at the time. This keeps down polytope 
+                   dimension and handles disturbances better. Default: True.
+    `use_all_horizon`: Used for closed loop algorithm. If true, allow reachability
+                       also in less than N steps.
     `trans_set`: If specified, force transitions to be in this set. If empty,
                  P1 is used
                 
@@ -668,27 +694,27 @@ def solveFeasable(P1, P2, ssys, N, min_vol=0.1, max_cell=10, \
     
     if len(part1) > 0:
         # Recursive union of sets
-        poly = pc.Polytope()
-        
-        for i in range(len(part1)):
+        poly = solveFeasable(part1.list_poly[0], part2, ssys, N,\
+                               trans_set=trans_set, closed_loop=closed_loop, \
+                               use_all_horizon=use_all_horizon)
+        for i in range(1, len(part1)):
             s0 = solveFeasable(part1.list_poly[i], part2, ssys, N,\
-                               trans_set=trans_set)
-            if pc.volume(s0) > min_vol/10:
-                poly = pc.union(poly, s0, check_convex=True)
+                               trans_set=trans_set, closed_loop=closed_loop, \
+                               use_all_horizon=use_all_horizon)
+            poly = pc.union(poly, s0, check_convex=True)
         return poly
     
     if len(part2) > 0:
-        # Recursive intersection of sets 
+        # Recursive union of sets 
         poly = solveFeasable(part1, part2.list_poly[0], ssys, N, \
-                             trans_set=trans_set)
-        if len(part2) == 1:
-            return poly
-        else:
-            for i in range(1, len(part2)):
-                s0 = solveFeasable(part1, part2.list_poly[i], ssys, N, \
-                                   trans_set=trans_set)
-                poly = pc.intersect(poly, s0)
-            return poly
+                             trans_set=trans_set, closed_loop=closed_loop, \
+                             use_all_horizon=use_all_horizon)
+        for i in range(1, len(part2)):
+            s0 = solveFeasable(part1, part2.list_poly[i], ssys, N, \
+                               trans_set=trans_set, closed_loop=closed_loop, \
+                               use_all_horizon=use_all_horizon)
+            poly = pc.union(poly, s0, check_convex=True)
+        return poly
     
     L1 = part1.A
     M1 = part1.b.reshape(part1.b.size,1)  
@@ -1051,7 +1077,7 @@ def createLM(ssys,N,L0,M0,L1,M1,L2,M2,L3,M3):
             L1AE = np.dot(L1A,E)
             L3AE = np.dot(np.dot(L3,Amatr),E)
 
-            for pos in range(N-NN-1):
+            for pos in range(N-i-1):
                 Gupper[ np.ix_(range(L0n + (i+pos)*L1n, L0n + (1+i+pos)*L1n),\
                                range( pos * p, (pos + 1) * p) ) ] = L1AE
 
@@ -1071,7 +1097,6 @@ def createLM(ssys,N,L0,M0,L1,M1,L2,M2,L3,M3):
 
     # Put together matrices L, M
     L = np.vstack([Lupper,np.vstack([Lmiddle,Llower]) ])
-    
     Mfirst = M0.reshape(M0.size,1)
     Mupper = np.tile(M1.reshape(M1.size,1), (N-1,1))
     Mmiddle = np.tile(M2.reshape(M2.size,1), (N,1))

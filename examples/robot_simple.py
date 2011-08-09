@@ -64,8 +64,8 @@ disc_dynamics = discretize.discretize(cont_partition, sys_dyn, use_mpt=True, ver
 #@discretize_end@
 
 # Optional: plot the discretized state space
-from tulip.polytope.plot import plot_partition
-plot_partition(disc_dynamics, plot_transitions=True)
+# from tulip.polytope.plot import plot_partition
+# plot_partition(disc_dynamics, plot_transitions=True)
 
 # Spec
 assumption = 'X0reach & []<>(!park)'

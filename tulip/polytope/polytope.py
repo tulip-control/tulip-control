@@ -962,7 +962,7 @@ def projection(poly1,dim,solver=None,abs_tol=1e-7):
     org_dim = range(dimension(poly1))
     new_dim = dim.flatten() - 1
     del_dim = np.setdiff1d(org_dim,new_dim) # Index of dimensions to remove 
-    
+        
     # Compute cheby ball in lower dim to see if projection exists
     norm = np.sum(poly1.A*poly1.A, axis=1).flatten()
     norm[del_dim] = 0
@@ -1147,7 +1147,7 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
     
     r,xc = cheby_ball(poly1)
     org_dim = poly1.A.shape[1]
-    
+            
     if verbose > 0:
         print "Starting iterhull projection from dim " + str(org_dim) + \
                 " to dim " + str(len(new_dim))
@@ -1173,13 +1173,12 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
             #to find a starting simplex
             cnt += 1
             if cnt > max_iter:  
-                print poly1
                 raise Exception("iterative_hull: could not find starting simplex")
             
             f1 = np.random.rand(len(new_dim)).flatten() - 0.5
             f = np.zeros(org_dim)
             f[new_dim]=f1
-            sol = solvers.lp(matrix(-f), matrix(poly1.A), matrix(poly1.b), None, None)
+            sol = solvers.lp(matrix(-f), matrix(poly1.A), matrix(poly1.b), None, None, lp_solver)
             xopt = np.array(sol['x']).flatten()  
             if Vert == None:
                 Vert = xopt.reshape(1,xopt.size)
