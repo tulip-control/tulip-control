@@ -205,7 +205,8 @@ class Automaton:
             self.states[current_id].transition = list(set(self.states[current_id].transition))
         return True
 
-    def writeDotFile(self, fname, distinguishTurns=None, turnOrder=None):
+    def writeDotFile(self, fname, hideZeros=False,
+                     distinguishTurns=None, turnOrder=None):
         """Write automaton to Graphviz DOT file.
 
         In each state, the node ID and nonzero variables and their
@@ -217,6 +218,12 @@ class Automaton:
         JTLV output), we include an ID for each node.  Thus, identical
         valuation of variables does *not* imply state equivalency
         (confusingly).
+
+        If hideZeros is True, then for each vertex (in the DOT
+        diagram) variables taking the value 0 are *not* shown.  This
+        may lead to more succinct diagrams when many boolean variables
+        are involved.  The default if False, i.e. show all variable
+        values.
 
         It is possible to break states into a linear sequence of steps
         for visualization purposes using the argument
@@ -261,7 +268,7 @@ class Automaton:
                 for agent_name in distinguishTurns.keys():
                     state_labels[str(state.id)+agent_name] = ''
             for (k,v) in state.state.items():
-                if v != -1:  # i.e., not False (but not applicable for general variables).
+                if (not hideZeros) or (v != 0):
                     if distinguishTurns is None:
                         agent_name = ''
                     else:
