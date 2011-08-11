@@ -1,3 +1,4 @@
+.. Emacs, this is -*-rst-*-
 .. highlight:: rst
 
 Tutorial and Examples
@@ -114,14 +115,14 @@ represented by a finite transition system.
 
 CtsSysDyn class is used to define continuous dynamics.
 
-     .. autoclass:: discretizeM.CtsSysDyn
+     .. autoclass:: discretize.CtsSysDyn
 	:noindex:
 
 
 Once we have the proposition preserving partition and the continuous dynamics,
 continuous state space discretization can be done using the following function call:
 
-     .. autofunction:: discretizeM.discretizeM
+     .. autofunction:: discretize.discretizeM
 	:noindex:
 
 
