@@ -59,7 +59,6 @@ from subprocess import call
 from automaton import Automaton, AutomatonState
 from errorprint import printWarning, printError
 from congexf import dumpGexf, changeGexfAttvalue
-from gephitools import openGexf
 from gephistream import GephiStream
 
 def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
@@ -136,12 +135,10 @@ def simulateGraph(aut_states_list, destfile):
     # Changes to the graph will be streamed from here.
     gs = GephiStream('server')
     
-    # Open Gephi in the background and configure for viewing.
-    gephi = openGexf(destfile)
-    
-    print '*** Note: simulateGraph is still in development. For now, ' + \
-          'initiate streaming manually. You have %d seconds.' % long_delay
-    time.sleep(long_delay)
+    # Open Gephi in a separate thread.
+    print "Opening " + destfile + " in Gephi."
+    gephi = Process(target=lambda: call(["gephi", destfile]))
+    gephi.start()
     
     # 'aut_states_list' is a list of lists of automaton states. Transitioning
     # from one 'aut_states' to the next should correspond to changing
@@ -158,4 +155,4 @@ def simulateGraph(aut_states_list, destfile):
     # Close the graph streaming server and the Gephi thread.
     gs.close()
     print 'Close Gephi to exit.'
-    gephi.close()
+    gephi.join()
