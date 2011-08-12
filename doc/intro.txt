@@ -10,9 +10,14 @@ embedded control software as discussed in [1]_, [2]_.
 
 The basic problem setup is sketched in :doc:`tutorial`.
 
-Please also see `the wiki <http://tulip-control.sourceforge.net>`_ for an
-overview and related links.  Note that *this documentation is still
-under development*.  For help and support, please visit `our support page <http://sourceforge.net/projects/tulip-control/support>`_.
+Please also see `the wiki <http://tulip-control.sourceforge.net>`_ for
+an overview and related links.  Though installation should be easy
+(and standardized) through setup.py, there are some dependencies that
+will need to be manually installed if not already available; details
+are provided in :doc:`install`.  Note that *this documentation is
+still under development*.  For help and support, please visit `our
+support page
+<http://sourceforge.net/projects/tulip-control/support>`_.
 
 
 References
