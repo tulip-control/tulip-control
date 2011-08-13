@@ -42,18 +42,17 @@ to a GEXF file (in Gephi).
 import re
 
 from tulip.automaton import AutomatonState, Automaton
-from tulip.errorprint import printWarning, printError
 
+activeID = 'is_active'
 
-def tagGexfAttr(var_name, var_type, idt_lvl=3):
+def tagGexfAttr(var_name, var_type, idt_lvl):
     """
-    Encode the variable specified in a gexf-readable attribute.
+    Encode the variable specified in a gexf-readable attribute string.
 
     Arguments:
     var_name -- the string name of the desired variable.
     var_type -- Python type of the variable.
-    idt_lvl -- level of indentation of the attribute. Default is 3,
-        as gexf attributes are usually three levels in.
+    idt_lvl -- level of indentation of the final string.
 
     Return:
     String representing a gexf attribute.
@@ -78,15 +77,15 @@ def tagGexfAttr(var_name, var_type, idt_lvl=3):
     return attribute
     
     
-def tagGexfAttvalue(var_name, var_val, idt_lvl=5):
+def tagGexfAttvalue(var_name, var_val, idt_lvl):
     """
-    Encode the attribute specified in a gexf-readable attribute value.
+    Encode the attribute specified in a gexf-readable attribute value
+    string.
 
     Arguments:
     var_name -- the string name of the attribute.
     var_val -- value of the attribute for this node/edge.
-    idt_lvl -- level of indentation of the attribute value. Default is 5,
-        as gexf attributes are usually five levels in.
+    idt_lvl -- level of indentation of the final string.
     
     Return:
     String representing a gexf attribute value.
@@ -105,17 +104,17 @@ def tagGexfAttvalue(var_name, var_val, idt_lvl=5):
     return attvalue
     
     
-def tagGexfNode(w_id, state, label, idt_lvl=3):
+def tagGexfNode(p_id, state, label, idt_lvl):
     """
-    Encode the state specified in a gexf-readable node. The variables
-    in the specified state are stored as attribute values.
+    Encode the state specified in a gexf-readable node string.
+    The variables in the specified state are stored as
+    attribute values.
 
     Arguments:
-    w_id -- the ID of this node's Automaton/W set
+    p_id -- the ID of this node's parent Automaton.
     state -- the AutomatonState object to be encoded.
     label -- a string name for the node.
-    idt_lvl -- level of indentation of the node. Default is 3,
-        as gexf nodes are usually three levels in.
+    idt_lvl -- level of indentation of the final string.
 
     Return:
     String representing a gexf node.
@@ -123,28 +122,28 @@ def tagGexfNode(w_id, state, label, idt_lvl=3):
     
     if not (isinstance(state, AutomatonState) and
             isinstance(label, str) and
-            isinstance(w_id, int) and isinstance(idt_lvl, int)):
+            isinstance(p_id, int) and isinstance(idt_lvl, int)):
         raise TypeError("Invalid arguments to tagGexfNode")
     
-    state_ID = str(w_id) + '.' + str(state.id)
+    state_ID = str(p_id) + '.' + str(state.id)
     
     nl = "\n"  # newline
     idt = "  "  # indentation
 
     # Generate a line of XML for the node.
     node = idt * idt_lvl + '<node id="' + state_ID + \
-           '" label="' + label + '" pid="' + str(w_id) + '">' + nl
+           '" label="' + label + '" pid="' + str(p_id) + '">' + nl
     idt_lvl += 1
     node += idt * idt_lvl + '<attvalues>' + nl
 
     # Iterate through attributes.
     idt_lvl += 1
     attr_dict = state.state.copy()
-    # is_active is a node attribute used to simulate the automaton.
-    # It changes to 1 when the automaton is currently at that node.
-    attr_dict['is_active'] = 0
+    # activeID holds the name of an attribute used to simulate the automaton.
+    # It changes from 0 when the automaton is currently at that node.
+    attr_dict[activeID] = 0
     for (k, v) in attr_dict.items():
-        node += tagGexfAttvalue(k, v, idt_lvl=idt_lvl)
+        node += tagGexfAttvalue(k, v, idt_lvl)
     idt_lvl -= 1
 
     # Close attributes and node.
@@ -155,19 +154,19 @@ def tagGexfNode(w_id, state, label, idt_lvl=3):
     return node
         
     
-def tagGexfEdge(sourcew_id, source, targetw_id, target, label, idt_lvl=3):
+def tagGexfEdge(sourcep_id, source, targetp_id, target, label, idt_lvl):
     """
-    Encode the transition specified in a gexf-readable edge. The variables
-    in the target's state are stored as attribute values.
+    Encode the transition specified in a gexf-readable edge string.
+    The variables in the target's state are stored as
+    attribute values.
 
     Arguments:
-    sourcew_id -- the ID of the source's Automaton or W set.
+    sourcep_id -- the ID of the source's parent Automaton.
     source -- the AutomatonState for the 'tail' of the edge.
-    targetw_id -- the ID of the target's Automaton or W set.
+    targetp_id -- the ID of the target's parent Automaton.
     target -- the AutomatonState for the 'head' of the edge.
     label -- a string name for the edge.
-    idt_lvl -- level of indentation of the edge. Default is 3,
-        as gexf edges are usually three levels in.
+    idt_lvl -- level of indentation of the final string.
 
     Return:
     String representing a gexf edge.
@@ -176,12 +175,12 @@ def tagGexfEdge(sourcew_id, source, targetw_id, target, label, idt_lvl=3):
     if not (isinstance(source, AutomatonState) and
             isinstance(target, AutomatonState) and
             isinstance(label, str) and
-            isinstance(sourcew_id, int) and isinstance(targetw_id, int) and
+            isinstance(sourcep_id, int) and isinstance(targetp_id, int) and
             isinstance(idt_lvl, int)):
         raise TypeError("Invalid arguments to tagGexfEdge")
     
-    source_ID = str(sourcew_id) + '.' + str(source.id)
-    target_ID = str(targetw_id) + '.' + str(target.id)
+    source_ID = str(sourcep_id) + '.' + str(source.id)
+    target_ID = str(targetp_id) + '.' + str(target.id)
     edge_ID = source_ID + '-' + target_ID
     
     nl = "\n"  # newline
@@ -198,11 +197,11 @@ def tagGexfEdge(sourcew_id, source, targetw_id, target, label, idt_lvl=3):
     # Iterate through attributes.
     idt_lvl += 1
     attr_dict = target.state.copy()
-    # is_active is an edge attribute used to simulate the automaton.
-    # It changes to 1 when the edge is a valid transition.
-    attr_dict['is_active'] = 0
+    # activeID holds the name of an attribute used to simulate the automaton.
+    # It changes from 0 when the automaton is currently at that node.
+    attr_dict[activeID] = 0
     for (k, v) in attr_dict.items():
-        edge += tagGexfAttvalue(k, v, idt_lvl=idt_lvl)
+        edge += tagGexfAttvalue(k, v, idt_lvl)
     idt_lvl -= 1
     
     # Close attributes and node.
@@ -220,10 +219,11 @@ def dumpGexf(aut_list, label_vars=None):
 
     Arguments:
     aut_list -- a list of Automaton objects. Generate a hierarchical graph
-                with each Automaton as a supernode. Note: if a single
-                Automaton is given instead, it will be wrapped in a list.
+        with each Automaton as a supernode. Note: if a single
+        Automaton is given instead, it will be wrapped in a list.
     label_vars -- a list of state variable names whose values will be labels
-                  on nodes and edges of the graph.
+        on nodes and edges of the graph. If this is 'None', show all
+        attributes in labels
 
     Return:
     A gexf formatted string that can be written to file.
@@ -244,12 +244,13 @@ def dumpGexf(aut_list, label_vars=None):
             for (k, v) in state.state.items():
                 if k not in attr_dict.keys():
                     attr_dict[k] = type(v)
+    # If no 'label_vars' were passed, use all attributes as labels
     if label_vars is None:
         label_vars = attr_dict.keys()
     elif isinstance(label_vars, list):
         if label_vars != filter(lambda x: x in attr_dict.keys(), label_vars):
             raise TypeError("Invalid arguments to dumpGexf.")
-    attr_dict['is_active'] = int
+    attr_dict[activeID] = int
 
     
     nl = "\n"  # newline
@@ -270,7 +271,7 @@ def dumpGexf(aut_list, label_vars=None):
     # AutomatonState states.
     idt_lvl += 1
     for (k, v) in attr_dict.items():
-        output += tagGexfAttr(k, v, idt_lvl=idt_lvl)
+        output += tagGexfAttr(k, v, idt_lvl)
     idt_lvl -= 1
     
     # Close node attributes tag and open edge attributes tag.
@@ -282,7 +283,7 @@ def dumpGexf(aut_list, label_vars=None):
     # AutomatonState states.
     idt_lvl += 1
     for (k, v) in attr_dict.items():
-        output += tagGexfAttr(k, v, idt_lvl=idt_lvl)
+        output += tagGexfAttr(k, v, idt_lvl)
     idt_lvl -= 1
     
     # Close edge attributes tag and open nodes tag.
@@ -303,8 +304,7 @@ def dumpGexf(aut_list, label_vars=None):
         for state in aut.states:
             label = filter(lambda x: x in state.state.keys(), label_vars)
             label = str(map(lambda x: state.state[x], label))
-            output += tagGexfNode(aut_id, state, label,
-                                  idt_lvl=idt_lvl)
+            output += tagGexfNode(aut_id, state, label, idt_lvl)
         
         aut_id += 1
     idt_lvl -= 1
@@ -328,7 +328,7 @@ def dumpGexf(aut_list, label_vars=None):
                 label = filter(lambda x: x in target.state.keys(), label_vars)
                 label = str(map(lambda x: target.state[x], label))
                 output += tagGexfEdge(aut_id, state, aut_id, target,
-                                      label, idt_lvl=idt_lvl)
+                                      label, idt_lvl)
         if aut_id > 0:
             # Build edges between automata.
             output += idt * idt_lvl + \
@@ -358,14 +358,15 @@ def changeGexfAttvalue(gexf_string, att_name, att_val,
     Change an attribute for the given node or edge (or both).
 
     Arguments:
-    gexf_string -- a gexf-formatted string (writable to file).
+    gexf_string -- a gexf-formatted string (writable to file). This should have
+        been generated by 'dumpGexf'.
     att_name -- the string name of the attribute to be changed.
     att_val -- the new value of the attribute to be changed.
     node_id -- optional id for the node to be changed.
     edge_id -- optional id for the edge to be changed.
 
     Return:
-    A changed gexf output string. If changes are not possible, returns
+    A changed gexf output string. If changes are not possible, returns the
     original string.
     """
     if not (isinstance(gexf_string, str) and isinstance(att_name, str)):
@@ -379,7 +380,8 @@ def changeGexfAttvalue(gexf_string, att_name, att_val,
         end = start + gexf_string[start:].find('</attvalues>')
         
         # Search for desired attvalue and set bounds to only this attvalue.
-        start = start + gexf_string[start:end].find('<attvalue for="' + att_name)
+        start = start + \
+                gexf_string[start:end].find('<attvalue for="' + att_name)
         end = start + gexf_string[start:end].find('>') + 1
         
         # Check if attvalue has been found.
@@ -395,7 +397,8 @@ def changeGexfAttvalue(gexf_string, att_name, att_val,
         end = start + gexf_string[start:].find('</attvalues>')
         
         # Search for desired attvalue and set bounds to only this attvalue.
-        start = start + gexf_string[start:end].find('<attvalue for="' + att_name)
+        start = start + \
+                gexf_string[start:end].find('<attvalue for="' + att_name)
         end = start + gexf_string[start:end].find('>') + 1
         
         # Check if attvalue has been found.
@@ -414,13 +417,13 @@ if __name__ == "__main__":
     testAutState1 = AutomatonState(id=1, state={'a':2, 'b':3}, transition=[0])
     testAut = Automaton([testAutState0, testAutState1])
     print "Testing tagGexfAttr..."
-    assert tagGexfAttr('a', int, idt_lvl=3) == \
+    assert tagGexfAttr('a', int, 3) == \
            '      <attribute id="a" type="integer" />\n'   
     print "Testing tagGexfAttvalue..."
-    assert tagGexfAttvalue('a', 0, idt_lvl=5) == \
+    assert tagGexfAttvalue('a', 0, 5) == \
            '          <attvalue for="a" value="0" />\n'
     print "Testing tagGexfNode..."
-    assert tagGexfNode(0, testAutState0, 'foo', idt_lvl=3) == \
+    assert tagGexfNode(0, testAutState0, 'foo', 3) == \
            '      <node id="0.0" label="foo" pid="0">\n' + \
            '        <attvalues>\n' + \
            '          <attvalue for="a" value="0" />\n' + \
@@ -430,7 +433,7 @@ if __name__ == "__main__":
            '      </node>\n'
     
     print "Testing tagGexfEdge..."
-    assert tagGexfEdge(0, testAutState0, 0, testAutState1, 'bar', idt_lvl=3) == \
+    assert tagGexfEdge(0, testAutState0, 0, testAutState1, 'bar', 3) == \
            '      <edge id="0.0-0.1" source="0.0" target="0.1" label="bar">\n' + \
            '        <attvalues>\n' + \
            '          <attvalue for="a" value="2" />\n' + \

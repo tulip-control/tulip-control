@@ -40,7 +40,6 @@ the automaton as a graph.
 Note that the Gephi Graph Streaming API plugin must be installed.
 """
 
-import os
 import time
 from multiprocessing import Process, Manager
 from subprocess import call
@@ -67,17 +66,18 @@ class GraphHandler(BaseHTTPRequestHandler):
         """
         try:
             if not self.path.endswith("?operation=getGraph"): raise IOError
-            # Accept GET request.
+            # Accept GET request and return a success code.
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
             
-            # Send messages until the empty string is passed in msg_lst.
-            # The server must have a multiprocessing list named msg_list.
+            # Send messages until the empty string is passed in 'msg_list'.
+            # The server must have a multithreaded list named 'msg_list'.
             msg_list = self.server.msg_list
             index = 0
             msg = True
             while msg:
+                # Send only messages that have not yet been sent.
                 for msg in msg_list[index:]:
                     print 'send-to %s: %s' % (str(self.client_address), msg)
                     self.wfile.write(msg)
@@ -92,15 +92,22 @@ class GephiStream:
     on a live Gephi graph workspace.
 
     Note: The 'close()' function should be called when streaming is complete.
-
-    'mode' determines whether each instance is a client or a server.
-    In client mode, connects to an existing Gephi server.
-    In server mode, starts a graph streaming server.
-
+    
     Arguments:
-    mode -- is this gephistream a 'server' or 'client'?
-    host -- name of the server host.
-    port -- name of the server port.
+    mode -- 'server' or 'client'? 'mode' determines whether each instance
+        is a client or a server. In client mode, connect to an existing
+        Gephi server. [The Gephi streaming server is still unstable and
+        in development.] In server mode, start a graph streaming server.
+    host -- name of the server host. In 'client' mode, connect to 'host'
+        and try to send data there. In 'server' mode, set up an HTTP server
+        at 'host' and stream data to any clients that might try to connect
+        there. Default is 'localhost'.
+    port -- name of the server port. In 'client' mode, connect to 'port'
+        and try to send data there. In 'server' mode, set up an HTTP server
+        at 'port' and stream data to any clients that might try to connect
+        there. Default is 8080.
+    workspace -- an int representing the Gephi workspace of this stream.
+        Default is 0.
 
     Fields:
     mode -- see above.
@@ -108,7 +115,6 @@ class GephiStream:
     port -- see above.
     url -- the server's streaming URL.
     msg_list -- a list of all commands being streamed in 'server' mode.
-    streamthread -- an asynchronous Thread running the server/client.
     """
     
     def __init__(self, mode, host="localhost", port=8080, workspace=0):
@@ -122,12 +128,21 @@ class GephiStream:
         self.url = 'http://%s:%d/workspace%d?operation=getGraph' % \
                    (host, port, workspace)
         self.msg_list = Manager().list()
-        self.streamthread = Process(target=self.stream)
-        self.streamthread.daemon = True
-        self.streamthread.start()
+        stream_thread = Process(target=self.stream)
+        stream_thread.daemon = True
+        stream_thread.start()
     
     
     def close(self):
+        """
+        Close the server or client and stop streaming.
+        
+        Arguments:
+        (none)
+        
+        Return:
+        (nothing)
+        """
         # Sending an empty string should terminate all graph streams.
         self.send('')
         # Deleting self here forces the stream daemon thread to stop.
@@ -136,7 +151,7 @@ class GephiStream:
     
     def stream(self):
         """
-        Streams graph to/from Gephi.
+        Streams the graph to/from Gephi.
         
         Arguments:
         (none)
@@ -192,10 +207,10 @@ class GephiStream:
         Arguments:
         command -- a string representing the command to be given. Choose from:
             "an": Add node.
-            "cn": Change node attribute.
+            "cn": Change node attributes.
             "dn": Delete node.
             "ae": Add edge.
-            "ce": Change edge attribute.
+            "ce": Change edge attributes.
             "de": Delete edge.
         target -- a string representing the ID of the target node or edge.
         attribute_dict -- a dictionary of attributes to be changed. The keys
@@ -227,34 +242,34 @@ class GephiStream:
         return output
     
 
-    def addNode(self, w_id, state):
+    def addNode(self, p_id, state):
         """
         Add a node to the current graph.
 
         Arguments:
-        w_id -- an integer representing this node's Automaton/W set ID.
+        p_id -- an integer representing this node's parent Automaton.
         state -- an AutomatonState object.
 
         Return:
         (nothing)
         """
         
-        if not (isinstance(w_id, int) and
+        if not (isinstance(p_id, int) and
                 isinstance(state, AutomatonState)):
             raise TypeError("Invalid arguments to addNode")
         
-        node_ID = str(w_id) + '.' + str(state.id)
+        node_ID = str(p_id) + '.' + str(state.id)
         attribute_dict = state.state.copy()
         
         self.send(self.wrapJSON("an", node_ID, attribute_dict))
     
     
-    def changeNode(self, w_id, state, change_dict):
+    def changeNode(self, p_id, state, change_dict):
         """
         Change a node of the current graph.
 
         Arguments:
-        w_id -- an integer representing this node's Automaton/W set ID.
+        p_id -- an integer representing this node's parent Automaton.
         state -- an AutomatonState object.
         change_dict -- a dictionary of attributes to change.
 
@@ -262,59 +277,59 @@ class GephiStream:
         (nothing)
         """
         
-        if not (isinstance(w_id, int) and
+        if not (isinstance(p_id, int) and
                 isinstance(state, AutomatonState) and
                 isinstance(change_dict, dict)):
             raise TypeError("Invalid arguments to changeNode")
         
-        node_ID = str(w_id) + '.' + str(state.id)
+        node_ID = str(p_id) + '.' + str(state.id)
         
         self.send(self.wrapJSON("cn", node_ID, change_dict))
     
     
-    def deleteNode(self, w_id, state):
+    def deleteNode(self, p_id, state):
         """
         Delete a node of the current graph.
 
         Arguments:
-        w_id -- an integer representing this node's Automaton/W set ID.
+        p_id -- an integer representing this node's parent Automaton.
         state -- an AutomatonState object.
 
         Return:
         (nothing)
         """
         
-        if not (isinstance(w_id, int) and
+        if not (isinstance(p_id, int) and
                 isinstance(state, AutomatonState)):
             raise TypeError("Invalid arguments to deleteNode")
         
-        node_ID = str(w_id) + '.' + str(state.id)
+        node_ID = str(p_id) + '.' + str(state.id)
         
         self.send(self.wrapJSON("dn", node_ID, {}))
     
     
-    def addEdge(self, sourcew_id, source, targetw_id, target):
+    def addEdge(self, sourcep_id, source, targetp_id, target):
         """
         Add an edge to the current graph.
 
         Arguments:
-        sourcew_id -- an integer representing the source's Automaton/W set ID.
+        sourcep_id -- an integer representing the source's parent Automaton.
         source -- an AutomatonState object.
-        targetw_id -- an integer representing the target's Automaton/W set ID.
+        targetp_id -- an integer representing the target's parent Automaton.
         target -- an AutomatonState object.
 
         Return:
         (nothing)
         """
         
-        if not (isinstance(sourcew_id, int) and
+        if not (isinstance(sourcep_id, int) and
                 isinstance(source, AutomatonState) and
-                isinstance(targetw_id, int) and
+                isinstance(targetp_id, int) and
                 isinstance(target, AutomatonState)):
             raise TypeError("Invalid arguments to addEdge")
         
-        source_ID = str(sourcew_id) + '.' + str(source.id)
-        target_ID = str(targetw_id) + '.' + str(target.id)
+        source_ID = str(sourcep_id) + '.' + str(source.id)
+        target_ID = str(targetp_id) + '.' + str(target.id)
         edge_ID = source_ID + '-' + target_ID
         
         attribute_dict = target.state.copy()
@@ -324,14 +339,14 @@ class GephiStream:
         self.send(self.wrapJSON("ae", edge_ID, attribute_dict))
     
     
-    def changeEdge(self, sourcew_id, source, targetw_id, target, change_dict):
+    def changeEdge(self, sourcep_id, source, targetp_id, target, change_dict):
         """
         Change an edge of the current graph.
 
         Arguments:
-        sourcew_id -- an integer representing the source's Automaton/W set ID.
+        sourcep_id -- an integer representing the source's parent Automaton.
         source -- an AutomatonState object.
-        targetw_id -- an integer representing the target's Automaton/W set ID.
+        targetp_id -- an integer representing the target's parent Automaton.
         target -- an AutomatonState object.
         change_dict -- a dictionary of attributes to change.
 
@@ -339,28 +354,28 @@ class GephiStream:
         (nothing)
         """
         
-        if not (isinstance(sourcew_id, int) and
+        if not (isinstance(sourcep_id, int) and
                 isinstance(source, AutomatonState) and
-                isinstance(targetw_id, int) and
+                isinstance(targetp_id, int) and
                 isinstance(target, AutomatonState) and
                 isinstance(change_dict, dict)):
             raise TypeError("Invalid arguments to changeEdge")
         
-        source_ID = str(sourcew_id) + '.' + str(source.id)
-        target_ID = str(targetw_id) + '.' + str(target.id)
+        source_ID = str(sourcep_id) + '.' + str(source.id)
+        target_ID = str(targetp_id) + '.' + str(target.id)
         edge_ID = source_ID + '-' + target_ID
         
         self.send(self.wrapJSON("ce", edge_ID, change_dict))
     
     
-    def deleteEdge(self, sourcew_id, source, targetw_id, target):
+    def deleteEdge(self, sourcep_id, source, targetp_id, target):
         """
         Delete an edge from the current graph.
         
         Arguments:
-        sourcew_id -- an integer representing the source's Automaton/W set ID.
+        sourcep_id -- an integer representing the source's parent Automaton.
         source -- an AutomatonState object.
-        targetw_id -- an integer representing the target's Automaton/W set ID.
+        targetp_id -- an integer representing the target's parent Automaton.
         target -- an AutomatonState object.
 
         Return:
@@ -370,14 +385,14 @@ class GephiStream:
               "It appears to delete an arbitrary edge " + \
               "connecting the two nodes."
         
-        if not (isinstance(sourcew_id, int) and
+        if not (isinstance(sourcep_id, int) and
                 isinstance(source, AutomatonState) and
-                isinstance(targetw_id, int) and
+                isinstance(targetp_id, int) and
                 isinstance(target, AutomatonState)):
             raise TypeError("Invalid arguments to deleteEdge")
         
-        source_ID = str(sourcew_id) + '.' + str(source.id)
-        target_ID = str(targetw_id) + '.' + str(target.id)
+        source_ID = str(sourcep_id) + '.' + str(source.id)
+        target_ID = str(targetp_id) + '.' + str(target.id)
         edge_ID = source_ID + '-' + target_ID
         
         self.send(self.wrapJSON("de", edge_ID, {}))
@@ -388,7 +403,7 @@ if __name__ == "__main__":
     # Number of seconds to pause between tests
     delay = 2
     
-    print "*** NOTE: Tests are still in development. Manually open Gephi,\n" + \
+    print "*** NOTE: Tests are not self-enclosed. Manually open Gephi,\n" + \
           "go to the 'Streaming' tab, and enter the streaming URL and\n" + \
           "start the master server. ***\n\n"
     

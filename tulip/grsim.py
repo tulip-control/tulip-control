@@ -47,8 +47,8 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 minor refactoring by SCL <slivingston@caltech.edu>
 3 May 2011.
 
-graph visualization added by Yuchen Lin
-23 June 2011
+Gephi graph visualization added by Yuchen Lin
+23 June - 12 August 2011.
 """
 
 import time
@@ -60,6 +60,8 @@ from automaton import Automaton, AutomatonState
 from errorprint import printWarning, printError
 from congexf import dumpGexf, changeGexfAttvalue
 from gephistream import GephiStream
+
+activeID = 'is_active'
 
 def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, verbose=0):
     """
@@ -108,8 +110,31 @@ def grsim(aut, init_state, env_states=[], num_it=20, deterministic_env=True, ver
         aut_states.append(aut_state)
     return aut_states
 
-###################################################################
-def writeStatesToFile(aut_list, aut_states_list, destfile, label_vars=None):
+
+
+def writeStatesToFile(aut_list, destfile, aut_states_list=[], label_vars=None):
+    """
+    Write the states and transitions from a list of automata to a '.gexf' graph
+    file. If a list of simulated states is given, record the sequence of
+    traversed states.
+
+    Arguments:
+    aut_list -- a list of Automaton objects.
+    destfile -- the string name of the desired destination file.
+    aut_states_list -- a list of lists of automaton states, each one
+        representing a sequence of transitions.
+    label_vars -- a list of the names of the system or environment variables
+        to be encoded as labels.
+    
+    Return:
+    (nothing)
+    """
+    if not (isinstance(aut_list, list) and isinstance(destfile, str) and
+            isinstance(aut_states_list, list) and
+            (label_vars == None or isinstance(label_vars, list))):
+        raise TypeError("Invalid arguments to writeStatesToFile")
+
+    # Generate a Gexf-formatted string of automata.
     output = dumpGexf(aut_list, label_vars=label_vars)
     
     # 'aut_states_list' is a list of lists of automaton states. Transitioning
@@ -118,38 +143,67 @@ def writeStatesToFile(aut_list, aut_states_list, destfile, label_vars=None):
     iteration = 1
     for (i, aut_states) in enumerate(aut_states_list):
         for state in aut_states:
-            output = changeGexfAttvalue(output, "is_active", iteration,
+            output = changeGexfAttvalue(output, activeID, iteration,
                                         node_id=str(i) + '.' + str(state.id))
             iteration += 1
-    print "Writing simulation result to " + destfile
+    print "Writing graph states to " + destfile
     f = open(destfile, 'w')
     f.write(output)
     f.close()
 
-###################################################################
-def simulateGraph(aut_states_list, destfile):
-    # Number of seconds between each graph update.
-    delay = 2
-    long_delay = 8
+
+
+def simulateGraph(aut_states_list, sourcefile, delay=2, vis_depth=3):
+    """
+    Open Gephi (a graph visualization application) and stream
+    a live automaton simulation to it.
+
+    Arguments:
+    aut_states_list -- a list of lists of automaton states, each one
+        representing a sequence of transitions.
+    sourcefile -- the string name of a '.gexf' graph file to be opened
+        in Gephi.
+    delay -- the time, in seconds, between each streamed update.
+    vis_depth -- a positive integer representing the number of states
+        to display as 'active' at any moment.
     
-    # Changes to the graph will be streamed from here.
+    Return:
+    (nothing)
+    """
+    if not (isinstance(aut_states_list, list) and
+            isinstance(sourcefile, str) and isinstance(delay, int) and
+            isinstance(vis_depth, int)):
+        raise TypeError("Invalid arguments to simulateGraph")
+    
+    # Changes to the graph will be streamed from this server.
     gs = GephiStream('server')
     
     # Open Gephi in a separate thread.
-    print "Opening " + destfile + " in Gephi."
-    gephi = Process(target=lambda: call(["gephi", destfile]))
+    print "Opening " + sourcefile + " in Gephi."
+    gephi = Process(target=lambda: call(["gephi", sourcefile]))
     gephi.start()
+    
+    # Wait for user before streaming simulation.
+    raw_input("When Gephi has loaded, press 'return' or 'enter' to start " + \
+              "streaming the automaton simulation.\n")
     
     # 'aut_states_list' is a list of lists of automaton states. Transitioning
     # from one 'aut_states' to the next should correspond to changing
     # automata in the receding horizon case.
     active_nodes = {}
-    iteration = 1
     for (i, aut_states) in enumerate(aut_states_list):
         for state in aut_states:
-            gs.changeNode(i, state, {'is_active': iteration})
-            active_nodes[state] = iteration  # useful for future extension?
-            iteration += 1
+            # Decrement old nodes until their activeID becomes 0.
+            for (key, value) in active_nodes.items():
+                gs.changeNode(i, key, {activeID: value - 1})
+                if value > 1:
+                    active_nodes[key] = value - 1
+                else:
+                    del active_nodes[key]
+            
+            # Give the current node a starting value.
+            gs.changeNode(i, state, {activeID: vis_depth})
+            active_nodes[state] = vis_depth
             time.sleep(delay)
     
     # Close the graph streaming server and the Gephi thread.

@@ -35,7 +35,6 @@ package org.tulip.automatonsimulation;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import org.openide.util.Lookup;
 import org.gephi.project.api.ProjectController;
@@ -65,21 +64,26 @@ public class AutomatonSimulationImpl extends Thread
     /*
      * Fields
      */
-    // When stop changes to true, attempts to close all running methods.
+    // When 'stop' changes to true, attempts to close all running methods.
     public volatile boolean stop = false;
+    // 'delay' sets the number of ms to wait between rank updates and
+    // automaton open/close checks.
+    public int delay = 700;
+    
     // Set active attribute name.
-    final static String activeID = "is_active";
+    public String activeID = "is_active";
     // Set setup parameters.
-    static URL streamURL;
-    final static double labelSize = 0.7;
-    final static double edgeSize = 10.0;
+    public double labelSize = 0.7;
+    // Set streaming parameters.
+    public String streamURL =
+          "http://localhost:8080/workspace0?operation=getGraph";
     // Set ranking parameters.
-    final static Color startColor = new Color(0xBBBBBB);
-    final static Color endColor = new Color(0x23C20E);
+    public int startColor = 0xBBBBBB;
+    public int endColor = 0x23C20E;
     // Set ForceAtlas parameters.
-    final static double repulsionStrength = 1000.0;
-    final static double attractionStrength = 1.0;
-    final static double gravity = 250.0;
+    public double repulsionStrength = 1000.0;
+    public double attractionStrength = 1.0;
+    public double gravity = 250.0;
     
     // Gephi controllers, models, and data.
     private ProjectController pc;
@@ -102,18 +106,6 @@ public class AutomatonSimulationImpl extends Thread
     {
         try
         {
-            // Set streaming URL.
-            try
-            {
-                streamURL = new URL(
-                        "http://localhost:8080/workspace0?operation=getGraph");
-            }
-            catch (MalformedURLException e)
-            {
-                System.out.println("Oh, no! MalformedURLException thrown...");
-                e.printStackTrace();
-            }
-            
             // Get basic controllers and models.
             pc = Lookup.getDefault().lookup(ProjectController.class);
             workspace = pc.getCurrentWorkspace();
@@ -143,7 +135,7 @@ public class AutomatonSimulationImpl extends Thread
     /* 
      * Delete all nodes and edges in the current graph.
      */
-    public void deleteGraph()
+    public void deleteGraph() throws InterruptedException
     {
         graph.clear();
     }
@@ -151,10 +143,10 @@ public class AutomatonSimulationImpl extends Thread
     
     
     /* 
-     * Prepare graph for simulation by expanding automata, configuring labels,
-     * setting edge widths, etc.
+     * Prepare graph for simulation by expanding automata and configuring
+     * label size.
      */
-    public void setupGraph()
+    public void setupGraph() throws InterruptedException
     {
         for (int i=0; i<automata.length; i++)
         {
@@ -168,12 +160,6 @@ public class AutomatonSimulationImpl extends Thread
                       setSize((float) labelSize);
             }
         }
-        
-        for (int i=0; i<edges.length; i++)
-        {
-            // Set edge size.
-            edges[i].getEdgeData().setSize((float) edgeSize);
-        }
     }
     
     
@@ -181,16 +167,17 @@ public class AutomatonSimulationImpl extends Thread
     /* 
      * Start graph streaming from the streaming URL.
      */
-    public void startStreaming()
+    public void startStreaming() throws InterruptedException
     {
         try
         {
             StreamingEndpoint streamingEndpoint = new StreamingEndpoint(
-                  streamURL, streamingController.getStreamType("JSON"));
+                  new URL(streamURL),
+                  streamingController.getStreamType("JSON"));
             StreamingConnection streamingConnection = streamingController.
                   connect(streamingEndpoint, graph);
             streamingConnection.asynchProcess();
-            
+
             // Accept stream until signalled to stop.
             while (!stop) {}
             streamingConnection.close();
@@ -207,11 +194,12 @@ public class AutomatonSimulationImpl extends Thread
     /* 
      * Perpetually expand 'active' automata and retract not 'active' automata.
      */
-    public void viewActiveAutomata()
+    public void viewActiveAutomata() throws InterruptedException
     {
         // Run until signalled to stop.
         while (!stop)
         {
+            Thread.sleep(delay);
             for (int i=0; i<automata.length; i++)
             {
                 // Check children for a nonzero active value.
@@ -244,7 +232,7 @@ public class AutomatonSimulationImpl extends Thread
     /* 
      * Perpetually rank and color nodes by their 'active' attribute.
      */
-    public void rankNodes()
+    public void rankNodes() throws InterruptedException
     {
         // Set up node color ranking.
         Ranking activeRanking = rankingController.getRankingModel().
@@ -252,11 +240,13 @@ public class AutomatonSimulationImpl extends Thread
               getColumn(activeID));
         ColorTransformer activeTransformer =
               rankingController.getObjectColorTransformer(activeRanking);
-        activeTransformer.setColors(new Color[]{startColor, endColor});
+        activeTransformer.setColors(new Color[]
+              {new Color(startColor), new Color(endColor)});
         
         // Rank nodes until signalled to stop.
         while (!stop)
         {
+            Thread.sleep(delay);
             rankingController.transform(activeTransformer);
         }
     }
@@ -266,7 +256,7 @@ public class AutomatonSimulationImpl extends Thread
     /* 
      * Perpetually use a Force Atlas layout on the currently visible graph.
      */
-    public void layoutGraph()
+    public void layoutGraph() throws InterruptedException
     {
         // Set up Force Atlas layout.
         ForceAtlasLayout forceAtlasLayout = new ForceAtlas().buildLayout();

@@ -1,6 +1,35 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (c) 2011 by California Institute of Technology
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the California Institute of Technology nor
+ *    the names of its contributors may be used to endorse or promote
+ *    products derived from this software without specific prior
+ *    written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH
+ * OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
 package org.tulip.automatonsimulation;
 
@@ -43,10 +72,26 @@ public final class AutomatonSimulationTopComponent extends TopComponent {
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
         jCheckBox3 = new javax.swing.JCheckBox();
-        jLabel1 = new javax.swing.JLabel();
+        jLabel0 = new javax.swing.JLabel();
         jCheckBox4 = new javax.swing.JCheckBox();
         jCheckBox5 = new javax.swing.JCheckBox();
         jToggleButton1 = new javax.swing.JToggleButton();
+        jTextField1 = new javax.swing.JTextField();
+        jTextField2 = new javax.swing.JTextField();
+        jTextField3 = new javax.swing.JTextField();
+        jTextField4 = new javax.swing.JTextField();
+        jTextField5 = new javax.swing.JTextField();
+        jTextField6 = new javax.swing.JTextField();
+        jTextField7 = new javax.swing.JTextField();
+        jTextField8 = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(jCheckBox1, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jCheckBox1.text")); // NOI18N
 
@@ -54,7 +99,7 @@ public final class AutomatonSimulationTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jCheckBox3, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jCheckBox3.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel0, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel0.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jCheckBox4, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jCheckBox4.text")); // NOI18N
 
@@ -67,41 +112,161 @@ public final class AutomatonSimulationTopComponent extends TopComponent {
             }
         });
 
+        jTextField1.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField1.text")); // NOI18N
+
+        jTextField2.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField2.text")); // NOI18N
+
+        jTextField3.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField3.text")); // NOI18N
+
+        jTextField4.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField4.text")); // NOI18N
+
+        jTextField5.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField5.text")); // NOI18N
+
+        jTextField6.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField6.text")); // NOI18N
+
+        jTextField7.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField7.text")); // NOI18N
+
+        jTextField8.setText(org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jTextField8.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel1.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel3.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel2.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel6, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel6.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel7, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel7.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel8, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel8.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel9, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel9.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel10, org.openide.util.NbBundle.getMessage(AutomatonSimulationTopComponent.class, "AutomatonSimulationTopComponent.jLabel10.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jCheckBox2)
-                    .addComponent(jCheckBox1)
-                    .addComponent(jCheckBox5)
-                    .addComponent(jCheckBox4)
-                    .addComponent(jCheckBox3)
-                    .addComponent(jToggleButton1))
-                .addContainerGap(57, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(3, 3, 3)
+                                                .addComponent(jLabel8))
+                                            .addComponent(jLabel9)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(88, 88, 88)
+                                                .addComponent(jLabel10))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(67, 67, 67)
+                                                .addComponent(jLabel7))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(60, 60, 60)
+                                                .addComponent(jLabel6)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel2)
+                                            .addComponent(jLabel1))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                .addGap(12, 12, 12))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextField7, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField6, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField5, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jToggleButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jCheckBox2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jCheckBox3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jCheckBox4))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jCheckBox5))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jCheckBox1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel0, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(jLabel0)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBox1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBox2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBox3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBox4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBox5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jToggleButton1)
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addGap(17, 17, 17)
+                        .addComponent(jToggleButton1))
+                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(46, 46, 46))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jTextField1, jTextField2, jTextField3, jTextField4, jTextField5, jTextField6, jTextField7, jTextField8});
+
     }// </editor-fold>//GEN-END:initComponents
 /* 
  * This thread is started or refreshed each time jButton1 is pressed.
@@ -116,12 +281,6 @@ public class jButton1ActionRunnable implements Runnable
      */
     public volatile boolean stop = false;
     
-    boolean box1 = false;
-    boolean box2 = false;
-    boolean box3 = false;
-    boolean box4 = false;
-    boolean box5 = false;
-    
     AutSimRunnable as;
     
     // Thread thread0;
@@ -134,16 +293,19 @@ public class jButton1ActionRunnable implements Runnable
     /* 
      * Constructor
      */
-    jButton1ActionRunnable(boolean box1, boolean box2, boolean box3,
-                           boolean box4, boolean box5)
+    jButton1ActionRunnable()
     {
-        this.box1 = box1;
-        this.box2 = box2;
-        this.box3 = box3;
-        this.box4 = box4;
-        this.box5 = box5;
-        
+        // Start a runnable automaton simulation and set variables.
         as = new AutSimRunnable();
+        
+        as.activeID = jTextField1.getText();
+        as.labelSize = Double.parseDouble(jTextField2.getText());
+        as.streamURL = jTextField3.getText();
+        as.startColor = Integer.decode(jTextField4.getText());
+        as.endColor = Integer.decode(jTextField5.getText());
+        as.repulsionStrength = Double.parseDouble(jTextField6.getText());
+        as.attractionStrength = Double.parseDouble(jTextField7.getText());
+        as.gravity = Double.parseDouble(jTextField8.getText());
         
         // thread0 = new Thread(as);
         thread1 = new Thread(as);
@@ -160,31 +322,31 @@ public class jButton1ActionRunnable implements Runnable
         {
             int delay = 1000;
 
-            if (box1)
+            if (jCheckBox1.isSelected())
             {
                 as.action = 1;
                 thread1.start();
                 Thread.sleep(delay);
             }
-            if (box2)
+            if (jCheckBox2.isSelected())
             {
                 as.action = 2;
                 thread2.start();
                 Thread.sleep(delay);
             }
-            if (box3)
+            if (jCheckBox3.isSelected())
             {
                 as.action = 3;
                 thread3.start();
                 Thread.sleep(delay);
             }
-            if (box4)
+            if (jCheckBox4.isSelected())
             {
                 as.action = 4;
                 thread4.start();
                 Thread.sleep(delay);
             }
-            if (box5)
+            if (jCheckBox5.isSelected())
             {
                 as.action = 5;
                 thread5.start();
@@ -218,14 +380,21 @@ public class AutSimRunnable extends AutomatonSimulationImpl implements Runnable
     @Override
     public void run()
     {
-        switch(action)
+        try
         {
-            case(0): deleteGraph(); break;
-            case(1): setupGraph(); break;
-            case(2): startStreaming(); break;
-            case(3): viewActiveAutomata(); break;
-            case(4): rankNodes(); break;
-            case(5): layoutGraph(); break;
+            switch(action)
+            {
+                case(0): deleteGraph(); break;
+                case(1): setupGraph(); break;
+                case(2): startStreaming(); break;
+                case(3): viewActiveAutomata(); break;
+                case(4): rankNodes(); break;
+                case(5): layoutGraph(); break;
+            }
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
         }
     }
 }
@@ -239,11 +408,7 @@ private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GE
         jToggleButton1.setText("Stop");
         
         // Read current checkbox states.
-        actionRunnable = new jButton1ActionRunnable(jCheckBox1.isSelected(),
-                                                    jCheckBox2.isSelected(),
-                                                    jCheckBox3.isSelected(),
-                                                    jCheckBox4.isSelected(),
-                                                    jCheckBox5.isSelected());
+        actionRunnable = new jButton1ActionRunnable();
 
         // Start thread.
         actionThread = new Thread(actionRunnable);
@@ -273,7 +438,23 @@ private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GE
     private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JCheckBox jCheckBox5;
+    private javax.swing.JLabel jLabel0;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jTextField6;
+    private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
     private javax.swing.JToggleButton jToggleButton1;
     // End of variables declaration//GEN-END:variables
     @Override
@@ -283,6 +464,17 @@ private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GE
         jCheckBox3.setSelected(true);
         jCheckBox4.setSelected(true);
         jCheckBox5.setSelected(true);
+        
+        AutSimRunnable as = new AutSimRunnable();
+        
+        jTextField1.setText(as.activeID);
+        jTextField2.setText(Double.toString(as.labelSize));
+        jTextField3.setText(as.streamURL);
+        jTextField4.setText("0x" + Integer.toHexString(as.startColor));
+        jTextField5.setText("0x" + Integer.toHexString(as.endColor));
+        jTextField6.setText(Double.toString(as.repulsionStrength));
+        jTextField7.setText(Double.toString(as.attractionStrength));
+        jTextField8.setText(Double.toString(as.gravity));
     }
 
     @Override

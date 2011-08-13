@@ -87,7 +87,8 @@ if not load_from_XML:
 
     conxml.writeXMLfile("rsimple_example.xml", prob, [assumption, guarantee], sys_dyn, aut, pretty=True)
 
-else:  # Read from tulipcon XML file
+else:
+    # Read from tulipcon XML file
     (prob, sys_dyn, aut) = conxml.readXMLfile("rsimple_example.xml")
     disc_dynamics = prob.getDiscretizedDynamics()
 
@@ -95,11 +96,15 @@ else:  # Read from tulipcon XML file
 # Simulate
 num_it = 30
 init_state = {'X0reach': True}
+aut_states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
+
 destfile = 'rsimple_example.gexf'
 label_vars = ['park', 'cellID', 'X0reach']
-aut_states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
-grsim.writeStatesToFile([aut], [], destfile, label_vars=label_vars)
-grsim.simulateGraph([aut_states], destfile)
+grsim.writeStatesToFile([aut], destfile, label_vars=label_vars)
+
+delay = 2
+vis_depth = 3
+grsim.simulateGraph([aut_states], destfile, delay=delay, vis_depth=vis_depth)
 
 
 f = open('rsimple_example_disc_dynamics.txt', 'w')
