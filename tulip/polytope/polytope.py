@@ -596,6 +596,8 @@ def cheby_ball(poly1):
     sol = solvers.lp(c, G, h, None, None, lp_solver)
     if sol['status'] == "optimal":
         r = sol['x'][-1]
+        if r < 0:
+            return 0,None
         xc = sol['x'][0:-1]
     else:
         # Polytope is empty
@@ -955,6 +957,14 @@ def projection(poly1,dim,solver=None,abs_tol=1e-7):
     To project the polytope `P` onto the first three dimensions, use
         >>> P_proj = projection(P, [1,2,3])
     """
+    
+    if len(poly1) > 0:
+        ret = Polytope()
+        for i in range(len(poly1.list_poly)):
+            p = projection(poly1.list_poly[i], dim, solver=solver, abs_tol=abs_tol)
+            ret = union(ret, p, check_convex=True)
+        return ret
+    
     if (dimension(poly1) < len(dim)) or is_empty(poly1):
         return poly1
     
