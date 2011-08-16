@@ -113,7 +113,8 @@ for i in range(1, len(cellid_arr)):
     # For each step, calculate N input signals
     for j in range(N):
         u_seq = discretize.get_input(x, sys_dyn, disc_dynamics, \
-                cellid_arr[i-1], cellid_arr[i], N-j, test_result=True)
+                cellid_arr[i-1], cellid_arr[i], N-j, mid_weight=3, Q=np.eye(2*(N-j)), \
+                test_result=True)
         u0 = u_seq[0,:] # Only the first input should be used
         u_arr[(i-1)*N + j,:] = u0   # Store input
         
@@ -126,8 +127,8 @@ for i in range(1, len(cellid_arr)):
 # Print trajectory information
 for i in range(u_arr.shape[0]):
     print "From: " + str(cellid_arr[np.floor(i/N)]) + " to " + str(cellid_arr[np.floor(i/N) + 1]) \
-            + " d: " + str(u_arr[i,:]) + " x: " + str(x_arr[i,:]) + " d: " + str(d_arr[i,:])
-print "x(N): " + str(x_arr[-1,:])
+            + " u: " + str(u_arr[i,:]) + " x: " + str(x_arr[i,:]) + " d: " + str(d_arr[i,:])
+print "Final state x: " + str(x_arr[-1,:])
         
 # Plot state trajectory
 ax = plot_partition(disc_dynamics, show=False)

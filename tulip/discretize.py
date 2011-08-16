@@ -66,6 +66,7 @@ import sys, os, time, subprocess
 from copy import deepcopy
 import numpy as np
 from scipy import io as sio
+from scipy.linalg import block_diag
 from cvxopt import matrix,solvers
 
 import polytope as pc
@@ -93,14 +94,29 @@ class CtsSysDyn:
     """
 
     def __init__(self, A=[], B=[], E=[], K=[], Uset=None, Wset=None):
+        
         if Uset == None:
             print "Warning: Uset not given in CtsSysDyn()"
+        
+        if (Uset != None) & (not isinstance(Uset, pc.Polytope)):
+            raise Exception("CtsSysDyn: `Uset` has to be a Polytope")
+
         self.A = A
         self.B = B
-        self.E = E
-        self.K = K
+        
+        if len(K) == 0:
+            self.K = np.zeros([A.shape[1], 1])
+        else:
+            self.K = K.reshape(K.size,1)
+
+        if len(E) == 0:
+            self.E = np.zeros([A.shape[1], 1])
+            self.Wset = pc.Polytope()
+        else:
+            self.E = E
+            self.Wset = Wset
+        
         self.Uset = Uset
-        self.Wset = Wset
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                use_mpt=True, conservative=False, max_num_poly=5, \
@@ -521,11 +537,13 @@ def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,
                                        orig_list_region=orig_list, orig=orig)                           
     return new_part
 
-def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
-              closed_loop = True, test_result=False):
+def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
+            conservative=False, closed_loop = True, test_result=False):
  
     """Calculate an input signal sequence taking the plant from state `start` 
-    to state `end` in the partition part, such that x'Rx + u'Qu is minimal.
+    to state `end` in the partition part, such that 
+    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal.
+    If no cost parameters are given, Q = I and mid_weight=3 are used. 
         
     Input:
     - `x0`: initial continuous state
@@ -536,8 +554,10 @@ def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
     - `N`: the horizon length
     - `R`: state cost matrix for x = [x(1)' x(2)' .. x(N)']', 
            size (N*xdim x N*xdim). If empty, zero matrix is used.
+    - `r`: cost vector for x = [x(1)' x(2)' .. x(N)']', size (N*xdim x 1)
     - `Q`: input cost matrix for u = [u(0)' u(1)' .. u(N-1)']', 
            size (N*udim x N*udim). If empty, identity matrix is used.
+    - `mid_weight`: cost weight for |x(N)-xc|_2
     - `conservative`: if True, force plant to stay inside initial state during
                       execution. if False, plant is forced to stay inside
                       the original proposition preserving cell
@@ -547,7 +567,6 @@ def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
     
     Output:
     - A (N x m) numpy array where row k contains u(k) for k = 0,1 ... N-1.
-    
     
     Note1: The same horizon length as in reachability analysis should be 
     used in order to guarantee feasibility.
@@ -563,17 +582,23 @@ def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
     If the original proposition preserving partition is not convex, 
     safety can not be guaranteed."""
     
-    if (len(R) == 0) and (len(Q) == 0):
+    if (len(R) == 0) and (len(Q) == 0) and (len(r) == 0):
         Q = np.eye(N*ssys.B.shape[1])
         R = np.zeros([N*x0.size, N*x0.size])
+        r = np.zeros([N*x0.size,1])
+        mid_weight = 3
+    if len(R) == 0:
+        R = np.zeros([N*x0.size, N*x0.size])
+    if len(Q) == 0:
+        Q = np.zeros([N*ssys.B.shape[1], N*ssys.B.shape[1]])    
+    if len(r) == 0:
+        r = np.zeros([N*x0.size,1])
     
     if (R.shape[0] != R.shape[1]) or (R.shape[0] != N*x0.size):
-        raise Exception("get_input: R must be square and have side\
-                        N * dim(state space)")
+        raise Exception("get_input: R must be square and have side N * dim(state space)")
     
     if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N*ssys.B.shape[1]):
-        raise Exception("get_input: Q must be square and have side \
-                        N * dim(input space)")
+        raise Exception("get_input: Q must be square and have side N * dim(input space)")
     if part.trans != None:
         if part.trans[end,start] != 1:
             raise Exception("get_input: no transition from state " + str(start) + \
@@ -582,8 +607,7 @@ def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
         print "get_input: Warning, no transition matrix found, assuming feasible"
     
     if (not conservative) & (part.orig == None):
-        print "List of original proposition preserving partitions not given, \
-              reverting to conservative mode"
+        print "List of original proposition preserving partitions not given, reverting to conservative mode"
         conservative = True
        
     P_start = part.list_region[start]
@@ -614,13 +638,29 @@ def get_input(x0, ssys, part, start, end, N, R=[], Q=[], conservative=False, \
         low_u = np.zeros([N,m])
         for i in range(len(P_end.list_poly)):
             P3 = P_end.list_poly[i]
-            u, cost = getInputHelper(x0, ssys, P1, P3, N, R, Q, closed_loop=closed_loop)
+            if mid_weight > 0:
+                rc, xc = pc.cheby_ball(P3)
+                R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
+                    mid_weight*np.eye(n)
+                r[range((N-1)*n, N*n), :] += -mid_weight*xc
+            try:
+                u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+            except:
+                continue
             if cost < low_cost:
                 low_u = u
+                low_cost = cost
+        if low_cost == np.inf:
+            raise Exception("get_input: Did not find any trajectory")
     else:
         P3 = P_end
-        low_u, cost = getInputHelper(x0, ssys, P1, P3, N, R, Q, closed_loop=closed_loop)
-
+        if mid_weight > 0:
+            rc, xc = pc.cheby_ball(P3)
+            R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
+                mid_weight*np.eye(n)
+            r[range((N-1)*n, N*n), :] += -mid_weight*xc
+        low_u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+        
     if test_result:
         good = is_seq_inside(x0, low_u, ssys, P1, P3)
         if not good:
@@ -728,7 +768,7 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
     if trans_set == None:
         trans_set = part1
 
-    L,M = createLM(ssys, N, part1, trans_set, part2)
+    L,M = createLM(ssys, N, part1, trans_set, part2) 
     
     # Ready to make polytope
     poly1 = pc.reduce(pc.Polytope(L,M))
@@ -937,19 +977,18 @@ def discretizeFromMatlab(origPart):
                                                trans, list_prop_symbol)
     return newPartition
 
-def getInputHelper(x0, ssys, P1, P3, N, R, Q, closed_loop=True):
+def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
     '''Calculates the sequence u_seq such that
     - x(t+1) = A x(t) + B u(t) + K
-    - x(k) \in list_P[k] for k = 0...N
-    - u(k) \in PU
+    - x(k) \in P1 for k = 0,...N
+    - x(N) \in P3
+    - [u(k); x(k)] \in PU
+    
+    and minimizes x'Rx + 2*r'x + u'Qu
+    xc is the center of P3
     '''
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
-    if R.size == 0:
-        R = np.zeros([n*N, n*N])
-        
-    if Q.size == 0:
-        Q = np.zeros([m*N, m*N])
     
     list_P = []
     if closed_loop:
@@ -960,13 +999,13 @@ def getInputHelper(x0, ssys, P1, P3, N, R, Q, closed_loop=True):
                                 trans_set=P1)    
             list_P.insert(0, temp_part)
         list_P.insert(0,P1)
-        L,M = createLM(ssys, N, list_P, None, None, disturbance_ind=[1])
+        L,M = createLM(ssys, N, list_P, disturbance_ind=[1])
     else:
         list_P.append(P1)
         for i in range(N-1,0,-1):
             list_P.append(P1)
         list_P.append(P3)
-        L,M = createLM(ssys, N, list_P, None, None)
+        L,M = createLM(ssys, N, list_P)
     
     # Remove first constraint on x(0)
     L = L[range(list_P[0].A.shape[0], L.shape[0]),:]
@@ -981,40 +1020,32 @@ def getInputHelper(x0, ssys, P1, P3, N, R, Q, closed_loop=True):
     # Constraints
     G = matrix(Lu)
     h = matrix(M)
-    
-    # Build matrices Ct and An
-    # Ct = [ B 0 ... 0; AB B 0 ... 0 ; A^2B AB B 0..0; ... ; A^(N-1)B ... B]
-    # Kt = [ K; AK + K; A^2K+AK+K; ... ; A^(N-1)K + ... + K ]
-    # An = [ A; A^2; A^3; ... ; A^N-1]
-    b0 = ssys.B.shape[0]
-    b1 = ssys.B.shape[1]
-    aa = ssys.A.shape[0]
-    Amatr = ssys.A.copy()
-    ABmatr = ssys.B.copy()
-    Ct = np.zeros([b0*N, b1*N])
-    An = np.zeros([aa*N, aa])
+
+    B_diag = ssys.B
+    for i in range(N-1):
+        B_diag = block_diag(B_diag,ssys.B)
+    K_hat = np.tile(ssys.K, (N,1))
+
+    A_it = ssys.A.copy()
+    A_row = np.zeros([n, n*N])
+    A_K = np.zeros([n*N, n*N])
+    A_N = np.zeros([n*N, n])
+
     for i in range(N):
-        for j in range(N-i):
-            Ct[np.ix_(range((i+j)*b0, (i+j+1)*b0), range(j*b1,(j+1)*b1))] = i #ABmatr
-        An[np.ix_(range(i*aa, (i+1)*aa), range(aa))] = i #Amatr
+        A_row = np.dot(ssys.A, A_row)
+        A_row[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
+
+        A_N[np.ix_(range(i*n, (i+1)*n), range(n))] = A_it
+        A_K[np.ix_(range(i*n,(i+1)*n), range(A_K.shape[1]))] = A_row
         
-        Amatr = np.dot(ssys.A, Amatr)
-        ABmatr = np.dot(ssys.A, ABmatr)
-    if len(ssys.K) > 0:
-        An_temp = np.vstack([np.eye(ssys.A.shape[0]), An[range(An.shape[0] - ssys.A.shape[0]),:] ])
-        Kt = np.dot(An_temp,ssys.K)
-        for i in range(1,N):
-            Kt[range(i*ssys.A.shape[0], (i+1)*ssys.A.shape[0]),:] += Kt[range((i-1)*ssys.A.shape[0], i*ssys.A.shape[0]),:] 
-
-
-    # Cost function wrt u
-    # min u'(Q + Ct'*R*Ct)u + 2 (x0'*An' + Kt)*R*Ct*u
+        A_it = np.dot(ssys.A, A_it)
+        
+    Ct = np.dot(A_K, B_diag)
     P = matrix(Q + np.dot(Ct.T, np.dot(R, Ct)))
-    if len(ssys.K) > 0:
-        q = matrix(np.dot( np.dot(x0.reshape(1,x0.size), An.T) + Kt.T , np.dot(R, Ct) )).T
-    else:
-        q = matrix(np.dot( np.dot(x0.reshape(1,x0.size), An.T) , np.dot(R, Ct) )).T
-        
+    q = matrix(np.dot( np.dot(x0.reshape(1,x0.size), A_N.T) + \
+            np.dot(A_K, K_hat).T , np.dot(R, Ct) ) \
+            + np.dot(r.T, Ct )).T 
+    
     sol = solvers.qp(P,q,G,h)
     
     if sol['status'] != "optimal":
@@ -1029,6 +1060,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     """Compute the components of the polytope L [x(0)' u(0)' ... u(N-1)']' <= M
     which stacks the following constraints
     
+    - x(t+1) = A x(t) + B u(t) + E d(t)
+    - [u(k); x(k)] \in ssys.Uset for all k
+    
     If list_P is a Polytope:
     - x(0) \in list_P if list_P
     - x(k) \in Pk for k= 1,2, .. N-1
@@ -1036,8 +1070,6 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     
     If list_P is a list of polytopes
     - x(k) \in list_P[k] for k= 0, 1 ... N
-    - u(k) \in ssys.Uset for all k
-    - x(t+1) = A x(t) + B u(t) + E d(t)
     
     The returned polytope describes the intersection of the polytopes for all
     possible Input:
@@ -1069,25 +1101,18 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
     n = A.shape[1]  # State space dimension
     m = B.shape[1]  # Input space dimension
+    p = E.shape[1]  # Disturbance space dimension
     
-    if len(K) == 0:
-        K = np.zeros([n,1])
-    
-    if len(E) > 0:  
-        if pc.is_fulldim(D):
-            p = E.shape[1]  # Disturbance space dimension
-        else:
+    if np.sum(np.abs(E)) > 0:  
+        if not pc.is_fulldim(D):
             E = np.zeros(K.shape)
-            p = 1
-    else:
-        E = np.zeros(K.shape)
-        p = 1
            
     list_len = np.zeros(len(list_P))
     for i in range(len(list_P)):
         list_len[i] = list_P[i].A.shape[0]
 
     LUn = np.shape(PU.A)[0]
+    
     Lk = np.zeros([np.sum(list_len), n+N*m])
     LU = np.zeros([LUn*N,n+N*m])
     
@@ -1097,51 +1122,61 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     Gk = np.zeros([np.sum(list_len), p*N])
     GU = np.zeros([LUn*N, p*N])
     
-    K_hat = np.zeros([np.sum(list_len) + LUn*N, 1])
-                
-    Amatr = np.eye(n)
-    Bmatr = np.zeros([n, m*N])
-    Ematr = np.zeros([n, p*N])
-    K_it = np.zeros(K.shape)
-    
+    K_hat = np.tile(K, (N,1))
+    B_diag = B
+    E_diag = E
+    for i in range(N-1):
+        B_diag = block_diag(B_diag,B)
+        E_diag = block_diag(E_diag,E)
+    A_n = np.eye(n)
+    A_k = np.zeros([n, n*N])
     sum_vert = 0
     for i in range(N+1):
         Li = list_P[i]
         ######### FOR L #########
-        Lk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(0,n)) ] = \
-            np.dot(Li.A, Amatr)
-        Lk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(n, Lk.shape[1]))] = \
-            np.dot(Li.A,Bmatr)
+        AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])
+        Lk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(0,Lk.shape[1])) ] = \
+            np.dot(Li.A, AB_line)
         if i < N:
-            LU[np.ix_(range(i*LUn, (i+1)*LUn), range(n + m*i, n + m*(i+1)))] = PU.A
+            if PU.A.shape[1] == m:
+                LU[np.ix_(range(i*LUn, (i+1)*LUn), range(n + m*i, n + m*(i+1)))] = PU.A
+            elif PU.A.shape[1] == m+n:
+                uk_line = np.zeros([m, n + m*N])
+                uk_line[np.ix_(range(m), range(n+m*i, n+m*(i+1)))] = np.eye(m)
+                A_mult = np.vstack([uk_line, AB_line])
+                b_mult = np.zeros([m+n, 1])
+                b_mult[range(m, m+n), :] = np.dot(A_k, K_hat)
+                LU[np.ix_(range(i*LUn, (i+1)*LUn), range(n+m*N))] = np.dot(PU.A, A_mult)
+                MU[range(i*LUn, (i+1)*LUn), :] -= np.dot(PU.A, b_mult)
         ######### FOR M #########
-        Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = Li.b.reshape(Li.b.size,1)
+        Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = Li.b.reshape(Li.b.size,1) - \
+                np.dot(np.dot(Li.A,A_k), K_hat)
         ######### FOR G #########
         if i in disturbance_ind:
-            Gk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(Gk.shape[1]))] = \
-                np.dot(Li.A,Ematr)
-        ######### FOR K #########
-        K_hat[ range(sum_vert, sum_vert + Li.A.shape[0]), :] = np.dot(Li.A,K_it)
+            Gk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(Gk.shape[1]) )] = \
+                np.dot(np.dot(Li.A,A_k), E_diag)
+            if (PU.A.shape[1] == m+n) & (i < N):
+                A_k_E_diag = np.dot(A_k, E_diag)
+                d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
+                GU[np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))] = \
+                   np.dot(PU.A, d_mult)
         ####### Iterate #########
         if i < N:
             sum_vert += Li.A.shape[0]
-            Amatr = np.dot(Amatr, A)
-            Bmatr = np.dot(A, Bmatr)
-            Ematr = np.dot(A, Ematr)
-            Bmatr[np.ix_(range(n), range(i*m, (i+1)*m))] = B
-            Ematr[np.ix_(range(n), range(i*p, (i+1)*p))] = E
-            K_it = np.dot(A, K_it) + K
+            A_n = np.dot(A, A_n)
+            A_k = np.dot(A, A_k)
+            A_k[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
                 
     # Get disturbance sets
     if np.sum(np.abs(Gk)) > 0:  
         G = np.vstack([Gk,GU])
         D_hat = get_max_extreme(G,D,N)
     else:
-        D_hat = np.zeros(K_hat.shape)
-        
+        D_hat = np.zeros([np.sum(list_len) + LUn*N,1])
+
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
-    M = np.vstack([Mk, MU]) - K_hat - D_hat
+    M = np.vstack([Mk, MU]) - D_hat
     return L,M
 
 def get_max_extreme(G,D,N):
@@ -1191,7 +1226,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     """
     
     N = u_seq.shape[0]
-    x = x0
+    x = x0.reshape(x0.size,1)
     
     A = ssys.A
     B = ssys.B
@@ -1202,18 +1237,11 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     
     inside = True
     for i in range(N-1):
-        u = u_seq[i,:]
-    
-        if not pc.is_inside(ssys.Uset,u):
-            print "is_seq_inside: got u outside boundary set"
-    
-        x = np.dot(A,x) + np.dot(B,u) + K
-        
+        u = u_seq[i,:].reshape(u_seq[i,:].size,1)
+        x = np.dot(A,x) + np.dot(B,u) + K       
         if not pc.is_inside(P0, x):
             inside = False
-    un_1 = u_seq[N-1,:]
-    if not pc.is_inside(ssys.Uset, un_1):
-        print "is_seq_inside: got u outside boundary set"
+    un_1 = u_seq[N-1,:].reshape(u_seq[N-1,:].size,1)
     xn = np.dot(A,x) + np.dot(B,un_1) + K
     if not pc.is_inside(P1, xn):
         inside = False
