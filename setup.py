@@ -57,8 +57,10 @@ def check_glpk():
     return False
 
 
-# Handle "test" argument to check for dependencies;
-# occurs by default if "install" is given.
+# Handle "check" argument to check for dependencies;
+# occurs by default if "install" is given,
+# unless both "install" and "nocheck" are given (but typical
+# users do not need "nocheck").
 #
 # The behavior is such that if "check" is given as a command-line
 # argument, but "install" is not, then setup (as provided by
@@ -87,11 +89,22 @@ optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand
 import sys
 perform_setup = True
 check_deps = False
-if 'install' in sys.argv[1:]:
+if 'install' in sys.argv[1:] and 'nocheck' not in sys.argv[1:]:
     check_deps = True
 elif 'check' in sys.argv[1:]:
     perform_setup = False
     check_deps = True
+
+# Pull "check" and "nocheck" from argument list, if present, to play
+# nicely with Distutils setup.
+try:
+    sys.argv.remove('check')
+except ValueError:
+    pass
+try:
+    sys.argv.remove('nocheck')
+except ValueError:
+    pass
 
 if check_deps:
     print "Checking for dependencies..."
