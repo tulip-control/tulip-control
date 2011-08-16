@@ -4,17 +4,22 @@ rhtlp module.
 
 ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 
 import sys, os
 import math
 from numpy import array
+from subprocess import call
 
 from tulip.polytope_computations import Polytope
 from tulip.discretizeM import CtsSysDyn
 from tulip.spec import GRSpec
 from tulip.rhtlp import RHTLPProb, ShortHorizonProb
+from tulip import grsim
 
 
 # Road configuration
@@ -315,3 +320,22 @@ for id in xrange(0, roadLength*roadWidth):
     excluded_state['X'+str(id)] = False
 
 ret = rhtlpprob.validate(excluded_state=excluded_state)
+print ret
+
+# Synthesize automatons for each short horizon problem.
+aut_list = [shprob.synthesizePlannerAut() for shprob in rhtlpprob.shprobs]
+
+
+
+# Generate graph of all automatons.
+destfile = 'acar_example.gexf'
+grsim.writeStatesToFile(aut_list, destfile)
+
+# Display graph?
+if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
+    try:
+        print "Opening GEXF file in Gephi."
+        call(["gephi", destfile])
+    except:
+        print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
+              "gephi " + destfile + "\n\n"

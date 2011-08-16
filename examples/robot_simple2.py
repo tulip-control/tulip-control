@@ -6,6 +6,9 @@ September 2, 2010
 
 minor refactoring by SCL <slivingston@caltech.edu>
 3 May 2011.
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 import sys, os
@@ -62,24 +65,22 @@ realizability = prob.checkRealizability(verbose=2)
 # Compute an automaton
 aut = prob.synthesizePlannerAut(verbose=2)
 
-# Simulate
+
+
+# Simulate.
 num_it = 30
-init_state = {}
-init_state['X0reach'] = True
-env_states = []
-for i in xrange(0,num_it):
+env_states = [{'X0reach': True}]
+for i in range(1, num_it):
     if (i%3 == 0):
         env_states.append({'park':True})
     else:
         env_states.append({'park':False})
 
-states = grsim.grsim(aut, init_state, env_states, num_it)
-grsim.writeStatesToFile(states, 'robot_sim.txt')
-
-f = open('robot_disc_dynamics.txt', 'w')
-disc_dynamics = prob.getDiscretizedDynamics()
-f.write(str(disc_dynamics.list_prop_symbol) + '\n')
-for i in xrange(0, len(disc_dynamics.list_region)):
-    f.write(str(disc_dynamics.list_region[i].list_prop))
-    f.write('\n')
-f.close()
+destfile = 'rsimple_example.gexf'
+label_vars = ['park', 'cellID', 'X0reach']
+delay = 2
+vis_depth = 3
+aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
+                         num_it=num_it, deterministic_env=False, graph_vis=True,
+                         destfile=destfile, label_vars=label_vars, delay=delay,
+                         vis_depth=vis_depth)

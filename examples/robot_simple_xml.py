@@ -12,6 +12,7 @@ September 2, 2010
 Small modifications by SCL <slivingston@caltech.edu>
 
 Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 import sys, os
@@ -30,7 +31,7 @@ smvfile = os.path.join(path, 'specs', testfile+'.smv')
 spcfile = os.path.join(path, 'specs', testfile+'.spc')
 autfile = os.path.join(path, 'specs', testfile+'.aut')
 
-load_from_XML = True
+load_from_XML = False
 if not load_from_XML:
 
     # Environment variables
@@ -93,20 +94,26 @@ else:
     disc_dynamics = prob.getDiscretizedDynamics()
 
 
-# Simulate
+# Simulate.
 num_it = 30
-init_state = {'X0reach': True}
-aut_states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
+env_states = [{'X0reach': True}]
+for i in range(1, num_it):
+    if (i%3 == 0):
+        env_states.append({'park':True})
+    else:
+        env_states.append({'park':False})
 
 destfile = 'rsimple_example.gexf'
 label_vars = ['park', 'cellID', 'X0reach']
-grsim.writeStatesToFile([aut], destfile, label_vars=label_vars)
-
 delay = 2
 vis_depth = 3
-grsim.simulateGraph([aut_states], destfile, delay=delay, vis_depth=vis_depth)
+aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
+                         num_it=num_it, deterministic_env=False, graph_vis=True,
+                         destfile=destfile, label_vars=label_vars, delay=delay,
+                         vis_depth=vis_depth)
 
 
+# Save discrete dynamics.
 f = open('rsimple_example_disc_dynamics.txt', 'w')
 f.write(str(disc_dynamics.list_prop_symbol) + '\n')
 for i in xrange(0, len(disc_dynamics.list_region)):

@@ -45,7 +45,9 @@ Nok Wongpiromsarn (nok@cds.caltech.edu)
 :Version: 0.1.0
 """
 
-import re, copy, os
+import re, copy, os, random
+from pygraph.classes.digraph import digraph
+from pygraph.algorithms.accessibility import connected_components
 import xml.etree.ElementTree as ET
 
 from errorprint import printWarning, printError
@@ -146,6 +148,90 @@ class Automaton:
                 for i in xrange(0,len(transition)):
                     transition[i] = int(transition[i])
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
+
+    def trimDeadStates(self):
+        """
+        Recursively delete states with no outgoing transitions.
+
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        # Create directed graph in pygraph.
+        gr = digraph()
+        
+        # Add nodes to graph.
+        for state in self.states:
+            gr.add_node(state.id, state.state.items())
+        
+        # Add edges to graph.
+        for state in self.states:
+            for trans in state.transition:
+                gr.add_edge((state.id, trans))
+        
+        # Delete nodes with no outbound transitions.
+        changed = True  # Becomes False when no deletions have been made.
+        while changed:
+            changed = False
+            for node in gr.nodes():
+                if gr.neighbors(node) == []:
+                    changed = True
+                    gr.del_node(node)
+        
+        # Reorder nodes by setting 'new_state_id'.
+        for (i, node) in enumerate(gr.nodes()):
+            gr.add_node_attribute(node, ('new_state_id', i))
+        
+        # Recreate automaton from graph.
+        self.states = []
+        for node in gr.nodes():
+            node_attr = dict(gr.node_attributes(node))
+            id = node_attr.pop('new_state_id')
+            transition = [dict(gr.node_attributes(neighbor))['new_state_id']
+                          for neighbor in gr.neighbors(node)]
+            self.states.append(AutomatonState(id=id, state=node_attr,
+                                              transition=transition))
+    
+    def trimUnconnectedStates(self, aut_state_id):
+        """
+        Delete all states that are inaccessible from the given state.
+        
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        # Create directed graph in pygraph.
+        gr = digraph()
+        
+        # Add nodes to graph.
+        for state in self.states:
+            gr.add_node(state.id, state.state.items())
+        
+        # Add edges to graph.
+        for state in self.states:
+            for trans in state.transition:
+                gr.add_edge((state.id, trans))
+        
+        # Delete nodes that are unconnected to 'aut_state_id'.
+        connected = connected_components(gr)
+        main_component = connected[aut_state_id]
+        for node in gr.nodes():
+            if connected[node] != main_component:
+                gr.del_node(node)
+        
+        # Reorder nodes by setting 'new_state_id'.
+        for (i, node) in enumerate(gr.nodes()):
+            gr.add_node_attribute(node, ('new_state_id', i))
+        
+        # Recreate automaton from graph.
+        self.states = []
+        for node in gr.nodes():
+            node_attr = dict(gr.node_attributes(node))
+            id = node_attr.pop('new_state_id')
+            transition = [dict(gr.node_attributes(neighbor))['new_state_id']
+                          for neighbor in gr.neighbors(node)]
+            self.states.append(AutomatonState(id=id, state=node_attr,
+                                              transition=transition))
 
     def writeDotFile(self, fname):
         """Write automaton to Graphviz DOT file.
@@ -415,7 +501,8 @@ class Automaton:
                 return aut_state
         return -1
 
-    def findNextAutState(self, current_aut_state, env_state):
+    def findNextAutState(self, current_aut_state, env_state={},
+                         deterministic_env=True):
         """
         Return the next AutomatonState object based on `env_state`.
         Return -1 if such an AutomatonState object is not found.
@@ -426,20 +513,26 @@ class Automaton:
           for unknown current or initial automaton state.
         - `env_state`: a dictionary whose keys are the names of the environment 
           variables and whose values are the values of the variables.
+        - 'deterministic_env': specifies whether to choose the environment state deterministically.
         """
-        transition = []
         if (current_aut_state is None):
-            transition = range(0, self.size())
+            transition = range(self.size())
         else:
-            transition = current_aut_state.transition
-        for next_aut_state_id in transition:
-            is_env = True
+            transition = current_aut_state.transition[:]
+        
+        def stateSatisfiesEnv(next_aut_id):
             for var in env_state.keys():
-                if (self.states[next_aut_state_id].state[var] != env_state[var]):
-                    is_env = False
-            if (is_env):
-                return self.states[next_aut_state_id]
-        return -1
+                if not (self.states[next_aut_id].state[var] == env_state[var]):
+                    return False
+            return True
+        transition = filter(stateSatisfiesEnv, transition)
+        
+        if len(transition) == 0:
+            return -1
+        elif (deterministic_env):
+            return self.states[transition[0]]
+        else:
+            return self.states[random.choice(transition)]
 
 
 ###################################################################

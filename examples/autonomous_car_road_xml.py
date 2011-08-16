@@ -7,6 +7,9 @@ ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
 
 Small modifications by SCL <slivingston@caltech.edu>
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 
@@ -351,7 +354,7 @@ aut_list = [shprob.synthesizePlannerAut() for shprob in rhtlpprob.shprobs]
 
 # Generate graph of all automatons.
 destfile = 'acar_example.gexf'
-grsim.writeStatesToFile(aut_list, [], destfile)
+grsim.writeStatesToFile(aut_list, destfile)
 
 # Display graph?
 if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
@@ -361,11 +364,3 @@ if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
     except:
         print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
               "gephi " + destfile + "\n\n"
-
-
-
-# if sp_auts is False:
-#     print 'Error: rhtlp prob instance failed validation check.'
-# else:
-#     for sp_aut in sp_auts:
-#         sp_aut.writeDotFile(sp_aut.__jtlvfile[:-4]+'.dot')
