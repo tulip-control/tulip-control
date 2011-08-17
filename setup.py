@@ -56,6 +56,14 @@ def check_glpk():
         return True
     return False
 
+def check_gephi():
+    import subprocess
+    cmd = subprocess.Popen(['which', 'gephi'], stdout=subprocess.PIPE)
+    for line in cmd.stdout:
+        if 'gephi' in line:
+            return True
+    return False
+
 
 # Handle "check" argument to check for dependencies;
 # occurs by default if "install" is given,
@@ -84,7 +92,7 @@ other_depends = {'MPT' : [check_mpt, 'ERROR: MPT not found.'],
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/']}
+optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'], 'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/']}
 
 import sys
 perform_setup = True
@@ -129,6 +137,11 @@ if check_deps:
         import matplotlib
     except:
         print 'ERROR: matplotlib not found.'
+        raise
+    try:
+        import pygraph
+    except:
+        print 'ERROR: python-graph not found.'
         raise
 
     # Other dependencies

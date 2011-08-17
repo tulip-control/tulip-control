@@ -91,15 +91,22 @@ jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
                         priority_kind=3, verbose=3)
 aut = automaton.Automaton(autfile, [], 3)
 
+# Remove dead-end states from automaton
+aut.trimDeadStates()
+
 # Simulate
 num_it = 10
-init_state = {}
-init_state['X0reach'] = True
-states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
+init_state = [{'X0reach': True}]
+
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+destfile = 'rsdisturbance_example.gexf'
+states = grsim.grsim([aut], init_state, num_it=num_it,
+                     deterministic_env=False, graph_vis=graph_vis,
+                     destfile=destfile)
 
 # Store discrete trajectory in np array
 cellid_arr = []
-for state in states:
+for (autID, state) in states:
     cellid_arr.append(state['cellID'])
 cellid_arr = np.array(cellid_arr)
 

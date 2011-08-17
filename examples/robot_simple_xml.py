@@ -10,6 +10,9 @@ Originally by Nok Wongpiromsarn (nok@cds.caltech.edu)
 September 2, 2010
 
 Small modifications by SCL <slivingston@caltech.edu>
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 import sys, os
@@ -18,10 +21,11 @@ from numpy import array
 from tulip import *
 from tulip import polytope_computations as pc
 from tulip import conxml
+from tulip import grsim
 
 
 # Specify where the smv file, spc file and aut file will go
-testfile = 'robot_simple'
+testfile = 'rsimple_example'
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 smvfile = os.path.join(path, 'specs', testfile+'.smv')
 spcfile = os.path.join(path, 'specs', testfile+'.spc')
@@ -81,30 +85,41 @@ if not load_from_XML:
     jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
                             priority_kind=3, verbose=3)
     aut = automaton.Automaton(autfile, [], 3)
+    
+    # Remove dead-end states from automaton
+    aut.trimDeadStates()
 
     conxml.writeXMLfile("rsimple_example.xml", prob, [assumption, guarantee], sys_dyn, aut, pretty=True)
 
-else:  # Read from tulipcon XML file
+else:
+    # Read from tulipcon XML file
     (prob, sys_dyn, aut) = conxml.readXMLfile("rsimple_example.xml")
     disc_dynamics = prob.getDiscretizedDynamics()
 
-if not aut.writeDotFile("rdsimple.dot"):
-    print "Error occurred while generating DOT file."
-else:
-    try:
-        call("dot rdsimple.dot -Tpng -o rdsimple.png".split())
-    except:
-        print "Failed to create image from DOT file. To do so, try\n\ndot rdsimple.dot -Tpng -o rdsimple.png\n"
 
-
-# Simulate
+# Simulate.
 num_it = 30
-init_state = {}
-init_state['X0reach'] = True
-states = grsim.grsim(aut, init_state, num_it=num_it, deterministic_env=False)
-grsim.writeStatesToFile(states, 'robot_sim.txt')
+env_states = [{'X0reach': True}]
+for i in range(1, num_it):
+    if (i%3 == 0):
+        env_states.append({'park':True})
+    else:
+        env_states.append({'park':False})
 
-f = open('robot_disc_dynamics.txt', 'w')
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+destfile = 'rsimple_example.gexf'
+label_vars = ['park', 'cellID', 'X0reach']
+delay = 2
+vis_depth = 3
+aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
+                         num_it=num_it, deterministic_env=False,
+                         graph_vis=graph_vis, destfile=destfile,
+                         label_vars=label_vars, delay=delay,
+                         vis_depth=vis_depth)
+
+
+# Save discrete dynamics.
+f = open('rsimple_example_disc_dynamics.txt', 'w')
 f.write(str(disc_dynamics.list_prop_symbol) + '\n')
 for i in xrange(0, len(disc_dynamics.list_region)):
     f.write(str(disc_dynamics.list_region[i].list_prop))

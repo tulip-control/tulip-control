@@ -43,7 +43,9 @@ ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 ca. August 3, 2010
 """
 
-import re, copy, os
+import re, copy, os, random
+from pygraph.classes.digraph import digraph
+from pygraph.algorithms.accessibility import connected_components
 import xml.etree.ElementTree as ET
 
 from errorprint import printWarning, printError
@@ -147,6 +149,31 @@ class Automaton:
                 for i in xrange(0,len(transition)):
                     transition[i] = int(transition[i])
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
+    
+    def writeFile(self, destfile):
+        """
+        Write an aut file that is readable by 'self.loadFile'. Note that this
+        is not a true automaton file.
+        
+        Input:
+        
+        - 'destfile': the file name to be written to.
+        """
+        output = ""
+        for state in self.states:
+            output += 'State ' + str(state.id) + ' with rank # -> <'
+            for (k, v) in state.state.items():
+                output += str(k) + ':' + str(v) + ', '
+            if state.transition == []:
+                output += '>\n	With no successors.\n'
+            else:
+                output = output[:-2] + '>\n	With successors : '
+                output += str(state.transition)[1:-1] + '\n'
+        
+        print 'Writing output to %s.' % destfile
+        f = open(destfile, 'w')
+        f.write(output)
+                      
 
     def trimRedundantStates(self):
         """DEFUNCT UNTIL FURTHER NOTICE!
@@ -204,6 +231,87 @@ class Automaton:
         for current_id in range(len(self.states)):
             self.states[current_id].transition = list(set(self.states[current_id].transition))
         return True
+
+
+    def trimDeadStates(self):
+        """
+        Recursively delete states with no outgoing transitions.
+
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        self.createPygraphRepr()
+        
+        # Delete nodes with no outbound transitions.
+        changed = True  # Becomes False when no deletions have been made.
+        while changed:
+            changed = False
+            for node in self.pygraph.nodes():
+                if self.pygraph.neighbors(node) == []:
+                    changed = True
+                    self.pygraph.del_node(node)
+        
+        self.loadPygraphRepr()
+        
+    def trimUnconnectedStates(self, aut_state_id):
+        """
+        Delete all states that are inaccessible from the given state.
+        
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        self.createPygraphRepr()
+        
+        # Delete nodes that are unconnected to 'aut_state_id'.
+        connected = connected_components(self.pygraph)
+        main_component = connected[aut_state_id]
+        for node in self.pygraph.nodes():
+            if connected[node] != main_component:
+                self.pygraph.del_node(node)
+        
+        self.loadPygraphRepr()
+
+    def createPygraphRepr(self):
+        """
+        Generate a python-graph representation of this automaton, stored
+        in 'self.pygraph'
+        """
+        # Create directed graph in pygraph.
+        self.pygraph = digraph()
+        
+        # Add nodes to graph.
+        for state in self.states:
+            self.pygraph.add_node(state.id, state.state.items())
+        
+        # Add edges to graph.
+        for state in self.states:
+            for trans in state.transition:
+                self.pygraph.add_edge((state.id, trans))
+     
+    def loadPygraphRepr(self):
+        """
+        Recreate automaton states from 'self.pygraph'.
+        
+        Merge and update transition listings as needed.  N.B., this
+        method will change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        # Reorder nodes by setting 'new_state_id'.
+        for (i, node) in enumerate(self.pygraph.nodes()):
+            self.pygraph.add_node_attribute(node, ('new_state_id', i))
+        
+        # Recreate automaton from graph.
+        self.states = []
+        for node in self.pygraph.nodes():
+            node_attr = dict(self.pygraph.node_attributes(node))
+            id = node_attr.pop('new_state_id')
+            transition = [dict(self.pygraph.node_attributes(neighbor))['new_state_id']
+                          for neighbor in self.pygraph.neighbors(node)]
+            self.states.append(AutomatonState(id=id, state=node_attr,
+                                              transition=transition))
+        
 
     def writeDotFile(self, fname, hideZeros=False,
                      distinguishTurns=None, turnOrder=None):
@@ -542,7 +650,8 @@ class Automaton:
                 return aut_state
         return -1
 
-    def findNextAutState(self, current_aut_state, env_state):
+    def findNextAutState(self, current_aut_state, env_state={},
+                         deterministic_env=True):
         """
         Return the next AutomatonState object based on `env_state`.
         Return -1 if such an AutomatonState object is not found.
@@ -553,20 +662,26 @@ class Automaton:
           for unknown current or initial automaton state.
         - `env_state`: a dictionary whose keys are the names of the environment 
           variables and whose values are the values of the variables.
+        - 'deterministic_env': specifies whether to choose the environment state deterministically.
         """
-        transition = []
         if (current_aut_state is None):
-            transition = range(0, self.size())
+            transition = range(self.size())
         else:
-            transition = current_aut_state.transition
-        for next_aut_state_id in transition:
-            is_env = True
+            transition = current_aut_state.transition[:]
+        
+        def stateSatisfiesEnv(next_aut_id):
             for var in env_state.keys():
-                if (self.states[next_aut_state_id].state[var] != env_state[var]):
-                    is_env = False
-            if (is_env):
-                return self.states[next_aut_state_id]
-        return -1
+                if not (self.states[next_aut_id].state[var] == env_state[var]):
+                    return False
+            return True
+        transition = filter(stateSatisfiesEnv, transition)
+        
+        if len(transition) == 0:
+            return -1
+        elif (deterministic_env):
+            return self.states[transition[0]]
+        else:
+            return self.states[random.choice(transition)]
 
 
 ###################################################################

@@ -7,18 +7,23 @@ ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
 
 Small modifications by SCL <slivingston@caltech.edu>
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 
 import sys, os
 import math
 from numpy import array
+from subprocess import call
 
 from tulip.polytope_computations import Polytope
 from tulip.discretizeM import CtsSysDyn
 from tulip.spec import GRSpec
 from tulip.rhtlp import RHTLPProb, ShortHorizonProb
 from tulip import conxml
+from tulip import grsim
 
 
 ##############################
@@ -342,8 +347,22 @@ for id in xrange(0, roadLength*roadWidth):
 ret = rhtlpprob.validate(excluded_state=excluded_state)
 print ret
 
-# if sp_auts is False:
-#     print 'Error: rhtlp prob instance failed validation check.'
-# else:
-#     for sp_aut in sp_auts:
-#         sp_aut.writeDotFile(sp_aut.__jtlvfile[:-4]+'.dot')
+# Synthesize automatons for each short horizon problem.
+aut_list = [shprob.synthesizePlannerAut() for shprob in rhtlpprob.shprobs]
+
+# Remove dead-end states from automata.
+for aut in aut_list:
+    aut.trimDeadStates()
+
+if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
+    # Generate graph of all automatons.
+    destfile = 'acar_example.gexf'
+    grsim.writeStatesToFile(aut_list, destfile)
+
+    # Display graph.
+    try:
+        print "Opening GEXF file in Gephi."
+        call(["gephi", destfile])
+    except:
+        print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
+              "gephi " + destfile + "\n\n"
