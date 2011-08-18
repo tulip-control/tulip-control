@@ -116,7 +116,7 @@ for i in range(1, num_it):
     else:
         env_states.append({'park':False})
 
-graph_vis raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
 destfile = 'rsimple_example.gexf'
 label_vars = ['park', 'cellID', 'X0reach']
 delay = 2

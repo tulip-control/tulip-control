@@ -100,14 +100,14 @@ init_state = [{'X0reach': True}]
 
 graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
 destfile = 'rsdisturbance_example.gexf'
-states = grsim.grsim([aut], init_state, num_it=num_it,
+states = grsim.grsim([aut], env_states=init_state, num_it=num_it,
                      deterministic_env=False, graph_vis=graph_vis,
                      destfile=destfile)
 
 # Store discrete trajectory in np array
 cellid_arr = []
 for (autID, state) in states:
-    cellid_arr.append(state['cellID'])
+    cellid_arr.append(state.state['cellID'])
 cellid_arr = np.array(cellid_arr)
 
 # First continuous state is middle point of first cell
