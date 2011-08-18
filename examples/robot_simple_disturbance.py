@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-The example is an extension of robot_discrete_simple.py by including continuous dynamics
-and disturbance. 
+The example is an extension of robot_discrete_simple.py by including disturbanceand input computation using the "closed loop" algorithm.
 
 Petter Nilsson (pettni@kth.se)
 August 14, 2011
@@ -132,7 +131,7 @@ for i in range(1, len(cellid_arr)):
         x_arr = np.vstack([x_arr, x])   # Store state
 
 # Print trajectory information
-for i in range(u_arr.shape[0]):
+for i in range(x_arr.shape[0]-1):
     print "From: " + str(cellid_arr[np.floor(i/N)]) + " to " + str(cellid_arr[np.floor(i/N) + 1]) \
             + " u: " + str(u_arr[i,:]) + " x: " + str(x_arr[i,:]) + " d: " + str(d_arr[i,:])
 print "Final state x: " + str(x_arr[-1,:])

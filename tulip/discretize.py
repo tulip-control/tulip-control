@@ -542,7 +542,8 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
  
     """Calculate an input signal sequence taking the plant from state `start` 
     to state `end` in the partition part, such that 
-    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal.
+    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal. xc is
+    the chebyshev center of the final cell.
     If no cost parameters are given, Q = I and mid_weight=3 are used. 
         
     Input:
@@ -582,7 +583,8 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
     If the original proposition preserving partition is not convex, 
     safety can not be guaranteed."""
     
-    if (len(R) == 0) and (len(Q) == 0) and (len(r) == 0):
+    if (len(R) == 0) and (len(Q) == 0) and (len(r) == 0) and (mid_weight == 0):
+        # Default behavior
         Q = np.eye(N*ssys.B.shape[1])
         R = np.zeros([N*x0.size, N*x0.size])
         r = np.zeros([N*x0.size,1])
@@ -645,7 +647,9 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
                 r[range((N-1)*n, N*n), :] += -mid_weight*xc
             try:
                 u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+                r[range((N-1)*n, N*n), :] += mid_weight*xc
             except:
+                r[range((N-1)*n, N*n), :] += mid_weight*xc
                 continue
             if cost < low_cost:
                 low_u = u
@@ -985,7 +989,6 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
     - [u(k); x(k)] \in PU
     
     and minimizes x'Rx + 2*r'x + u'Qu
-    xc is the center of P3
     '''
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
