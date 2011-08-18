@@ -148,7 +148,7 @@ def grsim(aut_list, aut_trans_dict={}, env_states=[{}], num_it=20,
         # a 'current_aut_state' of None means to choose an initial state.
         aut_state = aut.findNextAutState(current_aut_state=aut_state,
                                          env_state=env_state,
-                                         deterministic_env=True)
+                                         deterministic_env=deterministic_env)
         if aut_state == -1:
             printError('The specified sequence of environment states ' + \
                        'does not satisfy the environment assumption.')

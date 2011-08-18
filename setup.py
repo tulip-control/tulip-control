@@ -166,9 +166,9 @@ if perform_setup:
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
           url = 'http://tulip-control.sourceforge.net',
-          requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib'],
+          requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib', 'pygraph'],
           packages = ['tulip'],
           package_dir = {'tulip' : 'tulip'},
           package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar', 'polytope/*.py']},
-          scripts = ['tools/aut2dot',]
+          scripts = ['tools/aut2dot','tools/aut2gexf','tools/trim_aut']
           )
