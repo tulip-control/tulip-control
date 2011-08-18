@@ -19,7 +19,7 @@ import sys, os
 from numpy import array
 
 from tulip import *
-from tulip import polytope_computations as pc
+import tulip.polytope as pc
 from tulip import conxml
 from tulip import grsim
 
@@ -60,13 +60,13 @@ if not load_from_XML:
     A = array([[1., 0.],[ 0., 1.]])
     B = array([[1.1052, 0.],[ 0., 1.1052]])
     U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-    sys_dyn = discretizeM.CtsSysDyn(A,B,[],U,[])
+    sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 
     # Compute the proposition preserving partition of the continuous state space
     cont_partition = prop2part.prop2part2(cont_state_space, cont_props)
 
     # Discretize the continuous state space
-    disc_dynamics = discretizeM.discretizeM(cont_partition, sys_dyn, verbose=2)
+    disc_dynamics = discretize.discretize(cont_partition, sys_dyn, use_mpt=True, verbose=2)
 
     # Spec
     assumption = 'X0reach & []<>(!park)'
