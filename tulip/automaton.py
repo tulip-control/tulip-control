@@ -634,6 +634,30 @@ class Automaton:
                 all_aut_states.append(aut_state)
         return all_aut_states
 
+    def findAllAutPartState(self, state_frag):
+        """Return list of nodes consistent with the given fragment.
+
+        state_frag should be a dictionary.  We say the state in a node
+        is ``consistent'' with the fragment if for every variable
+        appearing in state_frag, the valuations in state_frag and the
+        node are the same.
+
+        E.g., let aut be an instance of Automaton.  Then
+        aut.findAllAutPartState({"foobar" : 1}) would return a list of
+        nodes (instances of AutomatonState) in which the variable
+        "foobar" is 1 (true).
+        """
+        all_aut_states = []
+        for aut_state in self.states:
+            match_flag = True
+            for k in state_frag.items():
+                if k not in aut_state.state.items():
+                    match_flag = False
+                    break
+            if match_flag:
+                all_aut_states.append(aut_state)
+        return all_aut_states
+
     def findAutState(self, state):
         """
         Return the first AutomatonState object stored in this automaton whose state 
