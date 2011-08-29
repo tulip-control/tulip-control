@@ -50,11 +50,11 @@ def check_yices():
     return False
 
 def check_glpk():
-    import os.path
-    if os.path.exists('/usr/include/glpk.h') \
-            or os.path.exists('/usr/local/include/glpk.h'):
-        return True
-    return False
+    try:
+        import cvxopt.glpk
+    except ImportError:
+        return False
+    return True
 
 def check_gephi():
     import subprocess
