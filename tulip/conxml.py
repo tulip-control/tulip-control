@@ -49,10 +49,10 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 import rhtlp
-import discretizeM
+import discretize
 import automaton
 import prop2part
-import polytope_computations as pc
+import polytope as pc
 import jtlvint
 import errorprint as ep
 from spec import GRSpec
@@ -125,7 +125,7 @@ def loadXML(x, verbose=0, use_pickling=False):
         (tag_name, E) = untagmatrix(c_dyn.find("E"))
         (tag_name, Uset) = untagpolytope(c_dyn.find("U_set"))
         (tag_name, Wset) = untagpolytope(c_dyn.find("W_set"))
-        sys_dyn = discretizeM.CtsSysDyn(A, B, E, Uset, Wset)
+        sys_dyn = discretize.CtsSysDyn(A, B, E, [], Uset, Wset)
 
     # Extract LTL specification
     s_elem = elem.find("spec")
@@ -245,7 +245,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
 
     prob is an instance of SynthesisProb or a child class, such as
     RHTLPProb (both defined in rhtlp.py).  sys_dyn is an instance of
-    CtsSysDyn (defined in discretizeM.py), or None. If None, then
+    CtsSysDyn (defined in discretize.py), or None. If None, then
     continuous dynamics are considered empty (i.e. there are none);
     ** NOT IMPLEMENTED YET (where sys_dyn = None) **
 
@@ -277,7 +277,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     """
     if not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
         raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
-    if sys_dyn is not None and not isinstance(sys_dyn, discretizeM.CtsSysDyn):
+    if sys_dyn is not None and not isinstance(sys_dyn, discretize.CtsSysDyn):
         raise TypeError("sys_dyn should be an instance of discretizeM.CtsSysDyn or None.")
     if aut is not None and not isinstance(aut, automaton.Automaton):
         raise TypeError("aut should be an instance of Automaton or None.")

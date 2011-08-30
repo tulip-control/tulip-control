@@ -4,36 +4,46 @@ rhtlp module.
 
 ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
 August 28, 2010
+
+Small modifications by Yuchen Lin.
+12 Aug 2011
 """
 
 
+#@import_section@
 import sys, os
 import math
 from numpy import array
+from subprocess import call
 
-from tulip.polytope_computations import Polytope
-from tulip.discretizeM import CtsSysDyn
+from tulip.polytope import Polytope
+from tulip.discretize import CtsSysDyn
 from tulip.spec import GRSpec
 from tulip.rhtlp import RHTLPProb, ShortHorizonProb
+from tulip import grsim
+#@import_section_end@
 
 
-# Road configuration
+# Road configuration and Problem setup
+#@roadsetup@
 roadWidth = 3
 roadLength = 10
-
-# Problem setup
 dpopup = 2
 dsr = 3
 horizon = 3
+#@roadsetup_end@
 
 # Continuous dynamics: \dot{x} = u_x, \dot{y} = u_y
+#@contdyn@
 A = array([[1.1052, 0.],[ 0., 1.1052]])
 B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-sys_dyn = CtsSysDyn(A,B,[],U,[])
+sys_dyn = CtsSysDyn(A,B,[],[],U,[])
+#@contdyn_end@
 
 
 # Variables and propositions
+#@varprop@
 env_vars = {}
 cont_props = {}
 for x in xrange(0, roadLength):
@@ -42,12 +52,16 @@ for x in xrange(0, roadLength):
         obs = 'obs' + id
         cell = 'X' + id
         env_vars[obs] = 'boolean'
-        cont_props[cell] = Polytope(array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]), \
-                                        array([[x+1.], [-float(x)], [y+1.], [-float(y)]]))
+        cont_props[cell] = Polytope(array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]]),
+                                    array([[x+1.], [-float(x)], [y+1.], [-float(y)]]))
+#@varprop_end@
 
+########################################
 # Specification
-spec = GRSpec(env_init='', sys_init='', env_safety='', sys_safety='', \
-                  env_prog='', sys_prog='')
+########################################
+#@spec@
+spec = GRSpec(env_init='', sys_init='', env_safety='', sys_safety='',
+              env_prog='', sys_prog='')
 init_cells = range(0, roadLength*(roadWidth-1)+1, roadLength)
 
 # Assumption on the initial state
@@ -191,15 +205,21 @@ for fcell in final_cells:
         cell += ' | '
     cell += 'X' + str(fcell)
 spec.sys_prog = '(' + cell + ')'
+#@spec_end@
 
+
+#@prob@
 rhtlpprob = RHTLPProb(shprobs=[], Phi='True', discretize=False,
                       env_vars = env_vars, sys_disc_vars = {},
                       disc_props = {}, cont_props = cont_props, spec = spec,
                       sp_name = os.path.join('tmpspec', 'a_car'))
+#@prob_end@
 
 
+########################################
 # Short Horizon Problems
-
+########################################
+#@shorthoriz@
 for x_init in xrange(0, roadLength):
     print 'adding W' + str(x_init)
     # Environment variables
@@ -268,13 +288,18 @@ for x_init in xrange(0, roadLength):
                                          sys_dyn = sys_dyn,
                                          sp_name = os.path.join('tmpspec',
                                                                 'W'+str(x_init))))
+#@shorthoriz_end@
 
+#@setF@
 for x_init in xrange(0, roadLength):
     FWind = min([roadLength-1, x_init+horizon-1])
     rhtlpprob.shprobs[x_init].setFW(FW=rhtlpprob.shprobs[FWind], update=True, verbose=3)
+#@setF_end@
 
 # Validate whether rhtpprob is valid
+#@valid@
 ret = rhtlpprob.validate()
+#@valid_end@
 
 # The result of the above validate() call is
 # state 
@@ -310,8 +335,31 @@ ret = rhtlpprob.validate()
 #   (= X28 false)
 #   is not in any W
 # Since we know that we don't have to deal with the above state, we will exclude it.
+#@exclude@
 excluded_state = {}
 for id in xrange(0, roadLength*roadWidth):
     excluded_state['X'+str(id)] = False
 
 ret = rhtlpprob.validate(excluded_state=excluded_state)
+print ret
+#@exclude_end@
+
+# Synthesize automatons for each short horizon problem.
+aut_list = [shprob.synthesizePlannerAut() for shprob in rhtlpprob.shprobs]
+
+# Remove dead-end states from automata.
+for aut in aut_list:
+    aut.trimDeadStates()
+
+if raw_input("Do you want to open in Gephi? (y/n)") == 'y':
+    # Generate graph of all automatons.
+    destfile = 'acar_example.gexf'
+    grsim.writeStatesToFile(aut_list, destfile)
+
+    # Display graph.
+    try:
+        print "Opening GEXF file in Gephi."
+        call(["gephi", destfile])
+    except:
+        print "Failed to open " + destfile + " in Gephi. Try:\n\n" + \
+              "gephi " + destfile + "\n\n"

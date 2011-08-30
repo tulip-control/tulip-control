@@ -8,6 +8,10 @@ and its writeDotFile method from the command-line. Accepts a *.aut
 filename and, optionally, a destination filename. If no destination is
 given, default is to use input filename with new ending ".dot"
 
+By default in each state node, variables taking the value zero are not
+listed.  To disable this (i.e., do not hide any valuations), use the
+flag "-z".
+
 Also note that command-line arguments are handled manually, since they
 are so simple...
 
@@ -15,7 +19,7 @@ Example: suppose you have robotctrl.aut from a TuLiP (or JTLV)
 session. Then to generate a corresponding DOT file and create a PNG
 image, try
 
-$ aut2dot.py robotctrl.aut
+$ aut2dot robotctrl.aut
 $ dot -Tpng -O robotctrl.dot
 
 Depending on your graphviz installation, the resulting image file may
@@ -27,9 +31,16 @@ from tulip.automaton import Automaton
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print "Usage: aut2dot.py INPUT.aut [OUTPUT.dot]"
+    if len(sys.argv) < 2 or len(sys.argv) > 4:
+        print "Usage: aut2dot.py [-z] INPUT.aut [OUTPUT.dot]"
         exit(1)
+
+    # Detect and strip -z flag
+    if "-z" in sys.argv:
+        hidez_flag = False
+        sys.argv.remove("-z")
+    else:
+        hidez_flag = True
 
     if len(sys.argv) == 3:
         destfile = sys.argv[2]
@@ -40,6 +51,6 @@ if __name__ == "__main__":
             destfile = sys.argv[1][:-4] + ".dot"
     
     aut = Automaton(sys.argv[1])
-    if not aut.writeDotFile(destfile):
+    if not aut.writeDotFile(destfile, hideZeros=hidez_flag):
         print "Failed to create DOT file, " + destfile
         exit(-1)

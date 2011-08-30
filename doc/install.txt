@@ -1,0 +1,163 @@
+.. Emacs, this is -*-rst-*-
+.. highlight:: rst
+
+Installation
+============
+
+TuLiP is known to work with Python versions 2.6 and 2.7.  (This
+comment matters given dependence on Python standard libraries.)  To
+determine your default installed version of Python, open a new
+terminal and type::
+
+ $ python -V
+
+Note that you may have more than one version installed.  On Unix
+machines, these are typically named with the usual "python" followed
+by a major and minor version number, e.g. "python2.6".  Try looking
+for these with::
+
+ $ ls /usr/bin/python*
+
+The following packages are also *required*: `NumPy
+<http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_, `CVXOPT
+<http://abel.ee.ucla.edu/cvxopt/>`_, and `matplotlib
+<http://matplotlib.sourceforge.net/>`_.  These packages are quite
+standard in scientific computing environments and may already be
+installed.  To check, open a new terminal and try::
+
+ $ python -c 'import numpy'
+ $ python -c 'import scipy'
+ $ python -c 'import cvxopt'
+ $ python -c 'import matplotlib'
+
+If an error message occurs, the package might not be visible on the
+current path or may not be installed at all.  Try to install them
+yourself, or see section "Troubleshooting" below for help.
+
+The default (only) GR[1] synthesis tool used by TuLiP is implemented
+in `JTLV <http://jtlv.ysaar.net/>`_. Thus you must have Java version
+1.6 (or later) installed.  The Java runtime environment is standard on
+most platforms. You can check whether it's on the path and, if so,
+determine the version using::
+
+ $ java -version
+
+For receding horizon problems, you will need a tool for checking
+satisfiability.  At present only `Yices <http://yices.csl.sri.com/>`_
+is supported, so you must install it.  Once this is done, check that
+it is on the shell path with::
+
+ $ yices -V
+
+which will return the installed version number.  For problems on
+continuous state spaces, you will need methods for manipulating convex
+polytopes, computing partitions, etc.  In the recent release this
+required `MPT <http://control.ee.ethz.ch/~mpt/>`_ (the
+Multi-Parametric Toolbox), hence `Matlab
+<http://www.mathworks.com/products/matlab/>`_.  Code achieving
+independence is presently being developed and merged into the trunk
+sourcetree.  If you are going to use MPT, then its location must be
+added to the Matlab search path and it must be initialized.  You can
+achieve both steps automatically each time Matlab is opened by adding
+the following lines to your ``startup.m`` file::
+
+ addpath(genpath('/path/to/mpt'));
+ mpt_init;
+
+where "/path/to/mpt" should be replaced with the location where you
+placed MPT.  On Ubuntu GNU/Linux 11.04, running a default installation
+of Matlab R2010a, ``startup.m`` is located under
+``~/Documents/MATLAB/`` [#f1]_.  If there is no ``startup.m`` file
+present, you can create one; try an empty file with the above lines
+(and the mpt path suitably modified).
+
+Once all of the above preparations are completed, you can install
+TuLiP.  As with most `Distutils
+<http://docs.python.org/install/index.html>`_-based packages,
+installation proceeds with::
+
+ $ python setup.py install
+
+This script will also check for dependencies, i.e. look for NumPy,
+CVXOPT, etc.
+
+
+Troubleshooting
+---------------
+
+Regarding installation of numerical computing packages (NumPy, etc.),
+for the love of all that is good, please run tests to verify proper
+behavior!  ...unless you use a very well established install method.
+Nonetheless, unit testing is always good practice.
+
+If you think the necessary packages are installed, but are unsure how
+to debug Python, then consider the following tips.  To see the python
+path, execute::
+
+ $ python -c 'import sys; print "\n".join(sys.path)'
+
+Each path searched is listed on a new line. You can augment this list
+by appending locations (separated by ":") to the environment variable
+**PYTHONPATH**.  To see what it's currently set to, and add a new path
+to "/home/frodo/work", use::
+
+ $ echo $PYTHONPATH
+ $ export PYTHONPATH=$PYTHONPATH:/home/frodo/work
+
+You may need to tweak the export statement depending on your terminal
+shell.  All of my examples are tested with zsh (the Z shell).
+
+Ubuntu (or Debian) GNU/Linux
+````````````````````````````
+
+To install the python package dependencies, try::
+
+ $ sudo apt-get install python-numpy python-scipy python-matplotlib python-cvxopt
+
+Mac OS X
+````````
+
+For installing SciPy, NumPy, and Matplotlib, consider trying
+`Scipy Superpack for Mac OSX
+<http://stronginference.com/scipy-superpack/>`_ by Chris Fonnesbeck.
+
+To avoid problems when running examples with continuous dynamics, make
+sure you launch MATLAB from the command line in the shell and set up
+MPT from there.
+
+If you launch MATLAB through a short-cut and setup MPT that way, even
+if it looks as if it gets installed correctly, it won't work when you
+launch MATLAB from the terminal later on (they just use different path
+definitions in startup). Hence, when you call MPT within TuLiP, you
+will get an error if you did not use terminal while setting up
+MPT.
+`The details of the issue from Mathworks. <http://www.mathworks.com/support/solutions/en/data/1-Q4J2R/index.html?product=ML&solution=1-Q4J2R>`_
+
+virtualenv and pydoc
+````````````````````
+
+If you have installed TuLiP into a `virtualenv
+<http://www.virtualenv.org/>`_-built environment, then the
+documentation may not be visible through `pydoc
+<http://docs.python.org/library/pydoc.html>`_ .  There are more
+sophisticated ways to fix this, but an easy solution is to augment the
+path used by pydoc with an alias.  E.g., suppose your username is
+"frodo", you are running Python v2.6, and your virtual environment is
+called "PY_scratch" under your home directory.  Then the appropriate
+alias is similar to::
+
+ $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
+
+To set this alias for every new terminal session, add the line to your
+shell startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc``
+for zsh.  To test it, try looking at the Automaton module by
+entering::
+
+ $ pydoc tulip.automaton
+
+
+.. rubric:: Footnotes
+
+.. [#f1] On Unix systems, in particular GNU/Linux and Mac OS X, the
+         terminal shell treats ``~`` as a special symbol representing
+         the home directory of the current user.

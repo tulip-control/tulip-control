@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'TuLiP'
-copyright = u'2010-2011, Richard Murray, Necmiye Ozay, Ufuk Topcu, Nok Wongpiromsarn, Mumu Xu'
+copyright = u'2010-2011, California Institute of Technology'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -1,3 +1,5 @@
+.. Emacs, this is -*-rst-*-
+
 Receding horizon Temporal Logic Planning
 ========================================
 .. automodule:: spec

@@ -1,7 +1,3 @@
-# __init__.py - initialization for TuLiP
-#
-# Author: Richard M. Murray
-# Date: 19 Apr 2011
 #
 # This file contains the initialization information from the tulip package.
 #
@@ -37,18 +33,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# $Id$
 
-"""TuLiP Toolbox
+"""TuLiP Toolbox Polytope module
 
-The Temporal Logic Planning (TuLiP) Toolbox provides functions
-for verifying and constructing control protocols.
+Main functions are in polytope.py, which are imported automatically.
+Functions for plotting are in plot.py, requires matplotlib.
 """
 
-__all__ = ["prop2part", "grsim", "jtlvint", "automaton", "rhtlp", "spec", 'discretize', 'polytope']
-
-import prop2part
-import grsim
-import jtlvint
-import automaton
-from spec import GRSpec
+from polytope import *

@@ -1,3 +1,5 @@
+.. Emacs, this is -*-rst-*-
+
 Planner Synthesis
 =================
 .. automodule:: grgameint

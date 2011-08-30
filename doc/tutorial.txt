@@ -1,3 +1,4 @@
+.. Emacs, this is -*-rst-*-
 .. highlight:: rst
 
 Tutorial and Examples
@@ -114,14 +115,14 @@ represented by a finite transition system.
 
 CtsSysDyn class is used to define continuous dynamics.
 
-     .. autoclass:: discretizeM.CtsSysDyn
+     .. autoclass:: discretize.CtsSysDyn
 	:noindex:
 
 
 Once we have the proposition preserving partition and the continuous dynamics,
 continuous state space discretization can be done using the following function call:
 
-     .. autofunction:: discretizeM.discretizeM
+     .. autofunction:: discretize.discretizeM
 	:noindex:
 
 
@@ -154,11 +155,12 @@ states in cell :math:`c_j` satisfy proposition :math:`X_i`.
 Then, we can replace any proposition :math:`X_i` on the continuous state variables
 by the formula :math:`\displaystyle{\bigvee_{j \text{ s.t. } c_j \models X_i} v = c_j}`.
 
-Putting everything together, we now obtain a specification of the form in :eq:`spec`.
-We can then use the GR(1) Game implementation in `JTLV <http://jtlv.ysaar.net/>`_ to 
-automatically synthesize a planner that ensures the satisfaction of the specification,
-taking into account all the possible behaviors of the environment.
-This can be done using the following steps.
+Putting everything together, we now obtain a specification of the form
+in :eq:`spec` (see also :ref:`ssec:spectips`).  We can then use the
+GR(1) Game implementation in `JTLV <http://jtlv.ysaar.net/>`_ to
+automatically synthesize a planner that ensures the satisfaction of
+the specification, taking into account all the possible behaviors of
+the environment.  This can be done using the following steps.
 
     1. Generate input to JTLV
 
@@ -180,6 +182,20 @@ Step 1 and 2 above can be combined using the following function:
         .. autofunction:: jtlvint.synthesize
 	   :noindex:
 
+
+.. _ssec:spectips:
+
+Syntax for Writing Specifications 
+`````````````````````````````````
+
+The specification :eq:`spec` may contain various LTL operators, arithmetic operators for integer variables and parentheses 
+for precedence or to increase readability. Here is a quick list of names of the operators followed by the corresponding symbols that 
+are compatible with rhtlp: 
+
+and: &, or: |, not: !, next: next, always: [], eventually: <>, 
+implies: ->; boolean constants: TRUE, FALSE; order for integer variables: =, <, >, >=, <=; arithmetic operations: +, -; parantheses: (, ).
+
+Also note that the domains of the variables can be either boolean or a list of integers.
 
 .. _ssec:ex1:
 
@@ -210,22 +226,26 @@ by introducing an auxiliary discretey system variable :math:`X0reach,` initializ
 To automatically synthesize a planner for this robot, we first import the necessary modules.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 12-15
+   :start-after: @import_section@
+   :end-before: @import_section_end@
 
 Specify the smv file, spc file and aut file.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 18-22
+   :start-after: @filename_section@
+   :end-before: @filename_section_end@
 
 Specify the environment variables.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 25
+   :start-after: @envvar_section@
+   :end-before: @envvar_section_end@
 
 Specify the discrete system variable.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 31
+   :start-after: @sysdiscvar_section@
+   :end-before: @sysdiscvar_section_end@
 
 Specify the transition system representing the continuous dynamics.
 First, we list the propositions on the continuous states.
@@ -244,32 +264,38 @@ the robot can move to region i while only staying in the union of region i
 and region j.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 34, 38-39, 47-54, 59-64
+   :start-after: @ts_section@
+   :end-before: @ts_section_end@
 
 Specification.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 67-69
+   :start-after: @specification@
+   :end-before: @specification_end@
 
 Generate input to JTLV.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 72-73
+   :start-after: @geninput@
+   :end-before: @geninput_end@
 
 Check realizability.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 76-77
+   :start-after: @check@
+   :end-before: @check_end@
 
 Construct an automaton.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 80-81
+   :start-after: @compaut@
+   :end-before: @compaut_end@
 
 Run simulation.
 
 .. literalinclude:: ../examples/robot_discrete_simple.py
-   :lines: 85-95
+   :start-after: @sim@
+   :end-before: @sim_end@
 
 
 .. _ssec:ex2:
@@ -285,7 +311,8 @@ and specify the environment and the discrete system variables
 as in the previous example.
 
 .. literalinclude:: ../examples/robot_simple.py
-   :lines: 11-17, 19-24, 26, 32
+   :start-after: @importvar@
+   :end-before: @importvar_end@
 
 Next, we specify the continuous dynamics.
 This includes specifying the continuous state space, propositions on continuous variables,
@@ -293,24 +320,28 @@ and the dynamics.
 The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y} = u_y.`
 
 .. literalinclude:: ../examples/robot_simple.py
-   :lines: 35-37, 39-45, 47-50
+   :start-after: @contdyn@
+   :end-before: @contdyn_end@
 
 Now, we can construct the proposition preserving partition of the continuous state space
 and discretize the continuous state space based on the dynamics.
 
 .. literalinclude:: ../examples/robot_simple.py
-   :lines: 53, 56
+   :start-after: @discretize@
+   :end-before: @discretize_end@
 
 The rest is the same as in the previous example. 
 We specify system specification, 
 generate input to JTLV,
 check realizability,
-construct an automaton,
-and run simulation.
+construct an automaton, run simulation and write simulation results to a file.
 
 .. literalinclude:: ../examples/robot_simple.py
-   :lines: 64-66, 68-70, 72-75, 77-87
-
+   :start-after: @gencheckcomp@
+   :end-before: @gencheckcomp_end@
+.. literalinclude:: ../examples/robot_simple.py
+   :start-after: @sim@
+   :end-before: @sim_end@
 
 
 Defining a Synthesis Problem
@@ -338,29 +369,34 @@ Note that we don't have to specify the smv file, spc file and aut file
 as in the previous examples.
 
 .. literalinclude:: ../examples/robot_simple2.py
-   :lines: 11-17, 19, 25-26, 29-31, 33-39, 41-44
+   :start-after: @importvardyn@
+   :end-before: @importvardyn_end@
 
 Next, we specify system specification. Here, specification is a GRSpec object,
 instead of a list of length 2 as in the previous examples.
 
 .. literalinclude:: ../examples/robot_simple2.py
-   :lines: 47-51
+   :start-after: @specification@
+   :end-before: @specification_end@
 
 Now, we have all the necessary elements to construct a synthesis problem.
 
 .. literalinclude:: ../examples/robot_simple2.py
-   :lines: 54-56
+   :start-after: @synprob@
+   :end-before: @synprob_end@
 
 Once a SynthesisProb object is constructed, we can check the realizability of this problem
 and construct the automaton.
 
 .. literalinclude:: ../examples/robot_simple2.py
-   :lines: 59-60, 62
+   :start-after: @checkcomp@
+   :end-before: @checkcomp_end@
 
 Finally, we can run the simulation as before.
 
 .. literalinclude:: ../examples/robot_simple2.py
-   :lines: 65-75
+   :start-after: @sim@
+   :end-before: @sim_end@
 
 
 Receding Horizon Temporal Logic Planning
@@ -448,47 +484,56 @@ It is a simplified version of the problem presented in our
 We first import the necessary modules.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 13-18
+   :start-after: @import_section@
+   :end-before: @import_section_end@
 
 Specify the road configuration and the problem setup.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 22-23, 26-28
+   :start-after: @roadsetup@
+   :end-before: @roadsetup_end@
 
 Continuous dynamics.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 32-34
+   :start-after: @contdyn@
+   :end-before: @contdyn_end@
 
 Variables and propositions.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 38-47
+   :start-after: @varprop@
+   :end-before: @varprop_end@
 
 Specification.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 50-194
+   :start-after: @spec@
+   :end-before: @spec_end@
 
 Now, we construct the RHTLPProb object.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 196-198
+   :start-after: @prob@
+   :end-before: @prob_end@
 
 Add ShortHorizonProb objects to the RHTLPProb object.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 204-269
+   :start-after: @shorthoriz@
+   :end-before: @shorthoriz_end@
 
 For each :math:`\mathcal{W}_j`, set :math:`\mathcal{F}(\mathcal{W}_j).`
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 271-273
+   :start-after: @setF@
+   :end-before: @setF_end@
 
 Now, we can validate whether the RHTLPProb object satisfies all the sufficient conditions.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 276
+   :start-after: @valid@
+   :end-before: @valid_end@
 
 The result of the above ``validate()`` call is that the state in which
 :math:`X_i = 0, \forall i \in \{0, \ldots, 29\}` is not in any :math:`\mathcal{W}_j,` 
@@ -497,5 +542,5 @@ covers the entire state space is not satisfied.
 Since we know that we don't have to deal with the above state, we will exclude it.
 
 .. literalinclude:: ../examples/autonomous_car_road.py
-   :lines: 312-316
-
+   :start-after: @exclude@
+   :end-before: @exclude_end@

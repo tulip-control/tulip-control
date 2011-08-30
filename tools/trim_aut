@@ -1,9 +1,4 @@
-# __init__.py - initialization for TuLiP
-#
-# Author: Richard M. Murray
-# Date: 19 Apr 2011
-#
-# This file contains the initialization information from the tulip package.
+#! /usr/bin/env python
 #
 # Copyright (c) 2011 by California Institute of Technology
 # All rights reserved.
@@ -36,19 +31,40 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-# $Id$
 
-"""TuLiP Toolbox
 
-The Temporal Logic Planning (TuLiP) Toolbox provides functions
-for verifying and constructing control protocols.
+"""
+Accepts a *.aut filename and, optionally, a destination filename. If no
+destination is given, default is to use input filename with "_trimmed"
+appended.
+
+Also note that command-line arguments are handled manually, since they
+are so simple...
+
+Originally written by Scott Livingston for GraphViz DOT files.
+
+Modified by Yuchen Lin for automaton files.
 """
 
-__all__ = ["prop2part", "grsim", "jtlvint", "automaton", "rhtlp", "spec", 'discretize', 'polytope']
+import sys
+from subprocess import call
 
-import prop2part
-import grsim
-import jtlvint
-import automaton
-from spec import GRSpec
+from tulip.automaton import Automaton
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        print "Usage: trim_aut INPUT.aut [OUTPUT.aut]"
+        exit(1)
+
+    if len(sys.argv) == 3:
+        destfile = sys.argv[2]
+    else:
+        if len(sys.argv[1]) < 4:  # Handle weirdly short names
+            destfile = sys.argv[1] + "_trimmed"
+        else:
+            destfile = sys.argv[1][:-4] + "_trimmed.aut"
+    
+    aut = Automaton(sys.argv[1])
+    aut.trimDeadStates()
+    aut.writeFile(destfile)
