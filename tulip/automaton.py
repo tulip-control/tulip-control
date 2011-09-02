@@ -563,6 +563,33 @@ class Automaton:
                 return self.states[aut_state_index]
             else:
                 return -1
+
+    def getAutInSet(self, aut_state_id):
+        """Find all nodes that include given ID in their outward transitions.
+
+        If the automaton is viewed as a directed graph, and the given
+        ID corresponds to node v, then we are interested in all v'\in V
+        such that (v',v) is an edge in the graph.
+
+        (Comments on efficiency.)  The automaton is stored as a tree,
+        where parents connect to children as in a linked list. Thus
+        given a node, finding the set of outward edges takes constant
+        time, whereas finding the inward set (as done by this method)
+        requires searching the set of nodes and their respective
+        transition sets; so, O(N*M) time, where N is the number of
+        nodes and M is the average number of outward edges.
+
+        Return list of nodes (instances of AutomatonState),
+        or None on error.
+        """
+        this_node = self.getAutState(aut_state_id)
+        if not isinstance(this_node, AutomatonState):
+            return None
+        inward_list = []
+        for k in range(len(self.states)):
+            if aut_state_id in self.states[k].transition:
+                inward_list.append(self.states[k])
+        return inward_list
     
     def setAutStateState(self, aut_state_id, aut_state_state, verbose=0):
         """ 
