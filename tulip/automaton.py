@@ -313,6 +313,84 @@ class Automaton:
                                               transition=transition))
         
 
+    def writeDotFileEdged(self, fname, env_vars, sys_vars,
+                          hideZeros=False, hideAgentNames=True):
+        """Write edge-labeled automaton to Graphviz DOT file.
+
+        I forked the method writeDotFile for fear of feature creep.
+        At least now the features will creep upon us from separate
+        methods, rather than a single complicated argument list.
+
+        env_vars and sys_vars should be lists of variable names (type
+        string) describing environment and system variables,
+        respectively.
+
+        The intent is to view nodes labeled with a system decision,
+        and edges labeled with an environment decision, thus better
+        expressing the game.  Recall the automaton is a strategy.
+
+        Return False on failure; True otherwise (success).
+        """
+        if len(env_vars) == 0 or len(sys_vars) == 0:
+            return False
+
+        # Make looping possible
+        agents = {"env" : env_vars,
+                  "sys" : sys_vars}
+        
+        output = "digraph A {\n"
+
+        # Prebuild sane state names
+        state_labels = dict()
+        for state in self.states:
+            for agent_name in agents.keys():
+                state_labels[str(state.id)+agent_name] = ''
+            for (k,v) in state.state.items():
+                if (not hideZeros) or (v != 0):
+                    agent_name = None
+                    for agent_candidate in agents.keys():
+                        if k in agents[agent_candidate]:
+                            agent_name = agent_candidate
+                            break
+                    if agent_name is None:
+                        printWarning("variable \""+k+"\" does not belong to an agent in distinguishedTurns")
+                        return False
+
+                    if len(state_labels[str(state.id)+agent_name]) == 0:
+                        if len(agent_name) > 0 and not hideAgentNames:
+                            state_labels[str(state.id)+agent_name] += str(state.id)+"::"+agent_name+";\\n" + k+": "+str(v)
+                        else:
+                            state_labels[str(state.id)+agent_name] += str(state.id)+";\\n" + k+": "+str(v)
+                    else:
+                        state_labels[str(state.id)+agent_name] += ", "+k+": "+str(v)
+            
+            for agent_name in agents.keys():
+                if len(state_labels[str(state.id)+agent_name]) == 0:
+                    if not hideAgentNames:
+                        state_labels[str(state.id)+agent_name] = str(state.id)+"::"+agent_name+";\\n {}"
+                    else:
+                        state_labels[str(state.id)+agent_name] = str(state.id)+";\\n {}"
+
+        # Initialization point
+        output += "    \"\" [shape=circle,style=filled,color=black];\n"
+        
+        # All nodes and edges
+        for state in self.states:
+            if len(self.getAutInSet(state.id)) == 0:
+                # Treat init nodes specially
+                output += "    \"\" -> \"" \
+                    + state_labels[str(state.id)+"sys"] +"\" [label=\""
+                output += state_labels[str(state.id)+"env"] + "\"];\n"
+            for trans in state.transition:
+                output += "    \""+ state_labels[str(state.id)+"sys"] +"\" -> \"" \
+                    + state_labels[str(self.states[trans].id)+"sys"] +"\" [label=\""
+                output += state_labels[str(self.states[trans].id)+"env"] + "\"];\n"
+
+        output += "\n}\n"
+        with open(fname, "w") as f:
+            f.write(output)
+        return True
+
     def writeDotFile(self, fname, hideZeros=False,
                      distinguishTurns=None, turnOrder=None):
         """Write automaton to Graphviz DOT file.
@@ -660,6 +738,20 @@ class Automaton:
             if (aut_state.state == state):
                 all_aut_states.append(aut_state)
         return all_aut_states
+
+    def getAutInit(self):
+        """Return list of nodes that are initial, i.e. have empty In set.
+
+        N.B., the set of initial nodes is not saved, so every time you
+        call getAutInit, all nodes are checked for empty inward edge
+        sets, which itself incurs a search cost (cf. doc for method
+        getAutInSet).
+        """
+        init_nodes = []
+        for k in range(len(self.states)):
+            if len(self.getAutInSet(self.states[k].id)) == 0:
+                init_nodes.append(self.states[k])
+        return init_nodes
 
     def findAllAutPartState(self, state_frag):
         """Return list of nodes consistent with the given fragment.
