@@ -670,7 +670,7 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
         if not good:
             print "Calculated sequence not good"
     return low_u
-
+    
 def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
                   use_all_horizon=False, trans_set=None, max_num_poly=5):
 
@@ -1250,3 +1250,26 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         inside = False
             
     return inside
+    
+def get_cellID(x0, part):
+ 
+    """Return an integer specifying in which discrete state the continuous state x0
+    belongs to.
+        
+    Input:
+    - `x0`: initial continuous state
+    - `part`: PropPreservingPartition object specifying the state space partition
+    
+    Output:
+    - cellID: int specifying the discrete state in `part` x0 belongs to, -1 if x0 does 
+    not belong to any discrete state.
+    
+    Note1: If there are overlapping partitions (i.e., x0 can belong to more than one
+    discrete state), this just returns the first ID"""
+    
+    cellID = -1
+    for i in range(part.num_regions):
+        if pc.is_inside(part.list_region[i], x0):
+             cellID = i
+             break
+    return cellID
