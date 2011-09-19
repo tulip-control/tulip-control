@@ -24,5 +24,8 @@ polytope --- Polytope computations and plotting
 .. automodule:: polytope.polytope
    :members:
 
+Plotting
+````````
+
 .. automodule:: polytope.plot
    :members:
