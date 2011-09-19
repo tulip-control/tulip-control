@@ -33,22 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 -----------------
 Simulation Module
 -----------------
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 20, 2010
-:Version: 0.1.0
-
-minor refactoring by SCL <slivingston@caltech.edu>
-3 May 2011.
-
-Gephi graph visualization added by Yuchen Lin
-23 June - 12 August 2011.
 """
 
 import time
@@ -79,29 +67,30 @@ def grsim(aut_list, aut_trans_dict={}, env_states=[{}], num_it=20,
     dictionaries.
     
     Arguments:
-    aut_list -- a list of Automaton objects containing the automata
+
+    - `aut_list` -- a list of Automaton objects containing the automata
         generated from jtlvint.synthesize or jtlv.computeStrategy function.
-    aut_trans_dict -- a dictionary in which the keys correspond to exit states
+    - `aut_trans_dict` -- a dictionary in which the keys correspond to exit states
         of automata and the values are the entry states of the next automata.
         Both keys and values are tuples in the following format:
             (AutomatonID, AutomatonState)
         where 'AutomatonID' is an integer corresponding to the
         index of the current automaton and 'AutomatonState'
         is the current automaton state.
-    env_states -- a list of dictionaries of environment state, specifying
+    - `env_states` -- a list of dictionaries of environment state, specifying
         the sequence of environment states. If the length of this sequence
         is less than `num_it`, then this function will automatically pick
         the environment states for the rest of the execution.
-    num_it -- the number of iterations.
-    deterministic_env -- specify whether this function will choose
+    - `num_it` -- the number of iterations.
+    - `deterministic_env` -- specify whether this function will choose
         the environment state deterministically.
-    graph_vis -- specify whether to visualize the simulation in Gephi.
-    destfile -- for graph visualization, the string name of the desired
+    - `graph_vis` -- specify whether to visualize the simulation in Gephi.
+    - `destfile` -- for graph visualization, the string name of the desired
         destination '.gexf' file.
-    label_vars -- for graph visualization, a list of the names of the system
+    - `label_vars` -- for graph visualization, a list of the names of the system
         or environment variables to be encoded as labels.
-    delay -- for graph visualization, the time between simulation steps.
-    vis_depth -- for graph visualization, set the number of previous states to
+    - `delay` -- for graph visualization, the time between simulation steps.
+    - `vis_depth` -- for graph visualization, set the number of previous states to
         continue displaying.
         
     Return:
@@ -194,14 +183,15 @@ def writeStatesToFile(aut_list, destfile, aut_states_list=[], label_vars=None):
     sequence of traversed states.
 
     Arguments:
-    aut_list -- a list of Automaton objects.
-    destfile -- the string name of the desired destination file.
-    aut_states_list -- a list of tuples of automaton states, formatted as:
+
+    - `aut_list` -- a list of Automaton objects.
+    - `destfile` -- the string name of the desired destination file.
+    - `aut_states_list` -- a list of tuples of automaton states, formatted as:
             (AutomatonID, AutomatonState)
         where 'AutomatonID' is an integer corresponding to the
         index of the current automaton and 'AutomatonState'
         is the current automaton state.
-    label_vars -- a list of the names of the system or environment
+    - `label_vars` -- a list of the names of the system or environment
         variables to be encoded as labels.
     
     Return:
@@ -237,15 +227,17 @@ class visualizeGraph:
     a live automaton simulation to it.
 
     Arguments:
-    aut_list -- a list of Automaton objects.
-    destfile -- the string name of a '.gexf' graph file to be opened
+
+    - `aut_list` -- a list of Automaton objects.
+    - `destfile` -- the string name of a '.gexf' graph file to be opened
         in Gephi.
-    label_vars -- a list of the names of the system or environment
+    - `label_vars` -- a list of the names of the system or environment
         variables to be encoded as labels. 
     
     Fields:
-    gs -- a Gephi streaming server.
-    gephi -- an asynchronous process running Gephi.
+
+    - `gs` -- a Gephi streaming server.
+    - `gephi` -- an asynchronous process running Gephi.
     """
     def __init__(self, aut_list, destfile, label_vars=None):
         # First write the automata to file and open them in Gephi.
@@ -270,11 +262,11 @@ class visualizeGraph:
         self.gephi.join()
     
     def update(self, active_nodes):
-        """
-        Update the graph by streaming the changed active nodes.
+        """Update the graph by streaming the changed active nodes.
         
         Arguments:
-        active_nodes -- an ordered list of nodes that should be active.
+
+        - `active_nodes` -- an ordered list of nodes that should be active.
         
         Return:
         (nothing)

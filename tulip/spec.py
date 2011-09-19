@@ -33,16 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 --------------------
 Specification Module
 --------------------
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 25, 2010
-:Version: 0.1.0
 """
 
 import re, copy

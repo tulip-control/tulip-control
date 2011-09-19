@@ -50,7 +50,6 @@
 #  projection_interhull
 #  projection_exthull
 #
-
 """
 A computational geometry module for polytope computations. The module can be
 accessed by writing
@@ -74,14 +73,6 @@ Primary functions:
 Classes:
 	- Region
 	- Polytope
-
-Created by N. Ozay, 8/15/10 (necmiye@cds.caltech.edu)
-Modified by U. Topcu, 8/16/10
-
-minor refactoring by SCL <slivingston@caltech.edu>
-1 May 2011.
-
-Modified and restructured by P. Nilsson, summer 2011
 """
 
 import numpy as np
@@ -109,13 +100,13 @@ np.set_printoptions(precision=5, suppress = True)
 class Polytope:
     """Polytope class with following fields
     
-    -A: a numpy array for the hyperplane normals in hyperplane representation of a polytope
-    -b:  a numpy array for the hyperplane offsets in hyperplane representation of a polytope
-    -array: python array in the case of a union of convex polytopes
-    -chebXc: coordinates of chebyshev center (if calculated)
-    -chebR: chebyshev radius (if calculated)
-    -bbox: bounding box (if caluclated)
-    -minrep: if polytope is in minimal representation (after running reduce)
+    - `A`: a numpy array for the hyperplane normals in hyperplane representation of a polytope
+    - `b`:  a numpy array for the hyperplane offsets in hyperplane representation of a polytope
+    - `array`: python array in the case of a union of convex polytopes
+    - `chebXc`: coordinates of chebyshev center (if calculated)
+    - `chebR`: chebyshev radius (if calculated)
+    - `bbox`: bounding box (if caluclated)
+    - `minrep`: if polytope is in minimal representation (after running reduce)
     """
     
     def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None):
@@ -206,14 +197,14 @@ class Region:
     
     Contains the following fields:
     
-    `list_poly`: list of Polytope objects
-    `list_prop`: list of propositions inside region
-    `bbox`: if calculated, bounding box of region (see bounding_box)
-    `fulldim`: if calculated, boolean indicating whether region is fully dimensional
-    `volume`: if calculated, volume of region
-    -chebXc: coordinates of maximum chebyshev center (if calculated)
-    -chebR: maximum chebyshev radius (if calculated)
-"""
+    - `list_poly`: list of Polytope objects
+    - `list_prop`: list of propositions inside region
+    - `bbox`: if calculated, bounding box of region (see bounding_box)
+    - `fulldim`: if calculated, boolean indicating whether region is fully dimensional
+    - `volume`: if calculated, volume of region
+    - `chebXc`: coordinates of maximum chebyshev center (if calculated)
+    - `chebR`: maximum chebyshev radius (if calculated)
+    """
     
     def __init__(self, list_poly=[], list_prop=[]):
     
@@ -272,7 +263,7 @@ def is_empty(polyreg):
     `polyreg`: Polytope or Region instance
     
     Output:
-    'result': Boolean indicating whether polyreg is empty
+    `result`: Boolean indicating whether polyreg is empty
     """
     n = len(polyreg)
     if len(polyreg) == 0:
@@ -1448,7 +1439,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
 def num_bin(N, places=8):
     """Return N as list of bits, zero-filled to places.
 
-E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
-"""
+    E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
+    """
     return [(N>>k)&0x1  for k in range(places)]
     

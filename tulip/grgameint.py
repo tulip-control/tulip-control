@@ -33,18 +33,12 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 ---------------------------------------------------------------------
 Grgameint Module --- Interface to the JTLV implementation of GR1 game
 ---------------------------------------------------------------------
 
 About JTLV, see http://jtlv.ysaar.net/
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 20, 2010
-:Version: 0.1.0
 """
 
 import re, os, subprocess, sys

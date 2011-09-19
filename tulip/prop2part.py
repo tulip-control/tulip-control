@@ -32,15 +32,8 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 Proposition preserving partition module.
-
-Necmiye Ozay (necmiye@cds.caltech.edu)
-August 7, 2010
-
-minor refactoring by SCL <slivingston@caltech.edu>
-1 May 2011.
 """
 
 

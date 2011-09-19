@@ -33,18 +33,12 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 ------------------------------------
 Jtlvint Module --- Interface to JTLV
 ------------------------------------
 
 About JTLV, see http://jtlv.ysaar.net/
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 3, 2010
-:Version: 0.1.0
 """
 
 import re, os, subprocess, sys

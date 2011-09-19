@@ -33,19 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 -----------------------------------------------
 Receding horizon Temporal Logic Planning Module
 -----------------------------------------------
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 25, 2010
-:Version: 0.1.0
-
-minor refactoring by SCL <slivingston@caltech.edu>
-3 May 2011.
 """
 
 import sys, os, re, subprocess, copy

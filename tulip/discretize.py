@@ -30,11 +30,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """ 
-Algorithms related to discretization containing both MATLAB interface and Python
-discretization. Input calculation is available in python only but should work also
-for a state space partition discretized in MATLAB.
+Algorithms related to discretization containing both MATLAB interface
+and Python discretization. Input calculation is available in python
+only but should work also for a state space partition discretized in
+MATLAB.
 
 Classes:
     - CtsSysDyn
@@ -51,15 +51,6 @@ Helper functions:
     - getInputHelper
     - createLM
     - get_max_extreme
-
-Created by Ufuk Topcu, 8/30/10
-Modified by Nok Wongpiromsarn, 9/3/10
-
-:Version: 0.1.0
-
-minor refactoring by SCL <slivingston@caltech.edu>
-3 May 2011.
-Modified by Petter Nilsson, summer 2011
 """
 
 import sys, os, time, subprocess

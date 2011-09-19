@@ -33,14 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 ----------------
 Automaton Module
 ----------------
-
-ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
-ca. August 3, 2010
 """
 
 import re, copy, os, random

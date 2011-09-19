@@ -30,7 +30,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """
 Functions for plotting Polytopes and Partitions. The functions
 can be accessed by
@@ -42,8 +41,6 @@ Functions:
 	- plot
 	- plot_partition
 	- plot_trajectory
-
-Created by Petter Nilsson, 8/4/11
 """
 
 import numpy as np

@@ -41,7 +41,7 @@ to a GEXF file (in Gephi).
 
 import re
 
-from tulip.automaton import AutomatonState, Automaton
+from automaton import AutomatonState, Automaton
 
 activeID = 'is_active'
 
