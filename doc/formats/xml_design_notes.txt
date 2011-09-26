@@ -39,7 +39,7 @@ Notes:
   A = [[1, 2, 3],
        [4, 5, 6]]
   would be saved as
-  <A type="matrix" r="2" c="3">1, 2, 3, 4, 5, 6</A>
+  <A type="matrix" r="2" c="3">1 2 3 4 5 6</A>
 
 
 <tulipcon version="0">
@@ -70,10 +70,10 @@ Notes:
   <d_dyn>  N.B., this tag can also be empty (if disc dynamics is None).
     <domain type="polytope">...</domain>
     <trans type="matrix">...</trans>
-    <prop_symbols>...comma-separated list...</prop_symbols>
+    <prop_symbols>...space-separated list...</prop_symbols>
     <regions>
       <item type="region">
-        <list_prop>...comma-separated list...</list_prop>
+        <list_prop>...space-separated list...</list_prop>
         <reg_item type="polytope">...</reg_item>
       </item>
     </regions>
@@ -83,9 +83,11 @@ Notes:
     <node>
       <id>a unique identifier number</id>
       <name>a string name or description (may be empty, or the <name> tag may be omitted)</name>
-      <child_list>descendent nodes; comma-separated list of node ID numbers</child_list>
-      <variable name="" value="" />
+      <child_list>descendent nodes; space-separated list of node ID numbers</child_list>
+      <state>
+        <variable name="" value="" />
         ... omitted variables are assumed to take value 0 at this node.
+      </state>
     </node>
     ... more nodes ...
   </aut>

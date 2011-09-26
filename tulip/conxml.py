@@ -176,7 +176,7 @@ def loadXML(x, verbose=0, use_pickling=False):
         prob = None
     else:
         (tag_name, env_vars) = untagdict(elem.find("env_vars"))
-        (tag_name, sys_disc_vars) = untagdict(elem.find("con_vars"))
+        (tag_name, sys_disc_vars) = untagdict(elem.find("sys_vars"))
         if (d_dyn.find("domain") is None) \
                 and (d_dyn.find("trans") is None) \
                 and (d_dyn.find("prop_symbols") is None):
@@ -292,7 +292,8 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
         idt = ""
     idt_level = 0
 
-    output = '<tulipcon version="0">'+nl
+    output = '<?xml version="1.0" encoding="UTF-8"?>'+nl
+    output += '<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">'+nl
     idt_level += 1
     output += idt*idt_level+'<prob_type>'
     if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
@@ -316,7 +317,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     output += idt*idt_level+'</c_dyn>'+nl
 
     output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
-    output += tagdict("con_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
+    output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
 
     if spec is None:
         output += idt*idt_level+'<spec><assume></assume><guarantee></guarantee></spec>'+nl
@@ -374,7 +375,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
         idt_level += 1
         if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
             for R in disc_dynamics.list_region:
-                output += tagregion("item", R, pretty=pretty, idt_level=idt_level)
+                output += tagregion(R, pretty=pretty, idt_level=idt_level)
         idt_level -= 1
         output += idt*idt_level+'</regions>'+nl
         idt_level -= 1
@@ -440,7 +441,7 @@ def untaglist(x, cast_f=float, use_pickling=False):
     else:
         if cast_f is None:
             cast_f = str
-        li = [cast_f(k) for k in elem.text.split(",")]
+        li = [cast_f(k) for k in elem.text.split()]
     return (elem.tag, li)
 
 def untagdict(x, cast_f_keys=None, cast_f_values=None,
@@ -519,7 +520,7 @@ def untagmatrix(x, np_type=np.float64, use_pickling=False):
     else:
         num_rows = int(elem.attrib['r'])
         num_cols = int(elem.attrib['c'])
-        x_mat = np.array([k for k in elem.text.split(",")], dtype=np_type)
+        x_mat = np.array([k for k in elem.text.split()], dtype=np_type)
         x_mat = x_mat.reshape(num_rows, num_cols)
     return (elem.tag, x_mat)
 
@@ -555,7 +556,7 @@ def untagpolytope(x, np_type=np.float64, use_pickling=False):
     (K_out_name, K_out) = untagmatrix(k_tag, np_type=np_type,
                                       use_pickling=use_pickling)
 
-    return (elem.tag, pc.Polytope(H_out, K_out))
+    return (elem.tag, pc.Polytope(H_out, K_out, normalize=False))
 
 def untagregion(x, cast_f_list=str, np_type_P=np.float64, use_pickling=False):
     """Extract region from given tulipcon XML tag (string).
@@ -579,8 +580,8 @@ def untagregion(x, cast_f_list=str, np_type_P=np.float64, use_pickling=False):
         elem = ET.fromstring(x)
     else:
         elem = x
-    if elem.attrib['type'] != "region":
-        raise ValueError("tag should indicate type of ``region''.")
+    if elem.tag != "region":
+        raise ValueError("tag must be an instance of ``region''.")
 
     (tag_name, list_prop) = untaglist(elem.find("list_prop"), cast_f=cast_f_list,
                                       use_pickling=use_pickling)
@@ -643,7 +644,7 @@ def tagpolytope(name, P, use_pickling=False):
         raise TypeError("tag name must be a string.")
     # Handle nil polytope case
     if P is None or P == []:
-        P = pc.Polytope(np.array([]), np.array([]))
+        P = pc.Polytope(np.array([]), np.array([]), normalize=False)
     output = '<'+name+' type="polytope">'
     output += tagmatrix("H", P.A, use_pickling=False)
     output += tagmatrix("K", P.b, use_pickling=False)
@@ -667,14 +668,12 @@ def taglist(name, li, use_pickling=False):
 
     output = '<'+name+'>'
     if li is not None:
-        for i in range(len(li)-1):
-            output += str(li[i]) + ', '
-        output += str(li[-1])
+        output += ' '.join([str(k) for k in li])
     output += '</'+name+'>'
     return output
 
-def tagregion(name, R, pretty=False, use_pickling=False, idt_level=0):
-    """Create tag of type ``Region'', with given name.
+def tagregion(R, pretty=False, use_pickling=False, idt_level=0):
+    """Create tag of type ``Region.''
 
     Region is as defined in tulip.polytope_computations module.
 
@@ -686,9 +685,6 @@ def tagregion(name, R, pretty=False, use_pickling=False, idt_level=0):
     Return the resulting string.  On failure, raises an appropriate
     exception, or returns False.
     """
-    if not isinstance(name, str):
-        raise TypeError("tag name must be a string.")
-
     if pretty:
         nl = "\n"  # Newline
         idt = "  "  # Indentation
@@ -699,13 +695,13 @@ def tagregion(name, R, pretty=False, use_pickling=False, idt_level=0):
     # Handle nil Region case
     if R is None or R == []:
         R = pc.Region(list_poly=[], list_prop=[])
-    output = idt*idt_level+'<'+name+' type="region">'+nl
+    output = idt*idt_level+'<region>'+nl
     idt_level += 1
     output += idt*idt_level+taglist("list_prop", R.list_prop, use_pickling=use_pickling)+nl
     if R.list_poly is not None and len(R.list_poly) > 0:
         for P in R.list_poly:
             output += idt*idt_level+tagpolytope("reg_item", P)+nl
-    output += idt*(idt_level-1)+'</'+name+'>'+nl
+    output += idt*(idt_level-1)+'</region>'+nl
     return output
 
 def tagmatrix(name, A, use_pickling=False):
@@ -737,7 +733,7 @@ def tagmatrix(name, A, use_pickling=False):
         output = '<'+name+' type="matrix" r="'+str(A.shape[0]) \
             +'" c="1">'
         for i in range(A.shape[0]-1):
-            output += str(A[i]) + ', '
+            output += str(A[i]) + ' '
         output += str(A[-1]) + '</'+name+'>'
 
     else:  # Otherwise, treat as matrix
@@ -747,7 +743,7 @@ def tagmatrix(name, A, use_pickling=False):
             for j in range(A.shape[1]):
                 if i == A.shape[0]-1 and j == A.shape[1]-1:
                     break  # ...since last element is not followed by a comma.
-                output += str(A[i][j]) + ', '
+                output += str(A[i][j]) + ' '
         output += str(A[-1][-1]) + '</'+name+'>'
 
     return output
@@ -758,14 +754,14 @@ def conxml_test():
 #if __name__ == "__main__":
     A = np.array([[1,2,3],[4,5,6],[7,8,9]], dtype=np.float64)
     b = np.asarray(range(3))
-    assert tagmatrix("A", A, use_pickling=False) == '<A type="matrix" r="3" c="3">1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0</A>'
-    assert tagmatrix("b", b, use_pickling=False) == '<b type="matrix" r="3" c="1">0, 1, 2</b>'
+    assert tagmatrix("A", A, use_pickling=False) == '<A type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</A>'
+    assert tagmatrix("b", b, use_pickling=False) == '<b type="matrix" r="3" c="1">0 1 2</b>'
 
-    P = pc.Polytope(A, b)
-    assert tagpolytope("P", P, use_pickling=False) == '<P type="polytope"><H type="matrix" r="3" c="3">1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0</H><K type="matrix" r="3" c="1">0, 1, 2</K></P>'
+    P = pc.Polytope(A, b, normalize=False)
+    assert tagpolytope("P", P, use_pickling=False) == '<P type="polytope"><H type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</H><K type="matrix" r="3" c="1">0.0 1.0 2.0</K></P>'
 
     li = range(7)
-    assert taglist("trans", li, use_pickling=False) == '<trans>0, 1, 2, 3, 4, 5, 6</trans>'
+    assert taglist("trans", li, use_pickling=False) == '<trans>0 1 2 3 4 5 6</trans>'
 
     (li_out_name, li_out) = untaglist(taglist("trans", li,
                                               use_pickling=False),
@@ -775,10 +771,10 @@ def conxml_test():
     di = {1:2, 3:4, 'X0':'boolean'}
     assert tagdict("env_vars", di, use_pickling=False) == '<env_vars><item key="1" value="2" /><item key="X0" value="boolean" /><item key="3" value="4" /></env_vars>'
 
-    (di_out_name, di_out) = untagdict(tagdict("con_vars", di,
+    (di_out_name, di_out) = untagdict(tagdict("sys_vars", di,
                                               use_pickling=False),
                                       use_pickling=False)
-    assert (di_out_name == "con_vars") and (di_out == {'1': '2', 'X0': 'boolean', '3': '4'})
+    assert (di_out_name == "sys_vars") and (di_out == {'1': '2', 'X0': 'boolean', '3': '4'})
 
     (A_out_name, A_out) = untagmatrix(tagmatrix("A", A, use_pickling=False),
                                       use_pickling=False)
@@ -795,11 +791,11 @@ def conxml_test():
     assert (P_out_name == "P") and (np.all(np.all(P_out.A == P.A))) and (np.all(np.squeeze(P_out.b) == np.squeeze(P.b)))
 
     list_prop  = range(10)
-    list_poly = [pc.Polytope(A*(k+1), b*(k+1)) for k in range(10)]
+    list_poly = [pc.Polytope(A*(k+1), b*(k+1), normalize=False) for k in range(10)]
     R = pc.Region(list_prop=list_prop, list_poly=list_poly)
-    assert tagregion("R", R) == '<R type="region"><list_prop>0, 1, 2, 3, 4, 5, 6, 7, 8, 9</list_prop><reg_item type="polytope"><H type="matrix" r="3" c="3">1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0</H><K type="matrix" r="3" c="1">0, 1, 2</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0</H><K type="matrix" r="3" c="1">0, 2, 4</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0</H><K type="matrix" r="3" c="1">0, 3, 6</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0</H><K type="matrix" r="3" c="1">0, 4, 8</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0</H><K type="matrix" r="3" c="1">0, 5, 10</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">6.0, 12.0, 18.0, 24.0, 30.0, 36.0, 42.0, 48.0, 54.0</H><K type="matrix" r="3" c="1">0, 6, 12</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">7.0, 14.0, 21.0, 28.0, 35.0, 42.0, 49.0, 56.0, 63.0</H><K type="matrix" r="3" c="1">0, 7, 14</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">8.0, 16.0, 24.0, 32.0, 40.0, 48.0, 56.0, 64.0, 72.0</H><K type="matrix" r="3" c="1">0, 8, 16</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">9.0, 18.0, 27.0, 36.0, 45.0, 54.0, 63.0, 72.0, 81.0</H><K type="matrix" r="3" c="1">0, 9, 18</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0</H><K type="matrix" r="3" c="1">0, 10, 20</K></reg_item></R>'
+    assert tagregion(R) == '<region><list_prop>0 1 2 3 4 5 6 7 8 9</list_prop><reg_item type="polytope"><H type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</H><K type="matrix" r="3" c="1">0.0 1.0 2.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0</H><K type="matrix" r="3" c="1">0.0 2.0 4.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0</H><K type="matrix" r="3" c="1">0.0 3.0 6.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">4.0 8.0 12.0 16.0 20.0 24.0 28.0 32.0 36.0</H><K type="matrix" r="3" c="1">0.0 4.0 8.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0</H><K type="matrix" r="3" c="1">0.0 5.0 10.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">6.0 12.0 18.0 24.0 30.0 36.0 42.0 48.0 54.0</H><K type="matrix" r="3" c="1">0.0 6.0 12.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">7.0 14.0 21.0 28.0 35.0 42.0 49.0 56.0 63.0</H><K type="matrix" r="3" c="1">0.0 7.0 14.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">8.0 16.0 24.0 32.0 40.0 48.0 56.0 64.0 72.0</H><K type="matrix" r="3" c="1">0.0 8.0 16.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">9.0 18.0 27.0 36.0 45.0 54.0 63.0 72.0 81.0</H><K type="matrix" r="3" c="1">0.0 9.0 18.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0 90.0</H><K type="matrix" r="3" c="1">0.0 10.0 20.0</K></reg_item></region>'
 
-    (R_out_name, R_out) = untagregion(tagregion("R", R), cast_f_list=int)
+    (R_out_name, R_out) = untagregion(tagregion(R), cast_f_list=int)
     assert R_out.list_prop == R.list_prop
     for (ind, P) in enumerate(R_out.list_poly):
         R.list_poly[ind].b = np.asarray(R.list_poly[ind].b, dtype=np.float64)

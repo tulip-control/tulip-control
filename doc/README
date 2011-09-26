@@ -1,11 +1,28 @@
+TuLiP documentation
+===================
+
+Sphinx generated
+----------------
+
 Documentation is built using Sphinx, so the usual steps apply, i.e.
 
 make html
 
 Note that a Windows build file, make.bat, was auto-generated at the
-time of first initialising the docs configuration files but is not
-actively maintained.  It is included for convenience; please consider
-Makefile to be the ground truth.
+time of first initialising the docs configuration files (ca. 2011 May 8)
+but is not actively maintained.  It is included for convenience;
+please consider Makefile to be the ground truth.
+
+
+Format specifications
+---------------------
+
+The directory formats/ contains definitions and documentation about
+data and file formats used in the project.  The goal is formalize
+specifications expected in the code in a medium external to it.  Some
+of this is done in docstrings, but formats/ should provide single and
+normative points of reference.
+
 
 SCL
-8 May 2011
+2011 Sep 25
