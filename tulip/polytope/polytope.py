@@ -109,11 +109,11 @@ class Polytope:
     - `minrep`: if polytope is in minimal representation (after running reduce)
     """
     
-    def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None):
+    def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None, normalize=True):
         
         self.A = A.astype(float)
         self.b = b.astype(float).flatten()
-        if A.size > 0:
+        if A.size > 0 and normalize:
             # Normalize
             Anorm = np.sqrt(np.sum(A*A,1)).flatten()     
             pos = np.nonzero(Anorm > 1e-10)[0]
