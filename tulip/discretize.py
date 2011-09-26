@@ -77,7 +77,8 @@ class CtsSysDyn:
         u[t] \in Uset - polytope object
         d[t] \in Wset - polytope object
 
-    A CtsSysDyn object contains the fields A, B, E, K, Uset and Wset as defined above.
+    A CtsSysDyn object contains the fields A, B, E, K, Uset and Wset
+    as defined above.
     
     **Constructor**:
     
@@ -122,22 +123,27 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     - `part`: a PropPreservingPartition object
     - `ssys`: a CtsSysDyn object
     - `N`: horizon length
-    - `min_cell_volume`: the minimum volume of cells in the resulting partition 
-    - `closed_loop`: boolean indicating whether the `closed loop` algorithm
-                     should be used. default True
-    - `use_mpt`: if True, use MPT-based abstraction algorithm
-    - `conservative`: if true, force sequence in reachability analysis to stay
-                      inside starting cell. If false, safety is ensured by 
-                      keeping the sequence inside the original proposition
-                      preserving cell which needs to be convex
+
+    - `min_cell_volume`: the minimum volume of cells in the resulting
+                         partition.
+    - `closed_loop`: boolean indicating whether the `closed loop`
+                     algorithm should be used. default True.
+    - `use_mpt`: if True, use MPT-based abstraction algorithm.
+    - `conservative`: if true, force sequence in reachability analysis
+                      to stay inside starting cell. If false, safety
+                      is ensured by keeping the sequence inside the
+                      original proposition preserving cell which needs
+                      to be convex.
     - `max_num_poly`: maximum number of polytopes in a region to use in 
-                      reachability analysis
-    - `use_all_horizon`: in closed loop algorithm: if we should look for reach-
-                         ability also in less than N steps
-    - `trans_length`: the number of polytopes allowed to cross in a transition.
-                      a value of 1 checks transitions only between neighbors,
-                      a value of 2 checks neighbors of neighbors and so on.
-    - `remove_trans`: if True, remove found transitions between non-neighbors
+                      reachability analysis.
+    - `use_all_horizon`: in closed loop algorithm: if we should look
+                         for reach- ability also in less than N steps.
+    - `trans_length`: the number of polytopes allowed to cross in a
+                      transition.  a value of 1 checks transitions
+                      only between neighbors, a value of 2 checks
+                      neighbors of neighbors and so on.
+    - `remove_trans`: if True, remove found transitions between
+                      non-neighbors.
     - `abs_tol`: maximum volume for an "empty" polytope
     - `verbose`: level of verbosity
     
@@ -361,17 +367,18 @@ def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,
     - `part`: a PropPreservingPartition object
     - `ssys`: a CtsSysDyn object
     - `N`: horizon length
-    - `min_cell_volume`: the minimum volume of cells in the resulting partition 
-    - `closed_loop`: boolean indicating whether the `closed loop` algorithm
-                     should be used. default False
-    - `conservative`: if true, force sequence in reachability analysis to stay
-                      inside starting cell. If false, safety is ensured by 
-                      keeping the sequence inside the original proposition
-                      preserving cell
-    - `max_num_poly`: maximum number of polytopes in a region to use in 
-                      reachability analysis
-    - `use_all_horizon`: in closed loop algorithm: if we should look for reach-
-                         ability also in less than N steps
+    - `min_cell_volume`: the minimum volume of cells in the resulting
+                         partition.
+    - `closed_loop`: boolean indicating whether the `closed loop`
+                     algorithm should be used. default False.
+    - `conservative`: if true, force sequence in reachability analysis
+                      to stay inside starting cell. If false, safety
+                      is ensured by keeping the sequence inside the
+                      original proposition preserving cell.
+    - `max_num_poly`: maximum number of polytopes in a region to use
+                      in reachability analysis.
+    - `use_all_horizon`: in closed loop algorithm: if we should look
+                         for reach- ability also in less than N steps.
     - `abs_tol`: maximum volume for an "empty" polytope
     
     Output:
@@ -538,9 +545,11 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
     If no cost parameters are given, Q = I and mid_weight=3 are used. 
         
     Input:
+
     - `x0`: initial continuous state
     - `ssys`: CtsSysDyn object specifying system dynamics
-    - `part`: PropPreservingPartition object specifying the state space partition
+    - `part`: PropPreservingPartition object specifying the state
+              space partition.
     - `start`: int specifying the number of the initial state in `part`
     - `end`: int specifying the number of the end state in `part`
     - `N`: the horizon length
@@ -550,29 +559,33 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
     - `Q`: input cost matrix for u = [u(0)' u(1)' .. u(N-1)']', 
            size (N*udim x N*udim). If empty, identity matrix is used.
     - `mid_weight`: cost weight for |x(N)-xc|_2
-    - `conservative`: if True, force plant to stay inside initial state during
-                      execution. if False, plant is forced to stay inside
-                      the original proposition preserving cell
-    - `closed_loop`: should be True if closed loop discretization has been used
-    - `test_result`: performs a simulation (without disturbance) to make sure
-                     that the calculated input sequence is safe
+    - `conservative`: if True, force plant to stay inside initial
+                      state during execution. if False, plant is
+                      forced to stay inside the original proposition
+                      preserving cell.
+    - `closed_loop`: should be True if closed loop discretization has
+                     been used.
+    - `test_result`: performs a simulation (without disturbance) to
+                     make sure that the calculated input sequence is
+                     safe.
     
     Output:
     - A (N x m) numpy array where row k contains u(k) for k = 0,1 ... N-1.
     
-    Note1: The same horizon length as in reachability analysis should be 
-    used in order to guarantee feasibility.
+    Note1: The same horizon length as in reachability analysis should
+    be used in order to guarantee feasibility.
     
-    Note2: If the closed loop algorithm has been used to compute reachability 
-    the input needs to be recalculated for each time step (with decreasing 
-    horizon length). In this case only u(0) should be used as a control signal 
-    and u(1) ... u(N-1) thrown away.
+    Note2: If the closed loop algorithm has been used to compute
+    reachability the input needs to be recalculated for each time step
+    (with decreasing horizon length). In this case only u(0) should be
+    used as a control signal and u(1) ... u(N-1) thrown away.
     
-    Note3: The "conservative" calculation makes sure that the plants remains 
-    inside the convex hull of the starting region during execution, i.e. 
-    x(1), x(2) ...  x(N-1) are in conv_hull(starting region). 
-    If the original proposition preserving partition is not convex, 
-    safety can not be guaranteed."""
+    Note3: The "conservative" calculation makes sure that the plants
+    remains inside the convex hull of the starting region during
+    execution, i.e.  x(1), x(2) ...  x(N-1) are in conv_hull(starting
+    region).  If the original proposition preserving partition is not
+    convex, safety can not be guaranteed.
+    """
     
     if (len(R) == 0) and (len(Q) == 0) and (len(r) == 0) and (mid_weight == 0):
         # Default behavior
@@ -671,16 +684,18 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
     of the polytopes down.
     
     Input:
-    `P1`: A Polytope or Region object
-    `P2`: A Polytope or Region object
-    `ssys`: A CtsSysDyn object
-    `N`: The horizon length
-    `closed_loop`: If true, take 1 step at the time. This keeps down polytope 
-                   dimension and handles disturbances better. Default: True.
-    `use_all_horizon`: Used for closed loop algorithm. If true, allow reachability
-                       also in less than N steps.
-    `trans_set`: If specified, force transitions to be in this set. If empty,
-                 P1 is used
+
+    - `P1`: A Polytope or Region object
+    - `P2`: A Polytope or Region object
+    - `ssys`: A CtsSysDyn object
+    - `N`: The horizon length
+    - `closed_loop`: If true, take 1 step at the time. This keeps down
+                   polytope dimension and handles disturbances
+                   better. Default: True.
+    - `use_all_horizon`: Used for closed loop algorithm. If true,
+                       allow reachability also in less than N steps.
+    - `trans_set`: If specified, force transitions to be in this
+                 set. If empty, P1 is used
                 
     Output:
     `x0`: A Polytope or Region object defining the set in P1 from which
@@ -784,24 +799,33 @@ def discretizeM(part, ssys, N = 10, auto=True, minCellVolume = 0.1, \
     - `part`: a PropPreservingPartition object
     - `ssys`: a CtsSysDyn object
     - `N`: horizon length
-    - `auto`: a boolean that indicates whether to automatically run the MATLAB  
-      implementation of discretize.
-    - `minCellVolume`: the minimum volume of cells in the resulting partition
+    - `auto`: a boolean that indicates whether to automatically run
+              the MATLAB implementation of discretize.
+    - `minCellVolume`: the minimum volume of cells in the resulting
+                       partition.
     - `maxNumIterations`: the maximum number of iterations
-    - `useClosedLoopAlg`: a boolean that indicates whether to use the closed loop algorithm.
-      For the difference between the closed loop and the open loop algorithm, 
-      see Borrelli, F. Constrained Optimal Control of Linear and Hybrid Systems, 
-      volume 290 of Lecture Notes in Control and Information Sciences. Springer. 2003.
-    - `useAllHorizonLength`: a boolean that indicates whether all the horizon length up
-      to probStruct.N can be used. This option is relevant only when the closed 
-      loop algorithm is used.
-    - `useLargeSset`: a boolean that indicates whether when solving the reachability
-      problem between subcells of the original partition, the cell of the
-      original partition should be used for the safe set.
-    - `timeout`: timeout (in seconds) for polytope union operation. 
-      If negative, the timeout won't be used. Note that using timeout requires MATLAB
-      parallel computing toolbox.
-    - `maxNumPoly`: the maximum number of polytopes in a region used in computing reachability.
+    - `useClosedLoopAlg`: a boolean that indicates whether to use the
+                          closed loop algorithm.  For the difference
+                          between the closed loop and the open loop
+                          algorithm, see Borrelli, F. Constrained
+                          Optimal Control of Linear and Hybrid
+                          Systems, volume 290 of Lecture Notes in
+                          Control and Information
+                          Sciences. Springer. 2003.
+    - `useAllHorizonLength`: a boolean that indicates whether all the
+                             horizon length up to probStruct.N can be
+                             used. This option is relevant only when
+                             the closed loop algorithm is used.
+    - `useLargeSset`: a boolean that indicates whether when solving
+                      the reachability problem between subcells of the
+                      original partition, the cell of the original
+                      partition should be used for the safe set.
+    - `timeout`: timeout (in seconds) for polytope union operation.
+                 If negative, the timeout won't be used. Note that
+                 using timeout requires MATLAB parallel computing
+                 toolbox.
+    - `maxNumPoly`: the maximum number of polytopes in a region used
+                    in computing reachability.
     - `verbose`: level of verbosity
     """
         
@@ -1058,15 +1082,18 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     - [u(k); x(k)] \in ssys.Uset for all k
     
     If list_P is a Polytope:
+
     - x(0) \in list_P if list_P
     - x(k) \in Pk for k= 1,2, .. N-1
     - x(N) \in PN
     
     If list_P is a list of polytopes
+
     - x(k) \in list_P[k] for k= 0, 1 ... N
     
-    The returned polytope describes the intersection of the polytopes for all
-    possible Input:
+    The returned polytope describes the intersection of the polytopes
+    for all possible Input:
+
     - `ssys`: CtsSysDyn dynamics
     - `N`: horizon length
     - `list_P`: list of Polytopes or Polytope
@@ -1182,6 +1209,7 @@ def get_max_extreme(G,D,N):
     for every possible d_i in the set of extreme points to D^N.
     
     Input:
+
     - `G`: The matrix to maximize with respect to
     - `D`: Polytope describing the disturbance set
     - `N`: Horizon length
@@ -1210,6 +1238,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     account.
     
     Input:
+
     - `x0`: initial point for execution
     - `u_seq`: (N x m) array where row k is input for t = k
     - `ssys`: CtsSysDyn dynamics
