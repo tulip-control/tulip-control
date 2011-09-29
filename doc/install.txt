@@ -82,6 +82,34 @@ This script will also check for dependencies, i.e. look for NumPy,
 CVXOPT, etc.
 
 
+Other features (optional as of version 0.2a)
+--------------------------------------------
+
+Here are some optional advanced features that require installing additional dependencies. None of them is required to run the examples that come with the toolbox. Only in some examples you will be prompted to choose whether you would like to use Gephi visualization. You can simply say no if you don't have it installed.
+
+Gephi visualization
+```````````````````
+
+If you would like to use the new visualization and simulation functions that are part of release 0.2a, you need to download and install `Gephi <http://gephi.org/>`_. After making sure gephi is on the path, you can install tulip-AutomatonSimulation plugin for Gephi. To install the plugin, open Gephi, then the 'Tools' drop-down menu, 'Plugins', the
+'Downloaded' tab, 'Add Plugins...', and browse to this folder to select the 'org-tulip-automatonsimulation.nbm' file. Also select the 'org-gephi-layout-plugin.nbm' file. It contains an updated layout module that's necessary for the AutomatonSimulation plugin to work [#f2]_. Then choose 'Install' and follow the instructions given.
+
+To check if Gephi is on your path, try::
+
+$ which gephi
+
+If this returns nothing, then you should add Gephi to your path. On Mac OS X, you can do this, for instance, by following the instructions from `this webpage <http://keito.me/tutorials/macosx_path>`_ where YOURPATHHERE should be set to the directory where Gephi is located on your machine. It is typically located under ``/Applications/gephi.app/Contents/MacOS/``.
+
+No MPT
+``````
+
+This version of TuLiP replicates all necessary polytope computations from MPT (so there is no need for Matlab and MPT). However, if you choose to use this functionality, it is highly recommended that you install `glpk <http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you need to install glpk **before** installing CVXOPT and follow the instructions in CVXOPT installation to ensure it recognizes glpk as a solver. If you are a `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not do this linking automatically.
+
+Graph representation of automaton
+`````````````````````````````````
+
+Finally, if you want to look for connected components, reachable states, etc. of a TuLiP automaton object, there is an alternative graph representation of the automaton that requires `python-graph <http://code.google.com/p/python-graph/>`_.
+
+
 Troubleshooting
 ---------------
 
@@ -161,3 +189,7 @@ entering::
 .. [#f1] On Unix systems, in particular GNU/Linux and Mac OS X, the
          terminal shell treats ``~`` as a special symbol representing
          the home directory of the current user.
+
+.. [#f2] The current Gephi build uses version 0.8.0.2 of the layout module;
+         the version AutomatonSimulation plugin needs is 0.8.0.3. This extra
+         step should become unnecessary once Gephi updates its release.
