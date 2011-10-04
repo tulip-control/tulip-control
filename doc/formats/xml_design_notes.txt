@@ -48,7 +48,9 @@ Notes:
     <A type="matrix" r="3" c="3">...</A>
     <B type="matrix" r="3" c="1">...</B>
     <E>...same format as A and B...</E>
-    <sample_period></sample_period>
+    <sample_period>...optional; if included, then system is regarded
+                   as the discretization of a continuous-time system,
+                   using the given sampling period.</sample_period>
     <U_set type="polytope"><H type="matrix" r="3" c="3">...</H><K>...</K></U_set>
     <W_set>...same format as U_set...</W_set>
   </c_dyn>
@@ -67,7 +69,7 @@ Notes:
   <cont_props>
     <item key=""><cont_prop_poly type="polytope">...</cont_prop_poly></item>
   </cont_props>
-  <d_dyn>  N.B., this tag can also be empty (if disc dynamics is None).
+  <d_dyn horizon="N">  N.B., this tag can also be empty (if disc dynamics is None).
     <domain type="polytope">...</domain>
     <trans type="matrix">...</trans>
     <prop_symbols>...space-separated list...</prop_symbols>

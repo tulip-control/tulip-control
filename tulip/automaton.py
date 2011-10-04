@@ -533,7 +533,7 @@ class Automaton:
         output += idt_level*idt+'</aut>'+nl
         return output
 
-    def loadXML(self, x, use_pickling=False):
+    def loadXML(self, x, namespace="", use_pickling=False):
         """Read an automaton from given string conforming to tulipcon XML.
         
         N.B., on a successful processing of the given string, the
@@ -551,29 +551,34 @@ class Automaton:
         """
         if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
             raise ValueError("given automaton XML must be a string or ElementTree._ElementInterface.")
-        
+
+        if (namespace is None) or (len(namespace) == 0):
+            ns_prefix = ""
+        else:
+            ns_prefix = "{"+namespace+"}"
+
         if isinstance(x, str):
             etf = ET.fromstring(x)
         else:
             etf = x
-        if etf.tag != "aut":
+        if etf.tag != ns_prefix+"aut":
             return False
 
-        node_list = etf.findall("node")
+        node_list = etf.findall(ns_prefix+"node")
         states = []
         id_list = []  # For more convenient searching, and to catch redundancy
         for node in node_list:
-            this_id = int(node.find("id").text)
-            this_name = node.find("name").text
-            (tag_name, this_child_list) = conxml.untaglist(node.find("child_list"),
+            this_id = int(node.find(ns_prefix+"id").text)
+            this_name = node.find(ns_prefix+"name").text
+            (tag_name, this_child_list) = conxml.untaglist(node.find(ns_prefix+"child_list"),
                                                            cast_f=int)
-            if tag_name != "child_list":
+            if tag_name != ns_prefix+"child_list":
                 # This really should never happen and may not even be
                 # worth checking.
                 raise ValueError("failure of consistency check while processing aut XML string.")
-            (tag_name, this_state) = conxml.untagdict(node.find("state"),
+            (tag_name, this_state) = conxml.untagdict(node.find(ns_prefix+"state"),
                                                       cast_f_values=int)
-            if tag_name != "state":
+            if tag_name != ns_prefix+"state":
                 raise ValueError("failure of consistency check while processing aut XML string.")
             if this_id in id_list:
                 printWarning("duplicate nodes found: "+str(this_id)+"; ignoring...")

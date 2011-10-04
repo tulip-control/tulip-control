@@ -3,13 +3,13 @@ datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
 
 start = element tulipcon {
     attribute version { string "0" }
-    & element prob_type { "synth" | "rhtlp" }
+    & element prob_type { "synth" | "rhtlp" }?
     & element c_dyn { c_dyn-content }
-    & element env_vars { item-tag* }
-    & element sys_vars { item-tag* }
-    & element spec { spec-content }
+    & element env_vars { item-tag* }?
+    & element sys_vars { item-tag* }?
+    & element spec { spec-content }?
     & element d_dyn { d_dyn-content }
-    & element aut { aut-content }
+    & element aut { aut-content }?
     & element smv_file { text }?
     & element spec_file { text }?
     & element extra { text }
@@ -21,7 +21,7 @@ matrix-content =
     attribute type { "matrix" }
     , attribute r { xsd:integer }
     , attribute c { xsd:integer }
-    , list { xsd:float* }
+    , list { xsd:double* }
 
 polytope-content =
     attribute type { "polytope" }
@@ -35,7 +35,7 @@ item-tag =
     }
 
 c_dyn-content =
-    element sample_period { xsd:double }
+    element sample_period { xsd:double }?
     & element A { matrix-content }
     & element B { matrix-content }
     & element E { matrix-content }
@@ -56,11 +56,12 @@ regions-content =
     }*
 
 d_dyn-content =
-    (element domain { polytope-content }
-     & element trans { matrix-content }
-     & element prop_symbols { list { string* } }
-     & element regions { regions-content })
-    | empty
+    attribute horizon { xsd:integer }?
+    & ((element domain { polytope-content }
+       & element trans { matrix-content }
+       & element prop_symbols { list { string* } }
+       & element regions { regions-content })
+      | empty)
 
 aut-content =
     element node {

@@ -34,7 +34,11 @@
 # 
 # $Id$
 """
-Several functions that help in writing tulipcon XML files.
+Several functions that help in working with tulipcon XML files.
+
+This module includes a few functions for parsing YAML files, providing
+an easier way to specify transition systems.  See rsimple_example.yaml
+in the "examples" directory for reference.
 
 Note that many of these functions are just convenience wrappers around
 NumPy and Python's pickling routines, if the use_pickling flag is set.
@@ -57,12 +61,26 @@ import jtlvint
 import errorprint as ep
 from spec import GRSpec
 
+from StringIO import StringIO
+try:
+    import yaml
+except ImportError:
+    print "Warning: PyYAML package not found.\nYou will not be able to read/write YAML files."
+    yaml = None  # Thus calling a function that depends on PyYAML will
+                 # lead to an exception.
+
 
 #################
 # Problem Types #
 #################
 SYNTH_PROB = 0
 RHTLP_PROB = 1
+
+
+###############
+# XML Globals #
+###############
+DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/0"
 
 
 def readXMLfile(fname, verbose=0, use_pickling=False):
@@ -75,7 +93,7 @@ def readXMLfile(fname, verbose=0, use_pickling=False):
         x = f.read()
     return loadXML(x, verbose=verbose, use_pickling=use_pickling)
 
-def loadXML(x, verbose=0, use_pickling=False):
+def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE, use_pickling=False):
     """Return 3-tuple of, in terms of classes, (SynthesisProb, CtsSysDyn, Automaton).
 
     Any empty or missing items are set to None, or an exception is
@@ -96,15 +114,20 @@ def loadXML(x, verbose=0, use_pickling=False):
         elem = ET.fromstring(x)
     else:
         elem = x
+
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
         
-    if elem.tag != "tulipcon":
+    if elem.tag != ns_prefix+"tulipcon":
         raise TypeError("root tag should be tulipcon.")
     if ("version" not in elem.attrib.keys()):
         raise ValueError("unversioned tulipcon XML string.")
     if int(elem.attrib["version"]) != 0:
         raise ValueError("unsupported tulipcon XML version: "+str(elem.attrib["version"]))
 
-    ptype_tag = elem.find("prob_type")
+    ptype_tag = elem.find(ns_prefix+"prob_type")
     if ptype_tag is None:
         ep.printWarning('tulipcon XML string is missing <prob_type> tag;\nassuming SynthesisProb')
         ptype = SYNTH_PROB
@@ -116,26 +139,26 @@ def loadXML(x, verbose=0, use_pickling=False):
         raise ValueError("Unrecognized prob_type: "+str(ptype_tag.text))
     
     # Build CtsSysDyn, or set to None
-    c_dyn = elem.find("c_dyn")
+    c_dyn = elem.find(ns_prefix+"c_dyn")
     if c_dyn is None:
         sys_dyn = None
     else:
-        (tag_name, A) = untagmatrix(c_dyn.find("A"))
-        (tag_name, B) = untagmatrix(c_dyn.find("B"))
-        (tag_name, E) = untagmatrix(c_dyn.find("E"))
-        (tag_name, Uset) = untagpolytope(c_dyn.find("U_set"))
-        (tag_name, Wset) = untagpolytope(c_dyn.find("W_set"))
+        (tag_name, A) = untagmatrix(c_dyn.find(ns_prefix+"A"))
+        (tag_name, B) = untagmatrix(c_dyn.find(ns_prefix+"B"))
+        (tag_name, E) = untagmatrix(c_dyn.find(ns_prefix+"E"))
+        (tag_name, Uset) = untagpolytope(c_dyn.find(ns_prefix+"U_set"))
+        (tag_name, Wset) = untagpolytope(c_dyn.find(ns_prefix+"W_set"))
         sys_dyn = discretize.CtsSysDyn(A, B, E, [], Uset, Wset)
 
     # Extract LTL specification
-    s_elem = elem.find("spec")
-    if s_elem.find("env_init") is not None:  # instance of GRSpec style
+    s_elem = elem.find(ns_prefix+"spec")
+    if s_elem.find(ns_prefix+"env_init") is not None:  # instance of GRSpec style
         spec = GRSpec()
         for spec_tag in ["env_init", "env_safety", "env_prog",
                          "sys_init", "sys_safety", "sys_prog"]:
-            if (s_elem.find(spec_tag) is not None) \
-                    and (s_elem.find(spec_tag).text is not None):
-                setattr(spec, spec_tag, s_elem.find(spec_tag).text)
+            if (s_elem.find(ns_prefix+spec_tag) is not None) \
+                    and (s_elem.find(ns_prefix+spec_tag).text is not None):
+                setattr(spec, spec_tag, s_elem.find(ns_prefix+spec_tag).text)
                 setattr(spec, spec_tag,
                         getattr(spec, spec_tag).replace("&lt;", "<"))
                 setattr(spec, spec_tag,
@@ -144,25 +167,25 @@ def loadXML(x, verbose=0, use_pickling=False):
                         getattr(spec, spec_tag).replace("&amp;", "&"))
     else:  # assume, guarantee strings style
         spec = ["", ""]
-        if s_elem.find("assume") is not None:
-            spec[0] = s_elem.find("assume").text
-        if s_elem.find("guarantee") is not None:
-            spec[1] = s_elem.find("guarantee").text
+        if s_elem.find(ns_prefix+"assume") is not None:
+            spec[0] = s_elem.find(ns_prefix+"assume").text
+        if s_elem.find(ns_prefix+"guarantee") is not None:
+            spec[1] = s_elem.find(ns_prefix+"guarantee").text
         for k in [0, 1]:  # Undo special character encoding
             spec[k] = spec[k].replace("&lt;", "<")
             spec[k] = spec[k].replace("&gt;", ">")
             spec[k] = spec[k].replace("&amp;", "&")
 
     # ``Continuous propositions'', if available
-    cp_tag = elem.find("cont_props")
+    cp_tag = elem.find(ns_prefix+"cont_props")
     if cp_tag is not None:
         cont_props = dict()
-        for sym_tag in cp_tag.findall("item"):
+        for sym_tag in cp_tag.findall(ns_prefix+"item"):
             if "key" not in sym_tag.attrib.keys():
                 ep.printWarning("mal-formed <cont_props> tag in given tulipcon XML string.")
                 cont_props = {}
                 break  # Give-up on this <cont_props> tag
-            sym_poly_tag = sym_tag.find("cont_prop_poly")
+            sym_poly_tag = sym_tag.find(ns_prefix+"cont_prop_poly")
             if sym_poly_tag is None:
                 cont_props[sym_tag.attrib["key"]] = None
             else:
@@ -171,24 +194,24 @@ def loadXML(x, verbose=0, use_pickling=False):
         cont_props = {}
     
     # Discrete dynamics, if available
-    d_dyn = elem.find("d_dyn")
+    d_dyn = elem.find(ns_prefix+"d_dyn")
     if d_dyn is None:
         prob = None
     else:
-        (tag_name, env_vars) = untagdict(elem.find("env_vars"))
-        (tag_name, sys_disc_vars) = untagdict(elem.find("sys_vars"))
-        if (d_dyn.find("domain") is None) \
-                and (d_dyn.find("trans") is None) \
-                and (d_dyn.find("prop_symbols") is None):
+        (tag_name, env_vars) = untagdict(elem.find(ns_prefix+"env_vars"))
+        (tag_name, sys_disc_vars) = untagdict(elem.find(ns_prefix+"sys_vars"))
+        if (d_dyn.find(ns_prefix+"domain") is None) \
+                and (d_dyn.find(ns_prefix+"trans") is None) \
+                and (d_dyn.find(ns_prefix+"prop_symbols") is None):
             disc_dynamics = None
         else:
-            (tag_name, domain) = untagpolytope(d_dyn.find("domain"))
-            (tag_name, trans) = untagmatrix(d_dyn.find("trans"), np_type=np.uint8)
-            (tag_name, prop_symbols) = untaglist(d_dyn.find("prop_symbols"), cast_f=str)
-            region_elem = d_dyn.find("regions")
+            (tag_name, domain) = untagpolytope(d_dyn.find(ns_prefix+"domain"))
+            (tag_name, trans) = untagmatrix(d_dyn.find(ns_prefix+"trans"), np_type=np.uint8)
+            (tag_name, prop_symbols) = untaglist(d_dyn.find(ns_prefix+"prop_symbols"), cast_f=str)
+            region_elem = d_dyn.find(ns_prefix+"regions")
             list_region = []
             if region_elem is not None:
-                region_items = d_dyn.find("regions").findall("item")
+                region_items = d_dyn.find(ns_prefix+"regions").findall(ns_prefix+"item")
                 if region_items is not None and len(region_items) > 0:
                     for region_item in region_items:
                         (tag_name, R) = untagregion(region_item, cast_f_list=int,
@@ -227,13 +250,13 @@ def loadXML(x, verbose=0, use_pickling=False):
                                        spec=spec)
 
     # Build Automaton
-    aut_elem = elem.find("aut")
+    aut_elem = elem.find(ns_prefix+"aut")
     if aut_elem is None \
             or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         aut = None
     else:
         aut = automaton.Automaton()
-        if not aut.loadXML(aut_elem):
+        if not aut.loadXML(aut_elem, namespace=DEFAULT_NAMESPACE):
             ep.printError("failed to read Automaton from given tulipcon XML string.")
             aut = None
 
@@ -408,6 +431,153 @@ def writeXMLfile(fname, prob, spec, sys_dyn=None, aut=None,
                         pretty=pretty, use_pickling=use_pickling))
     return
 
+
+def loadXMLtrans(x, namespace=DEFAULT_NAMESPACE):
+    """Read only the continuous transition system from a tulipcon XML string.
+
+    I.e., the continuous dynamics (A, B, etc.), and the
+    proposition-preserving partition, along with its reachability
+    data.
+
+    Return (sys_dyn, disc_dynamics, horizon).
+
+    Raise exception if critical error.
+    """
+    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
+        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+
+    if isinstance(x, str):
+        elem = ET.fromstring(x)
+    else:
+        elem = x
+
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
+    if elem.tag != ns_prefix+"tulipcon":
+        raise TypeError("root tag should be tulipcon.")
+    if ("version" not in elem.attrib.keys()):
+        raise ValueError("unversioned tulipcon XML string.")
+    if int(elem.attrib["version"]) != 0:
+        raise ValueError("unsupported tulipcon XML version: "+str(elem.attrib["version"]))
+
+    # Build CtsSysDyn, or set to None
+    c_dyn = elem.find(ns_prefix+"c_dyn")
+    if c_dyn is None:
+        sys_dyn = None
+    else:
+        (tag_name, A) = untagmatrix(c_dyn.find(ns_prefix+"A"))
+        (tag_name, B) = untagmatrix(c_dyn.find(ns_prefix+"B"))
+        (tag_name, E) = untagmatrix(c_dyn.find(ns_prefix+"E"))
+        (tag_name, Uset) = untagpolytope(c_dyn.find(ns_prefix+"U_set"))
+        (tag_name, Wset) = untagpolytope(c_dyn.find(ns_prefix+"W_set"))
+        sys_dyn = discretize.CtsSysDyn(A, B, E, [], Uset, Wset)
+
+    # Discrete dynamics, if available
+    d_dyn = elem.find(ns_prefix+"d_dyn")
+    if d_dyn is None:
+        horizon = None
+        disc_dynamics = None
+    else:
+        if not d_dyn.attrib.has_key("horizon"):
+            raise ValueError("missing horizon length used for reachability computation.")
+        horizon = int(d_dyn.attrib["horizon"])
+        if (d_dyn.find(ns_prefix+"domain") is None) \
+                and (d_dyn.find(ns_prefix+"trans") is None) \
+                and (d_dyn.find(ns_prefix+"prop_symbols") is None):
+            disc_dynamics = None
+        else:
+            (tag_name, domain) = untagpolytope(d_dyn.find(ns_prefix+"domain"))
+            (tag_name, trans) = untagmatrix(d_dyn.find(ns_prefix+"trans"), np_type=np.uint8)
+            (tag_name, prop_symbols) = untaglist(d_dyn.find(ns_prefix+"prop_symbols"), cast_f=str)
+            region_elem = d_dyn.find(ns_prefix+"regions")
+            list_region = []
+            if region_elem is not None:
+                region_items = d_dyn.find(ns_prefix+"regions").findall(ns_prefix+"item")
+                if region_items is not None and len(region_items) > 0:
+                    for region_item in region_items:
+                        (tag_name, R) = untagregion(region_item, cast_f_list=int,
+                                                    np_type_P=np.float64)
+                        list_region.append(R)
+
+            disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
+                                                              num_prop=len(prop_symbols),
+                                                              list_region=list_region,
+                                                              num_regions=len(list_region),
+                                                              adj=0,
+                                                              trans=trans,
+                                                              list_prop_symbol=prop_symbols)
+
+    return (sys_dyn, disc_dynamics, horizon)
+
+
+def dumpXMLtrans(sys_dyn, disc_dynamics, horizon, extra="",
+                 pretty=False):
+    """Return tulipcon XML containing only a continuous transition system.
+
+    The argument extra (as a string) is copied verbatim into the
+    <extra> element.
+
+    The "pretty" flag has the same meaning as elsewhere (e.g., see
+    docstring for dumpXML function).
+    """
+    if not isinstance(sys_dyn, discretize.CtsSysDyn):
+        raise TypeError("sys_dyn must be an instance of discretizeM.CtsSysDyn")
+    if not isinstance(disc_dynamics, prop2part.PropPreservingPartition):
+        raise TypeError("disc_dynamics must be an instance of prop2part.PropPreservingPartition")
+    
+    if pretty:
+        nl = "\n"  # Newline
+        idt = "  "  # Indentation
+    else:
+        nl = ""
+        idt = ""
+    idt_level = 0
+
+    output = '<?xml version="1.0" encoding="UTF-8"?>'+nl
+    output += '<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">'+nl
+    idt_level += 1
+    output += idt*idt_level+'<c_dyn>'+nl
+    idt_level += 1
+    output += idt*idt_level+tagmatrix("A",sys_dyn.A)+nl
+    output += idt*idt_level+tagmatrix("B",sys_dyn.B)+nl
+    output += idt*idt_level+tagmatrix("E",sys_dyn.E)+nl
+
+    # Need facility for setting sample period; maybe as new attribute in CtsSysDyn class?
+    output += idt*idt_level+'<sample_period>1</sample_period>'+nl
+
+    output += idt*idt_level+tagpolytope("U_set", sys_dyn.Uset)+nl
+    output += idt*idt_level+tagpolytope("W_set", sys_dyn.Wset)+nl
+    idt_level -= 1
+    output += idt*idt_level+'</c_dyn>'+nl
+
+    output += idt*idt_level+'<d_dyn horizon="'+str(horizon)+'">'+nl
+    idt_level += 1
+
+    output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
+    output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
+    output += idt*idt_level+taglist("prop_symbols",
+                                    disc_dynamics.list_prop_symbol)+nl
+    output += idt*idt_level+'<regions>'+nl
+    idt_level += 1
+    if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
+        for R in disc_dynamics.list_region:
+            output += tagregion(R, pretty=pretty, idt_level=idt_level)
+    idt_level -= 1
+    output += idt*idt_level+'</regions>'+nl
+    idt_level -= 1
+    output += idt*idt_level+'</d_dyn>'+nl
+
+    output += idt_level*idt+'<extra>'+extra+'</extra>'+nl
+
+    idt_level -= 1
+    assert idt_level == 0
+    output += '</tulipcon>'+nl
+    return output
+
+
 def untaglist(x, cast_f=float, use_pickling=False):
     """Extract list from given tulipcon XML tag (string).
 
@@ -445,7 +615,7 @@ def untaglist(x, cast_f=float, use_pickling=False):
     return (elem.tag, li)
 
 def untagdict(x, cast_f_keys=None, cast_f_values=None,
-              use_pickling=False):
+              namespace=DEFAULT_NAMESPACE, use_pickling=False):
     """Extract list from given tulipcon XML tag (string).
 
     Use functions cast_f_keys and cast_f_values for type-casting
@@ -474,11 +644,16 @@ def untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         elem = x
 
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
     # Extract dictionary
     if use_pickling:
         di = pickle.loads(elem.text)
     else:
-        items_li = elem.findall('item')
+        items_li = elem.findall(ns_prefix+'item')
         if cast_f_keys is None:
             cast_f_keys = str
         if cast_f_values is None:
@@ -524,7 +699,8 @@ def untagmatrix(x, np_type=np.float64, use_pickling=False):
         x_mat = x_mat.reshape(num_rows, num_cols)
     return (elem.tag, x_mat)
 
-def untagpolytope(x, np_type=np.float64, use_pickling=False):
+def untagpolytope(x, np_type=np.float64, namespace=DEFAULT_NAMESPACE,
+                  use_pickling=False):
     """Extract polytope from given tuilpcon XML tag (string).
 
     Essentially calls untagmatrix and gathers results into Polytope
@@ -548,8 +724,13 @@ def untagpolytope(x, np_type=np.float64, use_pickling=False):
     if elem.attrib['type'] != "polytope":
         raise ValueError("tag should indicate type of ``polytope''.")
 
-    h_tag = elem.find('H')
-    k_tag = elem.find('K')
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+DEFAULT_NAMESPACE+"}"
+
+    h_tag = elem.find(ns_prefix+'H')
+    k_tag = elem.find(ns_prefix+'K')
 
     (H_out_name, H_out) = untagmatrix(h_tag, np_type=np_type,
                                       use_pickling=use_pickling)
@@ -558,7 +739,8 @@ def untagpolytope(x, np_type=np.float64, use_pickling=False):
 
     return (elem.tag, pc.Polytope(H_out, K_out, normalize=False))
 
-def untagregion(x, cast_f_list=str, np_type_P=np.float64, use_pickling=False):
+def untagregion(x, cast_f_list=str, np_type_P=np.float64,
+                namespace=DEFAULT_NAMESPACE, use_pickling=False):
     """Extract region from given tulipcon XML tag (string).
 
     The argument x can also be an instance of
@@ -576,23 +758,29 @@ def untagregion(x, cast_f_list=str, np_type_P=np.float64, use_pickling=False):
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
         raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
 
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+DEFAULT_NAMESPACE+"}"
+
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
         elem = x
-    if elem.tag != "region":
+    if elem.tag != ns_prefix+"region":
         raise ValueError("tag must be an instance of ``region''.")
 
-    (tag_name, list_prop) = untaglist(elem.find("list_prop"), cast_f=cast_f_list,
+    (tag_name, list_prop) = untaglist(elem.find(ns_prefix+"list_prop"), cast_f=cast_f_list,
                                       use_pickling=use_pickling)
     if list_prop is None:
         list_prop = []
 
-    poly_tags = elem.findall("reg_item")
+    poly_tags = elem.findall(ns_prefix+"reg_item")
     list_poly = []
     if poly_tags is not None and len(poly_tags) > 0:
         for P_elem in poly_tags:
             (tag_name, P) = untagpolytope(P_elem, np_type=np_type_P,
+                                          namespace=namespace,
                                           use_pickling=use_pickling)
             list_poly.append(P)
 
@@ -749,6 +937,86 @@ def tagmatrix(name, A, use_pickling=False):
     return output
 
 
+def yaml_polytope(x):
+    """Given dictionary from YAML data file, return polytope."""
+    tmp_H = np.loadtxt(StringIO(x["H"]))
+    tmp_K = np.loadtxt(StringIO(x["K"]))
+    if len(tmp_K.shape) == 1:
+        tmp_K = np.reshape(tmp_K, (tmp_K.shape[0], 1))
+    return pc.Polytope(tmp_H, tmp_K)
+
+
+def readYAMLfile(fname, verbose=0):
+    """Wrap loadYAML function."""
+    with open(fname, "r") as f:
+        x = f.read()
+    return loadYAML(x, verbose=verbose)
+
+def loadYAML(x, verbose=0):
+    """Read transition system specified using YAML in given string.
+
+    Return (sys_dyn, initial_partition, N), where:
+
+    - sys_dyn is the system dynamics (instance of CtsSysDyn),
+    - initial_partition is the given proposition-preserving partition
+      of the space (instance of PropPreservingPartition), and
+    - N is the horizon length (default is 10).
+
+    Raise exception if critical error.
+    """
+    dumped_data = yaml.load(x)
+
+    # Sanity check
+    if (("A" not in dumped_data.keys())
+        or ("B" not in dumped_data.keys())
+        or ("U" not in dumped_data.keys())
+        or ("H" not in dumped_data["U"].keys())
+        or ("K" not in dumped_data["U"].keys())
+        or ("initial_part" not in dumped_data.keys())
+        or ("X" not in dumped_data.keys())):
+        raise ValueError("Missing required data.")
+    
+    # Parse dynamics related strings
+    A = np.loadtxt(StringIO(dumped_data["A"]))
+    B = np.loadtxt(StringIO(dumped_data["B"]))
+    U = yaml_polytope(dumped_data["U"])
+    X = yaml_polytope(dumped_data["X"])
+    if dumped_data.has_key("E"):
+        E = np.loadtxt(StringIO(dumped_data["E"]))
+    else:
+        E = []  # No disturbances indicated by empty list.
+    if dumped_data.has_key("W"):
+        W = yaml_polytope(dumped_data["W"])
+    else:
+        W = []  # No disturbances
+    if dumped_data.has_key("horizon"):
+        N = dumped_data["horizon"]
+    else:
+        N = 10  # Default to 10, as in function discretize.discretize
+
+    # Parse initial partition
+    initial_part = dict()
+    for (k, v) in dumped_data["initial_part"].items():
+        initial_part[k] = yaml_polytope(v)
+
+    if verbose > 0:
+        print "A =\n", A
+        print "B =\n", B
+        print "E =\n", E
+        print "X =", X
+        print "U =", U
+        print "W =", W
+        print "horizon (N) =", N
+        for (k, v) in initial_part.items():
+            print k+" =\n", v
+
+    # Build transition system
+    sys_dyn = discretize.CtsSysDyn(A, B, E, [], U, W)
+    initial_partition = prop2part.prop2part2(X, initial_part)
+
+    return (sys_dyn, initial_partition, N)
+
+
 # This test should be broken into units.
 def conxml_test():
 #if __name__ == "__main__":
@@ -773,6 +1041,7 @@ def conxml_test():
 
     (di_out_name, di_out) = untagdict(tagdict("sys_vars", di,
                                               use_pickling=False),
+                                      namespace=None,
                                       use_pickling=False)
     assert (di_out_name == "sys_vars") and (di_out == {'1': '2', 'X0': 'boolean', '3': '4'})
 
@@ -787,6 +1056,7 @@ def conxml_test():
 
     (P_out_name, P_out) = untagpolytope(tagpolytope("P", P,
                                                     use_pickling=False),
+                                        namespace=None,
                                         use_pickling=False)
     assert (P_out_name == "P") and (np.all(np.all(P_out.A == P.A))) and (np.all(np.squeeze(P_out.b) == np.squeeze(P.b)))
 
@@ -795,7 +1065,7 @@ def conxml_test():
     R = pc.Region(list_prop=list_prop, list_poly=list_poly)
     assert tagregion(R) == '<region><list_prop>0 1 2 3 4 5 6 7 8 9</list_prop><reg_item type="polytope"><H type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</H><K type="matrix" r="3" c="1">0.0 1.0 2.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0</H><K type="matrix" r="3" c="1">0.0 2.0 4.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0</H><K type="matrix" r="3" c="1">0.0 3.0 6.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">4.0 8.0 12.0 16.0 20.0 24.0 28.0 32.0 36.0</H><K type="matrix" r="3" c="1">0.0 4.0 8.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0</H><K type="matrix" r="3" c="1">0.0 5.0 10.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">6.0 12.0 18.0 24.0 30.0 36.0 42.0 48.0 54.0</H><K type="matrix" r="3" c="1">0.0 6.0 12.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">7.0 14.0 21.0 28.0 35.0 42.0 49.0 56.0 63.0</H><K type="matrix" r="3" c="1">0.0 7.0 14.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">8.0 16.0 24.0 32.0 40.0 48.0 56.0 64.0 72.0</H><K type="matrix" r="3" c="1">0.0 8.0 16.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">9.0 18.0 27.0 36.0 45.0 54.0 63.0 72.0 81.0</H><K type="matrix" r="3" c="1">0.0 9.0 18.0</K></reg_item><reg_item type="polytope"><H type="matrix" r="3" c="3">10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0 90.0</H><K type="matrix" r="3" c="1">0.0 10.0 20.0</K></reg_item></region>'
 
-    (R_out_name, R_out) = untagregion(tagregion(R), cast_f_list=int)
+    (R_out_name, R_out) = untagregion(tagregion(R), cast_f_list=int, namespace=None)
     assert R_out.list_prop == R.list_prop
     for (ind, P) in enumerate(R_out.list_poly):
         R.list_poly[ind].b = np.asarray(R.list_poly[ind].b, dtype=np.float64)
