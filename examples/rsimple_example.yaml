@@ -1,8 +1,8 @@
-# Gleaned from robot_simple_disturbance.py.  Currently, only H-K
-# representation is supported for polytopes.  If disturbance polytope
-# W and dynamics matrix E are missing, they are assumed to be nil,
-# i.e. no disturbances.  If horizon is omitted, it is assumed to be
-# 10.
+# Gleaned from robot_simple_disturbance.py.  Currently, only
+# H-representation is supported for polytopes.  If disturbance
+# polytope W and dynamics matrix E are missing, they are assumed to be
+# nil, i.e. no disturbances.  If horizon is omitted, it is assumed to
+# be 10.
 #
 # SCL; 4 Oct 2011.
 
@@ -20,7 +20,7 @@ E: |  # Disturbances affect  state dynamics through E
   1 0
   0 1
 
-U:  # Example uses H-K representation.
+U:  # Example uses H-representation.
   H: |
     1 0
     -1 0

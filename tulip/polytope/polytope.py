@@ -112,6 +112,8 @@ class Polytope:
     - `bbox`: bounding box (if caluclated)
     - `minrep`: if polytope is in minimal representation (after
                 running reduce)
+    - `normalize`: if True (default), normalize given A and b arrays;
+                   else, use A and b without modification.
     """
     
     def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None, normalize=True):
