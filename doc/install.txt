@@ -20,15 +20,17 @@ for these with::
 
 The following packages are also *required*: `NumPy
 <http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_, `CVXOPT
-<http://abel.ee.ucla.edu/cvxopt/>`_, and `matplotlib
-<http://matplotlib.sourceforge.net/>`_.  These packages are quite
-standard in scientific computing environments and may already be
-installed.  To check, open a new terminal and try::
+<http://abel.ee.ucla.edu/cvxopt/>`_, `matplotlib
+<http://matplotlib.sourceforge.net/>`_, and `python-graph
+<http://code.google.com/p/python-graph/>`_.  Except for python-graph,
+these packages are quite standard in scientific computing environments
+and may already be installed.  To check, open a new terminal and try::
 
  $ python -c 'import numpy'
  $ python -c 'import scipy'
  $ python -c 'import cvxopt'
  $ python -c 'import matplotlib'
+ $ python -c 'import pygraph'
 
 If an error message occurs, the package might not be visible on the
 current path or may not be installed at all.  Try to install them
@@ -104,11 +106,6 @@ No MPT
 
 This version of TuLiP replicates all necessary polytope computations from MPT (so there is no need for Matlab and MPT). However, if you choose to use this functionality, it is highly recommended that you install `glpk <http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you need to install glpk **before** installing CVXOPT and follow the instructions in CVXOPT installation to ensure it recognizes glpk as a solver. If you are a `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not do this linking automatically.
 
-Graph representation of automaton
-`````````````````````````````````
-
-Finally, if you want to look for connected components, reachable states, etc. of a TuLiP automaton object, there is an alternative graph representation of the automaton that requires `python-graph <http://code.google.com/p/python-graph/>`_.
-
 
 Troubleshooting
 ---------------
@@ -135,6 +132,7 @@ to "/home/frodo/work", use::
 You may need to tweak the export statement depending on your terminal
 shell.  All of my examples are tested with zsh (the Z shell).
 
+
 Ubuntu (or Debian) GNU/Linux
 ````````````````````````````
 
@@ -160,6 +158,15 @@ definitions in startup). Hence, when you call MPT within TuLiP, you
 will get an error if you did not use terminal while setting up
 MPT.
 `The details of the issue from Mathworks. <http://www.mathworks.com/support/solutions/en/data/1-Q4J2R/index.html?product=ML&solution=1-Q4J2R>`_
+
+Installing other Python dependencies
+````````````````````````````````````
+
+The command ``pip install ...`` or ``easy_install ...`` will usually
+suffice. To get `python-graph
+<http://code.google.com/p/python-graph/>`_, try::
+
+ $ easy_install python-graph-core
 
 virtualenv and pydoc
 ````````````````````
