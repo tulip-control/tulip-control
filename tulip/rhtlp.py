@@ -407,8 +407,7 @@ class SynthesisProb:
             for fromcell in xrange(0,len(disc_dynamics.trans)):
                 disc_dynamics.trans[fromcell][fromcell] = 1
             if (sys_dyn is not None):
-                disc_dynamics = discretize(cont_partition, sys_dyn, \
-                                       use_mpt=True, verbose=verbose)
+                disc_dynamics = discretize(cont_partition, sys_dyn, verbose=verbose)
         else:
             if (verbose > 0):
                 print("No continuous component")
