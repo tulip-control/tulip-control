@@ -51,17 +51,19 @@ it is on the shell path with::
 
  $ yices -V
 
-which will return the installed version number.  For problems on
-continuous state spaces, you will need methods for manipulating convex
-polytopes, computing partitions, etc.  In the recent release this
-required `MPT <http://control.ee.ethz.ch/~mpt/>`_ (the
-Multi-Parametric Toolbox), hence `Matlab
-<http://www.mathworks.com/products/matlab/>`_.  Code achieving
-independence is presently being developed and merged into the trunk
-sourcetree.  If you are going to use MPT, then its location must be
-added to the Matlab search path and it must be initialized.  You can
-achieve both steps automatically each time Matlab is opened by adding
-the following lines to your ``startup.m`` file::
+which will return the installed version number.
+
+For problems on continuous state spaces, you will need methods for
+manipulating convex polytopes, computing partitions, etc.  In the
+recent release this is by default achieved with `MPT
+<http://control.ee.ethz.ch/~mpt/>`_ (the Multi-Parametric Toolbox), a
+`Matlab <http://www.mathworks.com/products/matlab/>`_ toolbox.  An
+alternative implementation is under development; see
+:ref:`no-mpt-sec-label`. If you are going to use MPT,
+then its location must be added to the Matlab search path and it must
+be initialized.  You can achieve both steps automatically each time
+Matlab is opened by adding the following lines to your ``startup.m``
+file::
 
  addpath(genpath('/path/to/mpt'));
  mpt_init;
@@ -101,10 +103,26 @@ $ which gephi
 
 If this returns nothing, then you should add Gephi to your path. On Mac OS X, you can do this, for instance, by following the instructions from `this webpage <http://keito.me/tutorials/macosx_path>`_ where YOURPATHHERE should be set to the directory where Gephi is located on your machine. It is typically located under ``/Applications/gephi.app/Contents/MacOS/``.
 
+.. _no-mpt-sec-label:
+
 No MPT
 ``````
 
-This version of TuLiP replicates all necessary polytope computations from MPT (so there is no need for Matlab and MPT). However, if you choose to use this functionality, it is highly recommended that you install `glpk <http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you need to install glpk **before** installing CVXOPT and follow the instructions in CVXOPT installation to ensure it recognizes glpk as a solver. If you are a `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not do this linking automatically.
+This version of TuLiP replicates all necessary polytope computations
+from MPT (so there is no need for Matlab and MPT). However, if you
+choose to use this functionality, it is highly recommended that you
+install `GLPK <http://www.gnu.org/s/glpk/>`_ (a fast linear
+programming solver). Note that you need to install GLPK **before**
+installing CVXOPT and follow the instructions in CVXOPT installation
+to ensure it recognizes GLPK as a solver. If you are a `MacPorts
+<http://www.macports.org/>`_ user, please note that MacPorts does not
+do this linking automatically.
+
+To begin using this functionality, set the flag ``use_mpt`` to False
+where appropriate. The most notable case is when calling
+``discretize`` (defined in ``tulip.discretize`` module). In future
+releases (after 0.2a) this flag will be set to False by default, thus
+formally removing any dependency on MPT.
 
 
 Troubleshooting
@@ -147,9 +165,9 @@ For installing SciPy, NumPy, and Matplotlib, consider trying
 `Scipy Superpack for Mac OSX
 <http://stronginference.com/scipy-superpack/>`_ by Chris Fonnesbeck.
 
-To avoid problems when running examples with continuous dynamics, make
-sure you launch MATLAB from the command line in the shell and set up
-MPT from there.
+**If you are using MPT**, make sure you launch MATLAB from the command
+line in the shell and set up MPT from there to avoid problems when
+running examples with continuous dynamics.
 
 If you launch MATLAB through a short-cut and setup MPT that way, even
 if it looks as if it gets installed correctly, it won't work when you
