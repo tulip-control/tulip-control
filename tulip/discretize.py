@@ -359,7 +359,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     return new_part
 
 def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
-               conservative=False, max_num_poly=5, use_mpt=False, \
+               conservative=False, max_num_poly=5, \
                use_all_horizon=False, abs_tol=1e-7, verbose=0):
 
     """Refine the partition and establish transitions based on reachability
@@ -964,7 +964,7 @@ def discretizeFromMatlab(origPart):
             polys = []
             props = []
             for i3 in range(0,int(numpoly[i1,i2])):
-                Ab = data['Cell'+str(i1)+'Reg'+str(i2)+'Poly'+str(i3)+'Ab']
+                Ab = np.array(data['Cell'+str(i1)+'Reg'+str(i2)+'Poly'+str(i3)+'Ab'].tolist(), dtype=np.float64)
                 A = deepcopy(Ab[:,0:-1])
                 b = np.zeros((A.shape[0],1))
                 b[0:,0] = deepcopy(Ab[:,-1])
