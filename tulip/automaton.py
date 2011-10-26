@@ -33,14 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 ----------------
 Automaton Module
 ----------------
-
-ORIGINALLY BY Nok Wongpiromsarn (nok@cds.caltech.edu)
-ca. August 3, 2010
 """
 
 import re, copy, os, random
@@ -482,7 +478,7 @@ class Automaton:
         output += idt_level*idt+'</aut>'+nl
         return output
 
-    def loadXML(self, x, use_pickling=False):
+    def loadXML(self, x, namespace="", use_pickling=False):
         """Read an automaton from given string conforming to tulipcon XML.
         
         N.B., on a successful processing of the given string, the
@@ -500,29 +496,34 @@ class Automaton:
         """
         if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
             raise ValueError("given automaton XML must be a string or ElementTree._ElementInterface.")
-        
+
+        if (namespace is None) or (len(namespace) == 0):
+            ns_prefix = ""
+        else:
+            ns_prefix = "{"+namespace+"}"
+
         if isinstance(x, str):
             etf = ET.fromstring(x)
         else:
             etf = x
-        if etf.tag != "aut":
+        if etf.tag != ns_prefix+"aut":
             return False
 
-        node_list = etf.findall("node")
+        node_list = etf.findall(ns_prefix+"node")
         states = []
         id_list = []  # For more convenient searching, and to catch redundancy
         for node in node_list:
-            this_id = int(node.find("id").text)
-            this_name = node.find("name").text
-            (tag_name, this_child_list) = conxml.untaglist(node.find("child_list"),
+            this_id = int(node.find(ns_prefix+"id").text)
+            this_name = node.find(ns_prefix+"name").text
+            (tag_name, this_child_list) = conxml.untaglist(node.find(ns_prefix+"child_list"),
                                                            cast_f=int)
-            if tag_name != "child_list":
+            if tag_name != ns_prefix+"child_list":
                 # This really should never happen and may not even be
                 # worth checking.
                 raise ValueError("failure of consistency check while processing aut XML string.")
-            (tag_name, this_state) = conxml.untagdict(node.find("state"),
+            (tag_name, this_state) = conxml.untagdict(node.find(ns_prefix+"state"),
                                                       cast_f_values=int)
-            if tag_name != "state":
+            if tag_name != ns_prefix+"state":
                 raise ValueError("failure of consistency check while processing aut XML string.")
             if this_id in id_list:
                 printWarning("duplicate nodes found: "+str(this_id)+"; ignoring...")
@@ -586,6 +587,33 @@ class Automaton:
                 return self.states[aut_state_index]
             else:
                 return -1
+
+    def getAutInSet(self, aut_state_id):
+        """Find all nodes that include given ID in their outward transitions.
+
+        If the automaton is viewed as a directed graph, and the given
+        ID corresponds to node v, then we are interested in all v'\in V
+        such that (v',v) is an edge in the graph.
+
+        (Comments on efficiency.)  The automaton is stored as a tree,
+        where parents connect to children as in a linked list. Thus
+        given a node, finding the set of outward edges takes constant
+        time, whereas finding the inward set (as done by this method)
+        requires searching the set of nodes and their respective
+        transition sets; so, O(N*M) time, where N is the number of
+        nodes and M is the average number of outward edges.
+
+        Return list of nodes (instances of AutomatonState),
+        or None on error.
+        """
+        this_node = self.getAutState(aut_state_id)
+        if not isinstance(this_node, AutomatonState):
+            return None
+        inward_list = []
+        for k in range(len(self.states)):
+            if aut_state_id in self.states[k].transition:
+                inward_list.append(self.states[k])
+        return inward_list
     
     def setAutStateState(self, aut_state_id, aut_state_state, verbose=0):
         """ 
@@ -656,6 +684,20 @@ class Automaton:
             if (aut_state.state == state):
                 all_aut_states.append(aut_state)
         return all_aut_states
+
+    def getAutInit(self):
+        """Return list of nodes that are initial, i.e. have empty In set.
+
+        N.B., the set of initial nodes is not saved, so every time you
+        call getAutInit, all nodes are checked for empty inward edge
+        sets, which itself incurs a search cost (cf. doc for method
+        getAutInSet).
+        """
+        init_nodes = []
+        for k in range(len(self.states)):
+            if len(self.getAutInSet(self.states[k].id)) == 0:
+                init_nodes.append(self.states[k])
+        return init_nodes
 
     def findAllAutPartState(self, state_frag):
         """Return list of nodes consistent with the given fragment.
