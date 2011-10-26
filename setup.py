@@ -93,8 +93,7 @@ def check_gephi():
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {'MPT' : [check_mpt, 'ERROR: MPT not found.'],
-                 'yices' : [check_yices, 'ERROR: Yices not found.']}
+other_depends = {'yices' : [check_yices, 'ERROR: Yices not found.']}
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -105,7 +104,8 @@ other_depends = {'MPT' : [check_mpt, 'ERROR: MPT not found.'],
 #           and False failure.
 optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'],
              'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/'],
-             'graphlibs' : [check_graphlibs, '', '']}
+             'graphlibs' : [check_graphlibs, '', ''],
+             'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/']}
 
 import sys
 perform_setup = True
@@ -169,7 +169,7 @@ if check_deps:
 
 if perform_setup:
     setup(name = 'tulip',
-          version = '0.2b',
+          version = '0.3a',
           description = 'Temporal Logic Planning (TuLiP) Toolbox',
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
