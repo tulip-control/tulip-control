@@ -68,7 +68,7 @@ cont_partition = prop2part.prop2part2(cont_state_space, cont_props)
 
 # Discretize the continuous state space
 disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
-                N=N, min_cell_volume=0.1, verbose=0)
+                use_mpt=True, N=N, min_cell_volume=0.1, verbose=0)
 
 #plot_partition(disc_dynamics, plot_transitions=True)
 

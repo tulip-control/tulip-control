@@ -119,7 +119,7 @@ class CtsSysDyn:
         self.Uset = Uset
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
-               use_mpt=False, conservative=False, max_num_poly=5, \
+               use_mpt=True, conservative=False, max_num_poly=5, \
                use_all_horizon=False, trans_length=1, remove_trans=False, 
                abs_tol=1e-7, verbose=0):
 

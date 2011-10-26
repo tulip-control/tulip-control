@@ -20,9 +20,8 @@ for these with::
 
 The following packages are also *required*: `NumPy
 <http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_, `CVXOPT
-<http://abel.ee.ucla.edu/cvxopt/>`_, `matplotlib
-<http://matplotlib.sourceforge.net/>`_, and `python-graph
-<http://code.google.com/p/python-graph/>`_.  Except for python-graph,
+<http://abel.ee.ucla.edu/cvxopt/>`_, and `matplotlib
+<http://matplotlib.sourceforge.net/>`_.  Except for python-graph,
 these packages are quite standard in scientific computing environments
 and may already be installed.  To check, open a new terminal and try::
 
@@ -30,11 +29,17 @@ and may already be installed.  To check, open a new terminal and try::
  $ python -c 'import scipy'
  $ python -c 'import cvxopt'
  $ python -c 'import matplotlib'
- $ python -c 'import pygraph'
 
 If an error message occurs, the package might not be visible on the
 current path or may not be installed at all.  Try to install them
-yourself, or see section "Troubleshooting" below for help.
+yourself, or see :ref:`troubleshoot-sec-label` below for help.
+
+`python-graph <http://code.google.com/p/python-graph/>`_ is not
+required for most uses of TuLiP, but a few methods of the Automaton
+class will be unavailable if python-graph is not found. To check if
+you already have it, try::
+
+ $ python -c 'import pygraph'
 
 The default (only) GR[1] synthesis tool used by TuLiP is implemented
 in `JTLV <http://jtlv.ysaar.net/>`_. Thus you must have Java version
@@ -124,6 +129,8 @@ where appropriate. The most notable case is when calling
 releases (after 0.2a) this flag will be set to False by default, thus
 formally removing any dependency on MPT.
 
+
+.. _troubleshoot-sec-label:
 
 Troubleshooting
 ---------------
