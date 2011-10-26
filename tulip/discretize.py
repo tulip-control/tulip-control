@@ -113,7 +113,7 @@ class CtsSysDyn:
         self.Uset = Uset
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
-               use_mpt=True, conservative=False, max_num_poly=5, \
+               use_mpt=False, conservative=False, max_num_poly=5, \
                use_all_horizon=False, trans_length=1, remove_trans=False, 
                abs_tol=1e-7, verbose=0):
 
@@ -358,7 +358,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     return new_part
 
 def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
-               conservative=False, max_num_poly=5, use_mpt=False, \
+               conservative=False, max_num_poly=5, \
                use_all_horizon=False, abs_tol=1e-7, verbose=0):
 
     """Refine the partition and establish transitions based on reachability
@@ -676,7 +676,7 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
         if not good:
             print "Calculated sequence not good"
     return low_u
-
+    
 def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
                   use_all_horizon=False, trans_set=None, max_num_poly=5):
 
@@ -981,7 +981,7 @@ def discretizeFromMatlab(origPart):
             polys = []
             props = []
             for i3 in range(0,int(numpoly[i1,i2])):
-                Ab = data['Cell'+str(i1)+'Reg'+str(i2)+'Poly'+str(i3)+'Ab']
+                Ab = np.array(data['Cell'+str(i1)+'Reg'+str(i2)+'Poly'+str(i3)+'Ab'].tolist(), dtype=np.float64)
                 A = deepcopy(Ab[:,0:-1])
                 b = np.zeros((A.shape[0],1))
                 b[0:,0] = deepcopy(Ab[:,-1])
@@ -1272,3 +1272,26 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         inside = False
             
     return inside
+    
+def get_cellID(x0, part):
+ 
+    """Return an integer specifying in which discrete state the continuous state x0
+    belongs to.
+        
+    Input:
+    - `x0`: initial continuous state
+    - `part`: PropPreservingPartition object specifying the state space partition
+    
+    Output:
+    - cellID: int specifying the discrete state in `part` x0 belongs to, -1 if x0 does 
+    not belong to any discrete state.
+    
+    Note1: If there are overlapping partitions (i.e., x0 can belong to more than one
+    discrete state), this just returns the first ID"""
+    
+    cellID = -1
+    for i in range(part.num_regions):
+        if pc.is_inside(part.list_region[i], x0):
+             cellID = i
+             break
+    return cellID

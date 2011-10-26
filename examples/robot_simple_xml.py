@@ -66,7 +66,7 @@ if not load_from_XML:
     cont_partition = prop2part.prop2part2(cont_state_space, cont_props)
 
     # Discretize the continuous state space
-    disc_dynamics = discretize.discretize(cont_partition, sys_dyn, use_mpt=False, verbose=2)
+    disc_dynamics = discretize.discretize(cont_partition, sys_dyn, verbose=2)
 
     # Spec
     assumption = 'X0reach & []<>(!park)'

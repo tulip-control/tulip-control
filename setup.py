@@ -8,6 +8,17 @@ from distutils.core import setup
 ###########################################
 # (see notes below.)
 
+def check_graphlibs():
+    """Check for presence of graph packages: python-graph."""
+    try:
+        import pygraph
+    except ImportError:
+        print 'python-graph not found. If you\'re interested, see http://code.google.com/p/python-graph/'
+        print 'Some methods for the Automaton class will not be available.'
+
+    # Dud return value to conform to typical behavior of check_... functions.
+    return True
+
 def check_mpt():
     import subprocess
 
@@ -93,6 +104,7 @@ other_depends = {'yices' : [check_yices, 'ERROR: Yices not found.']}
 #           and False failure.
 optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'],
              'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/'],
+             'graphlibs' : [check_graphlibs, '', ''],
              'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/']}
 
 import sys
@@ -139,11 +151,6 @@ if check_deps:
     except:
         print 'ERROR: matplotlib not found.'
         raise
-    try:
-        import pygraph
-    except:
-        print 'ERROR: python-graph not found.'
-        raise
 
     # Other dependencies
     for (dep_key, dep_val) in other_depends.items():
@@ -162,12 +169,12 @@ if check_deps:
 
 if perform_setup:
     setup(name = 'tulip',
-          version = '0.2a',
+          version = '0.3a',
           description = 'Temporal Logic Planning (TuLiP) Toolbox',
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
           url = 'http://tulip-control.sourceforge.net',
-          requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib', 'pygraph'],
+          requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib'],
           packages = ['tulip'],
           package_dir = {'tulip' : 'tulip'},
           package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar', 'polytope/*.py']},

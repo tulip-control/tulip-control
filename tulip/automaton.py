@@ -40,12 +40,19 @@ Automaton Module
 """
 
 import re, copy, os, random
-from pygraph.classes.digraph import digraph
-from pygraph.algorithms.accessibility import connected_components
 import xml.etree.ElementTree as ET
 
 from errorprint import printWarning, printError
 import conxml
+
+try:
+    from pygraph.classes.digraph import digraph
+    from pygraph.algorithms.accessibility import connected_components
+except ImportError:
+    print "python-graph package not found.\nHence some methods in Automaton class are unavailable."
+    # python-graph package not found. Disable dependent methods.
+    digraph = None
+    connected_components = None
     
 
 ###################################################################
@@ -237,6 +244,10 @@ class Automaton:
         method will change IDs after trimming to ensure indexing still
         works (since self.states attribute is a list).
         """
+        if digraph is None:
+            print "WARNING: attempted to call unavailable method trimDeadStates."
+            return
+
         self.createPygraphRepr()
         
         # Delete nodes with no outbound transitions.
@@ -258,6 +269,10 @@ class Automaton:
         method will change IDs after trimming to ensure indexing still
         works (since self.states attribute is a list).
         """
+        if connected_components is None:
+            print "WARNING: attempted to call unavailable method trimUnconnectedStates."
+            return
+
         self.createPygraphRepr()
         
         # Delete nodes that are unconnected to 'aut_state_id'.
@@ -274,6 +289,10 @@ class Automaton:
         Generate a python-graph representation of this automaton, stored
         in 'self.pygraph'
         """
+        if digraph is None:
+            print "WARNING: attempted to call unavailable method createPygraphRepr."
+            return
+
         # Create directed graph in pygraph.
         self.pygraph = digraph()
         
@@ -294,6 +313,10 @@ class Automaton:
         method will change IDs after trimming to ensure indexing still
         works (since self.states attribute is a list).
         """
+        if digraph is None:
+            print "WARNING: attempted to call unavailable method loadPygraphRepr."
+            return
+
         # Reorder nodes by setting 'new_state_id'.
         for (i, node) in enumerate(self.pygraph.nodes()):
             self.pygraph.add_node_attribute(node, ('new_state_id', i))
