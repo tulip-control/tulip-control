@@ -31,6 +31,8 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
+# $Id$
+#
 #
 #  Acknowledgement:
 #  The overall structure of this library and the functions in the list
@@ -556,6 +558,9 @@ def cheby_ball(poly1):
     
     Output:
     `rc,xc`: Chebyshev radius rc (float) and Chebyshev center xc (numpy array)
+
+    N.B., this function will return whatever it finds in attributes
+    chebR and chbXc if not None, without (re)computing the Chebyshev ball.
     
     Example (low dimension):
     
@@ -563,7 +568,7 @@ def cheby_ball(poly1):
     longest line segment along the first coordinate axis inside polytope P
     """
 
-    if (poly1.chebXc != None) & (poly1.chebR != None):
+    if (poly1.chebXc != None) and (poly1.chebR != None):
         #In case chebyshev ball already calculated and stored
         return poly1.chebR,poly1.chebXc
 
@@ -685,9 +690,11 @@ def bounding_box(polyreg):
     return l,u
     
 def envelope(reg, abs_tol=1e-7):
-    """Compute envelope of a region. The envelope is the polytope defined by all
-    "outer" inequalities a x < b such that {x | a x < b} intersection P = P for all
-    polytopes P in the region. In other words we want to find all "outer" 
+    """Compute envelope of a region.
+
+    The envelope is the polytope defined by all "outer" inequalities
+    a x < b such that {x | a x < b} intersection P = P for all polytopes
+    P in the region. In other words we want to find all "outer"
     equalities of the region.
     
     If envelope can't be computed an empty polytope is returned

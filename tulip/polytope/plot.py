@@ -30,6 +30,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+#
+# $Id$
 
 """
 Functions for plotting Polytopes and Partitions. The functions
@@ -84,7 +86,7 @@ def get_patch(poly1, color="blue"):
     patch = matplotlib.patches.Polygon(V[ind,:], True, color=color)
     return patch
     
-def plot(poly1):    
+def plot(poly1, show=True):
     """Plots a 2D polytope or a region using matplotlib.
     
     Input:
@@ -106,7 +108,8 @@ def plot(poly1):
         
             ax.set_xlim(l[0,0],u[0,0])
             ax.set_ylim(l[1,0],u[1,0])
-            plt.show()
+            if show:
+                plt.show()
         
         else:
             l,u = bounding_box(poly1)
