@@ -52,10 +52,9 @@
 #  projection_interhull
 #  projection_exthull
 #
-
 """
-A computational geometry module for polytope computations. The module can be
-accessed by writing
+A computational geometry module for polytope computations. The module
+can be accessed by writing
 
 > import tulip.polytope as pc
 
@@ -76,14 +75,6 @@ Primary functions:
 Classes:
 	- Region
 	- Polytope
-
-Created by N. Ozay, 8/15/10 (necmiye@cds.caltech.edu)
-Modified by U. Topcu, 8/16/10
-
-minor refactoring by SCL <slivingston@caltech.edu>
-1 May 2011.
-
-Modified and restructured by P. Nilsson, summer 2011
 """
 
 import numpy as np
@@ -111,20 +102,25 @@ np.set_printoptions(precision=5, suppress = True)
 class Polytope:
     """Polytope class with following fields
     
-    -A: a numpy array for the hyperplane normals in hyperplane representation of a polytope
-    -b:  a numpy array for the hyperplane offsets in hyperplane representation of a polytope
-    -array: python array in the case of a union of convex polytopes
-    -chebXc: coordinates of chebyshev center (if calculated)
-    -chebR: chebyshev radius (if calculated)
-    -bbox: bounding box (if caluclated)
-    -minrep: if polytope is in minimal representation (after running reduce)
+    - `A`: a numpy array for the hyperplane normals in hyperplane
+           representation of a polytope
+    - `b`: a numpy array for the hyperplane offsets in hyperplane
+           representation of a polytope
+    - `array`: python array in the case of a union of convex polytopes
+    - `chebXc`: coordinates of chebyshev center (if calculated)
+    - `chebR`: chebyshev radius (if calculated)
+    - `bbox`: bounding box (if caluclated)
+    - `minrep`: if polytope is in minimal representation (after
+                running reduce)
+    - `normalize`: if True (default), normalize given A and b arrays;
+                   else, use A and b without modification.
     """
     
-    def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None):
+    def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None, normalize=True):
         
         self.A = A.astype(float)
         self.b = b.astype(float).flatten()
-        if A.size > 0:
+        if A.size > 0 and normalize:
             # Normalize
             Anorm = np.sqrt(np.sum(A*A,1)).flatten()     
             pos = np.nonzero(Anorm > 1e-10)[0]
@@ -208,14 +204,15 @@ class Region:
     
     Contains the following fields:
     
-    `list_poly`: list of Polytope objects
-    `list_prop`: list of propositions inside region
-    `bbox`: if calculated, bounding box of region (see bounding_box)
-    `fulldim`: if calculated, boolean indicating whether region is fully dimensional
-    `volume`: if calculated, volume of region
-    -chebXc: coordinates of maximum chebyshev center (if calculated)
-    -chebR: maximum chebyshev radius (if calculated)
-"""
+    - `list_poly`: list of Polytope objects
+    - `list_prop`: list of propositions inside region
+    - `bbox`: if calculated, bounding box of region (see bounding_box)
+    - `fulldim`: if calculated, boolean indicating whether region is
+                 fully dimensional
+    - `volume`: if calculated, volume of region
+    - `chebXc`: coordinates of maximum chebyshev center (if calculated)
+    - `chebR`: maximum chebyshev radius (if calculated)
+    """
     
     def __init__(self, list_poly=[], list_prop=[]):
     
@@ -274,7 +271,7 @@ def is_empty(polyreg):
     `polyreg`: Polytope or Region instance
     
     Output:
-    'result': Boolean indicating whether polyreg is empty
+    `result`: Boolean indicating whether polyreg is empty
     """
     n = len(polyreg)
     if len(polyreg) == 0:
@@ -298,7 +295,10 @@ def is_fulldim(polyreg, abs_tol=1e-7):
     - `polyreg`: Polytope or Region instance
     
     Output:
-    - `result`: Boolean that is True if inner points found, False otherwise"""
+
+    - `result`: Boolean that is True if inner points found, False
+                otherwise.
+    """
 
     if polyreg.fulldim != None:
         return polyreg.fulldim
@@ -327,8 +327,9 @@ def is_convex(reg, abs_tol = 1e-7):
     `reg`: Region object
     
     Output:
-    `result,envelope`: result indicating if convex. if found to be convex
-                       the envelope describing the convex polytope is returned.
+    `result,envelope`: result indicating if convex. if found to be
+                       convex the envelope describing the convex
+                       polytope is returned.
     """
     
     if not is_fulldim(reg):
@@ -550,22 +551,25 @@ def union(polyreg1,polyreg2,check_convex=False):
     return ret
 
 def cheby_ball(poly1):
-    """Calculate the Chebyshev radius and center for a polytope. If input is a 
-    region the largest Chebyshev ball is returned.
+    """Calculate the Chebyshev radius and center for a polytope.
+
+    If input is a region the largest Chebyshev ball is returned.
     
     Input:
     `poly1`: A Polytope object
     
     Output:
-    `rc,xc`: Chebyshev radius rc (float) and Chebyshev center xc (numpy array)
+
+    `rc,xc`: Chebyshev radius rc (float) and center xc (numpy array)
 
     N.B., this function will return whatever it finds in attributes
     chebR and chbXc if not None, without (re)computing the Chebyshev ball.
     
     Example (low dimension):
     
-    r1,x1 = cheby_ball(P, [1]) calculates the center and half the length of the
-    longest line segment along the first coordinate axis inside polytope P
+    r1,x1 = cheby_ball(P, [1]) calculates the center and half the
+    length of the longest line segment along the first coordinate axis
+    inside polytope P
     """
 
     if (poly1.chebXc != None) and (poly1.chebR != None):
@@ -692,8 +696,8 @@ def bounding_box(polyreg):
 def envelope(reg, abs_tol=1e-7):
     """Compute envelope of a region.
 
-    The envelope is the polytope defined by all "outer" inequalities
-    a x < b such that {x | a x < b} intersection P = P for all polytopes
+    The envelope is the polytope defined by all "outer" inequalities a
+    x < b such that {x | a x < b} intersection P = P for all polytopes
     P in the region. In other words we want to find all "outer"
     equalities of the region.
     
@@ -954,8 +958,8 @@ def projection(poly1,dim,solver=None,abs_tol=1e-7):
     Input:
     - `poly1`: Polytope to project
     - `dim`: Dimensions on which to project
-    - `solver`: A solver can be specified, if left blank an attempt is made to
-                choose the most suitable solver.
+    - `solver`: A solver can be specified, if left blank an attempt is
+                made to choose the most suitable solver.
     
     Output:
     - Projected polytope in lower dimension
@@ -1050,8 +1054,8 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
     Input:
     - `poly1,poly2`: Polytopes or Regions to check
     - `abs_tol`: absolute tolerance
-    - `overlap`: used for overlapping polytopes, functions returns True if polytopes
-                 are neighbors OR overlap
+    - `overlap`: used for overlapping polytopes, functions returns
+                 True if polytopes are neighbors OR overlap
     
     Output:
     True if polytopes are adjacent, False otherwise"""
@@ -1455,7 +1459,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
 def num_bin(N, places=8):
     """Return N as list of bits, zero-filled to places.
 
-E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
-"""
+    E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
+    """
     return [(N>>k)&0x1  for k in range(places)]
     
