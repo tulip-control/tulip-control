@@ -1019,7 +1019,6 @@ def loadYAML(x, verbose=0):
 
 # This test should be broken into units.
 def conxml_test():
-#if __name__ == "__main__":
     A = np.array([[1,2,3],[4,5,6],[7,8,9]], dtype=np.float64)
     b = np.asarray(range(3))
     assert tagmatrix("A", A, use_pickling=False) == '<A type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</A>'
