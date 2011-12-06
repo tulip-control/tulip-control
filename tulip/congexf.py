@@ -32,7 +32,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: congexf.py 179 2011-09-19 06:04:54Z scottlivingston $
+# $Id$
 """
 Several functions that help in converting an AUT file (from JTLV)
 to a GEXF file (in Gephi).

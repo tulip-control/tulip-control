@@ -30,11 +30,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
+#
+# $Id$
 """ 
-Algorithms related to discretization containing both MATLAB interface and Python
-discretization. Input calculation is available in python only but should work also
-for a state space partition discretized in MATLAB.
+Algorithms related to discretization containing both MATLAB interface
+and Python discretization. Input calculation is available in python
+only but should work also for a state space partition discretized in
+MATLAB.
 
 Classes:
     - CtsSysDyn
