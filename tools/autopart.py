@@ -37,7 +37,7 @@ if __name__ == "__main__":
         verbose = 0
 
     if len(sys.argv) == 2:
-        out_fname = "OUT-"+sys.argv[1]+".xml"
+        out_fname = sys.argv[1]+".xml"
     else:
         out_fname = sys.argv[2]
 
