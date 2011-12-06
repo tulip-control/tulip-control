@@ -561,6 +561,9 @@ def cheby_ball(poly1):
     Output:
 
     `rc,xc`: Chebyshev radius rc (float) and center xc (numpy array)
+
+    N.B., this function will return whatever it finds in attributes
+    chebR and chbXc if not None, without (re)computing the Chebyshev ball.
     
     Example (low dimension):
     
@@ -569,7 +572,7 @@ def cheby_ball(poly1):
     inside polytope P
     """
 
-    if (poly1.chebXc != None) & (poly1.chebR != None):
+    if (poly1.chebXc != None) and (poly1.chebR != None):
         #In case chebyshev ball already calculated and stored
         return poly1.chebR,poly1.chebXc
 
