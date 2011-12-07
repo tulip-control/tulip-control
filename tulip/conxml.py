@@ -39,15 +39,8 @@ Several functions that help in working with tulipcon XML files.
 This module includes a few functions for parsing YAML files, providing
 an easier way to specify transition systems.  See rsimple_example.yaml
 in the "examples" directory for reference.
-
-Note that many of these functions are just convenience wrappers around
-NumPy and Python's pickling routines, if the use_pickling flag is set.
-However pickling is largely untested!  For now you should go with
-use_pickling=False (the default, so just call these functions without
-any pickling flags).
 """
 
-import pickle
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -83,7 +76,7 @@ RHTLP_PROB = 1
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/0"
 
 
-def readXMLfile(fname, verbose=0, use_pickling=False):
+def readXMLfile(fname, verbose=0):
     """Read tulipcon XML string directly from a file.
 
     Returns 3-tuple, as described in *loadXML* docstring.  (This is a
@@ -91,9 +84,9 @@ def readXMLfile(fname, verbose=0, use_pickling=False):
     """
     with open(fname, "r") as f:
         x = f.read()
-    return loadXML(x, verbose=verbose, use_pickling=use_pickling)
+    return loadXML(x, verbose=verbose)
 
-def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE, use_pickling=False):
+def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
     """Return 3-tuple of, in terms of classes, (SynthesisProb, CtsSysDyn, Automaton).
 
     Any empty or missing items are set to None, or an exception is
@@ -263,7 +256,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE, use_pickling=False):
     return (prob, sys_dyn, aut)
                                
 def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
-            synthesize_aut=False, verbose=0, pretty=False, use_pickling=False):
+            synthesize_aut=False, verbose=0, pretty=False):
     """Return tulipcon XML string.
 
     prob is an instance of SynthesisProb or a child class, such as
@@ -418,8 +411,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     return output
 
 def writeXMLfile(fname, prob, spec, sys_dyn=None, aut=None,
-                 synthesize_aut=False, verbose=0, pretty=False,
-                 use_pickling=False):
+                 synthesize_aut=False, verbose=0, pretty=False):
     """Write tulipcon XML string directly to a file.
 
     Returns nothing.  (This is a convenience method, mostly only
@@ -428,7 +420,7 @@ def writeXMLfile(fname, prob, spec, sys_dyn=None, aut=None,
     with open(fname, "w") as f:
         f.write(dumpXML(prob=prob, spec=spec, sys_dyn=sys_dyn, aut=aut,
                         synthesize_aut=synthesize_aut, verbose=verbose,
-                        pretty=pretty, use_pickling=use_pickling))
+                        pretty=pretty))
     return
 
 
@@ -578,14 +570,13 @@ def dumpXMLtrans(sys_dyn, disc_dynamics, horizon, extra="",
     return output
 
 
-def untaglist(x, cast_f=float, use_pickling=False):
+def untaglist(x, cast_f=float):
     """Extract list from given tulipcon XML tag (string).
 
     Use function cast_f for type-casting extracting element strings.
     The default is float, but another common case is cast_f=int (for
     ``integer'').  If cast_f is set to None, then items are left as
-    extracted, i.e. as strings.  Note that pickling restores the type
-    automatically, so cast_f is ignored if use_pickling is true.
+    extracted, i.e. as strings.
 
     The argument x can also be an instance of
     xml.etree.ElementTree._ElementInterface ; this is mainly for
@@ -604,9 +595,7 @@ def untaglist(x, cast_f=float, use_pickling=False):
         elem = x
 
     # Extract list
-    if use_pickling:
-        li = pickle.loads(elem.text)
-    elif elem.text is None:
+    if elem.text is None:
         li = []
     else:
         if cast_f is None:
@@ -615,7 +604,7 @@ def untaglist(x, cast_f=float, use_pickling=False):
     return (elem.tag, li)
 
 def untagdict(x, cast_f_keys=None, cast_f_values=None,
-              namespace=DEFAULT_NAMESPACE, use_pickling=False):
+              namespace=DEFAULT_NAMESPACE):
     """Extract list from given tulipcon XML tag (string).
 
     Use functions cast_f_keys and cast_f_values for type-casting
@@ -624,9 +613,7 @@ def untagdict(x, cast_f_keys=None, cast_f_values=None,
     are left untouched (as strings), but another common case is
     cast_f_values=int (for ``integer'') or cast_f_values=float (for
     ``floating-point numbers''), while leaving cast_f_keys=None to
-    indicate dictionary keys are strings.  Note that pickling restores
-    the type automatically, so cast_f_keys and cast_f_values are
-    ignored if use_pickling is true.
+    indicate dictionary keys are strings.
 
     The argument x can also be an instance of
     xml.etree.ElementTree._ElementInterface ; this is mainly for
@@ -650,21 +637,18 @@ def untagdict(x, cast_f_keys=None, cast_f_values=None,
         ns_prefix = "{"+namespace+"}"
 
     # Extract dictionary
-    if use_pickling:
-        di = pickle.loads(elem.text)
-    else:
-        items_li = elem.findall(ns_prefix+'item')
-        if cast_f_keys is None:
-            cast_f_keys = str
-        if cast_f_values is None:
-            cast_f_values = str
-        di = dict()
-        for item in items_li:
-            # N.B., we will overwrite duplicate keys without warning!
-            di[cast_f_keys(item.attrib['key'])] = cast_f_values(item.attrib['value'])
+    items_li = elem.findall(ns_prefix+'item')
+    if cast_f_keys is None:
+        cast_f_keys = str
+    if cast_f_values is None:
+        cast_f_values = str
+    di = dict()
+    for item in items_li:
+        # N.B., we will overwrite duplicate keys without warning!
+        di[cast_f_keys(item.attrib['key'])] = cast_f_values(item.attrib['value'])
     return (elem.tag, di)
 
-def untagmatrix(x, np_type=np.float64, use_pickling=False):
+def untagmatrix(x, np_type=np.float64):
     """Extract matrix from given tulipcon XML tag (string).
 
     np_type is the NumPy type into which to cast read string.  The
@@ -690,8 +674,6 @@ def untagmatrix(x, np_type=np.float64, use_pickling=False):
     
     if elem.text is None:
         x_mat = np.array([])  # Handle special empty case.
-    elif use_pickling:
-        x_mat = np.loads(elem.text)
     else:
         num_rows = int(elem.attrib['r'])
         num_cols = int(elem.attrib['c'])
@@ -699,8 +681,7 @@ def untagmatrix(x, np_type=np.float64, use_pickling=False):
         x_mat = x_mat.reshape(num_rows, num_cols)
     return (elem.tag, x_mat)
 
-def untagpolytope(x, np_type=np.float64, namespace=DEFAULT_NAMESPACE,
-                  use_pickling=False):
+def untagpolytope(x, np_type=np.float64, namespace=DEFAULT_NAMESPACE):
     """Extract polytope from given tuilpcon XML tag (string).
 
     Essentially calls untagmatrix and gathers results into Polytope
@@ -732,15 +713,13 @@ def untagpolytope(x, np_type=np.float64, namespace=DEFAULT_NAMESPACE,
     h_tag = elem.find(ns_prefix+'H')
     k_tag = elem.find(ns_prefix+'K')
 
-    (H_out_name, H_out) = untagmatrix(h_tag, np_type=np_type,
-                                      use_pickling=use_pickling)
-    (K_out_name, K_out) = untagmatrix(k_tag, np_type=np_type,
-                                      use_pickling=use_pickling)
+    (H_out_name, H_out) = untagmatrix(h_tag, np_type=np_type)
+    (K_out_name, K_out) = untagmatrix(k_tag, np_type=np_type)
 
     return (elem.tag, pc.Polytope(H_out, K_out, normalize=False))
 
 def untagregion(x, cast_f_list=str, np_type_P=np.float64,
-                namespace=DEFAULT_NAMESPACE, use_pickling=False):
+                namespace=DEFAULT_NAMESPACE):
     """Extract region from given tulipcon XML tag (string).
 
     The argument x can also be an instance of
@@ -770,8 +749,7 @@ def untagregion(x, cast_f_list=str, np_type_P=np.float64,
     if elem.tag != ns_prefix+"region":
         raise ValueError("tag must be an instance of ``region''.")
 
-    (tag_name, list_prop) = untaglist(elem.find(ns_prefix+"list_prop"), cast_f=cast_f_list,
-                                      use_pickling=use_pickling)
+    (tag_name, list_prop) = untaglist(elem.find(ns_prefix+"list_prop"), cast_f=cast_f_list)
     if list_prop is None:
         list_prop = []
 
@@ -780,13 +758,12 @@ def untagregion(x, cast_f_list=str, np_type_P=np.float64,
     if poly_tags is not None and len(poly_tags) > 0:
         for P_elem in poly_tags:
             (tag_name, P) = untagpolytope(P_elem, np_type=np_type_P,
-                                          namespace=namespace,
-                                          use_pickling=use_pickling)
+                                          namespace=namespace)
             list_poly.append(P)
 
     return (elem.tag, pc.Region(list_poly=list_poly, list_prop=list_prop))
 
-def tagdict(name, di, pretty=False, use_pickling=False, idt_level=0):
+def tagdict(name, di, pretty=False, idt_level=0):
     """Create tag that basically stores a dictionary object.
 
     If pretty is True, then use indentation and newlines to make the
@@ -794,17 +771,14 @@ def tagdict(name, di, pretty=False, use_pickling=False, idt_level=0):
     base indentation level on which to create automaton string.  This
     level is only relevant if pretty=True.
 
-    N.B., if you are *not* using pickling, then all keys and values
-    are treated as strings (and frequently wrapped in str() to force
-    this behavior).
+    N.B., all keys and values are treated as strings (and frequently
+    wrapped in str() to force this behavior).
 
     Return the resulting string.  On failure, raises an appropriate
     exception, or returns False.
     """
     if not isinstance(name, str):
         raise TypeError("tag name must be a string.")
-    if use_pickling:
-        return '<'+name+'>' + pickle.dumps(di) + '</'+name+'>'
 
     if pretty:
         nl = "\n"  # Newline
@@ -820,7 +794,7 @@ def tagdict(name, di, pretty=False, use_pickling=False, idt_level=0):
     output += idt*idt_level+'</'+name+'>'+nl
     return output
 
-def tagpolytope(name, P, use_pickling=False):
+def tagpolytope(name, P):
     """Create tag of type ``Polytope'', with given name.
 
     Polytope is as defined in tulip.polytope_computations module.
@@ -834,25 +808,22 @@ def tagpolytope(name, P, use_pickling=False):
     if P is None or P == []:
         P = pc.Polytope(np.array([]), np.array([]), normalize=False)
     output = '<'+name+' type="polytope">'
-    output += tagmatrix("H", P.A, use_pickling=False)
-    output += tagmatrix("K", P.b, use_pickling=False)
+    output += tagmatrix("H", P.A)
+    output += tagmatrix("K", P.b)
     output += '</'+name+'>'
     return output
 
-def taglist(name, li, use_pickling=False):
+def taglist(name, li):
     """Create tag that basically stores a list object.
 
-    N.B., if you are *not* using pickling, then all list elements are
-    treated as strings (and frequently wrapped in str() to force this
-    behavior).
+    N.B., all list elements are treated as strings (and frequently
+    wrapped in str() to force this behavior).
 
     Return the resulting string.  On failure, raises an appropriate
     exception, or returns False.
     """
     if not isinstance(name, str):
         raise TypeError("tag name must be a string.")
-    if use_pickling:
-        return '<'+name+'>' + pickle.dumps(li) + '</'+name+'>'
 
     output = '<'+name+'>'
     if li is not None:
@@ -860,7 +831,7 @@ def taglist(name, li, use_pickling=False):
     output += '</'+name+'>'
     return output
 
-def tagregion(R, pretty=False, use_pickling=False, idt_level=0):
+def tagregion(R, pretty=False, idt_level=0):
     """Create tag of type ``Region.''
 
     Region is as defined in tulip.polytope_computations module.
@@ -885,14 +856,14 @@ def tagregion(R, pretty=False, use_pickling=False, idt_level=0):
         R = pc.Region(list_poly=[], list_prop=[])
     output = idt*idt_level+'<region>'+nl
     idt_level += 1
-    output += idt*idt_level+taglist("list_prop", R.list_prop, use_pickling=use_pickling)+nl
+    output += idt*idt_level+taglist("list_prop", R.list_prop)+nl
     if R.list_poly is not None and len(R.list_poly) > 0:
         for P in R.list_poly:
             output += idt*idt_level+tagpolytope("reg_item", P)+nl
     output += idt*(idt_level-1)+'</region>'+nl
     return output
 
-def tagmatrix(name, A, use_pickling=False):
+def tagmatrix(name, A):
     """Create tag of type ``matrix'', with given name.
 
     Given matrix, A, should be an ndarray.  If it is a vector, rather
@@ -911,9 +882,6 @@ def tagmatrix(name, A, use_pickling=False):
     # Handle empty matrix case.
     if A is None or A == []:
         A = np.array([])
-
-    if use_pickling:
-        return '<'+name+' type="matrix">' + A.dumps() + '</'+name+'>'
 
     if len(A.shape) == 1 and A.shape[0] == 0:  # Empty matrix?
         output = '<'+name+' type="matrix" r="0" c="0"></'+name+'>'
@@ -961,6 +929,9 @@ def loadYAML(x, verbose=0):
     - initial_partition is the given proposition-preserving partition
       of the space (instance of PropPreservingPartition), and
     - N is the horizon length (default is 10).
+
+    To easily read and process this string from a file, instead call
+    the method *readYAMLfile*.
 
     Raise exception if critical error.
     """
@@ -1021,42 +992,34 @@ def loadYAML(x, verbose=0):
 def conxml_test():
     A = np.array([[1,2,3],[4,5,6],[7,8,9]], dtype=np.float64)
     b = np.asarray(range(3))
-    assert tagmatrix("A", A, use_pickling=False) == '<A type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</A>'
-    assert tagmatrix("b", b, use_pickling=False) == '<b type="matrix" r="3" c="1">0 1 2</b>'
+    assert tagmatrix("A", A) == '<A type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</A>'
+    assert tagmatrix("b", b) == '<b type="matrix" r="3" c="1">0 1 2</b>'
 
     P = pc.Polytope(A, b, normalize=False)
-    assert tagpolytope("P", P, use_pickling=False) == '<P type="polytope"><H type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</H><K type="matrix" r="3" c="1">0.0 1.0 2.0</K></P>'
+    assert tagpolytope("P", P) == '<P type="polytope"><H type="matrix" r="3" c="3">1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0</H><K type="matrix" r="3" c="1">0.0 1.0 2.0</K></P>'
 
     li = range(7)
-    assert taglist("trans", li, use_pickling=False) == '<trans>0 1 2 3 4 5 6</trans>'
+    assert taglist("trans", li) == '<trans>0 1 2 3 4 5 6</trans>'
 
-    (li_out_name, li_out) = untaglist(taglist("trans", li,
-                                              use_pickling=False),
-                                      use_pickling=False)
+    (li_out_name, li_out) = untaglist(taglist("trans", li))
     assert (li_out_name == "trans") and (li_out == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
 
     di = {1:2, 3:4, 'X0':'boolean'}
-    assert tagdict("env_vars", di, use_pickling=False) == '<env_vars><item key="1" value="2" /><item key="X0" value="boolean" /><item key="3" value="4" /></env_vars>'
+    assert tagdict("env_vars", di) == '<env_vars><item key="1" value="2" /><item key="X0" value="boolean" /><item key="3" value="4" /></env_vars>'
 
-    (di_out_name, di_out) = untagdict(tagdict("sys_vars", di,
-                                              use_pickling=False),
-                                      namespace=None,
-                                      use_pickling=False)
+    (di_out_name, di_out) = untagdict(tagdict("sys_vars", di),
+                                      namespace=None)
     assert (di_out_name == "sys_vars") and (di_out == {'1': '2', 'X0': 'boolean', '3': '4'})
 
-    (A_out_name, A_out) = untagmatrix(tagmatrix("A", A, use_pickling=False),
-                                      use_pickling=False)
+    (A_out_name, A_out) = untagmatrix(tagmatrix("A", A))
     assert (A_out_name == "A") and (np.all(np.all(A_out == A)))
 
-    (b_out_name, b_out) = untagmatrix(tagmatrix("b", b, use_pickling=False),
-                                      np_type=int,
-                                      use_pickling=False)
+    (b_out_name, b_out) = untagmatrix(tagmatrix("b", b),
+                                      np_type=int)
     assert (b_out_name == "b") and (np.all(np.squeeze(b_out) == b))
 
-    (P_out_name, P_out) = untagpolytope(tagpolytope("P", P,
-                                                    use_pickling=False),
-                                        namespace=None,
-                                        use_pickling=False)
+    (P_out_name, P_out) = untagpolytope(tagpolytope("P", P),
+                                        namespace=None)
     assert (P_out_name == "P") and (np.all(np.all(P_out.A == P.A))) and (np.all(np.squeeze(P_out.b) == np.squeeze(P.b)))
 
     list_prop  = range(10)

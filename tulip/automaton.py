@@ -524,7 +524,7 @@ class Automaton:
             f.write(output)
         return True
     
-    def dumpXML(self, pretty=True, use_pickling=False, idt_level=0):
+    def dumpXML(self, pretty=True, idt_level=0):
         """Return string of automaton conforming to tulipcon XML.
 
         If pretty is True, then use indentation and newlines to make
@@ -546,17 +546,15 @@ class Automaton:
             output += idt_level*idt+'<node>'+nl
             idt_level += 1
             output += idt_level*idt+'<id>' + str(node.id) + '</id><name></name>'+nl
-            output += idt_level*idt+conxml.taglist("child_list", node.transition,
-                                                   use_pickling=use_pickling)+nl
-            output += idt_level*idt+conxml.tagdict("state", node.state,
-                                                   use_pickling=use_pickling)+nl
+            output += idt_level*idt+conxml.taglist("child_list", node.transition)+nl
+            output += idt_level*idt+conxml.tagdict("state", node.state)+nl
             idt_level -= 1
             output += idt_level*idt+'</node>'+nl
         idt_level -= 1
         output += idt_level*idt+'</aut>'+nl
         return output
 
-    def loadXML(self, x, namespace="", use_pickling=False):
+    def loadXML(self, x, namespace=""):
         """Read an automaton from given string conforming to tulipcon XML.
         
         N.B., on a successful processing of the given string, the
