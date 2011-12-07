@@ -116,12 +116,3 @@ aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
                          graph_vis=graph_vis, destfile=destfile,
                          label_vars=label_vars, delay=delay,
                          vis_depth=vis_depth)
-
-
-# Save discrete dynamics.
-f = open('rsimple_example_disc_dynamics.txt', 'w')
-f.write(str(disc_dynamics.list_prop_symbol) + '\n')
-for i in xrange(0, len(disc_dynamics.list_region)):
-    f.write(str(disc_dynamics.list_region[i].list_prop))
-    f.write('\n')
-f.close()

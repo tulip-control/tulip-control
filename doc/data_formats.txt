@@ -1,0 +1,152 @@
+.. Emacs, this is -*-rst-*-
+.. highlight:: rst
+
+Data Formats
+============
+
+tulipcon XML
+------------
+
+.. highlight:: none
+
+The tulipcon XML schema is defined in ``tulipcon.rnc`` using `RELAX NG
+<http://relaxng.org/>`_ compact syntax. You may generate a W3C XML
+Schema definition from this using the tool
+`trang <http://code.google.com/p/jing-trang>`_, e.g. ::
+
+  $ trang -I rnc -O xsd doc/formats/tulipcon.rnc tulipcon.xsd
+
+Versions are specified with a natural number (and no minor nor text
+appended). The root tag indicates the version in use, e.g., a file
+defined using version 0 would begin like
+
+.. code-block:: xml
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">
+  ...
+
+Version 0
+`````````
+
+Pseudo-code describing the specification follows. It is *not
+normative*. Also, see notes below.
+
+.. code-block:: xml
+
+  <tulipcon version="0">
+    <prob_type>rhtlp or synth or ...</prob_type>
+    <c_dyn>
+      <A type="matrix" r="3" c="3">...</A>
+      <B type="matrix" r="3" c="1">...</B>
+      <E>...same format as A and B...</E>
+      <sample_period>...optional; if included, then system is regarded
+		     as the discretization of a continuous-time system,
+		     using the given sampling period.</sample_period>
+      <U_set type="polytope"><H type="matrix" r="3" c="3">...</H><K>...</K></U_set>
+      <W_set>...same format as U_set...</W_set>
+    </c_dyn>
+    <env_vars><item key="" value="" /></env_vars>
+    <con_vars><item key="" value="" /></con_vars>
+    <spec>
+      <assume>...assumption string...</assume>
+      <guarantee>...guarantee string...</guarantee>
+
+      ALTERNATIVELY (decision of which specification storage container
+      to use is based on what tags are found under <spec>),
+
+      <env_init>...</env_init><env_safety>...</env_safety><env_prog>...</env_prog>
+      <sys_init>...</sys_init><sys_safety>...</sys_safety><sys_prog>...</sys_prog>
+    </spec>
+    <d_dyn>  N.B., this tag can also be empty (if disc dynamics is None).
+      <domain type="polytope">...</domain>
+      <trans type="matrix">...</trans>
+      <prop_symbols>...space-separated list...</prop_symbols>
+      <regions>
+	<region>
+	  <list_prop>...space-separated list...</list_prop>
+	  <reg_item type="polytope">...</reg_item>
+	</region>
+        ...
+      </regions>
+    </d_dyn>
+    <aut>
+      <node>
+	<id>a unique identifier number</id>
+	<name>a string name or description (may be empty, or the <name> tag may be omitted)</name>
+	<child_list>descendent nodes; space-separated list of node ID numbers</child_list>
+	<state>
+          <item key="" value="" />
+          ...
+	</state>
+      </node>
+      ...
+    </aut>
+    <smv_file>
+  ...verbatim copy of corresponding SMV file...
+    </smv_file>
+    <spec_file>
+  ...verbatim copy of corresponding specification (*.spc) file...
+    </spec_file>
+    <extra>
+      Anything below here is arbitrary and ignored by tulip.  It is
+      included as a convenience and to facilitate keeping
+      application-specific notes with the synthesis results.  Please be
+      careful to *not* include non-printing characters or arbitrary
+      binary data; instead try base64 or similar, or include a reference
+      to an external data file, e.g. HDF5.
+    </extra>
+  </tulipcon>
+
+
+Notes: 
+
+* Polytopes are defined in :math:`H`-representation, i.e. system of
+  inequalities, :math:`Hx \leq K`.
+
+.. highlight:: none
+
+* Matrices are in row-major.  E.g., ::
+
+    A = [[1, 2, 3],
+         [4, 5, 6]]
+
+  would be saved as
+
+  .. code-block:: xml
+
+    <A type="matrix" r="2" c="3">1 2 3 4 5 6</A>
+
+
+
+Key Routines
+````````````
+
+.. autofunction:: tulip.conxml.loadXML
+.. autofunction:: tulip.conxml.dumpXML
+
+
+Continuous Systems in YAML
+--------------------------
+
+To facilitate experimentation, code reuse, etc., continuous sytems may
+be defined using `YAML <http://www.yaml.org/>`_.
+
+.. highlight:: none
+
+For example, to generate a proposition and reachability preserving
+partition from the linear system defined in
+``examples/rsimple_example.yaml``, try ::
+
+  $ tools/autopart.py examples/rsimple_example.yaml -p -v foo.xml
+
+(If ``autopart.py`` is not marked as executable, you will need to
+prepend this with ``python``.) The resulting tulipcon XML file is
+saved to ``foo.xml``. The flag ``-p`` causes a plot of the (planar)
+partition to be shown, and the flag ``-v`` means be verbose.
+
+
+Key Routines
+````````````
+
+.. autofunction:: tulip.conxml.loadYAML

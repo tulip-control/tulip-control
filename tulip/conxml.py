@@ -273,14 +273,14 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
 
     spec may be an instance of GRSpec or a list.  If of GRSPec, then
     it is formed as expected.  If spec is a list, then first element
-    of ``assume'' string, and second element of ``guarantee'' string.
+    of "assume" string, and second element of "guarantee" string.
     spec=None is also accepted, in which case the specification is
     considered empty, but note that this could cause problems later
     unless some content is introduced.
 
     ** synthesize_aut flag is IGNORED **
     If synthesize_aut is True, then if prob.__realizable is not None,
-    use its value to determine whether a previously computed *.aut
+    use its value to determine whether a previously computed \*.aut
     file should be read.  Else (if prob.__realizable is None or
     False), then try to compute automaton (saving to file
     prob.__jtlvfile + '.aut', as usual). If synthesize_aut is False,
@@ -575,7 +575,7 @@ def untaglist(x, cast_f=float):
 
     Use function cast_f for type-casting extracting element strings.
     The default is float, but another common case is cast_f=int (for
-    ``integer'').  If cast_f is set to None, then items are left as
+    "integer").  If cast_f is set to None, then items are left as
     extracted, i.e. as strings.
 
     The argument x can also be an instance of
@@ -611,8 +611,8 @@ def untagdict(x, cast_f_keys=None, cast_f_values=None,
     extracting key and value strings, respectively, or None.  The
     default is None, which means the extracted keys (resp., values)
     are left untouched (as strings), but another common case is
-    cast_f_values=int (for ``integer'') or cast_f_values=float (for
-    ``floating-point numbers''), while leaving cast_f_keys=None to
+    cast_f_values=int (for "integer") or cast_f_values=float (for
+    "floating-point numbers"), while leaving cast_f_keys=None to
     indicate dictionary keys are strings.
 
     The argument x can also be an instance of
@@ -795,7 +795,7 @@ def tagdict(name, di, pretty=False, idt_level=0):
     return output
 
 def tagpolytope(name, P):
-    """Create tag of type ``Polytope'', with given name.
+    """Create tag of type "Polytope", with given name.
 
     Polytope is as defined in tulip.polytope_computations module.
 
@@ -832,7 +832,7 @@ def taglist(name, li):
     return output
 
 def tagregion(R, pretty=False, idt_level=0):
-    """Create tag of type ``Region.''
+    """Create tag of type "Region."
 
     Region is as defined in tulip.polytope_computations module.
 
@@ -864,7 +864,7 @@ def tagregion(R, pretty=False, idt_level=0):
     return output
 
 def tagmatrix(name, A):
-    """Create tag of type ``matrix'', with given name.
+    """Create tag of type "matrix", with given name.
 
     Given matrix, A, should be an ndarray.  If it is a vector, rather
     than a matrix (i.e. if len(A.shape) = 1), then it is regarded as a
