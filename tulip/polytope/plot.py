@@ -123,7 +123,8 @@ def plot(poly1, show=True):
         
             ax.set_xlim(l[0,0],u[0,0])
             ax.set_ylim(l[1,0],u[1,0])
-            plt.show()
+            if show:
+                plt.show()
     else:
         print "Cannot plot empty polytope"
         
