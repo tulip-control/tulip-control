@@ -952,14 +952,24 @@ def qhull(vertices,abs_tol=1e-7):
         return Polytope()
     return Polytope(A,b,minrep=True,vertices=vert)
 
-def projection(poly1,dim,solver=None,abs_tol=1e-7):
+def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     """Projects a polytope onto lower dimensions.
     
     Input:
+
     - `poly1`: Polytope to project
     - `dim`: Dimensions on which to project
     - `solver`: A solver can be specified, if left blank an attempt is
                 made to choose the most suitable solver.
+    - `verbose`: if positive, print solver used in case of guessing;
+                 default is 0 (be silent).
+
+    Available solvers are:
+
+    - "esp": Equality Set Projection;
+    - "exthull": vertex projection;
+    - "fm": Fourier-Motzkin projection;
+    - "iterhull": iterative hull method.
     
     Output:
     - Projected polytope in lower dimension
@@ -1006,12 +1016,20 @@ def projection(poly1,dim,solver=None,abs_tol=1e-7):
         return projection_fm(poly1,new_dim,del_dim)
     elif solver == "iterhull": 
         return projection_iterhull(poly1,new_dim)
+    elif solver is not None:
+        print "WARNING: unrecognized projection solver \""+str(solver)+"\"."
     
     if len(del_dim) <= 2:
+        if verbose > 0:
+            print "projection: using Fourier-Motzkin."
         return projection_fm(poly1,new_dim,del_dim)
     elif len(org_dim) <= 4:
+        if verbose > 0:
+            print "projection: using exthull."
         return projection_exthull(poly1,new_dim)
     else:
+        if verbose > 0:
+            print "projection: using iterative hull."
         return projection_iterhull(poly1,new_dim)
         
 def separate(reg1, abs_tol=1e-7):
