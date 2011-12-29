@@ -87,7 +87,8 @@ class Automaton:
 
     - `states_or_file`: a string containing the name of the aut file
       to be loaded or a list of AutomatonState objects to be assigned
-      to the `states` of this Automaton object.
+      to the `states` of this Automaton object, or an (open) file-like
+      object.
 
     - `varname`: a list of all the variable names. If it is not empty
       and states_or_file is a string representing the name of the aut
@@ -99,11 +100,45 @@ class Automaton:
         if (isinstance(states_or_file, list)): 
             self.states = copy.deepcopy(states_or_file)
         # Construct this automaton from file
-        elif (isinstance(states_or_file, str)):
-            if (len(states_or_file) == 0):
+        else:
+            if isinstance(states_or_file, str) and (len(states_or_file) == 0):
                 self.states = []
             else:
                 self.loadFile(states_or_file, varnames=varnames, verbose=verbose)
+
+    def __eq__(self, other):
+        """Automaton equality comparison.
+
+        Two instances of Automaton are said to be equal if their nodes
+        may be identified: there is a bijection, and nodes of equal ID
+        agree on outgoing edge set and state (labelling).
+        """
+        if (not isinstance(other, Automaton)) or (len(self) != len(other)):
+            return False
+        if len(self) == 0: # Trivial case, both empty
+            return True
+        for node in self.states:
+            other_ind = 0
+            while (other.states[other_ind].id != node.id) and (other_ind < len(other)):
+                other_ind += 1
+            if other_ind >= len(other):
+                return False
+            sorted_transition = node.transition[:]
+            sorted_transition.sort()
+            other_sorted_transition = other.states[other_ind].transition[:]
+            other_sorted_transition.sort()
+            if sorted_transition != other_sorted_transition:
+                return False
+            if node.state.items() != other.states[other_ind].state.items():
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __len__(self):
+        """Return number of nodes."""
+        return len(self.states)
     
     def loadFile(self, aut_file, varnames=[], verbose=0):
         """
@@ -111,12 +146,17 @@ class Automaton:
 
         Input:
 
-        - `aut_file`: the name of the text file containing the automaton.
+        - `aut_file`: the name of the text file containing the
+          automaton, or an (open) file-like object.
+
         - `varnames`: a list of all the variable names. If it is not empty, then this 
           function will also check whether the variables in aut_file are in varnames.
         """
         self.states = []
-        f = open(aut_file, 'r')
+        if isinstance(aut_file, str):
+            f = open(aut_file, 'r')
+        else:
+            f = aut_file  # Else, assume aut_file behaves as file object.
         stateID = -1
         for line in f:
             # parse states
@@ -598,7 +638,9 @@ class Automaton:
                 # worth checking.
                 raise ValueError("failure of consistency check while processing aut XML string.")
             (tag_name, this_state) = conxml.untagdict(node.find(ns_prefix+"state"),
-                                                      cast_f_values=int)
+                                                      cast_f_values=int,
+                                                      namespace=namespace)
+
             if tag_name != ns_prefix+"state":
                 raise ValueError("failure of consistency check while processing aut XML string.")
             if this_id in id_list:
