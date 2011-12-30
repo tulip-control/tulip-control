@@ -66,6 +66,7 @@ except ImportError:
 #################
 # Problem Types #
 #################
+INCOMPLETE_PROB = -1
 SYNTH_PROB = 0
 RHTLP_PROB = 1
 
@@ -122,8 +123,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
 
     ptype_tag = elem.find(ns_prefix+"prob_type")
     if ptype_tag is None:
-        ep.printWarning('tulipcon XML string is missing <prob_type> tag;\nassuming SynthesisProb')
-        ptype = SYNTH_PROB
+        ptype = INCOMPLETE_PROB
     elif ptype_tag.text == "synth":
         ptype = SYNTH_PROB
     elif ptype_tag.text == "rhtlp":
@@ -139,9 +139,10 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
         (tag_name, A) = untagmatrix(c_dyn.find(ns_prefix+"A"))
         (tag_name, B) = untagmatrix(c_dyn.find(ns_prefix+"B"))
         (tag_name, E) = untagmatrix(c_dyn.find(ns_prefix+"E"))
+        (tag_name, K) = untagmatrix(c_dyn.find(ns_prefix+"K"))
         (tag_name, Uset) = untagpolytope(c_dyn.find(ns_prefix+"U_set"))
         (tag_name, Wset) = untagpolytope(c_dyn.find(ns_prefix+"W_set"))
-        sys_dyn = discretize.CtsSysDyn(A, B, E, [], Uset, Wset)
+        sys_dyn = discretize.CtsSysDyn(A, B, E, K, Uset, Wset)
 
     # Extract LTL specification
     s_elem = elem.find(ns_prefix+"spec")
@@ -149,15 +150,15 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
         spec = GRSpec()
         for spec_tag in ["env_init", "env_safety", "env_prog",
                          "sys_init", "sys_safety", "sys_prog"]:
-            if (s_elem.find(ns_prefix+spec_tag) is not None) \
-                    and (s_elem.find(ns_prefix+spec_tag).text is not None):
-                setattr(spec, spec_tag, s_elem.find(ns_prefix+spec_tag).text)
-                setattr(spec, spec_tag,
-                        getattr(spec, spec_tag).replace("&lt;", "<"))
-                setattr(spec, spec_tag,
-                        getattr(spec, spec_tag).replace("&gt;", ">"))
-                setattr(spec, spec_tag,
-                        getattr(spec, spec_tag).replace("&amp;", "&"))
+            if s_elem.find(ns_prefix+spec_tag) is None:
+                raise ValueError("invalid specification in tulipcon XML string.")
+            (tag_name, li) = untaglist(s_elem.find(ns_prefix+spec_tag),
+                                       cast_f=str, namespace=namespace)
+            li = [v.replace("&lt;", "<") for v in li]
+            li = [v.replace("&gt;", ">") for v in li]
+            li = [v.replace("&amp;", "&") for v in li]
+            setattr(spec, spec_tag, li)
+
     else:  # assume, guarantee strings style
         spec = ["", ""]
         if s_elem.find(ns_prefix+"assume") is not None:
@@ -169,13 +170,13 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
             spec[k] = spec[k].replace("&gt;", ">")
             spec[k] = spec[k].replace("&amp;", "&")
 
-    # ``Continuous propositions'', if available
+    # "Continuous propositions", if available
     cp_tag = elem.find(ns_prefix+"cont_props")
     if cp_tag is not None:
         cont_props = dict()
         for sym_tag in cp_tag.findall(ns_prefix+"item"):
             if "key" not in sym_tag.attrib.keys():
-                ep.printWarning("mal-formed <cont_props> tag in given tulipcon XML string.")
+                ep.printWarning("malformed <cont_props> tag in given tulipcon XML string.")
                 cont_props = {}
                 break  # Give-up on this <cont_props> tag
             sym_poly_tag = sym_tag.find(ns_prefix+"cont_prop_poly")
@@ -204,7 +205,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
             region_elem = d_dyn.find(ns_prefix+"regions")
             list_region = []
             if region_elem is not None:
-                region_items = d_dyn.find(ns_prefix+"regions").findall(ns_prefix+"item")
+                region_items = region_elem.findall(ns_prefix+"region")
                 if region_items is not None and len(region_items) > 0:
                     for region_item in region_items:
                         (tag_name, R) = untagregion(region_item, cast_f_list=int,
@@ -227,7 +228,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                                              disc_props={},
                                              disc_dynamics=disc_dynamics,
                                              smv_file="", spc_file="", verbose=2)
-        else:  # ptype == RHTLP_PROB
+        elif ptype == RHTLP_PROB:
             if disc_dynamics is not None:
                 prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
                                        env_vars=env_vars,
@@ -241,6 +242,8 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                                        sys_disc_vars=sys_disc_vars,
                                        cont_props=cont_props,
                                        spec=spec)
+        else: #ptype == INCOMPLETE_PROB
+            prob = None
 
     # Build Automaton
     aut_elem = elem.find(ns_prefix+"aut")
@@ -255,15 +258,14 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
 
     return (prob, sys_dyn, aut)
                                
-def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
+def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
             synthesize_aut=False, verbose=0, pretty=False):
     """Return tulipcon XML string.
 
     prob is an instance of SynthesisProb or a child class, such as
     RHTLPProb (both defined in rhtlp.py).  sys_dyn is an instance of
     CtsSysDyn (defined in discretize.py), or None. If None, then
-    continuous dynamics are considered empty (i.e. there are none);
-    ** NOT IMPLEMENTED YET (where sys_dyn = None) **
+    continuous dynamics are considered empty (i.e., there are none).
 
     If pretty is True, then use indentation and newlines to make the
     resulting XML string more visually appealing.
@@ -291,7 +293,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     To easily save the result here to a file, instead call the method
     *writeXMLfile*
     """
-    if not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
+    if prob is not None and not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
         raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
     if sys_dyn is not None and not isinstance(sys_dyn, discretize.CtsSysDyn):
         raise TypeError("sys_dyn should be an instance of discretizeM.CtsSysDyn or None.")
@@ -311,26 +313,30 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     output = '<?xml version="1.0" encoding="UTF-8"?>'+nl
     output += '<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">'+nl
     idt_level += 1
-    output += idt*idt_level+'<prob_type>'
-    if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
-        output += 'rhtlp'
-    elif isinstance(prob, rhtlp.SynthesisProb):
-        output += 'synth'
-    output += '</prob_type>'+nl
+    if prob is None:
+        output += idt*idt_level+'<c_dyn></c_dyn>'+nl
+    else:
+        output += idt*idt_level+'<prob_type>'
+        if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
+            output += 'rhtlp'
+        elif isinstance(prob, rhtlp.SynthesisProb):
+            output += 'synth'
+        output += '</prob_type>'+nl
 
-    output += idt*idt_level+'<c_dyn>'+nl
-    idt_level += 1
-    output += idt*idt_level+tagmatrix("A",sys_dyn.A)+nl
-    output += idt*idt_level+tagmatrix("B",sys_dyn.B)+nl
-    output += idt*idt_level+tagmatrix("E",sys_dyn.E)+nl
+        output += idt*idt_level+'<c_dyn>'+nl
+        idt_level += 1
+        output += idt*idt_level+tagmatrix("A",sys_dyn.A)+nl
+        output += idt*idt_level+tagmatrix("B",sys_dyn.B)+nl
+        output += idt*idt_level+tagmatrix("E",sys_dyn.E)+nl
+        output += idt*idt_level+tagmatrix("K",sys_dyn.K)+nl
 
-    # Need facility for setting sample period; maybe as new attribute in CtsSysDyn class?
-    output += idt*idt_level+'<sample_period>1</sample_period>'+nl
+        # Need facility for setting sample period; maybe as new attribute in CtsSysDyn class?
+        output += idt*idt_level+'<sample_period>1</sample_period>'+nl
 
-    output += idt*idt_level+tagpolytope("U_set", sys_dyn.Uset)+nl
-    output += idt*idt_level+tagpolytope("W_set", sys_dyn.Wset)+nl
-    idt_level -= 1
-    output += idt*idt_level+'</c_dyn>'+nl
+        output += idt*idt_level+tagpolytope("U_set", sys_dyn.Uset)+nl
+        output += idt*idt_level+tagpolytope("W_set", sys_dyn.Wset)+nl
+        idt_level -= 1
+        output += idt*idt_level+'</c_dyn>'+nl
 
     output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
     output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
@@ -346,14 +352,21 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
 
         # Map special XML characters to safe forms
         for k in spec_dict.keys():
-            spec_dict[k] = spec_dict[k].replace("<", "&lt;")
-            spec_dict[k] = spec_dict[k].replace(">", "&gt;")
-            spec_dict[k] = spec_dict[k].replace("&", "&amp;")
+            if isinstance(spec_dict[k], str):
+                spec_dict[k] = spec_dict[k].replace("<", "&lt;")
+                spec_dict[k] = spec_dict[k].replace(">", "&gt;")
+                spec_dict[k] = spec_dict[k].replace("&", "&amp;")
+            else:
+                spec_dict[k] = [v.replace("<", "&lt;") for v in spec_dict[k]]
+                spec_dict[k] = [v.replace(">", "&gt;") for v in spec_dict[k]]
+                spec_dict[k] = [v.replace("&", "&amp;") for v in spec_dict[k]]
         
         # Finally, dump XML tags
         output += idt*idt_level+'<spec>'+nl
         for (k, v) in spec_dict.items():
-            output += idt*(idt_level+1)+ '<'+k+'>' + v + '</'+k+'>'+nl
+            if isinstance(v, str):
+                v = [v,]
+            output += idt*(idt_level+1)+ taglist(k, v) +nl
         output += idt*idt_level+'</spec>'+nl
 
     else:
@@ -364,45 +377,47 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
         output += idt*idt_level+'<spec><assume>'+spec[0]+'</assume>'+nl
         output += idt*(idt_level+1)+'<guarantee>'+spec[1]+'</guarantee></spec>'+nl
 
-    # Perhaps there is a cleaner way to do this, rather than by
-    # checking for method getContProps?
-    if hasattr(prob, "getContProps"):
-        output += idt*idt_level+'<cont_props>'+nl
-        idt_level += 1
-        for (prop_sym, prop_poly) in prob.getContProps().items():
-            output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
-            output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
-            output += idt*idt_level+'</item>'+nl
-        idt_level -= 1
-        output += idt*idt_level+'</cont_props>'+nl
-
-    disc_dynamics = prob.getDiscretizedDynamics()
-    if disc_dynamics is None:
+    if prob is None:
         output += idt*idt_level+'<d_dyn></d_dyn>'+nl
     else:
-        output += idt*idt_level+'<d_dyn>'+nl
-        idt_level += 1
+        # Perhaps there is a cleaner way to do this, rather than by
+        # checking for method getContProps?
+        if hasattr(prob, "getContProps"):
+            output += idt*idt_level+'<cont_props>'+nl
+            idt_level += 1
+            for (prop_sym, prop_poly) in prob.getContProps().items():
+                output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
+                output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
+                output += idt*idt_level+'</item>'+nl
+            idt_level -= 1
+            output += idt*idt_level+'</cont_props>'+nl
 
-        output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
-        output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
-        output += idt*idt_level+taglist("prop_symbols",
-                                        disc_dynamics.list_prop_symbol)+nl
-        output += idt*idt_level+'<regions>'+nl
-        idt_level += 1
-        if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
-            for R in disc_dynamics.list_region:
-                output += tagregion(R, pretty=pretty, idt_level=idt_level)
-        idt_level -= 1
-        output += idt*idt_level+'</regions>'+nl
-        idt_level -= 1
-        output += idt*idt_level+'</d_dyn>'+nl
+        disc_dynamics = prob.getDiscretizedDynamics()
+        if disc_dynamics is None:
+            output += idt*idt_level+'<d_dyn></d_dyn>'+nl
+        else:
+            output += idt*idt_level+'<d_dyn>'+nl
+            idt_level += 1
+
+            output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
+            output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
+            output += idt*idt_level+taglist("prop_symbols",
+                                            disc_dynamics.list_prop_symbol)+nl
+            output += idt*idt_level+'<regions>'+nl
+            idt_level += 1
+            if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
+                for R in disc_dynamics.list_region:
+                    output += tagregion(R, pretty=pretty, idt_level=idt_level)
+            idt_level -= 1
+            output += idt*idt_level+'</regions>'+nl
+            idt_level -= 1
+            output += idt*idt_level+'</d_dyn>'+nl
 
     if aut is None:
         output += idt*idt_level+'<aut></aut>'+nl
     else:
         output += aut.dumpXML(pretty=pretty, idt_level=idt_level)+nl
 
-    output += idt_level*idt+'<smv_file></smv_file><spec_file></spec_file>'+nl
     output += idt_level*idt+'<extra></extra>'+nl
 
     idt_level -= 1
@@ -410,7 +425,7 @@ def dumpXML(prob, spec=['',''], sys_dyn=None, aut=None,
     output += '</tulipcon>'+nl
     return output
 
-def writeXMLfile(fname, prob, spec, sys_dyn=None, aut=None,
+def writeXMLfile(fname, prob=None, spec=['',''], sys_dyn=None, aut=None,
                  synthesize_aut=False, verbose=0, pretty=False):
     """Write tulipcon XML string directly to a file.
 
@@ -570,7 +585,8 @@ def dumpXMLtrans(sys_dyn, disc_dynamics, horizon, extra="",
     return output
 
 
-def untaglist(x, cast_f=float):
+def untaglist(x, cast_f=float,
+              namespace=DEFAULT_NAMESPACE):
     """Extract list from given tulipcon XML tag (string).
 
     Use function cast_f for type-casting extracting element strings.
@@ -594,13 +610,22 @@ def untaglist(x, cast_f=float):
     else:
         elem = x
 
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
     # Extract list
-    if elem.text is None:
+    if cast_f is None:
+        cast_f = str
+    litems = elem.findall(ns_prefix+'litem')
+    if len(litems) > 0:
+        li = [cast_f(k.attrib['value']) for k in litems]
+    elif elem.text is None:
         li = []
     else:
-        if cast_f is None:
-            cast_f = str
         li = [cast_f(k) for k in elem.text.split()]
+        
     return (elem.tag, li)
 
 def untagdict(x, cast_f_keys=None, cast_f_values=None,
@@ -813,11 +838,16 @@ def tagpolytope(name, P):
     output += '</'+name+'>'
     return output
 
-def taglist(name, li):
+def taglist(name, li, no_litem=False):
     """Create tag that basically stores a list object.
 
-    N.B., all list elements are treated as strings (and frequently
-    wrapped in str() to force this behavior).
+    N.B., all list elements are treated as strings (and wrapped in
+    str() to force this behavior).
+
+    By default, if an element in given list is of type string, then
+    each element is placed in its own <litem> tag. This allows
+    elements to be arbitrary (printable) strings in an XML file. To
+    disable this, invoke taglist with no_litem=True.
 
     Return the resulting string.  On failure, raises an appropriate
     exception, or returns False.
@@ -827,7 +857,16 @@ def taglist(name, li):
 
     output = '<'+name+'>'
     if li is not None:
-        output += ' '.join([str(k) for k in li])
+        has_str = False
+        for k in li:
+            if isinstance(k, str):
+                has_str = True
+                break
+        if has_str and not no_litem:
+            for k in li:
+                output += '<litem value="'+str(k)+'" />'
+        else:
+            output += ' '.join([str(k) for k in li])
     output += '</'+name+'>'
     return output
 
@@ -1003,6 +1042,13 @@ def conxml_test():
 
     (li_out_name, li_out) = untaglist(taglist("trans", li))
     assert (li_out_name == "trans") and (li_out == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+
+    li = ["hello, kitty", "it's GO TIME!"]
+    assert taglist("arblist", li) == '<arblist><litem value="hello, kitty" /><litem value="it\'s GO TIME!" /></arblist>'
+
+    (li_out_name, li_out) = untaglist(taglist("arblist", li), cast_f=None,
+                                      namespace=None)
+    assert (li_out_name == "arblist") and (li_out == ["hello, kitty", "it's GO TIME!"])
 
     di = {1:2, 3:4, 'X0':'boolean'}
     assert tagdict("env_vars", di) == '<env_vars><item key="1" value="2" /><item key="X0" value="boolean" /><item key="3" value="4" /></env_vars>'

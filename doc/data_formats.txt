@@ -40,14 +40,15 @@ normative*. Also, see notes below.
       <A type="matrix" r="3" c="3">...</A>
       <B type="matrix" r="3" c="1">...</B>
       <E>...same format as A and B...</E>
+      <K>...</K>
       <sample_period>...optional; if included, then system is regarded
 		     as the discretization of a continuous-time system,
 		     using the given sampling period.</sample_period>
       <U_set type="polytope"><H type="matrix" r="3" c="3">...</H><K>...</K></U_set>
       <W_set>...same format as U_set...</W_set>
     </c_dyn>
-    <env_vars><item key="" value="" /></env_vars>
-    <con_vars><item key="" value="" /></con_vars>
+    <env_vars><item key="" value="" />...</env_vars>
+    <con_vars><item key="" value="" />...</con_vars>
     <spec>
       <assume>...assumption string...</assume>
       <guarantee>...guarantee string...</guarantee>
@@ -55,7 +56,9 @@ normative*. Also, see notes below.
       ALTERNATIVELY (decision of which specification storage container
       to use is based on what tags are found under <spec>),
 
-      <env_init>...</env_init><env_safety>...</env_safety><env_prog>...</env_prog>
+      <env_init><litem value="" />...</env_init>
+      <env_safety>...</env_safety>
+      <env_prog>...</env_prog>
       <sys_init>...</sys_init><sys_safety>...</sys_safety><sys_prog>...</sys_prog>
     </spec>
     <d_dyn>  N.B., this tag can also be empty (if disc dynamics is None).
