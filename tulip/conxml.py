@@ -166,9 +166,12 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
         if s_elem.find(ns_prefix+"guarantee") is not None:
             spec[1] = s_elem.find(ns_prefix+"guarantee").text
         for k in [0, 1]:  # Undo special character encoding
-            spec[k] = spec[k].replace("&lt;", "<")
-            spec[k] = spec[k].replace("&gt;", ">")
-            spec[k] = spec[k].replace("&amp;", "&")
+            if spec[k] is None:
+                spec[k] = ""
+            else:
+                spec[k] = spec[k].replace("&lt;", "<")
+                spec[k] = spec[k].replace("&gt;", ">")
+                spec[k] = spec[k].replace("&amp;", "&")
 
     # "Continuous propositions", if available
     cp_tag = elem.find(ns_prefix+"cont_props")
@@ -313,9 +316,7 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     output = '<?xml version="1.0" encoding="UTF-8"?>'+nl
     output += '<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">'+nl
     idt_level += 1
-    if prob is None:
-        output += idt*idt_level+'<c_dyn></c_dyn>'+nl
-    else:
+    if prob is not None:
         output += idt*idt_level+'<prob_type>'
         if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
             output += 'rhtlp'
@@ -338,8 +339,8 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
         idt_level -= 1
         output += idt*idt_level+'</c_dyn>'+nl
 
-    output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
-    output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
+        output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
+        output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
 
     if spec is None:
         output += idt*idt_level+'<spec><assume></assume><guarantee></guarantee></spec>'+nl
@@ -377,9 +378,7 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
         output += idt*idt_level+'<spec><assume>'+spec[0]+'</assume>'+nl
         output += idt*(idt_level+1)+'<guarantee>'+spec[1]+'</guarantee></spec>'+nl
 
-    if prob is None:
-        output += idt*idt_level+'<d_dyn></d_dyn>'+nl
-    else:
+    if prob is not None:
         # Perhaps there is a cleaner way to do this, rather than by
         # checking for method getContProps?
         if hasattr(prob, "getContProps"):
@@ -393,9 +392,7 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
             output += idt*idt_level+'</cont_props>'+nl
 
         disc_dynamics = prob.getDiscretizedDynamics()
-        if disc_dynamics is None:
-            output += idt*idt_level+'<d_dyn></d_dyn>'+nl
-        else:
+        if disc_dynamics is not None:
             output += idt*idt_level+'<d_dyn>'+nl
             idt_level += 1
 

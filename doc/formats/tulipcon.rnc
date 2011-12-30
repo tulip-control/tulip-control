@@ -4,11 +4,11 @@ datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
 start = element tulipcon {
     attribute version { string "0" }
     & element prob_type { "synth" | "rhtlp" }?
-    & element c_dyn { c_dyn-content }
+    & element c_dyn { c_dyn-content }?
     & element env_vars { item-tag* }?
     & element sys_vars { item-tag* }?
     & element spec { spec-content }?
-    & element d_dyn { d_dyn-content }
+    & element d_dyn { d_dyn-content }?
     & element aut { aut-content }?
     & element smv_file { text }?
     & element spec_file { text }?

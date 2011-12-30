@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Emacs, this is -*-Python-*-
 """
-Convert an AUT file (from JTLV) to a DOT (in Graphviz) file.
+Generate a DOT (in Graphviz) file from tulipcon XML file.
 
 Note this is basically a wrapper to ease use of the Automaton class
-and its writeDotFile method from the command-line. Accepts a *.aut
+and its writeDotFile method from the command-line. Accepts a *.xml
 filename and, optionally, a destination filename. If no destination is
 given, default is to use input filename with new ending ".dot"
 
@@ -15,11 +15,10 @@ flag "-z".
 Also note that command-line arguments are handled manually, since they
 are so simple...
 
-Example: suppose you have robotctrl.aut from a TuLiP (or JTLV)
-session. Then to generate a corresponding DOT file and create a PNG
-image, try
+Example: suppose you have robotctrl.xml from a TuLiP session. Then to
+generate a corresponding DOT file and create a PNG image, try
 
-$ aut2dot robotctrl.aut
+$ xml2dot robotctrl.xml
 $ dot -Tpng -O robotctrl.dot
 
 Depending on your graphviz installation, the resulting image file may
@@ -28,11 +27,11 @@ be called robotctrl.dot.png
 
 import sys
 from tulip.automaton import Automaton
-
+from tulip.conxml import readXMLfile
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 4:
-        print "Usage: aut2dot [-z] INPUT.aut [OUTPUT.dot]"
+        print "Usage: xml2dot.py [-z] INPUT.xml [OUTPUT.dot]"
         exit(1)
 
     # Detect and strip -z flag
@@ -50,7 +49,7 @@ if __name__ == "__main__":
         else:
             destfile = sys.argv[1][:-4] + ".dot"
     
-    aut = Automaton(sys.argv[1])
+    (prob, sys_dyn, aut) = readXMLfile(sys.argv[1])
     if not aut.writeDotFile(destfile, hideZeros=hidez_flag):
         print "Failed to create DOT file, " + destfile
         exit(-1)

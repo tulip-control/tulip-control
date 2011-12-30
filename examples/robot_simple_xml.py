@@ -28,7 +28,7 @@ uncertainty = 0.05
 N = 5
 
 # Specify where the smv file, spc file and aut file will go
-testfile = 'robot_simple'
+testfile = 'rsimple_example'
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 smvfile = os.path.join(path, 'specs', testfile+'.smv')
 spcfile = os.path.join(path, 'specs', testfile+'.spc')
