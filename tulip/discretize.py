@@ -112,6 +112,15 @@ class CtsSysDyn:
         
         self.Uset = Uset
 
+    def __str__(self):
+        output = "A =\n"+str(self.A)
+        output += "\nB =\n"+str(self.B)
+        output += "\nE =\n"+str(self.E)
+        output += "\nK =\n"+str(self.K)
+        output += "\nUset =\n"+str(self.Uset)
+        output += "\nWset =\n"+str(self.Wset)
+        return output
+
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                use_mpt=False, conservative=False, max_num_poly=5, \
                use_all_horizon=False, trans_length=1, remove_trans=False, 
