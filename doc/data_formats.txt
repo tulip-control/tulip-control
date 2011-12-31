@@ -125,8 +125,8 @@ Notes:
 Key Routines
 ````````````
 
-.. autofunction:: tulip.conxml.loadXML
-.. autofunction:: tulip.conxml.dumpXML
+.. autofunction:: conxml.loadXML
+.. autofunction:: conxml.dumpXML
 
 
 Continuous Systems in YAML
@@ -152,4 +152,4 @@ partition to be shown, and the flag ``-v`` means be verbose.
 Key Routines
 ````````````
 
-.. autofunction:: tulip.conxml.loadYAML
+.. autofunction:: conxml.loadYAML
