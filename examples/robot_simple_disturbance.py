@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
-The example is an extension of robot_discrete_simple.py by including disturbanceand input computation using the "closed loop" algorithm.
+The example is an extension of robot_discrete_simple.py by including
+disturbanceand input computation using the "closed loop" algorithm.
 
 Petter Nilsson (pettni@kth.se)
 August 14, 2011
 """
 
-#@importvar@
 import sys, os
 import numpy as np
 from subprocess import call
