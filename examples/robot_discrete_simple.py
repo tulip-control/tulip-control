@@ -112,11 +112,15 @@ aut.trimDeadStates()
 
 # This example uses environment vs. system turn distinction.  To
 # disable it, just use (the default),
-# if not aut.writeDotFile("rdsimple.dot"):
-if not aut.writeDotFile("rdsimple_example.dot",
-                        distinguishTurns={"env": prob.getEnvVars().keys(),
-                                          "sys": prob.getSysVars().keys()},
-                        turnOrder=("env", "sys")):
+if not aut.writeDotFile(fname="rdsimple_example.dot", hideZeros=True):
+# if not aut.writeDotFile("rdsimple_example.dot",
+#                         distinguishTurns={"env": prob.getEnvVars().keys(),
+#                                           "sys": prob.getSysVars().keys()},
+#                         turnOrder=("env", "sys")):
+# if not aut.writeDotFileEdged(fname="rdsimple_example.dot",
+#                              env_vars = prob.getEnvVars().keys(),
+#                              sys_vars = prob.getSysVars().keys(),
+#                              hideZeros=True):
     print "Error occurred while generating DOT file."
 else:
     try:

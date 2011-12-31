@@ -1,0 +1,82 @@
+default namespace = "http://tulip-control.sourceforge.net/ns/0"
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = element tulipcon {
+    attribute version { string "0" }
+    & element prob_type { "synth" | "rhtlp" }?
+    & element c_dyn { c_dyn-content }?
+    & element env_vars { item-tag* }?
+    & element sys_vars { item-tag* }?
+    & element spec { spec-content }?
+    & element d_dyn { d_dyn-content }?
+    & element aut { aut-content }?
+    & element smv_file { text }?
+    & element spec_file { text }?
+    & element extra { text }
+}
+
+
+
+matrix-content =
+    attribute type { "matrix" }
+    , attribute r { xsd:integer }
+    , attribute c { xsd:integer }
+    , list { xsd:double* }
+
+polytope-content =
+    attribute type { "polytope" }
+    & element H { matrix-content }
+    & element K { matrix-content }
+
+item-tag =
+    element item {
+      attribute key { text }
+      , attribute value { text }
+    }
+
+litem-tag =
+    element litem {
+      attribute value { text }
+    }
+
+c_dyn-content =
+    element sample_period { xsd:double }?
+    & element A { matrix-content }
+    & element B { matrix-content }
+    & element E { matrix-content }
+    & element K { matrix-content }
+    & element U_set { polytope-content }
+    & element W_set { polytope-content }
+
+spec-content =
+    (element assume { text }
+     & element guarantee { text })
+    | (element env_init { litem-tag* }
+       & element env_safety { litem-tag* }
+       & element env_prog { litem-tag* }
+       & element sys_init { litem-tag* }
+       & element sys_safety { litem-tag* }
+       & element sys_prog { litem-tag* })
+
+regions-content =
+    element region {
+      element list_prop { list { string* } }
+      & element reg_item { polytope-content }
+    }*
+
+d_dyn-content =
+    attribute horizon { xsd:integer }?
+    & ((element domain { polytope-content }
+       & element trans { matrix-content }
+       & element prop_symbols { list { string* } | litem-tag* }
+       & element regions { regions-content })
+      | empty)
+
+aut-content =
+    element node {
+      element id { text }
+      & element name { text | empty }?
+      & element child_list { list { xsd:integer* } }
+      & element state { item-tag* }
+    }*
+

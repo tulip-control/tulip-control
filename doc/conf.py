@@ -14,12 +14,8 @@
 import sys, os
 
 # Make tulip package contents visible
-sys.path.append('../tulip')
+sys.path.append(os.path.abspath('../tulip'))
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -67,7 +63,7 @@ release = '0.3a'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'formats']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

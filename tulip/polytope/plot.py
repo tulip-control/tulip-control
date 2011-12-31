@@ -39,13 +39,12 @@ can be accessed by
 
 > from tulip.polytope.plot import *
 
-Functions: 
-    - get_patch
-	- plot
-	- plot_partition
-	- plot_trajectory
+Functions:
 
-Created by Petter Nilsson, 8/4/11
+    - get_patch
+    - plot
+    - plot_partition
+    - plot_trajectory
 """
 
 import numpy as np
@@ -59,9 +58,10 @@ def get_patch(poly1, color="blue"):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
     that can be added to a plot
     
-    Example:
+    Example::
+
     > # Plot Polytope objects poly1 and poly2 in the same plot
-    > import matploytlib.pyplot as plt
+    > import matplotlib.pyplot as plt
     > fig = plt.figure()
     > ax = fig.add_subplot(111)
     > p1 = get_patch(poly1, color="blue")
@@ -132,6 +132,7 @@ def plot_partition(ppp, plot_transitions=False, plot_numbers=True, show=True):
     """Plots a 2D PropPreservingPartition object using matplotlib
     
     Input:
+
     - `ppp`: A PropPreservingPartition object
     - `plot_transitions`: If True, represent transitions in `ppp` with arrows.
                           Requires transitions to be stored in `ppp`.
@@ -187,6 +188,7 @@ def plot_trajectory(ppp, x0, u_seq, ssys):
     input sequence u_seq.
     
     Input:
+
     - `ppp`: a PropPreservingPartition object
     - `x0`: initial state
     - `u_seq`: matrix where each row contains an input

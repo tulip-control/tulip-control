@@ -10,16 +10,13 @@ Welcome to TuLiP's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    intro
    install
    tutorial
-   rhtlp
-   parser
-   abstraction
-   synthesis
-   simulation
+   data_formats
+   mod_dumps
    
 
 Indices and tables

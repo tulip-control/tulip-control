@@ -33,19 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 -----------------------------------------------
 Receding horizon Temporal Logic Planning Module
 -----------------------------------------------
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 25, 2010
-:Version: 0.1.0
-
-minor refactoring by SCL <slivingston@caltech.edu>
-3 May 2011.
 """
 
 import sys, os, re, subprocess, copy
@@ -66,15 +57,21 @@ class SynthesisProb:
     
     A SynthesisProb object contains the following fields:
 
-    - `env_vars`: a dictionary {str : str} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
-      boolean or {0, 2, 3, 4, 5}.
-    - `sys_vars`: a dictionary {str : str} whose keys are the 
-      names of system variables and whose values are their possible values.
-    - `spec`: a GRSpec object that specifies the specification of this synthesis problem.
-    - `disc_cont_var`: the name of the continuous variable after the discretization.
-    - `disc_dynamics`: a list of Region objects corresponding to the partition of the
-      continuous state space.
+    - `env_vars`: a dictionary {str : str} whose keys are the names of
+      environment variables and whose values are their possible
+      values, e.g., boolean or {0, 2, 3, 4, 5}.
+
+    - `sys_vars`: a dictionary {str : str} whose keys are the names of
+      system variables and whose values are their possible values.
+
+    - `spec`: a GRSpec object that specifies the specification of this
+      synthesis problem.
+
+    - `disc_cont_var`: the name of the continuous variable after the
+      discretization.
+
+    - `disc_dynamics`: a list of Region objects corresponding to the
+      partition of the continuous state space.
 
     **Constructor**:
 
@@ -91,25 +88,38 @@ class SynthesisProb:
     `cont_state_space` = None[, `cont_props` = {}[, `sys_dyn` = None[, 
     `spec` = GRSpec()[, `verbose` = 0]]]]]]]])
 
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys
+      are the names of environment variables and whose values are
+      their possible values, e.g.,
       boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-      names of discrete system variables and whose values are their possible values.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-      propositions on discrete variables and whose values are the actual propositions
-      on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the 
-      transition system obtained from the discretization procedure.
-      if `disc_dynamics` is given, `cont_state_space`, `cont_props` and `sys_dyn`
-      will be ignored.
-    - `cont_state_space`: a Polytope object that represent the state space of the
+
+    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    - `disc_props`: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    - `disc_dynamics`: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.  If `disc_dynamics` is given,
+      `cont_state_space`, `cont_props` and `sys_dyn` will be ignored.
+
+    - `cont_state_space`: a Polytope object that represent the state
+      space of the continuous variables
+
+    - `cont_props`: a dictionary {str : Polytope} whose keys are the
+      symbols for propositions on continuous variables and whose
+      values are polytopes that represent the region in the state
+      space in which the corresponding proposition hold.
+
+    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the
       continuous variables
-    - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for 
-      propositions on continuous variables and whose values are polytopes that represent
-      the region in the state space in which the corresponding proposition hold.
-    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables
-    - `spec`: a GRSpec object that specifies the specification of this synthesis problem
+
+    - `spec`: a GRSpec object that specifies the specification of this
+      synthesis problem
+
     - `verbose`: an integer that specifies the level of verbosity.
     """
 
@@ -366,21 +376,33 @@ class SynthesisProb:
 
         Input:
 
-        - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-          of environment variables and whose values are their possible values, e.g., 
+        - `env_vars`: a dictionary {str : str} or {str : list} whose
+          keys are the names of environment variables and whose values
+          are their possible values, e.g.,
           boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-        - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-          names of discrete system variables and whose values are their possible values.
-        - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-          propositions on discrete variables and whose values are the actual propositions
-          on discrete variables.
-        - `cont_state_space`: a Polytope object that represent the state space of the
-          continuous variables
-        - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for 
-          propositions on continuous variables and whose values are polytopes that represent
-          the region in the state space in which the corresponding proposition hold.
-        - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables
-        - `spec`: a GRSpec object that specifies the specification of this synthesis problem.
+
+        - `sys_disc_vars`: a dictionary {str : str} or {str : list}
+          whose keys are the names of discrete system variables and
+          whose values are their possible values.
+
+        - `disc_props`: a dictionary {str : str} whose keys are the
+          symbols for propositions on discrete variables and whose
+          values are the actual propositions on discrete variables.
+
+        - `cont_state_space`: a Polytope object that represent the
+          state space of the continuous variables
+
+        - `cont_props`: a dictionary {str : Polytope} whose keys are
+          the symbols for propositions on continuous variables and
+          whose values are polytopes that represent the region in the
+          state space in which the corresponding proposition hold.
+
+        - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of
+          the continuous variables
+
+        - `spec`: a GRSpec object that specifies the specification of
+          this synthesis problem.
+
         - `verbose`: an integer that specifies the level of verbosity.
         """
 
@@ -433,17 +455,26 @@ class SynthesisProb:
 
         Input:
         
-        - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-          of environment variables and whose values are their possible values, e.g., 
+        - `env_vars`: a dictionary {str : str} or {str : list} whose
+          keys are the names of environment variables and whose values
+          are their possible values, e.g.,
           boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-        - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-          names of discrete system variables and whose values are their possible values.
-        - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-          propositions on discrete variables and whose values are the actual propositions
-          on discrete variables.
-        - `disc_dynamics`: a PropPreservingPartition object that represents the 
-          transition system obtained from the discretization procedure.
-        - `spec`: a GRSpec object that specifies the specification of this synthesis problem.
+
+        - `sys_disc_vars`: a dictionary {str : str} or {str : list}
+          whose keys are the names of discrete system variables and
+          whose values are their possible values.
+
+        - `disc_props`: a dictionary {str : str} whose keys are the
+          symbols for propositions on discrete variables and whose
+          values are the actual propositions on discrete variables.
+
+        - `disc_dynamics`: a PropPreservingPartition object that
+          represents the transition system obtained from the
+          discretization procedure.
+
+        - `spec`: a GRSpec object that specifies the specification of
+          this synthesis problem.
+
         - `verbose`: an integer that specifies the level of verbosity.
         """
 
@@ -712,21 +743,30 @@ class SynthesisProb:
     def synthesizePlannerAut(self, heap_size='-Xmx128m', priority_kind=3, init_option=1, \
                                  verbose=0):
         """Compute a planner automaton for this SynthesisProb. 
-        If this SynthesisProb is realizable, this function returns an Automaton object.
-        Otherwise, it returns a list of dictionary that represents the state
-        starting from which there exists no strategy for the system to satisfy the spec.
+
+        If this SynthesisProb is realizable, this function returns an
+        Automaton object.
+        Otherwise, it returns a list of dictionary that represents the
+        state starting from which there exists no strategy for the
+        system to satisfy the spec.
 
         Input:
 
         - `heap_size`: a string that specifies java heap size. 
-        - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-          priority used in extracting the automaton. See the documentation of the 
-          ``computeStrategy`` function for the possible values of `priority_kind`.
-        - `init_option`: an integer in that specifies how to handle the initial state of 
-          the system. See the documentation of the ``computeStrategy`` function for the 
-          possible values of `init_option`.
-        - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
-          this function will not print anything on the screen.
+
+        - `priority_kind`: a string of length 3 or an integer that
+          specifies the type of priority used in extracting the
+          automaton. See the documentation of the ``computeStrategy``
+          function for the possible values of `priority_kind`.
+
+        - `init_option`: an integer in that specifies how to handle
+          the initial state of the system. See the documentation of
+          the ``computeStrategy`` function for the possible values of
+          `init_option`.
+
+        - `verbose`: an integer that specifies the level of
+          verbosity. If verbose is set to 0, this function will not
+          print anything on the screen.
         """
         smv_file = self.__jtlvfile + '.smv'
         spc_file = self.__jtlvfile + '.spc'
@@ -756,13 +796,20 @@ class SynthesisProb:
 
         Input:
 
-        - `smv_file`: a string that specifies the name of the resulting smv file.
-        - `spc_file`: a string that specifies the name of the resulting spc file.
-        - `file_exist_option`: a string that indicate what to do when the specified smv_file 
-          or spc_file exists. Possible values are: 'a' (ask whether to replace or
-          create a new file), 'r' (replace the existing file), 'n' (create a new file).
-        - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
-          this function will not print anything on the screen.
+        - `smv_file`: a string that specifies the name of the
+          resulting smv file.
+
+        - `spc_file`: a string that specifies the name of the
+          resulting spc file.
+
+        - `file_exist_option`: a string that indicate what to do when
+          the specified smv_file or spc_file exists. Possible values
+          are: 'a' (ask whether to replace or create a new file), 'r'
+          (replace the existing file), 'n' (create a new file).
+
+        - `verbose`: an integer that specifies the level of
+          verbosity. If verbose is set to 0, this function will not
+          print anything on the screen.
         """
 
         # Check that the input is valid
@@ -982,15 +1029,17 @@ class SynthesisProb:
 
 class ShortHorizonProb(SynthesisProb):
     """
-    ShortHorizonProb class for specifying a short horizon problem for receding horizon 
-    temporal logic planning.
+    ShortHorizonProb class for specifying a short horizon problem for
+    receding horizon temporal logic planning.
+
     A ShortHorizonProb object contains the following fields:
 
     - `W`: a proposition that specifies a set W of states.
-    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
-      the set F(W).
+    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb
+      object that specifies the set F(W).
     - `Phi`: a proposition that specifies the receding horizon invariant.
-    - `global_prob`: a SynthesisProb object that represents the global problem.
+    - `global_prob`: a SynthesisProb object that represents the global
+      problem.
 
     **Constructor**:
 
@@ -1005,33 +1054,50 @@ class ShortHorizonProb(SynthesisProb):
     `cont_props` = {}[, `sys_dyn` = None]]]]]]]]]])
 
     - `W`: a proposition that specifies a set W of states.
-    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb object that specifies 
-      the set F(W).
+
+    - `FW`: a ShortHorizonProb object or a list of ShortHorizonProb
+      object that specifies the set F(W).
+
     - `Phi`: a proposition that specifies the receding horizon invariant.
+
     - `global_spec`: the global specification of the system.
-    - `file`: the name of the rhtlp file to be parsed. If `file` is given,
-      the rest of the inputs to this function will be ignored.
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
+
+    - `file`: the name of the rhtlp file to be parsed. If `file` is
+      given, the rest of the inputs to this function will be ignored.
+
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys
+      are the names of environment variables and whose values are
+      their possible values, e.g.,
       boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-      names of discrete system variables and whose values are their possible values.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-      propositions on discrete variables and whose values are the actual propositions
-      on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the 
-      transition system obtained from the discretization procedure.
-      if `disc_dynamics` is given, `cont_state_space`, `cont_props` and `sys_dyn`
-      will be ignored.
-    - `cont_state_space`: a Polytope object that represent the state space of the
-      continuous variables. Needed only when `discretize` is True.
-    - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for 
-      propositions on continuous variables and whose values are polytopes that represent
-      the region in the state space in which the corresponding proposition hold.
-      if `discretize` is False, `cont_props` can be just a list of symbols for 
-      propositions on continuous variables.
-    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables.
+
+    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    - `disc_props`: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    - `disc_dynamics`: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.  If `disc_dynamics` is given,
+      `cont_state_space`, `cont_props` and `sys_dyn` will be ignored.
+
+    - `cont_state_space`: a Polytope object that represent the state
+      space of the continuous variables.
       Needed only when `discretize` is True.
+
+    - `cont_props`: a dictionary {str : Polytope} whose keys are the
+      symbols for propositions on continuous variables and whose
+      values are polytopes that represent the region in the state
+      space in which the corresponding proposition hold.  If
+      `discretize` is False, `cont_props` can be just a list of
+      symbols for propositions on continuous variables.
+
+    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the
+      continuous variables.
+      Needed only when `discretize` is True.
+
     - `verbose`: an integer that specifies the level of verbosity.
     """
     def __init__(self, W='', FW=[], Phi='', global_prob=SynthesisProb(), **args):
@@ -1245,7 +1311,9 @@ class ShortHorizonProb(SynthesisProb):
 
 class RHTLPProb(SynthesisProb):
     """
-    RHTLPProb class for specifying a receding horizon temporal logic planning problem.
+    RHTLPProb class for specifying a receding horizon temporal logic
+    planning problem.
+
     A RHTLPProb object contains the following fields:
 
     - `shprobs`: a list of ShortHorizonProb objects
@@ -1265,32 +1333,51 @@ class RHTLPProb(SynthesisProb):
     `cont_props` = {}[, `sys_dyn` = None[, `spec` = GRSpec()]]]]]]])
 
     - `shprobs`: a list of ShortHorizonProb objects.
+
     - `Phi`: a string specifying the invariant for the RHTLP problem.
-    - `discretize`:  a boolean indicating whether to discretize the global problem.
-    - `file`: the name of the rhtlp file to be parsed. If `file` is given,
-      the rest of the inputs to this function will be ignored.
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
+
+    - `discretize`: a boolean indicating whether to discretize the
+      global problem.
+
+    - `file`: the name of the rhtlp file to be parsed. If `file` is
+      given, the rest of the inputs to this function will be ignored.
+
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys
+      are the names of environment variables and whose values are
+      their possible values, e.g.,
       boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-      names of discrete system variables and whose values are their possible values.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-      propositions on discrete variables and whose values are the actual propositions
-      on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the 
-      transition system obtained from the discretization procedure.
-      if `disc_dynamics` is given, `cont_state_space`, `cont_props` and `sys_dyn`
-      will be ignored.
-    - `cont_state_space`: a Polytope object that represent the state space of the
-      continuous variables. Needed only when `discretize` is True.
-    - `cont_props`: a dictionary {str : Polytope} whose keys are the symbols for 
-      propositions on continuous variables and whose values are polytopes that represent
-      the region in the state space in which the corresponding proposition hold.
-      if `discretize` is False, `cont_props` can be just a list of symbols for 
-      propositions on continuous variables.
-    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the continuous variables.
+
+    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    - `disc_props`: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    - `disc_dynamics`: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.  If `disc_dynamics` is given,
+      `cont_state_space`, `cont_props` and `sys_dyn` will be ignored.
+
+    - `cont_state_space`: a Polytope object that represent the state
+      space of the continuous variables.
       Needed only when `discretize` is True.
-    - `spec`: a GRSpec object that specifies the specification of this synthesis problem
+
+    - `cont_props`: a dictionary {str : Polytope} whose keys are the
+      symbols for propositions on continuous variables and whose
+      values are polytopes that represent the region in the state
+      space in which the corresponding proposition hold.  If
+      `discretize` is False, `cont_props` can be just a list of
+      symbols for propositions on continuous variables.
+
+    - `sys_dyn`: a CtsSysDyn object that specifies the dynamics of the
+      continuous variables.
+      Needed only when `discretize` is True.
+
+    - `spec`: a GRSpec object that specifies the specification of this
+      synthesis problem
+
     - `verbose`: an integer that specifies the level of verbosity.
     """
     def __init__(self, shprobs=[], Phi='True', discretize=False, **args):

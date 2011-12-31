@@ -33,18 +33,12 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 ------------------------------------
 Jtlvint Module --- Interface to JTLV
 ------------------------------------
 
 About JTLV, see http://jtlv.ysaar.net/
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 3, 2010
-:Version: 0.1.0
 """
 
 import re, os, subprocess, sys
@@ -62,26 +56,39 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
 
     Input:
 
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys
+      are the names of environment variables and whose values are
+      their possible values, e.g.,
       boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-      names of discrete system variables and whose values are their possible values.
-    - `spec`: a list of two strings that represents system specification of the form
-      assumption -> guarantee; the first string is the assumption and the second 
-      string is the guarantee.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-      propositions on discrete variables and whose values are the actual propositions
-      on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the 
-      transition system obtained from the discretization procedure.
+
+    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    - `spec`: a list of two strings that represents system
+      specification of the form assumption -> guarantee; the first
+      string is the assumption and the second string is the guarantee.
+
+    - `disc_props`: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    - `disc_dynamics`: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.
+
     - `smv_file`: a string that specifies the name of the resulting smv file.
+
     - `spc_file`: a string that specifies the name of the resulting spc file.
-    - `file_exist_option`: a string that indicate what to do when the specified smv_file 
-      or spc_file exists. Possible values are: 'a' (ask whether to replace or
-      create a new file), 'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
-      this function will not print anything on the screen.
+
+    - `file_exist_option`: a string that indicate what to do when the
+      specified smv_file or spc_file exists. Possible values are: 'a'
+      (ask whether to replace or create a new file), 'r' (replace the
+      existing file), 'n' (create a new file).
+
+    - `verbose`: an integer that specifies the level of verbosity. If
+      verbose is set to 0, this function will not print anything on
+      the screen.
     """
     prob = rhtlp.SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
                        sys_cont_vars=[], cont_state_space=None, \
@@ -99,21 +106,25 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
 
 def checkRealizability(smv_file='', spc_file='', aut_file='', heap_size='-Xmx128m', \
                            pick_sys_init=True, file_exist_option='a', verbose=0):
-    """Determine whether the spec in smv_file and spc_file is realizable without 
-    extracting an automaton.
+    """Determine whether the spec in smv_file and spc_file is
+    realizable without extracting an automaton.
 
     Input:
 
     - `smv_file`: a string that specifies the name of the smv file.
     - `spc_file`: a string that specifies the name of the spc file.
-    - `aut_file`: a string that specifies the name of the file containing the output of JTLV
-      (e.g. an initial state starting from which the spec is cannot be satisfied).
+
+    - `aut_file`: a string that specifies the name of the file
+      containing the output of JTLV
+      (e.g. an initial state starting from which the spec is cannot be
+      satisfied).
     - `heap_size`: a string that specifies java heap size. 
     - `pick_sys_init` is a boolean indicating whether the system can pick 
       its initial state (in response to the initial environment state).
-    - `file_exist_option`: a string that indicate what to do when the specified aut_file 
-      exists. Possible values are: 'a' (ask whether to replace or create a new file), 
-      'r' (replace the existing file), 'n' (create a new file).
+    - `file_exist_option`: a string that indicate what to do when the
+      specified aut_file exists. Possible values are: 'a' (ask whether
+      to replace or create a new file), 'r' (replace the existing
+      file), 'n' (create a new file).
     - `verbose`: an integer that specifies the level of verbosity.
     """
 
@@ -136,41 +147,62 @@ def synthesize(env_vars={}, sys_disc_vars={}, spec='', disc_props={}, \
                    aut_file='', heap_size='-Xmx128m', priority_kind=3, init_option=1, \
                    file_exist_option='a', verbose=0):
     """Compute an automaton satisfying `spec`. Return the realizability of `spec`.
-    If `spec` is realizable, the resulting automaton will be stored in the
-    `aut_file`. Otherwise, the counter examples will be stored.
-    This function essentially combines ``generateJTLVInput`` and ``computeStrategy``
+
+    If `spec` is realizable, the resulting automaton will be stored in
+    the `aut_file`. Otherwise, the counter examples will be stored.
+    This function essentially combines ``generateJTLVInput`` and
+    ``computeStrategy``
 
     Input:
 
-    - `env_vars`: a dictionary {str : str} or {str : list} whose keys are the names 
-      of environment variables and whose values are their possible values, e.g., 
+    - `env_vars`: a dictionary {str : str} or {str : list} whose keys
+      are the names of environment variables and whose values are
+      their possible values, e.g.,
       boolean or {0, 2, ..., 5} or [0, 2, 3, 4, 5].
-    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose keys are the 
-      names of discrete system variables and whose values are their possible values.
-    - `spec`: a list of two strings that represents system specification of the form
-      assumption -> guarantee; the first string is the assumption and the second 
-      string is the guarantee.
-    - `disc_props`: a dictionary {str : str} whose keys are the symbols for 
-      propositions on discrete variables and whose values are the actual propositions
-      on discrete variables.
-    - `disc_dynamics`: a PropPreservingPartition object that represents the 
-      transition system obtained from the discretization procedure.
+
+    - `sys_disc_vars`: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    - `spec`: a list of two strings that represents system
+      specification of the form assumption -> guarantee; the first
+      string is the assumption and the second string is the guarantee.
+
+    - `disc_props`: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    - `disc_dynamics`: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.
+
     - `smv_file`: a string that specifies the name of the resulting smv file.
+
     - `spc_file`: a string that specifies the name of the resulting spc file.
-    - `aut_file`: a string that specifies the name of the file containing the resulting 
-      automaton.
+
+    - `aut_file`: a string that specifies the name of the file
+      containing the resulting automaton.
+
     - `heap_size`: a string that specifies java heap size. 
-    - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-      priority used in extracting the automaton. See the documentation of the 
-      ``computeStrategy`` function for the possible values of `priority_kind`.
-    - `init_option`: an integer in that specifies how to handle the initial state of 
-      the system. See the documentation of the ``computeStrategy`` function for the 
-      possible values of `init_option`.
-    - `file_exist_option`: a string that indicate what to do when the specified smv_file 
-      or spc_file exists. Possible values are: 'a' (ask whether to replace or
-      create a new file), 'r' (replace the existing file), 'n' (create a new file).
-    - `verbose`: an integer that specifies the level of verbosity. If verbose is set to 0,
-      this function will not print anything on the screen.
+
+    - `priority_kind`: a string of length 3 or an integer that
+      specifies the type of priority used in extracting the
+      automaton. See the documentation of the ``computeStrategy``
+      function for the possible values of `priority_kind`.
+
+    - `init_option`: an integer in that specifies how to handle the
+      initial state of the system. See the documentation of the
+      ``computeStrategy`` function for the possible values of
+      `init_option`.
+
+    - `file_exist_option`: a string that indicate what to do when the
+      specified smv_file or spc_file exists. Possible values are: 'a'
+      (ask whether to replace or create a new file), 'r' (replace the
+      existing file), 'n' (create a new file).
+
+    - `verbose`: an integer that specifies the level of verbosity. If
+      verbose is set to 0, this function will not print anything on
+      the screen.
     """
     generateJTLVInput(env_vars=env_vars, sys_disc_vars=sys_disc_vars, spec=spec, \
                           disc_props=disc_props, disc_dynamics=disc_dynamics, \
@@ -189,18 +221,24 @@ def synthesize(env_vars={}, sys_disc_vars={}, spec='', disc_props={}, \
 
 def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
                         priority_kind=3, init_option=1, file_exist_option='a', verbose=0):
-    """Compute an automaton satisfying the spec in smv_file and spc_file and store in 
-    aut_file. Return the realizability of the spec.
+    """Compute an automaton satisfying the spec in smv_file and
+    spc_file and store in aut_file. Return the realizability of the
+    spec.
 
     Input:
 
     - `smv_file`: a string that specifies the name of the smv file.
+
     - `spc_file`: a string that specifies the name of the spc file.
-    - `aut_file`: a string that specifies the name of the file containing the resulting 
-      automaton.
+
+    - `aut_file`: a string that specifies the name of the file
+      containing the resulting automaton.
+
     - `heap_size`: a string that specifies java heap size. 
-    - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-      priority used in extracting the automaton. Possible values of `priority_kind` are: 
+
+    - `priority_kind`: a string of length 3 or an integer that
+      specifies the type of priority used in extracting the
+      automaton. Possible values of `priority_kind` are:
 
         * 3 - 'ZYX'
         * 7 - 'ZXY'
@@ -209,26 +247,38 @@ def computeStrategy(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         * 19 - 'XZY'
         * 23 - 'XYZ'
 
-      Here X means that the controller tries to disqualify one of the environment 
-      assumptions, 
-      Y means that the controller tries to advance with a finite path to somewhere, and
-      Z means that the controller tries to satisfy one of his guarantees.
-    - `init_option`: an integer in that specifies how to handle the initial state of 
-      the system. Possible values of `init_option` are
+      Here X means that the controller tries to disqualify one of the
+      environment assumptions,
+      Y means that the controller tries to advance with a finite path
+      to somewhere, and
+      Z means that the controller tries to satisfy one of his
+      guarantees.
 
-        * 0 - The system has to be able to handle all the possible initial system
-          states specified on the guarantee side of the specification.
-        * 1 (default) - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contains exactly one initial system state, starting from which
-          the system can satisfy the specification.
-        * 2 - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contain all the possible initial system states, starting from which
-          the system can satisfy the specification.
-    - `file_exist_option`: a string that indicate what to do when the specified aut_file 
-      exists. Possible values are: 'a' (ask whether to replace or create a new file), 
-      'r' (replace the existing file), 'n' (create a new file).
+    - `init_option`: an integer in that specifies how to handle the
+      initial state of the system. Possible values of `init_option`
+      are
+
+        * 0 - The system has to be able to handle all the possible
+          initial system states specified on the guarantee side of the
+          specification.
+
+        * 1 (default) - The system can choose its initial state, in
+          response to the initial environment state. For each initial
+          environment state, the resulting automaton contains exactly
+          one initial system state, starting from which the system can
+          satisfy the specification.
+
+        * 2 - The system can choose its initial state, in response to
+          the initial environment state. For each initial environment
+          state, the resulting automaton contain all the possible
+          initial system states, starting from which the system can
+          satisfy the specification.
+
+    - `file_exist_option`: a string that indicate what to do when the
+      specified aut_file exists. Possible values are: 'a' (ask whether
+      to replace or create a new file), 'r' (replace the existing
+      file), 'n' (create a new file).
+
     - `verbose`: an integer that specifies the level of verbosity.
     """
     realizable = grgameint.solveGame(smv_file=smv_file, \

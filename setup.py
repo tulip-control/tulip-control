@@ -12,6 +12,7 @@ def check_graphlibs():
     """Check for presence of graph packages: python-graph."""
     try:
         import pygraph
+        print "python-graph found."
     except ImportError:
         print 'python-graph not found. If you\'re interested, see http://code.google.com/p/python-graph/'
         print 'Some methods for the Automaton class will not be available.'

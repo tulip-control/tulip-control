@@ -33,16 +33,10 @@
 # SUCH DAMAGE.
 # 
 # $Id$
-
 """ 
 --------------------
 Specification Module
 --------------------
-
-Nok Wongpiromsarn (nok@cds.caltech.edu)
-
-:Date: August 25, 2010
-:Version: 0.1.0
 """
 
 import re, copy
@@ -55,16 +49,23 @@ class GRSpec:
 
     A GRSpec object contains the following fields:
 
-    - `env_init`: a string or a list of string that specifies the assumption about 
-      the initial state of the environment.
-    - `env_safety`: a string or a list of string that specifies the assumption about 
-      the evolution of the environment state.
-    - `env_prog`: a string or a list of string that specifies the justice assumption on 
-      the environment.
-    - `sys_init`: a string or a list of string that specifies the requirement on the 
-      initial state of the system.
-    - `sys_safety`: a string or a list of string that specifies the safety requirement.
-    - `sys_prog`: a string or a list of string that specifies the progress requirement.
+    - `env_init`: a string or a list of string that specifies the
+      assumption about the initial state of the environment.
+
+    - `env_safety`: a string or a list of string that specifies the
+      assumption about the evolution of the environment state.
+
+    - `env_prog`: a string or a list of string that specifies the
+      justice assumption on the environment.
+
+    - `sys_init`: a string or a list of string that specifies the
+      requirement on the initial state of the system.
+
+    - `sys_safety`: a string or a list of string that specifies the
+      safety requirement.
+
+    - `sys_prog`: a string or a list of string that specifies the
+      progress requirement.
     """
     def __init__(self, env_init='', sys_init='', env_safety='', sys_safety='', \
                      env_prog='', sys_prog=''):

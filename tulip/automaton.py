@@ -87,7 +87,8 @@ class Automaton:
 
     - `states_or_file`: a string containing the name of the aut file
       to be loaded or a list of AutomatonState objects to be assigned
-      to the `states` of this Automaton object.
+      to the `states` of this Automaton object, or an (open) file-like
+      object.
 
     - `varname`: a list of all the variable names. If it is not empty
       and states_or_file is a string representing the name of the aut
@@ -99,11 +100,45 @@ class Automaton:
         if (isinstance(states_or_file, list)): 
             self.states = copy.deepcopy(states_or_file)
         # Construct this automaton from file
-        elif (isinstance(states_or_file, str)):
-            if (len(states_or_file) == 0):
+        else:
+            if isinstance(states_or_file, str) and (len(states_or_file) == 0):
                 self.states = []
             else:
                 self.loadFile(states_or_file, varnames=varnames, verbose=verbose)
+
+    def __eq__(self, other):
+        """Automaton equality comparison.
+
+        Two instances of Automaton are said to be equal if their nodes
+        may be identified: there is a bijection, and nodes of equal ID
+        agree on outgoing edge set and state (labelling).
+        """
+        if (not isinstance(other, Automaton)) or (len(self) != len(other)):
+            return False
+        if len(self) == 0: # Trivial case, both empty
+            return True
+        for node in self.states:
+            other_ind = 0
+            while (other.states[other_ind].id != node.id) and (other_ind < len(other)):
+                other_ind += 1
+            if other_ind >= len(other):
+                return False
+            sorted_transition = node.transition[:]
+            sorted_transition.sort()
+            other_sorted_transition = other.states[other_ind].transition[:]
+            other_sorted_transition.sort()
+            if sorted_transition != other_sorted_transition:
+                return False
+            if node.state.items() != other.states[other_ind].state.items():
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __len__(self):
+        """Return number of nodes."""
+        return len(self.states)
     
     def loadFile(self, aut_file, varnames=[], verbose=0):
         """
@@ -111,12 +146,17 @@ class Automaton:
 
         Input:
 
-        - `aut_file`: the name of the text file containing the automaton.
+        - `aut_file`: the name of the text file containing the
+          automaton, or an (open) file-like object.
+
         - `varnames`: a list of all the variable names. If it is not empty, then this 
           function will also check whether the variables in aut_file are in varnames.
         """
         self.states = []
-        f = open(aut_file, 'r')
+        if isinstance(aut_file, str):
+            f = open(aut_file, 'r')
+        else:
+            f = aut_file  # Else, assume aut_file behaves as file object.
         stateID = -1
         for line in f:
             # parse states
@@ -332,6 +372,84 @@ class Automaton:
                                               transition=transition))
         
 
+    def writeDotFileEdged(self, fname, env_vars, sys_vars,
+                          hideZeros=False, hideAgentNames=True):
+        """Write edge-labeled automaton to Graphviz DOT file.
+
+        I forked the method writeDotFile for fear of feature creep.
+        At least now the features will creep upon us from separate
+        methods, rather than a single complicated argument list.
+
+        env_vars and sys_vars should be lists of variable names (type
+        string) describing environment and system variables,
+        respectively.
+
+        The intent is to view nodes labeled with a system decision,
+        and edges labeled with an environment decision, thus better
+        expressing the game.  Recall the automaton is a strategy.
+
+        Return False on failure; True otherwise (success).
+        """
+        if len(env_vars) == 0 or len(sys_vars) == 0:
+            return False
+
+        # Make looping possible
+        agents = {"env" : env_vars,
+                  "sys" : sys_vars}
+        
+        output = "digraph A {\n"
+
+        # Prebuild sane state names
+        state_labels = dict()
+        for state in self.states:
+            for agent_name in agents.keys():
+                state_labels[str(state.id)+agent_name] = ''
+            for (k,v) in state.state.items():
+                if (not hideZeros) or (v != 0):
+                    agent_name = None
+                    for agent_candidate in agents.keys():
+                        if k in agents[agent_candidate]:
+                            agent_name = agent_candidate
+                            break
+                    if agent_name is None:
+                        printWarning("variable \""+k+"\" does not belong to an agent in distinguishedTurns")
+                        return False
+
+                    if len(state_labels[str(state.id)+agent_name]) == 0:
+                        if len(agent_name) > 0 and not hideAgentNames:
+                            state_labels[str(state.id)+agent_name] += str(state.id)+"::"+agent_name+";\\n" + k+": "+str(v)
+                        else:
+                            state_labels[str(state.id)+agent_name] += str(state.id)+";\\n" + k+": "+str(v)
+                    else:
+                        state_labels[str(state.id)+agent_name] += ", "+k+": "+str(v)
+            
+            for agent_name in agents.keys():
+                if len(state_labels[str(state.id)+agent_name]) == 0:
+                    if not hideAgentNames:
+                        state_labels[str(state.id)+agent_name] = str(state.id)+"::"+agent_name+";\\n {}"
+                    else:
+                        state_labels[str(state.id)+agent_name] = str(state.id)+";\\n {}"
+
+        # Initialization point
+        output += "    \"\" [shape=circle,style=filled,color=black];\n"
+        
+        # All nodes and edges
+        for state in self.states:
+            if len(self.getAutInSet(state.id)) == 0:
+                # Treat init nodes specially
+                output += "    \"\" -> \"" \
+                    + state_labels[str(state.id)+"sys"] +"\" [label=\""
+                output += state_labels[str(state.id)+"env"] + "\"];\n"
+            for trans in state.transition:
+                output += "    \""+ state_labels[str(state.id)+"sys"] +"\" -> \"" \
+                    + state_labels[str(self.states[trans].id)+"sys"] +"\" [label=\""
+                output += state_labels[str(self.states[trans].id)+"env"] + "\"];\n"
+
+        output += "\n}\n"
+        with open(fname, "w") as f:
+            f.write(output)
+        return True
+
     def writeDotFile(self, fname, hideZeros=False,
                      distinguishTurns=None, turnOrder=None):
         """Write automaton to Graphviz DOT file.
@@ -446,7 +564,7 @@ class Automaton:
             f.write(output)
         return True
     
-    def dumpXML(self, pretty=True, use_pickling=False, idt_level=0):
+    def dumpXML(self, pretty=True, idt_level=0):
         """Return string of automaton conforming to tulipcon XML.
 
         If pretty is True, then use indentation and newlines to make
@@ -468,17 +586,15 @@ class Automaton:
             output += idt_level*idt+'<node>'+nl
             idt_level += 1
             output += idt_level*idt+'<id>' + str(node.id) + '</id><name></name>'+nl
-            output += idt_level*idt+conxml.taglist("child_list", node.transition,
-                                                   use_pickling=use_pickling)+nl
-            output += idt_level*idt+conxml.tagdict("state", node.state,
-                                                   use_pickling=use_pickling)+nl
+            output += idt_level*idt+conxml.taglist("child_list", node.transition)+nl
+            output += idt_level*idt+conxml.tagdict("state", node.state)+nl
             idt_level -= 1
             output += idt_level*idt+'</node>'+nl
         idt_level -= 1
         output += idt_level*idt+'</aut>'+nl
         return output
 
-    def loadXML(self, x, namespace="", use_pickling=False):
+    def loadXML(self, x, namespace=""):
         """Read an automaton from given string conforming to tulipcon XML.
         
         N.B., on a successful processing of the given string, the
@@ -522,7 +638,9 @@ class Automaton:
                 # worth checking.
                 raise ValueError("failure of consistency check while processing aut XML string.")
             (tag_name, this_state) = conxml.untagdict(node.find(ns_prefix+"state"),
-                                                      cast_f_values=int)
+                                                      cast_f_values=int,
+                                                      namespace=namespace)
+
             if tag_name != ns_prefix+"state":
                 raise ValueError("failure of consistency check while processing aut XML string.")
             if this_id in id_list:
