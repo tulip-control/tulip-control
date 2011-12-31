@@ -174,21 +174,21 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                 spec[k] = spec[k].replace("&amp;", "&")
 
     # "Continuous propositions", if available
-    cp_tag = elem.find(ns_prefix+"cont_props")
-    if cp_tag is not None:
-        cont_props = dict()
-        for sym_tag in cp_tag.findall(ns_prefix+"item"):
-            if "key" not in sym_tag.attrib.keys():
-                ep.printWarning("malformed <cont_props> tag in given tulipcon XML string.")
-                cont_props = {}
-                break  # Give-up on this <cont_props> tag
-            sym_poly_tag = sym_tag.find(ns_prefix+"cont_prop_poly")
-            if sym_poly_tag is None:
-                cont_props[sym_tag.attrib["key"]] = None
-            else:
-                (tag_name, cont_props[sym_tag.attrib["key"]]) = untagpolytope(sym_poly_tag)
-    else:
-        cont_props = {}
+    # cp_tag = elem.find(ns_prefix+"cont_props")
+    # if cp_tag is not None:
+    #     cont_props = dict()
+    #     for sym_tag in cp_tag.findall(ns_prefix+"item"):
+    #         if "key" not in sym_tag.attrib.keys():
+    #             ep.printWarning("malformed <cont_props> tag in given tulipcon XML string.")
+    #             cont_props = {}
+    #             break  # Give-up on this <cont_props> tag
+    #         sym_poly_tag = sym_tag.find(ns_prefix+"cont_prop_poly")
+    #         if sym_poly_tag is None:
+    #             cont_props[sym_tag.attrib["key"]] = None
+    #         else:
+    #             (tag_name, cont_props[sym_tag.attrib["key"]]) = untagpolytope(sym_poly_tag)
+    # else:
+    #     cont_props = {}
     
     # Discrete dynamics, if available
     d_dyn = elem.find(ns_prefix+"d_dyn")
@@ -237,13 +237,13 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                                        env_vars=env_vars,
                                        sys_disc_vars=sys_disc_vars,
                                        disc_dynamics=disc_dynamics,
-                                       cont_props=cont_props,
+                                       #cont_props=cont_props,
                                        spec=spec)
             else:
                 prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
                                        env_vars=env_vars,
                                        sys_disc_vars=sys_disc_vars,
-                                       cont_props=cont_props,
+                                       #cont_props=cont_props,
                                        spec=spec)
         else: #ptype == INCOMPLETE_PROB
             prob = None
@@ -381,15 +381,15 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     if prob is not None:
         # Perhaps there is a cleaner way to do this, rather than by
         # checking for method getContProps?
-        if hasattr(prob, "getContProps"):
-            output += idt*idt_level+'<cont_props>'+nl
-            idt_level += 1
-            for (prop_sym, prop_poly) in prob.getContProps().items():
-                output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
-                output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
-                output += idt*idt_level+'</item>'+nl
-            idt_level -= 1
-            output += idt*idt_level+'</cont_props>'+nl
+        # if hasattr(prob, "getContProps"):
+        #     output += idt*idt_level+'<cont_props>'+nl
+        #     idt_level += 1
+        #     for (prop_sym, prop_poly) in prob.getContProps().items():
+        #         output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
+        #         output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
+        #         output += idt*idt_level+'</item>'+nl
+        #     idt_level -= 1
+        #     output += idt*idt_level+'</cont_props>'+nl
 
         disc_dynamics = prob.getDiscretizedDynamics()
         if disc_dynamics is not None:

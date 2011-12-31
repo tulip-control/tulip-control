@@ -48,7 +48,7 @@ normative*. Also, see notes below.
       <W_set>...same format as U_set...</W_set>
     </c_dyn>
     <env_vars><item key="" value="" />...</env_vars>
-    <con_vars><item key="" value="" />...</con_vars>
+    <sys_vars><item key="" value="" />...</sys_vars>
     <spec>
       <assume>...assumption string...</assume>
       <guarantee>...guarantee string...</guarantee>
