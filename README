@@ -55,4 +55,4 @@ Tests are performed using nose; see http://readthedocs.org/docs/nose/
 for details.  From the root of the source tree (i.e., where setup.py
 is located), run::
 
-  nosetests
+  nosetests -v -w tests
