@@ -222,6 +222,8 @@ def normalized_polytope_projection_test():
     b = np.array([6, 6, 4, 4], dtype=np.float64)
     P = Polytope(A=A, b=b, normalize=False)
     P_normalized = Polytope(A=A, b=b, normalize=True)
+    ppoly = projection(P, [1, 2], solver="fm")
+    ppoly_n = projection(P_normalized, [1, 2], solver="fm")
     cheby_ball(ppoly)
     cheby_ball(ppoly_n)
     assert abs(ppoly.chebR-ppoly_n.chebR) < abs_tol
@@ -237,8 +239,7 @@ def normalized_polytope_projection_test():
             V = np.random.random((max_dim*2, orig_dim))
             P_normalized = qhull(V)
             P = P_normalized.copy()
-            scalar = 100*np.random.random() - 50
-            print scalar
+            scalar = 50*np.random.random()
             P.A *= scalar
             P.b *= scalar
             proj_dims = [k+1 for k in np.sort(np.random.permutation(orig_dim)[:red_dim])]
