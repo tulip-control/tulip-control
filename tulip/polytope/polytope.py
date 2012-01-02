@@ -810,7 +810,9 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     return reduce(Polytope(iA,ib))
           
 def volume(polyreg):
-    """Calculate the volume of a Polytope or Region.
+    """Approximately compute the volume of a Polytope or Region.
+    
+    A randomized algorithm is used.
     
     Input:
     - `polyreg`: Polytope or Region
