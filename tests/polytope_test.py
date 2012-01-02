@@ -215,16 +215,20 @@ def normalized_polytope_projection_test():
     """Normalization of fixed and random polytopes given to projection methods.
     """
     abs_tol = 1e-10
-    A = np.array([[1, 0],
-                  [-1, 0],
-                  [0, 1],
-                  [0, -1]], dtype=np.float64)
-    b = np.array([3, 3, 2, 2], dtype=np.float64)
+    A = np.array([[2, 0],
+                  [-2, 0],
+                  [0, 2],
+                  [0, -2]], dtype=np.float64)
+    b = np.array([6, 6, 4, 4], dtype=np.float64)
     P = Polytope(A=A, b=b, normalize=False)
     P_normalized = Polytope(A=A, b=b, normalize=True)
-    ppoly = projection(P, [1, 2], solver="fm")
-    ppoly_n = projection(P_normalized, [1, 2], solver="fm")
-    assert volume(mldivide(ppoly, ppoly_n)) < abs_tol
+    cheby_ball(ppoly)
+    cheby_ball(ppoly_n)
+    assert abs(ppoly.chebR-ppoly_n.chebR) < abs_tol
+    # also check if initial polytopes match
+    cheby_ball(P)
+    cheby_ball(P_normalized)
+    assert abs(P.chebR-P_normalized.chebR) < abs_tol
 
     for max_dim in [5,]:# 8]:
         for i in range(3):
@@ -234,9 +238,16 @@ def normalized_polytope_projection_test():
             P_normalized = qhull(V)
             P = P_normalized.copy()
             scalar = 100*np.random.random() - 50
+            print scalar
             P.A *= scalar
             P.b *= scalar
             proj_dims = [k+1 for k in np.sort(np.random.permutation(orig_dim)[:red_dim])]
             ppoly = projection(P, proj_dims, solver="iterhull")
             ppoly_n = projection(P_normalized, proj_dims, solver="iterhull")
-            assert volume(mldivide(ppoly, ppoly_n)) < abs_tol
+            cheby_ball(ppoly)
+            cheby_ball(ppoly_n)
+            assert abs(ppoly.chebR-ppoly_n.chebR) < abs_tol
+            # also check if initial polytopes match
+            cheby_ball(P)
+            cheby_ball(P_normalized)
+            assert abs(P.chebR-P_normalized.chebR) < abs_tol
