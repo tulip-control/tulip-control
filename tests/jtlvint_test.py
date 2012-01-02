@@ -62,7 +62,7 @@ class jtlvint_test:
                                        disc_dynamics=disc_dynamics,
                                        smv_file=self.smvfile,
                                        spc_file=self.spcfile,
-                                       verbose=2)
+                                       file_exist_option='r', verbose=2)
 
     def tearDown(self):
         os.remove(self.smvfile)
