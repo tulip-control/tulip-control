@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ from prop2part import PropPreservingPartition, prop2part2
 import automaton
 from spec import GRSpec
 import rhtlputil
-import grgameint
+import jtlvint
 
 
 class SynthesisProb:
@@ -707,7 +707,7 @@ class SynthesisProb:
             init_option = 0
 
             
-        realizable = grgameint.solveGame(smv_file=smv_file, spc_file=spc_file, \
+        realizable = jtlvint.solveGame(smv_file=smv_file, spc_file=spc_file, \
                                          aut_file=aut_file, \
                                          heap_size=heap_size, \
                                          priority_kind=-1, \
@@ -734,7 +734,7 @@ class SynthesisProb:
         ce = []
         if (not self.__realizable):
             aut_file = self.__jtlvfile + '.aut'
-            ce = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)        
+            ce = jtlvint.getCounterExamples(aut_file=aut_file, verbose=verbose)        
         return ce
 
 
@@ -773,7 +773,7 @@ class SynthesisProb:
         aut_file = self.__jtlvfile + '.aut'
         self.toJTLVInput(smv_file=smv_file, spc_file=spc_file, \
                           file_exist_option='r', verbose=verbose)
-        realizable = grgameint.solveGame(smv_file=smv_file, spc_file=spc_file, \
+        realizable = jtlvint.solveGame(smv_file=smv_file, spc_file=spc_file, \
                                          aut_file=aut_file, \
                                          heap_size=heap_size, \
                                          priority_kind=priority_kind, \
@@ -782,7 +782,7 @@ class SynthesisProb:
         self.__realizable = realizable
         if (not realizable):
             printError('spec not realizable', obj=self)
-            counter_examples = grgameint.getCounterExamples(aut_file=aut_file, verbose=verbose)
+            counter_examples = jtlvint.getCounterExamples(aut_file=aut_file, verbose=verbose)
             return counter_examples
         else:
             aut = automaton.Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
