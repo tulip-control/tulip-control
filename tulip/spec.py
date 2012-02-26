@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,9 @@ class GRSpec:
 
     A GRSpec object contains the following fields:
 
+    - `env_vars`: a list of variables (names given as strings) that
+      are determined by the environment.
+
     - `env_init`: a string or a list of string that specifies the
       assumption about the initial state of the environment.
 
@@ -58,6 +61,9 @@ class GRSpec:
     - `env_prog`: a string or a list of string that specifies the
       justice assumption on the environment.
 
+    - `sys_vars`: a list of variables (names given as strings) that
+      are controlled by the system.
+
     - `sys_init`: a string or a list of string that specifies the
       requirement on the initial state of the system.
 
@@ -66,9 +72,18 @@ class GRSpec:
 
     - `sys_prog`: a string or a list of string that specifies the
       progress requirement.
+
+    An empty list for any formula (e.g., if env_init = []) is marked
+    as "True" in the specification. This corresponds to the constant
+    Boolean function, which usually means that subformula has no
+    effect (is non-restrictive) on the spec.
     """
-    def __init__(self, env_init='', sys_init='', env_safety='', sys_safety='', \
-                     env_prog='', sys_prog=''):
+    def __init__(self, env_vars=[], sys_vars=[],
+                 env_init='', sys_init='',
+                 env_safety='', sys_safety='',
+                 env_prog='', sys_prog=''):
+        self.env_vars = copy.copy(env_vars)
+        self.sys_vars = copy.copy(sys_vars)
         self.env_init = copy.deepcopy(env_init)
         self.sys_init = copy.deepcopy(sys_init)
         self.env_safety = copy.deepcopy(env_safety)
@@ -263,3 +278,44 @@ class GRSpec:
                         desc_added = True
                     spec[1] += '\t[]<>(' + prog + ')'
         return spec
+
+
+    def dumpgr1c(self):
+        """Dump to gr1c specification string."""
+        output = "ENV: "+" ".join(self.env_vars)+";\n"
+        output += "SYS: "+" ".join(self.sys_vars)+";\n\n"
+
+        if isinstance(self.env_init, str):
+            output += "ENVINIT: "+self.env_init+";\n"
+        else:
+            output += "ENVINIT: "+"\n& ".join(["("+s+")" for s in self.env_init])+";\n"
+        if len(self.env_safety) == 0:
+            output += "ENVTRANS:;\n"
+        elif isinstance(self.env_safety, str):
+            output += "ENVTRANS: []"+self.env_safety+";\n"
+        else:
+            output += "ENVTRANS: "+"\n& ".join(["[]("+s+")" for s in self.env_safety])+";\n"
+        if len(self.env_prog) == 0:
+            output += "ENVGOAL:;\n\n"
+        elif isinstance(self.env_prog, str):
+            output += "ENVGOAL: []<>"+self.env_prog+";\n\n"
+        else:
+            output += "ENVGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.env_prog])+";\n\n"
+        
+        if isinstance(self.sys_init, str):
+            output += "SYSINIT: "+self.sys_init+";\n"
+        else:
+            output += "SYSINIT: "+"\n& ".join(["("+s+")" for s in self.sys_init])+";\n"
+        if len(self.sys_safety) == 0:
+            output += "SYSTRANS:;\n"
+        elif isinstance(self.sys_safety, str):
+            output += "SYSTRANS: []"+self.sys_safety+";\n"
+        else:
+            output += "SYSTRANS: "+"\n& ".join(["[]("+s+")" for s in self.sys_safety])+";\n"
+        if len(self.sys_prog) == 0:
+            output += "SYSGOAL:;\n"
+        elif isinstance(self.sys_prog, str):
+            output += "SYSGOAL: []<>"+self.sys_prog+";\n"
+        else:
+            output += "SYSGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.sys_prog])+";\n"
+        return output
