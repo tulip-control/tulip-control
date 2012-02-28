@@ -41,12 +41,21 @@ class gr1cint_test:
         pass
 
     def test_check_syntax(self):
-        assert check_syntax(REFERENCE_SPECFILE)
-        assert not check_syntax("foo")
+        assert check_syntax(REFERENCE_SPECFILE, verbose=1)
+        assert not check_syntax("foo", verbose=1)
 
     def test_dumpgr1c(self):
         spec = GRSpec(env_vars="x", sys_vars="y",
                       env_init="x", env_prog="x",
                       sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
                       sys_prog="y & x")
-        assert check_syntax(spec.dumpgr1c())
+        assert check_syntax(spec.dumpgr1c(), verbose=1)
+
+    def test_check_realizable(self):
+        spec = GRSpec(env_vars="x", sys_vars="y",
+                      env_init="x", env_prog="x",
+                      sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
+                      sys_prog="y & x")
+        assert not check_realizable(spec)
+        spec.sys_safety = []
+        assert check_realizable(spec)

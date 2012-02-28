@@ -37,24 +37,26 @@
 Interface to gr1c
 
 In general, functions defined here will raise CalledProcessError (from
-the subprocess module) if an exception occurs while interacting with
-the gr1c executable.
+the subprocess module) or OSError if an exception occurs while
+interacting with the gr1c executable.
+
+Most functions have a "verbose" argument.  0 means silent (the default
+setting), positive means provide some status updates.
 """
 
 import subprocess
 import tempfile
 
 from spec import GRSpec
-from errorprint import printWarning
+from errorprint import printWarning, printError
 
 GR1C_BIN_PREFIX=""
 
 
-def check_syntax(spec_str):
+def check_syntax(spec_str, verbose=0):
     """Check whether given string has correct gr1c specification syntax.
 
-    Return True if syntax check passed, False on error.  On error, the
-    output of the parser is printed.
+    Return True if syntax check passed, False on error.
     """
     f = tempfile.TemporaryFile()
     f.write(spec_str)
@@ -66,5 +68,26 @@ def check_syntax(spec_str):
     if p.returncode == 0:
         return True
     else:
-        print p.stdout.read()
+        if verbose > 0:
+            print p.stdout.read()
+        return False
+
+
+def check_realizable(spec, verbose=0):
+    """Decide realizability of specification defined by given GRSpec object.
+
+    Return True if realizable, False if not, or an error occurs.
+    """
+    f = tempfile.TemporaryFile()
+    f.write(spec.dumpgr1c())
+    f.seek(0)
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-r"],
+                         stdin=f,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p.wait()
+    if p.returncode == 0:
+        return True
+    else:
+        if verbose > 0:
+            print p.stdout.read()
         return False
