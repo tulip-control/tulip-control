@@ -41,13 +41,19 @@ you already have it, try::
 
  $ python -c 'import pygraph'
 
-The default (only) GR[1] synthesis tool used by TuLiP is implemented
-in `JTLV <http://jtlv.ysaar.net/>`_. Thus you must have Java version
-1.6 (or later) installed.  The Java runtime environment is standard on
+The default GR[1] synthesis tool used by TuLiP is implemented in `JTLV
+<http://jtlv.ysaar.net/>`_. To use it, you must have Java version 1.6
+(or later) installed.  The Java runtime environment is standard on
 most platforms. You can check whether it's on the path and, if so,
 determine the version using::
 
  $ java -version
+
+Another supported synthesis tool is `gr1c
+<https://github.com/slivingston/gr1c>`_. To see if it is on your path
+and which version is installed, try::
+
+ $ gr1c -V
 
 For receding horizon problems, you will need a tool for checking
 satisfiability.  At present only `Yices <http://yices.csl.sri.com/>`_
