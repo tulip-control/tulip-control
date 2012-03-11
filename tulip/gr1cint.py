@@ -47,6 +47,7 @@ setting), positive means provide some status updates.
 import subprocess
 import tempfile
 
+from conxml import loadXML
 from spec import GRSpec
 from errorprint import printWarning, printError
 
@@ -91,3 +92,25 @@ def check_realizable(spec, verbose=0):
         if verbose > 0:
             print p.stdout.read()
         return False
+
+
+def synthesize(spec, verbose=0):
+    """Synthesize strategy.
+
+    Return strategy as instance of Automaton class, or None if
+    unrealizable or error occurs.
+    """
+    # f = tempfile.TemporaryFile()
+    # f.write(spec.dumpgr1c())
+    # f.seek(0)
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (stdoutdata, stderrdata) = p.communicate(spec.dumpgr1c())
+    if p.returncode == 0:
+        (prob, sys_dyn, aut) = loadXML(stdoutdata)
+        return aut
+    else:
+        if verbose > 0:
+            print stdoutdata
+        return None

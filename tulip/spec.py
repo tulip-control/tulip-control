@@ -90,7 +90,86 @@ class GRSpec:
         self.sys_safety = copy.deepcopy(sys_safety)
         self.env_prog = copy.deepcopy(env_prog)
         self.sys_prog = copy.deepcopy(sys_prog)
-    
+
+
+    def importDiscDynamics(self, disc_dynamics, cont_varname="cellID"):
+        """Append results of discretization (abstraction) to specification.
+
+        disc_dynamics is an instance of PropPreservingPartition, such
+        as returned by the function discretize in module discretize.
+
+        NOTES:
+
+        - The cell names are *not* mangled, e.g., as in the
+          createProbFromDiscDynamics method of the SynthesisProb class.
+
+        - Any name in disc_dynamics.list_prop_symbol matching a system
+          variable is removed from sys_vars, and its occurrences in
+          the specification are replaced by a disjunction of
+          corresponding cells.
+
+        - gr1c does not (yet) support variable domains beyond Boolean,
+          so we treat each cell as a separate Boolean variable and
+          explicitly enforce mutual exclusion.
+        """
+        if len(disc_dynamics.list_region) == 0:  # Vacuous call?
+            return
+        cont_varname += "_"  # ...to make cell number easier to read
+        for i in range(len(disc_dynamics.list_region)):
+            if (cont_varname+str(i)) not in self.sys_vars:
+                self.sys_vars.append(cont_varname+str(i))
+
+        # The substitution code and transition code below are mostly
+        # from createProbFromDiscDynamics and toJTLVInput,
+        # respectively, in the rhtlp module, with some style updates.
+        for prop_ind, prop_sym in enumerate(disc_dynamics.list_prop_symbol):
+            reg = [j for j in range(len(disc_dynamics.list_region))
+                   if disc_dynamics.list_region[j].list_prop[prop_ind] != 0]
+            if len(reg) == 0:
+                subformula = "False"
+                subformula_next = "False"
+            else:
+                subformula = " | ".join([cont_varname+str(regID) for regID in reg])
+                subformula_next = " | ".join([cont_varname+str(regID)+"'" for regID in reg])
+            prop_sym_next = prop_sym+"'"
+            self.sym2prop(props={prop_sym_next:subformula_next})
+            self.sym2prop(props={prop_sym:subformula})
+
+        # It is easier to work with lists...
+        if isinstance(self.sys_safety, str):
+            if len(self.sys_safety) == 0:
+                self.sys_safety = []
+            else:
+                self.sys_safety = [self.sys_safety]
+        if isinstance(self.sys_init, str):
+            if len(self.sys_init) == 0:
+                self.sys_init = []
+            else:
+                self.sys_init = [self.sys_init]
+
+        # Transitions
+        for from_region in range(len(disc_dynamics.list_region)):
+            to_regions = [i for i in range(len(disc_dynamics.list_region))
+                          if disc_dynamics.trans[i][from_region] != 0]
+            self.sys_safety.append(cont_varname+str(from_region) + " -> (" + " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
+
+        # Mutex
+        self.sys_init.append("")
+        self.sys_safety.append("")
+        for regID in range(len(disc_dynamics.list_region)):
+            if len(self.sys_safety[-1]) > 0:
+                self.sys_init[-1] += "\n| "
+                self.sys_safety[-1] += "\n| "
+            self.sys_init[-1] += "(" + cont_varname+str(regID)
+            if len(disc_dynamics.list_region) > 1:
+                self.sys_init[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+")" for i in range(len(disc_dynamics.list_region)) if i != regID])
+            self.sys_init[-1] += ")"
+            self.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
+            if len(disc_dynamics.list_region) > 1:
+                self.sys_safety[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+"')" for i in range(len(disc_dynamics.list_region)) if i != regID])
+            self.sys_safety[-1] += ")"
+
+
     def sym2prop(self, props, verbose=0):
         """Replace the symbols of propositions in this spec with the actual propositions"""
         # Replace symbols for propositions on discrete variables with the actual 
@@ -100,71 +179,73 @@ class GRSpec:
             while (symfound):
                 symfound = False
                 for propSymbol, prop in props.iteritems():
+                    if propSymbol[-1] != "'":  # To handle gr1c primed variables
+                        propSymbol += r"\b"
                     if (verbose > 2):
                         print '\t' + propSymbol + ' -> ' + prop
                     if (isinstance(self.env_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init)) > 0):
-                            self.env_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_init)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_init)) > 0):
+                            self.env_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_init)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_init)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init[i])) > 0):
-                                self.env_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
+                                self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.env_init[i])
                                 symfound = True
 
                     if (isinstance(self.sys_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init)) > 0):
-                            self.sys_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_init)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_init)) > 0):
+                            self.sys_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_init)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_init)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init[i])) > 0):
-                                self.sys_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_init[i])) > 0):
+                                self.sys_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.sys_init[i])
                                 symfound = True
 
                     if (isinstance(self.env_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety)) > 0):
-                            self.env_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_safety)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_safety)) > 0):
+                            self.env_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_safety)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_safety)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety[i])) > 0):
-                                self.env_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_safety[i])) > 0):
+                                self.env_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                                 self.env_safety[i])
                                 symfound = True
 
                     if (isinstance(self.sys_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety)) > 0):
-                            self.sys_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_safety)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_safety)) > 0):
+                            self.sys_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_safety)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_safety)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety[i])) > 0):
-                                self.sys_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_safety[i])) > 0):
+                                self.sys_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                                 self.sys_safety[i])
                                 symfound = True
 
                     if (isinstance(self.env_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog)) > 0):
-                            self.env_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_prog)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_prog)) > 0):
+                            self.env_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_prog)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_prog)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog[i])) > 0):
-                                self.env_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_prog[i])) > 0):
+                                self.env_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.env_prog[i])
                                 symfound = True
 
                     if (isinstance(self.sys_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog)) > 0):
-                            self.sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_prog)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_prog)) > 0):
+                            self.sys_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_prog)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_prog)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog[i])) > 0):
-                                self.sys_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_prog[i])) > 0):
+                                self.sys_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.sys_prog[i])
                                 symfound = True
 
