@@ -2,11 +2,12 @@
 """
 Test the interface with gr1c.
 
-SCL; 25 Feb 2012.
+SCL; 11 Mar 2012.
 """
 
 import os
 
+from tulip.conxml import loadXML
 from tulip.spec import GRSpec
 from tulip.gr1cint import *
 
@@ -29,6 +30,39 @@ SYSTRANS: # Notice the safety formula spans two lines.
 & [](!y -> y');
 
 SYSGOAL: []<>y&x;
+"""
+
+REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
+<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">
+  <spec><env_init></env_init><env_safety></env_safety><env_prog></env_prog><sys_init></sys_init><sys_safety></sys_safety><sys_prog></sys_prog></spec>
+  <aut>
+    <node>
+      <id>0</id><name></name>
+      <child_list> 1 2</child_list>
+      <state>
+        <item key="x" value="1" />
+        <item key="y" value="0" />
+      </state>
+    </node>
+    <node>
+      <id>1</id><name></name>
+      <child_list> 1 2</child_list>
+      <state>
+        <item key="x" value="0" />
+        <item key="y" value="0" />
+      </state>
+    </node>
+    <node>
+      <id>2</id><name></name>
+      <child_list> 1 0</child_list>
+      <state>
+        <item key="x" value="1" />
+        <item key="y" value="1" />
+      </state>
+    </node>
+  </aut>
+  <extra></extra>
+</tulipcon>
 """
 
 
@@ -59,3 +93,13 @@ class gr1cint_test:
         assert not check_realizable(spec)
         spec.sys_safety = []
         assert check_realizable(spec)
+        
+    def test_synthesize(self):
+        spec = GRSpec(env_vars="x", sys_vars="y",
+                      env_init="x", env_prog="x",
+                      sys_init="y",
+                      sys_prog=["y & x", "!y"])
+        aut = synthesize(spec)
+        assert aut is not None
+        (prob, sys_dyn, aut_ref) = loadXML(REFERENCE_AUTXML)
+        assert aut == aut_ref
