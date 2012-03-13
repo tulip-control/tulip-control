@@ -44,6 +44,7 @@ Most functions have a "verbose" argument.  0 means silent (the default
 setting), positive means provide some status updates.
 """
 
+import copy
 import subprocess
 import tempfile
 
@@ -100,9 +101,6 @@ def synthesize(spec, verbose=0):
     Return strategy as instance of Automaton class, or None if
     unrealizable or error occurs.
     """
-    # f = tempfile.TemporaryFile()
-    # f.write(spec.dumpgr1c())
-    # f.seek(0)
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -114,3 +112,92 @@ def synthesize(spec, verbose=0):
         if verbose > 0:
             print stdoutdata
         return None
+
+
+class GR1CSession:
+    """Manage interactive session with gr1c.
+
+    Given lists of environment and system variable names determine the
+    order of values in state vectors for communication with the gr1c
+    process.  Eventually there may be code to infer this directly from
+    the spec file.
+
+    Unless otherwise indicated, command methods return True on
+    success, False if error.
+    """
+    def __init__(self, spec_filename, sys_vars, env_vars=[]):
+        self.spec_filename = spec_filename
+        self.sys_vars = sys_vars
+        self.env_vars = env_vars
+        if self.spec_filename is not None:
+            self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
+                                       "-i", self.spec_filename],
+                                      stdin=subprocess.PIPE,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT)
+        else:
+            self.p = None
+
+
+    def iswinning(self, state):
+        """Return True if given state is in winning set, False otherwise.
+
+        state should be a dictionary with keys of variable names
+        (strings) and values of the value taken by that variable in
+        this state, e.g., as in nodes of the Automaton class.
+        """
+        state_vector = range(len(state))
+        for ind in range(len(self.env_vars)):
+            state_vector[ind] = state[self.env_vars[ind]]
+        for ind in range(len(self.sys_vars)):
+            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+        self.p.stdin.write("winning "+" ".join([str(i) for i in state_vector])+"\n")
+        self.p.stdout.readline()
+        if self.p.stdout.readline() == "True\n":
+            return True
+        else:
+            return False
+        
+
+    def getvars(self):
+        """Return string of environment and system variable names in order.
+
+        Indices are indicated in parens.
+        """
+        self.p.stdin.write("var\n")
+        self.p.stdout.readline()
+        return self.p.stdout.readline()[:-1]
+
+    def reset(self, spec_filename=None):
+        """Quit and start anew, reading spec from file with given name.
+
+        If no filename given, then use previous one.
+        """
+        if self.p is not None:
+            self.p.stdin.write("quit\n")
+            returncode = self.p.wait()
+            self.p = None
+            if returncode != 0:
+                self.spec_filename = None
+                return False
+        if spec_filename is not None:
+            self.spec_filename = spec_filename
+        if self.spec_filename is not None:
+            self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
+                                       "-i", self.spec_filename],
+                                      stdin=subprocess.PIPE,
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.STDOUT)
+        else:
+            self.p = None
+        return True
+
+    def close(self):
+        """End session, and kill gr1c child process."""
+        self.p.stdin.write("quit\n")
+        returncode = self.p.wait()
+        self.p = None
+        if returncode != 0:
+            return False
+        else:
+            return True

@@ -2,7 +2,7 @@
 """
 Test the interface with gr1c.
 
-SCL; 11 Mar 2012.
+SCL; 12 Mar 2012.
 """
 
 import os
@@ -13,23 +13,19 @@ from tulip.gr1cint import *
 
 
 REFERENCE_SPECFILE = """
-ENV: x;
-SYS: y;
+# For example, regarding states as bitvectors, 1011 is not in winning
+# set, while 1010 is. (Ordering is x ze y zs.)
 
-ENVINIT: x;
-ENVTRANS:;# [](x -> !x') & [](!x -> x');
+ENV: x ze;
+SYS: y zs;
+
+ENVINIT: x & !ze;
+ENVTRANS: [] (zs -> ze') & []((!ze & !zs) -> !ze');
 ENVGOAL: []<>x;
 
-# Blank lines are optional and can placed between sections or parts of
-# formulas.
-
 SYSINIT: y;
-
-SYSTRANS: # Notice the safety formula spans two lines.
-[](y -> !y')
-& [](!y -> y');
-
-SYSGOAL: []<>y&x;
+SYSTRANS:;
+SYSGOAL: []<>y&x & []<>!y & []<> !ze;
 """
 
 REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
@@ -67,7 +63,6 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 class gr1cint_test:
-
     def setUp(self):
         pass
 
@@ -103,3 +98,19 @@ class gr1cint_test:
         assert aut is not None
         (prob, sys_dyn, aut_ref) = loadXML(REFERENCE_AUTXML)
         assert aut == aut_ref
+
+
+class GR1CSession_test:
+    def setUp(self):
+        self.spec_filename = "trivial_partwin.spc"
+        with open(self.spec_filename, "w") as f:
+            f.write(REFERENCE_SPECFILE)
+        self.gs = GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
+
+    def tearDown(self):
+        self.gs.close()
+        os.remove(self.spec_filename)
+
+    def test_iswinning(self):
+        assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
+        assert not self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":1})
