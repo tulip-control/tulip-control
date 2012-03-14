@@ -157,7 +157,89 @@ class GR1CSession:
             return True
         else:
             return False
-        
+
+
+    def getindex(self, state, goal_mode):
+        if goal_mode < 0 or goal_mode > self.numgoals()-1:
+            raise ValueError("Invalid goal mode requested: "+str(goal_mode))
+        state_vector = range(len(state))
+        for ind in range(len(self.env_vars)):
+            state_vector[ind] = state[self.env_vars[ind]]
+        for ind in range(len(self.sys_vars)):
+            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+        self.p.stdin.write("getindex "+" ".join([str(i) for i in state_vector])+" "+str(goal_mode)+"\n")
+        self.p.stdout.readline()
+        return int(self.p.stdout.readline()[:-1])
+
+    def env_next(self, state):
+        """Return list of possible next environment moves, given current state.
+
+        Format of given state is same as for iswinning method.
+        """
+        state_vector = range(len(state))
+        for ind in range(len(self.env_vars)):
+            state_vector[ind] = state[self.env_vars[ind]]
+        for ind in range(len(self.sys_vars)):
+            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+        self.p.stdin.write("envnext "+" ".join([str(i) for i in state_vector])+"\n")
+        self.p.stdout.readline()
+        env_moves = []
+        line = self.p.stdout.readline()
+        while line != "---\n":
+            env_moves.append(dict([(k, int(s)) for (k,s) in zip(self.env_vars, line.split())]))
+            line = self.p.stdout.readline()
+        return env_moves
+
+
+    def sys_nextfeas(self, state, env_move, goal_mode):
+        """Return list of next system moves consistent with some strategy.
+
+        Format of given state and env_move is same as for iswinning
+        method.
+        """
+        if goal_mode < 0 or goal_mode > self.numgoals()-1:
+            raise ValueError("Invalid goal mode requested: "+str(goal_mode))
+        state_vector = range(len(state))
+        for ind in range(len(self.env_vars)):
+            state_vector[ind] = state[self.env_vars[ind]]
+        for ind in range(len(self.sys_vars)):
+            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+        emove_vector = range(len(env_move))
+        for ind in range(len(self.env_vars)):
+            emove_vector[ind] = env_move[self.env_vars[ind]]
+        self.p.stdin.write("sysnext "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+" "+str(goal_mode)+"\n")
+        self.p.stdout.readline()
+        sys_moves = []
+        line = self.p.stdout.readline()
+        while line != "---\n":
+            sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
+            line = self.p.stdout.readline()
+        return sys_moves
+
+
+    def sys_nexta(self, state, env_move):
+        """Return list of possible next system moves, whether or not winning.
+
+        Format of given state and env_move is same as for iswinning
+        method.
+        """
+        state_vector = range(len(state))
+        for ind in range(len(self.env_vars)):
+            state_vector[ind] = state[self.env_vars[ind]]
+        for ind in range(len(self.sys_vars)):
+            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+        emove_vector = range(len(env_move))
+        for ind in range(len(self.env_vars)):
+            emove_vector[ind] = env_move[self.env_vars[ind]]
+        self.p.stdin.write("sysnexta "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+"\n")
+        self.p.stdout.readline()
+        sys_moves = []
+        line = self.p.stdout.readline()
+        while line != "---\n":
+            sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
+            line = self.p.stdout.readline()
+        return sys_moves
+
 
     def getvars(self):
         """Return string of environment and system variable names in order.
@@ -167,6 +249,11 @@ class GR1CSession:
         self.p.stdin.write("var\n")
         self.p.stdout.readline()
         return self.p.stdout.readline()[:-1]
+
+    def numgoals(self):
+        self.p.stdin.write("numgoals\n")
+        self.p.stdout.readline()
+        return int(self.p.stdout.readline()[:-1])
 
     def reset(self, spec_filename=None):
         """Quit and start anew, reading spec from file with given name.

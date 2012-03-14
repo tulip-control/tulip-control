@@ -2,7 +2,7 @@
 """
 Test the interface with gr1c.
 
-SCL; 12 Mar 2012.
+SCL; 14 Mar 2012.
 """
 
 import os
@@ -111,6 +111,23 @@ class GR1CSession_test:
         self.gs.close()
         os.remove(self.spec_filename)
 
+    def test_numgoals(self):
+        assert self.gs.numgoals() == 3
+
+    def test_getindex(self):
+        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
+        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 0
+
     def test_iswinning(self):
         assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
         assert not self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":1})
+
+    def test_env_next(self):
+        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":0}) == [{'x': 0, 'ze': 0}, {'x': 1, 'ze': 0}]
+        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":1}) == [{'x': 0, 'ze': 1}, {'x': 1, 'ze': 1}]
+
+    def test_sys_nexta(self):
+        assert self.gs.sys_nexta({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}) == [{'y': 0, 'zs': 0}, {'y': 0, 'zs': 1}, {'y': 1, 'zs': 0}, {'y': 1, 'zs': 1}]
+
+    def test_sys_nextfeas(self):
+        assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
