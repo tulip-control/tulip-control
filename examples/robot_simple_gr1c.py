@@ -11,9 +11,7 @@ generate a new tulipcon XML file, or read from one.
 
 SCL; 27 Mar 2012.
 """
-import sys, os
 import numpy as np
-from subprocess import call
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -22,6 +20,7 @@ from tulip import gr1cint
 from tulip.spec import GRSpec
 import tulip.polytope as pc
 from tulip.polytope.plot import plot_partition
+
 
 # Problem parameters
 input_bound = 0.4

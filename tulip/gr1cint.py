@@ -127,8 +127,8 @@ class GR1CSession:
     """
     def __init__(self, spec_filename, sys_vars, env_vars=[]):
         self.spec_filename = spec_filename
-        self.sys_vars = sys_vars
-        self.env_vars = env_vars
+        self.sys_vars = sys_vars[:]
+        self.env_vars = env_vars[:]
         if self.spec_filename is not None:
             self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
                                        "-i", self.spec_filename],
