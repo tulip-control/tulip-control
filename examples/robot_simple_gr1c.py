@@ -9,7 +9,7 @@ the gr1c synthesis tool, rather than the historic default of JTLV.
 Toggle the truth value of load_from_XML to indicate whether to
 generate a new tulipcon XML file, or read from one.
 
-SCL; 11 Mar 2012.
+SCL; 27 Mar 2012.
 """
 import sys, os
 import numpy as np
@@ -106,12 +106,12 @@ if not load_from_XML:
     # Remove dead-end states from automaton
     #aut.trimDeadStates()
 
-    #conxml.writeXMLfile("rsimple_example.xml", prob, spec, sys_dyn, aut, pretty=True)
+    conxml.writeXMLfile("rsimple_example.xml", spec=spec, sys_dyn=sys_dyn,
+                        aut=aut, disc_dynamics=disc_dynamics, pretty=True)
 
 else:
     # Read from tulipcon XML file
-    (prob, sys_dyn, aut) = conxml.readXMLfile("rsimple_example.xml")
-    disc_dynamics = prob.getDiscretizedDynamics()
+    (disc_dynamics, sys_dyn, aut) = conxml.readXMLfile("rsimple_example.xml")
 
 # Simulate
 num_it = 10

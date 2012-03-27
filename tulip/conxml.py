@@ -67,8 +67,9 @@ except ImportError:
 # Problem Types #
 #################
 INCOMPLETE_PROB = -1
-SYNTH_PROB = 0
-RHTLP_PROB = 1
+NONE_PROB = 0
+SYNTH_PROB = 1
+RHTLP_PROB = 2
 
 
 ###############
@@ -88,7 +89,13 @@ def readXMLfile(fname, verbose=0):
     return loadXML(x, verbose=verbose)
 
 def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
-    """Return 3-tuple of, in terms of classes, (SynthesisProb, CtsSysDyn, Automaton).
+    """Return ({SynthesisProb,PropPreservingPartition}, CtsSysDyn, Automaton).
+
+    The first element of the returned tuple depends on the problem
+    type detected. If type "none", then it is an instance of
+    PropPreservingPartition, e.g., as returned by the function
+    discretize in module discretize. If of type "synth" or "rhtlp",
+    then an instance of SynthesisProb or a child class is returned.
 
     Any empty or missing items are set to None, or an exception is
     raised if the missing item is required.
@@ -124,6 +131,8 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
     ptype_tag = elem.find(ns_prefix+"prob_type")
     if ptype_tag is None:
         ptype = INCOMPLETE_PROB
+    elif ptype_tag.text == "none":
+        ptype = NONE_PROB
     elif ptype_tag.text == "synth":
         ptype = SYNTH_PROB
     elif ptype_tag.text == "rhtlp":
@@ -173,23 +182,17 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                 spec[k] = spec[k].replace("&gt;", ">")
                 spec[k] = spec[k].replace("&amp;", "&")
 
-    # "Continuous propositions", if available
-    # cp_tag = elem.find(ns_prefix+"cont_props")
-    # if cp_tag is not None:
-    #     cont_props = dict()
-    #     for sym_tag in cp_tag.findall(ns_prefix+"item"):
-    #         if "key" not in sym_tag.attrib.keys():
-    #             ep.printWarning("malformed <cont_props> tag in given tulipcon XML string.")
-    #             cont_props = {}
-    #             break  # Give-up on this <cont_props> tag
-    #         sym_poly_tag = sym_tag.find(ns_prefix+"cont_prop_poly")
-    #         if sym_poly_tag is None:
-    #             cont_props[sym_tag.attrib["key"]] = None
-    #         else:
-    #             (tag_name, cont_props[sym_tag.attrib["key"]]) = untagpolytope(sym_poly_tag)
-    # else:
-    #     cont_props = {}
-    
+    # Build Automaton
+    aut_elem = elem.find(ns_prefix+"aut")
+    if aut_elem is None \
+            or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
+        aut = None
+    else:
+        aut = automaton.Automaton()
+        if not aut.loadXML(aut_elem, namespace=DEFAULT_NAMESPACE):
+            ep.printError("failed to read Automaton from given tulipcon XML string.")
+            aut = None
+
     # Discrete dynamics, if available
     d_dyn = elem.find(ns_prefix+"d_dyn")
     if d_dyn is None:
@@ -197,9 +200,9 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
     else:
         (tag_name, env_vars) = untagdict(elem.find(ns_prefix+"env_vars"))
         (tag_name, sys_disc_vars) = untagdict(elem.find(ns_prefix+"sys_vars"))
-        if (d_dyn.find(ns_prefix+"domain") is None) \
-                and (d_dyn.find(ns_prefix+"trans") is None) \
-                and (d_dyn.find(ns_prefix+"prop_symbols") is None):
+        if ((d_dyn.find(ns_prefix+"domain") is None)
+            and (d_dyn.find(ns_prefix+"trans") is None)
+            and (d_dyn.find(ns_prefix+"prop_symbols") is None)):
             disc_dynamics = None
         else:
             (tag_name, domain) = untagpolytope(d_dyn.find(ns_prefix+"domain"))
@@ -215,13 +218,29 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                                                     np_type_P=np.float64)
                         list_region.append(R)
 
+            orig_map_elem = d_dyn.find(ns_prefix+"orig_map")
+            orig_part_elem = d_dyn.find(ns_prefix+"orig_partition")
+            if (orig_map_elem is None) or (orig_part_elem is None):
+                orig_list_region = None
+                orig = None
+            else:
+                (tag_name, orig) = untaglist(orig_map_elem, cast_f=int)
+                cell_items = orig_part_elem.findall(ns_prefix+"cell")
+                orig_list_region = []
+                if cell_items is not None and len(cell_items) > 0:
+                    for cell_item in cell_items:
+                        (tag_name, P) = untagpolytope(cell_item)
+                        orig_list_region.append(P)
+                        
             disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
                                                               num_prop=len(prop_symbols),
                                                               list_region=list_region,
                                                               num_regions=len(list_region),
                                                               adj=0,
                                                               trans=trans,
-                                                              list_prop_symbol=prop_symbols)
+                                                              list_prop_symbol=prop_symbols,
+                                                              orig_list_region=orig_list_region,
+                                                              orig=orig)
 
         # Build appropriate ``problem'' instance
         if ptype == SYNTH_PROB:
@@ -245,23 +264,15 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                                        sys_disc_vars=sys_disc_vars,
                                        #cont_props=cont_props,
                                        spec=spec)
+        elif ptype == NONE_PROB:
+            prob = disc_dynamics
         else: #ptype == INCOMPLETE_PROB
             prob = None
-
-    # Build Automaton
-    aut_elem = elem.find(ns_prefix+"aut")
-    if aut_elem is None \
-            or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
-        aut = None
-    else:
-        aut = automaton.Automaton()
-        if not aut.loadXML(aut_elem, namespace=DEFAULT_NAMESPACE):
-            ep.printError("failed to read Automaton from given tulipcon XML string.")
-            aut = None
-
     return (prob, sys_dyn, aut)
-                               
+
+
 def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
+            disc_dynamics=None,
             synthesize_aut=False, verbose=0, pretty=False):
     """Return tulipcon XML string.
 
@@ -270,13 +281,18 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     CtsSysDyn (defined in discretize.py), or None. If None, then
     continuous dynamics are considered empty (i.e., there are none).
 
+    disc_dynamics is an instance of PropPreservingPartition, such as
+    returned by the function discretize in module discretize.  This
+    argument is supported to permit entire avoidance of SynthesisProb
+    or related classes.
+
     If pretty is True, then use indentation and newlines to make the
     resulting XML string more visually appealing.
     
     aut is an instance of Automaton.  If None (rather than an
     instance), then an empty <aut> tag is written.
 
-    spec may be an instance of GRSpec or a list.  If of GRSPec, then
+    spec may be an instance of GRSpec or a list.  If of GRSpec, then
     it is formed as expected.  If spec is a list, then first element
     of "assume" string, and second element of "guarantee" string.
     spec=None is also accepted, in which case the specification is
@@ -300,6 +316,8 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
         raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
     if sys_dyn is not None and not isinstance(sys_dyn, discretize.CtsSysDyn):
         raise TypeError("sys_dyn should be an instance of discretizeM.CtsSysDyn or None.")
+    if disc_dynamics is not None and not isinstance(disc_dynamics, prop2part.PropPreservingPartition):
+        raise TypeError("disc_dynamics should be an instance of prop2part.PropPreservingPartition or None.")
     if aut is not None and not isinstance(aut, automaton.Automaton):
         raise TypeError("aut should be an instance of Automaton or None.")
     if spec is not None and not isinstance(spec, (list, GRSpec)):
@@ -316,12 +334,14 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     output = '<?xml version="1.0" encoding="UTF-8"?>'+nl
     output += '<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">'+nl
     idt_level += 1
-    if prob is not None:
+    if sys_dyn is not None:
         output += idt*idt_level+'<prob_type>'
         if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
             output += 'rhtlp'
         elif isinstance(prob, rhtlp.SynthesisProb):
             output += 'synth'
+        else: # prob is None
+            output += 'none'
         output += '</prob_type>'+nl
 
         output += idt*idt_level+'<c_dyn>'+nl
@@ -339,8 +359,12 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
         idt_level -= 1
         output += idt*idt_level+'</c_dyn>'+nl
 
-        output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
-        output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
+        if prob is not None:
+            output += tagdict("env_vars", prob.getEnvVars(), pretty=pretty, idt_level=idt_level)
+            output += tagdict("sys_vars", prob.getSysVars(), pretty=pretty, idt_level=idt_level)
+        else:
+            output += tagdict("env_vars", dict([(v,"boolean") for v in spec.env_vars]), pretty=pretty, idt_level=idt_level)
+            output += tagdict("sys_vars", dict([(v,"boolean") for v in spec.sys_vars]), pretty=pretty, idt_level=idt_level)
 
     if spec is None:
         output += idt*idt_level+'<spec><assume></assume><guarantee></guarantee></spec>'+nl
@@ -378,37 +402,34 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
         output += idt*idt_level+'<spec><assume>'+spec[0]+'</assume>'+nl
         output += idt*(idt_level+1)+'<guarantee>'+spec[1]+'</guarantee></spec>'+nl
 
-    if prob is not None:
-        # Perhaps there is a cleaner way to do this, rather than by
-        # checking for method getContProps?
-        # if hasattr(prob, "getContProps"):
-        #     output += idt*idt_level+'<cont_props>'+nl
-        #     idt_level += 1
-        #     for (prop_sym, prop_poly) in prob.getContProps().items():
-        #         output += idt*idt_level+'<item key="'+prop_sym+'">'+nl
-        #         output += idt*(idt_level+1)+tagpolytope("cont_prop_poly", prop_poly)+nl
-        #         output += idt*idt_level+'</item>'+nl
-        #     idt_level -= 1
-        #     output += idt*idt_level+'</cont_props>'+nl
-
+    if (disc_dynamics is None) and (prob is not None):
         disc_dynamics = prob.getDiscretizedDynamics()
-        if disc_dynamics is not None:
-            output += idt*idt_level+'<d_dyn>'+nl
-            idt_level += 1
 
-            output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
-            output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
-            output += idt*idt_level+taglist("prop_symbols",
-                                            disc_dynamics.list_prop_symbol)+nl
-            output += idt*idt_level+'<regions>'+nl
+    if disc_dynamics is not None:
+        output += idt*idt_level+'<d_dyn>'+nl
+        idt_level += 1
+
+        output += idt*idt_level+tagpolytope("domain", disc_dynamics.domain)+nl
+        output += idt*idt_level+tagmatrix("trans", disc_dynamics.trans)+nl
+        output += idt*idt_level+taglist("prop_symbols",
+                                        disc_dynamics.list_prop_symbol)+nl
+        output += idt*idt_level+'<regions>'+nl
+        idt_level += 1
+        if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
+            for R in disc_dynamics.list_region:
+                output += tagregion(R, pretty=pretty, idt_level=idt_level)
+        idt_level -= 1
+        output += idt*idt_level+'</regions>'+nl
+        if disc_dynamics.orig_list_region is not None:
+            output += idt*idt_level+taglist("orig_map", disc_dynamics.orig)+nl
+            output += idt*idt_level+'<orig_partition>'+nl
             idt_level += 1
-            if disc_dynamics.list_region is not None and len(disc_dynamics.list_region) > 0:
-                for R in disc_dynamics.list_region:
-                    output += tagregion(R, pretty=pretty, idt_level=idt_level)
+            for P in disc_dynamics.orig_list_region:
+                output += idt*idt_level+tagpolytope("cell", P)+nl
             idt_level -= 1
-            output += idt*idt_level+'</regions>'+nl
-            idt_level -= 1
-            output += idt*idt_level+'</d_dyn>'+nl
+            output += idt*idt_level+'</orig_partition>'+nl
+        idt_level -= 1
+        output += idt*idt_level+'</d_dyn>'+nl
 
     if aut is None:
         output += idt*idt_level+'<aut></aut>'+nl
@@ -423,6 +444,7 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     return output
 
 def writeXMLfile(fname, prob=None, spec=['',''], sys_dyn=None, aut=None,
+                 disc_dynamics=None,
                  synthesize_aut=False, verbose=0, pretty=False):
     """Write tulipcon XML string directly to a file.
 
@@ -431,6 +453,7 @@ def writeXMLfile(fname, prob=None, spec=['',''], sys_dyn=None, aut=None,
     """
     with open(fname, "w") as f:
         f.write(dumpXML(prob=prob, spec=spec, sys_dyn=sys_dyn, aut=aut,
+                        disc_dynamics=disc_dynamics,
                         synthesize_aut=synthesize_aut, verbose=verbose,
                         pretty=pretty))
     return
@@ -571,6 +594,14 @@ def dumpXMLtrans(sys_dyn, disc_dynamics, horizon, extra="",
             output += tagregion(R, pretty=pretty, idt_level=idt_level)
     idt_level -= 1
     output += idt*idt_level+'</regions>'+nl
+    if disc_dynamics.orig_list_region is not None:
+        output += idt*idt_level+taglist("orig_map", disc_dynamics.orig)+nl
+        output += idt*idt_level+'<orig_partition>'+nl
+        idt_level += 1
+        for P in disc_dynamics.orig_list_region:
+            output += idt*idt_level+tagpolytope("cell", P)+nl
+        idt_level -= 1
+        output += idt*idt_level+'</orig_partition>'+nl
     idt_level -= 1
     output += idt*idt_level+'</d_dyn>'+nl
 
