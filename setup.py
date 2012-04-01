@@ -28,6 +28,13 @@ def check_gr1c():
         return False
     return True
 
+def check_yaml():
+    try:
+        import yaml
+    except ImportError:
+        return False
+    return True
+
 def check_mpt():
     import subprocess
 
@@ -115,7 +122,8 @@ optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand
              'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/'],
              'graphlibs' : [check_graphlibs, '', ''],
              'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/'],
-             'gr1c' : [check_gr1c, 'gr1c found.', 'gr1c not found.\nIf you\'re interested in a GR(1) synthesis tool besides JTLV, see https://github.com/slivingston/gr1c']}
+             'gr1c' : [check_gr1c, 'gr1c found.', 'gr1c not found.\nIf you\'re interested in a GR(1) synthesis tool besides JTLV, see https://github.com/slivingston/gr1c'],
+             'PyYAML' : [check_yaml, 'PyYAML found.', 'PyYAML not found.\nTo read/write YAML, you will need to install PyYAML; see http://pyyaml.org/']}
 
 import sys
 perform_setup = True

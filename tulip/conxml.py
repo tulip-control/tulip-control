@@ -58,7 +58,6 @@ from StringIO import StringIO
 try:
     import yaml
 except ImportError:
-    print "Warning: PyYAML package not found.\nYou will not be able to read/write YAML files."
     yaml = None  # Thus calling a function that depends on PyYAML will
                  # lead to an exception.
 
@@ -1002,6 +1001,9 @@ def loadYAML(x, verbose=0):
 
     Raise exception if critical error.
     """
+    if yaml is None:
+        raise ImportError("PyYAML package not found.\nTo read/write YAML, you will need to install PyYAML; see http://pyyaml.org/")
+
     dumped_data = yaml.load(x)
 
     # Sanity check

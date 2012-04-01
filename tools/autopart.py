@@ -8,10 +8,9 @@ Flags: -v  verbose;
        -p  generate figure using functions in polytope.plot module.
 
 
-SCL; 4 Oct 2011.
+SCL; 1 Apr 2012.
 """
 
-import yaml
 import numpy as np
 import sys
 from StringIO import StringIO
