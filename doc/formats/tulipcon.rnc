@@ -3,7 +3,7 @@ datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
 
 start = element tulipcon {
     attribute version { string "0" }
-    & element prob_type { "synth" | "rhtlp" }?
+    & element prob_type { "synth" | "rhtlp" | "none" }?
     & element c_dyn { c_dyn-content }?
     & element env_vars { item-tag* }?
     & element sys_vars { item-tag* }?
@@ -69,7 +69,9 @@ d_dyn-content =
     & ((element domain { polytope-content }
        & element trans { matrix-content }
        & element prop_symbols { list { string* } | litem-tag* }
-       & element regions { regions-content })
+       & element regions { regions-content }
+       & element orig_map { list { xsd:integer* } }?
+       & element orig_partition { element cell { polytope-content }* }?)
       | empty)
 
 aut-content =

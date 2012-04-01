@@ -20,6 +20,14 @@ def check_graphlibs():
     # Dud return value to conform to typical behavior of check_... functions.
     return True
 
+def check_gr1c():
+    import subprocess
+    try:
+        subprocess.call(["gr1c", "-V"], stdout=subprocess.PIPE)
+    except OSError:
+        return False
+    return True
+
 def check_mpt():
     import subprocess
 
@@ -106,7 +114,8 @@ other_depends = {'yices' : [check_yices, 'ERROR: Yices not found.']}
 optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'],
              'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/'],
              'graphlibs' : [check_graphlibs, '', ''],
-             'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/']}
+             'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/'],
+             'gr1c' : [check_gr1c, 'gr1c found.', 'gr1c not found.\nIf you\'re interested in a GR(1) synthesis tool besides JTLV, see https://github.com/slivingston/gr1c']}
 
 import sys
 perform_setup = True

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,9 @@ class GRSpec:
 
     A GRSpec object contains the following fields:
 
+    - `env_vars`: a list of variables (names given as strings) that
+      are determined by the environment.
+
     - `env_init`: a string or a list of string that specifies the
       assumption about the initial state of the environment.
 
@@ -58,6 +61,9 @@ class GRSpec:
     - `env_prog`: a string or a list of string that specifies the
       justice assumption on the environment.
 
+    - `sys_vars`: a list of variables (names given as strings) that
+      are controlled by the system.
+
     - `sys_init`: a string or a list of string that specifies the
       requirement on the initial state of the system.
 
@@ -66,16 +72,104 @@ class GRSpec:
 
     - `sys_prog`: a string or a list of string that specifies the
       progress requirement.
+
+    An empty list for any formula (e.g., if env_init = []) is marked
+    as "True" in the specification. This corresponds to the constant
+    Boolean function, which usually means that subformula has no
+    effect (is non-restrictive) on the spec.
     """
-    def __init__(self, env_init='', sys_init='', env_safety='', sys_safety='', \
-                     env_prog='', sys_prog=''):
+    def __init__(self, env_vars=[], sys_vars=[],
+                 env_init='', sys_init='',
+                 env_safety='', sys_safety='',
+                 env_prog='', sys_prog=''):
+        self.env_vars = copy.copy(env_vars)
+        self.sys_vars = copy.copy(sys_vars)
         self.env_init = copy.deepcopy(env_init)
         self.sys_init = copy.deepcopy(sys_init)
         self.env_safety = copy.deepcopy(env_safety)
         self.sys_safety = copy.deepcopy(sys_safety)
         self.env_prog = copy.deepcopy(env_prog)
         self.sys_prog = copy.deepcopy(sys_prog)
-    
+
+
+    def importDiscDynamics(self, disc_dynamics, cont_varname="cellID"):
+        """Append results of discretization (abstraction) to specification.
+
+        disc_dynamics is an instance of PropPreservingPartition, such
+        as returned by the function discretize in module discretize.
+
+        NOTES:
+
+        - The cell names are *not* mangled, e.g., as in the
+          createProbFromDiscDynamics method of the SynthesisProb class.
+
+        - Any name in disc_dynamics.list_prop_symbol matching a system
+          variable is removed from sys_vars, and its occurrences in
+          the specification are replaced by a disjunction of
+          corresponding cells.
+
+        - gr1c does not (yet) support variable domains beyond Boolean,
+          so we treat each cell as a separate Boolean variable and
+          explicitly enforce mutual exclusion.
+        """
+        if len(disc_dynamics.list_region) == 0:  # Vacuous call?
+            return
+        cont_varname += "_"  # ...to make cell number easier to read
+        for i in range(len(disc_dynamics.list_region)):
+            if (cont_varname+str(i)) not in self.sys_vars:
+                self.sys_vars.append(cont_varname+str(i))
+
+        # The substitution code and transition code below are mostly
+        # from createProbFromDiscDynamics and toJTLVInput,
+        # respectively, in the rhtlp module, with some style updates.
+        for prop_ind, prop_sym in enumerate(disc_dynamics.list_prop_symbol):
+            reg = [j for j in range(len(disc_dynamics.list_region))
+                   if disc_dynamics.list_region[j].list_prop[prop_ind] != 0]
+            if len(reg) == 0:
+                subformula = "False"
+                subformula_next = "False"
+            else:
+                subformula = " | ".join([cont_varname+str(regID) for regID in reg])
+                subformula_next = " | ".join([cont_varname+str(regID)+"'" for regID in reg])
+            prop_sym_next = prop_sym+"'"
+            self.sym2prop(props={prop_sym_next:subformula_next})
+            self.sym2prop(props={prop_sym:subformula})
+
+        # It is easier to work with lists...
+        if isinstance(self.sys_safety, str):
+            if len(self.sys_safety) == 0:
+                self.sys_safety = []
+            else:
+                self.sys_safety = [self.sys_safety]
+        if isinstance(self.sys_init, str):
+            if len(self.sys_init) == 0:
+                self.sys_init = []
+            else:
+                self.sys_init = [self.sys_init]
+
+        # Transitions
+        for from_region in range(len(disc_dynamics.list_region)):
+            to_regions = [i for i in range(len(disc_dynamics.list_region))
+                          if disc_dynamics.trans[i][from_region] != 0]
+            self.sys_safety.append(cont_varname+str(from_region) + " -> (" + " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
+
+        # Mutex
+        self.sys_init.append("")
+        self.sys_safety.append("")
+        for regID in range(len(disc_dynamics.list_region)):
+            if len(self.sys_safety[-1]) > 0:
+                self.sys_init[-1] += "\n| "
+                self.sys_safety[-1] += "\n| "
+            self.sys_init[-1] += "(" + cont_varname+str(regID)
+            if len(disc_dynamics.list_region) > 1:
+                self.sys_init[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+")" for i in range(len(disc_dynamics.list_region)) if i != regID])
+            self.sys_init[-1] += ")"
+            self.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
+            if len(disc_dynamics.list_region) > 1:
+                self.sys_safety[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+"')" for i in range(len(disc_dynamics.list_region)) if i != regID])
+            self.sys_safety[-1] += ")"
+
+
     def sym2prop(self, props, verbose=0):
         """Replace the symbols of propositions in this spec with the actual propositions"""
         # Replace symbols for propositions on discrete variables with the actual 
@@ -85,71 +179,73 @@ class GRSpec:
             while (symfound):
                 symfound = False
                 for propSymbol, prop in props.iteritems():
+                    if propSymbol[-1] != "'":  # To handle gr1c primed variables
+                        propSymbol += r"\b"
                     if (verbose > 2):
                         print '\t' + propSymbol + ' -> ' + prop
                     if (isinstance(self.env_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init)) > 0):
-                            self.env_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_init)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_init)) > 0):
+                            self.env_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_init)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_init)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_init[i])) > 0):
-                                self.env_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
+                                self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.env_init[i])
                                 symfound = True
 
                     if (isinstance(self.sys_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init)) > 0):
-                            self.sys_init = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_init)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_init)) > 0):
+                            self.sys_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_init)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_init)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_init[i])) > 0):
-                                self.sys_init[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_init[i])) > 0):
+                                self.sys_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.sys_init[i])
                                 symfound = True
 
                     if (isinstance(self.env_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety)) > 0):
-                            self.env_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_safety)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_safety)) > 0):
+                            self.env_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_safety)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_safety)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_safety[i])) > 0):
-                                self.env_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_safety[i])) > 0):
+                                self.env_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                                 self.env_safety[i])
                                 symfound = True
 
                     if (isinstance(self.sys_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety)) > 0):
-                            self.sys_safety = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_safety)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_safety)) > 0):
+                            self.sys_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_safety)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_safety)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_safety[i])) > 0):
-                                self.sys_safety[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_safety[i])) > 0):
+                                self.sys_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                                 self.sys_safety[i])
                                 symfound = True
 
                     if (isinstance(self.env_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog)) > 0):
-                            self.env_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.env_prog)
+                        if (len(re.findall(r'\b'+propSymbol, self.env_prog)) > 0):
+                            self.env_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_prog)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.env_prog)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.env_prog[i])) > 0):
-                                self.env_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.env_prog[i])) > 0):
+                                self.env_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.env_prog[i])
                                 symfound = True
 
                     if (isinstance(self.sys_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog)) > 0):
-                            self.sys_prog = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', self.sys_prog)
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_prog)) > 0):
+                            self.sys_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_prog)
                             symfound = True
                     else:
                         for i in xrange(0, len(self.sys_prog)):
-                            if (len(re.findall(r'\b'+propSymbol+r'\b', self.sys_prog[i])) > 0):
-                                self.sys_prog[i] = re.sub(r'\b'+propSymbol+r'\b', '('+prop+')', \
+                            if (len(re.findall(r'\b'+propSymbol, self.sys_prog[i])) > 0):
+                                self.sys_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
                                                               self.sys_prog[i])
                                 symfound = True
 
@@ -263,3 +359,44 @@ class GRSpec:
                         desc_added = True
                     spec[1] += '\t[]<>(' + prog + ')'
         return spec
+
+
+    def dumpgr1c(self):
+        """Dump to gr1c specification string."""
+        output = "ENV: "+" ".join(self.env_vars)+";\n"
+        output += "SYS: "+" ".join(self.sys_vars)+";\n\n"
+
+        if isinstance(self.env_init, str):
+            output += "ENVINIT: "+self.env_init+";\n"
+        else:
+            output += "ENVINIT: "+"\n& ".join(["("+s+")" for s in self.env_init])+";\n"
+        if len(self.env_safety) == 0:
+            output += "ENVTRANS:;\n"
+        elif isinstance(self.env_safety, str):
+            output += "ENVTRANS: []"+self.env_safety+";\n"
+        else:
+            output += "ENVTRANS: "+"\n& ".join(["[]("+s+")" for s in self.env_safety])+";\n"
+        if len(self.env_prog) == 0:
+            output += "ENVGOAL:;\n\n"
+        elif isinstance(self.env_prog, str):
+            output += "ENVGOAL: []<>"+self.env_prog+";\n\n"
+        else:
+            output += "ENVGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.env_prog])+";\n\n"
+        
+        if isinstance(self.sys_init, str):
+            output += "SYSINIT: "+self.sys_init+";\n"
+        else:
+            output += "SYSINIT: "+"\n& ".join(["("+s+")" for s in self.sys_init])+";\n"
+        if len(self.sys_safety) == 0:
+            output += "SYSTRANS:;\n"
+        elif isinstance(self.sys_safety, str):
+            output += "SYSTRANS: []"+self.sys_safety+";\n"
+        else:
+            output += "SYSTRANS: "+"\n& ".join(["[]("+s+")" for s in self.sys_safety])+";\n"
+        if len(self.sys_prog) == 0:
+            output += "SYSGOAL:;\n"
+        elif isinstance(self.sys_prog, str):
+            output += "SYSGOAL: []<>"+self.sys_prog+";\n"
+        else:
+            output += "SYSGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.sys_prog])+";\n"
+        return output

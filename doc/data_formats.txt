@@ -26,6 +26,11 @@ defined using version 0 would begin like
   <tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">
   ...
 
+Processing for version 0 is quite lax---it allows many tags to be
+missing or incomplete by using default values. Once the format
+stabilizes (at version 1 or so), requirements for conformance will be
+more strict.
+
 Version 0
 `````````
 
@@ -35,7 +40,7 @@ normative*. Also, see notes below.
 .. code-block:: xml
 
   <tulipcon version="0">
-    <prob_type>rhtlp or synth or ...</prob_type>
+    <prob_type>rhtlp or synth or none or ...</prob_type>
     <c_dyn>
       <A type="matrix" r="3" c="3">...</A>
       <B type="matrix" r="3" c="1">...</B>
@@ -72,6 +77,11 @@ normative*. Also, see notes below.
 	</region>
         ...
       </regions>
+      <orig_map>...space-separated list of indices...</orig_map>
+      <orig_partition>
+        <cell type="polytope">...</cell>
+        ...
+      </orig_partition>
     </d_dyn>
     <aut>
       <node>
