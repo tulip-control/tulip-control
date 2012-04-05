@@ -973,12 +973,15 @@ def tagmatrix(name, A):
 
 def yaml_polytope(x):
     """Given dictionary from YAML data file, return polytope."""
-    tmp_H = np.loadtxt(StringIO(x["H"]))
-    tmp_K = np.loadtxt(StringIO(x["K"]))
-    if len(tmp_K.shape) == 1:
-        tmp_K = np.reshape(tmp_K, (tmp_K.shape[0], 1))
-    return pc.Polytope(tmp_H, tmp_K)
-
+    if x.has_key("V"):
+        tmp_V = np.loadtxt(StringIO(x["V"]))
+        return pc.qhull(tmp_V)
+    else:
+        tmp_H = np.loadtxt(StringIO(x["H"]))
+        tmp_K = np.loadtxt(StringIO(x["K"]))
+        if len(tmp_K.shape) == 1:
+            tmp_K = np.reshape(tmp_K, (tmp_K.shape[0], 1))
+        return pc.Polytope(tmp_H, tmp_K)
 
 def readYAMLfile(fname, verbose=0):
     """Wrap loadYAML function."""
