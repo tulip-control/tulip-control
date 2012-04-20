@@ -192,6 +192,7 @@ if perform_setup:
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
           url = 'http://tulip-control.sourceforge.net',
+          license = 'BSD',
           requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib'],
           packages = ['tulip'],
           package_dir = {'tulip' : 'tulip'},
