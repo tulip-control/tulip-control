@@ -175,7 +175,20 @@ def grsim(aut_list, aut_trans_dict={}, env_states=[{}], num_it=20,
     return aut_states
 
 
+###################################################################
+def writeSimStatesToFile(states, file, verbose=0):
+    f = open(file, 'w')
+    if (verbose > 0):
+        print 'Writing simulation result to ' + file
+    for state in states:
+        for var in state[1].state.keys():
+            f.write(var + ':')
+            f.write(str(state[1].state[var]) + ', ')
+        f.write('\n')
+    f.close()
 
+
+###################################################################
 def writeStatesToFile(aut_list, destfile, aut_states_list=[], label_vars=None):
     """
     Write the states and transitions from a list of automata to a '.gexf'
