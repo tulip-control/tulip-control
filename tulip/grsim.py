@@ -177,6 +177,21 @@ def grsim(aut_list, aut_trans_dict={}, env_states=[{}], num_it=20,
 
 ###################################################################
 def writeSimStatesToFile(states, file, verbose=0):
+    """
+    Write a simulation trace (sequence of states) to a text file. 
+
+    Arguments:
+
+    - `states` -- a list of tuples of automaton states, formatted as:
+            (AutomatonID, AutomatonState)
+        where 'AutomatonID' is an integer corresponding to the
+        index of the current automaton and 'AutomatonState'
+        is the current automaton state.
+    - `file` -- the string name of the desired destination file.
+    
+    Return:
+    (nothing)
+    """
     f = open(file, 'w')
     if (verbose > 0):
         print 'Writing simulation result to ' + file
