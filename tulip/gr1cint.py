@@ -122,13 +122,23 @@ class GR1CSession:
     process.  Eventually there may be code to infer this directly from
     the spec file.
 
+    **gr1c is assumed not to use GNU Readline.**
+
+    Please compile it that way if you are using this class.
+    (Otherwise, GNU Readline will echo commands and make interaction
+    with gr1c more difficult.)
+
+    The argument `prompt` is the string printed by gr1c to indicate it
+    is ready for the next command.  The default value is a good guess.
+
     Unless otherwise indicated, command methods return True on
     success, False if error.
     """
-    def __init__(self, spec_filename, sys_vars, env_vars=[]):
+    def __init__(self, spec_filename, sys_vars, env_vars=[], prompt=">>> "):
         self.spec_filename = spec_filename
         self.sys_vars = sys_vars[:]
         self.env_vars = env_vars[:]
+        self.prompt = prompt
         if self.spec_filename is not None:
             self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
                                        "-i", self.spec_filename],
@@ -152,8 +162,7 @@ class GR1CSession:
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write("winning "+" ".join([str(i) for i in state_vector])+"\n")
-        self.p.stdout.readline()
-        if self.p.stdout.readline() == "True\n":
+        if "True\n" in self.p.stdout.readline():
             return True
         else:
             return False
@@ -168,8 +177,12 @@ class GR1CSession:
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write("getindex "+" ".join([str(i) for i in state_vector])+" "+str(goal_mode)+"\n")
-        self.p.stdout.readline()
-        return int(self.p.stdout.readline()[:-1])
+        line = self.p.stdout.readline()
+        if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
+        return int(line[:-1])
 
     def env_next(self, state):
         """Return list of possible next environment moves, given current state.
@@ -182,10 +195,13 @@ class GR1CSession:
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write("envnext "+" ".join([str(i) for i in state_vector])+"\n")
-        self.p.stdout.readline()
         env_moves = []
         line = self.p.stdout.readline()
-        while line != "---\n":
+        while "---\n" not in line:
+            if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
             env_moves.append(dict([(k, int(s)) for (k,s) in zip(self.env_vars, line.split())]))
             line = self.p.stdout.readline()
         return env_moves
@@ -208,10 +224,13 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnext "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+" "+str(goal_mode)+"\n")
-        self.p.stdout.readline()
         sys_moves = []
         line = self.p.stdout.readline()
-        while line != "---\n":
+        while "---\n" not in line:
+            if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
             sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
             line = self.p.stdout.readline()
         return sys_moves
@@ -232,10 +251,13 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnexta "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+"\n")
-        self.p.stdout.readline()
         sys_moves = []
         line = self.p.stdout.readline()
-        while line != "---\n":
+        while "---\n" not in line:
+            if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
             sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
             line = self.p.stdout.readline()
         return sys_moves
@@ -247,13 +269,21 @@ class GR1CSession:
         Indices are indicated in parens.
         """
         self.p.stdin.write("var\n")
-        self.p.stdout.readline()
-        return self.p.stdout.readline()[:-1]
+        line = self.p.stdout.readline()
+        if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
+        return line[:-1]
 
     def numgoals(self):
         self.p.stdin.write("numgoals\n")
-        self.p.stdout.readline()
-        return int(self.p.stdout.readline()[:-1])
+        line = self.p.stdout.readline()
+        if len(self.prompt) > 0:
+                loc = line.find(self.prompt)
+                if loc >= 0:
+                    line = line[len(self.prompt):]
+        return int(line[:-1])
 
     def reset(self, spec_filename=None):
         """Quit and start anew, reading spec from file with given name.
