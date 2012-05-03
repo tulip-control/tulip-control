@@ -33,7 +33,7 @@ env_vars = {'park' : 'boolean'}
 # Discrete system variable
 # Introduce a boolean variable X0reach to handle the spec [](park -> <>X0)
 # X0reach starts with TRUE. 
-# [](next(X0reach) = (X0 | X0reach) & !park)
+# [](next(X0reach) = X0 | (X0reach & !park))
 sys_disc_vars = {'X0reach' : 'boolean'}
 #@importvar_end@
 
@@ -73,7 +73,7 @@ disc_dynamics = discretize.discretize(cont_partition, sys_dyn, verbose=2)
 # Spec
 assumption = 'X0reach & []<>(!park)'
 guarantee = '[]<>X5 & []<>(X0reach)'
-guarantee += ' & [](next(X0reach) = ((X0 | X0reach) & !park))'
+guarantee += ' & [](next(X0reach) = (X0 | (X0reach & !park)))'
 
 #@gencheckcomp@
 # Generate input to JTLV

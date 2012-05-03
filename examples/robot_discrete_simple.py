@@ -39,7 +39,7 @@ env_vars = {'park' : 'boolean'}
 # Specify the discrete system variable
 # Introduce a boolean variable X0reach to handle the spec [](park -> <>X0)
 # X0reach starts with TRUE. 
-# [](next(X0reach) = (X0 | X0reach) & !park)
+# [](next(X0reach) = X0 | (X0reach & !park))
 #@sysdiscvar_section@
 sys_disc_vars = {'X0reach' : 'boolean'}
 #@sysdiscvar_section_end@
@@ -82,7 +82,7 @@ disc_dynamics.trans =   [[1, 1, 0, 1, 0, 0], \
 #@specification@
 assumption = 'X0reach & []<>(!park)'
 guarantee = '[]<>X5 & []<>(X0reach)'
-guarantee += ' & [](next(X0reach) = ((X0 | X0reach) & !park))'
+guarantee += ' & [](next(X0reach) = (X0 | (X0reach & !park)))'
 #@specification_end@
 
 # Generate input to JTLV

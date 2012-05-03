@@ -26,7 +26,7 @@ env_vars = {'park' : 'boolean'}
 # Discrete system variable
 # Introduce a boolean variable X0reach to handle the spec [](park -> <>X0)
 # X0reach starts with TRUE. 
-# [](next(X0reach) = (X0 | X0reach) & !park)
+# [](next(X0reach) = X0 | (X0reach & !park))
 sys_disc_vars = {'X0reach' : 'boolean'}
 
 
@@ -53,7 +53,7 @@ sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 spec = GRSpec()
 spec.env_prog = '!park'
 spec.sys_init = 'X0reach'
-spec.sys_safety = 'next(X0reach) = ((X0 | X0reach) & !park)'
+spec.sys_safety = 'next(X0reach) = (X0 | (X0reach & !park))'
 spec.sys_prog = ['X5', 'X0reach']
 #@specification_end@
 
