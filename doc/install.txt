@@ -50,7 +50,7 @@ determine the version using::
  $ java -version
 
 Another supported synthesis tool is `gr1c
-<https://github.com/slivingston/gr1c>`_. To see if it is on your path
+<http://scottman.net/2012/gr1c>`_. To see if it is on your path
 and which version is installed, try::
 
  $ gr1c -V
