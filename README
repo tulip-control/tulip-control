@@ -59,3 +59,5 @@ is located), run::
 
 To change default options, edit the "nosetests" section in setup.cfg.
 To disable output capture, add the flag "-s" when invoking nose.
+To run only one of the modules under the ``tests`` directory, give
+that module's name when invoking nose.
