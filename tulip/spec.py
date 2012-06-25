@@ -91,6 +91,61 @@ class GRSpec:
         self.env_prog = copy.deepcopy(env_prog)
         self.sys_prog = copy.deepcopy(sys_prog)
 
+        # It is easier to work with lists...
+        if isinstance(self.sys_safety, str):
+            if len(self.sys_safety) == 0:
+                self.sys_safety = []
+            else:
+                self.sys_safety = [self.sys_safety]
+        if isinstance(self.sys_init, str):
+            if len(self.sys_init) == 0:
+                self.sys_init = []
+            else:
+                self.sys_init = [self.sys_init]
+        if isinstance(self.sys_prog, str):
+            if len(self.sys_prog) == 0:
+                self.sys_prog = []
+            else:
+                self.sys_prog = [self.sys_prog]
+        if isinstance(self.env_safety, str):
+            if len(self.env_safety) == 0:
+                self.env_safety = []
+            else:
+                self.env_safety = [self.env_safety]
+        if isinstance(self.env_init, str):
+            if len(self.env_init) == 0:
+                self.env_init = []
+            else:
+                self.env_init = [self.env_init]
+        if isinstance(self.env_prog, str):
+            if len(self.env_prog) == 0:
+                self.env_prog = []
+            else:
+                self.env_prog = [self.env_prog]
+
+
+    def importGridWorld(self, gworld, sys_prefix="Y"):
+        """Append specification describing a gridworld.
+
+        Basically, call the spec method of the given GridWorld object
+        and merge with its output.
+
+        @type gworld: GridWorld
+        """
+        s = gworld.spec()
+        for evar in s.env_vars:
+            if evar not in self.env_vars:
+                self.env_vars.append(evar)
+        for svar in s.sys_vars:
+            if svar not in self.sys_vars:
+                self.sys_vars.append(svar)
+        self.env_init.extend(s.env_init)
+        self.env_safety.extend(s.env_safety)
+        self.env_prog.extend(s.env_prog)
+        self.sys_init.extend(s.sys_init)
+        self.sys_safety.extend(s.sys_safety)
+        self.sys_prog.extend(s.sys_prog)
+
 
     def importDiscDynamics(self, disc_dynamics, cont_varname="cellID"):
         """Append results of discretization (abstraction) to specification.
