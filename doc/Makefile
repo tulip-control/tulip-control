@@ -1,4 +1,4 @@
-# Makefile for Sphinx documentation
+# Makefile for Sphinx and Epydoc-generated documentation
 #
 
 # You can set these variables from the command line.
@@ -7,16 +7,21 @@ SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
 
+TULIP_REL     = ../tulip
+EPYDOC        = epydoc
+EPYBUILDDIR   = api_doc
+
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest
+.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest api
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html       to make standalone HTML files"
+	@echo "  api        to make API documentation using Epydoc"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
 	@echo "  pickle     to make pickle files"
@@ -34,7 +39,7 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(BUILDDIR)/* $(EPYBUILDDIR)/*
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -128,3 +133,6 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+api:
+	$(EPYDOC) --html -v --name=TuLiP --url=http://tulip-control.sourceforge.net -o $(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,automaton.py,congexf.py,conxml.py,discretize.py,errorprint.py,gr1cint.py,grsim.py,jtlvint.py,prop2part.py,rhtlp.py,rhtlputil.py,spec.py,gridworld.py,polytope/__init__.py,polytope/esp.py,polytope/plot.py,polytope/polytope.py,polytope/quickhull.py}
