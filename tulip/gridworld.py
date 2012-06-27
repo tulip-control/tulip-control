@@ -147,11 +147,12 @@ class GridWorld:
         for p in self.goal_list:
             plt.text(p[1], p[0], "G", size=font_pt)
         
-    def pretty(self, show_grid=False):
+    def pretty(self, show_grid=False, line_prefix=""):
         """Return pretty-for-printing string.
 
         @param show_grid: If True, then grid the pretty world and show
                           row and column labels along the outer edges.
+        @param line_prefix: prefix each line with this string.
         """
         # See comments in code for the method loads regarding values in W
         if self.W is None:
@@ -161,13 +162,16 @@ class GridWorld:
         #  * - wall (as used in original world matrix definition);
         #  G - goal location;
         #  I - possible initial location.
+        out_str = line_prefix
         if show_grid:
-            out_str = "  " + "".join([str(k).rjust(2) for k in range(self.W.shape[1])]) + "\n"
+            out_str += "  " + "".join([str(k).rjust(2) for k in range(self.W.shape[1])]) + "\n"
         else:
-            out_str = "-"*(self.W.shape[1]+2) + "\n"
+            out_str += "-"*(self.W.shape[1]+2) + "\n"
         for i in range(self.W.shape[0]):
+            out_str += line_prefix
             if show_grid:
                 out_str += "  " + "-"*(self.W.shape[1]*2+1) + "\n"
+                out_str += line_prefix
                 out_str += str(i).rjust(2)
             else:
                 out_str += "|"
@@ -186,6 +190,7 @@ class GridWorld:
                 else:
                     raise ValueError("Unrecognized internal world W encoding.")
             out_str += "|\n"
+        out_str += line_prefix
         if show_grid:
             out_str += "  " + "-"*(self.W.shape[1]*2+1) + "\n"
         else:
@@ -287,12 +292,16 @@ class GridWorld:
         with open(gw_file, "r") as f:
             self.loads(f.read())
 
-    def dumps(self):
-        """Dump gridworld description string."""
+    def dumps(self, line_prefix=""):
+        """Dump gridworld description string.
+
+        @param line_prefix: prefix each line with this string.
+        """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
-        out_str = " ".join([str(i) for i in self.W.shape])+"\n"
+        out_str = line_prefix+" ".join([str(i) for i in self.W.shape])+"\n"
         for i in range(self.W.shape[0]):
+            out_str += line_prefix
             for j in range(self.W.shape[1]):
                 if self.W[i][j] == 0:
                     if (i,j) in self.init_list:
