@@ -225,6 +225,8 @@ by introducing an auxiliary discrete system variable :math:`X0reach,` initialize
 
 To automatically synthesize a planner for this robot, we first import the necessary modules.
 
+.. highlight:: python
+
 .. literalinclude:: ../examples/robot_discrete_simple.py
    :start-after: @import_section@
    :end-before: @import_section_end@
