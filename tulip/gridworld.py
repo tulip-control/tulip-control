@@ -40,6 +40,9 @@ derived from btsynth; see http://scottman.net/2012/btsynth
 
 import itertools
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as mpl_cm
+
 from spec import GRSpec
 
 
@@ -117,6 +120,32 @@ class GridWorld:
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 0
+
+    def plot(self, font_pt=18, show_grid=False, grid_width=2):
+        """Draw figure depicting this gridworld.
+
+        Figure legend:
+          - "I" : possible initial position,
+          - "G" : goal.
+
+        @param font_pt: size (in points) for rendering text in the figure.
+        """
+        W = self.W.copy()
+        W = np.ones(shape=W.shape) - W
+        plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest")
+        if show_grid:
+            xmin, xmax, ymin, ymax = plt.axis()
+            x_steps = np.linspace(xmin, xmax, W.shape[1]+1)
+            y_steps = np.linspace(ymin, ymax, W.shape[0]+1)
+            for k in x_steps:
+                plt.plot([k, k], [ymin, ymax], 'k-', linewidth=grid_width)
+            for k in y_steps:
+                plt.plot([xmin, xmax], [k, k], 'k-', linewidth=grid_width)
+            plt.axis([xmin, xmax, ymin, ymax])
+        for p in self.init_list:
+            plt.text(p[1], p[0], "I", size=font_pt)
+        for p in self.goal_list:
+            plt.text(p[1], p[0], "G", size=font_pt)
         
     def pretty(self, show_grid=False):
         """Return pretty-for-printing string.
