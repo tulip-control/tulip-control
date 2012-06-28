@@ -43,6 +43,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as mpl_cm
 
+from polytope import Polytope
+from prop2part import prop2part2, PropPreservingPartition
 from spec import GRSpec
 
 
@@ -87,13 +89,24 @@ class GridWorld:
         return self.pretty(show_grid=True)
 
     def __getitem__(self, key):
-        """Return variable name corresponding to this cell."""
+        """Return variable name corresponding to this cell.
+
+        Supports negative wrapping, e.g., if Y is an instance of
+        GridWorld, then Y[-1,-1] will return the variable name of the
+        cell in the bottom-right corner, Y[0,-1] the name of the
+        top-right corner cell, etc.  As usual in Python, you can only
+        wrap around once.
+        """
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
         if len(key) != len(self.W.shape):
             raise ValueError("malformed gridworld key.")
-        if key[0] < 0 or key[1] < 0 or key[0] >= self.W.shape[0] or key[1] >= self.W.shape[1]:
+        if key[0] < -self.W.shape[0] or key[1] < -self.W.shape[1] or key[0] >= self.W.shape[0] or key[1] >= self.W.shape[1]:
             raise ValueError("gridworld key is out of bounds.")
+        if key[0] < 0:
+            key = (self.W.shape[0]+key[0], key[1])
+        if key[1] < 0:
+            key = (key[0], self.W.shape[1]+key[1])
         return str(self.prefix)+"_"+"_".join([str(i) for i in key])
 
 
@@ -317,6 +330,81 @@ class GridWorld:
             out_str += "\n"
         return out_str
 
+    def dumpPPartition(self, side_lengths=(1., 1.), offset=(0., 0.)):
+        """Return proposition-preserving partition from this gridworld.
+
+        In setting the initial transition matrix, we assume the
+        gridworld is 4-connected.
+
+        @param side_lengths: pair (W, H) giving width and height of
+                             each cell, assumed to be the same across
+                             the grid.
+        @param offset: 2-dimensional coordinate declaring where the
+                       bottom-left corner of the gridworld should be
+                       placed in the continuous space; default places
+                       it at the origin.
+
+        @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
+        """
+        if self.W is None:
+            raise ValueError("Gridworld does not exist.")
+        domain = Polytope(A=np.array([[0,-1],
+                                      [0,1],
+                                      [-1,0],
+                                      [1,0]], dtype=np.float64),
+                          b=np.array([-offset[1],
+                                       offset[1]+self.W.shape[0]*side_lengths[1],
+                                       -offset[0],
+                                       offset[0]+self.W.shape[1]*side_lengths[0]],
+                                     dtype=np.float64))
+        cells = {}
+        for i in range(self.W.shape[0]):
+            for j in range(self.W.shape[1]):
+                #adjacency[i]
+                cells[self.prefix+"_"+str(i)+"_"+str(j)] \
+                    = Polytope(A=np.array([[0,-1],
+                                           [0,1],
+                                           [-1,0],
+                                           [1,0]], dtype=np.float64),
+                               b=np.array([-offset[1]-i*side_lengths[1],
+                                            offset[1]+(i+1)*side_lengths[1],
+                                            -offset[0]-(self.W.shape[1]-j-1)*side_lengths[0],
+                                            offset[0]+(self.W.shape[1]-j)*side_lengths[0]],
+                                          dtype=np.float64))
+        part = prop2part2(domain, cells)
+
+        adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
+        for this_ind in range(len(part.list_region)):
+            (prefix, i, j) = extract_coord(part.list_prop_symbol[part.list_region[this_ind].list_prop.index(1)])
+            adjacency[this_ind, this_ind] = 1
+            if i > 0:
+                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i-1)+"_"+str(j))
+                ind = 0
+                while part.list_region[ind].list_prop[symbol_ind] == 0:
+                    ind += 1
+                adjacency[ind, this_ind] = 1
+            if j > 0:
+                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j-1))
+                ind = 0
+                while part.list_region[ind].list_prop[symbol_ind] == 0:
+                    ind += 1
+                adjacency[ind, this_ind] = 1
+            if i < self.W.shape[0]-1:
+                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i+1)+"_"+str(j))
+                ind = 0
+                while part.list_region[ind].list_prop[symbol_ind] == 0:
+                    ind += 1
+                adjacency[ind, this_ind] = 1
+            if j < self.W.shape[1]-1:
+                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j+1))
+                ind = 0
+                while part.list_region[ind].list_prop[symbol_ind] == 0:
+                    ind += 1
+                adjacency[ind, this_ind] = 1
+        part.adj = adjacency
+        return part
+        
+
     def spec(self):
         """Return GRSpec instance describing this gridworld.
 
@@ -448,6 +536,18 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
     gw.goal_list = goal_list
     gw.init_list = init_list
     return gw
+
+def unoccupied(size, prefix="Y"):
+    """Generate entirely unoccupied gridworld of given size.
+    
+    @param size: a pair, indicating number of rows and columns.
+    @param prefix: String to be used as prefix for naming gridworld
+                   cell variables.
+    @rtype: L{GridWorld}
+    """
+    if len(size) < 2:
+        raise TypeError("invalid gridworld size.")
+    return GridWorld(str(size[0])+" "+str(size[1]), prefix="Y")
 
 
 def extract_coord(var_name):

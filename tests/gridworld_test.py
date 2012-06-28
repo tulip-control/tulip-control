@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SCL; 24 Jun 2012.
+SCL; 28 June 2012.
 """
 
 import numpy as np
@@ -27,13 +27,19 @@ TRIVIAL_GWFILE = """
 
 class GridWorld_test:
     def setUp(self):
-        self.X = gw.GridWorld(REFERENCE_GWFILE)
+        self.prefix = "testworld"
+        self.X = gw.GridWorld(REFERENCE_GWFILE, prefix=self.prefix)
 
     def tearDown(self):
         self.X = None
         
     def test_size(self):
         assert self.X.size() == (6, 10)
+
+    def test_getitem(self):
+        assert self.X[0,0] == self.prefix+"_"+str(0)+"_"+str(0)
+        assert self.X[-1,0] == self.prefix+"_"+str(5)+"_"+str(0)
+        assert self.X[-1,-2] == self.prefix+"_"+str(5)+"_"+str(8)
 
     def test_equality(self):
         assert self.X == gw.GridWorld(REFERENCE_GWFILE)
