@@ -366,36 +366,38 @@ class GridWorld:
                                            [0,1],
                                            [-1,0],
                                            [1,0]], dtype=np.float64),
-                               b=np.array([-offset[1]-i*side_lengths[1],
-                                            offset[1]+(i+1)*side_lengths[1],
-                                            -offset[0]-(self.W.shape[1]-j-1)*side_lengths[0],
-                                            offset[0]+(self.W.shape[1]-j)*side_lengths[0]],
+                               b=np.array([-offset[1]-(self.W.shape[0]-i-1)*side_lengths[1],
+                                            offset[1]+(self.W.shape[0]-i)*side_lengths[1],
+                                            -offset[0]-j*side_lengths[0],
+                                            offset[0]+(j+1)*side_lengths[0]],
                                           dtype=np.float64))
         part = prop2part2(domain, cells)
 
         adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
         for this_ind in range(len(part.list_region)):
             (prefix, i, j) = extract_coord(part.list_prop_symbol[part.list_region[this_ind].list_prop.index(1)])
+            if self.W[i][j] != 0:
+                continue  # Static obstacle cells are not traversable
             adjacency[this_ind, this_ind] = 1
-            if i > 0:
+            if i > 0 and self.W[i-1][j] == 0:
                 symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i-1)+"_"+str(j))
                 ind = 0
                 while part.list_region[ind].list_prop[symbol_ind] == 0:
                     ind += 1
                 adjacency[ind, this_ind] = 1
-            if j > 0:
+            if j > 0 and self.W[i][j-1] == 0:
                 symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j-1))
                 ind = 0
                 while part.list_region[ind].list_prop[symbol_ind] == 0:
                     ind += 1
                 adjacency[ind, this_ind] = 1
-            if i < self.W.shape[0]-1:
+            if i < self.W.shape[0]-1 and self.W[i+1][j] == 0:
                 symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i+1)+"_"+str(j))
                 ind = 0
                 while part.list_region[ind].list_prop[symbol_ind] == 0:
                     ind += 1
                 adjacency[ind, this_ind] = 1
-            if j < self.W.shape[1]-1:
+            if j < self.W.shape[1]-1 and self.W[i][j+1] == 0:
                 symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j+1))
                 ind = 0
                 while part.list_region[ind].list_prop[symbol_ind] == 0:
