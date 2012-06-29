@@ -518,6 +518,7 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
     """
     num_cells = size[0]*size[1]
     goal_list = []
+    init_list = []
     W = np.zeros(num_cells, dtype=np.int32)
     num_blocks = int(np.round(wall_density*num_cells))
     for i in range(num_blocks):
@@ -527,9 +528,10 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
         avail_inds = np.array(range(num_cells))[W==0]
         avail_inds = [k for k in avail_inds if k not in goal_list]
         goal_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
-    avail_inds = np.array(range(num_cells))[W==0]
-    avail_inds = [k for k in avail_inds if (k not in goal_list)]
-    init_list = [avail_inds[np.random.randint(low=0, high=len(avail_inds))]]
+    for i in range(num_init):
+        avail_inds = np.array(range(num_cells))[W==0]
+        avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list]
+        init_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
     W = W.reshape(size)
     goal_list = [(k/size[1], k%size[1]) for k in goal_list]
     init_list = [(k/size[1], k%size[1]) for k in init_list]
