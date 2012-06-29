@@ -15,6 +15,7 @@ Contents:
    intro
    install
    tutorial
+   gridworlds
    data_formats
    mod_dumps
    

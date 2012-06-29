@@ -195,6 +195,8 @@ suffice. To get `python-graph
 
  $ easy_install python-graph-core
 
+.. _venv-pydoc-sec-label:
+
 virtualenv and pydoc
 ````````````````````
 
