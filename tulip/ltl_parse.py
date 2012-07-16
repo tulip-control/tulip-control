@@ -44,7 +44,8 @@ ParserElement.enablePackrat()
 TEMPORAL_OP_MAP = \
         { "G" : "GLOBALLY", "F" : "FINALLY", "X" : "NEXT",
         "[]" : "GLOBALLY", "<>" : "FINALLY", "next" : "NEXT",
-        "U" : "UNTIL", "V" : "RELEASE", "R" : "RELEASE" }
+        "U" : "UNTIL", "V" : "RELEASE", "R" : "RELEASE", 
+        "'" : "NEXT" }
 
 JTLV_MAP = { "GLOBALLY" : "[]", "FINALLY" : "<>", "NEXT" : "next",
         "UNTIL" : "U" }
@@ -71,18 +72,31 @@ class ASTNode(object):
     def flatten_SMV(self, node): return node.toSMV()
     def toJTLV(self): return self.flatten(self.flatten_JTLV)
     def toSMV(self): return self.flatten(self.flatten_SMV)
+    def map(self, f): return f(self)
+    
+class ASTNum(ASTNode):
+    def init(self, t):
+        self.val = int(t[0])
+    def __repr__(self):
+        return str(self.val)
+    def flatten(self, flattener=None, op=None):
+        return str(self)
 
 class ASTVar(ASTNode):
-    def __init__(self, s, l, t):
+    def init(self, t):
         self.val = t[0]
     def __repr__(self):
         return self.val
-    def flatten(self, flattener=None, op=None):
+    def flatten(self, flattener=str, op=None):
         # just return variable name (quoted?)
-        return self.val
+        return flattener(self)
+    def toJTLV(self):
+        return "(" + str(self) + ")"
+    def toSMV(self):
+        return str(self)
         
 class ASTBool(ASTNode):
-    def __init__(self, s, l, t):
+    def init(self, t):
         if t[0].upper() == "TRUE":
             self.val = True
         else:
@@ -98,9 +112,17 @@ class ASTUnary(ASTNode):
     def new(cls, op_node, operator=None):
         return cls(None, None, [operator, op_node])
     def init(self, tok):
-        self.operand = tok[1]
-        if isinstance(self, ASTUnTempOp):
-            self.operator = TEMPORAL_OP_MAP[tok[0]]
+        if tok[1] == "'":
+            if len(tok) > 2:
+                # handle left-associative chains, e.g. Y''
+                t = self.__class__(None, None, tok[:-1])
+                tok = [t, tok[-1]]
+            self.operand = tok[0]
+            self.operator = "NEXT"
+        else:
+            self.operand = tok[1]
+            if isinstance(self, ASTUnTempOp):
+                self.operator = TEMPORAL_OP_MAP[tok[0]]
     def __repr__(self):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
     def flatten(self, flattener=str, op=None):
@@ -110,6 +132,9 @@ class ASTUnary(ASTNode):
         except AttributeError:
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
+    def map(self, f):
+        self.operand = self.operand.map(f)
+        return f(self)
 
 class ASTNot(ASTUnary):
     def op(self): return "!"
@@ -125,13 +150,13 @@ class ASTUnTempOp(ASTUnary):
 
 class ASTBinary(ASTNode):
     @classmethod
-    def new(cls, (op_l, op_r), operator=None):
+    def new(cls, op_l, op_r, operator=None):
         return cls(None, None, [op_l, operator, op_r])
     def init(self, tok):
         # handle left-associative chains e.g. x && y && z
         if len(tok) > 3:
-            tok[0] = self.__class__(None, None, tok[:-2])
-            tok = [tok[0], tok[-2], tok[-1]]
+            t = self.__class__(None, None, tok[:-2])
+            tok = [t, tok[-2], tok[-1]]
         self.op_l = tok[0]
         self.op_r = tok[2]
         # generalise temporal operator
@@ -152,6 +177,10 @@ class ASTBinary(ASTNode):
         except AttributeError:
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
+    def map(self, f):
+        self.op_l = self.op_l.map(f)
+        self.op_r = self.op_r.map(f)
+        return f(self)
 
 
 class ASTAnd(ASTBinary):
@@ -180,11 +209,12 @@ class ASTArithmetic(ASTBinary):
 
 # Literals cannot start with G, F or X unless quoted
 restricted_alphas = filter(lambda x: x not in "GFX", alphas)
-# Quirk: allow literals of the form (G|F|X)n[A-Za-z]* so we can have X0 etc.
-var = (Word(restricted_alphas, alphanums + ".") + Optional("'") | \
-        Regex("[A-Za-z][0-9][A-Za-z0-9.]*\'?") | QuotedString('"')).setParseAction(ASTVar)
-atom = var | (CaselessKeyword("TRUE") | CaselessKeyword("FALSE")).setParseAction(ASTBool)
-number = var | Word(nums)
+# Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
+bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
+var = ~bool_keyword + (Word(restricted_alphas, alphanums + "." + "_") | \
+        Regex("[A-Za-z][0-9_][A-Za-z0-9._]*") | QuotedString('"')).setParseAction(ASTVar)
+atom = var | bool_keyword.setParseAction(ASTBool)
+number = var | Word(nums).setParseAction(ASTNum)
 
 # simple expression - no LTL operators
 '''simple_expr = operatorPrecedence(atom,
@@ -208,28 +238,47 @@ arith_expr = operatorPrecedence(number,
         ])
 
 # integer comparison expression
-comparison_expr = (arith_expr + oneOf("< <= > >= != =") + arith_expr).setParseAction(ASTComparator)
+comparison_expr = Group(arith_expr + oneOf("< <= > >= != =") + arith_expr).setParseAction(ASTComparator)
 
 proposition = comparison_expr | atom
 
+# hack so G/F/X doesn't mess with keywords (i.e. FALSE) or variables like X0, X_0_1
+UnaryTempOps = ~bool_keyword + oneOf("G F X [] <> next") + ~Word(nums + "_")
+
 # LTL expression
 ltl_expr = operatorPrecedence(proposition,
-        [("!", 1, opAssoc.RIGHT, ASTNot),
-        (oneOf("G F X [] <> next"), 1, opAssoc.RIGHT, ASTUnTempOp),
+        [("'", 1, opAssoc.LEFT, ASTUnTempOp),
+        ("!", 1, opAssoc.RIGHT, ASTNot),
+        (UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
         (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
         (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
         (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
         ("->", 2, opAssoc.RIGHT, ASTImp),
         ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        ("=", 2, opAssoc.RIGHT, ASTComparator),
+        (oneOf("= !="), 2, opAssoc.RIGHT, ASTComparator),
         (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp),
         ])
+ltl_expr.ignore(LineStart() + "--" + restOfLine)
+
+def extractVars(tree):
+    v = []
+    def f(t):
+        if isinstance(t, ASTVar):
+            v.append(t.val)
+        return t
+    tree.map(f)
+    return v
 
 def parse(formula):
     return ltl_expr.parseString(formula, parseAll=True)[0]
 
 if __name__ == "__main__":
-    ast = ltl_expr.parseString(sys.argv[1], parseAll=True)[0]
-    print ast
-    print ast.toJTLV()
-    print ast.toSMV()
+    try:
+        ast = parse(sys.argv[1])
+    except ParseException as e:
+        print "Parse error: " + str(e)
+        sys.exit(1)
+    print "Parsed expression:", ast
+    print "Variables:", extractVars(ast)
+    print "JTLV syntax:", ast.toJTLV()
+    print "SMV syntax:", ast.toSMV()
