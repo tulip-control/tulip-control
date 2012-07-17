@@ -32,7 +32,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# $Id:$
+# $Id$
 # LTL parser supporting JTLV, SPIN and SMV syntax (and mixtures thereof!)
 # Syntax taken roughly from http://spot.lip6.fr/wiki/LtlSyntax
 from pyparsing import *
@@ -53,8 +53,16 @@ JTLV_MAP = { "GLOBALLY" : "[]", "FINALLY" : "<>", "NEXT" : "next",
 SMV_MAP = { "GLOBALLY" : "G", "FINALLY" : "F", "NEXT" : "X",
         "UNTIL" : "U", "RELEASE" : "V" }
 
+SPIN_MAP = { "GLOBALLY" : "[]", "FINALLY" : "<>", "UNTIL" : "U",
+        "RELEASE" : "V" }
+
 class LTLException(Exception):
     pass
+    
+# Flattener helpers
+def flatten_JTLV(node): return node.toJTLV()
+def flatten_SMV(node): return node.toSMV()
+def flatten_Promela(node): return node.toPromela()
 
 class ASTNode(object):
     def __init__(self, s, l, t):
@@ -68,10 +76,9 @@ class ASTNode(object):
                 # not a ParseResult
                 tok = t
         self.init(tok)
-    def flatten_JTLV(self, node): return node.toJTLV()
-    def flatten_SMV(self, node): return node.toSMV()
-    def toJTLV(self): return self.flatten(self.flatten_JTLV)
-    def toSMV(self): return self.flatten(self.flatten_SMV)
+    def toJTLV(self): return self.flatten(flatten_JTLV)
+    def toSMV(self): return self.flatten(flatten_SMV)
+    def toPromela(self): return self.flatten(flatten_Promela)
     def map(self, f): return f(self)
     
 class ASTNum(ASTNode):
@@ -89,7 +96,7 @@ class ASTVar(ASTNode):
         return self.val
     def flatten(self, flattener=str, op=None):
         # just return variable name (quoted?)
-        return flattener(self)
+        return str(self)
     def toJTLV(self):
         return "(" + str(self) + ")"
     def toSMV(self):
@@ -140,13 +147,18 @@ class ASTNot(ASTUnary):
     def op(self): return "!"
 class ASTUnTempOp(ASTUnary):
     def op(self): return self.operator
+    def toPromela(self):
+        try:
+            return self.flatten(flatten_Promela, SPIN_MAP[self.op()])
+        except KeyError:
+            raise LTLException("Operator " + self.op() + " not supported in Promela")
     def toJTLV(self):
         try:
-            return self.flatten(self.flatten_JTLV, JTLV_MAP[self.op()])
+            return self.flatten(flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV")
     def toSMV(self):
-        return self.flatten(self.flatten_SMV, SMV_MAP[self.op()])
+        return self.flatten(flatten_SMV, SMV_MAP[self.op()])
 
 class ASTBinary(ASTNode):
     @classmethod
@@ -185,8 +197,12 @@ class ASTBinary(ASTNode):
 
 class ASTAnd(ASTBinary):
     def op(self): return "&"
+    def toPromela(self):
+        return self.flatten(flatten_Promela, "&&")
 class ASTOr(ASTBinary):
     def op(self): return "|"
+    def toPromela(self):
+        return self.flatten(flatten_Promela, "||")
 class ASTXor(ASTBinary):
     def op(self): return "xor"
 class ASTImp(ASTBinary):
@@ -195,15 +211,23 @@ class ASTBiImp(ASTBinary):
     def op(self): return "<->"
 class ASTBiTempOp(ASTBinary):
     def op(self): return self.operator
+    def toPromela(self):
+        try:
+            return self.flatten(flatten_Promela, SPIN_MAP[self.op()])
+        except KeyError:
+            raise LTLException("Operator " + self.op() + " not supported in Promela")
     def toJTLV(self):
         try:
-            return self.flatten(self.flatten_JTLV, JTLV_MAP[self.op()])
+            return self.flatten(flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV")
     def toSMV(self):
-        return self.flatten(self.flatten_SMV, SMV_MAP[self.op()])
+        return self.flatten(flatten_SMV, SMV_MAP[self.op()])
 class ASTComparator(ASTBinary):
     def op(self): return self.operator
+    def toPromela(self):
+        if self.operator == "=":
+            return self.flatten(flatten_Promela, "==")
 class ASTArithmetic(ASTBinary):
     def op(self): return self.operator
 
@@ -282,3 +306,4 @@ if __name__ == "__main__":
     print "Variables:", extractVars(ast)
     print "JTLV syntax:", ast.toJTLV()
     print "SMV syntax:", ast.toSMV()
+    print "Promela syntax:", ast.toPromela()
