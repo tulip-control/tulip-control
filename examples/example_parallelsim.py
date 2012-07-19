@@ -39,7 +39,7 @@ assumption = '[](req=0 -> <>(!ack))\n'
 assumption += ' & [](ack & next(!ack) -> req=0)\n'
 assumption += ' & [](!ack & next(ack) -> req!=0)\n'
 
-guarantee = '[](ack -> next(req=-1))\n' # VI
+guarantee = '[](ack -> next(req=0))\n' # VI
 guarantee += ' & [](!ack -> next(req=1 | req=2))\n'
 guarantee += ' & [](req!=-1 & next(req=0) -> ack)\n'
 guarantee += ' & [](req=-1 & next(req!=0) -> !ack)\n'
@@ -127,6 +127,11 @@ sender_strat = Strategy(sender_aut, V, ['ack'], ['req'], 'sender')
 receiver_strat = Strategy(receiver_aut, V, ['req'], ['ack', 'sink'], 'receiver')
 
 # Start threads
+
+print "\n#######################"
+print "# Starting Simulation #"
+print "#######################\n"
+
 sender_strat.start()
 receiver_strat.start()
 
