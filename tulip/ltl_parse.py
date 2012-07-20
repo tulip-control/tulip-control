@@ -294,7 +294,12 @@ def extractVars(tree):
     return v
 
 def parse(formula):
-    return ltl_expr.parseString(formula, parseAll=True)[0]
+    # Increase recursion limit for complex formulae
+    sys.setrecursionlimit(2000)
+    try:
+        return ltl_expr.parseString(formula, parseAll=True)[0]
+    except RuntimeError:
+        raise ParseException("Maximum recursion depth exceeded, could not parse")
 
 if __name__ == "__main__":
     try:
@@ -304,6 +309,9 @@ if __name__ == "__main__":
         sys.exit(1)
     print "Parsed expression:", ast
     print "Variables:", extractVars(ast)
-    print "JTLV syntax:", ast.toJTLV()
-    print "SMV syntax:", ast.toSMV()
-    print "Promela syntax:", ast.toPromela()
+    try:
+        print "JTLV syntax:", ast.toJTLV()
+        print "SMV syntax:", ast.toSMV()
+        print "Promela syntax:", ast.toPromela()
+    except LTLException as e:
+        print e.message
