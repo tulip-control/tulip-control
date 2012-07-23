@@ -173,6 +173,10 @@ class PropPreservingPartition:
         self.list_prop_symbol = list_prop_symbol
         self.orig_list_region = orig_list_region
         self.orig = orig
+        
+    def reg2props(self, region):
+        return [self.list_prop_symbol[n] for (n,p) in enumerate(
+                self.list_region[region].list_prop) if p]
 
     def __str__(self):
         output = "Domain: "+str(self.domain)+"\n"
