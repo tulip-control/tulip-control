@@ -39,11 +39,12 @@ derived from btsynth; see http://scottman.net/2012/btsynth
 """
 
 import itertools
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as mpl_cm
 
-from polytope import Polytope
+from polytope import Polytope, Region
 from prop2part import prop2part2, PropPreservingPartition
 from spec import GRSpec
 
@@ -160,7 +161,7 @@ class GridWorld:
         for p in self.goal_list:
             plt.text(p[1], p[0], "G", size=font_pt)
         
-    def pretty(self, show_grid=False, line_prefix=""):
+    def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
         """Return pretty-for-printing string.
 
         @param show_grid: If True, then grid the pretty world and show
@@ -176,6 +177,17 @@ class GridWorld:
         #  G - goal location;
         #  I - possible initial location.
         out_str = line_prefix
+        def direct(c1, c2):
+            (y1, x1) = c1
+            (y2, x2) = c2
+            if x1 > x2:
+                return "<"
+            elif x1 < x2:
+                return ">"
+            elif y1 > y2:
+                return "^"
+            elif y1 < y2:
+                return "v"
         if show_grid:
             out_str += "  " + "".join([str(k).rjust(2) for k in range(self.W.shape[1])]) + "\n"
         else:
@@ -195,7 +207,12 @@ class GridWorld:
                     if (i,j) in self.init_list:
                         out_str += "I"
                     elif (i,j) in self.goal_list:
-                        out_str += "G"
+                        if goal_order:
+                            out_str += str(self.goal_list.index((i,j)))
+                        else:
+                            out_str += "G"
+                    elif (i,j) in path:
+                        out_str += direct((i,j), path[path.index((i,j))+1 % len(path)])
                     else:
                         out_str += " "
                 elif self.W[i][j] == 1:
@@ -209,7 +226,6 @@ class GridWorld:
         else:
             out_str += "-"*(self.W.shape[1]+2) + "\n"
         return out_str
-    
 
     def size(self):
         if self.W is None:
@@ -403,9 +419,133 @@ class GridWorld:
                 adjacency[ind, this_ind] = 1
         part.adj = adjacency
         return part
+    
+    def discreteTransitionSystem(self):
+        """ Write a discrete transition system suitable for NuSMV synthesis.
+        Unlike dumpPPartition, this does not create polytopes.
         
-
+        @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
+        """
+        disc_dynamics = PropPreservingPartition(list_region=[],
+                            list_prop_symbol=[], trans=[])
+        num_cells = self.W.shape[0] * self.W.shape[1]
+        for i in range(self.W.shape[0]):
+            for j in range(self.W.shape[1]):
+                flat = lambda x, y: x*self.W.shape[1] + y
+                # Proposition
+                prop = self[i,j]
+                disc_dynamics.list_prop_symbol.append(prop)
+                # Region
+                r = [ 0 for x in range(0, num_cells) ]
+                r[flat(i,j)] = 1
+                disc_dynamics.list_region.append(Region("R_" + prop, r))
+                # Transitions
+                # trans[p][q] if q -> p
+                t = [ 0 for x in range(0, num_cells) ]
+                t[flat(i,j)] = 1
+                if self.W[i][j] == 0:
+                    if i > 0: t[flat(i-1,j)] = 1
+                    if j > 0: t[flat(i,j-1)] = 1
+                    if i < self.W.shape[0]-1: t[flat(i+1,j)] = 1
+                    if j < self.W.shape[1]-1: t[flat(i,j+1)] = 1
+                disc_dynamics.trans.append(t)
+        disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
+        disc_dynamics.num_regions = len(disc_dynamics.list_region)
+        return disc_dynamics
+        
     def spec(self):
+        """Return GRSpec instance describing this gridworld.
+
+        Syntax is that of gr1c; in particular, "next" variables are
+        primed. For example, x' refers to the variable x at the next
+        time step.
+
+        Variables are named according to prefix_R_C, where prefix is
+        given (attribute of this GridWorld object), R is the row, and
+        column the cell (0-indexed).
+
+        For incorporating this gridworld into an existing
+        specification (e.g., respecting external references to cell
+        variable names), see the method importGridWorld of class GRSpec.
+        """
+        if self.W is None:
+            raise ValueError("Gridworld does not exist.")
+        row_low = 0
+        row_high = self.W.shape[0]-1
+        col_low = 0
+        col_high = self.W.shape[1]-1
+        spec_trans = []
+        # Safety, transitions
+        for i in range(row_low, row_high+1):
+            for j in range(col_low, col_high+1):
+                if self.W[i][j] == 1:
+                    continue  # Cannot start from an occupied cell.
+                spec_trans.append(self[i,j]+" -> (")
+                # Normal transitions:
+                spec_trans[-1] += self[i,j]+"'"
+                if i > row_low and self.W[i-1][j] == 0:
+                    spec_trans[-1] += " | " + self[i-1,j]+"'"
+                if j > col_low and self.W[i][j-1] == 0:
+                    spec_trans[-1] += " | " + self[i,j-1]+"'"
+                if i < row_high and self.W[i+1][j] == 0:
+                    spec_trans[-1] += " | " + self[i+1,j]+"'"
+                if j < col_high and self.W[i][j+1] == 0:
+                    spec_trans[-1] += " | " + self[i,j+1]+"'"
+                spec_trans[-1] += ")"
+
+        # Safety, static
+        for i in range(row_low, row_high+1):
+            for j in range(col_low, col_high+1):
+                if self.W[i][j] == 1:
+                    spec_trans.append("!(" + self[i,j]+"'" + ")")
+
+        # Safety, mutex
+        pos_indices = [k for k in itertools.product(range(row_low, row_high+1), range(col_low, col_high+1))]
+        disj = []
+        for outer_ind in pos_indices:
+            conj = []
+            if outer_ind != (-1, -1) and self.W[outer_ind[0]][outer_ind[1]] == 1:
+                continue
+            if outer_ind == (-1, -1):
+                conj.append(self.prefix+"_n_n'")
+            else:
+                conj.append(self[outer_ind[0], outer_ind[1]]+"'")
+            for inner_ind in pos_indices:
+                if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
+                    or outer_ind == inner_ind):
+                    continue
+                if inner_ind == (-1, -1):
+                    conj.append("(!" + self.prefix+"_n_n')")
+                else:
+                    conj.append("(!" + self[inner_ind[0], inner_ind[1]]+"')")
+            disj.append("(" + " & ".join(conj) + ")")
+        spec_trans.append("\n| ".join(disj))
+
+        sys_vars = []
+        for i in range(self.W.shape[0]):
+            for j in range(self.W.shape[1]):
+                sys_vars.append(self[i,j])
+
+        initspec = []
+        for loc in self.init_list:
+            mutex = [self[loc[0],loc[1]]]
+            mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self[loc[0],loc[1]]])
+            initspec.append("(" + " & ".join(mutex) + ")")
+        init_str = " | ".join(initspec)
+
+        spec_goal = []
+        for loc in self.goal_list:
+            spec_goal.append(self.prefix+"_"+str(loc[0])+"_"+str(loc[1]))
+        
+        #oldspec = self.spec_old()
+        #assert(spec_trans == oldspec.sys_safety)
+        #assert(sys_vars == oldspec.sys_vars)
+        #assert(init_str == oldspec.sys_init[0])
+        #assert(spec_goal == oldspec.sys_prog)
+        return GRSpec(sys_vars=sys_vars, sys_init=init_str,
+                      sys_safety=spec_trans, sys_prog=spec_goal)
+                      
+    def spec_old(self):
         """Return GRSpec instance describing this gridworld.
 
         Syntax is that of gr1c; in particular, "next" variables are
@@ -519,17 +659,21 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
     init_list = []
     W = np.zeros(num_cells, dtype=np.int32)
     num_blocks = int(np.round(wall_density*num_cells))
-    for i in range(num_blocks):
-        avail_inds = np.array(range(num_cells))[W==0]
-        W[avail_inds[np.random.randint(low=0, high=len(avail_inds))]] = 1
-    for i in range(num_goals):
-        avail_inds = np.array(range(num_cells))[W==0]
-        avail_inds = [k for k in avail_inds if k not in goal_list]
-        goal_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
-    for i in range(num_init):
-        avail_inds = np.array(range(num_cells))[W==0]
-        avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list]
-        init_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+    try:
+        for i in range(num_blocks):
+            avail_inds = np.array(range(num_cells))[W==0]
+            W[avail_inds[np.random.randint(low=0, high=len(avail_inds))]] = 1
+        for i in range(num_goals):
+            avail_inds = np.array(range(num_cells))[W==0]
+            avail_inds = [k for k in avail_inds if k not in goal_list]
+            goal_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+        for i in range(num_init):
+            avail_inds = np.array(range(num_cells))[W==0]
+            avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list]
+            init_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+    except ValueError:
+        # We've run out of available indices, so cannot produce a world
+        raise ValueError("World too small for number of features")
     W = W.reshape(size)
     goal_list = [(k/size[1], k%size[1]) for k in goal_list]
     init_list = [(k/size[1], k%size[1]) for k in init_list]
@@ -538,6 +682,39 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
     gw.goal_list = goal_list
     gw.init_list = init_list
     return gw
+    
+def narrow_passage(size, passage_width=1, num_init=1, num_goals=2, prefix="Y"):
+    """Generate a narrow-passage world: this is a world containing 
+    two zones (initial, final) with a tube connecting them.
+    
+    @param size: a pair, indicating number of rows and columns.
+    @param tube_width: the width of the connecting tube in cells.
+    @param num_init: number of possible initial positions.
+    @param num_goals: number of positions to be visited infinitely often.
+    @param prefix: string to be used as prefix for naming gridworld
+                   cell variables.
+                   
+    @rtype: L{GridWorld}"""
+                   
+    (w, h) = size
+    if w < 3 or h < 3:
+        raise ValueError("Gridworld too small: minimum dimension 3")
+    Z = unoccupied(size, prefix)
+    izone = int(max(1, 0.3*size[1])) # boundary of left zone, 20% of width
+    gzone = size[1] - int(max(1, 0.3*size[1])) # boundary of right zone
+    if izone * size[0] < num_init or gzone * size[0] < num_goals:
+        raise ValueError("Too many initials/goals for grid size")
+    ptop = np.random.randint(0, size[1]-passage_width)
+    passage = range(ptop, ptop+passage_width)
+    for y in range(0, size[0]):
+        if y not in passage:
+            for x in range(izone, gzone):
+                Z.W[y][x] = 1
+    avail_cells = [(y,x) for y in range(size[0]) for x in range(izone)]
+    Z.init_list = random.sample(avail_cells, num_init)
+    avail_cells = [(y,x) for y in range(size[0]) for x in range(gzone, size[1])]
+    Z.goal_list = random.sample(avail_cells, num_goals)
+    return Z
 
 def unoccupied(size, prefix="Y"):
     """Generate entirely unoccupied gridworld of given size.
@@ -585,3 +762,28 @@ def prefix_filt(d, prefix):
             if k.startswith(prefix):
                 match_list.append(k)
     return dict([(k, d[k]) for k in match_list])
+    
+def extractPath(aut):
+    """Extract a path from a gridworld automaton"""
+    s = aut.getAutState(0)
+    path = []
+    visited = [0]
+    while 1:
+        for p in s.state:
+            if s.state[p]:
+                try:
+                    c = extract_coord(p)
+                    if c:
+                        path.append(c[1:])
+                except:
+                    pass
+        # next state
+        if len(s.transition) > 0:
+            if s.transition[0] in visited:
+                # loop detected
+                return path
+            visited.append(s.transition[0])
+            s = aut.getAutState(s.transition[0])
+        else:
+            # dead-end, return
+            return path

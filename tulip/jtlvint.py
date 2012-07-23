@@ -51,6 +51,9 @@ from errorprint import printWarning, printError
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
+class JTLVError(Exception):
+    pass
+
 
 def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
                           disc_dynamics=PropPreservingPartition(), \
@@ -454,9 +457,15 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, \
                 aut_file, str(priority_kind), str(init_option)
-        cmd = subprocess.call( \
-            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-                 str(priority_kind), str(init_option)])
+        if (verbose > 0):
+            ret = subprocess.call( \
+                ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                     str(priority_kind), str(init_option)])
+        else:
+            ret = subprocess.call( \
+                ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                     str(priority_kind), str(init_option)], stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT)
     else: # For debugging purpose
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
@@ -472,7 +481,9 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
 #                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
-    if (os.path.isfile(aut_file)):
+    if not ret == 0:
+        raise JTLVError("JTLV failed to solve")
+    if os.path.isfile(aut_file):
         f = open(aut_file, 'r')
         for line in f:
             if ("Specification is realizable" in line):
@@ -496,9 +507,11 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         sys.stderr = sys.__stderr__
 
     if (realizable and priority_kind > 0):
-        print("\nAutomaton successfully synthesized.\n")
+        if verbose > 0:
+            print("\nAutomaton successfully synthesized.\n")
     elif (priority_kind > 0):
-        print("\nERROR: Specification was unrealizable.\n")
+        if verbose > 0:
+            print("\nERROR: Specification was unrealizable.\n")
 
     return realizable
 

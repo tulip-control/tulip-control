@@ -570,21 +570,13 @@ class SynthesisProb:
                             for val in xrange(int(dots_pair[0])+1, int(dots_pair[1])):
                                 if (str(val) not in all_values):
                                     all_values.append(str(val))
-                        reg = ''
-                        for val in all_values:
-                            if (len(reg) > 0):
-                                reg += ', '
-                            reg += val
+                        reg = ', '.join(all_values)
                         self.__sys_vars[var] = '{' + reg + '}'
                     else:
                         printWarning("Unknown possible values for discrete " + \
                                          "system variable " + var, obj=self)
                 elif (isinstance(reg, list)):
-                    all_values = ''
-                    for val in reg:
-                        if (len(all_values) > 0):
-                            all_values += ', '
-                        all_values += str(val)
+                    all_values = ', '.join(reg)
                     self.__sys_vars[var] = '{' + all_values + '}'
                 else:
                     printWarning("Unknown possible values for discrete system " + \
@@ -787,8 +779,7 @@ class SynthesisProb:
         else:
             aut = automaton.Automaton(states_or_file=aut_file, varnames=[], verbose=verbose)
             return aut
-
-
+    
     ###################################################################
 
     def toJTLVInput(self, smv_file='', spc_file='', file_exist_option='r', verbose=0):
@@ -976,7 +967,10 @@ class SynthesisProb:
 
         # Assumption
         f.write('LTLSPEC\n')
-        f.write(assumption)
+        if assumption:
+            f.write(assumption)
+        else:
+            f.write("TRUE")
         f.write('\n;\n')
 
         # Guarantee
