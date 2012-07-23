@@ -228,11 +228,11 @@ class GridWorld:
         integers separated by whitespace, with the first being the
         number of rows and the second the number of columns.
 
-        The second non-blank line is used to construct the first row
-        of the gridworld, the third non-blank line to construct the
-        second row, and so on. A row definition is
-        whitespace-sensitive up to the number of columns (any
-        characters beyond the column count are ignored, so in
+        Each line after the size line is used to construct a row of
+        the gridworld. These are read in order with maximum number of
+        lines being the number of rows in the gridworld.  A row
+        definition is whitespace-sensitive up to the number of columns
+        (any characters beyond the column count are ignored, so in
         particular trailing whitespace is allowed) and can include the
         following symbols:
 
@@ -261,8 +261,6 @@ class GridWorld:
         goal_list = []
         row_index = -1
         for line in gw_desc.splitlines():
-            if len(line.lstrip()) > 0 and line.lstrip()[0] == "#":
-                continue  # Ignore comment lines
             if row_index != -1:
                 # Size has been read, so we are processing row definitions
                 if row_index >= W.shape[0]:
@@ -281,8 +279,8 @@ class GridWorld:
                 row_index += 1
             else:
                 # Still looking for gridworld size in the given string
-                if len(line.strip()) == 0:
-                    continue
+                if len(line.strip()) == 0 or line.lstrip()[0] == "#":
+                    continue  # Ignore blank and comment lines
                 line_el = line.split()
                 W = np.zeros((int(line_el[0]), int(line_el[1])),
                              dtype=np.int32)

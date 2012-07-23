@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +37,6 @@ Proposition preserving partition module.
 
 
 import numpy as np
-from time import time
 import copy
 
 import polytope as pc
@@ -148,6 +146,7 @@ def prop2partconvex(ppp):
     myconvexpartition.adj = adj.copy()
     return myconvexpartition
 
+
 class PropPreservingPartition:
     """Partition class with following fields
     
@@ -164,7 +163,6 @@ class PropPreservingPartition:
             new region
 
     """
-    
     def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None, orig_list_region=None, orig=None):
         self.domain = domain
         self.num_prop = num_prop
@@ -176,60 +174,18 @@ class PropPreservingPartition:
         self.orig_list_region = orig_list_region
         self.orig = orig
         
-#def test():
-if __name__ == "__main__":
-    start_time = time()
-    domain = np.array([[0., 2.],[0., 2.]])
+    def reg2props(self, region):
+        return [self.list_prop_symbol[n] for (n,p) in enumerate(
+                self.list_region[region].list_prop) if p]
 
-    domain_poly_A = np.array(np.vstack([np.eye(2),-np.eye(2)]))
-    domain_poly_b = np.array([np.r_[domain[:,1],-domain[:,0]]]).T
-    state_space = pc.Polytope(domain_poly_A, domain_poly_b)
-
-    cont_props = []
-    
-    A0 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-    b0 = np.array([[1., 0., 1., 0.]]).T
-    cont_props.append(pc.Polytope(A0, b0))
-    
-    A1 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-    b1 = np.array([[1., 0., 2., -1.]]).T
-    cont_props.append(pc.Polytope(A1, b1))
-    
-    
-    A2 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-    b2 = np.array([[2., -1., 1., 0.]]).T
-    cont_props.append(pc.Polytope(A2, b2))
-
-    A3 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-    b3 = np.array([[2., -1., 2., -1.]]).T
-    cont_props.append(pc.Polytope(A3, b3))
-    
-    cont_props_dict = dict({'C0':pc.Polytope(A0, b0),'C1':pc.Polytope(A1, b1),'C2':pc.Polytope(A2, b2),'C3':pc.Polytope(A3, b3) })
-    
-    mypartition = prop2part2(state_space, cont_props_dict)
-    
-    #print len(mypartition.list_region)
-    A4 = np.array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
-    b4 = np.array([[0.5, 0., 0.5, 0.]]).T
-    poly1 = pc.Polytope(A4,b4)
-
-    r1 = pc.mldivide(mypartition.list_region[3],poly1)
-    
-    verbose = 0
-    
-    xx = mypartition.adj
-    print xx
-    time_elapsed = time()-start_time
-    print time_elapsed
-    if verbose:
-        print 'time', time_elapsed
-        #print sys.getrefcount(np.dtype('float64'))
-        print '\nAdjacency matrix:\n', mypartition.adj
-    
-        for i in range(mypartition.num_regions):
-            print i+1,"th region has the following generators"
-            for j in range(len(mypartition.list_region[i].list_poly)):
-                print 'polytope',j,'in region',i+1
-                #print mypartition.list_region[i].list_poly[j].generators
-            print 'region',i+1,'proposition list is',mypartition.list_region[i].list_prop,'\n'
-
+    def __str__(self):
+        output = "Domain: "+str(self.domain)+"\n"
+        if self.list_prop_symbol is not None:
+            for j in range(len(self.list_region)):
+                output += "Region "+str(j)+", propositions: "+" ".join([self.list_prop_symbol[i] for i in range(len(self.list_prop_symbol)) if self.list_region[j].list_prop[i] != 0])+"\n"
+                output += str(self.list_region[j])
+        if hasattr(self.trans, "shape"):  # e.g., NumPy ndarrays have a shape
+            output +="Transition matrix:\n"+str(self.trans)+"\n"
+        elif hasattr(self.adj, "shape"):
+            output +="Adjacency matrix:\n"+str(self.adj)+"\n"
+        return output
