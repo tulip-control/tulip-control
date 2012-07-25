@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SCL; 24 Jun 2012.
+SCL; 5 July 2012.
 """
 
 import numpy as np
@@ -44,5 +44,5 @@ def importGridWorld_test():
     # Sanity-check
     X = gw.random_world((5, 10), prefix="sys")
     s = GRSpec()
-    s.importGridWorld(X, sys_prefix="sys")
+    s.importGridWorld(X)
     assert specs_equal(X.spec(), s)
