@@ -34,44 +34,42 @@
 # 
 # $Id$
 """ 
---------------------
-Specification Module
---------------------
+Specification module
 """
 
 import re, copy
 
 class GRSpec:
     """
-    GRSpec class for specifying a GR[1] specification of the form
+    GRSpec class for specifying a GR[1] specification of the form::
 
-        (env_init & []env_safety & []<>env_prog) -> (sys_init & []sys_safety & []<>sys_prog).
+        (env_init & []env_safety & []<>env_prog) -> (sys_init & []sys_safety & []<>sys_prog)
 
     A GRSpec object contains the following fields:
 
-    - `env_vars`: a list of variables (names given as strings) that
-      are determined by the environment.
+      - C{env_vars}: a list of variables (names given as strings) that
+        are determined by the environment.
 
-    - `env_init`: a string or a list of string that specifies the
-      assumption about the initial state of the environment.
+      - C{env_init}: a string or a list of string that specifies the
+        assumption about the initial state of the environment.
 
-    - `env_safety`: a string or a list of string that specifies the
-      assumption about the evolution of the environment state.
+      - C{env_safety}: a string or a list of string that specifies the
+        assumption about the evolution of the environment state.
 
-    - `env_prog`: a string or a list of string that specifies the
-      justice assumption on the environment.
+      - C{env_prog}: a string or a list of string that specifies the
+        justice assumption on the environment.
 
-    - `sys_vars`: a list of variables (names given as strings) that
-      are controlled by the system.
+      - C{sys_vars}: a list of variables (names given as strings) that
+        are controlled by the system.
 
-    - `sys_init`: a string or a list of string that specifies the
-      requirement on the initial state of the system.
+      - C{sys_init}: a string or a list of string that specifies the
+        requirement on the initial state of the system.
 
-    - `sys_safety`: a string or a list of string that specifies the
-      safety requirement.
+      - C{sys_safety}: a string or a list of string that specifies the
+        safety requirement.
 
-    - `sys_prog`: a string or a list of string that specifies the
-      progress requirement.
+      - C{sys_prog}: a string or a list of string that specifies the
+        progress requirement.
 
     An empty list for any formula (e.g., if env_init = []) is marked
     as "True" in the specification. This corresponds to the constant
@@ -124,15 +122,17 @@ class GRSpec:
                 self.env_prog = [self.env_prog]
 
 
-    def importGridWorld(self, gworld, sys_prefix="Y"):
+    def importGridWorld(self, gworld, offset=(0,0), controlled_dyn=True):
         """Append specification describing a gridworld.
 
         Basically, call the spec method of the given GridWorld object
-        and merge with its output.
+        and merge with its output.  See documentation about the
+        L{spec<gridworld.GridWorld.spec>} method of
+        L{GridWorld<gridworld.GridWorld>} class for details.
 
-        @type gworld: GridWorld
+        @type gworld: L{GridWorld}
         """
-        s = gworld.spec()
+        s = gworld.spec(offset=offset, controlled_dyn=controlled_dyn)
         for evar in s.env_vars:
             if evar not in self.env_vars:
                 self.env_vars.append(evar)
@@ -153,19 +153,20 @@ class GRSpec:
         disc_dynamics is an instance of PropPreservingPartition, such
         as returned by the function discretize in module discretize.
 
-        NOTES:
+        Notes
+        =====
+          - The cell names are *not* mangled, in contrast to the
+            approach taken in the createProbFromDiscDynamics method of
+            the SynthesisProb class.
 
-        - The cell names are *not* mangled, e.g., as in the
-          createProbFromDiscDynamics method of the SynthesisProb class.
+          - Any name in disc_dynamics.list_prop_symbol matching a system
+            variable is removed from sys_vars, and its occurrences in
+            the specification are replaced by a disjunction of
+            corresponding cells.
 
-        - Any name in disc_dynamics.list_prop_symbol matching a system
-          variable is removed from sys_vars, and its occurrences in
-          the specification are replaced by a disjunction of
-          corresponding cells.
-
-        - gr1c does not (yet) support variable domains beyond Boolean,
-          so we treat each cell as a separate Boolean variable and
-          explicitly enforce mutual exclusion.
+          - gr1c does not (yet) support variable domains beyond Boolean,
+            so we treat each cell as a separate Boolean variable and
+            explicitly enforce mutual exclusion.
         """
         if len(disc_dynamics.list_region) == 0:  # Vacuous call?
             return
