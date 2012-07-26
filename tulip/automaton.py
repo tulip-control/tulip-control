@@ -73,6 +73,13 @@ class AutomatonState:
         self.state = copy.copy(state)
         self.transition = transition[:]
 
+    def __copy__(self):
+        return AutomatonState(self.id, self.state, self.transition)
+        
+    def copy(self):
+        """Return copy of this automaton node."""
+        return self.__copy__()
+
 
 ###################################################################
 
@@ -139,7 +146,14 @@ class Automaton:
     def __len__(self):
         """Return number of nodes."""
         return len(self.states)
-    
+
+    def __copy__(self):
+        return Automaton(states_or_file=[s.copy() for s in self.states])
+
+    def copy(self):
+        """Return copy of this Automaton."""
+        return self.__copy__()
+
     def loadFile(self, aut_file, varnames=[], verbose=0):
         """
         Construct an automation from aut_file.
@@ -666,10 +680,7 @@ class Automaton:
         return True
 
     def size(self):
-        """
-        Return the number of states in this Automaton object.
-        """
-        return len(self.states)
+        return self.__len__()
 
     def addAutState(self, aut_state):
         """
