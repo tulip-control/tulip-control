@@ -56,7 +56,7 @@ class GridWorld:
         @param gw_desc: String containing a gridworld description, or
                         None to create an empty instance.
         @param prefix: String to be used as prefix for naming
-                       gridworld cell variables
+                       gridworld cell variables.
         """
         if gw_desc is not None:
             self.loads(gw_desc)
@@ -65,6 +65,7 @@ class GridWorld:
             self.init_list = []
             self.goal_list = []
         self.prefix = prefix
+        self.offset = (0, 0)
 
     def __eq__(self, other):
         """Test for equality.
@@ -108,16 +109,46 @@ class GridWorld:
             key = (self.W.shape[0]+key[0], key[1])
         if key[1] < 0:
             key = (key[0], self.W.shape[1]+key[1])
-        return str(self.prefix)+"_"+"_".join([str(i) for i in key])
+        return str(self.prefix)+"_"+str(key[0] + self.offset[0])+"_"+str(key[1] + self.offset[1])
+
+
+    def state(self, key, offset=(0, 0)):
+        """Return dictionary form of state with keys of variable names.
+
+        Supports negative indices for key, e.g., as in __getitem__.
+
+        The offset argument is motivated by the use-case of multiple
+        agents whose moves are governed by separate "gridworlds" but
+        who interact in a shared space; with an offset, we can make
+        "sub-gridworlds" and enforce rules like mutual exclusion.
+        """
+        if self.W is None:
+            raise ValueError("Gridworld is empty; no cells exist.")
+        if len(key) != len(self.W.shape):
+            raise ValueError("malformed gridworld key.")
+        if key[0] < -self.W.shape[0] or key[1] < -self.W.shape[1] or key[0] >= self.W.shape[0] or key[1] >= self.W.shape[1]:
+            raise ValueError("gridworld key is out of bounds.")
+        if key[0] < 0:
+            key = (self.W.shape[0]+key[0], key[1])
+        if key[1] < 0:
+            key = (key[0], self.W.shape[1]+key[1])
+        output = dict()
+        for i in range(self.W.shape[0]):
+            for j in range(self.W.shape[1]):
+                output[self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])] = 0
+        output[self.prefix+"_"+str(key[0]+offset[0])+"_"+str(key[1]+offset[1])] = 1
+        return output
 
 
     def isEmpty(self, coord):
         """Is cell at coord empty?
-        
-        @param coord: (row, column) pair.
+
+        @param coord: (row, column) pair; supports negative indices.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
+        if len(coord) != len(self.W.shape):
+            raise ValueError("malformed gridworld coord.")
         if self.W[coord[0]][coord[1]] == 0:
             return True
         else:
@@ -158,8 +189,8 @@ class GridWorld:
             plt.axis([xmin, xmax, ymin, ymax])
         for p in self.init_list:
             plt.text(p[1], p[0], "I", size=font_pt)
-        for p in self.goal_list:
-            plt.text(p[1], p[0], "G", size=font_pt)
+        for n,p in enumerate(self.goal_list):
+            plt.text(p[1], p[0], "G" + str(n), size=font_pt)
         
     def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
         """Return pretty-for-printing string.
@@ -168,6 +199,7 @@ class GridWorld:
                           row and column labels along the outer edges.
         @param line_prefix: prefix each line with this string.
         """
+        compress = lambda p: [ p[n] for n in range(len(p)-1) if p[n] != p[n+1] ]
         # See comments in code for the method loads regarding values in W
         if self.W is None:
             return ""
@@ -188,10 +220,14 @@ class GridWorld:
                 return "^"
             elif y1 < y2:
                 return "v"
+            else: # c1 == c2
+                return "."
         if show_grid:
             out_str += "  " + "".join([str(k).rjust(2) for k in range(self.W.shape[1])]) + "\n"
         else:
             out_str += "-"*(self.W.shape[1]+2) + "\n"
+        #if path:
+        #    path = compress(path)
         for i in range(self.W.shape[0]):
             out_str += line_prefix
             if show_grid:
@@ -212,7 +248,7 @@ class GridWorld:
                         else:
                             out_str += "G"
                     elif (i,j) in path:
-                        out_str += direct((i,j), path[path.index((i,j))+1 % len(path)])
+                        out_str += direct((i,j), path[(path.index((i,j))+1) % len(path)])
                     else:
                         out_str += " "
                 elif self.W[i][j] == 1:
@@ -228,6 +264,7 @@ class GridWorld:
         return out_str
 
     def size(self):
+        """Return size of gridworld as a tuple in row-major order."""
         if self.W is None:
             return (0, 0)
         else:
@@ -344,6 +381,33 @@ class GridWorld:
             out_str += "\n"
         return out_str
 
+
+    def dumpsubworld(self, size, offset=(0, 0), prefix="Y"):
+        """Generate new GridWorld instance from part of current one.
+
+        Does not perform automatic truncation (to make desired
+        subworld fit); instead a ValueError exception is raised.
+        Possible initial positions and goals are not included in the
+        returned GridWorld instance.
+
+        @param size: (height, width)
+        @param prefix: String to be used as prefix for naming
+                       subgridworld cell variables.
+        @rtype: L{GridWorld}
+        """
+        if self.W is None:
+            raise ValueError("Gridworld does not exist.")
+        if len(size) != len(self.W.shape) or len(offset) != len(self.W.shape):
+            raise ValueError("malformed size or offset.")
+        if offset[0] < 0 or offset[0] >= self.W.shape[0] or offset[1] < 0 or offset[1] >= self.W.shape[1]:
+            raise ValueError("offset is out of bounds.")
+        if size[0] < 1 or size[1] < 1 or offset[0]+size[0] > self.W.shape[0] or offset[1]+size[1] > self.W.shape[1]:
+            raise ValueError("unworkable subworld size, given offset.")
+        sub = GridWorld(prefix=prefix)
+        sub.W = self.W[offset[0]:(offset[0]+size[0]), offset[1]:(offset[1]+size[1])].copy()
+        return sub
+
+
     def dumpPPartition(self, side_lengths=(1., 1.), offset=(0., 0.)):
         """Return proposition-preserving partition from this gridworld.
 
@@ -421,8 +485,9 @@ class GridWorld:
         return part
     
     def discreteTransitionSystem(self):
-        """ Write a discrete transition system suitable for NuSMV synthesis.
-        Unlike dumpPPartition, this does not create polytopes.
+        """ Write a discrete transition system suitable for synthesis.
+        Unlike dumpPPartition, this does not create polytopes; it is 
+        nonetheless useful and computationally less expensive.
         
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
@@ -453,8 +518,13 @@ class GridWorld:
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
         return disc_dynamics
         
-    def spec(self):
+    def spec(self, offset=(0, 0), controlled_dyn=True):
         """Return GRSpec instance describing this gridworld.
+
+        The offset argument is motivated by the use-case of multiple
+        agents whose moves are governed by separate "gridworlds" but
+        who interact in a shared space; with an offset, we can make
+        "sub-gridworlds" and enforce rules like mutual exclusion.
 
         Syntax is that of gr1c; in particular, "next" variables are
         primed. For example, x' refers to the variable x at the next
@@ -466,18 +536,30 @@ class GridWorld:
 
         For incorporating this gridworld into an existing
         specification (e.g., respecting external references to cell
-        variable names), see the method importGridWorld of class GRSpec.
+        variable names), see the method L{GRSpec.importGridWorld}.
+
+        @param offset: index offset to apply when generating the
+                       specification; e.g., given prefix of "Y",
+                       offset=(2,1) would cause the variable for the
+                       cell at (0,3) to be named Y_2_4.
+
+        @param controlled_dyn: whether to treat this gridworld as
+                               describing controlled ("system") or
+                               uncontrolled ("environment") variables.
+
+        @rtype: L{GRSpec}
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
         row_low = 0
-        row_high = self.W.shape[0]-1
+        row_high = self.W.shape[0]
         col_low = 0
-        col_high = self.W.shape[1]-1
+        col_high = self.W.shape[1]
         spec_trans = []
+        self.offset = offset
         # Safety, transitions
-        for i in range(row_low, row_high+1):
-            for j in range(col_low, col_high+1):
+        for i in range(row_low, row_high):
+            for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
                     continue  # Cannot start from an occupied cell.
                 spec_trans.append(self[i,j]+" -> (")
@@ -487,20 +569,20 @@ class GridWorld:
                     spec_trans[-1] += " | " + self[i-1,j]+"'"
                 if j > col_low and self.W[i][j-1] == 0:
                     spec_trans[-1] += " | " + self[i,j-1]+"'"
-                if i < row_high and self.W[i+1][j] == 0:
+                if i < row_high-1 and self.W[i+1][j] == 0:
                     spec_trans[-1] += " | " + self[i+1,j]+"'"
-                if j < col_high and self.W[i][j+1] == 0:
+                if j < col_high-1 and self.W[i][j+1] == 0:
                     spec_trans[-1] += " | " + self[i,j+1]+"'"
                 spec_trans[-1] += ")"
 
         # Safety, static
-        for i in range(row_low, row_high+1):
-            for j in range(col_low, col_high+1):
+        for i in range(row_low, row_high):
+            for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
                     spec_trans.append("!(" + self[i,j]+"'" + ")")
 
         # Safety, mutex
-        pos_indices = [k for k in itertools.product(range(row_low, row_high+1), range(col_low, col_high+1))]
+        pos_indices = [k for k in itertools.product(range(row_low, row_high), range(col_low, col_high))]
         disj = []
         for outer_ind in pos_indices:
             conj = []
@@ -522,31 +604,41 @@ class GridWorld:
         spec_trans.append("\n| ".join(disj))
 
         sys_vars = []
-        for i in range(self.W.shape[0]):
-            for j in range(self.W.shape[1]):
+        for i in range(row_low, row_high):
+            for j in range(col_low, col_high):
                 sys_vars.append(self[i,j])
 
         initspec = []
         for loc in self.init_list:
             mutex = [self[loc[0],loc[1]]]
-            mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self[loc[0],loc[1]]])
+            mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self[loc]])
             initspec.append("(" + " & ".join(mutex) + ")")
         init_str = " | ".join(initspec)
 
         spec_goal = []
         for loc in self.goal_list:
-            spec_goal.append(self.prefix+"_"+str(loc[0])+"_"+str(loc[1]))
+            spec_goal.append(self[loc])
         
-        #oldspec = self.spec_old()
+        #oldspec = self.spec_old(offset, controlled_dyn)
         #assert(spec_trans == oldspec.sys_safety)
         #assert(sys_vars == oldspec.sys_vars)
         #assert(init_str == oldspec.sys_init[0])
         #assert(spec_goal == oldspec.sys_prog)
-        return GRSpec(sys_vars=sys_vars, sys_init=init_str,
-                      sys_safety=spec_trans, sys_prog=spec_goal)
+        self.offset = (0, 0)
+        if controlled_dyn:
+            return GRSpec(sys_vars=sys_vars, sys_init=init_str,
+                          sys_safety=spec_trans, sys_prog=spec_goal)
+        else:
+            return GRSpec(env_vars=sys_vars, env_init=init_str,
+                          env_safety=spec_trans, env_prog=spec_goal)
                       
-    def spec_old(self):
+    def spec_old(self, offset=(0, 0), controlled_dyn=True):
         """Return GRSpec instance describing this gridworld.
+
+        The offset argument is motivated by the use-case of multiple
+        agents whose moves are governed by separate "gridworlds" but
+        who interact in a shared space; with an offset, we can make
+        "sub-gridworlds" and enforce rules like mutual exclusion.
 
         Syntax is that of gr1c; in particular, "next" variables are
         primed. For example, x' refers to the variable x at the next
@@ -558,7 +650,18 @@ class GridWorld:
 
         For incorporating this gridworld into an existing
         specification (e.g., respecting external references to cell
-        variable names), see the method importGridWorld of class GRSpec.
+        variable names), see the method L{GRSpec.importGridWorld}.
+
+        @param offset: index offset to apply when generating the
+                       specification; e.g., given prefix of "Y",
+                       offset=(2,1) would cause the variable for the
+                       cell at (0,3) to be named Y_2_4.
+
+        @param controlled_dyn: whether to treat this gridworld as
+                               describing controlled ("system") or
+                               uncontrolled ("environment") variables.
+
+        @rtype: L{GRSpec}
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
@@ -572,24 +675,24 @@ class GridWorld:
             for j in range(col_low, col_high+1):
                 if self.W[i][j] == 1:
                     continue  # Cannot start from an occupied cell.
-                spec_trans.append(self.prefix+"_"+str(i)+"_"+str(j)+" -> (")
+                spec_trans.append(self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+" -> (")
                 # Normal transitions:
-                spec_trans[-1] += self.prefix+"_"+str(i)+"_"+str(j)+"'"
+                spec_trans[-1] += self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+"'"
                 if i > row_low and self.W[i-1][j] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i-1)+"_"+str(j)+"'"
+                    spec_trans[-1] += " | " + self.prefix+"_"+str(i-1+offset[0])+"_"+str(j+offset[1])+"'"
                 if j > col_low and self.W[i][j-1] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i)+"_"+str(j-1)+"'"
+                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+offset[0])+"_"+str(j-1+offset[1])+"'"
                 if i < row_high and self.W[i+1][j] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+1)+"_"+str(j)+"'"
+                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+1+offset[0])+"_"+str(j+offset[1])+"'"
                 if j < col_high and self.W[i][j+1] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i)+"_"+str(j+1)+"'"
+                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+offset[0])+"_"+str(j+1+offset[1])+"'"
                 spec_trans[-1] += ")"
 
         # Safety, static
         for i in range(row_low, row_high+1):
             for j in range(col_low, col_high+1):
                 if self.W[i][j] == 1:
-                    spec_trans.append("!(" + self.prefix+"_"+str(i)+"_"+str(j)+"'" + ")")
+                    spec_trans.append("!(" + self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+"'" + ")")
 
         # Safety, mutex
         first_subformula = True
@@ -603,7 +706,7 @@ class GridWorld:
             if outer_ind == (-1, -1):
                 spec_trans[-1] += "(" + self.prefix+"_n_n'"
             else:
-                spec_trans[-1] += "(" + self.prefix+"_"+str(outer_ind[0])+"_"+str(outer_ind[1])+"'"
+                spec_trans[-1] += "(" + self.prefix+"_"+str(outer_ind[0]+offset[0])+"_"+str(outer_ind[1]+offset[1])+"'"
             for inner_ind in pos_indices:
                 if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
                     or outer_ind == inner_ind):
@@ -611,31 +714,35 @@ class GridWorld:
                 if inner_ind == (-1, -1):
                     spec_trans[-1] += " & (!" + self.prefix+"_n_n')"
                 else:
-                    spec_trans[-1] += " & (!" + self.prefix+"_"+str(inner_ind[0])+"_"+str(inner_ind[1])+"'" + ")"
+                    spec_trans[-1] += " & (!" + self.prefix+"_"+str(inner_ind[0]+offset[0])+"_"+str(inner_ind[1]+offset[1])+"'" + ")"
             spec_trans[-1] += ")"
             first_subformula = False
 
-        sys_vars = []
+        pvars = []
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
-                sys_vars.append(self.prefix+"_"+str(i)+"_"+str(j))
+                pvars.append(self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1]))
 
         init_str = ""
         for loc in self.init_list:
             if len(init_str) > 0:
                 init_str += " | "
-            init_str += "(" + self.prefix+"_"+str(loc[0])+"_"+str(loc[1])
-            init_str_mutex = " & ".join(["!"+ovar for ovar in sys_vars if ovar != self.prefix+"_"+str(loc[0])+"_"+str(loc[1])])
+            init_str += "(" + self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1])
+            init_str_mutex = " & ".join(["!"+ovar for ovar in pvars if ovar != self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1])])
             if len(init_str_mutex) > 0:
                 init_str += " & " + init_str_mutex
             init_str += ")"
 
         spec_goal = []
         for loc in self.goal_list:
-            spec_goal.append(self.prefix+"_"+str(loc[0])+"_"+str(loc[1]))
+            spec_goal.append(self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1]))
 
-        return GRSpec(sys_vars=sys_vars, sys_init=init_str,
-                      sys_safety=spec_trans, sys_prog=spec_goal)
+        if controlled_dyn:
+            return GRSpec(sys_vars=pvars, sys_init=init_str,
+                          sys_safety=spec_trans, sys_prog=spec_goal)
+        else:
+            return GRSpec(env_vars=pvars, env_init=init_str,
+                          env_safety=spec_trans, env_prog=spec_goal)
 
 
 def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
@@ -728,6 +835,81 @@ def unoccupied(size, prefix="Y"):
         raise TypeError("invalid gridworld size.")
     return GridWorld(str(size[0])+" "+str(size[1]), prefix="Y")
 
+def add_trolls(Y, troll_list, prefix="X"):
+    """Create GR(1) specification with troll-like obstacles.
+
+    Trolls are introduced into the specification with names derived
+    from the given prefix and a number (matching the order in troll_list).
+
+    @type Y: L{GridWorld}
+    @param Y: The controlled gridworld, describing in particular
+              static obstacles that must be respected by the trolls.
+
+    @param troll_list: List of pairs of center position, to which the
+                       troll must always eventually return, and radius
+                       defining the extent of the trollspace.  The
+                       radius is measured using infinity-norm.
+    
+    @rtype: (L{GRSpec}, list)
+
+    @return: Returns (spec, moves_N) where spec is the specification
+             incorporating all of the trolls, and moves_N is a list of
+             lists of states (where "state" is given as a dictionary
+             with keys of variable names), where the length of moves_N
+             is equal to the number of trolls, and each element of
+             moves_N is a list of possible states of that the
+             corresponding troll (dynamic obstacle).
+    """
+    X = []
+    X_ID = -1
+    moves_N = []
+    (num_rows, num_cols) = Y.size()
+    for (center, radius) in troll_list:
+        if center[0] >= num_rows or center[0] < 0 or center[1] >= num_cols or center[1] < 0:
+            raise ValueError("troll center is outside of gridworld")
+        t_offset = (max(0, center[0]-radius), max(0, center[1]-radius))
+        t_size = [center[0]-t_offset[0]+radius+1, center[1]-t_offset[1]+radius+1]
+        if t_offset[0]+t_size[0] >= num_rows:
+            t_size[0] = num_rows-t_offset[0]
+        if t_offset[1]+t_size[1] >= num_cols:
+            t_size[1] = num_cols-t_offset[1]
+        t_size = (t_size[0], t_size[1])
+        X_ID += 1
+        X.append((t_offset, Y.dumpsubworld(t_size, offset=t_offset, prefix=prefix+"_"+str(X_ID))))
+        X[-1][1].goal_list = [(center[0]-t_offset[0], center[1]-t_offset[1])]
+        X[-1][1].init_list = [(center[0]-t_offset[0], center[1]-t_offset[1])]
+        moves_N.append([])
+        for i in range(t_size[0]):
+            for j in range(t_size[1]):
+                moves_N[-1].append(X[-1][1].state((i,j), offset=t_offset))
+
+    spec = GRSpec()
+    spec.importGridWorld(Y, controlled_dyn=True)
+    for Xi in X:
+        spec.importGridWorld(Xi[1], offset=Xi[0], controlled_dyn=False)
+
+    # Mutual exclusion
+    for i in range(Y.size()[0]):
+        for j in range(Y.size()[1]):
+            for Xi in X:
+                if i >= Xi[0][0] and i < Xi[0][0]+Xi[1].size()[0] and j >= Xi[0][1] and j < Xi[0][1]+Xi[1].size()[1]:
+                    spec.sys_safety.append("!("+Y[i,j]+"' & "+Xi[1].prefix+"_"+str(i)+"_"+str(j)+"')")
+
+    return (spec, moves_N)
+
+
+def unoccupied(size, prefix="Y"):
+    """Generate entirely unoccupied gridworld of given size.
+    
+    @param size: a pair, indicating number of rows and columns.
+    @param prefix: String to be used as prefix for naming gridworld
+                   cell variables.
+    @rtype: L{GridWorld}
+    """
+    if len(size) < 2:
+        raise TypeError("invalid gridworld size.")
+    return GridWorld(str(size[0])+" "+str(size[1]), prefix="Y")
+
 
 def extract_coord(var_name):
     """Assuming prefix_R_C format, return (prefix,row,column) tuple.
@@ -763,27 +945,41 @@ def prefix_filt(d, prefix):
                 match_list.append(k)
     return dict([(k, d[k]) for k in match_list])
     
-def extractPath(aut):
+def extractPath(aut, prefix=None):
     """Extract a path from a gridworld automaton"""
     s = aut.getAutState(0)
+    last = None
     path = []
     visited = [0]
     while 1:
+        updated = False
         for p in s.state:
-            if s.state[p]:
+            if (not prefix or p.startswith(prefix)) and s.state[p]:
                 try:
                     c = extract_coord(p)
                     if c:
                         path.append(c[1:])
+                        last = c[1:]
+                        updated = True
                 except:
                     pass
+        if not updated:
+            # Robot has not moved, even out path lengths
+            path.append(last)
         # next state
         if len(s.transition) > 0:
             if s.transition[0] in visited:
                 # loop detected
-                return path
+                break
             visited.append(s.transition[0])
             s = aut.getAutState(s.transition[0])
         else:
             # dead-end, return
-            return path
+            break
+    first = [ x for x in path if x ][0]
+    for i in range(len(path)):
+        if path[i] is None:
+            path[i] = first
+        else:
+            break
+    return path

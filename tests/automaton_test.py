@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """
-SCL; 29 Dec 2011.
+SCL; 26 Jul 2012.
 """
 
 from StringIO import StringIO
-from tulip.automaton import Automaton
+import copy
+from tulip.automaton import Automaton, AutomatonState
 
 
 REFERENCE_AUTFILE = """
@@ -74,3 +75,55 @@ def automaton2xml_test():
     assert aut == ref_aut
     aut.states[0].transition = []
     assert aut != ref_aut
+
+
+def node_copy_test():
+    node1 = AutomatonState(id=0, state={"nyan":0, "cat":1}, transition=[0])
+    node2 = node1.copy()
+    assert node2 is not node1
+    assert node2.id == 0
+    assert node2.state == {"nyan":0, "cat":1}
+    assert node2.transition == [0]
+
+
+class basic_Automaton_test():
+    def setUp(self):
+        self.empty_aut = Automaton()
+        self.singleton = Automaton(states_or_file=[AutomatonState(id=0, state={"x":0}, transition=[0])])
+        self.chain_len = 8
+        base_state = dict([("x"+str(k),0) for k in range(self.chain_len)])
+        self.chain_aut = Automaton()
+        for k in range(self.chain_len):
+            base_state["x"+str(k)] = 1
+            self.chain_aut.addAutState(AutomatonState(id=k, state=base_state, transition=[(k+1)%self.chain_len]))
+            base_state["x"+str(k)] = 0
+
+    def tearDown(self):
+        pass
+
+    def test_equality(self):
+        assert self.empty_aut == self.empty_aut
+        assert self.singleton == self.singleton
+        assert self.empty_aut != self.singleton
+
+    def test_size(self):
+        assert len(self.empty_aut) == 0  # Should give same result as size()
+        assert self.empty_aut.size() == 0
+        assert self.singleton.size() == 1
+        assert len(self.chain_aut) == self.chain_len
+
+    def test_copy(self):
+        A = self.singleton.copy()
+        assert len(A) == 1
+        B = copy.copy(self.singleton)
+        assert A == B
+        assert A is not B
+
+        C = self.chain_aut.copy()
+        assert len(C) == self.chain_len
+        assert C == self.chain_aut
+        base_state = dict([("x"+str(k),0) for k in range(self.chain_len)])
+        base_state["x0"] = 1
+        assert C.findAutState(base_state) != -1
+        C.findAutState(base_state).state["x0"] = 0
+        assert C != self.chain_aut

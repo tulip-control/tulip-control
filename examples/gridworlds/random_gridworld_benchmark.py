@@ -94,10 +94,6 @@ if __name__ == "__main__":
                             args.start_size, args.world_iterations, args.timeout)
     solvers = [ "jtlv", "NuSMV", "gr1c", "SPIN" ]
     disqualified = { k : False for k in solvers }
-    
-    if iters == 1 and wall_density > 0:
-        # Set iterations so wall_density increases 0..1
-        iters = int(1/wall_density)
 
     signal.signal(signal.SIGTERM, termhandler)
     try:
@@ -111,8 +107,7 @@ if __name__ == "__main__":
                 else:
                     wdensity += args.wall_density
                 if wdensity > 1:
-                    print "Maximum wall density exceeded!"
-                    break
+                    wdensity -= 1
                 try:
                     Z = gw.random_world((dim, dim),
                                         wall_density=wdensity,
@@ -120,7 +115,8 @@ if __name__ == "__main__":
                                         num_goals=NUM_GOALS)
                 except ValueError:
                     # World full!
-                    break
+                    print "Could not create world due to insufficient empty space"
+                    continue
                 gr1spec = Z.spec()
                 print Z
                 
@@ -238,7 +234,7 @@ if __name__ == "__main__":
                             chcpuoffset = chcputime()
                             if jtlvint.computeStrategy(smv_file="random_grid_jtlv.smv",
                                     spc_file="random_grid_jtlv.spc", aut_file="random_grid_jtlv.aut",
-                                    file_exist_option="r", heap_size="-Xmx5m"):
+                                    file_exist_option="r"):
                                 aut = automaton.Automaton("random_grid_jtlv.aut")
                                 assert(verify_path(Z, gw.extractPath(aut)))
                                 nstates = len(aut)

@@ -34,13 +34,16 @@
 #
 # $Id:$
 # SPIN interface
-from nusmvint import generateSolverInput
-import os
+import os, copy, re
 from subprocess import Popen, PIPE, call
 from contextlib import contextmanager
 from errorprint import printWarning, printError
+import ltl_parse, solver
 
-class SPINError(Exception):
+# total (OS + user) CPU time of children
+chcputime = (lambda: (lambda x: x[2] + x[3])(os.times()))
+
+class SPINError(solver.SolverException):
     pass
 
 @contextmanager
@@ -57,23 +60,36 @@ prv = lambda x: os.path.join("..", x)
 class SPINInstance:
     SPIN_PATH="/home/nick/SURF/Spin/Src6.2.2/spin"
     def __init__(self, model="tmp.pml", out="tmp.aut",
-                    path=SPIN_PATH, verbose=0):
+                    path=SPIN_PATH, preduce=True, verbose=0):
         (self.model, self.out, self.path) = (model, out, path)
+        (self.t_start, self.t_time) = (None, None)
         try:
             os.mkdir("pan")
         except OSError:
             # PAN directory already exists
             pass
         with cd("pan"):
-            call([self.path, "-a", prv(self.model)], stdout=PIPE)
-            call("gcc -o pan pan.c", shell=True)
+            spin = Popen([self.path, "-O", "-a", prv(self.model)], stdout=PIPE, stderr=PIPE)
+            (out, err) = spin.communicate()
+            if verbose > 0:
+                print out
+            if err:
+                raise SPINError(err)
+            if preduce:
+                shstr = "gcc -o pan pan.c"
+            else:
+                shstr = "gcc -DNOREDUCE -o pan pan.c"
+            if not call(shstr, shell=True) == 0:
+                raise SPINError("Could not compile verifier")
     def generateTrace(self, verbose=0):
+        # CPU timing does not include preparation of verifier
+        self.t_start = chcputime()
         realizable = False
         with open(self.out, 'w') as f:
             oldcwd = os.getcwd()
             (model_dn, model_fn) = os.path.split(self.model)
             with cd(model_dn):
-                pan = Popen(oldcwd + "/pan/pan -a", shell=True, stdout=PIPE)
+                pan = Popen(oldcwd + "/pan/pan -a", shell=True, stdout=PIPE, stderr=PIPE)
                 (out, err) = pan.communicate()
                 if verbose > 0:
                     print out
@@ -81,19 +97,117 @@ class SPINInstance:
                     raise SPINError(err)
                 if "acceptance cycle" in out:
                     realizable = True
-                spin = Popen([self.path, "-t", "-p", "-g", "-w", model_fn],
+                spin = Popen([self.path, "-t", "-p", "-g", "-w", "-l", model_fn],
                             stdout=f, stderr=PIPE)
                 (out, err) = spin.communicate()
+                self.t_time = chcputime() - self.t_start
                 if err:
                     raise SPINError(err)
                 return realizable
-                    
-def computeStrategy(pml_file, aut_file, verbose=0):
-    spin = SPINInstance(pml_file, aut_file, verbose=verbose)
+    def time(self):
+        return self.t_time
+
+def check(pml_file, aut_file, verbose=0, **opts):
     try:
-        return spin.generateTrace(verbose)
+        if "preduce" in opts:
+            spin = SPINInstance(pml_file, aut_file, preduce=opts["preduce"],
+                verbose=verbose)
+        else:
+            spin = SPINInstance(pml_file, aut_file, verbose=verbose)
+        result = spin.generateTrace(verbose)
     except SPINError as e:
         printError("SPIN error: " + e.message)
+    return (spin, result)
+       
+def computeStrategy(pml_file, aut_file, verbose=0):
+    (spin, result) = check(pml_file, aut_file, verbose)
+    return result
+
+def modularize(spec, name, v=None):
+    def f(t):
+        if isinstance(t, ltl_parse.ASTVar) and (v is None or t.val in v):
+            t.val = name + ":" + t.val
+        return t
+    return spec.map(f)
     
-def generateSPINInput(*args, **kwargs):
-    generateSolverInput(*args, solver='SPIN', **kwargs)
+def decanonize(spec, slvi):
+    def f(t):
+        if isinstance(t, ltl_parse.ASTVar):
+            t.val = slvi.varName(t.val)
+        return t
+    return spec.map(f)
+    
+def promelaVar(var, val, initial=None):
+    if val == "boolean":
+        if initial:
+            if isinstance(initial, list):
+                raise TypeError("SPIN interface does not accept multiple initials")
+            return "\tbool %s = %s;\n" % (var, str(initial))
+        else:
+            # default initial bool = false
+            return "\tbool %s = false;\n" % var
+    else:
+        # assume integer
+        if initial:
+            if isinstance(initial, list):
+                raise TypeError("SPIN interface does not accept multiple initials")
+            return "\tint %s = %s;\n" % (var, str(initial))
+        else:
+            # default initial int = 0
+            return "\tint %s = 0;\n" % var
+
+def writePromela(slvi):
+    (pml_file, spec, modules, globalv) = (slvi.out_file, slvi.spec, slvi.modules, slvi.globals)
+    if (not os.path.exists(os.path.abspath(os.path.dirname(pml_file)))):
+        if (verbose > 0):
+            printWarning('Folder for pml_file ' + pml_file + \
+                             ' does not exist. Creating...', obj=self)
+        os.mkdir(os.path.abspath(os.path.dirname(pml_file)))
+    
+    spec = copy.deepcopy(spec)
+    f = open(pml_file, 'w')
+    for var, (val, initial) in globalv.iteritems():
+        f.write(promelaVar(var, val, initial))
+    spec = [ decanonize(s, slvi) for s in spec ]
+    
+    for m in modules:
+        if m["instances"] > 1:
+            for n in range(m["instances"]):
+                modspec = copy.deepcopy(m["spec"])
+                modspec = modularize(modspec, "%s[%d]" % (m["name"], n), m["vars"].keys())
+                spec.append(modspec)
+        else:
+            # Seems to be a bug in SPIN: for process P with local variable x and
+            # exactly one instance, P:x works but P[0]:x does not
+            for n in range(m["instances"]):
+                modspec = copy.deepcopy(m["spec"])
+                modspec = modularize(modspec, m["name"], m["vars"].keys())
+                spec.append(modspec)
+    
+    for m in modules:
+        # Model
+        f.write("active [%d] proctype %s() {\n" % (m["instances"], m["name"]))
+        if m["vars"]:
+            for var, val in m["vars"].iteritems():
+                if var in m["initials"]:
+                    f.write(promelaVar(var, val, m["initials"][var]))
+                else:
+                    f.write(promelaVar(var, val))
+        # Dynamics
+        if m["dynamics"]:
+            f.write("\tdo\n")
+            (trans, disc_cont_var) = m["dynamics"]
+            for from_region in xrange(0, len(trans)):
+                to_regions = [j for j in range(0, len(trans)) if \
+                                  trans[j][from_region]]
+                for to_region in to_regions:
+                    f.write("\t\t:: %s == %d -> %s = %d\n" % (disc_cont_var, from_region,
+                                disc_cont_var, to_region))
+            f.write("\tod\n}\n")
+        
+    # Spec
+    spec = reduce(ltl_parse.ASTAnd.new, spec)
+    # Negate & write to file
+    spec = ltl_parse.ASTNot.new(spec)
+    f.write("ltl {" + spec.toPromela() + "}\n")
+    f.close()

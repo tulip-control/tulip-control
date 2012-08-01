@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SCL; 28 June 2012.
+SCL; 5 July 2012.
 """
 
 import numpy as np
@@ -11,7 +11,6 @@ from tulip.gr1cint import check_realizable
 REFERENCE_GWFILE = """
 # A very small example, realizable by itself.
 6 10
-
 *  G*
   ***  ***
          *
@@ -41,6 +40,11 @@ class GridWorld_test:
         assert self.X[-1,0] == self.prefix+"_"+str(5)+"_"+str(0)
         assert self.X[-1,-2] == self.prefix+"_"+str(5)+"_"+str(8)
 
+    def test_state(self):
+        assert self.X.state((2,3)) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 1, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
+        assert self.X.state((-1,0)) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 1, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
+        assert self.X.state((-1,-1)) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 1, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
+
     def test_equality(self):
         assert self.X == gw.GridWorld(REFERENCE_GWFILE)
         Y = gw.GridWorld()
@@ -53,6 +57,28 @@ class GridWorld_test:
 
     def test_spec_realizable(self):
         assert check_realizable(self.X.spec(), verbose=1)
+
+    def test_isEmpty(self):
+        assert not self.X.isEmpty((0, 0))
+        assert self.X.isEmpty((0, 1))
+        assert not self.X.isEmpty((-1, 0))
+        assert self.X.isEmpty((0, -1))
+
+    def test_dumpsubworld(self):
+        # No offset
+        X_local = self.X.dumpsubworld((2,4), prefix="X")
+        assert X_local.size() == (2, 4)
+        assert X_local[0,0] == "X_0_0"
+        assert not X_local.isEmpty((0,0))
+        assert X_local.isEmpty((0,1))
+
+        # Offset
+        X_local = self.X.dumpsubworld((2,4), offset=(1,0), prefix="Xoff")
+        assert X_local.size() == (2, 4)
+        assert X_local[0,0] == "Xoff_0_0"
+        assert X_local.isEmpty((0,0))
+        assert X_local.isEmpty((0,1))
+        assert not X_local.isEmpty((0,3))
 
 
 def extract_coord_test():

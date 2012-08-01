@@ -76,6 +76,13 @@ class AutomatonState:
         return "State: " + str(self.state) + "\n" + \
                 "Transitions: " + str(self.transition)
 
+    def __copy__(self):
+        return AutomatonState(self.id, self.state, self.transition)
+        
+    def copy(self):
+        """Return copy of this automaton node."""
+        return self.__copy__()
+
 
 ###################################################################
 
@@ -142,13 +149,20 @@ class Automaton:
     def __len__(self):
         """Return number of nodes."""
         return len(self.states)
+
+    def __copy__(self):
+        return Automaton(states_or_file=[s.copy() for s in self.states])
+
+    def copy(self):
+        """Return copy of this Automaton."""
+        return self.__copy__()
         
     def loadSPINAut(self, aut_file, varnames=[], verbose=0):
-        self.loadLinearAut(aut_file, '\(state (\d+)\)', '^\s*(\w+) = (\w+)',
+        self.loadLinearAut(aut_file, '\(state (\d+)\)', '^\s*((?:\w+\(\d+\):)?\w+) = (\w+)',
                     "<<<<<START OF CYCLE>>>>>", varnames, verbose)
         
     def loadSMVAut(self, aut_file, varnames=[], verbose=0):
-        self.loadLinearAut(aut_file, 'State: \d+\.(\d+)', '(\w+) = (\w+)',
+        self.loadLinearAut(aut_file, 'State: \d+\.(\d+)', '([\w.]+) = (\w+)',
                      "-- Loop starts here", varnames, verbose)
         
     def loadLinearAut(self, aut_file, state_regex, assign_regex, loop_text,
@@ -213,7 +227,7 @@ class Automaton:
             self.setAutStateTransition(stateID, [], verbose)
         if closable:
             f.close()
-    
+
     def loadFile(self, aut_file, varnames=[], verbose=0):
         """
         Construct an automation from aut_file.
@@ -736,10 +750,7 @@ class Automaton:
         return True
 
     def size(self):
-        """
-        Return the number of states in this Automaton object.
-        """
-        return len(self.states)
+        return self.__len__()
 
     def addAutState(self, aut_state):
         """
@@ -758,7 +769,7 @@ class Automaton:
         """
         Return an AutomatonState object stored in this Automaton object 
         whose id is `aut_state_id`. 
-        Return -1 if such AutomatonState object does not exist.
+        Raise IndexError if such AutomatonState object does not exist.
 
         Input:
 
@@ -774,7 +785,7 @@ class Automaton:
             if (aut_state_index >= 0):
                 return self.states[aut_state_index]
             else:
-                return -1
+                raise IndexError("State ID " + str(aut_state_id) + " not found.")
 
     def getAutInSet(self, aut_state_id):
         """Find all nodes that include given ID in their outward transitions.
@@ -817,13 +828,14 @@ class Automaton:
         - `aut_state_state`: a dictionary that represents the new state of the 
           AutomatonState object.
         """
-        aut_state = self.getAutState(aut_state_id)
-        if (isinstance(aut_state, AutomatonState)):
+        try:
+            aut_state = self.getAutState(aut_state_id)
             aut_state.state = aut_state_state
             if (verbose > 0):
                 print 'Setting state of AutomatonState ' + str(aut_state_id) + \
                     ': ' + str(aut_state_state)
-        else:
+        except IndexError:
+            # State does not already exist, add it
             self.addAutState(AutomatonState(id=aut_state_id, state=aut_state_state, \
                                                 transition=[]))
             if (verbose > 0):

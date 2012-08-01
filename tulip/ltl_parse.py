@@ -175,7 +175,10 @@ class ASTBinary(ASTNode):
         if isinstance(self, ASTBiTempOp):
             self.operator = TEMPORAL_OP_MAP[tok[1]]
         elif isinstance(self, ASTComparator) or isinstance(self, ASTArithmetic):
-            self.operator = tok[1]
+            if tok[1] == "==":
+                self.operator = "="
+            else:
+                self.operator = tok[1]
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
     def flatten(self, flattener=str, op=None):
@@ -228,6 +231,8 @@ class ASTComparator(ASTBinary):
     def toPromela(self):
         if self.operator == "=":
             return self.flatten(flatten_Promela, "==")
+        else:
+            return self.flatten(flatten_Promela)
 class ASTArithmetic(ASTBinary):
     def op(self): return self.operator
 
@@ -235,8 +240,8 @@ class ASTArithmetic(ASTBinary):
 restricted_alphas = filter(lambda x: x not in "GFX", alphas)
 # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
 bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
-var = ~bool_keyword + (Word(restricted_alphas, alphanums + "." + "_") | \
-        Regex("[A-Za-z][0-9_][A-Za-z0-9._]*") | QuotedString('"')).setParseAction(ASTVar)
+var = ~bool_keyword + (Word(restricted_alphas, alphanums + "._:") | \
+        Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')).setParseAction(ASTVar)
 atom = var | bool_keyword.setParseAction(ASTBool)
 number = var | Word(nums).setParseAction(ASTNum)
 
@@ -262,7 +267,7 @@ arith_expr = operatorPrecedence(number,
         ])
 
 # integer comparison expression
-comparison_expr = Group(arith_expr + oneOf("< <= > >= != =") + arith_expr).setParseAction(ASTComparator)
+comparison_expr = Group(arith_expr + oneOf("< <= > >= != = ==") + arith_expr).setParseAction(ASTComparator)
 
 proposition = comparison_expr | atom
 
@@ -279,7 +284,7 @@ ltl_expr = operatorPrecedence(proposition,
         (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
         ("->", 2, opAssoc.RIGHT, ASTImp),
         ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        (oneOf("= !="), 2, opAssoc.RIGHT, ASTComparator),
+        (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
         (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp),
         ])
 ltl_expr.ignore(LineStart() + "--" + restOfLine)
