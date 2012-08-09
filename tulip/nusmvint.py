@@ -47,7 +47,7 @@ class NuSMVError(solver.SolverException):
     pass
 
 class NuSMVInstance:
-    NUSMV_PATH = '/home/nick/SURF/NuSMV-2.5.4/nusmv/NuSMV'
+    NUSMV_PATH = os.path.join(os.path.dirname(__file__), "solvers/NuSMV")
     def __init__(self, model='tmp.smv', out='tmp.aut', path=NUSMV_PATH, verbose=0):
         self.model = model
         self.out = out
@@ -86,41 +86,59 @@ def modularize(spec, name):
         return t
     spec = spec.map(f)
     return spec
+    
+def SMV_transitions(trans, var, turns=False):
+    s = "\t\tnext(" + var + ") := case\n"
+    for from_region in xrange(0, len(trans)):
+        to_regions = [j for j in range(0, len(trans)) if \
+                          trans[j][from_region]]
+        if turns:
+            s += "\t\t\t%s = %d & turn = mine : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
+        else:
+            s += "\t\t\t%s = %d : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
+    if turns: s += "\t\t\tturn != mine : %s;\n" % var
+    s += "\t\tesac;\n"
+    return s
 
-def writeSMV(smv_file, spec, modules):
+def writeSMV(smv_file, spec, modules, turns=False):
     if (not os.path.exists(os.path.abspath(os.path.dirname(smv_file)))):
         if (verbose > 0):
             printWarning('Folder for smv_file ' + smv_file + \
                              ' does not exist. Creating...', obj=self)
         os.mkdir(os.path.abspath(os.path.dirname(smv_file)))
     spec = spec[:]
-    def SMV_transitions(trans, var):
-        s = "\t\tnext(" + var + ") := case\n"
-        for from_region in xrange(0, len(trans)):
-            to_regions = [j for j in range(0, len(trans)) if \
-                              trans[j][from_region]]
-            s += "\t\t\t" + var + " = " + str(from_region) + " : " + \
-                        "{" + ', '.join(map(str, to_regions)) + "};\n"
-        s += "\t\tesac;\n"
-        return s
-
     
     f = open(smv_file, 'w')
+    turn = 0
     main_vars = {}
     for m in modules:
-        if m["instances"] > 1:
-            for n in range(m["instances"]):
-                main_vars["%s_%d" % (m["name"], n)] = m["name"] + "()"
-                modspec = copy.deepcopy(m["spec"])
-                spec.append(modularize(modspec, "%s_%d" % (m["name"], n)))
-        else:
-            main_vars[m["name"]] = m["name"] + "()"
+        for n in range(m["instances"]):
+            if m["instances"] > 1:
+                instance_name = "%s_%d" % (m["name"], n)
+            else:
+                instance_name = m["name"]
+            if turns:
+                main_vars[instance_name] = m["name"] + "(turn,%d)" % turn
+                turn += 1
+            else:
+                main_vars[instance_name] = m["name"] + "()"
             modspec = copy.deepcopy(m["spec"])
-            spec.append(modularize(modspec, m["name"]))
-    modules = modules + [{"name" : "main", "vars" : main_vars, "dynamics" : None,
-                    "initials" : None }]
+            spec.append(modularize(modspec, instance_name))
+    if turns:
+        main_vars["turn"] = "0 .. %d" % (turn-1)
+        main_trans = [ [ int((n+1) % turn == m) for m in range(turn) ] for n in range(turn) ]
+        main_dynamics = (main_trans, "turn")
+        main_initials = {"turn" : 0}
+    else:
+        main_dynamics = None
+        main_initials = None
+    modules = modules + [{"name" : "main", "vars" : main_vars, "dynamics" : main_dynamics,
+                    "initials" : main_initials }]
     for m in modules:
-        f.write("MODULE %s\n" % m["name"])
+        if turns and not m["name"] == "main":
+            f.write("MODULE %s(turn,mine)\n" % m["name"])
+        else:
+            f.write("MODULE %s\n" % m["name"])
         
         if m["vars"]:
             f.write("\tVAR\n")
@@ -139,7 +157,7 @@ def writeSMV(smv_file, spec, modules):
                 
         if m["dynamics"]:
             # Discrete dynamics - explicit transition system
-            f.write(SMV_transitions(*m["dynamics"]))
+            f.write(SMV_transitions(*m["dynamics"], turns=(turns and not m["name"] == "main")))
         
     spec = reduce(ltl_parse.ASTAnd.new, spec)
     # Negate spec
@@ -151,13 +169,11 @@ def writeSMV(smv_file, spec, modules):
 
     f.close()
     
+# Raises NuSMVError
 def check(smv_file, aut_file, verbose=0, **opts):
     nusmv = NuSMVInstance(smv_file, aut_file, verbose=verbose)
     nusmv.generateTrace()
-    try:
-        result = nusmv.quit()
-    except NuSMVError as e:
-        printError("NuSMV error: " + e.message)
+    result = nusmv.quit()
     return (nusmv, result)
 
 def computeStrategy(smv_file, aut_file, verbose=0):

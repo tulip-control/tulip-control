@@ -29,83 +29,7 @@ from itertools import combinations
 
 # Max. memory usage
 MEMORY_LIMIT=900000000
-N_ROBOTS=1
-assert_message="ASSERT FAILED"
-get_assert_msg = lambda: assert_message
-
-def verify_path(W, path, seq):
-    global assert_message
-    goals = W.goal_list[:]
-    if seq:
-        # Check if path visits all goals in gridworld W in the correct order
-        for p in path:
-            if not goals: break
-            if goals[0] == p:
-                del(goals[0])
-            elif p in goals:
-                return False
-        if goals:
-            return False
-    else:
-        # Check if path visits all goals
-        for g in goals:
-            if not g in path:
-                assert_message = "Path does not visit goal " + str(g)
-                return False
-    # Ensure that path does not intersect an obstacle
-    for p in path:
-        if not W.isEmpty(p):
-            assert_message = "Path intersects obstacle at " + str(p)
-            return False
-    return True
-    
-def verify_mutex(paths):
-    # sanity check - all paths same length
-    if not all(len(p) == len(paths[0]) for p in paths):
-        assert_message = "Paths are different lengths"
-        return False
-    for t in zip(*paths):
-        # Coordinates in each tuple must be unique
-        if not len(set(t)) == len(t):
-            assert_message = "Non-unique coordinates in tuple " + str(t)
-            return False
-    return True
-    
-def run_simulation(Z, paths, jitter=0.0):
-    colors = 'rgbcmyk'
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    Z.plot()
-    def update_line(num, dlist, lines):
-        for (p,t), d in zip(lines, dlist):
-            t.set_data(d[...,:num+1])
-            p.set_data(d[...,num])
-        #fig.savefig("anim/out%03d.png" % num)
-        return lines,
-
-    data = []
-    lines = []
-    for n,path in enumerate(paths):
-        arr = np.array([[x,y] for (y,x) in path]).transpose()
-        arr = np.add(arr, jitter*(np.random.rand(*arr.shape) - 0.5))
-        data.append(arr)
-        l, = ax.plot([], [], 'o', color=colors[n], markersize=10.0, zorder=2)
-        l_trail, = ax.plot([], [], '-', color=colors[n], zorder=1)
-        lines.append((l, l_trail))
-    
-    ani = anim.FuncAnimation(fig, update_line, len(paths[0]), fargs=(data,lines),
-        interval=500)
-    plt.show()
-    
-def compress(paths):
-    # Remove superfluous path elements from a path list
-    pzip = zip(*paths)
-    acc = []
-    for n in range(len(pzip)-1):
-        if not pzip[n] == pzip[n+1]:
-            acc.append(pzip[n])
-    acc.append(pzip[-1])
-    return zip(*acc)
+N_ROBOTS=2
 
 if __name__ == "__main__":
     if len(sys.argv) > 4 or "-h" in sys.argv:
@@ -121,11 +45,11 @@ if __name__ == "__main__":
     else:
         ngoals = 2
 
-    #Z = gw.narrow_passage((height, width), 2)
-    Z = gw.random_world((height, width),
+    Z = gw.narrow_passage((height, width), 1, N_ROBOTS, ngoals)
+    """Z = gw.random_world((height, width),
                         wall_density=0.2,
                         num_init=N_ROBOTS,
-                        num_goals=ngoals)
+                        num_goals=ngoals)"""
     print Z
     
     resource.setrlimit(resource.RLIMIT_AS, (MEMORY_LIMIT, -1))
@@ -186,9 +110,11 @@ if __name__ == "__main__":
             if n != m:
                 solverinput.addSpec(ltl_parse.parse(
                     "[](robot_%d.cellID != robot_%d.cellID)" % (n, m)))
+        solverinput.setSolver("NuSMV")
+        solverinput.write("random_grid.smv")
         solverinput.setSolver("SPIN")
         solverinput.decompose("robot")
-        solverinput.write("random_grid.smv")
+        solverinput.write("random_grid.pml")
         #solverinput = nusmvint.generateNuSMVInput(discvars, ["", " & ".join(sp)],
         #                            {}, pp, "random_grid.smv", initials)
         #sp.extend(["[]<>(" + x + ")" for x in shufflespec])
@@ -201,25 +127,15 @@ if __name__ == "__main__":
         print "Writing automaton"
         aut = solverinput.automaton()
         if SOLVE_MODE in (1,2):
-            for state in aut.states:
-                # translate cellID -> proposition
-                for k in state.state.keys():
-                    var = k.rsplit(".")
-                    if var[-1] == "cellID":
-                        props = pp.reg2props(state.state[k])
-                        if props:
-                            for p in props:
-                                var[-1] = p
-                                state.state[".".join(var)] = True
-                            del(state.state[k])
-        paths = compress([ gw.extractPath(aut, "robot_%d" % n) for n in range(N_ROBOTS) ])
+            solver.restore_propositions(aut, pp)
+        paths = gw.compress_paths([ gw.extractPath(aut, "robot_%d" % n) for n in range(N_ROBOTS) ])
         for n in range(N_ROBOTS):
-            assert verify_path(Z, paths[n], SEQ), get_assert_msg()
+            assert gw.verify_path(Z, paths[n], SEQ)
             print Z.pretty(show_grid=True, path=paths[n], goal_order=SEQ)
-        assert(verify_mutex(paths))
+        assert(gw.verify_mutex(paths))
         aut.writeDotFile("random_grid.dot", hideZeros=True)
         call("dot random_grid.dot -Tpng -o random_grid.png".split())
-        run_simulation(Z, paths, jitter=0.2)
+        gw.animate_paths(Z, paths, jitter=0.2)
     else:
         print "Strategy cannot be realized."
     print "NuSMV solved in " + str(time.time() - start) + "s"

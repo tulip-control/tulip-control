@@ -42,6 +42,7 @@ import itertools
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as anim
 import matplotlib.cm as mpl_cm
 
 from polytope import Polytope, Region
@@ -983,3 +984,87 @@ def extractPath(aut, prefix=None):
         else:
             break
     return path
+    
+def verify_path(W, path, seq):
+    goals = W.goal_list[:]
+    if seq:
+        # Check if path visits all goals in gridworld W in the correct order
+        for p in path:
+            if not goals: break
+            if goals[0] == p:
+                del(goals[0])
+            elif p in goals:
+                return False
+        if goals:
+            return False
+    else:
+        # Check if path visits all goals
+        for g in goals:
+            if not g in path:
+                assert_message = "Path does not visit goal " + str(g)
+                return False
+    # Ensure that path does not intersect an obstacle
+    for p in path:
+        if not W.isEmpty(p):
+            assert_message = "Path intersects obstacle at " + str(p)
+            return False
+    return True
+    
+def verify_mutex(paths):
+    # sanity check - all paths same length
+    if not all(len(p) == len(paths[0]) for p in paths):
+        assert_message = "Paths are different lengths"
+        return False
+    for t in zip(*paths):
+        # Coordinates in each tuple must be unique
+        if not len(set(t)) == len(t):
+            assert_message = "Non-unique coordinates in tuple " + str(t)
+            return False
+    return True
+    
+def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
+    colors = 'rgbcmyk'
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    Z.plot()
+    def update_line(num, dlist, lines):
+        for (p,t), d in zip(lines, dlist):
+            t.set_data(d[...,:num+1])
+            p.set_data(d[...,num])
+        if save_prefix:
+            fig.savefig(save_prefix + "%03d.png" % num)
+        return lines,
+
+    data = []
+    lines = []
+    for n,path in enumerate(paths):
+        arr = np.array([[x,y] for (y,x) in path]).transpose()
+        arr = np.add(arr, jitter*(np.random.rand(*arr.shape) - 0.5))
+        data.append(arr)
+        l, = ax.plot([], [], 'o', color=colors[n], markersize=10.0, zorder=2)
+        l_trail, = ax.plot([], [], '-', color=colors[n], zorder=1)
+        lines.append((l, l_trail))
+    
+    if not save_prefix:
+        ani = anim.FuncAnimation(fig, update_line, len(paths[0]), fargs=(data,lines),
+            interval=500)
+        plt.show()
+    else:
+        print "Writing %s000.png - %s%03d.png" % (save_prefix, save_prefix, len(paths[0]))
+        for n in range(len(paths[0])):
+            update_line(n, data, lines)
+    
+def compress_paths(paths):
+    """ Remove insignificant path-element tuples from a path list
+    
+    Given a list of paths [[p11, p12, ..., p1n], [p21, p22, ..., p2n], ...]
+    a path-element tuple (p1k, p2k, ...) is insignificant if p1k = p1(k+1),
+    p2k = p2(k+1), ...; (p1n, p2n, ...) is always significant.
+    """
+    pzip = zip(*paths)
+    acc = []
+    for n in range(len(pzip)-1):
+        if not pzip[n] == pzip[n+1]:
+            acc.append(pzip[n])
+    acc.append(pzip[-1])
+    return zip(*acc)

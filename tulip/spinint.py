@@ -58,11 +58,12 @@ def cd(path):
 
 prv = lambda x: os.path.join("..", x)
 class SPINInstance:
-    SPIN_PATH="/home/nick/SURF/Spin/Src6.2.2/spin"
+    SPIN_PATH = os.path.join(os.path.dirname(__file__), "solvers/spin")
     def __init__(self, model="tmp.pml", out="tmp.aut",
                     path=SPIN_PATH, preduce=True, verbose=0):
         (self.model, self.out, self.path) = (model, out, path)
-        (self.t_start, self.t_time) = (None, None)
+        # Time everything, including generation of verifier
+        (self.t_start, self.t_time) = (chcputime(), None)
         try:
             os.mkdir("pan")
         except OSError:
@@ -73,7 +74,7 @@ class SPINInstance:
             (out, err) = spin.communicate()
             if verbose > 0:
                 print out
-            if err:
+            if err or spin.returncode != 0:
                 raise SPINError(err)
             if preduce:
                 shstr = "gcc -o pan pan.c"
@@ -82,8 +83,6 @@ class SPINInstance:
             if not call(shstr, shell=True) == 0:
                 raise SPINError("Could not compile verifier")
     def generateTrace(self, verbose=0):
-        # CPU timing does not include preparation of verifier
-        self.t_start = chcputime()
         realizable = False
         with open(self.out, 'w') as f:
             oldcwd = os.getcwd()
@@ -107,16 +106,14 @@ class SPINInstance:
     def time(self):
         return self.t_time
 
+# Raises SPINError
 def check(pml_file, aut_file, verbose=0, **opts):
-    try:
-        if "preduce" in opts:
-            spin = SPINInstance(pml_file, aut_file, preduce=opts["preduce"],
-                verbose=verbose)
-        else:
-            spin = SPINInstance(pml_file, aut_file, verbose=verbose)
-        result = spin.generateTrace(verbose)
-    except SPINError as e:
-        printError("SPIN error: " + e.message)
+    if "preduce" in opts:
+        spin = SPINInstance(pml_file, aut_file, preduce=opts["preduce"],
+            verbose=verbose)
+    else:
+        spin = SPINInstance(pml_file, aut_file, verbose=verbose)
+    result = spin.generateTrace(verbose)
     return (spin, result)
        
 def computeStrategy(pml_file, aut_file, verbose=0):
@@ -156,7 +153,7 @@ def promelaVar(var, val, initial=None):
             # default initial int = 0
             return "\tint %s = 0;\n" % var
 
-def writePromela(slvi):
+def writePromela(slvi, synchronize=False):
     (pml_file, spec, modules, globalv) = (slvi.out_file, slvi.spec, slvi.modules, slvi.globals)
     if (not os.path.exists(os.path.abspath(os.path.dirname(pml_file)))):
         if (verbose > 0):
@@ -184,6 +181,7 @@ def writePromela(slvi):
                 modspec = modularize(modspec, m["name"], m["vars"].keys())
                 spec.append(modspec)
     
+    if synchronize: f.write(promelaVar("SYNC_VAR", "int", 0))
     for m in modules:
         # Model
         f.write("active [%d] proctype %s() {\n" % (m["instances"], m["name"]))
@@ -195,15 +193,19 @@ def writePromela(slvi):
                     f.write(promelaVar(var, val))
         # Dynamics
         if m["dynamics"]:
+            turn = modules.index(m)
             f.write("\tdo\n")
+            if synchronize: f.write("\t\t:: SYNC_VAR == %d -> if\n" % turn)
             (trans, disc_cont_var) = m["dynamics"]
             for from_region in xrange(0, len(trans)):
                 to_regions = [j for j in range(0, len(trans)) if \
                                   trans[j][from_region]]
                 for to_region in to_regions:
-                    f.write("\t\t:: %s == %d -> %s = %d\n" % (disc_cont_var, from_region,
+                    f.write("\t\t\t:: %s == %d -> %s = %d\n" % (disc_cont_var, from_region,
                                 disc_cont_var, to_region))
-            f.write("\tod\n}\n")
+            if synchronize: f.write("\t\tfi; SYNC_VAR = %d\n" % ((turn+1) % len(modules)))
+            f.write("\tod\n")
+        f.write("}\n")
         
     # Spec
     spec = reduce(ltl_parse.ASTAnd.new, spec)
@@ -211,3 +213,8 @@ def writePromela(slvi):
     spec = ltl_parse.ASTNot.new(spec)
     f.write("ltl {" + spec.toPromela() + "}\n")
     f.close()
+
+def compatible(modules):
+    if any(any(isinstance(initial, list) for initial in m["initials"]) for m in modules):
+        return False
+    return True

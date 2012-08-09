@@ -52,6 +52,7 @@ class SolverInput:
         self.aut_file = None
         self.opts = {}
         self.si = None
+        self.realized = False
         
     def __repr__(self):
         return "Modules:\n" + "\n".join([str(m) for m in self.modules])
@@ -88,7 +89,7 @@ class SolverInput:
                     
     def delModule(self, name):
         self.modules.remove(self[name])
-                    
+
     def decompose(self, name, globalize=False):
         # Decompose a module with n instances and n initial values into n modules,
         # each with a single instance and a single initial. Useful for SPIN.
@@ -132,6 +133,8 @@ class SolverInput:
         elif solver == "SPIN":
             self.write = self.writePromela
             self._solve = spinint.check
+        else:
+            raise ValueError(solver + " is not a recognised solver.")
             
     def varName(self, name):
         # Given a canonical variable name, return a solver-compatible name
@@ -175,6 +178,8 @@ class SolverInput:
                 return ".".join(name.split(":"))
         
     def addSpec(self, spec):
+        if isinstance(spec, str):
+            spec = ltl_parse.parse(spec)
         self.spec.append(spec)
     def clearSpec(self):
         self.spec = []
@@ -203,6 +208,7 @@ class SolverInput:
     def solve(self, aut_file, verbose=0):
         if self.out_file:
             (self.si, result) = self._solve(self.out_file, aut_file, verbose, **self.opts)
+            self.realized = result
             if result:
                 self.aut_file = aut_file
             return result
@@ -229,6 +235,12 @@ class SolverInput:
         if self.si:
             return self.si.time()
         else:
+            return None
+            
+    def autSize(self):
+        try:
+            return len(self.automaton())
+        except SolverException:
             return None
             
 def generateSolverInput(sys_disc_vars={}, spec=[],
@@ -302,3 +314,17 @@ def generateNuSMVInput(*args, **kwargs):
     
 def generateSPINInput(*args, **kwargs):
     generateSolverInput(*args, solver='SPIN', **kwargs)
+    
+
+def restore_propositions(aut, pp):
+    for state in aut.states:
+        # translate cellID -> proposition
+        for k in state.state.keys():
+            var = k.rsplit(".")
+            if var[-1] == "cellID":
+                props = pp.reg2props(state.state[k])
+                if props:
+                    for p in props:
+                        var[-1] = p
+                        state.state[".".join(var)] = True
+                    del(state.state[k])
