@@ -9,7 +9,7 @@ from tulip.automaton import Automaton, AutomatonState
 
 
 # Useful for regression testing; may be good to later provide
-# backwards-compatibility testing for prior tulipcon versions.
+# backwards-compatibility testing for prior tulipcon XML Schema versions.
 REFERENCE_XMLFRAGMENT = """  <aut>
     <node>
       <id>0</id><name></name>
@@ -174,3 +174,31 @@ class basic_Automaton_test():
         assert C.findAutState(base_state) != -1
         C.findAutState(base_state).state["x0"] = 0
         assert C != self.chain_aut
+
+    def test_trimDeadStates(self):
+        self.chain_aut.states[-1].transition = []
+        assert len(self.chain_aut) == self.chain_len
+        self.chain_aut.trimDeadStates()
+        assert len(self.chain_aut) == 0
+
+    def test_trimUnconnectedStates(self):
+        # Assume that chain automaton has length at least 3;
+        # otherwise, it is not useful for testing this method.
+        assert self.chain_len >= 3
+        out_ID = self.chain_aut.states[-1].transition[0]
+        self.chain_aut.states[-1].transition = []
+        head_ID = self.chain_aut.states[out_ID].transition[0]
+        head_state = self.chain_aut.states[head_ID].state.copy()
+        self.chain_aut.states[out_ID].transition = []
+
+        # At this step, the node out_ID has been orphaned
+        self.chain_aut.trimUnconnectedStates(head_ID)
+        assert len(self.chain_aut) == self.chain_len-1
+
+        # trimUnconnectedStates does not preserve node IDs, so find
+        # the "head" anew based on state.  Recall that each node has a
+        # unique state in our chain automaton for testing.
+        head_node = self.chain_aut.findAutState(head_state)
+        out_ID = head_node.transition.pop()
+        self.chain_aut.trimUnconnectedStates(out_ID)
+        assert len(self.chain_aut) == self.chain_len-2
