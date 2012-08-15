@@ -1,11 +1,33 @@
 #!/usr/bin/env python
 """
-SCL; 26 Jul 2012.
+SCL; 15 August 2012.
 """
 
 from StringIO import StringIO
 import copy
 from tulip.automaton import Automaton, AutomatonState
+
+
+# Useful for regression testing; may be good to later provide
+# backwards-compatibility testing for prior tulipcon versions.
+REFERENCE_XMLFRAGMENT = """  <aut>
+    <node>
+      <id>0</id><name></name>
+      <child_list>1 2</child_list>
+      <state><item key="y" value="0" /><item key="x" value="1" /></state>
+    </node>
+    <node>
+      <id>1</id><name></name>
+      <child_list>1 2</child_list>
+      <state><item key="y" value="0" /><item key="x" value="0" /></state>
+    </node>
+    <node>
+      <id>2</id><name></name>
+      <child_list>1 0</child_list>
+      <state><item key="y" value="1" /><item key="x" value="1" /></state>
+    </node>
+  </aut>
+"""
 
 
 REFERENCE_AUTFILE = """
@@ -75,6 +97,31 @@ def automaton2xml_test():
     assert aut == ref_aut
     aut.states[0].transition = []
     assert aut != ref_aut
+
+def loadXML_test():
+    aut = Automaton()
+    aut.loadXML(REFERENCE_XMLFRAGMENT)
+    assert len(aut) == 3
+    assert (len(aut.states[0].state.keys()) == 2) and ("x" in aut.states[0].state.keys()) and ("y" in aut.states[0].state.keys())
+    node0 = aut.findAutState({"x": 1, "y": 0})
+    node1 = aut.findAutState({"x": 0, "y": 0})
+    node2 = aut.findAutState({"x": 1, "y": 1})
+    assert (len(node0.transition) == 2) and (node1 in [aut.states[node0.transition[0]], aut.states[node0.transition[1]]]) and (node2 in [aut.states[node0.transition[0]], aut.states[node0.transition[1]]])
+    assert node0.transition == node1.transition
+    assert len(node1.transition) == 2 and len(node2.transition) == 2
+
+
+# Close the loop
+def loaddumpXML_test():
+    aut_first = Automaton()
+    aut_first.loadXML(REFERENCE_XMLFRAGMENT)
+    aut_second = Automaton()
+    aut_second.loadXML(aut_first.dumpXML())
+    assert aut_first == aut_second
+    aut_first.states[0].transition = []
+    assert aut_first != aut_second
+    # Comparing string outputs seems too fragile to be a meaningful test
+    #assert aut_first.dumpXML(pretty=True, idt_level=1) == REFERENCE_XMLFRAGMENT
 
 
 def node_copy_test():
