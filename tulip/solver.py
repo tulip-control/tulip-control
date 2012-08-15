@@ -231,6 +231,7 @@ class SolverInput:
                 state.state[self.canonical(k)] = val
         return aut
     
+    # Metrics
     def solveTime(self):
         if self.si:
             return self.si.time()
@@ -242,6 +243,14 @@ class SolverInput:
             return len(self.automaton())
         except SolverException:
             return None
+            
+    def specNodes(self):
+        return sum(len(s) for s in self.spec) + len(self.spec)
+        
+    def numTransitions(self, module):
+        m = self[module]
+        trans = m["dynamics"][0]
+        return sum(sum(t) for t in trans)
             
 def generateSolverInput(sys_disc_vars={}, spec=[],
         disc_props = {}, disc_dynamics=PropPreservingPartition(),

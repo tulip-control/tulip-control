@@ -42,22 +42,34 @@ import string
 from itertools import combinations
 
 default_gw = { "size" : (5,5), "wall_density" : 0.2, "num_init" : 1, "num_goals" : 1,
-        "num_robots" : 1, "goal_sequence" : False }
+        "num_robots" : 1, "goal_sequence" : False, "obstacle_size" : (1,1) }
 datatype = { "solver" : 'S16', "width" : 'i4', "height" : 'i4',
         "num_init" : 'i4', "num_goals" : 'i4', "num_robots" : 'i4',
         "wall_density" : 'f8', "goal_sequence" : 'b', "cpu_time" : 'f8',
         "aut_size" : 'i4', "path_length" : 'i4', "realizable" : 'b',
-        "size" : 'i4', "description_length" : 'i4' }
+        "size" : 'i4', "description_length" : 'i4', "state_space" : 'i4',
+        "obstacle_size" : 'i4', "spec_nodes" : 'i4', "transitions" : 'i4' }
 record = [ "solver", "width", "height", "num_init", "num_goals", "num_robots",
-        "wall_density", "goal_sequence", "cpu_time", "aut_size", "path_length",
-        "realizable" ]
-descriptions = { "solver" : "Solver", "width" : "World width",
-        "height" : "World height", "num_init" : "Number of initial positions",
-        "num_goals" : "Number of goals", "num_robots" : "Number of robots", 
-        "wall_density" : "Wall density", "goal_sequence" : "Visit goals in sequence",
-        "cpu_time" : "CPU time (s)", "aut_size" : "Automaton size",
-        "path_length" : "Length of path", "realizable" : "Realizability",
-        "size" : "Number of cells", "description_length" : "Description length (bits)" }
+        "wall_density", "goal_sequence", "obstacle_size", "cpu_time", "aut_size",
+        "path_length", "realizable", "spec_nodes", "transitions" ]
+descriptions = { "solver" : "Solver",
+        "width" : "World width",
+        "height" : "World height",
+        "num_init" : "Number of initial positions",
+        "num_goals" : "Number of goals",
+        "num_robots" : "Number of robots", 
+        "wall_density" : "Wall density",
+        "goal_sequence" : "Visit goals in sequence",
+        "cpu_time" : "CPU time (s)",
+        "aut_size" : "Automaton size",
+        "path_length" : "Length of path",
+        "realizable" : "Realizability",
+        "size" : "Number of cells",
+        "description_length" : "Description length (bits)",
+        "state_space" : "Size of state space",
+        "obstacle_size" : "Size of obstacles (cells)",
+        "spec_nodes" : "Number of nodes in specification AST",
+        "transitions" : "Number of transitions" }
 
 def strfmt(dtype):
     format_map = { 'S' : '%s', 'i' : '%d', 'f' : '%.4f' }
@@ -92,8 +104,8 @@ def gridworld_model(Z, goal_sequence=False, sp=None):
     return gwmodel
     
 def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
-        num_robots=1, goal_sequence=False):
-    Z = gw.random_world(size, wall_density, num_init, num_goals)
+        num_robots=1, goal_sequence=False, obstacle_size=(1,1)):
+    Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
     model = gridworld_model(Z, goal_sequence)
     slvi = solver.SolverInput()
     slvi.addModule("grid", *model, instances=num_robots)
@@ -140,7 +152,7 @@ def benchmark_variable(solv, indep, vals, fixed={}):
                 (slvi, Z) = gridworld_problem(**opts)
             except ValueError:
                 continue
-            if opts["num_init"] > 0 and solv == "SPIN":
+            if opts["num_robots"] > 1 and solv == "SPIN":
                 slvi.decompose("grid", globalize=True)
             slvi.setSolver(solv)
             slvi.write("gw_bm.mdl")
@@ -154,6 +166,9 @@ def benchmark_variable(solv, indep, vals, fixed={}):
             row["height"] = row["size"][0]
             row["width"] = row["size"][1]
             del(row["size"])
+            row["obstacle_size"] = row["obstacle_size"][0] * row["obstacle_size"][1]
+            row["spec_nodes"] = slvi.specNodes()
+            row["transitions"] = slvi.numTransitions(slvi.modules[0]["name"])
             row = tuple([ row[k] for k in record ])
             result.append(row)
     except KeyboardInterrupt:
@@ -173,7 +188,7 @@ def mean_stdev(data, indep, dep, filt={}):
         selection = filtered[filtered[indep] == val]
         mean = selection[dep].mean()
         stdev = selection[dep].std()
-        # (input value, output mean, error in the mean)
+        # output mean, standard error
         row = list(val) + [ mean, stdev/np.sqrt(len(selection[dep])) ]
         avgs[n] = tuple(row)
     return avgs
@@ -190,8 +205,6 @@ def compute_fields(data):
     # Let m be the number of cells in the world, and n be the number of actors
     # Size = m = width * height
     ret["size"] = ret["width"] * ret["height"]
-    # ???: Configuration space = 2^m * m^n
-    #ret["space_size"] = 2**ret["size"] * ret["size"]**(ret["num_robots"])
     
     # Description length:
     # 1) 2m bits
@@ -266,7 +279,8 @@ def write_plotfile(prefix, plotstrs, xlabel, ylabel, log=False):
         f.write(s)
         f.write("plot " + ", ".join(pl))
         
-def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"], eqtype="lin", overwrite=False, cvar=None):
+def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
+         eqtype="lin", overwrite=False, cvar=None):
     # if xr is a generator, make it a list so we can iterate multiple times
     xr = list(xr)
     # Don't recalculate if the data already exists
@@ -305,4 +319,4 @@ nrange = lambda lower, upper, n: (x for x in range(lower, upper+1) for y in rang
 MEMORY_LIMIT=1000000000
 if __name__ == "__main__":
     resource.setrlimit(resource.RLIMIT_AS, (MEMORY_LIMIT, -1))
-    simple_benchmark("bm-goals/test10x10-1-50.SPIN,NuSMV", "num_goals", nrange(1, 50, 10), "cpu_time", fixed={"size" : (10, 10)}, cvar="description_length", overwrite=True)
+    simple_benchmark("bm-obstacles/square,1-10x1-10,30x30grid.SPIN,NuSMV", "obstacle_size", ((x, y) for x in nrange(1, 10, 1) for y in nrange(1, 10, 5)), "cpu_time", fixed = { "size" : (30,30), "wall_density" : 0.25 })

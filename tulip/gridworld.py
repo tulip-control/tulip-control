@@ -744,9 +744,41 @@ class GridWorld:
         else:
             return GRSpec(env_vars=pvars, env_init=init_str,
                           env_safety=spec_trans, env_prog=spec_goal)
+    
+    def scale(self, xf=1, yf=1):
+        """Return a new gridworld equivalent to this but scaled by integer
+        factor (xf, yf). In the new world, obstacles are increased in size but
+        initials and goals change their position only. If this world is of size
+        (h, w) then the returned world will be of size (h*yf, w*xf).
+        
+        @param xf: integer scaling factor for rows
+        @param yf: integer scaling factor for columns
+        
+        @rtype: L{GridWorld}
+        """
+        shape_scaled = (self.W.shape[0]*yf, self.W.shape[1]*xf)
+        scaleW = np.zeros(shape_scaled, dtype=np.int32)
+        scale_goal = []
+        scale_init = []
+        for row in range(shape_scaled[0]):
+            for col in range(shape_scaled[1]):
+                (y,x) = (row/yf, col/xf)
+                (yr, xr) = (row % yf, col % xf)
+                if self.W[y,x] == 1:
+                    scaleW[row, col] = 1
+                if (yr, xr) == (0, 0):
+                    if (y,x) in self.goal_list:
+                        scale_goal.append((row,col))
+                    if (y,x) in self.init_list:
+                        scale_init.append((row,col))
+        scale_gw = GridWorld(prefix=self.prefix)
+        scale_gw.W = scaleW
+        scale_gw.goal_list = scale_goal
+        scale_gw.init_list = scale_init
+        return scale_gw
 
-
-def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
+def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
+        obstacle_size=(1,1)):
     """Generate random gridworld of given size.
 
     While an instance of GridWorld is returned, other views of the
@@ -763,14 +795,34 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
     @rtype: L{GridWorld}
     """
     num_cells = size[0]*size[1]
+    obstacle_area = obstacle_size[0]*obstacle_size[1]
     goal_list = []
     init_list = []
     W = np.zeros(num_cells, dtype=np.int32)
-    num_blocks = int(np.round(wall_density*num_cells))
+    num_blocks = int(np.ceil(wall_density*num_cells/obstacle_area))
+    row_col = lambda k: (k/size[1], k%size[1])
     try:
         for i in range(num_blocks):
-            avail_inds = np.array(range(num_cells))[W==0]
-            W[avail_inds[np.random.randint(low=0, high=len(avail_inds))]] = 1
+            avail_inds = list(np.array(range(num_cells))[W==0])
+            filled = False
+            while not filled:
+                coord = avail_inds[np.random.randint(low=0, high=len(avail_inds))]
+                if row_col(coord)[0] + obstacle_size[0] > size[0] \
+                    or row_col(coord)[1] + obstacle_size[1] > size[1]:
+                        avail_inds.remove(coord)
+                        continue
+                cells = [ coord + y*size[1] + x
+                    for y in range(obstacle_size[0])
+                    for x in range(obstacle_size[1])]
+                try:
+                    if all([W[c] == 0 for c in cells]):
+                        for c in cells:
+                            W[c] = 1
+                        filled = True
+                    else:
+                        avail_inds.remove(coord)
+                except IndexError:
+                    avail_inds.remove(coord)
         for i in range(num_goals):
             avail_inds = np.array(range(num_cells))[W==0]
             avail_inds = [k for k in avail_inds if k not in goal_list]
@@ -783,8 +835,8 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y"):
         # We've run out of available indices, so cannot produce a world
         raise ValueError("World too small for number of features")
     W = W.reshape(size)
-    goal_list = [(k/size[1], k%size[1]) for k in goal_list]
-    init_list = [(k/size[1], k%size[1]) for k in init_list]
+    goal_list = [row_col(k) for k in goal_list]
+    init_list = [row_col(k) for k in init_list]
     gw = GridWorld(prefix=prefix)
     gw.W = W
     gw.goal_list = goal_list
@@ -977,7 +1029,10 @@ def extractPath(aut, prefix=None):
         else:
             # dead-end, return
             break
-    first = [ x for x in path if x ][0]
+    try:
+        first = [ x for x in path if x ][0]
+    except IndexError:
+        return []
     for i in range(len(path)):
         if path[i] is None:
             path[i] = first
@@ -1023,6 +1078,16 @@ def verify_mutex(paths):
     return True
     
 def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
+    """Animate a list of paths simultaneously in world Z using matplotlib.
+    
+    @param Z: Gridworld for which paths were generated.
+    @param paths: List of paths to animate (one per robot).
+    @param jitter: Random jitter added to each coordinate value in animation.
+                   Makes the robot's path more visible by avoiding overlap.
+    @param save_prefix: If not None, do not show an animation but produce a 
+                        series of images "<save_prefix>nnn.png" which can be 
+                        compiled into an animated GIF.
+    """
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -1055,13 +1120,19 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
             update_line(n, data, lines)
     
 def compress_paths(paths):
-    """ Remove insignificant path-element tuples from a path list
+    """Remove insignificant path-element tuples from a path list
     
     Given a list of paths [[p11, p12, ..., p1n], [p21, p22, ..., p2n], ...]
     a path-element tuple (p1k, p2k, ...) is insignificant if p1k = p1(k+1),
     p2k = p2(k+1), ...; (p1n, p2n, ...) is always significant.
+    
+    @param paths: A list of paths, where each path is a list of tuples, each
+                  representing a coordinate in the world.
+    
+    @rtype: list of lists of (x,y) tuples
     """
     pzip = zip(*paths)
+    if pzip == []: return []
     acc = []
     for n in range(len(pzip)-1):
         if not pzip[n] == pzip[n+1]:

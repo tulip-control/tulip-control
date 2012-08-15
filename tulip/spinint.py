@@ -32,7 +32,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id:$
+# $Id$
 # SPIN interface
 import os, copy, re
 from subprocess import Popen, PIPE, call

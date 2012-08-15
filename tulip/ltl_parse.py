@@ -80,6 +80,7 @@ class ASTNode(object):
     def toSMV(self): return self.flatten(flatten_SMV)
     def toPromela(self): return self.flatten(flatten_Promela)
     def map(self, f): return f(self)
+    def __len__(self): return 1
     
 class ASTNum(ASTNode):
     def init(self, t):
@@ -142,6 +143,8 @@ class ASTUnary(ASTNode):
     def map(self, f):
         self.operand = self.operand.map(f)
         return f(self)
+    def __len__(self):
+        return 1 + len(self.operand)
 
 class ASTNot(ASTUnary):
     def op(self): return "!"
@@ -196,7 +199,8 @@ class ASTBinary(ASTNode):
         self.op_l = self.op_l.map(f)
         self.op_r = self.op_r.map(f)
         return f(self)
-
+    def __len__(self):
+        return 1 + len(self.op_l) + len(self.op_r)
 
 class ASTAnd(ASTBinary):
     def op(self): return "&"
@@ -313,6 +317,7 @@ if __name__ == "__main__":
         print "Parse error: " + str(e)
         sys.exit(1)
     print "Parsed expression:", ast
+    print "Length:", len(ast)
     print "Variables:", extractVars(ast)
     try:
         print "JTLV syntax:", ast.toJTLV()
