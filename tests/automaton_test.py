@@ -137,6 +137,8 @@ class basic_Automaton_test():
     def setUp(self):
         self.empty_aut = Automaton()
         self.singleton = Automaton(states_or_file=[AutomatonState(id=0, state={"x":0}, transition=[0])])
+        self.small_env = Automaton()
+        self.small_env.loadXML(REFERENCE_XMLFRAGMENT)
         self.chain_len = 8
         base_state = dict([("x"+str(k),0) for k in range(self.chain_len)])
         self.chain_aut = Automaton()
@@ -157,6 +159,7 @@ class basic_Automaton_test():
         assert len(self.empty_aut) == 0  # Should give same result as size()
         assert self.empty_aut.size() == 0
         assert self.singleton.size() == 1
+        assert len(self.small_env) == 3
         assert len(self.chain_aut) == self.chain_len
 
     def test_copy(self):
@@ -174,6 +177,45 @@ class basic_Automaton_test():
         assert C.findAutState(base_state) != -1
         C.findAutState(base_state).state["x0"] = 0
         assert C != self.chain_aut
+
+    def test_getAutInSet(self):
+        assert self.empty_aut.getAutInSet(0) is None
+        result = self.singleton.getAutInSet(0)
+        assert len(result) == 1
+        assert result[0].state == self.singleton.states[0].state
+        assert result[0].transition == [0]
+        for k in range(self.chain_len):
+            result = self.chain_aut.getAutInSet(k)
+            assert len(result) == 1
+            assert result[0].id == (k-1)%self.chain_len
+            assert result[0].transition == [k]
+
+    def test_findAllAutPartState(self):
+        assert len(self.empty_aut.findAllAutPartState({})) == 0
+        assert len(self.singleton.findAllAutPartState({"x":1})) == 0
+        result = self.singleton.findAllAutPartState({"x":0})
+        assert (len(result) == 1) and (result[0].state == {"x":0})
+        result_glob = self.singleton.findAllAutPartState({})
+        assert result == result_glob
+
+        # The chain automaton (with length at least 2) has slightly
+        # more interesting structure to test.
+        assert len(self.chain_aut.findAllAutPartState({})) == self.chain_len
+        result = self.chain_aut.findAllAutPartState({"x0":0})
+        assert len(result) == self.chain_len-1
+        base_state = dict([(k,0) for k in result[0].state.keys()])
+        base_state["x0"] = 1
+        assert base_state not in [node.state for node in result]
+        base_state["x0"] = 0; base_state["x1"] = 1
+        assert base_state in [node.state for node in result]
+        assert len(self.chain_aut.findAllAutPartState({"x0":0, "x1":0})) == self.chain_len-2
+
+    def test_findNextAutState(self):
+        node0 = self.small_env.findAutState({"x": 1, "y": 0})
+        result_if_0 = self.small_env.findNextAutState(node0, env_state={"x":0})
+        result_if_1 = self.small_env.findNextAutState(node0, env_state={"x":1})
+        assert result_if_0.state == {"x":0, "y":0}
+        assert result_if_1.state == {"x":1, "y":1}
 
     def test_trimDeadStates(self):
         self.chain_aut.states[-1].transition = []
