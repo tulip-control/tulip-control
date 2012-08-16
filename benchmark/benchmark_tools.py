@@ -37,6 +37,7 @@
 import sys, resource, os
 import tulip.gridworld as gw
 from tulip import solver
+from tulip.solver_common import SolverException
 import numpy as np
 import string
 from itertools import combinations
@@ -48,10 +49,11 @@ datatype = { "solver" : 'S16', "width" : 'i4', "height" : 'i4',
         "wall_density" : 'f8', "goal_sequence" : 'b', "cpu_time" : 'f8',
         "aut_size" : 'i4', "path_length" : 'i4', "realizable" : 'b',
         "size" : 'i4', "description_length" : 'i4', "state_space" : 'i4',
-        "obstacle_size" : 'i4', "spec_nodes" : 'i4', "transitions" : 'i4' }
+        "obstacle_size" : 'i4', "spec_nodes" : 'i4', "transitions" : 'i4',
+        "memory" : 'i4' }
 record = [ "solver", "width", "height", "num_init", "num_goals", "num_robots",
-        "wall_density", "goal_sequence", "obstacle_size", "cpu_time", "aut_size",
-        "path_length", "realizable", "spec_nodes", "transitions" ]
+        "wall_density", "goal_sequence", "obstacle_size", "transitions",
+        "cpu_time", "aut_size", "path_length", "realizable", "spec_nodes", "memory" ]
 descriptions = { "solver" : "Solver",
         "width" : "World width",
         "height" : "World height",
@@ -69,7 +71,8 @@ descriptions = { "solver" : "Solver",
         "state_space" : "Size of state space",
         "obstacle_size" : "Size of obstacles (cells)",
         "spec_nodes" : "Number of nodes in specification AST",
-        "transitions" : "Number of transitions" }
+        "transitions" : "Number of transitions",
+        "memory" : "Peak memory usage (KB)" }
 
 def strfmt(dtype):
     format_map = { 'S' : '%s', 'i' : '%d', 'f' : '%.4f' }
@@ -134,7 +137,7 @@ def gridworld_solve_data(slvi, Z, opts):
         path_length = -1
     return { "solver" : slvi.solver, "cpu_time" : slvi.solveTime(),
             "aut_size" : aut_size, "realizable" : slvi.realized,
-            "path_length" : path_length }
+            "path_length" : path_length, "memory" : slvi.memoryUsage() }
 
 def benchmark_variable(solv, indep, vals, fixed={}):
     # opts contains the static parameters for the gridworld
@@ -158,7 +161,7 @@ def benchmark_variable(solv, indep, vals, fixed={}):
             slvi.write("gw_bm.mdl")
             try:
                 rlz = slvi.solve("gw_bm.aut")
-            except solver.SolverException as e:
+            except SolverException as e:
                 sys.stderr.write(solv + " raised error: " + e.message + "\n")
                 break
             outs = gridworld_solve_data(slvi, Z, opts)
@@ -280,7 +283,7 @@ def write_plotfile(prefix, plotstrs, xlabel, ylabel, log=False):
         f.write("plot " + ", ".join(pl))
         
 def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
-         eqtype="lin", overwrite=False, cvar=None):
+         eqtype="lin", overwrite=False, cvar=None, filt={}):
     # if xr is a generator, make it a list so we can iterate multiple times
     xr = list(xr)
     # Don't recalculate if the data already exists
@@ -303,7 +306,7 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
     if cvar is not None:
         # Switch from a controlled value to a computed one
         x = cvar
-    out = mean_stdev(arr, ["solver", x], y)
+    out = mean_stdev(arr, ["solver", x], y, filt)
     np.savetxt(prefix + ".dat", out, fmt=strfmt(out.dtype))
     plotstrs = []
     ci = lambda col: colidx(out, col)
@@ -315,8 +318,9 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
         
 colidx = lambda arr, name: arr.dtype.names.index(name) + 1
 nrange = lambda lower, upper, n: (x for x in range(lower, upper+1) for y in range(n))
+limit_mem = lambda limit: resource.setrlimit(resource.RLIMIT_AS, (limit*1024*1024, -1)) # MiB
 
-MEMORY_LIMIT=1000000000
+MEMORY_LIMIT=1000
 if __name__ == "__main__":
-    resource.setrlimit(resource.RLIMIT_AS, (MEMORY_LIMIT, -1))
+    limit_mem(MEMORY_LIMIT)
     simple_benchmark("bm-obstacles/square,1-10x1-10,30x30grid.SPIN,NuSMV", "obstacle_size", ((x, y) for x in nrange(1, 10, 1) for y in nrange(1, 10, 5)), "cpu_time", fixed = { "size" : (30,30), "wall_density" : 0.25 })

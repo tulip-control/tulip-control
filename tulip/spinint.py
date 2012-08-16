@@ -38,13 +38,14 @@ import os, copy, re
 from subprocess import Popen, PIPE, call
 from contextlib import contextmanager
 from errorprint import printWarning, printError
-import ltl_parse, solver
+from solver_common import SolverException, memoryMonitor
+import ltl_parse
+
+class SPINError(SolverException):
+    pass
 
 # total (OS + user) CPU time of children
 chcputime = (lambda: (lambda x: x[2] + x[3])(os.times()))
-
-class SPINError(solver.SolverException):
-    pass
 
 @contextmanager
 def cd(path):
@@ -71,6 +72,7 @@ class SPINInstance:
             pass
         with cd("pan"):
             spin = Popen([self.path, "-O", "-a", prv(self.model)], stdout=PIPE, stderr=PIPE)
+            self.max_mem = memoryMonitor(spin.pid)
             (out, err) = spin.communicate()
             if verbose > 0:
                 print out
@@ -89,6 +91,7 @@ class SPINInstance:
             (model_dn, model_fn) = os.path.split(self.model)
             with cd(model_dn):
                 pan = Popen(oldcwd + "/pan/pan -a", shell=True, stdout=PIPE, stderr=PIPE)
+                self.max_mem = max(self.max_mem, memoryMonitor(pan.pid))
                 (out, err) = pan.communicate()
                 if verbose > 0:
                     print out
@@ -105,6 +108,8 @@ class SPINInstance:
                 return realizable
     def time(self):
         return self.t_time
+    def memory(self):
+        return self.max_mem
 
 # Raises SPINError
 def check(pml_file, aut_file, verbose=0, **opts):

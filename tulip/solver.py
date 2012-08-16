@@ -35,12 +35,10 @@
 # $Id$
 # Generic solver interface
 
-class SolverException(Exception):
-    pass
-
 from tulip import rhtlp, ltl_parse, nusmvint, spinint, automaton
 from tulip.prop2part import PropPreservingPartition
-import copy, re
+import copy, re, resource, time, threading, os
+from solver_common import SolverException
 
 class SolverInput:
     def __init__(self, solver='NuSMV'):
@@ -251,7 +249,13 @@ class SolverInput:
         m = self[module]
         trans = m["dynamics"][0]
         return sum(sum(t) for t in trans)
-            
+    
+    def memoryUsage(self):
+        if self.si:
+            return self.si.memory()
+        else:
+            return None
+
 def generateSolverInput(sys_disc_vars={}, spec=[],
         disc_props = {}, disc_dynamics=PropPreservingPartition(),
         outfile='tmp.smv', initials={}, solver='NuSMV'):
@@ -323,7 +327,6 @@ def generateNuSMVInput(*args, **kwargs):
     
 def generateSPINInput(*args, **kwargs):
     generateSolverInput(*args, solver='SPIN', **kwargs)
-    
 
 def restore_propositions(aut, pp):
     for state in aut.states:

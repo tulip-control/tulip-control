@@ -34,16 +34,16 @@
 #
 # $Id$
 # NuSMV interface
-import rhtlp, os, ltl_parse, time, copy
+import rhtlp, os, ltl_parse, time, copy, threading
 from subprocess import Popen, PIPE, STDOUT
 from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError
-import solver
+from solver_common import SolverException, memoryMonitor
 
 # total (OS + user) CPU time of children
 chcputime = (lambda: (lambda x: x[2] + x[3])(os.times()))
 
-class NuSMVError(solver.SolverException):
+class NuSMVError(SolverException):
     pass
 
 class NuSMVInstance:
@@ -59,12 +59,17 @@ class NuSMVInstance:
         except OSError:
             printError("Could not execute " + path)
             return
+        def mmthread_run():
+            self.max_mem = memoryMonitor(self.instance.pid)
+        self.mmthread = threading.Thread(target=mmthread_run)
+        self.mmthread.start()
     def command(self, cmd):
         self.instance.stdin.write(cmd + '\n')
     def generateTrace(self):
         self.command('go; check_ltlspec; show_traces -o ' + self.out)
     def quit(self):
         self.command('quit')
+        self.mmthread.join()
         output = self.instance.communicate()
         self.t_time = chcputime() - self.t_start
         if self.verbose >= 2:
@@ -78,6 +83,8 @@ class NuSMVInstance:
         return True
     def time(self):
         return self.t_time
+    def memory(self):
+        return self.max_mem
             
 def modularize(spec, name):
     def f(t):
