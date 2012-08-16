@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -815,7 +813,7 @@ class Automaton:
         return all_aut_states
 
     def getAutInit(self):
-        """Return list of nodes that are initial, i.e. have empty In set.
+        """Return list of nodes that are initial, i.e., have empty In set.
 
         N.B., the set of initial nodes is not saved, so every time you
         call getAutInit, all nodes are checked for empty inward edge
