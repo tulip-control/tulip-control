@@ -1,11 +1,33 @@
 #!/usr/bin/env python
 """
-SCL; 26 Jul 2012.
+SCL; 15 August 2012.
 """
 
 from StringIO import StringIO
 import copy
 from tulip.automaton import Automaton, AutomatonState
+
+
+# Useful for regression testing; may be good to later provide
+# backwards-compatibility testing for prior tulipcon XML Schema versions.
+REFERENCE_XMLFRAGMENT = """  <aut>
+    <node>
+      <id>0</id><name></name>
+      <child_list>1 2</child_list>
+      <state><item key="y" value="0" /><item key="x" value="1" /></state>
+    </node>
+    <node>
+      <id>1</id><name></name>
+      <child_list>1 2</child_list>
+      <state><item key="y" value="0" /><item key="x" value="0" /></state>
+    </node>
+    <node>
+      <id>2</id><name></name>
+      <child_list>1 0</child_list>
+      <state><item key="y" value="1" /><item key="x" value="1" /></state>
+    </node>
+  </aut>
+"""
 
 
 REFERENCE_AUTFILE = """
@@ -76,6 +98,31 @@ def automaton2xml_test():
     aut.states[0].transition = []
     assert aut != ref_aut
 
+def loadXML_test():
+    aut = Automaton()
+    aut.loadXML(REFERENCE_XMLFRAGMENT)
+    assert len(aut) == 3
+    assert (len(aut.states[0].state.keys()) == 2) and ("x" in aut.states[0].state.keys()) and ("y" in aut.states[0].state.keys())
+    node0 = aut.findAutState({"x": 1, "y": 0})
+    node1 = aut.findAutState({"x": 0, "y": 0})
+    node2 = aut.findAutState({"x": 1, "y": 1})
+    assert (len(node0.transition) == 2) and (node1 in [aut.states[node0.transition[0]], aut.states[node0.transition[1]]]) and (node2 in [aut.states[node0.transition[0]], aut.states[node0.transition[1]]])
+    assert node0.transition == node1.transition
+    assert len(node1.transition) == 2 and len(node2.transition) == 2
+
+
+# Close the loop
+def loaddumpXML_test():
+    aut_first = Automaton()
+    aut_first.loadXML(REFERENCE_XMLFRAGMENT)
+    aut_second = Automaton()
+    aut_second.loadXML(aut_first.dumpXML())
+    assert aut_first == aut_second
+    aut_first.states[0].transition = []
+    assert aut_first != aut_second
+    # Comparing string outputs seems too fragile to be a meaningful test
+    #assert aut_first.dumpXML(pretty=True, idt_level=1) == REFERENCE_XMLFRAGMENT
+
 
 def node_copy_test():
     node1 = AutomatonState(id=0, state={"nyan":0, "cat":1}, transition=[0])
@@ -90,6 +137,8 @@ class basic_Automaton_test():
     def setUp(self):
         self.empty_aut = Automaton()
         self.singleton = Automaton(states_or_file=[AutomatonState(id=0, state={"x":0}, transition=[0])])
+        self.small_env = Automaton()
+        self.small_env.loadXML(REFERENCE_XMLFRAGMENT)
         self.chain_len = 8
         base_state = dict([("x"+str(k),0) for k in range(self.chain_len)])
         self.chain_aut = Automaton()
@@ -110,6 +159,7 @@ class basic_Automaton_test():
         assert len(self.empty_aut) == 0  # Should give same result as size()
         assert self.empty_aut.size() == 0
         assert self.singleton.size() == 1
+        assert len(self.small_env) == 3
         assert len(self.chain_aut) == self.chain_len
 
     def test_copy(self):
@@ -127,3 +177,70 @@ class basic_Automaton_test():
         assert C.findAutState(base_state) != -1
         C.findAutState(base_state).state["x0"] = 0
         assert C != self.chain_aut
+
+    def test_getAutInSet(self):
+        assert self.empty_aut.getAutInSet(0) is None
+        result = self.singleton.getAutInSet(0)
+        assert len(result) == 1
+        assert result[0].state == self.singleton.states[0].state
+        assert result[0].transition == [0]
+        for k in range(self.chain_len):
+            result = self.chain_aut.getAutInSet(k)
+            assert len(result) == 1
+            assert result[0].id == (k-1)%self.chain_len
+            assert result[0].transition == [k]
+
+    def test_findAllAutPartState(self):
+        assert len(self.empty_aut.findAllAutPartState({})) == 0
+        assert len(self.singleton.findAllAutPartState({"x":1})) == 0
+        result = self.singleton.findAllAutPartState({"x":0})
+        assert (len(result) == 1) and (result[0].state == {"x":0})
+        result_glob = self.singleton.findAllAutPartState({})
+        assert result == result_glob
+
+        # The chain automaton (with length at least 2) has slightly
+        # more interesting structure to test.
+        assert len(self.chain_aut.findAllAutPartState({})) == self.chain_len
+        result = self.chain_aut.findAllAutPartState({"x0":0})
+        assert len(result) == self.chain_len-1
+        base_state = dict([(k,0) for k in result[0].state.keys()])
+        base_state["x0"] = 1
+        assert base_state not in [node.state for node in result]
+        base_state["x0"] = 0; base_state["x1"] = 1
+        assert base_state in [node.state for node in result]
+        assert len(self.chain_aut.findAllAutPartState({"x0":0, "x1":0})) == self.chain_len-2
+
+    def test_findNextAutState(self):
+        node0 = self.small_env.findAutState({"x": 1, "y": 0})
+        result_if_0 = self.small_env.findNextAutState(node0, env_state={"x":0})
+        result_if_1 = self.small_env.findNextAutState(node0, env_state={"x":1})
+        assert result_if_0.state == {"x":0, "y":0}
+        assert result_if_1.state == {"x":1, "y":1}
+
+    def test_trimDeadStates(self):
+        self.chain_aut.states[-1].transition = []
+        assert len(self.chain_aut) == self.chain_len
+        self.chain_aut.trimDeadStates()
+        assert len(self.chain_aut) == 0
+
+    def test_trimUnconnectedStates(self):
+        # Assume that chain automaton has length at least 3;
+        # otherwise, it is not useful for testing this method.
+        assert self.chain_len >= 3
+        out_ID = self.chain_aut.states[-1].transition[0]
+        self.chain_aut.states[-1].transition = []
+        head_ID = self.chain_aut.states[out_ID].transition[0]
+        head_state = self.chain_aut.states[head_ID].state.copy()
+        self.chain_aut.states[out_ID].transition = []
+
+        # At this step, the node out_ID has been orphaned
+        self.chain_aut.trimUnconnectedStates(head_ID)
+        assert len(self.chain_aut) == self.chain_len-1
+
+        # trimUnconnectedStates does not preserve node IDs, so find
+        # the "head" anew based on state.  Recall that each node has a
+        # unique state in our chain automaton for testing.
+        head_node = self.chain_aut.findAutState(head_state)
+        out_ID = head_node.transition.pop()
+        self.chain_aut.trimUnconnectedStates(out_ID)
+        assert len(self.chain_aut) == self.chain_len-2

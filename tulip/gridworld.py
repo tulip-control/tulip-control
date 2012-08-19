@@ -249,7 +249,12 @@ class GridWorld:
                         else:
                             out_str += "G"
                     elif (i,j) in path:
-                        out_str += direct((i,j), path[(path.index((i,j))+1) % len(path)])
+                        indices = (n for (n,c) in enumerate(path) if c == (i,j))
+                        for x in indices:
+                            d = direct((i,j), path[(x+1) % len(path)])
+                            if d != ".":
+                                break
+                        out_str += d
                     else:
                         out_str += " "
                 elif self.W[i][j] == 1:
@@ -518,6 +523,20 @@ class GridWorld:
         disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
         return disc_dynamics
+    
+    def deterministicMovingObstacle(self, path):
+        trans = []
+        num_cells = self.W.shape[0] * self.W.shape[1]
+        for i in range(self.W.shape[0]):
+            for j in range(self.W.shape[1]):
+                flat = lambda x, y: x*self.W.shape[1] + y
+                t = [ 0 for x in range(0, num_cells) ]
+                if (i,j) in path:
+                    n = path.index((i,j))
+                    # path[n-1] -> path[n], path[L-1] -> path[0]
+                    t[flat(*path[(n-1)%len(path)])] = 1
+                trans.append(t)
+        return trans
         
     def spec(self, offset=(0, 0), controlled_dyn=True):
         """Return GRSpec instance describing this gridworld.
@@ -843,14 +862,18 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     gw.init_list = init_list
     return gw
     
-def narrow_passage(size, passage_width=1, num_init=1, num_goals=2, prefix="Y"):
+def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
+            passage_length=0.4, ptop=None, prefix="Y"):
     """Generate a narrow-passage world: this is a world containing 
     two zones (initial, final) with a tube connecting them.
     
     @param size: a pair, indicating number of rows and columns.
-    @param tube_width: the width of the connecting tube in cells.
+    @param passage_width: the width of the connecting passage in cells.
+    @param passage_length: the length of the passage as a proportion of the
+                           width of the world.
     @param num_init: number of possible initial positions.
     @param num_goals: number of positions to be visited infinitely often.
+    @param ptop: row number of top of passage, default (None) is random
     @param prefix: string to be used as prefix for naming gridworld
                    cell variables.
                    
@@ -860,12 +883,16 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2, prefix="Y"):
     if w < 3 or h < 3:
         raise ValueError("Gridworld too small: minimum dimension 3")
     Z = unoccupied(size, prefix)
-    izone = int(max(1, 0.3*size[1])) # boundary of left zone, 20% of width
-    gzone = size[1] - int(max(1, 0.3*size[1])) # boundary of right zone
+    # Zone width is 30% of world width by default
+    zone_width = ((1.0-passage_length)/2.0)*size[1]
+    izone = int(max(1, zone_width)) # boundary of left zone
+    gzone = size[1] - int(max(1, zone_width)) # boundary of right zone
     if izone * size[0] < num_init or gzone * size[0] < num_goals:
         raise ValueError("Too many initials/goals for grid size")
-    ptop = np.random.randint(0, size[1]-passage_width)
+    if ptop is None:
+        ptop = np.random.randint(0, size[0]-passage_width)
     passage = range(ptop, ptop+passage_width)
+    print passage, ptop
     for y in range(0, size[0]):
         if y not in passage:
             for x in range(izone, gzone):

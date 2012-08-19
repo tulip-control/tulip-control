@@ -37,6 +37,7 @@
 
 from tulip import rhtlp, ltl_parse, nusmvint, spinint, automaton
 from tulip.prop2part import PropPreservingPartition
+from tulip.errorprint import printWarning, printError
 import copy, re, resource, time, threading, os
 from solver_common import SolverException
 
@@ -183,13 +184,16 @@ class SolverInput:
         self.spec = []
     def getSpec(self):
         return self.spec
+    # Enforce 'turns' by default. This creates a 'turn' variable that determines
+    # which module can run at each step, and which is incremented when a module
+    # finishes. This makes NuSMV and SPIN behave in the same way.
     def writeSMV(self, filename):
         self.out_file = filename
-        nusmvint.writeSMV(filename, self.spec, self.modules)
+        nusmvint.writeSMV(filename, self.spec, self.modules, turns=True)
     def writePromela(self, filename):
         self.out_file = filename
         self.opts["preduce"] = self.local_refs()
-        spinint.writePromela(self)
+        spinint.writePromela(self, turns=True)
         
     def local_refs(self):
         has_lrefs = False
@@ -251,6 +255,7 @@ class SolverInput:
         return sum(sum(t) for t in trans)
     
     def memoryUsage(self):
+        # Memory usage in kilobytes
         if self.si:
             return self.si.memory()
         else:
@@ -269,6 +274,17 @@ def generateSolverInput(sys_disc_vars={}, spec=[],
         solverin.writePromela(outfile)
     return solverin
     
+def prop2reg(prop, regions, props):
+    propInd = props.index(prop)
+    reg = [j for j in range(0,len(regions)) if \
+        regions[j].list_prop[propInd]]
+    if len(reg) >= 1:
+        if len(reg) > 1:
+            print "WARNING: Selected region %d covered by %s" % (reg[0], prop)
+        return reg[0]
+    else:
+        return 
+    
 def discDynamicsModel(sys_disc_vars, spec, disc_props, disc_dynamics, initials):
     # Generate model for a general LTL solver from a
     # spec and discrete dynamics
@@ -283,22 +299,18 @@ def discDynamicsModel(sys_disc_vars, spec, disc_props, disc_dynamics, initials):
     initials_iter = initials.copy()
     for prop in initials_iter:
         if prop in disc_dynamics.list_prop_symbol and initials[prop] is True:
-            propInd = disc_dynamics.list_prop_symbol.index(prop)
-            reg = [j for j in range(0,disc_dynamics.num_regions) if \
-               disc_dynamics.list_region[j].list_prop[propInd]]
-            if len(reg) >= 1:
-                if disc_cont_var in initials:
-                    if isinstance(initials[disc_cont_var], list):
-                        initials[disc_cont_var].append(reg[0])
-                    else:
-                        initials[disc_cont_var] = [initials[disc_cont_var], reg[0]]
-                else:
-                    initials[disc_cont_var] = reg[0]
-                del(initials[prop])
-                if len(reg) > 1:
-                    print "WARNING: Selected region %d covered by %s" % (reg[0], prop)
-            elif len(reg) == 0:
+            reg = prop2reg(prop, disc_dynamics.list_region, disc_dynamics.list_prop_symbol)
+            if reg is None:
                 print "WARNING: No corresponding region found for proposition " + prop
+                continue
+            if disc_cont_var in initials:
+                if isinstance(initials[disc_cont_var], list):
+                    initials[disc_cont_var].append(reg)
+                else:
+                    initials[disc_cont_var] = [initials[disc_cont_var], reg]
+            else:
+                initials[disc_cont_var] = reg
+            del(initials[prop])
 
     trans = disc_dynamics.trans
     sys_vars = prob.getSysVars()
@@ -318,8 +330,8 @@ def discDynamicsModel(sys_disc_vars, spec, disc_props, disc_dynamics, initials):
         # only guarantee
         spec = guarantee
     else:
-        # empty guarantee; X -> T is always true, probably error
-        printWarning("No guarantee provided")
+        # empty guarantee; X -> T is always true, assume no spec
+        spec = None
     return (spec, (trans, disc_cont_var), sys_vars, initials)
 
 def generateNuSMVInput(*args, **kwargs):

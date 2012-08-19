@@ -60,8 +60,8 @@ def cd(path):
 prv = lambda x: os.path.join("..", x)
 class SPINInstance:
     SPIN_PATH = os.path.join(os.path.dirname(__file__), "solvers/spin")
-    def __init__(self, model="tmp.pml", out="tmp.aut",
-                    path=SPIN_PATH, preduce=True, verbose=0):
+    def __init__(self, model="tmp.pml", out="tmp.aut", path=SPIN_PATH,
+             preduce=True, verbose=0, safety=False):
         (self.model, self.out, self.path) = (model, out, path)
         # Time everything, including generation of verifier
         (self.t_start, self.t_time) = (chcputime(), None)
@@ -78,34 +78,35 @@ class SPINInstance:
                 print out
             if err or spin.returncode != 0:
                 raise SPINError(err)
-            if preduce:
-                shstr = "gcc -o pan pan.c"
-            else:
-                shstr = "gcc -DNOREDUCE -o pan pan.c"
+            opts = []
+            if not preduce:
+                opts.append("-DNOREDUCE")
+            if safety:
+                opts.append("-DSAFETY")
+            shstr = "gcc %s -o pan pan.c" % " ".join(opts)
             if not call(shstr, shell=True) == 0:
                 raise SPINError("Could not compile verifier")
     def generateTrace(self, verbose=0):
-        realizable = False
         with open(self.out, 'w') as f:
-            oldcwd = os.getcwd()
             (model_dn, model_fn) = os.path.split(self.model)
-            with cd(model_dn):
-                pan = Popen(oldcwd + "/pan/pan -a", shell=True, stdout=PIPE, stderr=PIPE)
-                self.max_mem = max(self.max_mem, memoryMonitor(pan.pid))
-                (out, err) = pan.communicate()
-                if verbose > 0:
-                    print out
-                if err:
-                    raise SPINError(err)
-                if "acceptance cycle" in out:
-                    realizable = True
-                spin = Popen([self.path, "-t", "-p", "-g", "-w", "-l", model_fn],
-                            stdout=f, stderr=PIPE)
-                (out, err) = spin.communicate()
-                self.t_time = chcputime() - self.t_start
-                if err:
-                    raise SPINError(err)
-                return realizable
+            if not model_dn: model_dn = "."
+            pan = Popen(["pan/pan", "-a"], stdout=PIPE, stderr=PIPE, cwd=model_dn)
+            self.max_mem = max(self.max_mem, memoryMonitor(pan.pid))
+            (out, err) = pan.communicate()
+            if verbose > 0:
+                print out
+            if err:
+                raise SPINError(err)
+            if not "acceptance cycle" in out:
+                return False
+            #os.rename("pan/
+            spin = Popen([self.path, "-t", "-p", "-g", "-w", "-l", model_fn],
+                        stdout=f, stderr=PIPE, cwd=model_dn)
+            (out, err) = spin.communicate()
+            self.t_time = chcputime() - self.t_start
+            if err:
+                raise SPINError(err)
+            return True
     def time(self):
         return self.t_time
     def memory(self):
@@ -113,11 +114,8 @@ class SPINInstance:
 
 # Raises SPINError
 def check(pml_file, aut_file, verbose=0, **opts):
-    if "preduce" in opts:
-        spin = SPINInstance(pml_file, aut_file, preduce=opts["preduce"],
-            verbose=verbose)
-    else:
-        spin = SPINInstance(pml_file, aut_file, verbose=verbose)
+    kwargs = { k : opts[k] for k in ["preduce", "safety"] if k in opts }
+    spin = SPINInstance(pml_file, aut_file, verbose=verbose, **kwargs)
     result = spin.generateTrace(verbose)
     return (spin, result)
        
@@ -158,7 +156,7 @@ def promelaVar(var, val, initial=None):
             # default initial int = 0
             return "\tint %s = 0;\n" % var
 
-def writePromela(slvi, synchronize=False):
+def writePromela(slvi, turns=False):
     (pml_file, spec, modules, globalv) = (slvi.out_file, slvi.spec, slvi.modules, slvi.globals)
     if (not os.path.exists(os.path.abspath(os.path.dirname(pml_file)))):
         if (verbose > 0):
@@ -166,27 +164,30 @@ def writePromela(slvi, synchronize=False):
                              ' does not exist. Creating...', obj=self)
         os.mkdir(os.path.abspath(os.path.dirname(pml_file)))
     
-    spec = copy.deepcopy(spec)
     f = open(pml_file, 'w')
     for var, (val, initial) in globalv.iteritems():
         f.write(promelaVar(var, val, initial))
     spec = [ decanonize(s, slvi) for s in spec ]
     
+    if len(modules) == 1:
+        # 'turns' has no effect if there's only one module
+        turns = False
+    
     for m in modules:
         if m["instances"] > 1:
             for n in range(m["instances"]):
-                modspec = copy.deepcopy(m["spec"])
-                modspec = modularize(modspec, "%s[%d]" % (m["name"], n), m["vars"].keys())
-                spec.append(modspec)
+                if m["spec"]:
+                    modspec = modularize(m["spec"], "%s[%d]" % (m["name"], n), m["vars"].keys())
+                    spec.append(modspec)
         else:
             # Seems to be a bug in SPIN: for process P with local variable x and
             # exactly one instance, P:x works but P[0]:x does not
             for n in range(m["instances"]):
-                modspec = copy.deepcopy(m["spec"])
-                modspec = modularize(modspec, m["name"], m["vars"].keys())
-                spec.append(modspec)
+                if m["spec"]:
+                    modspec = modularize(m["spec"], m["name"], m["vars"].keys())
+                    spec.append(modspec)
     
-    if synchronize: f.write(promelaVar("SYNC_VAR", "int", 0))
+    if turns: f.write(promelaVar("SYNC_VAR", "int", 0))
     for m in modules:
         # Model
         f.write("active [%d] proctype %s() {\n" % (m["instances"], m["name"]))
@@ -200,7 +201,7 @@ def writePromela(slvi, synchronize=False):
         if m["dynamics"]:
             turn = modules.index(m)
             f.write("\tdo\n")
-            if synchronize: f.write("\t\t:: SYNC_VAR == %d -> if\n" % turn)
+            if turns: f.write("\t\t:: SYNC_VAR == %d -> if\n" % turn)
             (trans, disc_cont_var) = m["dynamics"]
             for from_region in xrange(0, len(trans)):
                 to_regions = [j for j in range(0, len(trans)) if \
@@ -208,15 +209,19 @@ def writePromela(slvi, synchronize=False):
                 for to_region in to_regions:
                     f.write("\t\t\t:: %s == %d -> %s = %d\n" % (disc_cont_var, from_region,
                                 disc_cont_var, to_region))
-            if synchronize: f.write("\t\tfi; SYNC_VAR = %d\n" % ((turn+1) % len(modules)))
+            if turns: f.write("\t\tfi; SYNC_VAR = %d\n" % ((turn+1) % len(modules)))
             f.write("\tod\n")
         f.write("}\n")
-        
-    # Spec
-    spec = reduce(ltl_parse.ASTAnd.new, spec)
-    # Negate & write to file
-    spec = ltl_parse.ASTNot.new(spec)
-    f.write("ltl {" + spec.toPromela() + "}\n")
+    
+    if spec:
+        if all(ltl_parse.issafety(s) for s in spec):
+            slvi.opts["safety"] = True
+        # Spec
+        spec = reduce(ltl_parse.ASTAnd.new, spec)
+        # Negate & write to file
+        spec = ltl_parse.ASTNot.new(spec)
+        f.write("ltl {" + spec.toPromela() + "}\n")
+    
     f.close()
 
 def compatible(modules):

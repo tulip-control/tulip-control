@@ -91,19 +91,19 @@ def modularize(spec, name):
         if isinstance(t, ltl_parse.ASTVar):
             t.val = name + "." + t.val
         return t
-    spec = spec.map(f)
-    return spec
+    return spec.map(f)
     
 def SMV_transitions(trans, var, turns=False):
     s = "\t\tnext(" + var + ") := case\n"
     for from_region in xrange(0, len(trans)):
         to_regions = [j for j in range(0, len(trans)) if \
                           trans[j][from_region]]
-        if turns:
-            s += "\t\t\t%s = %d & turn = mine : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
-        else:
-            s += "\t\t\t%s = %d : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
-    if turns: s += "\t\t\tturn != mine : %s;\n" % var
+        if to_regions:
+            if turns:
+                s += "\t\t\t%s = %d & TURN_VAR = MY_TURN : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
+            else:
+                s += "\t\t\t%s = %d : {%s};\n" % (var, from_region, ', '.join(map(str, to_regions)))
+    if turns: s += "\t\t\tTURN_VAR != MY_TURN : %s;\n" % var
     s += "\t\tesac;\n"
     return s
 
@@ -118,6 +118,9 @@ def writeSMV(smv_file, spec, modules, turns=False):
     f = open(smv_file, 'w')
     turn = 0
     main_vars = {}
+    if len(modules) == 1:
+        # 'turns' has no effect if there's only one module
+        turns = False
     for m in modules:
         for n in range(m["instances"]):
             if m["instances"] > 1:
@@ -125,17 +128,17 @@ def writeSMV(smv_file, spec, modules, turns=False):
             else:
                 instance_name = m["name"]
             if turns:
-                main_vars[instance_name] = m["name"] + "(turn,%d)" % turn
+                main_vars[instance_name] = m["name"] + "(TURN_VAR,%d)" % turn
                 turn += 1
             else:
                 main_vars[instance_name] = m["name"] + "()"
-            modspec = copy.deepcopy(m["spec"])
-            spec.append(modularize(modspec, instance_name))
+            if m["spec"]:
+                spec.append(modularize(m["spec"], instance_name))
     if turns:
-        main_vars["turn"] = "0 .. %d" % (turn-1)
+        main_vars["TURN_VAR"] = "0 .. %d" % (turn-1)
         main_trans = [ [ int((n+1) % turn == m) for m in range(turn) ] for n in range(turn) ]
-        main_dynamics = (main_trans, "turn")
-        main_initials = {"turn" : 0}
+        main_dynamics = (main_trans, "TURN_VAR")
+        main_initials = {"TURN_VAR" : 0}
     else:
         main_dynamics = None
         main_initials = None
@@ -143,7 +146,7 @@ def writeSMV(smv_file, spec, modules, turns=False):
                     "initials" : main_initials }]
     for m in modules:
         if turns and not m["name"] == "main":
-            f.write("MODULE %s(turn,mine)\n" % m["name"])
+            f.write("MODULE %s(TURN_VAR,MY_TURN)\n" % m["name"])
         else:
             f.write("MODULE %s\n" % m["name"])
         
@@ -165,14 +168,17 @@ def writeSMV(smv_file, spec, modules, turns=False):
         if m["dynamics"]:
             # Discrete dynamics - explicit transition system
             f.write(SMV_transitions(*m["dynamics"], turns=(turns and not m["name"] == "main")))
-        
-    spec = reduce(ltl_parse.ASTAnd.new, spec)
-    # Negate spec
-    spec = ltl_parse.ASTNot.new(spec)
+    
+    if spec:
+        spec = reduce(ltl_parse.ASTAnd.new, spec)
+        # Negate spec
+        spec = ltl_parse.ASTNot.new(spec)
 
-    # Write spec to file
-    f.write("\tLTLSPEC\n")
-    f.write("\t\t" + spec.toSMV() + "\n")
+        # Write spec to file
+        f.write("\tLTLSPEC\n")
+        f.write("\t\t" + spec.toSMV() + "\n")
+    else:
+        printWarning("No specification supplied.")
 
     f.close()
     
