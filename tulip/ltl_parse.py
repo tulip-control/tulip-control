@@ -42,19 +42,19 @@ import sys
 ParserElement.enablePackrat()
 
 TEMPORAL_OP_MAP = \
-        { "G" : "GLOBALLY", "F" : "FINALLY", "X" : "NEXT",
-        "[]" : "GLOBALLY", "<>" : "FINALLY", "next" : "NEXT",
-        "U" : "UNTIL", "V" : "RELEASE", "R" : "RELEASE", 
-        "'" : "NEXT" }
+        { "G" : "G", "F" : "F", "X" : "X",
+        "[]" : "G", "<>" : "F", "next" : "X",
+        "U" : "U", "V" : "R", "R" : "R", 
+        "'" : "X"}
 
-JTLV_MAP = { "GLOBALLY" : "[]", "FINALLY" : "<>", "NEXT" : "next",
-        "UNTIL" : "U" }
+JTLV_MAP = { "G" : "[]", "F" : "<>", "X" : "next",
+        "U" : "U" }
 
-SMV_MAP = { "GLOBALLY" : "G", "FINALLY" : "F", "NEXT" : "X",
-        "UNTIL" : "U", "RELEASE" : "V" }
+SMV_MAP = { "G" : "G", "F" : "F", "X" : "X",
+        "U" : "U", "R" : "V" }
 
-SPIN_MAP = { "GLOBALLY" : "[]", "FINALLY" : "<>", "UNTIL" : "U",
-        "RELEASE" : "V" }
+SPIN_MAP = { "G" : "[]", "F" : "<>", "U" : "U",
+        "R" : "V" }
 
 class LTLException(Exception):
     pass
@@ -79,7 +79,9 @@ class ASTNode(object):
     def toJTLV(self): return self.flatten(flatten_JTLV)
     def toSMV(self): return self.flatten(flatten_SMV)
     def toPromela(self): return self.flatten(flatten_Promela)
-    def map(self, f): return f(self)
+    def map(self, f):
+        n = self.__class__(None, None, [str(self.val)])
+        return f(n)
     def __len__(self): return 1
     
 class ASTNum(ASTNode):
@@ -126,7 +128,7 @@ class ASTUnary(ASTNode):
                 t = self.__class__(None, None, tok[:-1])
                 tok = [t, tok[-1]]
             self.operand = tok[0]
-            self.operator = "NEXT"
+            self.operator = "X"
         else:
             self.operand = tok[1]
             if isinstance(self, ASTUnTempOp):
@@ -141,8 +143,8 @@ class ASTUnary(ASTNode):
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
     def map(self, f):
-        self.operand = self.operand.map(f)
-        return f(self)
+        n = self.__class__.new(self.operand.map(f), self.op())
+        return f(n)
     def __len__(self):
         return 1 + len(self.operand)
 
@@ -196,9 +198,8 @@ class ASTBinary(ASTNode):
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
     def map(self, f):
-        self.op_l = self.op_l.map(f)
-        self.op_r = self.op_r.map(f)
-        return f(self)
+        n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op())
+        return f(n)
     def __len__(self):
         return 1 + len(self.op_l) + len(self.op_r)
 
@@ -301,6 +302,20 @@ def extractVars(tree):
         return t
     tree.map(f)
     return v
+    
+# Crude test for safety spec
+def issafety(tree):
+    def f(t):
+        if isinstance(t, ASTUnTempOp) and not t.operator == "G":
+            return False
+        if isinstance(t, ASTBiTempOp):
+            return False
+        if isinstance(t, ASTUnary):
+            return t.operand
+        if isinstance(t, ASTBinary):
+            return (t.op_l and t.op_r)
+        return True
+    return tree.map(f)
 
 def parse(formula):
     # Increase recursion limit for complex formulae
@@ -319,6 +334,7 @@ if __name__ == "__main__":
     print "Parsed expression:", ast
     print "Length:", len(ast)
     print "Variables:", extractVars(ast)
+    print "Safety:", issafety(ast)
     try:
         print "JTLV syntax:", ast.toJTLV()
         print "SMV syntax:", ast.toSMV()
