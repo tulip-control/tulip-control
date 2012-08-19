@@ -39,7 +39,7 @@ import tulip.gridworld as gw
 from tulip import solver
 from tulip.solver_common import SolverException
 import numpy as np
-import string
+import string, random
 from itertools import combinations
 
 default_gw = { "size" : (5,5), "wall_density" : 0.2, "num_init" : 1, "num_goals" : 1,
@@ -72,11 +72,26 @@ descriptions = { "solver" : "Solver",
         "obstacle_size" : "Size of obstacles (cells)",
         "spec_nodes" : "Number of nodes in specification AST",
         "transitions" : "Number of transitions",
-        "memory" : "Peak memory usage (KB)" }
+        "memory" : "Peak memory usage (MB)" }
 
 def strfmt(dtype):
     format_map = { 'S' : '%s', 'i' : '%d', 'f' : '%.4f' }
     return [ format_map[dtype.fields[n][0].kind] for n in dtype.names ]
+
+def shuffled(l):
+    random.shuffle(l)
+    return l
+
+sweep_path = lambda Z: [ (row,col) for row in range(0, Z.W.shape[0])
+                            for col in range(0, Z.W.shape[1]) ]
+random_path = lambda Z: shuffled(sweep_path(Z))
+    
+def moving_obstacle_model(obst_path, Z, regions, symbols):
+    c2r = lambda x: solver.prop2reg(Z[x], regions, symbols)
+    obst_init = { "cellID" : c2r(obst_path[0]) }
+    obst_trans = Z.deterministicMovingObstacle(obst_path)
+    obst_vars = { "cellID" : "{" + ", ".join(str(c2r(c)) for c in obst_path) + "}" }
+    return (None, (obst_trans, "cellID"), obst_vars, obst_init)
 
 def gridworld_model(Z, goal_sequence=False, sp=None):
     if sp is None:
@@ -104,19 +119,29 @@ def gridworld_model(Z, goal_sequence=False, sp=None):
     pp = Z.discreteTransitionSystem()
     gwmodel = solver.discDynamicsModel(discvars, ["", " & ".join(sp)],
                 {}, pp, initials)
-    return gwmodel
+    return (gwmodel, pp)
+
+mutex = lambda m1, m2: "[](%s.cellID != %s.cellID)" % (m1, m2)
     
 def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
-        num_robots=1, goal_sequence=False, obstacle_size=(1,1)):
+        num_robots=1, goal_sequence=False, obstacle_size=(1,1), moving_obstacle=False):
     Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
-    model = gridworld_model(Z, goal_sequence)
+    (model, pp) = gridworld_model(Z, goal_sequence)
     slvi = solver.SolverInput()
     slvi.addModule("grid", *model, instances=num_robots)
+    if moving_obstacle:
+        obst_model = moving_obstacle_model(random_path(Z), Z, pp.list_region, pp.list_prop_symbol)
+        slvi.addModule("obstacle", *obst_model)
+        if num_robots == 1:
+            slvi.addSpec(mutex("grid", "obstacle"))
+        else:
+            for n in range(num_robots):
+                slvi.addSpec(mutex("grid_%d" % n, "obstacle"))
     if num_robots > 1:
         # Mutex
         for (n, m) in combinations(range(num_robots), 2):
             if n != m:
-                slvi.addSpec("[](grid_%d.cellID != grid_%d.cellID)" % (n, m))
+                slvi.addSpec(mutex("grid_%d" % n, "grid_%d" % m))
     return (slvi, Z)
     
 def gridworld_solve_data(slvi, Z, opts):
@@ -219,6 +244,9 @@ def compute_fields(data):
     #       sqrt(m) for m > 16, so i+g < sqrt(m) (~dim) is sufficient.
     ret["description_length"] = (ret["size"] + np.ceil(np.log2(ret["size"]))*
                 (ret["num_init"] + ret["num_goals"]))
+                
+    # Memory usage: convert to MB
+    ret["memory"] = ret["memory"]/1000
     return ret
 
 color = 1
@@ -318,9 +346,10 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
         
 colidx = lambda arr, name: arr.dtype.names.index(name) + 1
 nrange = lambda lower, upper, n: (x for x in range(lower, upper+1) for y in range(n))
+pair = lambda generator: ((x, x) for x in generator)
 limit_mem = lambda limit: resource.setrlimit(resource.RLIMIT_AS, (limit*1024*1024, -1)) # MiB
 
 MEMORY_LIMIT=1000
 if __name__ == "__main__":
     limit_mem(MEMORY_LIMIT)
-    simple_benchmark("bm-obstacles/square,1-10x1-10,30x30grid.SPIN,NuSMV", "obstacle_size", ((x, y) for x in nrange(1, 10, 1) for y in nrange(1, 10, 5)), "cpu_time", fixed = { "size" : (30,30), "wall_density" : 0.25 })
+    simple_benchmark("bm-obstacles/memtest", "obstacle_size", ((x, y) for x in nrange(1, 10, 1) for y in nrange(1, 10, 5)), "cpu_time", fixed = { "size" : (8,8), "wall_density" : 0.25 }, overwrite=True, solvers=["SPIN"])
