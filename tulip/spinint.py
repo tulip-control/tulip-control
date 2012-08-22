@@ -76,15 +76,21 @@ class SPINInstance:
             (out, err) = spin.communicate()
             if verbose > 0:
                 print out
-            if err or spin.returncode != 0:
+            if err:
                 raise SPINError(err)
+            elif spin.returncode != 0:
+                # SPIN may put error messages on stdout
+                raise SPINError(out)
             opts = []
             if not preduce:
                 opts.append("-DNOREDUCE")
             if safety:
                 opts.append("-DSAFETY")
             shstr = "gcc %s -o pan pan.c" % " ".join(opts)
-            if not call(shstr, shell=True) == 0:
+            gcc = Popen(shstr, shell=True)
+            self.max_mem = max(self.max_mem, memoryMonitor(gcc.pid))
+            retcode = gcc.wait()
+            if not retcode == 0:
                 raise SPINError("Could not compile verifier")
     def generateTrace(self, verbose=0):
         with open(self.out, 'w') as f:
@@ -99,7 +105,6 @@ class SPINInstance:
                 raise SPINError(err)
             if not "acceptance cycle" in out:
                 return False
-            #os.rename("pan/
             spin = Popen([self.path, "-t", "-p", "-g", "-w", "-l", model_fn],
                         stdout=f, stderr=PIPE, cwd=model_dn)
             (out, err) = spin.communicate()
@@ -169,7 +174,7 @@ def writePromela(slvi, turns=False):
         f.write(promelaVar(var, val, initial))
     spec = [ decanonize(s, slvi) for s in spec ]
     
-    if len(modules) == 1:
+    if len(modules) == 1 and modules[0]["instances"] == 1:
         # 'turns' has no effect if there's only one module
         turns = False
     
