@@ -61,6 +61,9 @@ import numpy as np
 from scipy import io as sio
 from scipy.linalg import block_diag
 from cvxopt import matrix,solvers
+from scipy import linalg
+import random
+from scipy import optimize
 
 import polytope as pc
 from prop2part import PropPreservingPartition
@@ -1304,3 +1307,163 @@ def get_cellID(x0, part):
              cellID = i
              break
     return cellID
+
+
+
+def samplePtsPoly(H0,numPts):
+    '''Generate uniform sampled points inside a polygon H0.'''
+    # TODO: Replace with outer ball approximation!!
+    pts = list()
+        
+    rd,xd = pc.cheby_ball(H0)
+    xd = xd.flatten()
+    expand_rd = 1.5     #expansion factor to make polygon more inside the chebyshev ball
+    rd *= expand_rd
+    
+    # Sample new point in H0
+    for k in xrange(numPts):
+        while True:
+            #z = 2*rd*np.random.rand(len(xd)) + xd - rd  #(xd-rd, xd+rd)    #sample within enlarged Cheby ball
+            z = np.random.multivariate_normal(xd,rd**2*np.eye(2))       #sample gaussian centered on Cheby ball
+            if pc.is_inside(H0, z):
+                pts.append(z)
+                break
+    #print pts
+    return pts
+
+
+def cstExpectedCost(numSamples, ssys, H0, H1, N, R, r, Q):
+    '''Calculates the expected cost of a trajectory starting in H0 and ending in H1.'''
+    
+    totalCost = 0.0
+    pts = samplePtsPoly(H0,numSamples)
+    while len(pts)>0:
+        x0 = pts.pop()
+        u,cost = getInputHelper(x0, ssys, H0, H1, N, R, r, Q)
+        totalCost += cost
+    return totalCost / float(numSamples)
+
+
+def cstMinCost(ssys, H0, H1, N, R, r, Q):
+    
+    def cstr(x, *args):
+        A,b = args[7:9]
+        return  b - np.dot(A,x)  # b - Ax >= 0
+
+    def func(x, *args):
+        ssys, H0, H1, N, R, r, Q = args[0:7]
+        u, cost = getInputHelper(x, ssys, H0, H1, N, R, r, Q)
+        return cost
+    # Constraint to start in H0 (Ax <= b)
+    A = H0.A
+    b = H0.b
+        
+    # Guess point in middle of H0
+    rd,xd = pc.cheby_ball(H0)
+    x_init = xd.flatten()
+        
+    # Call nonlinear solver from scipy.optimize
+    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, r, Q, A, b), f_ieqcons = cstr, \
+                               full_output=True, iprint = 0)   # cstr >= 0 is default
+    if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
+        return soln[1]
+    else:
+        print "Solver returned non-optimal solution!"
+        return None
+
+
+
+def cstMaxCost(ssys, H0, H1, N, R, r, Q):
+    '''Calculates the maximum cost of a trajectory under the constrained LQR problem.
+    Uses the fact that the constrained LQR value function is convex in initial state after
+    minimization over control inputs u, so a maximum value must occur on a vertex of the polygon.'''
+    vertices = pc.extreme(H0)
+    
+    maxCost = -np.Inf
+    for v in vertices:
+        u,cost = getInputHelper(v, ssys, H0, H1, N, R, r, Q)
+        if cost > maxCost:
+            maxCost = cost
+    
+    return maxCost
+
+
+def lqrValue(ssys, N, R, Q):
+    '''Calculates the discrete-time finite-horizon LQR value function at initial stage.
+    Value(x) = x.T * P0 * x for state x from the initial stage.'''
+    
+    A = ssys.A
+    B = ssys.B
+    P_N = Q
+    Pdict = dict()
+    Pdict[N] = P_N
+    
+    for k in xrange(N,0,-1):
+        P_k = Pdict[k]
+        #P_{k-1} = Q + A.T*(P_k - P_k*B * (R + B.T*P_k*B)^-1 * B.T*P_k)*A    
+        Pdict[k-1] = Q + A.T*(P_k - P_k*B* linalg.solve(R + B.T*P_k*B, B.T*P_k) )*A
+    
+    return Pdict[0]
+
+
+def lqrMaxCost(ssys, H0, N, R, Q):
+    '''Calculates the maximum cost of a trajectory under the unconstrained LQR problem.
+    Uses the fact that the unconstrained LQR value function is convex, so a maximum value
+    must occur on a vertex of the polygon.'''
+    
+    P0 = lqrValue(ssys, N, R, Q)
+    
+    vertices = pc.extreme(H0)
+    
+    maxCost = -np.Inf
+    for v in vertices:
+        cost = np.dot(v,np.dot(P0,v))     # V(v) = v.T*P0*v from unconstrained LQR theory
+        if cost > maxCost:
+            maxCost = cost
+    
+    return maxCost
+
+def lqrMinCost(ssys, H0, N, R, Q):
+    '''Calculates the minimum cost of a trajectory under the unconstrained LQR problem.
+    Uses the fact that the unconstrained LQR value function is convex.'''
+    
+    P0 = lqrValue(ssys, N, R, Q)
+    n = np.shape(P0)[0]
+    
+    P = matrix(P0)
+    q = matrix(np.zeros(n))
+    G = matrix(H0.A)
+    h = matrix(H0.b)
+    
+    sol = solvers.qp(P,q,G,h)
+    if sol['status'] == 'optimal':
+        minCost = sol['primal objective']
+    else:
+        print "QP solver returned non-optimal solution!"
+        quit()
+    return minCost
+
+
+def lqrExpectedCost(numSamples, ssys, H0, N, R, Q):
+    '''Calculates the expected cost of a trajectory starting in P0 and ending in P1.
+    Uses an LQR approximation.'''
+    
+    P0 = lqrValue(ssys, N, R, Q)
+    
+    totalCost = 0.0
+    pts = samplePtsPoly(H0,numSamples)
+    while len(pts)>0:
+        x0 = pts.pop()
+        cost = np.dot(x0,np.dot(P0,x0))     # V(v) = v.T*P0*v from unconstrained LQR theory
+        totalCost += cost
+    return totalCost / float(numSamples)
+
+
+
+
+
+
+
+
+
+
