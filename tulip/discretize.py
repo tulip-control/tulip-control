@@ -1363,7 +1363,8 @@ def cstMinCost(ssys, H0, H1, N, R, r, Q):
     x_init = xd.flatten()
         
     # Call nonlinear solver from scipy.optimize
-    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, r, Q, A, b), f_ieqcons = cstr, \
+    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, r, Q, A, b), \
+                               f_ieqcons = cstr, \
                                full_output=True, iprint = 0)   # cstr >= 0 is default
     if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
         return soln[1]
@@ -1440,7 +1441,7 @@ def lqrMinCost(ssys, H0, N, R, Q):
         minCost = sol['primal objective']
     else:
         print "QP solver returned non-optimal solution!"
-        quit()
+        return None
     return minCost
 
 
