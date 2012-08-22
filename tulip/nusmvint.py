@@ -118,7 +118,7 @@ def writeSMV(smv_file, spec, modules, turns=False):
     f = open(smv_file, 'w')
     turn = 0
     main_vars = {}
-    if len(modules) == 1:
+    if len(modules) == 1 and modules[0]["instances"] == 1:
         # 'turns' has no effect if there's only one module
         turns = False
     for m in modules:

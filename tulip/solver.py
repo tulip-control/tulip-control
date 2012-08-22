@@ -187,13 +187,13 @@ class SolverInput:
     # Enforce 'turns' by default. This creates a 'turn' variable that determines
     # which module can run at each step, and which is incremented when a module
     # finishes. This makes NuSMV and SPIN behave in the same way.
-    def writeSMV(self, filename):
+    def writeSMV(self, filename, turns=True):
         self.out_file = filename
-        nusmvint.writeSMV(filename, self.spec, self.modules, turns=True)
-    def writePromela(self, filename):
+        nusmvint.writeSMV(filename, self.spec, self.modules, turns=turns)
+    def writePromela(self, filename, turns=True):
         self.out_file = filename
         self.opts["preduce"] = self.local_refs()
-        spinint.writePromela(self, turns=True)
+        spinint.writePromela(self, turns=turns)
         
     def local_refs(self):
         has_lrefs = False

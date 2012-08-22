@@ -85,6 +85,33 @@ def shuffled(l):
 sweep_path = lambda Z: [ (row,col) for row in range(0, Z.W.shape[0])
                             for col in range(0, Z.W.shape[1]) ]
 random_path = lambda Z: shuffled(sweep_path(Z))
+
+def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None):
+    """Convenience function for interactive use, solve gridworld Z with
+    SolverInput slvi (e.g. from gridworld_problem), and show animation"""
+    if not slvi:
+        slvi = input_from_gw(Z, num_robots=instances)
+    slvi.setSolver(solv)
+    if solv == "SPIN":
+        for m in slvi.modules:
+            if m["instances"] > 1:
+                slvi.decompose(m["name"])
+    slvi.write("gw_solve.mdl")
+    rlz = slvi.solve("gw_solve.aut", 1)
+    if not rlz:
+        return False
+    aut = slvi.automaton()
+    solver.restore_propositions(aut, Z.discreteTransitionSystem())
+    paths = []
+    for m in slvi.modules:
+        if  m["instances"] > 1:
+            for n in range(m["instances"]):
+                paths.append(gw.extract_path(aut, "%s_%d" % (m["name"], n)))
+        else:
+            paths.append(gw.extract_path(aut, m["name"]))
+    paths = [ p for p in paths if p ]
+    paths = gw.compress_paths(paths)
+    gw.animate_paths(Z, paths)
     
 def moving_obstacle_model(obst_path, Z, regions, symbols):
     c2r = lambda x: solver.prop2reg(Z[x], regions, symbols)
@@ -122,10 +149,8 @@ def gridworld_model(Z, goal_sequence=False, sp=None):
     return (gwmodel, pp)
 
 mutex = lambda m1, m2: "[](%s.cellID != %s.cellID)" % (m1, m2)
-    
-def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
-        num_robots=1, goal_sequence=False, obstacle_size=(1,1), moving_obstacle=False):
-    Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
+
+def input_from_gw(Z, num_robots=1, goal_sequence=False, moving_obstacle=False):
     (model, pp) = gridworld_model(Z, goal_sequence)
     slvi = solver.SolverInput()
     slvi.addModule("grid", *model, instances=num_robots)
@@ -142,6 +167,12 @@ def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
         for (n, m) in combinations(range(num_robots), 2):
             if n != m:
                 slvi.addSpec(mutex("grid_%d" % n, "grid_%d" % m))
+    return slvi
+    
+def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
+        num_robots=1, goal_sequence=False, obstacle_size=(1,1), moving_obstacle=False):
+    Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
+    slvi = input_from_gw(Z, num_robots, goal_sequence, moving_obstacle)
     return (slvi, Z)
     
 def gridworld_solve_data(slvi, Z, opts):
@@ -151,9 +182,9 @@ def gridworld_solve_data(slvi, Z, opts):
         pp = Z.discreteTransitionSystem()
         solver.restore_propositions(aut, pp)
         if opts["num_robots"] > 1:
-                paths = [gw.extractPath(aut, "grid_%d" % n) for n in range(opts["num_robots"])]
+                paths = [gw.extract_path(aut, "grid_%d" % n) for n in range(opts["num_robots"])]
         else:
-            paths = [gw.extractPath(aut, "grid")]
+            paths = [gw.extract_path(aut, "grid")]
         for p in paths: assert(gw.verify_path(Z, p, opts["goal_sequence"]))
         assert(gw.verify_mutex(paths))
         path_length = len(gw.compress_paths(paths)[0])
@@ -250,17 +281,19 @@ def compute_fields(data):
     return ret
 
 color = 1
-def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None):
+def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None, initial=1):
     global color
     expform = (string.Template("exp(${ID}_a*x + ${ID}_b)"), "exp(%.3g*x + %.3g)")
     linform = (string.Template("${ID}_a*x + ${ID}_b"), "%.3g*x + %.3g")
-    powform = lambda p: (string.Template("${ID}_a*x**%d + ${ID}_b" % p), "%.3g*x**" + str(p) + " + %.3g")
+    powform = lambda p: (string.Template("${ID}_a*x**%.2g + ${ID}_b" % p), "%.3g*x**" + str(p) + " + %.3g")
 
-    plotfit = string.Template("""${ID}_a = ${ID}_b = 0.5
+    plotfit = string.Template("""${ID}_a = 0.5
+    ${ID}_b = $INITIAL
     ${ID}_f(x) = $FORMULA
     fit ${ID}_f(x) "$FILENAME" using $XCOL:$YCOL via ${ID}_a, ${ID}_b
     """)
-    plotfit_filter = string.Template("""${ID}_a = ${ID}_b = 0.5
+    plotfit_filter = string.Template("""${ID}_a = 0.5
+    ${ID}_b = $INITIAL
     ${ID}_f(x) = $FORMULA
     fit ${ID}_f(x) "$FILENAME" using $XCOL:((stringcolumn(1) eq "$FILTER") ? $$$YCOL : 1/0) via ${ID}_a, ${ID}_b
     """)
@@ -275,17 +308,19 @@ def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None):
     elif eqtype == "lin":
         eqn = linform
     elif eqtype.startswith("pow_"):
-        eqn = powform(int(eqtype.rpartition("_")[2]))
+        eqn = powform(float(eqtype.rpartition("_")[2]))
+    else:
+        raise ValueError("Unknown equation type " + eqtype)
         
     fx = eqn[0].substitute(ID=ident)
     if filterval:
         fit = plotfit_filter.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, FORMULA=fx, FILTER=filterval)
+                YCOL=ycol, FORMULA=fx, FILTER=filterval, INITIAL=initial)
         plot = plottpl_filter.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
                 YCOL=ycol, ERRCOL=ycol+1, COLOR=color, FORMULA=eqn[1], FILTER=filterval)
     else:
         fit = plotfit.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, FORMULA=fx)
+                YCOL=ycol, FORMULA=fx, INITIAL=initial)
         plot = plottpl.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
                 YCOL=ycol, ERRCOL=ycol+1, COLOR=color, FORMULA=eqn[1])
     color = color + 1
@@ -320,10 +355,19 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
         for s in solvers:
             data.extend(benchmark_variable(s, x, xr, fixed))
         arr = np.array(data, dtype=[ (k, datatype[k]) for k in record ])
-        with open(prefix + "_raw.dat", "w") as f:
-            # header
-            f.write("#" + " ".join(record) + "\n")
-            np.savetxt(f, arr, fmt=strfmt(arr.dtype))
+        try:
+            with open(prefix + "_raw.dat", "w") as f:
+                # header
+                f.write("#" + " ".join(record) + "\n")
+                np.savetxt(f, arr, fmt=strfmt(arr.dtype))
+        except IOError:
+            # Don't lose the raw data! Try writing it to the current directory.
+            print >>sys.stderr, "Unable to write" + prefix + "_raw.dat" + \
+                     ", writing to raw_data_rescued.dat"
+            with open("raw_data_rescued.dat", "w") as f:
+                # header
+                f.write("#" + " ".join(record) + "\n")
+                np.savetxt(f, arr, fmt=strfmt(arr.dtype))
     else:
         try:
             arr = np.genfromtxt(prefix + "_raw.dat", dtype=[ (k, datatype[k]) for k in record ])
@@ -334,6 +378,8 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
     if cvar is not None:
         # Switch from a controlled value to a computed one
         x = cvar
+    # Add x,y to prefix to distinguish files generated from the same data
+    prefix = prefix + "." + x + "-" + y
     out = mean_stdev(arr, ["solver", x], y, filt)
     np.savetxt(prefix + ".dat", out, fmt=strfmt(out.dtype))
     plotstrs = []
@@ -341,8 +387,8 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
     if isinstance(eqtype, str):
         eqtype = [eqtype for s in solvers]
     for s, eq in zip(solvers, eqtype):
-        plotstrs.append(plotstrings(s, ci(x), ci(y), prefix + ".dat", eq, s))
-    write_plotfile(prefix, plotstrs, descriptions[x], descriptions[y], (eqtype == "exp"))
+        plotstrs.append(plotstrings(s, ci(x), ci(y), prefix + ".dat", eq, s, initial=out[out["solver"] == s][y][0]))
+    write_plotfile(prefix, plotstrs, descriptions[x], descriptions[y], (eqtype[0] == "exp"))
         
 colidx = lambda arr, name: arr.dtype.names.index(name) + 1
 nrange = lambda lower, upper, n: (x for x in range(lower, upper+1) for y in range(n))
