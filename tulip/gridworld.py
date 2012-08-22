@@ -41,6 +41,7 @@ derived from btsynth; see http://scottman.net/2012/btsynth
 import itertools
 import random
 import numpy as np
+from numpy.random import random_integers as rnd
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import matplotlib.cm as mpl_cm
@@ -176,22 +177,25 @@ class GridWorld:
 
         @param font_pt: size (in points) for rendering text in the figure.
         """
-        W = self.W.copy()
-        W = np.ones(shape=W.shape) - W
-        plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest")
+        if 1 in self.W:
+            W = self.W.copy()
+            W = np.ones(shape=W.shape) - W
+            plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest",
+                zorder=-2)
+        plt.axis([self.W.shape[1], -1, self.W.shape[0], -1])
         if show_grid:
             xmin, xmax, ymin, ymax = plt.axis()
-            x_steps = np.linspace(xmin, xmax, W.shape[1]+1)
-            y_steps = np.linspace(ymin, ymax, W.shape[0]+1)
+            x_steps = np.linspace(-0.5, self.W.shape[1]-0.5, self.W.shape[1]+1)
+            y_steps = np.linspace(-0.5, self.W.shape[0]-0.5, self.W.shape[0]+1)
             for k in x_steps:
                 plt.plot([k, k], [ymin, ymax], 'k-', linewidth=grid_width)
             for k in y_steps:
                 plt.plot([xmin, xmax], [k, k], 'k-', linewidth=grid_width)
             plt.axis([xmin, xmax, ymin, ymax])
         for p in self.init_list:
-            plt.text(p[1], p[0], "I", size=font_pt)
+            plt.text(p[1], p[0], "I", size=font_pt, ha="center", va="center", zorder=-1)
         for n,p in enumerate(self.goal_list):
-            plt.text(p[1], p[0], "G" + str(n), size=font_pt)
+            plt.text(p[1], p[0], "G" + str(n), size=font_pt, ha="center", va="center", zorder=-1)
         
     def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
         """Return pretty-for-printing string.
@@ -795,6 +799,26 @@ class GridWorld:
         scale_gw.goal_list = scale_goal
         scale_gw.init_list = scale_init
         return scale_gw
+        
+def place_features(W, n):
+    """Place n features randomly in 1D array W"""
+    try:
+        avail_inds = np.arange(W.size)[W==0]
+        np.random.shuffle(avail_inds)
+        return avail_inds[:n]
+    except IndexError:
+        raise ValueError("Unable to place features: no empty space left")
+        
+def world_from_1D(W, size, goal_list, init_list, prefix="Y"):
+    W = W.reshape(size)
+    row_col = lambda k: (k/size[1], k%size[1])
+    goal_list = [row_col(k) for k in goal_list]
+    init_list = [row_col(k) for k in init_list]
+    gw = GridWorld(prefix=prefix)
+    gw.W = W
+    gw.goal_list = goal_list
+    gw.init_list = init_list
+    return gw
 
 def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         obstacle_size=(1,1)):
@@ -842,25 +866,51 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
                         avail_inds.remove(coord)
                 except IndexError:
                     avail_inds.remove(coord)
-        for i in range(num_goals):
-            avail_inds = np.array(range(num_cells))[W==0]
-            avail_inds = [k for k in avail_inds if k not in goal_list]
-            goal_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
-        for i in range(num_init):
-            avail_inds = np.array(range(num_cells))[W==0]
-            avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list]
-            init_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+        goal_list = place_features(W, num_goals)
+        init_list = place_features(W, num_init)
     except ValueError:
         # We've run out of available indices, so cannot produce a world
         raise ValueError("World too small for number of features")
-    W = W.reshape(size)
-    goal_list = [row_col(k) for k in goal_list]
-    init_list = [row_col(k) for k in init_list]
-    gw = GridWorld(prefix=prefix)
-    gw.W = W
-    gw.goal_list = goal_list
-    gw.init_list = init_list
-    return gw
+    return world_from_1D(W, size, goal_list, init_list, prefix)
+
+# From http://en.wikipedia.org/wiki/Maze_generation_algorithm#Python_code_example
+# (08/21/2012)
+def maze(width, height, complexity=.75, density =.75):
+    # Only odd shapes
+    shape = ((height//2)*2+1, (width//2)*2+1)
+    # Adjust complexity and density relative to maze size
+    complexity = int(complexity*(5*(shape[0]+shape[1])))
+    density    = int(density*(shape[0]//2*shape[1]//2))
+    # Build actual maze
+    Z = np.zeros(shape, dtype=bool)
+    # Fill borders
+    Z[0,:] = Z[-1,:] = 1
+    Z[:,0] = Z[:,-1] = 1
+    # Make isles
+    for i in range(density):
+        x, y = rnd(0,shape[1]//2)*2, rnd(0,shape[0]//2)*2
+        Z[y,x] = 1
+        for j in range(complexity):
+            neighbours = []
+            if x > 1:           neighbours.append( (y,x-2) )
+            if x < shape[1]-2:  neighbours.append( (y,x+2) )
+            if y > 1:           neighbours.append( (y-2,x) )
+            if y < shape[0]-2:  neighbours.append( (y+2,x) )
+            if len(neighbours):
+                y_,x_ = neighbours[rnd(0,len(neighbours)-1)]
+                if Z[y_,x_] == 0:
+                    Z[y_,x_] = 1
+                    Z[y_+(y-y_)//2, x_+(x-x_)//2] = 1
+                    x, y = x_, y_
+    return Z
+
+def maze_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
+        complexity=.75):
+    W = maze(size[1], size[0], complexity, wall_density)
+    W = W.reshape(-1)
+    goal_list = place_features(W, num_goals)
+    init_list = place_features(W, num_init)
+    return world_from_1D(W, size, goal_list, init_list, prefix)
     
 def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
             passage_length=0.4, ptop=None, prefix="Y"):
@@ -1025,7 +1075,7 @@ def prefix_filt(d, prefix):
                 match_list.append(k)
     return dict([(k, d[k]) for k in match_list])
     
-def extractPath(aut, prefix=None):
+def extract_path(aut, prefix=None):
     """Extract a path from a gridworld automaton"""
     s = aut.getAutState(0)
     last = None
@@ -1118,7 +1168,7 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    Z.plot()
+    Z.plot(font_pt=min(288/Z.W.shape[1], 48), show_grid=True)
     def update_line(num, dlist, lines):
         for (p,t), d in zip(lines, dlist):
             t.set_data(d[...,:num+1])
