@@ -1,4 +1,5 @@
 %fname = 'runDiscretizeMatlab.m';
+%p = '/Users/necmiye/Documents/RHTLP_toolbox/tulip/trunk/examples/tmpmat';
 %p = which(fname);
 %p = p(1:end-length(fname));
 %matfilein = [p 'tmpmat' filesep 'dataToMatlab.mat'];
@@ -10,6 +11,7 @@ donefile = [p filesep 'done.txt'];
 
 load(matfilein)
 
+addpath(pathdef);
 % mpt_init('rescueLP', true, 'rescueQP', true, 'lpsolver', 'sedumi')
 
 adj = double(adj);

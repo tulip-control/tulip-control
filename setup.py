@@ -59,7 +59,7 @@ def check_mpt():
                             '-nosplash',
                             '-nojvm',
                             '-r',
-                            'if (exist(\'mpt_init\', \'file\')==2) && (exist(\'polytope\', \'file\')==2), disp \'MPT FOUND; GO TIME\'; else, disp \'NO MPT; PANIC\'; end; pause(1); exit'],
+                            'warning off; addpath(pathdef); if (exist(\'mpt_init\', \'file\')==2) && (exist(\'polytope\', \'file\')==2), disp \'MPT FOUND; GO TIME\'; else, disp \'NO MPT; PANIC\'; end; pause(1); exit'],
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in cmd.stdout:
         if 'MPT FOUND; GO TIME' in line:
