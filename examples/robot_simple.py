@@ -8,7 +8,7 @@ September 2, 2010
 import sys, os
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '../tulip'))
 
-from prop2part import Polytope, Region, PropPreservingPartition, prop2part2
+from prop2part import Polytope, Region, PropPreservingPartition, prop2part
 from discretizeM import CtsSysDyn, discretizeM
 from jtlvint import *
 from automaton import *
@@ -50,7 +50,7 @@ U = Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],
 sys_dyn = CtsSysDyn(A,B,[],U,[])
 
 # Compute the proposition preserving partition of the continuous state space
-cont_partition = prop2part2(cont_state_space, cont_props)
+cont_partition = prop2part(cont_state_space, cont_props)
 
 # Discretize the continuous state space
 disc_dynamics = discretizeM(cont_partition, sys_dyn, verbose=2)

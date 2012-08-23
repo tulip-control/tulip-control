@@ -50,7 +50,7 @@ from errorprint import printWarning, printError, printInfo
 from parsespec import parseSpec
 from polytope_computations import Polytope, Region
 from discretizeM import CtsSysDyn, discretizeM
-from prop2part import PropPreservingPartition, prop2part2
+from prop2part import PropPreservingPartition, prop2part
 from automaton import Automaton
 from spec import GRSpec
 import rhtlputil
@@ -382,7 +382,7 @@ class SynthesisProb:
         if (cont_state_space is not None):
             if (cont_props is None):
                 cont_props = []
-            cont_partition = prop2part2(cont_state_space, cont_props)
+            cont_partition = prop2part(cont_state_space, cont_props)
             disc_dynamics = copy.deepcopy(cont_partition)
             disc_dynamics.trans = disc_dynamics.adj
             for fromcell in xrange(0,len(disc_dynamics.trans)):
