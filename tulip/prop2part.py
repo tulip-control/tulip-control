@@ -47,7 +47,7 @@ from time import time
 import copy
 
 
-def prop2part(state_space, cont_props_dict):
+def prop2part2(state_space, cont_props_dict):
 	"""Main function that takes a domain (state_space) and a list of propositions (cont_props), and
 	returns a proposition preserving partition of the state space"""
 	cont_props = cont_props_dict.values()
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 	
 	cont_props_dict = dict({'C0':Polytope(A0, b0),'C1':Polytope(A1, b1),'C2':Polytope(A2, b2),'C3':Polytope(A3, b3) })
 	
-	mypartition = prop2part(state_space, cont_props_dict)
+	mypartition = prop2part2(state_space, cont_props_dict)
 	
 	#print len(mypartition.list_region)
 	A4 = array([[1., 0.], [-1., 0.], [0., 1.], [0., -1.]])
