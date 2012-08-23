@@ -40,6 +40,8 @@ MATLAB.
 
 Classes:
     - CtsSysDyn
+    - PwaSubsysDyn
+    - PwaSysDyn
     
 Primary functions:
     - discretize
@@ -61,7 +63,7 @@ import numpy as np
 from scipy import io as sio
 from scipy.linalg import block_diag
 from cvxopt import matrix,solvers
-
+import itertools
 import polytope as pc
 from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
@@ -120,6 +122,67 @@ class CtsSysDyn:
         output += "\nUset =\n"+str(self.Uset)
         output += "\nWset =\n"+str(self.Wset)
         return output
+        
+class PwaSubsysDyn(CtsSysDyn):
+    """PwaSubsysDyn class for specifying a subsystem of piecewise affine continuous dynamics.
+
+        s[t+1] = A_i*s[t] + B_i*u[t] + E_i*d[t] + K_i
+        u[t] \in Uset_i - polytope object
+        d[t] \in Wset_i - polytope object
+        for H_i*s[t]<=g_i - subdomain, type: polytope object
+
+    PwaSubsysDyn class inherits from CtsSysDyn with the additional field:
+    - sub_domain: domain with nonempty interior where these dynamics are active, type: polytope
+    """
+
+    def __init__(self, A=[], B=[], E=[], K=[], Uset=None, Wset=None, sub_domain=None):
+        
+        if sub_domain == None:
+            print "Warning: sub_domain is not given in PwaSubsysDyn()"
+        
+        if (sub_domain != None) & (not isinstance(sub_domain, pc.Polytope)):
+            raise Exception("PwaSubsysDyn: `sub_domain` has to be a Polytope")
+
+        CtsSysDyn.__init__(self, A, B, E, K, Uset, Wset)
+        self.sub_domain = sub_domain
+        
+class PwaSysDyn:
+    """PwaSysDyn class for specifying a piecewise affine system.
+    A PwaSysDyn object contains the fields:
+    - list_subsys: list of PwaSubsysDyn
+    - domain: domain over which piecewise affine system is defined, type: polytope
+    
+    For the system to be well-defined the sub_domains of its subsystems should be 
+    mutually exclusive (modulo intersections with empty interior) and cover the domain.
+    """
+
+    def __init__(self, list_subsys=[], domain=None):
+        
+        if domain == None:
+            print "Warning: domain not given in PwaSysDyn()"
+        
+        if (domain != None) & (not isinstance(domain, pc.Polytope)):
+            raise Exception("PwaSysDyn: `domain` has to be a Polytope")
+
+        if len(list_subsys) > 0:
+            uncovered_dom = domain.copy()
+            n = list_subsys[0].A.shape[1]  # State space dimension
+            m = list_subsys[0].B.shape[1]  # Input space dimension
+            p = list_subsys[0].E.shape[1]  # Disturbance space dimension
+            for subsys in list_subsys:
+                uncovered_dom = pc.mldivide(uncovered_dom, subsys.sub_domain)
+                if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or p!=subsys.E.shape[1]):
+                    raise Exception("""PwaSysDyn: state, input, disturbance dimensions
+                                     have to be the same for all subsystems""")
+            if not pc.is_empty(uncovered_dom):
+                raise Exception("PwaSysDyn: subdomains have to cover the domain")
+            for x in itertools.combinations(list_subsys, 2):
+                if pc.is_fulldim(pc.intersect(x[0].sub_domain,x[1].sub_domain)):
+                    raise Exception("PwaSysDyn: subdomains have to be mutually exclusive")
+        
+        self.list_subsys = list_subsys
+        self.domain = domain
+
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                use_mpt=False, conservative=False, max_num_poly=5, \
@@ -1304,3 +1367,27 @@ def get_cellID(x0, part):
              cellID = i
              break
     return cellID
+    
+if __name__ == "__main__":
+    cont_state_space = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
+                               array([[3.],[0.],[2.],[0.]]))
+    cont_props = {}
+    for i in xrange(0, 3):
+        for j in xrange(0, 2):
+            prop_sym = 'X' + str(3*j + i)
+            cont_props[prop_sym] = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
+                                                   array([[float(i+1)],[float(-i)],[float(j+1)],[float(-j)]]))
+
+    A1 = array([[1.1052, 0.],[ 0., 1.1052]])
+    B1 = array([[1.1052, 0.],[ 0., 1.1052]])
+    U1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
+    dom1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
+                                           array([[3.],[-1.],[2.],[0.]]))
+    A2 = array([[0.9948, 0.],[ 0., 1.1052]])
+    B2 = array([[-1.1052, 0.],[ 0., 1.1052]])
+    U2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
+    dom2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
+                                           array([[1.],[0.],[2.],[0.]]))
+    sys_dyn1 = PwaSubsysDyn(A1,B1,[],[],U1,[],dom1)
+    sys_dyn2 = PwaSubsysDyn(A2,B2,[],[],U2,[],dom2)
+    pwa_sys = PwaSysDyn([sys_dyn1,sys_dyn2], cont_state_space)
