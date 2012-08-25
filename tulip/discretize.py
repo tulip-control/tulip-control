@@ -1369,6 +1369,8 @@ def get_cellID(x0, part):
     return cellID
     
 if __name__ == "__main__":
+    import prop2part
+    from numpy import array
     cont_state_space = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
                                array([[3.],[0.],[2.],[0.]]))
     cont_props = {}
@@ -1382,12 +1384,14 @@ if __name__ == "__main__":
     B1 = array([[1.1052, 0.],[ 0., 1.1052]])
     U1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
     dom1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                                           array([[3.],[-1.],[2.],[0.]]))
+                                           array([[3.],[0.],[2.],[-0.5]]))
     A2 = array([[0.9948, 0.],[ 0., 1.1052]])
     B2 = array([[-1.1052, 0.],[ 0., 1.1052]])
     U2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
     dom2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                                           array([[1.],[0.],[2.],[0.]]))
+                                           array([[3],[0.],[0.5],[0.]]))
     sys_dyn1 = PwaSubsysDyn(A1,B1,[],[],U1,[],dom1)
     sys_dyn2 = PwaSubsysDyn(A2,B2,[],[],U2,[],dom2)
     pwa_sys = PwaSysDyn([sys_dyn1,sys_dyn2], cont_state_space)
+    ppp = prop2part.prop2part2(cont_state_space, cont_props)
+    pwappp = prop2part.PWAPartition(pwa_sys, ppp)
