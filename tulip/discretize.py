@@ -71,12 +71,12 @@ from_matfile = os.path.join(matfile_dir, 'dataFromMatlab.mat')
 donefile = os.path.join(matfile_dir, 'done.txt')
 
 
-def block_diag2(A,B):
+def _block_diag2(A,B):
     """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
 
     Old versions of the linear algebra package in SciPy (i.e.,
     scipy.linalg) do not have a block_diag() function.  Providing
-    block_diag2() here until most folks are using sufficiently
+    _block_diag2() here until most folks are using sufficiently
     up-to-date SciPy installations improves portability.
     """
     if len(A.shape) == 1:  # Cast 1d array into matrix
@@ -1069,7 +1069,7 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
 
     B_diag = ssys.B
     for i in range(N-1):
-        B_diag = block_diag2(B_diag,ssys.B)
+        B_diag = _block_diag2(B_diag,ssys.B)
     K_hat = np.tile(ssys.K, (N,1))
 
     A_it = ssys.A.copy()
@@ -1175,8 +1175,8 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     B_diag = B
     E_diag = E
     for i in range(N-1):
-        B_diag = block_diag2(B_diag,B)
-        E_diag = block_diag2(E_diag,E)
+        B_diag = _block_diag2(B_diag,B)
+        E_diag = _block_diag2(E_diag,E)
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
     sum_vert = 0
