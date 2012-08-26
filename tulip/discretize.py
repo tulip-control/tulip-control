@@ -172,8 +172,8 @@ class PwaSysDyn:
             for subsys in list_subsys:
                 uncovered_dom = pc.mldivide(uncovered_dom, subsys.sub_domain)
                 if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or p!=subsys.E.shape[1]):
-                    raise Exception("""PwaSysDyn: state, input, disturbance dimensions
-                                     have to be the same for all subsystems""")
+                    raise Exception("PwaSysDyn: state, input, disturbance dimensions\
+                                     have to be the same for all subsystems")
             if not pc.is_empty(uncovered_dom):
                 raise Exception("PwaSysDyn: subdomains have to cover the domain")
             for x in itertools.combinations(list_subsys, 2):
@@ -195,7 +195,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     Input:
     
     - `part`: a PropPreservingPartition object
-    - `ssys`: a CtsSysDyn object
+    - `ssys`: a CtsSysDyn or PwaSysDyn object
     - `N`: horizon length
 
     - `min_cell_volume`: the minimum volume of cells in the resulting
@@ -230,6 +230,9 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
     
+    if isinstance(ssys,PwaSysDyn):
+        part = prop2part.PWAPartition(ssys, part)
+    
     # Save original polytopes, require them to be convex 
     if not conservative:
         for poly in part.list_region:
@@ -247,16 +250,21 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     # Call MPT discretization
     if use_mpt:
-        return discretizeM(part, ssys, N=N, auto=True, minCellVolume=min_cell_volume, \
-                    maxNumIterations=5, useClosedLoopAlg=closed_loop, \
-                    useAllHorizonLength=use_all_horizon, useLargeSset=False, \
-                    timeout=-1, maxNumPoly=max_num_poly, verbose=verbose)
+        if isinstance(ssys,PwaSysDyn):
+            raise Exception("discretize: Piecewise affine system discretization in\
+                            MPT is not supported")
+        else:
+            return discretizeM(part, ssys, N=N, auto=True, minCellVolume=min_cell_volume, \
+                        maxNumIterations=5, useClosedLoopAlg=closed_loop, \
+                        useAllHorizonLength=use_all_horizon, useLargeSset=False, \
+                        timeout=-1, maxNumPoly=max_num_poly, verbose=verbose)
     
-    # Cheby radius of disturbance set
-    if len(ssys.E) > 0:
-        rd,xd = pc.cheby_ball(ssys.Wset)
-    else:
-        rd = 0.
+    # Cheby radius of disturbance set (defined within the loop for pwa systems)
+    if isinstance(ssys,CtsSysDyn):
+        if len(ssys.E) > 0:
+            rd,xd = pc.cheby_ball(ssys.Wset)
+        else:
+            rd = 0.
     
     # Initialize matrix for pairs to check
     IJ = part.adj.copy()
@@ -271,6 +279,8 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
     sol = deepcopy(part.list_region)
     adj = part.adj.copy()
+    subsys_list = part.list_subsys[:]
+    ss = ssys
 
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -282,17 +292,28 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         si = sol[i]
         sj = sol[j]
         
+        if isinstance(ssys,PwaSysDyn):
+            ss = ssys.list_subsys[subsys_list[i]]
+            if len(ss.E) > 0:
+                rd,xd = pc.cheby_ball(ss.Wset)
+            else:
+                rd = 0.
+        
         if verbose > 1:        
             print "\n Working with states " + str(i) + " and " + str(j) \
                   + " with lengths " + str(len(si)) + " and " + str(len(sj))
+            if isinstance(ssys,PwaSysDyn):
+                print "where subsystem " +  str(subsys_list[i]) + " is active."
+                  
+            
         
         if conservative:
             # Don't use trans_set
-            S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop, 
+            S0 = solveFeasable(si,sj,ss,N, closed_loop=closed_loop, 
                         max_num_poly=max_num_poly, use_all_horizon=use_all_horizon)
         else:
             # Use original cell as trans_set
-            S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
+            S0 = solveFeasable(si,sj,ss,N, closed_loop=closed_loop,\
                     trans_set=orig_list[orig[i]], use_all_horizon=use_all_horizon, \
                     max_num_poly=max_num_poly)
         
@@ -331,6 +352,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             num_new = len(difflist)
             for reg in difflist:
                 sol.append(reg)
+                subsys_list.append(subsys_list[i])
             size = len(sol)
             
             # Update transition matrix
@@ -426,7 +448,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
                     list_region=sol, num_regions=len(sol), adj=adj, \
                     trans=transitions, list_prop_symbol=part.list_prop_symbol, \
-                    orig_list_region=orig_list, orig=orig)                           
+                    orig_list_region=orig_list, orig=orig, list_subsys = subsys_list)                           
     return new_part
 
 def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
@@ -1387,7 +1409,7 @@ if __name__ == "__main__":
                                            array([[3.],[0.],[2.],[-0.5]]))
     A2 = array([[0.9948, 0.],[ 0., 1.1052]])
     B2 = array([[-1.1052, 0.],[ 0., 1.1052]])
-    U2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
+    U2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), 0.02*array([[1.],[1.],[1.],[1.]]))
     dom2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
                                            array([[3],[0.],[0.5],[0.]]))
     sys_dyn1 = PwaSubsysDyn(A1,B1,[],[],U1,[],dom1)
@@ -1395,3 +1417,4 @@ if __name__ == "__main__":
     pwa_sys = PwaSysDyn([sys_dyn1,sys_dyn2], cont_state_space)
     ppp = prop2part.prop2part2(cont_state_space, cont_props)
     pwappp = prop2part.PWAPartition(pwa_sys, ppp)
+    disc_dynamics = discretize(ppp, pwa_sys, min_cell_volume=0.05, verbose=2)
