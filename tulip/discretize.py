@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -61,11 +60,10 @@ import sys, os, time, subprocess
 from copy import deepcopy
 import numpy as np
 from scipy import io as sio
-from scipy.linalg import block_diag
 from cvxopt import matrix,solvers
 import itertools
 import polytope as pc
-from prop2part import PropPreservingPartition
+from prop2part import PropPreservingPartition, PWAPartition
 from errorprint import printWarning, printError, printInfo
 
 matfile_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
@@ -73,6 +71,25 @@ matfile_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
 to_matfile = os.path.join(matfile_dir, 'dataToMatlab.mat')
 from_matfile = os.path.join(matfile_dir, 'dataFromMatlab.mat')
 donefile = os.path.join(matfile_dir, 'done.txt')
+
+
+def block_diag2(A,B):
+    """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
+
+    Old versions of the linear algebra package in SciPy (i.e.,
+    scipy.linalg) do not have a block_diag() function.  Providing
+    block_diag2() here until most folks are using sufficiently
+    up-to-date SciPy installations improves portability.
+    """
+    if len(A.shape) == 1:  # Cast 1d array into matrix
+        A = np.array([A])
+    if len(B.shape) == 1:
+        B = np.array([B])
+    C = np.zeros((A.shape[0]+B.shape[0], A.shape[1]+B.shape[1]))
+    C[:A.shape[0], :A.shape[1]] = A.copy()
+    C[A.shape[0]:, A.shape[1]:] = B.copy()
+    return C
+
 
 class CtsSysDyn:
     """CtsSysDyn class for specifying the continuous dynamics:
@@ -231,7 +248,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
     
     if isinstance(ssys,PwaSysDyn):
-        part = prop2part.PWAPartition(ssys, part)
+        part = PWAPartition(ssys, part)
     
     # Save original polytopes, require them to be convex 
     if not conservative:
@@ -279,7 +296,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
     sol = deepcopy(part.list_region)
     adj = part.adj.copy()
-    subsys_list = part.list_subsys[:]
+    subsys_list = deepcopy(part.list_subsys)
     ss = ssys
 
     # Do the abstraction
@@ -352,7 +369,8 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             num_new = len(difflist)
             for reg in difflist:
                 sol.append(reg)
-                subsys_list.append(subsys_list[i])
+                if isinstance(ssys,PwaSysDyn):
+                    subsys_list.append(subsys_list[i])
             size = len(sol)
             
             # Update transition matrix
@@ -1137,7 +1155,7 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
 
     B_diag = ssys.B
     for i in range(N-1):
-        B_diag = block_diag(B_diag,ssys.B)
+        B_diag = block_diag2(B_diag,ssys.B)
     K_hat = np.tile(ssys.K, (N,1))
 
     A_it = ssys.A.copy()
@@ -1243,8 +1261,8 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     B_diag = B
     E_diag = E
     for i in range(N-1):
-        B_diag = block_diag(B_diag,B)
-        E_diag = block_diag(E_diag,E)
+        B_diag = block_diag2(B_diag,B)
+        E_diag = block_diag2(E_diag,E)
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
     sum_vert = 0
@@ -1389,32 +1407,3 @@ def get_cellID(x0, part):
              cellID = i
              break
     return cellID
-    
-if __name__ == "__main__":
-    import prop2part
-    from numpy import array
-    cont_state_space = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                               array([[3.],[0.],[2.],[0.]]))
-    cont_props = {}
-    for i in xrange(0, 3):
-        for j in xrange(0, 2):
-            prop_sym = 'X' + str(3*j + i)
-            cont_props[prop_sym] = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                                                   array([[float(i+1)],[float(-i)],[float(j+1)],[float(-j)]]))
-
-    A1 = array([[1.1052, 0.],[ 0., 1.1052]])
-    B1 = array([[1.1052, 0.],[ 0., 1.1052]])
-    U1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
-    dom1 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                                           array([[3.],[0.],[2.],[-0.5]]))
-    A2 = array([[0.9948, 0.],[ 0., 1.1052]])
-    B2 = array([[-1.1052, 0.],[ 0., 1.1052]])
-    U2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), 0.02*array([[1.],[1.],[1.],[1.]]))
-    dom2 = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
-                                           array([[3],[0.],[0.5],[0.]]))
-    sys_dyn1 = PwaSubsysDyn(A1,B1,[],[],U1,[],dom1)
-    sys_dyn2 = PwaSubsysDyn(A2,B2,[],[],U2,[],dom2)
-    pwa_sys = PwaSysDyn([sys_dyn1,sys_dyn2], cont_state_space)
-    ppp = prop2part.prop2part2(cont_state_space, cont_props)
-    pwappp = prop2part.PWAPartition(pwa_sys, ppp)
-    disc_dynamics = discretize(ppp, pwa_sys, min_cell_volume=0.05, verbose=2)
