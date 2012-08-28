@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-The example is an extension of the robot_simple_disturbance.py
+This example is an extension of the robot_simple_disturbance.py
 code by Petter Nilsson and Nok Wongpiromsarn. It demonstrates 
 the use of TuLiP for systems with piecewise affine dynamics.
 
@@ -54,7 +54,7 @@ for i in xrange(0, 3):
 
 input_bound = 0.4
 uncertainty = 0.05
-
+#@subsystem0@
 A0 = np.array([[1.1052, 0.],[ 0., 1.1052]])
 B0 = np.array([[1.1052, 0.],[ 0., 1.1052]])
 E0 = np.array([[1,0],[0,1]])
@@ -65,7 +65,9 @@ W0 = pc.Polytope(np.array([[1.,0.],[-1.,0.],[0.,1.],[0.,-1.]]), \
 dom0 = pc.Polytope(np.array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),\
                   np.array([[3],[0.],[2.],[-0.5]]))
 sys_dyn0 = discretize.PwaSubsysDyn(A0,B0,E0,[],U0,W0,dom0)
+#@subsystem0_end@
 
+#@subsystem1@
 A1 = np.array([[0.9948, 0.],[ 0., 1.1052]])
 B1 = np.array([[-1.1052, 0.],[ 0., 1.1052]])
 E1 = np.array([[1,0],[0,1]])
@@ -76,13 +78,16 @@ W1 = pc.Polytope(np.array([[1.,0.],[-1.,0.],[0.,1.],[0.,-1.]]), \
 dom1 = pc.Polytope(np.array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),\
                   np.array([[3],[0.],[0.5],[0.]]))
 sys_dyn1 = discretize.PwaSubsysDyn(A1,B1,E1,[],U1,W1,dom1)
+#@subsystem1_end@
 
+#@pwasystem@
 # Build piecewise affine system from its subsystems
 sys_dyn = discretize.PwaSysDyn([sys_dyn0,sys_dyn1], cont_state_space)
+#@pwasystem_end@
 
+#@synth@
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part2(cont_state_space, cont_props)
-
 
 # Discretize the continuous state space
 disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
@@ -91,6 +96,12 @@ disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True,
 #plot_partition(disc_dynamics, plot_transitions=True)
 
 # Spec
+# Built-in response property of JTLV is used while forming the
+# specification `[](park -> <>X0)`. The resulting automaton will have an 
+# additional variable TRIGGERED_1, similar to X0reach in
+# robot_simple.py but introduced automatically by JTLV, which can
+# simply be ignored in simulations.
+
 assumption = '[]<>(!park)'
 guarantee = '[]<>X5'
 guarantee += ' & [](park -> <>X0)'
@@ -107,12 +118,13 @@ realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile,
 jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
                         priority_kind=3, verbose=3)
 aut = automaton.Automaton(autfile, [], 3)
+#@synth_end@
 
 # Remove dead-end states from automaton
 aut.trimDeadStates()
 
 
-
+#@sim@
 # Simulate
 num_it = 10
 init_state = {}
@@ -133,6 +145,7 @@ x_arr = x
 u_arr = np.zeros([N*num_it, B0.shape[1]])
 d_arr = np.zeros([N*num_it, E0.shape[1]])
 for i in range(1, len(cellid_arr)):
+    # Find the currently active subsystem of the pwa system
     ss = sys_dyn.list_subsys[disc_dynamics.list_subsys[cellid_arr[i-1]]]
     # For each step, calculate N input signals
     for j in range(N):
@@ -171,3 +184,4 @@ ax.plot(x_arr[0,0], x_arr[0,1], 'og')
 ax.plot(x_arr[-1,0], x_arr[-1,1], 'or')
 
 plt.show()
+#@sim_end@

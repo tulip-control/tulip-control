@@ -4,7 +4,7 @@
 Tutorial and Examples
 =======================
 
-The rhtlp is developed for synthesis of embedded control systems,
+TuLiP is developed for synthesis of embedded control systems,
 allowing planning to be done in a receding horizon manner.
 For more information regarding the theory behind this, please visit
 our `wiki <http://tulip-control.sourceforge.net>`_.
@@ -42,7 +42,7 @@ following discrete-time linear time-invariant state space model:
 for :math:`t \in \{0,1,2,...\}`
 
 .. math::
-   s[t+1]  &=   As[t] + Bu[t] + Ed[t] \\
+   s[t+1]  &=   As[t] + Bu[t] + Ed[t] + K\\
    u[t]    &\in U\\
    d[t]    &\in D\\
    s[0]	   &\in S
@@ -192,8 +192,21 @@ The specification :eq:`spec` may contain various LTL operators, arithmetic opera
 for precedence or to increase readability. Here is a quick list of names of the operators followed by the corresponding symbols that 
 are compatible with rhtlp: 
 
-and: &, or: |, not: !, next: next, always: [], eventually: <>, 
-implies: ->; boolean constants: TRUE, FALSE; order for integer variables: =, <, >, >=, <=; arithmetic operations: +, -; parantheses: (, ).
+============================  =====================
+     Operator                      Symbol
+----------------------------  ---------------------
+and                                   &
+or                                    \|
+not                                   ! 
+next                                next
+always                               []
+eventually                           <>
+implies                              -> 
+boolean constants               TRUE, FALSE 
+order for integer variables    =, <, >, >=, <= 
+arithmetic operations                +, - 
+parentheses                          (, )
+============================  =====================
 
 Also note that the domains of the variables can be either boolean or a list of integers.
 
@@ -345,7 +358,6 @@ construct an automaton, run simulation and write simulation results to a file.
    :start-after: @sim@
    :end-before: @sim_end@
 
-
 Defining a Synthesis Problem
 ````````````````````````````
 
@@ -400,6 +412,81 @@ Finally, we can run the simulation as before.
    :start-after: @sim@
    :end-before: @sim_end@
 
+Working with Systems with Piecewise Affine Dynamics
+```````````````````````````````````````````````````
+
+TuLiP can also handle piecewise affine dynamics of the form: 
+
+for :math:`t \in \{0,1,2,...\}`
+
+.. math::
+   s[t+1]  &=   A_is[t] + B_iu[t] + E_id[t] + K_i\\
+   u[t]    &\in U_i\\
+   d[t]    &\in D_i\\
+   s[t]	   &\in S_i
+   :label: pwadynamics
+
+where :math:`S_i \subseteq \mathbb{R}^n` for :math:`i \in \{0,1,2, \ldots,n_s\}` form 
+a polytopic partition of the state space :math:`S`, in :eq:`dynamics`,
+:math:`U_i \subseteq \mathbb{R}^m` is the set of admissible control inputs, 
+:math:`D_i \subseteq \mathbb{R}^p` is the set of exogenous disturbances within :math:`S_i`, and
+:math:`s[t], u[t], d[t]` are the continuous state, the control signal and
+the exogenous disturbance, respectively, at time :math:`t`.
+
+PwaSubsysDyn class is used to represent subsystems of the form :eq:`pwadynamics`.
+
+     .. autoclass:: discretize.PwaSubsysDyn
+	:noindex:
+
+The subsystems can be put together to define a piecewise affine system which is represented 
+by PwaSysDyn class.
+
+     .. autoclass:: discretize.PwaSysDyn
+	:noindex:
+
+
+Example 4: Robot Motion Planning with Piecewise Affine Dynamics
+```````````````````````````````````````````````````````````````
+
+This example is provided in examples/robot_simple_pwa.py.
+It is an extension of the previous examples including a robot model
+with piecewise affine dynamics.
+
+Assume our robot is traveling on a nonhomogenous surface (x-y plane), 
+resulting in different dynamics at different parts of the plane. 
+Since the continuous state space in this example is just x-y position, different
+dynamics in different parts of the surface can be modeled as a piecewise 
+affine system. When :math:`s[t] \in[0, 3]\times[0.5, 2]`, the following dynamics
+are active:
+
+.. literalinclude:: ../examples/robot_simple_pwa.py
+   :start-after: @subsystem0@
+   :end-before: @subsystem0_end@
+
+When :math:`s[t] \in[0, 3]\times[0, 0.5]`, the following dynamics
+are active:
+
+.. literalinclude:: ../examples/robot_simple_pwa.py
+   :start-after: @subsystem1@
+   :end-before: @subsystem1_end@
+
+Piecewise affine system can be formed from the dynamics of its subsystems.
+
+.. literalinclude:: ../examples/robot_simple_pwa.py
+   :start-after: @pwasystem@
+   :end-before: @pwasystem_end@
+
+Discretization and synthesis follow exactly as before.
+
+.. literalinclude:: ../examples/robot_simple_pwa.py
+   :start-after: @synth@
+   :end-before: @synth_end@
+
+Finally, we can simulate the continuous and discrete parts and plot the resulting trajectories.
+
+.. literalinclude:: ../examples/robot_simple_pwa.py
+   :start-after: @sim@
+   :end-before: @sim_end@
 
 Receding Horizon Temporal Logic Planning
 ----------------------------------------
@@ -408,7 +495,7 @@ For systems with a certain structure, the computational complexity of
 the planner synthesis can be alleviated by solving the planning problems
 in a receding horizon fashion, i.e., compute the plan or strategy over
 a "shorter" horizon, starting from the current state,
-implement the initial portion of hte plan,
+implement the initial portion of the plan,
 move the horizon one step ahead, and recompute.
 This approach essentially reduces the planner synthesis problem
 into a set of smaller problems.
@@ -477,7 +564,7 @@ contains many functions such as ``computePhi()`` and ``validate()``.
 
 
 
-Example 4: Autonomous Vehicle
+Example 5: Autonomous Vehicle
 `````````````````````````````
 This example is provided in examples/autonomous_car_road.py.
 It is a simplified version of the problem presented in our

@@ -62,6 +62,7 @@ for x in xrange(0, roadLength):
 #@spec@
 spec = GRSpec(env_init='', sys_init='', env_safety='', sys_safety='',
               env_prog='', sys_prog='')
+spec.sys_init = ''
 init_cells = range(0, roadLength*(roadWidth-1)+1, roadLength)
 
 # Assumption on the initial state

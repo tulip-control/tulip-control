@@ -146,7 +146,7 @@ def prop2partconvex(ppp):
     myconvexpartition.adj = adj.copy()
     return myconvexpartition
     
-def PWAPartition(pwa_sys, ppp, abs_tol=1e-5):
+def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     """ This function takes a piecewise affine system pwa_sys and a proposition 
     preserving partition ppp whose domain is a subset of the domain of pwa_sys
     and returns a refined proposition preserving partition where in each
@@ -167,7 +167,7 @@ def PWAPartition(pwa_sys, ppp, abs_tol=1e-5):
     
     """
     if pc.is_fulldim(pc.mldivide(ppp.domain, pwa_sys.domain)):
-        raise Exception("PWAPartition: pwa system is not defined everywhere in the state space")
+        raise Exception("pwaPartition: pwa system is not defined everywhere in the state space")
 
     new_list = []
     subsys_list = []

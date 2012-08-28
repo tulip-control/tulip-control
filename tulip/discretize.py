@@ -63,7 +63,7 @@ from scipy import io as sio
 from cvxopt import matrix,solvers
 import itertools
 import polytope as pc
-from prop2part import PropPreservingPartition, PWAPartition
+from prop2part import PropPreservingPartition, pwa_partition
 from errorprint import printWarning, printError, printInfo
 
 matfile_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
@@ -149,7 +149,8 @@ class PwaSubsysDyn(CtsSysDyn):
         for H_i*s[t]<=g_i - subdomain, type: polytope object
 
     PwaSubsysDyn class inherits from CtsSysDyn with the additional field:
-    - sub_domain: domain with nonempty interior where these dynamics are active, type: polytope
+    
+    - `sub_domain`: domain with nonempty interior where these dynamics are active, type: polytope
     """
 
     def __init__(self, A=[], B=[], E=[], K=[], Uset=None, Wset=None, sub_domain=None):
@@ -166,8 +167,10 @@ class PwaSubsysDyn(CtsSysDyn):
 class PwaSysDyn:
     """PwaSysDyn class for specifying a piecewise affine system.
     A PwaSysDyn object contains the fields:
-    - list_subsys: list of PwaSubsysDyn
-    - domain: domain over which piecewise affine system is defined, type: polytope
+    
+    - `list_subsys`: list of PwaSubsysDyn
+    
+    - `domain`: domain over which piecewise affine system is defined, type: polytope
     
     For the system to be well-defined the sub_domains of its subsystems should be 
     mutually exclusive (modulo intersections with empty interior) and cover the domain.
@@ -248,7 +251,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
     
     if isinstance(ssys,PwaSysDyn):
-        part = PWAPartition(ssys, part)
+        part = pwa_partition(ssys, part)
     
     # Save original polytopes, require them to be convex 
     if not conservative:
