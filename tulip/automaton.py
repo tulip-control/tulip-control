@@ -803,7 +803,10 @@ class Automaton:
         Return list of nodes (instances of AutomatonState),
         or None on error.
         """
-        this_node = self.getAutState(aut_state_id)
+        try:
+            this_node = self.getAutState(aut_state_id)
+        except IndexError:
+            return None
         if not isinstance(this_node, AutomatonState):
             return None
         inward_list = []
@@ -969,6 +972,13 @@ class Automaton:
             return self.states[transition[0]]
         else:
             return self.states[random.choice(transition)]
+            
+    def stripNames(self):
+        for state in self.states:
+            for k in state.state.keys():
+                stripped = k.split(".")[-1]
+                state.state[stripped] = state.state[k]
+                del(state.state[k])
 
 
 ###################################################################

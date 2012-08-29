@@ -46,6 +46,8 @@ class SolverInput:
         self.modules = []
         self.spec = []
         self.globals = {}
+        self.write = None
+        """write(mdl_file, turns) calls the appropriate model-writing function"""
         self.setSolver(solver)
         self.out_file = None
         self.aut_file = None
@@ -69,11 +71,25 @@ class SolverInput:
             raise KeyError("Duplicate keys found!")
             
     def moduleInstances(self):
-        return [ "%s_%d" % (m["name"], n)
-            for m in self.modules for n in range(m["instances"]) ]
+        multimodules = [ "%s_%d" % (m["name"], n)
+            for m in self.modules for n in range(m["instances"])
+            if m["instances"] > 1 ]
+        return multimodules + [ m["name"] for m in self.modules
+                                    if m["instances"] == 1 ]
             
     def addModule(self, name, spec=None, dynamics=None, sys_vars=None,
                         initials=None, instances=1):
+        """Add a new module to this SolverInput.
+        
+        @param name: Name of the new module.
+        @param spec: Module specification as an AST (from L{ltl_parse.parse})
+        @param dynamics: Discrete dynamics of the system, as a tuple
+                        (transition system, discretized variable name)
+        @param sys_vars: Dictionary describing system variables { "var" : val/range }
+        @param initials: Dictionary describing initial values of system variables:
+                            { "var" : val/range }
+        @param instances: Number of instances of the module to instantiate at runtime.
+        """
         try:
             if self[name]:
                 self.delModule(name)
@@ -90,8 +106,16 @@ class SolverInput:
         self.modules.remove(self[name])
 
     def decompose(self, name, globalize=False):
-        # Decompose a module with n instances and n initial values into n modules,
-        # each with a single instance and a single initial. Useful for SPIN.
+        """Decompose a module with n instances and n initial values into n modules,
+        each with a single instance and a single initial. Useful for SPIN, as SPIN
+        cannot deal with multiple initial values for a single variable.
+        
+        @type name: string
+        @param name: Module name to decompose. Decomposing a module "mod" with
+                    n instances gives modules "mod_0" ... "mod_n".
+        @type globalize: boolean
+        @param globalize: If True, globalize variables in the created modules.
+        """
         m = self[name]
         for n in range(m["instances"]):
             # Split initials
@@ -106,6 +130,13 @@ class SolverInput:
         self.delModule(name)
         
     def globalize(self, name):
+        """Globalize local variables in a given module.
+        For each local variable "var" in module "mod", create a global variable
+        "mod_var" and replace all references to "var" with references to "mod_var".
+        
+        @type name: string
+        @param name: Name of module whose variables will be globalized.
+        """
         nm = self[name]
         for var, val in nm["vars"].iteritems():
             if var in nm["initials"]:
@@ -192,22 +223,17 @@ class SolverInput:
         nusmvint.writeSMV(filename, self.spec, self.modules, turns=turns)
     def writePromela(self, filename, turns=True):
         self.out_file = filename
-        self.opts["preduce"] = self.local_refs()
         spinint.writePromela(self, turns=turns)
-        
-    def local_refs(self):
-        has_lrefs = False
-        def f(t):
-            if isinstance(t, ltl_parse.ASTVar):
-                #if re.match("(\w+)\[(\d+)\]:(\w+)", t.val):
-                if t.val.find(".") != -1:
-                    has_lrefs = True
-            return t
-        for s in self.spec:
-            s.map(f)
-        return has_lrefs
     
     def solve(self, aut_file, verbose=0):
+        """Solve the problem represented by this class.
+        
+        @param aut_file: Output automaton filename.
+        @param verbose: Verbosity level, 0 = quiet.
+        
+        @rtype: boolean
+        @returns: Realizability of the problem.
+        """
         if self.out_file:
             (self.si, result) = self._solve(self.out_file, aut_file, verbose, **self.opts)
             self.realized = result
@@ -218,6 +244,13 @@ class SolverInput:
             raise SolverException("No file to solve")
             
     def automaton(self):
+        """Construct an automaton object for a solved problem.
+        Requires that the problem has already been solved and an automaton
+        file has been generated (i.e. realizable). The file read is pointed
+        to by the aut_file property, which is set by L{solve}.
+        
+        @rtype: L{Automaton}
+        """
         aut = automaton.Automaton('', [])
         if not self.aut_file:
             raise SolverException("Automaton file has not been generated")
@@ -264,14 +297,39 @@ class SolverInput:
 def generateSolverInput(sys_disc_vars={}, spec=[],
         disc_props = {}, disc_dynamics=PropPreservingPartition(),
         outfile='tmp.smv', initials={}, solver='NuSMV'):
+    """Function mimicking L{jtlvint.generateJTLVInput} for NuSMV & SPIN.
+
+    @param sys_disc_vars: a dictionary {str : str} or {str : list} whose
+      keys are the names of discrete system variables and whose values
+      are their possible values.
+
+    @param spec: a list of two strings that represents system
+      specification of the form assumption -> guarantee; the first
+      string is the assumption and the second string is the guarantee.
+      N.B. In this function ['assumption', 'guarantee'] is exactly equivalent
+      to ['', '(assumption)->(guarantee)']
+
+    @param disc_props: a dictionary {str : str} whose keys are the
+      symbols for propositions on discrete variables and whose values
+      are the actual propositions on discrete variables.
+
+    @param disc_dynamics: a PropPreservingPartition object that
+      represents the transition system obtained from the
+      discretization procedure.
+
+    @param outfile: a string that specifies the name of the resulting model file.
+    
+    @param initials: a dictionary {str : str} whose keys are the names of
+        discrete system variables 
+    
+    @rtype: L{SolverInput}
+    """
     solverin = SolverInput()
     ddmodel = discDynamicsModel(sys_disc_vars, spec, disc_props,
                      disc_dynamics, initials)
     solverin.addModule("module", *ddmodel)
-    if solver == "NuSMV":
-        solverin.writeSMV(outfile)
-    elif solver == "SPIN":
-        solverin.writePromela(outfile)
+    solverin.setSolver(solver)
+    solverin.write(outfile)
     return solverin
     
 def prop2reg(prop, regions, props):

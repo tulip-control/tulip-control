@@ -21,21 +21,28 @@ http://tulip-control.sourceforge.net/doc/install.html
 The documentation sources (see below) can be found under doc/
 
 
-Sphinx generated documentation
-------------------------------
+Sphinx and Epydoc generated documentation
+-----------------------------------------
 
-The sources under doc/ are built using Sphinx, so the usual steps apply, i.e.
+There are two main sources of documentation outside the code.  The
+"user" documentation is under doc/ and is built with `Sphinx
+<http://sphinx.pocoo.org/>`_, so the usual steps apply, i.e. ::
 
   make html
 
 Note that a Windows build file, make.bat, was auto-generated at the
 time of first initialising the docs configuration files (ca. 2011 May
 8) but is not actively maintained.  It is included for convenience;
-please consider Makefile to be the ground truth.
-
-A built copy for the most recent release of TuLiP is available online at
+please consider Makefile to be the ground truth.  A built copy for the
+most recent release of TuLiP is available online at
 
 http://tulip-control.sourceforge.net/doc/
+
+The API documentation is generated with `Epydoc
+<http://epydoc.sourceforge.net/>`_ and can also be built from the
+``doc`` directory, now by ::
+
+  make api
 
 
 Format specifications

@@ -89,9 +89,18 @@ sweep_path = lambda Z: [ (row,col) for row in range(0, Z.W.shape[0])
                             for col in range(0, Z.W.shape[1]) ]
 random_path = lambda Z: shuffled(sweep_path(Z))
 
-def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None, save_prefix=None):
-    """Convenience function for interactive use, solve gridworld Z with
-    SolverInput slvi (e.g. from gridworld_problem), and show animation"""
+def solve_paths(Z, instances=1, solv="NuSMV", slvi=None, verbose=0):
+    """Convenience function, solve gridworld Z with SolverInput slvi (e.g. from
+        gridworld_problem), and return the resulting paths.
+        
+    @param Z: Gridworld to solve.
+    @param instances: Number of instances of Z to create, ignored 
+                        if slvi is not None.
+    @param solv: Name of solver.
+    @param slvi: SolverInput to use. If None, the function will create one.
+        
+    @rtype: (L{SolverInput}, list)
+    @return: Tuple of SolverInput object used and list of paths."""
     if not slvi:
         slvi = input_from_gw(Z, num_robots=instances)
     slvi.setSolver(solv)
@@ -100,9 +109,9 @@ def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None, save_prefix=None)
             if m["instances"] > 1:
                 slvi.decompose(m["name"])
     slvi.write("gw_solve.mdl")
-    rlz = slvi.solve("gw_solve.aut", 1)
+    rlz = slvi.solve("gw_solve.aut", verbose)
     if not rlz:
-        return False
+        return (slvi, None)
     aut = slvi.automaton()
     solver.restore_propositions(aut, Z.discreteTransitionSystem())
     paths = []
@@ -114,8 +123,7 @@ def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None, save_prefix=None)
             paths.append(gw.extract_path(aut, m["name"]))
     paths = [ p for p in paths if p ]
     paths = gw.compress_paths(paths)
-    gw.animate_paths(Z, paths, 0.0, save_prefix)
-    return slvi
+    return (slvi, paths)
     
 def moving_obstacle_model(obst_path, Z, regions, symbols):
     c2r = lambda x: solver.prop2reg(Z[x], regions, symbols)

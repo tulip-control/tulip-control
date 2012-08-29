@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,7 +58,6 @@ import sys, os, time, subprocess
 from copy import deepcopy
 import numpy as np
 from scipy import io as sio
-from scipy.linalg import block_diag
 from cvxopt import matrix,solvers
 
 import polytope as pc
@@ -71,6 +69,25 @@ matfile_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), \
 to_matfile = os.path.join(matfile_dir, 'dataToMatlab.mat')
 from_matfile = os.path.join(matfile_dir, 'dataFromMatlab.mat')
 donefile = os.path.join(matfile_dir, 'done.txt')
+
+
+def _block_diag2(A,B):
+    """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
+
+    Old versions of the linear algebra package in SciPy (i.e.,
+    scipy.linalg) do not have a block_diag() function.  Providing
+    _block_diag2() here until most folks are using sufficiently
+    up-to-date SciPy installations improves portability.
+    """
+    if len(A.shape) == 1:  # Cast 1d array into matrix
+        A = np.array([A])
+    if len(B.shape) == 1:
+        B = np.array([B])
+    C = np.zeros((A.shape[0]+B.shape[0], A.shape[1]+B.shape[1]))
+    C[:A.shape[0], :A.shape[1]] = A.copy()
+    C[A.shape[0]:, A.shape[1]:] = B.copy()
+    return C
+
 
 class CtsSysDyn:
     """CtsSysDyn class for specifying the continuous dynamics:
@@ -1052,7 +1069,7 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
 
     B_diag = ssys.B
     for i in range(N-1):
-        B_diag = block_diag(B_diag,ssys.B)
+        B_diag = _block_diag2(B_diag,ssys.B)
     K_hat = np.tile(ssys.K, (N,1))
 
     A_it = ssys.A.copy()
@@ -1158,8 +1175,8 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     B_diag = B
     E_diag = E
     for i in range(N-1):
-        B_diag = block_diag(B_diag,B)
-        E_diag = block_diag(E_diag,E)
+        B_diag = _block_diag2(B_diag,B)
+        E_diag = _block_diag2(E_diag,E)
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
     sum_vert = 0

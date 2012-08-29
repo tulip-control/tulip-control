@@ -449,7 +449,7 @@ class SynthesisProb:
 
     def createProbFromDiscDynamics(self, env_vars={}, sys_disc_vars={}, \
                        disc_props={}, disc_dynamics=PropPreservingPartition(), \
-                       spec=GRSpec(), verbose=0):
+                       spec=None, verbose=0):
         """
         Construct SynthesisProb from discretized continuous dynamics.
 
@@ -606,7 +606,10 @@ class SynthesisProb:
             self.__disc_dynamics = copy.deepcopy(disc_dynamics)
 
         # Process the spec
-        self.__spec = copy.deepcopy(spec)
+        if spec:
+            self.__spec = copy.deepcopy(spec)
+        else:
+            self.__spec = GRSpec()
 
         # Replace any cont_prop XC by (s.p = P1) | (s.p = P2) | ... | (s.p = Pn) where 
         # P1, ..., Pn are cells in disc_dynamics that satisfy XC

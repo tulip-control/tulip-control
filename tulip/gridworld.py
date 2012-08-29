@@ -182,7 +182,7 @@ class GridWorld:
             W = np.ones(shape=W.shape) - W
             plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest",
                 zorder=-2)
-        plt.axis([self.W.shape[1], -1, self.W.shape[0], -1])
+        plt.axis([-1, self.W.shape[1], self.W.shape[0], -1])
         if show_grid:
             xmin, xmax, ymin, ymax = plt.axis()
             x_steps = np.linspace(-0.5, self.W.shape[1]-0.5, self.W.shape[1]+1)
@@ -906,7 +906,18 @@ def maze(width, height, complexity=.75, density =.75):
 
 def maze_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         complexity=.75):
+    """Generate a random maze gridworld.
+    
+    @param size: a pair, indicating number of rows and columns.
+    @param wall_density: the ratio of walls to total number of cells.
+    @param num_init: number of possible initial positions.
+    @param num_goals: number of positions to be visited infinitely often.
+    @param prefix: string to be used as prefix for naming gridworld
+                   cell variables.
+    @param complexity: value in [0,1] determining the complexity of the maze.
+    """
     W = maze(size[1], size[0], complexity, wall_density)
+    size = W.shape
     W = W.reshape(-1)
     goal_list = place_features(W, num_goals)
     init_list = place_features(W, num_init)
@@ -927,7 +938,8 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     @param prefix: string to be used as prefix for naming gridworld
                    cell variables.
                    
-    @rtype: L{GridWorld}"""
+    @rtype: L{GridWorld}
+    """
                    
     (w, h) = size
     if w < 3 or h < 3:
@@ -1117,7 +1129,7 @@ def extract_path(aut, prefix=None):
             break
     return path
     
-def verify_path(W, path, seq):
+def verify_path(W, path, seq=False):
     goals = W.goal_list[:]
     if seq:
         # Check if path visits all goals in gridworld W in the correct order

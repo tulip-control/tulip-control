@@ -61,16 +61,27 @@ prv = lambda x: os.path.join("..", x)
 class SPINInstance:
     SPIN_PATH = os.path.join(os.path.dirname(__file__), "solvers/spin")
     def __init__(self, model="tmp.pml", out="tmp.aut", path=SPIN_PATH,
-             preduce=True, verbose=0, safety=False):
-        (self.model, self.out, self.path) = (model, out, path)
+             preduce=True, verbose=0, safety=False, pandir="pan"):
+        """Create new SPIN instance, generate pan verifier.
+        
+        @param model: Path of Promela model file.
+        @param out: Output path for resulting automaton.
+        @param path: Path to the spin executable (default TULIP_DIR/solvers/spin).
+        @param preduce: If True, use partial-order reduction to speed up solving.
+        @param verbose: Verbosity level, 0 = quiet, > 0 = print messages.
+        @param safety: Set to True to use optimisations for safety specifications.
+        
+        @raise SPINError: When any SPIN subcomponent raises an error.
+        """
+        (self.model, self.out, self.path, self.pandir) = (model, out, path, pandir)
         # Time everything, including generation of verifier
         (self.t_start, self.t_time) = (chcputime(), None)
         try:
-            os.mkdir("pan")
+            os.mkdir(self.pandir)
         except OSError:
             # PAN directory already exists
             pass
-        with cd("pan"):
+        with cd(self.pandir):
             spin = Popen([self.path, "-O", "-a", prv(self.model)], stdout=PIPE, stderr=PIPE)
             self.max_mem = memoryMonitor(spin.pid)
             (out, err) = spin.communicate()
@@ -93,10 +104,17 @@ class SPINInstance:
             if not retcode == 0:
                 raise SPINError("Could not compile verifier")
     def generateTrace(self, verbose=0):
+        """Run verifier and generate automaton file.
+        
+        @param verbose: Verbosity level, 0 = quiet, > 0 = print messages.
+        
+        @raise SPINError: When any SPIN subcomponent raises an error.
+        """
         with open(self.out, 'w') as f:
             (model_dn, model_fn) = os.path.split(self.model)
             if not model_dn: model_dn = "."
-            pan = Popen(["pan/pan", "-a"], stdout=PIPE, stderr=PIPE, cwd=model_dn)
+            pan = Popen([os.path.join(self.pandir, "pan"), "-a"], stdout=PIPE,
+                         stderr=PIPE, cwd=model_dn)
             self.max_mem = max(self.max_mem, memoryMonitor(pan.pid))
             (out, err) = pan.communicate()
             if verbose > 0:
@@ -117,8 +135,18 @@ class SPINInstance:
     def memory(self):
         return self.max_mem
 
-# Raises SPINError
 def check(pml_file, aut_file, verbose=0, **opts):
+    """Generate trace from model and store in automaton file.
+    
+    @param pml_file: Path of Promela model file.
+    @param aut_file: Output path for resulting automaton.
+    @param verbose: Verbosity level, 0 = quiet, > 0 = print messages.
+    @param preduce: If True, use partial-order reduction to speed up solving.
+    @param safety: Set to True to use optimisations for safety specifications.
+    
+    @rtype: (SPINInstance, boolean)
+    @returns: Tuple of created SPIN instance and realizability result.
+    """
     kwargs = { k : opts[k] for k in ["preduce", "safety"] if k in opts }
     spin = SPINInstance(pml_file, aut_file, verbose=verbose, **kwargs)
     result = spin.generateTrace(verbose)
@@ -160,8 +188,27 @@ def promelaVar(var, val, initial=None):
         else:
             # default initial int = 0
             return "\tint %s = 0;\n" % var
+            
+def local_refs(spec):
+    """Test if the specification has local references."""
+    has_lrefs = False
+    def f(t):
+        if isinstance(t, ltl_parse.ASTVar):
+            #if re.match("(\w+)\[(\d+)\]:(\w+)", t.val):
+            if t.val.find(":") != -1:
+                has_lrefs = True
+        return t
+    for s in spec:
+        s.map(f)
+    return has_lrefs
 
 def writePromela(slvi, turns=False):
+    """Write a Promela model file from the provided SolverInput.
+    
+    @param slvi: SolverInput instance to generate model from.
+    @type turns: boolean
+    @param turns: Require that modules execute in-turn.
+    """
     (pml_file, spec, modules, globalv) = (slvi.out_file, slvi.spec, slvi.modules, slvi.globals)
     if (not os.path.exists(os.path.abspath(os.path.dirname(pml_file)))):
         if (verbose > 0):
@@ -221,6 +268,7 @@ def writePromela(slvi, turns=False):
     if spec:
         if all(ltl_parse.issafety(s) for s in spec):
             slvi.opts["safety"] = True
+        slvi.opts["preduce"] = local_refs(spec)
         # Spec
         spec = reduce(ltl_parse.ASTAnd.new, spec)
         # Negate & write to file
