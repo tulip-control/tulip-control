@@ -1077,16 +1077,54 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
     q = matrix(np.dot( np.dot(x0.reshape(1,x0.size), A_N.T) + \
             np.dot(A_K, K_hat).T , np.dot(R, Ct) ) \
             + np.dot(r.T, Ct )).T 
+            
+            
+    ## MODIFIED BY ERIC 8/22/12
+    def cstr1(x, *args):
+        # TODO Need to add the control constraints
+        G,h = args[2:4]
+        tmp = h.T - np.dot(G,x)
+        #print "cstr1", tmp[0]
+        return  tmp[0]  # h - Gx >= 0
+
+    def func1(x, *args):
+        P, q = args[0:2]
+        cost = np.dot(x,np.dot(P,x)) + np.dot(q.T,x)
+        #print "func1",cost[0]
+        return cost[0]
+        
+    # Call nonlinear solver from scipy.optimize
+#    G = np.array(G)
+#    h = np.array(h)
+#    P = np.array(P)
+#    q = np.array(q)
+    u_init = np.zeros((n*N,1))
+    soln = optimize.fmin_slsqp(func1, u_init, args = (P, q, G, h), \
+                               f_ieqcons = cstr1, \
+                               full_output=True, iprint = 0)   # cstr >= 0 is default
+    ### END MODIFICATION
     
-    sol = solvers.qp(P,q,G,h)
+#    ## ORIGINAL CVXOPT SOLVER
+#    sol = solvers.qp(P,q,G,h)
+#    
+#    if sol['status'] != "optimal":
+#        raise Exception("getInputHelper: QP solver finished with status " + \
+#                        str(sol['status']))
+#    u = np.array(sol['x']).flatten()
+#    cost = sol['primal objective']
+#    
+#    print soln[1],cost
+#    assert abs(soln[1]-cost) < 1e-4
+#    
+##    return u.reshape(N, m), cost
+#    ## END ORIGINAL
     
-    if sol['status'] != "optimal":
-        raise Exception("getInputHelper: QP solver finished with status " + \
-                        str(sol['status']))
-    u = np.array(sol['x']).flatten()
-    cost = sol['primal objective']
+    if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
+        return soln[0], soln[1]
+    else:
+        print "Solver returned non-optimal solution!"
+        return None
     
-    return u.reshape(N, m), cost
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     """Compute the components of the polytope L [x(0)' u(0)' ... u(N-1)']' <= M
@@ -1339,7 +1377,7 @@ def cstExpectedCost(numSamples, ssys, H0, H1, N, R, r, Q):
     pts = samplePtsPoly(H0,numSamples)
     while len(pts)>0:
         x0 = pts.pop()
-        u,cost = getInputHelper(x0, ssys, H0, H1, N, R, r, Q)
+        u,cost = getInputHelper(x0, ssys, H0, H1, N, R, r, Q, closed_loop=False)
         totalCost += cost
     return totalCost / float(numSamples)
 
@@ -1352,7 +1390,7 @@ def cstMinCost(ssys, H0, H1, N, R, r, Q):
 
     def func(x, *args):
         ssys, H0, H1, N, R, r, Q = args[0:7]
-        u, cost = getInputHelper(x, ssys, H0, H1, N, R, r, Q)
+        u, cost = getInputHelper(x, ssys, H0, H1, N, R, r, Q, closed_loop=False)
         return cost
     # Constraint to start in H0 (Ax <= b)
     A = H0.A
@@ -1382,7 +1420,7 @@ def cstMaxCost(ssys, H0, H1, N, R, r, Q):
     
     maxCost = -np.Inf
     for v in vertices:
-        u,cost = getInputHelper(v, ssys, H0, H1, N, R, r, Q)
+        u,cost = getInputHelper(v, ssys, H0, H1, N, R, r, Q, closed_loop=False)
         if cost > maxCost:
             maxCost = cost
     
