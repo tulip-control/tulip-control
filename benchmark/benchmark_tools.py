@@ -40,20 +40,22 @@ from tulip import solver
 from tulip.solver_common import SolverException
 import numpy as np
 import string, random
-from itertools import combinations
+from itertools import combinations, imap
 
 default_gw = { "size" : (5,5), "wall_density" : 0.2, "num_init" : 1, "num_goals" : 1,
-        "num_robots" : 1, "goal_sequence" : False, "obstacle_size" : (1,1) }
+        "num_robots" : 1, "goal_sequence" : False, "obstacle_size" : (1,1),
+        "world_type" : "random" }
 datatype = { "solver" : 'S16', "width" : 'i4', "height" : 'i4',
         "num_init" : 'i4', "num_goals" : 'i4', "num_robots" : 'i4',
         "wall_density" : 'f8', "goal_sequence" : 'b', "cpu_time" : 'f8',
         "aut_size" : 'i4', "path_length" : 'i4', "realizable" : 'b',
         "size" : 'i4', "description_length" : 'i4', "state_space" : 'i4',
         "obstacle_size" : 'i4', "spec_nodes" : 'i4', "transitions" : 'i4',
-        "memory" : 'i4' }
+        "memory" : 'i4', "world_type" : 'S16' }
 record = [ "solver", "width", "height", "num_init", "num_goals", "num_robots",
-        "wall_density", "goal_sequence", "obstacle_size", "transitions",
-        "cpu_time", "aut_size", "path_length", "realizable", "spec_nodes", "memory" ]
+        "wall_density", "goal_sequence", "obstacle_size", "world_type",
+        "transitions", "cpu_time", "aut_size", "path_length", "realizable",
+        "spec_nodes", "memory" ]
 descriptions = { "solver" : "Solver",
         "width" : "World width",
         "height" : "World height",
@@ -72,7 +74,8 @@ descriptions = { "solver" : "Solver",
         "obstacle_size" : "Size of obstacles (cells)",
         "spec_nodes" : "Number of nodes in specification AST",
         "transitions" : "Number of transitions",
-        "memory" : "Peak memory usage (MB)" }
+        "memory" : "Peak memory usage (MB)",
+        "world_type" : "Type of world" }
 
 def strfmt(dtype):
     format_map = { 'S' : '%s', 'i' : '%d', 'f' : '%.4f' }
@@ -86,7 +89,7 @@ sweep_path = lambda Z: [ (row,col) for row in range(0, Z.W.shape[0])
                             for col in range(0, Z.W.shape[1]) ]
 random_path = lambda Z: shuffled(sweep_path(Z))
 
-def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None):
+def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None, save_prefix=None):
     """Convenience function for interactive use, solve gridworld Z with
     SolverInput slvi (e.g. from gridworld_problem), and show animation"""
     if not slvi:
@@ -111,7 +114,8 @@ def solve_and_animate(Z, instances=1, solv="NuSMV", slvi=None):
             paths.append(gw.extract_path(aut, m["name"]))
     paths = [ p for p in paths if p ]
     paths = gw.compress_paths(paths)
-    gw.animate_paths(Z, paths)
+    gw.animate_paths(Z, paths, 0.0, save_prefix)
+    return slvi
     
 def moving_obstacle_model(obst_path, Z, regions, symbols):
     c2r = lambda x: solver.prop2reg(Z[x], regions, symbols)
@@ -170,8 +174,16 @@ def input_from_gw(Z, num_robots=1, goal_sequence=False, moving_obstacle=False):
     return slvi
     
 def gridworld_problem(size=(5,5), wall_density=0.2, num_init=1, num_goals=1,
-        num_robots=1, goal_sequence=False, obstacle_size=(1,1), moving_obstacle=False):
-    Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
+        num_robots=1, goal_sequence=False, obstacle_size=(1,1), moving_obstacle=False,
+        world_type="random"):
+    """Generate a gridworld problem with a particular parameter set.
+    
+    @rtype: (L{SolverInput}, L{GridWorld})
+    """
+    if world_type == "maze":
+        Z = gw.maze_world(size, wall_density, num_init, num_goals)
+    else:
+        Z = gw.random_world(size, wall_density, num_init, num_goals, obstacle_size=obstacle_size)
     slvi = input_from_gw(Z, num_robots, goal_sequence, moving_obstacle)
     return (slvi, Z)
     
@@ -194,45 +206,60 @@ def gridworld_solve_data(slvi, Z, opts):
     return { "solver" : slvi.solver, "cpu_time" : slvi.solveTime(),
             "aut_size" : aut_size, "realizable" : slvi.realized,
             "path_length" : path_length, "memory" : slvi.memoryUsage() }
+            
+def benchmark_instance(solv, opts):
+    print solv, opts
+    try:
+        (slvi, Z) = gridworld_problem(**opts)
+    except ValueError:
+        sys.stderr.write("Could not create gridworld with these parameters")
+        return ()
+    if opts["num_robots"] > 1 and solv == "SPIN":
+        slvi.decompose("grid", globalize=True)
+    slvi.setSolver(solv)
+    slvi.write("gw_bm.mdl")
+    try:
+        rlz = slvi.solve("gw_bm.aut")
+    except SolverException as e:
+        sys.stderr.write(solv + " raised error: " + e.message + "\n")
+        return ()
+    outs = gridworld_solve_data(slvi, Z, opts)
+    row = dict(opts.items() + outs.items())
+    row["height"] = row["size"][0]
+    row["width"] = row["size"][1]
+    del(row["size"])
+    row["obstacle_size"] = row["obstacle_size"][0] * row["obstacle_size"][1]
+    row["spec_nodes"] = slvi.specNodes()
+    row["transitions"] = slvi.numTransitions(slvi.modules[0]["name"])
+    row = tuple([ row[k] for k in record ])
+    return row
 
 def benchmark_variable(solv, indep, vals, fixed={}):
     # opts contains the static parameters for the gridworld
     opts = dict(default_gw.items() + fixed.items())
-    result = []
+    def f(v):
+        o = opts.copy()
+        o[indep] = v
+        # A specification with more robots than initial positions is trivially
+        # unrealizable, so assume that we want as many inits as robots.
+        if o["num_robots"] > o["num_init"] and "num_init" not in fixed:
+            o["num_init"] = o["num_robots"]
+        return o
+    # This can be easily parallelized if the underlying solve is made
+    # threadsafe, i.e. distinct files, pan directories for SPIN
+    benches = ((solv, f(v)) for v in vals)
     try:
-        for v in vals:
-            opts[indep] = v
-            # A specification with more robots than initial positions is trivially
-            # unrealizable, so assume that we want as many inits as robots.
-            if opts["num_robots"] > opts["num_init"] and "num_init" not in fixed:
-                opts["num_init"] = opts["num_robots"]
-            print solv, opts
-            try:
-                (slvi, Z) = gridworld_problem(**opts)
-            except ValueError:
-                continue
-            if opts["num_robots"] > 1 and solv == "SPIN":
-                slvi.decompose("grid", globalize=True)
-            slvi.setSolver(solv)
-            slvi.write("gw_bm.mdl")
-            try:
-                rlz = slvi.solve("gw_bm.aut")
-            except SolverException as e:
-                sys.stderr.write(solv + " raised error: " + e.message + "\n")
-                break
-            outs = gridworld_solve_data(slvi, Z, opts)
-            row = dict(opts.items() + outs.items())
-            row["height"] = row["size"][0]
-            row["width"] = row["size"][1]
-            del(row["size"])
-            row["obstacle_size"] = row["obstacle_size"][0] * row["obstacle_size"][1]
-            row["spec_nodes"] = slvi.specNodes()
-            row["transitions"] = slvi.numTransitions(slvi.modules[0]["name"])
-            row = tuple([ row[k] for k in record ])
+        result = []
+        # Parallelism: use multiprocessing.Pool.imap
+        bm_iter = lambda (solv, opts): benchmark_instance(solv, opts)
+        it = imap(bm_iter, benches)
+        for row in it:
             result.append(row)
     except KeyboardInterrupt:
         pass
-    return result
+    except IndexError:
+        pass
+    return [ r for r in result if r ]
     
 def mean_stdev(data, indep, dep, filt={}):
     if filt:
@@ -280,28 +307,23 @@ def compute_fields(data):
     ret["memory"] = ret["memory"]/1000
     return ret
 
-color = 1
-def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None, initial=1):
-    global color
+color_last = 0
+def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None, initial=1, color=None):
+    if not color:
+        global color_last
+        color = color_last = color_last + 1
     expform = (string.Template("exp(${ID}_a*x + ${ID}_b)"), "exp(%.3g*x + %.3g)")
     linform = (string.Template("${ID}_a*x + ${ID}_b"), "%.3g*x + %.3g")
     powform = lambda p: (string.Template("${ID}_a*x**%.2g + ${ID}_b" % p), "%.3g*x**" + str(p) + " + %.3g")
 
-    plotfit = string.Template("""${ID}_a = 0.5
+    fittpl = string.Template("""${ID}_a = 0.5
     ${ID}_b = $INITIAL
     ${ID}_f(x) = $FORMULA
     fit ${ID}_f(x) "$FILENAME" using $XCOL:$YCOL via ${ID}_a, ${ID}_b
     """)
-    plotfit_filter = string.Template("""${ID}_a = 0.5
-    ${ID}_b = $INITIAL
-    ${ID}_f(x) = $FORMULA
-    fit ${ID}_f(x) "$FILENAME" using $XCOL:((stringcolumn(1) eq "$FILTER") ? $$$YCOL : 1/0) via ${ID}_a, ${ID}_b
-    """)
-    
     plottpl = string.Template("\"$FILENAME\" using $XCOL:$YCOL:$ERRCOL with errorbars \
-    title \"$ID\" lt $COLOR, ${ID}_f(x) title sprintf(\"$ID fit: $FORMULA\", ${ID}_a, ${ID}_b) lt $COLOR")
-    plottpl_filter = string.Template("\"$FILENAME\" using $XCOL:((stringcolumn(1) eq \"$FILTER\") ? $$$YCOL : 1/0):$ERRCOL \
-    with errorbars title \"$ID\" lt $COLOR, ${ID}_f(x) title sprintf(\"$ID fit: $FORMULA\", ${ID}_a, ${ID}_b) lt $COLOR")
+    title \"$ID\" lt $COLOR")
+    plotfit = string.Template(", ${ID}_f(x) title sprintf(\"$ID fit: $FORMULA\", ${ID}_a, ${ID}_b) lt $COLOR")
     
     if eqtype == "exp":
         eqn = expform
@@ -309,28 +331,30 @@ def plotstrings(ident, xcol, ycol, outfile, eqtype, filterval=None, initial=1):
         eqn = linform
     elif eqtype.startswith("pow_"):
         eqn = powform(float(eqtype.rpartition("_")[2]))
+    elif eqtype == "" or eqtype == "none":
+        eqn = None
     else:
         raise ValueError("Unknown equation type " + eqtype)
         
-    fx = eqn[0].substitute(ID=ident)
     if filterval:
-        fit = plotfit_filter.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, FORMULA=fx, FILTER=filterval, INITIAL=initial)
-        plot = plottpl_filter.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, ERRCOL=ycol+1, COLOR=color, FORMULA=eqn[1], FILTER=filterval)
+        ycol_str = "((stringcolumn(1) eq \"" + filterval + "\") ? $" + str(ycol) + " : 1/0)"
     else:
-        fit = plotfit.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, FORMULA=fx, INITIAL=initial)
-        plot = plottpl.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
-                YCOL=ycol, ERRCOL=ycol+1, COLOR=color, FORMULA=eqn[1])
-    color = color + 1
+        ycol_str = str(ycol)
+    
+    plot = plottpl.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
+            YCOL=ycol_str, ERRCOL=ycol+1, COLOR=color)
+    if eqn:
+        fx = eqn[0].substitute(ID=ident)
+        fit = fittpl.substitute(ID=ident, FILENAME=outfile, XCOL=xcol,
+                YCOL=ycol_str, FORMULA=fx, INITIAL=initial)
+        plot += plotfit.substitute(ID=ident, FORMULA=eqn[1], COLOR=color)
     return (fit, plot)
     
-def write_plotfile(prefix, plotstrs, xlabel, ylabel, log=False):    
+def write_plotfile(prefix, plotstrs, xlabel, ylabel, log=False, terminal="png"):    
     pf = string.Template("""
     set xlabel "$XAXIS"
     set ylabel "$YAXIS"
-    set terminal png font "" 10
+    $TERM_STR
     set output "$FN_PNG"
     """)
     pl = []
@@ -340,8 +364,12 @@ def write_plotfile(prefix, plotstrs, xlabel, ylabel, log=False):
             pl.append(plot)
         if log:
             f.write("set log y")
-        s = pf.substitute(FN_PNG=prefix + ".png", XAXIS=xlabel,
-                    YAXIS=ylabel)
+        if terminal == "png":
+            termstr = "set terminal png font \"\" 10"
+        elif terminal == "emf":
+            termstr = "set terminal emf size 480,360"
+        s = pf.substitute(FN_PNG=prefix + "." + terminal, XAXIS=xlabel,
+                    YAXIS=ylabel, TERM_STR=termstr)
         f.write(s)
         f.write("plot " + ", ".join(pl))
         
@@ -386,8 +414,9 @@ def simple_benchmark(prefix, x, xr, y, fixed={}, solvers=["NuSMV", "SPIN"],
     ci = lambda col: colidx(out, col)
     if isinstance(eqtype, str):
         eqtype = [eqtype for s in solvers]
-    for s, eq in zip(solvers, eqtype):
-        plotstrs.append(plotstrings(s, ci(x), ci(y), prefix + ".dat", eq, s, initial=out[out["solver"] == s][y][0]))
+    for n, (s, eq) in enumerate(zip(solvers, eqtype)):
+        plotstrs.append(plotstrings(s, ci(x), ci(y), prefix + ".dat", eq, s,
+                 initial=out[out["solver"] == s][y][0], color=n+1))
     write_plotfile(prefix, plotstrs, descriptions[x], descriptions[y], (eqtype[0] == "exp"))
         
 colidx = lambda arr, name: arr.dtype.names.index(name) + 1
