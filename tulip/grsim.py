@@ -101,7 +101,7 @@ def grsim(aut_list, aut_trans_dict={}, env_states=[{}], num_it=20,
     """
     if not (isinstance(aut_list, list) and len(aut_list) > 0 and
             isinstance(aut_trans_dict, dict) and
-            isinstance(env_states, list) and len(env_states) > 0 and
+            isinstance(env_states, list) and
             isinstance(num_it, int) and isinstance(deterministic_env, bool) and
             isinstance(graph_vis, bool) and isinstance(destfile, str) and
             (label_vars == None or isinstance(label_vars, list)) and

@@ -47,13 +47,13 @@ setting), positive means provide some status updates.
 import copy
 import subprocess
 import tempfile
+import os
 
 from conxml import loadXML
 from spec import GRSpec
 from errorprint import printWarning, printError
 
 GR1C_BIN_PREFIX=""
-
 
 def check_syntax(spec_str, verbose=0):
     """Check whether given string has correct gr1c specification syntax.

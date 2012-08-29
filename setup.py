@@ -187,7 +187,7 @@ if check_deps:
 
 if perform_setup:
     setup(name = 'tulip',
-          version = '0.3c',
+          version = '0.4',
           description = 'Temporal Logic Planning (TuLiP) Toolbox',
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
