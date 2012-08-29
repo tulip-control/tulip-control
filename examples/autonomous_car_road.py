@@ -60,8 +60,14 @@ for x in xrange(0, roadLength):
 # Specification
 ########################################
 #@spec@
-spec = GRSpec(env_init='', sys_init='', env_safety='', sys_safety='',
-              env_prog='', sys_prog='')
+spec = GRSpec()
+spec.env_init=''  # Hack to use GRSpec in an outdated way.
+spec.env_safety=''
+spec.env_prog=''
+spec.sys_init=''
+spec.sys_safety=''
+spec.sys_prog=''
+
 init_cells = range(0, roadLength*(roadWidth-1)+1, roadLength)
 
 # Assumption on the initial state
