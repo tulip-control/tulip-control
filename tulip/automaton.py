@@ -70,6 +70,9 @@ class AutomatonState:
         self.id = id
         self.state = copy.copy(state)
         self.transition = transition[:]
+    def __repr__(self):
+        return "State: " + str(self.state) + "\n" + \
+                "Transitions: " + str(self.transition)
 
     def __copy__(self):
         return AutomatonState(self.id, self.state, self.transition)
@@ -151,6 +154,77 @@ class Automaton:
     def copy(self):
         """Return copy of this Automaton."""
         return self.__copy__()
+        
+    def loadSPINAut(self, aut_file, varnames=[], verbose=0):
+        self.loadLinearAut(aut_file, '\(state (\d+)\)', '^\s*((?:\w+\(\d+\):)?\w+) = (\w+)',
+                    "<<<<<START OF CYCLE>>>>>", varnames, verbose)
+        
+    def loadSMVAut(self, aut_file, varnames=[], verbose=0):
+        self.loadLinearAut(aut_file, 'State: \d+\.(\d+)', '([\w.]+) = (\w+)',
+                     "-- Loop starts here", varnames, verbose)
+        
+    def loadLinearAut(self, aut_file, state_regex, assign_regex, loop_text,
+                    varnames=[], verbose=0):
+        self.states = []
+        
+        try:
+            f = open(aut_file, 'r')
+            closable = True
+        except IOError:
+            printWarning("Could not open " + aut_file + " for reading")
+            return
+        except TypeError:
+            # assume aut_file is already a file object
+            f = aut_file
+            # don't close a file we didn't open
+            closable = False
+            
+        stateID = -1
+        valuation = {}
+        loopState = None
+        val_change = True
+        for (lineno, line) in enumerate(f, 1):
+            if re.search(state_regex, line) is not None:
+                # Only write a new state if the valuation has changed
+                if val_change:
+                    # conclude a previous state
+                    if stateID >= 0:
+                        self.setAutStateState(stateID, valuation, verbose)
+                        self.setAutStateTransition(stateID, [stateID+1], verbose)
+                    stateID += 1
+                val_change = False
+                #try:
+                #    stateID = int(stateID.group(1)) - 1 # start numbering from 0
+                #except:
+                #    printWarning("SMV aut parsing failed on line " + str(lineno) +
+                #                ":\n\t" + line)
+                #    return
+            elif loop_text in line:
+                loopState = stateID + 1
+            else:
+                try:
+                    # variable assignment
+                    (var, val) = re.search(assign_regex, line).group(1,2)
+                except AttributeError:
+                    # probably a comment line, ignore
+                    continue
+                if varnames and not var in varnames:
+                    printWarning('Unknown variable ' + var, obj=self)
+                try:
+                    if var not in valuation or not valuation[var] == int(val):
+                        val_change = True
+                    valuation[var] = int(val)
+                except:
+                    if var not in valuation or not valuation[var] == val:
+                        val_change = True
+                    valuation[var] = val
+        self.setAutStateState(stateID, valuation, verbose)
+        if loopState is not None:
+            self.setAutStateTransition(stateID, [loopState], verbose)
+        else:
+            self.setAutStateTransition(stateID, [], verbose)
+        if closable:
+            f.close()
 
     def loadFile(self, aut_file, varnames=[], verbose=0):
         """
@@ -167,8 +241,10 @@ class Automaton:
         self.states = []
         if isinstance(aut_file, str):
             f = open(aut_file, 'r')
+            closable = True
         else:
             f = aut_file  # Else, assume aut_file behaves as file object.
+            closable = False
         stateID = -1
         for line in f:
             # parse states
@@ -182,20 +258,11 @@ class Automaton:
                     except:
                         state[var] = val
                     if (len(varnames) > 0):
-                        var_found = False
-                        for var2 in varnames:
-                            if (var == var2):
-                                var_found = True
-                        if (not var_found):
+                        if not var in varnames:
                             printWarning('Unknown variable ' + var, obj=self)
-                if (len(state.keys()) < len(varnames)):
-                    for var in varnames:
-                        var_found = False
-                        for var2 in state.keys():
-                            if (var == var2):
-                                var_found = True
-                        if (not var_found):
-                            printWarning('Variable ' + var + ' not assigned', obj=self)
+                for var in varnames:
+                    if not var in state.keys():
+                        printWarning('Variable ' + var + ' not assigned', obj=self)
                 self.setAutStateState(stateID, state, verbose)
 
             # parse transitions
@@ -204,6 +271,9 @@ class Automaton:
                 for i in xrange(0,len(transition)):
                     transition[i] = int(transition[i])
                 self.setAutStateTransition(stateID, list(set(transition)), verbose)
+        if closable:
+            f.close()
+        
     
     def writeFile(self, destfile):
         """
@@ -525,7 +595,7 @@ class Automaton:
                 for agent_name in distinguishTurns.keys():
                     state_labels[str(state.id)+agent_name] = ''
             for (k,v) in state.state.items():
-                if (not hideZeros) or (v != 0):
+                if not (hideZeros and (v == 0 or v == "FALSE")):
                     if distinguishTurns is None:
                         agent_name = ''
                     else:
@@ -697,7 +767,7 @@ class Automaton:
         """
         Return an AutomatonState object stored in this Automaton object 
         whose id is `aut_state_id`. 
-        Return -1 if such AutomatonState object does not exist.
+        Raise IndexError if such AutomatonState object does not exist.
 
         Input:
 
@@ -713,7 +783,7 @@ class Automaton:
             if (aut_state_index >= 0):
                 return self.states[aut_state_index]
             else:
-                return -1
+                raise IndexError("State ID " + str(aut_state_id) + " not found.")
 
     def getAutInSet(self, aut_state_id):
         """Find all nodes that include given ID in their outward transitions.
@@ -733,7 +803,10 @@ class Automaton:
         Return list of nodes (instances of AutomatonState),
         or None on error.
         """
-        this_node = self.getAutState(aut_state_id)
+        try:
+            this_node = self.getAutState(aut_state_id)
+        except IndexError:
+            return None
         if not isinstance(this_node, AutomatonState):
             return None
         inward_list = []
@@ -756,13 +829,14 @@ class Automaton:
         - `aut_state_state`: a dictionary that represents the new state of the 
           AutomatonState object.
         """
-        aut_state = self.getAutState(aut_state_id)
-        if (isinstance(aut_state, AutomatonState)):
+        try:
+            aut_state = self.getAutState(aut_state_id)
             aut_state.state = aut_state_state
             if (verbose > 0):
                 print 'Setting state of AutomatonState ' + str(aut_state_id) + \
                     ': ' + str(aut_state_state)
-        else:
+        except IndexError:
+            # State does not already exist, add it
             self.addAutState(AutomatonState(id=aut_state_id, state=aut_state_state, \
                                                 transition=[]))
             if (verbose > 0):
@@ -898,6 +972,13 @@ class Automaton:
             return self.states[transition[0]]
         else:
             return self.states[random.choice(transition)]
+            
+    def stripNames(self):
+        for state in self.states:
+            for k in state.state.keys():
+                stripped = k.split(".")[-1]
+                state.state[stripped] = state.state[k]
+                del(state.state[k])
 
 
 ###################################################################

@@ -51,6 +51,9 @@ from errorprint import printWarning, printError
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
+class JTLVError(Exception):
+    pass
+
 
 def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
                           disc_dynamics=PropPreservingPartition(), \
@@ -403,6 +406,11 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
                     aut_file = aut_file_part[0] + str(i) + aut_file_part[1] + \
                         aut_file_part[2]
                 print('aut file: ' + aut_file)
+    
+    try:
+        os.unlink(aut_file)
+    except OSError:
+        pass
 
     # Convert the priority_kind to the corresponding integer
     if (isinstance(priority_kind, str)):
@@ -454,9 +462,15 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
         if (verbose > 1):
             print "  java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, \
                 aut_file, str(priority_kind), str(init_option)
-        cmd = subprocess.call( \
-            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-                 str(priority_kind), str(init_option)])
+        if (verbose > 0):
+            ret = subprocess.call( \
+                ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                     str(priority_kind), str(init_option)])
+        else:
+            ret = subprocess.call( \
+                ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
+                     str(priority_kind), str(init_option)], stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT)
     else: # For debugging purpose
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
@@ -472,7 +486,7 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
 #                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     realizable = False
-    if (os.path.isfile(aut_file)):
+    if os.path.isfile(aut_file):
         f = open(aut_file, 'r')
         for line in f:
             if ("Specification is realizable" in line):
@@ -482,23 +496,14 @@ def solveGame(smv_file, spc_file, aut_file='', heap_size='-Xmx128m', \
                 realizable = False
                 break
     else:
-        printError("Cannot write to aut file. Running synthesis again...")
-        cmd = subprocess.Popen( \
-            ["java", heap_size, "-jar", jtlv_grgame, smv_file, spc_file, aut_file, \
-                 str(priority_kind), str(init_option)], \
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
-        for line in cmd.stdout:
-            print "\t" + line,
-            if "Specification is realizable" in line:
-                realizable = True
-        cmd.stdout.close()
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
+        raise JTLVError("Solve failed")
 
     if (realizable and priority_kind > 0):
-        print("\nAutomaton successfully synthesized.\n")
+        if verbose > 0:
+            print("\nAutomaton successfully synthesized.\n")
     elif (priority_kind > 0):
-        print("\nERROR: Specification was unrealizable.\n")
+        if verbose > 0:
+            print("\nERROR: Specification was unrealizable.\n")
 
     return realizable
 

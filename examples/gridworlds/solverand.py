@@ -37,8 +37,9 @@ if __name__ == "__main__":
                         num_init=1,
                         num_goals=2)
     print Z
+    print "Spec length: " + str(len(Z.spec().dumpgr1c()))
     
-    if not gr1cint.check_realizable(Z.spec()):
+    if not gr1cint.check_realizable(Z.spec((3,1))):
         print "Not realizable."
     else:
         aut = gr1cint.synthesize(Z.spec())
