@@ -59,7 +59,7 @@ def memoryMonitor(pid):
             # exponential backoff
             t *= 1.2
     except IOError:
-        pass
+        return 0
     finally:
         statm.close()
     return maxmem*os.sysconf("SC_PAGE_SIZE")/1024 # KiB
