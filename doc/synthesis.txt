@@ -2,9 +2,6 @@
 
 Planner Synthesis
 =================
-.. automodule:: grgameint
-   :members:
-
 .. automodule:: jtlvint
    :members:
 

@@ -145,6 +145,61 @@ def prop2partconvex(ppp):
     adj =  adj+adj.T+np.eye(num_reg, dtype=np.int8)
     myconvexpartition.adj = adj.copy()
     return myconvexpartition
+    
+def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
+    """ This function takes a piecewise affine system pwa_sys and a proposition 
+    preserving partition ppp whose domain is a subset of the domain of pwa_sys
+    and returns a refined proposition preserving partition where in each
+    region a unique subsystem of pwa_sys is active.
+    
+    Modified from Petter Nilsson's code implementing merge algorithm in 
+    Nilsson et al. `Temporal Logic Control of Switched Affine Systems with an
+    Application in Fuel Balancing`, ACC 2012.
+    
+    Input:
+    
+    - `pwa_sys`: a PwaSysDyn object
+    - `ppp`: a PropPreservingPartition object
+    
+    Output:
+    
+    - A PropPreservingPartition object with subsystem assignments
+    
+    """
+    if pc.is_fulldim(pc.mldivide(ppp.domain, pwa_sys.domain)):
+        raise Exception("pwaPartition: pwa system is not defined everywhere in the state space")
+
+    new_list = []
+    subsys_list = []
+    parent = []
+    for i in range(len(pwa_sys.list_subsys)):
+        for j in range(ppp.num_regions):
+            isect = pc.intersect(pwa_sys.list_subsys[i].sub_domain, ppp.list_region[j])
+            if pc.is_fulldim(isect):
+                rc, xc = pc.cheby_ball(isect)
+                if rc < abs_tol:
+                    print "Warning: One of the regions in the refined PPP is too small, this may cause numerical problems"
+                if len(isect) == 0:
+                    isect = pc.Region([isect], [])
+                isect.list_prop = ppp.list_region[j].list_prop
+                subsys_list.append(i)
+                new_list.append(isect)
+                parent.append(j)
+    
+    adj = np.zeros([len(new_list), len(new_list)], dtype=int)
+    for i in range(len(new_list)):
+        for j in range(i+1, len(new_list)):
+            if (ppp.adj[parent[i], parent[j]] == 1) or \
+                    (parent[i] == parent[j]):
+                if pc.is_adjacent(new_list[i], new_list[j]):
+                    adj[i,j] = 1
+                    adj[j,i] = 1
+        adj[i,i] = 1
+            
+    return PropPreservingPartition(domain=ppp.domain,\
+                    num_prop=ppp.num_prop, list_region=new_list, num_regions=len(new_list), \
+                    adj=adj, trans=None, list_prop_symbol=ppp.list_prop_symbol, 
+                    list_subsys = subsys_list)
 
 
 class PropPreservingPartition:
@@ -161,9 +216,11 @@ class PropPreservingPartition:
     - orig_list_region: original proposition preserving regions
     - orig: list assigning an original proposition preserving region to each
             new region
+    - list_subsys: list assigning the subsystem of the picewise affine system that 
+              is active in that region to each region in ppp 
 
     """
-    def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None, orig_list_region=None, orig=None):
+    def __init__(self, domain=None, num_prop=0, list_region=[], num_regions=0, adj=0, trans=0, list_prop_symbol=None, orig_list_region=None, orig=None, list_subsys=None):
         self.domain = domain
         self.num_prop = num_prop
         self.list_region = list_region[:]
@@ -173,6 +230,7 @@ class PropPreservingPartition:
         self.list_prop_symbol = list_prop_symbol
         self.orig_list_region = orig_list_region
         self.orig = orig
+        self.list_subsys = list_subsys
         
     def reg2props(self, region):
         return [self.list_prop_symbol[n] for (n,p) in enumerate(
