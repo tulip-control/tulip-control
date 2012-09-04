@@ -119,7 +119,7 @@ class SolverInput:
         m = self[name]
         for n in range(m["instances"]):
             # Split initials
-            init_inst = { k : v[n] for k,v in m["initials"].iteritems() if isinstance(v, list) }
+            init_inst = dict([ (k, v[n]) for k,v in m["initials"].iteritems() if isinstance(v, list) ])
             nm = copy.deepcopy(m)
             nm["name"] = "%s_%d" % (m["name"], n)
             nm["initials"] = dict(m["initials"].items() + init_inst.items())

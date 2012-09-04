@@ -42,6 +42,7 @@ def memoryMonitor(pid):
     maxmem = 0
     t = 0.01
     procstr = "/proc/%d/statm" % pid
+    statm = None
     try:
         statm = open(procstr, "r")
         while 1:
@@ -61,5 +62,6 @@ def memoryMonitor(pid):
     except IOError:
         return 0
     finally:
-        statm.close()
+        if statm:
+            statm.close()
     return maxmem*os.sysconf("SC_PAGE_SIZE")/1024 # KiB

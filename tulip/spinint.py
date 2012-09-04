@@ -147,7 +147,7 @@ def check(pml_file, aut_file, verbose=0, **opts):
     @rtype: (SPINInstance, boolean)
     @returns: Tuple of created SPIN instance and realizability result.
     """
-    kwargs = { k : opts[k] for k in ["preduce", "safety"] if k in opts }
+    kwargs = dict([ (k, opts[k]) for k in ["preduce", "safety"] if k in opts ])
     spin = SPINInstance(pml_file, aut_file, verbose=verbose, **kwargs)
     result = spin.generateTrace(verbose)
     return (spin, result)
