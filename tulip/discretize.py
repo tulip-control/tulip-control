@@ -1010,7 +1010,7 @@ def discretizeFromMatlab(origPart):
                                                trans, list_prop_symbol)
     return newPartition
 
-def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
+def getInputHelper_orig(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
     '''Calculates the sequence u_seq such that
     - x(t+1) = A x(t) + B u(t) + K
     - x(k) \in P1 for k = 0,...N
@@ -1078,53 +1078,84 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
             np.dot(A_K, K_hat).T , np.dot(R, Ct) ) \
             + np.dot(r.T, Ct )).T 
             
-            
-    ## MODIFIED BY ERIC 8/22/12
-    def cstr1(x, *args):
-        # TODO Need to add the control constraints
-        G,h = args[2:4]
-        tmp = h.T - np.dot(G,x)
-        #print "cstr1", tmp[0]
-        return  tmp[0]  # h - Gx >= 0
-
-    def func1(x, *args):
-        P, q = args[0:2]
-        cost = np.dot(x,np.dot(P,x)) + np.dot(q.T,x)
-        #print "func1",cost[0]
-        return cost[0]
+    sol = solvers.qp(P,q,G,h)
+    
+    if sol['status'] != "optimal":
+        raise Exception("getInputHelper: QP solver finished with status " + \
+                        str(sol['status']))
+    u = np.array(sol['x']).flatten()
+    cost = sol['primal objective']
+    
+    return u.reshape(N, m), cost
+    
+    
+def getInputHelper(x0, ssys, P1, P3, N, R, Q):
+    '''Calculates the sequence u_seq such that
+    - x(t+1) = A x(t) + B u(t) + K
+    - x(k) \in P1 for k = 0,...N
+    - x(N) \in P3
+    - [u(k); x(k)] \in PU
+    
+    and minimizes x'Rx + u'Qu
+    '''
+    n = ssys.A.shape[1]
+    m = ssys.B.shape[1]
+    
+    list_P = []
+    list_P.append(P1)
+    for i in xrange(N-1):
+        list_P.append(P1)
+    list_P.append(P3)
+    L,M = createLM(ssys, N, list_P)
+    
+    # Remove first constraint on x(0)
+    L = L[range(list_P[0].A.shape[0], L.shape[0]),:]
+    M = M[range(list_P[0].A.shape[0], M.shape[0]),:]
+    
+    # Separate L matrix
+    Lx = L[:,range(n)]
+    Lu = L[:,range(n,L.shape[1])] 
+    
+    M = M - np.dot(Lx, x0).reshape(Lx.shape[0],1)
         
-    # Call nonlinear solver from scipy.optimize
-#    G = np.array(G)
-#    h = np.array(h)
-#    P = np.array(P)
-#    q = np.array(q)
-    u_init = np.zeros((n*N,1))
-    soln = optimize.fmin_slsqp(func1, u_init, args = (P, q, G, h), \
-                               f_ieqcons = cstr1, \
-                               full_output=True, iprint = 0)   # cstr >= 0 is default
-    ### END MODIFICATION
+    # Constraints
+    G = matrix(Lu)
+    h = matrix(M)
+
+#    B_diag = ssys.B
+#    for i in range(N-1):
+#        B_diag = block_diag(B_diag,ssys.B)
+    B_diag = block_diag(*[ssys.B]*N)
+    K_hat = np.tile(ssys.K, (N,1))
+
+    A_it = ssys.A.copy()
+    A_row = np.zeros([n, n*N])
+    A_K = np.zeros([n*N, n*N])
+    A_N = np.zeros([n*N, n])
+
+    for i in range(N):
+        A_row = np.dot(ssys.A, A_row)
+        A_row[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
+
+        A_N[np.ix_(range(i*n, (i+1)*n), range(n))] = A_it
+        A_K[np.ix_(range(i*n,(i+1)*n), range(A_K.shape[1]))] = A_row
+        
+        A_it = np.dot(ssys.A, A_it)
+        
+    Ct = np.dot(A_K, B_diag)
+    P = matrix(Q + np.dot(Ct.T, np.dot(R, Ct)))
+    q = 0.0*matrix(np.dot( np.dot(x0.reshape(1,x0.size), A_N.T) + np.dot(A_K, K_hat).T , np.dot(R, Ct) ) ).T 
+            
+    sol = solvers.qp(P,q,G,h)
     
-#    ## ORIGINAL CVXOPT SOLVER
-#    sol = solvers.qp(P,q,G,h)
-#    
-#    if sol['status'] != "optimal":
-#        raise Exception("getInputHelper: QP solver finished with status " + \
-#                        str(sol['status']))
-#    u = np.array(sol['x']).flatten()
-#    cost = sol['primal objective']
-#    
-#    print soln[1],cost
-#    assert abs(soln[1]-cost) < 1e-4
-#    
-##    return u.reshape(N, m), cost
-#    ## END ORIGINAL
+    if sol['status'] != "optimal":
+        raise Exception("getInputHelper: QP solver finished with status " + \
+                        str(sol['status']))
+    u = np.array(sol['x']).flatten()
+    cost = sol['primal objective']
     
-    if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
-        return soln[0], soln[1]
-    else:
-        print "Solver returned non-optimal solution!"
-        return None
-    
+    return u.reshape(N, m), cost
+
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     """Compute the components of the polytope L [x(0)' u(0)' ... u(N-1)']' <= M
@@ -1370,27 +1401,27 @@ def samplePtsPoly(H0,numPts):
     return pts
 
 
-def cstExpectedCost(numSamples, ssys, H0, H1, N, R, r, Q):
+def cstExpectedCost(numSamples, ssys, H0, H1, N, R, Q):
     '''Calculates the expected cost of a trajectory starting in H0 and ending in H1.'''
     
     totalCost = 0.0
     pts = samplePtsPoly(H0,numSamples)
     while len(pts)>0:
         x0 = pts.pop()
-        u,cost = getInputHelper(x0, ssys, H0, H1, N, R, r, Q, closed_loop=False)
+        u,cost = getInputHelper(x0, ssys, H0, H1, N, R, Q)
         totalCost += cost
     return totalCost / float(numSamples)
 
 
-def cstMinCost(ssys, H0, H1, N, R, r, Q):
+def cstMinCost(ssys, H0, H1, N, R, Q):
     
     def cstr(x, *args):
-        A,b = args[7:9]
+        A,b = args[6:9]
         return  b - np.dot(A,x)  # b - Ax >= 0
 
     def func(x, *args):
-        ssys, H0, H1, N, R, r, Q = args[0:7]
-        u, cost = getInputHelper(x, ssys, H0, H1, N, R, r, Q, closed_loop=False)
+        ssys, H0, H1, N, R, Q = args[0:6]
+        u, cost = getInputHelper(x, ssys, H0, H1, N, R, Q)
         return cost
     # Constraint to start in H0 (Ax <= b)
     A = H0.A
@@ -1401,7 +1432,7 @@ def cstMinCost(ssys, H0, H1, N, R, r, Q):
     x_init = xd.flatten()
         
     # Call nonlinear solver from scipy.optimize
-    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, r, Q, A, b), \
+    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, Q, A, b), \
                                f_ieqcons = cstr, \
                                full_output=True, iprint = 0)   # cstr >= 0 is default
     if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
@@ -1412,7 +1443,7 @@ def cstMinCost(ssys, H0, H1, N, R, r, Q):
 
 
 
-def cstMaxCost(ssys, H0, H1, N, R, r, Q):
+def cstMaxCost(ssys, H0, H1, N, R, Q):
     '''Calculates the maximum cost of a trajectory under the constrained LQR problem.
     Uses the fact that the constrained LQR value function is convex in initial state after
     minimization over control inputs u, so a maximum value must occur on a vertex of the polygon.'''
@@ -1420,10 +1451,10 @@ def cstMaxCost(ssys, H0, H1, N, R, r, Q):
     
     maxCost = -np.Inf
     for v in vertices:
-        u,cost = getInputHelper(v, ssys, H0, H1, N, R, r, Q, closed_loop=False)
+        u,cost = getInputHelper(v, ssys, H0, H1, N, R, Q)
         if cost > maxCost:
             maxCost = cost
-    
+            
     return maxCost
 
 

@@ -16,7 +16,7 @@ import tulip.polytope as pc
 A = np.array([[1, 0.],[ 0., 1]])
 B = np.array([[1, 0.],[ 0., 1]])
 E = np.array([[1,0],[0,1]])
-u_bound = 0.3          #control bound for TuLiP
+u_bound = 1.1          #control bound for TuLiP
 w_bound_tulip = 0.01    #noise bound for TuLiP
 U = pc.Polytope(np.array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),  \
                 u_bound*np.array([[1.],[1.],[1.],[1.]]))
@@ -24,7 +24,7 @@ W = pc.Polytope(np.array([[1.,0.],[-1.,0.],[0.,1.],[0.,-1.]]), \
                 w_bound_tulip*np.array([1., 1., 1., 1.]))
 
 # Miscellaneous
-numSteps = 4              #number of control steps between regions
+numSteps = 1              #number of control steps between regions
 plot_traj = False       #show plots of the system trajectories?
 
 # Continuous state space
@@ -58,18 +58,19 @@ assert (disc_dynamics.trans == disc_dynamics.adj).all()
 
 # Determine the minimum, expected, and maximum costs between two regions.  
 # Use the unconstrained LQR approximation as well as the fully constrained problem.
-numSamples = 10
+numSamples = 5
 N = numSteps
 ssys = sys_dyn
 Q = 10*np.eye(2)
 R = 0.5*np.eye(2)
-r = np.zeros([2,1])
+#r = np.zeros([2,1])
 print "Q=\n",Q
 print "R=\n",R
 
 Q_block = linalg.block_diag(*[Q]*N)
+print "Q_block=\n",Q_block
 R_block = linalg.block_diag(*[R]*N)
-r_block = np.zeros([2*N,1])
+#r_block = np.zeros([2*N,1])
 
 for i in xrange(disc_dynamics.num_regions):
     for j in xrange(disc_dynamics.num_regions):
@@ -83,10 +84,11 @@ for i in xrange(disc_dynamics.num_regions):
             lqrExpCost = discretize.lqrExpectedCost(numSamples, ssys, H0, N, R, Q)
             lqrMaxCost = discretize.lqrMaxCost(ssys, H0, N, R, Q)
 
-            cstMinCost = discretize.cstMinCost(ssys, H0, H1, N, R_block, r_block, Q_block)
+            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, N, R_block, Q_block)
+
+            cstMinCost = discretize.cstMinCost(ssys, H0, H1, N, R_block, Q_block)
             cstExpCost = discretize.cstExpectedCost(numSamples, ssys, H0, H1, N, \
-                                                     R_block, r_block, Q_block)
-            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, N, R_block, r_block, Q_block)
+                                                     R_block, Q_block)
 
             print i,j
             print "lqrMinCost=",lqrMinCost
