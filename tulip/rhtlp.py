@@ -576,7 +576,7 @@ class SynthesisProb:
                         printWarning("Unknown possible values for discrete " + \
                                          "system variable " + var, obj=self)
                 elif (isinstance(reg, list)):
-                    all_values = ', '.join(reg)
+                    all_values = ', '.join(map(str, reg))
                     self.__sys_vars[var] = '{' + all_values + '}'
                 else:
                     printWarning("Unknown possible values for discrete system " + \
