@@ -46,6 +46,8 @@ from prop2part import PropPreservingPartition
 from polytope import Region
 import rhtlp
 from errorprint import printWarning, printError
+import check_spec
+import sys
 
 # Get jtlv_path
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -97,6 +99,12 @@ def generateJTLVInput(env_vars={}, sys_disc_vars={}, spec=[], disc_props={}, \
       verbose is set to 0, this function will not print anything on
       the screen.
     """
+
+	# First, check that the spec is in the right format
+    if not check_spec.check_jtlv(spec[0], spec[1], env_vars, sys_disc_vars,
+	                             disc_dynamics):
+		print "ERROR: Your spec is not GR(1)!"
+
     prob = rhtlp.SynthesisProb(env_vars={}, sys_disc_vars={}, disc_props={}, \
                        sys_cont_vars=[], cont_state_space=None, \
                        cont_props={}, sys_dyn=None, spec=['',''], verbose=verbose)
