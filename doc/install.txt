@@ -20,19 +20,25 @@ for these with::
 
 The following packages are also *required*: `NumPy
 <http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_, `CVXOPT
-<http://abel.ee.ucla.edu/cvxopt/>`_, and `matplotlib
-<http://matplotlib.sourceforge.net/>`_.  Except for python-graph,
-these packages are quite standard in scientific computing environments
-and may already be installed.  To check, open a new terminal and try::
+<http://abel.ee.ucla.edu/cvxopt/>`_, `pyparsing
+<http://pyparsing.wikispaces.com/>`_, and `matplotlib
+<http://matplotlib.sourceforge.net/>`_ (at least version 1.1).  Except
+for python-graph, these packages are quite standard in scientific
+computing environments and may already be installed.  To check, open a
+new terminal and try::
 
  $ python -c 'import numpy'
  $ python -c 'import scipy'
  $ python -c 'import cvxopt'
- $ python -c 'import matplotlib'
+ $ python -c 'import pyparsing'
+ $ python -c 'import matplotlib; print matplotlib.__version__'
 
 If an error message occurs, the package might not be visible on the
-current path or may not be installed at all.  Try to install them
-yourself, or see :ref:`troubleshoot-sec-label` below for help.
+current path or may not be installed at all.  The last line should
+cause the version of Matplotlib to be printed.  More or less that
+approach can be used to easily find the installed versions for other
+packages.  Try to install them yourself, or see
+:ref:`troubleshoot-sec-label` below for help.
 
 `python-graph <http://code.google.com/p/python-graph/>`_ is not
 required for most uses of TuLiP, but a few methods of the Automaton
@@ -92,6 +98,24 @@ Other features (optional)
 -------------------------
 
 Here are some optional advanced features that require installing additional dependencies. None of them is required to run the examples that come with the toolbox. Only in some examples you will be prompted to choose whether you would like to use Gephi visualization. You can simply say no if you don't have it installed.
+
+
+External solvers
+````````````````
+
+If you wish to use functions depending on `SPIN
+<http://spinroot.com/spin/>`_ or `NuSMV <http://nusmv.fbk.eu/>`_, then
+you must create a directory called ``solvers`` within the tulip
+package and place there executables for (or links to) SPIN and
+NuSMV. For instance, if you have TuLiP installed under
+``/usr/local/lib/python2.7/site-packages``, the SPIN executable at
+``/usr/bin/spin``, and the NuSMV executable at ``/usr/bin/NuSMV``,
+then you would do ::
+
+  $ sudo mkdir /usr/local/lib/python2.7/site-packages/tulip/solvers
+  $ sudo ln -s /usr/bin/spin /usr/local/lib/python2.7/site-packages/tulip/solvers
+  $ sudo ln -s /usr/bin/NuSMV /usr/local/lib/python2.7/site-packages/tulip/solvers
+
 
 Gephi visualization
 ```````````````````
