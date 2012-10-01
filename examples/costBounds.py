@@ -9,6 +9,7 @@ import scipy.linalg as linalg
 
 from tulip import *
 import tulip.polytope as pc
+from tulip.polytope.plot import plot_partition
 
 ## Linear dynamics for TuLiP
 # x_{t+1} = Ax_t + Bu_t + Ew_t
@@ -16,16 +17,16 @@ import tulip.polytope as pc
 A = np.array([[1, 0.],[ 0., 1]])
 B = np.array([[1, 0.],[ 0., 1]])
 E = np.array([[1,0],[0,1]])
-u_bound = 1.1          #control bound for TuLiP
-w_bound_tulip = 0.01    #noise bound for TuLiP
+u_bound = 0.6           #control bound for TuLiP
+w_bound_tulip = 0.05    #noise bound for TuLiP
 U = pc.Polytope(np.array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),  \
                 u_bound*np.array([[1.],[1.],[1.],[1.]]))
 W = pc.Polytope(np.array([[1.,0.],[-1.,0.],[0.,1.],[0.,-1.]]), \
                 w_bound_tulip*np.array([1., 1., 1., 1.]))
 
 # Miscellaneous
-numSteps = 1              #number of control steps between regions
-plot_traj = False       #show plots of the system trajectories?
+numSteps = 5                #number of control steps between regions
+plot_traj = False           #show plots of the system trajectories?
 
 # Continuous state space
 cont_state_space = pc.Polytope(np.array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]),
@@ -55,26 +56,28 @@ print 'Transition matrix:\n',disc_dynamics.trans.transpose()
 assert (disc_dynamics.trans.transpose() == disc_dynamics.trans).all()
 assert (disc_dynamics.trans == disc_dynamics.adj).all()
 
+#plot_partition(disc_dynamics, show=True)
+
 
 # Determine the minimum, expected, and maximum costs between two regions.  
 # Use the unconstrained LQR approximation as well as the fully constrained problem.
 numSamples = 5
 N = numSteps
 ssys = sys_dyn
-Q = 10*np.eye(2)
-R = 0.5*np.eye(2)
+Q = 1.0*np.eye(2)
+R = 1.0*np.eye(2)
 #r = np.zeros([2,1])
 print "Q=\n",Q
 print "R=\n",R
 
-Q_block = linalg.block_diag(*[Q]*N)
-print "Q_block=\n",Q_block
-R_block = linalg.block_diag(*[R]*N)
+#Q_block = linalg.block_diag(*[Q]*N)
+#print "Q_block=\n",Q_block
+#R_block = linalg.block_diag(*[R]*N)
 #r_block = np.zeros([2*N,1])
 
 for i in xrange(disc_dynamics.num_regions):
     for j in xrange(disc_dynamics.num_regions):
-        if disc_dynamics.trans[i,j] and i != j:
+        if disc_dynamics.trans[i,j]:# and i == j:
             print ""
 
             H0 = disc_dynamics.list_region[i].list_poly[0]
@@ -84,19 +87,15 @@ for i in xrange(disc_dynamics.num_regions):
             lqrExpCost = discretize.lqrExpectedCost(numSamples, ssys, H0, N, R, Q)
             lqrMaxCost = discretize.lqrMaxCost(ssys, H0, N, R, Q)
 
-            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, N, R_block, Q_block)
-
-            cstMinCost = discretize.cstMinCost(ssys, H0, H1, N, R_block, Q_block)
-            cstExpCost = discretize.cstExpectedCost(numSamples, ssys, H0, H1, N, \
-                                                     R_block, Q_block)
+            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, N, R, Q)
+            #cstMinCost = discretize.cstMinCost(ssys, H0, H1, N, R, Q)
+            cstExpCost = discretize.cstExpectedCost(numSamples, ssys, H0, H1, N, R, Q)
 
             print i,j
             print "lqrMinCost=",lqrMinCost
             print "lqrExpCost=",lqrExpCost
             print "lqrMaxCost=",lqrMaxCost
-            print "cstMinCost=",cstMinCost
+            #print "cstMinCost=",cstMinCost
             print "cstExpCost=",cstExpCost
             print "cstMaxCost=",cstMaxCost
-
-#plot_partition(disc_dynamics, show=True)
 
