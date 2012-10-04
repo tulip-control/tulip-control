@@ -83,13 +83,17 @@ for i in xrange(disc_dynamics.num_regions):
             H0 = disc_dynamics.list_region[i].list_poly[0]
             H1 = disc_dynamics.list_region[j].list_poly[0]
             
-            lqrMinCost = discretize.lqrMinCost(ssys, H0, N, R, Q)
-            lqrExpCost = discretize.lqrExpectedCost(numSamples, ssys, H0, N, R, Q)
-            lqrMaxCost = discretize.lqrMaxCost(ssys, H0, N, R, Q)
+            rc, xc = pc.cheby_ball(H1)
+            xc = xc.flatten()
+            
+            lqrMinCost = discretize.lqrMinCost(ssys, H0, xc, N, R, Q)
+            lqrExpCost = discretize.lqrExpectedCost(numSamples, ssys, H0, xc, N, R, Q)
+            lqrMaxCost = discretize.lqrMaxCost(ssys, H0, xc, N, R, Q)
 
-            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, N, R, Q)
-            #cstMinCost = discretize.cstMinCost(ssys, H0, H1, N, R, Q)
-            cstExpCost = discretize.cstExpectedCost(numSamples, ssys, H0, H1, N, R, Q)
+            # Modified functions
+            cstMaxCost = discretize.cstMaxCost(ssys, H0, H1, xc, N, R, Q)
+            #cstMinCost = discretize.cstMinCost(ssys, H0, H1, xc, N, R, Q)
+            cstExpCost = discretize.cstExpectedCost(numSamples, ssys, H0, H1, xc, N, R, Q)
 
             print i,j
             print "lqrMinCost=",lqrMinCost

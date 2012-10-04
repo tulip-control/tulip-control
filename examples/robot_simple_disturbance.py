@@ -79,15 +79,18 @@ guarantee += ' & [](next(X0reach) = ((X0 | X0reach) & !park))'
 
 # Generate input to JTLV
 prob = jtlvint.generateJTLVInput(env_vars, sys_disc_vars, [assumption, guarantee],
-                                 {}, disc_dynamics, smvfile, spcfile, verbose=2)
+                                 {}, disc_dynamics, smvfile, spcfile, verbose=2,
+                                 file_exist_option='r')
 
 # Check realizability
 realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile,
-                                           aut_file=autfile, verbose=3)
+                                           aut_file=autfile, verbose=3,
+                                           file_exist_option='r')
 
 # Compute an automaton
 jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
-                        priority_kind=3, verbose=3)
+                        priority_kind=3, verbose=3,
+                        file_exist_option='r')
 aut = automaton.Automaton(autfile, [], 3)
 
 # Remove dead-end states from automaton
@@ -97,7 +100,7 @@ aut.trimDeadStates()
 num_it = 10
 init_state = {'X0reach': True}
 
-graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+graph_vis = False#raw_input("Do you want to open in Gephi? (y/n)") == 'y'
 destfile = 'rsdisturbance_example.gexf'
 states = grsim.grsim([aut], env_states=[init_state], num_it=num_it,
                      deterministic_env=False, graph_vis=graph_vis,

@@ -554,7 +554,7 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
  
     """Calculate an input signal sequence taking the plant from state `start` 
     to state `end` in the partition part, such that 
-    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal. xc is
+    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(T)|_2 is minimal. xc is
     the chebyshev center of the final cell.
     If no cost parameters are given, Q = I and mid_weight=3 are used. 
         
@@ -688,6 +688,90 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
         if not good:
             print "Calculated sequence not good"
     return low_u
+
+def get_input_mod(x0, ssys, part, start, end, N, R, Q):
+ 
+    """Calculate an input signal sequence taking the plant from state `start` 
+    to state `end` in the partition part, such that 
+    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(T)|_2 is minimal. xc is
+    the chebyshev center of the final cell.
+    If no cost parameters are given, Q = I and mid_weight=3 are used. 
+        
+    Input:
+
+    - `x0`: initial continuous state
+    - `ssys`: CtsSysDyn object specifying system dynamics
+    - `part`: PropPreservingPartition object specifying the state
+              space partition.
+    - `start`: int specifying the number of the initial state in `part`
+    - `end`: int specifying the number of the end state in `part`
+    - `N`: the horizon length
+    - `R`: state cost matrix for x = [x(1)' x(2)' .. x(N)']', 
+           size (N*xdim x N*xdim). If empty, zero matrix is used.
+    - `r`: cost vector for x = [x(1)' x(2)' .. x(N)']', size (N*xdim x 1)
+    - `Q`: input cost matrix for u = [u(0)' u(1)' .. u(N-1)']', 
+           size (N*udim x N*udim). If empty, identity matrix is used.
+    - `mid_weight`: cost weight for |x(N)-xc|_2
+    
+    Output:
+    - A (N x m) numpy array where row k contains u(k) for k = 0,1 ... N-1.
+    
+    Note1: The same horizon length as in reachability analysis should
+    be used in order to guarantee feasibility.
+    """
+    
+    if part.trans != None:
+        if part.trans[end,start] != 1:
+            raise Exception("get_input: no transition from state " + str(start) + \
+                " to state " + str(end))
+    else:
+        print "get_input: Warning, no transition matrix found, assuming feasible"
+       
+    P_start = part.list_region[start]
+    P_end = part.list_region[end]
+    
+    n = ssys.A.shape[1]
+    m = ssys.B.shape[1]
+    
+    # Take original proposition preserving cell as constraint
+    P1 = part.orig_list_region[part.orig[start]]
+    
+    if len(P_end) > 0:
+        low_cost = np.inf
+        low_u = np.zeros([N,m])
+        for i in range(len(P_end.list_poly)):
+            P3 = P_end.list_poly[i]
+            if mid_weight > 0:
+                rc, xc = pc.cheby_ball(P3)
+                R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
+                    mid_weight*np.eye(n)
+                r[range((N-1)*n, N*n), :] += -mid_weight*xc
+            try:
+                u, cost = getInputHelper(x0, ssys, P1, P3, N, R, Q)
+                r[range((N-1)*n, N*n), :] += mid_weight*xc
+            except:
+                r[range((N-1)*n, N*n), :] += mid_weight*xc
+                continue
+            if cost < low_cost:
+                low_u = u
+                low_cost = cost
+        if low_cost == np.inf:
+            raise Exception("get_input: Did not find any trajectory")
+    else:
+        P3 = P_end
+        if mid_weight > 0:
+            rc, xc = pc.cheby_ball(P3)
+            R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
+                mid_weight*np.eye(n)
+            r[range((N-1)*n, N*n), :] += -mid_weight*xc
+        low_u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+        
+    if test_result:
+        good = is_seq_inside(x0, low_u, ssys, P1, P3)
+        if not good:
+            print "Calculated sequence not good"
+    return low_u
+
     
 def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
                   use_all_horizon=False, trans_set=None, max_num_poly=5):
@@ -1084,7 +1168,7 @@ def getInputHelper_orig(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
         raise Exception("getInputHelper: QP solver finished with status " + \
                         str(sol['status']))
     u = np.array(sol['x']).flatten()
-    cost = sol['primal objective']
+    cost = sol['primal objective'] + np.dot(x0, np.dot( np.dot(A_N.T, np.dot(Q,A_N)), x0) )
     
     return u.reshape(N, m), cost
     
@@ -1436,19 +1520,19 @@ def samplePtsPoly(H0,numPts):
     return pts
 
 
-def cstExpectedCost(numSamples, ssys, H0, H1, N, R, Q):
+def cstExpectedCost(numSamples, ssys, H0, H1, xf, N, R, Q):
     '''Calculates the expected cost of a trajectory starting in H0 and ending in H1.'''
     
     totalCost = 0.0
     pts = samplePtsPoly(H0,numSamples)
     while len(pts)>0:
-        x0 = pts.pop()
+        x0 = pts.pop() #- xf  #Coordinate shift
         u,cost = getInputHelper(x0, ssys, H0, H1, N, R, Q)
         totalCost += cost
     return totalCost / float(numSamples)
 
 
-def cstMinCost(ssys, H0, H1, N, R, Q):
+def cstMinCost(ssys, H0, H1, xf, N, R, Q):
     
     def cstr(x, *args):
         A,b = args[6:9]
@@ -1467,7 +1551,7 @@ def cstMinCost(ssys, H0, H1, N, R, Q):
         
     # Guess point in middle of H0
     rd,xd = pc.cheby_ball(H0)
-    x_init = xd.flatten()
+    x_init = xd.flatten() #-xf  #Coordinate shift
         
     # Call nonlinear solver from scipy.optimize
     soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, Q, A, b), \
@@ -1481,7 +1565,7 @@ def cstMinCost(ssys, H0, H1, N, R, Q):
 
 
 
-def cstMaxCost(ssys, H0, H1, N, R, Q):
+def cstMaxCost(ssys, H0, H1, xf, N, R, Q):
     '''Calculates the maximum cost of a trajectory under the constrained LQR problem.
     Uses the fact that the constrained LQR value function is convex in initial state after
     minimization over control inputs u, so a maximum value must occur on a vertex of the polygon.'''
@@ -1489,6 +1573,11 @@ def cstMaxCost(ssys, H0, H1, N, R, Q):
     
     maxCost = -np.Inf
     for v in vertices:
+        v = v #- xf      #Coordinate shift
+#        print H0, H1
+#        H0.b = H0.b + np.dot(H0.A,xf)
+#        H1.b = H1.b + np.dot(H1.A,xf)
+#        print H0,H1
         u,cost = getInputHelper(v, ssys, H0, H1, N, R, Q)
         if cost > maxCost:
             maxCost = cost
@@ -1514,45 +1603,45 @@ def lqrValue(ssys, N, R, Q):
     return Pdict[0]
 
 
-def lqrMaxCost(ssys, H0, N, R, Q):
+def lqrMaxCost(ssys, H0, xf, N, R, Q):
     '''Calculates the maximum cost of a trajectory under the unconstrained LQR problem.
     Uses the fact that the unconstrained LQR value function is convex, so a maximum value
     must occur on a vertex of the polygon.'''
     
     P0 = lqrValue(ssys, N, R, Q)
-    
     vertices = pc.extreme(H0)
     
     maxCost = -np.Inf
     for v in vertices:
+        v = v - xf  #Coordinate shift
         cost = np.dot(v,np.dot(P0,v))     # V(v) = v.T*P0*v from unconstrained LQR theory
         if cost > maxCost:
             maxCost = cost
     
     return maxCost
 
-def lqrMinCost(ssys, H0, N, R, Q):
+def lqrMinCost(ssys, H0, xf, N, R, Q):
     '''Calculates the minimum cost of a trajectory under the unconstrained LQR problem.
     Uses the fact that the unconstrained LQR value function is convex.'''
     
     P0 = lqrValue(ssys, N, R, Q)
     n = np.shape(P0)[0]
     
-    P = matrix(P0)
-    q = matrix(np.zeros(n))
+    P = 2.0*matrix(P0)        #scale for cvxopt
+    q = matrix( -2.0*np.dot(xf.T, P0) )
     G = matrix(H0.A)
     h = matrix(H0.b)
     
     sol = solvers.qp(P,q,G,h)
     if sol['status'] == 'optimal':
-        minCost = sol['primal objective']
+        minCost = sol['primal objective'] + np.dot(xf.T, np.dot(P0,xf)) #Coordinate shift
     else:
         print "QP solver returned non-optimal solution!"
         return None
     return minCost
 
 
-def lqrExpectedCost(numSamples, ssys, H0, N, R, Q):
+def lqrExpectedCost(numSamples, ssys, H0, xf, N, R, Q):
     '''Calculates the expected cost of a trajectory starting in P0 and ending in P1.
     Uses an LQR approximation.'''
     
@@ -1561,17 +1650,7 @@ def lqrExpectedCost(numSamples, ssys, H0, N, R, Q):
     totalCost = 0.0
     pts = samplePtsPoly(H0,numSamples)
     while len(pts)>0:
-        x0 = pts.pop()
+        x0 = pts.pop() - xf     #Coordinate shift
         cost = np.dot(x0,np.dot(P0,x0))     # V(v) = v.T*P0*v from unconstrained LQR theory
         totalCost += cost
     return totalCost / float(numSamples)
-
-
-
-
-
-
-
-
-
-
