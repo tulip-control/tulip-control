@@ -1,0 +1,10 @@
+Aircraft Electric Systems Specification Generator
+Huan Xu, 30 October 2012
+
+This directory contains the files needed to generate specifications for an electric power system. Provided files are
+
+     SLD.mat   		    Example matrix for an electric power system with two sets of AC generators, AC buses, rectifier units, and DC buses
+     topology.jpg   	    A single-line diagram for the the SLD example
+     AES_specgen.py	    Conversion tool.
+     			    	       To run specification generator for Yices: python AES_specgen.py yices
+				       To run specification generator for TuLiP: python AES_specgen.py tulip
