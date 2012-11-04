@@ -1,0 +1,7 @@
+# Given environment action, transition to next node and return system response.
+
+string[] env_variables
+uint16[] env_move
+---
+string[] sys_variables
+uint16[] sys_move

@@ -1,0 +1,5 @@
+# Get attributes of the current automaton node.
+
+---
+string[] variables
+uint16[] state

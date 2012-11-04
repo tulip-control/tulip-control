@@ -1,0 +1,7 @@
+This ``contrib`` directory is a place for things that are not a part
+of TuLiP per se but are still closely dependent and generally useful.
+Their versions (if given) are entirely independent of TuLiP.  Below is
+a summary of contents.
+
+tulip_ros
+  provides several TuLiP services through ROS <http://www.ros.org>.
