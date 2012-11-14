@@ -47,6 +47,8 @@ for verifying and constructing control protocols.
 
 __all__ = ["prop2part", "grsim", "jtlvint", "automaton", "rhtlp", "spec", 'discretize', 'polytope']
 
+__version__ = "0.4a"
+
 import prop2part
 import grsim
 import jtlvint

@@ -186,8 +186,9 @@ if check_deps:
 
 
 if perform_setup:
+    from tulip import __version__ as tulip_version
     setup(name = 'tulip',
-          version = '0.4a',
+          version = tulip_version,
           description = 'Temporal Logic Planning (TuLiP) Toolbox',
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
