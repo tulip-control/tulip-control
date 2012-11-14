@@ -215,15 +215,15 @@ Microsoft Windows
 
 For Windows users, type the above commands without "$" in the terminal. For example, check the version of your Python by typing::
 
-python -v
+  python -v
 
 To check whether the packages has been installed, open a new terminal and try::
 
-python
-import numpy 
-import scipy
-import cvxopt
-import matplotlib
+  python
+  import numpy
+  import scipy
+  import cvxopt
+  import matplotlib
 
 If an error message occurs, the package might not be visible on the current path or may not be installed at all. When you cannot find a suitable package of NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying `Unofficial Windows Binaries for Python Extension Packages <http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ by Christoph Gohlke. 
 
