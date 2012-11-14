@@ -215,7 +215,7 @@ Microsoft Windows
 
 For Windows users, type the above commands without "$" in the terminal. For example, check the version of your Python by typing::
 
-  python -v
+  python -V
 
 To check whether the packages has been installed, open a new terminal and try::
 
