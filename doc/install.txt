@@ -210,6 +210,25 @@ will get an error if you did not use terminal while setting up
 MPT.
 `The details of the issue from Mathworks. <http://www.mathworks.com/support/solutions/en/data/1-Q4J2R/index.html?product=ML&solution=1-Q4J2R>`_
 
+Microsoft Windows
+`````````````````
+
+For Windows users, type the above commands without "$" in the terminal. For example, check the version of your Python by typing::
+
+python -v
+
+To check whether the packages has been installed, open a new terminal and try::
+
+python
+import numpy 
+import scipy
+import cvxopt
+import matplotlib
+
+If an error message occurs, the package might not be visible on the current path or may not be installed at all. When you cannot find a suitable package of NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying `Unofficial Windows Binaries for Python Extension Packages <http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ by Christoph Gohlke. 
+
+The package of Gr1c for Windows still cannot be found. But without this package, you can also run most TuLiP functions.
+
 Installing other Python dependencies
 ````````````````````````````````````
 
