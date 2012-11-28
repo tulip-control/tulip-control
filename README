@@ -18,7 +18,8 @@ troubleshooting, are available at
 
 http://tulip-control.sourceforge.net/doc/install.html
 
-The documentation sources (see below) can be found under doc/
+The documentation sources (see below) can be found under doc/.
+A test suite (see below) is provided under tests/.
 
 
 Sphinx and Epydoc generated documentation
