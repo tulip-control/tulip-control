@@ -36,14 +36,14 @@ assumption = '[](req=0 -> <>(!ack))\n'
 assumption += ' & [](ack & next(!ack) -> req=0)\n'
 assumption += ' & [](!ack & next(ack) -> req!=0)\n'
 
-guarantee = '[](ack -> next(req=0))\n' # VI
+guarantee = '[](ack -> next(req=0))\n'
 guarantee += ' & [](!ack -> next(req=1 | req=2))\n'
 guarantee += ' & [](req!=-1 & next(req=0) -> ack)\n'
 guarantee += ' & [](req=-1 & next(req!=0) -> !ack)\n'
 for d in xrange(1,data):
-    guarantee += ' & [](req=%i & next(req!=%i) -> next(req=0))\n' % (d, d) #V
+    guarantee += ' & [](req=%i & next(req!=%i) -> next(req=0))\n' % (d, d)
 for d in xrange(1,data):
-    guarantee += ' & [](req=%i & !ack -> next(req=%i))\n' % (d, d) # IV
+    guarantee += ' & [](req=%i & !ack -> next(req=%i))\n' % (d, d)
 
 # Generate JTLV input
 prob = jtlvint.generateJTLVInput(env_vars, sys_disc_vars, [assumption, guarantee], \
@@ -71,19 +71,19 @@ sys_disc_vars = {'ack' : 'boolean', 'sink' : range(0,data)}
 disc_dynamics = None
 
 # GR1 specification
-assumption = '[](req!=0 & next(req=0) -> ack)\n' #X
-assumption += ' & [](req=0 & next(req!=0) -> !ack)\n' #IX
+assumption = '[](req!=0 & next(req=0) -> ack)\n'
+assumption += ' & [](req=0 & next(req!=0) -> !ack)\n'
 
-guarantee = '[](req=0 -> next(!ack))\n' # XII
-guarantee += ' & [](req!=0 -> next(ack))\n' # XI
-guarantee += ' & [](!ack & next(ack) -> req!=0)\n' # XIV
-guarantee += ' & [](ack & next(!ack) -> req=0)\n' # XIII
+guarantee = '[](req=0 -> next(!ack))\n'
+guarantee += ' & [](req!=0 -> next(ack))\n'
+guarantee += ' & [](!ack & next(ack) -> req!=0)\n'
+guarantee += ' & [](ack & next(!ack) -> req=0)\n'
 guarantee += ' & [](req!=0 -> <>('
 for d in xrange(1,data):
     if d != 1:
         guarantee += ' | '
     guarantee += '(sink=%i & req=%i)' % (d, d)
-guarantee += '))\n' #XV
+guarantee += '))\n'
 
 # Generate JTLV input
 prob = jtlvint.generateJTLVInput(env_vars, sys_disc_vars, [assumption, guarantee], \
