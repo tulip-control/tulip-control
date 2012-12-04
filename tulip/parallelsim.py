@@ -76,12 +76,14 @@ class Strategy(threading.Thread):
     - `name` -- name to identify the Strategy in the screen output.
     - `Tmin` -- minimum time between transitions (in ms)
     - `Tmax` -- maximum time between transitions (in ms)
+    - `runtime` -- time in seconds to run the thread;
+                   if 0 (default), then run indefinitely.
         
     Note: The automaton sleeps a certain amount of time between transitions.
            This time is a value chosen uniformly between `Tmin` and `Tmax`.
     """
 
-    def __init__(self, D, V, X, Y, name, Tmin=1000, Tmax=1000):
+    def __init__(self, D, V, X, Y, name, Tmin=1000, Tmax=1000, runtime=0):
         threading.Thread.__init__(self)
         self.D = D # automaton
         self.V = V # dictionary of state variables and their current values
@@ -92,6 +94,8 @@ class Strategy(threading.Thread):
 
         self.Tmin = Tmin # minimum time between steps (in ms)
         self.Tmax = Tmax # maximum time between steps (in ms)
+
+        self.runtime = runtime  # in seconds
 
 
     # Inherit run function from Thread class
@@ -108,8 +112,10 @@ class Strategy(threading.Thread):
             printError(self.name + ": No transition found.", obj=self)
 
         # CONSECUTION
+        start_time = time.time()
         while True:
-
+            if self.runtime > 0 and time.time() - start_time > self.runtime:
+                break
             print '%s %04i\t: %s\n' % (self.name, aut_state.id, str(self.V)),
 
             #sleep for a given time (to emulate different processor frequencies)
@@ -122,10 +128,10 @@ class Strategy(threading.Thread):
             aut_state = self.D.findNextAutState(current_aut_state=aut_state, env_state=inputs)
             if (aut_state==-1):
                 printError(self.name + ": No transition found.", obj=self)
-                
+
             # check environment assumptions
             if(not isinstance(aut_state, AutomatonState)):
                 printError(self.name + ": The environment violated its assumptions.", obj=self)
-                    
+
             # write system variables
             map(lambda (k,v): self.V.update({k:v}), dict(filter(lambda (k,v): k in self.Y, aut_state.state.iteritems())).iteritems())

@@ -123,8 +123,8 @@ from tulip.parallelsim import Strategy
 V = {'ack': 0, 'req': 0, 'sink': 0}
 
 # Strategies
-sender_strat = Strategy(sender_aut, V, ['ack'], ['req'], 'sender')
-receiver_strat = Strategy(receiver_aut, V, ['req'], ['ack', 'sink'], 'receiver')
+sender_strat = Strategy(sender_aut, V, ['ack'], ['req'], 'sender')#, runtime=10)
+receiver_strat = Strategy(receiver_aut, V, ['req'], ['ack', 'sink'], 'receiver')#, runtime=10)
 
 # Start threads
 
@@ -134,7 +134,10 @@ print "#######################\n"
 
 sender_strat.start()
 receiver_strat.start()
-
+try:
+    while True:
+        pass
+except KeyboardInterrupt:
+    sender_strat.runtime = 1
+    receiver_strat.runtime = 1
 #@sim_end@
-
-
