@@ -119,7 +119,7 @@ class Strategy(threading.Thread):
             print '%s %04i\t: %s\n' % (self.name, aut_state.id, str(self.V)),
 
             #sleep for a given time (to emulate different processor frequencies)
-            time.sleep(random.uniform(self.Tmin/1000, self.Tmax/1000)) 
+            time.sleep(random.uniform(self.Tmin/1000., self.Tmax/1000.))
 
             # get environment variables
             inputs = dict(filter(lambda (k,v): k in self.X, self.V.iteritems()))
