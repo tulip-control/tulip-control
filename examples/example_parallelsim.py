@@ -6,7 +6,7 @@ Example of parallel simulation: Executing a communication protocol to transmit i
 Clemens Wiltsche (wclemens@cds.caltech.edu)
 18 Jul 2012
 
-Minor modifications by SCL; 3 Dec 2012.
+Minor modifications by SCL; 9 Dec 2012.
 """
 
 import sys, os
@@ -38,8 +38,6 @@ assumption += ' & [](!ack & next(ack) -> req!=0)\n'
 
 guarantee = '[](ack -> next(req=0))\n'
 guarantee += ' & [](!ack -> next(req=1 | req=2))\n'
-guarantee += ' & [](req!=-1 & next(req=0) -> ack)\n'
-guarantee += ' & [](req=-1 & next(req!=0) -> !ack)\n'
 for d in xrange(1,data):
     guarantee += ' & [](req=%i & next(req!=%i) -> next(req=0))\n' % (d, d)
 for d in xrange(1,data):
