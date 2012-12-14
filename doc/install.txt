@@ -9,14 +9,14 @@ comment matters given dependence on Python standard libraries.)  To
 determine your default installed version of Python, open a new
 terminal and type::
 
- $ python -V
+  $ python -V
 
 Note that you may have more than one version installed.  On Unix
 machines, these are typically named with the usual "python" followed
 by a major and minor version number, e.g. "python2.6".  Try looking
 for these with::
 
- $ ls /usr/bin/python*
+  $ ls /usr/bin/python*
 
 The following packages are also *required*: `NumPy
 <http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_, `CVXOPT
@@ -27,11 +27,11 @@ for python-graph, these packages are quite standard in scientific
 computing environments and may already be installed.  To check, open a
 new terminal and try::
 
- $ python -c 'import numpy'
- $ python -c 'import scipy'
- $ python -c 'import cvxopt'
- $ python -c 'import pyparsing'
- $ python -c 'import matplotlib; print matplotlib.__version__'
+  $ python -c 'import numpy'
+  $ python -c 'import scipy'
+  $ python -c 'import cvxopt'
+  $ python -c 'import pyparsing'
+  $ python -c 'import matplotlib; print matplotlib.__version__'
 
 If an error message occurs, the package might not be visible on the
 current path or may not be installed at all.  The last line should
@@ -45,7 +45,7 @@ required for most uses of TuLiP, but a few methods of the Automaton
 class will be unavailable if python-graph is not found. To check if
 you already have it, try::
 
- $ python -c 'import pygraph'
+  $ python -c 'import pygraph'
 
 The default GR[1] synthesis tool used by TuLiP is implemented in `JTLV
 <http://jtlv.ysaar.net/>`_. To use it, you must have Java version 1.6
@@ -53,20 +53,20 @@ The default GR[1] synthesis tool used by TuLiP is implemented in `JTLV
 most platforms. You can check whether it's on the path and, if so,
 determine the version using::
 
- $ java -version
+  $ java -version
 
 Another supported synthesis tool is `gr1c
 <http://scottman.net/2012/gr1c>`_. To see if it is on your path
 and which version is installed, try::
 
- $ gr1c -V
+  $ gr1c -V
 
 For receding horizon problems, you will need a tool for checking
 satisfiability.  At present only `Yices <http://yices.csl.sri.com/>`_
 is supported, so you must install it.  Once this is done, check that
 it is on the shell path with::
 
- $ yices -V
+  $ yices -V
 
 which will return the installed version number.
 
@@ -87,7 +87,7 @@ TuLiP.  As with most `Distutils
 <http://docs.python.org/install/index.html>`_-based packages,
 installation proceeds with::
 
- $ python setup.py install
+  $ python setup.py install
 
 This script will also check for dependencies, i.e. look for NumPy,
 CVXOPT, etc.
@@ -124,7 +124,7 @@ If you would like to use the new visualization and simulation functions that are
 
 To check if Gephi is on your path, try::
 
-$ which gephi
+  $ which gephi
 
 If this returns nothing, then you should add Gephi to your path. On Mac OS X, you can do this, for instance, by following the instructions from `this webpage <http://keito.me/tutorials/macosx_path>`_ where YOURPATHHERE should be set to the directory where Gephi is located on your machine. It is typically located under ``/Applications/gephi.app/Contents/MacOS/``.
 
@@ -143,8 +143,8 @@ be initialized.  You can achieve both steps automatically each time
 Matlab is opened by adding the following lines to your ``startup.m``
 file::
 
- addpath(genpath('/path/to/mpt'));
- mpt_init;
+  addpath(genpath('/path/to/mpt'));
+  mpt_init;
 
 where "/path/to/mpt" should be replaced with the location where you
 placed MPT.  On Ubuntu GNU/Linux 11.04, running a default installation
@@ -169,15 +169,15 @@ If you think the necessary packages are installed, but are unsure how
 to debug Python, then consider the following tips.  To see the python
 path, execute::
 
- $ python -c 'import sys; print "\n".join(sys.path)'
+  $ python -c 'import sys; print "\n".join(sys.path)'
 
 Each path searched is listed on a new line. You can augment this list
 by appending locations (separated by ":") to the environment variable
 **PYTHONPATH**.  To see what it's currently set to, and add a new path
 to "/home/frodo/work", use::
 
- $ echo $PYTHONPATH
- $ export PYTHONPATH=$PYTHONPATH:/home/frodo/work
+  $ echo $PYTHONPATH
+  $ export PYTHONPATH=$PYTHONPATH:/home/frodo/work
 
 You may need to tweak the export statement depending on your terminal
 shell.  All of my examples are tested with zsh (the Z shell).
@@ -188,7 +188,7 @@ Ubuntu (or Debian) GNU/Linux
 
 To install the python package dependencies, try::
 
- $ sudo apt-get install python-numpy python-scipy python-matplotlib python-cvxopt
+  $ sudo apt-get install python-numpy python-scipy python-matplotlib python-cvxopt
 
 Mac OS X
 ````````
@@ -235,7 +235,7 @@ The command ``pip install ...`` or ``easy_install ...`` will usually
 suffice. To get `python-graph
 <http://code.google.com/p/python-graph/>`_, try::
 
- $ easy_install python-graph-core
+  $ easy_install python-graph-core
 
 .. _venv-pydoc-sec-label:
 
@@ -252,14 +252,14 @@ path used by pydoc with an alias.  E.g., suppose your username is
 called "PY_scratch" under your home directory.  Then the appropriate
 alias is similar to::
 
- $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
+  $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
 
 To set this alias for every new terminal session, add the line to your
 shell startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc``
 for zsh.  To test it, try looking at the Automaton module by
 entering::
 
- $ pydoc tulip.automaton
+  $ pydoc tulip.automaton
 
 
 .. rubric:: Footnotes
