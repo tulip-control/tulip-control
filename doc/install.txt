@@ -74,8 +74,7 @@ For problems on continuous state spaces, you will need methods for
 manipulating convex polytopes, computing partitions, etc.  In the
 recent release this is by default achieved with the TuLiP polytope
 library which uses some convex optimization routines from CVXOPT. 
-If you use this functionality, it is highly recommended, yet not require, 
-that you install `GLPK <http://www.gnu.org/s/glpk/>`_ (a fast linear
+If you use this functionality, it is highly recommended---but not required---that you install `GLPK <http://www.gnu.org/s/glpk/>`_ (a fast linear
 programming solver). Note that you need to install GLPK **before**
 installing CVXOPT and follow the instructions in CVXOPT installation
 to ensure it recognizes GLPK as a solver. If you are a `MacPorts
