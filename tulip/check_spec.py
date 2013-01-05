@@ -57,16 +57,16 @@ It does NOT check:
 """
 
 import pyparsing
+from pyparsing import *
 from tulip import ltl_parse
 from tulip.ltl_parse import *
-
+import pdb
 
 def check_jtlv(assumption, guarantee, env_vars, sys_vars, disc_dynamics):
 	"""
-	Checks that an input (assumption spec, guarantee spec, and variables) form
-	a valid GR(1) specification.
+	Checks that an input (assumption spec, guarantee spec, and variables) 
+	form a valid GR(1) specification.
 	"""
-
 	# Check that dictionaries are in the correct format
 	if not check_keys(env_vars):
 		return False
@@ -89,7 +89,7 @@ def check_jtlv(assumption, guarantee, env_vars, sys_vars, disc_dynamics):
 		discrete_dynamics_symbols = disc_dynamics.list_prop_symbol
 		dummy_list = [ "" for symbol in discrete_dynamics_symbols ]
 		temp_dictionary = dict(zip(discrete_dynamics_symbols, dummy_list))
-		total_dictionary = dict(total_dictionary.items(), 
+		total_dictionary = dict(total_dictionary.items() + 
 		  temp_dictionary.items())
 	except:
 		pass
@@ -125,7 +125,7 @@ def check_jtlv(assumption, guarantee, env_vars, sys_vars, disc_dynamics):
 	 [("&", 2, pyparsing.opAssoc.RIGHT)])
 	try: 
 		GR1_expression.parseString(assumption)
-	except pyparsing.ParseException:
+	except ParseException:
 		print "Assumption is not in GR(1) format."
 		return False
 	try:
@@ -166,8 +166,8 @@ def check_other(spec, variable_dictionary, disc_dynamics):
 
 
 def check_values(dictionary):
-	"""Checks that all the possible values of the variables are either strings
-	or numbers (ints or floats), but not alphanumeric."""
+	"""Checks that all the possible values of the variables are either 
+	   strings or numbers (ints or floats), but not alphanumeric."""
 
 	# Check that all values of variables are either "boolean", integers,
 	# strings, and NOT alphanumeric strings.
@@ -197,14 +197,16 @@ def check_values(dictionary):
 					except ValueError:
 						found_string = True
 					if found_string & found_int:
-						print "Value " + str(possible_value) + " is invalid."
+						print "Value " + str(possible_value) + \
+						  " is invalid."
 						return False
 	return True
 
 
 def check_parentheses(spec):
-	"""Checks whether all the parentheses in a spec are closed. Returns False if
-	there are errors and True when there are no errors."""
+	"""Checks whether all the parentheses in a spec are closed. 
+	   Returns False if there are errors and True when there are no 
+	   errors."""
 
 	open_parens = 0
 
@@ -213,11 +215,6 @@ def check_parentheses(spec):
 			open_parens += 1
 		elif char == ")":
 			open_parens -= 1
-		if open_parens < 0:
-			print "A spec around the characters " + \
-			  spec[max(0,index-10):min(index+5,len(spec))] + " is missing " \
-			  + "an open-parenthesis somewhere earlier"
-			return False
 
 	if open_parens != 0:
 		if open_parens > 0:
@@ -234,14 +231,15 @@ def check_parentheses(spec):
 
 
 def check_keys(dictionary):
-	"""Replaces all keys in the dicationary that are not of the given type.
-	Also converts all non-string values to strings to make JTLV happy."""
+	"""Yells at the user if any key is not a string and if a key is a
+	   number."""
 
 	for key in dictionary.keys():
 		# Check that the keys are strings
 		if type(key) != str:
 			print "Key " + str(key) + " is invalid"
 			return False
+
 		# Check that the keys are not numbers
 		try:
 			int(key)
@@ -262,22 +260,22 @@ def check_vars(spec, dictionary):
 	"""Make sure that all non operators in "spec" are in the dictionary."""
 
 	# Replace all special characters with whitespace
-	special_characters = ["next(", "[]", "<>", "->", "&", "|", "!", "+", "-", \
-	  "=", "*", "(", ")", "\n", "<", ">", "<=", ">=", "<->", "^"]
+	special_characters = ["next(", "[]", "<>", "->", "&", "|", "!", "+", \
+	  "-", "=", "*", "(", ")", "\n", "<", ">", "<=", ">=", "<->", "^", \
+	  "\t"]
 	for word in special_characters:
-		spec = spec.replace(word, " ")
+		spec = spec.replace(word, "")
 
-	# Now, replace all possible values with whitespace as well.
+	# Now, replace all variable names and values with whitespace as well.
 	possible_values = dictionary.keys()
-	for value in dictionary.values():
-		try:
-			temp_list = list(value)
-		except TypeError:
-			temp_list = [value]
-		possible_values.extend(temp_list)
+	possible_values.extend(dictionary.values())
 	for value in possible_values:
-		temp_value = " " + str(value).strip() + " "
-		spec = spec.replace(temp_value, " ")
+		spec = spec.replace(value, "")
+
+	# Remove all instances of "true" and "false"
+	spec = spec.lower()
+	spec.replace("true", " ")
+	spec.replace("false", " ")
 
 	# Make sure that the resulting string is empty
 	spec = spec.split()
