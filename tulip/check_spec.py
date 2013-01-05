@@ -60,13 +60,13 @@ import pyparsing
 from pyparsing import *
 from tulip import ltl_parse
 from tulip.ltl_parse import *
-import pdb
 
 def check_jtlv(assumption, guarantee, env_vars, sys_vars, disc_dynamics):
 	"""
-	Checks that an input (assumption spec, guarantee spec, and variables) 
+	Checks that an input (assumption spec, guarantee spec, and variables)
 	form a valid GR(1) specification.
 	"""
+
 	# Check that dictionaries are in the correct format
 	if not check_keys(env_vars):
 		return False
@@ -89,7 +89,7 @@ def check_jtlv(assumption, guarantee, env_vars, sys_vars, disc_dynamics):
 		discrete_dynamics_symbols = disc_dynamics.list_prop_symbol
 		dummy_list = [ "" for symbol in discrete_dynamics_symbols ]
 		temp_dictionary = dict(zip(discrete_dynamics_symbols, dummy_list))
-		total_dictionary = dict(total_dictionary.items() + 
+		total_dictionary = dict(total_dictionary.items() +
 		  temp_dictionary.items())
 	except:
 		pass
@@ -166,7 +166,7 @@ def check_other(spec, variable_dictionary, disc_dynamics):
 
 
 def check_values(dictionary):
-	"""Checks that all the possible values of the variables are either 
+	"""Checks that all the possible values of the variables are either
 	   strings or numbers (ints or floats), but not alphanumeric."""
 
 	# Check that all values of variables are either "boolean", integers,
@@ -204,8 +204,8 @@ def check_values(dictionary):
 
 
 def check_parentheses(spec):
-	"""Checks whether all the parentheses in a spec are closed. 
-	   Returns False if there are errors and True when there are no 
+	"""Checks whether all the parentheses in a spec are closed.
+	   Returns False if there are errors and True when there are no
 	   errors."""
 
 	open_parens = 0
