@@ -270,12 +270,16 @@ def check_vars(spec, dictionary):
 	possible_values = dictionary.keys()
 	possible_values.extend(dictionary.values())
 	for value in possible_values:
-		spec = spec.replace(value, "")
+		if isinstance(value, (list, tuple)):
+			for individual_value in value:
+				spec = spec.replace(str(individual_value), "")
+		else:
+			spec = spec.replace(value, "")
 
 	# Remove all instances of "true" and "false"
 	spec = spec.lower()
-	spec.replace("true", " ")
-	spec.replace("false", " ")
+	spec.replace("true", "")
+	spec.replace("false", "")
 
 	# Make sure that the resulting string is empty
 	spec = spec.split()
