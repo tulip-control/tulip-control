@@ -51,8 +51,9 @@ numpy_ver = np.version.version.split('.')
 numpy_ver = float(numpy_ver[0] + str('.') + numpy_ver[1])
 
 class Facet: 
-    """A class describing a n-1 dimensional polyhedron with the 
+    """A class describing a facet (n-1 dimensional face) of an n dimensional polyhedron with the 
     following fields:
+    N.B. Polyhedron is assumed to contain the origin (inside and outside are defined accordingly)
     
     - `outside`: a list of points outside the facet
     - `vertices`: the vertices of the facet in a n*n matrix where each row denotes a vertex
@@ -74,7 +75,8 @@ class Facet:
         A0 = np.hstack([points,np.ones([sh[0],1])])
         b0 = np.zeros([sh[0],1])
         b = np.vstack([np.zeros([sh[0],1]),1])
-        c = np.ones(sh[1]+1)
+        c = np.zeros(sh[1]+1)
+        c[-1] = -1.
         A = np.vstack([A0,c])
         sol = np.linalg.solve(A,b)
 
@@ -87,7 +89,7 @@ class Facet:
         if np.sum(n.flatten()*points[0]) < 0:
             n = -n
         self.normal = n
-        self.distance = np.abs(d)
+        self.distance = -d
     
     def get_furthest(self):
     	"""Returns the point in outside the furthest away from the facet"""
