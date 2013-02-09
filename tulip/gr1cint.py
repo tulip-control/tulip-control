@@ -101,7 +101,7 @@ def synthesize(spec, verbose=0):
     Return strategy as instance of Automaton class, or None if
     unrealizable or error occurs.
     """
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip0"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (stdoutdata, stderrdata) = p.communicate(spec.dumpgr1c())
