@@ -122,8 +122,11 @@ else:
 num_it = 10
 init_state = {'X0reach': True}
 
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+destfile = 'rsdisturbance_example.gexf'
 states = grsim.grsim([aut], env_states=[init_state], num_it=num_it,
-                     deterministic_env=False)
+                     deterministic_env=False, graph_vis=graph_vis,
+                     destfile=destfile)
 
 # Store discrete trajectory in np array
 cellid_arr = []
