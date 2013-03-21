@@ -43,8 +43,8 @@ for i in xrange(0, 3):
                                            array([[float(i+1)],[float(-i)],[float(j+1)],[float(-j)]]))
 
 # Continuous dynamics: \dot{x} = u_x, \dot{y} = u_y
-A = array([[1.0, 0.],[ 0., 1.0]])
-B = array([[0.1, 0.],[ 0., 0.1]])
+A = array([[1.1052, 0.],[ 0., 1.1052]])
+B = array([[1.1052, 0.],[ 0., 1.1052]])
 U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
 sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 #@importvardyn_end@
@@ -87,8 +87,16 @@ for i in range(1, num_it):
     else:
         env_states.append({'park':False})
 
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+destfile = 'rsimple2_example.gexf'
+label_vars = ['park', 'cellID', 'X0reach']
+delay = 2
+vis_depth = 3
 aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
-                         num_it=num_it, deterministic_env=False)
+                         num_it=num_it, deterministic_env=False,
+                         graph_vis=graph_vis, destfile=destfile,
+                         label_vars=label_vars, delay=delay,
+                         vis_depth=vis_depth)
 
 f = open('rsimple2_example_disc_dynamics.txt', 'w')
 disc_dynamics = prob.getDiscretizedDynamics()

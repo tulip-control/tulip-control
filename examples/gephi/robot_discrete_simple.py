@@ -139,6 +139,14 @@ for i in range(1, num_it):
     else:
         env_states.append({'park':False})
 
+graph_vis = raw_input("Do you want to open in Gephi? (y/n)") == 'y'
+destfile = 'rdsimple_example.gexf'
+label_vars = ['park', 'cellID', 'X0reach']
+delay = 2
+vis_depth = 3
 aut_states = grsim.grsim([aut], aut_trans_dict={}, env_states=env_states,
-                         num_it=num_it, deterministic_env=False)
+                         num_it=num_it, deterministic_env=False,
+                         graph_vis=graph_vis, destfile=destfile,
+                         label_vars=label_vars, delay=delay,
+                         vis_depth=vis_depth)
 #@sim_end@
