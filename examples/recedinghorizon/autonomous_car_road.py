@@ -37,7 +37,7 @@ horizon = 3
 #@contdyn@
 A = array([[1.0, 0.],[ 0., 1.0]])
 B = array([[0.1, 0.],[ 0., 0.1]])
-U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
+U = Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
 sys_dyn = CtsSysDyn(A,B,[],[],U,[])
 #@contdyn_end@
 
