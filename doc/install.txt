@@ -4,6 +4,8 @@
 Installation
 ============
 
+The latest release of TuLiP can be downloaded from `here <http://sourceforge.net/projects/tulip-control/files/?source=navbar>`_.
+
 TuLiP is known to work with Python versions 2.6 and 2.7.  (This
 comment matters given dependence on Python standard libraries.)  To
 determine your default installed version of Python, open a new
@@ -62,7 +64,7 @@ and which version is installed, try::
   $ gr1c -V
 
 For receding horizon problems, you will need a tool for checking
-satisfiability.  At present only `Yices <http://yices.csl.sri.com/>`_
+satisfiability.  At present only `Yices 1 <http://yices.csl.sri.com/>`_
 is supported, so you must install it.  Once this is done, check that
 it is on the shell path with::
 

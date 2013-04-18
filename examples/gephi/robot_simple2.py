@@ -43,8 +43,8 @@ for i in xrange(0, 3):
                                            array([[float(i+1)],[float(-i)],[float(j+1)],[float(-j)]]))
 
 # Continuous dynamics: \dot{x} = u_x, \dot{y} = u_y
-A = array([[1.1052, 0.],[ 0., 1.1052]])
-B = array([[1.1052, 0.],[ 0., 1.1052]])
+A = array([[1.0, 0.],[ 0., 1.0]])
+B = array([[0.1, 0.],[ 0., 0.1]])
 U = pc.Polytope(array([[1., 0.],[-1., 0.], [0., 1.], [0., -1.]]), array([[1.],[1.],[1.],[1.]]))
 sys_dyn = discretize.CtsSysDyn(A,B,[],[],U,[])
 #@importvardyn_end@
