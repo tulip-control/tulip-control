@@ -40,7 +40,7 @@ if __name__ == "__main__":
     else:
         out_fname = sys.argv[2]
 
-    (sys_dyn, initial_partition, N) = conxml.readYAMLfile(sys.argv[1], verbose=verbose)
+    (sys_dyn, initial_partition, N) = conxml.readYAMLfile(sys.argv[1], verbose=verbose)[0:3]
     disc_dynamics = discretize.discretize(initial_partition, sys_dyn, N=N,
                                           use_mpt=False, verbose=verbose)
 
