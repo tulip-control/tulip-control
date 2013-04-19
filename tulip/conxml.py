@@ -995,7 +995,7 @@ def loadYAML(x, verbose=0):
     Return (sys_dyn, initial_partition, N), where:
 
     - sys_dyn is the system dynamics (instance of CtsSysDyn),
-    - initial_partition is the given proposition-preserving partition
+    - cont_prop is the continuous propositions
       of the space (instance of PropPreservingPartition), and
     - N is the horizon length (default is 10).
 
@@ -1015,8 +1015,10 @@ def loadYAML(x, verbose=0):
         or ("U" not in dumped_data.keys())
         or ("H" not in dumped_data["U"].keys())
         or ("K" not in dumped_data["U"].keys())
-        or ("initial_part" not in dumped_data.keys())
-        or ("X" not in dumped_data.keys())):
+        or ("cont_prop" not in dumped_data.keys())
+        or ("X" not in dumped_data.keys())
+        or ("assumption" not in dumped_data.keys())
+        or ("guarantee" not in dumped_data.keys())):
         raise ValueError("Missing required data.")
     
     # Parse dynamics related strings
@@ -1036,11 +1038,23 @@ def loadYAML(x, verbose=0):
         N = dumped_data["horizon"]
     else:
         N = 10  # Default to 10, as in function discretize.discretize
+        
+    env_vars = dict()
+    if dumped_data.has_key("env_vars"):
+        env_vars = dumped_data["env_vars"]
+        
+    sys_disc_vars = dict()
+    if dumped_data.has_key("sys_disc_vars"):
+        sys_disc_vars = dumped_data["sys_disc_vars"]
 
     # Parse initial partition
-    initial_part = dict()
-    for (k, v) in dumped_data["initial_part"].items():
-        initial_part[k] = yaml_polytope(v)
+    cont_prop = dict()
+    for (k, v) in dumped_data["cont_prop"].items():
+        cont_prop[k] = yaml_polytope(v)
+        
+    # Spec
+    assumption = dumped_data["assumption"]
+    guarantee = dumped_data["guarantee"]
 
     if verbose > 0:
         print "A =\n", A
@@ -1050,11 +1064,11 @@ def loadYAML(x, verbose=0):
         print "U =", U
         print "W =", W
         print "horizon (N) =", N
-        for (k, v) in initial_part.items():
+        for (k, v) in cont_prop.items():
             print k+" =\n", v
 
     # Build transition system
     sys_dyn = discretize.CtsSysDyn(A, B, E, [], U, W)
-    initial_partition = prop2part.prop2part2(X, initial_part)
+    initial_partition = prop2part.prop2part2(X, cont_prop)
 
-    return (sys_dyn, initial_partition, N)
+    return (sys_dyn, initial_partition, N, assumption, guarantee, env_vars, sys_disc_vars)

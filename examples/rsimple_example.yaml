@@ -5,6 +5,7 @@
 # be 10.
 #
 # SCL; 4 Oct 2011.
+# NO; 19 Apt 2013 (complete problem description).
 
 
 # Dynamics
@@ -46,8 +47,8 @@ W:  # Disturbances polytope
 
 horizon: 5  # Also called "N"; number of control inputs to move between regions.
 
-# Initial partition (respecting propositions)
-initial_part:
+# List of continuous propositions
+cont_prop:
   X0:
     H: |
       1 0
@@ -90,3 +91,15 @@ initial_part:
       0 1
       0 -1
     K: 3 -2 2 -1
+
+env_vars:
+  park : boolean
+
+sys_disc_vars:
+  X0reach : boolean
+
+assumption:
+  'X0reach & []<>(!park)'
+
+guarantee:
+  '[]<>X5 & []<>(X0reach) & [](next(X0reach) = ((X0 | X0reach) & !park))'
