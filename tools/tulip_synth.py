@@ -2,8 +2,8 @@
 """ A script to use TuLiP (with jtlv) from command line
 (other solvers not supported yet)
 
-Input: .yaml file that containts a problem description
-Output: .xml file that contains the problem description and synthesized automatton
+Input: .yaml file that contains a problem description
+Output: .xml file that contains the problem description and synthesized automaton
 
 Command line usage: python tulip_synth.py your_yaml_file.yaml [output_file.xml]
 

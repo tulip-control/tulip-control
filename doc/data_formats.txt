@@ -142,7 +142,7 @@ Key Routines
 Continuous Systems in YAML
 --------------------------
 
-To facilitate experimentation, code reuse, etc., continuous sytems may
+To facilitate experimentation, code reuse, etc., continuous systems may
 be defined using `YAML <http://www.yaml.org/>`_.
 
 .. highlight:: none
