@@ -40,7 +40,7 @@ current path or may not be installed at all.  The last line should
 cause the version of Matplotlib to be printed.  More or less that
 approach can be used to easily find the installed versions for other
 packages.  Try to install them yourself, or see
-:ref:`troubleshoot-sec-label` below for help.
+:ref:`epd-sec-label` and :ref:`troubleshoot-sec-label` below for help.
 
 `python-graph <http://code.google.com/p/python-graph/>`_ is not
 required for most uses of TuLiP, but a few methods of the Automaton
@@ -156,6 +156,20 @@ present, you can create one; try an empty file with the above lines
 (and the mpt path suitably modified). To begin using MPT, 
 set the flag ``use_mpt`` to True where appropriate.
 
+.. _epd-sec-label:
+
+New to Python?
+--------------
+
+If you don't already use Python for scientific computing, consider using 
+`Enthought Python Distribution (EPD) <http://enthought.com>`_ (now called
+Enthought Canopy). This will make the installation process a lot easier. 
+The EPD Free (now called Canopy Express) distribution comes with Python 
+and includes NumPy, SciPy, matplotlib. EPD Free together with cvxopt and 
+pyparsing is sufficient to run TuLiP. 
+
+EPD seems to work fine on most platforms but if you cannot get it to work,  
+alternative packages for Mac OS X and Microsoft Windows are mentioned below. 
 
 .. _troubleshoot-sec-label:
 
