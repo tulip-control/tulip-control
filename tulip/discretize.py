@@ -205,7 +205,7 @@ class PwaSysDyn:
 
 
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
-               use_mpt=False, conservative=False, max_num_poly=5, \
+               use_mpt=False, conservative=True, max_num_poly=5, \
                use_all_horizon=False, trans_length=1, remove_trans=False, 
                abs_tol=1e-7, verbose=0):
 
@@ -227,7 +227,10 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                       to stay inside starting cell. If false, safety
                       is ensured by keeping the sequence inside the
                       original proposition preserving cell which needs
-                      to be convex.
+                      to be convex. In order to use the value false,
+                      ensure to have a convex initial partition or use
+                      prop2partconvex to postprocess the proposition
+                      preserving partition before calling discretize.
     - `max_num_poly`: maximum number of polytopes in a region to use in 
                       reachability analysis.
     - `use_all_horizon`: in closed loop algorithm: if we should look
@@ -402,7 +405,8 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 adj[i,size-1-kk] = 1
                 adj[size-1-kk,i] = 1
                 adj[size-1-kk,size-1-kk] = 1
-                orig = np.hstack([orig, orig[i]])
+                if not conservative:
+                    orig = np.hstack([orig, orig[i]])
             adj[i,i] = 1
                         
             if verbose > 1:
@@ -620,7 +624,8 @@ def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,
                     transitions[k,size-1] = 0
                     
             # Assign original proposition cell to new state and update counts
-            orig = np.hstack([orig, orig[i]])
+            if not conservative:
+                orig = np.hstack([orig, orig[i]])
             print num_new_reg
             num_new_reg = np.hstack([num_new_reg, 0])
             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
@@ -653,7 +658,7 @@ def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,
     return new_part
 
 def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
-            conservative=False, closed_loop = True, test_result=False):
+            conservative=True, closed_loop = True, test_result=False):
  
     """Calculate an input signal sequence taking the plant from state `start` 
     to state `end` in the partition part, such that 
