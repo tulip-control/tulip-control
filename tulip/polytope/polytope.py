@@ -783,7 +783,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     if len(poly1) > 0:
         P = Polytope()
         for poly in poly1.list_poly:
-            int_p = intersect(poly, poly2)
+            int_p = intersect(poly, poly2, abs_tol)
             rp, xp = cheby_ball(int_p)
             if rp > abs_tol:
                 P = union(P, int_p, check_convex=False)
@@ -792,7 +792,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     if len(poly2) > 0:
         P = Polytope()
         for poly in poly2.list_poly:
-            int_p = intersect(poly1, poly)
+            int_p = intersect(poly1, poly, abs_tol)
             rp, xp = cheby_ball(int_p)
             if rp > abs_tol:
                 P = union(P, int_p, check_convex=False)
@@ -801,7 +801,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     iA = np.vstack([poly1.A, poly2.A])
     ib = np.hstack([poly1.b, poly2.b])
     
-    return reduce(Polytope(iA,ib))
+    return reduce(Polytope(iA,ib), abs_tol=abs_tol)
           
 def volume(polyreg):
     """Approximately compute the volume of a Polytope or Region.
