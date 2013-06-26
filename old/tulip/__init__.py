@@ -1,4 +1,11 @@
-# Copyright (c) 2013 by California Institute of Technology
+# __init__.py - initialization for TuLiP
+#
+# Author: Richard M. Murray
+# Date: 19 Apr 2011
+#
+# This file contains the initialization information from the tulip package.
+#
+# Copyright (c) 2011 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,3 +36,21 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+# 
+# $Id$
+
+"""TuLiP Toolbox
+
+The Temporal Logic Planning (TuLiP) Toolbox provides functions
+for verifying and constructing control protocols.
+"""
+
+__all__ = ["prop2part", "grsim", "jtlvint", "automaton", "rhtlp", "spec", 'discretize', 'polytope']
+
+__version__ = "0.4a"
+
+import prop2part
+import grsim
+import jtlvint
+import automaton
+from spec import GRSpec
