@@ -1,5 +1,6 @@
 TuLiP
 =====
+This is the source repository for TuLiP, the temporal logic planning toolbox.
 
 Installation
 ------------
@@ -16,7 +17,7 @@ option "nocheck"::
 Detailed instructions, including notes about dependencies and
 troubleshooting, are available at
 
-http://tulip-control.sourceforge.net/doc/install.html
+  http://tulip-control.sourceforge.net/doc/install.html
 
 The documentation sources (see below) can be found under doc/.
 A test suite (see below) is provided under tests/.
@@ -37,7 +38,7 @@ time of first initialising the docs configuration files (ca. 2011 May
 please consider Makefile to be the ground truth.  A built copy for the
 most recent release of TuLiP is available online at
 
-http://tulip-control.sourceforge.net/doc/
+  http://tulip-control.sourceforge.net/doc/
 
 The API documentation is generated with `Epydoc
 <http://epydoc.sourceforge.net/>`_ and can also be built from the
@@ -48,7 +49,6 @@ The API documentation is generated with `Epydoc
 
 Format specifications
 ---------------------
-
 The directory doc/formats/ contains definitions and documentation
 about data and file formats used in the project.  The goal is to
 formalize specifications expected in the code in a medium external to
@@ -58,7 +58,6 @@ single and normative points of reference.
 
 Testing
 -------
-
 Tests are performed using nose; see http://readthedocs.org/docs/nose/
 for details.  From the root of the source tree (i.e., where setup.py
 is located), run::
