@@ -1,0 +1,5 @@
+This directory contains some examples of the use of the TuLiP toolbox.  The follow examples are included here:
+
+* robot_planning/ - simple motion planning example 
+
+RMM, 26 Jun 2013

@@ -1,0 +1,12 @@
+This directory contains a simple robot planning planning example that
+illustrates the usage of the TuLiP toolbox.
+
+robot_discrete.py - discrete transition model
+robot_continuous.py - continuous dynamics (with abstraction)
+robot_disturbance.py - modification to include disturbance forces
+
+In each of the examples, the task involves repeatedly visiting a cell,
+responding to a parking signal, and avoiding an environmental
+obstacle.
+
+RMM, 26 Jun 2013
