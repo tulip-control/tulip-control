@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -198,6 +198,36 @@ class Polytope:
     def copy(self):
         """Return copy of this Polytope."""
         return self.__copy__()
+        
+    @classmethod
+    def from_box(cls, I=np.array([])):
+        """Class method for easy construction of hyperrectangles.
+        
+        Input:
+        - `I` : an n by 2 numpy array representing intervals cross-product of
+                which defines the n dimensional hyperrectangle
+                
+        Output:
+        - Polytope that corresponds to the hyperrectangle defined by I
+        """
+        n = I.shape
+        if n[1]!=2:
+            raise Exception("Polytope: input to from_box must be n by 2")
+        else:
+            n = n[0]
+        A = np.vstack([np.eye(n),-np.eye(n)])
+        b = np.zeros(2*n)
+        for i in range(n):
+            if I[i,0]>I[i,1]:
+                raise Exception("Polytope: invalid interval in from_box method.\
+                                 First element of an interval must\
+                                 not be larger than the second")
+            else:
+                b[i]=I[i,1]
+                b[i+n]=-I[i,0]
+                
+        return cls(A, b, minrep = True)
+        
 
 class Region:
     """Class for lists of convex polytopes
