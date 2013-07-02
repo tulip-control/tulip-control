@@ -33,6 +33,8 @@
 
 """ 
 Proposition preserving partition module.
+
+Restructured by NO, 30 Jun 2013.
 """
 
 
@@ -40,7 +42,7 @@ import numpy as np
 from scipy import sparse as sp
 import copy
 
-import polytope as pc
+from tulip import polytope as pc
 
 def prop2part(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of

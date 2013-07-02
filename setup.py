@@ -13,5 +13,5 @@ setup(name = 'tulip',
       requires = ['numpy', 'scipy', 'cvxopt'],
       packages = ['tulip'],
       package_dir = {'tulip' : 'tulip'},
-      package_data={'tulip': ['jtlv_grgame.jar', 'polytope/*.py']},
+      package_data={'tulip': ['jtlv_grgame.jar', 'polytope/*.py', 'abstract/*.py']},
       )
