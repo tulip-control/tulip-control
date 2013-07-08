@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright (c) 2011, 2012 by California Institute of Technology
+# Copyright (c) 2011-2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,13 +29,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-# $Id$
 """ 
 Specification module
 """
 
-import re, copy, ltl_parse
+import re, copy
 
 class GRSpec:
     """
@@ -306,26 +302,27 @@ class GRSpec:
                                 symfound = True
 
     def toSMVSpec(self):
-        trees = []
-        # NuSMV can only handle system states
-        for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
-                        (self.sys_prog, ['[]', '<>'])]:
-            if s:
-                if isinstance(s, str):
-                    s = [s]
-                subtrees = []
-                ops.reverse() # so we apply operators outwards
-                for f in s:
-                    t = ltl_parse.parse(f)
-                    # assign appropriate temporal operators
-                    for op in ops:
-                        t = ltl_parse.ASTUnTempOp.new(t, op)
-                    subtrees.append(t)
-                # & together expressions
-                t = reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), subtrees)
-                trees.append(t)
-        # & together converted subformulae
-        return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
+        raise Exception("GRSpec.toSMVSpec is defunct, possibly temporarily")
+        # trees = []
+        # # NuSMV can only handle system states
+        # for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
+        #                 (self.sys_prog, ['[]', '<>'])]:
+        #     if s:
+        #         if isinstance(s, str):
+        #             s = [s]
+        #         subtrees = []
+        #         ops.reverse() # so we apply operators outwards
+        #         for f in s:
+        #             t = ltl_parse.parse(f)
+        #             # assign appropriate temporal operators
+        #             for op in ops:
+        #                 t = ltl_parse.ASTUnTempOp.new(t, op)
+        #             subtrees.append(t)
+        #         # & together expressions
+        #         t = reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), subtrees)
+        #         trees.append(t)
+        # # & together converted subformulae
+        # return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
 
     def toJTLVSpec(self):
         """Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
