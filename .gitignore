@@ -1,6 +1,7 @@
 *.*~
 *.pyc
-*.DS_Store
+*.egg-info
+.DS_Store
 *.png
 *.PNG
 *.pdf
