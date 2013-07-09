@@ -90,7 +90,7 @@ except ImportError:
 
 def dprint(s):
     """Debug mode print."""
-    print(s)
+    #print(s)
 
 class States(object):
     """Methods to manage states, initial states, current state.
@@ -117,6 +117,14 @@ class States(object):
         """State labeling defined ?"""
         if not hasattr(self.graph, '__state_label_def__'):
             raise Exception('No state labeling defined for this class.')        
+    
+    def __exist_final_states__(self):
+        """Check if system has final states."""
+        if not hasattr(self.graph, 'final_states'):
+            warnings.warn('System does not have final states.')
+            return False
+        else:
+            return True
     
     def __dot_str__(self, to_pydot_graph):
         """Copy nodes to given graph, with attributes for dot export."""
@@ -264,6 +272,17 @@ class States(object):
     def is_initial(self, state):
         return state in self.initial
     
+    def is_final(self, state):       
+        """Check if state \\in final states."""
+        if not self.__exist_final_states__():
+            return
+        
+        return state in self.graph.final_states
+    
+    def is_accepting(self, state):
+        """Alias to is_final()."""
+        return self.is_final(state)
+    
     def check(self):
         """Check sanity of various state sets.
         
@@ -295,7 +314,7 @@ class States(object):
         """
         return self.post({state} )
     
-    def post(self, states):
+    def post(self, states, actions='all'):
         """Direct successor set (1-hop) for given states.
         
         Over all actions or letters, i.e., edge labeling ignored by states.pre,
@@ -314,7 +333,12 @@ class States(object):
         successors = set()
         for state in states:
             successors |= set(self.graph.successors(state) )
-        return successors
+            
+        if actions == 'all':
+            return successors
+        
+        for state in successors:
+            pass
     
     def pre_single(self, state):
         """Direct predecessors of single state.
@@ -334,6 +358,14 @@ class States(object):
         for state in states:
             predecessors |= set(self.graph.predecessors(state) )
         return predecessors
+    
+    def add_final(self, state):
+        """Convenience for automaton.add_final_state()."""
+        
+        if not self.__exist_final_states__():
+            return
+        
+        self.graph.add_final_state(state)
 
 class Transitions(object):
     """Building block for managing transitions.
@@ -570,6 +602,8 @@ class LabeledTransitions(Transitions):
     def relabel(self, from_state, to_state, old_labels, new_labels, check=True):
         """Change the label of an existing labeled transition.
         
+        TODO partial relabeling available
+        
         Need to identify existing transition by providing old label.
         
         A labeled transition is (uniquely) identified by the list:
@@ -646,9 +680,51 @@ class LabeledTransitions(Transitions):
         self.graph.add_edge(from_state, to_state, **edge_label)
     
     def add_labeled_from(self, from_states, to_states, labels, check=True):
+        """Add multiple labeled transitions.
+        
+        Adds transitions between all states in set from_states,
+        to all states in set to_states, annotating them with the same labels.
+        For more details, see add_labeled().
+        """
         for from_state in from_states:
             for to_state in to_states:
                 self.add_labeled(from_state, to_state, labels, check=check)
+    
+    def with_label(self, from_state, to_states='any', desired_label='any'):
+        """Find all edges from_state to_states, annotated with guard_label.
+        
+        TODO support partial labels
+        """
+        def label_is_desired(cur_label, desired_label):
+            for (label_type, desired_val) in desired_label.iteritems():
+                dprint('Label type checked:\n\t' +str(label_type) )
+                cur_val = cur_label[label_type]
+                dprint('Label of checked transition:\n\t' +str(cur_val) )
+                dprint('Desired label:\n\t' +str(desired_val) )
+                if cur_val != desired_val and True not in cur_val:
+                    return False
+            return True
+        
+        out_edges = self.graph.edges(from_state, data=True, keys=True)
+        
+        found_edges = set()        
+        for from_state, to_state, key, cur_label in out_edges:
+            if to_state not in to_states and to_states is not 'any':
+                continue
+            
+            # any guard ok ?
+            if desired_label is 'any':
+                ok = True
+            else:
+                dprint('checking guard')
+                ok = label_is_desired(cur_label, desired_label)
+            
+            if ok:
+                dprint('transition label matched desired label')
+                found_edge = (from_state, to_state, key)
+                found_edges.add(found_edge)
+            
+        return found_edges
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
@@ -695,9 +771,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             3) transitions
             4) transition attributes (include labels)
         """
+        raise NotImplementedError
     
     def __ne__(self, other):
-        return not self.__eq__(other)    
+        return not self.__eq__(other) 
     
     def __le__(self, other):
         """Check sub-finite-transition-system relationship.
@@ -711,7 +788,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             2) transitions (between same node IDs)
             3) transition attributes (includes labels).
         """
-    # isomorphism, not implemented yet, but an Exception
+        raise NotImplementedError
     
     def __lt__(self, other):
         return self.__le__(other) and self.__ne__(other)
@@ -725,22 +802,23 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
 	# operations on single transitions system
     def reachable(self):
         """Return reachable subautomaton."""
+        raise NotImplementedError
         
     def trim_dead(self):
-        pass
+        raise NotImplementedError
     
     def trim_unreachable(self):
-        pass
+        raise NotImplementedError
     
     # file i/o
     def load_xml(self):
-        pass
+        raise NotImplementedError
         
     def dump_xml(self):
-        pass
+        raise NotImplementedError
     
     def write_xml_file(self):
-        pass
+        raise NotImplementedError
     
     def dump_dot(self):
         """Return dot string.
@@ -772,10 +850,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         pydot_graph.write_pdf(path)
     
     def dump_dot_color(self):
-        pass
+        raise NotImplementedError
     
     def write_dot_color_file(self):
-        pass
+        raise NotImplementedError
     
 class FiniteSequence(object):
     """Used to construct finite words."""
@@ -921,6 +999,7 @@ class FiniteTransitionSystemSimulation(object):
         
         We need to decide a format.
         """
+        raise NotImplementedError
 
 class FTSSim(FiniteTransitionSystemSimulation):
     """Alias for Finite Transition System Simulation."""
@@ -951,6 +1030,10 @@ class AtomicPropositions(object):
     
     def __str__(self):
         return 'Atomic Propositions:\n\t' +pformat(self() )
+    
+    def __check_state__(self, state):
+        if state not in self.graph:
+            raise Exception('State not in set of states.')
     
     def add(self, atomic_proposition):
         self.atomic_propositions.add(atomic_proposition)
@@ -1003,8 +1086,7 @@ class AtomicPropositions(object):
             self.add_labeled_state(state, ap_label)
             return
         
-        if not self.graph.states.is_member(state):
-            raise Exception('State not in set of states.')
+        self.__check_state__(state)
         
         if not set(ap_label) <= self.atomic_propositions:
             raise Exception('Label \\notsubset AP.')
@@ -1014,14 +1096,20 @@ class AtomicPropositions(object):
     
     def label_states(self, states, ap_label, check=True):
         """Label multiple states with the same AP label."""
+        
         for state in states:
             self.label_state(state, ap_label, check=True)
     
     def delabel_state(self, state):
         """Alias for remove_label_from_state()."""
+        
+        raise NotImplementedError
     
-    def remove_label_from_state(self, state):
-        """."""
+    def of(self, state):
+        """Get AP set labeling given state."""
+        
+        self.__check_state__(state)
+        return self.graph.node[state][self.name]
         
     def list_states_with_labels(self):
         """Return list of labeled states.
@@ -1032,18 +1120,18 @@ class AtomicPropositions(object):
             state \in States
             label \in 2^AP
         """
-        
         return self.states(data=True)
     
     def remove_state_with_label(self, labels):
         """Find states with given label"""
+        raise NotImplementedError
     
     def find_states_with_label(self, labels):
         """Return all states with label in given set."""
-        pass
+        raise NotImplementedError
     
     def remove_labels_from_states(self, states):
-        pass
+        raise NotImplementedError
 
 # big issue: edge naming !
 class Actions(object):
@@ -1150,25 +1238,26 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         so they are not yet regarded as guards.
         For more semantics, use a FiniteStateMachine.
         """
+        raise NotImplementedError
     
     def merge_states(self):
-        pass
+        raise NotImplementedError
 
     # operations between transition systems
     def union(self):
-        pass
+        raise NotImplementedError
     
     def intersection(self):
-        pass
+        raise NotImplementedError
         
     def difference(self):
-        pass
+        raise NotImplementedError
 
     def composition(self):
-        pass
+        raise NotImplementedError
     
     def projection_on(self):
-        pass
+        raise NotImplementedError
     
     def simulate(self, state_sequence="random"):
         """
@@ -1176,13 +1265,24 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                 inputs="random" | given array
                 mode="acceptor" | "transfucer"
         """
-        # generating simulation
+        raise NotImplementedError
     
     def is_simulation(self, simulation=FTSSim() ):
-        pass
+        raise NotImplementedError
     
     def loadSPINAut():
-        pass
+        raise NotImplementedError
+
+class FTS(FiniteTransitionSystem):
+    """Alias to FiniteTransitionSystem."""
+    
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 atomic_propositions=[], actions=[] ):
+        FiniteTransitionSystem.__init__(
+            self, name=name, states=states, initial_states=initial_states,
+            current_state=current_state, atomic_propositions=atomic_propositions,
+            actions=actions
+        )
 
 class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Analogous to FTS, but for open systems, with system and environment."""
@@ -1465,7 +1565,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         # becaus of possible branching due to non-determinism
         run = [initial_state]
         for letter in input_word:
-            print(letter)
+            dprint(letter)
             
             # blocked
         
@@ -1473,7 +1573,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
     # operations on two automata
     def add_subautomaton(self):
-        pass
+        raise NotImplementedError
    
 class StarAutomaton(FiniteStateAutomaton):
     """Finite-word finite-state automaton."""
@@ -1485,8 +1585,6 @@ class DeterninisticFiniteAutomaton(StarAutomaton):
     # check each transitin added
     
     
-    def is_deterministic(self):
-        return True
     
 class DFA(DeterninisticFiniteAutomaton):
     """Alias for deterministic finite-word finite-state automaton."""
@@ -1502,9 +1600,11 @@ class NFA(NonDeterministicFiniteAutomaton):
 
 def nfa2dfa():
     """Determinize NFA."""
+    raise NotImplementedError
     
 def dfa2nfa():
     """Relax state addition constraint of determinism."""
+    raise NotImplementedError
 
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, states=[], initial_states=[], final_states=[],
@@ -1530,23 +1630,132 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
     """Construct transition system equal to synchronous product TS x NBA.
     
     Def. 4.62, p.200 [Baier]
+    
+    erratum
+    -------
+    note the erratum: P_{pers}(A) is ^_{q\in F} !q, verified from:
+        http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf
     """
     
-    prod_ts = FiniteTransitionSystem() 
+    fts = transition_system
+    ba = buchi_automaton
+    
+    prodts = FiniteTransitionSystem()
+    prodts.atomic_propositions.add_from(ba.states() )
+
+    # construct initial states of product automaton
+    s0s = fts.states.initial.copy()
+    q0s = ba.states.initial.copy()
+    
+    final_states_preimage = set()    
+    
+    for s0 in s0s:
+        dprint('----\nChecking initial state:\n\t' +str(s0) )        
+        
+        Ls0 = fts.atomic_propositions.of(s0)
+        Ls0_dict = {'in_alphabet': Ls0}
+        
+        for q0 in q0s:
+            enabled_ba_trans = ba.transitions.with_label(q0, desired_label=Ls0_dict)
+            
+            # q0 blocked ?
+            if enabled_ba_trans == set():
+                continue
+            
+            # which q next ?     (note: curq0 = q0)
+            for (curq0, q, edge_key) in enabled_ba_trans:
+                new_sq0 = (s0, q)                
+                prodts.states.add(new_sq0)
+                prodts.states.add_initial(new_sq0)
+                prodts.atomic_propositions.label_state(new_sq0, {q} )
+                
+                # final state ?
+                if ba.states.is_final(q):
+                    final_states_preimage.add(new_sq0)
+    
+    dprint(prodts)    
+    
+    # start visiting reachable in DFS or BFS way
+    # (doesn't matter if we are going to store the result)    
+    queue = prodts.states.initial.copy()
+    visited = set()
+    while queue:
+        sq = queue.pop()
+        visited.add(sq)
+        (s, q) = sq
+        
+        dprint('Current product state:\n\t' +str(sq) )
+        
+        # get next states
+        next_ss = fts.states.post_single(s)
+        next_sqs = set()
+        for next_s in next_ss:
+            dprint('Next state:\n\t' +str(next_s) )
+            
+            Ls = fts.atomic_propositions.of(next_s)
+            Ls_dict = {'in_alphabet': Ls}
+
+            dprint("Next state's label:\n\t" +str(Ls_dict) )
+            
+            enabled_ba_trans = ba.transitions.with_label(q, desired_label=Ls_dict)
+            dprint('Enabled BA transitions:\n\t' +str(enabled_ba_trans) )
+            
+            if enabled_ba_trans == set():
+                continue
+            
+            for (q, next_q, edge_key) in enabled_ba_trans:
+                new_sq = (next_s, next_q)
+                next_sqs.add(new_sq)
+                dprint('Adding state:\n\t' +str(new_sq) )
+                
+                prodts.states.add(new_sq)
+                
+                if ba.states.is_final(next_q):
+                    final_states_preimage.add(new_sq)
+                    dprint(str(new_sq) +' contains a final state.')
+                
+                prodts.atomic_propositions.label_state(new_sq, {next_q} )
+                
+                dprint('Adding transitions:\n\t' +str(sq) +'--->' +str(new_sq) )
+                # is fts transition labeled with an action ?
+                ts_enabled_trans = fts.transitions.with_label(
+                    s, to_states={next_s}, desired_label='any'
+                )
+                for (from_s, to_s, edge_key) in ts_enabled_trans:
+                    attr_dict = fts.get_edge_data(from_s, to_s, key=edge_key)
+                    assert(from_s == s)
+                    assert(to_s == next_s)
+                    dprint(attr_dict)
+                    
+                    # labeled transition ?
+                    if attr_dict == {}:
+                        prodts.transitions.add(sq, new_sq)
+                    else:
+                        prodts.transitions.add_labeled(sq, new_sq, **attr_dict)
+        
+        # discard visited & push them to queue
+        new_sqs = set()
+        for next_sq in next_sqs:
+            if next_sq not in visited:
+                new_sqs.add(next_sq)
+                queue.add(next_sq)
+    
+    return (prodts, final_states_preimage)
+    #TODO option to return (or convert ?) prodts to BA
 
 class RabinAutomaton(OmegaAutomaton):
     def acceptance_condition(self, prefix, suffix):
-        pass
+        raise NotImplementedError
 
 class StreettAutomaton(OmegaAutomaton):
     def acceptance_condition(self, prefix, suffix):
-        pass
+        raise NotImplementedError
 
 class MullerAutomaton(OmegaAutomaton):
     """Probably not very useful as a data structure for practical purposes."""
     
     def acceptance_condition(self, prefix, suffix):
-        pass
+        raise NotImplementedError
 
 def ba2dra():
     """Buchi to Deterministic Rabin Automaton converter."""
@@ -1557,13 +1766,13 @@ def ba2ltl():
 class ParityAutomaton(OmegaAutomaton):
     
     def dump_gr1c():
-        pass
+        raise NotImplementedError
 
 class ParityGameGraph():
     """Parity Games."""
 
 class WeightedAutomaton():
-    pass
+    """."""
 
 ###########
 # Finite-State Machines : I/O = Reactive = Open Systems
@@ -1601,9 +1810,11 @@ class FiniteStateMachineSimulation(object):
         
         For GUI output, use either wxpython or matlab.
         """
+        raise NotImplementedError
         
     def save():
         """Dump to file."""
+        raise NotImplementedError
 
 class FiniteStateMachine(LabeledStateDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
@@ -1620,8 +1831,6 @@ class FiniteStateMachine(LabeledStateDiGraph):
     def __init__(self):
         LabeledStateDiGraph.__init__(self)        
         
-        self.initial_states = {}        
-        
         self.input_ports = {'name':'type'}
         self.output_ports ={'name': 'type'}
         
@@ -1634,44 +1843,46 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
         self.variables = {'name':'type'}
     
-    def set_initial_states(self):
-        pass
-        
-    def get_initial_states(self):
-        pass
-    
     def is_deterministic(self):
         """Does there exist a transition for each state and each input letter ?"""
+        raise NotImplementedError
     
 # operations on single state machine
     def complement(self):
-        pass
+        raise NotImplementedError
 
     def determinize(self):
-        pass
+        raise NotImplementedError
 
 # operations between state machines
     def sync_product(self):
-        pass
+        raise NotImplementedError
         
     def async_product(self):
-        pass
+        raise NotImplementedError
     
     def run(self, input_sequence):
         self.simulation = FiniteStateMachineSimulation()
+        raise NotImplementedError
 
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
+    
+    def __init__(self):
+        FiniteStateMachine.__init__(self)
 
 ## transducers
 class MooreMachine(FiniteStateMachine):
     """Moore machine."""
+    #raise NotImplementedError
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine."""
+    #raise NotImplementedError
 
 def moore2mealy(moore_machine, mealy_machine):
     """Convert Moore machine to equivalent Mealy machine"""
+    raise NotImplementedError
 
 ####
 # Program Graph (memo)
@@ -1691,15 +1902,16 @@ class MarkovDecisionProcess():
     http://nicky.vanforeest.com/probability/mdp/mdp.html
     https://github.com/stober/gridworld
     """
-    pass
+    #raise NotImplementedError
 
-class MDP():
+class MDP(MarkovDecisionProcess):
     """Alias."""
 
 class PartiallyObservableMarkovDecisionProcess():
     """
     http://danielmescheder.wordpress.com/2011/12/05/training-a-pomdp-with-python/
     """
+    #raise NotImplementedError
 
 class POMDP(PartiallyObservableMarkovDecisionProcess):
     """Alias."""
