@@ -118,7 +118,7 @@ def fts_minimal_example():
     fts.transitions.add('s1', 's0')
     
     if save_fig:
-        fts.write_pdf_file('small_fts.pdf')
+        fts.save_png('small_fts.png')
     
     return fts
 
@@ -332,8 +332,8 @@ def fts_maximal_example():
     pdf_fname = path +'.pdf'
     
     if save_fig:
-        fts.write_pdf_file(pdf_fname)
-        fts.write_dot_file(dot_fname)
+        fts.save_pdf(pdf_fname)
+        fts.save_dot(dot_fname)
     # svg support easy to add, so that latex native support is achieved
 
 def ofts_maximal_example():
@@ -371,8 +371,8 @@ def ofts_maximal_example():
     pdf_fname = path +'.pdf'
     
     if save_fig:
-        ofts.write_pdf_file(pdf_fname)
-        ofts.write_dot_file(dot_fname)
+        ofts.save_pdf(pdf_fname)
+        ofts.save_dot(dot_fname)
 
 def powerset(iterable):
     """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
@@ -427,7 +427,7 @@ def ba_minimal_example():
     ba.transitions.add_labeled('q2', 'q2', true)
     
     if save_fig:
-        ba.write_pdf_file('small_ba.pdf')
+        ba.save_png('small_ba.png')
     
     return ba
         
@@ -481,14 +481,14 @@ def ba_maximal_example():
     pdf_fname = path +'.pdf'
     
     if save_fig:
-        ba.write_pdf_file(pdf_fname)
-        ba.write_dot_file(dot_fname)
+        ba.save_pdf(pdf_fname)
+        ba.save_dot(dot_fname)
     
     return ba
     
 if __name__ == '__main__':
     fts = fts_minimal_example()
     ba = ba_minimal_example()
-    prod_fts, final_states_preimage = ts.ts_nba_synchronous_product(fts, ba)
+    prod_fts, final_states_preimage = fts *ba
     
-    prod_fts.write_pdf_file('prod.pdf')
+    prod_fts.save_png('prod.png')

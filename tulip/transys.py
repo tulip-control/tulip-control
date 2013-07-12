@@ -90,12 +90,16 @@ except ImportError:
 
 def dprint(s):
     """Debug mode print."""
-    #print(s)
+    print(s)
 
 class States(object):
     """Methods to manage states, initial states, current state.
         
     add, remove, count, test membership
+    
+    see also
+    --------
+    LabeledStateDiGraph
     """
     def __init__(self, graph, initial_states=[], current_state=None):
         self.graph = graph
@@ -177,19 +181,24 @@ class States(object):
     def add(self, state):
         """Create single state.
         
-        C{state} can be any hashable object except None
-        See networkx.MultiDiGraph.add_node.
+        C{state} can be any hashable object except None (see nx add_node below)
         
         For annotating a state with a subset of atomic propositions,
         or other (custom) annotation, use the functions provided by
         AtomicPropositions, or directly the add_node function of networkx.
+        
+        see also
+        --------
+        networkx.MultiDiGraph.add_node
         """
         self.graph.add_node(state)
     
     def add_from(self, states):
         """Add multiple states from iterable container states.
         
-        See networkx.MultiDiGraph.add_nodes_from.
+        see also
+        --------
+        networkx.MultiDiGraph.add_nodes_from.
         """
         self.graph.add_nodes_from(states)
     
@@ -344,7 +353,10 @@ class States(object):
         """Direct predecessors of single state.
         
         pre_single() exists to contrast with pre().
-        See also post() vs post_single().
+        
+        see also
+        --------
+        post() vs post_single().
         """
         return self.pre({state} )
     
@@ -360,12 +372,42 @@ class States(object):
         return predecessors
     
     def add_final(self, state):
-        """Convenience for automaton.add_final_state()."""
+        """Convenience for FSA.add_final_state().
         
+        see also
+        --------
+        self.add_final_from  
+        """
         if not self.__exist_final_states__():
             return
         
         self.graph.add_final_state(state)
+    
+    def add_final_from(self, states):
+        """Convenience for FSA.add_final_states_from().
+        
+        see also
+        --------
+        self.add_final
+        """
+        if not self.__exist_final_states__():
+            return
+        
+        self.graph.add_final_states_from(states)
+    
+    def rename(self, new_states_dict):
+        """Map states in place, based on dict.
+        
+        input
+        -----
+        - C{new_states_dict}: {old_state : new_state}
+        (partial allowed, i.e., projection)
+        
+        See also
+        --------
+        networkx.relabel_nodes
+        """
+        return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
 
 class Transitions(object):
     """Building block for managing transitions.
@@ -465,6 +507,15 @@ class Transitions(object):
                 self.remove(from_state, to_state)
 
 class LabeledTransitions(Transitions):
+    """Superclass for open/closed FTS, FSA, FSM.
+    
+    In more detail, the following classes inherit from this one:
+        FiniteTransitionSystem (closed)
+        OpenFiniteTransitionSystem
+        FiniteStateAutomaton
+        FiniteStateMachine
+    """
+    
     def __init__(self, graph):
         Transitions.__init__(self, graph)
     
@@ -522,18 +573,32 @@ class LabeledTransitions(Transitions):
             if not check_label:
                 cur_label_def.add(label)
             elif not label in label_set:
-                raise Exception('Given label not in set of transition labels.')
+                msg = 'Given label:\n\t' +str(label) +'\n'
+                msg += 'not in set of transition labels:\n\t' +str(label_set)
+                raise Exception(msg)
                 
         return edge_label
         
     def __dot_str__(self, to_pydot_graph):
         """Return label for dot export.
         """        
-        def form_edge_label(edge_data, label_def):
+        def form_edge_label(edge_data, label_def, label_format):
             edge_dot_label = '"'
+            sep_label_sets = label_format['separator']
             for (label_type, label_value) in edge_data.iteritems():
                 if label_type in label_def:
-                    edge_dot_label += label_type +':' +str(label_value) +'\\n'
+                    # label formatting
+                    type_name = label_format[label_type]
+                    sep_type_value = label_format['type?label']
+                    
+                    # avoid turning strings to lists
+                    if isinstance(label_value, str):
+                        label_str = label_value
+                    else:
+                        label_str = str(list(label_value) )
+                    
+                    edge_dot_label += type_name +sep_type_value
+                    edge_dot_label += label_str +sep_label_sets
             edge_dot_label += '"'
             
             return edge_dot_label
@@ -542,9 +607,10 @@ class LabeledTransitions(Transitions):
         
         # get labeling def
         label_def = self.graph.__transition_label_def__
+        label_format = self.graph.__transition_dot_label_format__
         
         for (u, v, key, edge_data) in self.graph.edges_iter(data=True, keys=True):
-            edge_dot_label = form_edge_label(edge_data, label_def)
+            edge_dot_label = form_edge_label(edge_data, label_def, label_format)
             to_pydot_graph.add_edge(u, v, key=key, label=edge_dot_label)
             
     def remove_labeled(self, from_state, to_state, label):
@@ -627,12 +693,6 @@ class LabeledTransitions(Transitions):
         If edge between same nodes, either unlabeled or with same label
         already exists, then raise error.
         
-        input:
-            -C{labels} is single label, if single action set /alphabet defined,
-            or if multiple action sets /alphabets, then either:
-                list of labels in proper oder
-                or dict of action_set_name : label pairs
-        
         Checks states are already in set of states.
         Checks action is already in set of actions.
         If not, raises exception.
@@ -640,6 +700,13 @@ class LabeledTransitions(Transitions):
         To override, use check = False.
         Then given states are added to set of states,
         and given action is added to set of actions.
+        
+        input
+        -----
+            -C{labels} is single label, if single action set /alphabet defined,
+            or if multiple action sets /alphabets, then either:
+                list of labels in proper oder
+                or dict of action_set_name : label pairs
         """
         self.__exist_labels__()
         self.__check_states__(from_state, to_state, check=check)
@@ -736,6 +803,17 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.transitions = LabeledTransitions(self)
 
         self.dot_node_shape = {'normal':'circle'}
+        self.default_export_path = './'
+        self.default_export_fname = 'out'
+        
+    def __export_fname__(self, path):
+        if path == 'default':
+            if self.name == '':
+                return self.default_export_path +self.default_export_fname
+            else:
+                return self.default_export_path +self.name
+        else:
+            return path
     
     def __pydot_missing__(self):
         if pydot is None:
@@ -833,19 +911,30 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """Alias to dump_dot()."""
         return self.dump_dot()
     
-    def write_dot_file(self, path):
+    def save_dot(self, path='default'):
         """Save .dot file.
         
         Requires pydot.        
         """
+        path = self.__export_fname__(path) +'.dot'
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_dot(path)
     
-    def write_pdf_file(self, path):
+    def save_png(self, path='default'):
+        """Save .png file.
+        
+        Requires pydot.        
+        """
+        path = self.__export_fname__(path) +'.png'
+        pydot_graph = self.__to_pydot__()
+        pydot_graph.write_png(path)
+    
+    def save_pdf(self, path='default'):
         """Save .pdf file.
         
         Requires pydot.        
         """
+        path = self.__export_fname__(path) +'.pdf'
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_pdf(path)
     
@@ -854,7 +943,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     
     def write_dot_color_file(self):
         raise NotImplementedError
-    
+
 class FiniteSequence(object):
     """Used to construct finite words."""
     def __init__(self, sequence):
@@ -1032,8 +1121,10 @@ class AtomicPropositions(object):
         return 'Atomic Propositions:\n\t' +pformat(self() )
     
     def __check_state__(self, state):
-        if state not in self.graph:
-            raise Exception('State not in set of states.')
+        if state not in self.graph.states():
+            msg = 'State:\n\t' +str(state)
+            msg += ' is not in set of states:\n\t:' +str(self.graph.states() )
+            raise Exception(msg)
     
     def add(self, atomic_proposition):
         self.atomic_propositions.add(atomic_proposition)
@@ -1066,7 +1157,8 @@ class AtomicPropositions(object):
     def add_labeled_state(self, state, ap_label):
         """Add single state with its label.
         
-        input:
+        input
+        -----
             state = defines element to be added to set of states S
                   = hashable object (int, str, etc)
             ap_label \in 2^AP
@@ -1180,7 +1272,24 @@ class Actions(object):
             raise Exception(msg)
         
         self.actions.remove(action)
+        
+    def of(self, from_state, to_state, edge_key):
+        attr_dict = self.graph.get_edge_data(from_state, to_state, key=edge_key)
+        
+        if attr_dict is None:
+            msg = 'No transition from state: ' +str(from_state)
+            msg += ', to state: ' +str(to_state) +', with key: '
+            msg += str(edge_key) +' exists.'
+            warnings.warn(msg)
+        
+        label_order = self.graph.__transition_label_order__
+        transition_label_values = set()
+        for label_type in label_order:
+            cur_label_value = attr_dict[label_type]
+            transition_label_values.add(cur_label_value)
     
+        return transition_label_values
+        
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System for modeling closed systems.
     
@@ -1196,6 +1305,16 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
            (transitions labeled by Act)
         L = state labeing function
           : S-> 2^AP
+    
+    dot export
+    ----------
+    Format transition labels using C{__transition_dot_label_format__} which is a
+    dict with values:
+        - 'actions' (=name of transitions attribute): type before separator
+        - 'type?label': separator between label type and value
+        - 'separator': between labels for different sets of actions
+            (e.g. sys, env). Not used for closed FTS, because it has single set
+            of actions.
     """
     
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
@@ -1217,8 +1336,12 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         self.__transition_label_def__ = {'actions': self.actions}
         self.__transition_label_order__ = ['actions']
+        self.__transition_dot_label_format__ = {'actions':'',
+                                                'type?label':'',
+                                                'separator':'\\n'}
 
         self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'fts'
 
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
@@ -1226,6 +1349,38 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s += str(self.atomic_propositions) +'\n'
         
         return s
+    
+    def __mul__(self, ts_or_ba):
+        """Synchronous product of TS with TS or BA.
+        
+        see also
+        --------
+        self.sync_prod
+        """
+        return self.sync_prod(ts_or_ba)
+    
+    def __or__(self, ts):
+        """Synchronous product between transition systems."""
+        return self.async_prod(ts)
+    
+    def sync_prod(self, ts_or_ba):
+        """Synchronous product TS x BA or TS1 x TS2.
+        
+        see also
+        --------
+        self.__mul__, self.async_prod, BuchiAutomaton.sync_prod
+        """
+        if isinstance(ts_or_ba, FiniteTransitionSystem):
+            return self.__ts_ts_sync_prod__(ts_or_ba)
+        elif isinstance(ts_or_ba, BuchiAutomaton):
+            ba = ts_or_ba
+            return __ts_ba_sync_prod__(self, ba)
+        else:
+            raise Exception('Argument must be TS or BA.')
+    
+    def async_prod(self, ts):
+        """Asynchronous product TS1 x TS2 between Finite Transition Systems."""
+        raise NotImplementedError
     
     def is_blocking(self):
         """Does each state have at least one outgoing transition ?
@@ -1302,8 +1457,12 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self.__transition_label_def__ = {'sys_actions': self.sys_actions,
                                          'env_actions': self.env_actions}
         self.__transition_label_order__ = ['sys_actions', 'env_actions']
-        
+        self.__transition_dot_label_format__ = {'sys_actions':'sys',
+                                                'env_actions':'env',
+                                                'type?label':':',
+                                                'separator':'\\n'}
         self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'ofts'
         
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
@@ -1312,6 +1471,16 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         s += str(self.atomic_propositions) +'\n'
         
         return s
+
+class oFTS(OpenFiniteTransitionSystem):
+    """Alias to transys.OpenFiniteTransitionSystem."""
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 atomic_propositions=[], sys_actions=[], env_actions=[] ):
+        OpenFiniteTransitionSystem.__init__(
+            self, name=name, states=states, initial_states=initial_states,
+            current_state=None, atomic_propositions=atomic_propositions,
+            sys_actions=sys_actions, env_actions=env_actions
+        )
 
 ###########
 # Automata
@@ -1421,51 +1590,62 @@ class FSASim(FiniteStateAutomatonSimulation):
 class FiniteStateAutomaton(LabeledStateDiGraph):
     """Generic automaton.
     
-        1) states
-        2) initial states
-        3) final states
+    1) states
+    2) initial states
+    3) final states
+    
+    4) input alphabet = set of input letters
+    5) transition labels
+    
+    4) acceptor mode (i.e., you can ask is_accepted ?, but nothing more)
+    5) for generator mode, use a synthesis algorithm
+       To avoid misconceptions, NO SIMULATION MODE provided.
+    
+    Synthesis interpretation
+    ------------------------
+    A synthesis algorithm is applying model checking (is accepted ?)
+    to each possible input word,
+    normally represented by a deterministic finite transition system,
+    but during acceptance checking implicitly by graph searching
+    (assuming the model is everything an only the automaton is the constraint)
+    
+    Dually, a model checking algorithm is iteratively attempting synthesis
+    for each possible input word.
+    However, since synthesis is fundamentally operating by trying out words
+    and seeing whether they get accepted, it follows that
+    an automaton is operable ONLY in acceptor mode.
+    
+    Generator construction
+    ----------------------
+    For a "generator", we would need to convert the automaton to a
+    (nontrivial) transition system producing maximal initial paths,
+    as discussed below.
+    
+    The above algorithms return a single accepted input word, if found.
+    That word is represented as a (deterministic) Finite Transition System.
+    If we want to represent more than one accepted word (e.g. the whole
+    language), we would need to find all possible such FTS and
+    construct their "union".
+    
+    Open Systems
+    ------------
+    Finally, note that a Finite State Machine or transducer is an OPEN SYSTEM.
+    As such, it does not represent an input word of an automaton.
+    It can be used for game synthesis, where inputs and outputs make sense.
+    
+    Alternatively, only after closing a system can it be used
+    (in the sense of having a program graph which can be unfolded).
+    
+    input
+    -----
+    
+    returns
+    -------
+    
+    see also
+    --------    
+    __dot_str__ of LabeledStateDiGraph
         
-        4) input alphabet = set of input letters
-        5) transition labels
-        
-        4) acceptor mode (i.e., you can ask is_accepted ?, but nothing more)
-        5) for generator mode, use a synthesis algorithm
-           To avoid misconceptions, NO SIMULATION MODE provided.
-        
-        Synthesis interpretation
-        ------------------------
-        A synthesis algorithm is applying model checking (is accepted ?)
-        to each possible input word,
-        normally represented by a deterministic finite transition system,
-        but during acceptance checking implicitly by graph searching
-        (assuming the model is everything an only the automaton is the constraint)
-        
-        Dually, a model checking algorithm is iteratively attempting synthesis
-        for each possible input word.
-        However, since synthesis is fundamentally operating by trying out words
-        and seeing whether they get accepted, it follows that
-        an automaton is operable ONLY in acceptor mode.
-        
-        Generator construction
-        ----------------------
-        For a "generator", we would need to convert the automaton to a
-        (nontrivial) transition system producing maximal initial paths,
-        as discussed below.
-        
-        The above algorithms return a single accepted input word, if found.
-        That word is represented as a (deterministic) Finite Transition System.
-        If we want to represent more than one accepted word (e.g. the whole
-        language), we would need to find all possible such FTS and
-        construct their "union".
-        
-        Open Systems
-        ------------
-        Finally, note that a Finite State Machine or transducer is an OPEN SYSTEM.
-        As such, it does not represent an input word of an automaton.
-        It can be used for game synthesis, where inputs and outputs make sense.
-        
-        Alternatively, only after closing a system can it be used
-        (in the sense of having a program graph which can be unfolded).
     """
     
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
@@ -1486,7 +1666,13 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.__transition_label_def__ = {'in_alphabet': self.alphabet}
         self.__transition_label_order__ = ['in_alphabet']
         
+        # used before label value
+        self.__transition_dot_label_format__ = {'in_alphabet':'',
+                                                'type?label':'',
+                                                'separator':'\\n'}
+        
         self.dot_node_shape = {'normal':'circle', 'final':'doublecircle'}
+        self.default_export_fname = 'fsa'
         
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
@@ -1563,7 +1749,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         
         # should be implemented properly with nested depth-first search,
         # becaus of possible branching due to non-determinism
-        run = [initial_state]
+        
         for letter in input_word:
             dprint(letter)
             
@@ -1574,7 +1760,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     # operations on two automata
     def add_subautomaton(self):
         raise NotImplementedError
-   
+
 class StarAutomaton(FiniteStateAutomaton):
     """Finite-word finite-state automaton."""
 
@@ -1582,9 +1768,7 @@ class DeterninisticFiniteAutomaton(StarAutomaton):
     """Deterministic finite-word finite-state Automaton."""
 
     # check each initial state added
-    # check each transitin added
-    
-    
+    # check each transition added
     
 class DFA(DeterninisticFiniteAutomaton):
     """Alias for deterministic finite-word finite-state automaton."""
@@ -1607,27 +1791,131 @@ def dfa2nfa():
     raise NotImplementedError
 
 class OmegaAutomaton(FiniteStateAutomaton):
-    def __init__(self, states=[], initial_states=[], final_states=[],
+    def __init__(self, name='', states=[], initial_states=[], final_states=[],
                  input_alphabet=[]):
         FiniteStateAutomaton.__init__(self,
-            states=states, initial_states=initial_states,
+            name=name, states=states, initial_states=initial_states,
             final_states=final_states, input_alphabet=input_alphabet
         )
 
 class BuchiAutomaton(OmegaAutomaton):
-    def __init__(self, states=[], initial_states=[], final_states=[],
+    def __init__(self, name='', states=[], initial_states=[], final_states=[],
                  input_alphabet=[]):
-        OmegaAutomaton.__init__(self,
-            states=states, initial_states=initial_states,
+        OmegaAutomaton.__init__(
+            self, name=name, states=states, initial_states=initial_states,
             final_states=final_states, input_alphabet=input_alphabet
         )
+    
+    def __add__(self, other):
+        """Union of two automata, with equal states identified."""
+        raise NotImplementedError
+    
+    def __mul__(self, ts_or_ba):
+        return self.sync_prod(ts_or_ba)
+    
+    def __or__(self, ba):
+        return self.async_prod(ba)
+        
+    def __ba_ba_sync_prod__(self, ba2):
+        ba1 = self
+        
+        raise NotImplementedError
+        #TODO BA x BA sync prod algorithm
+
+    def sync_prod(self, ts_or_ba):
+        """Synchronous product between (BA, TS), or (BA1, BA2).
+        
+        The result is always a Buchi Automaton.
+        
+        If C{ts_or_ba} is a Finite Transition System, then the result is the
+        Buchi Automaton equal to the synchronous product of this Buchi Automaton
+        with the given Transition System. Note that the accepting states of the
+        product system are the preimage under projection of the set of accepting
+        states of this Buchi Automaton.
+        
+        If C{ts_or_ba} is a Buchi Automaton, then the result is the Buchi Automaton
+        equal to the synchronous product between this Buchi Automaton and the
+        given Buchi Automaton. The set of accepting states of the resulting
+        Buchi Automaton is equal to the intersection of the preimages under
+        projection of the sets of accepting states of the individual Buchi Automata.
+        
+        This definition of accepting set extends Def.4.8, p.156 [Baier] to NBA.
+        
+        see also
+        --------        
+        ts_ba_sync_prod.
+        """
+        
+        if isinstance(ts_or_ba, BuchiAutomaton):
+            return self.__ba_ba_sync_prod__(ts_or_ba)
+        elif isinstance(ts_or_ba, FiniteTransitionSystem):
+            ts = ts_or_ba
+            return __ba_ts_sync_prod__(self, ts)
+        else:
+            raise Exception('argument should be an FTS or a BA.')
+    
+    def async_prod(self, other):
+        """Should it be defined in a superclass ?"""
+        raise NotImplementedError
+    
+    def acceptance_condition(self, prefix, suffix):
+        """Check if given infinite word over alphabet \Sigma is accepted."""
         
 
-    def acceptance_condition(self, prefix, suffix):
-        pass
+class BA(BuchiAutomaton):
+    def __init__(self, name='', states=[], initial_states=[], final_states=[],
+                 input_alphabet=[]):
+        BuchiAutomaton.__init__(
+            self, name=name, states=states, initial_states=initial_states,
+            final_states=final_states, input_alphabet=input_alphabet
+        )
 
-def ts_nba_synchronous_product(transition_system, buchi_automaton):
+def __ba_ts_sync_prod__(buchi_automaton, transition_system):
+    """Construct Buchi Automaton equal to synchronous product TS x NBA.
+    
+    returns
+    -------
+    C{prod_ba}, the product Buchi Automaton.
+    
+    see also
+    --------
+    __ts_ba_sync_prod__, BuchiAutomaton.sync_prod
+    """
+    (prod_ts, persistent) = __ts_ba_sync_prod__(transition_system, buchi_automaton)
+    print prod_ts
+    prod_ba = BuchiAutomaton()
+    
+    # copy S, S0, from prod_TS-> prod_BA
+    prod_ba.states.add_from(prod_ts.states() )
+    prod_ba.states.add_initial_from(prod_ts.states.initial)
+    
+    # final states = persistent set
+    prod_ba.states.add_final_from(persistent)
+    
+    # copy edges, translating transitions, i.e., chaning transition labels
+    prod_ba.alphabet.add_from(buchi_automaton.alphabet() )
+    for (from_state, to_state) in prod_ts.edges_iter():
+        # prject prod_TS state to TS state        
+        ts_to_state = to_state[0]
+        msg = 'prod_TS: to_state =\n\t' +str(to_state) +'\n'
+        msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
+        dprint(msg)
+        
+        transition_label = transition_system.atomic_propositions.of(ts_to_state)
+        prod_ba.transitions.add_labeled(from_state, to_state, transition_label)   
+    
+    return prod_ba
+
+def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     """Construct transition system equal to synchronous product TS x NBA.
+    
+    returns
+    -------
+    C{(prod_ts, persist) }, where C{prod_ts} is a transition system representing
+    the synchronous product between the transition system TS and the
+    non-deterministic Buchi Automaton NBA. C{persist} is the subset of states of
+    C{prod_ts} which is the preimage under projection of the set of accepting
+    states of the Buchi Automaton BA.
     
     Def. 4.62, p.200 [Baier]
     
@@ -1635,6 +1923,10 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
     -------
     note the erratum: P_{pers}(A) is ^_{q\in F} !q, verified from:
         http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf
+    
+    see also
+    --------
+    __ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
     
     fts = transition_system
@@ -1642,6 +1934,7 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
     
     prodts = FiniteTransitionSystem()
     prodts.atomic_propositions.add_from(ba.states() )
+    prodts.actions.add_from(fts.actions() )
 
     # construct initial states of product automaton
     s0s = fts.states.initial.copy()
@@ -1731,7 +2024,8 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
                     if attr_dict == {}:
                         prodts.transitions.add(sq, new_sq)
                     else:
-                        prodts.transitions.add_labeled(sq, new_sq, **attr_dict)
+                        #TODO open FTS
+                        prodts.transitions.add_labeled(sq, new_sq, attr_dict.values()[0] )
         
         # discard visited & push them to queue
         new_sqs = set()
@@ -1740,8 +2034,8 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
                 new_sqs.add(next_sq)
                 queue.add(next_sq)
     
+    print prodts
     return (prodts, final_states_preimage)
-    #TODO option to return (or convert ?) prodts to BA
 
 class RabinAutomaton(OmegaAutomaton):
     def acceptance_condition(self, prefix, suffix):
@@ -1842,6 +2136,8 @@ class FiniteStateMachine(LabeledStateDiGraph):
         self.output_alphabets = {}
         
         self.variables = {'name':'type'}
+        
+        self.default_export_fname = 'fsm'
     
     def is_deterministic(self):
         """Does there exist a transition for each state and each input letter ?"""
