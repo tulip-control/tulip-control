@@ -80,17 +80,34 @@ import networkx as nx
 import warnings
 import copy
 from pprint import pformat
+from itertools import chain, combinations
+from collections import Iterable, Hashable
+
+def powerset(iterable):
+    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    
+    From:
+        http://docs.python.org/2/library/itertools.html,
+    also in:
+        https://pypi.python.org/pypi/more-itertools
+    """
+    
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+def contains_multiple(iterable):
+    return list(iterable) != list(set(iterable) )
 
 try:
     import pydot
 except ImportError:
-    print "pydot package not found.\nHence dot export not unavailable."
+    print('pydot package not found.\nHence dot export not unavailable.')
     # python-graph package not found. Disable dependent methods.
     pydot = None
 
 def dprint(s):
     """Debug mode print."""
-    print(s)
+    #print(s)
 
 class States(object):
     """Methods to manage states, initial states, current state.
@@ -111,16 +128,49 @@ class States(object):
         
         Default: state annotation not returned.
         To obtain that use argumet data=True.
+        
+        @returns: set of states if C{data=False}
+                list of tuples of states with annotation dict if C{data=False}
         """
-        return self.graph.nodes(data=data)
+        if data:
+            return self.graph.nodes(data=True)
+        else:
+            return set(self.graph.nodes(data=False))
     
     def __str__(self):
-        return 'States:\n\t' +pformat(self(data=False) )
+        return 'States:\n\t' +pformat(self(data=False) )    
+    
+    def __eq__(self, other):
+        return self.graph.nodes(data=False) == other
+        
+    def __ne__(self, other):
+        return self.graph.nodes(data=False) != other
+    
+    def __lt__(self, other):
+        return self.graph.nodes(data=False) < other
+    
+    def __gt__(self, other):
+        return self.graph.nodes(data=False) > other
+    
+    def __le__(self, other):
+        return self.graph.nodes(data=False) <= other
+    
+    def __ge__(self, other):
+        return self.graph.nodes(data=False) >= other
+    
+    def __contains__(self, state):
+        """Check if single state \\in set_of_states."""
+        return self.graph.has_node(state)    
     
     def __exist_labels__(self):
         """State labeling defined ?"""
-        if not hasattr(self.graph, '__state_label_def__'):
-            raise Exception('No state labeling defined for this class.')        
+        if hasattr(self.graph, '__state_label_def__'):
+            return True
+        else:
+            msg = 'No state labeling defined for class: '
+            msg += str(type(self.graph) )
+            dprint(msg)
+            return False
     
     def __exist_final_states__(self):
         """Check if system has final states."""
@@ -140,14 +190,29 @@ class States(object):
                 g.add_node(phantom_node, label='""', shape='none')
                 g.add_edge(phantom_node, state)
         
-        def form_node_label(state, state_data, label_def):
+        def form_node_label(state, state_data, label_def, label_format):
+            sep_label_sets = label_format['separator']
             node_dot_label = '"' +str(state) +'\\n'
             for (label_type, label_value) in state_data.iteritems():
                 if label_type in label_def:
-                    node_dot_label += label_type +':' +str(label_value) +'\\n'
+                    # label formatting
+                    type_name = label_format[label_type]
+                    sep_type_value = label_format['type?label']
+                    
+                    # avoid turning strings to lists,
+                    # or non-iterables to lists
+                    if isinstance(label_value, str):
+                        label_str = label_value
+                    elif isinstance(label_value, Iterable): # and not str
+                        label_str = str(list(label_value) )
+                    else:
+                        label_str = str(label_value)
+                    
+                    node_dot_label += type_name +sep_type_value
+                    node_dot_label += label_str +sep_label_sets
             node_dot_label += '"'
             
-            return node_dot_label        
+            return node_dot_label  
         
         def decide_node_shape(graph, state):
             node_shape = graph.dot_node_shape['normal']
@@ -162,16 +227,20 @@ class States(object):
                 
             return node_shape
         
-        self.__exist_labels__()        
-        
         # get labeling def
-        label_def = self.graph.__state_label_def__
+        
+        if self.__exist_labels__():
+            label_def = self.graph.__state_label_def__
+            label_format = self.graph.__state_dot_label_format__
         
         for (state, state_data) in self.graph.nodes_iter(data=True):
             if_initial_add_incoming_edge(to_pydot_graph, state, self.initial)
-            
-            node_dot_label = form_node_label(state, state_data, label_def)
             node_shape = decide_node_shape(self.graph, state)
+            
+            if self.__exist_labels__():
+                node_dot_label = form_node_label(state, state_data, label_def, label_format)
+            else:
+                node_dot_label = str(state)
             
             # TODO replace with int to reduce size
             to_pydot_graph.add_node(state, label=node_dot_label, shape=node_shape,
@@ -205,17 +274,6 @@ class States(object):
     def number(self):
         """Total number of states."""
         return self.graph.number_of_nodes()
-        
-    def include(self, states):
-        """Check if given_set_of_states \\in set_of_states."""
-        for state in states:
-            if not self.graph.has_node(state):
-                return False
-        return True
-    
-    def is_member(self, state):
-        """Check if single state \\in set_of_states."""
-        return self.graph.has_node(state)
     
     def remove(self, state):
         """Remove single state."""
@@ -232,7 +290,7 @@ class States(object):
         If state \\notin states, exception raised.
         """
         
-        if not self.is_member(state):
+        if state not in self:
             raise Exception('State given is not in set of states.\n'+
                             'Cannot set current state to given state.')
         
@@ -336,7 +394,8 @@ class States(object):
             Post(s)
         If multiple stats provided, then union Post(s) for s in states provided.
         """
-        if not self.include(states):
+        
+        if not states <= self():
             raise Exception('Not all states given are in the set of states.')
         
         successors = set()
@@ -363,7 +422,7 @@ class States(object):
     def pre(self, states):
         """Predecessor set (1-hop) for given state.
         """
-        if not self.include(states):
+        if not states <= self():
             raise Exception('Not all states given are in the set of states.')
         
         predecessors = set()
@@ -442,10 +501,10 @@ class Transitions(object):
         if not check_states:
             graph.states.add_from({from_state, to_state} )
         
-        if not graph.states.is_member(from_state):
+        if from_state not in graph.states:
             raise Exception('from_state \\notin states.')
         
-        if not graph.states.is_member(to_state):
+        if to_state not in graph.states:
             raise Exception('to_state \\notin states.')
         
         # if another un/labeled edge already exists between these nodes,
@@ -467,10 +526,10 @@ class Transitions(object):
             self.graph.states.add_from(from_states)
             self.graph.states.add_from(to_states)
         
-        if not self.graph.states.include(from_states):
+        if not from_states <= self.graph.states():
             raise Exception('from_states \\not\\subseteq states.')
         
-        if not self.graph.states.include(to_states):
+        if not to_states <= self.graph.states():
             raise Exception('to_states \\not\\subseteq states.')
         
         for from_state in from_states:
@@ -533,11 +592,11 @@ class LabeledTransitions(Transitions):
         if not check:
             self.graph.states.add_from({from_state, to_state} )
         
-        if not self.graph.states.is_member(from_state):
+        if from_state not in self.graph.states:
             msg = str(from_state) +' = from_state \\notin state'
             raise Exception(msg)
         
-        if not self.graph.states.is_member(to_state):
+        if to_state not in self.graph.states:
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
     
@@ -567,14 +626,12 @@ class LabeledTransitions(Transitions):
         
         # check if dict is consistent with label defs
         for (typename, label) in edge_label.iteritems():
-            cur_label_def = label_def[typename]
-            label_set = cur_label_def()
-            
+            possible_labels = label_def[typename]
             if not check_label:
-                cur_label_def.add(label)
-            elif not label in label_set:
+                possible_labels.add(label)
+            elif label not in possible_labels:
                 msg = 'Given label:\n\t' +str(label) +'\n'
-                msg += 'not in set of transition labels:\n\t' +str(label_set)
+                msg += 'not in set of transition labels:\n\t' +str(possible_labels)
                 raise Exception(msg)
                 
         return edge_label
@@ -1115,10 +1172,13 @@ class AtomicPropositions(object):
         self.atomic_propositions = set(atomic_propositions)
     
     def __call__(self):
-        return self.atomic_propositions
+        return self.atomic_propositions    
     
     def __str__(self):
         return 'Atomic Propositions:\n\t' +pformat(self() )
+    
+    def __contains__(self, atomic_proposition):
+        return atomic_proposition in self.atomic_propositions
     
     def __check_state__(self, state):
         if state not in self.graph.states():
@@ -1127,10 +1187,28 @@ class AtomicPropositions(object):
             raise Exception(msg)
     
     def add(self, atomic_proposition):
+        """Add single atomic proposition.
+        
+        @type atomic_proposition: hashable
+        """
+        if not isinstance(atomic_proposition, Hashable):
+            raise Exception('Atomic propositions stored in set, so must be hashable.')
+        
+        if atomic_proposition in self.atomic_propositions:
+            warnings.warn('Atomic Proposition already in set of APs.')
+        
         self.atomic_propositions.add(atomic_proposition)
     
     def add_from(self, atomic_propositions):
-        self.atomic_propositions |= set(atomic_propositions)
+        """Add multiple atomic propositions.
+        
+        @type atomic_propositions: iterable
+        """
+        if not isinstance(atomic_propositions, Iterable):
+            raise Exception('Atomic Propositions must be provided in iterable.')
+        
+        for atomic_proposition in atomic_propositions:
+            self.add(atomic_proposition) # use checks
         
     def remove(self, atomic_proposition):
         node_ap = nx.get_node_attributes(self.graph, self.name)
@@ -1149,10 +1227,8 @@ class AtomicPropositions(object):
             self.atomic_propositions.difference({atomic_proposition} )
         
     def number(self):
+        """Count atomic propositions."""
         return len(self.atomic_propositions)
-    
-    def include(self, atomic_proposition):
-        return len(self.atomic_propositions.intersect(set(atomic_proposition) ) )
     
     def add_labeled_state(self, state, ap_label):
         """Add single state with its label.
@@ -1246,17 +1322,21 @@ class Actions(object):
         
         return msg
     
+    def __contains__(self, action):
+        return action in self.actions
+    
     def add(self, action=[]):
         self.actions.add(action)
     
     def add_from(self, actions=[]):
+        """Add multiple actions.
+        
+        @type actions: iterable
+        """
         self.actions |= set(actions)
     
     def number(self):
         return len(self.actions)
-    
-    def is_member(self, action):
-        return self.actions.issuperset({action} )
     
     def remove(self, action):
         edges_action = nx.get_edge_attributes(self.graph, self.name)
@@ -1333,6 +1413,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.actions = Actions(self, 'actions', actions)
         
         self.__state_label_def__ = {'ap': self.atomic_propositions}
+        self.__state_dot_label_format__ = {'ap':'',
+                                           'type?label':'',
+                                           'separator':'\\n'}
         
         self.__transition_label_def__ = {'actions': self.actions}
         self.__transition_label_order__ = ['actions']
@@ -1452,7 +1535,10 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self.env_actions = Actions(self, 'env_actions', env_actions)
         self.atomic_propositions = AtomicPropositions(self, 'ap', atomic_propositions)
         
-        self.__state_label_def__ = {'ap': self.atomic_propositions}        
+        self.__state_label_def__ = {'ap': self.atomic_propositions}
+        self.__state_dot_label_format__ = {'ap':'',
+                                           'type?label':'',
+                                           'separator':'\\n'}
         
         self.__transition_label_def__ = {'sys_actions': self.sys_actions,
                                          'env_actions': self.env_actions}
@@ -1488,31 +1574,107 @@ class oFTS(OpenFiniteTransitionSystem):
 class Alphabet(object):
     """Stores input letters annotating transitions of an automaton."""
     
-    def __init__(self, graph, name, letters=[]):
+    def __init__(self, graph, name, letters=[], atomic_proposition_based=False):
         self.name = name
-        self.alphabet = set(letters)
         self.graph = graph
+        self.atomic_proposition_based = atomic_proposition_based
+        
+        if self.atomic_proposition_based:
+            self.atomic_propositions = AtomicPropositions(graph, 'ap for alphabet')
+            self.alphabet = None
+        else:
+            self.alphabet = set(letters)
+            self.atomic_propositions = None
+        
+        self.add_from(letters)
     
     def __str__(self):
-        return 'Alphabet:\n' +pformat(self.alphabet)
+        return 'Alphabet:\n' +str(self() )
     
     def __call__(self):
-        return self.alphabet
+        if self.atomic_proposition_based:
+            return set(powerset(self.atomic_propositions() ) )
+        else:
+            return self.alphabet
     
-    def add(self, new_input_letter):
-        self.alphabet.add(new_input_letter)
+    def __contains__(self, letter):
+        if self.atomic_proposition_based:
+            return letter <= self.atomic_propositions()
+        else:
+            return letter in self.alphabet
     
-    def add_from(self, new_input_letters):
-        self.alphabet |= set(new_input_letters)
+    def add(self, new_letter):
+        """Add single letter to alphabet.
+        
+        If C{atomic_proposition_based=False},
+        then the letter is stored in C{alphabet}.
+        
+        If C{atomic_proposition_based=True},
+        the the atomic propositions within the letter
+        are stored in C{atomic_propositions}.
+        
+        @type new_input_letter:
+            - hashable if C{atomic_proposition_based=False}
+            - iterable if C{atomic_proposition_based=True}
+        
+        See also
+        --------
+        add_from, AtomicPropositions
+        """
+        if self.atomic_proposition_based:
+            # check multiplicity
+            if contains_multiple(new_letter):
+                msg = """
+                    Letter contains multiple Atomic Propositions.
+                    Multiples will be discarded.
+                    """
+                warnings.warn(msg)
+            
+            self.atomic_propositions.add_from(new_letter)
+        else:
+            self.alphabet.add(new_letter)
+    
+    def add_from(self, new_letters):
+        """Add multiple letters to alphabet.
+        
+        If C{atomic_proposition_based=False},
+        then these are stored in C{alphabet}.
+        
+        If C{atomic_proposition_based=True},
+        then the atomic propositions within each letter
+        are stored in C{atomic_propositions}.
+        
+        @type new_letters:
+            - iterable of hashables,
+              if C{atomic_proposition_based=False}
+            - iterable of iterables of hashables,
+              if C{atomic_proposition_based=True}
+        
+        See also
+        --------
+        add, AtomicPropositions
+        """        
+        if self.atomic_proposition_based:
+            for new_letter in new_letters:
+                self.add(new_letter)
+        else:
+            self.alphabet |= set(new_letters)
     
     def number(self):
-        return len(self.alphabet)
-    
-    def is_member(self, letter):
-        return letter in self.alphabet
+        if self.atomic_proposition_based:
+            return 2**self.atomic_propositions.number()
+        else:
+            return len(self.alphabet)        
     
     def remove(self, rm_input_letter):
-        self.alphabet.remove(rm_input_letter)
+        if self.atomic_proposition_based:
+            msg = """Removing from an Atomic Proposition-based aphabet
+                  not supported, because it can reduce the set of atomic
+                  propositions so that other letters \\not\\in 2^AP any more.
+                  """
+            raise Exception(msg)
+        else:
+            self.alphabet.remove(rm_input_letter)
         
     def remove_from(self, rm_input_letters):
         self.alphabet.difference(rm_input_letters)
@@ -1649,7 +1811,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     """
     
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[]):
+                 input_alphabet=[], atomic_proposition_based=True):
         LabeledStateDiGraph.__init__(
             self, name=name,
             states=states, initial_states=initial_states
@@ -1658,10 +1820,9 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.final_states = set()
         self.add_final_states_from(final_states)
         
-        self.alphabet = Alphabet(self, 'in_alphabet')
+        self.alphabet = Alphabet(self, 'in_alphabet',
+                                 atomic_proposition_based=atomic_proposition_based)
         self.alphabet.add_from(input_alphabet)
-        
-        self.__state_label_def__ = {'in_alphabet': self.alphabet}
         
         self.__transition_label_def__ = {'in_alphabet': self.alphabet}
         self.__transition_label_order__ = ['in_alphabet']
@@ -1677,6 +1838,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
         s += '\n' +str(self.transitions) +'\n' +str(self.alphabet) +'\n'
+        s += 'Final States:\n\t' +str(self.final_states)
         
         return s
 
@@ -1792,18 +1954,20 @@ def dfa2nfa():
 
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[]):
+                 input_alphabet=[], atomic_proposition_based=True):
         FiniteStateAutomaton.__init__(self,
             name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet
+            final_states=final_states, input_alphabet=input_alphabet,
+            atomic_proposition_based=atomic_proposition_based
         )
 
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[]):
+                 input_alphabet=[], atomic_proposition_based=True):
         OmegaAutomaton.__init__(
             self, name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet
+            final_states=final_states, input_alphabet=input_alphabet,
+            atomic_proposition_based=atomic_proposition_based
         )
     
     def __add__(self, other):
@@ -1864,10 +2028,11 @@ class BuchiAutomaton(OmegaAutomaton):
 
 class BA(BuchiAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[]):
+                 input_alphabet=[], atomic_proposition_based=True):
         BuchiAutomaton.__init__(
             self, name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet
+            final_states=final_states, input_alphabet=input_alphabet,
+            atomic_proposition_based=atomic_proposition_based
         )
 
 def __ba_ts_sync_prod__(buchi_automaton, transition_system):
@@ -1882,8 +2047,9 @@ def __ba_ts_sync_prod__(buchi_automaton, transition_system):
     __ts_ba_sync_prod__, BuchiAutomaton.sync_prod
     """
     (prod_ts, persistent) = __ts_ba_sync_prod__(transition_system, buchi_automaton)
-    print prod_ts
-    prod_ba = BuchiAutomaton()
+    
+    prod_name = buchi_automaton.name +'*' +transition_system.name
+    prod_ba = BuchiAutomaton(name=prod_name)
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
@@ -1932,7 +2098,8 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     fts = transition_system
     ba = buchi_automaton
     
-    prodts = FiniteTransitionSystem()
+    prodts_name = fts.name +'*' +ba.name
+    prodts = FiniteTransitionSystem(name=prodts_name)
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions() )
 
@@ -2034,7 +2201,6 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
                 new_sqs.add(next_sq)
                 queue.add(next_sq)
     
-    print prodts
     return (prodts, final_states_preimage)
 
 class RabinAutomaton(OmegaAutomaton):
@@ -2189,14 +2355,8 @@ def moore2mealy(moore_machine, mealy_machine):
 # Stochastic
 ####
 class MarkovDecisionProcess():
-    """
-    Many implementations already available, to be adapted to networkx
-    
-    http://aima.cs.berkeley.edu/python/mdp.html
+    """what about
     https://code.google.com/p/pymdptoolbox/
-    http://vrde.wordpress.com/2008/01/13/pythonic-markov-decision-process-mdp/
-    http://nicky.vanforeest.com/probability/mdp/mdp.html
-    https://github.com/stober/gridworld
     """
     #raise NotImplementedError
 

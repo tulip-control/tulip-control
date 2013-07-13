@@ -118,7 +118,7 @@ def fts_minimal_example():
     fts.transitions.add('s1', 's0')
     
     if save_fig:
-        fts.save_png('small_fts.png')
+        fts.save_pdf('small_fts.png')
     
     return fts
 
@@ -168,7 +168,7 @@ def fts_maximal_example():
     print('Number of initial states:\n\t' +str(fts.states.number_of_initial() ) )
     print('Current state:\n\t' +str(fts.states.current) )
     
-    print("Is 'pay' a state ?\n\t" +str(fts.states.is_member('pay') ) )
+    print("Is 'pay' a state ?\n\t" +str('pay' in fts.states) )
     print("Is 'not pay' a state ?\n\t" +str('not pay' in fts.states() ) )
     print("Is 'bla' a state ?\n\t" +str('bla' in fts) )
     print('')
@@ -228,7 +228,7 @@ def fts_maximal_example():
     fts.states.remove_from({'not a state', 'also not a state'} )
     
     #avoid adding characters 'p', 'a', 'y' at states
-    fts.transitions.add_from('pay', {'select'}, check_states=False)
+    fts.transitions.add_from({'pay'}, {'select'}, check_states=False)
     print("States now include 'p', 'a', 'y':\n\t" +str(fts.states() ) )
     fts.states.remove_from({'p', 'a', 'y'} )
     print("Fixed:\n\t" +str(fts.states() ) +'\n')
@@ -333,7 +333,7 @@ def fts_maximal_example():
     
     if save_fig:
         fts.save_pdf(pdf_fname)
-        fts.save_dot(dot_fname)
+        #fts.save_dot(dot_fname)
     # svg support easy to add, so that latex native support is achieved
 
 def ofts_maximal_example():
@@ -372,20 +372,7 @@ def ofts_maximal_example():
     
     if save_fig:
         ofts.save_pdf(pdf_fname)
-        ofts.save_dot(dot_fname)
-
-def powerset(iterable):
-    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
-    
-    From:
-        http://docs.python.org/2/library/itertools.html,
-    also in:
-        https://pypi.python.org/pypi/more-itertools
-    """
-    from itertools import chain, combinations
-    
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+        #ofts.save_dot(dot_fname)
 
 def ba_minimal_example():
     """Small example.
@@ -406,18 +393,16 @@ def ba_minimal_example():
     msg += '\n=================='
     print(msg)
     
-    ba = ts.BuchiAutomaton()
+    ba = ts.BuchiAutomaton(atomic_proposition_based=True)
     ba.states.add_from({'q0', 'q1', 'q2'})
     ba.states.add_initial('q0')
     ba.states.add_final('q1')
     
     # TODO auto negation alphabet closure ?
-    #aps = {'true', '!green', 'green'}
-    #a = powerset(aps)
     
-    true = frozenset([True])
-    green = frozenset(['green'])
-    not_green = frozenset(['not green'])
+    true = {True}
+    green = {'green'}
+    not_green = {'not green'}
     ba.alphabet.add_from([true, green, not_green] )
     
     ba.transitions.add_labeled('q0', 'q0', true)
@@ -427,7 +412,7 @@ def ba_minimal_example():
     ba.transitions.add_labeled('q2', 'q2', true)
     
     if save_fig:
-        ba.save_png('small_ba.png')
+        ba.save_pdf('small_ba.png')
     
     return ba
         
@@ -435,21 +420,15 @@ def ba_maximal_example():
     """Buchi Automaton demo."""
     
     print('==================\nBuchi Automaton\n==================')
-    ba = ts.BuchiAutomaton()
+    ba = ts.BuchiAutomaton(atomic_proposition_based=True)
     
     ba.states.add('q0')
     ba.states.add_from({'q1', 'q2', 'q3'} )
     
     ba.states.add_initial('q0')
     
-    ba.alphabet.add(frozenset(['paid'] ) )
-    ba.alphabet.add_from(
-        [frozenset(['drink', 'paid']),
-         frozenset(['']),
-         frozenset(['drink']) ]
-    )
-    ba.alphabet.remove(frozenset(['drink'] ) )
-    ba.alphabet.add(frozenset(['drink'] ) )
+    ba.alphabet.add({'paid'} )
+    ba.alphabet.add_from([{'drink', 'paid'}, {''}, {'drink'} ] )
     
     print('Number of letters: ' +str(ba.alphabet.number() ) +'\n')
     print('Alphabet: ' +str(ba.alphabet() ) +'\n')
@@ -482,13 +461,18 @@ def ba_maximal_example():
     
     if save_fig:
         ba.save_pdf(pdf_fname)
-        ba.save_dot(dot_fname)
+        #ba.save_dot(dot_fname)
     
     return ba
     
 if __name__ == '__main__':
+    sims_demo()
+    fts_maximal_example()
+    ofts_maximal_example()
+    ba_maximal_example()    
+    
     fts = fts_minimal_example()
     ba = ba_minimal_example()
     prod_fts, final_states_preimage = fts *ba
     
-    prod_fts.save_png('prod.png')
+    prod_fts.save_pdf('prod.png')
