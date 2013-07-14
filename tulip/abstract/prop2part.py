@@ -103,12 +103,13 @@ def prop2part(state_space, cont_props_dict):
                 count+=1
         num_reg = len(mypartition.list_region)
         mypartition.num_regions = num_reg
-    adj = sp.csr_matrix((num_reg,num_reg), dtype=np.int8)
+    adj = sp.lil_matrix((num_reg,num_reg), dtype=np.int8)
     for i in range(num_reg):
         for j in range(i+1,num_reg):
-            adj[i,j] = pc.is_adjacent(mypartition.list_region[i],
-                                           mypartition.list_region[j])
-    adj =  adj+adj.T+sp.eye(num_reg, num_reg, dtype=np.int8)
+            dum = pc.is_adjacent(mypartition.list_region[i], mypartition.list_region[j])
+            adj[i,j] = dum
+            adj[j,i] = dum
+        adj[i,i] = 1
     mypartition.adj = adj.copy()
     return mypartition
     
@@ -125,12 +126,13 @@ def prop2partconvex(ppp):
             myconvexpartition.list_region.append(region_now) 
     num_reg = len(myconvexpartition.list_region)
     myconvexpartition.num_regions = num_reg
-    adj = sp.csr_matrix((num_reg,num_reg), dtype=np.int8)
+    adj = sp.lil_matrix((num_reg,num_reg), dtype=np.int8)
     for i in range(num_reg):
         for j in range(i+1,num_reg):
-            adj[i,j] = pc.is_adjacent(myconvexpartition.list_region[i],
-                                           myconvexpartition.list_region[j])
-    adj =  adj+adj.T+sp.eye(num_reg, num_reg, dtype=np.int8)
+            dum = pc.is_adjacent(myconvexpartition.list_region[i], myconvexpartition.list_region[j])
+            adj[i,j] = dum
+            adj[j,i] = dum
+        adj[i,i] = 1 
     myconvexpartition.adj = adj.copy()
     return myconvexpartition
     
@@ -174,7 +176,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 new_list.append(isect)
                 parent.append(j)
     
-    adj = sp.csr_matrix((len(new_list), len(new_list)), dtype=np.int8)
+    adj = sp.lil_matrix((num_reg,num_reg), dtype=np.int8)
     for i in range(len(new_list)):
         for j in range(i+1, len(new_list)):
             if (ppp.adj[parent[i], parent[j]] == 1) or \
@@ -196,7 +198,7 @@ class PropPreservingPartition:
     - num_prop: number of propositions
     - list_region: proposition preserving regions, type: list of Region
     - num_regions: length of the above list
-    - adj: a sparse matrix showing which regions are adjacent
+    - adj: a sparse matrix showing which regions are adjacent, type scipy lil sparse
     - list_prop_symbol: list of symbols of propositions
     - list_subsys: list assigning the subsystem of the piecewise affine system that 
               is active in that region to each region in ppp 
