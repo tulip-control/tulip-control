@@ -77,6 +77,7 @@ todo
 """
 
 import networkx as nx
+from scipy.sparse import lil_matrix # is this really needed ?
 import warnings
 import copy
 from pprint import pformat
@@ -96,7 +97,7 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
 def contains_multiple(iterable):
-    return list(iterable) != list(set(iterable) )
+    return len(iterable) != len(set(iterable) )
 
 try:
     import pydot
@@ -123,11 +124,14 @@ class States(object):
         self.initial = set(initial_states)
         self.current = current_state
     
-    def __call__(self, data=False):
+    def __call__(self, data=False, listed=False):
         """Return set of states.
         
         Default: state annotation not returned.
         To obtain that use argumet data=True.
+        
+        @param data: include annotation dict of each state
+        @param listed: return list of states (instead of set)        
         
         @returns: set of states if C{data=False}
                 list of tuples of states with annotation dict if C{data=False}
@@ -135,7 +139,10 @@ class States(object):
         if data:
             return self.graph.nodes(data=True)
         else:
-            return set(self.graph.nodes(data=False))
+            if listed:
+                return self.graph.nodes(data=False)
+            else:
+                return set(self.graph.nodes(data=False) )
     
     def __str__(self):
         return 'States:\n\t' +pformat(self(data=False) )    
@@ -814,6 +821,17 @@ class LabeledTransitions(Transitions):
             for to_state in to_states:
                 self.add_labeled(from_state, to_state, labels, check=check)
     
+    def add_labeled_adj(self, adj, labels, check=True, state_map='ordered'):
+        """Add multiple transitions from adjacency matrix.
+        
+        These transitions are enabled when the given guard is active.        
+        """
+        states_list = self.graph.states(ordered=True)
+        
+        # create graph from adjacency
+        # in-place replace nodes, based on map
+        # compose graphs (vs union, vs disjoint union)
+    
     def with_label(self, from_state, to_states='any', desired_label='any'):
         """Find all edges from_state to_states, annotated with guard_label.
         
@@ -863,14 +881,25 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.default_export_path = './'
         self.default_export_fname = 'out'
         
-    def __export_fname__(self, path):
+    def __add_missing_extension__(self, path, file_type):
+        import os
+        filename, file_extension = os.path.splitext(path)
+        desired_extension = os.path.extsep +file_type
+        if file_extension != desired_extension:
+            path = filename +desired_extension
+        return path
+    
+    def __export_fname__(self, path, file_type, addext):
         if path == 'default':
             if self.name == '':
-                return self.default_export_path +self.default_export_fname
+                path = self.default_export_path +self.default_export_fname
             else:
-                return self.default_export_path +self.name
-        else:
-            return path
+                path = self.default_export_path +self.name
+        
+        if addext:
+            path = self.__add_missing_extension__(path, file_type)
+        
+        return path
     
     def __pydot_missing__(self):
         if pydot is None:
@@ -968,30 +997,31 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """Alias to dump_dot()."""
         return self.dump_dot()
     
-    def save_dot(self, path='default'):
+    def save_dot(self, path='default', add_missing_extension=True):
         """Save .dot file.
         
         Requires pydot.        
         """
-        path = self.__export_fname__(path) +'.dot'
+        path = self.__export_fname__(path, 'dot', addext=add_missing_extension)
+        
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_dot(path)
     
-    def save_png(self, path='default'):
+    def save_png(self, path='default', add_missing_extension=True):
         """Save .png file.
         
         Requires pydot.        
         """
-        path = self.__export_fname__(path) +'.png'
+        path = self.__export_fname__(path, 'png', addext=add_missing_extension)
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_png(path)
     
-    def save_pdf(self, path='default'):
+    def save_pdf(self, path='default', add_missing_extension=True):
         """Save .pdf file.
         
         Requires pydot.        
         """
-        path = self.__export_fname__(path) +'.pdf'
+        path = self.__export_fname__(path, 'pdf', addext=add_missing_extension)
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_pdf(path)
     
@@ -1186,7 +1216,7 @@ class AtomicPropositions(object):
             msg += ' is not in set of states:\n\t:' +str(self.graph.states() )
             raise Exception(msg)
     
-    def add(self, atomic_proposition):
+    def add(self, atomic_proposition, check_existing=True):
         """Add single atomic proposition.
         
         @type atomic_proposition: hashable
@@ -1194,12 +1224,12 @@ class AtomicPropositions(object):
         if not isinstance(atomic_proposition, Hashable):
             raise Exception('Atomic propositions stored in set, so must be hashable.')
         
-        if atomic_proposition in self.atomic_propositions:
-            warnings.warn('Atomic Proposition already in set of APs.')
+        if atomic_proposition in self.atomic_propositions and check_existing:
+            raise Exception('Atomic Proposition already in set of APs.')
         
         self.atomic_propositions.add(atomic_proposition)
     
-    def add_from(self, atomic_propositions):
+    def add_from(self, atomic_propositions, check_existing=True):
         """Add multiple atomic propositions.
         
         @type atomic_propositions: iterable
@@ -1208,7 +1238,7 @@ class AtomicPropositions(object):
             raise Exception('Atomic Propositions must be provided in iterable.')
         
         for atomic_proposition in atomic_propositions:
-            self.add(atomic_proposition) # use checks
+            self.add(atomic_proposition, check_existing) # use checks
         
     def remove(self, atomic_proposition):
         node_ap = nx.get_node_attributes(self.graph, self.name)
@@ -1230,17 +1260,20 @@ class AtomicPropositions(object):
         """Count atomic propositions."""
         return len(self.atomic_propositions)
     
-    def add_labeled_state(self, state, ap_label):
+    def add_labeled_state(self, state, ap_label, check=True):
         """Add single state with its label.
         
-        input
-        -----
-            state = defines element to be added to set of states S
+        @param state: defines element to be added to set of states S
                   = hashable object (int, str, etc)
-            ap_label \in 2^AP
+        @type ap_label: iterable \\in 2^AP
         """
         self.graph.states.add(state)
-        self.add_from(ap_label)
+        
+        if not check:
+            self.add_from(ap_label)
+        
+        if not set(ap_label) <= self.atomic_propositions:
+            raise Exception('Label \\not\\subset AP.')
         
         kw = {self.name: ap_label}
         self.graph.add_node(state, **kw)
@@ -1251,13 +1284,13 @@ class AtomicPropositions(object):
         State and AP label checked, override with check = False.        
         """
         if not check:
-            self.add_labeled_state(state, ap_label)
+            self.add_labeled_state(state, ap_label, check=check)
             return
         
         self.__check_state__(state)
         
         if not set(ap_label) <= self.atomic_propositions:
-            raise Exception('Label \\notsubset AP.')
+            raise Exception('Label \\not\\subset AP.')
         
         kw = {self.name: ap_label}
         self.graph.add_node(state, **kw)
@@ -1630,7 +1663,7 @@ class Alphabet(object):
                     """
                 warnings.warn(msg)
             
-            self.atomic_propositions.add_from(new_letter)
+            self.atomic_propositions.add_from(new_letter, check_existing=False)
         else:
             self.alphabet.add(new_letter)
     
@@ -2059,7 +2092,20 @@ def __ba_ts_sync_prod__(buchi_automaton, transition_system):
     prod_ba.states.add_final_from(persistent)
     
     # copy edges, translating transitions, i.e., chaning transition labels
-    prod_ba.alphabet.add_from(buchi_automaton.alphabet() )
+    if buchi_automaton.alphabet.atomic_proposition_based:
+        # direct access, not the inefficient
+        #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
+        # which would generate a combinatorially large alphabet
+        prod_ba.alphabet.atomic_propositions.add_from(
+            buchi_automaton.alphabet.atomic_propositions()
+        )
+    else:
+        msg ="""
+            Buchi Automaton must be Atomic Proposition-based,
+            otherwise the synchronous product is not well-defined.
+            """
+        raise Exception(msg)
+    
     for (from_state, to_state) in prod_ts.edges_iter():
         # prject prod_TS state to TS state        
         ts_to_state = to_state[0]
@@ -2094,6 +2140,11 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     --------
     __ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
+    if not buchi_automaton.alphabet.atomic_proposition_based:
+        msg = """Buchi automaton not stored as Atomic Proposition-based.
+                synchronous product with Finite Transition System
+                is not well-defined."""
+        raise Exception(msg)
     
     fts = transition_system
     ba = buchi_automaton
