@@ -30,17 +30,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id: discretize.py 390 2012-08-31 00:04:25Z necozay $
 """ 
-Algorithms related to discretization containing both MATLAB interface
-and Python discretization. Input calculation is available in python
-only but should work also for a state space partition discretized in
-MATLAB.
+Algorithms related to discretization of continuous dynamics.
 
-Classes:
-    - CtsSysDyn
-    - PwaSubsysDyn
-    - PwaSysDyn
+Class:
+    - AbstractSysDyn
     
 Primary functions:
     - discretize
@@ -48,24 +42,46 @@ Primary functions:
     
 Helper functions:
     - solveFeasable
-    - discretizeM
-    - discretizeToMatlab
-    - discretizeFromMatlab
     - getInputHelper
     - createLM
     - get_max_extreme
 """
 
-import sys, os, time, subprocess
 from copy import deepcopy
 import numpy as np
 from scipy import io as sio
 from cvxopt import matrix,solvers
 import itertools
 import polytope as pc
+import transys as ts
+from tulip.hybrid import *
 from prop2part import PropPreservingPartition, pwa_partition
-from errorprint import printWarning, printError, printInfo
 
+
+class AbstractSysDyn:
+    """
+    AbstractSysDyn class for discrete abstractions of continuous
+    dynamics.
+    
+    An AbstractSysDyn object contains the fields:
+    - ppp: a proposition preserving partition object each region of which
+           corresponds to a discrete state of the abstraction
+    - ofts: a finite transition system, abstracting the continuous system,
+            that can be fed into discrete synthesis algorithms
+    - orig_list_region: original proposition preserving regions
+    - orig: list assigning an original proposition preserving region to each
+            new region 
+            
+    Note1: There could be some redundancy in ppp and ofts in that they are
+    both decorated with propositions. This might be useful to keep each of 
+    them as functional units on their own (possible to change later). 
+    """
+    def __init__(self, ppp=None, ofts=None, orig_list_region=None, orig=None):
+        self.ppp = ppp
+        self.ofts = ofts
+        self.orig_list_region = orig_list_region
+        self.orig = orig
+    
 
 def _block_diag2(A,B):
     """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
@@ -84,122 +100,8 @@ def _block_diag2(A,B):
     C[A.shape[0]:, A.shape[1]:] = B.copy()
     return C
 
-
-class CtsSysDyn:
-    """CtsSysDyn class for specifying the continuous dynamics:
-
-        s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
-        u[t] \in Uset - polytope object
-        d[t] \in Wset - polytope object
-
-    A CtsSysDyn object contains the fields A, B, E, K, Uset and Wset
-    as defined above.
-    
-    **Constructor**:
-    
-    **CtsSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `K` = [][, `Uset` = [][, `Wset` = []]]]]]])
-    """
-
-    def __init__(self, A=[], B=[], E=[], K=[], Uset=None, Wset=None):
-        
-        if Uset == None:
-            print "Warning: Uset not given in CtsSysDyn()"
-        
-        if (Uset != None) & (not isinstance(Uset, pc.Polytope)):
-            raise Exception("CtsSysDyn: `Uset` has to be a Polytope")
-
-        self.A = A
-        self.B = B
-        
-        if len(K) == 0:
-            self.K = np.zeros([A.shape[1], 1])
-        else:
-            self.K = K.reshape(K.size,1)
-
-        if len(E) == 0:
-            self.E = np.zeros([A.shape[1], 1])
-            self.Wset = pc.Polytope()
-        else:
-            self.E = E
-            self.Wset = Wset
-        
-        self.Uset = Uset
-
-    def __str__(self):
-        output = "A =\n"+str(self.A)
-        output += "\nB =\n"+str(self.B)
-        output += "\nE =\n"+str(self.E)
-        output += "\nK =\n"+str(self.K)
-        output += "\nUset =\n"+str(self.Uset)
-        output += "\nWset =\n"+str(self.Wset)
-        return output
-        
-class PwaSubsysDyn(CtsSysDyn):
-    """PwaSubsysDyn class for specifying a subsystem of piecewise affine continuous dynamics.
-
-        s[t+1] = A_i*s[t] + B_i*u[t] + E_i*d[t] + K_i
-        u[t] \in Uset_i - polytope object
-        d[t] \in Wset_i - polytope object
-        for H_i*s[t]<=g_i - subdomain, type: polytope object
-
-    PwaSubsysDyn class inherits from CtsSysDyn with the additional field:
-    
-    - `sub_domain`: domain with nonempty interior where these dynamics are active, type: polytope
-    """
-
-    def __init__(self, A=[], B=[], E=[], K=[], Uset=None, Wset=None, sub_domain=None):
-        
-        if sub_domain == None:
-            print "Warning: sub_domain is not given in PwaSubsysDyn()"
-        
-        if (sub_domain != None) & (not isinstance(sub_domain, pc.Polytope)):
-            raise Exception("PwaSubsysDyn: `sub_domain` has to be a Polytope")
-
-        CtsSysDyn.__init__(self, A, B, E, K, Uset, Wset)
-        self.sub_domain = sub_domain
-        
-class PwaSysDyn:
-    """PwaSysDyn class for specifying a piecewise affine system.
-    A PwaSysDyn object contains the fields:
-    
-    - `list_subsys`: list of PwaSubsysDyn
-    
-    - `domain`: domain over which piecewise affine system is defined, type: polytope
-    
-    For the system to be well-defined the sub_domains of its subsystems should be 
-    mutually exclusive (modulo intersections with empty interior) and cover the domain.
-    """
-
-    def __init__(self, list_subsys=[], domain=None):
-        
-        if domain == None:
-            print "Warning: domain not given in PwaSysDyn()"
-        
-        if (domain != None) & (not isinstance(domain, pc.Polytope)):
-            raise Exception("PwaSysDyn: `domain` has to be a Polytope")
-
-        if len(list_subsys) > 0:
-            uncovered_dom = domain.copy()
-            n = list_subsys[0].A.shape[1]  # State space dimension
-            m = list_subsys[0].B.shape[1]  # Input space dimension
-            p = list_subsys[0].E.shape[1]  # Disturbance space dimension
-            for subsys in list_subsys:
-                uncovered_dom = pc.mldivide(uncovered_dom, subsys.sub_domain)
-                if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or p!=subsys.E.shape[1]):
-                    raise Exception("PwaSysDyn: state, input, disturbance dimensions\
-                                     have to be the same for all subsystems")
-            if not pc.is_empty(uncovered_dom):
-                raise Exception("PwaSysDyn: subdomains have to cover the domain")
-            for x in itertools.combinations(list_subsys, 2):
-                if pc.is_fulldim(pc.intersect(x[0].sub_domain,x[1].sub_domain)):
-                    raise Exception("PwaSysDyn: subdomains have to be mutually exclusive")
-        
-        self.list_subsys = list_subsys
-        self.domain = domain
-
-
 def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
-               conservative=False, max_num_poly=5, \
+               conservative=True, max_num_poly=5, \
                use_all_horizon=False, trans_length=1, remove_trans=False, 
                abs_tol=1e-7, verbose=0):
 
@@ -208,35 +110,34 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     Input:
     
-    - `part`: a PropPreservingPartition object
-    - `ssys`: a CtsSysDyn or PwaSysDyn object
-    - `N`: horizon length
-
-    - `min_cell_volume`: the minimum volume of cells in the resulting
-                         partition.
-    - `closed_loop`: boolean indicating whether the `closed loop`
-                     algorithm should be used. default True.
-    - `conservative`: if true, force sequence in reachability analysis
-                      to stay inside starting cell. If false, safety
-                      is ensured by keeping the sequence inside the
-                      original proposition preserving cell which needs
-                      to be convex.
-    - `max_num_poly`: maximum number of polytopes in a region to use in 
-                      reachability analysis.
-    - `use_all_horizon`: in closed loop algorithm: if we should look
-                         for reach- ability also in less than N steps.
-    - `trans_length`: the number of polytopes allowed to cross in a
-                      transition.  a value of 1 checks transitions
-                      only between neighbors, a value of 2 checks
-                      neighbors of neighbors and so on.
-    - `remove_trans`: if True, remove found transitions between
-                      non-neighbors.
-    - `abs_tol`: maximum volume for an "empty" polytope
-    - `verbose`: level of verbosity
-    
-    Output:
-    
-    - A PropPreservingPartition object with transitions
+    @param part: a PropPreservingPartition object
+    @param ssys: a LtiSysDyn or PwaSysDyn object
+    @param N: horizon length
+    @param min_cell_volume: the minimum volume of cells in the resulting
+        partition.
+    @param closed_loop: boolean indicating whether the `closed loop`
+        algorithm should be used. default True.
+    @param conservative: if true, force sequence in reachability analysis
+        to stay inside starting cell. If false, safety
+        is ensured by keeping the sequence inside the
+        original proposition preserving cell which needs
+        to be convex. In order to use the value false,
+        ensure to have a convex initial partition or use
+        prop2partconvex to postprocess the proposition
+        preserving partition before calling discretize.
+    @param max_num_poly: maximum number of polytopes in a region to use in 
+        reachability analysis.
+    @param use_all_horizon: in closed loop algorithm: if we should look
+        for reach- ability also in less than N steps.
+    @param trans_length: the number of polytopes allowed to cross in a
+        transition.  a value of 1 checks transitions
+        only between neighbors, a value of 2 checks
+        neighbors of neighbors and so on.
+    @param remove_trans: if True, remove found transitions between
+        non-neighbors.
+    @param abs_tol: maximum volume for an "empty" polytope
+    @param verbose: level of verbosity
+    @return: An AbstractSysDyn object
     """
 
     orig_list = []
@@ -263,7 +164,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     
     
     # Cheby radius of disturbance set (defined within the loop for pwa systems)
-    if isinstance(ssys,CtsSysDyn):
+    if isinstance(ssys,LtiSysDyn):
         if len(ssys.E) > 0:
             rd,xd = pc.cheby_ball(ssys.Wset)
         else:
@@ -295,8 +196,6 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         i = ind[1][0]
         j = ind[0][0]
         IJ[j,i] = 0
-        print ind
-        print IJ
         si = sol[i]
         sj = sol[j]
         
@@ -390,7 +289,8 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 adj[i,size-1-kk] = 1
                 adj[size-1-kk,i] = 1
                 adj[size-1-kk,size-1-kk] = 1
-                orig = np.hstack([orig, orig[i]])
+                if not conservative:
+                    orig = np.hstack([orig, orig[i]])
             adj[i,i] = 1
                         
             if verbose > 1:
@@ -453,199 +353,200 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 print "No transition found, diff vol: " + str(vol2) + \
                       ", intersect vol: " + str(vol1)
             transitions[j,i] = 0
-                  
+
     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
                     list_region=sol, num_regions=len(sol), adj=adj, \
-                    trans=transitions, list_prop_symbol=part.list_prop_symbol, \
-                    orig_list_region=orig_list, orig=orig, list_subsys = subsys_list)                           
+                    list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)                           
     return new_part
 
-def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
-               conservative=False, max_num_poly=5, \
-               use_all_horizon=False, abs_tol=1e-7, verbose=0):
-
-    """Refine the partition and establish transitions based on reachability
-    analysis.
-    
-    Input:
-    
-    - `part`: a PropPreservingPartition object
-    - `ssys`: a CtsSysDyn object
-    - `N`: horizon length
-    - `min_cell_volume`: the minimum volume of cells in the resulting
-                         partition.
-    - `closed_loop`: boolean indicating whether the `closed loop`
-                     algorithm should be used. default False.
-    - `conservative`: if true, force sequence in reachability analysis
-                      to stay inside starting cell. If false, safety
-                      is ensured by keeping the sequence inside the
-                      original proposition preserving cell.
-    - `max_num_poly`: maximum number of polytopes in a region to use
-                      in reachability analysis.
-    - `use_all_horizon`: in closed loop algorithm: if we should look
-                         for reach- ability also in less than N steps.
-    - `abs_tol`: maximum volume for an "empty" polytope
-    
-    Output:
-    
-    - A PropPreservingPartition object with transitions
-    """
-    min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
-    
-    orig_list = []
-    
-    for poly in part.list_region:
-        if len(poly) == 0:
-            orig_list.append(poly.copy())
-        elif len(poly) == 1:
-            orig_list.append(poly.list_poly[0].copy())
-        else:
-            raise Exception("solveFeasible: original list contains non-convex \
-                            polytope regions")
-    
-    orig = range(len(orig_list))
-    
-    # Cheby radius of disturbance set
-    if len(ssys.E) > 0:
-        rd,xd = pc.cheby_ball(ssys.Wset)
-    else:
-        rd = 0.
-    
-    # Initialize matrix for pairs to check
-    IJ = part.adj.copy()
-    IJ = IJ.todense()
-    IJ = np.array(IJ)
-    if verbose > 1:
-        print "\n Starting IJ: \n" + str(IJ)
-
-    # Initialize output
-    transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
-    sol = deepcopy(part.list_region)
-    adj = part.adj.copy()
-    adj = adj.todense()
-    adj = np.array(adj)
-    
-    # List of how many "new" regions that have been created for each region
-    # and a list of original number of neighbors
-    num_new_reg = np.zeros(len(orig_list))
-    num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
-
-    while np.sum(IJ) > 0:
-        ind = np.nonzero(IJ)
-        i = ind[0][0]
-        j = ind[1][0]
-                
-        IJ[i,j] = 0
-        num_new_reg[i] += 1
-        print num_new_reg
-        si = sol[i]
-        sj = sol[j]
-        
-        if verbose > 1:        
-            print "\n Working with states " + str(i) + " and " + str(j)
-        
-        if conservative:
-            S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop, 
-                        min_vol=min_cell_volume, max_num_poly=max_num_poly,\
-                        use_all_horizon=use_all_horizon)
-        else:
-            S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
-                    min_vol=min_cell_volume, trans_set=orig_list[orig[i]], \
-                    use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
-        
-        if verbose > 1:
-            print "Computed reachable set S0 with volume " + str(pc.volume(S0))
-        
-        isect = pc.intersect(si, S0)
-        risect, xi = pc.cheby_ball(isect)
-        vol1 = pc.volume(isect)
-
-        diff = pc.mldivide(si, S0)
-        rdiff, xd = pc.cheby_ball(diff)
-        
-        # We don't want our partitions to be smaller than the disturbance set
-        # Could be a problem since cheby radius is calculated for smallest
-        # convex polytope, so if we have a region we might throw away a good
-        # cell.
-        
-        if rdiff < abs_tol:
-            if verbose > 1:
-                print "Transition found"
-            transitions[i,j] = 1
-        
-        elif (vol1 > min_cell_volume) & (risect > rd) & \
-                (num_new_reg[i] <= num_orig_neigh[i]+1):
-        
-            # Make sure new cell is Region and add proposition lists
-            if len(isect) == 0:
-                isect = pc.Region([isect], si.list_prop)
-            else:
-                isect.list_prop = si.list_prop
-        
-            # Add new state
-            sol.append(isect)
-            size = len(sol)
-            
-            # Add transitions
-            transitions = np.hstack([transitions, np.zeros([size - 1, 1], dtype=int) ])
-            transitions = np.vstack([transitions, np.zeros([1, size], dtype=int) ])
-            
-            transitions[size-1,:] = transitions[i,:] # All sets reachable from orig cell are reachable from both cells
-            transitions[size-1,j] = 1   # j is reachable from new cell            
-            
-            # Take care of adjacency
-            old_adj = np.nonzero(adj[i,:])[0]
-            
-            adj = np.hstack([adj, np.zeros([size - 1, 1], dtype=int) ])
-            adj = np.vstack([adj, np.zeros([1, size], dtype=int) ])
-            adj[i,size-1] = 1
-            adj[size-1,i] = 1
-            adj[size-1,size-1] = 1
-                                    
-            for k in np.setdiff1d(old_adj,[i,size-1]):
-                if pc.is_adjacent(sol[size-1],sol[k],overlap=True):
-                    adj[size-1,k] = 1
-                    adj[k, size-1] = 1
-                else:
-                    # Actively remove (valid) transitions between non-neighbors
-                    transitions[size-1,k] = 0
-                    transitions[k,size-1] = 0
-                    
-            # Assign original proposition cell to new state and update counts
-            orig = np.hstack([orig, orig[i]])
-            print num_new_reg
-            num_new_reg = np.hstack([num_new_reg, 0])
-            num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
-            
-            if verbose > 1:
-                print "\n Adding state" + str(size-1) + "\n"
-            
-            # Just add adjacent cells for checking, unless transition already found            
-            IJ = np.hstack([IJ, np.zeros([size - 1, 1], dtype=int) ])
-            IJ = np.vstack([IJ, np.zeros([1, size], dtype=int) ])
-            horiz2 = adj[size-1,:] - transitions[size-1,:] > 0
-            verti2 = adj[:,size-1] - transitions[:,size-1] > 0
-            IJ[size-1,:] = horiz2.astype(int)
-            IJ[:,size-1] = verti2.astype(int)      
-            
-            #if verbose > 1:
-                #print "\n Updated adj: \n" + str(adj)
-                #print "\n Updated trans: \n" + str(transitions)
-                #print "\n Updated IJ: \n" + str(IJ)
-                    
-        else:
-            if verbose > 1:
-                print "No transition found, intersect vol: " + str(vol1)
-            transitions[i,j] = 0
-                  
-    new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop,
-                                       list_region=sol, num_regions=len(sol), adj=np.array([]), 
-                                       trans=transitions, list_prop_symbol=part.list_prop_symbol,
-                                       orig_list_region=orig_list, orig=orig)                           
-    return new_part
+# DEFUNCT until further notice
+# def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
+#                conservative=False, max_num_poly=5, \
+#                use_all_horizon=False, abs_tol=1e-7, verbose=0):
+# 
+#     """Refine the partition and establish transitions based on reachability
+#     analysis.
+#     
+#     Input:
+#     
+#     - `part`: a PropPreservingPartition object
+#     - `ssys`: a LtiSysDyn object
+#     - `N`: horizon length
+#     - `min_cell_volume`: the minimum volume of cells in the resulting
+#                          partition.
+#     - `closed_loop`: boolean indicating whether the `closed loop`
+#                      algorithm should be used. default False.
+#     - `conservative`: if true, force sequence in reachability analysis
+#                       to stay inside starting cell. If false, safety
+#                       is ensured by keeping the sequence inside the
+#                       original proposition preserving cell.
+#     - `max_num_poly`: maximum number of polytopes in a region to use
+#                       in reachability analysis.
+#     - `use_all_horizon`: in closed loop algorithm: if we should look
+#                          for reach- ability also in less than N steps.
+#     - `abs_tol`: maximum volume for an "empty" polytope
+#     
+#     Output:
+#     
+#     - A PropPreservingPartition object with transitions
+#     """
+#     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
+#     
+#     orig_list = []
+#     
+#     for poly in part.list_region:
+#         if len(poly) == 0:
+#             orig_list.append(poly.copy())
+#         elif len(poly) == 1:
+#             orig_list.append(poly.list_poly[0].copy())
+#         else:
+#             raise Exception("solveFeasible: original list contains non-convex \
+#                             polytope regions")
+#     
+#     orig = range(len(orig_list))
+#     
+#     # Cheby radius of disturbance set
+#     if len(ssys.E) > 0:
+#         rd,xd = pc.cheby_ball(ssys.Wset)
+#     else:
+#         rd = 0.
+#     
+#     # Initialize matrix for pairs to check
+#     IJ = part.adj.copy()
+#     IJ = IJ.todense()
+#     IJ = np.array(IJ)
+#     if verbose > 1:
+#         print "\n Starting IJ: \n" + str(IJ)
+# 
+#     # Initialize output
+#     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
+#     sol = deepcopy(part.list_region)
+#     adj = part.adj.copy()
+#     adj = adj.todense()
+#     adj = np.array(adj)
+#     
+#     # List of how many "new" regions that have been created for each region
+#     # and a list of original number of neighbors
+#     num_new_reg = np.zeros(len(orig_list))
+#     num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+# 
+#     while np.sum(IJ) > 0:
+#         ind = np.nonzero(IJ)
+#         i = ind[0][0]
+#         j = ind[1][0]
+#                 
+#         IJ[i,j] = 0
+#         num_new_reg[i] += 1
+#         print num_new_reg
+#         si = sol[i]
+#         sj = sol[j]
+#         
+#         if verbose > 1:        
+#             print "\n Working with states " + str(i) + " and " + str(j)
+#         
+#         if conservative:
+#             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop, 
+#                         min_vol=min_cell_volume, max_num_poly=max_num_poly,\
+#                         use_all_horizon=use_all_horizon)
+#         else:
+#             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
+#                     min_vol=min_cell_volume, trans_set=orig_list[orig[i]], \
+#                     use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
+#         
+#         if verbose > 1:
+#             print "Computed reachable set S0 with volume " + str(pc.volume(S0))
+#         
+#         isect = pc.intersect(si, S0)
+#         risect, xi = pc.cheby_ball(isect)
+#         vol1 = pc.volume(isect)
+# 
+#         diff = pc.mldivide(si, S0)
+#         rdiff, xd = pc.cheby_ball(diff)
+#         
+#         # We don't want our partitions to be smaller than the disturbance set
+#         # Could be a problem since cheby radius is calculated for smallest
+#         # convex polytope, so if we have a region we might throw away a good
+#         # cell.
+#         
+#         if rdiff < abs_tol:
+#             if verbose > 1:
+#                 print "Transition found"
+#             transitions[i,j] = 1
+#         
+#         elif (vol1 > min_cell_volume) & (risect > rd) & \
+#                 (num_new_reg[i] <= num_orig_neigh[i]+1):
+#         
+#             # Make sure new cell is Region and add proposition lists
+#             if len(isect) == 0:
+#                 isect = pc.Region([isect], si.list_prop)
+#             else:
+#                 isect.list_prop = si.list_prop
+#         
+#             # Add new state
+#             sol.append(isect)
+#             size = len(sol)
+#             
+#             # Add transitions
+#             transitions = np.hstack([transitions, np.zeros([size - 1, 1], dtype=int) ])
+#             transitions = np.vstack([transitions, np.zeros([1, size], dtype=int) ])
+#             
+#             transitions[size-1,:] = transitions[i,:] # All sets reachable from orig cell are reachable from both cells
+#             transitions[size-1,j] = 1   # j is reachable from new cell            
+#             
+#             # Take care of adjacency
+#             old_adj = np.nonzero(adj[i,:])[0]
+#             
+#             adj = np.hstack([adj, np.zeros([size - 1, 1], dtype=int) ])
+#             adj = np.vstack([adj, np.zeros([1, size], dtype=int) ])
+#             adj[i,size-1] = 1
+#             adj[size-1,i] = 1
+#             adj[size-1,size-1] = 1
+#                                     
+#             for k in np.setdiff1d(old_adj,[i,size-1]):
+#                 if pc.is_adjacent(sol[size-1],sol[k],overlap=True):
+#                     adj[size-1,k] = 1
+#                     adj[k, size-1] = 1
+#                 else:
+#                     # Actively remove (valid) transitions between non-neighbors
+#                     transitions[size-1,k] = 0
+#                     transitions[k,size-1] = 0
+#                     
+#             # Assign original proposition cell to new state and update counts
+#             if not conservative:
+#                 orig = np.hstack([orig, orig[i]])
+#             print num_new_reg
+#             num_new_reg = np.hstack([num_new_reg, 0])
+#             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
+#             
+#             if verbose > 1:
+#                 print "\n Adding state" + str(size-1) + "\n"
+#             
+#             # Just add adjacent cells for checking, unless transition already found            
+#             IJ = np.hstack([IJ, np.zeros([size - 1, 1], dtype=int) ])
+#             IJ = np.vstack([IJ, np.zeros([1, size], dtype=int) ])
+#             horiz2 = adj[size-1,:] - transitions[size-1,:] > 0
+#             verti2 = adj[:,size-1] - transitions[:,size-1] > 0
+#             IJ[size-1,:] = horiz2.astype(int)
+#             IJ[:,size-1] = verti2.astype(int)      
+#             
+#             #if verbose > 1:
+#                 #print "\n Updated adj: \n" + str(adj)
+#                 #print "\n Updated trans: \n" + str(transitions)
+#                 #print "\n Updated IJ: \n" + str(IJ)
+#                     
+#         else:
+#             if verbose > 1:
+#                 print "No transition found, intersect vol: " + str(vol1)
+#             transitions[i,j] = 0
+#                   
+#     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop,
+#                                        list_region=sol, num_regions=len(sol), adj=np.array([]), 
+#                                        trans=transitions, list_prop_symbol=part.list_prop_symbol,
+#                                        orig_list_region=orig_list, orig=orig)                           
+#     return new_part
 
 def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
-            conservative=False, closed_loop = True, test_result=False):
+            conservative=True, closed_loop = True, test_result=False):
  
     """Calculate an input signal sequence taking the plant from state `start` 
     to state `end` in the partition part, such that 
@@ -656,7 +557,7 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
     Input:
 
     - `x0`: initial continuous state
-    - `ssys`: CtsSysDyn object specifying system dynamics
+    - `ssys`: LtiSysDyn object specifying system dynamics
     - `part`: PropPreservingPartition object specifying the state
               space partition.
     - `start`: int specifying the number of the initial state in `part`
@@ -796,7 +697,7 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
 
     - `P1`: A Polytope or Region object
     - `P2`: A Polytope or Region object
-    - `ssys`: A CtsSysDyn object
+    - `ssys`: A LtiSysDyn object
     - `N`: The horizon length
     - `closed_loop`: If true, take 1 step at the time. This keeps down
                    polytope dimension and handles disturbances
@@ -899,14 +800,15 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
 
 
 def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
-    '''Calculates the sequence u_seq such that
+    """
+    Calculates the sequence u_seq such that
     - x(t+1) = A x(t) + B u(t) + K
     - x(k) \in P1 for k = 0,...N
     - x(N) \in P3
     - [u(k); x(k)] \in PU
     
     and minimizes x'Rx + 2*r'x + u'Qu
-    '''
+    """
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
     
@@ -996,7 +898,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     The returned polytope describes the intersection of the polytopes
     for all possible Input:
 
-    - `ssys`: CtsSysDyn dynamics
+    - `ssys`: LtiSysDyn dynamics
     - `N`: horizon length
     - `list_P`: list of Polytopes or Polytope
     - `Pk, PN`: Polytopes
@@ -1143,7 +1045,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
 
     - `x0`: initial point for execution
     - `u_seq`: (N x m) array where row k is input for t = k
-    - `ssys`: CtsSysDyn dynamics
+    - `ssys`: LtiSysDyn dynamics
     - `P0`: Polytope where we want x(k) to remain for k = 1, ... N-1
     
     Output:
