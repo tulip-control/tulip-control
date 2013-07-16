@@ -234,7 +234,7 @@ GR[1].
 An equivalent GR[1] specification of the above specification can be obtained
 by introducing an auxiliary discrete system variable :math:`X0reach,` initialized to 
 `True`. The transition relation of :math:`X0reach,` is given by
-:math:`\square(\text{next}(X0reach) = ((s \in C_0 \vee X0reach) \wedge \neg park)).`
+:math:`\square(\text{next}(X0reach) = (s \in C_0 \vee (X0reach \wedge \neg park))).`
 
 To automatically synthesize a planner for this robot, we first import the necessary modules.
 
