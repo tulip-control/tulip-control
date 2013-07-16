@@ -663,7 +663,12 @@ class LabeledTransitions(Transitions):
         If check == False, then add them.
         """
         if not check:
-            self.graph.states.add_from({from_state, to_state} )
+            # attempt adding only if not already in set of states
+            # to avoid ordering-related exceptions
+            if from_state not in self.graph:
+                self.graph.states.add(from_state)
+            if to_state not in self.graph:
+                self.graph.states.add(to_state)
         
         if from_state not in self.graph.states:
             msg = str(from_state) +' = from_state \\notin state'
@@ -686,7 +691,7 @@ class LabeledTransitions(Transitions):
         
         # constuct label dict
         edge_label = dict()
-        if isinstance(labels, list):
+        if isinstance(labels, list) or isinstance(labels, tuple):
             for i in range(len(label_order) ):
                 cur_name = label_order[i]
                 cur_label = labels[i]
@@ -887,14 +892,41 @@ class LabeledTransitions(Transitions):
             for to_state in to_states:
                 self.add_labeled(from_state, to_state, labels, check=check)
     
-    def add_labeled_adj(self, adj, labels, check=True, state_map='ordered'):
+    def add_labeled_adj(self, adj, labels, check_labels=True, state_map='ordered'):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are enabled when the given guard is active.        
         """
-        states_list = self.graph.states(ordered=True)
+        # state order maintained ?
+        if self.graph.states.list is None:
+            raise Exception('System must have ordered states to use add_labeled_adj.')
         
-        # create graph from adjacency
+        # square ?
+        if adj.shape[0] != adj.shape[1]:
+            raise Exception('Adjacency matrix must be square.')
+        
+        n = adj.shape[0]
+        
+        # no existing states ?
+        if len(self.graph.states() ) == 0:
+            new_states = range(n)
+            self.graph.states.add_from(new_states)
+            print('Added ordered list of states: ' +str(self.graph.states.list) )
+        
+        # convert to format friendly for edge iteration
+        nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
+        
+        # add each edge using existing checks
+        states_list = self.graph.states.list
+        for edge in nx_adj.edges_iter():
+            (from_idx, to_idx) = edge
+            
+            from_state = states_list[from_idx]
+            to_state = states_list[to_idx]
+            
+            self.graph.transitions.add_labeled(from_state, to_state, labels,
+                                               check=check_labels)
+        
         # in-place replace nodes, based on map
         # compose graphs (vs union, vs disjoint union)
     

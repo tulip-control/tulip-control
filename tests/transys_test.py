@@ -464,7 +464,33 @@ def ba_maximal_example():
         #ba.save_dot(dot_fname)
     
     return ba
+
+def scipy_sparse_labeled_adj():
+    from scipy.sparse import lil_matrix
+    from numpy.random import rand
     
+    A = lil_matrix((10, 10))
+    A[0, :3] = rand(3)
+    
+    print(A)
+    
+    ofts = ts.oFTS()
+    
+    # note: to avoid first defining actions, pass arg check_labels=False
+    ofts.sys_actions.add('move')
+    ofts.env_actions.add('rain')
+    labels = ('move', 'rain')
+    ofts.transitions.add_labeled_adj(A, labels)
+    #ofts.transitions.add_labeled_adj(A, labels, check_labels=False)
+    
+    print('------------------------------------\n'+
+          'Successfully added adjacency matrix transitions on guard: '
+          +str(labels) +', to open FTS.\n'+
+          '------------------------------------result:\n')
+    print(ofts)
+    
+    return ofts
+
 if __name__ == '__main__':
     sims_demo()
     fts_maximal_example()
@@ -476,3 +502,5 @@ if __name__ == '__main__':
     prod_fts, final_states_preimage = fts *ba
     
     prod_fts.save_pdf('prod.png')
+    
+    ofts = scipy_sparse_labeled_adj()
