@@ -343,7 +343,7 @@ def ofts_maximal_example():
     
     ofts = ts.OpenFiniteTransitionSystem()
     
-    ofts.states.add_from({'s1', 's2', 's3'} )
+    ofts.states.add_from(['s1', 's2', 's3'] )
     ofts.states.add_initial('s1')
     
     ofts.transitions.add('s1', 's2') # unlabeled
@@ -423,7 +423,7 @@ def ba_maximal_example():
     ba = ts.BuchiAutomaton(atomic_proposition_based=True)
     
     ba.states.add('q0')
-    ba.states.add_from({'q1', 'q2', 'q3'} )
+    ba.states.add_from({'q1', 'q2', 'q3'}, destroy_order=True)
     
     ba.states.add_initial('q0')
     

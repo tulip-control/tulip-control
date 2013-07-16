@@ -102,7 +102,7 @@ def contains_multiple(iterable):
 try:
     import pydot
 except ImportError:
-    print('pydot package not found.\nHence dot export not unavailable.')
+    warnings.warn('pydot package not found.\nHence dot export not unavailable.')
     # python-graph package not found. Disable dependent methods.
     pydot = None
 
@@ -119,10 +119,14 @@ class States(object):
     --------
     LabeledStateDiGraph
     """
-    def __init__(self, graph, initial_states=[], current_state=None):
+    def __init__(self, graph, states=[], initial_states=[], current_state=None):
         self.graph = graph
-        self.initial = set(initial_states)
-        self.current = current_state
+        self.initial = set()
+        self.list = list() # None when list disabled
+        
+        self.add_from(states)
+        self.add_initial_from(initial_states)
+        self.set_current(current_state)
     
     def __call__(self, data=False, listed=False):
         """Return set of states.
@@ -140,6 +144,8 @@ class States(object):
             return self.graph.nodes(data=True)
         else:
             if listed:
+                if self.list is None:
+                    raise Exception('State ordering not maintained.')
                 return self.graph.nodes(data=False)
             else:
                 return set(self.graph.nodes(data=False) )
@@ -252,9 +258,17 @@ class States(object):
             # TODO replace with int to reduce size
             to_pydot_graph.add_node(state, label=node_dot_label, shape=node_shape,
                                     style='rounded')
-        
+    
+    def __warn_if_state_exists__(self, state):
+        if state in self:
+            if self.list is not None:
+                raise Exception('State exists and ordering enabled: ambiguous.')
+            else:
+                warnings.warn('State already exists.')
+                return
+    
     # states
-    def add(self, state):
+    def add(self, new_state):
         """Create single state.
         
         C{state} can be any hashable object except None (see nx add_node below)
@@ -267,16 +281,50 @@ class States(object):
         --------
         networkx.MultiDiGraph.add_node
         """
-        self.graph.add_node(state)
+        self.__warn_if_state_exists__(new_state)
+        self.graph.add_node(new_state)
+        
+        # list maintained ?
+        if self.list is not None:
+            self.list.append(new_state)
     
-    def add_from(self, states):
+    def add_from(self, new_states, destroy_order=False):
         """Add multiple states from iterable container states.
         
         see also
         --------
         networkx.MultiDiGraph.add_nodes_from.
         """
-        self.graph.add_nodes_from(states)
+        if not isinstance(new_states, list):
+            if not isinstance(new_states, Iterable):
+                raise Exception('New set of states must be iterable container.')
+            
+            # order currently maintained ?
+            if self.list is not None:
+                # no states stored ?
+                if len(self.list) == 0:
+                    warnings.warn("Added non-list to empty system with ordering."+
+                                  "Won't remember state order from now on.")
+                    self.list = None
+                else:
+                    # cancel existing ordering ?
+                    if destroy_order:
+                        warnings.warn('Added non-list of new states.'+
+                                      'Existing state order forgotten.')
+                        self.list = None
+                    else:
+                        raise Exception('Ordered states maintained.'+
+                                        'Please add list of states instead.')
+        
+        # iteration used for comprehensible error message
+        for new_state in new_states:
+            self.__warn_if_state_exists__(new_state)
+        
+        self.graph.add_nodes_from(new_states)
+        
+        # list maintained ?
+        if self.list is not None:
+            self.list = self.list +new_states
     
     def number(self):
         """Total number of states."""
@@ -284,21 +332,39 @@ class States(object):
     
     def remove(self, state):
         """Remove single state."""
-        self.graph.remove_node(state)    
+        self.graph.remove_node(state)
+        
+        # no ordering maintained ?
+        if self.list is None:
+            return
+        
+        self.list.remove(state)
     
     def remove_from(self, states):
         """Remove a list of states."""
         self.graph.remove_nodes_from(states)
+        
+        # no ordering maintained ?
+        if self.list is None:
+            return
+        
+        for state in states:
+            self.list.remove(state)
     
     def set_current(self, state):
         """Select current state.
         
         State membership is checked.
         If state \\notin states, exception raised.
+        
+        None is possible.
         """
+        if state is None:
+            self.current = None
+            return
         
         if state not in self:
-            raise Exception('State given is not in set of states.\n'+
+            raise Exception('Current state given is not in set of states.\n'+
                             'Cannot set current state to given state.')
         
         self.current = state
@@ -874,7 +940,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def __init__(self, name='', states=[], initial_states=[], current_state=None):
         nx.MultiDiGraph.__init__(self, name=name)
         
-        self.states = States(self, initial_states, current_state)
+        self.states = States(self, states=states, initial_states=initial_states,
+                             current_state=current_state)
         self.transitions = LabeledTransitions(self)
 
         self.dot_node_shape = {'normal':'circle'}
@@ -1016,13 +1083,35 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         pydot_graph = self.__to_pydot__()
         pydot_graph.write_png(path)
     
-    def save_pdf(self, path='default', add_missing_extension=True):
+    def save_pdf(self, path='default', add_missing_extension=True, rankdir='LR'):
         """Save .pdf file.
         
-        Requires pydot.        
+        @param path: path to image
+            (extension .pdf appened if missing and add_missing_extension==True)
+        @type path: str
+        
+        @param add_missing_extension: if extension .pdf missing, it is appended
+        @type add_missing_extension: bool
+        
+        @param rankdir: direction for dot layout
+        @type rankdir: str = 'TB' | 'LR'
+            (i.e., Top->Bottom | Left->Right)
+        
+        caution
+        -------
+        rankdir is experimental argument
+        
+        See also
+        --------
+        save_dot, save_png
+        
+        depends
+        -------
+        pydot      
         """
         path = self.__export_fname__(path, 'pdf', addext=add_missing_extension)
         pydot_graph = self.__to_pydot__()
+        pydot_graph.set_rankdir(rankdir)
         pydot_graph.write_pdf(path)
     
     def dump_dot_color(self):
@@ -1438,7 +1527,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         be defined).
         """
         LabeledStateDiGraph.__init__(
-            self, name=name, states=[], initial_states=initial_states,
+            self, name=name, states=states, initial_states=initial_states,
             current_state=current_state
         )
         
@@ -2038,6 +2127,12 @@ class BuchiAutomaton(OmegaAutomaton):
         
         This definition of accepting set extends Def.4.8, p.156 [Baier] to NBA.
         
+        caution
+        -------
+        This method includes semantics for true\in\Sigma (p.916, [Baier]),
+        so there is a slight overlap with logic grammar.
+        In other words, this module is not completely isolated from logics.
+        
         see also
         --------        
         ts_ba_sync_prod.
@@ -2150,7 +2245,8 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     ba = buchi_automaton
     
     prodts_name = fts.name +'*' +ba.name
-    prodts = FiniteTransitionSystem(name=prodts_name)
+    # using set() destroys order
+    prodts = FiniteTransitionSystem(name=prodts_name, states=set() )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions() )
 
