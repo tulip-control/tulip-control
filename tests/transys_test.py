@@ -491,6 +491,31 @@ def scipy_sparse_labeled_adj():
     
     return ofts
 
+def label_per_state():
+    """Add states with (possibly) different AP labels each."""
+    
+    fts = ts.FTS()
+    fts.states.add_from(['s0', 's1'] )
+    fts.atomic_propositions.add_from(['p', '!p'] )
+    fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}] )
+    print(fts)
+    
+    fts = ts.FTS()
+    fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}], check=False)
+    print(fts)
+    
+    fts = ts.FTS()
+    fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
+    print(fts)
+    
+    fts = ts.FTS()
+    fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
+    print(fts)
+    
+    fts = ts.FTS()
+    fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
+    print(fts)
+
 if __name__ == '__main__':
     sims_demo()
     fts_maximal_example()
@@ -504,3 +529,5 @@ if __name__ == '__main__':
     prod_fts.save_pdf('prod.png')
     
     ofts = scipy_sparse_labeled_adj()
+    label_per_state()
+    

@@ -609,6 +609,48 @@ class Transitions(object):
             for to_state in to_states:
                 self.graph.add_edge(from_state, to_state)
     
+    def add_adj(self, adj):
+        """Add multiple transitions from adjacency matrix.
+        
+        These transitions are not labeled.
+        To label then, use either LabeledTransitions.relabel(),
+        or remove() and then LabeledTransitions.add_labeled_adj().
+        
+        @param adj: new transitions, represented by the
+            non-zero elements of an adjacency matrix.
+            Note that adjacency here is in the sense of nodes
+            and not spatial.
+        @type adj: scipy.sparse.lil (list of lists)
+        """
+        # state order maintained ?
+        if self.graph.states.list is None:
+            raise Exception('System must have ordered states to use add_labeled_adj.')
+        
+        # square ?
+        if adj.shape[0] != adj.shape[1]:
+            raise Exception('Adjacency matrix must be square.')
+        
+        n = adj.shape[0]
+        
+        # no existing states ?
+        if len(self.graph.states() ) == 0:
+            new_states = range(n)
+            self.graph.states.add_from(new_states)
+            print('Added ordered list of states: ' +str(self.graph.states.list) )
+        
+        # convert to format friendly for edge iteration
+        nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
+        
+        # add each edge using existing checks
+        states_list = self.graph.states.list
+        for edge in nx_adj.edges_iter():
+            (from_idx, to_idx) = edge
+            
+            from_state = states_list[from_idx]
+            to_state = states_list[to_idx]
+            
+            self.add(from_state, to_state)
+    
     def number(self):
         """Count transitions."""
         return self.graph.number_of_edges()
@@ -896,6 +938,20 @@ class LabeledTransitions(Transitions):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are enabled when the given guard is active.        
+        
+        @param adj: new transitions represented by adjacency matrix.
+            Note that here adjacency is in the sense of nodes,
+            not spatial.
+        @type adj: scipy.sparse.lil (list of lists)
+        
+        @param labels: combination of labels with which to annotate each of
+            the new transitions created from matrix adj.
+            Each label value must be already in one of the
+            transition labeling sets.
+        @type labels: tuple of valid transition labels
+        
+        @param check_labels: check validity of labels, or just add them as new
+        @type check_labels: bool
         """
         # state order maintained ?
         if self.graph.states.list is None:
@@ -924,11 +980,12 @@ class LabeledTransitions(Transitions):
             from_state = states_list[from_idx]
             to_state = states_list[to_idx]
             
-            self.graph.transitions.add_labeled(from_state, to_state, labels,
-                                               check=check_labels)
+            self.add_labeled(from_state, to_state, labels, check=check_labels)
         
         # in-place replace nodes, based on map
         # compose graphs (vs union, vs disjoint union)
+        
+        # TODO add overwriting (=delete_labeled +add once more) capability
     
     def with_label(self, from_state, to_states='any', desired_label='any'):
         """Find all edges from_state to_states, annotated with guard_label.
@@ -1420,7 +1477,49 @@ class AtomicPropositions(object):
         """Label multiple states with the same AP label."""
         
         for state in states:
-            self.label_state(state, ap_label, check=True)
+            self.label_state(state, ap_label, check=check)
+    
+    def label_per_state(self, states, ap_label_list, check=True):
+        """Label multiple states, each with a (possibly) different AP label.
+        
+        If no states currently exist and C{states=[]} passed,
+        then new states 0,...,N-1 are created,
+        where N = C{len(ap_label_list) } the number of AP labels in the list.
+        Note that these AP labels are not necessarily different with each other.
+        
+        @param states: existing states to be labeled with ap_label_list,
+            or string 'create' to cause creation of new int ID states
+        @type states: interable container of existing states |
+            str 'create'
+        
+        @param ap_label_list: valid AP labels for annotating C{states}
+        @type ap_label_list: list of valid labels
+        
+        @param check: check if given states and given labels already exist.
+            If C{check=False}, then each state passed is added to system,
+            and each AP is added to the APs of the system.
+        @type check: bool
+        
+        examples
+        --------
+        fts.states.add_from(['s0', 's1'] )
+        fts.atomic_propositions.add_from(['p', '!p'] )
+        fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}] )
+        
+        or to skip adding them first:
+        fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}], check=False)
+        
+        The following 3 are equivalent:
+        fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
+        fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
+        fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
+        """
+        if states == 'create':
+            states = range(len(ap_label_list) )
+            check = False
+        
+        for state, curlabel in zip(states, ap_label_list):
+            self.label_state(state, curlabel, check=check)
     
     def delabel_state(self, state):
         """Alias for remove_label_from_state()."""
