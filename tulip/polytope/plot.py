@@ -128,14 +128,14 @@ def plot(poly1, show=True):
     else:
         print "Cannot plot empty polytope"
         
-def plot_partition(ppp, plot_transitions=False, plot_numbers=True, show=True):
+def plot_partition(ppp, trans=None, plot_numbers=True, show=True):
     """Plots a 2D PropPreservingPartition object using matplotlib
     
     Input:
 
     - `ppp`: A PropPreservingPartition object
-    - `plot_transitions`: If True, represent transitions in `ppp` with arrows.
-                          Requires transitions to be stored in `ppp`.
+    - `trans`: Transition matrix, when used transitions in `ppp` 
+               are shown with arrows.
     - `plot_numbers`: If True, plot the number of the Region in the center of 
                       each Region.
     - `show`: If True, show the plot. Otherwise return axis object. Axis object is good
@@ -145,7 +145,6 @@ def plot_partition(ppp, plot_transitions=False, plot_numbers=True, show=True):
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
     reg_list = ppp.list_region
-    trans = ppp.trans
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -164,7 +163,7 @@ def plot_partition(ppp, plot_transitions=False, plot_numbers=True, show=True):
     for i in range(len(reg_list)):
         reg = reg_list[i]
         rc, xc = cheby_ball(reg)
-        if plot_transitions:
+        if trans is not None:
             for j in np.nonzero(trans[:,i])[0]:
                 reg1 = reg_list[j]
                 rc1,xc1 = cheby_ball(reg1)

@@ -49,11 +49,11 @@ Helper functions:
 
 from copy import deepcopy
 import numpy as np
-from scipy import io as sio
+from scipy import sparse as sp
 from cvxopt import matrix,solvers
 import itertools
-import polytope as pc
-import transys as ts
+from tulip import polytope as pc
+import tulip.transys as ts
 from tulip.hybrid import *
 from prop2part import PropPreservingPartition, pwa_partition
 
@@ -177,7 +177,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     if trans_length > 1:
         k = 1
         while k < trans_length:
-            IJ = np.dot(IJ, part.adj)
+            IJ = np.dot(IJ, np.array(part.adj.todense()))
             k += 1
         IJ = (IJ > 0).astype(int)
         
@@ -355,9 +355,13 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             transitions[j,i] = 0
 
     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
-                    list_region=sol, num_regions=len(sol), adj=adj, \
-                    list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)                           
-    return new_part
+                    list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj), \
+                    list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)
+                
+    ofts = ts.oFTS()
+    labels = ('1','1') #default abstraction is deterministic, labels are not needed
+    ofts.transitions.add_labeled_adj(sp.lil_matrix(transitions), labels, check_labels=False)
+    return AbstractSysDyn(ppp=new_part, ofts=ofts, orig_list_region=orig_list, orig=orig)
 
 # DEFUNCT until further notice
 # def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
