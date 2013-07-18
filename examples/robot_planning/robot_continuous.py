@@ -13,6 +13,8 @@ Small modifications by Yuchen Lin.
 
 NO, system and cont. prop definitions based on TuLiP 1.x
 2 Jul, 2013
+NO, TuLiP 1.x discretization
+17 Jul, 2013
 """
 
 #@importvar@
@@ -21,7 +23,7 @@ from numpy import array
 
 from tulip import *
 import tulip.polytope as pc
-from tulip.abstract import prop2part
+from tulip.abstract import prop2part, discretize
 #@importvar_end@
 
 # Continuous state space
@@ -44,6 +46,8 @@ cont_props['X2'] = pc.Polytope.from_box(array([[1., 2.],[2., 3.]]))
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part(cont_state_space, cont_props)
+disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
+                N=8, min_cell_volume=0.1, verbose=0)
 
 # TO DO (when the relevant pieces are in place):
 # Specifications

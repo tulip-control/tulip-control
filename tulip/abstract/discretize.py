@@ -53,7 +53,7 @@ from scipy import sparse as sp
 from cvxopt import matrix,solvers
 import itertools
 from tulip import polytope as pc
-import tulip.transys as ts
+from tulip import transys as ts
 from tulip.hybrid import *
 from prop2part import PropPreservingPartition, pwa_partition
 
@@ -357,10 +357,23 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
                     list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj), \
                     list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)
-                
+    
+    # Generate transition system and add transitions       
     ofts = ts.oFTS()
-    labels = ('1','1') #default abstraction is deterministic, labels are not needed
-    ofts.transitions.add_labeled_adj(sp.lil_matrix(transitions), labels, check_labels=False)
+    ofts.transitions.add_adj(sp.lil_matrix(transitions))
+    
+    # Decorate TS with state labels
+    ofts.atomic_propositions.add_from(part.list_prop_symbol)
+    prop_list = []
+    for reg in sol:
+        state_prop = set()
+        for prop_ind in range(len(reg.list_prop)):
+            if reg.list_prop[prop_ind]==1:
+                state_prop.add(part.list_prop_symbol[prop_ind]) 
+        prop_list.append(state_prop)
+
+    ofts.atomic_propositions.label_per_state(range(len(prop_list)),prop_list)
+    
     return AbstractSysDyn(ppp=new_part, ofts=ofts, orig_list_region=orig_list, orig=orig)
 
 # DEFUNCT until further notice
