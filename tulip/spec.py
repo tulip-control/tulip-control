@@ -35,6 +35,7 @@ Specification module
 
 import re, copy
 
+
 class GRSpec:
     """
     GRSpec class for specifying a GR[1] specification of the form::
@@ -118,7 +119,7 @@ class GRSpec:
                 self.env_prog = [self.env_prog]
 
 
-    def importGridWorld(self, gworld, offset=(0,0), controlled_dyn=True):
+    def import_GridWorld(self, gworld, offset=(0,0), controlled_dyn=True):
         """Append specification describing a gridworld.
 
         Basically, call the spec method of the given GridWorld object
@@ -143,7 +144,7 @@ class GRSpec:
         self.sys_prog.extend(s.sys_prog)
 
 
-    def importDiscDynamics(self, disc_dynamics, cont_varname="cellID"):
+    def import_PropPreservingPartition(self, disc_dynamics, cont_varname="cellID"):
         """Append results of discretization (abstraction) to specification.
 
         disc_dynamics is an instance of PropPreservingPartition, such
@@ -184,8 +185,8 @@ class GRSpec:
                 subformula = " | ".join([cont_varname+str(regID) for regID in reg])
                 subformula_next = " | ".join([cont_varname+str(regID)+"'" for regID in reg])
             prop_sym_next = prop_sym+"'"
-            self.sym2prop(props={prop_sym_next:subformula_next})
-            self.sym2prop(props={prop_sym:subformula})
+            self.sym_to_prop(props={prop_sym_next:subformula_next})
+            self.sym_to_prop(props={prop_sym:subformula})
 
         # It is easier to work with lists...
         if isinstance(self.sys_safety, str):
@@ -222,10 +223,9 @@ class GRSpec:
             self.sys_safety[-1] += ")"
 
 
-    def sym2prop(self, props, verbose=0):
-        """Replace the symbols of propositions in this spec with the actual propositions"""
-        # Replace symbols for propositions on discrete variables with the actual 
-        # propositions
+    def sym_to_prop(self, props, verbose=0):
+        """Replace the symbols of propositions with the actual propositions
+        """
         if (props is not None):
             symfound = True
             while (symfound):
@@ -301,8 +301,8 @@ class GRSpec:
                                                               self.sys_prog[i])
                                 symfound = True
 
-    def toSMVSpec(self):
-        raise Exception("GRSpec.toSMVSpec is defunct, possibly temporarily")
+    def to_smv(self):
+        raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
         # trees = []
         # # NuSMV can only handle system states
         # for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
@@ -324,7 +324,7 @@ class GRSpec:
         # # & together converted subformulae
         # return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
 
-    def toJTLVSpec(self):
+    def to_jtlv(self):
         """Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
         specification."""
         spec = ['', '']
@@ -434,7 +434,7 @@ class GRSpec:
         return spec
 
 
-    def dumpgr1c(self):
+    def to_gr1c(self):
         """Dump to gr1c specification string."""
         output = "ENV: "+" ".join(self.env_vars)+";\n"
         output += "SYS: "+" ".join(self.sys_vars)+";\n\n"

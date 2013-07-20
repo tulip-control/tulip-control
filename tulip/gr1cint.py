@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright (c) 2012 by California Institute of Technology
+# Copyright (c) 2012, 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,8 +29,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-# $Id$
 """
 Interface to gr1c
 
@@ -51,9 +47,9 @@ import os
 
 from conxml import loadXML
 from spec import GRSpec
-from errorprint import printWarning, printError
 
 GR1C_BIN_PREFIX=""
+
 
 def check_syntax(spec_str, verbose=0):
     """Check whether given string has correct gr1c specification syntax.

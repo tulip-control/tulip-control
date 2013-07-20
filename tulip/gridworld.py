@@ -1,4 +1,4 @@
-# Copyright (c) 2012 by California Institute of Technology
+# Copyright (c) 2012, 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-# $Id$
 """
 Routines for working with gridworlds.
 
@@ -47,7 +45,7 @@ import matplotlib.animation as anim
 import matplotlib.cm as mpl_cm
 
 from polytope import Polytope, Region
-from prop2part import prop2part2, PropPreservingPartition
+from abstract.prop2part import prop2part, PropPreservingPartition
 from spec import GRSpec
 
 
@@ -459,7 +457,7 @@ class GridWorld:
                                             -offset[0]-j*side_lengths[0],
                                             offset[0]+(j+1)*side_lengths[0]],
                                           dtype=np.float64))
-        part = prop2part2(domain, cells)
+        part = prop2part(domain, cells)
 
         adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
         for this_ind in range(len(part.list_region)):
