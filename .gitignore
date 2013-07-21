@@ -7,3 +7,4 @@
 *.pdf
 *.PDF
 /build/
+/dist/
