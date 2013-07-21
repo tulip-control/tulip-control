@@ -32,3 +32,4 @@
 
 __all__ = ["abstract", "polytope", "hybrid", "transys"]
 
+__version__ = "1.0a"

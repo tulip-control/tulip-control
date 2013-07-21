@@ -4,20 +4,22 @@
 Tutorial and Examples
 =======================
 
-TuLiP is developed for synthesis of embedded control systems,
-allowing planning to be done in a receding horizon manner.
-For more information regarding the theory behind this, please visit
-our `wiki <http://tulip-control.sourceforge.net>`_.
+TuLiP is developed for synthesis of discrete controllers for hybrid control
+systems, including supervisory controllers, switching controllers and
+receding horizon temporal logic planners.
 
+Discrete State Example
+----------------------
+To illustrate the basic synthesis capabilities of TuLiP, we synthesize a
+simple discrete state controller for a robotic motion control system.
 
-Synthesis of Embedded Control Systems
--------------------------------------
-We consider a system that comprises the physical component, which we refer to as 
-the plant, and the (potentially dynamic and not a priori known) environment in 
-which the plant operates. 
-The system may contain both continuous (physical) and discrete (computational)
-components.
-In summary, the problem we are interested in consists of
+Synthesis of Reactive Controllers
+---------------------------------
+We consider a system that comprises the physical component, which we refer
+to as the plant, and the (potentially dynamic and not a priori known)
+environment in which the plant operates.  The system may contain both
+continuous (physical) and discrete (computational) components.  In summary,
+the problem we are interested in consists of
 
   - discrete system state,
   - continuous system state,
@@ -25,14 +27,13 @@ In summary, the problem we are interested in consists of
   - specification.
 
 Here, `discrete` state refer to the state that can take only a finite number
-of possible values while
-`continuous` state refer to the state that can take an infinite number
-of possible values, e.g., the position of the car.
-The `environment` state is related to factors over which the system does not 
-have control such as the position of an obstacle and the outside temperature.
-At any given time, the controller regulates the `system` (or `controlled`) 
-state such that the specification is satisfied, given the current value of the 
-environment variables and the previous system states.
+of possible values while `continuous` state refer to the state that can take
+an infinite number of possible values, e.g., the position of the car.  The
+`environment` state is related to factors over which the system does not
+have control such as the position of an obstacle and the outside
+temperature.  At any given time, the controller regulates the `system` (or
+`controlled`) state such that the specification is satisfied, given the
+current value of the environment variables and the previous system states.
 We say that the specification is `realizable` if for any possible behavior
 of the environment, such a controller exists, i.e., there exists a strategy
 for the system to satisfy the specification.
@@ -42,10 +43,8 @@ following discrete-time linear time-invariant state space model:
 for :math:`t \in \{0,1,2,...\}`
 
 .. math::
-   s[t+1]  &=   As[t] + Bu[t] + Ed[t] + K\\
-   u[t]    &\in U\\
-   d[t]    &\in D\\
-   s[0]	   &\in S
+   s[t+1]  =   As[t] + Bu[t] + Ed[t] + K \qquad
+   u[t] \in U,\, d[t] \in D,\, s[0] \in S,
    :label: dynamics
 
 where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous 
@@ -72,34 +71,33 @@ The assumption :math:`\varphi_e` on the environment and the desired behavior
 :math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
 See our `wiki <http://tulip-control.sourceforge.net>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
 
-
-.. image:: ecssyn.*
-
-As illustrated in the figure above, our approach to this embedded control 
+As described in the :doc:`intro`, our approach to this reactive control 
 system synthesis consists of the following main steps:
 
-   1. :ref:`Generate a proposition preserving partition of the continuous state space. <ssec:prop-part>`
-   2. :ref:`Discretize the continuous state space based on the evolution of the continuous state. <ssec:disc>`
+   1. :ref:`Generate a proposition preserving partition of the continuous
+      state space. <ssec:prop-part>` 
+   2. :ref:`Discretize the continuous state space based on the evolution of
+      the continuous state. <ssec:disc>` 
    3. :ref:`Digital design synthesis. <ssec:syn>`
-
 
 .. _ssec:prop-part:
 
 Proposition Preserving Partition of Continuous State Space
 ``````````````````````````````````````````````````````````
-Given the continuous state space :math:`S` of the system and the set :math:`\Pi_c` of 
-propositions on the continuous state of the system, we partition :math:`S` into a finite 
-number of cells such that all the continuous states in each cell satisfy exactly the 
-same set of propositions in :math:`\Pi_c`. 
+Given the continuous state space :math:`S` of the system and the set
+:math:`\Pi_c` of propositions on the continuous state of the system, we
+partition :math:`S` into a finite number of cells such that all the
+continuous states in each cell satisfy exactly the same set of propositions
+in :math:`\Pi_c`.
 
 This can be done using the following function call:
 
-     .. autofunction:: prop2part.prop2part2
+     .. autofunction:: abstract.prop2part2
 	:noindex:
 
 The above function returns a proposition preserving partition as a PropPreservingPartition object.
 
-     .. autoclass:: prop2part.PropPreservingPartition
+     .. autoclass:: abstract.PropPreservingPartition
 	:noindex:
 
 
