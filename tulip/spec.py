@@ -36,13 +36,15 @@ Specification module
 import re, copy
 
 
-class GRSpec:
-    """
-    GRSpec class for specifying a GR[1] specification of the form::
+class GRSpec(object):
+    """GR(1) specification
 
-        (env_init & []env_safety & []<>env_prog) -> (sys_init & []sys_safety & []<>sys_prog)
+    The canonical form is::
 
-    A GRSpec object contains the following fields:
+      (env_init & []env_safety & []<>env_prog_1 & []<>env_prog_2 & ...)
+        -> (sys_init & []sys_safety & []<>sys_prog_1 & []<>sys_prog_2 & ...)
+
+    A GRSpec object contains the following attributes:
 
       - C{env_vars}: a list of variables (names given as strings) that
         are determined by the environment.
@@ -224,7 +226,7 @@ class GRSpec:
 
 
     def sym_to_prop(self, props, verbose=0):
-        """Replace the symbols of propositions with the actual propositions
+        """Replace the symbols of propositions with the actual propositions.
         """
         if (props is not None):
             symfound = True
@@ -325,8 +327,8 @@ class GRSpec:
         # return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
 
     def to_jtlv(self):
-        """Return a list of two strings [assumption, guarantee] corresponding to this GR[1]
-        specification."""
+        """Return specification as list of two strings [assumption, guarantee].
+        """
         spec = ['', '']
         # env init
         if (isinstance(self.env_init, str)):
