@@ -176,7 +176,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 new_list.append(isect)
                 parent.append(j)
     
-    adj = sp.lil_matrix((num_reg,num_reg), dtype=np.int8)
+    adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
     for i in range(len(new_list)):
         for j in range(i+1, len(new_list)):
             if (ppp.adj[parent[i], parent[j]] == 1) or \
