@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2011, 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,8 +29,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-# $Id$
 """
 Several functions that help in working with tulipcon XML files.
 
@@ -45,12 +41,11 @@ import re
 import xml.etree.ElementTree as ET
 import numpy as np
 
-import rhtlp
-import discretize
+from hybrid import LtiSysDyn
 import automaton
-import prop2part
+from abstract.prop2part import prop2part, PropPreservingProposition
 import polytope as pc
-import jtlvint
+#import jtlvint  # XXX: not yet overhauled
 import errorprint as ep
 from spec import GRSpec
 
@@ -150,7 +145,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
         (tag_name, K) = untagmatrix(c_dyn.find(ns_prefix+"K"))
         (tag_name, Uset) = untagpolytope(c_dyn.find(ns_prefix+"U_set"))
         (tag_name, Wset) = untagpolytope(c_dyn.find(ns_prefix+"W_set"))
-        sys_dyn = discretize.CtsSysDyn(A, B, E, K, Uset, Wset)
+        sys_dyn = LtiSysDyn(A, B, E, K, Uset, Wset)
 
     # Extract LTL specification
     s_elem = elem.find(ns_prefix+"spec")
@@ -189,7 +184,7 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
     else:
         aut = automaton.Automaton()
         if not aut.loadXML(aut_elem, namespace=DEFAULT_NAMESPACE):
-            ep.printError("failed to read Automaton from given tulipcon XML string.")
+            raise ValueError("failed to read Automaton from given tulipcon XML string.")
             aut = None
 
     # Discrete dynamics, if available
@@ -231,38 +226,40 @@ def loadXML(x, verbose=0, namespace=DEFAULT_NAMESPACE):
                         (tag_name, P) = untagpolytope(cell_item)
                         orig_list_region.append(P)
                         
-            disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
-                                                              num_prop=len(prop_symbols),
-                                                              list_region=list_region,
-                                                              num_regions=len(list_region),
-                                                              adj=0,
-                                                              trans=trans,
-                                                              list_prop_symbol=prop_symbols,
-                                                              orig_list_region=orig_list_region,
-                                                              orig=orig)
+            disc_dynamics = PropPreservingPartition(domain=domain,
+                                                    num_prop=len(prop_symbols),
+                                                    list_region=list_region,
+                                                    num_regions=len(list_region),
+                                                    adj=0,
+                                                    trans=trans,
+                                                    list_prop_symbol=prop_symbols,
+                                                    orig_list_region=orig_list_region,
+                                                    orig=orig)
 
         # Build appropriate ``problem'' instance
         if ptype == SYNTH_PROB:
-            prob = jtlvint.generateJTLVInput(env_vars=env_vars,
-                                             sys_disc_vars=sys_disc_vars,
-                                             spec=spec,
-                                             disc_props={},
-                                             disc_dynamics=disc_dynamics,
-                                             smv_file="", spc_file="", verbose=2)
+            raise Exception("conxml.loadXML: SYNTH_PROB type is defunct, possibly temporarily")
+            # prob = jtlvint.generateJTLVInput(env_vars=env_vars,
+            #                                  sys_disc_vars=sys_disc_vars,
+            #                                  spec=spec,
+            #                                  disc_props={},
+            #                                  disc_dynamics=disc_dynamics,
+            #                                  smv_file="", spc_file="", verbose=2)
         elif ptype == RHTLP_PROB:
-            if disc_dynamics is not None:
-                prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
-                                       env_vars=env_vars,
-                                       sys_disc_vars=sys_disc_vars,
-                                       disc_dynamics=disc_dynamics,
-                                       #cont_props=cont_props,
-                                       spec=spec)
-            else:
-                prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
-                                       env_vars=env_vars,
-                                       sys_disc_vars=sys_disc_vars,
-                                       #cont_props=cont_props,
-                                       spec=spec)
+            raise Exception("conxml.loadXML: RHTLP_PROB type is defunct, possibly temporarily")
+            # if disc_dynamics is not None:
+            #     prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
+            #                            env_vars=env_vars,
+            #                            sys_disc_vars=sys_disc_vars,
+            #                            disc_dynamics=disc_dynamics,
+            #                            #cont_props=cont_props,
+            #                            spec=spec)
+            # else:
+            #     prob = rhtlp.RHTLPProb(shprobs=[], Phi="True", discretize=False,
+            #                            env_vars=env_vars,
+            #                            sys_disc_vars=sys_disc_vars,
+            #                            #cont_props=cont_props,
+            #                            spec=spec)
         elif ptype == NONE_PROB:
             prob = disc_dynamics
         else: #ptype == INCOMPLETE_PROB
@@ -311,12 +308,14 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     To easily save the result here to a file, instead call the method
     *writeXMLfile*
     """
-    if prob is not None and not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
-        raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
-    if sys_dyn is not None and not isinstance(sys_dyn, discretize.CtsSysDyn):
+    if prob is not None:
+        raise Exception("conxml.dumpXML: non-empty prob types are not supported, possibly temporarily")
+    # if prob is not None and not isinstance(prob, (rhtlp.SynthesisProb, rhtlp.RHTLPProb)):
+    #     raise TypeError("prob should be an instance (or child) of rhtlp.SynthesisProb.")
+    if sys_dyn is not None and not isinstance(sys_dyn, LtiSysDyn):
         raise TypeError("sys_dyn should be an instance of discretizeM.CtsSysDyn or None.")
-    if disc_dynamics is not None and not isinstance(disc_dynamics, prop2part.PropPreservingPartition):
-        raise TypeError("disc_dynamics should be an instance of prop2part.PropPreservingPartition or None.")
+    if disc_dynamics is not None and not isinstance(disc_dynamics, PropPreservingPartition):
+        raise TypeError("disc_dynamics should be an instance of PropPreservingPartition or None.")
     if aut is not None and not isinstance(aut, automaton.Automaton):
         raise TypeError("aut should be an instance of Automaton or None.")
     if spec is not None and not isinstance(spec, (list, GRSpec)):
@@ -335,12 +334,16 @@ def dumpXML(prob=None, spec=['',''], sys_dyn=None, aut=None,
     idt_level += 1
     if sys_dyn is not None:
         output += idt*idt_level+'<prob_type>'
-        if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
-            output += 'rhtlp'
-        elif isinstance(prob, rhtlp.SynthesisProb):
-            output += 'synth'
-        else: # prob is None
+        if prob is None:
             output += 'none'
+        else:
+            raise Exception("conxml.dumpXML: non-empty prob types are not supported, possibly temporarily")
+        # if isinstance(prob, rhtlp.RHTLPProb):  # Beware of order and inheritance
+        #     output += 'rhtlp'
+        # elif isinstance(prob, rhtlp.SynthesisProb):
+        #     output += 'synth'
+        # else: # prob is None
+        #     output += 'none'
         output += '</prob_type>'+nl
 
         output += idt*idt_level+'<c_dyn>'+nl
@@ -499,7 +502,7 @@ def loadXMLtrans(x, namespace=DEFAULT_NAMESPACE):
         (tag_name, E) = untagmatrix(c_dyn.find(ns_prefix+"E"))
         (tag_name, Uset) = untagpolytope(c_dyn.find(ns_prefix+"U_set"))
         (tag_name, Wset) = untagpolytope(c_dyn.find(ns_prefix+"W_set"))
-        sys_dyn = discretize.CtsSysDyn(A, B, E, [], Uset, Wset)
+        sys_dyn = LtiSysDyn(A, B, E, [], Uset, Wset)
 
     # Discrete dynamics, if available
     d_dyn = elem.find(ns_prefix+"d_dyn")
@@ -528,13 +531,13 @@ def loadXMLtrans(x, namespace=DEFAULT_NAMESPACE):
                                                     np_type_P=np.float64)
                         list_region.append(R)
 
-            disc_dynamics = prop2part.PropPreservingPartition(domain=domain,
-                                                              num_prop=len(prop_symbols),
-                                                              list_region=list_region,
-                                                              num_regions=len(list_region),
-                                                              adj=0,
-                                                              trans=trans,
-                                                              list_prop_symbol=prop_symbols)
+            disc_dynamics = PropPreservingPartition(domain=domain,
+                                                    num_prop=len(prop_symbols),
+                                                    list_region=list_region,
+                                                    num_regions=len(list_region),
+                                                    adj=0,
+                                                    trans=trans,
+                                                    list_prop_symbol=prop_symbols)
 
     return (sys_dyn, disc_dynamics, horizon)
 
@@ -549,10 +552,10 @@ def dumpXMLtrans(sys_dyn, disc_dynamics, horizon, extra="",
     The "pretty" flag has the same meaning as elsewhere (e.g., see
     docstring for dumpXML function).
     """
-    if not isinstance(sys_dyn, discretize.CtsSysDyn):
+    if not isinstance(sys_dyn, LtiSysDyn):
         raise TypeError("sys_dyn must be an instance of discretizeM.CtsSysDyn")
-    if not isinstance(disc_dynamics, prop2part.PropPreservingPartition):
-        raise TypeError("disc_dynamics must be an instance of prop2part.PropPreservingPartition")
+    if not isinstance(disc_dynamics, PropPreservingPartition):
+        raise TypeError("disc_dynamics must be an instance of PropPreservingPartition")
     
     if pretty:
         nl = "\n"  # Newline
@@ -1068,7 +1071,7 @@ def loadYAML(x, verbose=0):
             print k+" =\n", v
 
     # Build transition system
-    sys_dyn = discretize.CtsSysDyn(A, B, E, [], U, W)
-    initial_partition = prop2part.prop2part2(X, cont_prop)
+    sys_dyn = LtiSysDyn(A, B, E, [], U, W)
+    initial_partition = prop2part(X, cont_prop)
 
     return (sys_dyn, initial_partition, N, assumption, guarantee, env_vars, sys_disc_vars)
