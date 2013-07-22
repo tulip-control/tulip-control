@@ -114,8 +114,9 @@ def prop2part(state_space, cont_props_dict):
     return mypartition
     
 def prop2partconvex(ppp):
-    """This function takes a proposition preserving partition and generates another proposition preserving partition     
-    such that each part in the new partition is a convex polytope"""
+    """This function takes a proposition preserving partition and generates 
+    another proposition preserving partition such that each part in the new 
+    partition is a convex polytope"""
     myconvexpartition = PropPreservingPartition(domain=copy.deepcopy(ppp.domain),
                                           num_prop=ppp.num_prop,
                                           list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol))
@@ -188,7 +189,145 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
             
     return PropPreservingPartition(domain=ppp.domain,\
                     num_prop=ppp.num_prop, list_region=new_list, num_regions=len(new_list), \
-                    adj=adj, list_prop_symbol=ppp.list_prop_symbol, list_subsys = subsys_list)        
+                    adj=adj, list_prop_symbol=ppp.list_prop_symbol, list_subsys = subsys_list)
+                
+                
+def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
+    """ This function takes a proposition preserving partition ppp and the size 
+    of the grid or the number of grids, and returns a refined proposition 
+    preserving partition with grids.
+     
+    Input:
+    
+    - `ppp`: a PropPreservingPartition object
+    - `grid_size`: the size of the grid, type: float or list of float
+    - `num_grid_pnts`: the number of grids for each dimension, type: integer or 
+                       list of integer
+    
+    Output:
+    
+    - A PropPreservingPartition object with grids
+        
+    Note: There could be numerical instabilities when the continuous 
+    propositions in ppp do not align well with the grid resulting in very small 
+    regions. Performace significantly degrades without glpk.
+    
+    """
+    
+    
+    if (grid_size!=None)&(num_grid_pnts!=None):
+        raise Exception("add_grid: Only one of the grid size or number of \
+                        grid points parameters is allowed to be given.")
+    if (grid_size==None)&(num_grid_pnts==None):
+        raise Exception("add_grid: At least one of the grid size or number of \
+                         grid points parameters must be given.")
+ 
+    dim=len(ppp.domain.A[0])
+    domain_bb = pc.bounding_box(ppp.domain)
+    size_list=list()
+    if grid_size!=None:
+        if isinstance( grid_size, list ):
+            if len(grid_size)==dim:
+                size_list=grid_size
+            else:
+                raise Exception("add_grid: grid_size isn't given in a correct format.")
+        elif isinstance( grid_size, float ):
+            for i in range(dim):
+                size_list.append(grid_size)
+        else:
+            raise Exception("add_grid: grid_size isn't given in a correct format.")
+    else:
+        if isinstance( num_grid_pnts, list ):
+            if len(num_grid_pnts)==dim:
+                for i in range(dim):
+                    if isinstance( num_grid_pnts[i], int ):
+                        grid_size=(float(domain_bb[1][i])-float(domain_bb[0][i]))/num_grid_pnts[i]
+                        size_list.append(grid_size)
+                    else:
+                        raise Exception("add_grid: num_grid_pnts isn't given in a correct format.")
+            else:
+                raise Exception("add_grid: num_grid_pnts isn't given in a correct format.")
+        elif isinstance( num_grid_pnts, int ):
+            for i in range(dim):
+                grid_size=(float(domain_bb[1][i])-float(domain_bb[0][i]))/num_grid_pnts
+                size_list.append(grid_size)
+        else:
+            raise Exception("add_grid: num_grid_pnts isn't given in a correct format.")
+
+    
+    j=0
+    list_grid=dict()
+    
+    while j<dim:
+        list_grid[j]=compute_interval(float(domain_bb[0][j]),float(domain_bb[1][j]), size_list[j], abs_tol)
+        if j>0:
+            if j==1:
+                re_list=list_grid[j-1]
+                re_list=product_interval(re_list, list_grid[j])
+            else:
+                re_list=product_interval(re_list, list_grid[j])
+        j+=1
+        
+    new_list = []
+    parent = []
+    for i in range(len(re_list)):
+        temp_list=list()
+        j=0
+        while j<dim*2:
+            temp_list.append([re_list[i][j],re_list[i][j+1]])
+            j=j+2
+        for j in range(ppp.num_regions):
+            isect = pc.intersect(pc.Polytope.from_box(np.array(temp_list)), ppp.list_region[j], abs_tol)
+            #if pc.is_fulldim(isect):
+            rc, xc = pc.cheby_ball(isect)
+            if rc > abs_tol/2:
+                if rc < abs_tol:
+                    print "Warning: One of the regions in the refined PPP is too small, this may cause numerical problems"
+                if len(isect) == 0:
+                    isect = pc.Region([isect], [])
+                isect.list_prop = ppp.list_region[j].list_prop
+                new_list.append(isect)
+                parent.append(j)   
+    
+    adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
+    for i in range(len(new_list)):
+        for j in range(i+1, len(new_list)):
+            if (ppp.adj[parent[i], parent[j]] == 1) or \
+                    (parent[i] == parent[j]):
+                if pc.is_adjacent(new_list[i], new_list[j]):
+                    adj[i,j] = 1
+                    adj[j,i] = 1
+        adj[i,i] = 1
+            
+    return PropPreservingPartition(domain=ppp.domain, num_prop=ppp.num_prop, 
+                    list_region=new_list, num_regions=len(new_list), \
+                    adj=adj, list_prop_symbol=ppp.list_prop_symbol)        
+
+
+#### Helper functions ####
+def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):
+    """Help function implementing intervals computation for each dimension. 
+    """
+    list_g=list()
+    i=low_domain
+    while True:
+        if (i+size+abs_tol)>=high_domain:
+            list_g.append([i,high_domain])
+            break
+        else:
+            list_g.append([i,i+size])
+        i=i+size
+    return list_g
+
+def product_interval(list1, list2):
+    """Help function implementing combination of all intervals for any two interval lists. 
+    """
+    new_list=list()
+    for m in range(len(list1)):
+        for n in range(len(list2)):
+            new_list.append(list1[m]+list2[n])
+    return new_list
+################################      
         
 
 class PropPreservingPartition:
