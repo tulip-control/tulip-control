@@ -39,6 +39,7 @@ sys.states.add_initial('X0')    # start in state X0
 # Define the allowable transitions
 #! TODO (IF): can arguments be a singleton instead of a list?
 #! TODO (IF): can we use lists instead of sets?
+#!   * use optional flag to allow list as label
 sys.transitions.add_from({'X0'}, {'X1', 'X3'})
 sys.transitions.add_from({'X1'}, {'X0', 'X4', 'X2'})
 sys.transitions.add_from({'X2'}, {'X1', 'X5'})
@@ -77,7 +78,7 @@ env_safe = set([])              # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) = X0 | (X0reach & !park))
+#     [](next(X0reach) == X0 || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
@@ -88,8 +89,8 @@ env_init |= {'X0reach'}
 # Define the specification
 sys_vars = set()                # empty set
 sys_init = set()                # empty set
-sys_prog = 'X5'                 # []<>X5
-sys_safe = {'next(X0reach) = X0 | (X0reach & !park)'}
+sys_prog = 'home'               # []<>X5
+sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
