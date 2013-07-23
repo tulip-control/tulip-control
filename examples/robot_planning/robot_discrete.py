@@ -60,9 +60,9 @@ sys.atomic_propositions.label_state('X5', 'lot')
 # the park signal is turned off infinitely often.
 #
 env_vars = {'park'}
-env_init = set([])              # empty set
+env_init = set()                # empty set
 env_prog = '[]<>(!park)'
-env_safe = set([])              # empty set
+env_safe = set()                # empty set
 
 # 
 # System specification
@@ -87,7 +87,7 @@ env_vars |= {'X0reach'}
 env_init |= {'X0reach'}
 
 # Define the specification
-sys_vars = set()                # empty set
+sys_vars = {'home', 'lot'}
 sys_init = set()                # empty set
 sys_prog = 'home'               # []<>X5
 sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
