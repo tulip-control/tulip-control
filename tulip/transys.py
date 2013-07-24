@@ -77,13 +77,36 @@ todo
 """
 
 import networkx as nx
-from scipy.sparse import lil_matrix # is this really needed ?
+#from scipy.sparse import lil_matrix # is this really needed ?
 import warnings
 import copy
 from pprint import pformat
 from itertools import chain, combinations
 from collections import Iterable, Hashable
+from cStringIO import StringIO
 
+try:
+    import pydot
+except ImportError:
+    warnings.warn('pydot package not found.\nHence dot export not unavailable.')
+    # python-graph package not found. Disable dependent methods.
+    pydot = None
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    matplotlib = True
+except ImportError:
+    warnings.warn('matplotlib package not found.\nSo no loading of dot plots.')
+    matplotlib = None
+
+try:
+    from IPython.display import display, Image
+    IPython = True
+except ImportError:
+    warnings.warn('IPython not found.\nSo loaded dot images not inline.')
+    IPython = None
+    
 def powerset(iterable):
     """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     
@@ -98,13 +121,6 @@ def powerset(iterable):
 
 def contains_multiple(iterable):
     return len(iterable) != len(set(iterable) )
-
-try:
-    import pydot
-except ImportError:
-    warnings.warn('pydot package not found.\nHence dot export not unavailable.')
-    # python-graph package not found. Disable dependent methods.
-    pydot = None
 
 def dprint(s):
     """Debug mode print."""
@@ -1156,7 +1172,13 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def save_dot(self, path='default', add_missing_extension=True):
         """Save .dot file.
         
-        Requires pydot.        
+        depends
+        -------
+        pydot
+        
+        see also
+        --------
+        save_pdf, save_png
         """
         path = self.__export_fname__(path, 'dot', addext=add_missing_extension)
         
@@ -1166,7 +1188,11 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def save_png(self, path='default', add_missing_extension=True):
         """Save .png file.
         
-        Requires pydot.        
+        Requires pydot.
+        
+        see also
+        --------
+        save_dot, save_pdf
         """
         path = self.__export_fname__(path, 'png', addext=add_missing_extension)
         pydot_graph = self.__to_pydot__()
@@ -1190,7 +1216,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         -------
         rankdir is experimental argument
         
-        See also
+        see also
         --------
         save_dot, save_png
         
@@ -1208,6 +1234,68 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     
     def write_dot_color_file(self):
         raise NotImplementedError
+    
+    def plot(self):
+        """Plot image using dot.
+        
+        No file I/O involved.
+        Requires GraphViz dot and either Matplotlib or IPython.
+        
+        NetworkX does not yet support plotting multiple edges between 2 nodes.
+        This method fixes that issue, so users don't need to look at files
+        in a separate viewer during development.
+        
+        see also
+        --------
+        save
+        
+        depends
+        -------
+        IPython or Matplotlib
+        """
+        
+        pydot_graph = self.__to_pydot__()
+        png_str = pydot_graph.create_png()
+        
+        # installed ?
+        if IPython:
+            print('IPython installed.')
+            
+            # called by IPython ?
+            try:
+                cfg = get_ipython().config
+                print('Script called by IPython.')
+                
+                # Caution!!! : not ordinary dict, but IPython.config.loader.Config
+                
+                # qtconsole ?
+                if cfg['IPKernelApp']:
+                    print('Within IPython QtConsole.')
+                    display(Image(data=png_str) )
+                    return
+            except:
+                print('IPython installed, but not called from it.')
+        else:
+            print('IPython not installed.')
+        
+        # not called from IPython QtConsole, try Matplotlib...
+        
+        # installed ?
+        if matplotlib:
+            print('Matplotlib installed.')
+            
+            sio = StringIO()
+            sio.write(png_str)
+            sio.seek(0)
+            img = mpimg.imread(sio)
+            imgplot = plt.imshow(img, aspect='equal')
+            plt.show()
+            return imgplot
+        else:
+            print('Matplotlib not installed.')
+        
+        warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
+        return None
 
 class FiniteSequence(object):
     """Used to construct finite words."""
