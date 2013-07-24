@@ -1251,7 +1251,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         depends
         -------
-        IPython or Matplotlib
+        dot and either of IPython or Matplotlib
         """
         
         pydot_graph = self.__to_pydot__()
@@ -1272,7 +1272,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                 if cfg['IPKernelApp']:
                     print('Within IPython QtConsole.')
                     display(Image(data=png_str) )
-                    return
+                    return True
             except:
                 print('IPython installed, but not called from it.')
         else:

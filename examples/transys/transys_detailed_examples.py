@@ -30,14 +30,14 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Transition System module usage examples
+Transition System module developer examples
 """
 
 import networkx as nx
 import tulip.transys as ts
 import warnings
 
-save_fig = True
+save_fig = False
 
 def sims_demo():
     """Storing simulations."""
@@ -303,7 +303,7 @@ def fts_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if save_fig:
+    if not fts.plot() and save_fig:
         fts.save_pdf(pdf_fname)
         #fts.save_dot(dot_fname)
     # svg support easy to add, so that latex native support is achieved
@@ -351,7 +351,7 @@ def ba_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if save_fig:
+    if not ba.plot() and save_fig:
         ba.save_pdf(pdf_fname)
         #ba.save_dot(dot_fname)
     

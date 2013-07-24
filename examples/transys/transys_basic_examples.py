@@ -30,12 +30,12 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Transition System module usage examples
+Transition System module usage small examples
 """
 
 import tulip.transys as ts
 
-save_fig = True
+save_fig = False
 
 def fts_minimal_example():
     """Small example, for more see the maximal example."""
@@ -51,12 +51,12 @@ def fts_minimal_example():
     fts.transitions.add('s0', 's1')
     fts.transitions.add('s1', 's0')
     
-    if save_fig:
+    if not fts.plot() and save_fig:
         fts.save_pdf('small_fts.png')
     
     return fts
 
-def ofts_maximal_example():
+def ofts_minimal_example():
     """Open FTS demo."""
     msg = '==================\nOpen FTS\n=================='
     print(msg)
@@ -87,10 +87,9 @@ def ofts_maximal_example():
     print(ofts)
     
     path = './test_ofts'
-    dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if save_fig:
+    if not ofts.plot() and save_fig:
         ofts.save_pdf(pdf_fname)
         #ofts.save_dot(dot_fname)
 
@@ -131,16 +130,25 @@ def ba_minimal_example():
     ba.transitions.add_labeled('q1', 'q2', green)
     ba.transitions.add_labeled('q2', 'q2', true)
     
-    if save_fig:
+    if not ba.plot() and save_fig:
         ba.save_pdf('small_ba.png')
     
     return ba
 
 if __name__ == '__main__':
+    print('Intended to be run within IPython.\n'
+          +'If no plots appear, change save_fig = True, '
+          +'to save them to files instead.')
+    
     fts = fts_minimal_example()
-    ofts_maximal_example()
+    ofts_minimal_example()
     ba = ba_minimal_example()
     
     (prod_fts, final_states_preimage) = fts *ba
+    prod_ba = ba *fts
     
-    prod_fts.save_pdf('prod.png')
+    if not prod_fts.plot() and save_fig:
+        prod_fts.save_pdf('prod.png')
+    
+    if not prod_ba.plot() and save_fig:
+        prod_ba.save_pdf('prod.png')
