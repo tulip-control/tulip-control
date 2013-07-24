@@ -303,9 +303,9 @@ def fts_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if not fts.plot() and save_fig:
-        fts.save_pdf(pdf_fname)
-        #fts.save_dot(dot_fname)
+    if not fts.plot() and save:
+        fts.save(path=pdf_fname)
+        #fts.save(path=dot_fname)
     # svg support easy to add, so that latex native support is achieved
         
 def ba_maximal_example():
@@ -351,9 +351,9 @@ def ba_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if not ba.plot() and save_fig:
-        ba.save_pdf(pdf_fname)
-        #ba.save_dot(dot_fname)
+    if not ba.plot() and save:
+        ba.save(path=pdf_fname)
+        #ba.save(path=dot_fname)
     
     return ba
 

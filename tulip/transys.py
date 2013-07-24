@@ -1169,43 +1169,23 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """Alias to dump_dot()."""
         return self.dump_dot()
     
-    def save_dot(self, path='default', add_missing_extension=True):
-        """Save .dot file.
+    def save(self, fileformat='pdf', path='default', add_missing_extension=True,
+             rankdir='LR'):
+        """Save image to file.
         
-        depends
-        -------
-        pydot
+        Recommended: pdf, svg (can render LaTeX labels with inkscape export)
         
-        see also
-        --------
-        save_pdf, save_png
-        """
-        path = self.__export_fname__(path, 'dot', addext=add_missing_extension)
-        
-        pydot_graph = self.__to_pydot__()
-        pydot_graph.write_dot(path)
-    
-    def save_png(self, path='default', add_missing_extension=True):
-        """Save .png file.
-        
-        Requires pydot.
-        
-        see also
-        --------
-        save_dot, save_pdf
-        """
-        path = self.__export_fname__(path, 'png', addext=add_missing_extension)
-        pydot_graph = self.__to_pydot__()
-        pydot_graph.write_png(path)
-    
-    def save_pdf(self, path='default', add_missing_extension=True, rankdir='LR'):
-        """Save .pdf file.
+        @param fileformat: type of image file
+        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'ps'
+            (for more, see pydot.write)
         
         @param path: path to image
-            (extension .pdf appened if missing and add_missing_extension==True)
+            (extension C{.fileformat} appened if missing and
+             C{add_missing_extension==True} )
         @type path: str
         
-        @param add_missing_extension: if extension .pdf missing, it is appended
+        @param add_missing_extension: if extension C{.fileformat} missing,
+            it is appended
         @type add_missing_extension: bool
         
         @param rankdir: direction for dot layout
@@ -1214,20 +1194,21 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         caution
         -------
-        rankdir is experimental argument
-        
-        see also
-        --------
-        save_dot, save_png
+        rankdir experimental argument
         
         depends
         -------
-        pydot      
+        dot, pydot
+        
+        see also
+        --------
+        plot
         """
-        path = self.__export_fname__(path, 'pdf', addext=add_missing_extension)
+        path = self.__export_fname__(path, fileformat, addext=add_missing_extension)
+        
         pydot_graph = self.__to_pydot__()
         pydot_graph.set_rankdir(rankdir)
-        pydot_graph.write_pdf(path)
+        pydot_graph.write(path, format=fileformat)
     
     def dump_dot_color(self):
         raise NotImplementedError
