@@ -145,6 +145,8 @@ def fts_maximal_example():
     print("Is 'bla' a state ?\n\t" +str('bla' in fts) )
     print('')
     
+    fts.plot()
+    
     # add transition info (unlabeled)
     fts.transitions.add('pay', 'select') # notice: no labels
     fts.transitions.add_from({'select'}, {'soda', 'beer'} )
@@ -209,6 +211,7 @@ def fts_maximal_example():
     print('Transitions:\n\t' +str(fts.transitions() ) )
     print('Number of transitions:\n\t' +str(fts.transitions.number() ) +'\n')
     
+    fts.plot()
     print(fts) # pretty
     
     # ----------------------------------------
@@ -233,9 +236,9 @@ def fts_maximal_example():
     
     # first remove unlabeled, then add new labeled
     fts.transitions.remove('pay', 'select')
-    print(fts)
+    fts.plot()
     fts.transitions.add_labeled('pay', 'select', 'insert_coin')
-    print(fts)
+    fts.plot()
     fts.transitions.remove_labeled('pay', 'select', 'insert_coin')
     
     try:
@@ -249,12 +252,12 @@ def fts_maximal_example():
         print('trying to add transition with new label also fails.\n')
     
     # to override and add new state and/or new labels
-    print(fts)
+    fts.plot()
     fts.transitions.add_labeled('pay', 'new state', 'new action', check=False)
-    print(fts)
+    fts.plot()
     fts.states.remove('new state')
     fts.actions.remove('new action')
-    print(fts)
+    fts.plot()
     
     fts.transitions.add_labeled('pay', 'select', 'insert_coin')
     fts.transitions.remove_from({'select'}, {'soda', 'beer'} )
@@ -262,8 +265,10 @@ def fts_maximal_example():
     fts.transitions.label('soda', 'pay', 'get_soda')
     fts.transitions.label('beer', 'pay', 'get_be oops mistake', check_label=False)
     fts.transitions.relabel('beer', 'pay', 'get_be oops mistake', 'get_beer')
+    fts.plot()
     
     fts.actions.remove('get_be oops mistake') # checks that it is not used by edges
+    fts.plot()
     
     try:
         fts.transitions.add_labeled('c12', 'c13', 'insert_coin')
@@ -276,6 +281,7 @@ def fts_maximal_example():
     print('Number of actions: ' +str(fts.actions.number() ) )
     print('Actions: ' +str(fts.actions() ) )
     print('Labeled transitions: ' +str(fts.transitions(data=True) ) )
+    fts.plot()
     
     # fast way to get all edges with value of actions
     nx.get_edge_attributes(fts, 'actions')
@@ -296,6 +302,7 @@ def fts_maximal_example():
     fts.atomic_propositions.label_state('new state', {'hihi'}, check=False)
     fts.states.remove('new state')
     fts.atomic_propositions.remove('hihi')
+    fts.plot()
     
     # export
     print('========\n CAUTION: Saving DOT, PDF files\n=========\n')
@@ -305,8 +312,7 @@ def fts_maximal_example():
     
     if not fts.plot() and save:
         fts.save(path=pdf_fname)
-        #fts.save(path=dot_fname)
-    # svg support easy to add, so that latex native support is achieved
+        #fts.save(path=dot_fname, fileformat='dot')
         
 def ba_maximal_example():
     """Buchi Automaton demo."""
@@ -318,6 +324,7 @@ def ba_maximal_example():
     ba.states.add_from({'q1', 'q2', 'q3'}, destroy_order=True)
     
     ba.states.add_initial('q0')
+    ba.plot()
     
     ba.alphabet.add({'paid'} )
     ba.alphabet.add_from([{'drink', 'paid'}, {''}, {'drink'} ] )
@@ -335,6 +342,7 @@ def ba_maximal_example():
     ba.transitions.add_labeled('q1', 'q2', frozenset(['paid', 'drink'] ) )
     ba.transitions.add_labeled('q3', 'q0', frozenset([''] ) )
     ba.transitions.add_labeled('q1', 'q3', frozenset(['drink'] ) )
+    ba.plot()
     
     # final states
     ba.add_final_state('q1')
@@ -344,7 +352,6 @@ def ba_maximal_example():
     
     print('Number of final states:\n\t' +str(ba.number_of_final_states() ) +'\n')
     print('Final states:\n\t' +str(ba.final_states) +'\n')
-    
     print(ba)
     
     path = './test_ba'
@@ -353,7 +360,7 @@ def ba_maximal_example():
     
     if not ba.plot() and save:
         ba.save(path=pdf_fname)
-        #ba.save(path=dot_fname)
+        #ba.save(path=dot_fname, fileformat='dot')
     
     return ba
 
@@ -379,7 +386,7 @@ def scipy_sparse_labeled_adj():
           'Successfully added adjacency matrix transitions on guard: '
           +str(labels) +', to open FTS.\n'+
           '------------------------------------result:\n')
-    print(ofts)
+    ofts.plot()
     
     return ofts
 
@@ -390,23 +397,23 @@ def label_per_state():
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add_from(['p', '!p'] )
     fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}] )
-    print(fts)
+    fts.plot()
     
     fts = ts.FTS()
     fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}], check=False)
-    print(fts)
+    fts.plot()
     
     fts = ts.FTS()
     fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
-    print(fts)
+    fts.plot()
     
     fts = ts.FTS()
     fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
-    print(fts)
+    fts.plot()
     
     fts = ts.FTS()
     fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
-    print(fts)
+    fts.plot()
 
 if __name__ == '__main__':
     sims_demo()

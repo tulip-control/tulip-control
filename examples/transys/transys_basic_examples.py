@@ -130,7 +130,7 @@ def ba_minimal_example():
     ba.transitions.add_labeled('q2', 'q2', true)
     
     if not ba.plot() and save_fig:
-        ba.save(path='small_ba.png')
+        ba.save(path='small_ba.png', fileformat='png')
     
     return ba
 
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     prod_ba = ba *fts
     
     if not prod_fts.plot() and save_fig:
-        prod_fts.save(path='prod.png')
+        prod_fts.save(path='prod.png', fileformat='png')
     
     if not prod_ba.plot() and save_fig:
-        prod_ba.save(path='prod.png')
+        prod_ba.save(path='prod.png', fileformat='png')
