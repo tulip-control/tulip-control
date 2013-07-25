@@ -122,6 +122,21 @@ def powerset(iterable):
 def contains_multiple(iterable):
     return len(iterable) != len(set(iterable) )
 
+def is_subset(small_iterable, big_iterable):
+    """Comparison for handling unhashable items of lists."""
+    try:
+        return set(small_iterable) <= set(big_iterable)
+    except TypeError:
+        # not all items hashable...
+        big_list = list(big_iterable)
+        
+        for item in small_iterable:
+            if item not in big_list:
+                return False
+        return True
+    except:
+        raise Exception('Failed to compare iterables.')
+
 def dprint(s):
     """Debug mode print."""
     #print(s)
@@ -131,18 +146,64 @@ class States(object):
         
     add, remove, count, test membership
     
+    mutable states
+    --------------
+    During language parsing, LTL->BA converion or partition refinement
+    it is convenient to keep revisiting states and replacing them by others
+    which refine them.
+    
+    For this it useful to store the objects that will be further processed
+    directly as states. For example, suppose we want to store ['a', '||', 'b']
+    as a state, then visit it, recognize the operator '||' and replace
+    ['a', '||', 'b'] by two new states: 'a' and: 'b'.
+    
+    However, we cannot store ['a', '||', 'b'] as a NetworkX state, because
+    a list is not hashable. There are two solutions:
+    
+    - recursively freeze everything
+    - store actual states as labels of int states
+    - maintain a bijection between states and ints,
+      using the later as NetworkX states
+    
+    The first alternative is painful and requires that each user write their
+    custom freezing code, depending on the particular data structure stored.
+    The second alternative is even worse.
+    
+    The second approach is implemented if C{mutable==True}.
+    From the user's viewpoint, everything remains the same.
+    
+    Using this flag can slow down comparisons, so it is appropriate for the
+    special case of refinement. In many cases the resulting states after the
+    refinement are hashable without special arrangements (e.g. strings).
+    So the final result would then be storable in an ordinary NetworkX graph.
+    
+    @param mutable: enable storage of unhashable states
+    @type mutable: bool (default: False)
+    
     see also
     --------
-    LabeledStateDiGraph
+    LabeledStateDiGraph, LabeledTransitions, Transitions
     """
-    def __init__(self, graph, states=[], initial_states=[], current_state=None):
+    def __init__(self, graph, states=[], initial_states=[], current_state=None,
+                 mutable=False, removed_state_callback=None):
         self.graph = graph
-        self.initial = set()
         self.list = list() # None when list disabled
+        
+        # biject mutable states <-> ints ?
+        if mutable:
+            self.mutants = dict()
+            self.min_free_id = 0
+            self.initial = list()
+        else:
+            self.mutants = None
+            self.min_free_id = None
+            self.initial = set()
         
         self.add_from(states)
         self.add_initial_from(initial_states)
         self.set_current(current_state)
+        
+        self._removed_state_callback = removed_state_callback
     
     def __call__(self, data=False, listed=False):
         """Return set of states.
@@ -151,20 +212,57 @@ class States(object):
         To obtain that use argumet data=True.
         
         @param data: include annotation dict of each state
-        @param listed: return list of states (instead of set)        
+        @type data: bool
         
-        @returns: set of states if C{data=False}
-                list of tuples of states with annotation dict if C{data=False}
+        @param listed:
+            Return ordered states (instead of random list).
+            Available only if order maintained.
+            List is always returned anyway, to avoid issues with mutable states.
+        
+        @returns:
+            If C{data==True},
+                then return [(state, attr_dict),...]
+            If C{data==False} and C{listed==True} and state order maintained,
+                then return [state_i,...]
+            If C{data==False} and C{listed==True} but no order maintained,
+                then return [state_i,...] (RANDOM ORDER)
         """
-        if data:
-            return self.graph.nodes(data=True)
-        else:
+        if (data != True) and (data != False):
+            raise Exception('Functionality of States() changed.')
+        
+        if data == True:
+            state_id_data_pairs = self.graph.nodes(data=True)
+            
+            # no replacement needed ?
+            if not self._is_mutable():
+                state_data_pairs = state_id_data_pairs
+                return state_data_pairs
+            
+            # replace state_id-> state
+            state_data_pairs = []
+            for (state_id, attr_dict) in state_id_data_pairs:
+                state = self._int2mutant(state_id)
+                
+                state_data_pairs += [(state, attr_dict) ]
+                
+            return state_data_pairs
+        elif data == False:
             if listed:
                 if self.list is None:
                     raise Exception('State ordering not maintained.')
-                return self.graph.nodes(data=False)
+                state_ids = self.list
             else:
-                return set(self.graph.nodes(data=False) )
+                state_ids = self.graph.nodes(data=False)
+            
+            # return list, so avoid hashing issues when states are mutable
+            # selection here avoids infinite recursion
+            if self._is_mutable():
+                return self._ints2mutants(state_ids)
+            else:
+                states = state_ids
+                return states
+        else:
+            raise Exception("data must be bool\n")
     
     def __str__(self):
         return 'States:\n\t' +pformat(self(data=False) )    
@@ -187,9 +285,124 @@ class States(object):
     def __ge__(self, other):
         return self.graph.nodes(data=False) >= other
     
+    def _is_mutable(self):
+        if self.mutants is None:
+            return False
+        else:
+            return True
+    
+    def _mutant2int(self, state):
+        """Convert mutant to its integer ID.
+        
+        If C{state} \\in states, then return its int ID.
+        Otherwise return the smallest available int ID, if mutable,
+        or the given state, if immutable.
+        
+        @param state: state to check for
+        
+        @returns:
+            If states not mutable,
+                then return given C{state}.
+            If C{state} does not exist and states mutable,
+                then return min free int ID.
+            If C{state} does exist and states mutable,
+                then return its int ID.
+        
+        note
+        ----
+        If not mutable, no check that given state is valid,
+        because this direction (also) inputs to the data structure new states.
+        
+        see also
+        --------
+        _int2mutant
+        """
+        
+        # classic NetworkX ?
+        if not self._is_mutable():
+            dprint('Immutable states (must be hashable): classic NetworkX.\n')
+            return state
+        
+        mutants = self.mutants
+        state_id = [x for x in mutants if mutants[x] == state]
+        
+        # found state ?
+        if len(state_id) == 0:
+            dprint('No states matching. State is new.\n')
+        elif len(state_id) == 1:
+            return state_id[0]
+        else:
+            msg = 'Found multiple state_ids with the same state !\n'
+            msg += 'This violates injectivity from IDs to states.\n'
+            msg += 'In particular, state:\n\t' +str(state) +'\n'
+            msg += 'is a common value for the keys:\n\t' +str(state_id)
+            raise Exception(msg)
+        
+        # new, get next free id
+        return self.min_free_id
+    
+    def _int2mutant(self, state_id):
+        """Convert integer ID to its mutant.
+        
+        If C{state_id} \\in used IDs, then return corresponding state.
+        Otherwise return None, or the given state, if not mutable.
+        
+        @param state_id: ID number to check for
+        @type state_id:
+            int, if mutable
+            valid state, if immutable
+        
+        @returns:
+            If states not mutable,
+                then return given argument, because it is the actual state.
+            If states are mutable and C{state_id} is used,
+                then return corresponding C{state}.
+            If states are mutable but C{state_id} is free,
+                then return None.
+        
+        note
+        ----
+        If not mutable, given int checked to be valid state,
+        because this direction outputs to the world.
+        
+        see also
+        --------
+        _mutant2int_
+        """
+        
+        # classic NetworkX ?
+        if not self._is_mutable():
+            state = state_id
+            
+            if state not in self():
+                msg = 'States are immutable.\n.'
+                msg = 'Given integer ID is not a state.\n'
+                raise Exception(msg)
+            return state
+        
+        mutants = self.mutants
+        
+        # found ID ?
+        if state_id in mutants:
+            state = mutants[state_id]
+            dprint('For ID:\n\t' +str(state_id) +'\n'
+                   +'Found state:\n\t' +str(state) )
+            return state
+        
+        # mutable, but ID unused
+        dprint('Mutable states, but this ID is currently unused.')
+        return None
+    
+    def _mutants2ints(self, states):
+        return map(self._mutant2int, states)
+    
+    def _ints2mutants(self, ints):
+        return map(self._int2mutant, ints)
+    
     def __contains__(self, state):
         """Check if single state \\in set_of_states."""
-        return self.graph.has_node(state)    
+        state_id = self._mutant2int(state)
+        return self.graph.has_node(state_id)    
     
     def __exist_labels__(self):
         """State labeling defined ?"""
@@ -201,27 +414,31 @@ class States(object):
             dprint(msg)
             return False
     
-    def __exist_final_states__(self):
+    def __exist_final_states__(self, msg=True):
         """Check if system has final states."""
         if not hasattr(self.graph, 'final_states'):
-            warnings.warn('System does not have final states.')
+            if msg:
+                warnings.warn('System does not have final states.')
             return False
         else:
             return True
     
     def __dot_str__(self, to_pydot_graph):
-        """Copy nodes to given graph, with attributes for dot export."""
+        """Copy nodes to given Pydot graph, with attributes for dot export."""
         
-        def if_initial_add_incoming_edge(g, state, initial_states):
-            if state in initial_states:
-                phantom_node = 'phantominit' +str(state)
-                
-                g.add_node(phantom_node, label='""', shape='none')
-                g.add_edge(phantom_node, state)
+        def add_incoming_edge(g, state):
+            phantom_node = 'phantominit' +str(state)
+            
+            g.add_node(phantom_node, label='""', shape='none')
+            g.add_edge(phantom_node, state)
         
         def form_node_label(state, state_data, label_def, label_format):
-            sep_label_sets = label_format['separator']
+            # node itself
             node_dot_label = '"' +str(state) +'\\n'
+            
+            # add node annotations from action, AP sets etc
+            # other key,values in state attr_dict ignored
+            sep_label_sets = label_format['separator']
             for (label_type, label_value) in state_data.iteritems():
                 if label_type in label_def:
                     # label formatting
@@ -247,11 +464,11 @@ class States(object):
             node_shape = graph.dot_node_shape['normal']
             
             # check if final states defined
-            if not hasattr(graph, 'final_states'):
+            if not self.__exist_final_states__(msg=False):
                 return node_shape
             
             # check for final states
-            if state in graph.final_states:
+            if self.is_final(state):
                 node_shape = graph.dot_node_shape['final']
                 
             return node_shape
@@ -262,21 +479,27 @@ class States(object):
             label_def = self.graph.__state_label_def__
             label_format = self.graph.__state_dot_label_format__
         
-        for (state, state_data) in self.graph.nodes_iter(data=True):
-            if_initial_add_incoming_edge(to_pydot_graph, state, self.initial)
+        for (state_id, state_data) in self.graph.nodes_iter(data=True):
+            state = self._int2mutant(state_id)
+            
+            if  self.is_initial(state):
+                add_incoming_edge(to_pydot_graph, state_id)
+            
             node_shape = decide_node_shape(self.graph, state)
             
+            # state annotation
             if self.__exist_labels__():
                 node_dot_label = form_node_label(state, state_data, label_def, label_format)
             else:
                 node_dot_label = str(state)
             
-            # TODO replace with int to reduce size
-            to_pydot_graph.add_node(state, label=node_dot_label, shape=node_shape,
+            # TODO option to replace with int to reduce size,
+            # TODO generate separate LaTeX legend table (PNG option ?)
+            to_pydot_graph.add_node(state_id, label=node_dot_label, shape=node_shape,
                                     style='rounded')
     
     def __warn_if_state_exists__(self, state):
-        if state in self:
+        if state in self():
             if self.list is not None:
                 raise Exception('State exists and ordering enabled: ambiguous.')
             else:
@@ -287,85 +510,136 @@ class States(object):
     def add(self, new_state):
         """Create single state.
         
-        C{state} can be any hashable object except None (see nx add_node below)
+        The new state must be hashable, unless mutable states are enabled.
+        For details about mutable states see the docstring of transys.States.
         
         For annotating a state with a subset of atomic propositions,
         or other (custom) annotation, use the functions provided by
-        AtomicPropositions, or directly the add_node function of networkx.
+        AtomicPropositions, or directly the NetworkX.MultiDiGraph.add_node method.
+        
+        @param new_state:
+            Single new state to add.
+        @type new_state:
+            If states immutable, then C{state} must be a hashable object.
+                Any hashable allowed, except for None (see nx add_node below).
+            If states mutable, then C{state} can be unhashable.
         
         see also
         --------
         networkx.MultiDiGraph.add_node
         """
+        new_state_id = self._mutant2int(new_state)
         self.__warn_if_state_exists__(new_state)
-        self.graph.add_node(new_state)
+        
+        dprint('Adding new id: ' +str(new_state_id) )
+        self.graph.add_node(new_state_id)
+        
+        # mutant ?
+        if self._is_mutable():
+            self.mutants[new_state_id] = new_state
+            
+            # find min free id
+            found = False
+            while not found:
+                self.min_free_id = self.min_free_id +1
+                
+                if not self.mutants.has_key(self.min_free_id):
+                    found = True
         
         # list maintained ?
         if self.list is not None:
             self.list.append(new_state)
     
     def add_from(self, new_states, destroy_order=False):
-        """Add multiple states from iterable container states.
+        """Add multiple states from iterable container.
         
         see also
         --------
         networkx.MultiDiGraph.add_nodes_from.
         """
-        if not isinstance(new_states, list):
+        def check_order(new_states):
+            # ordered ?
+            if isinstance(new_states, list):
+                return
+            
+            # interable at least ?
             if not isinstance(new_states, Iterable):
                 raise Exception('New set of states must be iterable container.')
             
-            # order currently maintained ?
-            if self.list is not None:
-                # no states stored ?
-                if len(self.list) == 0:
-                    warnings.warn("Added non-list to empty system with ordering."+
-                                  "Won't remember state order from now on.")
-                    self.list = None
-                else:
-                    # cancel existing ordering ?
-                    if destroy_order:
-                        warnings.warn('Added non-list of new states.'+
-                                      'Existing state order forgotten.')
-                        self.list = None
-                    else:
-                        raise Exception('Ordered states maintained.'+
-                                        'Please add list of states instead.')
+            # no order currently maintained ?
+            if self.list is None:
+                return
+            
+            # no states stored yet ?
+            if len(self.list) == 0:
+                warnings.warn("Will add non-list to empty system with ordering."+
+                              "Won't remember state order from now on.")
+                self.list = None
+                return
+            
+            # cancel ordering of already stored states ?
+            if destroy_order:
+                warnings.warn('Added non-list of new states.'+
+                              'Existing state order forgotten.')
+                self.list = None
+                return
+            
+            raise Exception('Ordered states maintained.'+
+                            'Please add list of states instead.')
+        
+        check_order(new_states)
         
         # iteration used for comprehensible error message
         for new_state in new_states:
             self.__warn_if_state_exists__(new_state)
         
-        self.graph.add_nodes_from(new_states)
+        # mutable ?
+        if self._is_mutable():
+            for new_state in new_states:
+                self.add(new_state)
+        else:
+            self.graph.add_nodes_from(new_states)
         
-        # list maintained ?
-        if self.list is not None:
-            self.list = self.list +new_states
+            # list maintained ?
+            if self.list is not None:
+                self.list = self.list +list(new_states)
     
     def number(self):
         """Total number of states."""
         return self.graph.number_of_nodes()
     
-    def remove(self, state):
+    def remove(self, rm_state):
         """Remove single state."""
-        self.graph.remove_node(state)
         
-        # no ordering maintained ?
-        if self.list is None:
+        # not a state ?
+        if rm_state not in self():
+            warnings.warn('Attempting to remove inexistent state.')
             return
         
-        self.list.remove(state)
+        state_id = self._mutant2int(rm_state)
+        self.graph.remove_node(state_id)
+        
+        # are mutants ?
+        if self._is_mutable():
+            self.mutants.pop(state_id)
+            self.min_free_id = min(self.min_free_id, state_id)
+        
+        # ordering maintained ?
+        if self.list is not None:
+            self.list.remove(rm_state)
+        
+        # rm if init
+        if self.is_initial(rm_state):
+            self.remove_initial(rm_state)
+        
+        # chain to parent (for final states etc)
+        if self._removed_state_callback:
+            self._removed_state_callback(rm_state)
     
-    def remove_from(self, states):
+    def remove_from(self, rm_states):
         """Remove a list of states."""
-        self.graph.remove_nodes_from(states)
-        
-        # no ordering maintained ?
-        if self.list is None:
-            return
-        
-        for state in states:
-            self.list.remove(state)
+        for rm_state in rm_states:
+            self.remove(rm_state)
     
     def set_current(self, state):
         """Select current state.
@@ -379,7 +653,7 @@ class States(object):
             self.current = None
             return
         
-        if state not in self:
+        if state not in self():
             raise Exception('Current state given is not in set of states.\n'+
                             'Cannot set current state to given state.')
         
@@ -393,25 +667,34 @@ class States(object):
         First use states.add to include it in set of states,
         then states.add_initial.
         """
-        if not new_initial_state in self.graph.nodes():
-            raise Exception('New initial state \\notin States.')
+        if not new_initial_state in self():
+            raise Exception('New initial state \\notin States.\n'
+                            'Add it first to states using sys.states.add')
+        
+        # ensure uniqueness for unhashable states
+        if self.is_initial(new_initial_state):
+            warnings.warn('Already an initial state.\n')
+            return
+        
+        # use sets when possible for efficiency
+        if self._is_mutable():
+            self.initial.append(new_initial_state)
         else:
             self.initial.add(new_initial_state)
 
     def add_initial_from(self, new_initial_states):
         """Add multiple initial states.
         
-        Should already bein set of states.
+        Should already be in set of states.
         """
-        new_initial_states = set(new_initial_states)     
-        
-        if len(new_initial_states) is 0:
+        if len(new_initial_states) == 0:
             return
         
-        if not new_initial_states <= set(self.graph.nodes() ):
-            raise Exception('New Initial States \\notsubset States.')
-        else:
+        if self._is_mutable():
             self.initial |= set(new_initial_states)
+        else:
+            for new_initial_state in new_initial_states:
+                self.add_initial(new_initial_state)
         
     def number_of_initial(self):
         """Count initial states."""
@@ -419,21 +702,37 @@ class States(object):
     
     def remove_initial(self, rm_initial_state):
         """Delete single state from set of initial states."""
-        self.initial.remove(rm_initial_state)
+        if self.is_initial(rm_initial_state):
+            self.initial.remove(rm_initial_state)
+        else:
+            warnings.warn('Attempting to remove inexistent initial state.'
+                          +str(rm_initial_state) )
     
     def remove_initial_from(self, rm_initial_states):
         """Delete multiple states from set of initial states."""
-        self.initial = self.initial.difference(rm_initial_states)
+        if len(rm_initial_states) == 0:
+            return
+        
+        if self._is_mutable():
+            self.initial = self.initial.difference(rm_initial_states)
+        else:
+            # mutable states
+            for rm_initial_state in rm_initial_states:
+                self.remove_initial(rm_initial_state)
     
     def is_initial(self, state):
-        return state in self.initial
+        return is_subset([state], self.initial)
     
     def is_final(self, state):       
-        """Check if state \\in final states."""
+        """Check if state \\in final states.
+        
+        Convenience method, violates class independence,
+        so might be removed in the future.
+        """
         if not self.__exist_final_states__():
             return
         
-        return state in self.graph.final_states
+        return is_subset([state], self.graph.final_states)
     
     def is_accepting(self, state):
         """Alias to is_final()."""
@@ -447,17 +746,18 @@ class States(object):
             Current state is set
             Current state \\subseteq states
         """
-        if not self.initial <= set(self.graph.nodes() ):
+        if not is_subset(self.initial, self() ):
             warnings.warn('Ininital states \\not\\subseteq states.')
         
         if self.current is None:
             warnings.warn('Current state unset.')
             return
         
-        if self.current not in self.graph.nodes():
+        if self.current not in self():
             warnings.warn('Current state \\notin states.')
         
-        print('States are ok.')
+        print('States and Initial States are ok.\n'
+              +'For final states, refer to my parent.')
     
     def post_single(self, state):
         """Direct successors of a single state.
@@ -468,9 +768,10 @@ class States(object):
         Reason is that a state may happen to be anything,
         so possibly something iterable.
         """
-        return self.post({state} )
+        state_id = self._mutant2int(state)
+        return self.post([state_id] )
     
-    def post(self, states, actions='all'):
+    def post(self, states):
         """Direct successor set (1-hop) for given states.
         
         Over all actions or letters, i.e., edge labeling ignored by states.pre,
@@ -483,19 +784,15 @@ class States(object):
             Post(s)
         If multiple stats provided, then union Post(s) for s in states provided.
         """
-        
-        if not states <= self():
+        if not is_subset(states, self() ):
             raise Exception('Not all states given are in the set of states.')
         
-        successors = set()
-        for state in states:
-            successors |= set(self.graph.successors(state) )
-            
-        if actions == 'all':
-            return successors
+        state_ids = self._mutants2ints(states)
         
-        for state in successors:
-            pass
+        successors = set()
+        for state_id in state_ids:
+            successors |= set(self.graph.successors(state_id) )
+        return successors
     
     def pre_single(self, state):
         """Direct predecessors of single state.
@@ -506,17 +803,20 @@ class States(object):
         --------
         post() vs post_single().
         """
-        return self.pre({state} )
+        state_id = self._mutant2int(state)
+        return self.pre([state_id] )
     
     def pre(self, states):
         """Predecessor set (1-hop) for given state.
         """
-        if not states <= self():
+        if not is_subset(states, self() ):
             raise Exception('Not all states given are in the set of states.')
         
+        state_ids = self._mutants2ints(states)
+        
         predecessors = set()
-        for state in states:
-            predecessors |= set(self.graph.predecessors(state) )
+        for state_id in state_ids:
+            predecessors |= set(self.graph.predecessors(state_id) )
         return predecessors
     
     def add_final(self, state):
@@ -576,6 +876,12 @@ class Transitions(object):
     def __str__(self):
         return 'Transitions:\n' +pformat(self(data=True) )
     
+    def _mutant2int(self, from_state, to_state):
+        from_state_id = self.graph.states._mutant2int(from_state)
+        to_state_id = self.graph.states._mutant2int(to_state)
+        
+        return (from_state_id, to_state_id)
+    
     def add(self, from_state, to_state, check_states=True):
         """Add unlabeled transition, checking states \\in set of states.
         
@@ -585,21 +891,24 @@ class Transitions(object):
         If check_states = False, and states not already in set of states,
         then they are added.
         """
-        graph = self.graph
-        
         if not check_states:
-            graph.states.add_from({from_state, to_state} )
+            self.graph.states.add_from({from_state, to_state} )
         
-        if from_state not in graph.states:
+        if from_state not in self.graph.states():
             raise Exception('from_state \\notin states.')
         
-        if to_state not in graph.states:
+        if to_state not in self.graph.states():
             raise Exception('to_state \\notin states.')
+        
+        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        
+        dprint('Adding transition:\n\t'
+               +str(from_state_id) +'--->' +str(to_state_id) )
         
         # if another un/labeled edge already exists between these nodes,
         # then avoid duplication of edges
-        if not graph.has_edge(from_state, to_state):
-            graph.add_edge(from_state, to_state)
+        if not self.graph.has_edge(from_state_id, to_state_id):
+            self.graph.add_edge(from_state_id, to_state_id)
     
     def add_from(self, from_states, to_states, check_states=True):
         """Add non-deterministic transition.
@@ -615,10 +924,10 @@ class Transitions(object):
             self.graph.states.add_from(from_states)
             self.graph.states.add_from(to_states)
         
-        if not from_states <= self.graph.states():
+        if not is_subset(from_states, self.graph.states() ):
             raise Exception('from_states \\not\\subseteq states.')
         
-        if not to_states <= self.graph.states():
+        if not is_subset(to_states, self.graph.states() ):
             raise Exception('to_states \\not\\subseteq states.')
         
         for from_state in from_states:
@@ -682,10 +991,12 @@ class Transitions(object):
         provided by the alphabet or action classes.
         Those identify transitions by their action or input letter labels.
         """
-        edge_set = copy.copy(self.graph.get_edge_data(from_state, to_state) )
+        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        
+        edge_set = copy.copy(self.graph.get_edge_data(from_state_id, to_state_id) )
         for (edge_key, label) in edge_set.iteritems():
             if label == {}:
-                self.graph.remove_edge(from_state, to_state, key=edge_key)
+                self.graph.remove_edge(from_state_id, to_state_id, key=edge_key)
     
     def remove_from(self, from_states, to_states):
         """Delete all unlabeled transitions between multiple state pairs.
@@ -723,16 +1034,16 @@ class LabeledTransitions(Transitions):
         if not check:
             # attempt adding only if not already in set of states
             # to avoid ordering-related exceptions
-            if from_state not in self.graph:
+            if from_state not in self.graph.states():
                 self.graph.states.add(from_state)
-            if to_state not in self.graph:
+            if to_state not in self.graph.states():
                 self.graph.states.add(to_state)
         
-        if from_state not in self.graph.states:
+        if from_state not in self.graph.states():
             msg = str(from_state) +' = from_state \\notin state'
             raise Exception(msg)
         
-        if to_state not in self.graph.states:
+        if to_state not in self.graph.states():
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
     
@@ -812,7 +1123,8 @@ class LabeledTransitions(Transitions):
         edge_label = self.__get_labeling__(label, check_label=True)
         
         # get all transitions with given label
-        edge_set = copy.copy(self.graph.get_edge_data(from_state, to_state,
+        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        edge_set = copy.copy(self.graph.get_edge_data(from_state_id, to_state_id,
                                                       default={} ) )
         
         found_one = 0
@@ -823,7 +1135,7 @@ class LabeledTransitions(Transitions):
             
             if label == edge_label:
                 dprint('Matched. Removing...')
-                self.graph.remove_edge(from_state, to_state, key=edge_key)
+                self.graph.remove_edge(from_state_id, to_state_id, key=edge_key)
                 found_one = 1
         
         if not found_one:
@@ -844,7 +1156,9 @@ class LabeledTransitions(Transitions):
         self.__check_states__(from_state, to_state, check=True)
         
         # chek if same unlabeled transition exists
-        trans_from_to = self.graph.get_edge_data(from_state, to_state, default={} )
+        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        trans_from_to = self.graph.get_edge_data(from_state_id, to_state_id,
+                                                 default={} )
         if {} not in trans_from_to.values():
             msg = "Unlabeled transition from_state-> to_state doesn't exist,\n"
             msg += 'where:\t from_state = ' +str(from_state) +'\n'
@@ -905,7 +1219,9 @@ class LabeledTransitions(Transitions):
         self.__check_states__(from_state, to_state, check=check)
         
         # chek if same unlabeled transition exists
-        trans_from_to = self.graph.get_edge_data(from_state, to_state, default={} )
+        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        trans_from_to = self.graph.get_edge_data(from_state_id, to_state_id,
+                                                 default={} )
         if {} in trans_from_to.values():
             msg = 'Unlabeled transition from_state-> to_state already exists,\n'
             msg += 'where:\t from_state = ' +str(from_state) +'\n'
@@ -937,7 +1253,7 @@ class LabeledTransitions(Transitions):
         
         # states, labels checked, no same unlabeled nor labeled,
         # so add it
-        self.graph.add_edge(from_state, to_state, **edge_label)
+        self.graph.add_edge(from_state_id, to_state_id, **edge_label)
     
     def add_labeled_from(self, from_states, to_states, labels, check=True):
         """Add multiple labeled transitions.
@@ -1018,11 +1334,14 @@ class LabeledTransitions(Transitions):
                     return False
             return True
         
-        out_edges = self.graph.edges(from_state, data=True, keys=True)
+        from_state_id = self.graph.states._mutant2int(from_state)
+        to_state_ids = self.graph.states._mutants2ints(to_states)
+        
+        out_edges = self.graph.edges(from_state_id, data=True, keys=True)
         
         found_edges = set()        
-        for from_state, to_state, key, cur_label in out_edges:
-            if to_state not in to_states and to_states is not 'any':
+        for from_state_id, to_state_id, key, cur_label in out_edges:
+            if to_state_id not in to_state_ids and to_states is not 'any':
                 continue
             
             # any guard ok ?
@@ -1034,6 +1353,7 @@ class LabeledTransitions(Transitions):
             
             if ok:
                 dprint('transition label matched desired label')
+                to_state = self.graph.states._int2mutant(to_state_id)
                 found_edge = (from_state, to_state, key)
                 found_edges.add(found_edge)
             
@@ -1042,11 +1362,13 @@ class LabeledTransitions(Transitions):
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
     
-    def __init__(self, name='', states=[], initial_states=[], current_state=None):
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 mutable=False, removed_state_callback=None):
         nx.MultiDiGraph.__init__(self, name=name)
         
         self.states = States(self, states=states, initial_states=initial_states,
-                             current_state=current_state)
+                             current_state=current_state, mutable=mutable,
+                             removed_state_callback=removed_state_callback)
         self.transitions = LabeledTransitions(self)
 
         self.dot_node_shape = {'normal':'circle'}
@@ -1235,35 +1557,40 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         dot and either of IPython or Matplotlib
         """
         
+        # anything to plot ?
+        if self.states.number() == 0:
+            print("The system doesn't have any states to plot.\n")
+            return
+        
         pydot_graph = self.__to_pydot__()
         png_str = pydot_graph.create_png()
         
         # installed ?
         if IPython:
-            print('IPython installed.')
+            dprint('IPython installed.')
             
             # called by IPython ?
             try:
                 cfg = get_ipython().config
-                print('Script called by IPython.')
+                dprint('Script called by IPython.')
                 
                 # Caution!!! : not ordinary dict, but IPython.config.loader.Config
                 
                 # qtconsole ?
                 if cfg['IPKernelApp']:
-                    print('Within IPython QtConsole.')
+                    dprint('Within IPython QtConsole.')
                     display(Image(data=png_str) )
                     return True
             except:
                 print('IPython installed, but not called from it.')
         else:
-            print('IPython not installed.')
+            dprint('IPython not installed.')
         
         # not called from IPython QtConsole, try Matplotlib...
         
         # installed ?
         if matplotlib:
-            print('Matplotlib installed.')
+            dprint('Matplotlib installed.')
             
             sio = StringIO()
             sio.write(png_str)
@@ -1273,7 +1600,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             plt.show()
             return imgplot
         else:
-            print('Matplotlib not installed.')
+            dprint('Matplotlib not installed.')
         
         warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
         return None
@@ -1720,7 +2047,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     """
     
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], actions=[] ):
+                 atomic_propositions=[], actions=[], mutable=False):
         """Note first sets of states in order of decreasing importance,
         then first state labeling, then transitin labeling (states more
         fundamentalthan transitions, because transitions need states in order to
@@ -1728,7 +2055,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         """
         LabeledStateDiGraph.__init__(
             self, name=name, states=states, initial_states=initial_states,
-            current_state=current_state
+            current_state=current_state, mutable=mutable
         )
         
         self.atomic_propositions = AtomicPropositions(self, 'ap', atomic_propositions)
@@ -1837,20 +2164,21 @@ class FTS(FiniteTransitionSystem):
     """Alias to FiniteTransitionSystem."""
     
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], actions=[] ):
+                 atomic_propositions=[], actions=[], mutable=False):
         FiniteTransitionSystem.__init__(
             self, name=name, states=states, initial_states=initial_states,
             current_state=current_state, atomic_propositions=atomic_propositions,
-            actions=actions
+            actions=actions, mutable=mutable
         )
 
 class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Analogous to FTS, but for open systems, with system and environment."""
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], sys_actions=[], env_actions=[] ):
+                 atomic_propositions=[], sys_actions=[], env_actions=[],
+                 mutable=False):
         LabeledStateDiGraph.__init__(
             self, name=name, states=[], initial_states=initial_states,
-            current_state=current_state
+            current_state=current_state, mutable=mutable
         )
         
         self.sys_actions = Actions(self, 'sys_actions', sys_actions)
@@ -1883,11 +2211,12 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
 class oFTS(OpenFiniteTransitionSystem):
     """Alias to transys.OpenFiniteTransitionSystem."""
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], sys_actions=[], env_actions=[] ):
+                 atomic_propositions=[], sys_actions=[], env_actions=[],
+                 mutable=False):
         OpenFiniteTransitionSystem.__init__(
             self, name=name, states=states, initial_states=initial_states,
             current_state=None, atomic_propositions=atomic_propositions,
-            sys_actions=sys_actions, env_actions=env_actions
+            sys_actions=sys_actions, env_actions=env_actions, mutable=mutable
         )
 
 ###########
@@ -2133,13 +2462,19 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     """
     
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True):
+                 input_alphabet=[], atomic_proposition_based=True,
+                 mutable=False):
         LabeledStateDiGraph.__init__(
             self, name=name,
-            states=states, initial_states=initial_states
+            states=states, initial_states=initial_states, mutable=mutable,
+            removed_state_callback=self._removed_state_callback
         )
         
-        self.final_states = set()
+        if mutable:
+            self.final_states = list()
+        else:
+            self.final_states = set()
+        
         self.add_final_states_from(final_states)
         
         self.alphabet = Alphabet(self, 'in_alphabet',
@@ -2163,21 +2498,39 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         s += 'Final States:\n\t' +str(self.final_states)
         
         return s
+    
+    def _removed_state_callback(self, rm_state):
+        self.remove_final_state(rm_state)
+    
+    def _is_final(self, state):
+        return is_subset([state], self.final_states)
 
     # final states
     def add_final_state(self, new_final_state):
         if not new_final_state in self.states():
             raise Exception('New final state \\notin States.')
-        else:
+        
+        # already final ?
+        if self._is_final(new_final_state):
+            warnings.warn('Attempting to add existing final state.\n')
+            return
+        
+        # mutable states ?
+        if self.states.mutants == None:
             self.final_states.add(new_final_state)
+        else:
+            self.final_states.append(new_final_state)
 
     def add_final_states_from(self, new_final_states):
-        new_final_states = set(new_final_states)     
-        
-        if not new_final_states <= set(self.states() ):
+        if not is_subset(new_final_states, self.states() ):
             raise Exception('New Final States \\notsubset States.')
-        else:
+        
+        # mutable states ?
+        if self.states.mutants == None:
             self.final_states |= set(new_final_states)
+        else:
+            for new_final_state in new_final_states:
+                self.add_final_state(new_final_state)
     
     def number_of_final_states(self):
         return len(self.final_states)
@@ -2186,7 +2539,11 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.final_states.remove(rm_final_state)
     
     def remove_final_states_from(self, rm_final_states):
-        self.final_states = self.final_states.difference(rm_final_states)
+        if self.states.mutants == None:
+            self.final_states = self.final_states.difference(rm_final_states)
+        else:
+            for rm_final_state in rm_final_states:
+                self.remove_final_state(rm_final_state)
     
     def find_edges_between(self, start_state, end_state):
         """Return list of edges between given nodes.
@@ -2211,9 +2568,11 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     # checks
     def is_deterministic(self):
         """overloaded method."""
+        raise NotImplementedError
         
     def is_blocking(self):
         """overloaded method."""
+        raise NotImplementedError
     
     def is_accepted(self, input_word):
         """Check if input word is accepted."""
@@ -2276,20 +2635,24 @@ def dfa2nfa():
 
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True):
+                 input_alphabet=[], atomic_proposition_based=True,
+                 mutable=False):
         FiniteStateAutomaton.__init__(self,
             name=name, states=states, initial_states=initial_states,
             final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based
+            atomic_proposition_based=atomic_proposition_based,
+            mutable=mutable
         )
 
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True):
+                 input_alphabet=[], atomic_proposition_based=True,
+                 mutable=False):
         OmegaAutomaton.__init__(
             self, name=name, states=states, initial_states=initial_states,
             final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based
+            atomic_proposition_based=atomic_proposition_based,
+            mutable=mutable
         )
     
     def __add__(self, other):
@@ -2356,11 +2719,13 @@ class BuchiAutomaton(OmegaAutomaton):
 
 class BA(BuchiAutomaton):
     def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True):
+                 input_alphabet=[], atomic_proposition_based=True,
+                 mutable=False):
         BuchiAutomaton.__init__(
             self, name=name, states=states, initial_states=initial_states,
             final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based
+            atomic_proposition_based=atomic_proposition_based,
+            mutable=mutable
         )
 
 def __ba_ts_sync_prod__(buchi_automaton, transition_system):
@@ -2551,6 +2916,7 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     return (prodts, final_states_preimage)
 
 class RabinAutomaton(OmegaAutomaton):
+    """Remember to override the final set management."""
     def acceptance_condition(self, prefix, suffix):
         raise NotImplementedError
 

@@ -202,7 +202,7 @@ def fts_maximal_example():
     fts.states.remove_from({'not a state', 'also not a state'} )
     
     #avoid adding characters 'p', 'a', 'y' at states
-    fts.transitions.add_from({'pay'}, {'select'}, check_states=False)
+    fts.transitions.add_from('pay', {'select'}, check_states=False)
     print("States now include 'p', 'a', 'y':\n\t" +str(fts.states() ) )
     fts.states.remove_from({'p', 'a', 'y'} )
     print("Fixed:\n\t" +str(fts.states() ) +'\n')
