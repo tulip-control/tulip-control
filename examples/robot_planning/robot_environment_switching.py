@@ -1,5 +1,9 @@
 # This is an example to demonstrate how the output of the TuLiP discretization 
-# for a system with uncontrolled switching might look like.
+# for a system with uncontrollable switching (i.e., modes are controlled by the
+# environment) might look like.
+
+# NO, 26 Jul 2013.
+
 # We will assume, we have the 6 cell robot example.
 
 #
@@ -15,6 +19,9 @@ from tulip import spec
 import numpy as np
 from scipy import sparse as sp
 
+###########################################
+# Environment switched system with 2 modes:
+###########################################
 
 sys_swe = transys.oFTS()
 
@@ -25,12 +32,12 @@ sys_swe.sys_actions.add('')
 # environment.
 
 sys_swe.env_actions.add_from({'slippery','normal'})
-# environment actions are mutually exclusive
+# Environment actions are mutually exclusive.
 
 # Discretization builds a transition matrix (invisible to the end user)
 
-# within each mode the transitions can be deterministically chosen, environment
-# chooses the mode (the surface can be slippery or normal)
+# Within each mode the transitions can be deterministically chosen, environment
+# chooses the mode (the surface can be slippery or normal).
 transmat1 = np.array([[1,1,0,1,0,0],
                      [1,1,1,0,1,0],
                      [0,1,1,0,1,1],
@@ -40,7 +47,7 @@ transmat1 = np.array([[1,1,0,1,0,0],
                      
 sys_swe.transitions.add_labeled_adj(sp.lil_matrix(transmat1),('','normal'))
 
-# in slippery mode can't stay still and makes larger jumps
+# In slippery mode, the robot can't stay still and makes larger jumps.
 transmat2 = np.array([[0,0,1,1,0,0],
                      [1,0,1,0,1,0],
                      [1,0,0,0,1,1],
@@ -71,7 +78,7 @@ env_safe = set()                # empty set
 
 # We might want to add additional assumptions
 # env_prog |= '!slippery'       
-#! NOTE: what slippery means can be infered from TS, r do we need to declare
+#! NOTE: what "slippery" means can be infered from TS. Or, do we need to declare
 # it as environment variable explicitly?
 
 

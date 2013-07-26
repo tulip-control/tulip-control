@@ -1,8 +1,12 @@
-# This is an example to demonstrate how the output of abstracting a switched
-# system, where the mode of the system depends on a combination of environment
-# and system controlled modes. We assume within each mode there is some rich
-# control authority that can be used to establish deterministic reachability 
-# relations through the use of low-level control.
+# This is an example to demonstrate how the output of a discretization algorithm
+# that abstracts a switched system, where the mode of the system depends on a 
+# combination of environment and system controlled variables, might look like. 
+# We assume within each mode the control authority is rich enough to establish 
+# deterministic reachability relations through the use of low-level continuous 
+# inputs.
+
+# NO, 26 Jul 2013.
+
 # We will assume, we have the 6 cell robot example.
 
 #
@@ -32,18 +36,18 @@ sys_hyb = transys.oFTS()
 sys_hyb.sys_actions.add_from({'gear0','gear1'})
 sys_hyb.env_actions.add_from({'slippery','normal'})
 
-# first environment chooses a mode, than the system chooses a mode and within
+# First environment chooses a mode, than the system chooses a mode and within
 # each mode there exists a low level controller to take any available transition
-# deterministically
+# deterministically.
 
 # gear0 basically stops the robot no matter what the enviornment does so
-# we take the transitions to be identity
+# We take the transitions to be identity.
 trans1 = np.eye(6)
 
 sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(trans1),('gear0','normal'))
 sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(trans1),('gear0','slippery'))
 
-# gear1 dynamics are similar to the environment switching example
+# gear1 dynamics are similar to the environment switching example.
 transmat1 = np.array([[1,1,0,1,0,0],
                      [1,1,1,0,1,0],
                      [0,1,1,0,1,1],

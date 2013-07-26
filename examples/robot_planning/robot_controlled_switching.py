@@ -1,6 +1,9 @@
 # This is an example to demonstrate how the output of abstracting a switched
 # system, where the only control over the dynamics is through mode switching
 # might look like.
+
+# NO, 26 Jul 2013.
+
 # We will assume, we have the 6 cell robot example.
 
 #
