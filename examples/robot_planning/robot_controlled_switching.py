@@ -1,0 +1,135 @@
+# This is an example to demonstrate how the output of abstracting a switched
+# system, where the only control over the dynamics is through mode switching
+# might look like.
+# We will assume, we have the 6 cell robot example.
+
+#
+#     +---+---+---+
+#     | 3 | 4 | 5 |
+#     +---+---+---+
+#     | 0 | 1 | 2 |
+#     +---+---+---+
+#
+
+from tulip import *
+from tulip import spec
+import numpy as np
+from scipy import sparse as sp
+
+
+###############################
+# Switched system with 4 modes:
+###############################
+
+# In this scenario we have limited actions "left, right, up, down" with 
+# uncertain (nondeterministics) outcomes (e.g., due to bad actuators or 
+# bad low-level feedback controllers)
+
+# Only control over the dynamics is through mode switching
+# Transitions should be interpreted as nondeterministic
+
+# Create a finite transition system
+sys_sws = transys.oFTS()
+
+sys_sws.sys_actions.add_from({'right','up','left','down'})
+sys_sws.env_actions.add('') 
+#! NOTE: no env action so just leaving blank(?), the other alternative is to set
+# check_labels=False but I could not get it to work (Ioannis??)
+
+# mode1 transitions
+transmat1 = np.array([[0,1,0,0,1,0],
+                      [0,0,1,0,0,1],
+                      [0,0,1,0,0,0],
+                      [0,1,0,0,1,0],
+                      [0,0,1,0,0,1],
+                      [0,0,0,0,0,1]])
+sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat1), ('right',''))
+                      
+# mode2 transitions
+transmat2 = np.array([[0,0,0,1,0,0],
+                      [0,0,0,0,1,1],
+                      [0,0,0,0,0,1],
+                      [0,0,0,1,0,0],
+                      [0,0,0,0,1,0],
+                      [0,0,0,0,0,1]])
+sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat2), ('up',''))
+                      
+# mode3 transitions
+transmat3 = np.array([[1,0,0,0,0,0],
+                      [1,0,0,1,0,0],
+                      [0,1,0,0,1,0],
+                      [0,0,0,1,0,0],
+                      [1,0,0,1,0,0],
+                      [0,1,0,0,1,0]])
+sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat3), ('left',''))
+                      
+# mode4 transitions
+transmat4 = np.array([[1,0,0,0,0,0],
+                      [0,1,0,0,0,0],
+                      [0,0,1,0,0,0],
+                      [1,0,0,0,0,0],
+                      [0,1,1,0,0,0],
+                      [0,0,1,0,0,0]])
+sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat4), ('down',''))
+
+
+# Decorate TS with state labels (aka atomic propositions)
+sys_sws.atomic_propositions.add_from(['home','lot'])
+sys_sws.atomic_propositions.label_per_state(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+
+# This is what is visible to the outside world (and will go into synthesis method)
+print sys_sws
+
+#
+# Environment variables and specification
+#
+# The environment can issue a park signal that the robot just respond
+# to by moving to the lower left corner of the grid.  We assume that
+# the park signal is turned off infinitely often.
+#
+env_vars = {'park'}
+env_init = set()                # empty set
+env_prog = '[]<>(!park)'
+env_safe = set()                # empty set
+
+# 
+# System specification
+#
+# The system specification is that the robot should repeatedly revisit
+# the upper right corner of the grid while at the same time responding
+# to the park signal by visiting the lower left corner.  The LTL
+# specification is given by 
+#
+#     []<> home && [](park -> <>lot)
+#
+# Since this specification is not in GR(1) form, we introduce the
+# variable X0reach that is initialized to True and the specification
+# [](park -> <>lot) becomes
+#
+#     [](next(X0reach) == X0 || (X0reach && !park))
+#
+
+# Augment the environmental description to make it GR(1)
+#! TODO: create a function to convert this type of spec automatically
+env_vars |= {'X0reach'}
+env_init |= {'X0reach'}
+
+# Define the specification
+#! NOTE: maybe "synthesize" should infer the atomic proposition from the 
+# transition system? Or, we can declare the mode variable, and the values
+# of the mode variable are read from the transition system.
+sys_vars = set()                # part of TS
+sys_init = set()                # empty set
+sys_prog = 'home'               # []<>X5
+sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+
+# Create the specification
+specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
+                    env_safe, sys_safe, env_prog, sys_prog)
+                    
+# Controller synthesis
+#
+# At this point we can synthesize the controller using one of the available
+# methods.  Here we make use of JTLV.
+#
+ctrl = synthesize('jtlv', specs, sys_sws)
