@@ -106,36 +106,162 @@ try:
 except ImportError:
     warnings.warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
+
+def unique(iterable):
+    """Return unique elements.
     
-def powerset(iterable):
-    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    If all items in iterable are hashable, then returns set.
+    If iterable contains unhashable item, then returns list of unique elements.
     
-    From:
-        http://docs.python.org/2/library/itertools.html,
-    also in:
-        https://pypi.python.org/pypi/more-itertools
+    note
+    ----
+    Always returning a list for consistency was tempting,
+    however this defeats the purpose of creating this function
+    to achieve brevity elsewhere in the code.
     """
+    # hashable items ?
+    try:
+        unique_items = set(iterable)
+    except:
+        unique_items = []
+        for item in iterable:
+            if item not in unique_items:
+                unique_items.append(item)
     
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+    return unique_items
 
 def contains_multiple(iterable):
-    return len(iterable) != len(set(iterable) )
+    """Does iterable contain any item multiple times ?"""    
+    return len(iterable) != len(unique(iterable) )
 
 def is_subset(small_iterable, big_iterable):
-    """Comparison for handling unhashable items of lists."""
+    """Comparison for handling list <= set, and lists with unhashable items."""
     try:
-        return set(small_iterable) <= set(big_iterable)
+        # first, avoid object duplication
+        if not isinstance(small_iterable, set):
+            small_iterable = set(small_iterable)
+        
+        if not isinstance(big_iterable, set):
+            big_iterable = set(big_iterable)
+        
+        return small_iterable <= big_iterable
     except TypeError:
         # not all items hashable...
-        big_list = list(big_iterable)
+    
+        # list to avoid: unhashable \in set ? => error
+        if not isinstance(big_iterable, list):
+            # avoid object duplication
+            big_iterable = list(big_iterable)
         
         for item in small_iterable:
-            if item not in big_list:
+            if item not in big_iterable:
                 return False
         return True
     except:
         raise Exception('Failed to compare iterables.')
+
+def powerset(iterable):
+        """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+        
+        From:
+            http://docs.python.org/2/library/itertools.html,
+        also in:
+            https://pypi.python.org/pypi/more-itertools
+        """
+        s = list(iterable)
+        return chain.from_iterable(combinations(s, r) for r in range(len(s)+1) )
+
+class PowerSet(object):
+    """Efficiently store power set of a mathematical set.
+    
+    Set here isn't necessarily a Python set,
+    i.e., it may comprise of unhashable elements.
+    
+    Upon initialization the iterable defining the (math) set is checked.
+    If all elements are hashable, then a set is used internally.
+    Otherwise a list is used, filtering items to be unique.
+    
+    usage
+    -----
+    s = [[1, 2], '3', {'a':1}, 1]
+    p = PowerSet(iterable=s)
+    
+    q = Powerset()
+    q.define_set(s)
+    
+    p.add_set_element({3: 'a'} )
+    p.remove_set_element([1,2] )
+    
+    params
+    ------
+    @param iterable: mathematical set S of elements, on which this 2^S defined.
+    @type iterable: iterable container
+    
+    see also
+    --------
+    is_subset
+    """
+    def __init__(self, iterable=[]):
+        self.define_set(iterable)
+    
+    def __str__(self):
+        return str(self.__call__() )
+    
+    def __contains__(self, item):
+        """Is item \\in 2^iterable = this powerset(iterable)."""
+        if not isinstance(item, Iterable):
+            raise Exception('Not iterable, this is a powerset, '+
+                            'so it contains (math) sets.')
+        
+        return is_subset(item, self.math_set)
+    
+    def __call__(self):
+        """Return the powerset as list of subsets, each subset as tuple."""
+        return list(powerset(self.math_set) )
+    
+    def define_set(self, iterable):
+        self.math_set = unique(iterable)
+    
+    def add_set_element(self, element):
+        """Add new element to underlying set S.
+        
+        This powerset is 2^S.
+        """
+        if isinstance(self.math_set, list):
+            if element not in self.math_set:
+                self.math_set.append(element)
+            return
+        
+        # set
+        if isinstance(element, Hashable):
+            if element not in self.math_set:
+                self.math_set.add(element)
+            return
+            
+        # element not Hashable, so cannot be \in set, hence new
+        # switch to list storage
+        self.math_set = unique(list(self.math_set) +[element] )
+    
+    def remove_set_element(self, element):
+        """Remove existing element from set S.
+        
+        This powerset is 2^S.
+        """
+        try:
+            self.math_set.remove(element)
+        except (ValueError, KeyError) as e:
+            warnings.warn('Set element not in set S.\n'+
+                          'Maybe you targeted another element for removal ?')
+        
+        # already efficient ?
+        if isinstance(self.math_set, set):
+            return
+        
+        # maybe all hashable after removal ?
+        try:
+            self.math_set = set(self.math_set)
+        except:
+            return
 
 def dprint(s):
     """Debug mode print."""
@@ -1468,6 +1594,12 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def trim_unreachable(self):
         raise NotImplementedError
     
+    def is_deterministic(self):
+        """Does there exist a transition for each state and each input letter ?"""
+        raise NotImplementedError
+    
+    
+    
     # file i/o
     def load_xml(self):
         raise NotImplementedError
@@ -1950,8 +2082,55 @@ class AtomicPropositions(object):
     def remove_labels_from_states(self, states):
         raise NotImplementedError
 
-# big issue: edge naming !
-class Actions(object):
+class EdgeSubLabel(object):
+    """Manage pieces comprising an edge label.
+    
+    Each transition is a graph edge (s1, s2) paired with a label.
+    The label can consist of one or more pieces, called sub-labels.
+    Each sub-label is an element from some pre-defined set.
+    This set might e.g. be various actions, as {work, sleep}.
+    
+    This class is for defining and managing the set of elements
+    from which a sub-label is picked. Note that in case an edge label
+    comprises of a single sub-label, then the notions of label and sub-label
+    are identical.
+    
+    But for systems with more sub-labels,
+        e.g., {system_actions, environment_actions}
+    a label consists of two sub-labels, each of which can be selected
+    from the set of available system actions and environment actions.
+    Each of these sets is defined using this class.
+    
+    The purpose is to support labels with any number of sub-labels,
+    without the need to re-write keyword-value management of
+    NetworkX edge dictionaries every time this is needed.
+    
+    For methods annotating edges with sub-labels chosen from the set
+    defined here, see the LabeledTransitions class.
+    
+    example
+    -------
+    The action taken when traversing an edge.
+    Each edge is annotated by a single action.
+    If an edge (s1, s2) can be taken on two transitions,
+    then 2 copies of that same edge are stored.
+    Each copy is annotated using a different action,
+    the actions must belong to the same action set.
+    That action set is defined by an EdgeSubLabel instance.
+    This description is a (closed) FTS.
+    
+    The system and environment actions associated with an edge
+    of a reactive system. To store these, 2 sub-labels are used
+    and their sets are defined by two different EdgeSubLabel instances,
+    encapsulated within the same (open) FTS.
+    
+    see also
+    --------
+    LabeledTransitions
+    """
+
+
+class Actions(set):
     """Store set of system or environment actions."""
     
     def __init__(self, graph, name, actions=[]):
@@ -2715,6 +2894,12 @@ class BuchiAutomaton(OmegaAutomaton):
     
     def acceptance_condition(self, prefix, suffix):
         """Check if given infinite word over alphabet \Sigma is accepted."""
+    
+    def determinize(self):
+        raise NotImplementedError
+    
+    def complement(self):
+        raise NotImplementedError
         
 
 class BA(BuchiAutomaton):
@@ -3001,8 +3186,12 @@ class FiniteStateMachine(LabeledStateDiGraph):
     so it does not "care" about word length.
     It continues as long as its input is fed with letters.
     """
-    def __init__(self):
-        LabeledStateDiGraph.__init__(self)        
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 mutable=False):
+        LabeledStateDiGraph.__init__(
+            self, name=name, states=states, initial_states=initial_states,
+            current_state=current_state, mutable=mutable,
+            removed_state_callback=self._removed_state_callback)        
         
         self.input_ports = {'name':'type'}
         self.output_ports ={'name': 'type'}
@@ -3018,33 +3207,30 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
         self.default_export_fname = 'fsm'
     
-    def is_deterministic(self):
-        """Does there exist a transition for each state and each input letter ?"""
-        raise NotImplementedError
+    def _removed_state_callback(self):
+        """Remove it also from anywhere within this class, besides the states."""
     
-# operations on single state machine
-    def complement(self):
-        raise NotImplementedError
+    
 
-    def determinize(self):
-        raise NotImplementedError
-
-# operations between state machines
+    # operations between state machines
     def sync_product(self):
         raise NotImplementedError
         
     def async_product(self):
         raise NotImplementedError
     
-    def run(self, input_sequence):
+    def simulate(self, input_sequence):
         self.simulation = FiniteStateMachineSimulation()
         raise NotImplementedError
 
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
     
-    def __init__(self):
-        FiniteStateMachine.__init__(self)
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 mutable=False):
+        FiniteStateMachine.__init__(
+            self, name=name, states=states, initial_states=[],
+            current_state=current_state, mutable=mutable)
 
 ## transducers
 class MooreMachine(FiniteStateMachine):
