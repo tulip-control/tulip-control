@@ -114,7 +114,7 @@ def fts_maximal_example():
     fts.states.remove_from({'pay', 'soda'} )
     fts.states.add_from({'pay', 'soda'} )
     
-    fts.states.set_current('pay')
+    fts.states.set_current(['pay'])
     
     fts.states.add_initial('pay') # should already be a state
     fts.states.add_initial_from({'soda', 'select'} )
@@ -278,9 +278,9 @@ def fts_maximal_example():
     fts.transitions.add_labeled('c12', 'c13', 'insert_coin', check=False)
     fts.states.remove_from({'c12', 'c13'} ) # undo
     
-    print('Type of (set of) actions: ' +str(fts.actions.name) )
-    print('Number of actions: ' +str(fts.actions.number() ) )
-    print('Actions: ' +str(fts.actions() ) )
+    print('Types of actions: ' +str(fts.__transition_label_def__.keys() ) )
+    print('Number of actions: ' +str(len(fts.actions) ) )
+    print('Actions: ' +str(fts.actions ) )
     print('Labeled transitions: ' +str(fts.transitions(data=True) ) )
     fts.plot()
     
@@ -370,9 +370,16 @@ def mealy_machine_example():
     
     class check_diaphragm():
         """camera f-number."""
-        def is_valid(x):
+        def is_valid_value(x):
             if x <= 0.7 or x > 256:
                 raise TypeError('This f-# is outside allowable range.')
+        
+        def is_valid_guard(self, guard):
+            # when properly implemented, do appropriate syntactic check
+            if isinstance(guard, float):
+                return True
+            
+            return False
         
         def contains(guard_set, input_port_value):
             """This method "knows" that we are using x to denote the input
@@ -387,9 +394,16 @@ def mealy_machine_example():
     
     class check_camera():
         """is it looking upwards ?"""
-        def is_valid(self, x):
-            if x.shape != (1, 3):
+        def is_valid_value(self, x):
+            if x.shape != (3,):
                 raise Exception('Not a 3d vector!')
+        
+        def is_valid_guard(self, guard):
+            # when properly implemented, do appropriate syntactic check
+            if isinstance(guard, np.ndarray) and guard.shape == (3,):
+                return True
+            
+            return False
         
         def contains(self, guard_set, input_port_value):
             v1 = guard_set # guard_halfspace_normal_vector
@@ -409,27 +423,39 @@ def mealy_machine_example():
     # note: guards are conjunctions, any disjunction is represented by 2 edges
     
     # input defs
-    speed = {'zero', 'low', 'high', 'crazy'} # discrete set
-    seats_taken = ts.PowerSet(range(5) ) # where occupants are seated
-    aperture = check_diaphragm()
-    camera_dir = check_camera()
+    inputs = OrderedDict([
+        ['speed', {'zero', 'low', 'high', 'crazy'} ],
+        ['seats', ts.PowerSet(range(5) ) ],
+        ['aperture', check_diaphragm() ],
+        ['camera', check_camera() ]
+    ])
+    m.add_inputs(inputs)
     
-    inputs = OrderedDict((('speed', speed),
-                          ('seats', seats_taken),
-                          ('aperture', aperture),
-                          ('camera', camera_dir) ) )
-    m.inputs.add(inputs)
+    # outputs def
+    outputs = OrderedDict([
+        ['photo', {'capture', 'wait'} ]
+    ])
+    m.add_outputs(outputs)
+    
+    # state variables def
+    state_vars = outputs = OrderedDict([
+        ['light', {'on', 'off'} ]
+    ])
+    m.add_state_vars(state_vars)
     
     # guard defined using input sub-label ordering
-    guard = ('low', (0, 1), 0.3, np.array([0,0,1]) )
-    m.transitions.add('s0', 's1', guard)
+    guard = ('low', (0, 1), 0.3, np.array([0,0,1]), 'capture')
+    m.transitions.add_labeled('s0', 's1', guard)
     
     # guard defined using input sub-label names
     guard = {'camera':np.array([1,1,1]),
              'speed':'high',
-             'yaw':0.3,
-             'seats':(2, 3) }
-    m.transitions.add('s1', 's2', guard)
+             'aperture':0.3,
+             'seats':(2, 3),
+             'photo':'wait'}
+    m.transitions.add_labeled('s1', 's2', guard)
+    
+    m.plot()
     
     return m
 
@@ -486,7 +512,7 @@ def label_per_state():
 
 if __name__ == '__main__':
     #sims_demo()
-    #fts_maximal_example()
+    fts_maximal_example()
     #ofts_maximal_example()
     #ba_maximal_example()
     

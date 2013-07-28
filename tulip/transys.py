@@ -235,6 +235,14 @@ class PowerSet(object):
         # switch to list storage
         self.math_set = unique(list(self.math_set) +[element] )
     
+    def add_set_elements(self, elements):
+        """Add multiple new elements to underlying set S.
+        
+        This powerset is 2^S.
+        """
+        for element in elements:
+            self.add_set_element(element)
+    
     def remove_set_element(self, element):
         """Remove existing element from set S.
         
@@ -977,7 +985,7 @@ class States(object):
         return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
 
 class Transitions(object):
-    """Building block for managing transitions.
+    """Building block for managing unlabeled transitions = edges.
     
     Note that a directed edge is an ordered set of nodes.
     Unlike an edge, a transition is a labeled edge.
@@ -1010,6 +1018,10 @@ class Transitions(object):
         If check_states = False, and states not already in set of states,
         then they are added.
         """
+        if not isinstance(check_states, bool):
+            raise TypeError('check_states must be bool.\n'
+                            +'Maybe you intended to call add_labeled instead ?')
+        
         if not check_states:
             self.graph.states.add_from({from_state, to_state} )
         
@@ -1127,13 +1139,58 @@ class Transitions(object):
                 self.remove(from_state, to_state)
 
 class LabeledTransitions(Transitions):
-    """Superclass for open/closed FTS, FSA, FSM.
+    """Manage labeled transitions (!= edges).
     
-    In more detail, the following classes inherit from this one:
+    Each transition is a graph edge (s1, s2) paired with a label.
+    The label can consist of one or more pieces, called sub-labels.
+    Each sub-label is an element from some pre-defined set.
+    This set might e.g. be various actions, as {work, sleep}.
+    
+    This class is for defining and managing transitions, together with
+    the set of elements from which sub-label are picked.
+    Note that in case an edge label comprises of a single sub-label,
+    then the notions of label and sub-label are identical.
+    
+    But for systems with more sub-labels,
+        e.g., {system_actions, environment_actions}
+    a label consists of two sub-labels, each of which can be selected
+    from the set of available system actions and environment actions.
+    Each of these sets is defined using this class.
+    
+    The purpose is to support labels with any number of sub-labels,
+    without the need to re-write keyword-value management of
+    NetworkX edge dictionaries every time this is needed.
+    
+    caution
+    -------
+    Before removal of a sublabel value from the sublabel type V,
+    remember to check using sys.transitions.check_sublabeling()
+    that the value is not currently used by any edges.
+    
+    example
+    -------
+    The action taken when traversing an edge.
+    Each edge is annotated by a single action.
+    If an edge (s1, s2) can be taken on two transitions,
+    then 2 copies of that same edge are stored.
+    Each copy is annotated using a different action,
+    the actions must belong to the same action set.
+    That action set is defined as a ser instance.
+    This description is a (closed) FTS.
+    
+    The system and environment actions associated with an edge
+    of a reactive system. To store these, 2 sub-labels are used
+    and their sets are encapsulated within the same (open) FTS.
+    
+    In more detail, the following classes encapsulate this one:
         FiniteTransitionSystem (closed)
         OpenFiniteTransitionSystem
         FiniteStateAutomaton
         FiniteStateMachine
+    
+    see also
+    --------
+    Transitions
     """
     
     def __init__(self, graph):
@@ -1141,8 +1198,7 @@ class LabeledTransitions(Transitions):
     
     def __exist_labels__(self):
         """Labeling defined ?"""
-        if not hasattr(self.graph, '__transition_label_order__') or \
-           not hasattr(self.graph, '__transition_label_def__'):
+        if not hasattr(self.graph, '__transition_label_def__'):
             raise Exception('No transition labeling defined for this class.')
     
     def __check_states__(self, from_state, to_state, check=True):
@@ -1170,18 +1226,17 @@ class LabeledTransitions(Transitions):
         self.__exist_labels__()
         
         # get labeling def
-        label_order = self.graph.__transition_label_order__
         label_def = self.graph.__transition_label_def__
         
         # single label ?
-        if len(label_order) == 1:
+        if len(label_def) == 1:
             labels = [labels]
         
         # constuct label dict
         edge_label = dict()
         if isinstance(labels, list) or isinstance(labels, tuple):
-            for i in range(len(label_order) ):
-                cur_name = label_order[i]
+            for i in range(len(labels) ):
+                cur_name = label_def.keys()[i]
                 cur_label = labels[i]
                 
                 edge_label[cur_name] = cur_label
@@ -1193,13 +1248,35 @@ class LabeledTransitions(Transitions):
         # check if dict is consistent with label defs
         for (typename, label) in edge_label.iteritems():
             possible_labels = label_def[typename]
-            if not check_label:
-                possible_labels.add(label)
-            elif label not in possible_labels:
-                msg = 'Given label:\n\t' +str(label) +'\n'
-                msg += 'not in set of transition labels:\n\t' +str(possible_labels)
-                raise Exception(msg)
+            
+            # iterable sublabel discreption ? (i.e., discrete ?)
+            if isinstance(possible_labels, Iterable):
+                if not check_label:
+                    possible_labels.add(label)
+                elif label not in possible_labels:
+                    msg = 'Given label:\n\t' +str(label) +'\n'
+                    msg += 'not in set of transition labels:\n\t' +str(possible_labels)
+                    raise Exception(msg)
                 
+                continue
+            
+            # not iterable, check using convention:
+            
+            # sublabel type not defined ?
+            if possible_labels == None:
+                print('Undefined sublabel type')
+                continue
+            
+            # check given ?
+            if not hasattr(possible_labels, 'is_valid_guard'):
+                raise TypeError('SubLabel type V does not have method is_valid.')
+            
+            # check sublabel type
+            if not possible_labels.is_valid_guard(label):
+                raise TypeError('Sublabel:\n\t' +str(label) +'\n' +
+                                'not valid for sublabel type:\n\t' +
+                                str(possible_labels) )
+            
         return edge_label
         
     def __dot_str__(self, to_pydot_graph):
@@ -1217,8 +1294,10 @@ class LabeledTransitions(Transitions):
                     # avoid turning strings to lists
                     if isinstance(label_value, str):
                         label_str = label_value
-                    else:
+                    elif isinstance(label_value, Iterable):
                         label_str = str(list(label_value) )
+                    else:
+                        label_str = str(label_value)
                     
                     edge_dot_label += type_name +sep_type_value
                     edge_dot_label += label_str +sep_label_sets
@@ -1226,7 +1305,7 @@ class LabeledTransitions(Transitions):
             
             return edge_dot_label
         
-        self.__exist_labels__()     
+        self.__exist_labels__()
         
         # get labeling def
         label_def = self.graph.__transition_label_def__
@@ -1490,13 +1569,28 @@ class LabeledTransitions(Transitions):
             msg += str(edge_key) +' exists.'
             warnings.warn(msg)
         
-        label_order = self.graph.__transition_label_order__
+        label_def = self.graph.__transition_label_def__
         transition_label_values = set()
-        for label_type in label_order:
+        for label_type in label_def:
             cur_label_value = attr_dict[label_type]
             transition_label_values.add(cur_label_value)
     
         return transition_label_values
+    
+    def check_sublabeling(self, sublabel_name, sublabel_value):
+        edge_sublabels = nx.get_edge_attributes(self.graph, sublabel_name)
+        
+        edges_using_sublabel_value = set()
+        for (edge, cur_sublabel_value) in edge_sublabels.iteritems():
+            if cur_sublabel_value == sublabel_value:
+                edges_using_sublabel_value.add(edge)                
+        
+        if edges_using_sublabel_value:
+            msg = 'AP (=' +str(sublabel_name) +') still used '
+            msg += 'in label of nodes: ' +str(edges_using_sublabel_value)
+            raise Exception(msg)
+        
+        #self.actions.remove(action)
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
@@ -2095,104 +2189,15 @@ class AtomicPropositions(object):
     def remove_labels_from_states(self, states):
         raise NotImplementedError
 
-class EdgeSubLabel(object):
-    """Manage pieces comprising an edge label.
-    
-    Each transition is a graph edge (s1, s2) paired with a label.
-    The label can consist of one or more pieces, called sub-labels.
-    Each sub-label is an element from some pre-defined set.
-    This set might e.g. be various actions, as {work, sleep}.
-    
-    This class is for defining and managing the set of elements
-    from which a sub-label is picked. Note that in case an edge label
-    comprises of a single sub-label, then the notions of label and sub-label
-    are identical.
-    
-    But for systems with more sub-labels,
-        e.g., {system_actions, environment_actions}
-    a label consists of two sub-labels, each of which can be selected
-    from the set of available system actions and environment actions.
-    Each of these sets is defined using this class.
-    
-    The purpose is to support labels with any number of sub-labels,
-    without the need to re-write keyword-value management of
-    NetworkX edge dictionaries every time this is needed.
-    
-    For methods annotating edges with sub-labels chosen from the set
-    defined here, see the LabeledTransitions class.
-    
-    example
-    -------
-    The action taken when traversing an edge.
-    Each edge is annotated by a single action.
-    If an edge (s1, s2) can be taken on two transitions,
-    then 2 copies of that same edge are stored.
-    Each copy is annotated using a different action,
-    the actions must belong to the same action set.
-    That action set is defined by an EdgeSubLabel instance.
-    This description is a (closed) FTS.
-    
-    The system and environment actions associated with an edge
-    of a reactive system. To store these, 2 sub-labels are used
-    and their sets are defined by two different EdgeSubLabel instances,
-    encapsulated within the same (open) FTS.
-    
-    see also
-    --------
-    LabeledTransitions
-    """
-
-
 class Actions(set):
     """Store set of system or environment actions."""
-    
-    def __init__(self, graph, name, actions=[]):
-        self.name = name
-        self.actions = set(actions)
-        self.graph = graph
-    
-    def __call__(self):
-        return self.actions
-    
-    def __str__(self):
-        n = str(self.number() )
-        action_set_name = self.name
-        
-        msg = 'The ' +n +' Actions of type: ' +action_set_name +', are:\n\t'
-        msg += str(self.actions)
-        
-        return msg
-    
-    def __contains__(self, action):
-        return action in self.actions
-    
-    def add(self, action=[]):
-        self.actions.add(action)
     
     def add_from(self, actions=[]):
         """Add multiple actions.
         
         @type actions: iterable
         """
-        self.actions |= set(actions)
-    
-    def number(self):
-        return len(self.actions)
-    
-    def remove(self, action):
-        edges_action = nx.get_edge_attributes(self.graph, self.name)
-        
-        edges_using_action = set()
-        for (edge, curaction) in edges_action.iteritems():
-            if curaction == action:
-                edges_using_action.add(edge)                
-        
-        if edges_using_action:
-            msg = 'AP (=' +str(action) +') still used '
-            msg += 'in label of nodes: ' +str(edges_using_action)
-            raise Exception(msg)
-        
-        self.actions.remove(action)
+        self |= set(actions)
         
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System for modeling closed systems.
@@ -2233,16 +2238,20 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             current_state=current_state, mutable=mutable
         )
         
-        self.atomic_propositions = AtomicPropositions(self, 'ap', atomic_propositions)
-        self.actions = Actions(self, 'actions', actions)
-        
-        self.__state_label_def__ = {'ap': self.atomic_propositions}
+        # state labels
+        self.__state_label_def__ = OrderedDict(
+            [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
+        )
+        self.atomic_propositions = self.__state_label_def__['ap']
         self.__state_dot_label_format__ = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
         
-        self.__transition_label_def__ = {'actions': self.actions}
-        self.__transition_label_order__ = ['actions']
+        # edge labels comprised of sublabels (here single sublabel)
+        self.__transition_label_def__ = OrderedDict(
+            [['actions', Actions(actions)]]
+        )
+        self.actions = self.__transition_label_def__['actions']
         self.__transition_dot_label_format__ = {'actions':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
@@ -2251,8 +2260,18 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
+        def actions_str(actions):
+            n = str(len(actions) )
+            #action_set_name = self.name
+            action_set_name = 'actions'
+        
+            msg = 'The ' +n +' Actions of type: ' +action_set_name +', are:\n\t'
+            msg += str(self.actions)
+        
+            return msg
+        
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
-        s += '\n' +str(self.transitions) +'\n' +str(self.actions) +'\n'
+        s += '\n' +str(self.transitions) +'\n' +actions_str(self.actions) +'\n'
         s += str(self.atomic_propositions) +'\n'
         
         return s
@@ -2356,18 +2375,22 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
             current_state=current_state, mutable=mutable
         )
         
-        self.sys_actions = Actions(self, 'sys_actions', sys_actions)
-        self.env_actions = Actions(self, 'env_actions', env_actions)
-        self.atomic_propositions = AtomicPropositions(self, 'ap', atomic_propositions)
-        
-        self.__state_label_def__ = {'ap': self.atomic_propositions}
+        # state labeling
+        self.__state_label_def__ = OrderedDict(
+            [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
+        )
+        self.atomic_propositions = self.__state_label_def__['ap']
         self.__state_dot_label_format__ = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
         
-        self.__transition_label_def__ = {'sys_actions': self.sys_actions,
-                                         'env_actions': self.env_actions}
-        self.__transition_label_order__ = ['sys_actions', 'env_actions']
+        # edge labeling (here 2 sublabels)
+        self.__transition_label_def__ = OrderedDict([
+            ['sys_actions', Actions(sys_actions) ],
+            ['env_actions', Actions(env_actions) ]
+        ])
+        self.sys_actions = self.__transition_label_def__['sys_actions']
+        self.env_actions = self.__transition_label_def__['env_actions']
         self.__transition_dot_label_format__ = {'sys_actions':'sys',
                                                 'env_actions':'env',
                                                 'type?label':':',
@@ -2383,7 +2406,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         
         return s
 
-class oFTS(OpenFiniteTransitionSystem):
+class OpenFTS(OpenFiniteTransitionSystem):
     """Alias to transys.OpenFiniteTransitionSystem."""
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
                  atomic_propositions=[], sys_actions=[], env_actions=[],
@@ -2393,114 +2416,6 @@ class oFTS(OpenFiniteTransitionSystem):
             current_state=None, atomic_propositions=atomic_propositions,
             sys_actions=sys_actions, env_actions=env_actions, mutable=mutable
         )
-
-class Alphabet(object):
-    """Stores input letters annotating transitions of an automaton."""
-    
-    def __init__(self, graph, name, letters=[], atomic_proposition_based=False):
-        self.name = name
-        self.graph = graph
-        self.atomic_proposition_based = atomic_proposition_based
-        
-        if self.atomic_proposition_based:
-            self.atomic_propositions = AtomicPropositions(graph, 'ap for alphabet')
-            self.alphabet = None
-        else:
-            self.alphabet = set(letters)
-            self.atomic_propositions = None
-        
-        self.add_from(letters)
-    
-    def __str__(self):
-        return 'Alphabet:\n' +str(self() )
-    
-    def __call__(self):
-        if self.atomic_proposition_based:
-            return set(powerset(self.atomic_propositions() ) )
-        else:
-            return self.alphabet
-    
-    def __contains__(self, letter):
-        if self.atomic_proposition_based:
-            return letter <= self.atomic_propositions()
-        else:
-            return letter in self.alphabet
-    
-    def add(self, new_letter):
-        """Add single letter to alphabet.
-        
-        If C{atomic_proposition_based=False},
-        then the letter is stored in C{alphabet}.
-        
-        If C{atomic_proposition_based=True},
-        the the atomic propositions within the letter
-        are stored in C{atomic_propositions}.
-        
-        @type new_input_letter:
-            - hashable if C{atomic_proposition_based=False}
-            - iterable if C{atomic_proposition_based=True}
-        
-        See also
-        --------
-        add_from, AtomicPropositions
-        """
-        if self.atomic_proposition_based:
-            # check multiplicity
-            if contains_multiple(new_letter):
-                msg = """
-                    Letter contains multiple Atomic Propositions.
-                    Multiples will be discarded.
-                    """
-                warnings.warn(msg)
-            
-            self.atomic_propositions.add_from(new_letter, check_existing=False)
-        else:
-            self.alphabet.add(new_letter)
-    
-    def add_from(self, new_letters):
-        """Add multiple letters to alphabet.
-        
-        If C{atomic_proposition_based=False},
-        then these are stored in C{alphabet}.
-        
-        If C{atomic_proposition_based=True},
-        then the atomic propositions within each letter
-        are stored in C{atomic_propositions}.
-        
-        @type new_letters:
-            - iterable of hashables,
-              if C{atomic_proposition_based=False}
-            - iterable of iterables of hashables,
-              if C{atomic_proposition_based=True}
-        
-        See also
-        --------
-        add, AtomicPropositions
-        """        
-        if self.atomic_proposition_based:
-            for new_letter in new_letters:
-                self.add(new_letter)
-        else:
-            self.alphabet |= set(new_letters)
-    
-    def number(self):
-        if self.atomic_proposition_based:
-            return 2**self.atomic_propositions.number()
-        else:
-            return len(self.alphabet)        
-    
-    def remove(self, rm_input_letter):
-        if self.atomic_proposition_based:
-            msg = """Removing from an Atomic Proposition-based aphabet
-                  not supported, because it can reduce the set of atomic
-                  propositions so that other letters \\not\\in 2^AP any more.
-                  """
-            raise Exception(msg)
-        else:
-            self.alphabet.remove(rm_input_letter)
-        
-    def remove_from(self, rm_input_letters):
-        self.alphabet.difference(rm_input_letters)
 
 class InfiniteWord(InfiniteSequence):
     """Store word.
@@ -2627,15 +2542,28 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     returns
     -------
     
+    alphabet
+    --------
+    Add single letter to alphabet.
+        
+    If C{atomic_proposition_based=False},
+    then the alphabet is represented by a set.
+    
+    If C{atomic_proposition_based=True},
+    the the alphabet is represented by a powerset 2^AP
+    and you manage the set of Atomic Propositions AP within the powerset.
+    
     see also
     --------    
     __dot_str__ of LabeledStateDiGraph
         
     """
     
-    def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True,
-                 mutable=False):
+    def __init__(
+        self, name='', states=[], initial_states=[], final_states=[],
+        input_alphabet_or_atomic_propositions=[],
+        atomic_proposition_based=True, mutable=False
+    ):
         LabeledStateDiGraph.__init__(
             self, name=name,
             states=states, initial_states=initial_states, mutable=mutable,
@@ -2646,15 +2574,20 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
             self.final_states = list()
         else:
             self.final_states = set()
-        
         self.add_final_states_from(final_states)
         
-        self.alphabet = Alphabet(self, 'in_alphabet',
-                                 atomic_proposition_based=atomic_proposition_based)
-        self.alphabet.add_from(input_alphabet)
+        # edge labeling
+        if atomic_proposition_based:
+            self.atomic_proposition_based = True
+            alphabet = PowerSet(input_alphabet_or_atomic_propositions)
+        else:
+            self.atomic_proposition_based = False
+            alphabet = set(input_alphabet_or_atomic_propositions)
         
-        self.__transition_label_def__ = {'in_alphabet': self.alphabet}
-        self.__transition_label_order__ = ['in_alphabet']
+        self.__transition_label_def__ = OrderedDict([
+            ['in_alphabet', alphabet]
+        ])
+        self.alphabet = self.__transition_label_def__['in_alphabet']
         
         # used before label value
         self.__transition_dot_label_format__ = {'in_alphabet':'',
@@ -2665,8 +2598,10 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.default_export_fname = 'fsa'
         
     def __str__(self):
-        s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
-        s += '\n' +str(self.transitions) +'\n' +str(self.alphabet) +'\n'
+        s = str(self.states)
+        s += '\nState Labels:\n' +pformat(self.states(data=True) ) +'\n'
+        s += str(self.transitions) +'\n'
+        s += 'Alphabet:\n' +str(self.alphabet) +'\n'
         s += 'Final States:\n\t' +str(self.final_states)
         
         return s
@@ -2930,13 +2865,11 @@ def __ba_ts_sync_prod__(buchi_automaton, transition_system):
     prod_ba.states.add_final_from(persistent)
     
     # copy edges, translating transitions, i.e., chaning transition labels
-    if buchi_automaton.alphabet.atomic_proposition_based:
+    if buchi_automaton.atomic_proposition_based:
         # direct access, not the inefficient
         #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
         # which would generate a combinatorially large alphabet
-        prod_ba.alphabet.atomic_propositions.add_from(
-            buchi_automaton.alphabet.atomic_propositions()
-        )
+        prod_ba.alphabet.add_set_elements(buchi_automaton.alphabet.math_set)
     else:
         msg ="""
             Buchi Automaton must be Atomic Proposition-based,
@@ -2978,7 +2911,7 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     --------
     __ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
-    if not buchi_automaton.alphabet.atomic_proposition_based:
+    if not buchi_automaton.atomic_proposition_based:
         msg = """Buchi automaton not stored as Atomic Proposition-based.
                 synchronous product with Finite Transition System
                 is not well-defined."""
@@ -3125,9 +3058,9 @@ class ParityGameGraph():
 class WeightedAutomaton():
     """."""
 
-###########
+#############################################################################
 # Finite-State Machines : I/O = Reactive = Open Systems
-###########
+#############################################################################
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
         curvaluation = valuations[name]     
@@ -3294,27 +3227,58 @@ class FiniteStateMachine(LabeledStateDiGraph):
     --------
     FMS, MealyMachine, MooreMachine
     """
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 mutable=False):
+    def __init__(self, name='', mutable=False):
         LabeledStateDiGraph.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            current_state=current_state, mutable=mutable,
-            removed_state_callback=self._removed_state_callback)
+            self, mutable=mutable,
+            removed_state_callback=self._removed_state_callback
+        )
         
-        # "alphabets" (ports are the dict keys)
-        self.inputs = OrderedDict()
-        self.outputs = OrderedDict()
-        
+        # state labeling
+        self.__state_label_def__ = OrderedDict()
+        self.state_vars = OrderedDict()
+        # TODO the __state_dot_label_format__ should be automatically
+        # expanded when adding new inputs, using the keys of the new inputs
+        self.__state_dot_label_format__ = {'type?label':':',
+                                           'separator':'\\n'}
         #self.set_actions = {}
         
-        self.state_variables = {'name':'type'}
+        # edge labeling
+        # "alphabets" (ports are the dict keys)
+        self.__transition_label_def__ = OrderedDict()
+        
+        # will point to selected values of self.__transition_label_def__
+        self.inputs = OrderedDict()
+        # TODO as above
+        self.__transition_dot_label_format__ = {'input_i':'in',
+                                                'type?label':':',
+                                                'separator':'\\n'}
         
         self.default_export_fname = 'fsm'
     
     def _removed_state_callback(self):
         """Remove it also from anywhere within this class, besides the states."""
     
+    def add_inputs(self, new_inputs_ordered_dict):
+        for (in_port_name, in_port_type) in new_inputs_ordered_dict.iteritems():
+            # append
+            self.__transition_label_def__[in_port_name] = in_port_type
+            
+            # inform inputs
+            self.inputs[in_port_name] = self.__transition_label_def__[in_port_name]
+            
+            # printing format
+            self.__transition_dot_label_format__[in_port_name] = str(in_port_name)
     
+    def add_state_vars(self, new_vars_ordered_dict):
+        for (var_name, var_type) in new_vars_ordered_dict.iteritems():
+            # append
+            self.__state_label_def__[var_name] = var_type
+            
+            # inform state vars
+            self.state_vars[var_name] = self.__state_label_def__[var_name]
+            
+            # printing format
+            self.__state_dot_label_format__[var_name] = str(var_name)
     
     def is_blocking(self, state):
         """From this state, for each input valuation, there exists a transition.
@@ -3350,31 +3314,58 @@ class FiniteStateMachine(LabeledStateDiGraph):
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
     
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 mutable=False):
-        FiniteStateMachine.__init__(
-            self, name=name, states=states, initial_states=[],
-            current_state=current_state, mutable=mutable)
+    def __init__(self, name='', mutable=False):
+        FiniteStateMachine.__init__(self, name=name, mutable=mutable)
 
-## transducers
 class MooreMachine(FiniteStateMachine):
     """Moore machine."""
-    #raise NotImplementedError
+    def __init__(self):
+        self.default_export_fname = 'moore'
+        
+        raise NotImplementedError
+    
+    def add_outputs(self, new_outputs_ordered_dict):
+        for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
+            # append
+            self.__state_label_def__[out_port_name] = out_port_type
+            
+            # inform state vars
+            self.outputs[out_port_name] = \
+                self.__state_label_def__[out_port_name]
+            
+            # printing format
+            self.__state_dot_label_format__[out_port_name] = \
+                '/out:' +str(out_port_name)
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine."""
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 mutable=False):
-        FiniteStateMachine.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            current_state=current_state, mutable=mutable)
+    def __init__(self, name='', mutable=False):
+        FiniteStateMachine.__init__(self, name=name, mutable=mutable)
+        
+        # will point to selected values of self.__transition_label_def__
+        self.outputs = OrderedDict()
+        
+        self.default_export_fname = 'mealy'
+    
+    def add_outputs(self, new_outputs_ordered_dict):
+        for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
+            # append
+            self.__transition_label_def__[out_port_name] = out_port_type
+            
+            # inform state vars
+            self.outputs[out_port_name] = \
+                self.__transition_label_def__[out_port_name]
+            
+            # printing format
+            self.__transition_dot_label_format__[out_port_name] = \
+                '/out:' +str(out_port_name)
     
     def get_outputs(self, from_state, next_state):
         #labels = 
         
         output_valuations = dict()
-        for output_port in self.output_ports:
-            output_valuations[output_port] = 1
+        for output_port in self.outputs:
+            output_valuations[output_port]
     
     def update(self, input_valuations, from_state='current'):
         if from_state != 'current':

@@ -141,6 +141,8 @@ if __name__ == '__main__':
     
     fts = fts_minimal_example()
     ofts_minimal_example()
+    
+    """
     ba = ba_minimal_example()
     
     (prod_fts, final_states_preimage) = fts *ba
@@ -151,3 +153,4 @@ if __name__ == '__main__':
     
     if not prod_ba.plot() and save_fig:
         prod_ba.save(path='prod.png', fileformat='png')
+    """
