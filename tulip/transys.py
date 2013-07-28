@@ -34,7 +34,7 @@ Transition System Module
 """
 
 """
-incorporating code from:
+based on code from:
     Automaton class and supporting methods (Scott Livingston)
 and
     Automaton Module (TuLiP distribution v0.3c)
@@ -43,13 +43,9 @@ and
 """
 
 """
-targets
--------
- timed automata
-
-todo
-----
-    same filtering for state annot
+TODO
+    protect initial states
+    timed automata (with counters, dense time semantics ?)
 
  import from
    string/text file
@@ -61,19 +57,13 @@ todo
    via matlab
    transducer mode
 
- save to
-   xml, dot-> svg-> pdf
-
  conversions between automata types
    either internally or
    by calling external converters (e.g. ltl2dstar)
  operations between trasition systms and automata or game graphs
 
  dependent on other modules
-   ltl2ba: uses also spec class
-   
- dot export based on networkx uses pygraphviz, recently ported to python3
-     https://groups.google.com/forum/#!topic/pygraphviz-discuss/mbK5voZ9-hs
+   ltl2ba: uses also spec classs
 """
 
 import networkx as nx
@@ -82,7 +72,7 @@ import warnings
 import copy
 from pprint import pformat
 from itertools import chain, combinations
-from collections import Iterable, Hashable
+from collections import Iterable, Hashable, OrderedDict
 from cStringIO import StringIO
 
 try:
@@ -218,6 +208,9 @@ class PowerSet(object):
     def __call__(self):
         """Return the powerset as list of subsets, each subset as tuple."""
         return list(powerset(self.math_set) )
+    
+    def __iter__(self):
+        return iter(self() )
     
     def define_set(self, iterable):
         self.math_set = unique(iterable)
@@ -767,7 +760,7 @@ class States(object):
         for rm_state in rm_states:
             self.remove(rm_state)
     
-    def set_current(self, state):
+    def set_current(self, states):
         """Select current state.
         
         State membership is checked.
@@ -775,15 +768,15 @@ class States(object):
         
         None is possible.
         """
-        if state is None:
+        if states is None:
             self.current = None
             return
         
-        if state not in self():
+        if not is_subset(states, self() ):
             raise Exception('Current state given is not in set of states.\n'+
                             'Cannot set current state to given state.')
         
-        self.current = state
+        self.current = states
     
 	# initial states
     def add_initial(self, new_initial_state):
@@ -1484,6 +1477,26 @@ class LabeledTransitions(Transitions):
                 found_edges.add(found_edge)
             
         return found_edges
+    
+    def label_of(self, from_state, to_state, edge_key='any'):
+        if edge_key == 'any':
+            attr_dict = self.graph.get_edge_data(from_state, to_state)
+        else:
+            attr_dict = self.graph.get_edge_data(from_state, to_state, key=edge_key)
+        
+        if attr_dict is None:
+            msg = 'No transition from state: ' +str(from_state)
+            msg += ', to state: ' +str(to_state) +', with key: '
+            msg += str(edge_key) +' exists.'
+            warnings.warn(msg)
+        
+        label_order = self.graph.__transition_label_order__
+        transition_label_values = set()
+        for label_type in label_order:
+            cur_label_value = attr_dict[label_type]
+            transition_label_values.add(cur_label_value)
+    
+        return transition_label_values
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
@@ -2181,23 +2194,6 @@ class Actions(set):
         
         self.actions.remove(action)
         
-    def of(self, from_state, to_state, edge_key):
-        attr_dict = self.graph.get_edge_data(from_state, to_state, key=edge_key)
-        
-        if attr_dict is None:
-            msg = 'No transition from state: ' +str(from_state)
-            msg += ', to state: ' +str(to_state) +', with key: '
-            msg += str(edge_key) +' exists.'
-            warnings.warn(msg)
-        
-        label_order = self.graph.__transition_label_order__
-        transition_label_values = set()
-        for label_type in label_order:
-            cur_label_value = attr_dict[label_type]
-            transition_label_values.add(cur_label_value)
-    
-        return transition_label_values
-        
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System for modeling closed systems.
     
@@ -2398,9 +2394,6 @@ class oFTS(OpenFiniteTransitionSystem):
             sys_actions=sys_actions, env_actions=env_actions, mutable=mutable
         )
 
-###########
-# Automata
-###########
 class Alphabet(object):
     """Stores input letters annotating transitions of an automaton."""
     
@@ -3177,33 +3170,144 @@ class FiniteStateMachineSimulation(object):
 class FiniteStateMachine(LabeledStateDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
-    Takes letters in the input alphabet one-by-one,
-    follows transitions labeled by these letters, and
-    returns letters in the output alphabet.
+    inputs
+    ------
+    P = {p1, p2,...} is the set of input ports.
+    An input port p takes values in a set Vp.
+    Set Vp is called the "type" of input port p.
+    A "valuation" is an assignment of values to the input ports in P.
     
-    Note that a transducer may operate on either finite or infinite words, i.e.,
+    We call "inputs" the set of pairs:
+    
+        {(p_i, Vp_i),...}
+    
+    of input ports p_i and their corresponding types Vp_i.
+    
+    A guard is a predicate (bool-valued) used as sub-label for a transition.
+    A guard is defined by a set and evaluated using set membership.
+    So given an input port value p=x, then if:
+    
+        x \in guard_set
+    
+    then the guard is True, otherwise it is False.
+    
+    The "inputs" are defined by an OrderedDict:
+    
+        {'p1':explicit, 'p2':check, 'p3':None, ...}
+    
+    where:
+        - C{explicit}:
+            is an iterable representation of Vp,
+            possible only for discrete Vp.
+            If 'p1' is explicitly typed, then guards are evaluated directly:
+            
+                input_port_value == guard_value ?
+        
+        - C{check}:
+            is a class with methods:
+            
+                - C{.is_valid(x) }:
+                    check if value given to input port 'p1' is
+                    in the set of possible values Vp.
+                
+                - C{.contains(guard_set, input_port_value) }:
+                    check if C{input_port_value} \\in C{guard_set}
+                    This allows flexible type definitions.
+                    
+                    For example, C{input_port_value} might be assigned
+                    int values, but the C{guard_set} be defined by
+                    a symbolic expression as the str: 'x<=5'.
+                    
+                    Then the user is responsible for providing
+                    the appropriate method to the Mealy Machine,
+                    using the custom C{check} class described here.
+                    
+                    Note that we could provide a rudimentary library
+                    for the basic types of checks, e.g., for
+                    the above simple symbolic case, where using
+                    function eval() is sufficient.
+            
+        - C{None}:
+            signifies that no type is currently defined for
+            this input port, so input type checking and guard
+            evaluation are disabled.
+            
+            This can be used to skip type definitions when
+            they are not needed by the user.
+            
+            However, since Machines are in general the output
+            of synthesis, it follows that they are constructed
+            by code, so the benefits of typedefs will be
+            considerable compared to the required coding effort.
+    
+    An OrderedDict is used to allow setting guards using tuples
+    (so order of inputs) or dicts, to avoid writing dicts for each
+    guard definition (which would be quite cumbersome).
+    
+    Guards annotate transitions:
+        
+        Guards: States x States ---> Input_Predicates
+    
+    outputs
+    -------
+    Similarly defined to inputs, but:
+    
+        - for Mealy Machines they annotate transitions
+        - for Moore Machines they annotate states
+    
+    state variables
+    ---------------
+    Similarly defined to inputs, they annotate states,
+    for both Mealy and Moore machines:
+    
+        States ---> State_Variables
+    
+    update function
+    ---------------
+    The transition relation:
+    
+        - for Mealy Machines:
+        
+                States x Input_Valuations ---> Output_Valuations x States
+                
+            Note that in the range Output_Valuations are ordered before States
+            to emphasize that an output_valuation is produced
+            during the transition, NOT at the next state.
+            
+            The data structure representation of the update function is
+            by storage of the Guards function and definition of Guard
+            evaluation for each input port via the OrderedDict discussed above.
+        
+        - for Moore Machines:
+        
+            States x Input_Valuations ---> States
+            States ---> Output_valuations
+    
+    note
+    ----
+    A transducer may operate on either finite or infinite words, i.e.,
     it is not equipped with interpretation semantics on the words,
     so it does not "care" about word length.
     It continues as long as its input is fed with letters.
+    
+    see also
+    --------
+    FMS, MealyMachine, MooreMachine
     """
     def __init__(self, name='', states=[], initial_states=[], current_state=None,
                  mutable=False):
         LabeledStateDiGraph.__init__(
             self, name=name, states=states, initial_states=initial_states,
             current_state=current_state, mutable=mutable,
-            removed_state_callback=self._removed_state_callback)        
+            removed_state_callback=self._removed_state_callback)
         
-        self.input_ports = {'name':'type'}
-        self.output_ports ={'name': 'type'}
+        # "alphabets" (ports are the dict keys)
+        self.inputs = OrderedDict()
+        self.outputs = OrderedDict()
         
-        self.guards = {}
-        self.output_actions = {}
-        self.set_actions = {}        
+        #self.set_actions = {}
         
-        self.input_alphabets = {}
-        self.output_alphabets = {}
-        
-        self.variables = {'name':'type'}
+        self.state_variables = {'name':'type'}
         
         self.default_export_fname = 'fsm'
     
@@ -3211,6 +3315,26 @@ class FiniteStateMachine(LabeledStateDiGraph):
         """Remove it also from anywhere within this class, besides the states."""
     
     
+    
+    def is_blocking(self, state):
+        """From this state, for each input valuation, there exists a transition.
+        
+        @param state: state to be checked as blocking
+        @type state: single state to be checked
+        """
+        raise NotImplementedError
+    
+    def is_receptive(self, states='all'):
+        """For each state, for each input valuation, there exists a transition.
+        
+        @param states: states to be checked whether blocking
+        @type states: iterable container of states
+        """
+        for state in states:
+            if self.is_blocking(state):
+                return False
+                
+        return True
 
     # operations between state machines
     def sync_product(self):
@@ -3239,7 +3363,32 @@ class MooreMachine(FiniteStateMachine):
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine."""
-    #raise NotImplementedError
+    def __init__(self, name='', states=[], initial_states=[], current_state=None,
+                 mutable=False):
+        FiniteStateMachine.__init__(
+            self, name=name, states=states, initial_states=initial_states,
+            current_state=current_state, mutable=mutable)
+    
+    def get_outputs(self, from_state, next_state):
+        #labels = 
+        
+        output_valuations = dict()
+        for output_port in self.output_ports:
+            output_valuations[output_port] = 1
+    
+    def update(self, input_valuations, from_state='current'):
+        if from_state != 'current':
+            if self.states.current != None:
+                warnings.warn('from_state != current state,\n'+
+                              'will set current = from_state')
+            self.current = from_state
+        
+        next_states = self.transitions.with_label(from_state,
+                                                  desired_label=input_valuations)
+        outputs = self.get_outputs(from_state, next_states, desired_label=input_valuations)
+        self.states.set_current(next_states)
+        
+        return zip(outputs, next_states)
 
 def moore2mealy(moore_machine, mealy_machine):
     """Convert Moore machine to equivalent Mealy machine"""

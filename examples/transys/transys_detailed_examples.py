@@ -34,6 +34,7 @@ Transition System module developer examples
 """
 
 import networkx as nx
+from collections import OrderedDict
 import tulip.transys as ts
 import warnings
 
@@ -364,6 +365,74 @@ def ba_maximal_example():
     
     return ba
 
+def mealy_machine_example():
+    import numpy as np   
+    
+    class check_diaphragm():
+        """camera f-number."""
+        def is_valid(x):
+            if x <= 0.7 or x > 256:
+                raise TypeError('This f-# is outside allowable range.')
+        
+        def contains(guard_set, input_port_value):
+            """This method "knows" that we are using x to denote the input
+            within guards."""
+            guard_var_def = {'x': input_port_value}
+            guard_value = eval(guard_set, guard_var_def)
+            
+            if not isinstance(guard_value, bool):
+                raise TypeError('Guard value is non-boolean.\n'
+                                'A guard is a predicate, '
+                                'so it can take only boolean values.')
+    
+    class check_camera():
+        """is it looking upwards ?"""
+        def is_valid(self, x):
+            if x.shape != (1, 3):
+                raise Exception('Not a 3d vector!')
+        
+        def contains(self, guard_set, input_port_value):
+            v1 = guard_set # guard_halfspace_normal_vector
+            v2 = input_port_value # camera_direction_vector
+            
+            if np.inner(v1, v2) > 0.8:
+                return True
+            
+            return False
+    
+    m = ts.MealyMachine()
+    
+    m.states.add('s0')
+    m.states.add_from(['s1', 's2'])
+    m.states.add_initial('s0')
+    
+    # note: guards are conjunctions, any disjunction is represented by 2 edges
+    
+    # input defs
+    speed = {'zero', 'low', 'high', 'crazy'} # discrete set
+    seats_taken = ts.PowerSet(range(5) ) # where occupants are seated
+    aperture = check_diaphragm()
+    camera_dir = check_camera()
+    
+    inputs = OrderedDict((('speed', speed),
+                          ('seats', seats_taken),
+                          ('aperture', aperture),
+                          ('camera', camera_dir) ) )
+    m.inputs.add(inputs)
+    
+    # guard defined using input sub-label ordering
+    guard = ('low', (0, 1), 0.3, np.array([0,0,1]) )
+    m.transitions.add('s0', 's1', guard)
+    
+    # guard defined using input sub-label names
+    guard = {'camera':np.array([1,1,1]),
+             'speed':'high',
+             'yaw':0.3,
+             'seats':(2, 3) }
+    m.transitions.add('s1', 's2', guard)
+    
+    return m
+
 def scipy_sparse_labeled_adj():
     from scipy.sparse import lil_matrix
     from numpy.random import rand
@@ -416,11 +485,12 @@ def label_per_state():
     fts.plot()
 
 if __name__ == '__main__':
-    sims_demo()
-    fts_maximal_example()
+    #sims_demo()
+    #fts_maximal_example()
     #ofts_maximal_example()
-    ba_maximal_example()
+    #ba_maximal_example()
     
-    ofts = scipy_sparse_labeled_adj()
-    label_per_state()
+    #ofts = scipy_sparse_labeled_adj()
+    #label_per_state()
+    m = mealy_machine_example()
     
