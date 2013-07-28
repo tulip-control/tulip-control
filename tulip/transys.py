@@ -531,9 +531,9 @@ class States(object):
         state_id = self._mutant2int(state)
         return self.graph.has_node(state_id)    
     
-    def __exist_labels__(self):
+    def _exist_labels(self):
         """State labeling defined ?"""
-        if hasattr(self.graph, '__state_label_def__'):
+        if hasattr(self.graph, '_state_label_def'):
             return True
         else:
             msg = 'No state labeling defined for class: '
@@ -541,7 +541,7 @@ class States(object):
             dprint(msg)
             return False
     
-    def __exist_final_states__(self, msg=True):
+    def _exist_final_states(self, msg=True):
         """Check if system has final states."""
         if not hasattr(self.graph, 'final_states'):
             if msg:
@@ -550,7 +550,7 @@ class States(object):
         else:
             return True
     
-    def __dot_str__(self, to_pydot_graph):
+    def _dot_str(self, to_pydot_graph):
         """Copy nodes to given Pydot graph, with attributes for dot export."""
         
         def add_incoming_edge(g, state):
@@ -591,7 +591,7 @@ class States(object):
             node_shape = graph.dot_node_shape['normal']
             
             # check if final states defined
-            if not self.__exist_final_states__(msg=False):
+            if not self._exist_final_states(msg=False):
                 return node_shape
             
             # check for final states
@@ -602,9 +602,9 @@ class States(object):
         
         # get labeling def
         
-        if self.__exist_labels__():
-            label_def = self.graph.__state_label_def__
-            label_format = self.graph.__state_dot_label_format__
+        if self._exist_labels():
+            label_def = self.graph._state_label_def
+            label_format = self.graph._state_dot_label_format
         
         for (state_id, state_data) in self.graph.nodes_iter(data=True):
             state = self._int2mutant(state_id)
@@ -615,7 +615,7 @@ class States(object):
             node_shape = decide_node_shape(self.graph, state)
             
             # state annotation
-            if self.__exist_labels__():
+            if self._exist_labels():
                 node_dot_label = form_node_label(state, state_data, label_def, label_format)
             else:
                 node_dot_label = str(state)
@@ -625,7 +625,7 @@ class States(object):
             to_pydot_graph.add_node(state_id, label=node_dot_label, shape=node_shape,
                                     style='rounded')
     
-    def __warn_if_state_exists__(self, state):
+    def _warn_if_state_exists(self, state):
         if state in self():
             if self.list is not None:
                 raise Exception('State exists and ordering enabled: ambiguous.')
@@ -656,7 +656,7 @@ class States(object):
         networkx.MultiDiGraph.add_node
         """
         new_state_id = self._mutant2int(new_state)
-        self.__warn_if_state_exists__(new_state)
+        self._warn_if_state_exists(new_state)
         
         dprint('Adding new id: ' +str(new_state_id) )
         self.graph.add_node(new_state_id)
@@ -718,7 +718,7 @@ class States(object):
         
         # iteration used for comprehensible error message
         for new_state in new_states:
-            self.__warn_if_state_exists__(new_state)
+            self._warn_if_state_exists(new_state)
         
         # mutable ?
         if self._is_mutable():
@@ -856,7 +856,7 @@ class States(object):
         Convenience method, violates class independence,
         so might be removed in the future.
         """
-        if not self.__exist_final_states__():
+        if not self._exist_final_states():
             return
         
         return is_subset([state], self.graph.final_states)
@@ -953,7 +953,7 @@ class States(object):
         --------
         self.add_final_from  
         """
-        if not self.__exist_final_states__():
+        if not self._exist_final_states():
             return
         
         self.graph.add_final_state(state)
@@ -965,7 +965,7 @@ class States(object):
         --------
         self.add_final
         """
-        if not self.__exist_final_states__():
+        if not self._exist_final_states():
             return
         
         self.graph.add_final_states_from(states)
@@ -1196,12 +1196,12 @@ class LabeledTransitions(Transitions):
     def __init__(self, graph):
         Transitions.__init__(self, graph)
     
-    def __exist_labels__(self):
+    def _exist_labels(self):
         """Labeling defined ?"""
-        if not hasattr(self.graph, '__transition_label_def__'):
+        if not hasattr(self.graph, '_transition_label_def'):
             raise Exception('No transition labeling defined for this class.')
     
-    def __check_states__(self, from_state, to_state, check=True):
+    def _check_states(self, from_state, to_state, check=True):
         """Are from_state, to_state \\in states.
         
         If check == False, then add them.
@@ -1222,11 +1222,11 @@ class LabeledTransitions(Transitions):
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
     
-    def __get_labeling__(self, labels, check_label=True):
-        self.__exist_labels__()
+    def _get_labeling(self, labels, check_label=True):
+        self._exist_labels()
         
         # get labeling def
-        label_def = self.graph.__transition_label_def__
+        label_def = self.graph._transition_label_def
         
         # single label ?
         if len(label_def) == 1:
@@ -1279,7 +1279,7 @@ class LabeledTransitions(Transitions):
             
         return edge_label
         
-    def __dot_str__(self, to_pydot_graph):
+    def _dot_str(self, to_pydot_graph):
         """Return label for dot export.
         """        
         def form_edge_label(edge_data, label_def, label_format):
@@ -1305,20 +1305,20 @@ class LabeledTransitions(Transitions):
             
             return edge_dot_label
         
-        self.__exist_labels__()
+        self._exist_labels()
         
         # get labeling def
-        label_def = self.graph.__transition_label_def__
-        label_format = self.graph.__transition_dot_label_format__
+        label_def = self.graph._transition_label_def
+        label_format = self.graph._transition_dot_label_format
         
         for (u, v, key, edge_data) in self.graph.edges_iter(data=True, keys=True):
             edge_dot_label = form_edge_label(edge_data, label_def, label_format)
             to_pydot_graph.add_edge(u, v, key=key, label=edge_dot_label)
             
     def remove_labeled(self, from_state, to_state, label):
-        self.__exist_labels__()
-        self.__check_states__(from_state, to_state, check=True)
-        edge_label = self.__get_labeling__(label, check_label=True)
+        self._exist_labels()
+        self._check_states(from_state, to_state, check=True)
+        edge_label = self._get_labeling(label, check_label=True)
         
         # get all transitions with given label
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1350,8 +1350,8 @@ class LabeledTransitions(Transitions):
         
         Requires that action set or alphabet be defined.
         """
-        self.__exist_labels__()
-        self.__check_states__(from_state, to_state, check=True)
+        self._exist_labels()
+        self._check_states(from_state, to_state, check=True)
         
         # chek if same unlabeled transition exists
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1386,8 +1386,8 @@ class LabeledTransitions(Transitions):
         multiple edges with different labels by storing them as attribute info
         in a single graph edge, not very friendly.
         """
-        self.__exist_labels__()
-        self.__check_states__(from_state, to_state, check=True)
+        self._exist_labels()
+        self._check_states(from_state, to_state, check=True)
         
         self.remove_labeled(from_state, to_state, old_labels)
         self.add_labeled(from_state, to_state, new_labels, check=check)
@@ -1413,8 +1413,8 @@ class LabeledTransitions(Transitions):
                 list of labels in proper oder
                 or dict of action_set_name : label pairs
         """
-        self.__exist_labels__()
-        self.__check_states__(from_state, to_state, check=check)
+        self._exist_labels()
+        self._check_states(from_state, to_state, check=check)
         
         # chek if same unlabeled transition exists
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1437,7 +1437,7 @@ class LabeledTransitions(Transitions):
         # if labels were not previously in label set,
         # then a similar issue can arise only with unlabeled transitions
         # pre-existing. This is avoided by first checking for an unlabeled trans.        
-        edge_label = self.__get_labeling__(labels, check_label=check)
+        edge_label = self._get_labeling(labels, check_label=check)
         
         # check if same labeled transition exists
         if edge_label in trans_from_to.values():
@@ -1569,7 +1569,7 @@ class LabeledTransitions(Transitions):
             msg += str(edge_key) +' exists.'
             warnings.warn(msg)
         
-        label_def = self.graph.__transition_label_def__
+        label_def = self.graph._transition_label_def
         transition_label_values = set()
         for label_type in label_def:
             cur_label_value = attr_dict[label_type]
@@ -1608,7 +1608,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.default_export_path = './'
         self.default_export_fname = 'out'
         
-    def __add_missing_extension__(self, path, file_type):
+    def _add_missing_extension(self, path, file_type):
         import os
         filename, file_extension = os.path.splitext(path)
         desired_extension = os.path.extsep +file_type
@@ -1616,7 +1616,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             path = filename +desired_extension
         return path
     
-    def __export_fname__(self, path, file_type, addext):
+    def _export_fname(self, path, file_type, addext):
         if path == 'default':
             if self.name == '':
                 path = self.default_export_path +self.default_export_fname
@@ -1624,11 +1624,11 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                 path = self.default_export_path +self.name
         
         if addext:
-            path = self.__add_missing_extension__(path, file_type)
+            path = self._add_missing_extension(path, file_type)
         
         return path
     
-    def __pydot_missing__(self):
+    def _pydot_missing(self):
         if pydot is None:
             msg = 'Attempted calling dump_dot.\n'
             msg += 'Unavailable due to pydot not installed.\n'
@@ -1637,15 +1637,15 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         return False
     
-    def __to_pydot__(self):
+    def _to_pydot(self):
         """Convert to properly annotated pydot graph."""
-        if self.__pydot_missing__():
+        if self._pydot_missing():
             return
         
         dummy_nx_graph = nx.MultiDiGraph()
         
-        self.states.__dot_str__(dummy_nx_graph)
-        self.transitions.__dot_str__(dummy_nx_graph)
+        self.states._dot_str(dummy_nx_graph)
+        self.transitions._dot_str(dummy_nx_graph)
         
         pydot_graph = nx.to_pydot(dummy_nx_graph)
         
@@ -1722,7 +1722,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Requires pydot.        
         """
-        pydot_graph = self.__to_pydot__()
+        pydot_graph = self._to_pydot()
         
         return pydot_graph.to_string()
     
@@ -1765,9 +1765,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         --------
         plot
         """
-        path = self.__export_fname__(path, fileformat, addext=add_missing_extension)
+        path = self._export_fname(path, fileformat, addext=add_missing_extension)
         
-        pydot_graph = self.__to_pydot__()
+        pydot_graph = self._to_pydot()
         pydot_graph.set_rankdir(rankdir)
         pydot_graph.write(path, format=fileformat)
     
@@ -1801,7 +1801,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             print("The system doesn't have any states to plot.\n")
             return
         
-        pydot_graph = self.__to_pydot__()
+        pydot_graph = self._to_pydot()
         png_str = pydot_graph.create_png()
         
         # installed ?
@@ -1955,7 +1955,7 @@ class FiniteTransitionSystemSimulation(object):
         trace = self.trace.prefix
         action_trace = self.action_trace.prefix
         
-        msg += self.__print__(path, trace, action_trace)
+        msg += self._print(path, trace, action_trace)
         
         msg += "\n\t Simulation Suffix:\n\t"
         
@@ -1963,11 +1963,11 @@ class FiniteTransitionSystemSimulation(object):
         trace = self.trace.suffix
         action_trace = self.action_trace.suffix
         
-        msg += self.__print__(path, trace, action_trace)
+        msg += self._print(path, trace, action_trace)
         
         return msg
         
-    def __print__(self, path, trace, action_trace):
+    def _print(self, path, trace, action_trace):
         cur_state_seq, next_state_seq = path.steps()
         cur_label_seq, next_label_seq = trace.steps()
         
@@ -2023,7 +2023,7 @@ class AtomicPropositions(object):
     def __contains__(self, atomic_proposition):
         return atomic_proposition in self.atomic_propositions
     
-    def __check_state__(self, state):
+    def _check_state(self, state):
         if state not in self.graph.states():
             msg = 'State:\n\t' +str(state)
             msg += ' is not in set of states:\n\t:' +str(self.graph.states() )
@@ -2100,7 +2100,7 @@ class AtomicPropositions(object):
             self.add_labeled_state(state, ap_label, check=check)
             return
         
-        self.__check_state__(state)
+        self._check_state(state)
         
         if not set(ap_label) <= self.atomic_propositions:
             raise Exception('Label \\not\\subset AP.')
@@ -2164,7 +2164,7 @@ class AtomicPropositions(object):
     def of(self, state):
         """Get AP set labeling given state."""
         
-        self.__check_state__(state)
+        self._check_state(state)
         return self.graph.node[state][self.name]
         
     def list_states_with_labels(self):
@@ -2217,7 +2217,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     
     dot export
     ----------
-    Format transition labels using C{__transition_dot_label_format__} which is a
+    Format transition labels using C{_transition_dot_label_format} which is a
     dict with values:
         - 'actions' (=name of transitions attribute): type before separator
         - 'type?label': separator between label type and value
@@ -2239,20 +2239,20 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         )
         
         # state labels
-        self.__state_label_def__ = OrderedDict(
+        self._state_label_def = OrderedDict(
             [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
         )
-        self.atomic_propositions = self.__state_label_def__['ap']
-        self.__state_dot_label_format__ = {'ap':'',
+        self.atomic_propositions = self._state_label_def['ap']
+        self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
         
         # edge labels comprised of sublabels (here single sublabel)
-        self.__transition_label_def__ = OrderedDict(
+        self._transition_label_def = OrderedDict(
             [['actions', Actions(actions)]]
         )
-        self.actions = self.__transition_label_def__['actions']
-        self.__transition_dot_label_format__ = {'actions':'',
+        self.actions = self._transition_label_def['actions']
+        self._transition_dot_label_format = {'actions':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
 
@@ -2297,10 +2297,10 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.__mul__, self.async_prod, BuchiAutomaton.sync_prod
         """
         if isinstance(ts_or_ba, FiniteTransitionSystem):
-            return self.__ts_ts_sync_prod__(ts_or_ba)
+            return self._ts_ts_sync_prod(ts_or_ba)
         elif isinstance(ts_or_ba, BuchiAutomaton):
             ba = ts_or_ba
-            return __ts_ba_sync_prod__(self, ba)
+            return _ts_ba_sync_prod(self, ba)
         else:
             raise Exception('Argument must be TS or BA.')
     
@@ -2376,22 +2376,22 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         )
         
         # state labeling
-        self.__state_label_def__ = OrderedDict(
+        self._state_label_def = OrderedDict(
             [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
         )
-        self.atomic_propositions = self.__state_label_def__['ap']
-        self.__state_dot_label_format__ = {'ap':'',
+        self.atomic_propositions = self._state_label_def['ap']
+        self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
         
         # edge labeling (here 2 sublabels)
-        self.__transition_label_def__ = OrderedDict([
+        self._transition_label_def = OrderedDict([
             ['sys_actions', Actions(sys_actions) ],
             ['env_actions', Actions(env_actions) ]
         ])
-        self.sys_actions = self.__transition_label_def__['sys_actions']
-        self.env_actions = self.__transition_label_def__['env_actions']
-        self.__transition_dot_label_format__ = {'sys_actions':'sys',
+        self.sys_actions = self._transition_label_def['sys_actions']
+        self.env_actions = self._transition_label_def['env_actions']
+        self._transition_dot_label_format = {'sys_actions':'sys',
                                                 'env_actions':'env',
                                                 'type?label':':',
                                                 'separator':'\\n'}
@@ -2449,18 +2449,18 @@ class FiniteStateAutomatonSimulation(object):
         word = self.input_word.prefix
         run = self.run.prefix
         
-        msg += self.__print__(word, run)
+        msg += self._print(word, run)
         
         msg += "\n\t Simulation Suffix:\n\t"
         
         word = self.input_word.suffix
         run = self.run.suffix
         
-        msg += self.__print__(word, run)
+        msg += self._print(word, run)
         
         return msg
         
-    def __print__(self, word, run):
+    def _print(self, word, run):
         cur_state_seq, next_state_seq = run.steps()
         letter_seq = word.sequence
         
@@ -2555,7 +2555,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     
     see also
     --------    
-    __dot_str__ of LabeledStateDiGraph
+    LabeledStateDiGraph._dot_str
         
     """
     
@@ -2584,13 +2584,13 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
             self.atomic_proposition_based = False
             alphabet = set(input_alphabet_or_atomic_propositions)
         
-        self.__transition_label_def__ = OrderedDict([
+        self._transition_label_def = OrderedDict([
             ['in_alphabet', alphabet]
         ])
-        self.alphabet = self.__transition_label_def__['in_alphabet']
+        self.alphabet = self._transition_label_def['in_alphabet']
         
         # used before label value
-        self.__transition_dot_label_format__ = {'in_alphabet':'',
+        self._transition_dot_label_format = {'in_alphabet':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
         
@@ -2772,7 +2772,7 @@ class BuchiAutomaton(OmegaAutomaton):
     def __or__(self, ba):
         return self.async_prod(ba)
         
-    def __ba_ba_sync_prod__(self, ba2):
+    def _ba_ba_sync_prod(self, ba2):
         ba1 = self
         
         raise NotImplementedError
@@ -2809,10 +2809,10 @@ class BuchiAutomaton(OmegaAutomaton):
         """
         
         if isinstance(ts_or_ba, BuchiAutomaton):
-            return self.__ba_ba_sync_prod__(ts_or_ba)
+            return self._ba_ba_sync_prod(ts_or_ba)
         elif isinstance(ts_or_ba, FiniteTransitionSystem):
             ts = ts_or_ba
-            return __ba_ts_sync_prod__(self, ts)
+            return _ba_ts_sync_prod(self, ts)
         else:
             raise Exception('argument should be an FTS or a BA.')
     
@@ -2841,7 +2841,7 @@ class BA(BuchiAutomaton):
             mutable=mutable
         )
 
-def __ba_ts_sync_prod__(buchi_automaton, transition_system):
+def _ba_ts_sync_prod(buchi_automaton, transition_system):
     """Construct Buchi Automaton equal to synchronous product TS x NBA.
     
     returns
@@ -2850,9 +2850,9 @@ def __ba_ts_sync_prod__(buchi_automaton, transition_system):
     
     see also
     --------
-    __ts_ba_sync_prod__, BuchiAutomaton.sync_prod
+    _ts_ba_sync_prod, BuchiAutomaton.sync_prod
     """
-    (prod_ts, persistent) = __ts_ba_sync_prod__(transition_system, buchi_automaton)
+    (prod_ts, persistent) = _ts_ba_sync_prod(transition_system, buchi_automaton)
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
     prod_ba = BuchiAutomaton(name=prod_name)
@@ -2889,7 +2889,7 @@ def __ba_ts_sync_prod__(buchi_automaton, transition_system):
     
     return prod_ba
 
-def __ts_ba_sync_prod__(transition_system, buchi_automaton):
+def _ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system equal to synchronous product TS x NBA.
     
     returns
@@ -2909,7 +2909,7 @@ def __ts_ba_sync_prod__(transition_system, buchi_automaton):
     
     see also
     --------
-    __ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
+    _ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
     if not buchi_automaton.atomic_proposition_based:
         msg = """Buchi automaton not stored as Atomic Proposition-based.
@@ -3234,22 +3234,22 @@ class FiniteStateMachine(LabeledStateDiGraph):
         )
         
         # state labeling
-        self.__state_label_def__ = OrderedDict()
+        self._state_label_def = OrderedDict()
         self.state_vars = OrderedDict()
-        # TODO the __state_dot_label_format__ should be automatically
+        # TODO the _state_dot_label_format should be automatically
         # expanded when adding new inputs, using the keys of the new inputs
-        self.__state_dot_label_format__ = {'type?label':':',
+        self._state_dot_label_format = {'type?label':':',
                                            'separator':'\\n'}
         #self.set_actions = {}
         
         # edge labeling
         # "alphabets" (ports are the dict keys)
-        self.__transition_label_def__ = OrderedDict()
+        self._transition_label_def = OrderedDict()
         
-        # will point to selected values of self.__transition_label_def__
+        # will point to selected values of self._transition_label_def
         self.inputs = OrderedDict()
         # TODO as above
-        self.__transition_dot_label_format__ = {'input_i':'in',
+        self._transition_dot_label_format = {'input_i':'in',
                                                 'type?label':':',
                                                 'separator':'\\n'}
         
@@ -3261,24 +3261,24 @@ class FiniteStateMachine(LabeledStateDiGraph):
     def add_inputs(self, new_inputs_ordered_dict):
         for (in_port_name, in_port_type) in new_inputs_ordered_dict.iteritems():
             # append
-            self.__transition_label_def__[in_port_name] = in_port_type
+            self._transition_label_def[in_port_name] = in_port_type
             
             # inform inputs
-            self.inputs[in_port_name] = self.__transition_label_def__[in_port_name]
+            self.inputs[in_port_name] = self._transition_label_def[in_port_name]
             
             # printing format
-            self.__transition_dot_label_format__[in_port_name] = str(in_port_name)
+            self._transition_dot_label_format[in_port_name] = str(in_port_name)
     
     def add_state_vars(self, new_vars_ordered_dict):
         for (var_name, var_type) in new_vars_ordered_dict.iteritems():
             # append
-            self.__state_label_def__[var_name] = var_type
+            self._state_label_def[var_name] = var_type
             
             # inform state vars
-            self.state_vars[var_name] = self.__state_label_def__[var_name]
+            self.state_vars[var_name] = self._state_label_def[var_name]
             
             # printing format
-            self.__state_dot_label_format__[var_name] = str(var_name)
+            self._state_dot_label_format[var_name] = str(var_name)
     
     def is_blocking(self, state):
         """From this state, for each input valuation, there exists a transition.
@@ -3327,14 +3327,14 @@ class MooreMachine(FiniteStateMachine):
     def add_outputs(self, new_outputs_ordered_dict):
         for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
             # append
-            self.__state_label_def__[out_port_name] = out_port_type
+            self._state_label_def[out_port_name] = out_port_type
             
             # inform state vars
             self.outputs[out_port_name] = \
-                self.__state_label_def__[out_port_name]
+                self._state_label_def[out_port_name]
             
             # printing format
-            self.__state_dot_label_format__[out_port_name] = \
+            self._state_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
 
 class MealyMachine(FiniteStateMachine):
@@ -3342,7 +3342,7 @@ class MealyMachine(FiniteStateMachine):
     def __init__(self, name='', mutable=False):
         FiniteStateMachine.__init__(self, name=name, mutable=mutable)
         
-        # will point to selected values of self.__transition_label_def__
+        # will point to selected values of self._transition_label_def
         self.outputs = OrderedDict()
         
         self.default_export_fname = 'mealy'
@@ -3350,14 +3350,14 @@ class MealyMachine(FiniteStateMachine):
     def add_outputs(self, new_outputs_ordered_dict):
         for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
             # append
-            self.__transition_label_def__[out_port_name] = out_port_type
+            self._transition_label_def[out_port_name] = out_port_type
             
             # inform state vars
             self.outputs[out_port_name] = \
-                self.__transition_label_def__[out_port_name]
+                self._transition_label_def[out_port_name]
             
             # printing format
-            self.__transition_dot_label_format__[out_port_name] = \
+            self._transition_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
     
     def get_outputs(self, from_state, next_state):
