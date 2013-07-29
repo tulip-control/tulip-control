@@ -38,6 +38,7 @@ from collections import OrderedDict
 import tulip.transys as ts
 import warnings
 
+hl = 60*'='
 save_fig = False
 
 def sims_demo():
@@ -98,12 +99,7 @@ def sims_demo():
 def fts_maximal_example():
     """Finite-Transition System demo."""
     
-    msg = """
-    =================================================
-        Closed FTS   -    Example 2.2, p.21 [Baier]
-    =================================================
-    """
-    print(msg)
+    print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
     fts = ts.FiniteTransitionSystem(name='Beverage vending machine')
     
     # add state info
@@ -174,18 +170,18 @@ def fts_maximal_example():
     pre = fts.states.pre_single('pay')
     
     # all 1-hop post sets
-    print('\n-----\nPost sets are:\n')
+    print('\n' +10*'-' +'\nPost sets are:\n')
     for state in fts.states():
         post = fts.states.post({state} )
         # same as:
         # post = fts.states.post_signle(state)
         
         print('\tof state: ' +str(state) +', the states: ' +str(post) )
-    print('------\n')
+    print(10*'-' +'\n')
     
     # same thing
     post_all = fts.states.post(fts.states() )
-    print('Same thing as above:\n\t' +str(post_all) +'\n--------\n')
+    print('Same thing as above:\n\t' +str(post_all) +'\n' +10*'-' +'\n')
     
     try:
         fts.transitions.add('pay', 'not yet a state')
@@ -278,7 +274,7 @@ def fts_maximal_example():
     fts.transitions.add_labeled('c12', 'c13', 'insert_coin', check=False)
     fts.states.remove_from({'c12', 'c13'} ) # undo
     
-    print('Types of actions: ' +str(fts.__transition_label_def__.keys() ) )
+    print('Types of actions: ' +str(fts._transition_label_def.keys() ) )
     print('Number of actions: ' +str(len(fts.actions) ) )
     print('Actions: ' +str(fts.actions ) )
     print('Labeled transitions: ' +str(fts.transitions(data=True) ) )
@@ -306,7 +302,7 @@ def fts_maximal_example():
     fts.plot()
     
     # export
-    print('========\n CAUTION: Saving DOT, PDF files\n=========\n')
+    print(hl +'\n CAUTION: Saving DOT, PDF files\n' +hl +'\n')
     path = './test_fts'
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
@@ -318,7 +314,7 @@ def fts_maximal_example():
 def ba_maximal_example():
     """Buchi Automaton demo."""
     
-    print('==================\nBuchi Automaton\n==================')
+    print(hl +'\nBuchi Automaton\n' +hl)
     ba = ts.BuchiAutomaton(atomic_proposition_based=True)
     
     ba.states.add('q0')
@@ -477,10 +473,9 @@ def scipy_sparse_labeled_adj():
     ofts.transitions.add_labeled_adj(A, labels)
     #ofts.transitions.add_labeled_adj(A, labels, check_labels=False)
     
-    print('------------------------------------\n'+
+    print(30*'-' +'\n'+
           'Successfully added adjacency matrix transitions on guard: '
-          +str(labels) +', to open FTS.\n'+
-          '------------------------------------result:\n')
+          +str(labels) +', to open FTS.\n' +30*'-' +'result:\n')
     ofts.plot()
     
     return ofts

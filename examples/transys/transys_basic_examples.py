@@ -35,6 +35,7 @@ Transition System module usage small examples
 
 import tulip.transys as ts
 
+hl = 60*'='
 save_fig = False
 
 def fts_minimal_example():
@@ -58,7 +59,7 @@ def fts_minimal_example():
 
 def ofts_minimal_example():
     """Open FTS demo."""
-    msg = '==================\nOpen FTS\n=================='
+    msg = hl +'\nOpen FTS\n' +hl
     print(msg)
     
     ofts = ts.OpenFiniteTransitionSystem()
@@ -106,9 +107,8 @@ def ba_minimal_example():
     q2 state is a bit redundant, just let the automaton die.
     """
     
-    msg = '==================\nBuchi Automaton (small example):    '
-    msg += 'Example 4.64, p.202 [Baier]'
-    msg += '\n=================='
+    msg = hl +'\nBuchi Automaton (small example):    '
+    msg += 'Example 4.64, p.202 [Baier]\n' +hl
     print(msg)
     
     ba = ts.BuchiAutomaton(atomic_proposition_based=True)

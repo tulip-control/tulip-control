@@ -44,7 +44,6 @@ and
 
 """
 TODO
-    protect initial states
     timed automata (with counters, dense time semantics ?)
 
  import from
@@ -74,6 +73,7 @@ from pprint import pformat
 from itertools import chain, combinations
 from collections import Iterable, Hashable, OrderedDict
 from cStringIO import StringIO
+debug = False
 
 try:
     import pydot
@@ -96,6 +96,37 @@ try:
 except ImportError:
     warnings.warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
+
+class MathSet(object):
+    """Mathematical set, allows unhashable elements."""
+    
+    def __init__(self, iterable=[]):
+        if not isinstance(iterable, Iterable):
+            raise TypeError('iterable must be an iterable container.')
+        
+        self.set = set(filter(lambda x: isinstance(x, Hashable), iterable) )
+        self.list = filter(lambda x: not isinstance(x, Hashable), iterable)
+    
+    def __str__(self):
+        return str(self.set) +' U ' +str(self.list)
+    
+    def __call__(self):
+        return list(self.set) +self.list
+    
+    def add(self, item):
+        if isinstance(item, Hashable):
+            self.set.add(item)
+        else:
+            if item not in self.list:
+                self.list.append(item)
+            else:
+                warnings.warn('item already in MathSet.')
+    
+    def remove(self, item):
+        if isinstance(item, Hashable):
+            self.set.remove(item)
+        else:
+            self.list.remove(item)
 
 def unique(iterable):
     """Return unique elements.
@@ -194,6 +225,9 @@ class PowerSet(object):
     def __init__(self, iterable=[]):
         self.define_set(iterable)
     
+    def __get__(self, instance, value):
+        return self()
+    
     def __str__(self):
         return str(self.__call__() )
     
@@ -264,9 +298,13 @@ class PowerSet(object):
         except:
             return
 
-def dprint(s):
-    """Debug mode print."""
-    #print(s)
+if debug:
+    def dprint(s):
+        """Debug mode print."""
+        print(s)
+else:
+    def dprint(s):
+        pass
 
 class States(object):
     """Methods to manage states, initial states, current state.
@@ -320,17 +358,20 @@ class States(object):
         if mutable:
             self.mutants = dict()
             self.min_free_id = 0
-            self.initial = list()
+            self._initial = list()
         else:
             self.mutants = None
             self.min_free_id = None
-            self.initial = set()
+            self._initial = set()
         
         self.add_from(states)
         self.add_initial_from(initial_states)
         self.set_current(current_state)
         
         self._removed_state_callback = removed_state_callback
+    
+    def __get__(self):
+        return self.__call__()
     
     def __call__(self, data=False, listed=False):
         """Return set of states.
@@ -620,10 +661,17 @@ class States(object):
             else:
                 node_dot_label = str(state)
             
+            # state color
+            if state_data.has_key('color'):
+                node_color = state_data['color']
+            else:
+                node_color = '"red"'
+            
             # TODO option to replace with int to reduce size,
             # TODO generate separate LaTeX legend table (PNG option ?)
-            to_pydot_graph.add_node(state_id, label=node_dot_label, shape=node_shape,
-                                    style='rounded')
+            to_pydot_graph.add_node(
+                state_id, label=node_dot_label, shape=node_shape,
+                style='rounded', color=node_color)
     
     def _warn_if_state_exists(self, state):
         if state in self():
@@ -787,6 +835,11 @@ class States(object):
         self.current = states
     
 	# initial states
+    def _get_initial(self):
+        return self._initial
+    
+    initial = property(_get_initial)
+    
     def add_initial(self, new_initial_state):
         """Add state to set of initial states.
         
@@ -795,8 +848,12 @@ class States(object):
         then states.add_initial.
         """
         if not new_initial_state in self():
-            raise Exception('New initial state \\notin States.\n'
-                            'Add it first to states using sys.states.add')
+            raise Exception(
+                'New initial state \\notin States.\n'
+                'Add it first to states using sys.states.add()\n'
+                'FYI: new initial state:\n\t' +str(new_initial_state) +'\n'
+                'and States:\n\t' +str(self() )
+            )
         
         # ensure uniqueness for unhashable states
         if self.is_initial(new_initial_state):
@@ -805,9 +862,9 @@ class States(object):
         
         # use sets when possible for efficiency
         if self._is_mutable():
-            self.initial.append(new_initial_state)
+            self._initial.append(new_initial_state)
         else:
-            self.initial.add(new_initial_state)
+            self._initial.add(new_initial_state)
 
     def add_initial_from(self, new_initial_states):
         """Add multiple initial states.
@@ -818,19 +875,19 @@ class States(object):
             return
         
         if self._is_mutable():
-            self.initial |= set(new_initial_states)
+            self._initial |= set(new_initial_states)
         else:
             for new_initial_state in new_initial_states:
                 self.add_initial(new_initial_state)
         
     def number_of_initial(self):
         """Count initial states."""
-        return len(self.initial)
+        return len(self._initial)
     
     def remove_initial(self, rm_initial_state):
         """Delete single state from set of initial states."""
         if self.is_initial(rm_initial_state):
-            self.initial.remove(rm_initial_state)
+            self._initial.remove(rm_initial_state)
         else:
             warnings.warn('Attempting to remove inexistent initial state.'
                           +str(rm_initial_state) )
@@ -841,14 +898,14 @@ class States(object):
             return
         
         if self._is_mutable():
-            self.initial = self.initial.difference(rm_initial_states)
+            self._initial = self._initial.difference(rm_initial_states)
         else:
             # mutable states
             for rm_initial_state in rm_initial_states:
                 self.remove_initial(rm_initial_state)
     
     def is_initial(self, state):
-        return is_subset([state], self.initial)
+        return is_subset([state], self._initial)
     
     def is_final(self, state):       
         """Check if state \\in final states.
@@ -873,7 +930,7 @@ class States(object):
             Current state is set
             Current state \\subseteq states
         """
-        if not is_subset(self.initial, self() ):
+        if not is_subset(self._initial, self() ):
             warnings.warn('Ininital states \\not\\subseteq states.')
         
         if self.current is None:
@@ -912,7 +969,8 @@ class States(object):
         If multiple stats provided, then union Post(s) for s in states provided.
         """
         if not is_subset(states, self() ):
-            raise Exception('Not all states given are in the set of states.')
+            raise Exception('Not all states given are in the set of states.\n'+
+                            'Did you mean to use port_single() instead ?')
         
         state_ids = self._mutants2ints(states)
         
@@ -983,6 +1041,17 @@ class States(object):
         networkx.relabel_nodes
         """
         return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
+        
+class LabeledStates(States):
+    """States with annotation.
+    
+    For FTS and OpenFTS each state label consists of a single sublabel,
+    which a subset of AP, the set of atomic propositions.
+    
+    For Machines, each state label consists of (possibly multiple) sublabels,
+    each of which is either a variable, or, only for Moore machines,
+    may be an output.
+    """
 
 class Transitions(object):
     """Building block for managing unlabeled transitions = edges.
@@ -1524,11 +1593,20 @@ class LabeledTransitions(Transitions):
         """
         def label_is_desired(cur_label, desired_label):
             for (label_type, desired_val) in desired_label.iteritems():
-                dprint('Label type checked:\n\t' +str(label_type) )
+                dprint('SubLabel type checked:\n\t' +str(label_type) )
                 cur_val = cur_label[label_type]
-                dprint('Label of checked transition:\n\t' +str(cur_val) )
+                dprint('possible label values:\n\t' +str(cur_val) )
                 dprint('Desired label:\n\t' +str(desired_val) )
+                
                 if cur_val != desired_val and True not in cur_val:
+                    # common bug
+                    if isinstance(cur_val, (set,list) ) and \
+                       isinstance(desired_val, (set, list) ) and \
+                       cur_val.__class__ != desired_val.__class__:
+                           warnings.warn('Set label compared to list label,\n'
+                                         'did you mixed sets and lists when '
+                                         'initializing AP labels ?')
+                    
                     return False
             return True
         
@@ -1595,9 +1673,18 @@ class LabeledTransitions(Transitions):
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
     
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 mutable=False, removed_state_callback=None):
+    def __init__(self, name='', states=[], initial_states=[],
+                 current_state=None, mutable=False,
+                 removed_state_callback=None,
+                 from_networkx_graph=None):
         nx.MultiDiGraph.__init__(self, name=name)
+        
+        if from_networkx_graph is not None and len(states) > 0:
+            raise ValueError('Give either states or Networkx graph, not both.')
+        
+        if from_networkx_graph is not None:
+            states = from_networkx_graph.nodes()
+            edges = from_networkx_graph.edges()
         
         self.states = States(self, states=states, initial_states=initial_states,
                              current_state=current_state, mutable=mutable,
@@ -1607,6 +1694,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.dot_node_shape = {'normal':'circle'}
         self.default_export_path = './'
         self.default_export_fname = 'out'
+        
+        if from_networkx_graph is not None:
+            for (from_state, to_state) in edges:
+                self.transitions.add(from_state, to_state)
         
     def _add_missing_extension(self, path, file_type):
         import os
@@ -1798,7 +1889,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         # anything to plot ?
         if self.states.number() == 0:
-            print("The system doesn't have any states to plot.\n")
+            print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
             return
         
         pydot_graph = self._to_pydot()
@@ -1993,8 +2084,8 @@ class FiniteTransitionSystemSimulation(object):
 class FTSSim(FiniteTransitionSystemSimulation):
     """Alias for Finite Transition System Simulation."""
     
-    def __init__(self):
-        FiniteTransitionSystemSimulation.__init__(self)
+    def __init__(self, **args):
+        FiniteTransitionSystemSimulation.__init__(self, **args)
 
 class AtomicPropositions(object):
     """Store & print set of atomic propositions.
@@ -2025,8 +2116,8 @@ class AtomicPropositions(object):
     
     def _check_state(self, state):
         if state not in self.graph.states():
-            msg = 'State:\n\t' +str(state)
-            msg += ' is not in set of states:\n\t:' +str(self.graph.states() )
+            msg = 'State:\n\t' +str(state) +'\n'
+            msg += 'is not in set of states:\n\t' +str(self.graph.states() )
             raise Exception(msg)
     
     def add(self, atomic_proposition, check_existing=True):
@@ -2102,8 +2193,11 @@ class AtomicPropositions(object):
         
         self._check_state(state)
         
-        if not set(ap_label) <= self.atomic_propositions:
-            raise Exception('Label \\not\\subset AP.')
+        # note: after moving, this will change to \in PowerSet(AP)
+        if not is_subset(ap_label, self.atomic_propositions):
+            raise Exception('Label \\not\\subset AP.'
+                            'FYI Label:\n\t' +str(ap_label) +'\n'
+                            'AP:\n\t' +str(self.atomic_propositions) )
         
         kw = {self.name: ap_label}
         self.graph.add_node(state, **kw)
@@ -2162,10 +2256,17 @@ class AtomicPropositions(object):
         raise NotImplementedError
     
     def of(self, state):
-        """Get AP set labeling given state."""
+        """Get AP set labeling given state.
+        
+        If state does I{not} have AP label, return None.
+        """
         
         self._check_state(state)
-        return self.graph.node[state][self.name]
+        try:
+            return self.graph.node[state][self.name]
+        except KeyError:
+            warnings.warn("State: " +str(state) +", doesn't have AP label.")
+            return None
         
     def list_states_with_labels(self):
         """Return list of labeled states.
@@ -2226,17 +2327,13 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             of actions.
     """
     
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], actions=[], mutable=False):
+    def __init__(self, atomic_propositions=[], actions=[], **args):
         """Note first sets of states in order of decreasing importance,
         then first state labeling, then transitin labeling (states more
         fundamentalthan transitions, because transitions need states in order to
         be defined).
         """
-        LabeledStateDiGraph.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            current_state=current_state, mutable=mutable
-        )
+        LabeledStateDiGraph.__init__(self, **args)
         
         # state labels
         self._state_label_def = OrderedDict(
@@ -2357,23 +2454,14 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
 class FTS(FiniteTransitionSystem):
     """Alias to FiniteTransitionSystem."""
     
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], actions=[], mutable=False):
-        FiniteTransitionSystem.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            current_state=current_state, atomic_propositions=atomic_propositions,
-            actions=actions, mutable=mutable
-        )
+    def __init__(self, **args):
+        FiniteTransitionSystem.__init__(self, **args)
 
 class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Analogous to FTS, but for open systems, with system and environment."""
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], sys_actions=[], env_actions=[],
-                 mutable=False):
-        LabeledStateDiGraph.__init__(
-            self, name=name, states=[], initial_states=initial_states,
-            current_state=current_state, mutable=mutable
-        )
+    def __init__(self, atomic_propositions=[], sys_actions=[],
+                 env_actions=[], **args):
+        LabeledStateDiGraph.__init__(self, **args)
         
         # state labeling
         self._state_label_def = OrderedDict(
@@ -2408,14 +2496,8 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
 
 class OpenFTS(OpenFiniteTransitionSystem):
     """Alias to transys.OpenFiniteTransitionSystem."""
-    def __init__(self, name='', states=[], initial_states=[], current_state=None,
-                 atomic_propositions=[], sys_actions=[], env_actions=[],
-                 mutable=False):
-        OpenFiniteTransitionSystem.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            current_state=None, atomic_propositions=atomic_propositions,
-            sys_actions=sys_actions, env_actions=env_actions, mutable=mutable
-        )
+    def __init__(self, **args):
+        OpenFiniteTransitionSystem.__init__(self, **args)
 
 class InfiniteWord(InfiniteSequence):
     """Store word.
@@ -2482,10 +2564,8 @@ class FiniteStateAutomatonSimulation(object):
 class FSASim(FiniteStateAutomatonSimulation):
     """Alias."""
     
-    def __init__(self, input_word=InfiniteWord(), run=InfiniteSequence() ):
-        FiniteStateAutomatonSimulation.__init__(
-            self, input_word=input_word, run=run
-        )
+    def __init__(self, **args):
+        FiniteStateAutomatonSimulation.__init__(self, **args)
 
 class FiniteStateAutomaton(LabeledStateDiGraph):
     """Generic automaton.
@@ -2560,14 +2640,12 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     """
     
     def __init__(
-        self, name='', states=[], initial_states=[], final_states=[],
-        input_alphabet_or_atomic_propositions=[],
-        atomic_proposition_based=True, mutable=False
+        self, final_states=[], input_alphabet_or_atomic_propositions=[],
+        atomic_proposition_based=True, mutable=False, **args
     ):
         LabeledStateDiGraph.__init__(
-            self, name=name,
-            states=states, initial_states=initial_states, mutable=mutable,
-            removed_state_callback=self._removed_state_callback
+            self, mutable=mutable,
+            removed_state_callback=self._removed_state_callback, **args
         )
         
         if mutable:
@@ -2741,26 +2819,12 @@ def dfa2nfa():
     raise NotImplementedError
 
 class OmegaAutomaton(FiniteStateAutomaton):
-    def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True,
-                 mutable=False):
-        FiniteStateAutomaton.__init__(self,
-            name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based,
-            mutable=mutable
-        )
+    def __init__(self, **args):
+        FiniteStateAutomaton.__init__(self, **args)
 
 class BuchiAutomaton(OmegaAutomaton):
-    def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True,
-                 mutable=False):
-        OmegaAutomaton.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based,
-            mutable=mutable
-        )
+    def __init__(self, **args):
+        OmegaAutomaton.__init__(self, **args)
     
     def __add__(self, other):
         """Union of two automata, with equal states identified."""
@@ -2814,7 +2878,8 @@ class BuchiAutomaton(OmegaAutomaton):
             ts = ts_or_ba
             return _ba_ts_sync_prod(self, ts)
         else:
-            raise Exception('argument should be an FTS or a BA.')
+            raise Exception('ts_or_ba should be an FTS or a BA.\n'+
+                            'Got type: ' +str(ts_or_ba) )
     
     def async_prod(self, other):
         """Should it be defined in a superclass ?"""
@@ -2831,15 +2896,134 @@ class BuchiAutomaton(OmegaAutomaton):
         
 
 class BA(BuchiAutomaton):
-    def __init__(self, name='', states=[], initial_states=[], final_states=[],
-                 input_alphabet=[], atomic_proposition_based=True,
-                 mutable=False):
-        BuchiAutomaton.__init__(
-            self, name=name, states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet,
-            atomic_proposition_based=atomic_proposition_based,
-            mutable=mutable
-        )
+    def __init__(self, **args):
+        BuchiAutomaton.__init__(self, **args)
+
+def tuple2ba(ba_tuple, name='ba', atomic_proposition_based=True):
+    """Create a Buchi Automaton from a tuple of fields.
+    
+    @param ba_tuple: defines Buchi Automaton
+    @type ba_tuple: (Q, Q_0, Q_F, \\Sigma, trans)
+        (maybe replacing \\Sigma by AP since it is an AP-based BA ?)
+        where:
+            Q = set of states
+            Q_0 = set of initial states, must be \\subset S
+            Q_F = set of final states
+            \\Sigma = alphabet
+            trans = transition relation, represented by list of triples:
+                    [(from_state, to_state, guard), ...]
+                where:
+                    guard \\in \\Sigma.
+    
+    @param name: used for file export
+    @type name: str
+    
+    note
+    ----
+    "final states" in the context of \\omega-automata is a misnomer,
+    because the system never reaches a "final" state, as in non-transitioning.
+    
+    So "accepting states" allows for an evolving behavior,
+    and is a better description.
+    
+    "final states" is appropriate for NFAs.
+    
+    see also
+    --------
+    tuple2fts
+    """
+    (states, initial_states, accepting_states,
+     alphabet, transitions) = ba_tuple
+    
+    ba = BA(name=name, atomic_proposition_based=atomic_proposition_based)
+    
+    ba.states.add_from(states)
+    ba.states.add_initial(initial_states)
+    ba.states.add_final(accepting_states)
+    
+    ba.alphabet.add_from(alphabet)
+    for transition in transitions:
+        (from_state, to_state, guard) = transition
+        ba.transitions.add_labeled(from_state, to_state, guard)
+    
+    return ba
+
+def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
+    """Create a Finite Transition System from a tuple of fields.
+    
+    @param S: set of states
+    @type S: iterable of hashables
+    
+    @param S_0: set of initial states, must be \\subset S
+    @type S_0: iterable of elements from S
+    
+    @param AP: set of Atomic Propositions for state labeling:
+            L: S-> 2^AP
+    @type AP: iterable of hashables
+    
+    @param L: state labeling definition
+    @type L: iterable of (state, AP_label) pairs:
+        [(state0, {'p'} ), ...]
+        | None, to skip state labeling.
+    
+    @param Act: set of Actions for edge labeling:
+            R: E-> Act
+    @type Act: iterable of hashables
+    
+    @param trans: transition relation
+    @type trans: list of triples:
+                    [(from_state, to_state, act), ...]
+                where:
+                    act \\in Act
+    
+    @param name: used for file export
+    @type name: str
+    
+    hint
+    ----
+    To rememeber the arg order:
+    
+    1) it starts with states (S0 requires S before it is defined)
+    
+    2) continues with the pair (AP, L), because states are more fundamental
+    than transitions (transitions require states to be defined)
+    and because the state labeling L requires AP to be defined.
+    
+    3) ends with the pair (Act, trans), because transitions in trans require
+    actions in Act to be defined.
+    
+    see also
+    --------
+    tuple2ba
+    """
+    # better names
+    states = S
+    initial_states = S0
+    ap = AP
+    state_labeling = L
+    actions = Act
+    transitions = trans
+    
+    ts = FTS(name=name)
+    
+    ts.states.add_from(states)
+    ts.states.add_initial_from(initial_states)
+    
+    ts.atomic_propositions.add_from(ap)
+    
+    # state labeling assigned ?
+    if state_labeling is not None:
+        for (state, ap_label) in state_labeling:
+            print('Labeling state:\n\t' +str(state) +'\n' +
+                  'with label:\n\t' +str(ap_label) )
+            ts.atomic_propositions.label_state(state, ap_label)
+    
+    ts.actions.add_from(actions)
+    for transition in transitions:
+        (from_state, to_state, act) = transition
+        ts.transitions.add_labeled(from_state, to_state, act)
+    
+    return ts
 
 def _ba_ts_sync_prod(buchi_automaton, transition_system):
     """Construct Buchi Automaton equal to synchronous product TS x NBA.
@@ -2911,6 +3095,16 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     --------
     _ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
+    if not isinstance(transition_system, FiniteTransitionSystem):
+        msg = 'transition_system not transys.FiniteTransitionSystem.\n'
+        msg += 'Actual type passed: ' +str(type(transition_system) )
+        raise TypeError(msg)
+    
+    if not isinstance(buchi_automaton, BuchiAutomaton):
+        msg = 'transition_system not transys.BuchiAutomaton.\n'
+        msg += 'Actual type passed: ' +str(type(buchi_automaton) )
+        raise TypeError(msg)
+    
     if not buchi_automaton.atomic_proposition_based:
         msg = """Buchi automaton not stored as Atomic Proposition-based.
                 synchronous product with Finite Transition System
@@ -2924,7 +3118,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     # using set() destroys order
     prodts = FiniteTransitionSystem(name=prodts_name, states=set() )
     prodts.atomic_propositions.add_from(ba.states() )
-    prodts.actions.add_from(fts.actions() )
+    prodts.actions.add_from(fts.actions)
 
     # construct initial states of product automaton
     s0s = fts.states.initial.copy()
@@ -2943,6 +3137,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             
             # q0 blocked ?
             if enabled_ba_trans == set():
+                dprint('blocked q0 = ' +str(q0) )
                 continue
             
             # which q next ?     (note: curq0 = q0)
@@ -2976,6 +3171,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             dprint('Next state:\n\t' +str(next_s) )
             
             Ls = fts.atomic_propositions.of(next_s)
+            if Ls is None:
+                raise Exception('No AP label for FTS state: ' +str(next_s) +
+                                ', did you forget labeing it ?')
             Ls_dict = {'in_alphabet': Ls}
 
             dprint("Next state's label:\n\t" +str(Ls_dict) )
@@ -3227,31 +3425,26 @@ class FiniteStateMachine(LabeledStateDiGraph):
     --------
     FMS, MealyMachine, MooreMachine
     """
-    def __init__(self, name='', mutable=False):
+    def __init__(self, **args):
         LabeledStateDiGraph.__init__(
-            self, mutable=mutable,
-            removed_state_callback=self._removed_state_callback
+            self, removed_state_callback=self._removed_state_callback, **args
         )
+        
+        # values will point to values of _*_label_def below
+        self.state_vars = OrderedDict()
+        self.inputs = OrderedDict()
+        self.outputs = OrderedDict()
+        #self.set_actions = {}
         
         # state labeling
         self._state_label_def = OrderedDict()
-        self.state_vars = OrderedDict()
-        # TODO the _state_dot_label_format should be automatically
-        # expanded when adding new inputs, using the keys of the new inputs
         self._state_dot_label_format = {'type?label':':',
-                                           'separator':'\\n'}
-        #self.set_actions = {}
+                                        'separator':'\\n'}
         
         # edge labeling
-        # "alphabets" (ports are the dict keys)
         self._transition_label_def = OrderedDict()
-        
-        # will point to selected values of self._transition_label_def
-        self.inputs = OrderedDict()
-        # TODO as above
-        self._transition_dot_label_format = {'input_i':'in',
-                                                'type?label':':',
-                                                'separator':'\\n'}
+        self._transition_dot_label_format = {'type?label':':',
+                                             'separator':'\\n'}
         
         self.default_export_fname = 'fsm'
     
@@ -3314,12 +3507,13 @@ class FiniteStateMachine(LabeledStateDiGraph):
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
     
-    def __init__(self, name='', mutable=False):
-        FiniteStateMachine.__init__(self, name=name, mutable=mutable)
+    def __init__(self, **args):
+        FiniteStateMachine.__init__(self, **args)
 
 class MooreMachine(FiniteStateMachine):
     """Moore machine."""
-    def __init__(self):
+    def __init__(self, **args):
+        FiniteStateMachine.__init__(self, **args)
         self.default_export_fname = 'moore'
         
         raise NotImplementedError
@@ -3339,12 +3533,10 @@ class MooreMachine(FiniteStateMachine):
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine."""
-    def __init__(self, name='', mutable=False):
-        FiniteStateMachine.__init__(self, name=name, mutable=mutable)
+    def __init__(self, **args):
+        FiniteStateMachine.__init__(self, **args)
         
         # will point to selected values of self._transition_label_def
-        self.outputs = OrderedDict()
-        
         self.default_export_fname = 'mealy'
     
     def add_outputs(self, new_outputs_ordered_dict):
