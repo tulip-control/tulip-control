@@ -32,7 +32,7 @@
 
 """ 
 ---------------------------------------------------------------------
-Interface to library of synthesis tools, e.g. JTLV, gr1(c)
+Interface to library of synthesis tools, e.g. JTLV, gr1c
 ---------------------------------------------------------------------
 
 TODO:
