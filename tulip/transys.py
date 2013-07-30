@@ -2902,35 +2902,35 @@ class BA(BuchiAutomaton):
 def tuple2ba(ba_tuple, name='ba', atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
     
-    @param ba_tuple: defines Buchi Automaton
-    @type ba_tuple: (Q, Q_0, Q_F, \\Sigma, trans)
-        (maybe replacing \\Sigma by AP since it is an AP-based BA ?)
-        where:
-            Q = set of states
-            Q_0 = set of initial states, must be \\subset S
-            Q_F = set of final states
-            \\Sigma = alphabet
-            trans = transition relation, represented by list of triples:
-                    [(from_state, to_state, guard), ...]
-                where:
-                    guard \\in \\Sigma.
-    
-    @param name: used for file export
-    @type name: str
-    
     note
-    ----
+    ====
     "final states" in the context of \\omega-automata is a misnomer,
     because the system never reaches a "final" state, as in non-transitioning.
-    
+
     So "accepting states" allows for an evolving behavior,
     and is a better description.
-    
+
     "final states" is appropriate for NFAs.
     
     see also
-    --------
-    tuple2fts
+    ========
+    L{tuple2fts}
+
+    @type ba_tuple: tuple
+    @param ba_tuple: defines Buchi Automaton by a tuple (Q, Q_0, Q_F,
+        \\Sigma, trans) (maybe replacing \\Sigma by AP since it is an
+        AP-based BA ?)  where:
+
+            - Q = set of states
+            - Q_0 = set of initial states, must be \\subset S
+            - Q_F = set of final states
+            - \\Sigma = alphabet
+            - trans = transition relation, represented by list of triples:
+              [(from_state, to_state, guard), ...]
+              where guard \\in \\Sigma.
+
+    @param name: used for file export
+    @type name: str
     """
     (states, initial_states, accepting_states,
      alphabet, transitions) = ba_tuple
@@ -2950,7 +2950,24 @@ def tuple2ba(ba_tuple, name='ba', atomic_proposition_based=True):
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
     """Create a Finite Transition System from a tuple of fields.
-    
+
+    hint
+    ====
+    To rememeber the arg order:
+
+    1) it starts with states (S0 requires S before it is defined)
+
+    2) continues with the pair (AP, L), because states are more fundamental
+    than transitions (transitions require states to be defined)
+    and because the state labeling L requires AP to be defined.
+
+    3) ends with the pair (Act, trans), because transitions in trans require
+    actions in Act to be defined.
+
+    see also
+    ========
+    L{tuple2ba}
+
     @param S: set of states
     @type S: iterable of hashables
     
@@ -2971,30 +2988,10 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
     @type Act: iterable of hashables
     
     @param trans: transition relation
-    @type trans: list of triples:
-                    [(from_state, to_state, act), ...]
-                where:
-                    act \\in Act
+    @type trans: list of triples: [(from_state, to_state, act), ...] where act \\in Act
     
     @param name: used for file export
     @type name: str
-    
-    hint
-    ----
-    To rememeber the arg order:
-    
-    1) it starts with states (S0 requires S before it is defined)
-    
-    2) continues with the pair (AP, L), because states are more fundamental
-    than transitions (transitions require states to be defined)
-    and because the state labeling L requires AP to be defined.
-    
-    3) ends with the pair (Act, trans), because transitions in trans require
-    actions in Act to be defined.
-    
-    see also
-    --------
-    tuple2ba
     """
     # better names
     states = S
