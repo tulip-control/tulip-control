@@ -44,6 +44,8 @@ and
 
 """
 TODO
+    Baier bisimulation algorithm
+    Moore to Mealy
     timed automata (with counters, dense time semantics ?)
 
  import from
@@ -73,6 +75,8 @@ from pprint import pformat
 from itertools import chain, combinations
 from collections import Iterable, Hashable, OrderedDict
 from cStringIO import StringIO
+
+hl = 60 *'-'
 debug = False
 
 try:
@@ -156,7 +160,31 @@ def contains_multiple(iterable):
     return len(iterable) != len(unique(iterable) )
 
 def is_subset(small_iterable, big_iterable):
-    """Comparison for handling list <= set, and lists with unhashable items."""
+    """Comparison for handling list <= set, and lists with unhashable items.
+    """
+    # asserts removed when compiling with optimization on...
+    # it would have been elegant to use instead:
+    #   assert(isinstance(big_iterable, Iterable))
+    # since the error msg is succintly stated by the assert itself
+    if not isinstance(big_iterable, Iterable):
+        raise TypeError('big_iterable must be Iterable, '
+                        'otherwise subset relation undefined.\n'
+                        'Got:\n\t' +str(big_iterable) +'\ninstead.')
+        
+    if not isinstance(small_iterable, Iterable):
+        raise TypeError('small_iterable must be Iterable, '
+                        'otherwise subset relation undefined.\n'
+                        'Got:\n\t' +str(big_iterable) +'\ninstead.')
+    
+    # nxor
+    if isinstance(small_iterable, str) != isinstance(big_iterable, str):
+        raise TypeError('Either both or none of small_iterable, '
+                        'big_iterable should be strings.\n'
+                        'Otherwise subset relation between string '
+                        'and non-string may introduce bugs.\nGot:\n\t' +
+                        str(big_iterable) +',\t' +str(small_iterable) +
+                        '\ninstead.')
+    
     try:
         # first, avoid object duplication
         if not isinstance(small_iterable, set):
@@ -246,6 +274,9 @@ class PowerSet(object):
     def __iter__(self):
         return iter(self() )
     
+    def __len__(self):
+        return 2**len(self.math_set)
+    
     def define_set(self, iterable):
         self.math_set = unique(iterable)
     
@@ -305,6 +336,10 @@ if debug:
 else:
     def dprint(s):
         pass
+
+def vprint(string, verbose=True):
+    if verbose:
+        print(string)
 
 class States(object):
     """Methods to manage states, initial states, current state.
@@ -597,7 +632,7 @@ class States(object):
         def add_incoming_edge(g, state):
             phantom_node = 'phantominit' +str(state)
             
-            g.add_node(phantom_node, label='""', shape='none')
+            g.add_node(phantom_node, label='""', shape='none', width='0')
             g.add_edge(phantom_node, state)
         
         def form_node_label(state, state_data, label_def, label_format):
@@ -661,17 +696,26 @@ class States(object):
             else:
                 node_dot_label = str(state)
             
-            # state color
+            # state boundary color
             if state_data.has_key('color'):
                 node_color = state_data['color']
             else:
-                node_color = '"red"'
+                node_color = '"black"'
+            
+            # state interior color
+            node_style = '"rounded'
+            if state_data.has_key('fillcolor'):
+                node_style += ',filled"'
+                fill_color = state_data['fillcolor']
+            else:
+                node_style += '"'
+                fill_color = "none"
             
             # TODO option to replace with int to reduce size,
             # TODO generate separate LaTeX legend table (PNG option ?)
             to_pydot_graph.add_node(
                 state_id, label=node_dot_label, shape=node_shape,
-                style='rounded', color=node_color)
+                style=node_style, color=node_color, fillcolor=fill_color)
     
     def _warn_if_state_exists(self, state):
         if state in self():
@@ -1070,7 +1114,7 @@ class Transitions(object):
         return self.graph.edges(data=data)
     
     def __str__(self):
-        return 'Transitions:\n' +pformat(self(data=True) )
+        return 'Transitions:\n\t' +pformat(self(data=True) )
     
     def _mutant2int(self, from_state, to_state):
         from_state_id = self.graph.states._mutant2int(from_state)
@@ -1095,10 +1139,12 @@ class Transitions(object):
             self.graph.states.add_from({from_state, to_state} )
         
         if from_state not in self.graph.states():
-            raise Exception('from_state \\notin states.')
+            raise Exception('from_state:\n\t' +str(from_state) +
+                            '\\notin states:\n\t' +str(self.graph.states() ) )
         
         if to_state not in self.graph.states():
-            raise Exception('to_state \\notin states.')
+            raise Exception('to_state:\n\t' +str(to_state) +
+                            '\\notin states:\n\t' +str(self.graph.states() ) )
         
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
         
@@ -1284,14 +1330,15 @@ class LabeledTransitions(Transitions):
                 self.graph.states.add(to_state)
         
         if from_state not in self.graph.states():
-            msg = str(from_state) +' = from_state \\notin state'
+            msg = 'from_state:\n\t' +str(from_state)
+            msg += '\n\\notin States:' +str(self.graph.states() )
             raise Exception(msg)
         
         if to_state not in self.graph.states():
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
     
-    def _get_labeling(self, labels, check_label=True):
+    def _form_kv_label(self, labels, check_label=True):
         self._exist_labels()
         
         # get labeling def
@@ -1315,16 +1362,21 @@ class LabeledTransitions(Transitions):
             raise Exception('Bug')
         
         # check if dict is consistent with label defs
-        for (typename, label) in edge_label.iteritems():
+        for (typename, sublabel) in edge_label.iteritems():
             possible_labels = label_def[typename]
             
-            # iterable sublabel discreption ? (i.e., discrete ?)
+            # iterable sublabel descreption ? (i.e., discrete ?)
             if isinstance(possible_labels, Iterable):
                 if not check_label:
-                    possible_labels.add(label)
-                elif label not in possible_labels:
-                    msg = 'Given label:\n\t' +str(label) +'\n'
-                    msg += 'not in set of transition labels:\n\t' +str(possible_labels)
+                    possible_labels.add(sublabel)
+                elif sublabel not in possible_labels:
+                    msg = 'Given label:\n\t' +str(sublabel) +'\n'
+                    msg += 'not in set of transition labels:\n\t'
+                    msg += str(possible_labels) +'\n'
+                    msg += 'If Atomic Propositions involved,\n'
+                    msg += 'did you forget to pass an iterable of APs,\n'
+                    msg += 'instead of a single AP ?\n'
+                    msg += "(e.g., {'p'} instead of 'p')"
                     raise Exception(msg)
                 
                 continue
@@ -1341,8 +1393,8 @@ class LabeledTransitions(Transitions):
                 raise TypeError('SubLabel type V does not have method is_valid.')
             
             # check sublabel type
-            if not possible_labels.is_valid_guard(label):
-                raise TypeError('Sublabel:\n\t' +str(label) +'\n' +
+            if not possible_labels.is_valid_guard(sublabel):
+                raise TypeError('Sublabel:\n\t' +str(sublabel) +'\n' +
                                 'not valid for sublabel type:\n\t' +
                                 str(possible_labels) )
             
@@ -1387,7 +1439,7 @@ class LabeledTransitions(Transitions):
     def remove_labeled(self, from_state, to_state, label):
         self._exist_labels()
         self._check_states(from_state, to_state, check=True)
-        edge_label = self._get_labeling(label, check_label=True)
+        edge_label = self._form_kv_label(label, check_label=True)
         
         # get all transitions with given label
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1506,7 +1558,7 @@ class LabeledTransitions(Transitions):
         # if labels were not previously in label set,
         # then a similar issue can arise only with unlabeled transitions
         # pre-existing. This is avoided by first checking for an unlabeled trans.        
-        edge_label = self._get_labeling(labels, check_label=check)
+        edge_label = self._form_kv_label(labels, check_label=check)
         
         # check if same labeled transition exists
         if edge_label in trans_from_to.values():
@@ -1694,6 +1746,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.dot_node_shape = {'normal':'circle'}
         self.default_export_path = './'
         self.default_export_fname = 'out'
+        self.default_layout = 'dot'
         
         if from_networkx_graph is not None:
             for (from_state, to_state) in edges:
@@ -1821,8 +1874,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """Alias to dump_dot()."""
         return self.dump_dot()
     
-    def save(self, fileformat='pdf', path='default', add_missing_extension=True,
-             rankdir='LR'):
+    def save(self, fileformat='pdf', path='default',
+             add_missing_extension=True, rankdir='LR', prog=None):
         """Save image to file.
         
         Recommended: pdf, svg (can render LaTeX labels with inkscape export)
@@ -1844,6 +1897,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         @type rankdir: str = 'TB' | 'LR'
             (i.e., Top->Bottom | Left->Right)
         
+        @param prog: executable to call
+        @type prog: dot | circo | ... see pydot.Dot.write
+        
         caution
         -------
         rankdir experimental argument
@@ -1854,13 +1910,17 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         see also
         --------
-        plot
+        plot, pydot.Dot.write
         """
         path = self._export_fname(path, fileformat, addext=add_missing_extension)
         
+        if prog is None:
+            prog = self.default_layout
+        
         pydot_graph = self._to_pydot()
         pydot_graph.set_rankdir(rankdir)
-        pydot_graph.write(path, format=fileformat)
+        pydot_graph.set_splines('true')
+        pydot_graph.write(path, format=fileformat, prog=prog)
     
     def dump_dot_color(self):
         raise NotImplementedError
@@ -1868,7 +1928,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def write_dot_color_file(self):
         raise NotImplementedError
     
-    def plot(self):
+    def plot(self, rankdir='LR', prog=None):
         """Plot image using dot.
         
         No file I/O involved.
@@ -1886,14 +1946,18 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         -------
         dot and either of IPython or Matplotlib
         """
-        
         # anything to plot ?
         if self.states.number() == 0:
             print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
             return
         
+        if prog is None:
+            prog = self.default_layout
+        
         pydot_graph = self._to_pydot()
-        png_str = pydot_graph.create_png()
+        pydot_graph.set_rankdir(rankdir)
+        pydot_graph.set_splines('true')
+        png_str = pydot_graph.create_png(prog=prog)
         
         # installed ?
         if IPython:
@@ -2197,7 +2261,9 @@ class AtomicPropositions(object):
         if not is_subset(ap_label, self.atomic_propositions):
             raise Exception('Label \\not\\subset AP.'
                             'FYI Label:\n\t' +str(ap_label) +'\n'
-                            'AP:\n\t' +str(self.atomic_propositions) )
+                            'AP:\n\t' +str(self.atomic_propositions) +'\n' +
+                            'Note that APs must be in an iterable,\n' +
+                            "even single ones, e.g. {'p'}.")
         
         kw = {self.name: ap_label}
         self.graph.add_node(state, **kw)
@@ -2356,22 +2422,17 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'fts'
 
-    def __str__(self):
-        def actions_str(actions):
-            n = str(len(actions) )
-            #action_set_name = self.name
-            action_set_name = 'actions'
-        
-            msg = 'The ' +n +' Actions of type: ' +action_set_name +', are:\n\t'
-            msg += str(self.actions)
-        
-            return msg
-        
-        s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
-        s += '\n' +str(self.transitions) +'\n' +actions_str(self.actions) +'\n'
-        s += str(self.atomic_propositions) +'\n'
+    def __str__(self):        
+        s = hl +'\nFinite Transition System (closed)\n' +hl
+        s += str(self.states) +'\n' +str(self.atomic_propositions) +'\n'
+        s += 'State Labels:\n' +pformat(self.states(data=True) ) +'\n'
+        s += 'Actions:\n\t' +str(self.actions) +'\n'
+        s += str(self.transitions) +'\n' +hl +'\n'
         
         return s
+    
+    def __repr__(self):
+        return self.__str__()
     
     def __mul__(self, ts_or_ba):
         """Synchronous product of TS with TS or BA.
@@ -2693,7 +2754,8 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     # final states
     def add_final_state(self, new_final_state):
         if not new_final_state in self.states():
-            raise Exception('New final state \\notin States.')
+            raise Exception('Given final state:\n\t' +str(new_final_state) +
+                            '\n\\notin States:\n\t' +str(self.states() ) )
         
         # already final ?
         if self._is_final(new_final_state):
@@ -2708,7 +2770,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
     def add_final_states_from(self, new_final_states):
         if not is_subset(new_final_states, self.states() ):
-            raise Exception('New Final States \\notsubset States.')
+            raise Exception('Given Final States \\notsubset States.')
         
         # mutable states ?
         if self.states.mutants == None:
@@ -2826,6 +2888,17 @@ class BuchiAutomaton(OmegaAutomaton):
     def __init__(self, **args):
         OmegaAutomaton.__init__(self, **args)
     
+    def __str__(self):
+        s = hl +'\nB' +u'\xfc' +'chi Automaton\n' +hl
+        s += str(self.states) +'\n'
+        s += 'Input Alphabet Letters (\in 2^AP):\n\t' +str(self.alphabet)
+        s += '\n' +str(self.transitions) +'\n' +hl +'\n'
+        
+        return s
+    
+    def __repr__(self):
+        return self.__str__()
+    
     def __add__(self, other):
         """Union of two automata, with equal states identified."""
         raise NotImplementedError
@@ -2893,13 +2966,68 @@ class BuchiAutomaton(OmegaAutomaton):
     
     def complement(self):
         raise NotImplementedError
-        
 
 class BA(BuchiAutomaton):
     def __init__(self, **args):
         BuchiAutomaton.__init__(self, **args)
 
-def tuple2ba(ba_tuple, name='ba', atomic_proposition_based=True):
+def negation_closure(atomic_propositions):
+    """Given: ['p', ...], return: [True, 'p', '!p', ...].
+    
+    @param atomic_propositions: AP set
+    @type atomic_propositions: iterable container of strings
+    """
+    def negate(x):
+        # starts with ! ?
+        if x.find('!') == 0:
+            x = x[1:]
+        else:
+            x = '!'+x
+        return x
+    
+    if not isinstance(atomic_propositions, Iterable):
+        raise TypeError('atomic_propositions must be Iterable.'
+                        'Got:\n\t' +str(atomic_propositions) +'\ninstead.')
+    
+    ap = [f(x)
+          for x in atomic_propositions
+          for f in (lambda x: x, negate) ] +[True]
+    return unique(ap)
+
+def prepend_with(states, prepend_str):
+    """Prepend items with given string.
+    
+    example
+    -------
+    states = [0, 1]
+    prepend_str = 's'
+    states = prepend_with(states, prepend_str)
+    assert(states == ['s0', 's1'] )
+    
+    see also
+    --------
+    tuple2ba, tuple2fts
+    
+    @param states: items prepended with string C{prepend_str}
+    @type states: iterable
+    
+    @param prepend_str: text prepended to C{states}
+    @type prepend_str: str
+    """
+    if not isinstance(states, Iterable):
+        raise TypeError('states must be Iterable. Got:\n\t' +
+                        str(states) +'\ninstead.')
+    if not isinstance(prepend_str, str) and prepend_str is not None:
+        raise TypeError('prepend_str must be Iterable. Got:\n\t' +
+                        str(prepend_str) +'\ninstead.')
+    
+    if prepend_str is None:
+        return states
+    
+    return [prepend_str +str(s) for s in states]
+
+def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
+             atomic_proposition_based=True, verbose=False):
     """Create a Buchi Automaton from a tuple of fields.
     
     note
@@ -2932,23 +3060,52 @@ def tuple2ba(ba_tuple, name='ba', atomic_proposition_based=True):
     @param name: used for file export
     @type name: str
     """
-    (states, initial_states, accepting_states,
-     alphabet, transitions) = ba_tuple
+    # args
+    if not isinstance(S, Iterable):
+        raise TypeError('States S must be iterable, even for single state.')
+    
+    if not isinstance(S0, Iterable) or isinstance(S0, str):
+        S0 = [S0]
+    
+    if not isinstance(Sa, Iterable) or isinstance(Sa, str):
+        Sa = [Sa]
+    
+    # comprehensive names
+    states = S
+    initial_states = S0
+    accepting_states = Sa
+    alphabet_or_ap = Sigma_or_AP
+    transitions = trans
+    
+    # prepending states with given str
+    if prepend_str:
+        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
+               'will be prepended to all states.', verbose)
+    states = prepend_with(states, prepend_str)
+    initial_states = prepend_with(initial_states, prepend_str)
+    accepting_states = prepend_with(accepting_states, prepend_str)
     
     ba = BA(name=name, atomic_proposition_based=atomic_proposition_based)
     
     ba.states.add_from(states)
-    ba.states.add_initial(initial_states)
-    ba.states.add_final(accepting_states)
+    ba.states.add_initial_from(initial_states)
+    ba.states.add_final_from(accepting_states)
     
-    ba.alphabet.add_from(alphabet)
+    if atomic_proposition_based:
+        ba.alphabet.add_set_elements(alphabet_or_ap)
+    else:
+        ba.alphabet.add(alphabet_or_ap)
+    
     for transition in transitions:
         (from_state, to_state, guard) = transition
+        [from_state, to_state] = prepend_with([from_state, to_state],
+                                              prepend_str)
         ba.transitions.add_labeled(from_state, to_state, guard)
     
     return ba
 
-def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
+def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
+              prepend_str=None, verbose=False):
     """Create a Finite Transition System from a tuple of fields.
 
     hint
@@ -2993,13 +3150,68 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
     @param name: used for file export
     @type name: str
     """
-    # better names
+    def str2singleton(ap_label):
+        """If string, convert to set(string).
+        
+        Convention: singleton str {'*'}
+        can be passed as str '*' instead.
+        """
+        if isinstance(ap_label, str):
+            vprint('Saw str state label:\n\t' +ap_label, verbose)
+            ap_label = {ap_label}
+            vprint('Replaced with singleton:\n\t' +str(ap_label) +'\n',
+                   verbose)
+        return ap_label
+    
+    def pair_labels_with_states(states, state_labeling):
+        if state_labeling is None:
+            return
+        
+        if not isinstance(state_labeling, Iterable):
+            raise TypeError('State labeling function: L->2^AP must be '
+                            'defined using an Iterable.')
+        
+        state_label_pairs = True
+        
+        # cannot be caught by try below
+        if isinstance(state_labeling[0], str):
+            state_label_pairs = False
+        
+        try:
+            (state, ap_label) = state_labeling[0]
+        except ValueError:
+            state_label_pairs = False
+        
+        if state_label_pairs:
+            return
+        
+        vprint('State labeling L not tuples (state, ap_label),\n'
+                   'zipping with states S...\n', verbose)
+        state_labeling = zip(states, state_labeling)
+        return state_labeling
+    
+    # args
+    if not isinstance(S, Iterable):
+        raise TypeError('States S must be iterable, even for single state.')
+    
+    # convention
+    if not isinstance(S0, Iterable) or isinstance(S0, str):
+        S0 = [S0]
+    
+    # comprehensive names
     states = S
     initial_states = S0
     ap = AP
-    state_labeling = L
+    state_labeling = pair_labels_with_states(states, L)
     actions = Act
     transitions = trans
+    
+    # prepending states with given str
+    if prepend_str:
+        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
+               'will be prepended to all states.', verbose)
+    states = prepend_with(states, prepend_str)
+    initial_states = prepend_with(initial_states, prepend_str)
     
     ts = FTS(name=name)
     
@@ -3008,18 +3220,61 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts'):
     
     ts.atomic_propositions.add_from(ap)
     
+    # note: verbosity before actions below
+    # to avoid screening by possible error caused by action
+    
     # state labeling assigned ?
     if state_labeling is not None:
         for (state, ap_label) in state_labeling:
-            print('Labeling state:\n\t' +str(state) +'\n' +
-                  'with label:\n\t' +str(ap_label) )
+            ap_label = str2singleton(ap_label)
+            (state,) = prepend_with([state], prepend_str)
+            
+            vprint('Labeling state:\n\t' +str(state) +'\n' +
+                  'with label:\n\t' +str(ap_label) +'\n', verbose)
             ts.atomic_propositions.label_state(state, ap_label)
     
-    ts.actions.add_from(actions)
-    for transition in transitions:
-        (from_state, to_state, act) = transition
-        ts.transitions.add_labeled(from_state, to_state, act)
+    # any transition labeling ?
+    if actions is None:
+        for (from_state, to_state) in transitions:
+            (from_state, to_state) = prepend_with([from_state, to_state],
+                                                  prepend_str)
+            vprint('Added unlabeled edge:\n\t' +str(from_state) +
+                   '--->' +str(to_state) +'\n', verbose)
+            ts.transitions.add(from_state, to_state)
+    else:
+        ts.actions.add_from(actions)
+        for (from_state, to_state, act) in transitions:
+            (from_state, to_state) = prepend_with([from_state, to_state],
+                                                  prepend_str)
+            vprint('Added labeled edge (=transition):\n\t' +
+                   str(from_state) +'---[' +str(act) +']--->' +
+                   str(to_state) +'\n', verbose)
+            ts.transitions.add_labeled(from_state, to_state, act)
     
+    return ts
+
+def cycle_labeled_with(L):
+    """Return cycle FTS with given labeling.
+    
+    @param L: state labeling
+    @type L: iterable of state labels, e.g., [{'p', 'q'}, ...]
+        Single strings are identified with singleton Atomic Propositions,
+        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+    
+    @returns: FTS with states ['s0', ..., 'sN'], where N=len(L)
+        and state labels defined by L, i.e., ('s0', L[0]),...
+    """
+    n = len(L)
+    S = range(n)
+    S0 = [] # user will define them
+    AP = negation_closure(L)
+    Act = None
+    from_states = range(0, n-1)
+    to_states = range(1, n)
+    trans = zip(from_states, to_states)
+    trans += [(n-1, 0)] # close cycle
+    
+    ts = tuple2fts(S, S0, AP, L, Act, trans, prepend_str='s')
     return ts
 
 def _ba_ts_sync_prod(buchi_automaton, transition_system):
@@ -3170,7 +3425,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             Ls = fts.atomic_propositions.of(next_s)
             if Ls is None:
                 raise Exception('No AP label for FTS state: ' +str(next_s) +
-                                ', did you forget labeing it ?')
+                                '\n Did you forget labeing it ?')
             Ls_dict = {'in_alphabet': Ls}
 
             dprint("Next state's label:\n\t" +str(Ls_dict) )
