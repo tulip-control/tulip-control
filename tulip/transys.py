@@ -506,6 +506,15 @@ class States(object):
         Otherwise return the smallest available int ID, if mutable,
         or the given state, if immutable.
         
+        note
+        ----
+        If not mutable, no check that given state is valid,
+        because this direction (also) inputs to the data structure new states.
+        
+        see also
+        --------
+        _int2mutant
+        
         @param state: state to check for
         
         @returns:
@@ -515,15 +524,6 @@ class States(object):
                 then return min free int ID.
             If C{state} does exist and states mutable,
                 then return its int ID.
-        
-        note
-        ----
-        If not mutable, no check that given state is valid,
-        because this direction (also) inputs to the data structure new states.
-        
-        see also
-        --------
-        _int2mutant
         """
         
         # classic NetworkX ?
@@ -555,6 +555,15 @@ class States(object):
         If C{state_id} \\in used IDs, then return corresponding state.
         Otherwise return None, or the given state, if not mutable.
         
+        note
+        ----
+        If not mutable, given int checked to be valid state,
+        because this direction outputs to the world.
+        
+        see also
+        --------
+        _mutant2int_
+        
         @param state_id: ID number to check for
         @type state_id:
             int, if mutable
@@ -567,15 +576,6 @@ class States(object):
                 then return corresponding C{state}.
             If states are mutable but C{state_id} is free,
                 then return None.
-        
-        note
-        ----
-        If not mutable, given int checked to be valid state,
-        because this direction outputs to the world.
-        
-        see also
-        --------
-        _mutant2int_
         """
         
         # classic NetworkX ?
@@ -741,16 +741,16 @@ class States(object):
         or other (custom) annotation, use the functions provided by
         AtomicPropositions, or directly the NetworkX.MultiDiGraph.add_node method.
         
+        see also
+        --------
+        networkx.MultiDiGraph.add_node
+        
         @param new_state:
             Single new state to add.
         @type new_state:
             If states immutable, then C{state} must be a hashable object.
                 Any hashable allowed, except for None (see nx add_node below).
             If states mutable, then C{state} can be unhashable.
-        
-        see also
-        --------
-        networkx.MultiDiGraph.add_node
         """
         new_state_id = self._mutant2int(new_state)
         self._warn_if_state_exists(new_state)
@@ -2146,6 +2146,18 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Recommended: pdf, svg (can render LaTeX labels with inkscape export)
         
+        caution
+        -------
+        rankdir experimental argument
+        
+        depends
+        -------
+        dot, pydot
+        
+        see also
+        --------
+        plot, pydot.Dot.write
+        
         @param fileformat: type of image file
         @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'ps'
             (for more, see pydot.write)
@@ -2165,18 +2177,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         @param prog: executable to call
         @type prog: dot | circo | ... see pydot.Dot.write
-        
-        caution
-        -------
-        rankdir experimental argument
-        
-        depends
-        -------
-        dot, pydot
-        
-        see also
-        --------
-        plot, pydot.Dot.write
         """
         path = self._export_fname(path, fileformat, addext=add_missing_extension)
         
@@ -2548,19 +2548,6 @@ class AtomicPropositions(object):
         where N = C{len(ap_label_list) } the number of AP labels in the list.
         Note that these AP labels are not necessarily different with each other.
         
-        @param states: existing states to be labeled with ap_label_list,
-            or string 'create' to cause creation of new int ID states
-        @type states: interable container of existing states |
-            str 'create'
-        
-        @param ap_label_list: valid AP labels for annotating C{states}
-        @type ap_label_list: list of valid labels
-        
-        @param check: check if given states and given labels already exist.
-            If C{check=False}, then each state passed is added to system,
-            and each AP is added to the APs of the system.
-        @type check: bool
-        
         examples
         --------
         fts.states.add_from(['s0', 's1'] )
@@ -2574,6 +2561,19 @@ class AtomicPropositions(object):
         fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
         fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
         fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
+        
+        @param states: existing states to be labeled with ap_label_list,
+            or string 'create' to cause creation of new int ID states
+        @type states: interable container of existing states |
+            str 'create'
+        
+        @param ap_label_list: valid AP labels for annotating C{states}
+        @type ap_label_list: list of valid labels
+        
+        @param check: check if given states and given labels already exist.
+            If C{check=False}, then each state passed is added to system,
+            and each AP is added to the APs of the system.
+        @type check: bool
         """
         if states == 'create':
             states = range(len(ap_label_list) )
