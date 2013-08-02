@@ -46,8 +46,8 @@ based on code from:
 """
 
 import copy, itertools, os, re, subprocess, tempfile, textwrap
+import warnings
 from collections import OrderedDict
-from errorprint import printWarning
 
 import transys as ts
 from spec import GRSpec
@@ -128,10 +128,10 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
     # init_option
     if (isinstance(init_option, int)):
         if (init_option < 0 or init_option > 2):
-            printWarning("Unknown init_option. Setting it to the default (1)")
+            warnings.warn("Unknown init_option. Setting it to the default (1)")
             init_option = 1
     else:
-        printWarning("Unknown init_option. Setting it to the default (1)")
+        warnings.warn("Unknown init_option. Setting it to the default (1)")
         init_option = 1
 
     
@@ -251,16 +251,16 @@ def getPriority(priority_kind):
         elif (priority_kind == 'XYZ'):
             priority_kind = 23
         else:
-            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+            warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
             priority_kind = 3
     elif (isinstance(priority_kind, int)):
         if (priority_kind > 0 and priority_kind != 3 and priority_kind != 7 and \
                 priority_kind != 11 and priority_kind != 15 and priority_kind != 19 and \
                 priority_kind != 23):
-            printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+            warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
             priority_kind = 3
     else:
-        printWarning("Unknown priority_kind. Setting it to the default (ZYX)")
+        warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
         priority_kind = 3
     return priority_kind
 
