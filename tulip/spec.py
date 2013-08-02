@@ -119,6 +119,41 @@ class GRSpec(object):
             else:
                 self.env_prog = [self.env_prog]
 
+    def __str__(self):
+        return self.to_canon()
+
+    def to_canon(self):
+        """Output formula in TuLiP LTL syntax.
+
+        Beware!  The canonical TuLiP LTL syntax is under active
+        development and may change without notice.  Consult
+        U{https://sourceforge.net/p/tulip-control/wiki/TL_formula_syntax/}
+        """
+        conj_cstr = lambda s: " & " if len(s) > 0 else ""
+        assumption = ""
+        if len(self.env_init) > 0:
+            assumption += " & ".join(["("+s+")" for s in self.env_init])
+        if len(self.env_safety) > 0:
+            assumption += conj_cstr(assumption)+" & ".join(["[]("+s+")" for s in self.env_safety])
+        if len(self.env_prog) > 0:
+            assumption += conj_cstr(assumption)+" & ".join(["[]<>("+s+")" for s in self.env_prog])
+        guarantee = ""
+        if len(self.sys_init) > 0:
+            guarantee += conj_cstr(guarantee)+" & ".join(["("+s+")" for s in self.sys_init])
+        if len(self.sys_safety) > 0:
+            guarantee += conj_cstr(guarantee)+" & ".join(["[]("+s+")" for s in self.sys_safety])
+        if len(self.sys_prog) > 0:
+            guarantee += conj_cstr(guarantee)+" & ".join(["[]<>("+s+")" for s in self.sys_prog])
+
+        # Put the parts together, simplifying in special cases
+        if len(guarantee) > 0:
+            if len(assumption) > 0:
+                return "("+assumption+") -> ("+guarantee+")"
+            else:
+                return guarantee
+        else:
+            return "True"
+
 
     def import_GridWorld(self, gworld, offset=(0,0), controlled_dyn=True):
         """Append specification describing a gridworld.
