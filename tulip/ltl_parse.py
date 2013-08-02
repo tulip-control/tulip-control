@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (c) 2011-2013 by California Institute of Technology
 # All rights reserved.
 #
@@ -32,9 +30,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-# $Id$
-# LTL parser supporting JTLV, SPIN and SMV syntax (and mixtures thereof!)
-# Syntax taken roughly from http://spot.lip6.fr/wiki/LtlSyntax
+"""
+LTL parser supporting JTLV, SPIN and SMV syntax (and mixtures thereof!)
+Syntax taken roughly from http://spot.lip6.fr/wiki/LtlSyntax
+"""
+
 from pyparsing import *
 import sys
 

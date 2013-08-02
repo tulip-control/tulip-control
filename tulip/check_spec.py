@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (c) 2011, 2012 by California Institute of Technology
 # All rights reserved.
 #
@@ -32,7 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-
 """
 ---------------------------------------------------
 Syntax Checking functions for JTLV, nuSMV, and Spin
