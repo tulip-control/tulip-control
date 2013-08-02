@@ -45,8 +45,8 @@ def fts_minimal_example():
     fts.states.add_from(['s0', 's1'] )
     fts.states.add_initial('s0')
     
-    fts.atomic_propositions.add_from({'green', 'not green'})
-    fts.atomic_propositions.label_state('s0', {'not green'})
+    fts.atomic_propositions.add_from({'green', 'not_green'})
+    fts.atomic_propositions.label_state('s0', {'not_green'})
     fts.atomic_propositions.label_state('s1', {'green'})
     
     fts.transitions.add('s0', 's1')
@@ -116,18 +116,13 @@ def ba_minimal_example():
     ba.states.add_initial('q0')
     ba.states.add_final('q1')
     
-    # TODO auto negation alphabet closure ?
+    ba.alphabet.add_set_elements([True, 'green', 'not_green'] )
     
-    true = {True}
-    green = {'green'}
-    not_green = {'not green'}
-    ba.alphabet.add_from([true, green, not_green] )
-    
-    ba.transitions.add_labeled('q0', 'q0', true)
-    ba.transitions.add_labeled('q0', 'q1', not_green)
-    ba.transitions.add_labeled('q1', 'q1', not_green)
-    ba.transitions.add_labeled('q1', 'q2', green)
-    ba.transitions.add_labeled('q2', 'q2', true)
+    ba.transitions.add_labeled('q0', 'q0', {True})
+    ba.transitions.add_labeled('q0', 'q1', {'not_green'})
+    ba.transitions.add_labeled('q1', 'q1', {'not_green'})
+    ba.transitions.add_labeled('q1', 'q2', {'green'})
+    ba.transitions.add_labeled('q2', 'q2', {True})
     
     if not ba.plot() and save_fig:
         ba.save(path='small_ba.png', fileformat='png')
@@ -141,8 +136,6 @@ if __name__ == '__main__':
     
     fts = fts_minimal_example()
     ofts_minimal_example()
-    
-    """
     ba = ba_minimal_example()
     
     (prod_fts, final_states_preimage) = fts *ba
@@ -153,4 +146,3 @@ if __name__ == '__main__':
     
     if not prod_ba.plot() and save_fig:
         prod_ba.save(path='prod.png', fileformat='png')
-    """

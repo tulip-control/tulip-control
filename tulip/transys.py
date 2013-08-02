@@ -75,9 +75,10 @@ from pprint import pformat
 from itertools import chain, combinations
 from collections import Iterable, Hashable, OrderedDict
 from cStringIO import StringIO
+from time import strftime
 
 hl = 60 *'-'
-debug = False
+debug = True
 
 try:
     import pydot
@@ -241,14 +242,12 @@ class PowerSet(object):
     p.add_set_element({3: 'a'} )
     p.remove_set_element([1,2] )
     
-    params
-    ------
-    @param iterable: mathematical set S of elements, on which this 2^S defined.
-    @type iterable: iterable container
-    
     see also
     --------
     is_subset
+    
+    @param iterable: mathematical set S of elements, on which this 2^S defined.
+    @type iterable: iterable container
     """
     def __init__(self, iterable=[]):
         self.define_set(iterable)
@@ -262,8 +261,8 @@ class PowerSet(object):
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
         if not isinstance(item, Iterable):
-            raise Exception('Not iterable, this is a powerset, '+
-                            'so it contains (math) sets.')
+            raise Exception('Not iterable:\n\t' +str(item) +',\n'
+                            'this is a powerset, so it contains (math) sets.')
         
         return is_subset(item, self.math_set)
     
@@ -330,6 +329,8 @@ class PowerSet(object):
             return
 
 if debug:
+    import traceback
+    
     def dprint(s):
         """Debug mode print."""
         print(s)
@@ -377,12 +378,12 @@ class States(object):
     refinement are hashable without special arrangements (e.g. strings).
     So the final result would then be storable in an ordinary NetworkX graph.
     
-    @param mutable: enable storage of unhashable states
-    @type mutable: bool (default: False)
-    
     see also
     --------
     LabeledStateDiGraph, LabeledTransitions, Transitions
+    
+    @param mutable: enable storage of unhashable states
+    @type mutable: bool (default: False)
     """
     def __init__(self, graph, states=[], initial_states=[], current_state=None,
                  mutable=False, removed_state_callback=None):
@@ -487,6 +488,10 @@ class States(object):
     
     def __ge__(self, other):
         return self.graph.nodes(data=False) >= other
+    
+    def __len__(self):
+        """Total number of states."""
+        return self.graph.number_of_nodes()
     
     def _is_mutable(self):
         if self.mutants is None:
@@ -612,7 +617,7 @@ class States(object):
         if hasattr(self.graph, '_state_label_def'):
             return True
         else:
-            msg = 'No state labeling defined for class: '
+            msg = 'No state labeling defined for class:\n\t'
             msg += str(type(self.graph) )
             dprint(msg)
             return False
@@ -822,10 +827,6 @@ class States(object):
             # list maintained ?
             if self.list is not None:
                 self.list = self.list +list(new_states)
-    
-    def number(self):
-        """Total number of states."""
-        return self.graph.number_of_nodes()
     
     def remove(self, rm_state):
         """Remove single state."""
@@ -1108,13 +1109,24 @@ class Transitions(object):
     def __init__(self, graph):
         self.graph = graph
     
-    def __call__(self, data=True):
-        """Return list of transitions."""
+    def __call__(self):
+        """Return list of transitions.
         
-        return self.graph.edges(data=data)
+        The transitions are yet unlabeled, so they are graph edges,
+        i.e., ordered pairs of states: (s1, s2).
+        The edge direction is from s1 to s2, i.e., s1-> s2.
+        
+        LabeledTransitions overload this to return transitions,
+        i.e., labeled edges = triples: (s1, s2, label).
+        
+        see also
+        --------
+        LabeledTransitions.__call__
+        """
+        return self.graph.edges(data=False)
     
     def __str__(self):
-        return 'Transitions:\n\t' +pformat(self(data=True) )
+        return 'Transitions:\n\t' +pformat(self() )
     
     def _mutant2int(self, from_state, to_state):
         from_state_id = self.graph.states._mutant2int(from_state)
@@ -1252,6 +1264,42 @@ class Transitions(object):
         for from_state in from_states:
             for to_state in to_states:
                 self.remove(from_state, to_state)
+    
+    def between(self, from_states, to_states):
+        """Return list of edges between given nodes.
+        
+        Filtering the edge set E is based on end-point states of edge,
+        because edges are not yet labeled.
+        To search over labeled edges = transitions, see LabeledTransitions.find
+        
+        note
+        ----
+        filter around NetworkX.MultiDiGraph.edges()
+        
+        see also
+        --------
+        LabeledTransitions.find
+        
+        @param start_states: from where transition should start
+        @type start_states: valid states
+        
+        @param end_states: where transition should end
+        @type end_states: valid states
+        
+        @return: Edges between given subsets of states
+        @rtype: list of state pairs as tuples:
+            [(C{from_state}, C{to_state}), ...]
+        such that:
+            - C{from_state} \\in C{from_states} and
+            - C{to_state} \\in C{to_states}
+        """
+        edges = []
+        for (from_state, to_state) in self.graph.edges_iter(
+            from_states, data=False, keys=False
+        ):
+            if to_state in to_states:
+                edges.append((from_state, to_state) )
+        return edges
 
 class LabeledTransitions(Transitions):
     """Manage labeled transitions (!= edges).
@@ -1311,6 +1359,45 @@ class LabeledTransitions(Transitions):
     def __init__(self, graph):
         Transitions.__init__(self, graph)
     
+    def __call__(self, labeled=False, as_dict=True):
+        """Return all edges, optionally paired with labels.
+        
+        note
+        ----
+        __call__(labeled=True, as_dict=True) is equivalent to find(),
+        i.e., find without any restrictions on the desired
+        from_state, to_state, nor sublabels.
+        
+        see also
+        --------
+        find
+        
+        @param labeled: If C{True}, then return labeled edges
+        @type labeled: bool
+        
+        @param as_dict:
+            - If C{True}, then return sublabel values keyed by sublabel type:
+                {sublabel_type : sublabel_value, ...}
+            - Otherwise return list of sublabel values ordered by
+                _transition_label_def
+        @type as_dict: bool
+        
+        @return: labeled or unlabeled edges, depending on args.
+        @rtype: list of edges = unlabeled transitions = [(s1, s2), ...]
+            | list of labeled edges = transitions = [(s1, s2, L), ...]
+            where the label L = dict | list, depending on args.
+        """
+        if not labeled:
+            return self.graph.edges(data=False)
+        
+        edges = [] # if labeled, should better be called "transitions"
+        for (from_node, to_node, attr_dict) in self.graph.edge_iter(data=True):
+            annotation = self._attr_dict2sublabels(attr_dict, as_dict)
+            edge = (from_node, to_node, annotation)
+            edges.append(edge)
+        
+        return edges
+    
     def _exist_labels(self):
         """Labeling defined ?"""
         if not hasattr(self.graph, '_transition_label_def'):
@@ -1338,7 +1425,83 @@ class LabeledTransitions(Transitions):
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
     
-    def _form_kv_label(self, labels, check_label=True):
+    def _attr_dict2sublabels(self, attr_dict, as_dict):
+        """Extract sublabels representation from edge attribute dict.
+        
+        - If C{as_dict==True}, then return dict of:
+            {sublabel_type : sublabel_value, ...}
+        Otherwise return list of sublabel values:
+            [sublabel_value, ...]
+        ordered by _attr_dict2sublabels_list.
+        
+        see also
+        --------
+        _attr_dict2sublabels_list
+        """
+        if as_dict:
+            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
+            annotation = sublabels_dict
+        else:
+            sublabel_values = self._attr_dict2sublabels_list(attr_dict)
+            annotation = sublabel_values
+        
+        return annotation
+    
+    def _attr_dict2sublabels_list(self, attr_dict):
+        """Convert attribute dict to tuple of sublabel values."""
+        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
+        sublabel_values = self._sublabels_dict2list(sublabels_dict)
+        return sublabel_values
+    
+    def _attr_dict2sublabels_dict(self, attr_dict):
+        """Filter the edge attributes which are not labels.
+        
+        see also
+        --------
+        _attr_dict2sublabels_list
+        
+        @return: sublabel types with their values
+        @rtype: {C{sublabel_type} : C{sublabel_value},...}
+        """
+        self._exist_labels()
+        
+        sublabel_ordict = self.graph._transition_label_def        
+        sublabels_dict = {k:v for k,v in attr_dict.iteritems()
+                              if k in sublabel_ordict}
+        
+        return sublabels_dict
+    
+    def _sublabels_dict2list(self, sublabels_dict):
+        """Return ordered sulabel values.
+        
+        Sublabel values are ordered according to sublabel ordering
+        defined in graph._transition_label_def, which is an OrderedDict.
+        
+        see also
+        --------
+        _sublabels_list2dict
+        """
+        self._exist_labels()
+        
+        sublabel_ordict = self.graph._transition_label_def        
+        sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
+                                             if k in sublabels_dict]
+        
+        return sublabel_values
+    
+    def _sublabels_list2dict(self, sublabel_values, check_label=True):
+        """Return sublabel values dict from tuple.
+        
+        see also
+        --------
+        _sublabels_dict2list
+        
+        @param sublabels_tuple: ordered sublabel values
+        @type sublabels_tuple: tuple
+        
+        @param check_label: verify existence of label
+        @type check_label: bool
+        """
         self._exist_labels()
         
         # get labeling def
@@ -1346,18 +1509,21 @@ class LabeledTransitions(Transitions):
         
         # single label ?
         if len(label_def) == 1:
-            labels = [labels]
+            dprint('Replaced sublabel value:\n\t' +str(sublabel_values) )
+            sublabel_values = [sublabel_values]
+            dprint('with the singleton:\n\t' +str(sublabel_values) )
         
         # constuct label dict
         edge_label = dict()
-        if isinstance(labels, list) or isinstance(labels, tuple):
-            for i in range(len(labels) ):
+        if isinstance(sublabel_values, list) or \
+        isinstance(sublabel_values, tuple):
+            for i in range(len(sublabel_values) ):
                 cur_name = label_def.keys()[i]
-                cur_label = labels[i]
+                cur_label = sublabel_values[i]
                 
                 edge_label[cur_name] = cur_label
-        elif isinstance(labels, dict):
-            edge_label = labels
+        elif isinstance(sublabel_values, dict):
+            edge_label = sublabel_values
         else:
             raise Exception('Bug')
         
@@ -1435,11 +1601,30 @@ class LabeledTransitions(Transitions):
         for (u, v, key, edge_data) in self.graph.edges_iter(data=True, keys=True):
             edge_dot_label = form_edge_label(edge_data, label_def, label_format)
             to_pydot_graph.add_edge(u, v, key=key, label=edge_dot_label)
-            
+    
+    def _mutable2ints(self, from_states, to_states):
+        """Convert possibly unhashable states to internal ones.
+        
+        If states are hashable, the internal ones are the same.
+        Otherwise the internal ones are ints maintained in bijection
+        with the mutable states.
+        """
+        if from_states == 'any':
+            from_state_ids = 'any'
+        else:
+            from_state_ids = self.graph.states._mutants2ints(from_states)
+        
+        if to_states == 'any':
+            to_state_ids = 'any'
+        else:
+            to_state_ids = self.graph.states._mutants2ints(to_states)
+        
+        return (from_state_ids, to_state_ids)
+    
     def remove_labeled(self, from_state, to_state, label):
         self._exist_labels()
         self._check_states(from_state, to_state, check=True)
-        edge_label = self._form_kv_label(label, check_label=True)
+        edge_label = self._sublabels_list2dict(label, check_label=True)
         
         # get all transitions with given label
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1558,7 +1743,7 @@ class LabeledTransitions(Transitions):
         # if labels were not previously in label set,
         # then a similar issue can arise only with unlabeled transitions
         # pre-existing. This is avoided by first checking for an unlabeled trans.        
-        edge_label = self._form_kv_label(labels, check_label=check)
+        edge_label = self._sublabels_list2dict(labels, check_label=check)
         
         # check if same labeled transition exists
         if edge_label in trans_from_to.values():
@@ -1638,15 +1823,84 @@ class LabeledTransitions(Transitions):
         
         # TODO add overwriting (=delete_labeled +add once more) capability
     
-    def with_label(self, from_state, to_states='any', desired_label='any'):
-        """Find all edges from_state to_states, annotated with guard_label.
+    def find(self, from_states='any', to_states='any', desired_label='any',
+             as_dict=True):
+        """Find all edges from_state to_states, annotated with given label.
+        
+        Instead of having two separate methods to:
+            - find all labels of edges between given states (s1, s2)
+            - find all transitions (s1, s2, L) with given label L,
+                possibly from some given state s1,
+                i.e., the edges leading to the successor states
+                Post(s1, a) = Post(s1) restricted by action a
+        this method provides both functionalities,
+        attempting to reduce duplication of effort by the user.
+        
+        Preimage under edge labeling function L of given label,
+        intersected with given subset of edges:
+            L^{-1}(desired_label) \\cap (from_states x to_states)
         
         TODO support partial labels
+        
+        note
+        ----
+        -  __call__
+        
+        - If called with C{from_states} = all states,
+        then the labels annotating returned edges are those which
+        appear at least once as edge annotations.
+        This may not be the set of all possible
+        labels, in case there valid but yet unused edge labels.
+        
+        - find could have been named ".from...", but it would elongate its
+        name w/o adding information. Since you search for transitions, there
+        are underlying states and this function naturally provides the option
+        to restrict those states to a subset of the possible ones.
+        
+        see also
+        --------
+        label, relabel, add_labeled, add_labeled_adj, __call__
+        
+        @param from_states: subset of states from which transition must start
+        @type from_states: 'any' (default)
+            | iterable of valid states
+            | single valid state
+        
+        @param to_states: set of states to which the transitions must lead
+        @type to_states: 'any' (default)
+            | iterable of valid states
+            | single valid state
+        
+        @param desired_label: label with which to filter the transitions
+        @type desired_label: {sublabel_type : desired_sublabel_value, ...}
+            | 'any', to search over all transitions (default)
+        
+        @param as_dict:
+            - If C{True}, then return sublabels as dict:
+                {sublabel_type : sublabel_value}
+            - Otherwise return sublabel values ordered in list,
+              the list order based on graph._transition_label_def
+        @type as_dict: bool
+        
+        @return: set of transitions = labeled edges:
+                (C{from_state}, C{to_state}, label)
+            such that:
+                (C{from_state}, C{to_state} )
+                \\in C{from_states} x C{to_states}
+                
+        @rtype: list of transitions = list of labeled edges
+                = [(C{from_state}, C{to_state}, C{label}),...]
+            where:
+                - C{from_state} \\in C{from_states}
+                - C{to_state} \\in C{to_states}
+                - C{label}: dict
+                    | tuple of edge annotation,
+                    determined by C{as_dict}.
         """
-        def label_is_desired(cur_label, desired_label):
+        def label_is_desired(attr_dict, desired_label):
             for (label_type, desired_val) in desired_label.iteritems():
                 dprint('SubLabel type checked:\n\t' +str(label_type) )
-                cur_val = cur_label[label_type]
+                cur_val = attr_dict[label_type]
                 dprint('possible label values:\n\t' +str(cur_val) )
                 dprint('Desired label:\n\t' +str(desired_val) )
                 
@@ -1662,13 +1916,13 @@ class LabeledTransitions(Transitions):
                     return False
             return True
         
-        from_state_id = self.graph.states._mutant2int(from_state)
-        to_state_ids = self.graph.states._mutants2ints(to_states)
-        
-        out_edges = self.graph.edges(from_state_id, data=True, keys=True)
-        
-        found_edges = set()        
-        for from_state_id, to_state_id, key, cur_label in out_edges:
+        # interface
+        (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
+                                                            to_states)
+        found_transitions = []        
+        for from_state_id, to_state_id, attr_dict in self.graph.edges(
+            from_state_ids, data=True, keys=False
+        ):
             if to_state_id not in to_state_ids and to_states is not 'any':
                 continue
             
@@ -1676,22 +1930,33 @@ class LabeledTransitions(Transitions):
             if desired_label is 'any':
                 ok = True
             else:
-                dprint('checking guard')
-                ok = label_is_desired(cur_label, desired_label)
+                dprint('Checking guard.')
+                ok = label_is_desired(attr_dict, desired_label)
             
             if ok:
-                dprint('transition label matched desired label')
+                dprint('Transition label matched desired label.')
+                
+                from_state = self.graph.states._int2mutant(from_state_id)
                 to_state = self.graph.states._int2mutant(to_state_id)
-                found_edge = (from_state, to_state, key)
-                found_edges.add(found_edge)
+                
+                annotation = self._attr_dict2sublabels(attr_dict, as_dict)
+                transition = (from_state, to_state, annotation)
+                
+                found_transitions.append(transition)
             
-        return found_edges
+        return found_transitions
     
-    def label_of(self, from_state, to_state, edge_key='any'):
+    def _label_of(self, from_states, to_states='any', as_dict=True):
+        """Depreceated: use find instead. This to be removed."""
+        
+        if to_states == 'any':
+            to_states = self.graph.states.post_single(from_state)
+        
         if edge_key == 'any':
             attr_dict = self.graph.get_edge_data(from_state, to_state)
         else:
-            attr_dict = self.graph.get_edge_data(from_state, to_state, key=edge_key)
+            attr_dict = self.graph.get_edge_data(from_state, to_state,
+                                                 key=edge_key)
         
         if attr_dict is None:
             msg = 'No transition from state: ' +str(from_state)
@@ -1700,14 +1965,15 @@ class LabeledTransitions(Transitions):
             warnings.warn(msg)
         
         label_def = self.graph._transition_label_def
-        transition_label_values = set()
+        transition_label_values = list()
         for label_type in label_def:
             cur_label_value = attr_dict[label_type]
-            transition_label_values.add(cur_label_value)
+            transition_label_values.append(cur_label_value)
     
         return transition_label_values
     
     def check_sublabeling(self, sublabel_name, sublabel_value):
+        """Check which sublabels are still being used."""
         edge_sublabels = nx.get_edge_attributes(self.graph, sublabel_name)
         
         edges_using_sublabel_value = set()
@@ -1947,7 +2213,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         dot and either of IPython or Matplotlib
         """
         # anything to plot ?
-        if self.states.number() == 0:
+        if len(self.states) == 0:
             print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
             return
         
@@ -2329,7 +2595,8 @@ class AtomicPropositions(object):
         
         self._check_state(state)
         try:
-            return self.graph.node[state][self.name]
+            state_sublabel_name = self.name
+            return self.graph.node[state][state_sublabel_name]
         except KeyError:
             warnings.warn("State: " +str(state) +", doesn't have AP label.")
             return None
@@ -2511,6 +2778,96 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     
     def loadSPINAut():
         raise NotImplementedError
+    
+    def dump_promela(self, procname=None):
+        """Convert an automaton to Promela source code.
+        
+        Creats a process which can be simulated as an independent
+        thread in the SPIN model checker.
+        
+        see also
+        --------
+        save, plot
+        
+        @param fname: file name
+        @type fname: str
+        
+        @param procname: Promela process name, i.e., proctype procname())
+        @type procname: str (default: system's name)
+        
+        @param add_missing_extension: add file extension 'pml', if missing
+        @type add_missing_extension: bool
+        """
+        def state2promela(state, ap_label, ap_alphabet):
+            s = str(state) +':\n'
+            s += '\t printf("State: ' +str(state) +'\\n");\n\t atomic{'
+            
+            # convention ! means negation
+            
+            missing_props = filter(lambda x: x[0] == '!', ap_label)
+            present_props = ap_label.difference(missing_props)
+            
+            assign_props = lambda x: str(x) + ' = 1;'
+            if len(present_props) > 0:
+                s += ' '.join(map(assign_props, present_props) )
+            
+            # rm "!"
+            assign_props = lambda x: str(x[1:] ) + ' = 0;'
+            if len(missing_props) > 0:
+                s += ' '.join(map(assign_props, missing_props) )
+            
+            s += '}\n'
+            return s
+        
+        def outgoing_trans2promela(transitions):
+            s = '\t if\n'
+            for (from_state, to_state, sublabels_dict) in transitions:
+                s += '\t :: printf("' +str(sublabels_dict) +'\\n");\n'
+                s += '\t\t goto ' +str(to_state) +'\n'
+            s += '\t fi;\n\n'
+            return s
+        
+        if procname is None:
+            procname = self.name
+        
+        s = ''
+        for ap in self.atomic_propositions():
+            # convention "!" means negation
+            if ap[0] != '!':
+                s += 'bool ' +str(ap) +';\n'
+        
+        s += '\nactive proctype ' +procname +'(){\n'
+        
+        s += '\t if\n'
+        for initial_state in self.states.initial:
+            s += '\t :: goto ' +str(initial_state) +'\n'
+        s += '\t fi;\n'
+        
+        for state in self.states():
+            ap_alphabet = self.atomic_propositions()
+            ap_label = self.atomic_propositions.of(state)
+            s += state2promela(state, ap_label, ap_alphabet)
+            
+            outgoing_transitions = self.transitions.find({state}, as_dict=True)
+            s += outgoing_trans2promela(outgoing_transitions)
+        
+        s += '}\n'
+        return s
+    
+    def save_promela(self, fname=None, add_missing_extension=True):
+        if fname is None:
+            fname = self.name
+            fname = self._export_fname(fname, 'pml', add_missing_extension)
+        
+        s = '/*\n * Promela file generated with TuLiP\n'
+        s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
+        
+        s += self.dump_promela()
+        
+        # dump to file
+        f = open(fname, 'w')
+        f.write(s)
+        f.close()
 
 class FTS(FiniteTransitionSystem):
     """Alias to FiniteTransitionSystem."""
@@ -2791,26 +3148,6 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         else:
             for rm_final_state in rm_final_states:
                 self.remove_final_state(rm_final_state)
-    
-    def find_edges_between(self, start_state, end_state):
-        """Return list of edges between given nodes.
-        
-        Each edge in the list is a tuple of:
-            (start_state, end_state, edge_dict)
-        """
-        return self.edges(start_state, end_state)
-    
-    def find_guards_between(self, start_state, end_state):
-        """Return sets of input letters labeling transtions between given states."""
-        edges_between = self.find_edges_between(start_state, end_state)
-        guards = []
-        for edge in edges_between:
-            guard = edge[2]['input_letter']
-            guards.append(guard)
-    
-    def remove_transition(self, start_state, end_state, input_letter=[]):
-        """Remove all edges connecting the given states."""
-        self.remove_edges_from((start_state, end_state) )
 
     # checks
     def is_deterministic(self):
@@ -2971,6 +3308,19 @@ class BA(BuchiAutomaton):
     def __init__(self, **args):
         BuchiAutomaton.__init__(self, **args)
 
+def str2singleton(ap_label, verbose=False):
+        """If string, convert to set(string).
+        
+        Convention: singleton str {'*'}
+        can be passed as str '*' instead.
+        """
+        if isinstance(ap_label, str):
+            vprint('Saw str state label:\n\t' +ap_label, verbose)
+            ap_label = {ap_label}
+            vprint('Replaced with singleton:\n\t' +str(ap_label) +'\n',
+                   verbose)
+        return ap_label
+
 def negation_closure(atomic_propositions):
     """Given: ['p', ...], return: [True, 'p', '!p', ...].
     
@@ -3100,6 +3450,9 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
         (from_state, to_state, guard) = transition
         [from_state, to_state] = prepend_with([from_state, to_state],
                                               prepend_str)
+        # convention
+        if atomic_proposition_based:
+            guard = str2singleton(guard)
         ba.transitions.add_labeled(from_state, to_state, guard)
     
     return ba
@@ -3150,19 +3503,6 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     @param name: used for file export
     @type name: str
     """
-    def str2singleton(ap_label):
-        """If string, convert to set(string).
-        
-        Convention: singleton str {'*'}
-        can be passed as str '*' instead.
-        """
-        if isinstance(ap_label, str):
-            vprint('Saw str state label:\n\t' +ap_label, verbose)
-            ap_label = {ap_label}
-            vprint('Replaced with singleton:\n\t' +str(ap_label) +'\n',
-                   verbose)
-        return ap_label
-    
     def pair_labels_with_states(states, state_labeling):
         if state_labeling is None:
             return
@@ -3226,7 +3566,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # state labeling assigned ?
     if state_labeling is not None:
         for (state, ap_label) in state_labeling:
-            ap_label = str2singleton(ap_label)
+            ap_label = str2singleton(ap_label, verbose=verbose)
             (state,) = prepend_with([state], prepend_str)
             
             vprint('Labeling state:\n\t' +str(state) +'\n' +
@@ -3385,15 +3725,15 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         Ls0_dict = {'in_alphabet': Ls0}
         
         for q0 in q0s:
-            enabled_ba_trans = ba.transitions.with_label(q0, desired_label=Ls0_dict)
+            enabled_ba_trans = ba.transitions.find({q0}, desired_label=Ls0_dict)
             
             # q0 blocked ?
-            if enabled_ba_trans == set():
+            if len(enabled_ba_trans) == 0:
                 dprint('blocked q0 = ' +str(q0) )
                 continue
             
             # which q next ?     (note: curq0 = q0)
-            for (curq0, q, edge_key) in enabled_ba_trans:
+            for (curq0, q, sublabels) in enabled_ba_trans:
                 new_sq0 = (s0, q)                
                 prodts.states.add(new_sq0)
                 prodts.states.add_initial(new_sq0)
@@ -3430,13 +3770,13 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
 
             dprint("Next state's label:\n\t" +str(Ls_dict) )
             
-            enabled_ba_trans = ba.transitions.with_label(q, desired_label=Ls_dict)
+            enabled_ba_trans = ba.transitions.find({q}, desired_label=Ls_dict)
             dprint('Enabled BA transitions:\n\t' +str(enabled_ba_trans) )
             
-            if enabled_ba_trans == set():
+            if len(enabled_ba_trans) == 0:
                 continue
             
-            for (q, next_q, edge_key) in enabled_ba_trans:
+            for (q, next_q, sublabels) in enabled_ba_trans:
                 new_sq = (next_s, next_q)
                 next_sqs.add(new_sq)
                 dprint('Adding state:\n\t' +str(new_sq) )
@@ -3451,21 +3791,22 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 
                 dprint('Adding transitions:\n\t' +str(sq) +'--->' +str(new_sq) )
                 # is fts transition labeled with an action ?
-                ts_enabled_trans = fts.transitions.with_label(
-                    s, to_states={next_s}, desired_label='any'
+                ts_enabled_trans = fts.transitions.find(
+                    {s}, to_states={next_s}, desired_label='any', as_dict=False
                 )
-                for (from_s, to_s, edge_key) in ts_enabled_trans:
-                    attr_dict = fts.get_edge_data(from_s, to_s, key=edge_key)
+                for (from_s, to_s, sublabel_values) in ts_enabled_trans:
+                    #attr_dict = fts.get_edge_data(from_s, to_s, key=edge_key)
                     assert(from_s == s)
                     assert(to_s == next_s)
-                    dprint(attr_dict)
+                    dprint('Sublabel value:\n\t' +str(sublabel_values) )
                     
                     # labeled transition ?
-                    if attr_dict == {}:
+                    if len(sublabel_values) == 0:
                         prodts.transitions.add(sq, new_sq)
                     else:
                         #TODO open FTS
-                        prodts.transitions.add_labeled(sq, new_sq, attr_dict.values()[0] )
+                        prodts.transitions.add_labeled(sq, new_sq,
+                                                       sublabel_values[0] )
         
         # discard visited & push them to queue
         new_sqs = set()
@@ -3763,7 +4104,25 @@ class FSM(FiniteStateMachine):
         FiniteStateMachine.__init__(self, **args)
 
 class MooreMachine(FiniteStateMachine):
-    """Moore machine."""
+    """Moore machine.
+    
+    A Moore machine implements the discrete dynamics:
+        x[k+1] = f(x[k], u[k] )
+        y[k] = g(x[k] )
+    where:
+        -k: discrete time = sequence index
+        -x: state = valuation of state variables
+        -X: set of states = S
+        -u: inputs = valuation of input ports
+        -y: output actions = valuation of output ports
+        -f: X-> 2^X, transition function
+        -g: X-> Out, output function
+    Observe that the output depends only on the state.
+    
+    note
+    ----
+    valuation: assignment of values to each port
+    """
     def __init__(self, **args):
         FiniteStateMachine.__init__(self, **args)
         self.default_export_fname = 'moore'
@@ -3771,7 +4130,8 @@ class MooreMachine(FiniteStateMachine):
         raise NotImplementedError
     
     def add_outputs(self, new_outputs_ordered_dict):
-        for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
+        for (out_port_name, out_port_type) in \
+        new_outputs_ordered_dict.iteritems():
             # append
             self._state_label_def[out_port_name] = out_port_type
             
@@ -3784,7 +4144,25 @@ class MooreMachine(FiniteStateMachine):
                 '/out:' +str(out_port_name)
 
 class MealyMachine(FiniteStateMachine):
-    """Mealy machine."""
+    """Mealy machine.
+    
+    A Mealy machine implements the discrete dynamics:
+        x[k+1] = f(x[k], u[k] )
+        y[k] = g(x[k], u[k] )
+    where:
+        -k: discrete time = sequence index
+        -x: state = valuation of state variables
+        -X: set of states = S
+        -u: inputs = valuation of input ports
+        -y: output actions = valuation of output ports
+        -f: X-> 2^X, transition function
+        -g: X-> Out, output function
+    Observe that the output is defined when a reaction occurs to an input.
+    
+    note
+    ----
+    valuation: assignment of values to each port
+    """
     def __init__(self, **args):
         FiniteStateMachine.__init__(self, **args)
         
@@ -3792,7 +4170,8 @@ class MealyMachine(FiniteStateMachine):
         self.default_export_fname = 'mealy'
     
     def add_outputs(self, new_outputs_ordered_dict):
-        for (out_port_name, out_port_type) in new_outputs_ordered_dict.iteritems():
+        for (out_port_name, out_port_type) in \
+        new_outputs_ordered_dict.iteritems():
             # append
             self._transition_label_def[out_port_name] = out_port_type
             
@@ -3818,9 +4197,11 @@ class MealyMachine(FiniteStateMachine):
                               'will set current = from_state')
             self.current = from_state
         
-        next_states = self.transitions.with_label(from_state,
-                                                  desired_label=input_valuations)
-        outputs = self.get_outputs(from_state, next_states, desired_label=input_valuations)
+        transitions = self.transitions.find({from_state},
+                                            desired_label=input_valuations)
+        next_states = [v for u,v,l in transitions]
+        outputs = self.get_outputs(from_state, next_states,
+                                   desired_label=input_valuations)
         self.states.set_current(next_states)
         
         return zip(outputs, next_states)
