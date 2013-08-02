@@ -189,18 +189,6 @@ class GRSpec(object):
             self.sym_to_prop(props={prop_sym_next:subformula_next})
             self.sym_to_prop(props={prop_sym:subformula})
 
-        # It is easier to work with lists...
-        if isinstance(self.sys_safety, str):
-            if len(self.sys_safety) == 0:
-                self.sys_safety = []
-            else:
-                self.sys_safety = [self.sys_safety]
-        if isinstance(self.sys_init, str):
-            if len(self.sys_init) == 0:
-                self.sys_init = []
-            else:
-                self.sys_init = [self.sys_init]
-
         # Transitions
         for from_region in range(len(disc_dynamics.list_region)):
             to_regions = [i for i in range(len(disc_dynamics.list_region))
@@ -226,6 +214,13 @@ class GRSpec(object):
 
     def sym_to_prop(self, props, verbose=0):
         """Replace the symbols of propositions with the actual propositions.
+
+        @type props: dict
+        @param props: a dictionary describing subformula (e.g.,
+            variable name) substitutions, where for each key-value
+            pair, all occurrences of key are replaced with value in
+            all components of this GRSpec object.  However, env_vars
+            and sys_vars are not changed.
         """
         if (props is not None):
             symfound = True
@@ -236,71 +231,41 @@ class GRSpec(object):
                         propSymbol += r"\b"
                     if (verbose > 2):
                         print '\t' + propSymbol + ' -> ' + prop
-                    if (isinstance(self.env_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.env_init)) > 0):
-                            self.env_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_init)
+                    for i in xrange(0, len(self.env_init)):
+                        if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
+                            self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                      self.env_init[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.env_init)):
-                            if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
-                                self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                              self.env_init[i])
-                                symfound = True
 
-                    if (isinstance(self.sys_init, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.sys_init)) > 0):
-                            self.sys_init = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_init)
+                    for i in xrange(0, len(self.sys_init)):
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_init[i])) > 0):
+                            self.sys_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                      self.sys_init[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.sys_init)):
-                            if (len(re.findall(r'\b'+propSymbol, self.sys_init[i])) > 0):
-                                self.sys_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                              self.sys_init[i])
-                                symfound = True
 
-                    if (isinstance(self.env_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.env_safety)) > 0):
-                            self.env_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_safety)
+                    for i in xrange(0, len(self.env_safety)):
+                        if (len(re.findall(r'\b'+propSymbol, self.env_safety[i])) > 0):
+                            self.env_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                        self.env_safety[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.env_safety)):
-                            if (len(re.findall(r'\b'+propSymbol, self.env_safety[i])) > 0):
-                                self.env_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                                self.env_safety[i])
-                                symfound = True
 
-                    if (isinstance(self.sys_safety, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.sys_safety)) > 0):
-                            self.sys_safety = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_safety)
+                    for i in xrange(0, len(self.sys_safety)):
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_safety[i])) > 0):
+                            self.sys_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                        self.sys_safety[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.sys_safety)):
-                            if (len(re.findall(r'\b'+propSymbol, self.sys_safety[i])) > 0):
-                                self.sys_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                                self.sys_safety[i])
-                                symfound = True
 
-                    if (isinstance(self.env_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.env_prog)) > 0):
-                            self.env_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.env_prog)
+                    for i in xrange(0, len(self.env_prog)):
+                        if (len(re.findall(r'\b'+propSymbol, self.env_prog[i])) > 0):
+                            self.env_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                      self.env_prog[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.env_prog)):
-                            if (len(re.findall(r'\b'+propSymbol, self.env_prog[i])) > 0):
-                                self.env_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                              self.env_prog[i])
-                                symfound = True
 
-                    if (isinstance(self.sys_prog, str)):
-                        if (len(re.findall(r'\b'+propSymbol, self.sys_prog)) > 0):
-                            self.sys_prog = re.sub(r'\b'+propSymbol, '('+prop+')', self.sys_prog)
+                    for i in xrange(0, len(self.sys_prog)):
+                        if (len(re.findall(r'\b'+propSymbol, self.sys_prog[i])) > 0):
+                            self.sys_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                                      self.sys_prog[i])
                             symfound = True
-                    else:
-                        for i in xrange(0, len(self.sys_prog)):
-                            if (len(re.findall(r'\b'+propSymbol, self.sys_prog[i])) > 0):
-                                self.sys_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')', \
-                                                              self.sys_prog[i])
-                                symfound = True
 
     def to_smv(self):
         raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
@@ -327,150 +292,97 @@ class GRSpec(object):
 
     def to_jtlv(self):
         """Return specification as list of two strings [assumption, guarantee].
+
+        Format is that of JTLV.  Cf. L{jtlvint}.
         """
         spec = ['', '']
-        # env init
-        if (isinstance(self.env_init, str)):
-            if (len(self.env_init) > 0 and not self.env_init.isspace()):
-                spec[0] += '-- valid initial env states\n'
-                spec[0] += '\t' + self.env_init
-        else:
-            desc_added = False
-            for env_init in self.env_init:
-                if (len(env_init) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- valid initial env states\n'
-                        desc_added = True
-                    spec[0] += '\t' + env_init
-        
-        # env safety
-        if (isinstance(self.env_safety, str)):
-            if (len(self.env_safety) > 0):
+        desc_added = False
+        for env_init in self.env_init:
+            if (len(env_init) > 0):
                 if (len(spec[0]) > 0):
                     spec[0] += ' & \n'
-                spec[0] += '-- safety assumption on environment\n'
-                spec[0] += '\t[](' + self.env_safety + ')'
-        else:
-            desc_added = False
-            for env_safety in self.env_safety:
-                if (len(env_safety) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- safety assumption on environment\n'
-                        desc_added = True
-                    spec[0] += '\t[](' + env_safety + ')'
+                if (not desc_added):
+                    spec[0] += '-- valid initial env states\n'
+                    desc_added = True
+                spec[0] += '\t' + env_init
 
-        # env progress
-        if (isinstance(self.env_prog, str)):
-            if (len(self.env_prog) > 0):
+        desc_added = False
+        for env_safety in self.env_safety:
+            if (len(env_safety) > 0):
                 if (len(spec[0]) > 0):
                     spec[0] += ' & \n'
-                spec[0] += '-- justice assumption on environment\n'
-                spec[0] += '\t[]<>(' + self.env_prog + ')'
-        else:
-            desc_added = False
-            for prog in self.env_prog:
-                if (len(prog) > 0):
-                    if (len(spec[0]) > 0):
-                        spec[0] += ' & \n'
-                    if (not desc_added):
-                        spec[0] += '-- justice assumption on environment\n'
-                        desc_added = True
-                    spec[0] += '\t[]<>(' + prog + ')'
+                if (not desc_added):
+                    spec[0] += '-- safety assumption on environment\n'
+                    desc_added = True
+                spec[0] += '\t[](' + env_safety + ')'
 
-        # sys init
-        if (isinstance(self.sys_init, str)):
-            if (len(self.sys_init) > 0 and not self.sys_init.isspace()):
-                spec[1] += '-- valid initial system states\n'
-                spec[1] += '\t' + self.sys_init
-        else:
-            desc_added = False
-            for sys_init in self.sys_init:
-                if (len(sys_init) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- valid initial system states\n'
-                        desc_added = True
-                    spec[1] += '\t' + sys_init
+        desc_added = False
+        for prog in self.env_prog:
+            if (len(prog) > 0):
+                if (len(spec[0]) > 0):
+                    spec[0] += ' & \n'
+                if (not desc_added):
+                    spec[0] += '-- justice assumption on environment\n'
+                    desc_added = True
+                spec[0] += '\t[]<>(' + prog + ')'
 
-        # sys safety
-        if (isinstance(self.sys_safety, str)):
-            if (len(self.sys_safety) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' & '
-                spec[1] += '-- safety requirement on system\n'
-                spec[1] +='\t[](' + self.sys_safety + ')'
-        else:
-            desc_added = False
-            for sys_safety in self.sys_safety:
-                if (len(sys_safety) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- safety requirement on system\n'
-                        desc_added = True
-                    spec[1] += '\t[](' + sys_safety + ')'
-
-        # sys progress
-        if (isinstance(self.sys_prog, str)):
-            if (len(self.sys_prog) > 0):
+        desc_added = False
+        for sys_init in self.sys_init:
+            if (len(sys_init) > 0):
                 if (len(spec[1]) > 0):
                     spec[1] += ' & \n'
-                spec[1] += '-- progress requirement on system\n'
-                spec[1] += '\t[]<>(' + self.sys_prog + ')'
-        else:
-            desc_added = False
-            for prog in self.sys_prog:
-                if (len(prog) > 0):
-                    if (len(spec[1]) > 0):
-                        spec[1] += ' & \n'
-                    if (not desc_added):
-                        spec[1] += '-- progress requirement on system\n'
-                        desc_added = True
-                    spec[1] += '\t[]<>(' + prog + ')'
+                if (not desc_added):
+                    spec[1] += '-- valid initial system states\n'
+                    desc_added = True
+                spec[1] += '\t' + sys_init
+
+        desc_added = False
+        for sys_safety in self.sys_safety:
+            if (len(sys_safety) > 0):
+                if (len(spec[1]) > 0):
+                    spec[1] += ' & \n'
+                if (not desc_added):
+                    spec[1] += '-- safety requirement on system\n'
+                    desc_added = True
+                spec[1] += '\t[](' + sys_safety + ')'
+
+        desc_added = False
+        for prog in self.sys_prog:
+            if (len(prog) > 0):
+                if (len(spec[1]) > 0):
+                    spec[1] += ' & \n'
+                if (not desc_added):
+                    spec[1] += '-- progress requirement on system\n'
+                    desc_added = True
+                spec[1] += '\t[]<>(' + prog + ')'
         return spec
 
 
     def to_gr1c(self):
-        """Dump to gr1c specification string."""
+        """Dump to gr1c specification string.
+
+        Cf. L{gr1cint}.
+        """
         output = "ENV: "+" ".join(self.env_vars)+";\n"
         output += "SYS: "+" ".join(self.sys_vars)+";\n\n"
 
-        if isinstance(self.env_init, str):
-            output += "ENVINIT: "+self.env_init+";\n"
-        else:
-            output += "ENVINIT: "+"\n& ".join(["("+s+")" for s in self.env_init])+";\n"
+        output += "ENVINIT: "+"\n& ".join(["("+s+")" for s in self.env_init])+";\n"
         if len(self.env_safety) == 0:
             output += "ENVTRANS:;\n"
-        elif isinstance(self.env_safety, str):
-            output += "ENVTRANS: []"+self.env_safety+";\n"
         else:
             output += "ENVTRANS: "+"\n& ".join(["[]("+s+")" for s in self.env_safety])+";\n"
         if len(self.env_prog) == 0:
             output += "ENVGOAL:;\n\n"
-        elif isinstance(self.env_prog, str):
-            output += "ENVGOAL: []<>"+self.env_prog+";\n\n"
         else:
             output += "ENVGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.env_prog])+";\n\n"
         
-        if isinstance(self.sys_init, str):
-            output += "SYSINIT: "+self.sys_init+";\n"
-        else:
-            output += "SYSINIT: "+"\n& ".join(["("+s+")" for s in self.sys_init])+";\n"
+        output += "SYSINIT: "+"\n& ".join(["("+s+")" for s in self.sys_init])+";\n"
         if len(self.sys_safety) == 0:
             output += "SYSTRANS:;\n"
-        elif isinstance(self.sys_safety, str):
-            output += "SYSTRANS: []"+self.sys_safety+";\n"
         else:
             output += "SYSTRANS: "+"\n& ".join(["[]("+s+")" for s in self.sys_safety])+";\n"
         if len(self.sys_prog) == 0:
             output += "SYSGOAL:;\n"
-        elif isinstance(self.sys_prog, str):
-            output += "SYSGOAL: []<>"+self.sys_prog+";\n"
         else:
             output += "SYSGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.sys_prog])+";\n"
         return output
