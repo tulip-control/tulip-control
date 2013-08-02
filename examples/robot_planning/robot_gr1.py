@@ -36,7 +36,8 @@ will be a specification of the form:
 """
 
 # Import the packages that we need
-from tulip import *
+from tulip import spec, jtlvint, synth
+
 
 #
 # Environment specification
@@ -86,10 +87,11 @@ sys_prog = set()                # empty set
 #     [](next(X0reach) == X0 || (X0reach && !park))
 #
 
-# Augment the environmental description to make it GR(1)
-env_vars |= {'X0reach'}
-env_init |= {'X0reach'}
+# Augment the system description to make it GR(1)
+sys_vars |= {'X0reach'}
+sys_init |= {'X0reach'}
 sys_safe |= {'next(X0reach) == X0 || (X0reach && !park)'}
+sys_prog |= {'X0reach'}
 
 # Create a GR(1) specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
@@ -101,8 +103,11 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of gr1c.
 #
-ctrl = synthesize('gr1c', specs)
+
+ctrl = synth.synthesize('jtlv', specs)
+
 
 # Generate a graphical representation of the controller for viewing
 #! TODO: save_png should probably not be a method in transys?
-ctrl.save_png('robot_gr1.png')
+if ctrl:
+    ctrl.save('png', 'robot_gr1.png')

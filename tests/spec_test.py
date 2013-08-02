@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
-SCL; 20 July 2013.
+SCL; 2 August 2013.
 """
 
+import copy
 import numpy as np
 from tulip.spec import GRSpec
 import tulip.gridworld as gw
@@ -46,3 +47,19 @@ def import_GridWorld_test():
     s = GRSpec()
     s.import_GridWorld(X)
     assert specs_equal(X.spec(), s)
+
+
+class GRSpec_test:
+    def setUp(self):
+        self.f = GRSpec(env_vars=["x"], sys_vars=["y"],
+                        env_prog=["!x", "x"], sys_prog=["y&!x"])
+
+    def tearDown(self):
+        self.f = None
+
+    def test_sym_to_prop(self):
+        original_env_vars = copy.copy(self.f.env_vars)
+        original_sys_vars = copy.copy(self.f.sys_vars)
+        self.f.sym_to_prop({"x":"bar", "y":"uber|cat"})
+        assert self.f.env_vars == original_env_vars and self.f.sys_vars == original_sys_vars
+        assert self.f.env_prog == ["!(bar)", "(bar)"] and self.f.sys_prog == ["(uber|cat)&!(bar)"]
