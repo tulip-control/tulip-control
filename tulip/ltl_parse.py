@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2011, 2012 by California Institute of Technology
+# Copyright (c) 2011-2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -280,7 +280,7 @@ proposition = comparison_expr | atom
 UnaryTempOps = ~bool_keyword + oneOf("G F X [] <> next") + ~Word(nums + "_")
 
 # LTL expression
-ltl_expr = operatorPrecedence(proposition,
+_ltl_expr = operatorPrecedence(proposition,
         [("'", 1, opAssoc.LEFT, ASTUnTempOp),
         ("!", 1, opAssoc.RIGHT, ASTNot),
         (UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
@@ -292,7 +292,7 @@ ltl_expr = operatorPrecedence(proposition,
         (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
         (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp),
         ])
-ltl_expr.ignore(LineStart() + "--" + restOfLine)
+_ltl_expr.ignore(LineStart() + "--" + restOfLine)
 
 def extractVars(tree):
     v = []
@@ -321,7 +321,7 @@ def parse(formula):
     # Increase recursion limit for complex formulae
     sys.setrecursionlimit(2000)
     try:
-        return ltl_expr.parseString(formula, parseAll=True)[0]
+        return _ltl_expr.parseString(formula, parseAll=True)[0]
     except RuntimeError:
         raise ParseException("Maximum recursion depth exceeded, could not parse")
 
