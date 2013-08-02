@@ -29,6 +29,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+"""
+TuLiP toolbox
+
+The Temporal Logic Planning (TuLiP) Toolbox provides functions
+for verifying and constructing control protocols.
+"""
 
 __all__ = ["abstract", "polytope", "hybrid", "transys"]
 
