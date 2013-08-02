@@ -49,26 +49,26 @@ class GRSpec(object):
       - C{env_vars}: a list of variables (names given as strings) that
         are determined by the environment.
 
-      - C{env_init}: a string or a list of string that specifies the
-        assumption about the initial state of the environment.
+      - C{env_init}: a list of string that specifies the assumption
+        about the initial state of the environment.
 
-      - C{env_safety}: a string or a list of string that specifies the
-        assumption about the evolution of the environment state.
+      - C{env_safety}: a list of string that specifies the assumption
+        about the evolution of the environment state.
 
-      - C{env_prog}: a string or a list of string that specifies the
-        justice assumption on the environment.
+      - C{env_prog}: a list of string that specifies the justice
+        assumption on the environment.
 
       - C{sys_vars}: a list of variables (names given as strings) that
         are controlled by the system.
 
-      - C{sys_init}: a string or a list of string that specifies the
-        requirement on the initial state of the system.
+      - C{sys_init}: a list of string that specifies the requirement
+        on the initial state of the system.
 
-      - C{sys_safety}: a string or a list of string that specifies the
-        safety requirement.
+      - C{sys_safety}: a list of string that specifies the safety
+        requirement.
 
-      - C{sys_prog}: a string or a list of string that specifies the
-        progress requirement.
+      - C{sys_prog}: a list of string that specifies the progress
+        requirement.
 
     An empty list for any formula (e.g., if env_init = []) is marked
     as "True" in the specification. This corresponds to the constant
@@ -88,7 +88,6 @@ class GRSpec(object):
         self.env_prog = copy.deepcopy(env_prog)
         self.sys_prog = copy.deepcopy(sys_prog)
 
-        # It is easier to work with lists...
         if isinstance(self.sys_safety, str):
             if len(self.sys_safety) == 0:
                 self.sys_safety = []
