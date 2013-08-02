@@ -31,9 +31,7 @@
 # SUCH DAMAGE.
 
 """ 
----------------------------------------------------------------------
 Interface to the JTLV implementation of GR(1) synthesis
----------------------------------------------------------------------
 
 JTLV: http://jtlv.ysaar.net/
 
@@ -78,48 +76,50 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1, init_option=1
     
 
 def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, init_option=1, verbose=0):
-    
     """Decide realizability of specification defined by given GRSpec object.
 
     Return True if realizable, False if not, or an error occurs.
     Automaton is extracted for file names by fAUT, unless priority_kind == -1
     
 
-    Input:
+    @param spec: a GRSpec object.
+    @param fSMV, fLTL, fAUT: file name for use with JTLV.  This
+        enables synthesize() to access them later on.
+    @param heap_size: a string that specifies java heap size.
 
-    - `spec`: a GRSpec object.
-    -  fSMV, fLTL, fAUT: file name for use with JTLV.
-        This enables synthesize() to access them later on
-    - `heap_size`: a string that specifies java heap size.
-    - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-      priority used in extracting the automaton. Possible values of `priority_kind` are: 
+    @param priority_kind: a string of length 3 or an integer that specifies
+        the type of priority used in extracting the
+        automaton. Possible values of C{priority_kind} are:
 
-        * -1 - No Automaton
-        * 3 - 'ZYX'
-        * 7 - 'ZXY'
-        * 11 - 'YZX'
-        * 15 - 'YXZ'
-        * 19 - 'XZY'
-        * 23 - 'XYZ'
+            - -1 - No Automaton
+            - 3 - 'ZYX'
+            - 7 - 'ZXY'
+            - 11 - 'YZX'
+            - 15 - 'YXZ'
+            - 19 - 'XZY'
+            - 23 - 'XYZ'
 
-      Here X means that the controller tries to disqualify one of the environment 
-      assumptions, 
-      Y means that the controller tries to advance with a finite path to somewhere, and
-      Z means that the controller tries to satisfy one of his guarantees.
-    - `init_option`: an integer in that specifies how to handle the initial state of 
-      the system. Possible values of `init_option` are
+        Here X means that the controller tries to disqualify one of
+        the environment assumptions, Y means that the controller tries
+        to advance with a finite path to somewhere, and Z means that
+        the controller tries to satisfy one of his guarantees.
 
-        * 0 - The system has to be able to handle all the possible initial system
-          states specified on the guarantee side of the specification.
-        * 1 (default) - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contains exactly one initial system state, starting from which
-          the system can satisfy the specification.
-        * 2 - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contain all the possible initial system states, starting from which
-          the system can satisfy the specification.
-    - `verbose`: an integer that specifies the level of verbosity.
+    @param init_option: an integer in that specifies how to handle the
+        initial state of the system. Possible values of C{init_option}
+        are
+
+            - 0 - The system has to be able to handle all the possible initial system
+              states specified on the guarantee side of the specification.
+            - 1 (default) - The system can choose its initial state, in response to the initial
+              environment state. For each initial environment state, the resulting
+              automaton contains exactly one initial system state, starting from which
+              the system can satisfy the specification.
+            - 2 - The system can choose its initial state, in response to the initial
+              environment state. For each initial environment state, the resulting
+              automaton contain all the possible initial system states, starting from which
+              the system can satisfy the specification.
+
+    @param verbose: an integer that specifies the level of verbosity.
     """
 
  
@@ -159,46 +159,12 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
 
 def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, verbose=0):
     """Synthesize a strategy satisfying the spec.
+
+    Arguments are described in documentation for L{solve_game}.
     
     Return strategy as instance of Automaton class, or None if
     unrealizable or error occurs.
     """
-    
-    """
-    Input:
-
-    - spec: a GRSpec object.
-    - `heap_size`: a string that specifies java heap size. 
-    - `priority_kind`: a string of length 3 or an integer that specifies the type of 
-      priority used in extracting the automaton. Possible values of `priority_kind` are: 
-
-        * 3 - 'ZYX'
-        * 7 - 'ZXY'
-        * 11 - 'YZX'
-        * 15 - 'YXZ'
-        * 19 - 'XZY'
-        * 23 - 'XYZ'
-
-      Here X means that the controller tries to disqualify one of the environment 
-      assumptions, 
-      Y means that the controller tries to advance with a finite path to somewhere, and
-      Z means that the controller tries to satisfy one of his guarantees.
-    - `init_option`: an integer in that specifies how to handle the initial state of 
-      the system. Possible values of `init_option` are
-
-        * 0 - The system has to be able to handle all the possible initial system
-          states specified on the guarantee side of the specification.
-        * 1 (default) - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contains exactly one initial system state, starting from which
-          the system can satisfy the specification.
-        * 2 - The system can choose its initial state, in response to the initial
-          environment state. For each initial environment state, the resulting
-          automaton contain all the possible initial system states, starting from which
-          the system can satisfy the specification.
-    - `verbose`: an integer that specifies the level of verbosity.
-    """
-
     fSMV, fLTL, fAUT = createFiles(spec)
     
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
