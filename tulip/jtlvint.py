@@ -47,7 +47,7 @@ import copy, itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
-import transys as ts
+import transys
 from spec import GRSpec
 
 #for checking form of spec
@@ -262,9 +262,11 @@ def callJTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
 
 
 def generateJTLV_SMV(spec, verbose=0):
-    ''' This function returns the SMV module definitions needed by JTLV.
-    It takes as input a GRSpec object.
-    '''
+    """Return the SMV module definitions needed by JTLV.
+
+    It takes as input a GRSpec object.  N.B., assumes all variables
+    are Boolean (i.e., atomic propositions).
+    """
     smv = ""
 
     # Write the header
@@ -281,7 +283,7 @@ def generateJTLV_SMV(spec, verbose=0):
     MODULE env -- inputs
         VAR
     """))
-    for var in spec.env_vars:
+    for var in spec.env_vars.keys():
         smv+= '\t\t'
         smv+= var
         smv+= ' : boolean;\n'
@@ -292,7 +294,7 @@ def generateJTLV_SMV(spec, verbose=0):
     MODULE sys -- outputs
         VAR
     """))
-    for var in spec.sys_vars:
+    for var in spec.sys_vars.keys():
         smv+= '\t\t'
         smv+= var
         smv+= ' : boolean;\n'
@@ -300,14 +302,16 @@ def generateJTLV_SMV(spec, verbose=0):
     return smv
 
 def generateJTLV_LTL(spec, verbose=0):
-    ''' This function returns the LTLSPEC for JTLV.
-    It takes as input a GRSpec object.
-    '''
-    specLTL = spec.to_jtlv() 
+    """Return the LTLSPEC for JTLV.
+
+    It takes as input a GRSpec object.  N.B., assumes all variables
+    are Boolean (i.e., atomic propositions).
+    """
+    specLTL = spec.to_jtlv()
     assumption = specLTL[0]
     guarantee = specLTL[1]
     
-    if not check_gr1(assumption, guarantee, spec.env_vars, spec.sys_vars):
+    if not check_gr1(assumption, guarantee, spec.env_vars.keys(), spec.sys_vars.keys()):
         raise Exception('Spec not in GR(1) format')
     
     assumption = re.sub(r'\b'+'True'+r'\b', 'TRUE', assumption)
@@ -326,10 +330,10 @@ def generateJTLV_LTL(spec, verbose=0):
     
     # Replace any environment variable var in spec with e.var and replace any 
     # system variable var with s.var
-    for var in spec.env_vars:
+    for var in spec.env_vars.keys():
         assumption = re.sub(r'\b'+var+r'\b', 'e.'+var, assumption)
         guarantee = re.sub(r'\b'+var+r'\b', 'e.'+var, guarantee)
-    for var in spec.sys_vars:
+    for var in spec.sys_vars.keys():
         assumption = re.sub(r'\b'+var+r'\b', 's.'+var, assumption)
         guarantee = re.sub(r'\b'+var+r'\b', 's.'+var, guarantee)
 
@@ -352,10 +356,10 @@ def generateJTLV_LTL(spec, verbose=0):
     return ltl
 
 def loadFile(aut_file, spec, verbose=0):
-        import transys as ts
-        
-        """
-        Construct a Mealy Machine from an aut_file.
+        """Construct a Mealy Machine from an aut_file.
+
+        N.B., assumes all variables are Boolean (i.e., atomic
+        propositions).
 
         Input:
 
@@ -364,6 +368,8 @@ def loadFile(aut_file, spec, verbose=0):
 
         - `spec`: a GROne spec.
         """
+        env_vars = spec.env_vars.keys()  # Enforce Boolean var assumption
+        sys_vars = spec.sys_vars.keys()
         
         if isinstance(aut_file, str):
             f = open(aut_file, 'r')
@@ -373,23 +379,23 @@ def loadFile(aut_file, spec, verbose=0):
             closable = False
         
         #build Mealy Machine
-        m = ts.MealyMachine()
+        m = transys.MealyMachine()
     
         # input defs       
         inputs = OrderedDict([list(a) for a in \
-                              zip(spec.env_vars, itertools.repeat({'0', '1'}))])
+                              zip(env_vars, itertools.repeat({'0', '1'}))])
         m.add_inputs(inputs)
         
         # outputs def
         outputs = OrderedDict([list(a) for a in \
-                               zip(spec.sys_vars, itertools.repeat({'0', '1'}))])
+                               zip(sys_vars, itertools.repeat({'0', '1'}))])
         m.add_outputs(outputs)
         
         # state variables def
         state_vars = outputs
         m.add_state_vars(state_vars)
         
-        varnames = spec.sys_vars.union(spec.env_vars)
+        varnames = sys_vars+env_vars
         
         stateDict = {}               
         for line in f:
@@ -425,16 +431,14 @@ def loadFile(aut_file, spec, verbose=0):
                     
         #add transitions with guards to the Mealy Machine
         for s in stateDict.keys():
-            v, ts = stateDict[s]
-            for t in ts:
+            v, transitions = stateDict[s]
+            for t in transitions:
                 guard = stateDict[t][0]
                 try:
                     m.transitions.add_labeled(s, t, guard, check=False) 
                 except Exception, e:
                     print e
                
-                
-        m.plot()
         return m
         
             
@@ -502,7 +506,7 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
 	
 	# Check that all non-special-characters metioned are variable names
 	# or possible values
-        varnames = env_vars.union(sys_vars)
+        varnames = env_vars+sys_vars
 	if not check_spec(assumption,varnames):
 		return False
 	if not check_spec(guarantee, varnames):
