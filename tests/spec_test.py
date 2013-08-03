@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """
-SCL; 2 August 2013.
+SCL; 3 August 2013.
 """
 
 import copy
-import numpy as np
 from tulip.spec import GRSpec
 import tulip.gridworld as gw
 
@@ -18,8 +17,6 @@ def specs_equal(s1, s2):
     if s1 is None or s2 is None:
         raise TypeError
     for s in [s1, s2]:
-        s.env_vars.sort()
-        s.sys_vars.sort()
         if hasattr(s.env_init, "sort"):
             s.env_init.sort()
         if hasattr(s.env_safety, "sort"):
@@ -51,7 +48,7 @@ def import_GridWorld_test():
 
 class GRSpec_test:
     def setUp(self):
-        self.f = GRSpec(env_vars=["x"], sys_vars=["y"],
+        self.f = GRSpec(env_vars={"x"}, sys_vars={"y"},
                         env_init=["x"], sys_safety=["y"],
                         env_prog=["!x", "x"], sys_prog=["y&!x"])
         self.triv = GRSpec(env_vars=["x"], sys_vars=["y"],
@@ -76,3 +73,7 @@ class GRSpec_test:
         # guarantee is empty (and thus interpreted as being "True").
         assert self.triv.to_canon() == "True"
         assert self.empty.to_canon() == "True"
+
+    def test_init(self):
+        assert len(self.f.env_vars) == 1 and len(self.f.sys_vars) == 1
+        assert self.f.env_vars["x"] == "boolean" and self.f.sys_vars["y"] == "boolean"

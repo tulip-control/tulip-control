@@ -46,8 +46,10 @@ class GRSpec(object):
 
     A GRSpec object contains the following attributes:
 
-      - C{env_vars}: a list of variables (names given as strings) that
-        are determined by the environment.
+      - C{env_vars}: a dictionary of variables (names given as
+        strings) that are determined by the environment; each key is a
+        variable name and its value (in the dictionary) is the
+        corresponding domain (see notes below about domains).
 
       - C{env_init}: a list of string that specifies the assumption
         about the initial state of the environment.
@@ -58,8 +60,9 @@ class GRSpec(object):
       - C{env_prog}: a list of string that specifies the justice
         assumption on the environment.
 
-      - C{sys_vars}: a list of variables (names given as strings) that
-        are controlled by the system.
+      - C{sys_vars}: a dictionary of variables (names given as
+        strings) that are controlled by the system; analogous to
+        C{env_vars}.
 
       - C{sys_init}: a list of string that specifies the requirement
         on the initial state of the system.
@@ -74,50 +77,69 @@ class GRSpec(object):
     as "True" in the specification. This corresponds to the constant
     Boolean function, which usually means that subformula has no
     effect (is non-restrictive) on the spec.
-    """
-    def __init__(self, env_vars=[], sys_vars=[],
-                 env_init='', sys_init='',
-                 env_safety='', sys_safety='',
-                 env_prog='', sys_prog=''):
-        self.env_vars = copy.copy(env_vars)
-        self.sys_vars = copy.copy(sys_vars)
-        self.env_init = copy.deepcopy(env_init)
-        self.sys_init = copy.deepcopy(sys_init)
-        self.env_safety = copy.deepcopy(env_safety)
-        self.sys_safety = copy.deepcopy(sys_safety)
-        self.env_prog = copy.deepcopy(env_prog)
-        self.sys_prog = copy.deepcopy(sys_prog)
 
-        if isinstance(self.sys_safety, str):
-            if len(self.sys_safety) == 0:
-                self.sys_safety = []
-            else:
-                self.sys_safety = [self.sys_safety]
-        if isinstance(self.sys_init, str):
-            if len(self.sys_init) == 0:
-                self.sys_init = []
-            else:
-                self.sys_init = [self.sys_init]
-        if isinstance(self.sys_prog, str):
-            if len(self.sys_prog) == 0:
-                self.sys_prog = []
-            else:
-                self.sys_prog = [self.sys_prog]
-        if isinstance(self.env_safety, str):
-            if len(self.env_safety) == 0:
-                self.env_safety = []
-            else:
-                self.env_safety = [self.env_safety]
-        if isinstance(self.env_init, str):
-            if len(self.env_init) == 0:
-                self.env_init = []
-            else:
-                self.env_init = [self.env_init]
-        if isinstance(self.env_prog, str):
-            if len(self.env_prog) == 0:
-                self.env_prog = []
-            else:
-                self.env_prog = [self.env_prog]
+    N.B., domains are specified in multiple datatypes.  The type is
+    indicated below in parenthesis.  Recognized domains are:
+
+      - C{boolean} (str)
+
+    Consult L{GRSpec.__init__} concerning arguments at the time of
+    instantiation.
+    """
+    def __init__(self, env_vars=None, sys_vars=None, env_init='', sys_init='',
+                 env_safety='', sys_safety='', env_prog='', sys_prog=''):
+        """Instantiate a GRSpec object.
+
+        Instantiating GRSpec without arguments results in an empty
+        formula.  The default domain of a variable is "boolean".
+
+        @type env_vars: dict or iterable
+        @param env_vars: If env_vars is a dictionary, then its keys
+            should be variable names, and values are domains of the
+            corresponding variable.  Else, if env_vars is an iterable,
+            then assume all environment variables are Boolean (or
+            "atomic propositions").  Cf. L{GRSpec} for details.
+
+        @type sys_vars: set or dict
+        @param sys_vars: Mutatis mutandis, env_vars.
+
+        @param env_init, env_safety, env_prog, sys_init, sys_safety, sys_prog:
+            A string or iterable of strings.  An empty string is
+            converted to an empty list.  A string is placed in a list.
+            iterables are converted to lists.  Cf. L{GRSpec}.
+        """
+        if env_vars is None:
+            env_vars = dict()
+        elif not isinstance(env_vars, dict):
+            env_vars = dict([(v,"boolean") for v in env_vars])
+        if sys_vars is None:
+            sys_vars = dict()
+        elif not isinstance(sys_vars, dict):
+            sys_vars = dict([(v,"boolean") for v in sys_vars])
+
+        self.env_vars = copy.deepcopy(env_vars)
+        self.sys_vars = copy.deepcopy(sys_vars)
+
+        self.env_init = env_init
+        self.sys_init = sys_init
+        self.env_safety = env_safety
+        self.sys_safety = sys_safety
+        self.env_prog = env_prog
+        self.sys_prog = sys_prog
+
+        for formula_component in ["env_init", "env_safety", "env_prog",
+                                  "sys_init", "sys_safety", "sys_prog"]:
+            if isinstance(getattr(self, formula_component), str):
+                if len(getattr(self, formula_component)) == 0:
+                    setattr(self, formula_component, [])
+                else:
+                    setattr(self, formula_component,
+                            [getattr(self, formula_component)])
+            elif not isinstance(getattr(self, formula_component), list):
+                setattr(self, formula_component,
+                        list(getattr(self, formula_component)))
+            setattr(self, formula_component,
+                    copy.deepcopy(getattr(self, formula_component)))
 
     def __str__(self):
         return self.to_canon()
@@ -167,11 +189,11 @@ class GRSpec(object):
         """
         s = gworld.spec(offset=offset, controlled_dyn=controlled_dyn)
         for evar in s.env_vars:
-            if evar not in self.env_vars:
-                self.env_vars.append(evar)
+            if not self.env_vars.has_key(evar):
+                self.env_vars[evar] = "boolean"
         for svar in s.sys_vars:
-            if svar not in self.sys_vars:
-                self.sys_vars.append(svar)
+            if not self.sys_vars.has_key(svar):
+                self.sys_vars[svar] = "boolean"
         self.env_init.extend(s.env_init)
         self.env_safety.extend(s.env_safety)
         self.env_prog.extend(s.env_prog)
