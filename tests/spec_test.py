@@ -50,9 +50,9 @@ class GRSpec_test:
     def setUp(self):
         self.f = GRSpec(env_vars={"x"}, sys_vars={"y"},
                         env_init=["x"], sys_safety=["y"],
-                        env_prog=["!x", "x"], sys_prog=["y&!x"])
+                        env_prog=["!x", "x"], sys_prog=["y&&!x"])
         self.triv = GRSpec(env_vars=["x"], sys_vars=["y"],
-                           env_init=["x & !x"])
+                           env_init=["x && !x"])
         self.empty = GRSpec()
 
     def tearDown(self):
@@ -61,13 +61,13 @@ class GRSpec_test:
     def test_sym_to_prop(self):
         original_env_vars = copy.copy(self.f.env_vars)
         original_sys_vars = copy.copy(self.f.sys_vars)
-        self.f.sym_to_prop({"x":"bar", "y":"uber|cat"})
+        self.f.sym_to_prop({"x":"bar", "y":"uber||cat"})
         assert self.f.env_vars == original_env_vars and self.f.sys_vars == original_sys_vars
-        assert self.f.env_prog == ["!(bar)", "(bar)"] and self.f.sys_prog == ["(uber|cat)&!(bar)"]
+        assert self.f.env_prog == ["!(bar)", "(bar)"] and self.f.sys_prog == ["(uber||cat)&&!(bar)"]
 
     def test_to_canon(self):
         # Fragile!
-        assert self.f.to_canon() == "((x) & []<>(!x) & []<>(x)) -> ([](y) & []<>(y&!x))"
+        assert self.f.to_canon() == "((x) && []<>(!x) && []<>(x)) -> ([](y) && []<>(y&&!x))"
         # N.B., to_canon() returns for self.triv not because because
         # it detected that the assumption is false, but rather the
         # guarantee is empty (and thus interpreted as being "True").
