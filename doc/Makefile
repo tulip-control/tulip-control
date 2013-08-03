@@ -36,4 +36,4 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 api:
-	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.sourceforge.net -o $(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,spec.py,polytope/__init__.py,polytope/esp.py,polytope/plot.py,polytope/polytope.py,polytope/quickhull.py,transys.py,jtlvint.py,gr1cint.py}
+	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.sourceforge.net -o $(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,spec.py,polytope/__init__.py,polytope/esp.py,polytope/plot.py,polytope/polytope.py,polytope/quickhull.py,transys.py,jtlvint.py,gr1cint.py,synth.py}

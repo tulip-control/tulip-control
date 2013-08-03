@@ -29,21 +29,24 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
-""" 
----------------------------------------------------------------------
-Interface to library of synthesis tools, e.g. JTLV, gr1c
----------------------------------------------------------------------
+"""
+Interface to library of synthesis tools, e.g., JTLV, gr1c
 
 TODO:
-    allow transitions systems as input in addition to GRSpec objects
+
+    - allow transitions systems as input in addition to GRSpec objects
     
-    Desired capabilities and relevant issues (from Scott):
-        - Automatic selection of output type of transition system based on given arguments.
-        - Inference of system variables and corresponding domains from a given (incomplete)
+    - Desired capabilities and relevant issues (from Scott):
+
+        - Automatic selection of output type of transition system
+          based on given arguments.
+
+        - Inference of system variables and corresponding domains from
+          a given (incomplete)
+
         - LTL formula and labeled transition system.
+
         - Available as tulip.synthesize or from tulip import synthesize.
-    
 """
 
 
@@ -53,9 +56,23 @@ from tulip import jtlvint
 
 
 def synthesize(option, specs, sys=None):
-    """
-        Function to call the appropriate synthesis tool on the spec.
-        Takes an option string and a GRSpec object
+    """Function to call the appropriate synthesis tool on the spec.
+
+    Beware!  This function provides a generic interface to a variety
+    of routines.  Being under active development, the types of
+    arguments supported and types of objects returned may change
+    without notice.
+
+    @param option: Magic string that declares what tool to invoke,
+        what method to use, etc.  Currently recognized forms:
+
+          - C{"gr1c"}: use gr1c for GR(1) synthesis via L{gr1cint}.
+          - C{"jtlv"}: use JTLV for GR(1) synthesis via L{jtlvint}.
+    @type specs: L{spec.GRSpec}
+    @param sys: NOT IMPLEMENTED YET.
+
+    @return: Return automaton implementing the strategy, or None if
+        error.
     """
     #here we need somehting like:
     #spec.import_PropPreservingPartition(sys)
@@ -67,6 +84,4 @@ def synthesize(option, specs, sys=None):
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are \"jtlv\" and \"gr1c\"')
-  
-
-
+    return ctrl
