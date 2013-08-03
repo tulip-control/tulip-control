@@ -2524,6 +2524,7 @@ class AtomicPropositions(object):
         self._check_state(state)
         
         # note: after moving, this will change to \in PowerSet(AP)
+        ap_label = str2singleton(ap_label)
         if not is_subset(ap_label, self.atomic_propositions):
             raise Exception('Label \\not\\subset AP.'
                             'FYI Label:\n\t' +str(ap_label) +'\n'
@@ -3523,7 +3524,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             state_label_pairs = False
         
         if state_label_pairs:
-            return
+            return state_labeling
         
         vprint('State labeling L not tuples (state, ap_label),\n'
                    'zipping with states S...\n', verbose)
