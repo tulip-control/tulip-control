@@ -116,7 +116,7 @@ def ba_minimal_example():
     ba.states.add_initial('q0')
     ba.states.add_final('q1')
     
-    ba.alphabet.add_set_elements([True, 'green', 'not_green'] )
+    ba.alphabet.math_set |= [True, 'green', 'not_green']
     
     ba.transitions.add_labeled('q0', 'q0', {True})
     ba.transitions.add_labeled('q0', 'q1', {'not_green'})

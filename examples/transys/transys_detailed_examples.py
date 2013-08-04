@@ -323,8 +323,8 @@ def ba_maximal_example():
     ba.states.add_initial('q0')
     ba.plot()
     
-    ba.alphabet.add_set_element('paid')
-    ba.alphabet.add_set_elements(['drink', 'paid', ''] )
+    ba.alphabet.math_set.add(['paid'] )
+    ba.alphabet.math_set |= ['drink', 'paid', '']
     
     print('Number of letters: ' +str(len(ba.alphabet) ) +'\n')
     print('Alphabet: ' +str(ba.alphabet() ) +'\n')

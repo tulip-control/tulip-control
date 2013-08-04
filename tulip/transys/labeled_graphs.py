@@ -125,9 +125,7 @@ class MathSet(object):
         -------
         >>> s = MathSet([1, 2, 'a', {3, 4} ] )
         """
-        self._set = set()
-        self._list = list()
-        
+        self._delete_all()
         self.add_from(iterable)
     
     def __repr__(self):
@@ -139,8 +137,12 @@ class MathSet(object):
     def __call__(self):
         return list(self._set) +self._list
     
-    def __get__(self):
-        return self()
+    #def __get__(self, instance, iterable):
+    #    return self()
+    
+    #def __set__(self, instance, iterable):
+    #    self._delete_all()
+    #    self.add_from(iterable)
     
     def __or__(self, other):
         """Union with another mathematical set.
@@ -177,9 +179,24 @@ class MathSet(object):
     
     def __eq__(self, other):
         if not isinstance(other, MathSet):
-            raise TypeError('For now comparison only to another MathSet.')
+            raise TypeError('For now comparison only to another MathSet.\n' +
+                            'Got:\n\t' +str(other) +'\n of type: ' +
+                            str(type(other) ) +', instead.')
         
-        return (self._set == other._set) and (self._list == other._list)
+        dummy_list = list(self._list)
+        same_lists = True
+        for item in other._list:
+            try:
+                dummy_list.remove(item)
+            except:
+                # unique element not found to be rm'd
+                same_lists = False
+                break
+        
+        # anything remaining ?
+        same_lists = same_lists and len(dummy_list) == 0
+        
+        return (self._set == other._set) and same_lists
     
     def __contains__(self, item):
         if isinstance(item, Hashable):
@@ -199,6 +216,10 @@ class MathSet(object):
     
     def _filter_unhashables(self, iterable):
         return filter(lambda x: not isinstance(x, Hashable), iterable)
+    
+    def _delete_all(self):
+        self._set = set()
+        self._list = list()
     
     def add(self, item):
         """Add element to mathematical set.
@@ -220,7 +241,7 @@ class MathSet(object):
         if isinstance(item, Hashable):
             self._set.add(item)
         else:
-            if item not in self.list:
+            if item not in self._list:
                 self._list.append(item)
             else:
                 warnings.warn('item already in MathSet.')
@@ -277,10 +298,14 @@ class MathSet(object):
         @param item: An item already in the set.
             For adding items, see add.
         """
+        if item not in self:
+            warnings.warn('Set element not in set S.\n'+
+                          'Maybe you targeted another element for removal ?')
+        
         if isinstance(item, Hashable):
             self._set.remove(item)
         else:
-            self._list.remove(item)
+            self._list.remove(item)    
 
 def unique(iterable):
     """Return unique elements.
@@ -379,21 +404,25 @@ class PowerSet(object):
     
     Set here isn't necessarily a Python set,
     i.e., it may comprise of unhashable elements.
-    
-    Upon initialization the iterable defining the (math) set is checked.
-    If all elements are hashable, then a set is used internally.
-    Otherwise a list is used, filtering items to be unique.
-    
-    usage
-    -----
-    >>> s = [[1, 2], '3', {'a':1}, 1]
-    >>> p = PowerSet(s)
+      
+    example
+    -------
+    Specify the mathematical set S underlying the PowerSet.
+    >>> S = [[1, 2], '3', {'a':1}, 1]
+    >>> p = PowerSet(S)
     
     >>> q = PowerSet()
-    >>> q.math_set = s
+    >>> q.math_set = S
     
-    >>> p.add_set_element({3: 'a'} )
-    >>> p.remove_set_element([1,2] )
+    Add new element to underlying set S.
+    >>> p.math_set.add({3: 'a'} )
+    
+    Add multiple new elements to underlying set S.
+    >>> p.math_set.add_from({3, 'a'} )
+    >>> p.math_set |= [1,2]
+    
+    Remove existing element from set S.
+    >>> p.remove(1)
     
     see also
     --------
@@ -401,9 +430,16 @@ class PowerSet(object):
     
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
-    """
+    """    
     def __init__(self, iterable=[]):
-        self.math_set = iterable
+        """Create new PowerSet over elements contained in S = C{iterable}.
+        
+        This powerset is 2^S.
+        
+        @param iterable: contains elements of set S underlying the PowerSet.
+        @type iterable: iterable of elements which can be hashable or not.
+        """
+        self.math_set = MathSet(iterable)
     
     def __get__(self, instance, value):
         return self()
@@ -443,82 +479,14 @@ class PowerSet(object):
         if not isinstance(other, PowerSet):
             raise TypeError('Can only compare to another PowerSet.')
         
-        return self._math_set == other._math_set
+        return other.math_set == self.math_set
     
-    def _get_set(self):
-        return list(self._math_set)
-    
-    def _define_set(self, iterable):
-        """Specify the mathematical set underlying the PowerSet.
+    def __setattr__(self, name, value):
+        if name is 'math_set' and not isinstance(value, MathSet):
+            raise Exception('math_set attribute of PowerSet must be of ' +
+                          'class MathSet. Given:\n\t' +str(value) )
         
-        example
-        -------
-        underlying_set = [1,2]
-        p1 = PowerSet()
-        p1._define_set(underlying_set)
-        
-        p2 = PowerSet(underlying_set)
-        
-        p1 == p2
-        
-        @param iterable: contains elements of set S underlying the PowerSet.
-            The old set is discarded and the new one replaces it.
-        @type iterable: iterable of elements which can be hashable or not.
-            Depending on hashability, the internal representation changes
-            automatically.
-        """
-        self._math_set = unique(iterable)
-    
-    math_set = property(_get_set, _define_set)
-    
-    def add_set_element(self, element):
-        """Add new element to underlying set S.
-        
-        This powerset is 2^S.
-        """
-        if isinstance(self.math_set, list):
-            if element not in self.math_set:
-                self.math_set.append(element)
-            return
-        
-        # set
-        if isinstance(element, Hashable):
-            if element not in self.math_set:
-                self.math_set.add(element)
-            return
-            
-        # element not Hashable, so cannot be \in set, hence new
-        # switch to list storage
-        self.math_set = unique(list(self.math_set) +[element] )
-    
-    def add_set_elements(self, iterable):
-        """Add multiple new elements to underlying set S.
-        
-        This powerset is 2^S.
-        """
-        for element in iterable:
-            self.add_set_element(element)
-    
-    def remove_set_element(self, element):
-        """Remove existing element from set S.
-        
-        This powerset is 2^S.
-        """
-        try:
-            self.math_set.remove(element)
-        except (ValueError, KeyError) as e:
-            warnings.warn('Set element not in set S.\n'+
-                          'Maybe you targeted another element for removal ?')
-        
-        # already efficient ?
-        if isinstance(self.math_set, set):
-            return
-        
-        # maybe all hashable after removal ?
-        try:
-            self.math_set = set(self.math_set)
-        except:
-            return
+        object.__setattr__(self, name, value)
 
 if debug:
     import traceback

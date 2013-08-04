@@ -431,7 +431,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     ba.states.add_final_from(accepting_states)
     
     if atomic_proposition_based:
-        ba.alphabet.add_set_elements(alphabet_or_ap)
+        ba.alphabet.math_set |= alphabet_or_ap
     else:
         ba.alphabet.add(alphabet_or_ap)
     
@@ -476,7 +476,7 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         # direct access, not the inefficient
         #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
         # which would generate a combinatorially large alphabet
-        prod_ba.alphabet.add_set_elements(buchi_automaton.alphabet.math_set)
+        prod_ba.alphabet.math_set |= buchi_automaton.alphabet.math_set
     else:
         msg ="""
             Buchi Automaton must be Atomic Proposition-based,
