@@ -1,3 +1,6 @@
+#
+# This file contains the initialization information from the tulip package.
+#
 # Copyright (c) 2013 by California Institute of Technology
 # All rights reserved.
 #
@@ -29,54 +32,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+# 
+
+"""TuLiP Toolbox Transition System module
 """
-Created on Wed Jul 24 23:25:28 2013
-
-@author: ifilippi
-"""
-
-from tulip import transys as trs
-
-def test_mutable_fts():
-    ts = trs.FTS(mutable=True)
-    
-    s0 = [1, 3]
-    s1 = ['f', 1, dict() ]
-    
-    ts.states.add(s0)
-    ts.states.add(s1)
-    
-    ts.states.add_initial(s0)
-    
-    ts.transitions.add(s0, s1)
-    print ts
-    ts.plot()
-    
-    ts.states.remove(s0)
-    ts.plot()
-    
-    return ts
-
-def test_mutable_ba():
-    ba = trs.BA(mutable=True)
-    
-    s0 = [1, 5]
-    s1 = [{}, (1, 2), 'f', ['d', {} ] ]
-    
-    ba.states.add_from([s0, s1] )
-    ba.states.add_initial(s0)
-    ba.add_final_state(s1)
-    
-    ba.alphabet.add_set_elements({'p', '!p'} )
-    ba.transitions.add(s0, s1)
-    ba.transitions.remove(s0, s1)
-    
-    ba.transitions.add_labeled(s0, s1, {'p', '!p'} )
-    ba.plot()
-    
-    ba.transitions.remove_labeled(s0, s1, {'p', '!p'} )
-    ba.plot()
-
-if __name__ == '__main__':
-    ts = test_mutable_fts()
-    ba = test_mutable_ba()
+from transys import *
+from automata import *
+from machines import *
