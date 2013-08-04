@@ -67,7 +67,7 @@ def test_mutable_ba():
     ba.states.add_initial(s0)
     ba.add_final_state(s1)
     
-    ba.alphabet.add({'p', '!p'} )
+    ba.alphabet.add_set_elements({'p', '!p'} )
     ba.transitions.add(s0, s1)
     ba.transitions.remove(s0, s1)
     

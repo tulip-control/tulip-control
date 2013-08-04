@@ -132,7 +132,7 @@ def fts_maximal_example():
     
     # get state info
     print('States:\n\t' +str(fts.states() ) )
-    print('Number of states:\n\t' +str(fts.states.number() ) )
+    print('Number of states:\n\t' +str(len(fts.states) ) )
     print('Initial states:\n\t' +str(fts.states.initial) )
     print('Number of initial states:\n\t' +str(fts.states.number_of_initial() ) )
     print('Current state:\n\t' +str(fts.states.current) )
@@ -199,7 +199,7 @@ def fts_maximal_example():
     fts.states.remove_from({'not a state', 'also not a state'} )
     
     #avoid adding characters 'p', 'a', 'y' at states
-    fts.transitions.add_from('pay', {'select'}, check_states=False)
+    fts.transitions.add_from({'pay'}, {'select'}, check_states=False)
     print("States now include 'p', 'a', 'y':\n\t" +str(fts.states() ) )
     fts.states.remove_from({'p', 'a', 'y'} )
     print("Fixed:\n\t" +str(fts.states() ) +'\n')
@@ -277,7 +277,7 @@ def fts_maximal_example():
     print('Types of actions: ' +str(fts._transition_label_def.keys() ) )
     print('Number of actions: ' +str(len(fts.actions) ) )
     print('Actions: ' +str(fts.actions ) )
-    print('Labeled transitions: ' +str(fts.transitions(data=True) ) )
+    print('Labeled transitions: ' +str(fts.transitions() ) )
     fts.plot()
     
     # fast way to get all edges with value of actions
@@ -323,10 +323,10 @@ def ba_maximal_example():
     ba.states.add_initial('q0')
     ba.plot()
     
-    ba.alphabet.add({'paid'} )
-    ba.alphabet.add_from([{'drink', 'paid'}, {''}, {'drink'} ] )
+    ba.alphabet.add_set_element('paid')
+    ba.alphabet.add_set_elements(['drink', 'paid', ''] )
     
-    print('Number of letters: ' +str(ba.alphabet.number() ) +'\n')
+    print('Number of letters: ' +str(len(ba.alphabet) ) +'\n')
     print('Alphabet: ' +str(ba.alphabet() ) +'\n')
     
     try:
@@ -464,7 +464,7 @@ def scipy_sparse_labeled_adj():
     
     print(A)
     
-    ofts = ts.oFTS()
+    ofts = ts.OpenFTS()
     
     # note: to avoid first defining actions, pass arg check_labels=False
     ofts.sys_actions.add('move')
@@ -509,9 +509,9 @@ if __name__ == '__main__':
     #sims_demo()
     fts_maximal_example()
     #ofts_maximal_example()
-    #ba_maximal_example()
+    ba_maximal_example()
     
-    #ofts = scipy_sparse_labeled_adj()
-    #label_per_state()
+    ofts = scipy_sparse_labeled_adj()
+    label_per_state()
     m = mealy_machine_example()
     
