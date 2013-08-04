@@ -77,7 +77,7 @@ import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
 hl = 60 *'-'
-debug = True
+debug = False
 
 try:
     import pydot
@@ -102,41 +102,195 @@ except ImportError:
     IPython = None
 
 class MathSet(object):
-    """Mathematical set, allows unhashable elements."""
+    """Mathematical set, allows unhashable elements.
     
+    examples
+    --------
+    >>> s = MathSet(['a', 1, [1,2], {'a', 'b'} ] )
+    
+    Then print(s) shows how the elements were separately stored
+    in a set and list, to optimize contains operations:
+    
+    >>> print(s)
+    set(['a', 1]) U [[1, 2], set(['a', 'b'])]
+    
+    see also
+    --------
+    PowerSet
+    """    
     def __init__(self, iterable=[]):
-        if not isinstance(iterable, Iterable):
-            raise TypeError('iterable must be an iterable container.')
+        """Initialize by adding elements from iterable.
         
-        self.set = set(filter(lambda x: isinstance(x, Hashable), iterable) )
-        self.list = filter(lambda x: not isinstance(x, Hashable), iterable)
+        example
+        -------
+        >>> s = MathSet([1, 2, 'a', {3, 4} ] )
+        """
+        self._set = set()
+        self._list = list()
+        
+        self.add_from(iterable)
+    
+    def __repr__(self):
+        return str(self._set) +' U ' +str(self._list)
     
     def __str__(self):
-        return str(self.set) +' U ' +str(self.list)
+        return self.__repr__()
     
     def __call__(self):
-        return list(self.set) +self.list
+        return list(self._set) +self._list
+    
+    def __get__(self):
+        return self()
+    
+    def __or__(self, other):
+        """Union with another mathematical set.
+        
+        see also
+        --------
+        __ior__
+        
+        @param other: any other mathematical set.
+        @type other: iterable, elements not restricted to hashable
+        
+        @return: self | iterable
+        @rtype: MathSet
+        """
+        s = MathSet(self)
+        s.add_from(other)
+        return s
+    
+    def __ior__(self, iterable):
+        """Union with of MathSet with iterable.
+        
+        see also
+        --------
+        __or__
+        
+        @param iterable: any mathematical set.
+        @type iterable: iterable, elements not restricted to hashable
+        
+        @return: self | iterable
+        @rtype: MathSet
+        """
+        self.add_from(iterable)
+        return self
+    
+    def __eq__(self, other):
+        if not isinstance(other, MathSet):
+            raise TypeError('For now comparison only to another MathSet.')
+        
+        return (self._set == other._set) and (self._list == other._list)
+    
+    def __contains__(self, item):
+        if isinstance(item, Hashable):
+            return item in self._set
+        else:
+            return item in self._list
+    
+    def __iter__(self):
+        return iter(self() )
+    
+    def __len__(self):
+        """Number of elements in set."""
+        return len(self._set) +len(self._list)
+    
+    def _filter_hashables(self, iterable):
+        return filter(lambda x: isinstance(x, Hashable), iterable)
+    
+    def _filter_unhashables(self, iterable):
+        return filter(lambda x: not isinstance(x, Hashable), iterable)
     
     def add(self, item):
+        """Add element to mathematical set.
+        
+        example
+        -------
+        >>> s = MathSet()
+        >>> s.add(1)
+        set([1]) U []
+        
+        see also
+        --------
+        remove
+        
+        @param item: the new set element
+        @type item: anything, if hashable it is stored in a Python set,
+            otherwise stored in a list.
+        """
         if isinstance(item, Hashable):
-            self.set.add(item)
+            self._set.add(item)
         else:
             if item not in self.list:
-                self.list.append(item)
+                self._list.append(item)
             else:
                 warnings.warn('item already in MathSet.')
     
+    def add_from(self, iterable):
+        """Add multiple elements to mathematical set.
+        
+        Equivalent to |=
+        
+        example
+        -------
+        >>> s = MathSet()
+        >>> s.add_from([1, 2, {3} ] )
+        
+        is equivalent to:
+        
+        >>> s = MathSet()
+        >>> s |= [1, 2, {3} ]
+        
+        see also
+        --------
+        add
+        
+        @param iterable: new MathSet elements
+        @type iterable: iterable containing (possibly not hashable) elements
+        """
+        if not isinstance(iterable, Iterable):
+            raise TypeError('Can only add elements to MathSet from Iterable.\n' +
+                            'Got:\n\t' +str(iterable) +'\n instead.')
+        
+        if isinstance(iterable, MathSet):
+            self._set |= set(iterable._set)
+            self._list = list(unique(self._list +
+                          self._filter_unhashables(iterable) ) )
+            return
+        
+        # speed up
+        if isinstance(iterable, set):
+            self._set |= iterable
+            return
+        
+        # filter to optimize storage
+        self._set |= set(self._filter_hashables(iterable) )
+        self._list = list(unique(self._list +
+                          self._filter_unhashables(iterable) ) )
+    
     def remove(self, item):
+        """Remove existing element from mathematical set.
+        
+        see also
+        --------
+        add, __or__
+        
+        @param item: An item already in the set.
+            For adding items, see add.
+        """
         if isinstance(item, Hashable):
-            self.set.remove(item)
+            self._set.remove(item)
         else:
-            self.list.remove(item)
+            self._list.remove(item)
 
 def unique(iterable):
     """Return unique elements.
     
-    If all items in iterable are hashable, then returns set.
-    If iterable contains unhashable item, then returns list of unique elements.
+    @return: iterable with duplicates removed, as C{set} if possible.
+    @rtype:
+        - If all items in C{iterable} are hashable,
+            then returns C{set}.
+        - If iterable contains unhashable item,
+            then returns C{list} of unique elements.
     
     note
     ----
@@ -232,14 +386,14 @@ class PowerSet(object):
     
     usage
     -----
-    s = [[1, 2], '3', {'a':1}, 1]
-    p = PowerSet(iterable=s)
+    >>> s = [[1, 2], '3', {'a':1}, 1]
+    >>> p = PowerSet(s)
     
-    q = Powerset()
-    q.define_set(s)
+    >>> q = PowerSet()
+    >>> q.math_set = s
     
-    p.add_set_element({3: 'a'} )
-    p.remove_set_element([1,2] )
+    >>> p.add_set_element({3: 'a'} )
+    >>> p.remove_set_element([1,2] )
     
     see also
     --------
@@ -249,7 +403,7 @@ class PowerSet(object):
     @type iterable: iterable container
     """
     def __init__(self, iterable=[]):
-        self.define_set(iterable)
+        self.math_set = iterable
     
     def __get__(self, instance, value):
         return self()
@@ -275,8 +429,47 @@ class PowerSet(object):
     def __len__(self):
         return 2**len(self.math_set)
     
-    def define_set(self, iterable):
-        self.math_set = unique(iterable)
+    def __add__(self, other):
+        if not isinstance(other, PowerSet):
+            raise TypeError('Union defined only between PowerSets.\n' +
+                            'Got instead:\n\t other = ' +str(other) )
+        
+        list1 = self.math_set
+        list2 = other.math_set
+        union = list1 +list2
+        return PowerSet(union)
+    
+    def __eq__(self, other):
+        if not isinstance(other, PowerSet):
+            raise TypeError('Can only compare to another PowerSet.')
+        
+        return self._math_set == other._math_set
+    
+    def _get_set(self):
+        return list(self._math_set)
+    
+    def _define_set(self, iterable):
+        """Specify the mathematical set underlying the PowerSet.
+        
+        example
+        -------
+        underlying_set = [1,2]
+        p1 = PowerSet()
+        p1._define_set(underlying_set)
+        
+        p2 = PowerSet(underlying_set)
+        
+        p1 == p2
+        
+        @param iterable: contains elements of set S underlying the PowerSet.
+            The old set is discarded and the new one replaces it.
+        @type iterable: iterable of elements which can be hashable or not.
+            Depending on hashability, the internal representation changes
+            automatically.
+        """
+        self._math_set = unique(iterable)
+    
+    math_set = property(_get_set, _define_set)
     
     def add_set_element(self, element):
         """Add new element to underlying set S.
@@ -298,12 +491,12 @@ class PowerSet(object):
         # switch to list storage
         self.math_set = unique(list(self.math_set) +[element] )
     
-    def add_set_elements(self, elements):
+    def add_set_elements(self, iterable):
         """Add multiple new elements to underlying set S.
         
         This powerset is 2^S.
         """
-        for element in elements:
+        for element in iterable:
             self.add_set_element(element)
     
     def remove_set_element(self, element):

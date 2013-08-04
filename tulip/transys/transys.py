@@ -706,16 +706,27 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     
     return ts
 
-def cycle_labeled_with(L):
-    """Return cycle FTS with given labeling.
+def line_labeled_with(L):
+    """Return linear FTS with given labeling.
+    
+    The resulting system will be a terminating sequence:
+        s0-> s1-> ... -> sN
+    where: N = C{len(L) -1}.
+    
+    see also
+    --------
+    cycle_labeled_with
     
     @param L: state labeling
-    @type L: iterable of state labels, e.g., [{'p', 'q'}, ...]
+    @type L: iterable of state labels, e.g., [{'p', '!p', 'q',...]
         Single strings are identified with singleton Atomic Propositions,
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
-    @returns: FTS with states ['s0', ..., 'sN'], where N=len(L)
-        and state labels defined by L, i.e., ('s0', L[0]),...
+    @returns: FTS with:
+        - states ['s0', ..., 'sN'], where N = len(L) -1
+        - state labels defined by L, so s0 is labeled with L[0], etc.
+        - transitions forming a sequence:
+            - s_{i} ---> s_{i+1}, for: 0 <= i < N
     """
     n = len(L)
     S = range(n)
@@ -725,7 +736,36 @@ def cycle_labeled_with(L):
     from_states = range(0, n-1)
     to_states = range(1, n)
     trans = zip(from_states, to_states)
-    trans += [(n-1, 0)] # close cycle
     
     ts = tuple2fts(S, S0, AP, L, Act, trans, prepend_str='s')
+    return ts
+
+def cycle_labeled_with(L):
+    """Return cycle FTS with given labeling.
+    
+    The resulting system will be a cycle:
+        s0-> s1-> ... -> sN -> s0
+    where: N = C{len(L) -1}.
+    
+    see also
+    --------
+    line_labeled_with
+    
+    @param L: state labeling
+    @type L: iterable of state labels, e.g., [{'p', 'q'}, ...]
+        Single strings are identified with singleton Atomic Propositions,
+        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+    
+    @returns: FTS with:
+        - states ['s0', ..., 'sN'], where N = len(L) -1
+        - state labels defined by L, so s0 is labeled with L[0], etc.
+        - transitions forming a cycle:
+            - s_{i} ---> s_{i+1}, for: 0 <= i < N
+            - s_N ---> s_0
+    """
+    ts = line_labeled_with(L)
+    last_state = 's' +str(len(L)-1)
+    ts.transitions.add(last_state, 's0')
+    
+    #trans += [(n-1, 0)] # close cycle
     return ts
