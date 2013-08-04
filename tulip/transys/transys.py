@@ -32,6 +32,19 @@
 """
 Transition System Module
 """
+from collections import Iterable, Hashable, OrderedDict
+from time import strftime
+from pprint import pformat
+import warnings
+
+import networkx as nx
+
+from labeled_graphs import LabeledStateDiGraph, is_subset, str2singleton
+from labeled_graphs import unique, prepend_with, vprint
+import automata
+from executions import FTSSim
+
+hl = 60 *'-'
 
 class AtomicPropositions(object):
     """Store & print set of atomic propositions.
@@ -340,9 +353,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         """
         if isinstance(ts_or_ba, FiniteTransitionSystem):
             return self._ts_ts_sync_prod(ts_or_ba)
-        elif isinstance(ts_or_ba, BuchiAutomaton):
+        elif isinstance(ts_or_ba, automata.BuchiAutomaton):
             ba = ts_or_ba
-            return _ts_ba_sync_prod(self, ba)
+            return automata._ts_ba_sync_prod(self, ba)
         else:
             raise Exception('Argument must be TS or BA.')
     

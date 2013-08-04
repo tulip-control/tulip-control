@@ -32,6 +32,15 @@
 """
 Transition System Module
 """
+from collections import Iterable, OrderedDict
+from pprint import pformat
+import warnings
+
+from labeled_graphs import LabeledStateDiGraph, PowerSet
+from labeled_graphs import is_subset, dprint, vprint, prepend_with, str2singleton
+import transys
+
+hl = 60 *'-'
 
 class FiniteStateAutomaton(LabeledStateDiGraph):
     """Generic automaton.
@@ -230,7 +239,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
             
             # blocked
         
-        return FSASim()
+        #return FSASim()
 
     # operations on two automata
     def add_subautomaton(self):
@@ -295,7 +304,7 @@ class BuchiAutomaton(OmegaAutomaton):
         return self.async_prod(ba)
         
     def _ba_ba_sync_prod(self, ba2):
-        ba1 = self
+        #ba1 = self
         
         raise NotImplementedError
         #TODO BA x BA sync prod algorithm
@@ -332,7 +341,7 @@ class BuchiAutomaton(OmegaAutomaton):
         
         if isinstance(ts_or_ba, BuchiAutomaton):
             return self._ba_ba_sync_prod(ts_or_ba)
-        elif isinstance(ts_or_ba, FiniteTransitionSystem):
+        elif isinstance(ts_or_ba, transys.FiniteTransitionSystem):
             ts = ts_or_ba
             return _ba_ts_sync_prod(self, ts)
         else:
@@ -509,7 +518,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     --------
     _ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
-    if not isinstance(transition_system, FiniteTransitionSystem):
+    if not isinstance(transition_system, transys.FiniteTransitionSystem):
         msg = 'transition_system not transys.FiniteTransitionSystem.\n'
         msg += 'Actual type passed: ' +str(type(transition_system) )
         raise TypeError(msg)
@@ -530,7 +539,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     prodts_name = fts.name +'*' +ba.name
     # using set() destroys order
-    prodts = FiniteTransitionSystem(name=prodts_name, states=set() )
+    prodts = transys.FiniteTransitionSystem(name=prodts_name, states=set() )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
 

@@ -32,6 +32,11 @@
 """
 Finite State Machines Module
 """
+from collections import OrderedDict
+import warnings
+
+from labeled_graphs import LabeledStateDiGraph
+import executions
 
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
@@ -249,7 +254,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
         raise NotImplementedError
     
     def simulate(self, input_sequence):
-        self.simulation = FiniteStateMachineSimulation()
+        self.simulation = executions.FiniteStateMachineSimulation()
         raise NotImplementedError
 
 class FSM(FiniteStateMachine):

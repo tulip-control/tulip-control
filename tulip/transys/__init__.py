@@ -36,3 +36,6 @@
 
 """TuLiP Toolbox Transition System module
 """
+from transys import *
+from automata import *
+from machines import *

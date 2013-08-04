@@ -66,16 +66,15 @@ TODO
  dependent on other modules
    ltl2ba: uses also spec classs
 """
+from pprint import pformat
+from itertools import chain, combinations
+from collections import Iterable, Hashable
+from cStringIO import StringIO
+import warnings
+import copy
 
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
-import warnings
-import copy
-from pprint import pformat
-from itertools import chain, combinations
-from collections import Iterable, Hashable, OrderedDict
-from cStringIO import StringIO
-from time import strftime
 
 hl = 60 *'-'
 debug = True
