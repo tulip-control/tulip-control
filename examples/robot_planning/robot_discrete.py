@@ -9,7 +9,7 @@ transition system.
 """
 
 # Import the packages that we need
-from tulip import *
+from tulip import transys, spec, jtlvint, synth
 
 #
 # System dynamics
@@ -102,7 +102,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synthesize('jtlv', specs, sys)
+ctrl = synth.synthesize('jtlv', specs, sys)
 
 #
 # Generate a graphical representation of the controller for viewing
