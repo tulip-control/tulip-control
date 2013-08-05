@@ -101,6 +101,43 @@ except ImportError:
     warnings.warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
+def compare_lists(list1, list2):
+    """Compare list contents, ignoring ordering.
+    
+    Hashability of elements not assumed, incurring O(N**2)
+    
+    see also
+    --------
+    MathSet
+    
+    @type list1: list
+    @type list2: list
+    
+    @return: True if a bijection exists between the lists.
+        Note that this takes into account multiplicity of elements.
+    @rtype: bool
+    """
+    if not isinstance(list1, list):
+        raise TypeError('Not a list, instead list1:\n\t' +str(list1) )
+    
+    if not isinstance(list2, list):
+        raise TypeError('Not a list, instead list2:\n\t' +str(list2) )
+    
+    dummy_list = list(list1)
+    same_lists = True
+    for item in list2:
+        try:
+            dummy_list.remove(item)
+        except:
+            # unique element not found to be rm'd
+            same_lists = False
+            break
+        
+    # anything remaining ?
+    same_lists = same_lists and len(dummy_list) == 0
+    
+    return same_lists
+
 class MathSet(object):
     """Mathematical set, allows unhashable elements.
     
@@ -114,6 +151,17 @@ class MathSet(object):
     >>> print(s)
     set(['a', 1]) U [[1, 2], set(['a', 'b'])]
     
+    Set operations similar to the builtin type are supported:
+    >>> p = MathSet()
+    >>> p.add(1)
+    >>> p |= [1, 2]
+    >>> p |= {3, 4}
+    >>> p |= [[1, 2], '5', {'a':1} ]
+    >>> p.add_from([5, 6, '7', {8, 9} ] )
+    >>> p.remove(1)
+    >>> p
+    set([2, 3, 4, 5, 6, '5', '7']) U [[1, 2], {'a': 1}, set([8, 9])]
+    
     see also
     --------
     PowerSet
@@ -124,6 +172,10 @@ class MathSet(object):
         example
         -------
         >>> s = MathSet([1, 2, 'a', {3, 4} ] )
+        
+        @param iterable: iterable from which to initialize the set S
+            which underlies the PowerSet 2^S
+        @type iterable: iterable, any element types allowed
         """
         self._delete_all()
         self.add_from(iterable)
@@ -164,6 +216,10 @@ class MathSet(object):
     def __ior__(self, iterable):
         """Union with of MathSet with iterable.
         
+        example
+        -------
+        
+        
         see also
         --------
         __or__
@@ -183,18 +239,7 @@ class MathSet(object):
                             'Got:\n\t' +str(other) +'\n of type: ' +
                             str(type(other) ) +', instead.')
         
-        dummy_list = list(self._list)
-        same_lists = True
-        for item in other._list:
-            try:
-                dummy_list.remove(item)
-            except:
-                # unique element not found to be rm'd
-                same_lists = False
-                break
-        
-        # anything remaining ?
-        same_lists = same_lists and len(dummy_list) == 0
+        same_lists = compare_lists(self._list, other._list)
         
         return (self._set == other._set) and same_lists
     
@@ -232,7 +277,7 @@ class MathSet(object):
         
         see also
         --------
-        remove
+        add_from, __ior__, remove
         
         @param item: the new set element
         @type item: anything, if hashable it is stored in a Python set,
@@ -263,7 +308,7 @@ class MathSet(object):
         
         see also
         --------
-        add
+        add, __ior__, remove
         
         @param iterable: new MathSet elements
         @type iterable: iterable containing (possibly not hashable) elements
@@ -291,9 +336,16 @@ class MathSet(object):
     def remove(self, item):
         """Remove existing element from mathematical set.
         
+        example
+        -------
+        >>> p = MathSet([1, 2] )
+        >>> p.remove(1)
+        >>> p
+        set([2]) U []
+        
         see also
         --------
-        add, __or__
+        add, add_from, __or__
         
         @param item: An item already in the set.
             For adding items, see add.
@@ -310,18 +362,18 @@ class MathSet(object):
 def unique(iterable):
     """Return unique elements.
     
+    note
+    ----
+    Always returning a list for consistency was tempting,
+    however this defeats the purpose of creating this function
+    to achieve brevity elsewhere in the code.
+    
     @return: iterable with duplicates removed, as C{set} if possible.
     @rtype:
         - If all items in C{iterable} are hashable,
             then returns C{set}.
         - If iterable contains unhashable item,
             then returns C{list} of unique elements.
-    
-    note
-    ----
-    Always returning a list for consistency was tempting,
-    however this defeats the purpose of creating this function
-    to achieve brevity elsewhere in the code.
     """
     # hashable items ?
     try:
@@ -445,7 +497,7 @@ class PowerSet(object):
         return self()
     
     def __str__(self):
-        return str(self.__call__() )
+        return 'PowerSet(' +str(self.math_set) +' )'
     
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
@@ -467,12 +519,12 @@ class PowerSet(object):
     
     def __add__(self, other):
         if not isinstance(other, PowerSet):
-            raise TypeError('Union defined only between PowerSets.\n' +
+            raise TypeError('Addition defined only between PowerSets.\n' +
                             'Got instead:\n\t other = ' +str(other) )
         
         list1 = self.math_set
         list2 = other.math_set
-        union = list1 +list2
+        union = list1 | list2
         return PowerSet(union)
     
     def __eq__(self, other):
@@ -489,7 +541,7 @@ class PowerSet(object):
         object.__setattr__(self, name, value)
 
 if debug:
-    import traceback
+    #import traceback
     
     def dprint(s):
         """Debug mode print."""
