@@ -39,8 +39,9 @@ import warnings
 
 import networkx as nx
 
-from labeled_graphs import LabeledStateDiGraph, is_subset, str2singleton
-from labeled_graphs import unique, prepend_with, vprint
+from labeled_graphs import LabeledStateDiGraph, str2singleton
+from labeled_graphs import prepend_with, vprint
+from mathset import is_subset, unique
 import automata
 from executions import FTSSim
 

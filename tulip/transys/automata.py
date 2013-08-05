@@ -36,8 +36,9 @@ from collections import Iterable, OrderedDict
 from pprint import pformat
 import warnings
 
-from labeled_graphs import LabeledStateDiGraph, PowerSet
-from labeled_graphs import is_subset, dprint, vprint, prepend_with, str2singleton
+from labeled_graphs import LabeledStateDiGraph
+from labeled_graphs import dprint, vprint, prepend_with, str2singleton
+from mathset import PowerSet, is_subset
 import transys
 
 hl = 60 *'-'
