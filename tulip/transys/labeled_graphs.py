@@ -32,40 +32,6 @@
 """
 Transition System Module
 """
-
-"""
-based on code from:
-    Automaton class and supporting methods (Scott Livingston)
-and
-    Automaton Module (TuLiP distribution v0.3c)
-
-@author: Ioannis Filippidis
-"""
-
-"""
-TODO
-    Baier bisimulation algorithm
-    Moore to Mealy
-    timed automata (with counters, dense time semantics ?)
-
- import from
-   string/text file
-   promela
-   xml
-
- simulation
-   random
-   via matlab
-   transducer mode
-
- conversions between automata types
-   either internally or
-   by calling external converters (e.g. ltl2dstar)
- operations between trasition systms and automata or game graphs
-
- dependent on other modules
-   ltl2ba: uses also spec classs
-"""
 from pprint import pformat
 from collections import Iterable
 from cStringIO import StringIO
