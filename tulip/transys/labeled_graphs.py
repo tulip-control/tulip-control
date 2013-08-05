@@ -82,6 +82,191 @@ def vprint(string, verbose=True):
     if verbose:
         print(string)
 
+class LabelConsistency(object):
+    """Container of methods for checking sublabel consistency.
+    
+    Used by both LabeledStates and LabeledTransitions
+    to verify that sublabels on states and edges are in their
+    corresponding (math) sets.
+    
+    For example, if the 'actions' sublabel set has type: {'yes', 'no'},
+    an attempt to label an FTS transition with 'not sure' will fail.
+    """
+    def __init__(self, label_def):
+        """Link to the label definition from within the systems.
+        
+        @param label_def: dict defining labels:
+                - for states: _state_label_def
+                - for transitions: _transition_label_def
+            from within each system (FTS, FSA, FSM etc)
+        @type label_def: dict of the form {sublabel_name : sublabel_type}.
+            For example: {'actions' : {'start', 'stop', 'turn'}, ...}
+        """
+        self.label_def = label_def
+    
+    def _attr_dict2sublabels(self, attr_dict, as_dict):
+        """Extract sublabels representation from edge attribute dict.
+        
+        - If C{as_dict==True}, then return dict of:
+            {sublabel_type : sublabel_value, ...}
+        Otherwise return list of sublabel values:
+            [sublabel_value, ...]
+        ordered by _attr_dict2sublabels_list.
+        
+        see also
+        --------
+        _attr_dict2sublabels_list
+        """
+        if as_dict:
+            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
+            annotation = sublabels_dict
+        else:
+            sublabel_values = self._attr_dict2sublabels_list(attr_dict)
+            annotation = sublabel_values
+        
+        return annotation
+    
+    def _attr_dict2sublabels_list(self, attr_dict):
+        """Convert attribute dict to tuple of sublabel values."""
+        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
+        sublabel_values = self._sublabels_dict2list(sublabels_dict)
+        return sublabel_values
+    
+    def _attr_dict2sublabels_dict(self, attr_dict):
+        """Filter the edge attributes which are not labels.
+        
+        see also
+        --------
+        _attr_dict2sublabels_list
+        
+        @return: sublabel types with their values
+        @rtype: {C{sublabel_type} : C{sublabel_value},...}
+        """
+        self._exist_labels()
+        
+        sublabel_ordict = self.label_def
+        sublabels_dict = {k:v for k,v in attr_dict.iteritems()
+                              if k in sublabel_ordict}
+        
+        return sublabels_dict
+            
+    def _sublabels_dict2list(self, sublabels_dict):
+        """Return ordered sulabel values.
+        
+        Sublabel values are ordered according to sublabel ordering
+        defined in graph._transition_label_def, which is an OrderedDict.
+        
+        see also
+        --------
+        _sublabels_list2dict
+        """
+        self._exist_labels()
+        
+        sublabel_ordict = self.label_def
+        sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
+                                             if k in sublabels_dict]
+        
+        return sublabel_values
+    
+    def _sublabels_list2dict(self, sublabel_values, check_label=True):
+        """Return sublabel values dict from tuple.
+        
+        see also
+        --------
+        _sublabels_dict2list
+        
+        @param sublabels_tuple: ordered sublabel values
+        @type sublabels_tuple: tuple
+        
+        @param check_label: verify existence of label
+        @type check_label: bool
+        """
+        # get labeling def
+        label_def = self.label_def
+        
+        # single label ?
+        if len(label_def) == 1:
+            # hack strings for now, until deciding
+            if label_def.has_key('ap'):
+                sublabel_values = str2singleton(sublabel_values)
+            
+            dprint('Replaced sublabel value:\n\t' +str(sublabel_values) )
+            sublabel_values = [sublabel_values]
+            dprint('with the singleton:\n\t' +str(sublabel_values) )
+        
+        # constuct label dict
+        edge_label = dict()
+        if isinstance(sublabel_values, list) or \
+        isinstance(sublabel_values, tuple):
+            for i in range(len(sublabel_values) ):
+                cur_name = label_def.keys()[i]
+                cur_label = sublabel_values[i]
+                
+                edge_label[cur_name] = cur_label
+        elif isinstance(sublabel_values, dict):
+            edge_label = sublabel_values
+        else:
+            raise Exception('Bug')
+        
+        # check if dict is consistent with label defs
+        for (typename, sublabel) in edge_label.iteritems():
+            possible_labels = label_def[typename]
+            
+            # iterable sublabel descreption ? (i.e., discrete ?)
+            if isinstance(possible_labels, Iterable):
+                if not check_label:
+                    possible_labels.add(sublabel)
+                elif sublabel not in possible_labels:
+                    msg = 'Given label:\n\t' +str(sublabel) +'\n'
+                    msg += 'not in set of transition labels:\n\t'
+                    msg += str(possible_labels) +'\n'
+                    msg += 'If Atomic Propositions involved,\n'
+                    msg += 'did you forget to pass an iterable of APs,\n'
+                    msg += 'instead of a single AP ?\n'
+                    msg += "(e.g., {'p'} instead of 'p')"
+                    raise Exception(msg)
+                
+                continue
+            
+            # not iterable, check using convention:
+            
+            # sublabel type not defined ?
+            if possible_labels == None:
+                print('Undefined sublabel type')
+                continue
+            
+            # check given ?
+            #TODO change to is_valid_sublabel
+            if not hasattr(possible_labels, 'is_valid_guard'):
+                raise TypeError('SubLabel type V does not have method is_valid.')
+            
+            # check sublabel type
+            if not possible_labels.is_valid_guard(sublabel):
+                raise TypeError('Sublabel:\n\t' +str(sublabel) +'\n' +
+                                'not valid for sublabel type:\n\t' +
+                                str(possible_labels) )
+            
+        return edge_label
+    
+    def label_is_desired(self, attr_dict, desired_label):
+            for (label_type, desired_val) in desired_label.iteritems():
+                dprint('SubLabel type checked:\n\t' +str(label_type) )
+                cur_val = attr_dict[label_type]
+                dprint('possible label values:\n\t' +str(cur_val) )
+                dprint('Desired label:\n\t' +str(desired_val) )
+                
+                if cur_val != desired_val and True not in cur_val:
+                    # common bug
+                    if isinstance(cur_val, (set,list) ) and \
+                       isinstance(desired_val, (set, list) ) and \
+                       cur_val.__class__ != desired_val.__class__:
+                           warnings.warn('Set label compared to list label,\n'
+                                         'did you mixed sets and lists when '
+                                         'initializing AP labels ?')
+                    
+                    return False
+            return True
+
 class States(object):
     """Methods to manage states, initial states, current state.
         
@@ -348,19 +533,17 @@ class States(object):
         return map(self._int2mutant, ints)
     
     def __contains__(self, state):
-        """Check if single state \\in set_of_states."""
+        """Check if single state \\in set_of_states.
+        
+        @param state: Check if C{state} already in states.
+        @type state: if mutable states enabled, then any type,
+            otherwise must be hashable
+        
+        @return: C{True} if C{state} is in states.
+        @rtype: bool
+        """
         state_id = self._mutant2int(state)
-        return self.graph.has_node(state_id)    
-    
-    def _exist_labels(self):
-        """State labeling defined ?"""
-        if hasattr(self.graph, '_state_label_def'):
-            return True
-        else:
-            msg = 'No state labeling defined for class:\n\t'
-            msg += str(type(self.graph) )
-            dprint(msg)
-            return False
+        return self.graph.has_node(state_id)
     
     def _exist_final_states(self, msg=True):
         """Check if system has final states."""
@@ -370,97 +553,6 @@ class States(object):
             return False
         else:
             return True
-    
-    def _dot_str(self, to_pydot_graph):
-        """Copy nodes to given Pydot graph, with attributes for dot export."""
-        
-        def add_incoming_edge(g, state):
-            phantom_node = 'phantominit' +str(state)
-            
-            g.add_node(phantom_node, label='""', shape='none', width='0')
-            g.add_edge(phantom_node, state)
-        
-        def form_node_label(state, state_data, label_def, label_format):
-            # node itself
-            node_dot_label = '"' +str(state) +'\\n'
-            
-            # add node annotations from action, AP sets etc
-            # other key,values in state attr_dict ignored
-            sep_label_sets = label_format['separator']
-            for (label_type, label_value) in state_data.iteritems():
-                if label_type in label_def:
-                    # label formatting
-                    type_name = label_format[label_type]
-                    sep_type_value = label_format['type?label']
-                    
-                    # avoid turning strings to lists,
-                    # or non-iterables to lists
-                    if isinstance(label_value, str):
-                        label_str = label_value
-                    elif isinstance(label_value, Iterable): # and not str
-                        label_str = str(list(label_value) )
-                    else:
-                        label_str = str(label_value)
-                    
-                    node_dot_label += type_name +sep_type_value
-                    node_dot_label += label_str +sep_label_sets
-            node_dot_label += '"'
-            
-            return node_dot_label  
-        
-        def decide_node_shape(graph, state):
-            node_shape = graph.dot_node_shape['normal']
-            
-            # check if final states defined
-            if not self._exist_final_states(msg=False):
-                return node_shape
-            
-            # check for final states
-            if self.is_final(state):
-                node_shape = graph.dot_node_shape['final']
-                
-            return node_shape
-        
-        # get labeling def
-        
-        if self._exist_labels():
-            label_def = self.graph._state_label_def
-            label_format = self.graph._state_dot_label_format
-        
-        for (state_id, state_data) in self.graph.nodes_iter(data=True):
-            state = self._int2mutant(state_id)
-            
-            if  self.is_initial(state):
-                add_incoming_edge(to_pydot_graph, state_id)
-            
-            node_shape = decide_node_shape(self.graph, state)
-            
-            # state annotation
-            if self._exist_labels():
-                node_dot_label = form_node_label(state, state_data, label_def, label_format)
-            else:
-                node_dot_label = str(state)
-            
-            # state boundary color
-            if state_data.has_key('color'):
-                node_color = state_data['color']
-            else:
-                node_color = '"black"'
-            
-            # state interior color
-            node_style = '"rounded'
-            if state_data.has_key('fillcolor'):
-                node_style += ',filled"'
-                fill_color = state_data['fillcolor']
-            else:
-                node_style += '"'
-                fill_color = "none"
-            
-            # TODO option to replace with int to reduce size,
-            # TODO generate separate LaTeX legend table (PNG option ?)
-            to_pydot_graph.add_node(
-                state_id, label=node_dot_label, shape=node_shape,
-                style=node_style, color=node_color, fillcolor=fill_color)
     
     def _warn_if_state_exists(self, state):
         if state in self():
@@ -664,10 +756,6 @@ class States(object):
         else:
             for new_initial_state in new_initial_states:
                 self.add_initial(new_initial_state)
-        
-    def number_of_initial(self):
-        """Count initial states."""
-        return len(self._initial)
     
     def remove_initial(self, rm_initial_state):
         """Delete single state from set of initial states."""
@@ -837,6 +925,342 @@ class LabeledStates(States):
     each of which is either a variable, or, only for Moore machines,
     may be an output.
     """
+    """Store & print set of atomic propositions.
+
+    Note that any transition system or automaton is just annotated by atomic
+    propositions. They are either present or absent.
+    Their interpretation is external to this module.
+    That is, evaluating whether an AP is true or false, so present or absent as
+    a member of a set of APs requires semantics defined and processed elsewhere.
+    
+    The simplest representation for APs stored here is a set of strings.
+    """
+    def __init__(self, graph, states=[], initial_states=[], current_state=None,
+                 mutable=False, removed_state_callback=None):
+        States.__init__(self, graph, states=states,
+                        initial_states=initial_states,
+                        current_state=current_state, mutable=mutable,
+                        removed_state_callback=removed_state_callback)
+        
+        # labeling defined ?
+        if hasattr(self.graph, '_state_label_def'):
+            self._label_check = \
+                LabelConsistency(self.graph._state_label_def)
+        else:
+            self._label_check = None
+    
+    def _exist_state_labels(self):
+        if self._label_check is None:
+            raise('State labeling not defined for this system.')
+    
+    def _exist_labels(self):
+        """State labeling defined ?"""
+        if hasattr(self.graph, '_state_label_def'):
+            return True
+        else:
+            # don't prevent dot export
+            msg = 'No state labeling defined for class:\n\t'
+            msg += str(type(self.graph) )
+            dprint(msg)
+            return False
+    
+    def _dot_str(self, to_pydot_graph):
+        """Copy nodes to given Pydot graph, with attributes for dot export."""
+        
+        def add_incoming_edge(g, state):
+            phantom_node = 'phantominit' +str(state)
+            
+            g.add_node(phantom_node, label='""', shape='none', width='0')
+            g.add_edge(phantom_node, state)
+        
+        def form_node_label(state, state_data, label_def, label_format):
+            # node itself
+            node_dot_label = '"' +str(state) +'\\n'
+            
+            # add node annotations from action, AP sets etc
+            # other key,values in state attr_dict ignored
+            sep_label_sets = label_format['separator']
+            for (label_type, label_value) in state_data.iteritems():
+                if label_type in label_def:
+                    # label formatting
+                    type_name = label_format[label_type]
+                    sep_type_value = label_format['type?label']
+                    
+                    # avoid turning strings to lists,
+                    # or non-iterables to lists
+                    if isinstance(label_value, str):
+                        label_str = label_value
+                    elif isinstance(label_value, Iterable): # and not str
+                        label_str = str(list(label_value) )
+                    else:
+                        label_str = str(label_value)
+                    
+                    node_dot_label += type_name +sep_type_value
+                    node_dot_label += label_str +sep_label_sets
+            node_dot_label += '"'
+            
+            return node_dot_label  
+        
+        def decide_node_shape(graph, state):
+            node_shape = graph.dot_node_shape['normal']
+            
+            # check if final states defined
+            if not self._exist_final_states(msg=False):
+                return node_shape
+            
+            # check for final states
+            if self.is_final(state):
+                node_shape = graph.dot_node_shape['final']
+                
+            return node_shape
+        
+        # get labeling def        
+        if self._exist_labels():
+            label_def = self.graph._state_label_def
+            label_format = self.graph._state_dot_label_format
+        
+        for (state_id, state_data) in self.graph.nodes_iter(data=True):
+            state = self._int2mutant(state_id)
+            
+            if  self.is_initial(state):
+                add_incoming_edge(to_pydot_graph, state_id)
+            
+            node_shape = decide_node_shape(self.graph, state)
+            
+            # state annotation
+            if self._exist_labels():
+                node_dot_label = form_node_label(state, state_data, label_def, label_format)
+            else:
+                node_dot_label = str(state)
+            
+            # state boundary color
+            if state_data.has_key('color'):
+                node_color = state_data['color']
+            else:
+                node_color = '"black"'
+            
+            # state interior color
+            node_style = '"rounded'
+            if state_data.has_key('fillcolor'):
+                node_style += ',filled"'
+                fill_color = state_data['fillcolor']
+            else:
+                node_style += '"'
+                fill_color = "none"
+            
+            # TODO option to replace with int to reduce size,
+            # TODO generate separate LaTeX legend table (PNG option ?)
+            to_pydot_graph.add_node(
+                state_id, label=node_dot_label, shape=node_shape,
+                style=node_style, color=node_color, fillcolor=fill_color)
+    
+    def _check_state(self, state, check=True):
+        if not check:
+            # add only if absent, to avoid order-preserving exceptions
+            if state not in self:
+                self.graph.states.add(state)
+        
+        if state not in self:
+            msg = 'State:\n\t' +str(state) +'\n'
+            msg += 'is not in set of states:\n\t' +str(self)
+            raise Exception(msg)
+    
+    def label(self, state, label, check=True):
+        """Add single state with its label.
+        
+        see also
+        --------
+        labels, find
+        
+        @param state: added to set of states
+        @type state: for mutable system states any type,
+            otherwise must be hashable (if in classic NetworkX mode)
+        
+        @param label: sublabels used to annotate C{state}
+        @type label: ordered Iterable of labels
+        """
+        self._exist_state_labels()
+        self._check_state(state, check=check)
+        
+        sublabels = label
+        
+        state_label = self._label_check._sublabels_list2dict(
+            sublabels, check_label=check
+        )
+        
+        state_id = self._mutant2int(state)
+        self.graph.add_node(state_id, **state_label)
+        
+        #if not is_subset(label, self.graph.atomic_propositions):
+        #    msg = 'Label \\not\\subset AP.'
+        #    msg += 'FYI Label:\n\t' +str(label) +'\n'
+        #    msg += 'AP:\n\t' +str(self.graph.atomic_propositions) +'\n'
+        #    msg += 'Note that APs must be in an iterable,\n'
+        #    msg += "even single ones, e.g. {'p'}."
+        #    raise Exception(msg)
+    
+    def labels(self, states, label_list='paired', check=True):
+        """Label multiple states, each with a (possibly) different AP label.
+        
+        input formats
+        -------------
+        Two ways of passing the state labeling:
+            - separately:
+                - C{states = [s0, s1, ...] }
+                - C{label_list = [L0, L1, ...] }
+            where state: s0, is labeled with label: L0, etc.
+            
+            For labeling all states, this approach requires typing
+            fewer parentheses. If C{label_list} is a singleton,
+            then it is used for labeling all states.
+            
+            - paired:
+                - C{states = [(s0, L0), (s1, L1), ...] }
+                - C{label_list = 'paired'}
+            
+            Setting C{label_list} resolves ambiguity which can
+            be caused otherwise, because states are allowed to
+            be anything. So testing if states is an Iterable
+            of pairs would not necessarily imply they are
+            state-label pairs. They could be states which are
+            themselves tuples, e.g. in case of product automata.
+            
+            To reduce the user's load, by default
+            C{label_list} is C{'paired'}.
+        
+        creating states
+        ---------------
+        If no states currently exist and C{states='create'},
+        then new states 0,...,N-1 are created,
+        where: N = C{len(label_list) }.
+        
+        examples
+        --------
+        >>> from tulip import transys as trs
+        >>> fts = trs.FTS()
+        >>> fts.states.add_from(['s0', 's1'] )
+        
+        >>> fts.atomic_propositions.math_set |= ['p', '!p']
+        
+        >>> states = ['s0', 's1']
+        >>> state_labels = [{'p'}, {'!p'} ]
+        >>> fts.states.labels(states, state_labels)
+        
+        You can skip adding them and directly label:
+        
+        >>> fts.states.labels(states, state_labels, check=False)
+        
+        The following three are equivalent:
+        
+        >>> fts.states.labels([1, 2], [{'p'}, {'!p'}], check=False)
+        >>> fts.states.labels(range(2), [{'p'}, {'!p'}], check=False)
+        >>> fts.states.labels('create', [{'p'}, {'!p'}] )
+        
+        see also
+        --------
+        label, find, LabeledTransitions, States, FTS, BA, FSM
+        
+        @param states: existing states to be labeled with ap_label_list,
+            or string 'create' to cause creation of new int ID states
+        @type states: interable container of existing states
+            | str 'create'
+        
+        @param ap_label_list: valid AP labels for annotating C{states}
+        @type ap_label_list: list of valid labels
+            | 'paired' (see "input formats" above)
+        
+        @param check: check if given states and given labels already exist.
+            If C{check=False}, then each state passed is added to system,
+            and each AP is added to the APs of the system.
+        @type check: bool
+        """
+        if states == 'create':
+            n = len(label_list)
+            states = range(n)
+            check = False
+        
+        # already paired ?
+        if label_list == 'paired':
+            state_label_pairs = states
+        else:
+            # single label for all states ?
+            if len(label_list) == 1:
+                print('Single state label applied to each state.')
+                label_list = len(states) *label_list
+            
+            state_label_pairs = zip(states, label_list)
+        
+        for state, curlabel in state_label_pairs:
+            self.label(state, curlabel, check=check)
+    
+    def find(self, states='any', desired_label='any', as_dict=True):
+        """Filter by desired states and by desired state labels.
+        """
+        if states is 'any':
+            state_ids = 'any'
+        else:
+            state_ids = self._mutants2ints(states)
+        
+        found_state_label_pairs = []
+        for state_id, attr_dict in self.graph.nodes_iter(data=True):
+            if state_id not in state_ids:
+                continue
+            
+            # label ok ?
+            if desired_label is 'any':
+                ok = True
+            else:
+                dprint('Checking state label.')
+                ok = self._label_check.label_is_desired(attr_dict, desired_label)
+            
+            if ok:
+                dprint('State label matched desired label.')
+                
+                state = self._int2mutant(state_id)
+                annotation = \
+                    self._label_check._attr_dict2sublabels(attr_dict, as_dict)
+                state_label_pair = (state, annotation)
+                
+                found_state_label_pairs.append(state_label_pair)
+        
+        return found_state_label_pairs
+        
+        #except KeyError:
+        #warnings.warn("State: " +str(state) +", doesn't have AP label.")
+        #return None
+    
+    def delabel(self, states):
+        """Remove labels from states."""
+        
+        raise NotImplementedError
+    
+    def _check_sublabeling(self, state_sublabel_value):
+        """Verify consistency: all sublabels used are defined.
+        
+        To be used after or before removing a sublabel value from
+        its corresponding type definition.
+        Previously these checks where automatically performed,
+        using dedicated classes. But dedicating classes to
+        checks unnecessarily duplicates data types as
+        for example MathSet or PowerSet, which are otherwise
+        between systems and can be reused.
+        """
+        raise NotImplementedError
+        
+        node_ap = nx.get_node_attributes(self.graph, self.name)
+        
+        nodes_using_ap = set()
+        for (node, ap_subset) in node_ap.iteritems():
+            if state_sublabel_value in ap_subset:
+                nodes_using_ap.add(node)                
+        
+        if nodes_using_ap:
+            msg = 'AP (=' +str(state_sublabel_value) +') still used '
+            msg += 'in label of nodes: ' +str(nodes_using_ap)
+            raise Exception(msg)
+        
+        self.atomic_propositions = \
+            self.atomic_propositions.difference({state_sublabel_value} )
 
 class Transitions(object):
     """Building block for managing unlabeled transitions = edges.
@@ -1095,9 +1519,15 @@ class LabeledTransitions(Transitions):
     --------
     Transitions
     """
-    
     def __init__(self, graph):
         Transitions.__init__(self, graph)
+        
+        # labeling defined ?
+        if hasattr(self.graph, '_transition_label_def'):
+            self._label_check = \
+                LabelConsistency(self.graph._transition_label_def)
+        else:
+            self._label_check = None
     
     def __call__(self, labeled=False, as_dict=True):
         """Return all edges, optionally paired with labels.
@@ -1132,16 +1562,16 @@ class LabeledTransitions(Transitions):
         
         edges = [] # if labeled, should better be called "transitions"
         for (from_node, to_node, attr_dict) in self.graph.edge_iter(data=True):
-            annotation = self._attr_dict2sublabels(attr_dict, as_dict)
+            annotation = self._label_check._attr_dict2sublabels(attr_dict, as_dict)
             edge = (from_node, to_node, annotation)
             edges.append(edge)
         
         return edges
     
     def _exist_labels(self):
-        """Labeling defined ?"""
-        if not hasattr(self.graph, '_transition_label_def'):
-            raise Exception('No transition labeling defined for this class.')
+        if self._label_check is None:
+            raise Exception('Transition labeling not defined for:\n\t.' +
+                            str(self.graph) )
     
     def _check_states(self, from_state, to_state, check=True):
         """Are from_state, to_state \\in states.
@@ -1151,160 +1581,19 @@ class LabeledTransitions(Transitions):
         if not check:
             # attempt adding only if not already in set of states
             # to avoid ordering-related exceptions
-            if from_state not in self.graph.states():
+            if from_state not in self.graph.states:
                 self.graph.states.add(from_state)
-            if to_state not in self.graph.states():
+            if to_state not in self.graph.states:
                 self.graph.states.add(to_state)
         
-        if from_state not in self.graph.states():
+        if from_state not in self.graph.states:
             msg = 'from_state:\n\t' +str(from_state)
             msg += '\n\\notin States:' +str(self.graph.states() )
             raise Exception(msg)
         
-        if to_state not in self.graph.states():
+        if to_state not in self.graph.states:
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
-    
-    def _attr_dict2sublabels(self, attr_dict, as_dict):
-        """Extract sublabels representation from edge attribute dict.
-        
-        - If C{as_dict==True}, then return dict of:
-            {sublabel_type : sublabel_value, ...}
-        Otherwise return list of sublabel values:
-            [sublabel_value, ...]
-        ordered by _attr_dict2sublabels_list.
-        
-        see also
-        --------
-        _attr_dict2sublabels_list
-        """
-        if as_dict:
-            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
-            annotation = sublabels_dict
-        else:
-            sublabel_values = self._attr_dict2sublabels_list(attr_dict)
-            annotation = sublabel_values
-        
-        return annotation
-    
-    def _attr_dict2sublabels_list(self, attr_dict):
-        """Convert attribute dict to tuple of sublabel values."""
-        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
-        sublabel_values = self._sublabels_dict2list(sublabels_dict)
-        return sublabel_values
-    
-    def _attr_dict2sublabels_dict(self, attr_dict):
-        """Filter the edge attributes which are not labels.
-        
-        see also
-        --------
-        _attr_dict2sublabels_list
-        
-        @return: sublabel types with their values
-        @rtype: {C{sublabel_type} : C{sublabel_value},...}
-        """
-        self._exist_labels()
-        
-        sublabel_ordict = self.graph._transition_label_def        
-        sublabels_dict = {k:v for k,v in attr_dict.iteritems()
-                              if k in sublabel_ordict}
-        
-        return sublabels_dict
-    
-    def _sublabels_dict2list(self, sublabels_dict):
-        """Return ordered sulabel values.
-        
-        Sublabel values are ordered according to sublabel ordering
-        defined in graph._transition_label_def, which is an OrderedDict.
-        
-        see also
-        --------
-        _sublabels_list2dict
-        """
-        self._exist_labels()
-        
-        sublabel_ordict = self.graph._transition_label_def        
-        sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
-                                             if k in sublabels_dict]
-        
-        return sublabel_values
-    
-    def _sublabels_list2dict(self, sublabel_values, check_label=True):
-        """Return sublabel values dict from tuple.
-        
-        see also
-        --------
-        _sublabels_dict2list
-        
-        @param sublabels_tuple: ordered sublabel values
-        @type sublabels_tuple: tuple
-        
-        @param check_label: verify existence of label
-        @type check_label: bool
-        """
-        self._exist_labels()
-        
-        # get labeling def
-        label_def = self.graph._transition_label_def
-        
-        # single label ?
-        if len(label_def) == 1:
-            dprint('Replaced sublabel value:\n\t' +str(sublabel_values) )
-            sublabel_values = [sublabel_values]
-            dprint('with the singleton:\n\t' +str(sublabel_values) )
-        
-        # constuct label dict
-        edge_label = dict()
-        if isinstance(sublabel_values, list) or \
-        isinstance(sublabel_values, tuple):
-            for i in range(len(sublabel_values) ):
-                cur_name = label_def.keys()[i]
-                cur_label = sublabel_values[i]
-                
-                edge_label[cur_name] = cur_label
-        elif isinstance(sublabel_values, dict):
-            edge_label = sublabel_values
-        else:
-            raise Exception('Bug')
-        
-        # check if dict is consistent with label defs
-        for (typename, sublabel) in edge_label.iteritems():
-            possible_labels = label_def[typename]
-            
-            # iterable sublabel descreption ? (i.e., discrete ?)
-            if isinstance(possible_labels, Iterable):
-                if not check_label:
-                    possible_labels.add(sublabel)
-                elif sublabel not in possible_labels:
-                    msg = 'Given label:\n\t' +str(sublabel) +'\n'
-                    msg += 'not in set of transition labels:\n\t'
-                    msg += str(possible_labels) +'\n'
-                    msg += 'If Atomic Propositions involved,\n'
-                    msg += 'did you forget to pass an iterable of APs,\n'
-                    msg += 'instead of a single AP ?\n'
-                    msg += "(e.g., {'p'} instead of 'p')"
-                    raise Exception(msg)
-                
-                continue
-            
-            # not iterable, check using convention:
-            
-            # sublabel type not defined ?
-            if possible_labels == None:
-                print('Undefined sublabel type')
-                continue
-            
-            # check given ?
-            if not hasattr(possible_labels, 'is_valid_guard'):
-                raise TypeError('SubLabel type V does not have method is_valid.')
-            
-            # check sublabel type
-            if not possible_labels.is_valid_guard(sublabel):
-                raise TypeError('Sublabel:\n\t' +str(sublabel) +'\n' +
-                                'not valid for sublabel type:\n\t' +
-                                str(possible_labels) )
-            
-        return edge_label
         
     def _dot_str(self, to_pydot_graph):
         """Return label for dot export.
@@ -1364,7 +1653,8 @@ class LabeledTransitions(Transitions):
     def remove_labeled(self, from_state, to_state, label):
         self._exist_labels()
         self._check_states(from_state, to_state, check=True)
-        edge_label = self._sublabels_list2dict(label, check_label=True)
+        edge_label = \
+            self._label_check._sublabels_list2dict(label, check_label=True)
         
         # get all transitions with given label
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
@@ -1400,16 +1690,21 @@ class LabeledTransitions(Transitions):
         self._check_states(from_state, to_state, check=True)
         
         # chek if same unlabeled transition exists
-        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        trans_from_to = self.graph.get_edge_data(from_state_id, to_state_id,
-                                                 default={} )
+        (from_state_id, to_state_id) = \
+            self.graph.states._mutant2int(from_state, to_state)
+        trans_from_to = self.graph.get_edge_data(
+            from_state_id, to_state_id, default={} )
+        
         if {} not in trans_from_to.values():
-            msg = "Unlabeled transition from_state-> to_state doesn't exist,\n"
-            msg += 'where:\t from_state = ' +str(from_state) +'\n'
+            msg = 'Unlabeled transition from_state-> to_state '
+            msg += "doesn't exist,\n where:\t"
+            msg += 'from_state = ' +str(from_state) +'\n'
             msg += 'and:\t to_state = ' +str(to_state) +'\n'
             msg += 'So it cannot be labeled.\n'
-            msg += 'Either add it first using: transitions.add(), then label it,\n'
-            msg += 'or use transitions.add_labeled(), same with a single call.\n'
+            msg += 'Either add it first using: transitions.add() '
+            msg += 'and then label it,\n'
+            msg += 'or use transitions.add_labeled(), '
+            msg += 'same with a single call.\n'
             raise Exception(msg)
         
         # label it
@@ -1483,7 +1778,8 @@ class LabeledTransitions(Transitions):
         # if labels were not previously in label set,
         # then a similar issue can arise only with unlabeled transitions
         # pre-existing. This is avoided by first checking for an unlabeled trans.        
-        edge_label = self._sublabels_list2dict(labels, check_label=check)
+        edge_label = \
+            self._label_check._sublabels_list2dict(labels, check_label=check)
         
         # check if same labeled transition exists
         if edge_label in trans_from_to.values():
@@ -1543,7 +1839,8 @@ class LabeledTransitions(Transitions):
         if len(self.graph.states() ) == 0:
             new_states = range(n)
             self.graph.states.add_from(new_states)
-            print('Added ordered list of states: ' +str(self.graph.states.list) )
+            print('Added ordered list of states: ' +
+                  str(self.graph.states.list) )
         
         # convert to format friendly for edge iteration
         nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
@@ -1556,7 +1853,8 @@ class LabeledTransitions(Transitions):
             from_state = states_list[from_idx]
             to_state = states_list[to_idx]
             
-            self.add_labeled(from_state, to_state, labels, check=check_labels)
+            self.add_labeled(from_state, to_state, labels,
+                             check=check_labels)
         
         # in-place replace nodes, based on map
         # compose graphs (vs union, vs disjoint union)
@@ -1637,26 +1935,6 @@ class LabeledTransitions(Transitions):
                     | tuple of edge annotation,
                     determined by C{as_dict}.
         """
-        def label_is_desired(attr_dict, desired_label):
-            for (label_type, desired_val) in desired_label.iteritems():
-                dprint('SubLabel type checked:\n\t' +str(label_type) )
-                cur_val = attr_dict[label_type]
-                dprint('possible label values:\n\t' +str(cur_val) )
-                dprint('Desired label:\n\t' +str(desired_val) )
-                
-                if cur_val != desired_val and True not in cur_val:
-                    # common bug
-                    if isinstance(cur_val, (set,list) ) and \
-                       isinstance(desired_val, (set, list) ) and \
-                       cur_val.__class__ != desired_val.__class__:
-                           warnings.warn('Set label compared to list label,\n'
-                                         'did you mixed sets and lists when '
-                                         'initializing AP labels ?')
-                    
-                    return False
-            return True
-        
-        # interface
         (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
                                                             to_states)
         found_transitions = []        
@@ -1671,7 +1949,7 @@ class LabeledTransitions(Transitions):
                 ok = True
             else:
                 dprint('Checking guard.')
-                ok = label_is_desired(attr_dict, desired_label)
+                ok = self._label_check.label_is_desired(attr_dict, desired_label)
             
             if ok:
                 dprint('Transition label matched desired label.')
@@ -1679,7 +1957,8 @@ class LabeledTransitions(Transitions):
                 from_state = self.graph.states._int2mutant(from_state_id)
                 to_state = self.graph.states._int2mutant(to_state_id)
                 
-                annotation = self._attr_dict2sublabels(attr_dict, as_dict)
+                annotation = \
+                    self._label_check._attr_dict2sublabels(attr_dict, as_dict)
                 transition = (from_state, to_state, annotation)
                 
                 found_transitions.append(transition)
@@ -1688,7 +1967,7 @@ class LabeledTransitions(Transitions):
     
     def _label_of(self, from_states, to_states='any', as_dict=True):
         """Depreceated: use find instead. This to be removed."""
-        
+        raise NotImplementedError
         if to_states == 'any':
             to_states = self.graph.states.post_single(from_state)
         
@@ -1712,8 +1991,9 @@ class LabeledTransitions(Transitions):
     
         return transition_label_values
     
-    def check_sublabeling(self, sublabel_name, sublabel_value):
+    def _check_sublabeling(self, sublabel_name, sublabel_value):
         """Check which sublabels are still being used."""
+        raise NotImplementedError
         edge_sublabels = nx.get_edge_attributes(self.graph, sublabel_name)
         
         edges_using_sublabel_value = set()
@@ -1744,7 +2024,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             states = from_networkx_graph.nodes()
             edges = from_networkx_graph.edges()
         
-        self.states = States(self, states=states, initial_states=initial_states,
+        self.states = LabeledStates(self, states=states, initial_states=initial_states,
                              current_state=current_state, mutable=mutable,
                              removed_state_callback=removed_state_callback)
         self.transitions = LabeledTransitions(self)

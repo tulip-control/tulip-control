@@ -179,10 +179,6 @@ class FiniteStateMachine(LabeledStateDiGraph):
     FMS, MealyMachine, MooreMachine
     """
     def __init__(self, **args):
-        LabeledStateDiGraph.__init__(
-            self, removed_state_callback=self._removed_state_callback, **args
-        )
-        
         # values will point to values of _*_label_def below
         self.state_vars = OrderedDict()
         self.inputs = OrderedDict()
@@ -200,6 +196,10 @@ class FiniteStateMachine(LabeledStateDiGraph):
                                              'separator':'\\n'}
         
         self.default_export_fname = 'fsm'
+        
+        LabeledStateDiGraph.__init__(
+            self, removed_state_callback=self._removed_state_callback, **args
+        )
     
     def _removed_state_callback(self):
         """Remove it also from anywhere within this class, besides the states."""

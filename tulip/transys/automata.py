@@ -119,17 +119,6 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self, final_states=[], input_alphabet_or_atomic_propositions=[],
         atomic_proposition_based=True, mutable=False, **args
     ):
-        LabeledStateDiGraph.__init__(
-            self, mutable=mutable,
-            removed_state_callback=self._removed_state_callback, **args
-        )
-        
-        if mutable:
-            self.final_states = list()
-        else:
-            self.final_states = set()
-        self.add_final_states_from(final_states)
-        
         # edge labeling
         if atomic_proposition_based:
             self.atomic_proposition_based = True
@@ -142,6 +131,17 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
             ['in_alphabet', alphabet]
         ])
         self.alphabet = self._transition_label_def['in_alphabet']
+        
+        LabeledStateDiGraph.__init__(
+            self, mutable=mutable,
+            removed_state_callback=self._removed_state_callback, **args
+        )
+        
+        if mutable:
+            self.final_states = list()
+        else:
+            self.final_states = set()
+        self.add_final_states_from(final_states)
         
         # used before label value
         self._transition_dot_label_format = {'in_alphabet':'',
@@ -553,7 +553,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     for s0 in s0s:
         dprint('----\nChecking initial state:\n\t' +str(s0) )        
         
-        Ls0 = fts.atomic_propositions.of(s0)
+        Ls0 = fts.states.find(s0)
         Ls0_dict = {'in_alphabet': Ls0}
         
         for q0 in q0s:

@@ -32,238 +32,18 @@
 """
 Transition System Module
 """
-from collections import Iterable, Hashable, OrderedDict
+from collections import Iterable, OrderedDict
 from time import strftime
 from pprint import pformat
-import warnings
-
-import networkx as nx
 
 from labeled_graphs import LabeledStateDiGraph, str2singleton
 from labeled_graphs import prepend_with, vprint
-from mathset import is_subset, unique
+from mathset import PowerSet, MathSet, unique
 import automata
 from executions import FTSSim
 
 hl = 60 *'-'
 
-class AtomicPropositions(object):
-    """Store & print set of atomic propositions.
-
-    Note that any transition system or automaton is just annotated by atomic
-    propositions. They are either present or absent.
-    Their interpretation is external to this module.
-    That is, evaluating whether an AP is true or false, so present or absent as
-    a member of a set of APs requires semantics defined and processed elsewhere.
-    
-    The simplest representation for APs stored here is a set of strings.
-    """    
-    
-    # manipulate AP set (AP alphabet, not to be confused with input alphabet)
-    def __init__(self, graph, name, atomic_propositions=[]):
-        self.graph = graph
-        self.name = name
-        self.atomic_propositions = set(atomic_propositions)
-    
-    def __call__(self):
-        return self.atomic_propositions    
-    
-    def __str__(self):
-        return 'Atomic Propositions:\n\t' +pformat(self() )
-    
-    def __contains__(self, atomic_proposition):
-        return atomic_proposition in self.atomic_propositions
-    
-    def _check_state(self, state):
-        if state not in self.graph.states():
-            msg = 'State:\n\t' +str(state) +'\n'
-            msg += 'is not in set of states:\n\t' +str(self.graph.states() )
-            raise Exception(msg)
-    
-    def add(self, atomic_proposition, check_existing=True):
-        """Add single atomic proposition.
-        
-        @type atomic_proposition: hashable
-        """
-        if not isinstance(atomic_proposition, Hashable):
-            raise Exception('Atomic propositions stored in set, so must be hashable.')
-        
-        if atomic_proposition in self.atomic_propositions and check_existing:
-            raise Exception('Atomic Proposition already in set of APs.')
-        
-        self.atomic_propositions.add(atomic_proposition)
-    
-    def add_from(self, atomic_propositions, check_existing=True):
-        """Add multiple atomic propositions.
-        
-        @type atomic_propositions: iterable
-        """
-        if not isinstance(atomic_propositions, Iterable):
-            raise Exception('Atomic Propositions must be provided in iterable.')
-        
-        for atomic_proposition in atomic_propositions:
-            self.add(atomic_proposition, check_existing) # use checks
-        
-    def remove(self, atomic_proposition):
-        node_ap = nx.get_node_attributes(self.graph, self.name)
-        
-        nodes_using_ap = set()
-        for (node, ap_subset) in node_ap.iteritems():
-            if atomic_proposition in ap_subset:
-                nodes_using_ap.add(node)                
-        
-        if nodes_using_ap:
-            msg = 'AP (=' +str(atomic_proposition) +') still used '
-            msg += 'in label of nodes: ' +str(nodes_using_ap)
-            raise Exception(msg)
-        
-        self.atomic_propositions = \
-            self.atomic_propositions.difference({atomic_proposition} )
-        
-    def number(self):
-        """Count atomic propositions."""
-        return len(self.atomic_propositions)
-    
-    def add_labeled_state(self, state, ap_label, check=True):
-        """Add single state with its label.
-        
-        @param state: defines element to be added to set of states S
-                  = hashable object (int, str, etc)
-        @type ap_label: iterable \\in 2^AP
-        """
-        self.graph.states.add(state)
-        
-        if not check:
-            self.add_from(ap_label)
-        
-        if not set(ap_label) <= self.atomic_propositions:
-            raise Exception('Label \\not\\subset AP.')
-        
-        kw = {self.name: ap_label}
-        self.graph.add_node(state, **kw)
-    
-    def label_state(self, state, ap_label, check=True):
-        """Label state with subset of AP (Atomic Propositions).
-        
-        State and AP label checked, override with check = False.        
-        """
-        if not check:
-            self.add_labeled_state(state, ap_label, check=check)
-            return
-        
-        self._check_state(state)
-        
-        # note: after moving, this will change to \in PowerSet(AP)
-        ap_label = str2singleton(ap_label)
-        if not is_subset(ap_label, self.atomic_propositions):
-            raise Exception('Label \\not\\subset AP.'
-                            'FYI Label:\n\t' +str(ap_label) +'\n'
-                            'AP:\n\t' +str(self.atomic_propositions) +'\n' +
-                            'Note that APs must be in an iterable,\n' +
-                            "even single ones, e.g. {'p'}.")
-        
-        kw = {self.name: ap_label}
-        self.graph.add_node(state, **kw)
-    
-    def label_states(self, states, ap_label, check=True):
-        """Label multiple states with the same AP label."""
-        
-        for state in states:
-            self.label_state(state, ap_label, check=check)
-    
-    def label_per_state(self, states, ap_label_list, check=True):
-        """Label multiple states, each with a (possibly) different AP label.
-        
-        If no states currently exist and C{states=[]} passed,
-        then new states 0,...,N-1 are created,
-        where N = C{len(ap_label_list) } the number of AP labels in the list.
-        Note that these AP labels are not necessarily different with each other.
-        
-        examples
-        --------
-        fts.states.add_from(['s0', 's1'] )
-        fts.atomic_propositions.add_from(['p', '!p'] )
-        fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}] )
-        
-        or to skip adding them first:
-        fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}], check=False)
-        
-        The following 3 are equivalent:
-        fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
-        fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
-        fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
-        
-        @param states: existing states to be labeled with ap_label_list,
-            or string 'create' to cause creation of new int ID states
-        @type states: interable container of existing states |
-            str 'create'
-        
-        @param ap_label_list: valid AP labels for annotating C{states}
-        @type ap_label_list: list of valid labels
-        
-        @param check: check if given states and given labels already exist.
-            If C{check=False}, then each state passed is added to system,
-            and each AP is added to the APs of the system.
-        @type check: bool
-        """
-        if states == 'create':
-            states = range(len(ap_label_list) )
-            check = False
-        
-        for state, curlabel in zip(states, ap_label_list):
-            self.label_state(state, curlabel, check=check)
-    
-    def delabel_state(self, state):
-        """Alias for remove_label_from_state()."""
-        
-        raise NotImplementedError
-    
-    def of(self, state):
-        """Get AP set labeling given state.
-        
-        If state does I{not} have AP label, return None.
-        """
-        
-        self._check_state(state)
-        try:
-            state_sublabel_name = self.name
-            return self.graph.node[state][state_sublabel_name]
-        except KeyError:
-            warnings.warn("State: " +str(state) +", doesn't have AP label.")
-            return None
-        
-    def list_states_with_labels(self):
-        """Return list of labeled states.
-        
-        Each state is a tuple:
-            (state, label)
-        where:
-            state \in States
-            label \in 2^AP
-        """
-        return self.states(data=True)
-    
-    def remove_state_with_label(self, labels):
-        """Find states with given label"""
-        raise NotImplementedError
-    
-    def find_states_with_label(self, labels):
-        """Return all states with label in given set."""
-        raise NotImplementedError
-    
-    def remove_labels_from_states(self, states):
-        raise NotImplementedError
-
-class Actions(set):
-    """Store set of system or environment actions."""
-    
-    def add_from(self, actions=[]):
-        """Add multiple actions.
-        
-        @type actions: iterable
-        """
-        self |= set(actions)
-        
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System for modeling closed systems.
     
@@ -290,27 +70,25 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             (e.g. sys, env). Not used for closed FTS, because it has single set
             of actions.
     """
-    
     def __init__(self, atomic_propositions=[], actions=[], **args):
         """Note first sets of states in order of decreasing importance,
         then first state labeling, then transitin labeling (states more
         fundamentalthan transitions, because transitions need states in order to
         be defined).
         """
-        LabeledStateDiGraph.__init__(self, **args)
         
         # state labels
         self._state_label_def = OrderedDict(
-            [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
+            [['ap', PowerSet(atomic_propositions) ]]
         )
-        self.atomic_propositions = self._state_label_def['ap']
+        self.atomic_propositions = self._state_label_def['ap'].math_set
         self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
         
         # edge labels comprised of sublabels (here single sublabel)
         self._transition_label_def = OrderedDict(
-            [['actions', Actions(actions)]]
+            [['actions', MathSet(actions)]]
         )
         self.actions = self._transition_label_def['actions']
         self._transition_dot_label_format = {'actions':'',
@@ -319,10 +97,13 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
 
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'fts'
+        
+        LabeledStateDiGraph.__init__(self, **args)
 
     def __str__(self):        
         s = hl +'\nFinite Transition System (closed)\n' +hl
-        s += str(self.states) +'\n' +str(self.atomic_propositions) +'\n'
+        s += str(self.states) +'\n'
+        s += 'Atomic Propositions:\n\t' +pformat(self.atomic_propositions) +'\n'
         s += 'State Labels:\n' +pformat(self.states(data=True) ) +'\n'
         s += 'Actions:\n\t' +str(self.actions) +'\n'
         s += str(self.transitions) +'\n' +hl +'\n'
@@ -462,7 +243,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             procname = self.name
         
         s = ''
-        for ap in self.atomic_propositions():
+        for ap in self.atomic_propositions:
             # convention "!" means negation
             if ap[0] != '!':
                 s += 'bool ' +str(ap) +';\n'
@@ -475,8 +256,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s += '\t fi;\n'
         
         for state in self.states():
-            ap_alphabet = self.atomic_propositions()
-            ap_label = self.atomic_propositions.of(state)
+            ap_alphabet = self.atomic_propositions
+            ap_label = self.states.label_of(state)
             s += state2promela(state, ap_label, ap_alphabet)
             
             outgoing_transitions = self.transitions.find({state}, as_dict=True)
@@ -510,11 +291,9 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Analogous to FTS, but for open systems, with system and environment."""
     def __init__(self, atomic_propositions=[], sys_actions=[],
                  env_actions=[], **args):
-        LabeledStateDiGraph.__init__(self, **args)
-        
         # state labeling
         self._state_label_def = OrderedDict(
-            [['ap', AtomicPropositions(self, 'ap', atomic_propositions) ]]
+            [['ap', PowerSet(atomic_propositions) ]]
         )
         self.atomic_propositions = self._state_label_def['ap']
         self._state_dot_label_format = {'ap':'',
@@ -523,8 +302,8 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         
         # edge labeling (here 2 sublabels)
         self._transition_label_def = OrderedDict([
-            ['sys_actions', Actions(sys_actions) ],
-            ['env_actions', Actions(env_actions) ]
+            ['sys_actions', MathSet(sys_actions) ],
+            ['env_actions', MathSet(env_actions) ]
         ])
         self.sys_actions = self._transition_label_def['sys_actions']
         self.env_actions = self._transition_label_def['env_actions']
@@ -535,11 +314,13 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'ofts'
         
+        LabeledStateDiGraph.__init__(self, **args)
+        
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
         s += '\n' +str(self.transitions) +'\n'
         s += str(self.sys_actions) +'\n' +str(self.env_actions) +'\n'
-        s += str(self.atomic_propositions) +'\n'
+        s += 'Atomic Propositions:\n\t' +pformat(self.atomic_propositions) +'\n'
         
         return s
 
@@ -672,7 +453,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     ts.states.add_from(states)
     ts.states.add_initial_from(initial_states)
     
-    ts.atomic_propositions.add_from(ap)
+    ts.atomic_propositions |= ap
     
     # note: verbosity before actions below
     # to avoid screening by possible error caused by action
@@ -685,7 +466,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             
             vprint('Labeling state:\n\t' +str(state) +'\n' +
                   'with label:\n\t' +str(ap_label) +'\n', verbose)
-            ts.atomic_propositions.label_state(state, ap_label)
+            ts.states.label(state, ap_label)
     
     # any transition labeling ?
     if actions is None:
@@ -696,7 +477,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                    '--->' +str(to_state) +'\n', verbose)
             ts.transitions.add(from_state, to_state)
     else:
-        ts.actions.add_from(actions)
+        ts.actions |= actions
         for (from_state, to_state, act) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
