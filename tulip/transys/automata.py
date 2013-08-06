@@ -114,7 +114,6 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     LabeledStateDiGraph._dot_str
         
     """
-    
     def __init__(
         self, final_states=[], input_alphabet_or_atomic_propositions=[],
         atomic_proposition_based=True, mutable=False, **args
@@ -151,14 +150,22 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.dot_node_shape = {'normal':'circle', 'final':'doublecircle'}
         self.default_export_fname = 'fsa'
         
-    def __str__(self):
-        s = str(self.states)
-        s += '\nState Labels:\n' +pformat(self.states(data=True) ) +'\n'
-        s += str(self.transitions) +'\n'
-        s += 'Alphabet:\n' +str(self.alphabet) +'\n'
-        s += 'Final States:\n\t' +str(self.final_states)
+    def __repr__(self):
+        s = 'States:\n'
+        s += pformat(self.states(data=False), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Input Alphabet Letters:\n\t'
+        s += str(self.alphabet) +2*'\n'
+        s += 'Transitions & labeling w/ Input Letters:\n'
+        s += pformat(self.transitions(labeled=True), indent=3) +2*'\n'
+        s += 'Final states differently defined for specific types'
+        s += 'of automata, e.g. BA vs DRA.' +'\n' +hl +'\n'
         
         return s
+    
+    def __str__(self):
+        return self.__repr__()
     
     def _removed_state_callback(self, rm_state):
         self.remove_final_state(rm_state)
@@ -166,6 +173,8 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     def _is_final(self, state):
         return is_subset([state], self.final_states)
 
+    #TODO rm final states, pull them out as separate object,
+    # because they differ from flavor to flavor of automaton
     # final states
     def add_final_state(self, new_final_state):
         if not new_final_state in self.states():
@@ -283,16 +292,27 @@ class BuchiAutomaton(OmegaAutomaton):
     def __init__(self, **args):
         OmegaAutomaton.__init__(self, **args)
     
-    def __str__(self):
-        s = hl +'\nB' +u'\xfc' +'chi Automaton\n' +hl
-        s += str(self.states) +'\n'
-        s += 'Input Alphabet Letters (\in 2^AP):\n\t' +str(self.alphabet)
-        s += '\n' +str(self.transitions) +'\n' +hl +'\n'
+    def __repr__(self):
+        s = hl +'\nB' +u'\xfc' +'chi Automaton: ' +self.name +'\n' +hl +'\n'
+        s += 'States:\n'
+        s += pformat(self.states(data=False), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Final States:\n'
+        s += pformat(self.final_states, indent=3) +2*'\n'
+        
+        if self.atomic_proposition_based:
+            s += 'Input Alphabet Letters (\in 2^AP):\n\t'
+        else:
+            s += 'Input Alphabet Letters:\n\t'
+        s += str(self.alphabet) +2*'\n'
+        s += 'Transitions & labeling w/ Input Letters:\n'
+        s += pformat(self.transitions(labeled=True), indent=3) +'\n' +hl +'\n'
         
         return s
     
-    def __repr__(self):
-        return self.__str__()
+    def __str__(self):
+        return self.__repr__()
     
     def __add__(self, other):
         """Union of two automata, with equal states identified."""
@@ -492,8 +512,10 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
         dprint(msg)
         
-        transition_label = transition_system.atomic_propositions.of(ts_to_state)
-        prod_ba.transitions.add_labeled(from_state, to_state, transition_label)   
+        state_label_pairs = transition_system.states.find(ts_to_state)
+        (ts_to_state_, transition_label_dict) = state_label_pairs[0]
+        transition_label_value = transition_label_dict['ap']
+        prod_ba.transitions.add_labeled(from_state, to_state, transition_label_value)   
     
     return prod_ba
 
@@ -519,6 +541,26 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     --------
     _ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
     """
+    def convert_ts2ba_label(state_label_dict):
+        """Replace 'ap' key with 'in_alphabet'.
+        
+        @param state_label_dict: FTS state label, its value \\in 2^AP
+        @type state_label_dict: dict {'ap' : state_label_value}
+        
+        @return: BA edge label, its value \\in 2^AP
+            (same value with state_label_dict)
+        @rtype: dict {'in_alphabet' : edge_label_value}
+            Note: edge_label_value is the BA edge "guard"
+        """
+        dprint('Ls0:\t' +str(state_label_dict) )
+        
+        (s0_, label_dict) = state_label_dict[0]
+        Sigma_dict = {'in_alphabet': label_dict['ap'] }
+        
+        dprint('State label of: ' +str(s0) +', is: ' +str(Sigma_dict) )
+        
+        return Sigma_dict
+    
     if not isinstance(transition_system, transys.FiniteTransitionSystem):
         msg = 'transition_system not transys.FiniteTransitionSystem.\n'
         msg += 'Actual type passed: ' +str(type(transition_system) )
@@ -548,16 +590,21 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     s0s = fts.states.initial.copy()
     q0s = ba.states.initial.copy()
     
-    final_states_preimage = set()    
+    final_states_preimage = set()
     
+    dprint(hl +'\n' +' Product TS construction:\n' +hl +'\n')
     for s0 in s0s:
-        dprint('----\nChecking initial state:\n\t' +str(s0) )        
+        dprint('Checking initial state:\t' +str(s0) )
         
         Ls0 = fts.states.find(s0)
-        Ls0_dict = {'in_alphabet': Ls0}
+        
+        # desired input letter for BA
+        Sigma_dict = convert_ts2ba_label(Ls0)
         
         for q0 in q0s:
-            enabled_ba_trans = ba.transitions.find({q0}, desired_label=Ls0_dict)
+            enabled_ba_trans = ba.transitions.find(
+                {q0}, desired_label=Sigma_dict
+            )
             
             # q0 blocked ?
             if len(enabled_ba_trans) == 0:
@@ -565,11 +612,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 continue
             
             # which q next ?     (note: curq0 = q0)
+            dprint('enabled_ba_trans = ' +str(enabled_ba_trans) )
             for (curq0, q, sublabels) in enabled_ba_trans:
                 new_sq0 = (s0, q)                
                 prodts.states.add(new_sq0)
                 prodts.states.add_initial(new_sq0)
-                prodts.atomic_propositions.label_state(new_sq0, {q} )
+                prodts.states.label(new_sq0, {q} )
                 
                 # final state ?
                 if ba.states.is_final(q):
@@ -594,15 +642,15 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         for next_s in next_ss:
             dprint('Next state:\n\t' +str(next_s) )
             
-            Ls = fts.atomic_propositions.of(next_s)
-            if Ls is None:
+            Ls = fts.states.find(next_s)
+            if not Ls:
                 raise Exception('No AP label for FTS state: ' +str(next_s) +
                                 '\n Did you forget labeing it ?')
-            Ls_dict = {'in_alphabet': Ls}
-
-            dprint("Next state's label:\n\t" +str(Ls_dict) )
             
-            enabled_ba_trans = ba.transitions.find({q}, desired_label=Ls_dict)
+            Sigma_dict = convert_ts2ba_label(Ls)
+            dprint("Next state's label:\n\t" +str(Sigma_dict) )
+            
+            enabled_ba_trans = ba.transitions.find({q}, desired_label=Sigma_dict)
             dprint('Enabled BA transitions:\n\t' +str(enabled_ba_trans) )
             
             if len(enabled_ba_trans) == 0:
@@ -619,7 +667,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                     final_states_preimage.add(new_sq)
                     dprint(str(new_sq) +' contains a final state.')
                 
-                prodts.atomic_propositions.label_state(new_sq, {next_q} )
+                prodts.states.label(new_sq, {next_q} )
                 
                 dprint('Adding transitions:\n\t' +str(sq) +'--->' +str(new_sq) )
                 # is fts transition labeled with an action ?

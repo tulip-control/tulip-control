@@ -33,10 +33,13 @@
 Finite State Machines Module
 """
 from collections import OrderedDict
+from pprint import pformat
 import warnings
 
 from labeled_graphs import LabeledStateDiGraph
 import executions
+
+hl = 60 *'-'
 
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
@@ -200,6 +203,9 @@ class FiniteStateMachine(LabeledStateDiGraph):
         LabeledStateDiGraph.__init__(
             self, removed_state_callback=self._removed_state_callback, **args
         )
+        
+        self.dot_node_shape = {'normal':'ellipse'}
+        self.default_export_fname = 'fsm'
     
     def _removed_state_callback(self):
         """Remove it also from anywhere within this class, besides the states."""
@@ -285,9 +291,29 @@ class MooreMachine(FiniteStateMachine):
     """
     def __init__(self, **args):
         FiniteStateMachine.__init__(self, **args)
+        
+        self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'moore'
         
         raise NotImplementedError
+    
+    def __repr__(self):
+        #TODO: improve port formatting
+        s = hl +'\nMoore Machine: ' +self.name +'\n' +hl +'\n'
+        s += 'State Variables:\n\t' +pformat(self.state_vars) +'\n'
+        s += 'Output ports:\n\t' +pformat(self.outputs) +'\n'
+        s += 'States & labeling w/ State Vars & Output Ports:\n\t'
+        s += str(self.states(data=True) ) +'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Input ports:\n\t' +pformat(self.inputs) +'\n'
+        s += 'Transitions & labeling w/ Input Port guards:\n\t'
+        s += str(self.transitions(data=True) ) +'\n' +hl +'\n'
+        
+        return s
+    
+    def __str__(self):
+        return self.__repr__()
     
     def add_outputs(self, new_outputs_ordered_dict):
         for (out_port_name, out_port_type) in \
@@ -327,7 +353,25 @@ class MealyMachine(FiniteStateMachine):
         FiniteStateMachine.__init__(self, **args)
         
         # will point to selected values of self._transition_label_def
+        self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'mealy'
+    
+    def __repr__(self):
+        #TODO: improve port formatting
+        s = hl +'\nMealy Machine: ' +self.name +'\n' +hl +'\n'
+        s += str(self.states) +'\n'
+        s += 'State Variables:\n' +pformat(self.state_vars) +'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Input ports:\n\t' +str(self.inputs) +'\n'
+        s += 'Output ports:\n\t' +str(self.outputs) +'\n'
+        s += 'Transitions & Labels:\n\t' +str(self.transitions(data=True) )
+        s += '\n' +hl +'\n'
+        
+        return s
+    
+    def __str__(self):
+        return self.__repr__()
     
     def add_outputs(self, new_outputs_ordered_dict):
         for (out_port_name, out_port_type) in \

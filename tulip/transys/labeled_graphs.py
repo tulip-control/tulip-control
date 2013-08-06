@@ -44,7 +44,7 @@ import networkx as nx
 from mathset import is_subset
 
 hl = 60 *'-'
-debug = False
+debug = True
 
 try:
     import pydot
@@ -142,7 +142,7 @@ class LabelConsistency(object):
         @return: sublabel types with their values
         @rtype: {C{sublabel_type} : C{sublabel_value},...}
         """
-        self._exist_labels()
+        #self._exist_labels()
         
         sublabel_ordict = self.label_def
         sublabels_dict = {k:v for k,v in attr_dict.iteritems()
@@ -160,7 +160,7 @@ class LabelConsistency(object):
         --------
         _sublabels_list2dict
         """
-        self._exist_labels()
+        #self._exist_labels()
         
         sublabel_ordict = self.label_def
         sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
@@ -249,23 +249,24 @@ class LabelConsistency(object):
         return edge_label
     
     def label_is_desired(self, attr_dict, desired_label):
-            for (label_type, desired_val) in desired_label.iteritems():
-                dprint('SubLabel type checked:\n\t' +str(label_type) )
-                cur_val = attr_dict[label_type]
-                dprint('possible label values:\n\t' +str(cur_val) )
-                dprint('Desired label:\n\t' +str(desired_val) )
-                
-                if cur_val != desired_val and True not in cur_val:
-                    # common bug
-                    if isinstance(cur_val, (set,list) ) and \
-                       isinstance(desired_val, (set, list) ) and \
-                       cur_val.__class__ != desired_val.__class__:
-                           warnings.warn('Set label compared to list label,\n'
-                                         'did you mixed sets and lists when '
-                                         'initializing AP labels ?')
+        for (label_type, desired_val) in desired_label.iteritems():
+            dprint('SubLabel type checked:\n\t' +str(label_type) )
+            cur_val = attr_dict[label_type]
+            dprint('possible label values:\n\t' +str(cur_val) )
+            dprint('Desired label:\n\t' +str(desired_val) )
+            
+            if cur_val != desired_val and True not in cur_val:
+                # common bug
+                if isinstance(cur_val, (set,list) ) and \
+                   isinstance(desired_val, (set, list) ) and \
+                   cur_val.__class__ != desired_val.__class__:
+                       msg = 'Set label:\n\t' +str(cur_val)
+                       msg += 'compared to list label:\n\t' +str(desired_val)
+                       msg += 'Did you mix sets & lists when setting AP labels ?'
+                       raise Exception(msg)
                     
-                    return False
-            return True
+                return False
+        return True
 
 class States(object):
     """Methods to manage states, initial states, current state.
@@ -394,7 +395,7 @@ class States(object):
             raise Exception("data must be bool\n")
     
     def __str__(self):
-        return 'States:\n\t' +pformat(self(data=False) )    
+        return 'States:\n' +pformat(self(data=False) )    
     
     def __eq__(self, other):
         return self.graph.nodes(data=False) == other
@@ -549,7 +550,8 @@ class States(object):
         """Check if system has final states."""
         if not hasattr(self.graph, 'final_states'):
             if msg:
-                warnings.warn('System does not have final states.')
+                warnings.warn('System of type: ' +str(type(self.graph) ) +
+                              'does not have final states.')
             return False
         else:
             return True
@@ -1195,26 +1197,77 @@ class LabeledStates(States):
     
     def find(self, states='any', desired_label='any', as_dict=True):
         """Filter by desired states and by desired state labels.
+        
+        see also
+        --------
+        label, labels, LabeledTransitions.find
+        
+        @param states: subset of states over which to search
+        @type states: 'any' (default)
+            | iterable of valid states
+            | single valid state
+        
+        @param desired_label: label with which to filter the states
+        @type desired_label: {sublabel_type : desired_sublabel_value, ...}
+            | 'any', to allow any state label (default)
+        
+        @param as_dict:
+            - If C{True}, then return sublabels as dict:
+                {sublabel_type : sublabel_value}
+            - Otherwise return sublabel values ordered in list,
+              the list order based on graph._transition_label_def
+        @type as_dict: bool
+        
+        @return: set of labeled states:
+                (C{state}, label)
+            such that:
+                C{state} \\in C{states} given as first argument
+                
+        @rtype: list of labeled states
+                = [(C{state}, C{label}),...]
+            where:
+                - C{state} \\in C{states}
+                - C{label}: dict
+                    | tuple of edge annotation,
+                    determined by C{as_dict}.
         """
+        #TODO support tuples as desired_labels, using available conversion
         if states is 'any':
             state_ids = 'any'
         else:
+            # singleton check
+            if states in self:
+                state = states
+                msg = 'LabeledStates.find got single state: ' +str(state) +'\n'
+                msg += 'instead of Iterable of states.\n'
+                states = [state]
+                msg += 'Replaced given states = ' +str(state)
+                msg += ' with states = ' +str(states)
+                warnings.warn(msg)
+                
             state_ids = self._mutants2ints(states)
+            dprint(state_ids)
         
         found_state_label_pairs = []
         for state_id, attr_dict in self.graph.nodes_iter(data=True):
-            if state_id not in state_ids:
+            dprint('Checking state_id = ' +str(state_id) +
+                   ', with attr_dict = ' +str(attr_dict) )
+            
+            if state_id not in state_ids and state_ids is not 'any':
+                dprint('state_id = ' +str(state_id) +', not desired.')
                 continue
             
-            # label ok ?
+            dprint('Checking state label:\n\t attr_dict = ' +str(attr_dict) +
+                   '\n vs:\n\t desired_label = ' +str(desired_label) )
             if desired_label is 'any':
+                dprint('Any label acceptable.')
                 ok = True
             else:
-                dprint('Checking state label.')
                 ok = self._label_check.label_is_desired(attr_dict, desired_label)
             
             if ok:
-                dprint('State label matched desired label.')
+                dprint('Label Matched:\n\t' +str(attr_dict) +
+                      ' == ' +str(desired_label) )
                 
                 state = self._int2mutant(state_id)
                 annotation = \
@@ -1222,6 +1275,8 @@ class LabeledStates(States):
                 state_label_pair = (state, annotation)
                 
                 found_state_label_pairs.append(state_label_pair)
+            else:
+                dprint('No match for label---> state discarded.')
         
         return found_state_label_pairs
         
@@ -1290,7 +1345,7 @@ class Transitions(object):
         return self.graph.edges(data=False)
     
     def __str__(self):
-        return 'Transitions:\n\t' +pformat(self() )
+        return 'Transitions:\n' +pformat(self() )
     
     def _mutant2int(self, from_state, to_state):
         from_state_id = self.graph.states._mutant2int(from_state)
@@ -1383,7 +1438,7 @@ class Transitions(object):
         if len(self.graph.states() ) == 0:
             new_states = range(n)
             self.graph.states.add_from(new_states)
-            print('Added ordered list of states: ' +str(self.graph.states.list) )
+            dprint('Added ordered list of states: ' +str(self.graph.states.list) )
         
         # convert to format friendly for edge iteration
         nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
@@ -1561,7 +1616,7 @@ class LabeledTransitions(Transitions):
             return self.graph.edges(data=False)
         
         edges = [] # if labeled, should better be called "transitions"
-        for (from_node, to_node, attr_dict) in self.graph.edge_iter(data=True):
+        for (from_node, to_node, attr_dict) in self.graph.edges_iter(data=True):
             annotation = self._label_check._attr_dict2sublabels(attr_dict, as_dict)
             edge = (from_node, to_node, annotation)
             edges.append(edge)
@@ -1839,8 +1894,8 @@ class LabeledTransitions(Transitions):
         if len(self.graph.states() ) == 0:
             new_states = range(n)
             self.graph.states.add_from(new_states)
-            print('Added ordered list of states: ' +
-                  str(self.graph.states.list) )
+            dprint('Added ordered list of states: ' +
+                   str(self.graph.states.list) )
         
         # convert to format friendly for edge iteration
         nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
@@ -1911,7 +1966,7 @@ class LabeledTransitions(Transitions):
         
         @param desired_label: label with which to filter the transitions
         @type desired_label: {sublabel_type : desired_sublabel_value, ...}
-            | 'any', to search over all transitions (default)
+            | 'any', to allow any label (default)
         
         @param as_dict:
             - If C{True}, then return sublabels as dict:

@@ -94,24 +94,30 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self._transition_dot_label_format = {'actions':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
-
-        self.dot_node_shape = {'normal':'box'}
-        self.default_export_fname = 'fts'
         
         LabeledStateDiGraph.__init__(self, **args)
+        
+        self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'fts'
 
-    def __str__(self):        
-        s = hl +'\nFinite Transition System (closed)\n' +hl
-        s += str(self.states) +'\n'
-        s += 'Atomic Propositions:\n\t' +pformat(self.atomic_propositions) +'\n'
-        s += 'State Labels:\n' +pformat(self.states(data=True) ) +'\n'
-        s += 'Actions:\n\t' +str(self.actions) +'\n'
-        s += str(self.transitions) +'\n' +hl +'\n'
+    def __repr__(self):        
+        s = hl +'\nFinite Transition System (closed) : '
+        s += self.name +'\n' +hl +'\n'
+        s += 'Atomic Propositions:\n\t'
+        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
+        s += 'States and State Labels (\in 2^AP):\n'
+        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Actions:\n\t' +str(self.actions) +2*'\n'
+        s += 'Transitions & Labels:\n'
+        s += pformat(self.transitions(labeled=True), indent=3)
+        s += '\n' +hl +'\n'
         
         return s
     
-    def __repr__(self):
-        return self.__str__()
+    def __str__(self):
+        return self.__repr__()
     
     def __mul__(self, ts_or_ba):
         """Synchronous product of TS with TS or BA.
@@ -121,6 +127,25 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.sync_prod
         """
         return self.sync_prod(ts_or_ba)
+    
+    def __add__(self, other):
+        if not isinstance(other, FiniteTransitionSystem):
+            raise TypeError('other class must be FiniteTransitionSystem.\n' +
+                            'Got instead:\n\t' +str(other) +
+                            '\nof type:\n\t' +str(type(other) ) )
+        # unite atomic propositions
+        self.atomic_propositions |= other.atomic_propositions
+        
+        # add extra states & their labels
+        for state, label in other.states.find():
+            if state not in self.states:
+                self.states.label(state, label, check=False)
+        
+        # copy actions
+        self.actions |= other.actions
+        
+        # copy extra transitions (be careful w/ labeling)
+        
     
     def __or__(self, ts):
         """Synchronous product between transition systems."""
@@ -157,14 +182,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         For more semantics, use a FiniteStateMachine.
         """
         raise NotImplementedError
-    
-    def merge_states(self):
-        raise NotImplementedError
 
-    # operations between transition systems
-    def union(self):
-        raise NotImplementedError
-    
+    # operations between transition systems    
     def intersection(self):
         raise NotImplementedError
         
@@ -311,18 +330,28 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
                                                 'env_actions':'env',
                                                 'type?label':':',
                                                 'separator':'\\n'}
-        self.dot_node_shape = {'normal':'box'}
-        self.default_export_fname = 'ofts'
         
         LabeledStateDiGraph.__init__(self, **args)
         
-    def __str__(self):
-        s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
-        s += '\n' +str(self.transitions) +'\n'
-        s += str(self.sys_actions) +'\n' +str(self.env_actions) +'\n'
-        s += 'Atomic Propositions:\n\t' +pformat(self.atomic_propositions) +'\n'
+        self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'ofts'
+        
+    def __repr__(self):
+        s = hl +'\nFinite Transition System (open) : '
+        s += self.name +'\n' +hl +'\n'
+        s += 'Atomic Propositions:\n'
+        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
+        s += 'States & State Labels (\in 2^AP):\n'
+        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += str(self.sys_actions) +2*'\n' +str(self.env_actions) +2*'\n'
+        s += pformat(self.transitions(labeled=True), indent=3) +'\n' +hl +'\n'
         
         return s
+    
+    def __str__(self):
+        return self.__repr__()
 
 class OpenFTS(OpenFiniteTransitionSystem):
     """Alias to transys.OpenFiniteTransitionSystem."""

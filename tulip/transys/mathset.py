@@ -34,6 +34,7 @@ Mathematical Sets and Power Sets
 """
 from itertools import chain, combinations
 from collections import Iterable, Hashable
+from pprint import pformat
 import warnings
 #from scipy.sparse import lil_matrix # is this really needed ?
 
@@ -120,7 +121,7 @@ class MathSet(object):
         self.add_from(iterable)
     
     def __repr__(self):
-        return str(self._set) +' U ' +str(self._list)
+        return pformat(self._set) +' U ' +pformat(self._list)
     
     def __str__(self):
         return self.__repr__()
@@ -435,8 +436,11 @@ class PowerSet(object):
     def __get__(self, instance, value):
         return self()
     
-    def __str__(self):
+    def __repr__(self):
         return 'PowerSet(' +str(self.math_set) +' )'
+    
+    def __str__(self):
+        return self.__repr__()
     
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
