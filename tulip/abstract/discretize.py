@@ -359,7 +359,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                     list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)
     
     # Generate transition system and add transitions       
-    ofts = ts.oFTS()
+    ofts = ts.OpenFTS()
     ofts.transitions.add_adj(sp.lil_matrix(transitions))
     
     # Decorate TS with state labels
@@ -372,7 +372,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 state_prop.add(part.list_prop_symbol[prop_ind]) 
         prop_list.append(state_prop)
 
-    ofts.atomic_propositions.label_per_state(range(len(prop_list)),prop_list)
+    ofts.states.labels(range(len(prop_list)),prop_list)
     
     return AbstractSysDyn(ppp=new_part, ofts=ofts, orig_list_region=orig_list, orig=orig)
 

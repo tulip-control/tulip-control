@@ -15,7 +15,7 @@
 #
 
 from tulip import *
-from tulip import spec
+from tulip import spec, synth
 import numpy as np
 from scipy import sparse as sp
 
@@ -23,7 +23,7 @@ from scipy import sparse as sp
 # Environment switched system with 2 modes:
 ###########################################
 
-sys_swe = transys.oFTS()
+sys_swe = transys.OpenFTS()
 
 sys_swe.sys_actions.add('')
 
@@ -59,7 +59,7 @@ sys_swe.transitions.add_labeled_adj(sp.lil_matrix(transmat2),('','slippery'))
 
 # Decorate TS with state labels (aka atomic propositions)
 sys_swe.atomic_propositions.add_from(['home','lot'])
-sys_swe.atomic_propositions.label_per_state(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+sys_swe.states.labels(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print sys_swe
@@ -121,4 +121,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synthesize('jtlv', specs, sys_swe)
+ctrl = synth.synthesize('jtlv', specs, sys_swe)

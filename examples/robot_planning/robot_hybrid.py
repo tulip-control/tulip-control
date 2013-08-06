@@ -18,7 +18,7 @@
 #
 
 from tulip import *
-from tulip import spec
+from tulip import spec, synth
 import numpy as np
 from scipy import sparse as sp
 
@@ -27,7 +27,7 @@ from scipy import sparse as sp
 # Hybrid system with 2 env, 2 system modes:
 ###########################################
 
-sys_hyb = transys.oFTS()
+sys_hyb = transys.OpenFTS()
 
 # We assume robots ability to transition between cells depends both on
 # discrete controlled modes (e.g., gears) and environment modes (e.g., surface
@@ -67,8 +67,8 @@ transmat2 = np.array([[0,0,1,1,0,0],
 sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(transmat2),('gear1','slippery'))
 
 # Decorate TS with state labels (aka atomic propositions)
-sys_hyb.atomic_propositions.add_from(['home','lot'])
-sys_hyb.atomic_propositions.label_per_state(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+sys_hyb.atomic_propositions |= ['home','lot']
+sys_hyb.states.labels(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print sys_hyb
@@ -128,4 +128,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synthesize('jtlv', specs, sys_hyb)
+ctrl = synth.synthesize('jtlv', specs, sys_hyb)

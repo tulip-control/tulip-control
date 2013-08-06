@@ -15,7 +15,7 @@
 #
 
 from tulip import *
-from tulip import spec
+from tulip import spec, synth
 import numpy as np
 from scipy import sparse as sp
 
@@ -32,7 +32,7 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-sys_sws = transys.oFTS()
+sys_sws = transys.OpenFTS()
 
 sys_sws.sys_actions.add_from({'right','up','left','down'})
 sys_sws.env_actions.add('') 
@@ -78,7 +78,7 @@ sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat4), ('down',''))
 
 # Decorate TS with state labels (aka atomic propositions)
 sys_sws.atomic_propositions.add_from(['home','lot'])
-sys_sws.atomic_propositions.label_per_state(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+sys_sws.states.labels(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print sys_sws
@@ -135,4 +135,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synthesize('jtlv', specs, sys_sws)
+ctrl = synth.synthesize('jtlv', specs, sys_sws)
