@@ -2349,7 +2349,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             sio.seek(0)
             img = mpimg.imread(sio)
             imgplot = plt.imshow(img, aspect='equal')
-            plt.show()
+            plt.show(block=False)
             return imgplot
         else:
             dprint('Matplotlib not installed.')

@@ -49,8 +49,11 @@ sys.transitions.add_from({'X5'}, {'X4', 'X2'})
 
 # Add atomic propositions to the states
 sys.atomic_propositions.add_from({'home', 'lot'})
-sys.atomic_propositions.label_state('X0', 'home')
-sys.atomic_propositions.label_state('X5', 'lot')
+sys.states.label('X0', 'home')
+sys.states.label('X5', 'lot')
+
+# if IPython and Matplotlib available
+#sys.plot()
 
 #
 # Environment variables and specification
