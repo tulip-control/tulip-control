@@ -476,7 +476,7 @@ class States(object):
         dprint('Converted: state = ' +str(state) +' ---> ' +str(state_id) )
         
         # found state ?
-        if len(state_id) == 0:
+        if not state_id:
             dprint('No states matching. State is new.\n')
         elif len(state_id) == 1:
             return state_id[0]
@@ -644,7 +644,7 @@ class States(object):
                 return
             
             # no states stored yet ?
-            if len(self.list) == 0:
+            if not self.list:
                 warnings.warn("Will add non-list to empty system with ordering."+
                               "Won't remember state order from now on.")
                 self.list = None
@@ -765,7 +765,7 @@ class States(object):
         
         Should already be in set of states.
         """
-        if len(new_initial_states) == 0:
+        if not new_initial_states:
             return
         
         if self._is_mutable():
@@ -784,7 +784,7 @@ class States(object):
     
     def remove_initial_from(self, rm_initial_states):
         """Delete multiple states from set of initial states."""
-        if len(rm_initial_states) == 0:
+        if not rm_initial_states:
             return
         
         if self._is_mutable():
@@ -1451,7 +1451,7 @@ class Transitions(object):
         n = adj.shape[0]
         
         # no existing states ?
-        if len(self.graph.states() ) == 0:
+        if not self.graph.states():
             new_states = range(n)
             self.graph.states.add_from(new_states)
             dprint('Added ordered list of states: ' +str(self.graph.states.list) )
@@ -1908,7 +1908,7 @@ class LabeledTransitions(Transitions):
         n = adj.shape[0]
         
         # no existing states ?
-        if len(self.graph.states() ) == 0:
+        if not self.graph.states():
             new_states = range(n)
             self.graph.states.add_from(new_states)
             dprint('Added ordered list of states: ' +
@@ -2089,7 +2089,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                  from_networkx_graph=None):
         nx.MultiDiGraph.__init__(self, name=name)
         
-        if from_networkx_graph is not None and len(states) > 0:
+        if from_networkx_graph is not None and states:
             raise ValueError('Give either states or Networkx graph, not both.')
         
         if from_networkx_graph is not None:
@@ -2305,7 +2305,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         dot and either of IPython or Matplotlib
         """
         # anything to plot ?
-        if len(self.states) == 0:
+        if not self.states:
             print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
             return
         

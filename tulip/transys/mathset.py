@@ -74,7 +74,7 @@ def compare_lists(list1, list2):
             break
         
     # anything remaining ?
-    same_lists = same_lists and len(dummy_list) == 0
+    same_lists = same_lists and not bool(dummy_list)
     
     return same_lists
 

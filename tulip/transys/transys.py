@@ -239,12 +239,12 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             present_props = ap_label.difference(missing_props)
             
             assign_props = lambda x: str(x) + ' = 1;'
-            if len(present_props) > 0:
+            if present_props:
                 s += ' '.join(map(assign_props, present_props) )
             
             # rm "!"
             assign_props = lambda x: str(x[1:] ) + ' = 0;'
-            if len(missing_props) > 0:
+            if missing_props:
                 s += ' '.join(map(assign_props, missing_props) )
             
             s += '}\n'

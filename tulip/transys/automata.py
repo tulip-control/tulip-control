@@ -607,7 +607,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             )
             
             # q0 blocked ?
-            if len(enabled_ba_trans) == 0:
+            if not enabled_ba_trans:
                 dprint('blocked q0 = ' +str(q0) )
                 continue
             
@@ -653,7 +653,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             enabled_ba_trans = ba.transitions.find({q}, desired_label=Sigma_dict)
             dprint('Enabled BA transitions:\n\t' +str(enabled_ba_trans) )
             
-            if len(enabled_ba_trans) == 0:
+            if not enabled_ba_trans:
                 continue
             
             for (q, next_q, sublabels) in enabled_ba_trans:
@@ -681,7 +681,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                     dprint('Sublabel value:\n\t' +str(sublabel_values) )
                     
                     # labeled transition ?
-                    if len(sublabel_values) == 0:
+                    if not sublabel_values:
                         prodts.transitions.add(sq, new_sq)
                     else:
                         #TODO open FTS
