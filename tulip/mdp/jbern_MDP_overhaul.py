@@ -1,5 +1,8 @@
 # First cut of an MDP class, and associated methods for TuLiP.
-# James Bern 8/2/2013
+# Originally: James Bern 8/2/2013
+# 
+# 8/5: MDP states and init states are now sets.
+# 8/6: value_iteration() rewritten for use in product MDPs.
 
 from copy import deepcopy
 from pprint import pprint
@@ -13,8 +16,8 @@ from transys import *
 class MDP:
     def __init__(self, name="DEFAULT MDP"):
         self.name = name
-        self.states = [] # TODO
-        self.initial_states = []
+        self.states = set()
+        self.initial_states = set()
         self.T = {} # form: T[s_i][a] = [(s_f_0, p_0), ...]
         self.R = {} # form: R[s_i][a] = <float>
 
@@ -79,7 +82,7 @@ def mdp_example():
     V2 = 1
     """
     self = MDP()
-    self.states = ['s0', 's1', 's2', 's3']
+    self.states = set(['s0', 's1', 's2', 's3', 's9'])
     self.init_states = ['s0'] # Ask about extending to multiple states
 
     self.T = {} # T[state][action][i] = ('si', p)
@@ -93,8 +96,12 @@ def mdp_example():
                     'a2' : [('s1', .1), ('s3', .9)]}
     self.T['s1'] = {'a1' : [('s2', .9), ('s0', .1)],
                     'a2' : [('s2', .1), ('s0', .9)]}
+    self.T['s2'] = {'a1' : [('s3', .9), ('s1', .1)],
+                    'a2' : [('s3', .1), ('s1', .9)]}
     self.T['s3'] = {'a1' : [('s0', .9), ('s2', .1)],
-                    'a2' : [('s0', .1), ('s2', .9)]}
+                    'a2' : [('s0', .1), ('s2', .9)],
+                    'a9' : [('s9', 1)]}
+    self.T['s9'] = {'a9' : [('s9', 1)]}
     # Initialize rewards
     self.R['s0'] = {'a1' : 0,
                     'a2' : 0}
@@ -176,12 +183,12 @@ def generate_product_MDP(mdp, ra, check_deterministic=False):
 
     # Initialize the product
     prod = MDP()
-    prod.initial_states = []
-    prod.states = [] # form: [(s0, q0), ...]
+    prod.initial_states = set()
+    prod.states = set() # form: [(s0, q0), ...]
     prod.T = {}
     for s in mdp.states:
         for q in ra.states():
-            prod.states.append((s, q))
+            prod.states.add((s, q))
             prod.T[(s,q)] = {}
 
     # Product initial states.
@@ -189,7 +196,7 @@ def generate_product_MDP(mdp, ra, check_deterministic=False):
         for q_0 in ra.states.initial:
             for q in ra.states():
                 if satisfies(ra=ra, qp=q, q=q_0, sp=s):
-                    prod.initial_states.append((s, q))
+                    prod.initial_states.add((s, q))
 
     # Product transitions
     for s_i_q_i_tup in prod.states:
@@ -213,14 +220,13 @@ def generate_product_MDP(mdp, ra, check_deterministic=False):
     # Product labelling.
     pass
 
+    # TODO
     # Run simple check of determinism of product:
-    # -That there is only one enabled action and also
+    # -That there is <=1 enabled action and also
     # -one enabled transition for that action.
     if check_deterministic:
         for action_dict in prod.T.values():
-            assert len(action_dict) == 1, str(action_dict) + " is invalid."
-            for tup_lst in action_dict.values():
-                assert len(tup_lst) == 1, str(tup_lst) + " is invalid."
+            assert len(action_dict) in [0, 1], str(action_dict) + " is invalid."
 
     return prod
 
@@ -259,12 +265,14 @@ def generate_product_MDP_example():
 # Max End Components
 ############################################################################
 
-def max_end_components(MDP):
+def max_end_components(MDP, show_steps=False):
     """
     Compute and return the maximal end components of an MDP, or product MDP.
     See: pg.878 B+K
     Note: uses a call to networkx.strongly_connected_components()
     """
+    show_steps = show_steps
+
     m = MDP.T
     A = {} # form: A[s][actions]
     for s in m.keys(): # TODO States
@@ -288,7 +296,7 @@ def max_end_components(MDP):
             for SCC in SCCs:
                 if not (len(SCC) == 1 and len(A[SCC[0]]) == 0):
                         keep_SCCs.append(SCC)
-                else:
+                elif show_steps:
                     print "removing trivial SCC " + str(SCC)
             SCCs = keep_SCCs
 
@@ -299,11 +307,12 @@ def max_end_components(MDP):
                         destinations = [dest_prob_tup[0] for dest_prob_tup in m[s][a]]
                         if set(destinations).issubset(set(T_i)):
                             keep_actions.append(a)
-                        else:
+                        elif show_steps:
                             print "removing action " + str(a)
                     A[s] = keep_actions
                     if len(A[s]) == 0:
-                        print "removing state " + str(s)
+                        if show_steps:
+                            print "removing state " + str(s)
                         R.add(s)
 
             while (len(R) > 0):
@@ -316,10 +325,12 @@ def max_end_components(MDP):
                     if t not in T:
                         continue
                     if b in A[t]:
-                        print "removing action " + str(b)
+                        if show_steps:
+                            print "removing action " + str(b)
                         A[t].remove(b)
                     if len(A[t]) == 0:
-                        print "removing state " + str(t)
+                        if show_steps:
+                            print "removing state " + str(t)
                         R.add(t)
 
             for T_i in SCCs:
@@ -355,7 +366,7 @@ def max_end_components_example():
 ############################################################################
 # Run Examples
 ############################################################################
-
+"""
 print ''
 mdp = mdp_example()
 pprint(mdp.T)
@@ -370,48 +381,79 @@ print ''
 max_end_components = max_end_components_example()
 pprint(max_end_components)
 print ''
-
+"""
 ############################################################################
 # Misc.
 ############################################################################
-def value_iteration(mdp, epsilon=0.001, R={}, gamma=.9):
+def value_iteration(mdp, epsilon=0.001, R={}, V1=set(), gamma=1, unknown_states=None):
     """
-    [Slightly modified] AIMA algorithm for value iteration,
-    which uses "transition system" = T = mdp.gen_AIMA_form()
+    Modified/specialized AIMA algorithm for value iteration,
+    which is used to perform value iteration over either all
+    of a product MDP or part of it if graph search has been used
+    to optimize.
     """
 
-    R = mdp.R_old
     gamma  = gamma
+    assert gamma == 1, "discounting not currently implemented"
+
     T = mdp.T
-    states = T.keys()
+
+    # Safely defaults to all non-V1 states in T.
+    unknown_states = unknown_states
+    if unknown_states == None:
+        unknown_states = set(mdp.states) - V1
+
+    V1 = V1
+    assert V1 != {}, "You have to first isolate at least the AMECs!"
+
     U1 = {}
-    for s in states:
+    for s in unknown_states:
         U1[s] = 0
 
     while True:
         U = deepcopy(U1)
         delta = 0
 
-        for s in states:
+        for s in unknown_states:
             actions = T[s].keys()
             state_value = []
 
             # I've added in here the notion of a terminal state w/
             # a one-time reward. (For a recurrent reward on an accepting state,
-            # one could add in the trivial action {'triv' : (<same state>, 1)}.
-            if len(actions) == 0:
-                state_value.append(0)
+            # one could add in the trivial action {'triv' : (<same state>, 1)}.)
+            # Now the rule becomes: if in V1
+            if s in V1:
+                state_value = [0]
 
             else:
                 for a in actions:
                     action_values = []
                     for (s1, p) in T[s][a]:
-                        action_values.append(p * U[s1])
+                        # determine value_s1
+                        if s1 in unknown_states:
+                            value_s1 = U[s1]
+                        elif s1 in V1:
+                            value_s1 = 1
+                        else: # s1 in V0
+                            value_s1 = 0
+                        action_values.append(p * value_s1)
 
                     state_value.append(sum(action_values))
 
-            U1[s] = R[s] + gamma * max(state_value)
+            U1[s] = R[s] + max(state_value)
             delta = max(delta, abs(U1[s] - U[s]))
 
-        if delta < epsilon * (1 - gamma) / gamma:
+        if delta < epsilon: # to support discounted rewards: * (1 - gamma) / gamma:
             return U
+
+
+
+
+
+
+
+
+
+
+
+
