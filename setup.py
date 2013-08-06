@@ -11,7 +11,8 @@ setup(name = 'tulip',
       url = 'http://tulip-control.sourceforge.net',
       license = 'BSD',
       requires = ['numpy', 'scipy', 'cvxopt', 'networkx'],
-      packages = ['tulip'],
+      packages = ['tulip', 'tulip.transys'],
       package_dir = {'tulip' : 'tulip'},
-      package_data={'tulip': ['jtlv_grgame.jar', 'polytope/*.py', 'abstract/*.py']},
-      )
+      package_data={'tulip': ['jtlv_grgame.jar', 'polytope/*.py',
+                              'abstract/*.py']},
+)
