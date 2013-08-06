@@ -35,7 +35,7 @@ Transition System module developer examples
 
 import networkx as nx
 from collections import OrderedDict
-import tulip.transys as ts
+import tulip.transys as trs
 import warnings
 
 hl = 60*'='
@@ -52,13 +52,13 @@ def sims_demo():
     #   s3 -[a]-> s3
     prefix = ['s1', 'a', 's2', 'b', 's3']
     suffix = ['s3', 'a', 's2', 'b', 's3']
-    execution = ts.InfiniteSequence(prefix, suffix)
+    execution = trs.InfiniteSequence(prefix, suffix)
     #print(execution)
     
     # trace def
     prefix = [{'p1', 'p2'}, {}, {'p1'} ]
     suffix = [{'p1'}, {}, {'p1'} ]
-    trace = ts.InfiniteSequence(prefix, suffix)
+    trace = trs.InfiniteSequence(prefix, suffix)
     
     #print(trace.get_prefix() )
     #print(trace.get_suffix() )
@@ -66,7 +66,7 @@ def sims_demo():
     #=============
     # FTS Sim
     #=============
-    fts_sim = ts.FiniteTransitionSystemSimulation(execution, trace)
+    fts_sim = trs.FiniteTransitionSystemSimulation(execution, trace)
     
     print('Execution of FTS: s0, a1, s1, ..., aN, sN')
     print(fts_sim.execution)
@@ -87,20 +87,20 @@ def sims_demo():
     #=============
     prefix = [{'p1'}, {'p3'}, {'p2'}]
     suffix = [{'p2'}, {'p1'}, {'p2'}]
-    input_word = ts.InfiniteWord(prefix, suffix)
+    input_word = trs.InfiniteWord(prefix, suffix)
     
     prefix = ['s1', 's2', 's3']
     suffix = ['s3', 's2', 's3']
-    run = ts.InfiniteSequence(prefix, suffix)
+    run = trs.InfiniteSequence(prefix, suffix)
     
-    aut_sim = ts.FiniteStateAutomatonSimulation(input_word, run)
+    aut_sim = trs.FiniteStateAutomatonSimulation(input_word, run)
     print(aut_sim)
 
 def fts_maximal_example():
     """Finite-Transition System demo."""
     
     print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
-    fts = ts.FiniteTransitionSystem(name='Beverage vending machine')
+    fts = trs.FiniteTransitionSystem(name='Beverage vending machine')
     
     # add state info
     fts.states.add('pay')
@@ -209,7 +209,7 @@ def fts_maximal_example():
     
     # get transition info (unlabeled)
     print('Transitions:\n\t' +str(fts.transitions() ) )
-    print('Number of transitions:\n\t' +str(fts.transitions.number() ) +'\n')
+    print('Number of transitions:\n\t' +str(len(fts.transitions) ) +'\n')
     
     fts.plot()
     print(fts) # pretty
@@ -318,7 +318,7 @@ def ba_maximal_example():
     """Buchi Automaton demo."""
     
     print(hl +'\nBuchi Automaton\n' +hl)
-    ba = ts.BuchiAutomaton(atomic_proposition_based=True)
+    ba = trs.BuchiAutomaton(atomic_proposition_based=True)
     
     ba.states.add('q0')
     ba.states.add_from({'q1', 'q2', 'q3'}, destroy_order=True)
@@ -413,7 +413,7 @@ def mealy_machine_example():
             
             return False
     
-    m = ts.MealyMachine()
+    m = trs.MealyMachine()
     
     m.states.add('s0')
     m.states.add_from(['s1', 's2'])
@@ -424,7 +424,7 @@ def mealy_machine_example():
     # input defs
     inputs = OrderedDict([
         ['speed', {'zero', 'low', 'high', 'crazy'} ],
-        ['seats', ts.PowerSet(range(5) ) ],
+        ['seats', trs.PowerSet(range(5) ) ],
         ['aperture', check_diaphragm() ],
         ['camera', check_camera() ]
     ])
@@ -467,7 +467,7 @@ def scipy_sparse_labeled_adj():
     
     print(A)
     
-    ofts = ts.OpenFTS()
+    ofts = trs.OpenFTS()
     
     # note: to avoid first defining actions, pass arg check_labels=False
     ofts.sys_actions.add('move')
@@ -486,25 +486,25 @@ def scipy_sparse_labeled_adj():
 def label_per_state():
     """Add states with (possibly) different AP labels each."""
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add_from(['p', '!p'] )
     fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}] )
     fts.plot()
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}], check=False)
     fts.plot()
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.labels([1, 2], [{'p'}, {'!p'}], check=False)
     fts.plot()
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.labels(range(2), [{'p'}, {'!p'}], check=False)
     fts.plot()
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.labels('create', [{'p'}, {'!p'}] )
     fts.plot()
 

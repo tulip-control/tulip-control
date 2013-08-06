@@ -130,6 +130,46 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         return self.sync_prod(ts_or_ba)
     
     def __add__(self, other):
+        """Merge two Finite Transition Systems.
+        
+        States, Initial States, Actions, Atomic Propositions and
+        State labels and Transitions of the second Transition System
+        are merged into the first and take precedence, overwriting
+        existing labeling.
+        
+        example
+        -------
+        This can be useful to construct systems quickly by
+        creating standard "pieces" using the functions:
+            line_labeled_with, cycle_labeled_with
+        
+        >>> n = 4
+        >>> L = n*['p'] # state labeling
+        >>> ts1 = line_labeled_with(L, n-1)
+        >>> ts1.plot()
+        >>> 
+        >>> L = n*['p']
+        >>> ts2 = cycle_labeled_with(L)
+        >>> ts2.states.label('s3', '!p')
+        >>> ts2.plot()
+        >>> 
+        >>> ts3 = ts1 +ts2
+        >>> ts3.transitions.add('s'+str(n-1), 's'+str(n) )
+        >>> ts3.default_layout = 'circo'
+        >>> ts3.plot()
+        
+        see also
+        --------
+        line_labeled_with, cycle_labeled_with
+        
+        @param other: system to merge with
+        @type other: C{FiniteTransitionSystem}
+        
+        @return: merge of C{self} with C{other}, union of states, initial states,
+            atomic propositions, actions, edges and labelings, with those
+            of C{other} taking precedence over C{self}.
+        @rtype: FiniteTransitionSystem
+        """
         if not isinstance(other, FiniteTransitionSystem):
             raise TypeError('other class must be FiniteTransitionSystem.\n' +
                             'Got instead:\n\t' +str(other) +
@@ -144,7 +184,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                 self.states.add(state)
             
             if label:
-                self.states.label(state, label)
+                self.states.label(state, label['ap'] )
         
         self.states.initial |= other.states.initial()
         
@@ -154,7 +194,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             if not label_dict:
                 self.transitions.add(from_state, to_state)
             else:
-                self.transitions.add_labeled(from_state, to_state, label_dict)
+                sublabel_value = label_dict['actions']
+                self.transitions.add_labeled(from_state, to_state, sublabel_value)
         
         return copy.copy(self)
     
@@ -530,7 +571,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     
     return ts
 
-def line_labeled_with(L):
+def line_labeled_with(L, m=0):
     """Return linear FTS with given labeling.
     
     The resulting system will be a terminating sequence:
@@ -546,19 +587,22 @@ def line_labeled_with(L):
         Single strings are identified with singleton Atomic Propositions,
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
-    @returns: FTS with:
+    @param m: starting index
+    @type m: int
+    
+    @return: FTS with:
         - states ['s0', ..., 'sN'], where N = len(L) -1
         - state labels defined by L, so s0 is labeled with L[0], etc.
         - transitions forming a sequence:
             - s_{i} ---> s_{i+1}, for: 0 <= i < N
     """
     n = len(L)
-    S = range(n)
+    S = range(m, m+n)
     S0 = [] # user will define them
     AP = negation_closure(L)
     Act = None
-    from_states = range(0, n-1)
-    to_states = range(1, n)
+    from_states = range(m, m+n-1)
+    to_states = range(m+1, m+n)
     trans = zip(from_states, to_states)
     
     ts = tuple2fts(S, S0, AP, L, Act, trans, prepend_str='s')
@@ -580,7 +624,7 @@ def cycle_labeled_with(L):
         Single strings are identified with singleton Atomic Propositions,
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
-    @returns: FTS with:
+    @return: FTS with:
         - states ['s0', ..., 'sN'], where N = len(L) -1
         - state labels defined by L, so s0 is labeled with L[0], etc.
         - transitions forming a cycle:
