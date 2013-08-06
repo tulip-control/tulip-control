@@ -362,7 +362,7 @@ class States(object):
             Available only if order maintained.
             List is always returned anyway, to avoid issues with mutable states.
         
-        @returns:
+        @return:
             If C{data==True},
                 then return [(state, attr_dict),...]
             If C{data==False} and C{listed==True} and state order maintained,
@@ -456,7 +456,7 @@ class States(object):
         
         @param state: state to check for
         
-        @returns:
+        @return:
             If states not mutable,
                 then return given C{state}.
             If C{state} does not exist and states mutable,
@@ -511,7 +511,7 @@ class States(object):
             int, if mutable
             valid state, if immutable
         
-        @returns:
+        @return:
             If states not mutable,
                 then return given argument, because it is the actual state.
             If states are mutable and C{state_id} is used,
@@ -2215,6 +2215,14 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         @param path: path to image
             (extension C{.fileformat} appened if missing and
              C{add_missing_extension==True} )
+             Default:
+            
+            - If C{self.name} is not set and no C{path} given,
+                then use C{self.default_export_fname} prepended with
+                C{self.default_export_fname}.
+            - If C{self.name} is set, but no C{path} given,
+                then use C{self.name} prepended with C{self.default_export_fname}.
+            - If C{path} is given, use that.
         @type path: str
         
         @param add_missing_extension: if extension C{.fileformat} missing,

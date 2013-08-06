@@ -33,7 +33,7 @@
 Transition System module usage small examples
 """
 
-import tulip.transys as ts
+import tulip.transys as trs
 
 hl = 60*'='
 save_fig = False
@@ -41,7 +41,7 @@ save_fig = False
 def fts_minimal_example():
     """Small example, for more see the maximal example."""
     
-    fts = ts.FTS()
+    fts = trs.FTS()
     fts.states.add_from(['s0', 's1'] )
     fts.states.initial.add('s0')
     
@@ -62,7 +62,7 @@ def ofts_minimal_example():
     msg = hl +'\nOpen FTS\n' +hl
     print(msg)
     
-    ofts = ts.OpenFiniteTransitionSystem()
+    ofts = trs.OpenFiniteTransitionSystem()
     
     ofts.states.add_from(['s1', 's2', 's3'] )
     ofts.states.initial.add('s1')
@@ -111,7 +111,7 @@ def ba_minimal_example():
     msg += 'Example 4.64, p.202 [Baier]\n' +hl
     print(msg)
     
-    ba = ts.BuchiAutomaton(atomic_proposition_based=True)
+    ba = trs.BuchiAutomaton(atomic_proposition_based=True)
     ba.states.add_from({'q0', 'q1', 'q2'})
     ba.states.initial.add('q0')
     ba.states.add_final('q1')
@@ -128,6 +128,36 @@ def ba_minimal_example():
         ba.save(path='small_ba.png', fileformat='png')
     
     return ba
+
+def merge_example():
+    """Merge two small FT Systems.
+    """
+    n = 4
+    L = n*['p']
+    ts1 = trs.line_labeled_with(L, n-1)
+    
+    ts1.actions |= ['step', 'jump']
+    ts1.transitions.label('s3', 's4', 'step')
+    ts1.transitions.label('s5', 's6', 'jump')
+    
+    ts1.plot()
+    
+    L = n*['p']
+    ts2 = trs.cycle_labeled_with(L)
+    ts2.states.label('s3', '!p')
+    
+    ts2.actions |= ['up', 'down']
+    ts2.transitions.label('s0', 's1', 'up')
+    ts2.transitions.label('s1', 's2', 'down')
+    
+    ts2.plot()
+    
+    ts3 = ts1 +ts2
+    ts3.transitions.add('s'+str(n-1), 's'+str(n) )
+    ts3.default_layout = 'circo'
+    ts3.plot('TB')
+    
+    return ts3
 
 if __name__ == '__main__':
     print('Intended to be run within IPython.\n'
@@ -146,3 +176,5 @@ if __name__ == '__main__':
     
     if not prod_ba.plot() and save_fig:
         prod_ba.save(path='prod.png', fileformat='png')
+    
+    merger_ts = merge_example()
