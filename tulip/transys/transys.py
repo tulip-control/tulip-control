@@ -35,6 +35,7 @@ Transition System Module
 from collections import Iterable, OrderedDict
 from time import strftime
 from pprint import pformat
+import copy
 
 from labeled_graphs import LabeledStateDiGraph, str2singleton
 from labeled_graphs import prepend_with, vprint
@@ -133,19 +134,29 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             raise TypeError('other class must be FiniteTransitionSystem.\n' +
                             'Got instead:\n\t' +str(other) +
                             '\nof type:\n\t' +str(type(other) ) )
-        # unite atomic propositions
+        
         self.atomic_propositions |= other.atomic_propositions
+        self.actions |= other.actions
         
         # add extra states & their labels
         for state, label in other.states.find():
             if state not in self.states:
-                self.states.label(state, label, check=False)
+                self.states.add(state)
+            
+            if label:
+                self.states.label(state, label)
         
-        # copy actions
-        self.actions |= other.actions
+        self.states.initial |= other.states.initial()
         
         # copy extra transitions (be careful w/ labeling)
+        for (from_state, to_state, label_dict) in other.transitions.find():
+            # labeled edge ?
+            if not label_dict:
+                self.transitions.add(from_state, to_state)
+            else:
+                self.transitions.add_labeled(from_state, to_state, label_dict)
         
+        return copy.copy(self)
     
     def __or__(self, ts):
         """Synchronous product between transition systems."""

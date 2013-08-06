@@ -1213,9 +1213,10 @@ class LabeledStates(States):
             dprint('Checking state_id = ' +str(state_id) +
                    ', with attr_dict = ' +str(attr_dict) )
             
-            if state_id not in state_ids and state_ids is not 'any':
-                dprint('state_id = ' +str(state_id) +', not desired.')
-                continue
+            if state_ids is not 'any':
+                if state_id not in state_ids:
+                    dprint('state_id = ' +str(state_id) +', not desired.')
+                    continue
             
             dprint('Checking state label:\n\t attr_dict = ' +str(attr_dict) +
                    '\n vs:\n\t desired_label = ' +str(desired_label) )
@@ -1306,6 +1307,10 @@ class Transitions(object):
     
     def __str__(self):
         return 'Transitions:\n' +pformat(self() )
+    
+    def __len__(self):
+        """Count transitions."""
+        return self.graph.number_of_edges()
     
     def _mutant2int(self, from_state, to_state):
         from_state_id = self.graph.states._mutant2int(from_state)
@@ -1412,10 +1417,6 @@ class Transitions(object):
             to_state = states_list[to_idx]
             
             self.add(from_state, to_state)
-    
-    def number(self):
-        """Count transitions."""
-        return self.graph.number_of_edges()
     
     def remove(self, from_state, to_state):
         """Delete all unlabeled transitions between two given states.
@@ -1656,11 +1657,17 @@ class LabeledTransitions(Transitions):
         if from_states == 'any':
             from_state_ids = 'any'
         else:
+            if from_states in self.graph.states:
+                raise TypeError('from_states is a single state,\n'
+                                'should be iterable of states.')
             from_state_ids = self.graph.states._mutants2ints(from_states)
         
         if to_states == 'any':
             to_state_ids = 'any'
         else:
+            if to_states in self.graph.states:
+                raise TypeError('to_states is a single state,\n'
+                                    'should be iterable of states.')
             to_state_ids = self.graph.states._mutants2ints(to_states)
         
         return (from_state_ids, to_state_ids)
@@ -1953,15 +1960,22 @@ class LabeledTransitions(Transitions):
         """
         (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
                                                             to_states)
-        found_transitions = []        
-        for from_state_id, to_state_id, attr_dict in self.graph.edges(
+        found_transitions = []
+        
+        if from_state_ids is 'any':
+            from_state_ids = self.graph.states()
+        
+        for from_state_id, to_state_id, attr_dict in self.graph.edges_iter(
             from_state_ids, data=True, keys=False
         ):
-            if to_state_id not in to_state_ids and to_states is not 'any':
-                continue
+            if to_states is not 'any':
+                if to_state_id not in to_state_ids:
+                    continue
             
             # any guard ok ?
             if desired_label is 'any':
+                ok = True
+            elif not attr_dict: # no guard defined
                 ok = True
             else:
                 dprint('Checking guard.')
