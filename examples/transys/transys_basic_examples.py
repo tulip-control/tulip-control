@@ -46,8 +46,8 @@ def fts_minimal_example():
     fts.states.add_initial('s0')
     
     fts.atomic_propositions.add_from({'green', 'not_green'})
-    fts.atomic_propositions.label_state('s0', {'not_green'})
-    fts.atomic_propositions.label_state('s1', {'green'})
+    fts.states.label('s0', {'not_green'})
+    fts.states.label('s1', {'green'})
     
     fts.transitions.add('s0', 's1')
     fts.transitions.add('s1', 's0')
@@ -83,7 +83,7 @@ def ofts_minimal_example():
     print('The Open TS now looks like:')
     print(ofts.transitions() )
     
-    ofts.atomic_propositions.add_from({'home', 'lot', 'p1'} )
+    ofts.atomic_propositions |= {'home', 'lot', 'p1'}
     
     print(ofts)
     

@@ -41,7 +41,7 @@ import copy
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-from mathset import is_subset
+from mathset import PowerSet, is_subset
 
 hl = 60 *'-'
 debug = True
@@ -215,7 +215,19 @@ class LabelConsistency(object):
             # iterable sublabel descreption ? (i.e., discrete ?)
             if isinstance(possible_labels, Iterable):
                 if not check_label:
-                    possible_labels.add(sublabel)
+                    if isinstance(possible_labels, PowerSet):
+                        possible_labels.math_set |= sublabel
+                    elif hasattr(possible_labels, 'add'):
+                        possible_labels.add(sublabel)
+                    elif hasattr(possible_labels, 'append'):
+                        possible_labels.append(sublabel)
+                    else:
+                        msg = 'Possible labels described by Iterable of type:\n'
+                        msg += str(type(possible_labels) ) +'\n'
+                        msg += 'but it is not a PowerSet, nor does it have'
+                        msg += 'an .add or .append method.\n'
+                        msg += 'Failed to add new label_value.'
+                        raise TypeError(msg)
                 elif sublabel not in possible_labels:
                     msg = 'Given label:\n\t' +str(sublabel) +'\n'
                     msg += 'not in set of transition labels:\n\t'
@@ -454,11 +466,14 @@ class States(object):
         
         # classic NetworkX ?
         if not self._is_mutable():
-            dprint('Immutable states (must be hashable): classic NetworkX.\n')
+            #dprint('Immutable states (must be hashable): classic NetworkX.\n')
             return state
+        dprint('Mutable states.')
         
         mutants = self.mutants
         state_id = [x for x in mutants if mutants[x] == state]
+        
+        dprint('Converted: state = ' +str(state) +' ---> ' +str(state_id) )
         
         # found state ?
         if len(state_id) == 0:
@@ -953,7 +968,8 @@ class LabeledStates(States):
     
     def _exist_state_labels(self):
         if self._label_check is None:
-            raise('State labeling not defined for this system.')
+            raise Exception('State labeling not defined for this system.\n' +
+                            'The system type = ' +str(type(self.graph) ) )
     
     def _exist_labels(self):
         """State labeling defined ?"""
@@ -1745,8 +1761,9 @@ class LabeledTransitions(Transitions):
         self._check_states(from_state, to_state, check=True)
         
         # chek if same unlabeled transition exists
-        (from_state_id, to_state_id) = \
-            self.graph.states._mutant2int(from_state, to_state)
+        from_state_id = self.graph.states._mutant2int(from_state)
+        to_state_id  = self.graph.states._mutant2int(to_state)
+        
         trans_from_to = self.graph.get_edge_data(
             from_state_id, to_state_id, default={} )
         

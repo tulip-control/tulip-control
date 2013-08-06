@@ -134,7 +134,7 @@ def fts_maximal_example():
     print('States:\n\t' +str(fts.states() ) )
     print('Number of states:\n\t' +str(len(fts.states) ) )
     print('Initial states:\n\t' +str(fts.states.initial) )
-    print('Number of initial states:\n\t' +str(fts.states.number_of_initial() ) )
+    print('Number of initial states:\n\t' +str(len(fts.states.initial) ) )
     print('Current state:\n\t' +str(fts.states.current) )
     
     print("Is 'pay' a state ?\n\t" +str('pay' in fts.states) )
@@ -287,16 +287,16 @@ def fts_maximal_example():
     fts.atomic_propositions.add('paid')
     fts.atomic_propositions.add_from({'', 'drink'} )
     
-    fts.atomic_propositions.label_state('pay', {''})
-    fts.atomic_propositions.label_states({'soda', 'beer'}, {'paid', 'drink'} )
-    fts.atomic_propositions.label_state('select', {'paid'} )
+    fts.states.label('pay', {''})
+    fts.states.labels({'soda', 'beer'}, {'paid', 'drink'} )
+    fts.states.label('select', {'paid'} )
     
     # no checking of state
-    fts.atomic_propositions.add_labeled_state('new state', {'paid'} )
+    fts.states.label('new state', {'paid'}, check=False)
     fts.states.remove('new state')
     
     # same thing, now 'hihi' also added
-    fts.atomic_propositions.label_state('new state', {'hihi'}, check=False)
+    fts.states.label('new state', {'hihi'}, check=False)
     fts.states.remove('new state')
     fts.atomic_propositions.remove('hihi')
     fts.plot()
@@ -486,23 +486,23 @@ def label_per_state():
     fts = ts.FTS()
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add_from(['p', '!p'] )
-    fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}] )
+    fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}] )
     fts.plot()
     
     fts = ts.FTS()
-    fts.atomic_propositions.label_per_state(['s0', 's1'], [{'p'}, {'!p'}], check=False)
+    fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}], check=False)
     fts.plot()
     
     fts = ts.FTS()
-    fts.atomic_propositions.label_per_state([1, 2], [{'p'}, {'!p'}], check=False)
+    fts.states.labels([1, 2], [{'p'}, {'!p'}], check=False)
     fts.plot()
     
     fts = ts.FTS()
-    fts.atomic_propositions.label_per_state(range(2), [{'p'}, {'!p'}], check=False)
+    fts.states.labels(range(2), [{'p'}, {'!p'}], check=False)
     fts.plot()
     
     fts = ts.FTS()
-    fts.atomic_propositions.label_per_state('create', [{'p'}, {'!p'}] )
+    fts.states.labels('create', [{'p'}, {'!p'}] )
     fts.plot()
 
 if __name__ == '__main__':

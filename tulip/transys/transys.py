@@ -314,7 +314,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self._state_label_def = OrderedDict(
             [['ap', PowerSet(atomic_propositions) ]]
         )
-        self.atomic_propositions = self._state_label_def['ap']
+        self.atomic_propositions = self._state_label_def['ap'].math_set
         self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}
