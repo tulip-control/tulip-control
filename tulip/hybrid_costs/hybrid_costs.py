@@ -13,159 +13,37 @@ from prop2part import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
 
 
-#def get_input_helper_all(x0, ssys, H0, H1, N, R, Q):
-#    '''Calculates the sequence u_seq such that
-#    - x(t+1) = A x(t) + B u(t)
-#    - x(k) \in H0 for k = 0,...,M
-#    - x(k) \in H1 for k = M+1,...,N
-#    - u(k) \in U for k = 0,...,N-1
-#    and minimizes \sum x'(k) R x(k) + u'(k) Q u(k) for k = 0,...,N
-#    over all values of M.
-#    '''
-#    minCost = np.Inf
-#    optU = []
-#    for k in xrange(1,N):
-#        u, cost = get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, k)
-#        if cost < minCost:
-#            minCost = cost
-#            optU = u
-#    return optU, minCost
-#
-#
-#def get_input_helper(x0, ssys, H0, H1, N, R, Q):
-#    '''Calculates the sequence u_seq such that
-#    - x(t+1) = A x(t) + B u(t)
-#    - x(k) \in H0 for k = 0,...,N-1
-#    - x(k) \in H1 for k = N
-#    - u(k) \in U for k = 0,...,N-1
-#    and minimizes \sum x'(k) R x(k) + u'(k) Q u(k) for k = 0,...,N
-#    '''
-#    return get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, N-1)
-#
-#  
-#def get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, switch):
-#    '''Calculates the sequence u_seq such that
-#    - x(t+1) = A x(t) + B u(t)
-#    - x(k) \in H0 for k = 0,...,switch
-#    - x(k) \in H1 for k = switch+1,...,N
-#    - u(k) \in U for k = 0,...,N-1
-#    and minimizes \sum x'(k) R x(k) + u'(k) Q u(k) for k = 0,...,N
-#    '''
-#    n = ssys.A.shape[1]
-#    m = ssys.B.shape[1]
-#    
-#    # Create dictionary with powers of A matrix
-#    A_dict = dict()     #(k --> A^k) key-value pairs
-#    A_dict[0] = ssys.A.copy()
-#    for k in xrange(1,N+1):
-#        A_dict[k] = np.dot(A_dict[k-1],ssys.A)
-#    
-#    ## Create the X vector.  X = S_x X(0) + S_u U
-#    S_x = np.eye(n)
-#    for k in xrange(1,N+1):
-#        S_x = np.vstack((S_x, A_dict[k]))
-#    assert S_x.shape == (n*(N+1),n)
-#
-#    S_u = np.zeros((n*(N+1),m*N))
-#    for row in xrange(1,N+1):      # First row is zeros (no control effect)
-#        for col in xrange(0,k):
-#            if row-col-1 >= 0:
-#                S_u[n*row:n*(row+1),n*col:n*(col+1)] = np.dot(A_dict[row-col-1],ssys.B)
-#            else:
-#                break
-#    assert S_u.shape == (n*(N+1),m*N)
-#    
-#    ## Define the cost function:  
-#    # J:= X' Q_blk X + U' R_blk U  = U'HU + 2 x'(0)FU + x'(0)Yx(0),
-#    # where H := (S_u' Q_blk S_u + R_blk), F := (S_x' Q_blk S_u), and Y := (S_x' Q_blk S_x)
-#    Q_blk = block_diag(*[Q]*(N+1))
-#    R_blk = block_diag(*[R]*N)
-#    
-#    H = np.dot(S_u.T, np.dot(Q_blk,S_u)) + R_blk
-#    F = np.dot(S_x.T, np.dot(Q_blk,S_u))
-#    Y = np.dot(S_x.T, np.dot(Q_blk,S_x))
-#    assert H.shape == (m*N,m*N)
-#    assert F.shape == (n,m*N)
-#    assert Y.shape == (n,n)
-#
-#    ## Create the input constraint matrices
-#    # D u(k) <= d for all k = 0,...,N-1
-#    # D_blk = blockdiag(D,...,D) and d_blk = [d',...,d']
-#    D_blk = block_diag(*[ssys.Uset.A]*N)
-#    d_blk = np.tile(ssys.Uset.b,(1,N))[0]
-#    
-#    ## Create the state constraint matrices
-#    # H0 x(k) <= h0 for all k = 0,...,N-1 and H1 x(N) <= h1
-#    # H_blk = blockdiag(H0,H0,...,H1) and h_blk = [h0',h0',,...,h1']
-#    H_before = block_diag(*[H0.A]*(switch+1))
-#    H_after = block_diag(*[H1.A]*(N-switch))
-#    H_blk = block_diag(H_before,H_after)
-#    h_before = np.tile(H0.b,(1,(switch+1)))[0]
-#    h_after = np.tile(H1.b,(1,(N-switch)))[0]
-#    h_blk = np.hstack((h_before,h_after))
-#    
-#    # Combine input and state constraints
-#    G = np.vstack((np.dot(H_blk, S_u), D_blk))
-#    h = np.hstack((h_blk-np.dot(H_blk, np.dot(S_x,x0)), d_blk))
-#        
-#    P = 2*matrix(H)     #factor of 2 for cvxopt input
-#    q = matrix(2*np.dot(x0,F)) 
-#    G = matrix(G)
-#    h = matrix(h)
-#            
-#    sol = solvers.qp(P,q,G,h)
-#    
-#    if sol['status'] != "optimal":
-#        raise Exception("getInputHelper: QP solver finished with status " + \
-#                        str(sol['status']))
-#    u = np.array(sol['x']).flatten()
-#    cost = sol['primal objective'] + np.dot(x0,np.dot(Y,x0))
-#    
-#    return u.reshape(N, m), cost
+def get_input_helper_all(x0, ssys, H0, H1, N, R, Q):
+    '''Calculates the sequence u_seq such that
+    - x(t+1) = A x(t) + B u(t)
+    - x(k) \in H0 for k = 0,...,M
+    - x(k) \in H1 for k = M+1,...,N
+    - u(k) \in U for k = 0,...,N-1
+    and minimizes \sum x'(k) R x(k) + u'(k) Q u(k) for k = 0,...,N
+    over all values of M.
+    '''
+    minCost = np.Inf
+    optU = []
+    for k in xrange(1,N):
+        u, cost = get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, k)
+        if cost < minCost:
+            minCost = cost
+            optU = u
+    return optU, minCost
 
 
+def get_input_helper(x0, ssys, H0, H1, N, R, Q):
+    '''Calculates the sequence u_seq such that
+    - x(t+1) = A x(t) + B u(t)
+    - x(k) \in H0 for k = 0,...,N-1
+    - x(k) \in H1 for k = N
+    - u(k) \in U for k = 0,...,N-1
+    and minimizes \sum x'(k) R x(k) + u'(k) Q u(k) for k = 0,...,N
+    '''
+    return get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, N-1)
 
-def cst_min_cost_bi(ssys, H0, H1, xf, N, R, Q):
-    
-    def cstr(x, *args):
-        A,b = args[6:9]
-        return  b - np.dot(A,x)  # b - Ax >= 0
-
-    def func(x, *args):
-        ssys, H0, H1, N, R, Q = args[0:6]
-        try:
-            u, cost = get_input_helper(x, ssys, H0, H1, N, R, Q)
-        except:
-            pass
-        return cost
-    # Constraint to start in H0 (Ax <= b)
-    A = H0.A
-    b = H0.b
-        
-    # Guess point in middle of H0
-    rd,xd = pc.cheby_ball(H0)
-    x_init = xd.flatten() #-xf  #Coordinate shift
-        
-    # Call nonlinear solver from scipy.optimize
-    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, Q, A, b), \
-                               f_ieqcons = cstr, \
-                               full_output=True, iprint = 0)   # cstr >= 0 is default
-    if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
-        return soln[1]
-    else:
-        print "Solver returned non-optimal solution!"
-        return None
-
-
-
-def cst_min_cost(ssys, H0, H1, N, R, Q):
-    
-    switch = N-1
-    
-    # Constraint to start in H0 (Ax <= b)
-    A = H0.A
-    b = H0.b
-    
+  
+def get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, switch):
     '''Calculates the sequence u_seq such that
     - x(t+1) = A x(t) + B u(t)
     - x(k) \in H0 for k = 0,...,switch
@@ -176,29 +54,11 @@ def cst_min_cost(ssys, H0, H1, N, R, Q):
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
     
-    # Create dictionary with powers of A matrix
-    A_dict = dict()     #(k --> A^k) key-value pairs
-    A_dict[0] = ssys.A.copy()
-    for k in xrange(1,N+1):
-        A_dict[k] = np.dot(A_dict[k-1],ssys.A)
-    
-    ## Create the X vector.  X = S_x X(0) + S_u U
-    S_x = np.eye(n)
-    for k in xrange(1,N+1):
-        S_x = np.vstack((S_x, A_dict[k]))
-    assert S_x.shape == (n*(N+1),n)
-
-    S_u = np.zeros((n*(N+1),m*N))
-    for row in xrange(1,N+1):      # First row is zeros (no control effect)
-        for col in xrange(0,k):
-            if row-col-1 >= 0:
-                S_u[n*row:n*(row+1),n*col:n*(col+1)] = np.dot(A_dict[row-col-1],ssys.B)
-            else:
-                break
-    assert S_u.shape == (n*(N+1),m*N)
+    # X = S_x x0 + S_u U
+    S_x, S_u = create_sys_dynamics(ssys,n,m,N)  # Create system dynamics matrices
     
     ## Define the cost function:  
-    # J:= X' Q_blk X + U' R_blk U  = U'HU + 2 x'(0)FU + x'(0)Yx(0),
+    # J:= X' Q_blk X + U' R_blk U  = U'HU + 2 x0' FU + x0' Y x0,
     # where H := (S_u' Q_blk S_u + R_blk), F := (S_x' Q_blk S_u), and Y := (S_x' Q_blk S_x)
     Q_blk = block_diag(*[Q]*(N+1))
     R_blk = block_diag(*[R]*N)
@@ -242,6 +102,72 @@ def cst_min_cost(ssys, H0, H1, N, R, Q):
                         str(sol['status']))
     u = np.array(sol['x']).flatten()
     cost = sol['primal objective'] + np.dot(x0,np.dot(Y,x0))
+    
+    return u.reshape(N, m), cost
+
+
+def create_sys_dynamics(ssys,n,m,N):
+    # Create dictionary with powers of A matrix
+    A_dict = dict()     #(k --> A^k) key-value pairs
+    A_dict[0] = ssys.A.copy()
+    for k in xrange(1,N+1):
+        A_dict[k] = np.dot(A_dict[k-1],ssys.A)
+    
+    ## Create the X vector.  X = S_x X(0) + S_u U
+    S_x = np.eye(n)
+    for k in xrange(1,N+1):
+        S_x = np.vstack((S_x, A_dict[k]))
+    assert S_x.shape == (n*(N+1),n)
+
+    S_u = np.zeros((n*(N+1),m*N))
+    for row in xrange(1,N+1):      # First row is zeros (no control effect)
+        for col in xrange(0,k):
+            if row-col-1 >= 0:
+                S_u[n*row:n*(row+1),n*col:n*(col+1)] = np.dot(A_dict[row-col-1],ssys.B)
+            else:
+                break
+    assert S_u.shape == (n*(N+1),m*N)
+    
+    return S_x, S_u
+
+
+
+def cst_min_cost_bi(ssys, H0, H1, xf, N, R, Q):
+    
+    def cstr(x, *args):
+        A,b = args[6:9]
+        return  b - np.dot(A,x)  # b - Ax >= 0
+
+    def func(x, *args):
+        ssys, H0, H1, N, R, Q = args[0:6]
+        try:
+            u, cost = get_input_helper(x, ssys, H0, H1, N, R, Q)
+        except:
+            pass
+        return cost
+    # Constraint to start in H0 (Ax <= b)
+    A = H0.A
+    b = H0.b
+        
+    # Guess point in middle of H0
+    rd,xd = pc.cheby_ball(H0)
+    x_init = xd.flatten() #-xf  #Coordinate shift
+        
+    # Call nonlinear solver from scipy.optimize
+    soln = optimize.fmin_slsqp(func, x_init, args = (ssys, H0, H1, N, R, Q, A, b), \
+                               f_ieqcons = cstr, \
+                               full_output=True, iprint = 0)   # cstr >= 0 is default
+    if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
+        return soln[1]
+    else:
+        print "Solver returned non-optimal solution!"
+        return None
+
+
+
+def cst_min_cost(ssys, H0, H1, N, R, Q):
+    # TODO: Solve joint optimization problem.  This should basically be the 
+    # same code as "get_input_helper", but with x0 as a decision variable in this case.
     
     return u.reshape(N, m), cost
         
