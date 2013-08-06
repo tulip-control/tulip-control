@@ -41,7 +41,7 @@ import copy
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-from mathset import PowerSet, is_subset
+from mathset import PowerSet, SubSet, is_subset
 
 hl = 60 *'-'
 debug = True
@@ -332,14 +332,15 @@ class States(object):
         if mutable:
             self.mutants = dict()
             self.min_free_id = 0
-            self._initial = list()
+            #self._initial = list()
         else:
             self.mutants = None
             self.min_free_id = None
-            self._initial = set()
+            #self._initial = set()
+        self.initial = SubSet(self)
         
         self.add_from(states)
-        self.add_initial_from(initial_states)
+        self.initial |= initial_states
         self.set_current(current_state)
         
         self._removed_state_callback = removed_state_callback
@@ -699,7 +700,7 @@ class States(object):
         
         # rm if init
         if self.is_initial(rm_state):
-            self.remove_initial(rm_state)
+            self.initial.remove(rm_state)
         
         # chain to parent (for final states etc)
         if self._removed_state_callback:
@@ -728,74 +729,8 @@ class States(object):
         
         self.current = states
     
-	# initial states
-    def _get_initial(self):
-        return self._initial
-    
-    initial = property(_get_initial)
-    
-    def add_initial(self, new_initial_state):
-        """Add state to set of initial states.
-        
-        C{new_initial_state} should already be a state.
-        First use states.add to include it in set of states,
-        then states.add_initial.
-        """
-        if not new_initial_state in self():
-            raise Exception(
-                'New initial state \\notin States.\n'
-                'Add it first to states using sys.states.add()\n'
-                'FYI: new initial state:\n\t' +str(new_initial_state) +'\n'
-                'and States:\n\t' +str(self() )
-            )
-        
-        # ensure uniqueness for unhashable states
-        if self.is_initial(new_initial_state):
-            warnings.warn('Already an initial state.\n')
-            return
-        
-        # use sets when possible for efficiency
-        if self._is_mutable():
-            self._initial.append(new_initial_state)
-        else:
-            self._initial.add(new_initial_state)
-
-    def add_initial_from(self, new_initial_states):
-        """Add multiple initial states.
-        
-        Should already be in set of states.
-        """
-        if not new_initial_states:
-            return
-        
-        if self._is_mutable():
-            self._initial |= set(new_initial_states)
-        else:
-            for new_initial_state in new_initial_states:
-                self.add_initial(new_initial_state)
-    
-    def remove_initial(self, rm_initial_state):
-        """Delete single state from set of initial states."""
-        if self.is_initial(rm_initial_state):
-            self._initial.remove(rm_initial_state)
-        else:
-            warnings.warn('Attempting to remove inexistent initial state.'
-                          +str(rm_initial_state) )
-    
-    def remove_initial_from(self, rm_initial_states):
-        """Delete multiple states from set of initial states."""
-        if not rm_initial_states:
-            return
-        
-        if self._is_mutable():
-            self._initial = self._initial.difference(rm_initial_states)
-        else:
-            # mutable states
-            for rm_initial_state in rm_initial_states:
-                self.remove_initial(rm_initial_state)
-    
     def is_initial(self, state):
-        return is_subset([state], self._initial)
+        return state in self.initial
     
     def is_final(self, state):       
         """Check if state \\in final states.
@@ -820,7 +755,7 @@ class States(object):
             Current state is set
             Current state \\subseteq states
         """
-        if not is_subset(self._initial, self() ):
+        if not is_subset(self.initial, self() ):
             warnings.warn('Ininital states \\not\\subseteq states.')
         
         if self.current is None:
@@ -932,6 +867,15 @@ class States(object):
         """
         return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
         
+    def __setattr__(self, name, value):
+        if name is 'initial' and not isinstance(value, SubSet):
+            msg = 'States.initial must be of class StateSubset.'
+            msg += 'Got instead:\n\t' +str(value) +'\nof class:\n\t'
+            msg += str(type(value) )
+            raise Exception(msg)
+        
+        object.__setattr__(self, name, value)
+    
 class LabeledStates(States):
     """States with annotation.
     

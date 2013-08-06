@@ -345,7 +345,9 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         s += pformat(self.states(data=True), indent=3) +2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += str(self.sys_actions) +2*'\n' +str(self.env_actions) +2*'\n'
+        s += 'System Actions:\n' +pformat(self.sys_actions, indent=3) +2*'\n'
+        s += 'Environment Actions:\n' +pformat(self.env_actions, indent=3) +2*'\n'
+        s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
         s += pformat(self.transitions(labeled=True), indent=3) +'\n' +hl +'\n'
         
         return s
@@ -480,7 +482,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     ts = FTS(name=name)
     
     ts.states.add_from(states)
-    ts.states.add_initial_from(initial_states)
+    ts.states.initial |= initial_states
     
     ts.atomic_propositions |= ap
     

@@ -33,7 +33,7 @@
 Mathematical Sets and Power Sets
 """
 from itertools import chain, combinations
-from collections import Iterable, Hashable
+from collections import Iterable, Hashable, Container
 from pprint import pformat
 import warnings
 #from scipy.sparse import lil_matrix # is this really needed ?
@@ -104,7 +104,7 @@ class MathSet(object):
     
     see also
     --------
-    PowerSet
+    SubSet, PowerSet, set
     """    
     def __init__(self, iterable=[]):
         """Initialize by adding elements from iterable.
@@ -171,6 +171,16 @@ class MathSet(object):
         @rtype: MathSet
         """
         self.add_from(iterable)
+        return self
+    
+    def __isub__(self, rm_items):
+        """Delete multiple elements."""
+        if not rm_items:
+            return
+        
+        for item in rm_items:
+            self.remove(item)
+        
         return self
     
     def __eq__(self, other):
@@ -297,7 +307,102 @@ class MathSet(object):
         if isinstance(item, Hashable):
             self._set.remove(item)
         else:
-            self._list.remove(item)    
+            self._list.remove(item)
+
+class SubSet(MathSet):
+    """Subset of selected MathSet, or other Iterable.
+    
+    Prior to adding new elements,
+    it checks that they are in its superset.
+    
+    example
+    -------
+    >>> superset = [1, 2]
+    >>> s = SubSet(superset)
+    >>> s |= [1, 2]
+    >>> print(s)
+    set([1, 2]) U []
+    >>> s.add(3)
+    raises exception because 3 \\notin [1,2]
+    
+    see also
+    --------
+    MathSet, PowerSet
+    """
+    def __init__(self, iterable_superset):
+        """Define the superset with respect to maintain consistency.
+        
+        @param superset: This SubSet checked vs C{superset}
+        @type superset: Iterable
+        """
+        self._superset = []
+        super(SubSet, self).__init__([])
+        self.superset = iterable_superset
+    
+    def _get_superset(self):
+        return self._superset
+    
+    def _set_superset(self, iterable_superset):
+        if not isinstance(iterable_superset, Container):
+            raise TypeError('superset must be Iterable,\n' +
+                            'Got instead:\n\t' +str(iterable_superset) )
+        
+        # consistent with existing values ?
+        if not is_subset(self(), iterable_superset):
+            msg = 'Not all elements currently in SubSet:\n\t' +str(self)
+            msg += 'are in given superset:\n\t' +str(iterable_superset)
+            raise Exception(msg)
+        
+        self._superset = iterable_superset
+    
+    superset = property(_get_superset, _set_superset)
+    
+    def add(self, new_element):
+        """Add state to subset.
+        
+        Extends MathSet.add with subset relation checking.
+        
+        example
+        -------
+        C{new_initial_state} should already be a state.
+        First use states.add to include it in set of states,
+        then states.add_initial.
+        
+        see also
+        --------
+        MathSet.add
+        """
+        if not new_element in self.superset:
+            raise Exception(
+                'New element state \\notin superset.\n'
+                'Add it first to states using e.g. sys.states.add()\n'
+                'FYI: new element:\n\t' +str(new_element) +'\n'
+                'and superset:\n\t' +str(self.superset)
+            )
+        
+        super(SubSet, self).add(new_element)
+    
+    def add_from(self, new_elements):
+        """Add multiple new elements to subset.
+        
+        Extends MathSet.add_from with subset relation checking.
+        
+        note
+        ----
+        It would be sufficient to extend only .add provided
+        MathSet.add_from called .add iteratively.
+        However MathSet.add_from filters states, which is
+        arguably more efficient. So both .add and .add_from
+        need to be extended here.
+        
+        see also
+        --------
+        add, __ior__
+        """
+        if not is_subset(new_elements, self._superset):
+            raise Exception('All new_elements should already be \\in ' +
+                            'self.superset = ' +str(self.superset) )
+        super(SubSet, self).add_from(new_elements)
 
 def unique(iterable):
     """Return unique elements.
@@ -337,15 +442,15 @@ def is_subset(small_iterable, big_iterable):
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
-    if not isinstance(big_iterable, Iterable):
-        raise TypeError('big_iterable must be Iterable, '
+    if not isinstance(big_iterable, (Iterable, Container) ):
+        raise TypeError('big_iterable must be either Iterable or Container, '
                         'otherwise subset relation undefined.\n'
                         'Got:\n\t' +str(big_iterable) +'\ninstead.')
-        
+    
     if not isinstance(small_iterable, Iterable):
         raise TypeError('small_iterable must be Iterable, '
                         'otherwise subset relation undefined.\n'
-                        'Got:\n\t' +str(big_iterable) +'\ninstead.')
+                        'Got:\n\t' +str(small_iterable) +'\ninstead.')
     
     # nxor
     if isinstance(small_iterable, str) != isinstance(big_iterable, str):
@@ -353,7 +458,7 @@ def is_subset(small_iterable, big_iterable):
                         'big_iterable should be strings.\n'
                         'Otherwise subset relation between string '
                         'and non-string may introduce bugs.\nGot:\n\t' +
-                        str(big_iterable) +',\t' +str(small_iterable) +
+                        str(small_iterable) +',\t' +str(big_iterable) +
                         '\ninstead.')
     
     try:
@@ -367,11 +472,14 @@ def is_subset(small_iterable, big_iterable):
         return small_iterable <= big_iterable
     except TypeError:
         # not all items hashable...
-    
-        # list to avoid: unhashable \in set ? => error
-        if not isinstance(big_iterable, list):
-            # avoid object duplication
-            big_iterable = list(big_iterable)
+        
+        try:
+            # list to avoid: unhashable \in set ? => error
+            if not isinstance(big_iterable, list):
+                # avoid object duplication
+                big_iterable = list(big_iterable)
+        except:
+            print('Could not convert big_iterable to list.')
         
         for item in small_iterable:
             if item not in big_iterable:
@@ -418,7 +526,7 @@ class PowerSet(object):
     
     see also
     --------
-    is_subset
+    MathSet, SubSet, is_subset
     
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
@@ -478,7 +586,9 @@ class PowerSet(object):
     
     def __setattr__(self, name, value):
         if name is 'math_set' and not isinstance(value, MathSet):
-            raise Exception('math_set attribute of PowerSet must be of ' +
-                          'class MathSet. Given:\n\t' +str(value) )
+            msg = 'PowerSet.math_set must be of class MathSet.\n'
+            msg += 'Got instead:\n\t' +str(value)
+            msg += '\nof class:\nt\t' +str(type(value) )
+            raise Exception(msg)
         
         object.__setattr__(self, name, value)

@@ -46,7 +46,7 @@ def test_mutable_fts():
     ts.states.add(s0)
     ts.states.add(s1)
     
-    ts.states.add_initial(s0)
+    ts.states.initial.add(s0)
     
     ts.transitions.add(s0, s1)
     print ts
@@ -64,7 +64,7 @@ def test_mutable_ba():
     s1 = [{}, (1, 2), 'f', ['d', {} ] ]
     
     ba.states.add_from([s0, s1] )
-    ba.states.add_initial(s0)
+    ba.states.initial.add(s0)
     ba.add_final_state(s1)
     
     ba.alphabet.math_set |= {'p', '!p'}

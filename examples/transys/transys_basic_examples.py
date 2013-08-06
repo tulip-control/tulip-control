@@ -43,7 +43,7 @@ def fts_minimal_example():
     
     fts = ts.FTS()
     fts.states.add_from(['s0', 's1'] )
-    fts.states.add_initial('s0')
+    fts.states.initial.add('s0')
     
     fts.atomic_propositions.add_from({'green', 'not_green'})
     fts.states.label('s0', {'not_green'})
@@ -65,7 +65,7 @@ def ofts_minimal_example():
     ofts = ts.OpenFiniteTransitionSystem()
     
     ofts.states.add_from(['s1', 's2', 's3'] )
-    ofts.states.add_initial('s1')
+    ofts.states.initial.add('s1')
     
     ofts.transitions.add('s1', 's2') # unlabeled
     
@@ -113,7 +113,7 @@ def ba_minimal_example():
     
     ba = ts.BuchiAutomaton(atomic_proposition_based=True)
     ba.states.add_from({'q0', 'q1', 'q2'})
-    ba.states.add_initial('q0')
+    ba.states.initial.add('q0')
     ba.states.add_final('q1')
     
     ba.alphabet.math_set |= [True, 'green', 'not_green']

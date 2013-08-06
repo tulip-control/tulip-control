@@ -34,7 +34,7 @@ sys = transys.FTS()
 
 # Define the states of the system
 sys.states.add_from(['X0', 'X1', 'X2', 'X3', 'X4', 'X5'])
-sys.states.add_initial('X0')    # start in state X0
+sys.states.initial.add('X0')    # start in state X0
 
 # Define the allowable transitions
 #! TODO (IF): can arguments be a singleton instead of a list?

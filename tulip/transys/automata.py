@@ -448,7 +448,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     ba = BA(name=name, atomic_proposition_based=atomic_proposition_based)
     
     ba.states.add_from(states)
-    ba.states.add_initial_from(initial_states)
+    ba.states.initial |= initial_states
     ba.states.add_final_from(accepting_states)
     
     if atomic_proposition_based:
@@ -487,7 +487,7 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
-    prod_ba.states.add_initial_from(prod_ts.states.initial)
+    prod_ba.states.initial |= prod_ts.states.initial
     
     # final states = persistent set
     prod_ba.states.add_final_from(persistent)
@@ -587,8 +587,8 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     prodts.actions.add_from(fts.actions)
 
     # construct initial states of product automaton
-    s0s = fts.states.initial.copy()
-    q0s = ba.states.initial.copy()
+    s0s = fts.states.initial()
+    q0s = ba.states.initial()
     
     final_states_preimage = set()
     
@@ -616,7 +616,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             for (curq0, q, sublabels) in enabled_ba_trans:
                 new_sq0 = (s0, q)                
                 prodts.states.add(new_sq0)
-                prodts.states.add_initial(new_sq0)
+                prodts.states.initial.add(new_sq0)
                 prodts.states.label(new_sq0, {q} )
                 
                 # final state ?
@@ -627,7 +627,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
-    queue = prodts.states.initial.copy()
+    queue = set(prodts.states.initial() )
     visited = set()
     while queue:
         sq = queue.pop()

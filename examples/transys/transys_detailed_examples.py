@@ -112,10 +112,13 @@ def fts_maximal_example():
     
     fts.states.set_current(['pay'])
     
-    fts.states.add_initial('pay') # should already be a state
-    fts.states.add_initial_from({'soda', 'select'} )
-    fts.states.remove_initial('soda')
-    fts.states.remove_initial_from({'soda', 'select'} )
+    fts.states.initial.add('pay') # should already be a state
+    fts.states.initial |= {'soda', 'select'}
+    fts.states.initial.remove('soda')
+    
+    fts.states.add('water')
+    fts.states.initial.add('water')
+    fts.states.initial -= {'water', 'select'}
     
     fts.states.check() # sanity
     
@@ -126,7 +129,7 @@ def fts_maximal_example():
     print("Post('pay') = " +str(post) )
     
     try:
-        fts.states.add_initial('not pay')
+        fts.states.initial.add('not pay')
     except:
         warnings.warn('You cannot add an initial state \\notin states.')
     
@@ -320,7 +323,7 @@ def ba_maximal_example():
     ba.states.add('q0')
     ba.states.add_from({'q1', 'q2', 'q3'}, destroy_order=True)
     
-    ba.states.add_initial('q0')
+    ba.states.initial.add('q0')
     ba.plot()
     
     ba.alphabet.math_set.add(['paid'] )
@@ -414,7 +417,7 @@ def mealy_machine_example():
     
     m.states.add('s0')
     m.states.add_from(['s1', 's2'])
-    m.states.add_initial('s0')
+    m.states.initial.add('s0')
     
     # note: guards are conjunctions, any disjunction is represented by 2 edges
     
