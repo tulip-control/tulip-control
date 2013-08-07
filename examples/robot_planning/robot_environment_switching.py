@@ -73,14 +73,8 @@ print sys_swe
 #
 env_vars = {'park'}
 env_init = set()                # empty set
-env_prog = '!park'
+env_prog = '[]<>(!park)'
 env_safe = set()                # empty set
-
-# We might want to add additional assumptions
-# env_prog |= '!slippery'       
-#! NOTE: what "slippery" means can be infered from TS. Or, do we need to declare
-# it as environment variable explicitly?
-
 
 # 
 # System specification
@@ -96,21 +90,21 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) == X0 || (X0reach && !park))
+#     [](next(X0reach) == lot || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
 #! TODO: create a function to convert this type of spec automatically
-env_vars |= {'X0reach'}
-env_init |= {'X0reach'}
 
 # Define the specification
 #! NOTE: maybe "synthesize" should infer the atomic proposition from the 
-# transition system?
-sys_vars = set()                # part of TS
-sys_init = set()                # empty set
-sys_prog = 'home'               # []<>X5
+# transition system? Or, we can declare the mode variable, and the values
+# of the mode variable are read from the transition system.
+sys_vars = {'X0reach'}
+sys_init = {'X0reach'}          
+sys_prog = {'home'}               # []<>home
 sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+sys_prog |= {'X0reach'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,

@@ -58,15 +58,17 @@ env_prog = '!park'              # []<>(!park)
 # and what the system is required to do in response to an environmental
 # action.  
 #
-sys_vars = {'X0', 'X1', 'X2', 'X3', 'X4', 'X5'}
-sys_init = {'X0'}
+sys_vars = {}
+sys_vars['loc'] = set([0,1,2,3,4,5])
+
+sys_init = {'loc=0'}
 sys_safe = {
-    'X0 -> next(X1 || X3)',
-    'X1 -> next(X0 || X4 || X2)',
-    'X2 -> next(X1 || X5)',
-    'X3 -> next(X0 || X4)',
-    'X4 -> next(X3 || X1 || X5)',
-    'X5 -> next(X4 || X2)',
+    'loc=0 -> next(loc=1 || loc=3)',
+    'loc=1 -> next(loc=0 || loc=4 || loc=2)',
+    'loc=2 -> next(loc=1 || loc=5)',
+    'loc=3 -> next(loc=0 || loc=4)',
+    'loc=4 -> next(loc=3 || loc=1 || loc=5)',
+    'loc=5 -> next(loc=4 || loc=2)',
 }
 sys_prog = set()                # empty set
 
@@ -78,19 +80,19 @@ sys_prog = set()                # empty set
 # to the park signal by visiting the lower left corner.  The LTL
 # specification is given by 
 #
-#     []<> X5 && [](park -> <>X0)
+#     []<> X5 && [](park -> <>(loc=0))
 #
 # Since this specification is not in GR(1) form, we introduce an
 # environment variable X0reach that is initialized to True and the
-# specification [](park -> <>X0) becomes
+# specification [](park -> <>(loc=0)) becomes
 #
-#     [](next(X0reach) == X0 || (X0reach && !park))
+#     [](next(X0reach) == (loc=0) || (X0reach && !park))
 #
 
 # Augment the system description to make it GR(1)
-sys_vars |= {'X0reach'}
+sys_vars['X0reach'] = 'boolean'
 sys_init |= {'X0reach'}
-sys_safe |= {'next(X0reach) == X0 || (X0reach && !park)'}
+sys_safe |= {'next(X0reach) == (loc=0) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create a GR(1) specification

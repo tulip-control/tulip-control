@@ -9,7 +9,7 @@ transition system.
 """
 
 # Import the packages that we need
-from tulip import transys, spec, jtlvint, synth
+from tulip import transys, spec, synth
 
 #
 # System dynamics
@@ -81,7 +81,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) == X0 || (X0reach && !park))
+#     [](next(X0reach) == lot || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
@@ -90,10 +90,11 @@ env_vars |= {'X0reach'}
 env_init |= {'X0reach'}
 
 # Define the specification
-sys_vars = {'home', 'lot'}
-sys_init = set()                # empty set
-sys_prog = 'home'               # []<>X5
+sys_vars = {'X0reach'}          # infer the rest from TS 
+sys_init = {'X0reach'}          
+sys_prog = {'home'}             # []<>home
 sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+sys_prog |= {'X0reach'} 
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
