@@ -59,7 +59,7 @@ disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True,
 
 env_vars = {'park'}
 env_init = set()                # empty set
-env_prog = '[]<>(!park)'
+env_prog = '!park'
 env_safe = set()                # empty set
 
 sys_vars = {'X0reach'}

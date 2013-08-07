@@ -82,7 +82,7 @@ print sys_hyb
 #
 env_vars = {'park'}
 env_init = set()                # empty set
-env_prog = '[]<>(!park)'
+env_prog = {'!park'}
 env_safe = set()                # empty set
 
 # 
