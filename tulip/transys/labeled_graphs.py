@@ -2365,7 +2365,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         For more semantics, use a FiniteStateMachine.
         """
         for state in self.states():
-            if self.states.is_final(state):
+            if self.states.is_terminal(state):
                 return True
         return False
     
