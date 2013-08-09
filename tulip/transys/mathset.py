@@ -153,12 +153,58 @@ class MathSet(object):
         s.add_from(other)
         return s
     
+    def cartesian(self, other):
+        """Return Cartesian product with other C{MathSet},
+        
+        as CartesianProduct instance.
+        This representation is internally more efficient,
+        because it is implicit (product not explicitly stored).
+        
+        see also
+        --------
+        CartesianProduct, __mul__
+        """
+        raise NotImplementedError
+    
+    def __mul__(self, other):
+        """Return the Cartesian product with another C{MathSet}.
+        
+        example
+        -------
+        >>> a = MathSet([1, 2] )
+        >>> b = MathSet([3, 4] )
+        >>> c = a *b
+        >>> print(type(c) )
+        
+        >>> print(c)
+        
+        
+        If we prefer a CartesianProduct returned instead:
+        >>> c = a.cartesian(b)
+        
+        see also
+        --------
+        cartesian
+        
+        @param other: set with which to take Cartesian product
+        @type other: MathSet
+        
+        @return: Cartesian product of C{self} with C{other}.
+        @rtype: C{MathSet} (explicit construction)
+        """
+        cartesian = [(x, y) for x in self
+                            for y in other]
+        return MathSet(cartesian)
+    
     def __ior__(self, iterable):
         """Union with of MathSet with iterable.
         
         example
         -------
-        
+        >>> s = MathSet([1, 2] )
+        >>> s |= [3, 4] # much cleaner & familiar
+        >>> print(s)
+        set([1, 2, 3, 4]) U []
         
         see also
         --------
@@ -195,7 +241,11 @@ class MathSet(object):
     
     def __contains__(self, item):
         if isinstance(item, Hashable):
-            return item in self._set
+            try:
+                return item in self._set
+            except:
+                print('Items within Hashable are mutable.')
+                return item in self._list
         else:
             return item in self._list
     
@@ -400,9 +450,48 @@ class SubSet(MathSet):
         add, __ior__
         """
         if not is_subset(new_elements, self._superset):
-            raise Exception('All new_elements should already be \\in ' +
+            raise Exception('All new_elements:\n\t' +str(new_elements) +
+                            '\nshould already be \\in ' +
                             'self.superset = ' +str(self.superset) )
         super(SubSet, self).add_from(new_elements)
+
+class CartesianProduct(object):
+    """List of MathSets, with Cartesian semantics.
+    """
+    def __init__(self):
+        self.mathsets = []
+    
+    def __contains__(self, element):
+        #TODO check ordered
+        if not isinstance(element, Iterable):
+            raise TypeError(
+                'Argument element must be Iterable, otherwise cannot ' +
+                'recover which item in it belongs to which set in the ' +
+                'Cartesian product.'
+            )
+        
+        for idx, item in enumerate(element):
+            if item not in self.mathsets[idx]:
+                return False
+        return True
+    
+    def __mul__(self, mathsets):
+        """Multiply Cartesian products."""
+        if not isinstance(mathsets, list):
+            raise TypeError('mathsets given must be a list of MathSet.')
+    
+    def add(self, mathset):
+        self.mathsets += [mathset]
+    
+    def add_from(self, mathsets):
+        self.mathsets += mathsets
+    
+    def remove(self, mathset):
+        self.mathsets.remove(mathset)
+    
+    def remove_from(self, mathsets):
+        for mathset in mathsets:
+            self.remove(mathset)
 
 def unique(iterable):
     """Return unique elements.

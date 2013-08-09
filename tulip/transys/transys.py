@@ -208,61 +208,141 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         see also
         --------
-        self.__mul__, self.async_prod, BuchiAutomaton.sync_prod
+        __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
+        Def. 2.42, pp. 75--76 [Baier 2008]
+        Def. 4.62, p.200 [Baier 2008]
         """
         if isinstance(ts_or_ba, FiniteTransitionSystem):
-            return self._ts_ts_sync_prod(ts_or_ba)
+            ts = ts_or_ba
+            return self._sync_prod(ts)
         elif isinstance(ts_or_ba, automata.BuchiAutomaton):
             ba = ts_or_ba
             return automata._ts_ba_sync_prod(self, ba)
         else:
             raise Exception('Argument must be TS or BA.')
     
-    def async_prod(self, ts):
-        """Asynchronous product TS1 x TS2 between Finite Transition Systems."""
-        raise NotImplementedError
-    
-    def is_blocking(self):
-        """Does each state have at least one outgoing transition ?
+    def _sync_prod(self, ts):
+        """Synchronous (tensor) product with other FTS.
         
-        Note that edge labels are NOT checked, i.e.,
-        it is not checked whether for each state and each possible symbol/letter
-        in the input alphabet, there exists at least one transition.
-        
-        The reason is that edge labels do not have any semantics at this level,
-        so they are not yet regarded as guards.
-        For more semantics, use a FiniteStateMachine.
+        @param ts: other FTS with which to take synchronous product
+        @type ts: FiniteTransitionSystem
         """
-        raise NotImplementedError
+        # type check done by caller: sync_prod
+        if self.states.mutants or ts.states.mutants:
+            mutable = True
+        else:
+            mutable = False
+        
+        prod_ts = FiniteTransitionSystem(mutable=mutable)
+        
+        # union of AP sets
+        prod_ts.atomic_propositions |= \
+            self.atomic_propositions | ts.atomic_propositions
+        
+        # for synchronous product: Cartesian product of action sets
+        prod_ts.actions |= self.actions * ts.actions
+        
+        prod_ts = super(FiniteTransitionSystem, self).tensor_product(
+            ts, prod_sys=prod_ts
+        )
+        
+        return prod_ts
+    
+    def async_prod(self, ts):
+        """Asynchronous product TS1 x TS2 between FT Systems.
+        
+        see also
+        --------
+        __or__, sync_prod, cartesian_product
+        Def. 2.18, p.38 [Baier 2008]
+        """
+        if not isinstance(ts, FiniteTransitionSystem):
+            raise TypeError('ts must be a FiniteTransitionSystem.')
+        
+        if self.states.mutants or ts.states.mutants:
+            mutable = True
+        else:
+            mutable = False
+        
+        # union of AP sets
+        prod_ts = FiniteTransitionSystem(mutable=mutable)
+        prod_ts.atomic_propositions |= \
+            self.atomic_propositions | ts.atomic_propositions
+        
+        # for parallel product: union of action sets
+        prod_ts.actions |= self.actions | ts.actions
+        
+        prod_ts = super(FiniteTransitionSystem, self).cartesian_product(
+            ts, prod_sys=prod_ts
+        )
+        
+        return prod_ts
 
     # operations between transition systems    
     def intersection(self):
+        """Conjunct with another FTS.
+        """
         raise NotImplementedError
         
     def difference(self):
+        """Remove a sub-FTS.
+        """
         raise NotImplementedError
 
     def composition(self):
+        """Compositions of FTS, with state replaced by another FTS.
+        """
         raise NotImplementedError
     
-    def projection_on(self):
+    def project(self, factor=None):
+        """Project onto subgraph or factor graph.
+        
+        @param factor: on what to project:
+            - If C{None}, then project on subgraph, i.e., using states
+            - If C{int}, then project on the designated element of
+                the tuple comprising each state
+        @type factor: None | int
+        """
         raise NotImplementedError
     
     def simulate(self, state_sequence="random"):
-        """
-            simulate automaton
-                inputs="random" | given array
-                mode="acceptor" | "transfucer"
+        """Simulate Finite Transition System.
+        
+        @type state_sequence: inputs="random"
+            | given array
+        
+        see also
+        --------
+        is_simulation
         """
         raise NotImplementedError
     
+    def sim(self, **args):
+        """Alias to simulate.
+        """
+        return self.simulate(**args)
+    
     def is_simulation(self, simulation=FTSSim() ):
+        """Check path, execution, trace or simulation given.
+        
+        terminology
+        -----------
+        - A path is a sequence of states.
+        - An execution is a sequence of alternating states, actions.
+        - A trace is the lift of a path by the labeling.
+            (Caution: a single trace may project on multiple paths)
+        - A bundle of the above is here called a simulation.
+        
+        see also
+        --------
+        simulate
+        """
         raise NotImplementedError
     
     def loadSPINAut():
         raise NotImplementedError
     
-    def dump_promela(self, procname=None):
+    def promela_str(self, procname=None):
         """Convert an automaton to Promela source code.
         
         Creats a process which can be simulated as an independent
@@ -345,7 +425,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s = '/*\n * Promela file generated with TuLiP\n'
         s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
         
-        s += self.dump_promela()
+        s += self.promela_str()
         
         # dump to file
         f = open(fname, 'w')

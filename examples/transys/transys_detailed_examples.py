@@ -310,9 +310,9 @@ def fts_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if not fts.plot() and save:
-        fts.save(path=pdf_fname)
-        #fts.save(path=dot_fname, fileformat='dot')
+    if not fts.plot() and save_fig:
+        fts.save(pdf_fname)
+        #fts.save(dot_fname, 'dot')
         
 def ba_maximal_example():
     """Buchi Automaton demo."""
@@ -358,9 +358,9 @@ def ba_maximal_example():
     dot_fname = path +'.dot'
     pdf_fname = path +'.pdf'
     
-    if not ba.plot() and save:
-        ba.save(path=pdf_fname)
-        #ba.save(path=dot_fname, fileformat='dot')
+    if not ba.plot() and save_fig:
+        ba.save(pdf_fname)
+        #ba.save(dot_fname, 'dot')
     
     return ba
 

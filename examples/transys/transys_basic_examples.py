@@ -53,7 +53,7 @@ def fts_minimal_example():
     fts.transitions.add('s1', 's0')
     
     if not fts.plot() and save_fig:
-        fts.save(path='small_fts.png')
+        fts.save('small_fts.png')
     
     return fts
 
@@ -91,7 +91,7 @@ def ofts_minimal_example():
     pdf_fname = path +'.pdf'
     
     if not ofts.plot() and save_fig:
-        ofts.save(path=pdf_fname)
+        ofts.save(pdf_fname)
 
 def ba_minimal_example():
     """Small example.
@@ -125,7 +125,7 @@ def ba_minimal_example():
     ba.transitions.add_labeled('q2', 'q2', {True})
     
     if not ba.plot() and save_fig:
-        ba.save(path='small_ba.png', fileformat='png')
+        ba.save('small_ba.png')
     
     return ba
 
@@ -172,9 +172,9 @@ if __name__ == '__main__':
     prod_ba = ba *fts
     
     if not prod_fts.plot() and save_fig:
-        prod_fts.save(path='prod.png', fileformat='png')
+        prod_fts.save('prod.png', 'png')
     
     if not prod_ba.plot() and save_fig:
-        prod_ba.save(path='prod.png', fileformat='png')
+        prod_ba.save('prod.png', 'png')
     
     merger_ts = merge_example()

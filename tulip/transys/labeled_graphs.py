@@ -41,10 +41,11 @@ import copy
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-from mathset import PowerSet, SubSet, is_subset
+from mathset import PowerSet, SubSet, is_subset, unique
+#from tulip import conxml
 
 hl = 60 *'-'
-debug = True
+debug = False
 
 try:
     import pydot
@@ -184,29 +185,34 @@ class LabelConsistency(object):
         # get labeling def
         label_def = self.label_def
         
-        # single label ?
-        if len(label_def) == 1:
-            # hack strings for now, until deciding
-            if label_def.has_key('ap'):
-                sublabel_values = str2singleton(sublabel_values)
-            
-            dprint('Replaced sublabel value:\n\t' +str(sublabel_values) )
-            sublabel_values = [sublabel_values]
-            dprint('with the singleton:\n\t' +str(sublabel_values) )
-        
-        # constuct label dict
-        edge_label = dict()
-        if isinstance(sublabel_values, list) or \
-        isinstance(sublabel_values, tuple):
-            for i in range(len(sublabel_values) ):
-                cur_name = label_def.keys()[i]
-                cur_label = sublabel_values[i]
+        # already a dict ?
+        if not isinstance(sublabel_values, dict):
+            # single label ?
+            if len(label_def) == 1:
+                # hack strings for now, until deciding
+                if label_def.has_key('ap'):
+                    sublabel_values = str2singleton(sublabel_values)
                 
-                edge_label[cur_name] = cur_label
-        elif isinstance(sublabel_values, dict):
-            edge_label = sublabel_values
+                dprint('Replaced sublabel value:\n\t' +
+                       str(sublabel_values) )
+                sublabel_values = [sublabel_values]
+                dprint('with the singleton:\n\t' +str(sublabel_values) )
+            
+            # constuct label dict
+            edge_label = dict()
+            if isinstance(sublabel_values, list) or \
+            isinstance(sublabel_values, tuple):
+                for i in range(len(sublabel_values) ):
+                    cur_name = label_def.keys()[i]
+                    cur_label = sublabel_values[i]
+                    
+                    edge_label[cur_name] = cur_label
+            elif isinstance(sublabel_values, dict):
+                edge_label = sublabel_values
+            else:
+                raise Exception('Bug')
         else:
-            raise Exception('Bug')
+            edge_label = sublabel_values
         
         # check if dict is consistent with label defs
         for (typename, sublabel) in edge_label.iteritems():
@@ -706,6 +712,10 @@ class States(object):
         if self._removed_state_callback:
             self._removed_state_callback(rm_state)
     
+    def rm(self, rm_state):
+        """Alias to remove."""
+        return self.remove(rm_state)
+    
     def remove_from(self, rm_states):
         """Remove a list of states."""
         for rm_state in rm_states:
@@ -773,35 +783,49 @@ class States(object):
         
         post_single() exists to contrast with post().
         
-        post() cannot guess when it is passed a single state, or multiple states.
-        Reason is that a state may happen to be anything,
-        so possibly something iterable.
+        post() cannot guess when it is passed a single state, or
+        multiple states. Reason is that a state may happen to be
+        anything, so possibly something iterable.
+        
+        see also
+        --------
+        post, pre_single
+        Def. 2.3, p.23 [Baier 2008]
         """
-        state_id = self._mutant2int(state)
-        return self.post([state_id] )
+        return self.post([state] )
     
     def post(self, states):
         """Direct successor set (1-hop) for given states.
         
-        Over all actions or letters, i.e., edge labeling ignored by states.pre,
-        because it may be undefined. Only classes which have an action set,
-        alphabet, or other transition labeling set provide a pre(state, label)
-        method, as for example pre(state, action) in the case of closed transition
+        Over all actions or letters, i.e., edge labeling ignored
+        by states.pre, because it may be undefined. Only classes
+        which have an action set, alphabet, or other transition
+        labeling set provide a pre(state, label) method, as for
+        example pre(state, action) in the case of closed transition
         systems.
         
-        Def. 2.3, p.23 [Baier] (and similar for automata)
-            Post(s)
-        If multiple stats provided, then union Post(s) for s in states provided.
+        If multiple stats provided,
+        then union Post(s) for s in states provided.
+        
+        see also
+        --------
+        post_single, pre
+        Def. 2.3, p.23 [Baier 2008]
         """
-        if not is_subset(states, self() ):
+        #if not is_subset(states, self() ):
+        try:
+            state_ids = self._mutants2ints(states)
+        except:
             raise Exception('Not all states given are in the set of states.\n'+
                             'Did you mean to use port_single() instead ?')
         
-        state_ids = self._mutants2ints(states)
-        
-        successors = set()
+        successor_ids = list()
         for state_id in state_ids:
-            successors |= set(self.graph.successors(state_id) )
+            successor_ids += self.graph.successors(state_id)
+        
+        successor_ids = unique(successor_ids)
+        successors = self._ints2mutants(successor_ids)
+        
         return successors
     
     def pre_single(self, state):
@@ -811,30 +835,52 @@ class States(object):
         
         see also
         --------
-        post() vs post_single().
+        pre, post_single
+        Def. 2.3, p.23 [Baier 2008]
         """
-        state_id = self._mutant2int(state)
-        return self.pre([state_id] )
+        return self.pre([state] )
     
     def pre(self, states):
         """Predecessor set (1-hop) for given state.
+        
+        see also
+        --------
+        pre_single, post
+        Def. 2.3, p.23 [Baier 2008]
         """
-        if not is_subset(states, self() ):
-            raise Exception('Not all states given are in the set of states.')
+        try:
+            state_ids = self._mutants2ints(states)
+        except:
+            raise Exception('Some given items are not states.')
         
-        state_ids = self._mutants2ints(states)
-        
-        predecessors = set()
+        predecessor_ids = list()
         for state_id in state_ids:
-            predecessors |= set(self.graph.predecessors(state_id) )
+            predecessor_ids += self.graph.predecessors(state_id)
+        
+        predecessor_ids = unique(predecessor_ids)
+        predecessors = self._ints2mutants(predecessor_ids)
+        
         return predecessors
+    
+    def is_terminal(self, state):
+        """Check if state has no outgoing transitions.
+        
+        see also
+        --------
+        Def. 2.4, p.23 [Baier 2008]
+        """
+        successors = self.post_single(state)
+        if successors:
+            return False
+        else:
+            return True
     
     def add_final(self, state):
         """Convenience for FSA.add_final_state().
         
         see also
         --------
-        self.add_final_from  
+        self.add_final_from
         """
         if not self._exist_final_states():
             return
@@ -984,7 +1030,7 @@ class LabeledStates(States):
         for (state_id, state_data) in self.graph.nodes_iter(data=True):
             state = self._int2mutant(state_id)
             
-            if  self.is_initial(state):
+            if self.is_initial(state):
                 add_incoming_edge(to_pydot_graph, state_id)
             
             node_shape = decide_node_shape(self.graph, state)
@@ -1812,7 +1858,7 @@ class LabeledTransitions(Transitions):
             msg += '\t from_state = ' +str(from_state) +'\n'
             msg += '\t to_state = ' +str(to_state) +'\n'
             msg += '\t label = ' +str(edge_label) +'\n'
-            raise Exception('Same labeled transiion already exists.')
+            raise Exception('Same labeled transition already exists.')
         
         # states, labels checked, no same unlabeled nor labeled,
         # so add it
@@ -1850,7 +1896,8 @@ class LabeledTransitions(Transitions):
         """
         # state order maintained ?
         if self.graph.states.list is None:
-            raise Exception('System must have ordered states to use add_labeled_adj.')
+            raise Exception('System must have ordered states to ' +
+                            'use add_labeled_adj.')
         
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -1960,10 +2007,11 @@ class LabeledTransitions(Transitions):
         """
         (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
                                                             to_states)
+        
         found_transitions = []
         
         if from_state_ids is 'any':
-            from_state_ids = self.graph.states()
+            from_state_ids = self.graph.nodes()
         
         for from_state_id, to_state_id, attr_dict in self.graph.edges_iter(
             from_state_ids, data=True, keys=False
@@ -1979,7 +2027,9 @@ class LabeledTransitions(Transitions):
                 ok = True
             else:
                 dprint('Checking guard.')
-                ok = self._label_check.label_is_desired(attr_dict, desired_label)
+                ok = self._label_check.label_is_desired(
+                    attr_dict, desired_label
+                )
             
             if ok:
                 dprint('Transition label matched desired label.')
@@ -1994,32 +2044,6 @@ class LabeledTransitions(Transitions):
                 found_transitions.append(transition)
             
         return found_transitions
-    
-    def _label_of(self, from_states, to_states='any', as_dict=True):
-        """Depreceated: use find instead. This to be removed."""
-        raise NotImplementedError
-        if to_states == 'any':
-            to_states = self.graph.states.post_single(from_state)
-        
-        if edge_key == 'any':
-            attr_dict = self.graph.get_edge_data(from_state, to_state)
-        else:
-            attr_dict = self.graph.get_edge_data(from_state, to_state,
-                                                 key=edge_key)
-        
-        if attr_dict is None:
-            msg = 'No transition from state: ' +str(from_state)
-            msg += ', to state: ' +str(to_state) +', with key: '
-            msg += str(edge_key) +' exists.'
-            warnings.warn(msg)
-        
-        label_def = self.graph._transition_label_def
-        transition_label_values = list()
-        for label_type in label_def:
-            cur_label_value = attr_dict[label_type]
-            transition_label_values.append(cur_label_value)
-    
-        return transition_label_values
     
     def _check_sublabeling(self, sublabel_name, sublabel_value):
         """Check which sublabels are still being used."""
@@ -2054,9 +2078,11 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             states = from_networkx_graph.nodes()
             edges = from_networkx_graph.edges()
         
-        self.states = LabeledStates(self, states=states, initial_states=initial_states,
-                             current_state=current_state, mutable=mutable,
-                             removed_state_callback=removed_state_callback)
+        self.states = LabeledStates(
+            self, states=states, initial_states=initial_states,
+            current_state=current_state, mutable=mutable,
+            removed_state_callback=removed_state_callback
+        )
         self.transitions = LabeledTransitions(self)
 
         self.dot_node_shape = {'normal':'circle'}
@@ -2108,6 +2134,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.transitions._dot_str(dummy_nx_graph)
         
         pydot_graph = nx.to_pydot(dummy_nx_graph)
+        pydot_graph.set_overlap(False)
         
         return pydot_graph
     
@@ -2150,7 +2177,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def __gt__(self, other):
         return other.__lt__(self)
 
-	# operations on single transitions system
+	# unary operators
     def reachable(self):
         """Return reachable subautomaton."""
         raise NotImplementedError
@@ -2162,35 +2189,252 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         raise NotImplementedError
     
     def is_deterministic(self):
-        """Does there exist a transition for each state and each input letter ?"""
+        """Does there exist a transition for each state & each input letter ?
+        """
         raise NotImplementedError
     
+    def _multiply_mutable_states(self, other, prod_graph, prod_sys):
+        def prod_ids2states(prod_state_id, self, other):
+            (idx1, idx2) = prod_state_id
+            state1 = self.states._int2mutant(idx1)
+            state2 = other.states._int2mutant(idx2)
+            prod_state = (state1, state2)
+            
+            return prod_state
+        
+        # union of state labels from the networkx tuples
+        for prod_state_id, attr_dict in prod_graph.nodes_iter(data=True):
+            prod_attr_dict = dict()
+            for k,v in attr_dict.iteritems():
+                (v1, v2) = v
+                
+                if v1 is None or v2 is None:
+                    raise Exception(
+                        'At least one factor has unlabeled state, '+
+                        "or the state sublabel types don't match."
+                    )
+                
+                try:
+                    prod_attr_dict[k] = v1 | v2
+                    continue
+                except:
+                    pass
+                
+                try:
+                    prod_attr_dict[k] = v2 +v2
+                    continue
+                except:
+                    raise TypeError(
+                        'The state sublabel types should support ' +
+                        'either | or + for labeled system products.'
+                    )
+            
+            prod_state = prod_ids2states(prod_state_id, self, other)
+            prod_sys.states.add(prod_state)
+            prod_sys.states.label(prod_state, prod_attr_dict)
+        
+        # prod of initial states
+        inits1 = self.states.initial
+        inits2 = self.states.initial
+        
+        prod_init = []
+        for (init1, init2) in zip(inits1, inits2):
+            new_init = (init1, init2)
+            prod_init.append(new_init)
+        
+        prod_sys.states.initial |= prod_init
+        
+        # multiply mutable states (only the reachable added)
+        if self.states.mutants or other.states.mutants:
+            for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
+                prod_state = prod_ids2states(prod_state_id, self, other)
+                prod_sys.states.mutants[idx] = prod_state
+            
+            prod_sys.states.min_free_id = idx +1
+        # no else needed: otherwise self already not mutant
+        
+        # action labeling is taken care by nx,
+        # since transition taken at a time
+        for from_state_id, to_state_id, edge_dict in \
+        prod_graph.edges_iter(data=True):            
+            from_state = prod_ids2states(from_state_id, self, other)
+            to_state = prod_ids2states(to_state_id, self, other)
+            
+            prod_sys.transitions.add_labeled(
+                from_state, to_state, edge_dict
+            )
+        return prod_sys
     
+    # binary operators (for magic binary operators: see above)
+    def tensor_product(self, other, prod_sys=None):
+        """Return strong product with given graph.
+        
+        reference
+        ---------
+        http://en.wikipedia.org/wiki/Strong_product_of_graphs
+        nx.algorithms.operators.product.strong_product
+        """
+        prod_graph = nx.product.tensor_product(self, other)
+        
+        # not populating ?
+        if prod_sys is None:
+            if self.states.mutants or other.states.mutants:
+                mutable = True
+            else:
+                mutable = False
+            prod_sys = LabeledStateDiGraph(mutable=mutable)
+        
+        prod_sys = self._multiply_mutable_states(
+            other, prod_graph, prod_sys
+        )
+        
+        return prod_sys
+        
+    def cartesian_product(self, other, prod_sys=None):
+        """Return Cartesian product with given graph.
+        
+        If u,v are nodes in C{self} and z,w nodes in C{other},
+        then ((u,v), (z,w) ) is an edge in the Cartesian product of
+        self with other if and only if:
+            - (u == v) and (z,w) is an edge of C{other}
+            OR
+            - (u,v) is an edge in C{self} and (z == w)
+            
+        In system-theoretic terms, the Cartesian product
+        is the interleaving where at each step,
+        only one system/process/player makes a move/executes.
+        
+        So it is a type of parallel system.
+        
+        This is an important distinction with the C{strong_product},
+        because that includes "diagonal" transitions, i.e., two
+        processes executing truly concurrently.
+        
+        Note that a Cartesian interleaving is different from a
+        strong interleaving, because the latter can skip states
+        and transition directly along the diagonal.
+        
+        For a model of computation, strong interleaving
+        would accurately model the existence of multiple cores,
+        not just multiple processes executing on a single core.
+        
+        references
+        ----------
+        http://en.wikipedia.org/wiki/Cartesian_product_of_graphs
+        nx.algorithms.operators.product.cartesian_product
+        """
+        prod_graph = nx.product.cartesian_product(self, other)
+        
+        # not populating ?
+        if prod_sys is None:
+            if self.states.mutants or other.states.mutants:
+                mutable = True
+            else:
+                mutable = False
+            prod_sys = LabeledStateDiGraph(mutable=mutable)
+        
+        prod_sys = self._multiply_mutable_states(
+            other, prod_graph, prod_sys
+        )
+        
+        return prod_sys
+    
+    def strong_product(self, other):
+        """Return strong product with given graph.
+        
+        reference
+        ---------
+        http://en.wikipedia.org/wiki/Strong_product_of_graphs
+        nx.algorithms.operators.product.strong_product
+        """
+        raise NotImplementedError
+        # An issue here is that transitions are possible both
+        # in sequence and simultaneously. So the actions set
+        # is the product of the factor ones and an empty action
+        # should also be introduced
+        
+    def is_blocking(self):
+        """Does each state have at least one outgoing transition ?
+        
+        Note that edge labels are NOT checked, i.e.,
+        it is not checked whether for each state and each possible symbol/letter
+        in the input alphabet, there exists at least one transition.
+        
+        The reason is that edge labels do not have any semantics at this level,
+        so they are not yet regarded as guards.
+        For more semantics, use a FiniteStateMachine.
+        """
+        for state in self.states():
+            if self.states.is_final(state):
+                return True
+        return False
     
     # file i/o
     def load_xml(self):
         raise NotImplementedError
         
-    def dump_xml(self):
-        raise NotImplementedError
+    def xml_str(self, pretty=True, idt_level=0):
+        """Return string of automaton conforming to tulipcon XML, version 1
+        
+        Note that the <anno> element is used to store the goal mode
+        and reach annotation value of each node.  This usage is
+        experimental; if it is shown to be useful, a dedicated element
+        will be introduced into the XML Schema.
+        
+        @param pretty: If pretty is True,
+            then use indentation and newlines to make
+            the resulting XML string more visually appealing.
+        @type pretty: bool
+        
+        @param idt_level: base indentation level on which to create
+            automaton string. This level is only relevant if pretty=True.
+        @type idt_level: int
+        """
+        if pretty:
+            nl = '\n'  # Newline
+            idt = '  '  # Indentation
+        else:
+            nl = ''
+            idt = ''
+        
+        out = idt_level*idt+'<aut type="basic">'+nl
+        idt_level += 1
+        for (node, label) in self.nodes_iter(data=True):
+            out += idt_level*idt+'<node>'+nl
+            
+            idt_level += 1
+            
+            idtn = idt_level *idt
+            cur_succ = self.successors(node)
+            
+            out += idtn +'<id>' +str(node) +'</id>'
+            #out += '<anno>' +str(label['mode'] ) +' '
+            #out += str(label['rgrad']) +'</anno>' +nl
+            out += idtn +conxml.taglist('child_list', cur_succ) +nl
+            out += idtn +conxml.tagdict('state', label['state'] ) +nl
+            
+            idt_level -= 1
+            
+            out += idt_level*idt+'</node>' +nl
+        
+        idt_level -= 1
+        out += idt_level*idt +'</aut>' +nl
+        
+        return out
     
     def write_xml_file(self):
         raise NotImplementedError
     
-    def dump_dot(self):
+    def dot_str(self):
         """Return dot string.
         
         Requires pydot.        
         """
         pydot_graph = self._to_pydot()
         
-        return pydot_graph.to_string()
+        return pydot_graph.to_string()        
     
-    def dot_str(self):
-        """Alias to dump_dot()."""
-        return self.dump_dot()
-    
-    def save(self, fileformat='pdf', path='default',
+    def save(self, filename='default', fileformat='pdf',
              add_missing_extension=True, rankdir='LR', prog=None):
         """Save image to file.
         
@@ -2212,7 +2456,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'ps'
             (for more, see pydot.write)
         
-        @param path: path to image
+        @param filename: path to image
             (extension C{.fileformat} appened if missing and
              C{add_missing_extension==True} )
              Default:
@@ -2221,9 +2465,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                 then use C{self.default_export_fname} prepended with
                 C{self.default_export_fname}.
             - If C{self.name} is set, but no C{path} given,
-                then use C{self.name} prepended with C{self.default_export_fname}.
+                then use C{self.name} prepended with
+                C{self.default_export_fname}.
             - If C{path} is given, use that.
-        @type path: str
+        @type filename: str
         
         @param add_missing_extension: if extension C{.fileformat} missing,
             it is appended
@@ -2236,7 +2481,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         @param prog: executable to call
         @type prog: dot | circo | ... see pydot.Dot.write
         """
-        path = self._export_fname(path, fileformat, addext=add_missing_extension)
+        path = self._export_fname(filename, fileformat,
+                                  addext=add_missing_extension)
         
         if prog is None:
             prog = self.default_layout
