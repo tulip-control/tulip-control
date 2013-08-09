@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 from scipy import io as sio
 from scipy.linalg import block_diag
-from cvxopt import matrix,solvers
+from cvxopt import matrix, solvers
 from scipy import linalg
 import random
 from scipy import optimize
@@ -54,29 +54,11 @@ def get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, switch):
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
     
-    # Create dictionary with powers of A matrix
-    A_dict = dict()     #(k --> A^k) key-value pairs
-    A_dict[0] = ssys.A.copy()
-    for k in xrange(1,N+1):
-        A_dict[k] = np.dot(A_dict[k-1],ssys.A)
-    
-    ## Create the X vector.  X = S_x X(0) + S_u U
-    S_x = np.eye(n)
-    for k in xrange(1,N+1):
-        S_x = np.vstack((S_x, A_dict[k]))
-    assert S_x.shape == (n*(N+1),n)
-
-    S_u = np.zeros((n*(N+1),m*N))
-    for row in xrange(1,N+1):      # First row is zeros (no control effect)
-        for col in xrange(0,k):
-            if row-col-1 >= 0:
-                S_u[n*row:n*(row+1),n*col:n*(col+1)] = np.dot(A_dict[row-col-1],ssys.B)
-            else:
-                break
-    assert S_u.shape == (n*(N+1),m*N)
+    # X = S_x x0 + S_u U
+    S_x, S_u = create_sys_dynamics(ssys,n,m,N)  # Create system dynamics matrices
     
     ## Define the cost function:  
-    # J:= X' Q_blk X + U' R_blk U  = U'HU + 2 x'(0)FU + x'(0)Yx(0),
+    # J:= X' Q_blk X + U' R_blk U  = U'HU + 2 x0' FU + x0' Y x0,
     # where H := (S_u' Q_blk S_u + R_blk), F := (S_x' Q_blk S_u), and Y := (S_x' Q_blk S_x)
     Q_blk = block_diag(*[Q]*(N+1))
     R_blk = block_diag(*[R]*N)
@@ -124,40 +106,33 @@ def get_input_helper_switch(x0, ssys, H0, H1, N, R, Q, switch):
     return u.reshape(N, m), cost
 
 
-
-def sample_pts_poly(H0,numPts):
-    '''Generate uniform sampled points inside a polygon H0.'''
-    # TODO: Replace with outer ball approximation!!
-    pts = list()
-        
-    rd,xd = pc.cheby_ball(H0)
-    xd = xd.flatten()
-    expand_rd = 1.5     #expansion factor to make polygon more inside the chebyshev ball
-    rd *= expand_rd
+def create_sys_dynamics(ssys,n,m,N):
+    # Create dictionary with powers of A matrix
+    A_dict = dict()     #(k --> A^k) key-value pairs
+    A_dict[0] = ssys.A.copy()
+    for k in xrange(1,N+1):
+        A_dict[k] = np.dot(A_dict[k-1],ssys.A)
     
-    # Sample new point in H0
-    for k in xrange(numPts):
-        while True:
-            z = np.random.multivariate_normal(xd,rd**2*np.eye(2))       #sample gaussian centered on Cheby ball
-            if pc.is_inside(H0, z):
-                pts.append(z)
+    ## Create the X vector.  X = S_x X(0) + S_u U
+    S_x = np.eye(n)
+    for k in xrange(1,N+1):
+        S_x = np.vstack((S_x, A_dict[k]))
+    assert S_x.shape == (n*(N+1),n)
+
+    S_u = np.zeros((n*(N+1),m*N))
+    for row in xrange(1,N+1):      # First row is zeros (no control effect)
+        for col in xrange(0,k):
+            if row-col-1 >= 0:
+                S_u[n*row:n*(row+1),n*col:n*(col+1)] = np.dot(A_dict[row-col-1],ssys.B)
+            else:
                 break
-    return pts
-
-
-def cst_expected_cost(numSamples, ssys, H0, H1, xf, N, R, Q):
-    '''Calculates the expected cost of a trajectory starting in H0 and ending in H1.'''
+    assert S_u.shape == (n*(N+1),m*N)
     
-    totalCost = 0.0
-    pts = sample_pts_poly(H0,numSamples)
-    while len(pts)>0:
-        x0 = pts.pop() #- xf  #Coordinate shift
-        u,cost = get_input_helper(x0, ssys, H0, H1, N, R, Q)
-        totalCost += cost
-    return totalCost / float(numSamples)
+    return S_x, S_u
 
 
-def cst_min_cost(ssys, H0, H1, xf, N, R, Q):
+
+def cst_min_cost_bi(ssys, H0, H1, xf, N, R, Q):
     
     def cstr(x, *args):
         A,b = args[6:9]
@@ -190,20 +165,42 @@ def cst_min_cost(ssys, H0, H1, xf, N, R, Q):
 
 
 
-def cst_max_cost(ssys, H0, H1, xf, N, R, Q):
+def cst_min_cost(ssys, H0, H1, N, R, Q):
+    # TODO: Solve joint optimization problem.  This should basically be the 
+    # same code as "get_input_helper", but with x0 as a decision variable in this case.
+    
+    return u.reshape(N, m), cost
+        
+
+
+
+def cst_max_cost(ssys, H0, H1, N, R, Q):
     '''Calculates the maximum cost of a trajectory under the constrained LQR problem.
     Uses the fact that the constrained LQR value function is convex in initial state after
     minimization over control inputs u, so a maximum value must occur on a vertex of the polygon.'''
     vertices = pc.extreme(H0)
     
-    maxCost = -np.Inf
+    max_cost = -np.Inf
     for v in vertices:
-        v = v #- xf      #Coordinate shift
         u,cost = get_input_helper(v, ssys, H0, H1, N, R, Q)
-        if cost > maxCost:
-            maxCost = cost
+        if cost > max_cost:
+            max_cost = cost
             
-    return maxCost
+    return max_cost
+
+
+def cst_expected_cost(num_samples, ssys, H0, H1, N, R, Q):
+    '''Calculates the expected cost of a trajectory starting in H0 and ending in H1.'''
+    
+    total_cost = 0.0
+    pts = sample_pts_poly(H0,num_samples)
+    while len(pts)>0:
+        x0 = pts.pop()
+        u,cost = get_input_helper(x0, ssys, H0, H1, N, R, Q)
+        total_cost += cost
+    return total_cost / float(num_samples)
+
+
 
 
 def lqr_value(ssys, N, R, Q):
@@ -224,30 +221,15 @@ def lqr_value(ssys, N, R, Q):
     return Pdict[0]
 
 
-def lqr_max_cost(ssys, H0, xf, N, R, Q):
-    '''Calculates the maximum cost of a trajectory under the unconstrained LQR problem.
-    Uses the fact that the unconstrained LQR value function is convex, so a maximum value
-    must occur on a vertex of the polygon.'''
-    
-    P0 = lqr_value(ssys, N, R, Q)
-    vertices = pc.extreme(H0)
-    
-    maxCost = -np.Inf
-    for v in vertices:
-        v = v - xf  #Coordinate shift
-        cost = np.dot(v,np.dot(P0,v))     # V(v) = v.T*P0*v from unconstrained LQR theory
-        if cost > maxCost:
-            maxCost = cost
-    
-    return maxCost
-
 def lqr_min_cost(ssys, H0, xf, N, R, Q):
     '''Calculates the minimum cost of a trajectory under the unconstrained LQR problem.
-    Uses the fact that the unconstrained LQR value function is convex.'''
+    Uses the fact that the unconstrained LQR value function is convex.
+    min_x (x-xf)' P0 (x-xf) s.t. Gx <= h.
+    Note: xf is not chosen as part of the optimization, or else the LQR value would be
+    zero by selecting x = xf on the boundary between the two regions.'''
     
     P0 = lqr_value(ssys, N, R, Q)
-    n = np.shape(P0)[0]
-    
+        
     P = 2.0*matrix(P0)        #scale for cvxopt
     q = matrix( -2.0*np.dot(xf.T, P0) )
     G = matrix(H0.A)
@@ -255,23 +237,63 @@ def lqr_min_cost(ssys, H0, xf, N, R, Q):
     
     sol = solvers.qp(P,q,G,h)
     if sol['status'] == 'optimal':
-        minCost = sol['primal objective'] + np.dot(xf.T, np.dot(P0,xf)) #Coordinate shift
+        min_cost = sol['primal objective'] + np.dot(xf.T, np.dot(P0,xf)) #Coordinate shift
     else:
         print "QP solver returned non-optimal solution!"
         return None
-    return minCost
+    return min_cost
 
 
-def lqr_expected_cost(numSamples, ssys, H0, xf, N, R, Q):
+def lqr_max_cost(ssys, H0, xf, N, R, Q):
+    '''Calculates the maximum cost of a trajectory under the unconstrained LQR problem.
+    Uses the fact that the unconstrained LQR value function is convex, so a maximum value
+    must occur on a vertex of the polygon.'''
+    # TODO: Make xf a free variable that is uncontrolled
+
+    P0 = lqr_value(ssys, N, R, Q)
+    vertices = pc.extreme(H0)
+    
+    max_cost = -np.Inf
+    for v in vertices:
+        v = v - xf  #Coordinate shift
+        cost = np.dot(v,np.dot(P0,v))     # V(v) = v.T*P0*v from unconstrained LQR theory
+        if cost > max_cost:
+            max_cost = cost
+    
+    return max_cost
+
+
+def lqr_expected_cost(num_samples, ssys, H0, H1, N, R, Q):
     '''Calculates the expected cost of a trajectory starting in P0 and ending in P1.
     Uses an LQR approximation.'''
     
     P0 = lqr_value(ssys, N, R, Q)
     
-    totalCost = 0.0
-    pts = sample_pts_poly(H0,numSamples)
-    while len(pts)>0:
-        x0 = pts.pop() - xf     #Coordinate shift
-        cost = np.dot(x0,np.dot(P0,x0))     # V(v) = v.T*P0*v from unconstrained LQR theory
-        totalCost += cost
-    return totalCost / float(numSamples)
+    total_cost = 0.0
+    pts_x0 = sample_pts_poly(H0,num_samples)
+    pts_xf = sample_pts_poly(H1,num_samples)
+    while len(pts_x0)>0:
+        x = pts_x0.pop() - pts_xf.pop()     #Coordinate shift
+        cost = np.dot(x,np.dot(P0,x))     # V(v) = v.T*P0*v from unconstrained LQR theory
+        total_cost += cost
+    return total_cost / float(num_samples)
+
+
+def sample_pts_poly(H0,num_pts):
+    '''Generate uniform sampled points inside a polygon H0.'''
+    # TODO: Replace with outer ball approximation
+    pts = list()
+        
+    rd,xd = pc.cheby_ball(H0)
+    xd = xd.flatten()
+    expand_rd = 1.5     #expansion factor to make polygon more inside the Chebyshev ball
+    rd *= expand_rd
+    
+    # Sample new point in H0
+    for k in xrange(num_pts):
+        while True:
+            z = np.random.multivariate_normal(xd,rd**2*np.eye(2))       #sample Gaussian centered on Cheby ball
+            if pc.is_inside(H0, z):
+                pts.append(z)
+                break
+    return pts
