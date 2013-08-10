@@ -37,8 +37,8 @@ from pprint import pformat
 import warnings
 
 from labeled_graphs import LabeledStateDiGraph
-from labeled_graphs import dprint, vprint, prepend_with, str2singleton
-from mathset import PowerSet, is_subset
+from labeled_graphs import vprint, prepend_with, str2singleton
+from mathset import PowerSet, SubSet, is_subset, dprint
 import transys
 
 hl = 60 *'-'
@@ -218,15 +218,18 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
     # checks
     def is_deterministic(self):
-        """overloaded method."""
+        """overloaded method.
+        """
         raise NotImplementedError
         
     def is_blocking(self):
-        """overloaded method."""
+        """overloaded method.
+        """
         raise NotImplementedError
     
     def is_accepted(self, input_word):
-        """Check if input word is accepted."""
+        """Check if input word is accepted.
+        """
         sim = self.simulate(input_word)
         
         inf_states = set(sim.run.get_suffix() )
@@ -239,7 +242,8 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         return accept
         
     def simulate(self, initial_state, input_word):
-        """Returns an Omega Automaton Simulation, with prefix, suffix."""
+        """Returns an Omega Automaton Simulation, with prefix, suffix.
+        """
         
         # should be implemented properly with nested depth-first search,
         # becaus of possible branching due to non-determinism
@@ -256,25 +260,30 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         raise NotImplementedError
 
 class StarAutomaton(FiniteStateAutomaton):
-    """Finite-word finite-state automaton."""
+    """Finite-word finite-state automaton.
+    """
 
 class DeterninisticFiniteAutomaton(StarAutomaton):
-    """Deterministic finite-word finite-state Automaton."""
+    """Deterministic finite-word finite-state Automaton.
+    """
 
     # check each initial state added
     # check each transition added
     
 class DFA(DeterninisticFiniteAutomaton):
-    """Alias for deterministic finite-word finite-state automaton."""
+    """Alias for deterministic finite-word finite-state automaton.
+    """
 
 class NonDeterministicFiniteAutomaton(StarAutomaton):
-    """"Non-deterministic finite-word finite-state automaton."""
+    """"Non-deterministic finite-word finite-state automaton.
+    """
     
     # note:
     #   is_deterministic still makes sense
     
 class NFA(NonDeterministicFiniteAutomaton):
-    """Alias for non-deterministic finite-word finite-state automaton."""
+    """Alias for non-deterministic finite-word finite-state automaton.
+    """
 
 def nfa2dfa():
     """Determinize NFA."""
@@ -369,10 +378,6 @@ class BuchiAutomaton(OmegaAutomaton):
             raise Exception('ts_or_ba should be an FTS or a BA.\n'+
                             'Got type: ' +str(ts_or_ba) )
     
-    def async_prod(self, other):
-        """Should it be defined in a superclass ?"""
-        raise NotImplementedError
-    
     def acceptance_condition(self, prefix, suffix):
         """Check if given infinite word over alphabet \Sigma is accepted."""
     
@@ -383,6 +388,8 @@ class BuchiAutomaton(OmegaAutomaton):
         raise NotImplementedError
 
 class BA(BuchiAutomaton):
+    """Alias to BuchiAutomaton.
+    """
     def __init__(self, **args):
         BuchiAutomaton.__init__(self, **args)
 
@@ -582,7 +589,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     prodts_name = fts.name +'*' +ba.name
     # using set() destroys order
-    prodts = transys.FiniteTransitionSystem(name=prodts_name, states=set() )
+    prodts = transys.FiniteTransitionSystem(
+        name=prodts_name, states=set()
+    )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
 
@@ -644,14 +653,19 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             
             Ls = fts.states.find(next_s)
             if not Ls:
-                raise Exception('No AP label for FTS state: ' +str(next_s) +
-                                '\n Did you forget labeing it ?')
+                raise Exception(
+                    'No AP label for FTS state: ' +str(next_s) +
+                     '\n Did you forget labeing it ?'
+                )
             
             Sigma_dict = convert_ts2ba_label(Ls)
             dprint("Next state's label:\n\t" +str(Sigma_dict) )
             
-            enabled_ba_trans = ba.transitions.find({q}, desired_label=Sigma_dict)
-            dprint('Enabled BA transitions:\n\t' +str(enabled_ba_trans) )
+            enabled_ba_trans = ba.transitions.find(
+                {q}, desired_label=Sigma_dict
+            )
+            dprint('Enabled BA transitions:\n\t' +
+                   str(enabled_ba_trans) )
             
             if not enabled_ba_trans:
                 continue
@@ -669,13 +683,15 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 
                 prodts.states.label(new_sq, {next_q} )
                 
-                dprint('Adding transitions:\n\t' +str(sq) +'--->' +str(new_sq) )
+                dprint('Adding transitions:\n\t' +str(sq) +
+                       '--->' +str(new_sq) )
+                
                 # is fts transition labeled with an action ?
                 ts_enabled_trans = fts.transitions.find(
-                    {s}, to_states={next_s}, desired_label='any', as_dict=False
+                    {s}, to_states={next_s},
+                    desired_label='any', as_dict=False
                 )
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
-                    #attr_dict = fts.get_edge_data(from_s, to_s, key=edge_key)
                     assert(from_s == s)
                     assert(to_s == next_s)
                     dprint('Sublabel value:\n\t' +str(sublabel_values) )
@@ -685,8 +701,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                         prodts.transitions.add(sq, new_sq)
                     else:
                         #TODO open FTS
-                        prodts.transitions.add_labeled(sq, new_sq,
-                                                       sublabel_values[0] )
+                        prodts.transitions.add_labeled(
+                            sq, new_sq, sublabel_values[0]
+                        )
         
         # discard visited & push them to queue
         new_sqs = set()
@@ -697,34 +714,220 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     return (prodts, final_states_preimage)
 
+class RabinPairs(object):
+    """Acceptance pairs for Rabin automaton.
+    
+    Each pair defines an acceptance condition.
+    A pair (L, U) comprises of:
+        - a set L of "good" states
+        - a set U of "bad" states
+    L,U must each be a subset of States.
+    
+    A run: (q0, q1, ...) is accepted if for at least one Rabin Pair,
+    it in intersects L an inf number of times, but U only finitely.
+    
+    Internally a list of 2-tuples of SubSet objects is maintained:
+        [(L1, U1), (L2, U2), ...]
+    where: Li, Ui, are SubSet objects, with superset
+    the Rabin automaton's States.
+    
+    caution
+    -------
+    Here and in ltl2dstar documentation L denotes a "good" set.
+    [Baier 2008] denote the a "bad" set with L.
+    To avoid ambiguity, attributes: .good, .bad were used here.
+    
+    example
+    -------
+    >>> dra = RabinAutomaton()
+    >>> dra.states.add_from([1, 2, 3] )
+    >>> dra.states.accepting.add([1], [2] )
+    >>> dra.states.accepting
+    
+    >>> dra.states.accepting.good(1)
+    
+    >>> dra.states.accepting.bad(1)
+    
+    see also
+    --------
+    RabinAutomaton
+    Def. 10.53, p.801, [Baier 2008]
+    ltl2dstar documentation: 
+    """
+    def __init__(self, automaton_states):
+        self._states = automaton_states
+        self._pairs = []
+    
+    def __repr__(self):
+        s = 'L = Good states, U = Bad states\n' +30*'-' +'\n'
+        for index, (good, bad) in enumerate(self._pairs):
+            s += 'Pair: ' +str(index) +', L = ' +str(good)
+            s += ', U = ' +str(bad) +'\n'
+        return s
+    
+    def __str__(self):
+        return self.__repr__()
+    
+    def __getitem__(self, index):
+        return self._pairs[index]
+    
+    def __iter__(self):
+        return iter(self._pairs)
+    
+    def __call__(self):
+        """Get list of 2-tuples (L, U) of good-bad sets of states.
+        """
+        return list(self._pairs)
+    
+    def add(self, good_states, bad_states):
+        """Add new acceptance pair (L, U).
+        
+        see also
+        --------
+        remove, add_states, good, bad
+        
+        @param good_states: set L of good states for this pair
+        @type good_states: container of valid states
+        
+        @param bad_states: set U of bad states for this pair
+        @type bad_states: container of valid states
+        """
+        good_set = SubSet(self._states)
+        good_set |= good_states
+        
+        bad_set = SubSet(self._states)
+        bad_set |= bad_states
+        
+        self._pairs.append((good_set, bad_set) )
+    
+    def remove(self, good_states, bad_states):
+        """Delete pair (L, U) of good-bad sets of states.
+        
+        note
+        ----
+        Removing a pair which is not last changes
+        the indices of all other pairs, because internally
+        a list is used.
+        
+        The sets L,U themselves (good-bad) are required
+        for the deletion, instead of an index, to prevent
+        acceidental deletion of an unintended pair.
+        
+        Get the intended pair using __getitem__ first
+        (or in any other way) and them call remove.
+        If the pair is corrent, then the removal will
+        be successful.
+        
+        see also
+        --------
+        add
+        
+        @param good_states: set of good states of this pair
+        @type good_states: 
+        """
+        good_set = SubSet(self._states)
+        good_set |= good_states
+        
+        bad_set = SubSet(self._states)
+        bad_set |= bad_states
+        
+        self._pairs.remove((good_set, bad_set) )
+    
+    def add_states(self, pair_index, good_states, bad_states):
+        try:
+            self._pairs[pair_index][0].add_from(good_states)
+            self._pairs[pair_index][1].add_from(bad_states)
+        except IndexError:
+            raise Exception("A pair with pair_index doesn't exist.\n" +
+                            'Create a new one by callign .add.')
+    
+    def good(self, index):
+        """Return set L of "good" states for this pair.
+        
+        @param index: number of Rabin acceptance pair
+        @type index: int <= current total number of pairs
+        """
+        return self._pairs[index][0]
+    
+    def bad(self, index):
+        """Return set U of "bad" states for this pair.
+        
+        @param index: number of Rabin acceptance pair
+        @type index: int <= current total number of pairs
+        """
+        return self._pairs[index][1]
+
 class RabinAutomaton(OmegaAutomaton):
-    """Remember to override the final set management."""
+    """Rabin finite-state omega-automaton.
+    """    
+    def __init__(self, **args):
+        OmegaAutomaton.__init__(self, **args)
+        
+        self.states.accepting = RabinPairs(self.states)
+    
+    def __repr__(self):
+        s = hl +'\nRabin Automaton: ' +self.name +'\n' +hl +'\n'
+        s += 'States:\n'
+        s += pformat(self.states(data=False), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += 'Final States:\n'
+        s += pformat(self.final_states, indent=3) +2*'\n'
+        
+        if self.atomic_proposition_based:
+            s += 'Input Alphabet Letters (\in 2^AP):\n\t'
+        else:
+            s += 'Input Alphabet Letters:\n\t'
+        s += str(self.alphabet) +2*'\n'
+        s += 'Transitions & labeling w/ Input Letters:\n'
+        s += pformat(self.transitions(labeled=True), indent=3)
+        s += '\n' +hl +'\n'
+        
+        return s
+    
+    def __str__(self):
+        return self.__repr__()
+    
     def acceptance_condition(self, prefix, suffix):
         raise NotImplementedError
 
+class DRA(RabinAutomaton):
+    """Alias of RabinAutomaton
+    """
+    # TODO enforce Determinism for this alias
+    def __init__(self, **args):
+        RabinAutomaton.__init__(self, **args)
+
 class StreettAutomaton(OmegaAutomaton):
+    """Omega-automaton with Streett acceptance condition.
+    """
     def acceptance_condition(self, prefix, suffix):
         raise NotImplementedError
 
 class MullerAutomaton(OmegaAutomaton):
-    """Probably not very useful as a data structure for practical purposes."""
-    
+    """Omega-automaton with Muller acceptance condition.
+    """
     def acceptance_condition(self, prefix, suffix):
         raise NotImplementedError
 
 def ba2dra():
-    """Buchi to Deterministic Rabin Automaton converter."""
+    """Buchi to Deterministic Rabin Automaton converter.
+    """
+    raise NotImplementedError
 
 def ba2ltl():
-    """Buchi Automaton to Linear Temporal Logic formula convertr."""
+    """Buchi Automaton to Linear Temporal Logic formula convertr.
+    """
+    raise NotImplementedError
 
 class ParityAutomaton(OmegaAutomaton):
-    
-    def dump_gr1c():
+    def gr1c_str():
         raise NotImplementedError
 
 class ParityGameGraph():
-    """Parity Games."""
+    """Parity Games.
+    """
 
 class WeightedAutomaton():
-    """."""
+    """Weighted Automaton.
+    """

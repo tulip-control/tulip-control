@@ -38,8 +38,14 @@ from pprint import pformat
 import warnings
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-hl = 60 *'-'
 debug = False
+def dprint(s):
+    """Debug mode print."""
+    if not debug:
+        return
+    print(s)
+
+hl = 60 *'-'
 
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.
@@ -92,6 +98,7 @@ class MathSet(object):
     set(['a', 1]) U [[1, 2], set(['a', 'b'])]
     
     Set operations similar to the builtin type are supported:
+    
     >>> p = MathSet()
     >>> p.add(1)
     >>> p |= [1, 2]
@@ -244,10 +251,9 @@ class MathSet(object):
             try:
                 return item in self._set
             except:
-                print('Items within Hashable are mutable.')
-                return item in self._list
-        else:
-            return item in self._list
+                dprint('UnHashable items within Hashable.')
+        
+        return item in self._list
     
     def __iter__(self):
         return iter(self() )
@@ -284,12 +290,16 @@ class MathSet(object):
             otherwise stored in a list.
         """
         if isinstance(item, Hashable):
-            self._set.add(item)
+            try:
+                self._set.add(item)
+                return
+            except TypeError:
+                dprint('UnHashable items within Hashable.')
+        
+        if item not in self._list:
+            self._list.append(item)
         else:
-            if item not in self._list:
-                self._list.append(item)
-            else:
-                warnings.warn('item already in MathSet.')
+            warnings.warn('item already in MathSet.')
     
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.
@@ -329,9 +339,14 @@ class MathSet(object):
             return
         
         # filter to optimize storage
-        self._set |= set(self._filter_hashables(iterable) )
-        self._list = list(unique(self._list +
+        try:
+            self._set |= set(self._filter_hashables(iterable) )
+            self._list = list(unique(self._list +
                           self._filter_unhashables(iterable) ) )
+            return
+        except:
+            # ...if contents are mutable
+            self._list = list(unique(self._list +list(iterable) ) )
     
     def remove(self, item):
         """Remove existing element from mathematical set.
@@ -351,13 +366,19 @@ class MathSet(object):
             For adding items, see add.
         """
         if item not in self:
-            warnings.warn('Set element not in set S.\n'+
-                          'Maybe you targeted another element for removal ?')
+            warnings.warn(
+                'Set element not in set S.\n'+
+                'Maybe you targeted another element for removal ?'
+            )
         
         if isinstance(item, Hashable):
-            self._set.remove(item)
-        else:
-            self._list.remove(item)
+            try:
+                self._set.remove(item)
+                return
+            except:
+                dprint('item: ' +str(item) +', contains unhashables.')
+            
+        self._list.remove(item)
 
 class SubSet(MathSet):
     """Subset of selected MathSet, or other Iterable.
@@ -568,7 +589,7 @@ def is_subset(small_iterable, big_iterable):
                 # avoid object duplication
                 big_iterable = list(big_iterable)
         except:
-            print('Could not convert big_iterable to list.')
+            dprint('Could not convert big_iterable to list.')
         
         for item in small_iterable:
             if item not in big_iterable:

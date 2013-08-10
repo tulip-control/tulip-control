@@ -41,11 +41,10 @@ import copy
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-from mathset import PowerSet, SubSet, is_subset, unique
+from mathset import PowerSet, SubSet, is_subset, unique, dprint
 #from tulip import conxml
 
 hl = 60 *'-'
-debug = False
 
 try:
     import pydot
@@ -68,16 +67,6 @@ try:
 except ImportError:
     warnings.warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
-
-if debug:
-    #import traceback
-    
-    def dprint(s):
-        """Debug mode print."""
-        print(s)
-else:
-    def dprint(s):
-        pass
 
 def vprint(string, verbose=True):
     if verbose:
@@ -2118,6 +2107,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if pydot is None:
             msg = 'Attempted calling dump_dot.\n'
             msg += 'Unavailable due to pydot not installed.\n'
+            print(type(warnings) )
             warnings.warn(msg)
             return True
         
@@ -2235,13 +2225,13 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         # prod of initial states
         inits1 = self.states.initial
-        inits2 = self.states.initial
+        inits2 = other.states.initial
         
         prod_init = []
         for (init1, init2) in zip(inits1, inits2):
             new_init = (init1, init2)
             prod_init.append(new_init)
-        
+        print prod_init in prod_sys.states
         prod_sys.states.initial |= prod_init
         
         # multiply mutable states (only the reachable added)
