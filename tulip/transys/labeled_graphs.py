@@ -37,6 +37,7 @@ from collections import Iterable
 from cStringIO import StringIO
 import warnings
 import copy
+from textwrap import fill
 
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
@@ -427,6 +428,14 @@ class States(object):
         """Total number of states."""
         return self.graph.number_of_nodes()
     
+    def __iter__(self):
+        return iter(self() )
+        
+    def __ior__(self, new_states):
+        #TODO carefully test this
+        self.add_from(new_states)
+        return self
+    
     def _is_mutable(self):
         if self.mutants is None:
             return False
@@ -641,8 +650,10 @@ class States(object):
             
             # no states stored yet ?
             if not self.list:
-                warnings.warn("Will add non-list to empty system with ordering."+
-                              "Won't remember state order from now on.")
+                print(
+                    'Adding non-list to empty system with ordering.\n'+
+                    "Won't remember state order from now on."
+                )
                 self.list = None
                 return
             
@@ -961,7 +972,7 @@ class LabeledStates(States):
             dprint(msg)
             return False
     
-    def _dot_str(self, to_pydot_graph):
+    def _dot_str(self, to_pydot_graph, wrap=10):
         """Copy nodes to given Pydot graph, with attributes for dot export."""
         
         def add_incoming_edge(g, state):
@@ -970,9 +981,12 @@ class LabeledStates(States):
             g.add_node(phantom_node, label='""', shape='none', width='0')
             g.add_edge(phantom_node, state)
         
-        def form_node_label(state, state_data, label_def, label_format):
+        def form_node_label(state, state_data, label_def,
+                            label_format, width=10):
             # node itself
-            node_dot_label = '"' +str(state) +'\\n'
+            state_str = fill(str(state), width=width)
+            state_str.replace('\n', '\\n')
+            node_dot_label = '"' +state_str +'\\n'
             
             # add node annotations from action, AP sets etc
             # other key,values in state attr_dict ignored
@@ -986,11 +1000,12 @@ class LabeledStates(States):
                     # avoid turning strings to lists,
                     # or non-iterables to lists
                     if isinstance(label_value, str):
-                        label_str = label_value
+                        label_str = fill(label_value, width=width)
                     elif isinstance(label_value, Iterable): # and not str
-                        label_str = str(list(label_value) )
+                        label_str = fill(str(list(label_value) ), width=width)
                     else:
-                        label_str = str(label_value)
+                        label_str = fill(label_value, width=width)
+                    label_str.replace('\n', '\\n')
                     
                     node_dot_label += type_name +sep_type_value
                     node_dot_label += label_str +sep_label_sets
@@ -1026,9 +1041,12 @@ class LabeledStates(States):
             
             # state annotation
             if self._exist_labels():
-                node_dot_label = form_node_label(state, state_data, label_def, label_format)
+                node_dot_label = form_node_label(
+                    state, state_data, label_def, label_format, wrap
+                )
             else:
-                node_dot_label = str(state)
+                node_dot_label = fill(str(state), width=wrap)
+                node_dot_label.replace('\n', '\\n')
             
             # state boundary color
             if state_data.has_key('color'):
@@ -1238,7 +1256,7 @@ class LabeledStates(States):
                 states = [state]
                 msg += 'Replaced given states = ' +str(state)
                 msg += ' with states = ' +str(states)
-                warnings.warn(msg)
+                dprint(msg)
                 
             state_ids = self._mutants2ints(states)
             dprint(state_ids)
@@ -2107,20 +2125,19 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if pydot is None:
             msg = 'Attempted calling dump_dot.\n'
             msg += 'Unavailable due to pydot not installed.\n'
-            print(type(warnings) )
             warnings.warn(msg)
             return True
         
         return False
     
-    def _to_pydot(self):
+    def _to_pydot(self, wrap=10):
         """Convert to properly annotated pydot graph."""
         if self._pydot_missing():
             return
         
         dummy_nx_graph = nx.MultiDiGraph()
         
-        self.states._dot_str(dummy_nx_graph)
+        self.states._dot_str(dummy_nx_graph, wrap)
         self.transitions._dot_str(dummy_nx_graph)
         
         pydot_graph = nx.to_pydot(dummy_nx_graph)
@@ -2192,36 +2209,42 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             
             return prod_state
         
-        # union of state labels from the networkx tuples
-        for prod_state_id, attr_dict in prod_graph.nodes_iter(data=True):
+        def label_union(nx_label):
+            (v1, v2) = nx_label
+            
+            if v1 is None or v2 is None:
+                raise Exception(
+                    'At least one factor has unlabeled state, '+
+                    "or the state sublabel types don't match."
+                )
+            
+            try:
+                return v1 | v2
+            except:
+                pass
+            
+            try:
+                return v2 +v2
+            except:
+                raise TypeError(
+                    'The state sublabel types should support ' +
+                    'either | or + for labeled system products.'
+                )
+        
+        def state_label_union(attr_dict):
             prod_attr_dict = dict()
             for k,v in attr_dict.iteritems():
-                (v1, v2) = v
-                
-                if v1 is None or v2 is None:
-                    raise Exception(
-                        'At least one factor has unlabeled state, '+
-                        "or the state sublabel types don't match."
-                    )
-                
-                try:
-                    prod_attr_dict[k] = v1 | v2
-                    continue
-                except:
-                    pass
-                
-                try:
-                    prod_attr_dict[k] = v2 +v2
-                    continue
-                except:
-                    raise TypeError(
-                        'The state sublabel types should support ' +
-                        'either | or + for labeled system products.'
-                    )
-            
+                prod_attr_dict[k] = label_union(v)
+            return prod_attr_dict
+        
+        # union of state labels from the networkx tuples
+        for prod_state_id, attr_dict in prod_graph.nodes_iter(data=True):
+            prod_attr_dict = state_label_union(attr_dict)
             prod_state = prod_ids2states(prod_state_id, self, other)
+            
             prod_sys.states.add(prod_state)
             prod_sys.states.label(prod_state, prod_attr_dict)
+        print(prod_sys.states)
         
         # prod of initial states
         inits1 = self.states.initial
@@ -2231,9 +2254,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         for (init1, init2) in zip(inits1, inits2):
             new_init = (init1, init2)
             prod_init.append(new_init)
-        print prod_init in prod_sys.states
         prod_sys.states.initial |= prod_init
         
+        """
         # multiply mutable states (only the reachable added)
         if self.states.mutants or other.states.mutants:
             for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
@@ -2242,6 +2265,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             
             prod_sys.states.min_free_id = idx +1
         # no else needed: otherwise self already not mutant
+        """
         
         # action labeling is taken care by nx,
         # since transition taken at a time
@@ -2415,17 +2439,18 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def write_xml_file(self):
         raise NotImplementedError
     
-    def dot_str(self):
+    def dot_str(self, wrap=10):
         """Return dot string.
         
         Requires pydot.        
         """
-        pydot_graph = self._to_pydot()
+        pydot_graph = self._to_pydot(wrap=wrap)
         
         return pydot_graph.to_string()        
     
     def save(self, filename='default', fileformat='pdf',
-             add_missing_extension=True, rankdir='LR', prog=None):
+             add_missing_extension=True, rankdir='LR', prog=None,
+             wrap=10):
         """Save image to file.
         
         Recommended: pdf, svg (can render LaTeX labels with inkscape export)
@@ -2477,7 +2502,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        pydot_graph = self._to_pydot()
+        pydot_graph = self._to_pydot(wrap=wrap)
         pydot_graph.set_rankdir(rankdir)
         pydot_graph.set_splines('true')
         pydot_graph.write(path, format=fileformat, prog=prog)
@@ -2488,7 +2513,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def write_dot_color_file(self):
         raise NotImplementedError
     
-    def plot(self, rankdir='LR', prog=None):
+    def plot(self, rankdir='LR', prog=None, wrap=10):
         """Plot image using dot.
         
         No file I/O involved.
@@ -2514,7 +2539,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        pydot_graph = self._to_pydot()
+        pydot_graph = self._to_pydot(wrap=wrap)
         pydot_graph.set_rankdir(rankdir)
         pydot_graph.set_splines('true')
         png_str = pydot_graph.create_png(prog=prog)
@@ -2569,7 +2594,7 @@ def str2singleton(ap_label, verbose=False):
             vprint('Saw str state label:\n\t' +ap_label, verbose)
             ap_label = {ap_label}
             vprint('Replaced with singleton:\n\t' +str(ap_label) +'\n',
-                   verbose)
+                   verbose=verbose)
         return ap_label
 
 def prepend_with(states, prepend_str):

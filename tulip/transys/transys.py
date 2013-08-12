@@ -70,6 +70,12 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         - 'separator': between labels for different sets of actions
             (e.g. sys, env). Not used for closed FTS, because it has single set
             of actions.
+    
+    note
+    ----
+    The attributes atomic_propositions and aps are equal.
+    When you want to produce readable code, use atomic_propositions.
+    Otherwise, aps offers shorthand access to the APs.
     """
     def __init__(self, atomic_propositions=[], actions=[], **args):
         """Note first sets of states in order of decreasing importance,
@@ -83,6 +89,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             [['ap', PowerSet(atomic_propositions) ]]
         )
         self.atomic_propositions = self._state_label_def['ap'].math_set
+        self.aps = self.atomic_propositions # shortcut
         self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}

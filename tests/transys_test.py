@@ -10,40 +10,7 @@ from tulip.transys.mathset import MathSet, SubSet, PowerSet
 from tulip.transys.mathset import compare_lists
 from tulip import transys as trs
 
-def subset_test():
-    a = SubSet([1,2,3,4, {1:2} ] )
-    print(a)
-    
-    a.add(1)
-    a.add_from([1,2] )
-    a |= [3,4]
-    
-    assert(a._set == {1,2,3,4} )
-    
-    a |= [{1:2} ]
-    assert(a._list == [{1:2} ] )
-    
-    a.superset = [1,2,3,4, {1:2}, '6']
-    
-    b = SubSet([1,'2'] )
-    b.add('2')
-    assert(b._set == {'2'} )
-    assert(not bool(b._list) )
-    assert(b._superset == [1,'2'] )
-    
-    superset = [1, 2]
-    s = SubSet(superset)
-    s |= [1, 2]
-    print(s)
-    assert(s._set == {1,2} )
-    assert(not bool(s._list) )
-    
-    #s.add(3)
-    
-    return a
-
-def powerset_test():
-    """MathSet"""
+def mathset_test():
     s = MathSet([1,2,[1,2] ] )
     q = MathSet()
     
@@ -84,7 +51,48 @@ def powerset_test():
     for item in s:
         print(item)
     
-    """PowerSet"""
+    """Mutable"""
+    a = MathSet()
+    b = MathSet([{'a':1} ] )
+    
+    a |= b
+    
+    assert(a._set == set() )
+    assert(a._list == [{'a':1} ] )
+
+def subset_test():
+    a = SubSet([1,2,3,4, {1:2} ] )
+    print(a)
+    
+    a.add(1)
+    a.add_from([1,2] )
+    a |= [3,4]
+    
+    assert(a._set == {1,2,3,4} )
+    
+    a |= [{1:2} ]
+    assert(a._list == [{1:2} ] )
+    
+    a.superset = [1,2,3,4, {1:2}, '6']
+    
+    b = SubSet([1,'2'] )
+    b.add('2')
+    assert(b._set == {'2'} )
+    assert(not bool(b._list) )
+    assert(b._superset == [1,'2'] )
+    
+    superset = [1, 2]
+    s = SubSet(superset)
+    s |= [1, 2]
+    print(s)
+    assert(s._set == {1,2} )
+    assert(not bool(s._list) )
+    
+    #s.add(3)
+    
+    return a
+
+def powerset_test():
     s = [[1, 2], '3', {'a':1}, 1]
     
     p = PowerSet(s)
@@ -144,6 +152,7 @@ def rabin_test():
     assert(dra.states.accepting._pairs[1][1]._list == [] )
 
 if __name__ == '__main__':
+    mathset_test()
     subset_test()
     powerset_test()
     rabin_test()

@@ -38,7 +38,7 @@ import warnings
 
 from labeled_graphs import LabeledStateDiGraph
 from labeled_graphs import vprint, prepend_with, str2singleton
-from mathset import PowerSet, SubSet, is_subset, dprint
+from mathset import MathSet, SubSet, PowerSet, is_subset, dprint
 import transys
 
 hl = 60 *'-'
@@ -487,15 +487,23 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     --------
     _ts_ba_sync_prod, BuchiAutomaton.sync_prod
     """
-    (prod_ts, persistent) = _ts_ba_sync_prod(transition_system, buchi_automaton)
+    (prod_ts, persistent) = _ts_ba_sync_prod(
+        transition_system, buchi_automaton
+    )
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
-    prod_ba = BuchiAutomaton(name=prod_name)
+    
+    if prod_ts.states.mutants:
+        mutable = True
+    else:
+        mutable = False
+    
+    prod_ba = BuchiAutomaton(name=prod_name, mutable=mutable)
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
-    prod_ba.states.initial |= prod_ts.states.initial
-    
+    prod_ba.states.initial |= prod_ts.states.initial()
+    print('initial:\n\t' +str(prod_ts.states.initial) )
     # final states = persistent set
     prod_ba.states.add_final_from(persistent)
     
@@ -512,8 +520,12 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
             """
         raise Exception(msg)
     
-    for (from_state, to_state) in prod_ts.edges_iter():
-        # prject prod_TS state to TS state        
+    for (from_state_id, to_state_id) in prod_ts.transitions():
+        # prject prod_TS state to TS state
+        
+        from_state = prod_ts.states._int2mutant(from_state_id)
+        to_state = prod_ts.states._int2mutant(to_state_id)
+        
         ts_to_state = to_state[0]
         msg = 'prod_TS: to_state =\n\t' +str(to_state) +'\n'
         msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
@@ -522,7 +534,9 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         state_label_pairs = transition_system.states.find(ts_to_state)
         (ts_to_state_, transition_label_dict) = state_label_pairs[0]
         transition_label_value = transition_label_dict['ap']
-        prod_ba.transitions.add_labeled(from_state, to_state, transition_label_value)   
+        prod_ba.transitions.add_labeled(
+            from_state, to_state, transition_label_value
+        )
     
     return prod_ba
 
@@ -588,9 +602,15 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     ba = buchi_automaton
     
     prodts_name = fts.name +'*' +ba.name
+    
+    if fts.states.mutants or ba.states.mutants:
+        mutable = True
+    else:
+        mutable = False
+    
     # using set() destroys order
     prodts = transys.FiniteTransitionSystem(
-        name=prodts_name, states=set()
+        name=prodts_name, states=set(), mutable=mutable
     )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
@@ -599,7 +619,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     s0s = fts.states.initial()
     q0s = ba.states.initial()
     
-    final_states_preimage = set()
+    final_states_preimage = MathSet()
     
     dprint(hl +'\n' +' Product TS construction:\n' +hl +'\n')
     for s0 in s0s:
@@ -612,7 +632,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         
         for q0 in q0s:
             enabled_ba_trans = ba.transitions.find(
-                {q0}, desired_label=Sigma_dict
+                [q0], desired_label=Sigma_dict
             )
             
             # q0 blocked ?
@@ -632,12 +652,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 if ba.states.is_final(q):
                     final_states_preimage.add(new_sq0)
     
-    dprint(prodts)    
+    dprint(prodts)
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
-    queue = set(prodts.states.initial() )
-    visited = set()
+    queue = MathSet(prodts.states.initial() )
+    visited = MathSet()
     while queue:
         sq = queue.pop()
         visited.add(sq)
@@ -647,7 +667,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         
         # get next states
         next_ss = fts.states.post_single(s)
-        next_sqs = set()
+        next_sqs = MathSet()
         for next_s in next_ss:
             dprint('Next state:\n\t' +str(next_s) )
             
@@ -662,7 +682,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             dprint("Next state's label:\n\t" +str(Sigma_dict) )
             
             enabled_ba_trans = ba.transitions.find(
-                {q}, desired_label=Sigma_dict
+                [q], desired_label=Sigma_dict
             )
             dprint('Enabled BA transitions:\n\t' +
                    str(enabled_ba_trans) )
@@ -688,7 +708,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 
                 # is fts transition labeled with an action ?
                 ts_enabled_trans = fts.transitions.find(
-                    {s}, to_states={next_s},
+                    [s], to_states=[next_s],
                     desired_label='any', as_dict=False
                 )
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
@@ -706,7 +726,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                         )
         
         # discard visited & push them to queue
-        new_sqs = set()
+        new_sqs = MathSet()
         for next_sq in next_sqs:
             if next_sq not in visited:
                 new_sqs.add(next_sq)

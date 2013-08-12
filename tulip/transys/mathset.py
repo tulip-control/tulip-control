@@ -35,6 +35,7 @@ Mathematical Sets and Power Sets
 from itertools import chain, combinations
 from collections import Iterable, Hashable, Container
 from pprint import pformat
+from random import randint
 import warnings
 #from scipy.sparse import lil_matrix # is this really needed ?
 
@@ -226,13 +227,21 @@ class MathSet(object):
         self.add_from(iterable)
         return self
     
+    def __sub__(self, rm_items):
+        s = MathSet(self)
+        print('s = ' +str(s) )
+        print(rm_items)
+        for item in rm_items:
+            if item in s:
+                print('Removing...: ' +str(item) )
+                s.remove(item)
+        return s
+    
     def __isub__(self, rm_items):
         """Delete multiple elements."""
-        if not rm_items:
-            return
-        
         for item in rm_items:
-            self.remove(item)
+            if item in self:
+                self.remove(item)
         
         return self
     
@@ -329,8 +338,7 @@ class MathSet(object):
         
         if isinstance(iterable, MathSet):
             self._set |= set(iterable._set)
-            self._list = list(unique(self._list +
-                          self._filter_unhashables(iterable) ) )
+            self._list = list(unique(self._list +iterable._list) )
             return
         
         # speed up
@@ -379,6 +387,36 @@ class MathSet(object):
                 dprint('item: ' +str(item) +', contains unhashables.')
             
         self._list.remove(item)
+    
+    def pop(self):
+        """Remove and return random MathSet element.
+        
+        Raises KeyError if MathSet is empty.
+        """
+        if not self:
+            raise KeyError
+        
+        if self._set and self._list:
+            if randint(0, 1):
+                return self._set.pop()
+            else:
+                return self._list.pop()
+        elif not self._list:
+            return self._set.pop()
+        elif not self._set:
+            return self._list.pop()
+        else:
+            raise Exception('Bug in empty MathSet: not self above' +
+                            'should not reaching this point.')
+    
+    def intersection(self, items):
+        s = MathSet()
+        for item in items:
+            print(item)
+            if item in self:
+                print('Adding...\n')
+                s.add(item)
+        return s
 
 class SubSet(MathSet):
     """Subset of selected MathSet, or other Iterable.
