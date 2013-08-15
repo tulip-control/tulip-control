@@ -383,12 +383,12 @@ def loadFile(aut_file, spec, verbose=0):
     
         # input defs       
         inputs = OrderedDict([list(a) for a in \
-                              zip(env_vars, itertools.repeat({'0', '1'}))])
+                              zip(env_vars, itertools.repeat({0, 1}))])
         m.add_inputs(inputs)
         
         # outputs def
         outputs = OrderedDict([list(a) for a in \
-                               zip(sys_vars, itertools.repeat({'0', '1'}))])
+                               zip(sys_vars, itertools.repeat({0, 1}))])
         m.add_outputs(outputs)
         
         # state variables def
@@ -429,19 +429,34 @@ def loadFile(aut_file, spec, verbose=0):
                 m.states.add(stateID)
                 stateDict[stateID] = (state,transition)
                     
-        #add transitions with guards to the Mealy Machine
-        for s in stateDict.keys():
-            v, transitions = stateDict[s]
-            for t in transitions:
-                guard = stateDict[t][0]
-                try:
-                    m.transitions.add_labeled(s, t, guard, check=False) 
-                except Exception, e:
-                    print e
-               
-        return m
-        
+        # add transitions with guards to the Mealy Machine
+        for from_state in stateDict.keys():
+            state, transitions = stateDict[from_state]
             
+            for to_state in transitions:
+                guard = stateDict[to_state][0]
+                try:
+                    m.transitions.add_labeled(
+                        from_state, to_state, guard, check=True
+                    ) 
+                except Exception, e:
+                    raise Exception('Failed to add transition:\n' +str(e) )
+        """
+        # label states
+        for to_state in m.states:
+            predecessors = m.states.pre_single(to_state)
+            
+            # any incoming edges ?
+            if predecessors:
+                # pick a predecessor
+                from_state = predecessors[0]
+                trans = m.transitions.find([from_state], [to_state] )
+                (from_, to_, trans_label) = trans[0]
+                
+                state_label = {k:trans_label[k] for k in m.state_vars}
+                m.states.label(to_state, state_label)
+        """
+        return m
             
 def getCounterExamples(aut_file, verbose=0):
     """Return a list of dictionaries, each representing a counter example.
