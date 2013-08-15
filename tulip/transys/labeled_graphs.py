@@ -172,7 +172,6 @@ class LabelConsistency(object):
         @param check_label: verify existence of label
         @type check_label: bool
         """
-        # get labeling def
         label_def = self.label_def
         
         # already a dict ?
@@ -189,17 +188,9 @@ class LabelConsistency(object):
                 dprint('with the singleton:\n\t' +str(sublabel_values) )
             
             # constuct label dict
-            edge_label = dict()
-            if isinstance(sublabel_values, list) or \
-            isinstance(sublabel_values, tuple):
-                for i in range(len(sublabel_values) ):
-                    cur_name = label_def.keys()[i]
-                    cur_label = sublabel_values[i]
-                    
-                    edge_label[cur_name] = cur_label
-            elif isinstance(sublabel_values, dict):
-                edge_label = sublabel_values
-            else:
+            try:
+                edge_label = dict(zip(label_def, sublabel_values) )
+            except:
                 raise Exception('Bug')
         else:
             edge_label = sublabel_values
@@ -208,7 +199,7 @@ class LabelConsistency(object):
         for (typename, sublabel) in edge_label.iteritems():
             possible_labels = label_def[typename]
             
-            # iterable sublabel descreption ? (i.e., discrete ?)
+            # iterable sublabel description ? (i.e., discrete ?)
             if isinstance(possible_labels, Iterable):
                 if not check_label:
                     if isinstance(possible_labels, PowerSet):
@@ -225,13 +216,13 @@ class LabelConsistency(object):
                         msg += 'Failed to add new label_value.'
                         raise TypeError(msg)
                 elif sublabel not in possible_labels:
-                    msg = 'Given label:\n\t' +str(sublabel) +'\n'
-                    msg += 'not in set of transition labels:\n\t'
+                    msg = 'Given SubLabel:\n\t' +str(sublabel) +'\n'
+                    msg += 'not in possible SubLabels:\n\t'
                     msg += str(possible_labels) +'\n'
-                    msg += 'If Atomic Propositions involved,\n'
-                    msg += 'did you forget to pass an iterable of APs,\n'
-                    msg += 'instead of a single AP ?\n'
-                    msg += "(e.g., {'p'} instead of 'p')"
+                    msg += 'Usual cause: when label comprised of\n'
+                    msg += 'single SubLabel, pass the value itself,\n'
+                    msg += 'instead of an Iterable like [value],\n'
+                    msg += 'because it gets converted to [value] anyway.'
                     raise Exception(msg)
                 
                 continue
@@ -257,22 +248,53 @@ class LabelConsistency(object):
         return edge_label
     
     def label_is_desired(self, attr_dict, desired_label):
-        for (label_type, desired_val) in desired_label.iteritems():
-            dprint('SubLabel type checked:\n\t' +str(label_type) )
-            cur_val = attr_dict[label_type]
-            dprint('possible label values:\n\t' +str(cur_val) )
-            dprint('Desired label:\n\t' +str(desired_val) )
+        def test_common_bug(cur_val, desired_val):
+            if isinstance(cur_val, (set, list) ) and \
+            isinstance(desired_val, (set, list) ) and \
+            cur_val.__class__ != desired_val.__class__:
+               msg = 'Set SubLabel:\n\t' +str(cur_val)
+               msg += 'compared to list SubLabel:\n\t' +str(desired_val)
+               msg += 'Did you mix sets & lists when setting AP labels ?'
+               raise Exception(msg)
+        
+        def evaluate_guard(eval_guard, guard, input_port_value):
+            dprint('Found guard semantics:\n\t')
+            dprint(eval_guard)
             
-            if cur_val != desired_val and True not in cur_val:
-                # common bug
-                if isinstance(cur_val, (set,list) ) and \
-                   isinstance(desired_val, (set, list) ) and \
-                   cur_val.__class__ != desired_val.__class__:
-                       msg = 'Set label:\n\t' +str(cur_val)
-                       msg += 'compared to list label:\n\t' +str(desired_val)
-                       msg += 'Did you mix sets & lists when setting AP labels ?'
-                       raise Exception(msg)
-                    
+            guard_value = eval_guard(guard, input_port_value)
+            
+            return guard_value
+        
+        def match_singleton_guard():
+            dprint('Actual SubLabel value:\n\t' +str(cur_val) )
+            dprint('Desired SubLabel value:\n\t' +str(desired_val) )
+            
+            return cur_val == desired_val or True in cur_val
+        
+        label_def = self.label_def
+        for (type_name, desired_val) in desired_label.iteritems():
+            cur_val = attr_dict[type_name]
+            type_def = label_def[type_name]
+            
+            dprint('Checking SubLabel type:\n\t' +str(type_name) )
+            
+            # guard semantics ?
+            if hasattr(type_def, 'eval_guard'):
+                guard_value = evaluate_guard(
+                    type_def.eval_guard, cur_val, desired_label
+                )
+                if not guard_value:
+                    return False
+                else:
+                    continue
+            
+            # no guard semantics given,
+            # then by convention:
+            #   guard is singleton {cur_val},
+            # so test for equality
+            guard_value = match_singleton_guard(cur_val, desired_val)
+            if not guard_value:
+                test_common_bug(cur_val, desired_val)
                 return False
         return True
 
@@ -1004,7 +1026,7 @@ class LabeledStates(States):
                     elif isinstance(label_value, Iterable): # and not str
                         label_str = fill(str(list(label_value) ), width=width)
                     else:
-                        label_str = fill(label_value, width=width)
+                        label_str = fill(str(label_value), width=width)
                     label_str.replace('\n', '\\n')
                     
                     node_dot_label += type_name +sep_type_value
@@ -2027,10 +2049,11 @@ class LabeledTransitions(Transitions):
                 if to_state_id not in to_state_ids:
                     continue
             
-            # any guard ok ?
             if desired_label is 'any':
+                dprint('Any label is allowed.')
                 ok = True
-            elif not attr_dict: # no guard defined
+            elif not attr_dict:
+                dprint('No guard defined.')
                 ok = True
             else:
                 dprint('Checking guard.')

@@ -32,6 +32,9 @@
 """
 Transition System Module
 """
+from collections import OrderedDict
+
+import machines
 
 class FiniteSequence(object):
     """Used to construct finite words."""
@@ -278,3 +281,66 @@ class FiniteStateMachineSimulation(object):
     def save():
         """Dump to file."""
         raise NotImplementedError
+
+class MachineInputSequence(object):
+    """Stores sequence of input port valuations.
+    
+    An input port valuation is an assignment of values to input ports.
+    So it can be viewed as a list of dictionaries.
+    
+    However, storing a list of dictionaries is more expensive than
+    storing a dictionary of lists.
+    
+    So this is a dictionary of lists, keyed by input port name.
+    In addition, it performs type checking for the input port values.
+    """
+    def __init__(self, machine):
+        """Initialize by defining inputs.
+        
+        @param machine: from where to copy the input port definitions
+        @type machine: FiniteStateMachine
+        """
+        if not isinstance(machine, machines.FiniteStateMachine):
+            raise TypeError(
+                'machine must be a FiniteStateMachine\n.' +
+                'Got instead:\n\t' +str(type(machine) ) )
+        
+        self.inputs = OrderedDict(machine.inputs)
+        self._input_valuations = dict()
+    
+    def __repr__(self):
+        s = ''
+        for i in range(len(self) ):
+            cur_port_values = [values[i]
+                               for values in self._input_valuations.values() ]
+            s += str(zip(self.inputs, cur_port_values) )
+        return s
+    
+    def __str__(self):
+        return self.__str__()
+    
+    def __getitem__(self, num):
+        return [self._input_valuations[port_name][num]
+                for port_name in self.inputs]
+    
+    def __len__(self):
+        return min(self._input_valuations.values() )
+    
+    def set_input_sequence(self, input_port_name, values_sequence):
+        """Define sequence of input values for single port.
+        
+        @param input_port: name of input port
+        @type input_port: str in C{self.input_ports}
+        
+        @param values_sequence: history of input values for C{input_port}
+        @type values_sequence: Iterable of values for this port.
+            Values must be valid with respect to the C{input_port} type.
+            The type is defined by self.inputs[input_port].
+        """
+        input_port_type = self.inputs[input_port_name]
+        
+        # check given values
+        for value in values_sequence:
+            input_port_type.is_valid_value(value)
+        
+        self._input_valuations[input_port_name]

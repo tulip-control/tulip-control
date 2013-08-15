@@ -442,8 +442,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
 class FTS(FiniteTransitionSystem):
     """Alias to FiniteTransitionSystem."""
     
-    def __init__(self, **args):
-        FiniteTransitionSystem.__init__(self, **args)
+    def __init__(self, *args, **kwargs):
+        FiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Analogous to FTS, but for open systems, with system and environment."""

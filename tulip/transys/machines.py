@@ -35,6 +35,8 @@ Finite State Machines Module
 from collections import OrderedDict
 from pprint import pformat
 import warnings
+from random import choice
+from textwrap import fill
 
 from labeled_graphs import LabeledStateDiGraph
 import executions
@@ -210,8 +212,25 @@ class FiniteStateMachine(LabeledStateDiGraph):
     def _removed_state_callback(self):
         """Remove it also from anywhere within this class, besides the states."""
     
-    def add_inputs(self, new_inputs_ordered_dict):
-        for (in_port_name, in_port_type) in new_inputs_ordered_dict.iteritems():
+    def _to_ordered_dict(self, x):
+        if not isinstance(x, OrderedDict):
+            try:
+                x = OrderedDict(x)
+            except:
+                raise TypeError('Argument must be an OrderedDict, ' +
+                                'or be directly convertible to an OrderedDict.')
+        return x
+    
+    def add_inputs(self, new_inputs):
+        """Create new inputs.
+        
+        @param new_inputs: pairs of port_name : port_type
+        @type new_inputs: OrderedDict
+            | [(port_name, port_type), ...]
+        """
+        new_inputs = self._to_ordered_dict(new_inputs)
+        
+        for (in_port_name, in_port_type) in new_inputs.iteritems():
             # append
             self._transition_label_def[in_port_name] = in_port_type
             
@@ -221,8 +240,10 @@ class FiniteStateMachine(LabeledStateDiGraph):
             # printing format
             self._transition_dot_label_format[in_port_name] = str(in_port_name)
     
-    def add_state_vars(self, new_vars_ordered_dict):
-        for (var_name, var_type) in new_vars_ordered_dict.iteritems():
+    def add_state_vars(self, new_state_vars):
+        new_state_vars = self._to_ordered_dict(new_state_vars)
+        
+        for (var_name, var_type) in new_state_vars.iteritems():
             # append
             self._state_label_def[var_name] = var_type
             
@@ -308,16 +329,17 @@ class MooreMachine(FiniteStateMachine):
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Input ports:\n\t' +pformat(self.inputs) +'\n'
         s += 'Transitions & labeling w/ Input Port guards:\n\t'
-        s += str(self.transitions(data=True) ) +'\n' +hl +'\n'
+        s += str(self.transitions(labeled=True) ) +'\n' +hl +'\n'
         
         return s
     
     def __str__(self):
         return self.__repr__()
     
-    def add_outputs(self, new_outputs_ordered_dict):
-        for (out_port_name, out_port_type) in \
-        new_outputs_ordered_dict.iteritems():
+    def add_outputs(self, new_outputs):
+        new_outputs = self._to_ordered_dict(new_outputs)
+        
+        for (out_port_name, out_port_type) in new_outputs.iteritems():
             # append
             self._state_label_def[out_port_name] = out_port_type
             
@@ -332,6 +354,50 @@ class MooreMachine(FiniteStateMachine):
 class MealyMachine(FiniteStateMachine):
     """Mealy machine.
     
+    examples
+    --------
+    Traffic Light: Fig. 3.14, p.72 [Lee-Seshia]
+    
+    >>> m = MealyMachine()
+    >>> pure_signal = {'present', 'absent'}
+    >>> m.add_inputs([('tick', pure_signal) ])
+    >>> m.add_outputs([('go', pure_signal), ('stop', pure_signal) ])
+    >>> m.states.add_from(['red', 'green', 'yellow'])
+    >>> m.states.initial.add('red')
+    
+    For brevity:
+    
+    >>> p = 'present'
+    >>> a = 'absent'
+    
+    The transitions can now be defined using tuples
+    for the values of the inputs and outputs.
+    The inputs and outputs annotate transitions of a Mealy machine.
+    The order is inputs, outputs and the order within each
+    is defined by the list passed to .add_inputs and .add_outputs above.
+    
+    >>> m.transitions.add_labeled('red', 'green', (p, p, a) )
+    >>> m.transitions.add_labeled('green', 'yellow', (p, a, p) )
+    >>> m.transitions.add_labeled('yellow', 'red', (p, a, p) )
+    
+    The transitions can equivalently be defined with dict().
+    So instead of the previous m.transitions.add_labeled, we can use:
+    
+    >>> label = {'tick':p, 'go':p, 'stop':a}
+    >>> m.transitions.add_labeled('red', 'green', label)
+    >>> label = {'tick':p, 'go':a, 'stop':p}
+    >>> m.transitions.add_labeled('green', 'yellow', label)
+    >>> label = {'tick':p, 'go':a, 'stop':p}
+    >>> m.transitions.add_labeled('yellow', 'red', label)
+    
+    This avoids any ordering issues, i.e., changing the
+    order of the sublabels does not matter:
+    
+    >>> label = {'go':p, 'tick':p, 'stop':a}
+    >>> m.transitions.add_labeled('red', 'green', label)
+    
+    theory
+    ------
     A Mealy machine implements the discrete dynamics:
         x[k+1] = f(x[k], u[k] )
         y[k] = g(x[k], u[k] )
@@ -357,25 +423,56 @@ class MealyMachine(FiniteStateMachine):
         self.default_export_fname = 'mealy'
     
     def __repr__(self):
-        #TODO: improve port formatting
+        def print_ports(port_dict):
+            s = ''
+            for (port_name, port_type) in port_dict.iteritems():
+                s += '\t' +str(port_name) +' : '
+                s += pformat(port_type) +'\n'
+            s += '\n'
+            return s
+        
+        def print_label(label_dict):
+            s = ''
+            for (name, value) in label_dict.iteritems():
+                s += '\t\t' +str(name) +' : ' +str(value) +'\n'
+            s += '\n'
+            return s
+        
         s = hl +'\nMealy Machine: ' +self.name +'\n' +hl +'\n'
-        s += str(self.states) +'\n'
-        s += 'State Variables:\n' +pformat(self.state_vars) +'\n'
+        s += 'State Variables:\n\t(name : type)\n'
+        s += print_ports(self.state_vars)
+        
+        s += 'States & State Var Values:\n'
+        for (state, label_dict) in self.states(data=True):
+            s += '\t' +str(state) +' :\n'
+            s += print_label(label_dict)
+        
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Input ports:\n\t' +str(self.inputs) +'\n'
-        s += 'Output ports:\n\t' +str(self.outputs) +'\n'
-        s += 'Transitions & Labels:\n\t' +str(self.transitions(data=True) )
-        s += '\n' +hl +'\n'
+        
+        s += 'Input Ports:\n\t(name : type)\n'
+        s += print_ports(self.inputs)
+        
+        s += 'Output Ports:\n\t(name : type)\n'
+        s += print_ports(self.outputs)
+        
+        s += 'Transitions & Labels: (from --> to : label)\n'
+        for (from_state, to_state, label_dict) in \
+        self.transitions(labeled=True):
+            s += '\t' +str(from_state) +' ---> '
+            s += str(to_state) +' :\n'
+            s += print_label(label_dict)
+        s += hl +'\n'
         
         return s
     
     def __str__(self):
         return self.__repr__()
     
-    def add_outputs(self, new_outputs_ordered_dict):
-        for (out_port_name, out_port_type) in \
-        new_outputs_ordered_dict.iteritems():
+    def add_outputs(self, new_outputs):
+        new_outputs = self._to_ordered_dict(new_outputs)
+        
+        for (out_port_name, out_port_type) in new_outputs.iteritems():
             # append
             self._transition_label_def[out_port_name] = out_port_type
             
@@ -387,28 +484,155 @@ class MealyMachine(FiniteStateMachine):
             self._transition_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
     
-    def get_outputs(self, from_state, next_state):
-        #labels = 
+    def simulate(self, inputs_sequence='manual', max_count=100):
+        if inputs_sequence not in ['manual', 'random'] and \
+        not isinstance(inputs_sequence, executions.MachineInputSequence):
+            raise Exception(
+                'Available simulation modes:\n' +
+                'manual, random, or guided by given MachineInputSequence.'
+            )
         
-        output_valuations = dict()
-        for output_port in self.outputs:
-            output_valuations[output_port]
+        if not self.states.current:
+            print('Current state unset.')
+            if not self.states.initial:
+                msg = 'Initial state(s) unset.\n'
+                msg += 'Set either states.current, or states.initial\n'
+                msg += 'before calling .simulate.'
+                print(msg)
+            else:
+                self.states.set_current(self.states.initial)
+        
+        if isinstance(inputs_sequence, executions.MachineInputSequence):
+            self._guided_simulation(inputs_sequence)
+            return
+        
+        count = 1
+        stop = False
+        mode = inputs_sequence
+        while not stop:
+            print(60 *'-' +'\n Current States:\t' +
+                  str(self.states.current) +2*'\n')
+            
+            count = self._step_simulation(mode, count)
+            
+            if mode == 'manual':
+                stop = count is None
+            elif mode == 'random':
+                stop = count is None or count > max_count
+            else:
+                raise Exception('Bug: mode has unkown value.')
     
-    def update(self, input_valuations, from_state='current'):
-        if from_state != 'current':
-            if self.states.current != None:
-                warnings.warn('from_state != current state,\n'+
-                              'will set current = from_state')
-            self.current = from_state
+    def _guided_simulation(self, inputs_sequence):
+        raise NotImplementedError
+    
+    def _step_simulation(self, mode, count):
+        def select_state(cur_states, mode):
+            if mode == 'random':
+                return choice(cur_states)
+            
+            cur_states = list(cur_states) # order them
+            while True:
+                msg = 'Found more than 1 current state.\n'
+                msg += 'Select from which state to step forward.\n'
+                msg += 'Available choices:' +2*'\n'
+                for (num, state) in enumerate(cur_states):
+                    msg += '\t' +str(num) +' : '
+                    msg += str(state) +'\n'
+                msg += '\n'
+                msg += 'Select from the above states by giving\n'
+                msg += 'the integer corresponding to your selection.\n'
+                msg += 'Press "Enter" to terminate the simulation:\n'
+                msg += '\t int = '
+                
+                id_selected = raw_input(msg)
+                if not id_selected:
+                    return None
+                try:
+                    return cur_states[int(id_selected) ]
+                except:
+                    print('Could not convert your input to integer.\n' +
+                          'Please try again.\n')
         
-        transitions = self.transitions.find({from_state},
-                                            desired_label=input_valuations)
-        next_states = [v for u,v,l in transitions]
-        outputs = self.get_outputs(from_state, next_states,
-                                   desired_label=input_valuations)
-        self.states.set_current(next_states)
+        def select_transition(transitions, mode):
+            if mode == 'random':
+                return choice(transitions)
+            
+            while True:
+                msg = 'Found more than 1 outgoing transitions:' +2*'\n'
+                for (num, transition) in enumerate(transitions):
+                    (from_state, to_state, guard) = transition
+                    msg += '\t' +str(num) +' : '
+                    msg += str(from_state) +' ---> ' +str(to_state) +'\n'
+                    msg += '\t\t' +str(guard) +'\n'
+                msg += '\n'
+                msg += 'Select from the available transitions above\n'
+                msg += 'by giving its integer,\n'
+                msg += 'Press "Enter" to stop the simulation:\n'
+                msg += '\t int = '
+                
+                id_selected = raw_input(msg)
+                if not id_selected:
+                    return None
+                try:
+                    return transitions[int(id_selected) ]
+                except:
+                    print('Could not convert your input to integer.\n' +
+                          'Please try again.\n')
         
-        return zip(outputs, next_states)
+        count += 1
+        cur_states = self.states.current
+        
+        if not cur_states:
+            print('No current states: Stopping simulation.')
+            return None
+        
+        if len(cur_states) > 1:
+            state_selected = select_state(cur_states, mode)
+            if not state_selected:
+                return None
+        elif cur_states:
+            state_selected = cur_states()[0]
+        else:
+            raise Exception('Bug: "if not" above must have caught this.')
+            
+        print('State to step from:\t' +str(state_selected) )
+        from_state = state_selected
+        
+        transitions = self.transitions.find([from_state] )
+        
+        if not transitions:
+            print('Did not find any outgoing transitions:\n' +
+                  'Stopping simulation.')
+            return None
+        
+        if len(transitions) > 1:
+            transition_selected = select_transition(transitions, mode)
+            if not transition_selected:
+                return None
+        elif transitions:
+            transition_selected = transitions[0]
+        else:
+            raise Exception('Bug: must have been caught by "if not" above.')
+        
+        (from_, to_state, guard) = transition_selected
+        
+        msg = 'Moving (from state ---> to state):\n\t'
+        msg += str(from_state) +' ---> ' +str(to_state) +'\n'
+        msg += 'via transition with guard:\n\t' +str(guard) +'\n'
+        print(msg)
+        
+        self.states.current.remove(from_state)
+        self.states.current.add(to_state)
+        
+        return count
+
+class Mealy(MealyMachine):
+    """Alias to Mealy machine.
+    """
+    def __init__(self, *args, **kwargs):
+        MealyMachine.__init__(self, *args, **kwargs)
+
+pure = {'present', 'absent'}
 
 def moore2mealy(moore_machine, mealy_machine):
     """Convert Moore machine to equivalent Mealy machine"""

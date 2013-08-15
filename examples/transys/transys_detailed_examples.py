@@ -363,101 +363,7 @@ def ba_maximal_example():
         #ba.save(dot_fname, 'dot')
     
     return ba
-
-def mealy_machine_example():
-    import numpy as np   
     
-    class check_diaphragm():
-        """camera f-number."""
-        def is_valid_value(x):
-            if x <= 0.7 or x > 256:
-                raise TypeError('This f-# is outside allowable range.')
-        
-        def is_valid_guard(self, guard):
-            # when properly implemented, do appropriate syntactic check
-            if isinstance(guard, float):
-                return True
-            
-            return False
-        
-        def contains(guard_set, input_port_value):
-            """This method "knows" that we are using x to denote the input
-            within guards."""
-            guard_var_def = {'x': input_port_value}
-            guard_value = eval(guard_set, guard_var_def)
-            
-            if not isinstance(guard_value, bool):
-                raise TypeError('Guard value is non-boolean.\n'
-                                'A guard is a predicate, '
-                                'so it can take only boolean values.')
-    
-    class check_camera():
-        """is it looking upwards ?"""
-        def is_valid_value(self, x):
-            if x.shape != (3,):
-                raise Exception('Not a 3d vector!')
-        
-        def is_valid_guard(self, guard):
-            # when properly implemented, do appropriate syntactic check
-            if isinstance(guard, np.ndarray) and guard.shape == (3,):
-                return True
-            
-            return False
-        
-        def contains(self, guard_set, input_port_value):
-            v1 = guard_set # guard_halfspace_normal_vector
-            v2 = input_port_value # camera_direction_vector
-            
-            if np.inner(v1, v2) > 0.8:
-                return True
-            
-            return False
-    
-    m = trs.MealyMachine()
-    
-    m.states.add('s0')
-    m.states.add_from(['s1', 's2'])
-    m.states.initial.add('s0')
-    
-    # note: guards are conjunctions, any disjunction is represented by 2 edges
-    
-    # input defs
-    inputs = OrderedDict([
-        ['speed', {'zero', 'low', 'high', 'crazy'} ],
-        ['seats', trs.PowerSet(range(5) ) ],
-        ['aperture', check_diaphragm() ],
-        ['camera', check_camera() ]
-    ])
-    m.add_inputs(inputs)
-    
-    # outputs def
-    outputs = OrderedDict([
-        ['photo', {'capture', 'wait'} ]
-    ])
-    m.add_outputs(outputs)
-    
-    # state variables def
-    state_vars = outputs = OrderedDict([
-        ['light', {'on', 'off'} ]
-    ])
-    m.add_state_vars(state_vars)
-    
-    # guard defined using input sub-label ordering
-    guard = ('low', (0, 1), 0.3, np.array([0,0,1]), 'capture')
-    m.transitions.add_labeled('s0', 's1', guard)
-    
-    # guard defined using input sub-label names
-    guard = {'camera':np.array([1,1,1]),
-             'speed':'high',
-             'aperture':0.3,
-             'seats':(2, 3),
-             'photo':'wait'}
-    m.transitions.add_labeled('s1', 's2', guard)
-    
-    m.plot()
-    
-    return m
-
 def scipy_sparse_labeled_adj():
     from scipy.sparse import lil_matrix
     from numpy.random import rand
@@ -516,5 +422,3 @@ if __name__ == '__main__':
     
     ofts = scipy_sparse_labeled_adj()
     label_per_state()
-    m = mealy_machine_example()
-    
