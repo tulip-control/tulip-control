@@ -13,7 +13,13 @@
 # ------there are <=1 satisfying transitions. TODO check w/ Eric
 # 8/7: added all states have actions to sanity check.
 # 8/7: added MDP.states and MDP.T compatibility to sanity check.
-# 8/7: added condense_split_dynamics() NOTE all code should work without it
+# 8/7: added condense_split_dynamics()
+# ------NOTE all code except sanity_check should work without it
+# 8/12: began implementation of costs, TODO how to deal with costs
+# -------in a product (should automatically generate from original MDP costs)
+# 8/14: A MEC now returns as:
+# -------(set-of-states, {state : set-of-actions for state in set-of-states})
+# -------instead of with a list of actions
 
 from copy import deepcopy
 from pprint import pprint
@@ -23,14 +29,14 @@ from transys import *
 ############################################################################
 # MDP
 ############################################################################
-
 class MDP:
     def __init__(self, name="DEFAULT MDP"):
         self.name = name
         self.states = set()
         self.initial_states = set()
-        self.T = {} # form: T[s_i][a] = [(s_f_0, p_0), ...]
-        self.R = {} # form: R[s_i][a] = <float>
+        self.T = {} # transitions | form: T[s_i][a] = [(s_f_0, p_0), ...]
+        self.C = {} # costs       | form: C[s_i][a] = <float>
+        self.probability_type = float
 
     def sanity_check(self):
         """
@@ -46,6 +52,19 @@ class MDP:
                 assert sum([dest_prob_tup[1] for dest_prob_tup in self.T[s_i][a]]) == 1,\
                     "Probabilities for A" + str((s_i, a)) + " don't sum to 1"
 
+    def actions(self, s):
+        """
+        Return set of actions available at s.
+        """
+        return set(self.T[s].keys())
+
+    def probability(self, s_i, a, s_f):
+        lst = self.T[s_i][a]
+        for tup in lst:
+            if tup[0] == s_f:
+                return tup[1]
+        raise Exception, "Invalid probability query."
+
     def pre_s_a(self, s_f):
         """
         Simple one-step pre.
@@ -57,6 +76,7 @@ class MDP:
                 if s_f in self.destinations(s_i, a):
                     pre.add((s_i, a))
         return pre
+
 
     def pre_s(self, s_f):
         """
@@ -123,6 +143,29 @@ class MDP:
                     if not added:
                         new_lst.append(tup)
                 self.T[s][key] = new_lst
+
+    def can_reach(mdp, B):
+        """
+        Returns set of states that can reach a set of a states B.
+        """
+        # Initialize with B
+        can_reach_B = deepcopy(B)
+        check_next = deepcopy(can_reach_B) # check_next is the frontier
+        # Idea is only find pre of new states
+        changed = True
+        while changed:
+            changed = False
+            shell_can_reach = deepcopy(can_reach_B)
+            for x in check_next:
+                pre_s = mdp.pre_s(x)
+                shell_can_reach.update(pre_s)
+            if len(shell_can_reach) > len(can_reach_B):
+                changed = True
+                check_next = shell_can_reach.difference(can_reach_B)
+                can_reach_B = deepcopy(shell_can_reach)
+        return can_reach_B
+
+
 def mdp_example():
     """
     A toy-MDP representing a four-square grid-world:
@@ -131,9 +174,6 @@ def mdp_example():
     s3 s2
 
     s2 is terminal
-
-    R(s0) = R(s1) = R(s3) = 0
-    R(s2) = 1
 
     From any square can do a move(target adjacent square) of form:
     --target adjacent square w/ p=.9
@@ -149,14 +189,12 @@ def mdp_example():
     self.init_states = ['s0'] # Ask about extending to multiple states
 
     self.T = {} # T[state][action][i] = ('si', p)
-    self.R = {} # R[state][action] = <float>reward
+    self.C = {} # C[state][action] = <float>reward
     for state in self.states:
         self.T[state] = {}
-        self.R[state] = {}
+        self.C[state] = {}
 
     # Initialized transitions
-    # Is V0 considered in like...a worst case?  Or is it more of a there exists
-    # -some sequence of actions for which you will definitely avoid V1.
     self.T['s0'] = {'a1' : [('s1', .9), ('s3', .1)],
                     'a2' : [('s1', .1), ('s3', .9)]}
     self.T['s1'] = {'a1' : [('s2', .9), ('s0', .1)],
@@ -167,15 +205,15 @@ def mdp_example():
                     'a2' : [('s0', .1), ('s2', .9)],}
     # Note if 's3' also has some garbage action we don't find it as in V1.
     self.T['s9'] = {'a9' : [('s9', 1)]}
-    # Initialize rewards
-    self.R['s0'] = {'a1' : 0,
+    # Initialize costs
+    self.C['s0'] = {'a1' : 0,
                     'a2' : 0}
-    self.R['s1'] = {'a1' : 0,
+    self.C['s1'] = {'a1' : 0,
                     'a2' : 0}
-    self.R['s3'] = {'a1' : 0,
+    self.C['s3'] = {'a1' : 0,
                     'a2' : 0}
 
-    # Currently just checks probabilities.
+    # Run a sanity check.
     self.sanity_check()
 
     return self
@@ -315,6 +353,7 @@ def generate_product_MDP(mdp, ra, check_deterministic=False):
 
     return prod
 
+
 def generate_product_MDP_example():
     """
     This is a trivial MDP cast from B+K pg.202 Traffic Light Example
@@ -342,7 +381,7 @@ def generate_product_MDP_example():
     ra.transitions.add_labeled('q1', 'q1', '!s1')
     ra.transitions.add_labeled('q1', 'q2', 's1')
     ra.transitions.add_labeled('q2', 'q2', '!s-1')
-    pprint(ra.transitions())
+    #pprint(ra.transitions())
 
     prod = generate_product_MDP(mdp, ra)
     return prod
@@ -373,7 +412,7 @@ def max_end_components(MDP, show_steps=False):
             R = set() # set of states to be removed
 
             # Compute nontrivial SCCs T1, ..., Tk of digraph G(T,A_T)
-            A_T = {t : A[t] for t in T}
+            A_T = {t : set(A[t]) for t in T}
             G = MDP.induce_digraph(states=T, actions=A_T)
             SCCs = networkx.strongly_connected_components(G)
 
@@ -426,9 +465,10 @@ def max_end_components(MDP, show_steps=False):
     # Return block.
     output = []
     for T in MEC:
-        A_T = {t: A[t] for t in T}
+        A_T = {t: set(A[t]) for t in T}
         output.append((T, A_T))
     return output
+
 
 def max_end_components_example():
     """
@@ -449,12 +489,57 @@ def max_end_components_example():
 
     return max_end_components(m)
 
+
+def accepting_max_end_components(prod, LK_lst):
+    """
+    Compute accepting max end components given L, K.
+    """
+    L = [LK[0] for LK in LK_lst] # TODO add fields to MDP class
+    K = [LK[1] for LK in LK_lst]
+
+    MECs = max_end_components(prod, show_steps=False)
+    AMECs = []
+    for MEC in MECs:
+        got_L = False
+        got_K = False
+        states_set = MEC[0]
+        for state in states_set:
+            # (s, q) convention
+            if type(state) is tuple:
+                q = state[1]
+            # <int> or <str> convention (produced by generate_product_MDP)
+            else:
+                q = state # i.e. <int> for Eric's simple example
+            if q in L:
+                got_L = True
+            elif q in K:
+                got_K = True
+        if got_K and not got_L:
+            AMECs.append(MEC)
+
+    assert len(AMECs) > 0, "No AMECs found."
+    return AMECs
+
+
+def accepting_max_end_components_example():
+    pass
+
 ############################################################################
 # Misc
 ############################################################################
-def gen_best_action_dict(mdp, V):
+def gen_best_action_dict(mdp, V, states=None, verbose=False):
+    """
+    Used for memoryless policies on discounted product value iteration.
+    """
+    print "\nWarning: gen_best_action_dict should only be used with a V " + \
+            "that utilized discounting or costs."
+
     best_dict = {}
-    for state in mdp.states:
+
+    if states == None:
+        states = mdp.states
+
+    for state in states:
         copies = 1
         # Grab all possible actions from state.
         actions = mdp.T[state]
@@ -477,29 +562,27 @@ def gen_best_action_dict(mdp, V):
             if action_value > best_value:
                 best_value = action_value
                 best_dict[state] = action
-        print str(best_value) + " (" + str(copies) + ") ", # SUGAR
+        if verbose:
+            print str(best_value) + " (" + str(copies) + ") " # SUGAR
     return best_dict
 
 ############################################################################
 # Main Function
 ############################################################################
 def __main__():
-    print ''
+    print
     mdp = mdp_example()
     pprint(mdp.T)
-    print ''
-    print ''
+    print
     prod = generate_product_MDP_example()
     pprint(prod.T)
-    print ''
-    print ''
+    print
     max_end_components = max_end_components_example()
     pprint(max_end_components)
-    print ''
-if __name__ == '__main__': __main__()
+    print
+    accepting_max_end_components = accepting_max_end_components_example()
+    pprint(accepting_max_end_components)
 
-
-
-
-
+if __name__ == '__main__':
+    __main__()
 

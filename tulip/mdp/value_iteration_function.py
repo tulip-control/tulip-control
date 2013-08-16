@@ -2,19 +2,35 @@
 # Notes: [(L0, K0), ...] is list of tuples (bad, good).
 # Dependencies: jbern_MDP_overhaul for MDP methods.
 # Originally: James Bern 8/6/2013
+#
+# 8/9: made search for V0 much more efficient.
+# 8/12: reintroduced discounting.
+# 8/12: reintroduced costs.
+# 8/16: wrote robust_value_iteration 
+# 8/16: added and checked the two small examples
+
+from jbern_MDP_overhaul import *
+from jbern_uncertain_MDP_overhaul import *
 
 from copy import deepcopy
 from pprint import pprint
-from jbern_MDP_overhaul import *
+
+import numpy as np
+from cvxopt import matrix
+from cvxopt import solvers
+from cvxopt import mul
 
 # Helper Function
-def value_iteration(mdp, epsilon=0.001, V1=set(), unknown_states=None):
+def value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None, gamma=1, costs_enabled=False):
     """
     Modified/specialized AIMA algorithm for value iteration,
     which is used to perform value iteration over either all
     of a product MDP or part of it if graph search has been used
     to optimize.
-    Used in product_MDP_value_iteration().
+    Called by product_MDP_value_iteration().
+
+    NOTE unknown_states is at least prod.states - AMECs, and at most
+    prod.states - (V1 U V0).
     """
 
     T = deepcopy(mdp.T)
@@ -22,11 +38,13 @@ def value_iteration(mdp, epsilon=0.001, V1=set(), unknown_states=None):
     # Safely defaults to all non-V1 states in T.
     unknown_states = unknown_states
     if unknown_states == None:
-        unknown_states = set(mdp.states) - V1
+        unknown_states = set(mdp.states) - V1o
 
-    V1 = V1 # Solely used to diff. b/t s part of V0 vs. V1
+    V1 = V1o # Solely used to diff. b/t s part of V0 vs. V1
 
     U1 = {s : 0.0 for s in unknown_states}
+
+    gamma = gamma
 
     while True:
         U = deepcopy(U1)
@@ -34,73 +52,200 @@ def value_iteration(mdp, epsilon=0.001, V1=set(), unknown_states=None):
         delta = 0
 
         for s in unknown_states:
+            U1[s] = 0
             actions = T[s].keys()
-            state_value = []
+            action_values_lst = []
 
             for a in actions:
-                action_values = []
+
+                # optional cost, NOTE must pass costs_enabled=True
+                if costs_enabled:
+                    try:
+                        U1[s] += C[s][a]
+                    except:
+                        raise Exception, "costs not fully defined"
+
+                # vector of constant transition probabilities 
+                P = []
+                # vector of destination state values
+                V = []
+
                 for tup in T[s][a]:
-                    s1, p = tup
+                    s_f, p = tup
                     # determine value_s1
-                    if s1 in unknown_states:
-                        value_s1 = U[s1]
-                    elif s1 in V1:
-                        value_s1 = 1.0
-                    else: # s1 in V0
-                        value_s1 = 0.0
-                    action_values.append(p * value_s1)
+                    if s_f in unknown_states:
+                        v = U[s_f]
+                    elif s_f in V1:
+                        v = gamma * 1.0
+                    else: # s_f in V0
+                        v = 0.0
+                    P.append(p)
+                    V.append(v)
 
-                state_value.append(sum(action_values))
+                action_value = np.dot(np.array(P), np.array(V))
+                action_values_lst.append(action_value)
 
-            U1[s] = max(state_value)
+            U1[s] = gamma * max(action_values_lst)
+
 
             delta = max(delta, abs(U1[s] - U[s]))
 
-        if delta < epsilon:
+        # optional discounting
+        if gamma == 1.0:
+            e_factor = 1.0
+        else:
+            e_factor = (1 - gamma) / gamma
+
+        if delta < e_factor * epsilon:
             return U1
 
-def product_MDP_value_iteration(prod, LK_lst, dumb=False):
+def robust_value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None, gamma=1, costs_enabled=False):
+    """
+    Value iteration for use in an UncertainMDP.
+    Currently only supports interval probabilities.
+
+    A modified version of value_iteration.
+    """
+
+    T = deepcopy(mdp.T)
+
+    # Safely defaults to all non-V1 states in T.
+    unknown_states = unknown_states
+    if unknown_states == None:
+        unknown_states = set(mdp.states) - V1o
+
+    V1 = V1o # Solely used to diff. b/t s part of V0 vs. V1
+
+    U1 = {s : 0.0 for s in unknown_states}
+
+    gamma = gamma
+
+    while True:
+        U = deepcopy(U1)
+
+        delta = 0
+
+        for s in unknown_states:
+            U1[s] = 0
+            actions = T[s].keys()
+            action_values_lst = []
+
+            for a in actions:
+
+                # optional cost, NOTE must pass costs_enabled=True
+                if costs_enabled:
+                    try:
+                        U1[s] += C[s][a]
+                    except:
+                        raise Exception, "costs not fully defined"
+
+                # vector of __interval__ transition probabilities 
+                P = []
+                # vector of destination state values
+                V = []
+
+                for tup in T[s][a]:
+                    s_f, p_interval = tup
+
+                    # determine value_s1
+                    if s_f in unknown_states:
+                        v = U[s_f]
+                    elif s_f in V1:
+                        v = gamma * 1.0
+                    else: # s_f in V0
+                        v = 0.0
+
+                    P.append(p_interval)
+                    V.append(v)
+
+                # The environment minimizes dot(P, V) by fixing P
+                # -with restriction that entries of P sum to 1.
+
+                n = len(P)
+
+                # c matrix, to be used as c:
+                # call it V for clarity/consistency
+                # form: col of state values 
+                V = matrix(V)
+                #print V
+
+                # G matrix, to be used as G:
+                # form: -1  0  0 ...
+                #       +1  0  0 ...
+                #        0 -1  0 ...
+                #        0 +1  0 ...
+                #        ...........
+                G = np.ndarray((2*n, n))
+                G_n = -1 * np.identity(n)
+                G_p = np.identity(n)
+                for i in range(n):
+                    r = 2*i
+                    G[r] = G_n[i]
+                    G[r+1] = G_p[i]
+                G = matrix(G)
+                #print G
+
+                # h matrix, to be used as h:
+                # form: col of -p1F, +p1C, -p2F, +P2C, ...
+                # (where F denotes floor/lower-bound on interval
+                #  and C denotes ceiling/upper-bound on interval)
+                h = []
+                for p_interval in P:
+                    h.append(-1*p_interval.low)
+                    h.append(p_interval.high)
+                h = matrix(h)
+                #print h
+
+                # A matrix, to be used as A:
+                # form: same as c
+                A = matrix(1.0, (1,n))
+                #print A
+
+                # b matrix
+                # form: 1x1 with entry 1
+                b = matrix(1.0, (1,1))
+                #print b
+
+                solvers.options["show_progress"] = False
+                P = solvers.lp(V, G, h, A, b)['x']
+                #for p in P:
+                #    print p
+                #print
+
+                # take the dot product of the fixed P and V
+                action_value = sum(mul(P, V))
+                #print action_value
+                action_values_lst.append(action_value)
+
+            # robot maximizes over the set of minimized actions
+            # update U1[s] accordingly
+            U1[s] = gamma * max(action_values_lst)
+            #print U1
+
+            delta = max(delta, abs(U1[s] - U[s]))
+
+        # optional discounting
+        if gamma == 1.0:
+            e_factor = 1.0
+        else:
+            e_factor = (1 - gamma) / gamma
+
+        if delta < e_factor * epsilon:
+            return U1
+
+def product_MDP_value_iteration(prod, AMECs, gamma=1):
     """
     Run value iteration on a product mdp with LK list.
 
-    dumb allows for a conservative search for V1, i.e.
-    without assuming the robot always takes the best action.
+    NOTE doesn't run graph search when gamma != 1.0,
+    since the discounted value of a state v1 in V1 but not in AMECs
+    is not 1.0.
 
-    Uses value_iteration().
+    Chooses between robust_value_iteration and value_iteration().
     """
     assert prod.states == set(prod.T.keys()), "states doesn't match T"
 
-    L = [LK[0] for LK in LK_lst] # TODO add fields to MDP class
-    K = [LK[1] for LK in LK_lst]
-    print "\n* Searching for AMECs *\n"
-
-    MECs = max_end_components(prod, show_steps=False)
-    AMECs = []
-    for MEC in MECs:
-        got_L = False
-        got_K = False
-        states_set = MEC[0]
-        for state in states_set:
-            # (s, q) convention
-            if type(state) is tuple:
-                q = state[1]
-            # <int> or <str> convention (produced by generate_product_MDP)
-            else:
-                q = state # i.e. <int> for Eric's simple example
-            if q in L:
-                got_L = True
-            elif q in K:
-                got_K = True
-        if got_K and not got_L:
-            AMECs.append(MEC)
-
-    print "Found " + str(len(AMECs)) + " AMECs:"
-    pprint(AMECs)
-    assert len(AMECs) > 0, "No AMECs found."
-
-    #print "L: " + str(L)
-    #print "K: " + str(K)
-    #pprint(AMECs)
+    AMECs = AMECs
 
     V0 = set()
     V1 = set()
@@ -110,40 +255,24 @@ def product_MDP_value_iteration(prod, LK_lst, dumb=False):
         states = AMEC[0]
         V1.update(states)
 
-    # Save a copy of V1 to compare time-savings of graph search
-    V1_safe = deepcopy(V1)
+    # Save a copy of V1 for if you want to compare time-savings of graph search
+    # V1_safe = deepcopy(V1)
 
-    ## GRAPH SEARCH BLOCK
-    print "\n* Running a graph search. *\n"
+    #GRAPH SEARCH BLOCK
+    print "\n* Running a graph search for V0. *\n"
 
-    # # V0 Search
-    def can_reach(mdp, B):
-        """
-        Returns set of states that can reach B.
-        """
-        # Initialize with B
-        can_reach_B = deepcopy(B)
-        changed = True
-        while changed:
-            changed = False
-            shell_can_reach = deepcopy(can_reach_B)
-            for x in can_reach_B:
-                pre_s = mdp.pre_s(x)
-                shell_can_reach.update(pre_s)
-            if len(shell_can_reach) > len(can_reach_B):
-                changed = True
-                can_reach_B = deepcopy(shell_can_reach)
-        return can_reach_B
-
-    # Compute set of states that could possibly reach an AMEC
-    can_reach_AMEC = can_reach(prod, V1)
+    ##V0 Search (custom)
+    # Use can_reach method to compute set of states
+    # that can possibly reach an AMEC.
+    can_reach_AMEC = prod.can_reach(V1)
     print "Found members of V0:"
     pprint(prod.states - can_reach_AMEC)
     V0.update(prod.states - can_reach_AMEC)
 
-    # # V1 Search B+K pg. 859
+    ##V1 Search B+K pg. 859
     new_V1 = set()
-    if not dumb:
+    if gamma == 1.0:
+        print "\n* Running a graph search for V1 *"
         prod2 = deepcopy(prod)
 
         U = deepcopy(V0)
@@ -170,44 +299,34 @@ def product_MDP_value_iteration(prod, LK_lst, dumb=False):
             U = deepcopy(U_new)
         new_V1 = prod2.T.keys() # NOTE don't use states since it's no longer accurate.
 
-    else: # dumb
-        for s_o in prod.states:
-            goes_to = set([s_o]) # Everywhere s_o can go.
-            changed = True
-            while changed:
-                shell_goes = deepcopy(goes_to)
-                changed = False
-                for s in goes_to:
-                    post_s = prod.post_s(s)
-                    shell_goes.update(post_s)
-                if len(shell_goes) > len(goes_to):
-                    changed = True
-                    goes_to = deepcopy(shell_goes)
+        print "\nFound members of V1:"
+        pprint(new_V1)
 
-            # If s_o does not ever go to any states in V0 => V1 
-            if len(goes_to.intersection(V0)) == 0:
-                new_V1.add(s_o)
+    else:
+        print "\n* Skipping V1 graph search due to discounting. *"
+        pass
 
-    print "\nFound members of V1:"
-    pprint(new_V1)
     V1.update(new_V1)
-    ## END GRAPH SEARCH BLOCK
+    #END GRAPH SEARCH BLOCK
 
-    print "\n* Running Value Iteration on Unknown States *\n"
+    print "\n* Running appropriate form of value iteration on unknown states *"
 
     # Perform value iteration to finish off
     unknown_states = deepcopy(prod.states)
     unknown_states -= V1
     unknown_states -= V0
 
-    print "unkown_states:"
-    pprint(unknown_states)
-
-    print "\nfor comparison, value_iteration _WITHOUT_ graph search finds: "
-    pprint(value_iteration(prod, V1=V1_safe))
-
-    print "\nvalue_iteration _WITH_ graph search finds: "
-    final_dict = value_iteration(prod, V1=V1, unknown_states=unknown_states)
+    # switch case for types of value iteration.
+    if prod.probability_type == float:
+        print "\nvalue_iteration finds: "
+        final_dict = value_iteration(prod, V1o=V1, unknown_states=unknown_states, gamma=gamma,
+            costs_enabled=False)
+    elif prod.probability_type == IntervalProbability:
+        print "\nrobust_value_iteration finds: "
+        final_dict = robust_value_iteration(prod, V1o=V1, unknown_states=unknown_states,
+                gamma=gamma, costs_enabled=False)
+    else:
+        raise NotImplementedError, "using unsupported type of MDP."
     pprint(final_dict)
 
     print "\nusing hashed V0 and V1, build up the final value dict:"
@@ -215,26 +334,45 @@ def product_MDP_value_iteration(prod, LK_lst, dumb=False):
         final_dict[v1] = 1.0
     for v0 in V0:
         final_dict[v0] = 0.0
-    pprint(final_dict)
 
     return final_dict
 
 def __main__():
-    prod = MDP()
-    prod.states = set([0,1,2,3,4,5])
-    prod.T = {0 : {'a':[(3,1)], 'b':[(0, .2), (1,.6), (3,.2)]},
+    print
+    # Small example to test product_MDP_value_iteration
+    # -for a normal MDP. NOTE checked by hand: 0.333...
+    prod = MDP(name="mdp_val_example")
+    prod.states = set([0,1,2,3])
+    prod.T = {0 : {'a':[(0,.25), (1,.25), (3,.5)]},
               1 : {'a':[(2,1)]},
               2 : {'a':[(1,1)]},
-              3 : {'a':[(3,1)]},
-              4 : {'a':[(3,1)]},
-              5 : {'a':[(2,1)]}}
-    pprint(product_MDP_value_iteration(prod, [(None, 2)], dumb=False))
+              3 : {'a':[(3,1)]}
+             }
+    prod.sanity_check()
+    LK_lst = [(None, 2)]
+    AMECs = accepting_max_end_components(prod, LK_lst)
+    print prod.name
+    pprint(product_MDP_value_iteration(prod, AMECs))
+
+    print "\n" + "*"*80 + "\n"
+    # Small example to test product_MDP_value_iteration
+    # -for an UncertainMDP. NOTE checked by hand: 0.2
+    prod = UncertainMDP(name="mdp_robust_val_example")
+    p25 = IntervalProbability(.15, .35)
+    p50 = IntervalProbability(.4, .6)
+    one = IntervalProbability.one()
+    prod.states = set([0,1,2,3])
+    prod.T = {0 : {'a':[(0,p25), (1,p25), (3,p50)]},
+              1 : {'a':[(2,one)]},
+              2 : {'a':[(1,one)]},
+              3 : {'a':[(3,one)]}
+             }
+    prod.sanity_check()
+    LK_lst = [(None, 2)]
+    AMECs = accepting_max_end_components(prod, LK_lst)
+    print prod.name
+    pprint(product_MDP_value_iteration(prod, AMECs))
 
 if __name__ == "__main__":
     __main__()
-
-
-
-
-
 
