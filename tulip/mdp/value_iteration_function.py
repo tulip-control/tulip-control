@@ -8,9 +8,9 @@
 # 8/12: reintroduced costs.
 # 8/16: wrote robust_value_iteration 
 # 8/16: added and checked the two small examples
+# 8/20: P_V_linear_program became own function.
 
-from jbern_MDP_overhaul import *
-from jbern_uncertain_MDP_overhaul import *
+from jbern_MDP_functions import *
 
 from copy import deepcopy
 from pprint import pprint
@@ -144,6 +144,7 @@ def robust_value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None,
                 # vector of destination state values
                 V = []
 
+                # set up P and V lists
                 for tup in T[s][a]:
                     s_f, p_interval = tup
 
@@ -158,59 +159,10 @@ def robust_value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None,
                     P.append(p_interval)
                     V.append(v)
 
-                # The environment minimizes dot(P, V) by fixing P
-                # -with restriction that entries of P sum to 1.
-
-                n = len(P)
-
-                # c matrix, to be used as c:
-                # call it V for clarity/consistency
-                # form: col of state values 
+                # solve linear program for updated p values
+                P = P_V_linear_program(P, V)
+                # convert V into a cvxopt matrix for taking dot product
                 V = matrix(V)
-                #print V
-
-                # G matrix, to be used as G:
-                # form: -1  0  0 ...
-                #       +1  0  0 ...
-                #        0 -1  0 ...
-                #        0 +1  0 ...
-                #        ...........
-                G = np.ndarray((2*n, n))
-                G_n = -1 * np.identity(n)
-                G_p = np.identity(n)
-                for i in range(n):
-                    r = 2*i
-                    G[r] = G_n[i]
-                    G[r+1] = G_p[i]
-                G = matrix(G)
-                #print G
-
-                # h matrix, to be used as h:
-                # form: col of -p1F, +p1C, -p2F, +P2C, ...
-                # (where F denotes floor/lower-bound on interval
-                #  and C denotes ceiling/upper-bound on interval)
-                h = []
-                for p_interval in P:
-                    h.append(-1*p_interval.low)
-                    h.append(p_interval.high)
-                h = matrix(h)
-                #print h
-
-                # A matrix, to be used as A:
-                # form: same as c
-                A = matrix(1.0, (1,n))
-                #print A
-
-                # b matrix
-                # form: 1x1 with entry 1
-                b = matrix(1.0, (1,1))
-                #print b
-
-                solvers.options["show_progress"] = False
-                P = solvers.lp(V, G, h, A, b)['x']
-                #for p in P:
-                #    print p
-                #print
 
                 # take the dot product of the fixed P and V
                 action_value = sum(mul(P, V))
@@ -232,6 +184,73 @@ def robust_value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None,
 
         if delta < e_factor * epsilon:
             return U1
+
+def P_V_linear_program(P, V):
+    """
+    The environment minimizes dot(P, V) by fixing P with restriction 
+    that entries of P sum to 1.
+    Requires elements of P are IntervalProbability's, and
+    elements of V are floats.
+    Takes P, V as lists, and returns P as a cvxopt matrix.
+    """
+    assert type(P) == list
+    assert type(V) == list
+    for v in V:
+        assert type(v) == float
+    for p in P:
+        assert isinstance(p, IntervalProbability), "P assumed matrix of IntervalProbability's"
+
+    n = len(P)
+
+    # c matrix, to be used as c:
+    # call it V for clarity/consistency
+    # form: col of state values
+    V = matrix(V)
+    #print V
+
+    # G matrix, to be used as G:
+    # form: -1  0  0 ...
+    #       +1  0  0 ...
+    #        0 -1  0 ...
+    #        0 +1  0 ...
+    #        ...........
+    G = np.ndarray((2*n, n))
+    G_n = -1 * np.identity(n)
+    G_p = np.identity(n)
+    for i in range(n):
+        r = 2*i
+        G[r] = G_n[i]
+        G[r+1] = G_p[i]
+    G = matrix(G)
+    #print G
+
+    # h matrix, to be used as h:
+    # form: col of -p1F, +p1C, -p2F, +P2C, ...
+    # (where F denotes floor/lower-bound on interval
+    #  and C denotes ceiling/upper-bound on interval)
+    h = []
+    for p_interval in P:
+        h.append(-1*p_interval.low)
+        h.append(p_interval.high)
+    h = matrix(h)
+    #print h
+
+    # A matrix, to be used as A:
+    # form: same as c
+    A = matrix(1.0, (1,n))
+    #print A
+
+    # b matrix
+    # form: 1x1 with entry 1
+    b = matrix(1.0, (1,1))
+    #print b
+
+    solvers.options["show_progress"] = False
+    P = solvers.lp(V, G, h, A, b)['x']
+    #for p in P:
+    #    print p
+    #print
+    return P
 
 def product_MDP_value_iteration(prod, AMECs, gamma=1):
     """
@@ -329,7 +348,7 @@ def product_MDP_value_iteration(prod, AMECs, gamma=1):
         raise NotImplementedError, "using unsupported type of MDP."
     pprint(final_dict)
 
-    print "\nusing hashed V0 and V1, build up the final value dict:"
+    print "\nusing stored members of V0 and V1 to build up final dict:"
     for v1 in V1:
         final_dict[v1] = 1.0
     for v0 in V0:
@@ -338,9 +357,10 @@ def product_MDP_value_iteration(prod, AMECs, gamma=1):
     return final_dict
 
 def __main__():
-    print
+    print "\n" + "*"*80 + "\n"
     # Small example to test product_MDP_value_iteration
-    # -for a normal MDP. NOTE checked by hand: 0.333...
+    # -for a normal MDP.
+    # NOTE checked by hand: 0.333...
     prod = MDP(name="mdp_val_example")
     prod.states = set([0,1,2,3])
     prod.T = {0 : {'a':[(0,.25), (1,.25), (3,.5)]},
@@ -356,7 +376,8 @@ def __main__():
 
     print "\n" + "*"*80 + "\n"
     # Small example to test product_MDP_value_iteration
-    # -for an UncertainMDP. NOTE checked by hand: 0.2
+    # -for an UncertainMDP.
+    # NOTE checked by hand: 0.2
     prod = UncertainMDP(name="mdp_robust_val_example")
     p25 = IntervalProbability(.15, .35)
     p50 = IntervalProbability(.4, .6)

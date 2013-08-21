@@ -1,15 +1,19 @@
 # MDP example for TuLiP, demonstrating: product-generation and simple
 # ---------------------------------------a simple two-pronged policty
-# Dependencies: jbern_MDP_overhaul, value_iteration_function
 # Originally: James Bern 8/6/2013
 #
 # 8/9: Rewrote gen_grid_T to take num_rows and num_cols
 # 8/9: Tested example for 15x15 MDP x 4-state Rabin => ~1000 state product
 # 8/12: First cut of two-pronged policy.
+# 8/17: (FIX) Error in gen_round_robin_dict corrected
+# -------AMEC (garbage) -> our_AMEC
 
 from jbern_MDP_overhaul import *
+from jbern_MDP_functions import *
+from transys import RabinAutomaton # FORNOW TODO make current w/ TuLiP
 from value_iteration_function import product_MDP_value_iteration
 from itertools import cycle
+from pprint import pprint
 
 def gen_grid_T(num_rows, num_cols, name='s'):
     """
@@ -135,8 +139,8 @@ LK_lst = [(None, 'q3'), (None, 'q4')]
 # Generate the product.
 prod = generate_product_MDP(mdp, ra, check_deterministic=True)
 
-# Two iteration schemes: memoryless discounting/min-path (to reach AMEC), and
-# -----------------------probabilistic/round robin (to visit all states in AMEC).
+# Two policies: (1) deterministic discounted value iteration to reach AMEC
+# --------------(2) round robin to visit all states in AMEC
 
 # Prelim.'s for (1)
 AMECs = accepting_max_end_components(prod, LK_lst)
@@ -155,10 +159,10 @@ def determine_AMEC(AMECs, s_in_AMEC):
 
 # Part One: memoryless goto_AMEC policy done with discounting.
 V_for_memoryless = product_MDP_value_iteration(prod, AMECs, gamma=.9)
-memoryless_policy = gen_best_action_dict(prod, V_for_memoryless, states=nonAMEC_states)
+memoryless_policy = gen_best_actions_dict(prod, V_for_memoryless, states=nonAMEC_states)
 #
 # # Demonstration of memoryless policy.
-print
+print "\npolicy one:"
 pprint(memoryless_policy)
 
 # Part Two: round-robin to visit all states in AMEC.
@@ -167,7 +171,7 @@ def gen_round_robin_dict(AMECs, AMEC_state):
     our_AMEC = determine_AMEC(AMECs, AMEC_state)
     our_AMEC_states = our_AMEC[0]
     for state in our_AMEC_states:
-        allowed_actions = AMEC[1][state]
+        allowed_actions = our_AMEC[1][state]
         # Use itertools cycles for convenience and reliability (TODO check overhead).
         round_robin_dict[state] = cycle(allowed_actions)
     return round_robin_dict
@@ -180,7 +184,7 @@ def next_action_from(round_robin_dict, state):
 #
 # # Demonstration of a state exhibiting the desired cyclic behavior.
 round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=('s1','q1'))
-print
+pprint(round_robin_dict)
 for i in range(10):
     for state in round_robin_dict.keys():
         print "state: " + str(state)
