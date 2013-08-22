@@ -7,13 +7,18 @@
 # 8/12: First cut of two-pronged policy.
 # 8/17: (FIX) Error in gen_round_robin_dict corrected
 # -------AMEC (garbage) -> our_AMEC
+# 8/21: Simulation added.
 
 from jbern_MDP_overhaul import *
 from jbern_MDP_functions import *
-from transys import RabinAutomaton # FORNOW TODO make current w/ TuLiP
 from value_iteration_function import product_MDP_value_iteration
+from transys import RabinAutomaton # FORNOW TODO make current w/ TuLiP
+
 from itertools import cycle
+
 from pprint import pprint
+
+import random
 
 def gen_grid_T(num_rows, num_cols, name='s'):
     """
@@ -76,6 +81,7 @@ mdp = MDP(name="video_mdp")
 mdp.T = gen_grid_T(3, 3)
 for state in mdp.T.keys():
     mdp.states.add(state)
+mdp.initial_states = set(['s0'])
 # Add a trap state that catches:
 # above s0
 # left of s0
@@ -159,11 +165,13 @@ def determine_AMEC(AMECs, s_in_AMEC):
 
 # Part One: memoryless goto_AMEC policy done with discounting.
 V_for_memoryless = product_MDP_value_iteration(prod, AMECs, gamma=.9)
-memoryless_policy = gen_best_actions_dict(prod, V_for_memoryless, states=nonAMEC_states)
+pprint(V_for_memoryless)
+mu_policy = gen_best_actions_dict(prod, V_for_memoryless, states=nonAMEC_states)
+pprint(mu_policy)
 #
 # # Demonstration of memoryless policy.
 print "\npolicy one:"
-pprint(memoryless_policy)
+pprint(mu_policy)
 
 # Part Two: round-robin to visit all states in AMEC.
 def gen_round_robin_dict(AMECs, AMEC_state):
@@ -184,13 +192,59 @@ def next_action_from(round_robin_dict, state):
 #
 # # Demonstration of a state exhibiting the desired cyclic behavior.
 round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=('s1','q1'))
+print "\npolicy two:"
 pprint(round_robin_dict)
+print
 for i in range(10):
     for state in round_robin_dict.keys():
         print "state: " + str(state)
         print "\taction: " + str(next_action_from(round_robin_dict, state))
         break
 
+# Run Simulation.
+NUM_STEPS = 20
+init_sq = deepcopy(prod.initial_states).pop()
+round_robin_dict = None
+generated_round_robin_dict = False
+for i in xrange(NUM_STEPS):
+    print "\nSimulation step: {}".format(i)
+    print "Init sq: {}".format(init_sq)
+    # Choose which policy to use.
+    if init_sq not in AMEC_states:
+        print "Operating under policy 1, with action:",
+        #FORNOW
+        action = deepcopy(mu_policy[init_sq]).pop()
+    else:
+        # Only generate the round_robin_dict once, and using approp.
+        # -AMEC_state.
+        if not generated_round_robin_dict:
+            round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=init_sq)
+            generated_round_robin_dict = True
+        print "Operating under policy 2, with action: ",
+        action = next_action_from(round_robin_dict, init_sq)
+    print action
+    # Random'ly determine final_s (in the original MDP).
+    # (This block would be replaced by 
+    # -the random motion modeled by the MDP.)
+    possible_final_s = [tup[0][0] for tup in prod.T[init_sq][action]] #SUGAR
+    print "potential next s: {}".format(possible_final_s)
+    random_draw = random.random()
+    cumm_prob = 0.0
+    for sq_p_tup in prod.T[init_sq][action]:
+        sq_tup, p = sq_p_tup
+        cumm_prob += p
+        if random_draw < cumm_prob:
+            final_s = sq_tup[0]
+            break
+    print "Next s: {}".format(final_s)
+    # Backtrack out the final_sq from the product MDP.
+    # (This block would be replaced by e.g. IR LED query of state.)
+    for sq_p_tup in prod.T[init_sq][action]:
+        sq_tup = sq_p_tup[0]
+        if final_s == sq_tup[0]:
+            final_sq = sq_tup
+    # Update the init_sq
+    init_sq = final_sq
 
 
 

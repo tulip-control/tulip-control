@@ -1,12 +1,14 @@
 # Originally: James Bern 8/17/2013
 #
 # 8/20: Policies complete.
+# 8/21: Simulation added.
 
 from jbern_uncertain_MDP_overhaul import *
 from jbern_MDP_functions import *
 from value_iteration_function import *
 from transys import RabinAutomaton # FORNOW TODO make current
 from itertools import cycle
+import random
 import networkx
 
 likely = IntervalProbability(.7, .9)
@@ -73,6 +75,7 @@ mdp = UncertainMDP(name="uncertain_example")
 mdp.T = gen_uncertain_grid_T(3, 3)
 for state in mdp.T.keys():
     mdp.states.add(state)
+mdp.initial_states = set(['s0'])
 # Add a trap state that catches:
 # above s0
 # left of s0
@@ -206,12 +209,16 @@ AMEC_distances = {s : -1 for s in Sr}
 for s in Sr:
     min_lst = []
     for b in B:
-        distance = -1 + len(networkx.shortest_path(G, source=s, target=b))
-        min_lst.append(distance)
+        try:
+            distance = -1 + len(networkx.shortest_path(G, source=s, target=b))
+            min_lst.append(distance)
+        #FORNOW no path exists without going through another AMEC state
+        except:
+            continue
     AMEC_distances[s] = min(min_lst)
 #
-pprint(AMEC_distances)
-print
+#pprint(AMEC_distances)
+#print
 #
 # Compute mu_policy for (1).
 # -Rule: take an action that has destination that has shorter distance
@@ -243,6 +250,7 @@ for s_i in Sr:
                 assert init_distance - final_distance == 1
                 mu_policy[s_i] = a
 #
+print "\npolicy one:"
 pprint(mu_policy)
 
 # Prelim.'s for (2)
@@ -270,6 +278,58 @@ def next_action_from(round_robin_dict, state):
     return round_robin_dict[state].next()
 #
 round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=('s1','q1'))
-print
+print "\npolicy two:"
 pprint(round_robin_dict)
 
+# Run Simulation.
+NUM_STEPS = 20
+init_sq = deepcopy(prod.initial_states).pop()
+round_robin_dict = None
+generated_round_robin_dict = False
+for i in xrange(NUM_STEPS):
+    print "\nSimulation step: {}".format(i)
+    print "Init sq: {}".format(init_sq)
+    # Choose which policy to use.
+    if init_sq not in B:
+        print "Operating under policy 1, with action:",
+        action = mu_policy[init_sq]
+    else:
+        # Only generate the round_robin_dict once, and using approp.
+        # -AMEC_state.
+        if not generated_round_robin_dict:
+            round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=init_sq)
+            generated_round_robin_dict = True
+        print "Operating under policy 2, with action: ",
+        action = next_action_from(round_robin_dict, init_sq)
+    print action
+    # Random'ly determine final_s (in the original MDP).
+    # (This block would be replaced by 
+    # -the random motion modeled by the MDP.)
+    possible_final_s = [tup[0][0] for tup in prod.T[init_sq][action]] #SUGAR
+    print "potential next s: {}".format(possible_final_s)
+    random_draw = random.random()
+    cumm_prob = 0.0
+    # Fix the probabilies within their ranges.
+    # NOTE this is sloppy, as prob's don't sum to 1.
+    # if desired, TODO normalize fixed probabilities.
+    fix_prob_lst = []
+    for sq_p_tup in prod.T[init_sq][action]:
+        sq, p = sq_p_tup
+        low, high = p.interval
+        fixed = random.uniform(low, high)
+        fix_prob_lst.append((sq, fixed))
+    for sq_p_tup in fix_prob_lst:
+        sq_tup, p = sq_p_tup
+        cumm_prob += p
+        if random_draw < cumm_prob:
+            final_s = sq_tup[0]
+            break
+    print "Next s: {}".format(final_s)
+    # Backtrack out the final_sq from the product MDP.
+    # (This block would be replaced by e.g. IR LED query of state.)
+    for sq_p_tup in prod.T[init_sq][action]:
+        sq_tup = sq_p_tup[0]
+        if final_s == sq_tup[0]:
+            final_sq = sq_tup
+    # Update the init_sq
+    init_sq = final_sq
