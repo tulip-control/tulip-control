@@ -67,6 +67,11 @@ def ofts_minimal_example():
     ofts.states.add_from(['s1', 's2', 's3'] )
     ofts.states.initial.add('s1')
     
+    ofts.atomic_propositions |= ['p']
+    ofts.states.label('s1', 'p')
+    ofts.states.label('s2', set() )
+    ofts.states.label('s3', 'p')
+    
     ofts.transitions.add('s1', 's2') # unlabeled
     
     ofts.sys_actions.add('try')
@@ -92,6 +97,8 @@ def ofts_minimal_example():
     
     if not ofts.plot() and save_fig:
         ofts.save(pdf_fname)
+    
+    return ofts
 
 def ba_minimal_example():
     """Small example.
@@ -165,7 +172,7 @@ if __name__ == '__main__':
           +'to save them to files instead.')
     
     fts = fts_minimal_example()
-    ofts_minimal_example()
+    ofts = ofts_minimal_example()
     ba = ba_minimal_example()
     
     (prod_fts, final_states_preimage) = fts *ba

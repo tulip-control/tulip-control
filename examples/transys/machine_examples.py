@@ -296,3 +296,5 @@ if __name__ == '__main__':
     
     m6.simulate('random', 4)
     #m6.simulate() for manual simulation
+    
+    m4.save('index.html', 'html')

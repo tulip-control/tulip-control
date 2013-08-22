@@ -43,6 +43,7 @@ import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
 from mathset import PowerSet, SubSet, is_subset, unique, dprint
+import save_d3
 #from tulip import conxml
 
 hl = 60 *'-'
@@ -265,7 +266,7 @@ class LabelConsistency(object):
             
             return guard_value
         
-        def match_singleton_guard():
+        def match_singleton_guard(cur_val, desired_val):
             dprint('Actual SubLabel value:\n\t' +str(cur_val) )
             dprint('Desired SubLabel value:\n\t' +str(desired_val) )
             
@@ -2476,7 +2477,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
              wrap=10):
         """Save image to file.
         
-        Recommended: pdf, svg (can render LaTeX labels with inkscape export)
+        Recommended: pdf, html, svg (can render LaTeX labels with inkscape export)
         
         caution
         -------
@@ -2491,8 +2492,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         plot, pydot.Dot.write
         
         @param fileformat: type of image file
-        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'ps'
+        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps'
             (for more, see pydot.write)
+            | 'html' (using d3.js for animation)
         
         @param filename: path to image
             (extension C{.fileformat} appened if missing and
@@ -2521,6 +2523,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """
         path = self._export_fname(filename, fileformat,
                                   addext=add_missing_extension)
+        
+        if fileformat is 'html':
+            save_d3.labeled_digraph2d3(self, path)
+            return
         
         if prog is None:
             prog = self.default_layout
