@@ -14,5 +14,6 @@ setup(name = 'tulip',
       packages = ['tulip', 'tulip.transys'],
       package_dir = {'tulip' : 'tulip'},
       package_data={'tulip': ['jtlv_grgame.jar', 'polytope/*.py',
-                              'abstract/*.py']},
+                              'abstract/*.py'],
+                    'tulip.transys' : ['d3.v3.min.js']},
 )
