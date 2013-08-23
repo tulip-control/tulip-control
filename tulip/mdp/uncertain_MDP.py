@@ -1,10 +1,14 @@
+# The UncertainMDP class.
+#
 # Originally: James Bern 8/13/2013
+# jbern@caltech.edu
 #
 # 8/20: better example
 
+from MDP import MDP
+from probability_types import *
+
 from pprint import pprint
-from jbern_MDP_overhaul import MDP
-from probability import IntervalProbability
 
 class UncertainMDP(MDP):
     """

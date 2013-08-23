@@ -1,6 +1,8 @@
+# To hold the different types of probability for use in UncertainMDP's.
+#
 # Originally: James Bern 8/17/2013
-# To hold all types of probability that are desired.
-
+# jbern@caltech.edu
+#
 # class float:
 #    """
 #    builtin float

@@ -1,7 +1,8 @@
-# First cut of value iteration for a product MDP.
-# Notes: [(L0, K0), ...] is list of tuples (bad, good).
-# Dependencies: jbern_MDP_overhaul for MDP methods.
+# Value iteration for product MDPs and UncertainMDPs
+# and associated methods.
+#
 # Originally: James Bern 8/6/2013
+# jbern@caltech.edu
 #
 # 8/9: made search for V0 much more efficient.
 # 8/12: reintroduced discounting.
@@ -10,15 +11,17 @@
 # 8/16: added and checked the two small examples
 # 8/20: P_V_linear_program became own function.
 
-from jbern_MDP_functions import *
-
-from copy import deepcopy
-from pprint import pprint
+from MDP_functions import *
 
 import numpy as np
 from cvxopt import matrix
 from cvxopt import solvers
 from cvxopt import mul
+
+from copy import deepcopy
+from pprint import pprint
+
+
 
 # Helper Function
 def value_iteration(mdp, epsilon=0.00001, V1o=set(), unknown_states=None, gamma=1, costs_enabled=False):

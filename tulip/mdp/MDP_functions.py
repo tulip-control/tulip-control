@@ -1,14 +1,19 @@
-# Originally: James Bern 8/17/2013
 # To hold all accessory functions.  Note: functions should work for both
 # MDPs and UncertainMDPs.
+
+# Originally: James Bern 8/17/2013
+# jbern@caltech.edu
+#
 # 8/17 gen_best_action_dict now returns all best actions (i.e. returns
 #--all equally best actions if they exist.
 
+from transys import RabinAutomaton # TODO make current w/ TuLiP
+from MDP import *
+from uncertain_MDP import *
+from probability_types import *
+
 import networkx
-from transys import RabinAutomaton # FORNOW TODO make current w/ TuLiP
-from jbern_MDP_overhaul import *
-from jbern_uncertain_MDP_overhaul import *
-from probability import *
+
 from copy import deepcopy
 from pprint import pprint
 

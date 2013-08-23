@@ -1,5 +1,7 @@
-# First cut of an MDP class, and associated methods for TuLiP.
+# The MDP class.
+#
 # Originally: James Bern 8/2/2013
+# jbern@caltech.edu
 # 
 # 8/5: MDP states and init states are now sets.
 # 8/6: value_iteration() rewritten for use in product MDPs.
@@ -24,9 +26,10 @@
 # 8/20: induce_digraph() now has sane default values
 # 8/20: started type checking NOTE not in UncertainMDP
 
+import networkx
+
 from copy import deepcopy
 from pprint import pprint
-import networkx
 
 ############################################################################
 # MDP
