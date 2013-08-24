@@ -7,7 +7,7 @@
 # 8/17 gen_best_action_dict now returns all best actions (i.e. returns
 #--all equally best actions if they exist.
 
-from transys import RabinAutomaton # TODO make current w/ TuLiP
+from transys_old import RabinAutomaton # TODO make current w/ TuLiP
 from MDP import *
 from uncertain_MDP import *
 from probability_types import *
@@ -327,6 +327,10 @@ def accepting_max_end_components(prod, LK_lst, allow_no_AMECs=False):
                 got_K = True
         if got_K and not got_L:
             AMECs.append(MEC)
+        if got_L:
+            print "Warning: called accepting_max_end_components with " + \
+                    "L states.  Due to nature of Rabin, winning set " + \
+                    "may not be an AMEC!"
 
     if len(AMECs) == 0:
         if not allow_no_AMECs:

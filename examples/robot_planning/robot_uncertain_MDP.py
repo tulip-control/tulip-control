@@ -2,6 +2,7 @@
 #
 # 8/20: Policies complete.
 # 8/21: Simulation added.
+# 8/22: Added rough tolerance in gen_actMax. TODO calc. carefully. 
 
 from jbern_uncertain_MDP_overhaul import *
 from jbern_MDP_functions import *
@@ -192,7 +193,7 @@ def gen_actMax(prod, V_orig, Sr):
             action_values[a] = sum(mul(P, V))
         max_value = max(action_values.values())
         for a in action_values.keys():
-            if action_values[a] == max_value:
+            if abs(action_values[a] - max_value) < .001: #FORNOW
                 best_actions.add(a)
         actMax[s_i] = best_actions
     return actMax
