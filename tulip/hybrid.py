@@ -194,7 +194,7 @@ class HybridSysDyn:
 		if cts_ss is None:
 			print "Warning: continuous state space not given in HybridSysDyn()"
 		if (cts_ss is not None) and \
-               (not (isinstance(domain, pc.Polytope)| isinstance(domain, pc.Region))):
+               (not (isinstance(cts_ss, pc.Polytope)| isinstance(cts_ss, pc.Region))):
 			raise Exception("HybridSysDyn: `cts_ss` has to be a Polytope or Region")
 
 		# Get the labels and, if there are the right number of them, use them.
@@ -239,9 +239,9 @@ class HybridSysDyn:
 	@classmethod
 	def from_pwa(cls, list_subsys=[], domain=None):
 		pwa_sys = PwaSysDyn(list_subsys,domain)
-		return cls((1,1), {(1,1):pwa_sys}, domain)
+		return cls((1,1), {(0,0):pwa_sys}, domain)
 
 	@classmethod
 	def from_lti(cls, A=[], B=[], E=[], K=[], Uset=None, Wset=None,domain=None):
 		pwa_sys = PwaSysDyn.from_lti(A,B,E,K,Uset,Wset,domain)
-		return cls((1,1), {(1,1):pwa_sys}, domain)
+		return cls((1,1), {(0,0):pwa_sys}, domain)
