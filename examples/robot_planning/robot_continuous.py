@@ -11,8 +11,6 @@ NO, system and cont. prop definitions based on TuLiP 1.x
 NO, TuLiP 1.x discretization
 17 Jul, 2013
 """
-
-import sys, os
 import numpy as np
 
 from tulip import *
@@ -57,10 +55,14 @@ disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True,
 
 # Specifications
 
+# Environment variables and assumptions
+
 env_vars = {'park'}
 env_init = set()                # empty set
 env_prog = '!park'
 env_safe = set()                # empty set
+
+# System variables and requirements
 
 sys_vars = {'X0reach'}
 sys_init = {'X0reach'}          
