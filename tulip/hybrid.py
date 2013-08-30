@@ -126,8 +126,9 @@ class PwaSysDyn:
         if domain == None:
             print "Warning: domain not given in PwaSysDyn()"
         
-        if (domain != None) & (not isinstance(domain, pc.Polytope)):
-            raise Exception("PwaSysDyn: `domain` has to be a Polytope")
+        if (domain != None) and \
+               (not (isinstance(domain, pc.Polytope)| isinstance(domain, pc.Region))):
+            raise Exception("PwaSysDyn: `domain` has to be a Polytope or Region")
 
         if len(list_subsys) > 0:
             uncovered_dom = domain.copy()
@@ -192,8 +193,9 @@ class HybridSysDyn:
 		# check that the continuous domain is specified
 		if cts_ss is None:
 			print "Warning: continuous state space not given in HybridSysDyn()"
-		if (cts_ss is not None) and (not isinstance(cts_ss, pc.Polytope)):
-			raise Exception("HybridSysDyn: `cts_ss` has to be a Polytope")
+		if (cts_ss is not None) and \
+               (not (isinstance(domain, pc.Polytope)| isinstance(domain, pc.Region))):
+			raise Exception("HybridSysDyn: `cts_ss` has to be a Polytope or Region")
 
 		# Get the labels and, if there are the right number of them, use them.
 		# Otherwise, ignore the labels.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-The example is an extension of robot_discrete_simple.py by including
-disturbance and input computation using the "closed loop" algorithm.
+This example is an extension of robot_discrete.py by including continuous
+dynamics with disturbances.
 
 Petter Nilsson (pettni@kth.se)
 August 14, 2011

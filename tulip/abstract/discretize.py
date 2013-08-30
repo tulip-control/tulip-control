@@ -232,7 +232,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         vol1 = pc.volume(isect)
 
         diff = pc.mldivide(si, S0)
-        rdiff, xd = pc.cheby_ball(isect)
+        rdiff, xd = pc.cheby_ball(diff)
         vol2 = pc.volume(diff)
         
         # We don't want our partitions to be smaller than the disturbance set
