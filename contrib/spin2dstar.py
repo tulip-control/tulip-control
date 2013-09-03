@@ -35,10 +35,10 @@ Convert from most of SPIN syntax to LTL2DSTAR syntax.
 
 Example usage:
 
-  $ ./spin2dstar.py "([]<>a) -> ([]<>b)"
+  $ ./spin2dstar.py '([]<>a) -> ([]<>b)'
 
 
-SCL; 1 Sep 2013
+SCL; 3 Sep 2013
 """
 
 import sys
@@ -144,7 +144,6 @@ def spin_to_AST(inform):
              | unary_or_less)
  
     form.parseString(inform, parseAll=True)
-    print expr_stack[0]
 
     assert len(expr_stack) == 1
     return expr_stack.pop()
