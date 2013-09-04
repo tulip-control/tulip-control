@@ -308,7 +308,8 @@ class MathSet(object):
         if item not in self._list:
             self._list.append(item)
         else:
-            warnings.warn('item already in MathSet.')
+            if debug:
+                warnings.warn('item already in MathSet.')
     
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.
@@ -409,14 +410,45 @@ class MathSet(object):
             raise Exception('Bug in empty MathSet: not self above' +
                             'should not reaching this point.')
     
-    def intersection(self, items):
+    def intersection(self, iterable):
+        """Return intersection with iterable.
+        
+        @param iterable: find common elements with C{self}
+        @type iterable: C{Iterable}
+        
+        @return: intersection of C{self} with C{iterable}
+        @rtype: C{MathSet}
+        """
         s = MathSet()
-        for item in items:
+        for item in iterable:
             print(item)
             if item in self:
                 print('Adding...\n')
                 s.add(item)
         return s
+    
+    def intersects(self, iterable):
+        """Check intersection with iterable.
+        
+        Checks the existence of common elements with iterable.
+        
+        >>> s = MathSet()
+        >>> s.add(1)
+        >>> r = [1,2]
+        >>> s.intersects(r)
+        True
+        
+        @param iterable: with which to check intersection
+        @type iterable: C{Iterable}
+        
+        @return: C{True} if C{self} has common element with C{iterable}.
+            Otherwise C{False}.
+        @rtype: C{bool}
+        """
+        for item in iterable:
+            if item in self:
+                return True
+        return False
 
 class SubSet(MathSet):
     """Subset of selected MathSet, or other Iterable.

@@ -604,7 +604,7 @@ class States(object):
             if self.list is not None:
                 raise Exception('State exists and ordering enabled: ambiguous.')
             else:
-                warnings.warn('State already exists.')
+                dprint('State already exists.')
                 return
     
     # states
@@ -851,6 +851,13 @@ class States(object):
         
         return successors
     
+    def reachable(self, state):
+        """Return states reachable from given state.
+        
+        Iterated post(), a wrapper of networkx.descendants.
+        """
+        return nx.descendants(self, state)
+    
     def pre_single(self, state):
         """Direct predecessors of single state.
         
@@ -944,6 +951,21 @@ class States(object):
             raise Exception(msg)
         
         object.__setattr__(self, name, value)
+    
+    def paint(self, state, color):
+        """Color the given state.
+        
+        The state is filled with given color,
+        rendered with dot when plotting and saving.
+        
+        @param state: valid system state
+        
+        @param color: with which to paint C{state}
+        @type color: str of valid dot color
+        """
+        state_id = self._mutant2int(state)
+        self.graph.node[state_id]['style'] = 'filled'
+        self.graph.node[state_id]['fillcolor'] = color
     
 class LabeledStates(States):
     """States with annotation.
@@ -1231,12 +1253,100 @@ class LabeledStates(States):
         for state, curlabel in state_label_pairs:
             self.label(state, curlabel, check=check)
     
-    def find(self, states='any', desired_label='any', as_dict=True):
-        """Filter by desired states and by desired state labels.
+    def labeled_with(self, desired_label):
+        """Return states with given label.
+        
+        Convenience method for calling find.
+        
+        @param desired_label: search for states with this label
+        @type desired_label: dict of form:
+            {sublabel_type : sublabel_value}
+        
+        @return: states with C{desired_label}
+        @rtype: list
         
         see also
         --------
-        label, labels, LabeledTransitions.find
+        find, label_of
+        """
+        state_label_pairs = self.find(desired_label=desired_label)
+        states = [state for (state, label) in state_label_pairs]
+        return states
+        
+    def label_of(self, state, as_dict=True):
+        """Return label of given state.
+        
+        Convenience method for calling find.
+        
+        see also
+        --------
+        find, labeled_with
+        
+        @param state: single system state
+        
+        @param as_dict: return label as dict
+        @type as_dict: bool
+        
+        @return: label of C{state}
+        @rtype: If C{as_dict is True}, then C{dict} of the form:
+                {sublabel_type : sublabel_value}
+            Otherwise list: C{(sublabel1_value, sublabel2_value, ...) }
+        """
+        state_label_pairs = self.find([state], as_dict=as_dict)
+        (state_, label) = state_label_pairs[0]
+        return label
+    
+    def find(self, states='any', desired_label='any', as_dict=True):
+        """Filter by desired states and by desired state labels.
+        
+        examples
+        --------
+        Assume that the system is:
+        
+        >>> import transys as trs
+        >>> ts = trs.FTS()
+        >>> ts.atomic_propositions.add('p')
+        >>> ts.states.add('s0')
+        >>> ts.states.label('s0', {'p'} )
+        
+        - To find the label of a single state C{'s0'}:
+            
+            >>> a = ts.states.find(['s0'] )
+            >>> (s0_, label) = a[0]
+            >>> print(label)
+            {'ap': set(['p'])}
+        
+            equivalently, but asking for a list instead of a dict:
+            
+            >>> a = ts.states.find(['s0'], as_dict=False)
+            >>> (s0_, label) = a[0]
+            >>> print(label)
+            [set(['p'])]
+            
+            Calling C{label_of} is a shortcut for the above.
+        
+        - To find all states with a specific label C{{'p'}}:
+            
+            >>> ts.states.label('s1', {'p'}, check=False)
+            >>> b = ts.states.find(desired_label={'ap':{'p'} } )
+            >>> states = [state for (state, label_) in b]
+            >>> print(set(states) )
+            {'s0', 's1'}
+            
+            Calling C{labeled_with} is a shortcut for the above.
+        
+        - To find all states in subset C{M} labeled with C{{'p'}}:
+            
+            >>> ts.states.label('s2', {'p'}, check=False)
+            >>> M = {'s0', 's2'}
+            >>> b = ts.states.find(M, {'ap': {'p'} } )
+            >>> states = [state for (state, label_) in b]
+            >>> print(set(states) )
+            {'s0', 's2'}
+        
+        see also
+        --------
+        label_of, labeled_with, label, labels, LabeledTransitions.find
         
         @param states: subset of states over which to search
         @type states: 'any' (default)
@@ -2528,6 +2638,15 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             save_d3.labeled_digraph2d3(self, path)
             return
         
+        method_name = '_save_' +fileformat
+        if hasattr(self, method_name):
+            method = getattr(self, method_name)
+            try:
+                method(path, add_missing_extension=add_missing_extension)
+                return
+            except:
+                print('Own export method called: ' +method_name +', failed.')
+        
         if prog is None:
             prog = self.default_layout
         
@@ -2569,49 +2688,84 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             prog = self.default_layout
         
         pydot_graph = self._to_pydot(wrap=wrap)
-        pydot_graph.set_rankdir(rankdir)
-        pydot_graph.set_splines('true')
-        png_str = pydot_graph.create_png(prog=prog)
         
-        # installed ?
-        if IPython:
-            dprint('IPython installed.')
+        return plot_pydot(pydot_graph, prog, rankdir)
+        
+def plot_pydot(graph, prog='dot', rankdir='LR'):
+    """Plot a networkx or pydot graph using dot.
+    
+    No files written or deleted from the disk.
+    
+    Note that all networkx graph classes are inherited
+    from networkx.Graph
+    
+    see also
+    --------
+    dot & pydot documentation
+    
+    @param graph: to plot
+    @type graph: networkx.Graph | pydot.Graph
+    
+    @param prog: GraphViz programto use
+    @type prog: 'dot' | 'neato' | 'circo' | 'twopi'
+        | 'fdp' | 'sfdp' | etc
+    
+    @param rankdir: direction to layout nodes
+    @type rankdir: 'LR' | 'TB'
+    """
+    if isinstance(graph, nx.Graph):
+        pydot_graph = nx.to_pydot(graph)
+    elif isinstance(graph, pydot.Graph):
+        pydot_graph = graph
+    else:
+        raise TypeError('graph not networkx or pydot class.' +
+            'Got instead: ' +str(type(graph) ) )
+    
+    pydot_graph.set_rankdir(rankdir)
+    pydot_graph.set_splines('true')
+    pydot_graph.set_bgcolor('gray')
+    
+    png_str = pydot_graph.create_png(prog=prog)
+    
+    # installed ?
+    if IPython:
+        dprint('IPython installed.')
+        
+        # called by IPython ?
+        try:
+            cfg = get_ipython().config
+            dprint('Script called by IPython.')
             
-            # called by IPython ?
-            try:
-                cfg = get_ipython().config
-                dprint('Script called by IPython.')
-                
-                # Caution!!! : not ordinary dict, but IPython.config.loader.Config
-                
-                # qtconsole ?
-                if cfg['IPKernelApp']:
-                    dprint('Within IPython QtConsole.')
-                    display(Image(data=png_str) )
-                    return True
-            except:
-                print('IPython installed, but not called from it.')
-        else:
-            dprint('IPython not installed.')
-        
-        # not called from IPython QtConsole, try Matplotlib...
-        
-        # installed ?
-        if matplotlib:
-            dprint('Matplotlib installed.')
+            # Caution!!! : not ordinary dict, but IPython.config.loader.Config
             
-            sio = StringIO()
-            sio.write(png_str)
-            sio.seek(0)
-            img = mpimg.imread(sio)
-            imgplot = plt.imshow(img, aspect='equal')
-            plt.show(block=False)
-            return imgplot
-        else:
-            dprint('Matplotlib not installed.')
+            # qtconsole ?
+            if cfg['IPKernelApp']:
+                dprint('Within IPython QtConsole.')
+                display(Image(data=png_str) )
+                return True
+        except:
+            print('IPython installed, but not called from it.')
+    else:
+        dprint('IPython not installed.')
+    
+    # not called from IPython QtConsole, try Matplotlib...
+    
+    # installed ?
+    if matplotlib:
+        dprint('Matplotlib installed.')
         
-        warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
-        return None
+        sio = StringIO()
+        sio.write(png_str)
+        sio.seek(0)
+        img = mpimg.imread(sio)
+        imgplot = plt.imshow(img, aspect='equal')
+        plt.show(block=False)
+        return imgplot
+    else:
+        dprint('Matplotlib not installed.')
+    
+    warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
+    return None
 
 def str2singleton(ap_label, verbose=False):
         """If string, convert to set(string).

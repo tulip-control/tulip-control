@@ -369,8 +369,10 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         @type add_missing_extension: bool
         """
         def state2promela(state, ap_label, ap_alphabet):
-            s = str(state) +':\n'
-            s += '\t printf("State: ' +str(state) +'\\n");\n\t atomic{'
+            s1 = str(state) +':\n'
+            
+            s2 = '\t :: atomic{\n'
+            s2 += '\t\t\t printf("State: ' +str(state) +'\\n");\n'
             
             # convention ! means negation
             
@@ -378,22 +380,24 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             present_props = ap_label.difference(missing_props)
             
             assign_props = lambda x: str(x) + ' = 1;'
+            s2 += '\t\t\t '
             if present_props:
-                s += ' '.join(map(assign_props, present_props) )
+                s2 += '\n\t\t\t '.join(map(assign_props, present_props) )
             
             # rm "!"
             assign_props = lambda x: str(x[1:] ) + ' = 0;'
             if missing_props:
-                s += ' '.join(map(assign_props, missing_props) )
+                s2 += '\n\t\t\t '.join(map(assign_props, missing_props) )
             
-            s += '}\n'
-            return s
+            s2 += '\n'
+            return (s1, s2)
         
-        def outgoing_trans2promela(transitions):
+        def outgoing_trans2promela(transitions, s2):
             s = '\t if\n'
             for (from_state, to_state, sublabels_dict) in transitions:
-                s += '\t :: printf("' +str(sublabels_dict) +'\\n");\n'
-                s += '\t\t goto ' +str(to_state) +'\n'
+                s += s2
+                s += '\t\t\t printf("' +str(sublabels_dict) +'\\n");\n'
+                s += '\t\t\t goto ' +str(to_state) +'\n\t\t}\n'
             s += '\t fi;\n\n'
             return s
         
@@ -415,27 +419,26 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         for state in self.states():
             ap_alphabet = self.atomic_propositions
-            ap_label = self.states.label_of(state)
-            s += state2promela(state, ap_label, ap_alphabet)
+            lst = self.states.find([state] )
+            (state_, ap_label) = lst[0]
+            (s1, s2) = state2promela(state, ap_label['ap'], ap_alphabet)
+            
+            s += s1
             
             outgoing_transitions = self.transitions.find({state}, as_dict=True)
-            s += outgoing_trans2promela(outgoing_transitions)
+            s += outgoing_trans2promela(outgoing_transitions, s2)
         
         s += '}\n'
         return s
     
-    def save_promela(self, fname=None, add_missing_extension=True):
-        if fname is None:
-            fname = self.name
-            fname = self._export_fname(fname, 'pml', add_missing_extension)
-        
+    def _save_pml(self, path, add_missing_extension=True):
         s = '/*\n * Promela file generated with TuLiP\n'
         s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
         
         s += self.promela_str()
         
         # dump to file
-        f = open(fname, 'w')
+        f = open(path, 'w')
         f.write(s)
         f.close()
 
