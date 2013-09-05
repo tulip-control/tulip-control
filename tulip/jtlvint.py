@@ -165,26 +165,24 @@ def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, v
     unrealizable or error occurs.
     """
     fSMV, fLTL, fAUT = create_files(spec)
-    
+
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
-    
-    
+
     # Build Automaton
-    
     if (not realizable):
-            counter_examples = get_counterexamples(fAUT, verbose=verbose)
-            os.unlink(fSMV)
-            os.unlink(fLTL)
-            os.unlink(fAUT)
-            return counter_examples
+        counter_examples = get_counterexamples(fAUT, verbose=verbose)
+        os.unlink(fSMV)
+        os.unlink(fLTL)
+        os.unlink(fAUT)
+        return counter_examples
     else: 
-            aut = load_file(fAUT, spec, verbose=verbose)
-            os.unlink(fSMV)
-            os.unlink(fLTL)
-            os.unlink(fAUT)
-            return aut
-        
-        
+        aut = load_file(fAUT, spec, verbose=verbose)
+        os.unlink(fSMV)
+        os.unlink(fLTL)
+        os.unlink(fAUT)
+        return aut
+
+
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
     fSMV = tempfile.NamedTemporaryFile(delete=False,suffix="smv")
@@ -496,8 +494,8 @@ def remove_comments(spec):
 
 def check_gr1(assumption, guarantee, env_vars, sys_vars):
     """Check format of a GR(1) specification."""
-        assumption = remove_comments(assumption)
-        guarantee = remove_comments(guarantee)
+    assumption = remove_comments(assumption)
+    guarantee = remove_comments(guarantee)
         
     # Check that dictionaries are in the correct format
     if not check_vars(env_vars):
@@ -556,7 +554,6 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
     return True
 
 
-
 def check_parentheses(spec):
     """Check whether all the parentheses in a spec are closed.
 
@@ -608,7 +605,6 @@ def check_vars(varNames):
 def check_spec(spec, varNames):
     """Verify that all non-operators in "spec" are in the list of vars.
     """
-        
     # Replace all special characters with whitespace
     special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
       "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
@@ -622,19 +618,14 @@ def check_spec(spec, varNames):
                 spec = spec.replace(str(individual_value), "")
         else:
             spec = spec.replace(value, "")
-        
-        
 
     # Remove all instances of "true" and "false"
     spec = spec.lower()
         
     spec.replace("true", "")
     spec.replace("false", "")
-        
 
     # Make sure that the resulting string is empty
     spec = spec.split()
         
     return not spec
-
-
