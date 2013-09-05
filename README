@@ -62,9 +62,10 @@ Tests are performed using nose; see http://readthedocs.org/docs/nose/
 for details.  From the root of the source tree (i.e., where setup.py
 is located), run::
 
-  nosetests
+  ./run_tests.py
 
-To change default options, edit the "nosetests" section in setup.cfg.
-To disable output capture, add the flag "-s" when invoking nose.
-To run only one of the modules under the ``tests`` directory, give
-that module's name when invoking nose.
+to run all available tests.  Use the flag "-h" to see driver script
+options.  To change default options, edit the "nosetests" section in
+setup.cfg.  To disable output capture, add the flag "-s" when invoking
+nose.  To run only one of the modules under the ``tests`` directory,
+give that module's name when invoking nose.
