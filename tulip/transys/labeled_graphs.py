@@ -2713,6 +2713,11 @@ def plot_pydot(graph, prog='dot', rankdir='LR'):
     @param rankdir: direction to layout nodes
     @type rankdir: 'LR' | 'TB'
     """
+    if pydot is None:
+        msg = 'Usig plot_pydot requires that pydot be installed.'
+        warnings.warn(msg)
+        return
+    
     if isinstance(graph, nx.Graph):
         pydot_graph = nx.to_pydot(graph)
     elif isinstance(graph, pydot.Graph):

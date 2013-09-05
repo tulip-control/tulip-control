@@ -302,7 +302,7 @@ class BuchiAutomaton(OmegaAutomaton):
         OmegaAutomaton.__init__(self, **args)
     
     def __repr__(self):
-        s = hl +'\nB' +u'\xfc' +'chi Automaton: ' +self.name +'\n' +hl +'\n'
+        s = hl +'\nBuchi Automaton: ' +self.name +'\n' +hl +'\n'
         s += 'States:\n'
         s += pformat(self.states(data=False), indent=3) +2*'\n'
         s += 'Initial States:\n'
