@@ -29,7 +29,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-
 """ 
 Interface to the JTLV implementation of GR(1) synthesis
 
@@ -61,14 +60,14 @@ JTLV_EXE = 'jtlv_grgame.jar'
 
 
 def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1, init_option=1, verbose=0):
-    #for standalone use
-    
     """Decide realizability of specification defined by given GRSpec object.
+
+    ...for standalone use
 
     Return True if realizable, False if not, or an error occurs.
     """
     
-    fSMV, fLTL, fAUT = createFiles(spec)
+    fSMV, fLTL, fAUT = create_files(spec)
     return solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
     os.unlink(fSMV)
     os.unlink(fLTL)
@@ -123,7 +122,7 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
     """
 
  
-    priority_kind = getPriority(priority_kind)
+    priority_kind = get_priority(priority_kind)
     
     # init_option
     if (isinstance(init_option, int)):
@@ -165,7 +164,7 @@ def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, v
     Return strategy as instance of Automaton class, or None if
     unrealizable or error occurs.
     """
-    fSMV, fLTL, fAUT = createFiles(spec)
+    fSMV, fLTL, fAUT = create_files(spec)
     
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
     
@@ -173,27 +172,27 @@ def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, v
     # Build Automaton
     
     if (not realizable):
-            counter_examples = getCounterExamples(fAUT, verbose=verbose)
+            counter_examples = get_counterexamples(fAUT, verbose=verbose)
             os.unlink(fSMV)
             os.unlink(fLTL)
             os.unlink(fAUT)
             return counter_examples
     else: 
-            aut = loadFile(fAUT, spec, verbose=verbose)
+            aut = load_file(fAUT, spec, verbose=verbose)
             os.unlink(fSMV)
             os.unlink(fLTL)
             os.unlink(fAUT)
             return aut
         
         
-def createFiles(spec):
-    #Creates temporary files for read/write by JTLV
+def create_files(spec):
+    """Create temporary files for read/write by JTLV."""
     fSMV = tempfile.NamedTemporaryFile(delete=False,suffix="smv")
-    fSMV.write(generateJTLV_SMV(spec))
+    fSMV.write(generate_JTLV_SMV(spec))
     fSMV.close()
     
     fLTL = tempfile.NamedTemporaryFile(delete=False,suffix="ltl")
-    fLTL.write(generateJTLV_LTL(spec))
+    fLTL.write(generate_JTLV_LTL(spec))
     fLTL.close()
     
     
@@ -201,8 +200,8 @@ def createFiles(spec):
     fAUT.close()
     return fSMV.name, fLTL.name, fAUT.name
 
-def getPriority(priority_kind):
-# Convert the priority_kind to the corresponding integer
+def get_priority(priority_kind):
+    """Convert the priority_kind to the corresponding integer."""
     if (isinstance(priority_kind, str)):
         if (priority_kind == 'ZYX'):
             priority_kind = 3
@@ -230,8 +229,8 @@ def getPriority(priority_kind):
         priority_kind = 3
     return priority_kind
 
-def callJTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
-    #subprocess calls to JTLV
+def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
+    """Subprocess calls to JTLV."""
     if (verbose > 0):
         print 'Calling jtlv with the following arguments:'
         print '  heap size: ' + heap_size
@@ -261,7 +260,7 @@ def callJTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
     #                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
 
-def generateJTLV_SMV(spec, verbose=0):
+def generate_JTLV_SMV(spec, verbose=0):
     """Return the SMV module definitions needed by JTLV.
 
     It takes as input a GRSpec object.  N.B., assumes all variables
@@ -301,7 +300,7 @@ def generateJTLV_SMV(spec, verbose=0):
         
     return smv
 
-def generateJTLV_LTL(spec, verbose=0):
+def generate_JTLV_LTL(spec, verbose=0):
     """Return the LTLSPEC for JTLV.
 
     It takes as input a GRSpec object.  N.B., assumes all variables
@@ -355,110 +354,110 @@ def generateJTLV_LTL(spec, verbose=0):
 
     return ltl
 
-def loadFile(aut_file, spec, verbose=0):
-        """Construct a Mealy Machine from an aut_file.
+def load_file(aut_file, spec, verbose=0):
+    """Construct a Mealy Machine from an aut_file.
 
-        N.B., assumes all variables are Boolean (i.e., atomic
-        propositions).
+    N.B., assumes all variables are Boolean (i.e., atomic
+    propositions).
 
-        Input:
+    Input:
 
-        - `aut_file`: the name of the text file containing the
-          automaton, or an (open) file-like object.
+    - `aut_file`: the name of the text file containing the
+      automaton, or an (open) file-like object.
 
-        - `spec`: a GROne spec.
-        """
-        env_vars = spec.env_vars.keys()  # Enforce Boolean var assumption
-        sys_vars = spec.sys_vars.keys()
-        
-        if isinstance(aut_file, str):
-            f = open(aut_file, 'r')
-            closable = True
-        else:
-            f = aut_file  # Else, assume aut_file behaves as file object.
-            closable = False
-        
-        #build Mealy Machine
-        m = transys.MealyMachine()
-    
-        # input defs       
-        inputs = OrderedDict([list(a) for a in \
-                              zip(env_vars, itertools.repeat({0, 1}))])
-        m.add_inputs(inputs)
-        
-        # outputs def
-        outputs = OrderedDict([list(a) for a in \
-                               zip(sys_vars, itertools.repeat({0, 1}))])
-        m.add_outputs(outputs)
-        
-        # state variables def
-        state_vars = outputs
-        m.add_state_vars(state_vars)
-        
-        varnames = sys_vars+env_vars
-        
-        stateDict = {}               
-        for line in f:
-            # parse states
-            if (line.find('State ') >= 0):
-                stateID = re.search('State (\d+)', line)
-                stateID = int(stateID.group(1))
-                
-            
-                state = dict(re.findall('(\w+):(\w+)', line))
-                for var, val in state.iteritems():
-                    try:
-                        state[var] = int(val)
-                    except:
-                        state[var] = val
-                    if (len(varnames) > 0):
-                        if not var in varnames:
-                            print 'Unknown variable ' + var
-                    
-                    
-                for var in varnames:
-                    if not var in state.keys():
-                        print 'Variable ' + var + ' not assigned'
-         
-            # parse transitions
-            if (line.find('successors') >= 0):
-                transition = re.findall(' (\d+)', line)
-                for i in xrange(0,len(transition)):
-                    transition[i] = int(transition[i])
-            
-                m.states.add(stateID)
-                stateDict[stateID] = (state,transition)
-                    
-        # add transitions with guards to the Mealy Machine
-        for from_state in stateDict.keys():
-            state, transitions = stateDict[from_state]
-            
-            for to_state in transitions:
-                guard = stateDict[to_state][0]
+    - `spec`: a GROne spec.
+    """
+    env_vars = spec.env_vars.keys()  # Enforce Boolean var assumption
+    sys_vars = spec.sys_vars.keys()
+
+    if isinstance(aut_file, str):
+        f = open(aut_file, 'r')
+        closable = True
+    else:
+        f = aut_file  # Else, assume aut_file behaves as file object.
+        closable = False
+
+    #build Mealy Machine
+    m = transys.MealyMachine()
+
+    # input defs
+    inputs = OrderedDict([list(a) for a in \
+                          zip(env_vars, itertools.repeat({0, 1}))])
+    m.add_inputs(inputs)
+
+    # outputs def
+    outputs = OrderedDict([list(a) for a in \
+                           zip(sys_vars, itertools.repeat({0, 1}))])
+    m.add_outputs(outputs)
+
+    # state variables def
+    state_vars = outputs
+    m.add_state_vars(state_vars)
+
+    varnames = sys_vars+env_vars
+
+    stateDict = {}
+    for line in f:
+        # parse states
+        if (line.find('State ') >= 0):
+            stateID = re.search('State (\d+)', line)
+            stateID = int(stateID.group(1))
+
+
+            state = dict(re.findall('(\w+):(\w+)', line))
+            for var, val in state.iteritems():
                 try:
-                    m.transitions.add_labeled(
-                        from_state, to_state, guard, check=True
-                    ) 
-                except Exception, e:
-                    raise Exception('Failed to add transition:\n' +str(e) )
-        """
-        # label states
-        for to_state in m.states:
-            predecessors = m.states.pre_single(to_state)
+                    state[var] = int(val)
+                except:
+                    state[var] = val
+                if (len(varnames) > 0):
+                    if not var in varnames:
+                        print 'Unknown variable ' + var
+
+
+            for var in varnames:
+                if not var in state.keys():
+                    print 'Variable ' + var + ' not assigned'
+
+        # parse transitions
+        if (line.find('successors') >= 0):
+            transition = re.findall(' (\d+)', line)
+            for i in xrange(0,len(transition)):
+                transition[i] = int(transition[i])
+
+            m.states.add(stateID)
+            stateDict[stateID] = (state,transition)
+
+    # add transitions with guards to the Mealy Machine
+    for from_state in stateDict.keys():
+        state, transitions = stateDict[from_state]
+
+        for to_state in transitions:
+            guard = stateDict[to_state][0]
+            try:
+                m.transitions.add_labeled(
+                    from_state, to_state, guard, check=True
+                )
+            except Exception, e:
+                raise Exception('Failed to add transition:\n' +str(e) )
+    """
+    # label states
+    for to_state in m.states:
+        predecessors = m.states.pre_single(to_state)
+
+        # any incoming edges ?
+        if predecessors:
+            # pick a predecessor
+            from_state = predecessors[0]
+            trans = m.transitions.find([from_state], [to_state] )
+            (from_, to_, trans_label) = trans[0]
+
+            state_label = {k:trans_label[k] for k in m.state_vars}
+            m.states.label(to_state, state_label)
+    """
+    return m
             
-            # any incoming edges ?
-            if predecessors:
-                # pick a predecessor
-                from_state = predecessors[0]
-                trans = m.transitions.find([from_state], [to_state] )
-                (from_, to_, trans_label) = trans[0]
-                
-                state_label = {k:trans_label[k] for k in m.state_vars}
-                m.states.label(to_state, state_label)
-        """
-        return m
-            
-def getCounterExamples(aut_file, verbose=0):
+def get_counterexamples(aut_file, verbose=0):
     """Return a list of dictionaries, each representing a counter example.
 
     Input:
@@ -485,52 +484,45 @@ def getCounterExamples(aut_file, verbose=0):
     return counter_examples
 
 
-def removeComments(spec):
-    #Remove comment lines from string
+def remove_comments(spec):
+    """Remove comment lines from string."""
     speclines = spec.split('\n')
     newspec = ''
     for line in speclines:
         if not '--' in line:
             newspec+=line+'\n'
     return newspec
-        
-
 
 
 def check_gr1(assumption, guarantee, env_vars, sys_vars):
-	"""
-	Checks that an input (assumption spec, guarantee spec, and variables)
-	form a valid GR(1) specification.
-	"""
-
-        assumption = removeComments(assumption)
-        guarantee = removeComments(guarantee)
+    """Check format of a GR(1) specification."""
+        assumption = remove_comments(assumption)
+        guarantee = remove_comments(guarantee)
         
-	# Check that dictionaries are in the correct format
-	if not check_vars(env_vars):
-		return False
-	if not check_vars(sys_vars):
-		return False
+    # Check that dictionaries are in the correct format
+    if not check_vars(env_vars):
+        return False
+    if not check_vars(sys_vars):
+        return False
 
-	# Check for parentheses mismatch
-	if not check_parentheses(assumption):
-		return False
-	if not check_parentheses(guarantee):
-		return False
+    # Check for parentheses mismatch
+    if not check_parentheses(assumption):
+        return False
+    if not check_parentheses(guarantee):
+        return False
 
-	
-	# Check that all non-special-characters metioned are variable names
-	# or possible values
+    # Check that all non-special-characters metioned are variable names
+    # or possible values
         varnames = env_vars+sys_vars
-	if not check_spec(assumption,varnames):
-		return False
-	if not check_spec(guarantee, varnames):
-		return False
+    if not check_spec(assumption,varnames):
+        return False
+    if not check_spec(guarantee, varnames):
+        return False
 
-	# Check that the syntax is GR(1). This uses pyparsing
-	prop = ltl_parse.proposition
-	UnaryTemporalOps = ~bool_keyword + oneOf("next") + ~Word(nums + "_")
-	next_ltl_expr = operatorPrecedence(prop,
+    # Check that the syntax is GR(1). This uses pyparsing
+    prop = ltl_parse.proposition
+    UnaryTemporalOps = ~bool_keyword + oneOf("next") + ~Word(nums + "_")
+    next_ltl_expr = operatorPrecedence(prop,
         [("'", 1, opAssoc.LEFT, ASTUnTempOp),
         ("!", 1, opAssoc.RIGHT, ASTNot),
         (UnaryTemporalOps, 1, opAssoc.RIGHT, ASTUnTempOp),
@@ -541,106 +533,108 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
         ("<->", 2, opAssoc.RIGHT, ASTBiImp),
         (oneOf("= !="), 2, opAssoc.RIGHT, ASTComparator),
         ])
-	always_expr = pyparsing.Literal("[]") + next_ltl_expr
-	always_eventually_expr = pyparsing.Literal("[]") + \
-	  pyparsing.Literal("<>") + next_ltl_expr
-	gr1_expr = next_ltl_expr | always_expr | always_eventually_expr
+    always_expr = pyparsing.Literal("[]") + next_ltl_expr
+    always_eventually_expr = pyparsing.Literal("[]") + \
+      pyparsing.Literal("<>") + next_ltl_expr
+    gr1_expr = next_ltl_expr | always_expr | always_eventually_expr
 
-	# Final Check
-	GR1_expression = pyparsing.operatorPrecedence(gr1_expr, 
-	 [("&", 2, pyparsing.opAssoc.RIGHT)])
+    # Final Check
+    GR1_expression = pyparsing.operatorPrecedence(gr1_expr,
+     [("&", 2, pyparsing.opAssoc.RIGHT)])
         
-	try: 
-		GR1_expression.parseString(assumption)
-	except ParseException:
-		print "Assumption is not in GR(1) format."
-		return False
+    try:
+        GR1_expression.parseString(assumption)
+    except ParseException:
+        print "Assumption is not in GR(1) format."
+        return False
         
-	try:
-		GR1_expression.parseString(guarantee)
-	except ParseException:
-		print "Guarantee is not in GR(1) format"
-		return False
-	return True
+    try:
+        GR1_expression.parseString(guarantee)
+    except ParseException:
+        print "Guarantee is not in GR(1) format"
+        return False
+    return True
 
 
 
 def check_parentheses(spec):
-	"""Checks whether all the parentheses in a spec are closed.
-	   Returns False if there are errors and True when there are no
-	   errors."""
+    """Check whether all the parentheses in a spec are closed.
 
-	open_parens = 0
+    Return False if there are errors and True when there are no
+    errors.
+    """
+    open_parens = 0
 
-	for index, char in enumerate(spec):
-		if char == "(":
-			open_parens += 1
-		elif char == ")":
-			open_parens -= 1
+    for index, char in enumerate(spec):
+        if char == "(":
+            open_parens += 1
+        elif char == ")":
+            open_parens -= 1
 
-	if open_parens != 0:
-		if open_parens > 0:
-			print "The spec is missing " + str(open_parens) + " close-" + \
-			  "parentheses or has " + str(open_parens) + " too many " + \
-			  "open-parentheses"
-		elif open_parens < 0:
-			print "The spec is missing " + str(-open_parens) + " open-" + \
-			  "parentheses or has " + str(open_parens) + " too many " + \
-			  "close-parentheses"
-		return False
+    if open_parens != 0:
+        if open_parens > 0:
+            print "The spec is missing " + str(open_parens) + " close-" + \
+              "parentheses or has " + str(open_parens) + " too many " + \
+              "open-parentheses"
+        elif open_parens < 0:
+            print "The spec is missing " + str(-open_parens) + " open-" + \
+              "parentheses or has " + str(open_parens) + " too many " + \
+              "close-parentheses"
+        return False
 
-	return True
+    return True
 
 
 def check_vars(varNames):
-	"""Complains if any variable name is not a string, or if any is a number."""
+    """Complain if any variable name is a number or not a string.
+    """
+    for item in varNames:
+        # Check that the vars are strings
+        if type(item) != str:
+            print "Prop " + str(item) + " is invalid"
+            return False
 
-	for item in varNames:
-		# Check that the vars are strings
-		if type(item) != str:
-			print "Prop " + str(item) + " is invalid"
-			return False
-
-		# Check that the keys are not numbers
-		try:
-			int(item)
-                        float(item)
-			print "Prop " + str(item) + " is invalid"
-			return False
-		except ValueError:
-			continue
-	return True
+        # Check that the keys are not numbers
+        try:
+            int(item)
+            float(item)
+            print "Prop " + str(item) + " is invalid"
+            return False
+        except ValueError:
+            continue
+    return True
 
 
 def check_spec(spec, varNames):
-	"""Make sure that all non operators in "spec" are in the list of vars."""
+    """Verify that all non-operators in "spec" are in the list of vars.
+    """
         
-	# Replace all special characters with whitespace
-	special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
-	  "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
-	for word in special_characters:
-		spec = spec.replace(word, "")
+    # Replace all special characters with whitespace
+    special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
+      "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
+    for word in special_characters:
+        spec = spec.replace(word, "")
         
-	# Now, replace all variable names and values with whitespace as well.
-	for value in varNames:
-		if isinstance(value, (list, tuple)):
-			for individual_value in value:
-				spec = spec.replace(str(individual_value), "")
-		else:
-			spec = spec.replace(value, "")
+    # Now, replace all variable names and values with whitespace as well.
+    for value in varNames:
+        if isinstance(value, (list, tuple)):
+            for individual_value in value:
+                spec = spec.replace(str(individual_value), "")
+        else:
+            spec = spec.replace(value, "")
         
-        
-
-	# Remove all instances of "true" and "false"
-	spec = spec.lower()
-        
-	spec.replace("true", "")
-	spec.replace("false", "")
         
 
-	# Make sure that the resulting string is empty
-	spec = spec.split()
+    # Remove all instances of "true" and "false"
+    spec = spec.lower()
         
-	return not spec
+    spec.replace("true", "")
+    spec.replace("false", "")
+        
+
+    # Make sure that the resulting string is empty
+    spec = spec.split()
+        
+    return not spec
 
 
