@@ -118,10 +118,10 @@ class States(object):
         if not hasattr(self.graph, '__state_label_def__'):
             raise Exception('No state labeling defined for this class.')
 
-    def __exist_final_states__(self):
-        """Check if system has final states."""
-        if not hasattr(self.graph, 'final_states'):
-            warnings.warn('System does not have final states.')
+    def __exist_accepting_states__(self):
+        """Check if system has accepting states."""
+        if not hasattr(self.graph, 'accepting_states'):
+            warnings.warn('System does not have accepting states.')
             return False
         else:
             return True
@@ -148,13 +148,13 @@ class States(object):
         def decide_node_shape(graph, state):
             node_shape = graph.dot_node_shape['normal']
 
-            # check if final states defined
-            if not hasattr(graph, 'final_states'):
+            # check if accepting states defined
+            if not hasattr(graph, 'accepting_states'):
                 return node_shape
 
-            # check for final states
-            if state in graph.final_states:
-                node_shape = graph.dot_node_shape['final']
+            # check for acceptig states
+            if state in graph.accepting_states:
+                node_shape = graph.dot_node_shape['accepting']
 
             return node_shape
 
@@ -272,16 +272,16 @@ class States(object):
     def is_initial(self, state):
         return state in self.initial
 
-    def is_final(self, state):
-        """Check if state \\in final states."""
-        if not self.__exist_final_states__():
+    def is_accepting(self, state):
+        """Check if state \\in accepting states."""
+        if not self.__exist_accepting_states__():
             return
 
-        return state in self.graph.final_states
+        return state in self.graph.accepting_states
 
     def is_accepting(self, state):
-        """Alias to is_final()."""
-        return self.is_final(state)
+        """Alias to is_accepting()."""
+        return self.is_accepting(state)
 
     def check(self):
         """Check sanity of various state sets.
@@ -359,13 +359,13 @@ class States(object):
             predecessors |= set(self.graph.predecessors(state) )
         return predecessors
 
-    def add_final(self, state):
-        """Convenience for automaton.add_final_state()."""
+    def add_accepting(self, state):
+        """Convenience for automaton.add_accepting_state()."""
 
-        if not self.__exist_final_states__():
+        if not self.__exist_accepting_states__():
             return
 
-        self.graph.add_final_state(state)
+        self.graph.add_accepting_state(state)
 
 class Transitions(object):
     """Building block for managing transitions.
@@ -1423,7 +1423,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
         1) states
         2) initial states
-        3) final states
+        3) accepting states
 
         4) input alphabet = set of input letters
         5) transition labels
@@ -1468,15 +1468,15 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         (in the sense of having a program graph which can be unfolded).
     """
 
-    def __init__(self, name='', states=[], initial_states=[], final_states=[],
+    def __init__(self, name='', states=[], initial_states=[], accepting_states=[],
                  input_alphabet=[]):
         LabeledStateDiGraph.__init__(
             self, name=name,
             states=states, initial_states=initial_states
         )
 
-        self.final_states = set()
-        self.add_final_states_from(final_states)
+        self.accepting_states = set()
+        self.add_accepting_states_from(accepting_states)
 
         self.alphabet = Alphabet(self, 'in_alphabet')
         self.alphabet.add_from(input_alphabet)
@@ -1486,7 +1486,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.__transition_label_def__ = {'in_alphabet': self.alphabet}
         self.__transition_label_order__ = ['in_alphabet']
 
-        self.dot_node_shape = {'normal':'circle', 'final':'doublecircle'}
+        self.dot_node_shape = {'normal':'circle', 'accepting':'doublecircle'}
 
     def __str__(self):
         s = str(self.states) +'\nState Labels:\n' +pformat(self.states(data=True) )
@@ -1494,29 +1494,29 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
         return s
 
-    # final states
-    def add_final_state(self, new_final_state):
-        if not new_final_state in self.states():
-            raise Exception('New final state \\notin States.')
+    # accepting states
+    def add_accepting_state(self, new_accepting_state):
+        if not new_accepting_state in self.states():
+            raise Exception('New accepting state \\notin States.')
         else:
-            self.final_states.add(new_final_state)
+            self.accepting_states.add(new_accepting_state)
 
-    def add_final_states_from(self, new_final_states):
-        new_final_states = set(new_final_states)
+    def add_accepting_states_from(self, new_accepting_states):
+        new_accepting_states = set(new_accepting_states)
 
-        if not new_final_states <= set(self.states() ):
-            raise Exception('New Final States \\notsubset States.')
+        if not new_accepting_states <= set(self.states() ):
+            raise Exception('New Accepting States \\notsubset States.')
         else:
-            self.final_states |= set(new_final_states)
+            self.accepting_states |= set(new_accepting_states)
 
-    def number_of_final_states(self):
-        return len(self.final_states)
+    def number_of_accepting_states(self):
+        return len(self.accepting_states)
 
-    def remove_final_state(self, rm_final_state):
-        self.final_states.remove(rm_final_state)
+    def remove_accepting_state(self, rm_accepting_state):
+        self.accepting_states.remove(rm_accepting_state)
 
-    def remove_final_states_from(self, rm_final_states):
-        self.final_states = self.final_states.difference(rm_final_states)
+    def remove_accepting_states_from(self, rm_accepting_states):
+        self.accepting_states = self.accepting_states.difference(rm_accepting_states)
 
     def find_edges_between(self, start_state, end_state):
         """Return list of edges between given nodes.
@@ -1551,7 +1551,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
 
         inf_states = set(sim.run.get_suffix() )
 
-        if bool(inf_states & self.final_states):
+        if bool(inf_states & self.accepting_states):
             accept = True
         else:
             accept = False
@@ -1607,19 +1607,19 @@ def dfa2nfa():
     raise NotImplementedError
 
 class OmegaAutomaton(FiniteStateAutomaton):
-    def __init__(self, states=[], initial_states=[], final_states=[],
+    def __init__(self, states=[], initial_states=[], accepting_states=[],
                  input_alphabet=[]):
         FiniteStateAutomaton.__init__(self,
             states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet
+            accepting_states=accepting_states, input_alphabet=input_alphabet
         )
 
 class BuchiAutomaton(OmegaAutomaton):
-    def __init__(self, states=[], initial_states=[], final_states=[],
+    def __init__(self, states=[], initial_states=[], accepting_states=[],
                  input_alphabet=[]):
         OmegaAutomaton.__init__(self,
             states=states, initial_states=initial_states,
-            final_states=final_states, input_alphabet=input_alphabet
+            accepting_states=accepting_states, input_alphabet=input_alphabet
         )
 
 
@@ -1647,7 +1647,7 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
     s0s = fts.states.initial.copy()
     q0s = ba.states.initial.copy()
 
-    final_states_preimage = set()
+    accepting_states_preimage = set()
 
     for s0 in s0s:
         dprint('----\nChecking initial state:\n\t' +str(s0) )
@@ -1669,9 +1669,9 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
                 prodts.states.add_initial(new_sq0)
                 prodts.atomic_propositions.label_state(new_sq0, {q} )
 
-                # final state ?
-                if ba.states.is_final(q):
-                    final_states_preimage.add(new_sq0)
+                # accepting state ?
+                if ba.states.is_accepting(q):
+                    accepting_states_preimage.add(new_sq0)
 
     dprint(prodts)
 
@@ -1710,9 +1710,9 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
 
                 prodts.states.add(new_sq)
 
-                if ba.states.is_final(next_q):
-                    final_states_preimage.add(new_sq)
-                    dprint(str(new_sq) +' contains a final state.')
+                if ba.states.is_accepting(next_q):
+                    accepting_states_preimage.add(new_sq)
+                    dprint(str(new_sq) +' contains a accepting state.')
 
                 prodts.atomic_propositions.label_state(new_sq, {next_q} )
 
@@ -1740,7 +1740,7 @@ def ts_nba_synchronous_product(transition_system, buchi_automaton):
                 new_sqs.add(next_sq)
                 queue.add(next_sq)
 
-    return (prodts, final_states_preimage)
+    return (prodts, accepting_states_preimage)
     #TODO option to return (or convert ?) prodts to BA
 
 class RabinAutomaton(OmegaAutomaton):

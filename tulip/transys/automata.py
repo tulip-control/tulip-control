@@ -48,7 +48,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     
     1) states
     2) initial states
-    3) final states
+    3) accepting states
     
     4) input alphabet = set of input letters
     5) transition labels
@@ -115,7 +115,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         
     """
     def __init__(
-        self, final_states=[], input_alphabet_or_atomic_propositions=[],
+        self, accepting_states=[], input_alphabet_or_atomic_propositions=[],
         atomic_proposition_based=True, mutable=False, **args
     ):
         # edge labeling
@@ -137,17 +137,17 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         )
         
         if mutable:
-            self.final_states = list()
+            self.accepting_states = list()
         else:
-            self.final_states = set()
-        self.add_final_states_from(final_states)
+            self.accepting_states = set()
+        self.add_accepting_states_from(accepting_states)
         
         # used before label value
         self._transition_dot_label_format = {'in_alphabet':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
         
-        self.dot_node_shape = {'normal':'circle', 'final':'doublecircle'}
+        self.dot_node_shape = {'normal':'circle', 'accepting':'doublecircle'}
         self.default_export_fname = 'fsa'
         
     def __repr__(self):
@@ -159,7 +159,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         s += str(self.alphabet) +2*'\n'
         s += 'Transitions & labeling w/ Input Letters:\n'
         s += pformat(self.transitions(labeled=True), indent=3) +2*'\n'
-        s += 'Final states differently defined for specific types'
+        s += 'Accepting states differently defined for specific types'
         s += 'of automata, e.g. BA vs DRA.' +'\n' +hl +'\n'
         
         return s
@@ -168,53 +168,55 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         return self.__repr__()
     
     def _removed_state_callback(self, rm_state):
-        self.remove_final_state(rm_state)
+        self.remove_accepting_state(rm_state)
     
-    def _is_final(self, state):
-        return is_subset([state], self.final_states)
+    def _is_accepting(self, state):
+        return is_subset([state], self.accepting_states)
 
-    #TODO rm final states, pull them out as separate object,
+    #TODO rm accepting states, pull them out as separate object,
     # because they differ from flavor to flavor of automaton
-    # final states
-    def add_final_state(self, new_final_state):
-        if not new_final_state in self.states():
-            raise Exception('Given final state:\n\t' +str(new_final_state) +
-                            '\n\\notin States:\n\t' +str(self.states() ) )
+    # accepting states
+    def add_accepting_state(self, new_accepting_state):
+        if not new_accepting_state in self.states():
+            msg = 'Given accepting state:\n\t' +str(new_accepting_state)
+            msg += '\n\\notin States:\n\t' +str(self.states() )
+            raise Exception(msg)
         
-        # already final ?
-        if self._is_final(new_final_state):
-            warnings.warn('Attempting to add existing final state.\n')
+        # already accepting ?
+        if self._is_accepting(new_accepting_state):
+            warnings.warn('Attempting to add existing accepting state.\n')
             return
         
         # mutable states ?
         if self.states.mutants == None:
-            self.final_states.add(new_final_state)
+            self.accepting_states.add(new_accepting_state)
         else:
-            self.final_states.append(new_final_state)
+            self.accepting_states.append(new_accepting_state)
 
-    def add_final_states_from(self, new_final_states):
-        if not is_subset(new_final_states, self.states() ):
-            raise Exception('Given Final States \\notsubset States.')
+    def add_accepting_states_from(self, new_accepting_states):
+        if not is_subset(new_accepting_states, self.states() ):
+            raise Exception('Given Accepting States \\notsubset States.')
         
         # mutable states ?
         if self.states.mutants == None:
-            self.final_states |= set(new_final_states)
+            self.accepting_states |= set(new_accepting_states)
         else:
-            for new_final_state in new_final_states:
-                self.add_final_state(new_final_state)
+            for new_accepting_state in new_accepting_states:
+                self.add_accepting_state(new_accepting_state)
     
-    def number_of_final_states(self):
-        return len(self.final_states)
+    def number_of_accepting_states(self):
+        return len(self.accepting_states)
     
-    def remove_final_state(self, rm_final_state):
-        self.final_states.remove(rm_final_state)
+    def remove_accepting_state(self, rm_accepting_state):
+        self.accepting_states.remove(rm_accepting_state)
     
-    def remove_final_states_from(self, rm_final_states):
+    def remove_accepting_states_from(self, rm_accepting_states):
         if self.states.mutants == None:
-            self.final_states = self.final_states.difference(rm_final_states)
+            self.accepting_states = \
+                self.accepting_states.difference(rm_accepting_states)
         else:
-            for rm_final_state in rm_final_states:
-                self.remove_final_state(rm_final_state)
+            for rm_accepting_state in rm_accepting_states:
+                self.remove_accepting_state(rm_accepting_state)
 
     # checks
     def is_deterministic(self):
@@ -234,7 +236,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         
         inf_states = set(sim.run.get_suffix() )
         
-        if bool(inf_states & self.final_states):
+        if bool(inf_states & self.accepting_states):
             accept = True
         else:
             accept = False
@@ -307,8 +309,8 @@ class BuchiAutomaton(OmegaAutomaton):
         s += pformat(self.states(data=False), indent=3) +2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Final States:\n'
-        s += pformat(self.final_states, indent=3) +2*'\n'
+        s += 'Accepting States:\n'
+        s += pformat(self.accepting_states, indent=3) +2*'\n'
         
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\in 2^AP):\n\t'
@@ -397,16 +399,6 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
              atomic_proposition_based=True, verbose=False):
     """Create a Buchi Automaton from a tuple of fields.
     
-    note
-    ====
-    "final states" in the context of \\omega-automata is a misnomer,
-    because the system never reaches a "final" state, as in non-transitioning.
-
-    So "accepting states" allows for an evolving behavior,
-    and is a better description.
-
-    "final states" is appropriate for NFAs.
-    
     see also
     ========
     L{tuple2fts}
@@ -418,7 +410,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
 
             - Q = set of states
             - Q_0 = set of initial states, must be \\subset S
-            - Q_F = set of final states
+            - Q_a = set of accepting states
             - \\Sigma = alphabet
             - trans = transition relation, represented by list of triples:
               [(from_state, to_state, guard), ...]
@@ -456,7 +448,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     
     ba.states.add_from(states)
     ba.states.initial |= initial_states
-    ba.states.add_final_from(accepting_states)
+    ba.states.add_accepting_from(accepting_states)
     
     if atomic_proposition_based:
         ba.alphabet.math_set |= alphabet_or_ap
@@ -504,8 +496,8 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     prod_ba.states.add_from(prod_ts.states() )
     prod_ba.states.initial |= prod_ts.states.initial()
     print('initial:\n\t' +str(prod_ts.states.initial) )
-    # final states = persistent set
-    prod_ba.states.add_final_from(persistent)
+    # accepting states = persistent set
+    prod_ba.states.add_accepting_from(persistent)
     
     # copy edges, translating transitions, i.e., chaning transition labels
     if buchi_automaton.atomic_proposition_based:
@@ -619,7 +611,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     s0s = fts.states.initial()
     q0s = ba.states.initial()
     
-    final_states_preimage = MathSet()
+    accepting_states_preimage = MathSet()
     
     dprint(hl +'\n' +' Product TS construction:\n' +hl +'\n')
     for s0 in s0s:
@@ -648,9 +640,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 prodts.states.initial.add(new_sq0)
                 prodts.states.label(new_sq0, {q} )
                 
-                # final state ?
-                if ba.states.is_final(q):
-                    final_states_preimage.add(new_sq0)
+                # accepting state ?
+                if ba.states.is_accepting(q):
+                    accepting_states_preimage.add(new_sq0)
     
     dprint(prodts)
     
@@ -697,9 +689,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 
                 prodts.states.add(new_sq)
                 
-                if ba.states.is_final(next_q):
-                    final_states_preimage.add(new_sq)
-                    dprint(str(new_sq) +' contains a final state.')
+                if ba.states.is_accepting(next_q):
+                    accepting_states_preimage.add(new_sq)
+                    dprint(str(new_sq) +' contains an accepting state.')
                 
                 prodts.states.label(new_sq, {next_q} )
                 
@@ -732,7 +724,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 new_sqs.add(next_sq)
                 queue.add(next_sq)
     
-    return (prodts, final_states_preimage)
+    return (prodts, accepting_states_preimage)
 
 class RabinPairs(object):
     """Acceptance pairs for Rabin automaton.
@@ -891,8 +883,8 @@ class RabinAutomaton(OmegaAutomaton):
         s += pformat(self.states(data=False), indent=3) +2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Final States:\n'
-        s += pformat(self.final_states, indent=3) +2*'\n'
+        s += 'Accepting States:\n'
+        s += pformat(self.accepting_states, indent=3) +2*'\n'
         
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\in 2^AP):\n\t'

@@ -121,7 +121,7 @@ def ba_minimal_example():
     ba = trs.BuchiAutomaton(atomic_proposition_based=True)
     ba.states.add_from({'q0', 'q1', 'q2'})
     ba.states.initial.add('q0')
-    ba.states.add_final('q1')
+    ba.states.add_accepting('q1')
     
     ba.alphabet.math_set |= [True, 'green', 'not_green']
     
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     ofts = ofts_minimal_example()
     ba = ba_minimal_example()
     
-    (prod_fts, final_states_preimage) = fts *ba
+    (prod_fts, accepting_states_preimage) = fts *ba
     prod_ba = ba *fts
     
     if not prod_fts.plot() and save_fig:

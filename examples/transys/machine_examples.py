@@ -287,6 +287,8 @@ def pedestrians():
     return m
 
 if __name__ == '__main__':
+    saving = False
+    
     m1 = mealy_machine_example()
     m2 = garage_counter()
     m3 = garage_counter_with_state_vars()
@@ -297,4 +299,6 @@ if __name__ == '__main__':
     m6.simulate('random', 4)
     #m6.simulate() for manual simulation
     
-    m4.save('index.html', 'html')
+    # save animated javascript
+    if saving:
+        m4.save('index.html', 'html')

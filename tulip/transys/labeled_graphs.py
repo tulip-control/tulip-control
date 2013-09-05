@@ -589,12 +589,12 @@ class States(object):
         state_id = self._mutant2int(state)
         return self.graph.has_node(state_id)
     
-    def _exist_final_states(self, msg=True):
-        """Check if system has final states."""
-        if not hasattr(self.graph, 'final_states'):
+    def _exist_accepting_states(self, msg=True):
+        """Check if system has accepting states."""
+        if not hasattr(self.graph, 'accepting_states'):
             if msg:
                 warnings.warn('System of type: ' +str(type(self.graph) ) +
-                              'does not have final states.')
+                              'does not have accepting states.')
             return False
         else:
             return True
@@ -731,7 +731,7 @@ class States(object):
         if self.is_initial(rm_state):
             self.initial.remove(rm_state)
         
-        # chain to parent (for final states etc)
+        # chain to parent (for accepting states etc)
         if self._removed_state_callback:
             self._removed_state_callback(rm_state)
     
@@ -765,20 +765,13 @@ class States(object):
     def is_initial(self, state):
         return state in self.initial
     
-    def is_final(self, state):       
-        """Check if state \\in final states.
-        
-        Convenience method, violates class independence,
-        so might be removed in the future.
+    def is_accepting(self, state):       
+        """Check if state \\in accepting states.
         """
-        if not self._exist_final_states():
+        if not self._exist_accepting_states():
             return
         
-        return is_subset([state], self.graph.final_states)
-    
-    def is_accepting(self, state):
-        """Alias to is_final()."""
-        return self.is_final(state)
+        return is_subset([state], self.graph.accepting_states)
     
     def check(self):
         """Check sanity of various state sets.
@@ -799,7 +792,7 @@ class States(object):
             warnings.warn('Current state \\notin states.')
         
         print('States and Initial States are ok.\n'
-              +'For final states, refer to my parent.')
+              +'For accepting states, refer to my parent.')
     
     def post_single(self, state):
         """Direct successors of a single state.
@@ -905,29 +898,29 @@ class States(object):
         else:
             return True
     
-    def add_final(self, state):
-        """Convenience for FSA.add_final_state().
+    def add_accepting(self, state):
+        """Convenience for FSA.add_accepting_state().
         
         see also
         --------
-        self.add_final_from
+        self.add_accepting_from
         """
-        if not self._exist_final_states():
+        if not self._exist_accepting_states():
             return
         
-        self.graph.add_final_state(state)
+        self.graph.add_accepting_state(state)
     
-    def add_final_from(self, states):
-        """Convenience for FSA.add_final_states_from().
+    def add_accepting_from(self, states):
+        """Convenience for FSA.add_accepting_states_from().
         
         see also
         --------
-        self.add_final
+        self.add_accepting
         """
-        if not self._exist_final_states():
+        if not self._exist_accepting_states():
             return
         
-        self.graph.add_final_states_from(states)
+        self.graph.add_accepting_states_from(states)
     
     def rename(self, new_states_dict):
         """Map states in place, based on dict.
@@ -1061,13 +1054,13 @@ class LabeledStates(States):
         def decide_node_shape(graph, state):
             node_shape = graph.dot_node_shape['normal']
             
-            # check if final states defined
-            if not self._exist_final_states(msg=False):
+            # check if accepting states defined
+            if not self._exist_accepting_states(msg=False):
                 return node_shape
             
-            # check for final states
-            if self.is_final(state):
-                node_shape = graph.dot_node_shape['final']
+            # check for accepting states
+            if self.is_accepting(state):
+                node_shape = graph.dot_node_shape['accepting']
                 
             return node_shape
         

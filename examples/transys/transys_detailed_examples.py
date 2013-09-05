@@ -344,14 +344,15 @@ def ba_maximal_example():
     ba.transitions.add_labeled('q1', 'q3', frozenset(['drink'] ) )
     ba.plot()
     
-    # final states
-    ba.add_final_state('q1')
-    ba.add_final_states_from({'q2', 'q3'} )
-    ba.remove_final_state('q2')
-    ba.remove_final_states_from({'q2', 'q3'} )
+    # accepting states
+    ba.add_accepting_state('q1')
+    ba.add_accepting_states_from({'q2', 'q3'} )
+    ba.remove_accepting_state('q2')
+    ba.remove_accepting_states_from({'q2', 'q3'} )
     
-    print('Number of final states:\n\t' +str(ba.number_of_final_states() ) +'\n')
-    print('Final states:\n\t' +str(ba.final_states) +'\n')
+    print('Number of accepting states:\n\t' +
+          str(ba.number_of_accepting_states() ) +'\n')
+    print('Accepting states:\n\t' +str(ba.accepting_states) +'\n')
     print(ba)
     
     path = './test_ba'
