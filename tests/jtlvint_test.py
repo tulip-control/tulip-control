@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Based on test code moved here from bottom of tulip/jtlvint.py
+Test the interface with JTLV.
 
-SCL; 5 Sep 2011.
+SCL; 5 Sep 2013.
 Vasu Raman; 4 Sept 2013
 """
 
