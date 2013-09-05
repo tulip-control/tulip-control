@@ -1,6 +1,3 @@
-.. Emacs, this is -*-rst-*-
-.. highlight:: rst
-
 Tutorial and Examples
 =======================
 
