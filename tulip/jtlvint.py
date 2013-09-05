@@ -66,7 +66,6 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1, init_option=1
 
     Return True if realizable, False if not, or an error occurs.
     """
-    
     fSMV, fLTL, fAUT = create_files(spec)
     return solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
     os.unlink(fSMV)
@@ -120,8 +119,6 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
 
     @param verbose: an integer that specifies the level of verbosity.
     """
-
- 
     priority_kind = get_priority(priority_kind)
     
     # init_option
@@ -134,7 +131,7 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
         init_option = 1
 
     
-    callJTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose)
+    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose)
     
     realizable = False
     
@@ -236,26 +233,26 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
         print '  priority_kind: ' + str(priority_kind) + '\n'
 
     if (len(JTLV_EXE) > 0):
-            jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-            if (verbose > 1):
-                print "  java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, \
-                    fAUT, str(priority_kind), str(init_option)
-            cmd = subprocess.call( \
-                ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
-                     str(priority_kind), str(init_option)])
+        jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
+        if (verbose > 1):
+            print "  java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, \
+                fAUT, str(priority_kind), str(init_option)
+        cmd = subprocess.call( \
+            ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
+                 str(priority_kind), str(init_option)])
     else: # For debugging purpose
-            classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
-                os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
-            if (verbose > 1):
-                print "  java", heap_size, "-cp", classpath, "GRMain", fSMV, \
-                    fLTL, fAUT, str(priority_kind), str(init_option)
-            cmd = subprocess.call( \
-                ["java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL, \
-                     fAUT, str(priority_kind), str(init_option)])
-    #         cmd = subprocess.Popen( \
-    #             ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
-    #                  aut_file, str(priority_kind), str(init_option)], \
-    #                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
+            os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
+        if (verbose > 1):
+            print "  java", heap_size, "-cp", classpath, "GRMain", fSMV, \
+                fLTL, fAUT, str(priority_kind), str(init_option)
+        cmd = subprocess.call( \
+            ["java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL, \
+                 fAUT, str(priority_kind), str(init_option)])
+#         cmd = subprocess.Popen( \
+#             ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
+#                  aut_file, str(priority_kind), str(init_option)], \
+#                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
 
 def generate_JTLV_SMV(spec, verbose=0):
@@ -511,7 +508,7 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
 
     # Check that all non-special-characters metioned are variable names
     # or possible values
-        varnames = env_vars+sys_vars
+    varnames = env_vars+sys_vars
     if not check_spec(assumption,varnames):
         return False
     if not check_spec(guarantee, varnames):
