@@ -6,10 +6,8 @@ SCL; 5 Sep 2013.
 Vasu Raman; 4 Sept 2013
 """
 
-import os
-
 from tulip.spec import GRSpec
-from tulip.jtlvint import *
+from tulip.jtlvint import check_gr1, check_realizable, synthesize
 
 
 def test_dumpjtlv():
