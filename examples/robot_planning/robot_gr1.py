@@ -107,10 +107,12 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('jtlv', specs)
 
 
-# Generate a graphical representation of the controller for viewing
+# Generate a graphical representation of the controller for viewing,
+# or a textual representation if pydot is missing.
 #! TODO: save_png should probably not be a method in transys?
 if ctrl:
-    ctrl.save('robot_gr1.png', 'png')
+    if not ctrl.save('robot_gr1.png', 'png'):
+        print ctrl
 
 ctrl.states.select_current([0])
 ctrl.simulate(inputs_sequence='random', iterations=100)

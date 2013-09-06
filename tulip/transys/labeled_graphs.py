@@ -2680,6 +2680,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         @param prog: executable to call
         @type prog: dot | circo | ... see pydot.Dot.write
+
+        @rtype: bool
+        @return: True if saving completed successfully, False otherwise.
         """
         path = self._export_fname(filename, fileformat,
                                   addext=add_missing_extension)
@@ -2703,10 +2706,11 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         pydot_graph = self._to_pydot(wrap=wrap)
         if pydot_graph is None:
             # A warning message should have been printed under _to_pydot()
-            return
+            return False
         pydot_graph.set_rankdir(rankdir)
         pydot_graph.set_splines('true')
         pydot_graph.write(path, format=fileformat, prog=prog)
+        return True
     
     def dump_dot_color(self):
         raise NotImplementedError
