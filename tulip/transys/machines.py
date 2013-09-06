@@ -181,7 +181,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
     
     see also
     --------
-    FMS, MealyMachine, MooreMachine
+    FSM, MealyMachine, MooreMachine
     """
     def __init__(self, **args):
         # values will point to values of _*_label_def below
