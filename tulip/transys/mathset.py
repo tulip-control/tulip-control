@@ -395,16 +395,16 @@ class MathSet(object):
         Raises KeyError if MathSet is empty.
         """
         if not self:
-            raise KeyError
+            raise KeyError('Nothing to pop: MathSet is empty.')
         
         if self._set and self._list:
             if randint(0, 1):
                 return self._set.pop()
             else:
                 return self._list.pop()
-        elif not self._list:
+        elif self._set and not self._list:
             return self._set.pop()
-        elif not self._set:
+        elif self._list and not self._set:
             return self._list.pop()
         else:
             raise Exception('Bug in empty MathSet: not self above' +

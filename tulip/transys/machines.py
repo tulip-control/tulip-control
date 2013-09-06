@@ -279,10 +279,6 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
     def async_product(self):
         raise NotImplementedError
-    
-    def simulate(self, input_sequence):
-        self.simulation = executions.FiniteStateMachineSimulation()
-        raise NotImplementedError
 
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
@@ -484,7 +480,8 @@ class MealyMachine(FiniteStateMachine):
             self._transition_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
     
-    def simulate(self, inputs_sequence='manual', max_count=100):
+    def simulate(self, inputs_sequence='manual', iterations=100):
+        max_count = iterations
         if inputs_sequence not in ['manual', 'random'] and \
         not isinstance(inputs_sequence, executions.MachineInputSequence):
             raise Exception(
@@ -500,7 +497,7 @@ class MealyMachine(FiniteStateMachine):
                 msg += 'before calling .simulate.'
                 print(msg)
             else:
-                self.states.set_current(self.states.initial)
+                self.states.select_current(self.states.initial)
         
         if isinstance(inputs_sequence, executions.MachineInputSequence):
             self._guided_simulation(inputs_sequence)
@@ -591,7 +588,7 @@ class MealyMachine(FiniteStateMachine):
             if not state_selected:
                 return None
         elif cur_states:
-            state_selected = cur_states()[0]
+            state_selected = choice(cur_states)
         else:
             raise Exception('Bug: "if not" above must have caught this.')
             
@@ -621,8 +618,8 @@ class MealyMachine(FiniteStateMachine):
         msg += 'via transition with guard:\n\t' +str(guard) +'\n'
         print(msg)
         
-        self.states.current.remove(from_state)
-        self.states.current.add(to_state)
+        self.states._current.remove(from_state)
+        self.states._current.add(to_state)
         
         return count
 

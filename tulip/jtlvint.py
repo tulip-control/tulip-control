@@ -431,7 +431,7 @@ def load_file(aut_file, spec, verbose=0):
             guard = stateDict[to_state][0]
             try:
                 m.transitions.add_labeled(
-                    from_state, to_state, guard, check=True
+                    from_state, to_state, guard, check=False
                 )
             except Exception, e:
                 raise Exception('Failed to add transition:\n' +str(e) )
