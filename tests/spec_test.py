@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-SCL; 3 August 2013.
+SCL; 6 Sep 2013.
 """
 
 import copy
@@ -68,9 +68,10 @@ class GRSpec_test:
     def test_to_canon(self):
         # Fragile!
         assert self.f.to_canon() == "((x) && []<>(!x) && []<>(x)) -> ([](y) && []<>(y&&!x))"
-        # N.B., to_canon() returns for self.triv not because because
-        # it detected that the assumption is false, but rather the
-        # guarantee is empty (and thus interpreted as being "True").
+        # N.B., for self.triv, to_canon() returns a formula missing
+        # the assumption part not because it detected that the
+        # assumption is false, but rather the guarantee is empty (and
+        # thus interpreted as being "True").
         assert self.triv.to_canon() == "True"
         assert self.empty.to_canon() == "True"
 
