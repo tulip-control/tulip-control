@@ -2,7 +2,7 @@
 """
 Driver script for testing nu-TuLiP.  Try calling it with "-h" flag.
 
-SCL; 6 May 2013.
+SCL; 5 Sep 2013.
 """
 
 import sys
@@ -11,7 +11,7 @@ import nose
 
 if __name__ == "__main__":
     if ("-h" in sys.argv) or ("--help" in sys.argv):
-        print """Usage: run_tests.py [--fast] [OPTIONS...] [[-]TESTFILES...]
+        print """Usage: run_tests.py [--cover] [--fast] [OPTIONS...] [[-]TESTFILES...]
 
     TESTFILES... is space-separated list of test file names, where the
     suffix "_test.py" is added to each given name.  E.g.,
@@ -35,9 +35,17 @@ if __name__ == "__main__":
     else:
         skip_slow = False
 
+    if "--cover" in sys.argv:
+        measure_coverage = True
+        sys.argv.remove("--cover")
+    else:
+        measure_coverage = False
+
     argv = [sys.argv[0]]
     if skip_slow:
         argv.append("--attr=!slow")
+    if measure_coverage:
+        argv.extend(["--with-coverage", "--cover-html", "--cover-package=tulip"])
     testfiles = []
     excludefiles = []
     for basename in sys.argv[1:]:  # Only add extant file names
