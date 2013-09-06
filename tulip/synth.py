@@ -31,24 +31,7 @@
 # SUCH DAMAGE.
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
-
-TODO:
-
-    - allow transitions systems as input in addition to GRSpec objects
-    
-    - Desired capabilities and relevant issues (from Scott):
-
-        - Automatic selection of output type of transition system
-          based on given arguments.
-
-        - Inference of system variables and corresponding domains from
-          a given (incomplete)
-
-        - LTL formula and labeled transition system.
-
-        - Available as tulip.synthesize or from tulip import synthesize.
 """
-
 
 import os
 from tulip import jtlvint
@@ -74,9 +57,6 @@ def synthesize(option, specs, sys=None):
     @return: Return automaton implementing the strategy, or None if
         error.
     """
-    #here we need somehting like:
-    #spec.import_PropPreservingPartition(sys)
-        
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs)
     elif option == 'jtlv':
