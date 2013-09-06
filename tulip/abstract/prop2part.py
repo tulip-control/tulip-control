@@ -165,7 +165,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     parent = []
     for i in range(len(pwa_sys.list_subsys)):
         for j in range(ppp.num_regions):
-            isect = pc.intersect(pwa_sys.list_subsys[i].sub_domain, ppp.list_region[j])
+            isect = pc.intersect(pwa_sys.list_subsys[i].domain, ppp.list_region[j])
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
                 if rc < abs_tol:
