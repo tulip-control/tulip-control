@@ -23,7 +23,7 @@ input_bound = 1.0
 uncertainty = 0.01
 
 # Continuous state space
-cont_state_space = pc.Polytope.from_box(np.array([[0., 2.],[0., 3.]]))
+cont_state_space = pc.Polytope.from_box(np.array([[0., 3.],[0., 2.]]))
 
 
 # Continuous dynamics
@@ -38,8 +38,8 @@ sys_dyn = hybrid.LtiSysDyn(A,B,E,[],U,W, cont_state_space)
 
 # Continuous proposition
 cont_props = {}
-cont_props['lot'] = pc.Polytope.from_box(np.array([[0., 1.],[0., 1.]]))
-cont_props['home'] = pc.Polytope.from_box(np.array([[1., 2.],[2., 3.]]))
+cont_props['home'] = pc.Polytope.from_box(np.array([[0., 1.],[0., 1.]]))
+cont_props['lot'] = pc.Polytope.from_box(np.array([[2., 3.],[1., 2.]]))
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part(cont_state_space, cont_props)
