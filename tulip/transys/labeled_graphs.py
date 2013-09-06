@@ -42,7 +42,8 @@ from textwrap import fill
 import networkx as nx
 #from scipy.sparse import lil_matrix # is this really needed ?
 
-from mathset import PowerSet, SubSet, is_subset, unique, dprint
+from mathset import MathSet, SubSet, PowerSet, \
+    is_subset, unique, dprint
 import save_d3
 #from tulip import conxml
 
@@ -360,7 +361,7 @@ class States(object):
         
         self.add_from(states)
         self.initial |= initial_states
-        self.set_current(current_state)
+        self.select_current(current_state)
         
         self._removed_state_callback = removed_state_callback
     
@@ -744,7 +745,7 @@ class States(object):
         for rm_state in rm_states:
             self.remove(rm_state)
     
-    def set_current(self, states):
+    def select_current(self, states):
         """Select current state.
         
         State membership is checked.
@@ -753,14 +754,35 @@ class States(object):
         None is possible.
         """
         if states is None:
-            self.current = None
+            msg = 'System has no states, current set to None.\n'
+            msg += 'You can add states using sys.states.add()'
+            warnings.warn(msg)
+            self._current = None
             return
         
-        if not is_subset(states, self() ):
-            raise Exception('Current state given is not in set of states.\n'+
-                            'Cannot set current state to given state.')
+        # single state given instead of singleton ?
+        if not isinstance(states, Iterable) and states in self:
+            msg = 'Single state provided, setting current states to it.\n'
+            msg += 'A subset of states expected as argument.'
+            warnings.warn(msg)
+            states = [states]
         
-        self.current = states
+        if not is_subset(states, self() ):
+            msg = 'Current state given is not in set of states.\n'
+            msg += 'Cannot set current state to given state.'
+            raise Exception(msg)
+        
+        self._current = MathSet()
+        self._current.add_from(states)
+    
+    @property
+    def current(self):
+        """Return list of current states.
+        
+        Multiple current states are meaningful in the context
+        of non-deterministic automata.
+        """
+        return list(self._current)
     
     def is_initial(self, state):
         return state in self.initial
@@ -1939,32 +1961,59 @@ class LabeledTransitions(Transitions):
         """Add new labeled transition, error if same exists.
         
         If edge between same nodes, either unlabeled or with same label
-        already exists, then raise error.
+        already exists, then:
+            - if check, then raise error
+            - otherwise produce warning
         
         Checks states are already in set of states.
         Checks action is already in set of actions.
-        If not, raises exception.
+        If not, raises exception or warning.
         
         To override, use check = False.
         Then given states are added to set of states,
-        and given action is added to set of actions.
+        given action is added to set of actions,
+        and if same edge with identical label already exists,
+        a warning is issued.
         
-        input
-        -----
-            -C{labels} is single label, if single action set /alphabet defined,
-            or if multiple action sets /alphabets, then either:
-                list of labels in proper oder
-                or dict of action_set_name : label pairs
+        see also
+        --------
+        add, label, relabel, add_labeled_adj
+        
+        @param from_state: start state of the transition
+        @type from_state: valid system state
+        
+        @param to_state: end state of the transition
+        @type to_state: valid system state
+        
+        @param labels: annotate this edge with these labels
+        @type labels:
+            - if single action set /alphabet defined,
+                then single label
+            - if multiple action sets /alphabets,
+                then either:
+                    - list of labels in proper oder
+                    - dict of action_set_name : label pairs
+        
+        @param check: if same edge with identical annotation
+            (=sublabels) already exists, then:
+                - if C{False}, then raise exception
+                - otherwise produce warning
+        @type check: bool
         """
         self._exist_labels()
         self._check_states(from_state, to_state, check=check)
         
         # chek if same unlabeled transition exists
-        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        trans_from_to = self.graph.get_edge_data(from_state_id, to_state_id,
-                                                 default={} )
+        (from_state_id, to_state_id) = self._mutant2int(
+            from_state, to_state
+        )
+        trans_from_to = self.graph.get_edge_data(
+            from_state_id, to_state_id, default={}
+        )
+        
         if {} in trans_from_to.values():
-            msg = 'Unlabeled transition from_state-> to_state already exists,\n'
+            msg = 'Unlabeled transition: '
+            msg += 'from_state-> to_state already exists,\n'
             msg += 'where:\t from_state = ' +str(from_state) +'\n'
             msg += 'and:\t to_state = ' +str(to_state) +'\n'
             raise Exception(msg)
@@ -1973,25 +2022,33 @@ class LabeledTransitions(Transitions):
         # then we check to see if same transition already exists
         #
         # if states were not previously in set of states,
-        # then transition is certainly new, so we won't abort in the middle,
-        # after adding states, but before adding transition,
-        # due to finding an existing one, because that is impossible.
+        # then transition is certainly new,
+        # so we won't abort due to finding an existing transition,
+        # in the middle, having added states, but not the transition,
+        # because that is impossible.
         #
         # if labels were not previously in label set,
-        # then a similar issue can arise only with unlabeled transitions
-        # pre-existing. This is avoided by first checking for an unlabeled trans.        
-        edge_label = \
-            self._label_check._sublabels_list2dict(labels, check_label=check)
+        # then a similar issue can arise only
+        # if an unlabeled transition already exists.
+        #
+        # Avoided by first checking for an unlabeled transition.        
+        edge_label = self._label_check._sublabels_list2dict(
+            labels, check_label=check
+        )
+        
+        msg = 'Same labeled transition:\n'
+        msg += 'from_state---[label]---> to_state\n'
+        msg += 'already exists, where:\n'
+        msg += '\t from_state = ' +str(from_state) +'\n'
+        msg += '\t to_state = ' +str(to_state) +'\n'
+        msg += '\t label = ' +str(edge_label) +'\n'
         
         # check if same labeled transition exists
         if edge_label in trans_from_to.values():
-            msg = 'Same labeled transition:\n'
-            msg += 'from_state---[label]---> to_state\n'
-            msg += 'already exists, where:\n'
-            msg += '\t from_state = ' +str(from_state) +'\n'
-            msg += '\t to_state = ' +str(to_state) +'\n'
-            msg += '\t label = ' +str(edge_label) +'\n'
-            raise Exception('Same labeled transition already exists.')
+            if check:
+                raise Exception(msg)
+            else:
+                warnings.warn(msg)
         
         # states, labels checked, no same unlabeled nor labeled,
         # so add it

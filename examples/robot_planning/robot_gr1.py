@@ -111,3 +111,6 @@ ctrl = synth.synthesize('jtlv', specs)
 #! TODO: save_png should probably not be a method in transys?
 if ctrl:
     ctrl.save('robot_gr1.png', 'png')
+
+ctrl.states.select_current([0])
+ctrl.simulate(inputs_sequence='random', iterations=100)
