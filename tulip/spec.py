@@ -142,7 +142,9 @@ class GRSpec(object):
                     copy.deepcopy(getattr(self, formula_component)))
 
     def __str__(self):
-        return self.to_canon()
+        output = "ENV VARIABLES: "+str(self.env_vars)+"\n"
+        output += "SYS VARIABLES: "+str(self.sys_vars)+"\n"
+        return output+"      FORMULA: "+self.to_canon()
 
     def to_canon(self):
         """Output formula in TuLiP LTL syntax.
