@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-This example is an extension of the robot_continuos.py
+This example is an extension of the robot_continuous.py
 code by Petter Nilsson and Nok Wongpiromsarn. It demonstrates 
 the use of TuLiP for systems with piecewise affine dynamics.
 
