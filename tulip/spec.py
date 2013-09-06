@@ -146,6 +146,32 @@ class GRSpec(object):
         output += "SYS VARIABLES: "+str(self.sys_vars)+"\n"
         return output+"      FORMULA: "+self.to_canon()
 
+    def copy(self):
+        return GRSpec(env_vars=dict(self.env_vars),
+                      sys_vars=dict(self.sys_vars),
+                      env_init=copy.copy(self.env_init),
+                      env_safety=copy.copy(self.env_safety),
+                      env_prog=copy.copy(self.env_prog),
+                      sys_init=copy.copy(self.sys_init),
+                      sys_safety=copy.copy(self.sys_safety),
+                      sys_prog=copy.copy(self.sys_prog))
+
+    def __or__(self, other):
+        """Create union of two specifications."""
+        result = self.copy()
+        for varname in other.env_vars.keys():
+            if result.env_vars.has_key(varname) and other[varname] != result.env_vars[varname]:
+                raise ValueError("Mismatched variable domains")
+        for varname in other.sys_vars.keys():
+            if result.sys_vars.has_key(varname) and other[varname] != result.sys_vars[varname]:
+                raise ValueError("Mismatched variable domains")
+        result.env_vars.update(other.env_vars)
+        result.sys_vars.update(other.sys_vars)
+        for formula_component in ["env_init", "env_safety", "env_prog",
+                                  "sys_init", "sys_safety", "sys_prog"]:
+            getattr(result, formula_component).extend(getattr(other, formula_component))
+        return result
+
     def to_canon(self):
         """Output formula in TuLiP LTL syntax.
 

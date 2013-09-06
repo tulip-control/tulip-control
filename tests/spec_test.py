@@ -65,6 +65,12 @@ class GRSpec_test:
         assert self.f.env_vars == original_env_vars and self.f.sys_vars == original_sys_vars
         assert self.f.env_prog == ["!(bar)", "(bar)"] and self.f.sys_prog == ["(uber||cat)&&!(bar)"]
 
+    def test_or(self):
+        g = GRSpec(env_vars={"z"}, env_prog=["!z"])
+        h = self.f | g
+        assert len(h.env_vars) == 2 and h.env_vars.has_key("z")
+        assert len(h.env_prog) == len(self.f.env_prog)+1 and "!z" in h.env_prog
+
     def test_to_canon(self):
         # Fragile!
         assert self.f.to_canon() == "((x) && []<>(!x) && []<>(x)) -> ([](y) && []<>(y&&!x))"
