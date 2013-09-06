@@ -2307,7 +2307,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     
     def _pydot_missing(self):
         if pydot is None:
-            msg = 'Attempted calling dump_dot.\n'
+            msg = 'Attempted calling _to_pydot.\n'
             msg += 'Unavailable due to pydot not installed.\n'
             warnings.warn(msg)
             return True
@@ -2317,7 +2317,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def _to_pydot(self, wrap=10):
         """Convert to properly annotated pydot graph."""
         if self._pydot_missing():
-            return
+            return None
         
         dummy_nx_graph = nx.MultiDiGraph()
         
@@ -2701,6 +2701,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             prog = self.default_layout
         
         pydot_graph = self._to_pydot(wrap=wrap)
+        if pydot_graph is None:
+            # A warning message should have been printed under _to_pydot()
+            return
         pydot_graph.set_rankdir(rankdir)
         pydot_graph.set_splines('true')
         pydot_graph.write(path, format=fileformat, prog=prog)
@@ -2764,7 +2767,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR'):
     @type rankdir: 'LR' | 'TB'
     """
     if pydot is None:
-        msg = 'Usig plot_pydot requires that pydot be installed.'
+        msg = 'Using plot_pydot requires that pydot be installed.'
         warnings.warn(msg)
         return
     
