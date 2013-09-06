@@ -52,7 +52,7 @@ TODO:
 
 import os
 from tulip import jtlvint
-#from tulip import gr1cint
+from tulip import gr1cint
 
 
 def synthesize(option, specs, sys=None):
@@ -79,7 +79,7 @@ def synthesize(option, specs, sys=None):
         
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs)
-    if option == 'jtlv':
+    elif option == 'jtlv':
         ctrl = jtlvint.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. '+\
