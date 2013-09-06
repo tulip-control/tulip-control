@@ -44,11 +44,237 @@ import copy
 import subprocess
 import tempfile
 import os
+import xml.etree.ElementTree as ET
+import networkx as nx
 
-from conxml import loadXML
 from spec import GRSpec
+from transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
+
+
+DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
+
+def _untaglist(x, cast_f=float,
+               namespace=DEFAULT_NAMESPACE):
+    """Extract list from given tulipcon XML tag (string).
+
+    Use function cast_f for type-casting extracting element strings.
+    The default is float, but another common case is cast_f=int (for
+    "integer").  If cast_f is set to None, then items are left as
+    extracted, i.e. as strings.
+
+    The argument x can also be an instance of
+    xml.etree.ElementTree._ElementInterface ; this is mainly for
+    internal use, e.g. by the function untagpolytope and some
+    load/dumpXML methods elsewhere.
+
+    Return result as 2-tuple, containing name of the tag (as a string)
+    and the list obtained from it.
+    """
+    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
+        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+
+    if isinstance(x, str):
+        elem = ET.fromstring(x)
+    else:
+        elem = x
+
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
+    # Extract list
+    if cast_f is None:
+        cast_f = str
+    litems = elem.findall(ns_prefix+'litem')
+    if len(litems) > 0:
+        li = [cast_f(k.attrib['value']) for k in litems]
+    elif elem.text is None:
+        li = []
+    else:
+        li = [cast_f(k) for k in elem.text.split()]
+
+    return (elem.tag, li)
+
+def _untagdict(x, cast_f_keys=None, cast_f_values=None,
+               namespace=DEFAULT_NAMESPACE, get_order=False):
+    """Extract dictionary from given tulipcon XML tag (string).
+
+    Use functions cast_f_keys and cast_f_values for type-casting
+    extracting key and value strings, respectively, or None.  The
+    default is None, which means the extracted keys (resp., values)
+    are left untouched (as strings), but another common case is
+    cast_f_values=int (for "integer") or cast_f_values=float (for
+    "floating-point numbers"), while leaving cast_f_keys=None to
+    indicate dictionary keys are strings.
+
+    The argument x can also be an instance of
+    xml.etree.ElementTree._ElementInterface ; this is mainly for
+    internal use, e.g. by the function untagpolytope and some
+    load/dumpXML methods elsewhere.
+
+    Return result as 2-tuple, containing name of the tag (as a string)
+    and the dictionary obtained from it.  If get_order is True, then
+    return a triple, where the first two elements are as usual and the
+    third is the list of keys in the order they were found.
+    """
+    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
+        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+
+    if isinstance(x, str):
+        elem = ET.fromstring(x)
+    else:
+        elem = x
+
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
+    # Extract dictionary
+    items_li = elem.findall(ns_prefix+"item")
+    if cast_f_keys is None:
+        cast_f_keys = str
+    if cast_f_values is None:
+        cast_f_values = str
+    di = dict()
+    if get_order:
+        key_list = []
+    for item in items_li:
+        # N.B., we will overwrite duplicate keys without warning!
+        di[cast_f_keys(item.attrib["key"])] = cast_f_values(item.attrib["value"])
+        if get_order:
+            key_list.append(item.attrib["key"])
+    if get_order:
+        return (elem.tag, di, key_list)
+    else:
+        return (elem.tag, di)
+
+
+def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
+    """Return GRSpec and MealyMachine constructed from output of gr1c.
+
+    x can be a string or an instance of
+    xml.etree.ElementTree._ElementInterface
+    """
+    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
+        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+
+    if isinstance(x, str):
+        elem = ET.fromstring(x)
+    else:
+        elem = x
+
+    if (namespace is None) or (len(namespace) == 0):
+        ns_prefix = ""
+    else:
+        ns_prefix = "{"+namespace+"}"
+
+    if elem.tag != ns_prefix+"tulipcon":
+        raise TypeError("root tag should be tulipcon.")
+    if ("version" not in elem.attrib.keys()):
+        raise ValueError("unversioned tulipcon XML string.")
+    if int(elem.attrib["version"]) != 1:
+        raise ValueError("unsupported tulipcon XML version: "+str(elem.attrib["version"]))
+
+    # Extract discrete variables and LTL specification
+    (tag_name, env_vardict, env_vars) = _untagdict(elem.find(ns_prefix+"env_vars"), get_order=True)
+    (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(ns_prefix+"sys_vars"), get_order=True)
+    env_domains = []
+    for v in env_vars:
+        dom = env_vardict[v]
+        if dom[0] == "[":
+            end_ind = dom.find("]")
+            if end_ind < 0:
+                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+            dom_parts = dom[1:end_ind].split(",")
+            if len(dom_parts) != 2:
+                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+            env_domains.append((int(dom_parts[0]), int(dom_parts[1])))
+        elif dom == "boolean":
+            env_domains.append("boolean")
+        else:
+            raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
+    sys_domains = []
+    for v in sys_vars:
+        dom = sys_vardict[v]
+        if dom[0] == "[":
+            end_ind = dom.find("]")
+            if end_ind < 0:
+                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+            dom_parts = dom[1:end_ind].split(",")
+            if len(dom_parts) != 2:
+                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+            sys_domains.append((int(dom_parts[0]), int(dom_parts[1])))
+        elif dom == "boolean":
+            sys_domains.append("boolean")
+        else:
+            raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
+    s_elem = elem.find(ns_prefix+"spec")
+    spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
+    for spec_tag in ["env_init", "env_safety", "env_prog",
+                     "sys_init", "sys_safety", "sys_prog"]:
+        if s_elem.find(ns_prefix+spec_tag) is None:
+            raise ValueError("invalid specification in tulipcon XML string.")
+        (tag_name, li) = _untaglist(s_elem.find(ns_prefix+spec_tag),
+                                    cast_f=str, namespace=namespace)
+        li = [v.replace("&lt;", "<") for v in li]
+        li = [v.replace("&gt;", ">") for v in li]
+        li = [v.replace("&amp;", "&") for v in li]
+        setattr(spec, spec_tag, li)
+
+    aut_elem = elem.find(ns_prefix+"aut")
+    if aut_elem is None \
+            or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
+        aut = None
+    else:
+        # Assume version 1 of tulipcon XML
+        if aut_elem.attrib["type"] != "basic":
+            raise ValueError("Automaton class only recognizes type \"basic\".")
+        node_list = aut_elem.findall(ns_prefix+"node")
+        id_list = []  # For more convenient searching, and to catch redundancy
+        A = nx.DiGraph()
+        for node in node_list:
+            this_id = int(node.find(ns_prefix+"id").text)
+            this_name = node.find(ns_prefix+"anno").text  # Assume version 1
+            (tag_name, this_name_list) = _untaglist(node.find(ns_prefix+"anno"),
+                                                    cast_f=int)
+            if len(this_name_list) == 2:
+                (mode, rgrad) = this_name_list
+            else:
+                (mode, rgrad) = (-1, -1)
+            (tag_name, this_child_list) = _untaglist(node.find(ns_prefix+"child_list"),
+                                                     cast_f=int)
+            if tag_name != ns_prefix+"child_list":
+                # This really should never happen and may not even be
+                # worth checking.
+                raise ValueError("failure of consistency check while processing aut XML string.")
+            (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
+                                                cast_f_values=int,
+                                                namespace=namespace)
+
+            if tag_name != ns_prefix+"state":
+                raise ValueError("failure of consistency check while processing aut XML string.")
+            if this_id in id_list:
+                printWarning("duplicate nodes found: "+str(this_id)+"; ignoring...")
+                continue
+            id_list.append(this_id)
+            A.add_node(this_id, state=copy.copy(this_state),
+                       mode=mode, rgrad=rgrad)
+            for next_node in this_child_list:
+                A.add_edge(this_id, next_node)
+
+        mach = MealyMachine()
+        mach.add_inputs([(evar, {0,1}) for evar in env_vars])
+        mach.add_outputs([(svar, {0,1}) for svar in sys_vars])
+        mach.states.add_from(A.nodes())
+        for u in A.nodes_iter():
+            for v in A.successors_iter(u):
+                mach.transitions.add_labeled(u, v, A.node[v]["state"])
+
+    return (spec, mach)
 
 
 def check_syntax(spec_str, verbose=0):
@@ -77,7 +303,7 @@ def check_realizable(spec, verbose=0):
     Return True if realizable, False if not, or an error occurs.
     """
     f = tempfile.TemporaryFile()
-    f.write(spec.dumpgr1c())
+    f.write(spec.to_gr1c())
     f.seek(0)
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-r"],
                          stdin=f,
@@ -97,12 +323,12 @@ def synthesize(spec, verbose=0):
     Return strategy as instance of Automaton class, or None if
     unrealizable or error occurs.
     """
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip0"],
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (stdoutdata, stderrdata) = p.communicate(spec.dumpgr1c())
+    (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     if p.returncode == 0:
-        (prob, sys_dyn, aut) = loadXML(stdoutdata)
+        (spec, aut) = load_aut_xml(stdoutdata)
         return aut
     else:
         if verbose > 0:

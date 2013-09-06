@@ -2,14 +2,13 @@
 """
 Test the interface with gr1c.
 
-SCL; 14 Mar 2012.
+SCL; 6 Sep 2013.
 """
 
 import os
 
-from tulip.conxml import loadXML
 from tulip.spec import GRSpec
-from tulip.gr1cint import *
+from tulip import gr1cint
 
 
 REFERENCE_SPECFILE = """
@@ -29,32 +28,22 @@ SYSGOAL: []<>y&x & []<>!y & []<> !ze;
 """
 
 REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
-<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">
+<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/1" version="1">
+  <env_vars><item key="x" value="boolean" /></env_vars>
+  <sys_vars><item key="y" value="boolean" /></sys_vars>
   <spec><env_init></env_init><env_safety></env_safety><env_prog></env_prog><sys_init></sys_init><sys_safety></sys_safety><sys_prog></sys_prog></spec>
-  <aut>
+  <aut type="basic">
     <node>
-      <id>0</id><name></name>
-      <child_list> 1 2</child_list>
-      <state>
-        <item key="x" value="1" />
-        <item key="y" value="0" />
-      </state>
+      <id>0</id><anno></anno><child_list> 1 2</child_list>
+      <state><item key="x" value="1" /><item key="y" value="0" /></state>
     </node>
     <node>
-      <id>1</id><name></name>
-      <child_list> 1 2</child_list>
-      <state>
-        <item key="x" value="0" />
-        <item key="y" value="0" />
-      </state>
+      <id>1</id><anno></anno><child_list> 1 2</child_list>
+      <state><item key="x" value="0" /><item key="y" value="0" /></state>
     </node>
     <node>
-      <id>2</id><name></name>
-      <child_list> 1 0</child_list>
-      <state>
-        <item key="x" value="1" />
-        <item key="y" value="1" />
-      </state>
+      <id>2</id><anno></anno><child_list> 1 0</child_list>
+      <state><item key="x" value="1" /><item key="y" value="1" /></state>
     </node>
   </aut>
   <extra></extra>
@@ -70,34 +59,34 @@ class gr1cint_test:
         pass
 
     def test_check_syntax(self):
-        assert check_syntax(REFERENCE_SPECFILE, verbose=1)
-        assert not check_syntax("foo", verbose=1)
+        assert gr1cint.check_syntax(REFERENCE_SPECFILE, verbose=1)
+        assert not gr1cint.check_syntax("foo", verbose=1)
 
-    def test_dumpgr1c(self):
+    def test_to_gr1c(self):
         spec = GRSpec(env_vars="x", sys_vars="y",
                       env_init="x", env_prog="x",
                       sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
                       sys_prog="y & x")
-        assert check_syntax(spec.dumpgr1c(), verbose=1)
+        assert gr1cint.check_syntax(spec.to_gr1c(), verbose=1)
 
     def test_check_realizable(self):
         spec = GRSpec(env_vars="x", sys_vars="y",
                       env_init="x", env_prog="x",
                       sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
                       sys_prog="y & x")
-        assert not check_realizable(spec)
+        assert not gr1cint.check_realizable(spec)
         spec.sys_safety = []
-        assert check_realizable(spec)
+        assert gr1cint.check_realizable(spec)
         
     def test_synthesize(self):
         spec = GRSpec(env_vars="x", sys_vars="y",
                       env_init="x", env_prog="x",
                       sys_init="y",
                       sys_prog=["y & x", "!y"])
-        aut = synthesize(spec)
+        aut = gr1cint.synthesize(spec)
         assert aut is not None
-        (prob, sys_dyn, aut_ref) = loadXML(REFERENCE_AUTXML)
-        assert aut == aut_ref
+        assert len(aut.inputs) == 1 and aut.inputs.has_key("x")
+        assert len(aut.outputs) == 1 and aut.outputs.has_key("y")
 
 
 class GR1CSession_test:
@@ -105,7 +94,7 @@ class GR1CSession_test:
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
             f.write(REFERENCE_SPECFILE)
-        self.gs = GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
+        self.gs = gr1cint.GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
 
     def tearDown(self):
         self.gs.close()
@@ -116,7 +105,7 @@ class GR1CSession_test:
 
     def test_getindex(self):
         assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 0
+        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 1
 
     def test_iswinning(self):
         assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
