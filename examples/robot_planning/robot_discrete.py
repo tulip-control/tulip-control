@@ -84,31 +84,28 @@ env_safe = set()                # empty set
 #     [](next(X0reach) == lot || (X0reach && !park))
 #
 
-# Augment the environmental description to make it GR(1)
+# Augment the system description to make it GR(1)
 #! TODO: create a function to convert this type of spec automatically
-env_vars |= {'X0reach'}
-env_init |= {'X0reach'}
-
-# Define the specification
 sys_vars = {'X0reach'}          # infer the rest from TS 
 sys_init = {'X0reach'}          
 sys_prog = {'home'}             # []<>home
-sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+sys_safe = {"((X0reach' & lot) | (!X0reach' & !lot)) | (X0reach & !park)"}
 sys_prog |= {'X0reach'} 
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
-
 #
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys)
+ctrl = synth.synthesize('gr1c', specs, sys)
 
 #
-# Generate a graphical representation of the controller for viewing
+# Generate a graphical representation of the controller for viewing,
+# or a textual representation if pydot is missing.
 #
-ctrl.save_png('robot_discrete.png')
+if not ctrl.save('robot_discrete.png', 'png'):
+    print ctrl

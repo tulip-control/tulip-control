@@ -34,8 +34,53 @@ Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
 
 import os
+
+from tulip import transys
+from tulip.spec import GRSpec
 from tulip import jtlvint
 from tulip import gr1cint
+
+
+def sys_to_spec(sys):
+    if not isinstance(sys, transys.FiniteTransitionSystem):
+        raise TypeError("synth.sys_to_spec only supports FiniteTransitionSystem objects")
+    # Assume everything is controlled; support for an environment
+    # definition is forthcoming.
+    sys_vars = list(sys.aps)
+    sys_vars.extend([s for s in sys.states])
+    trans = []
+
+    # Initial state, including enforcement of mutual exclusion
+    init = ["("+") | (".join(["("+str(current_state)+")"+" & "+ " & ".join(["!("+str(u)+")" for u in sys.states if u != current_state]) for current_state in sys.states.initial])+")"]
+    for state in sys.states.initial:
+        init.append(" & ".join(["("+str(ap)+")" for ap in sys.aps if ap in sys.states.label_of(state)["ap"]]))
+        if len(init[-1]) > 0:
+            init[-1] += " & "
+        init[-1] +=  " & ".join(["!("+str(ap)+")" for ap in sys.aps if ap not in sys.states.label_of(state)["ap"]])
+        init[-1] = "("+str(state)+") -> ("+init[-1]+")"
+
+    # Transitions
+    for from_state in sys.states:
+        trans.append("("+str(from_state)+") -> ("+" | ".join(["("+str(v)+"')" for (u,v,l) in sys.transitions.find(from_states=[from_state])])+")")
+
+    # Mutual exclusion of states
+    trans.append("(("+") | (".join(["("+str(current_state)+"')"+" & "+ " & ".join(["!("+str(u)+"')" for u in sys.states if u != current_state]) for current_state in sys.states])+"))")
+
+    # Require atomic propositions to follow states according to label
+    for state in sys.states:
+        if sys.states.label_of(state).has_key("ap"):
+            trans.append(" & ".join([str(ap)+"'" for ap in sys.aps if ap in sys.states.label_of(state)["ap"]]))
+        else:
+            trans.append("")
+        if len(trans[-1]) > 0:
+            trans[-1] += " & "
+        if not sys.states.label_of(state).has_key("ap"):
+            trans[-1] +=  " & ".join(["!"+str(ap)+"'" for ap in sys.aps])
+        else:
+            trans[-1] +=  " & ".join(["!"+str(ap)+"'" for ap in sys.aps if ap not in sys.states.label_of(state)["ap"]])
+        trans[-1] = "(("+str(state)+"') -> ("+trans[-1]+"))"
+
+    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
 
 def synthesize(option, specs, sys=None):
@@ -57,6 +102,10 @@ def synthesize(option, specs, sys=None):
     @return: Return automaton implementing the strategy, or None if
         error.
     """
+    if sys is not None:
+        sform = sys_to_spec(sys)
+    specs = specs | sform
+
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs)
     elif option == 'jtlv':
