@@ -619,8 +619,8 @@ def check_spec(spec, varNames):
     # Remove all instances of "true" and "false"
     spec = spec.lower()
         
-    spec.replace("true", "")
-    spec.replace("false", "")
+    spec = spec.replace("true", "")
+    spec = spec.replace("false", "")
 
     # Make sure that the resulting string is empty
     spec = spec.split()
