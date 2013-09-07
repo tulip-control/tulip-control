@@ -58,6 +58,23 @@ env_prog = '!park'              # []<>(!park)
 # and what the system is required to do in response to an environmental
 # action.  
 #
+def mutex(varnames):
+    mutex = set()
+    if len(varnames) > 1:
+        for p in varnames:
+            mut_str = p+' -> ! ('
+            first = True
+            for q in varnames:
+                if p != q:
+                    if not first:
+                        mut_str += ' || '
+                    first = False
+                    mut_str+=q
+            mut_str += ')'
+            mutex |= {mut_str}
+    return mutex
+    
+    
 sys_vars = {'X0', 'X1', 'X2', 'X3', 'X4', 'X5'}
 sys_init = {'X0'}
 sys_safe = {
@@ -68,6 +85,9 @@ sys_safe = {
     'X4 -> next(X3 || X1 || X5)',
     'X5 -> next(X4 || X2)',
 }
+
+sys_safe |= mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
+
 sys_prog = set()                # empty set
 
 # 
@@ -107,12 +127,15 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('jtlv', specs)
 
 
+# if the spec is unrealizable, ctrl is a list of counterexamples
+if isinstance(ctrl, list):
+    print "Counterexample: environment winning initial states: \n",ctrl
+
+else:
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
 #! TODO: save_png should probably not be a method in transys?
-if ctrl:
     if not ctrl.save('robot_gr1.png', 'png'):
         print ctrl
-
-ctrl.states.select_current([0])
-ctrl.simulate(inputs_sequence='random', iterations=100)
+    ctrl.states.select_current([0])
+    ctrl.simulate(inputs_sequence='random', iterations=100)
