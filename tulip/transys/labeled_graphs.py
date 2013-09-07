@@ -2689,14 +2689,14 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         if fileformat is 'html':
             save_d3.labeled_digraph2d3(self, path)
-            return
+            return True
         
         method_name = '_save_' +fileformat
         if hasattr(self, method_name):
             method = getattr(self, method_name)
             try:
                 method(path, add_missing_extension=add_missing_extension)
-                return
+                return True
             except:
                 print('Own export method called: ' +method_name +', failed.')
         
