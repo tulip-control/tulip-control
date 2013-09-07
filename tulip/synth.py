@@ -104,7 +104,7 @@ def synthesize(option, specs, sys=None):
     """
     if sys is not None:
         sform = sys_to_spec(sys)
-    specs = specs | sform
+        specs = specs | sform
 
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs)
