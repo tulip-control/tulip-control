@@ -361,7 +361,7 @@ class States(object):
         
         self.add_from(states)
         self.initial |= initial_states
-        self.select_current(current_state)
+        self.select_current(current_state, warn=False)
         
         self._removed_state_callback = removed_state_callback
     
@@ -745,7 +745,7 @@ class States(object):
         for rm_state in rm_states:
             self.remove(rm_state)
     
-    def select_current(self, states):
+    def select_current(self, states, warn=True):
         """Select current state.
         
         State membership is checked.
@@ -756,7 +756,8 @@ class States(object):
         if states is None:
             msg = 'System has no states, current set to None.\n'
             msg += 'You can add states using sys.states.add()'
-            warnings.warn(msg)
+            if warn:
+                warnings.warn(msg)
             self._current = None
             return
         
