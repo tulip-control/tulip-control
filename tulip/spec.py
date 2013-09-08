@@ -33,23 +33,102 @@
 Specification module
 """
 
+import time
 import re, copy
 
 
-class GRSpec(object):
+class LTL(object):
+    """LTL formula (specification)
+
+    Minimal class that describes an LTL formula in the canonical TuLiP
+    syntax.  It contains three attributes:
+
+      - C{formula}: a C{str} of the formula.  Syntax is only enforced
+        if the user requests it, e.g., using the L{check_form} method.
+
+      - C{input_variables}: a C{dict} of variables (names given as
+        strings) and their domains; each key is a variable name and
+        its value (in the dictionary) is its domain.  See notes below.
+        Semantically, these variables are considered to be inputs
+        (i.e., uncontrolled, externally determined).
+
+      - C{output_variables}: similar to C{input_variables}, but
+        considered to be outputs, i.e., controlled, the strategy for
+        setting of which we seek in formal synthesis.
+
+    N.B., domains are specified in multiple datatypes.  The type is
+    indicated below in parenthesis.  Recognized domains, along with
+    examples, are:
+
+      - boolean (C{str}); this domain is specified by C{"boolean"};
+      - finite_set (C{set}); e.g., C{{1,3,5}};
+      - range (C{tuple} of length 2); e.g., C{(0,15)}.
+
+    As with the C{formula} attribute, type-checking is only performed
+    if requested by the user.  E.g., any iterable can act as a
+    finite_set.  However, a range domain must be a C{tuple} of length
+    2; otherwise it is ambiguous with finite_set.
+    """
+    def __init__(self, formula=None, input_variables=None, output_variables=None):
+        """Instantiate an LTL object.
+
+        Any non-None arguments are saved to the corresponding
+        attribute by reference.
+        """
+        if formula is None:
+            formula = ""
+        if input_variables is None:
+            input_variables = dict()
+        if output_variables is None:
+            output_variables = dict()
+        self.formula = formula
+        self.input_variables = input_variables
+        self.output_variables = output_variables
+
+    def __str__(self):
+        return str(self.formula)
+
+    def dumps(self, timestamp=False):
+        """Dump TuLiP LTL file string.
+
+        @param timestamp: If True, then add comment to file with
+            current time in UTC.
+        """
+        if timestamp:
+            output = "# Generated at "+time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())+"\n"
+        else:
+            output = ""
+        output += "0  # Version\n%%\n"
+        if len(self.input_variables) > 0:
+            output += "INPUT:\n"
+            for (k,v) in self.input_variables.items():
+                output += str(k) + " : " + str(v) + ";\n"
+        if len(self.output_variables) > 0:
+            output += "\nOUTPUT:\n"
+            for (k,v) in self.output_variables.items():
+                output += str(k) + " : " + str(v) + ";\n"
+        return output + "\n%%\n\n"+self.formula
+
+    def check_form(self, check_undeclared_identifiers=False):
+        """Verify formula syntax and type-check variable domains.
+
+        Return True iff OK.
+        """
+        raise NotImplementedError
+
+
+class GRSpec(LTL):
     """GR(1) specification
 
-    The canonical form is::
+    The basic form is::
 
       (env_init & []env_safety & []<>env_prog_1 & []<>env_prog_2 & ...)
         -> (sys_init & []sys_safety & []<>sys_prog_1 & []<>sys_prog_2 & ...)
 
     A GRSpec object contains the following attributes:
 
-      - C{env_vars}: a dictionary of variables (names given as
-        strings) that are determined by the environment; each key is a
-        variable name and its value (in the dictionary) is the
-        corresponding domain (see notes below about domains).
+      - C{env_vars}: alias for C{input_variables} of L{LTL},
+        concerning variables that are determined by the environment
 
       - C{env_init}: a list of string that specifies the assumption
         about the initial state of the environment.
@@ -60,9 +139,8 @@ class GRSpec(object):
       - C{env_prog}: a list of string that specifies the justice
         assumption on the environment.
 
-      - C{sys_vars}: a dictionary of variables (names given as
-        strings) that are controlled by the system; analogous to
-        C{env_vars}.
+      - C{sys_vars}: alias for C{output_variables} of L{LTL},
+        concerning variables that are controlled by the system.
 
       - C{sys_init}: a list of string that specifies the requirement
         on the initial state of the system.
@@ -78,11 +156,6 @@ class GRSpec(object):
     Boolean function, which usually means that subformula has no
     effect (is non-restrictive) on the spec.
 
-    N.B., domains are specified in multiple datatypes.  The type is
-    indicated below in parenthesis.  Recognized domains are:
-
-      - C{boolean} (str)
-
     Consult L{GRSpec.__init__} concerning arguments at the time of
     instantiation.
     """
@@ -97,7 +170,7 @@ class GRSpec(object):
         @param env_vars: If env_vars is a dictionary, then its keys
             should be variable names, and values are domains of the
             corresponding variable.  Else, if env_vars is an iterable,
-            then assume all environment variables are Boolean (or
+            then assume all environment variables are C{boolean} (or
             "atomic propositions").  Cf. L{GRSpec} for details.
 
         @type sys_vars: set or dict
@@ -141,10 +214,57 @@ class GRSpec(object):
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
 
+        LTL.__init__(self, formula=self.to_canon(),
+                     input_variables=self.env_vars,
+                     output_variables=self.sys_vars)
+
     def __str__(self):
-        output = "ENV VARIABLES: "+str(self.env_vars)+"\n"
-        output += "SYS VARIABLES: "+str(self.sys_vars)+"\n"
-        return output+"      FORMULA: "+self.to_canon()
+        return self.to_canon()
+
+    def dumps(self, timestamp=False):
+        self.formula = self.to_canon()
+        return LTL.dumps(self, timestamp=timestamp)
+
+    def pretty(self):
+        output = "ENVIRONMENT VARIABLES:\n"
+        if len(self.env_vars) > 0:
+            for (k,v) in self.env_vars.items():
+                output += "\t"+str(k)+"\t"+str(v)+"\n"
+        else:
+            output += "\t(none)\n"
+        output += "\nSYSTEM VARIABLES:\n"
+        if len(self.sys_vars) > 0:
+            for (k,v) in self.sys_vars.items():
+                output += "\t"+str(k)+"\t"+str(v)+"\n"
+        else:
+            output += "\t(none)\n"
+        output += "\nFORMULA:\n"
+        output += "ASSUMPTION:\n"
+        if len(self.env_init) > 0:
+            output += "    INITIAL\n\t  "
+            output += "\n\t& ".join(["("+f+")" for f in self.env_init])+"\n"
+        if len(self.env_safety) > 0:
+            output += "    SAFETY\n\t  []"
+            output += "\n\t& []".join(["("+f+")" for f in self.env_safety])+"\n"
+        if len(self.env_prog) > 0:
+            output += "    LIVENESS\n\t  []<>"
+            output += "\n\t& []<>".join(["("+f+")" for f in self.env_prog])+"\n"
+
+        output += "GUARANTEE:\n"
+        if len(self.sys_init) > 0:
+            output += "    INITIAL\n\t  "
+            output += "\n\t& ".join(["("+f+")" for f in self.sys_init])+"\n"
+        if len(self.sys_safety) > 0:
+            output += "    SAFETY\n\t  []"
+            output += "\n\t& []".join(["("+f+")" for f in self.sys_safety])+"\n"
+        if len(self.sys_prog) > 0:
+            output += "    LIVENESS\n\t  []<>"
+            output += "\n\t& []<>".join(["("+f+")" for f in self.sys_prog])+"\n"
+        return output
+
+    def check_form(self):
+        self.formula = self.to_canon()
+        return LTL.check_form(self)
 
     def copy(self):
         return GRSpec(env_vars=dict(self.env_vars),

@@ -12,9 +12,7 @@ Contents:
 
    intro
    tutorial
-   gridworlds
-   data_formats
-   mod_dumps
+   specifications
 
 Indices and tables
 ==================
