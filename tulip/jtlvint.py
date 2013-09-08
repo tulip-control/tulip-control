@@ -52,8 +52,7 @@ from spec import GRSpec
 #for checking form of spec
 import pyparsing
 from pyparsing import *
-from tulip import ltl_parse
-from tulip.ltl_parse import *
+from tulip.spec.parse import *
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
@@ -515,7 +514,7 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
         return False
 
     # Check that the syntax is GR(1). This uses pyparsing
-    prop = ltl_parse.proposition
+    prop = proposition
     UnaryTemporalOps = ~bool_keyword + oneOf("next") + ~Word(nums + "_")
     next_ltl_expr = operatorPrecedence(prop,
         [("'", 1, opAssoc.LEFT, ASTUnTempOp),
