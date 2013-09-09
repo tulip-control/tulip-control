@@ -55,6 +55,8 @@ class LTL_test:
         self.f = None
 
     def test_loads_dumps_id(self):
+        # Dump/load identity test: Dumping the result from loading a
+        # dump should be identical to the original dump.
         assert self.f.dumps() == LTL.loads(self.f.dumps()).dumps()
 
 
