@@ -173,7 +173,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     --------
     OpenFTS, tuple2fts, line_labeled_with, cycle_labeled_with
     """
-    def __init__(self, atomic_propositions=[], actions=[], **args):
+    def __init__(self, **args):
         """Initialize Finite Transition System.
         
         @param atomic_propositions: state are labeled with
@@ -185,6 +185,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         For other arguments, see LabeledStateDiGraph
         """
+        atomic_propositions = []
+        actions = []
+        
         # state labels
         self._state_label_def = OrderedDict(
             [['ap', PowerSet(atomic_propositions) ]]

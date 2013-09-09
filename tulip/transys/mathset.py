@@ -545,6 +545,14 @@ class SubSet(MathSet):
                             '\nshould already be \\in ' +
                             'self.superset = ' +str(self.superset) )
         super(SubSet, self).add_from(new_elements)
+    
+    def has_superset(self, superset):
+        """Check if given set if the superset.
+        """
+        if superset is self._superset:
+            return True
+        else:
+            return False
 
 class CartesianProduct(object):
     """List of MathSets, with Cartesian semantics.

@@ -437,7 +437,7 @@ def load_file(aut_file, spec, verbose=0):
     """
     # label states
     for to_state in m.states:
-        predecessors = m.states.pre_single(to_state)
+        predecessors = m.states.pre(to_state)
 
         # any incoming edges ?
         if predecessors:

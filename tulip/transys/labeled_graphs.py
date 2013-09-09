@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Transition System Module
+Base classes for labeled directed graphs
 """
 from pprint import pformat
 from collections import Iterable
@@ -343,8 +343,8 @@ class States(object):
     @param mutable: enable storage of unhashable states
     @type mutable: bool (default: False)
     """
-    def __init__(self, graph, states=[], initial_states=[], current_state=None,
-                 mutable=False, removed_state_callback=None):
+    def __init__(self, graph, mutable=False,
+                 accepting_states_type=None):
         self.graph = graph
         self.list = list() # None when list disabled
         
@@ -359,11 +359,9 @@ class States(object):
             #self._initial = set()
         self.initial = SubSet(self)
         
-        self.add_from(states)
-        self.initial |= initial_states
-        self.select_current(current_state, warn=False)
-        
-        self._removed_state_callback = removed_state_callback
+        self._accepting_type = accepting_states_type
+        if accepting_states_type:
+            self.accepting = accepting_states_type(self)
     
     def __get__(self):
         return self.__call__()
@@ -459,6 +457,41 @@ class States(object):
         #TODO carefully test this
         self.add_from(new_states)
         return self
+    
+    def __contains__(self, state):
+        """Check if single state \\in set_of_states.
+        
+        @param state: Check if C{state} already in states.
+        @type state: if mutable states enabled, then any type,
+            otherwise must be hashable
+        
+        @return: C{True} if C{state} is in states.
+        @rtype: bool
+        """
+        state_id = self._mutant2int(state)
+        return self.graph.has_node(state_id)
+    
+    def __setattr__(self, name, value):
+        ok = True
+        if name is 'initial':
+            if not isinstance(value, SubSet):
+                ok = False
+            if ok:
+                ok = value.has_superset(self)
+        
+        if name is 'accepting':
+            if not isinstance(value, self._accepting_type):
+                ok = False
+            if ok:
+                ok = value.has_superset(self)
+        
+        if not ok:
+            msg = 'States.initial must be of class StateSubset.'
+            msg += 'Got instead:\n\t' +str(value) +'\nof class:\n\t'
+            msg += str(type(value) )
+            raise Exception(msg)
+        
+        object.__setattr__(self, name, value)
     
     def _is_mutable(self):
         if self.mutants is None:
@@ -577,25 +610,13 @@ class States(object):
     def _ints2mutants(self, ints):
         return map(self._int2mutant, ints)
     
-    def __contains__(self, state):
-        """Check if single state \\in set_of_states.
-        
-        @param state: Check if C{state} already in states.
-        @type state: if mutable states enabled, then any type,
-            otherwise must be hashable
-        
-        @return: C{True} if C{state} is in states.
-        @rtype: bool
-        """
-        state_id = self._mutant2int(state)
-        return self.graph.has_node(state_id)
-    
-    def _exist_accepting_states(self, msg=True):
+    def _exist_accepting_states(self, warn=True):
         """Check if system has accepting states."""
-        if not hasattr(self.graph, 'accepting_states'):
-            if msg:
-                warnings.warn('System of type: ' +str(type(self.graph) ) +
-                              'does not have accepting states.')
+        if not hasattr(self, 'accepting'):
+            if warn:
+                msg = 'System of type: ' +str(type(self.graph) )
+                msg += 'does not have accepting states.'
+                warnings.warn(msg)
             return False
         else:
             return True
@@ -608,7 +629,17 @@ class States(object):
                 dprint('State already exists.')
                 return
     
-    # states
+    def _single_state2singleton(self, state):
+        """Convert to a singleton list, if argument is a single state.
+        
+        Otherwise return given argument.
+        """
+        if state in self:
+            states = [state]
+        else:
+            states = state
+        return states
+    
     def add(self, new_state):
         """Create single state.
         
@@ -729,16 +760,12 @@ class States(object):
             self.list.remove(rm_state)
         
         # rm if init
-        if self.is_initial(rm_state):
+        if rm_state in self.initial:
             self.initial.remove(rm_state)
         
         # chain to parent (for accepting states etc)
-        if self._removed_state_callback:
-            self._removed_state_callback(rm_state)
-    
-    def rm(self, rm_state):
-        """Alias to remove."""
-        return self.remove(rm_state)
+        if rm_state in self.accepting:
+            self.accepting.remove(rm_state)
     
     def remove_from(self, rm_states):
         """Remove a list of states."""
@@ -785,16 +812,113 @@ class States(object):
         """
         return list(self._current)
     
-    def is_initial(self, state):
-        return state in self.initial
-    
-    def is_accepting(self, state):       
-        """Check if state \\in accepting states.
-        """
-        if not self._exist_accepting_states():
-            return
+    def is_terminal(self, state):
+        """Check if state has no outgoing transitions.
         
-        return is_subset([state], self.graph.accepting_states)
+        see also
+        --------
+        Def. 2.4, p.23 [Baier 2008]
+        """
+        successors = self.post(state)
+        if successors:
+            return False
+        else:
+            return True
+    
+    def is_blocking(self, state):
+        """Check if state has outgoing transitions for each label.
+        """
+    
+    def post(self, states):
+        """Direct successor set (1-hop) for given states.
+        
+        Over all actions or letters, i.e., edge labeling ignored
+        by states.pre, because it may be undefined. Only classes
+        which have an action set, alphabet, or other transition
+        labeling set provide a pre(state, label) method, as for
+        example pre(state, action) in the case of closed transition
+        systems.
+        
+        If multiple stats provided,
+        then union Post(s) for s in states provided.
+        
+        see also
+        --------
+        pre
+        Def. 2.3, p.23 [Baier 2008]
+        """
+        states = self._single_state2singleton(states)
+        
+        try:
+            state_ids = self._mutants2ints(states)
+        except:
+            raise Exception('Not all states given are in the set of states.\n'+
+                            'Did you mean to use port_single() instead ?')
+        
+        successor_ids = list()
+        for state_id in state_ids:
+            successor_ids += self.graph.successors(state_id)
+        
+        successor_ids = unique(successor_ids)
+        successors = self._ints2mutants(successor_ids)
+        
+        return successors
+    
+    def pre(self, states):
+        """Return direct predecessors (1-hop) of given state.
+        
+        see also
+        --------
+        post
+        Def. 2.3, p.23 [Baier 2008]
+        """
+        states = self._single_state2singleton(states)
+        
+        try:
+            state_ids = self._mutants2ints(states)
+        except:
+            raise Exception('Some given items are not states.')
+        
+        predecessor_ids = list()
+        for state_id in state_ids:
+            predecessor_ids += self.graph.predecessors(state_id)
+        
+        predecessor_ids = unique(predecessor_ids)
+        predecessors = self._ints2mutants(predecessor_ids)
+        
+        return predecessors
+    
+    def forward_reachable(self, state):
+        """Return states reachable from given state.
+        
+        Iterated post(), a wrapper of networkx.descendants.
+        """
+        state_id = self._mutant2int(state)
+        descendant_ids = nx.descendants(self, state_id)
+        descendants = self._ints2mutants(descendant_ids)
+        return descendants
+    
+    def backward_reachable(self, state):
+        """Return states from which the given state can be reached.
+        """
+        state_id = self._mutant2int(state)
+        descendant_ids = nx.ancestors(self, state_id)
+        ancestors = self._ints2mutants(descendant_ids)
+        return ancestors
+    
+    def rename(self, new_states_dict):
+        """Map states in place, based on dict.
+        
+        input
+        -----
+        - C{new_states_dict}: {old_state : new_state}
+        (partial allowed, i.e., projection)
+        
+        See also
+        --------
+        networkx.relabel_nodes
+        """
+        return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
     
     def check(self):
         """Check sanity of various state sets.
@@ -816,157 +940,6 @@ class States(object):
         
         print('States and Initial States are ok.\n'
               +'For accepting states, refer to my parent.')
-    
-    def post_single(self, state):
-        """Direct successors of a single state.
-        
-        post_single() exists to contrast with post().
-        
-        post() cannot guess when it is passed a single state, or
-        multiple states. Reason is that a state may happen to be
-        anything, so possibly something iterable.
-        
-        see also
-        --------
-        post, pre_single
-        Def. 2.3, p.23 [Baier 2008]
-        """
-        return self.post([state] )
-    
-    def post(self, states):
-        """Direct successor set (1-hop) for given states.
-        
-        Over all actions or letters, i.e., edge labeling ignored
-        by states.pre, because it may be undefined. Only classes
-        which have an action set, alphabet, or other transition
-        labeling set provide a pre(state, label) method, as for
-        example pre(state, action) in the case of closed transition
-        systems.
-        
-        If multiple stats provided,
-        then union Post(s) for s in states provided.
-        
-        see also
-        --------
-        post_single, pre
-        Def. 2.3, p.23 [Baier 2008]
-        """
-        #if not is_subset(states, self() ):
-        try:
-            state_ids = self._mutants2ints(states)
-        except:
-            raise Exception('Not all states given are in the set of states.\n'+
-                            'Did you mean to use port_single() instead ?')
-        
-        successor_ids = list()
-        for state_id in state_ids:
-            successor_ids += self.graph.successors(state_id)
-        
-        successor_ids = unique(successor_ids)
-        successors = self._ints2mutants(successor_ids)
-        
-        return successors
-    
-    def reachable(self, state):
-        """Return states reachable from given state.
-        
-        Iterated post(), a wrapper of networkx.descendants.
-        """
-        return nx.descendants(self, state)
-    
-    def pre_single(self, state):
-        """Direct predecessors of single state.
-        
-        pre_single() exists to contrast with pre().
-        
-        see also
-        --------
-        pre, post_single
-        Def. 2.3, p.23 [Baier 2008]
-        """
-        return self.pre([state] )
-    
-    def pre(self, states):
-        """Predecessor set (1-hop) for given state.
-        
-        see also
-        --------
-        pre_single, post
-        Def. 2.3, p.23 [Baier 2008]
-        """
-        try:
-            state_ids = self._mutants2ints(states)
-        except:
-            raise Exception('Some given items are not states.')
-        
-        predecessor_ids = list()
-        for state_id in state_ids:
-            predecessor_ids += self.graph.predecessors(state_id)
-        
-        predecessor_ids = unique(predecessor_ids)
-        predecessors = self._ints2mutants(predecessor_ids)
-        
-        return predecessors
-    
-    def is_terminal(self, state):
-        """Check if state has no outgoing transitions.
-        
-        see also
-        --------
-        Def. 2.4, p.23 [Baier 2008]
-        """
-        successors = self.post_single(state)
-        if successors:
-            return False
-        else:
-            return True
-    
-    def add_accepting(self, state):
-        """Convenience for FSA.add_accepting_state().
-        
-        see also
-        --------
-        self.add_accepting_from
-        """
-        if not self._exist_accepting_states():
-            return
-        
-        self.graph.add_accepting_state(state)
-    
-    def add_accepting_from(self, states):
-        """Convenience for FSA.add_accepting_states_from().
-        
-        see also
-        --------
-        self.add_accepting
-        """
-        if not self._exist_accepting_states():
-            return
-        
-        self.graph.add_accepting_states_from(states)
-    
-    def rename(self, new_states_dict):
-        """Map states in place, based on dict.
-        
-        input
-        -----
-        - C{new_states_dict}: {old_state : new_state}
-        (partial allowed, i.e., projection)
-        
-        See also
-        --------
-        networkx.relabel_nodes
-        """
-        return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
-        
-    def __setattr__(self, name, value):
-        if name is 'initial' and not isinstance(value, SubSet):
-            msg = 'States.initial must be of class StateSubset.'
-            msg += 'Got instead:\n\t' +str(value) +'\nof class:\n\t'
-            msg += str(type(value) )
-            raise Exception(msg)
-        
-        object.__setattr__(self, name, value)
     
     def paint(self, state, color):
         """Color the given state.
@@ -1003,12 +976,12 @@ class LabeledStates(States):
     
     The simplest representation for APs stored here is a set of strings.
     """
-    def __init__(self, graph, states=[], initial_states=[], current_state=None,
-                 mutable=False, removed_state_callback=None):
-        States.__init__(self, graph, states=states,
-                        initial_states=initial_states,
-                        current_state=current_state, mutable=mutable,
-                        removed_state_callback=removed_state_callback)
+    def __init__(self, graph, mutable=False,
+                 accepting_states_type=None):
+        States.__init__(
+            self, graph, mutable=mutable,
+            accepting_states_type=accepting_states_type
+        )
         
         # labeling defined ?
         if hasattr(self.graph, '_state_label_def'):
@@ -1078,11 +1051,11 @@ class LabeledStates(States):
             node_shape = graph.dot_node_shape['normal']
             
             # check if accepting states defined
-            if not self._exist_accepting_states(msg=False):
+            if not self._exist_accepting_states(warn=False):
                 return node_shape
             
             # check for accepting states
-            if self.is_accepting(state):
+            if state in self.accepting:
                 node_shape = graph.dot_node_shape['accepting']
                 
             return node_shape
@@ -1095,7 +1068,7 @@ class LabeledStates(States):
         for (state_id, state_data) in self.graph.nodes_iter(data=True):
             state = self._int2mutant(state_id)
             
-            if self.is_initial(state):
+            if state in self.initial:
                 add_incoming_edge(to_pydot_graph, state_id)
             
             node_shape = decide_node_shape(self.graph, state)
@@ -1737,7 +1710,7 @@ class LabeledTransitions(Transitions):
     --------
     Transitions
     """
-    def __init__(self, graph):
+    def __init__(self, graph, deterministic=False):
         Transitions.__init__(self, graph)
         
         # labeling defined ?
@@ -1746,6 +1719,8 @@ class LabeledTransitions(Transitions):
                 LabelConsistency(self.graph._transition_label_def)
         else:
             self._label_check = None
+        
+        self._deterministic = deterministic
     
     def __call__(self, labeled=False, as_dict=True):
         """Return all edges, optionally paired with labels.
@@ -1873,6 +1848,23 @@ class LabeledTransitions(Transitions):
             to_state_ids = self.graph.states._mutants2ints(to_states)
         
         return (from_state_ids, to_state_ids)
+    
+    def _breaks_determinism(self, from_state, sublabels):
+        """Return True if adding transition conserves determinism.
+        """
+        if not self._deterministic:
+            return
+        
+        if not from_state in self.graph.states:
+            raise Exception('from_state \notin graph')
+        
+        same_labeled = self.find([from_state], desired_label=sublabels)        
+        
+        if same_labeled:
+            msg = 'Candidate transition violates determinism.\n'
+            msg += 'Existing transitions with same label:\n'
+            msg += str(same_labeled)
+            raise Exception(msg)
     
     def remove_labeled(self, from_state, to_state, label):
         self._exist_labels()
@@ -2050,6 +2042,8 @@ class LabeledTransitions(Transitions):
                 raise Exception(msg)
             else:
                 warnings.warn(msg)
+        
+        self._breaks_determinism(from_state, labels)
         
         # states, labels checked, no same unlabeled nor labeled,
         # so add it
@@ -2257,34 +2251,40 @@ class LabeledTransitions(Transitions):
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton."""
     
-    def __init__(self, name='', states=[], initial_states=[],
-                 current_state=None, mutable=False,
-                 removed_state_callback=None,
-                 from_networkx_graph=None):
+    def __init__(
+            self, name='', mutable=False,
+            deterministic=False,
+            accepting_states_type=None,
+        ):
+        """Initialize labeled digraph.
+        
+        @param name: system name, default for save and __str__
+        @type name: str
+        
+        @param mutable: if C{True}, then mutable C{states} allowed
+        @type mutable: bool
+        
+        @param deterministic: if C{True}, then each transition
+            added is checked to maintain edge-label-determinism
+        @type deterministic: bool
+        
+        @param accepting_states_type:
+            accepting states use this class,
+            f C{None}, then no accepting states initialized
+        @type accepting_states_type: class definition
+        """
         nx.MultiDiGraph.__init__(self, name=name)
         
-        if from_networkx_graph is not None and states:
-            raise ValueError('Give either states or Networkx graph, not both.')
-        
-        if from_networkx_graph is not None:
-            states = from_networkx_graph.nodes()
-            edges = from_networkx_graph.edges()
-        
         self.states = LabeledStates(
-            self, states=states, initial_states=initial_states,
-            current_state=current_state, mutable=mutable,
-            removed_state_callback=removed_state_callback
+            self, mutable=mutable,
+            accepting_states_type=accepting_states_type
         )
-        self.transitions = LabeledTransitions(self)
+        self.transitions = LabeledTransitions(self, deterministic)
 
         self.dot_node_shape = {'normal':'circle'}
         self.default_export_path = './'
         self.default_export_fname = 'out'
         self.default_layout = 'dot'
-        
-        if from_networkx_graph is not None:
-            for (from_state, to_state) in edges:
-                self.transitions.add(from_state, to_state)
         
     def _add_missing_extension(self, path, file_type):
         import os
@@ -2368,6 +2368,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
     def __gt__(self, other):
         return other.__lt__(self)
+    
+    def copy(self):
+        return copy.deepcopy(self)
 
 	# unary operators
     def reachable(self):
@@ -2567,62 +2570,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             if self.states.is_terminal(state):
                 return True
         return False
-    
-    # file i/o
-    def load_xml(self):
-        raise NotImplementedError
-        
-    def xml_str(self, pretty=True, idt_level=0):
-        """Return string of automaton conforming to tulipcon XML, version 1
-        
-        Note that the <anno> element is used to store the goal mode
-        and reach annotation value of each node.  This usage is
-        experimental; if it is shown to be useful, a dedicated element
-        will be introduced into the XML Schema.
-        
-        @param pretty: If pretty is True,
-            then use indentation and newlines to make
-            the resulting XML string more visually appealing.
-        @type pretty: bool
-        
-        @param idt_level: base indentation level on which to create
-            automaton string. This level is only relevant if pretty=True.
-        @type idt_level: int
-        """
-        if pretty:
-            nl = '\n'  # Newline
-            idt = '  '  # Indentation
-        else:
-            nl = ''
-            idt = ''
-        
-        out = idt_level*idt+'<aut type="basic">'+nl
-        idt_level += 1
-        for (node, label) in self.nodes_iter(data=True):
-            out += idt_level*idt+'<node>'+nl
-            
-            idt_level += 1
-            
-            idtn = idt_level *idt
-            cur_succ = self.successors(node)
-            
-            out += idtn +'<id>' +str(node) +'</id>'
-            #out += '<anno>' +str(label['mode'] ) +' '
-            #out += str(label['rgrad']) +'</anno>' +nl
-            out += idtn +conxml.taglist('child_list', cur_succ) +nl
-            out += idtn +conxml.tagdict('state', label['state'] ) +nl
-            
-            idt_level -= 1
-            
-            out += idt_level*idt+'</node>' +nl
-        
-        idt_level -= 1
-        out += idt_level*idt +'</aut>' +nl
-        
-        return out
-    
-    def write_xml_file(self):
-        raise NotImplementedError
     
     def dot_str(self, wrap=10):
         """Return dot string.

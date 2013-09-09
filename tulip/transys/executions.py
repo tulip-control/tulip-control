@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Transition System Module
+Classes for executions, traces, words, input port valuations, etc.
 """
 from collections import OrderedDict
 
