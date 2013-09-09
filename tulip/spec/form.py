@@ -88,6 +88,16 @@ class LTL(object):
     def __str__(self):
         return str(self.formula)
 
+    def _domain_str(self, d):
+        if d == "boolean":
+            return d
+        elif isinstance(d, tuple) and len(d) == 2:
+            return "["+str(d[0])+", "+str(d[1])+"]"
+        elif hasattr(d, "__iter__"):
+            return "{"+", ".join([str(e) for e in d])+"}"
+        else:
+            raise ValueError("Unrecognized variable domain type.")
+
     def dumps(self, timestamp=False):
         """Dump TuLiP LTL file string.
 
@@ -102,12 +112,12 @@ class LTL(object):
         if len(self.input_variables) > 0:
             output += "INPUT:\n"
             for (k,v) in self.input_variables.items():
-                output += str(k) + " : " + str(v) + ";\n"
+                output += str(k) + " : " + self._domain_str(v) + ";\n"
         if len(self.output_variables) > 0:
             output += "\nOUTPUT:\n"
             for (k,v) in self.output_variables.items():
-                output += str(k) + " : " + str(v) + ";\n"
-        return output + "\n%%\n\n"+self.formula
+                output += str(k) + " : " + self._domain_str(v) + ";\n"
+        return output + "\n%%\n"+self.formula
 
     def check_form(self, check_undeclared_identifiers=False):
         """Verify formula syntax and type-check variable domains.
@@ -115,6 +125,87 @@ class LTL(object):
         Return True iff OK.
         """
         raise NotImplementedError
+
+
+    @staticmethod
+    def loads(s):
+        """Create LTL object from TuLiP LTL file string."""
+        for line in s.splitlines():
+            line = line.strip()  # Ignore leading and trailing whitespace
+            comment_ind = line.find("#")
+            if comment_ind > -1:
+                line = line[:comment_ind]
+            if len(line) > 0:  # Version number is the first nonblank line
+                try:
+                    version = int(line)
+                except ValueError:
+                    raise ValueError("Malformed version number.")
+                if version != 0:
+                    raise ValueError("Unrecognized version number: "+str(version))
+                break
+        try:
+            s = re.sub(r"#.*(\n|$)", "", s)  # Strip comments
+            preamble, declar, formula = s.split("%%\n")
+            input_ind = declar.find("INPUT:")
+            output_ind = declar.find("OUTPUT:")
+            if output_ind == -1:
+                output_ind = 0  # Default is OUTPUT
+            if input_ind == -1:
+                input_section = ""
+                output_section = declar[output_ind:]
+            elif input_ind < output_ind:
+                input_section = declar[input_ind:output_ind]
+                output_section = declar[output_ind:]
+            else:
+                output_section = declar[output_ind:input_ind]
+                input_section = declar[input_ind:]
+            input_section = input_section.replace("INPUT:", "")
+            output_section = output_section.replace("OUTPUT:", "")
+
+            variables = [dict(), dict()]
+            sections = [input_section, output_section]
+            for i in range(2):
+                for var_declar in sections[i].split(";"):
+                    if len(var_declar.strip()) == 0:
+                        continue
+                    name, domain = var_declar.split(":")
+                    name = name.strip()
+                    domain = domain.lstrip().rstrip(";")
+                    if domain[0] == "[":  # Range-type domain
+                        domain = domain.split(",")
+                        variables[i][name] = (int(domain[0][1:]), int(domain[1][:domain[1].index("]")]))
+                    elif domain[0] == "{":  # Finite set domain
+                        domain.strip()
+                        assert domain[-1] == "}"
+                        domain = domain[1:-1]  # Remove opening, closing braces
+                        variables[i][name] = list()
+                        for elem in domain.split(","):
+                            try:
+                                variables[i][name].append(int(elem))
+                            except ValueError:
+                                variables[i][name].append(str(elem))
+                        variables[i][name] = set(variables[i][name])
+                    elif domain == "boolean":
+                        variables[i][name] = domain
+                    else:
+                        raise TypeError
+
+        except ValueError, TypeError:
+            raise ValueError("Malformed TuLiP LTL specification string.")
+
+        return LTL(formula=formula, input_variables=variables[0], output_variables=variables[1])
+
+
+    @staticmethod
+    def load(f):
+        """Wrap L{loads} for reading from files.
+
+        @param f: file or str.  In the latter case, attempt to open a
+            file named "f" read-only.
+        """
+        if isinstance(f, str):
+            f = open(f, "rU")
+        return LTL.loads(f.read())
 
 
 class GRSpec(LTL):

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
-SCL; 6 Sep 2013.
+SCL; 9 Sep 2013.
 """
 
 import copy
-from tulip.spec import GRSpec
+from tulip.spec import LTL, GRSpec
 import tulip.gridworld as gw
 
 
-def specs_equal(s1, s2):
+def GR1specs_equal(s1, s2):
     """Return True if s1 and s2 are *roughly* syntactically equal.
 
     This function seems to be of little or no use outside this test
@@ -43,7 +43,19 @@ def import_GridWorld_test():
     X = gw.random_world((5, 10), prefix="sys")
     s = GRSpec()
     s.import_GridWorld(X)
-    assert specs_equal(X.spec(), s)
+    assert GR1specs_equal(X.spec(), s)
+
+
+class LTL_test:
+    def setUp(self):
+        self.f = LTL("[](p -> <>q)", input_variables={"p":"boolean"},
+                     output_variables={"q":"boolean"})
+
+    def tearDown(self):
+        self.f = None
+
+    def test_loads_dumps_id(self):
+        assert self.f.dumps() == LTL.loads(self.f.dumps()).dumps()
 
 
 class GRSpec_test:

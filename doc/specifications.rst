@@ -91,9 +91,11 @@ line, with no variable declarations.  All variable declarations following
 "input variables", sometimes called uncontrolled or part of the "environment".
 All variable declarations following ``OUTPUT:``, up to the appearance of
 ``INPUT:`` or ``%%``, are taken to be "output variables", sometimes called
-controlled or part of the "system".
+controlled or part of the "system".  The default behavior (i.e., if these
+keywords are omitted) is that of ``OUTPUT:``.
 
-A variable declaration is of the form ``name : domain;``.  The domain may be
+A variable declaration is of the form ``name : domain;``.  It may span multiple
+lines.  The domain may be
 
 - ``boolean``, if the variable (i.e., atomic proposition)can either be True or False;
 - ``[a,b]``, where ``a`` and ``b`` are integers; or
