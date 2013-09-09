@@ -114,7 +114,7 @@ BNF grammar, the formula syntax is descibed in the following.
    (disjunction), **->** (implication), and **<->** (equivalence).
 4. Temporal operators are **[]** (always), **<>** (eventually), **X** (next),
    **U** (until), **V** (release).
-5. Notice that the alternative operators **/\\** and **\/** for **&&** and
+5. Notice that the alternative operators **/\\** and **\\/** for **&&** and
    **||**, respectively, are not included; cf. the `Spin LTL formula syntax
    <http://spinroot.com/spin/Man/ltl.html>`_.  Furthermore, **W** (weak until)
    is not included.
