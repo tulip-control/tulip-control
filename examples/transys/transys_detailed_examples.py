@@ -110,7 +110,7 @@ def fts_maximal_example():
     fts.states.remove_from({'pay', 'soda'} )
     fts.states.add_from({'pay', 'soda'} )
     
-    fts.states.set_current(['pay'])
+    fts.states.select_current(['pay'])
     
     fts.states.initial.add('pay') # should already be a state
     fts.states.initial |= {'soda', 'select'}
@@ -170,7 +170,7 @@ def fts_maximal_example():
         print('pre cannot distinguish single states from sets of states, '+
                'because a state can be anything, e.g., something iterable.\n')
     # use instead
-    pre = fts.states.pre_single('pay')
+    pre = fts.states.pre('pay')
     
     # all 1-hop post sets
     print('\n' +10*'-' +'\nPost sets are:\n')
@@ -345,14 +345,14 @@ def ba_maximal_example():
     ba.plot()
     
     # accepting states
-    ba.add_accepting_state('q1')
-    ba.add_accepting_states_from({'q2', 'q3'} )
-    ba.remove_accepting_state('q2')
-    ba.remove_accepting_states_from({'q2', 'q3'} )
+    ba.states.accepting.add('q1')
+    ba.states.accepting |= {'q2', 'q3'}
+    ba.states.accepting.remove('q2')
+    ba.states.accepting.remove('q3')
     
     print('Number of accepting states:\n\t' +
-          str(ba.number_of_accepting_states() ) +'\n')
-    print('Accepting states:\n\t' +str(ba.accepting_states) +'\n')
+          str(len(ba.states.accepting) ) +'\n')
+    print('Accepting states:\n\t' +str(ba.states.accepting) +'\n')
     print(ba)
     
     path = './test_ba'

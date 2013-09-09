@@ -122,7 +122,7 @@ sys_safe |= {'gear1 && slippery -> next(gear1)'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
-                    
+
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available

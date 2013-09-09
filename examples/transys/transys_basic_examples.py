@@ -121,7 +121,7 @@ def ba_minimal_example():
     ba = trs.BuchiAutomaton(atomic_proposition_based=True)
     ba.states.add_from({'q0', 'q1', 'q2'})
     ba.states.initial.add('q0')
-    ba.states.add_accepting('q1')
+    ba.states.accepting.add('q1')
     
     ba.alphabet.math_set |= [True, 'green', 'not_green']
     

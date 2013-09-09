@@ -202,15 +202,10 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
         self.default_export_fname = 'fsm'
         
-        LabeledStateDiGraph.__init__(
-            self, removed_state_callback=self._removed_state_callback, **args
-        )
+        LabeledStateDiGraph.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
-    
-    def _removed_state_callback(self):
-        """Remove it also from anywhere within this class, besides the states."""
     
     def _to_ordered_dict(self, x):
         if not isinstance(x, OrderedDict):

@@ -65,7 +65,7 @@ def test_mutable_ba():
     
     ba.states.add_from([s0, s1] )
     ba.states.initial.add(s0)
-    ba.add_accepting_state(s1)
+    ba.states.accepting.add(s1)
     
     ba.alphabet.math_set |= {'p', '!p'}
     ba.transitions.add(s0, s1)

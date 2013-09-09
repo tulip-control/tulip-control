@@ -549,10 +549,7 @@ class SubSet(MathSet):
     def has_superset(self, superset):
         """Check if given set if the superset.
         """
-        if superset is self._superset:
-            return True
-        else:
-            return False
+        return superset is self._superset
 
 class CartesianProduct(object):
     """List of MathSets, with Cartesian semantics.

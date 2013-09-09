@@ -110,6 +110,5 @@ ctrl = synth.synthesize('jtlv', specs)
 
 
 # Generate a graphical representation of the controller for viewing
-#! TODO: save_png should probably not be a method in transys?
-if ctrl:
-    ctrl.save('png', 'robot_gr1.png')
+if not ctrl.save('png', 'robot_gr1.png'):
+    print(ctrl)

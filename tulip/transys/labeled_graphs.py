@@ -352,16 +352,17 @@ class States(object):
         if mutable:
             self.mutants = dict()
             self.min_free_id = 0
-            #self._initial = list()
         else:
             self.mutants = None
             self.min_free_id = None
-            #self._initial = set()
+        
         self.initial = SubSet(self)
         
         self._accepting_type = accepting_states_type
         if accepting_states_type:
             self.accepting = accepting_states_type(self)
+        
+        self.select_current([])
     
     def __get__(self):
         return self.__call__()
@@ -764,8 +765,9 @@ class States(object):
             self.initial.remove(rm_state)
         
         # chain to parent (for accepting states etc)
-        if rm_state in self.accepting:
-            self.accepting.remove(rm_state)
+        if self._exist_accepting_states():
+            if rm_state in self.accepting:
+                self.accepting.remove(rm_state)
     
     def remove_from(self, rm_states):
         """Remove a list of states."""
@@ -780,12 +782,13 @@ class States(object):
         
         None is possible.
         """
-        if states is None:
+        self._current = MathSet()
+        
+        if not states:
             msg = 'System has no states, current set to None.\n'
             msg += 'You can add states using sys.states.add()'
             if warn:
                 warnings.warn(msg)
-            self._current = None
             return
         
         # single state given instead of singleton ?
@@ -800,7 +803,6 @@ class States(object):
             msg += 'Cannot set current state to given state.'
             raise Exception(msg)
         
-        self._current = MathSet()
         self._current.add_from(states)
     
     @property

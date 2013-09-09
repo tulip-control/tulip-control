@@ -774,6 +774,11 @@ class RabinPairs(object):
         @type index: int <= current total number of pairs
         """
         return self._pairs[index][1]
+    
+    def has_superset(self, superset):
+        """Return true if the given argument is the superset.
+        """
+        return superset is self._states
 
 class RabinAutomaton(OmegaAutomaton):
     """Rabin automaton.

@@ -605,6 +605,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
             [['ap', PowerSet(atomic_propositions) ]]
         )
         self.atomic_propositions = self._state_label_def['ap'].math_set
+        self.aps = self.atomic_propositions
         self._state_dot_label_format = {'ap':'',
                                            'type?label':'',
                                            'separator':'\\n'}

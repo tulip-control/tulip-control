@@ -108,4 +108,4 @@ ctrl = synth.synthesize('gr1c', specs, sys)
 # or a textual representation if pydot is missing.
 #
 if not ctrl.save('robot_discrete.png', 'png'):
-    print ctrl
+    print(ctrl)
