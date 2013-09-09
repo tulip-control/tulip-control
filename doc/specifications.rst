@@ -97,9 +97,12 @@ keywords are omitted) is that of ``OUTPUT:``.
 A variable declaration is of the form ``name : domain;``.  It may span multiple
 lines.  The domain may be
 
-- ``boolean``, if the variable (i.e., atomic proposition)can either be True or False;
+- ``boolean``, if the variable (i.e., atomic proposition) can either be True or
+  False;
 - ``[a,b]``, where ``a`` and ``b`` are integers; or
-- ``{...}``, where ``...`` is a comma-separated list.
+- ``{...}``, where ``...`` is a comma-separated list.  The parser will attempt
+  to cast each element as an integer; if it fails, then the element is saved
+  verbatim as a string.
 
 Everything appearing after the second ``%%``, excepting comments, is considered
 to be part of the LTL formula.  Much of the syntax is taken from the `LTL
