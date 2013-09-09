@@ -316,6 +316,14 @@ class GRSpec(LTL):
         self.formula = self.to_canon()
         return LTL.dumps(self, timestamp=timestamp)
 
+    @staticmethod
+    def loads(s):
+        raise NotImplementedError
+
+    @staticmethod
+    def load(f):
+        raise NotImplementedError
+
     def pretty(self):
         output = "ENVIRONMENT VARIABLES:\n"
         if len(self.env_vars) > 0:
