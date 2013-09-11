@@ -2,7 +2,7 @@
 """
 Test the interface with JTLV.
 
-SCL; 5 Sep 2013.
+SCL; 11 Sep 2013.
 Vasu Raman; 4 Sept 2013
 """
 
@@ -13,8 +13,8 @@ from tulip.jtlvint import check_gr1, check_realizable, synthesize
 def test_dumpjtlv():
     spec = GRSpec(env_vars="x", sys_vars="y",
                   env_init="x", env_prog="x",
-                  sys_init="y", sys_safety=["y -> !next(y)", "!y -> next(y)"],
-                  sys_prog="y & x")
+                  sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
+                  sys_prog="y && x")
     specLTL = spec.to_jtlv()
     assumption = specLTL[0]
     guarantee = specLTL[1]
@@ -23,8 +23,8 @@ def test_dumpjtlv():
 def test_check_realizable():
     spec = GRSpec(env_vars="x", sys_vars="y",
                   env_init="x", env_prog="x",
-                  sys_init="y", sys_safety=["y -> !next(y)", "!y -> next(y)"],
-                  sys_prog="y & x")
+                  sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
+                  sys_prog="y && x")
     assert not check_realizable(spec)
     spec.sys_safety = []
     assert check_realizable(spec)

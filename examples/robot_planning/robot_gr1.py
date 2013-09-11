@@ -78,12 +78,12 @@ def mutex(varnames):
 sys_vars = {'X0', 'X1', 'X2', 'X3', 'X4', 'X5'}
 sys_init = {'X0'}
 sys_safe = {
-    'X0 -> next(X1 || X3)',
-    'X1 -> next(X0 || X4 || X2)',
-    'X2 -> next(X1 || X5)',
-    'X3 -> next(X0 || X4)',
-    'X4 -> next(X3 || X1 || X5)',
-    'X5 -> next(X4 || X2)',
+    'X0 -> X (X1 || X3)',
+    'X1 -> X (X0 || X4 || X2)',
+    'X2 -> X (X1 || X5)',
+    'X3 -> X (X0 || X4)',
+    'X4 -> X (X3 || X1 || X5)',
+    'X5 -> X (X4 || X2)',
 }
 
 sys_safe |= mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
@@ -104,14 +104,14 @@ sys_prog = set()                # empty set
 # environment variable X0reach that is initialized to True and the
 # specification [](park -> <>X0) becomes
 #
-#     [](next(X0reach) == X0 || (X0reach && !park))
+#     [](X (X0reach) <-> X0 || (X0reach && !park))
 #
 
 # Augment the system description to make it GR(1)
 sys_vars |= {'X0reach'}
 sys_init |= {'X0reach'}
-sys_safe |= {'next(X0reach) == X0 || (X0reach && !park)'}
-sys_prog |= {'X0reach'}
+sys_safe |= {'(X (X0reach) <-> X0) || (X0reach && !park)'}
+sys_prog |= {'X0reach', 'X5'}
 
 # Create a GR(1) specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,

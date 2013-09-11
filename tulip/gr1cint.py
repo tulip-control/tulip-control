@@ -197,6 +197,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             env_domains.append("boolean")
         else:
             raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
+    env_vars = dict([(env_vars[i], env_domains[i]) for i in range(len(env_vars))])
     sys_domains = []
     for v in sys_vars:
         dom = sys_vardict[v]
@@ -212,6 +213,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             sys_domains.append("boolean")
         else:
             raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
+    sys_vars = dict([(sys_vars[i], sys_domains[i]) for i in range(len(sys_vars))])
     s_elem = elem.find(ns_prefix+"spec")
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
@@ -267,8 +269,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                 A.add_edge(this_id, next_node)
 
         mach = MealyMachine()
-        mach.add_inputs([(evar, {0,1}) for evar in env_vars])
-        mach.add_outputs([(svar, {0,1}) for svar in sys_vars])
+        mach.add_inputs([(k,{0,1}) if v == "boolean" else (k,v) for (k,v) in env_vars.items()])
+        mach.add_outputs([(k,{0,1}) if v == "boolean" else (k,v) for (k,v) in sys_vars.items()])
         mach.states.add_from(A.nodes())
         for u in A.nodes_iter():
             for v in A.successors_iter(u):

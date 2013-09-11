@@ -36,6 +36,8 @@ Formulae constituting specifications
 import time
 import re, copy
 
+from tulip.spec import parse
+
 
 class LTL(object):
     """LTL formula (specification)
@@ -604,61 +606,63 @@ class GRSpec(LTL):
         for env_init in self.env_init:
             if (len(env_init) > 0):
                 if (len(spec[0]) > 0):
-                    spec[0] += ' & \n'
+                    spec[0] += ' && \n'
                 if (not desc_added):
                     spec[0] += '-- valid initial env states\n'
                     desc_added = True
-                spec[0] += '\t' + env_init
+                spec[0] += '\t' + parse.parse(env_init).to_jtlv()
 
         desc_added = False
         for env_safety in self.env_safety:
             if (len(env_safety) > 0):
                 if (len(spec[0]) > 0):
-                    spec[0] += ' & \n'
+                    spec[0] += ' && \n'
                 if (not desc_added):
                     spec[0] += '-- safety assumption on environment\n'
                     desc_added = True
-                spec[0] += '\t[](' + env_safety + ')'
+                env_safety = parse.parse(env_safety).to_jtlv()
+                spec[0] += '\t[](' + re.sub(r"next\s*\(", "next(", env_safety) + ')'
 
         desc_added = False
         for prog in self.env_prog:
             if (len(prog) > 0):
                 if (len(spec[0]) > 0):
-                    spec[0] += ' & \n'
+                    spec[0] += ' && \n'
                 if (not desc_added):
                     spec[0] += '-- justice assumption on environment\n'
                     desc_added = True
-                spec[0] += '\t[]<>(' + prog + ')'
+                spec[0] += '\t[]<>(' + parse.parse(prog).to_jtlv() + ')'
 
         desc_added = False
         for sys_init in self.sys_init:
             if (len(sys_init) > 0):
                 if (len(spec[1]) > 0):
-                    spec[1] += ' & \n'
+                    spec[1] += ' && \n'
                 if (not desc_added):
                     spec[1] += '-- valid initial system states\n'
                     desc_added = True
-                spec[1] += '\t' + sys_init
+                spec[1] += '\t' + parse.parse(sys_init).to_jtlv()
 
         desc_added = False
         for sys_safety in self.sys_safety:
             if (len(sys_safety) > 0):
                 if (len(spec[1]) > 0):
-                    spec[1] += ' & \n'
+                    spec[1] += ' && \n'
                 if (not desc_added):
                     spec[1] += '-- safety requirement on system\n'
                     desc_added = True
-                spec[1] += '\t[](' + sys_safety + ')'
+                sys_safety = parse.parse(sys_safety).to_jtlv()
+                spec[1] += '\t[](' + re.sub(r"next\s*\(", "next(", sys_safety) + ')'
 
         desc_added = False
         for prog in self.sys_prog:
             if (len(prog) > 0):
                 if (len(spec[1]) > 0):
-                    spec[1] += ' & \n'
+                    spec[1] += ' && \n'
                 if (not desc_added):
                     spec[1] += '-- progress requirement on system\n'
                     desc_added = True
-                spec[1] += '\t[]<>(' + prog + ')'
+                spec[1] += '\t[]<>(' + parse.parse(prog).to_jtlv() + ')'
         return spec
 
 
@@ -667,26 +671,36 @@ class GRSpec(LTL):
 
         Cf. L{gr1cint}.
         """
-        output = "ENV: "+" ".join(self.env_vars)+";\n"
-        output += "SYS: "+" ".join(self.sys_vars)+";\n\n"
+        def _to_gr1c_print_vars(vardict):
+            output = ""
+            for variable, domain in vardict.items():
+                if domain == "boolean":
+                    output += " "+variable
+                elif isinstance(domain, tuple) and len(domain) == 2:
+                    output += " "+variable+" ["+str(domain[0])+", "+str(domain[1])+"]"
+                else:
+                    raise ValueError("Domain type unsupported by gr1c: "+str(domain))
+            return output
+        output = "ENV:"+_to_gr1c_print_vars(self.env_vars)+";\n"
+        output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
 
-        output += "ENVINIT: "+"\n& ".join(["("+s+")" for s in self.env_init])+";\n"
+        output += "ENVINIT: "+"\n& ".join(["("+parse.parse(s).to_gr1c()+")" for s in self.env_init])+";\n"
         if len(self.env_safety) == 0:
             output += "ENVTRANS:;\n"
         else:
-            output += "ENVTRANS: "+"\n& ".join(["[]("+s+")" for s in self.env_safety])+";\n"
+            output += "ENVTRANS: "+"\n& ".join(["[]("+parse.parse(s).to_gr1c()+")" for s in self.env_safety])+";\n"
         if len(self.env_prog) == 0:
             output += "ENVGOAL:;\n\n"
         else:
-            output += "ENVGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.env_prog])+";\n\n"
+            output += "ENVGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.env_prog])+";\n\n"
         
-        output += "SYSINIT: "+"\n& ".join(["("+s+")" for s in self.sys_init])+";\n"
+        output += "SYSINIT: "+"\n& ".join(["("+parse.parse(s).to_gr1c()+")" for s in self.sys_init])+";\n"
         if len(self.sys_safety) == 0:
             output += "SYSTRANS:;\n"
         else:
-            output += "SYSTRANS: "+"\n& ".join(["[]("+s+")" for s in self.sys_safety])+";\n"
+            output += "SYSTRANS: "+"\n& ".join(["[]("+parse.parse(s).to_gr1c()+")" for s in self.sys_safety])+";\n"
         if len(self.sys_prog) == 0:
             output += "SYSGOAL:;\n"
         else:
-            output += "SYSGOAL: "+"\n& ".join(["[]<>("+s+")" for s in self.sys_prog])+";\n"
+            output += "SYSGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.sys_prog])+";\n"
         return output

@@ -2,7 +2,7 @@
 """
 Test the interface with gr1c.
 
-SCL; 6 Sep 2013.
+SCL; 11 Sep 2013.
 """
 
 import os
@@ -53,40 +53,43 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 
 class gr1cint_test:
     def setUp(self):
-        pass
+        self.f_un = GRSpec(env_vars="x", sys_vars="y",
+                           env_init="x", env_prog="x",
+                           sys_init="y",sys_safety=["y -> X(!y)","!y -> X(y)"],
+                           sys_prog="y && x")
+        self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
+                               sys_prog=["y=0", "y=5"])
 
     def tearDown(self):
-        pass
+        self.f_un = None
+        self.dcounter = None
 
     def test_check_syntax(self):
         assert gr1cint.check_syntax(REFERENCE_SPECFILE, verbose=1)
         assert not gr1cint.check_syntax("foo", verbose=1)
 
     def test_to_gr1c(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
-                      sys_prog="y & x")
-        assert gr1cint.check_syntax(spec.to_gr1c(), verbose=1)
+        assert gr1cint.check_syntax(self.f_un.to_gr1c(), verbose=1)
+        assert gr1cint.check_syntax(self.dcounter.to_gr1c(), verbose=1)
 
     def test_check_realizable(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
-                      sys_prog="y & x")
-        assert not gr1cint.check_realizable(spec)
-        spec.sys_safety = []
-        assert gr1cint.check_realizable(spec)
+        assert not gr1cint.check_realizable(self.f_un)
+        self.f_un.sys_safety = []
+        assert gr1cint.check_realizable(self.f_un)
+        assert gr1cint.check_realizable(self.dcounter)
         
     def test_synthesize(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y",
-                      sys_prog=["y & x", "!y"])
-        aut = gr1cint.synthesize(spec)
+        self.f_un.sys_safety = []  # Make it realizable
+        aut = gr1cint.synthesize(self.f_un)
         assert aut is not None
         assert len(aut.inputs) == 1 and aut.inputs.has_key("x")
         assert len(aut.outputs) == 1 and aut.outputs.has_key("y")
+
+        aut = gr1cint.synthesize(self.dcounter)
+        assert aut is not None
+        assert len(aut.inputs) == 0
+        assert len(aut.outputs) == 1 and aut.outputs.has_key("y")
+        assert len(aut.states) == 2
 
 
 class GR1CSession_test:
