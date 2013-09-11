@@ -10,7 +10,6 @@ import nose.tools as nt
 from pyparsing import ParseException
 
 from tulip.spec import LTL, GRSpec, parse
-import tulip.gridworld as gw
 
 
 def GR1specs_equal(s1, s2):
@@ -41,14 +40,6 @@ def GR1specs_equal(s1, s2):
     if s1.sys_init != s2.sys_init or s1.sys_safety != s2.sys_safety or s1.sys_prog != s2.sys_prog:
         return False
     return True
-
-
-def import_GridWorld_test():
-    # Sanity-check
-    X = gw.random_world((5, 10), prefix="sys")
-    s = GRSpec()
-    s.import_GridWorld(X)
-    assert GR1specs_equal(X.spec(), s)
 
 
 class LTL_test:

@@ -426,31 +426,6 @@ class GRSpec(LTL):
             return "True"
 
 
-    def import_GridWorld(self, gworld, offset=(0,0), controlled_dyn=True):
-        """Append specification describing a gridworld.
-
-        Basically, call the spec method of the given GridWorld object
-        and merge with its output.  See documentation about the
-        L{spec<gridworld.GridWorld.spec>} method of
-        L{GridWorld<gridworld.GridWorld>} class for details.
-
-        @type gworld: L{GridWorld}
-        """
-        s = gworld.spec(offset=offset, controlled_dyn=controlled_dyn)
-        for evar in s.env_vars:
-            if not self.env_vars.has_key(evar):
-                self.env_vars[evar] = "boolean"
-        for svar in s.sys_vars:
-            if not self.sys_vars.has_key(svar):
-                self.sys_vars[svar] = "boolean"
-        self.env_init.extend(s.env_init)
-        self.env_safety.extend(s.env_safety)
-        self.env_prog.extend(s.env_prog)
-        self.sys_init.extend(s.sys_init)
-        self.sys_safety.extend(s.sys_safety)
-        self.sys_prog.extend(s.sys_prog)
-
-
     def import_PropPreservingPartition(self, disc_dynamics, cont_varname="cellID"):
         """Append results of discretization (abstraction) to specification.
 
