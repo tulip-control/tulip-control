@@ -31,8 +31,9 @@
 # SUCH DAMAGE.
 # 
 """
-LTL parser supporting JTLV, SPIN and SMV syntax (and mixtures thereof!)
-Syntax taken roughly from http://spot.lip6.fr/wiki/LtlSyntax
+LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
+
+Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
 
 from pyparsing import *
@@ -50,6 +51,8 @@ TEMPORAL_OP_MAP = \
 JTLV_MAP = { "G" : "[]", "F" : "<>", "X" : "next",
         "U" : "U" }
 
+GR1C_MAP = { "G" : "[]", "F" : "<>", "X" : "'" }
+
 SMV_MAP = { "G" : "G", "F" : "F", "X" : "X",
         "U" : "U", "R" : "V" }
 
@@ -58,7 +61,10 @@ SPIN_MAP = { "G" : "[]", "F" : "<>", "U" : "U",
 
 class LTLException(Exception):
     pass
-    
+
+def dump_dot(ast):
+    return "digraph AST {\n"+ast.dump_dot()+"}\n"
+
 # Flattener helpers
 def flatten_JTLV(node): return node.toJTLV()
 def flatten_SMV(node): return node.toSMV()
@@ -91,6 +97,8 @@ class ASTNum(ASTNode):
         return str(self.val)
     def flatten(self, flattener=None, op=None):
         return str(self)
+    def dump_dot(self):
+        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
 
 class ASTVar(ASTNode):
     def init(self, t):
@@ -104,6 +112,8 @@ class ASTVar(ASTNode):
         return "(" + str(self) + ")"
     def toSMV(self):
         return str(self)
+    def dump_dot(self):
+        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
         
 class ASTBool(ASTNode):
     def init(self, t):
@@ -116,6 +126,8 @@ class ASTBool(ASTNode):
         else: return "FALSE"
     def flatten(self, flattener=None, op=None):
         return str(self)
+    def dump_dot(self):
+        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
 
 class ASTUnary(ASTNode):
     @classmethod
@@ -142,6 +154,10 @@ class ASTUnary(ASTNode):
         except AttributeError:
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
+    def dump_dot(self):
+        return (str(id(self))+"\n"
+                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
+                + str(id(self))+" -> "+self.operand.dump_dot())
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op())
         return f(n)
@@ -197,6 +213,11 @@ class ASTBinary(ASTNode):
         except AttributeError:
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
+    def dump_dot(self):
+        return (str(id(self))+"\n"
+                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
+                + str(id(self))+" -> "+self.op_l.dump_dot()
+                + str(id(self))+" -> "+self.op_r.dump_dot())
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op())
         return f(n)
