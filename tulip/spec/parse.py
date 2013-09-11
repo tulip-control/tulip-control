@@ -63,12 +63,17 @@ class LTLException(Exception):
     pass
 
 def dump_dot(ast):
+    """Create Graphiz DOT string from given AST.
+
+    @param ast: L{ASTNode}, etc., that has a dump_dot() method; for
+        example, the return value of a successful call to L{parse}.
+    """
     return "digraph AST {\n"+ast.dump_dot()+"}\n"
 
 # Flattener helpers
-def flatten_JTLV(node): return node.toJTLV()
-def flatten_SMV(node): return node.toSMV()
-def flatten_Promela(node): return node.toPromela()
+def _flatten_JTLV(node): return node.toJTLV()
+def _flatten_SMV(node): return node.toSMV()
+def _flatten_Promela(node): return node.toPromela()
 
 class ASTNode(object):
     def __init__(self, s, l, t):
@@ -82,9 +87,9 @@ class ASTNode(object):
                 # not a ParseResult
                 tok = t
         self.init(tok)
-    def toJTLV(self): return self.flatten(flatten_JTLV)
-    def toSMV(self): return self.flatten(flatten_SMV)
-    def toPromela(self): return self.flatten(flatten_Promela)
+    def toJTLV(self): return self.flatten(_flatten_JTLV)
+    def toSMV(self): return self.flatten(_flatten_SMV)
+    def toPromela(self): return self.flatten(_flatten_Promela)
     def map(self, f):
         n = self.__class__(None, None, [str(self.val)])
         return f(n)
@@ -170,16 +175,16 @@ class ASTUnTempOp(ASTUnary):
     def op(self): return self.operator
     def toPromela(self):
         try:
-            return self.flatten(flatten_Promela, SPIN_MAP[self.op()])
+            return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in Promela")
     def toJTLV(self):
         try:
-            return self.flatten(flatten_JTLV, JTLV_MAP[self.op()])
+            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV")
     def toSMV(self):
-        return self.flatten(flatten_SMV, SMV_MAP[self.op()])
+        return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
 
 class ASTBinary(ASTNode):
     @classmethod
@@ -227,11 +232,11 @@ class ASTBinary(ASTNode):
 class ASTAnd(ASTBinary):
     def op(self): return "&"
     def toPromela(self):
-        return self.flatten(flatten_Promela, "&&")
+        return self.flatten(_flatten_Promela, "&&")
 class ASTOr(ASTBinary):
     def op(self): return "|"
     def toPromela(self):
-        return self.flatten(flatten_Promela, "||")
+        return self.flatten(_flatten_Promela, "||")
 class ASTXor(ASTBinary):
     def op(self): return "xor"
 class ASTImp(ASTBinary):
@@ -242,78 +247,49 @@ class ASTBiTempOp(ASTBinary):
     def op(self): return self.operator
     def toPromela(self):
         try:
-            return self.flatten(flatten_Promela, SPIN_MAP[self.op()])
+            return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in Promela")
     def toJTLV(self):
         try:
-            return self.flatten(flatten_JTLV, JTLV_MAP[self.op()])
+            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV")
     def toSMV(self):
-        return self.flatten(flatten_SMV, SMV_MAP[self.op()])
+        return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
 class ASTComparator(ASTBinary):
     def op(self): return self.operator
     def toPromela(self):
         if self.operator == "=":
-            return self.flatten(flatten_Promela, "==")
+            return self.flatten(_flatten_Promela, "==")
         else:
-            return self.flatten(flatten_Promela)
+            return self.flatten(_flatten_Promela)
 class ASTArithmetic(ASTBinary):
     def op(self): return self.operator
 
 # Literals cannot start with G, F or X unless quoted
-restricted_alphas = filter(lambda x: x not in "GFX", alphas)
+_restricted_alphas = filter(lambda x: x not in "GFX", alphas)
 # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
-bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
-var = ~bool_keyword + (Word(restricted_alphas, alphanums + "._:") | \
+_bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
+_var = ~_bool_keyword + (Word(_restricted_alphas, alphanums + "._:") | \
         Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')).setParseAction(ASTVar)
-atom = var | bool_keyword.setParseAction(ASTBool)
-number = var | Word(nums).setParseAction(ASTNum)
-
-# simple expression - no LTL operators
-'''simple_expr = operatorPrecedence(atom,
-        [("!", 1, opAssoc.RIGHT, ASTNot),
-        (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
-        (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
-        (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
-        ("->", 2, opAssoc.RIGHT, ASTImp),
-        ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        (oneOf("< <= > >= != ="), 2, opAssoc.LEFT, ASTComparator),
-        (oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
-        (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
-        ("mod", 2, opAssoc.LEFT, ASTArithmetic)
-        ])'''
+_atom = _var | _bool_keyword.setParseAction(ASTBool)
+_number = _var | Word(nums).setParseAction(ASTNum)
 
 # arithmetic expression
-arith_expr = operatorPrecedence(number,
-        [(oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
-        (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
-        ("mod", 2, opAssoc.LEFT, ASTArithmetic)
-        ])
+_arith_expr = operatorPrecedence(_number,
+                                 [(oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
+                                  (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
+                                  ("mod", 2, opAssoc.LEFT, ASTArithmetic)])
 
 # integer comparison expression
-comparison_expr = Group(arith_expr + oneOf("< <= > >= != = ==") + arith_expr).setParseAction(ASTComparator)
+_comparison_expr = Group(_arith_expr + oneOf("< <= > >= != = ==") + _arith_expr).setParseAction(ASTComparator)
 
-proposition = comparison_expr | atom
+_proposition = _comparison_expr | _atom
 
 # hack so G/F/X doesn't mess with keywords (i.e. FALSE) or variables like X0, X_0_1
-UnaryTempOps = ~bool_keyword + oneOf("G F X [] <> next") + ~Word(nums + "_")
+_UnaryTempOps = ~_bool_keyword + oneOf("G F X [] <> next") + ~Word(nums + "_")
 
-# LTL expression
-_ltl_expr = operatorPrecedence(proposition,
-        [("'", 1, opAssoc.LEFT, ASTUnTempOp),
-        ("!", 1, opAssoc.RIGHT, ASTNot),
-        (UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
-        (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
-        (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
-        (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
-        ("->", 2, opAssoc.RIGHT, ASTImp),
-        ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
-        (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp),
-        ])
-_ltl_expr.ignore(LineStart() + "--" + restOfLine)
 
 def extractVars(tree):
     v = []
@@ -339,6 +315,22 @@ def issafety(tree):
     return tree.map(f)
 
 def parse(formula):
+    """Parse formula string and create abstract syntax tree (AST).
+    """
+    # LTL expression
+    _ltl_expr = operatorPrecedence(proposition,
+                                   [("'", 1, opAssoc.LEFT, ASTUnTempOp),
+                                    ("!", 1, opAssoc.RIGHT, ASTNot),
+                                    (UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
+                                    (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
+                                    (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
+                                    (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
+                                    ("->", 2, opAssoc.RIGHT, ASTImp),
+                                    ("<->", 2, opAssoc.RIGHT, ASTBiImp),
+                                    (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
+                                    (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp)])
+    _ltl_expr.ignore(LineStart() + "--" + restOfLine)
+
     # Increase recursion limit for complex formulae
     sys.setrecursionlimit(2000)
     try:

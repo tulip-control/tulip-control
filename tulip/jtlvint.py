@@ -52,7 +52,7 @@ from spec import GRSpec
 #for checking form of spec
 import pyparsing
 from pyparsing import *
-from tulip.spec.parse import *
+from tulip.spec import parse
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
@@ -513,19 +513,38 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
     if not check_spec(guarantee, varnames):
         return False
 
+    # Literals cannot start with G, F or X unless quoted
+    restricted_alphas = filter(lambda x: x not in "GFX", alphas)
+    # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
+    bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
+    var = ~bool_keyword + (Word(restricted_alphas, alphanums + "._:") | \
+                           Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')).setParseAction(parse.ASTVar)
+    atom = var | bool_keyword.setParseAction(parse.ASTBool)
+    number = var | Word(nums).setParseAction(parse.ASTNum)
+
+    # arithmetic expression
+    arith_expr = operatorPrecedence(number,
+                                    [(oneOf("* /"), 2, opAssoc.LEFT, parse.ASTArithmetic),
+                                     (oneOf("+ -"), 2, opAssoc.LEFT, parse.ASTArithmetic),
+                                     ("mod", 2, opAssoc.LEFT, parse.ASTArithmetic)])
+
+    # integer comparison expression
+    comparison_expr = Group(arith_expr + oneOf("< <= > >= != = ==") + arith_expr).setParseAction(parse.ASTComparator)
+
+    proposition = comparison_expr | atom
+
     # Check that the syntax is GR(1). This uses pyparsing
-    prop = proposition
     UnaryTemporalOps = ~bool_keyword + oneOf("next") + ~Word(nums + "_")
-    next_ltl_expr = operatorPrecedence(prop,
-        [("'", 1, opAssoc.LEFT, ASTUnTempOp),
-        ("!", 1, opAssoc.RIGHT, ASTNot),
-        (UnaryTemporalOps, 1, opAssoc.RIGHT, ASTUnTempOp),
-        (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
-        (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
-        (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
-        ("->", 2, opAssoc.RIGHT, ASTImp),
-        ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        (oneOf("= !="), 2, opAssoc.RIGHT, ASTComparator),
+    next_ltl_expr = operatorPrecedence(proposition,
+        [("'", 1, opAssoc.LEFT, parse.ASTUnTempOp),
+        ("!", 1, opAssoc.RIGHT, parse.ASTNot),
+        (UnaryTemporalOps, 1, opAssoc.RIGHT, parse.ASTUnTempOp),
+        (oneOf("& &&"), 2, opAssoc.LEFT, parse.ASTAnd),
+        (oneOf("| ||"), 2, opAssoc.LEFT, parse.ASTOr),
+        (oneOf("xor ^"), 2, opAssoc.LEFT, parse.ASTXor),
+        ("->", 2, opAssoc.RIGHT, parse.ASTImp),
+        ("<->", 2, opAssoc.RIGHT, parse.ASTBiImp),
+        (oneOf("= !="), 2, opAssoc.RIGHT, parse.ASTComparator),
         ])
     always_expr = pyparsing.Literal("[]") + next_ltl_expr
     always_eventually_expr = pyparsing.Literal("[]") + \
