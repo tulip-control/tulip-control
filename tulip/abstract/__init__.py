@@ -1,7 +1,4 @@
-#
-# This file contains the initialization information from the tulip package.
-#
-# Copyright (c) 2011 by California Institute of Technology
+# Copyright (c) 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,8 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-
 """TuLiP Toolbox Abstract module
 
-Main functions are in discretize.py (to be included later) and prop2part.py.
+Main functions are in discretize.py and prop2part.py.
 """
