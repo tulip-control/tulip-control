@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 """
-SCL; 9 Sep 2013.
+Unit tests for tulip.spec subpackage.
+
+SCL; 11 Sep 2013.
 """
 
 import copy
-from tulip.spec import LTL, GRSpec
+import nose.tools as nt
+from pyparsing import ParseException
+
+from tulip.spec import LTL, GRSpec, parse
 import tulip.gridworld as gw
 
 
@@ -98,3 +103,17 @@ class GRSpec_test:
     def test_init(self):
         assert len(self.f.env_vars) == 1 and len(self.f.sys_vars) == 1
         assert self.f.env_vars["x"] == "boolean" and self.f.sys_vars["y"] == "boolean"
+
+
+def parse_parse_check(formula, expected_length):
+    # If expected_length is None, then the formula is malformed, and
+    # thus we expect parsing to fail.
+    if expected_length is not None:
+        assert len(parse.parse(formula)) == expected_length
+    else:
+        nt.assert_raises(ParseException, parse.parse, formula)
+
+def parse_parse_test():
+    for (formula, expected_len) in [("G p", 2),
+                                    ("p G", None)]:
+        yield parse_parse_check, formula, expected_len

@@ -318,10 +318,10 @@ def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
     # LTL expression
-    _ltl_expr = operatorPrecedence(proposition,
+    _ltl_expr = operatorPrecedence(_proposition,
                                    [("'", 1, opAssoc.LEFT, ASTUnTempOp),
                                     ("!", 1, opAssoc.RIGHT, ASTNot),
-                                    (UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
+                                    (_UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
                                     (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
                                     (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
                                     (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
