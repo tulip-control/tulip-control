@@ -81,7 +81,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) == lot || (X0reach && !park))
+#     [](next(X0reach) <-> lot || (X0reach && !park))
 #
 
 # Augment the system description to make it GR(1)
@@ -89,7 +89,7 @@ env_safe = set()                # empty set
 sys_vars = {'X0reach'}          # infer the rest from TS 
 sys_init = {'X0reach'}          
 sys_prog = {'home'}             # []<>home
-sys_safe = {"((X0reach' & lot) | (!X0reach' & !lot)) | (X0reach & !park)"}
+sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'} 
 
 # Create the specification
