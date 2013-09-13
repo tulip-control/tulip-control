@@ -173,7 +173,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     --------
     OpenFTS, tuple2fts, line_labeled_with, cycle_labeled_with
     """
-    def __init__(self, **args):
+    def __init__(self, *args, **kwargs):
         """Initialize Finite Transition System.
         
         @param atomic_propositions: state are labeled with
@@ -207,7 +207,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                                                 'type?label':'',
                                                 'separator':'\\n'}
         
-        LabeledStateDiGraph.__init__(self, **args)
+        LabeledStateDiGraph.__init__(self, *args, **kwargs)
         
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'fts'
@@ -475,90 +475,6 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     
     def loadSPINAut():
         raise NotImplementedError
-    
-    def promela_str(self, procname=None):
-        """Convert an automaton to Promela source code.
-        
-        Creats a process which can be simulated as an independent
-        thread in the SPIN model checker.
-        
-        see also
-        --------
-        save, plot
-        
-        @param fname: file name
-        @type fname: str
-        
-        @param procname: Promela process name, i.e., proctype procname())
-        @type procname: str (default: system's name)
-        
-        @param add_missing_extension: add file extension 'pml', if missing
-        @type add_missing_extension: bool
-        """
-        def state2promela(state, ap_label, ap_alphabet):
-            s1 = str(state) +':\n'
-            
-            s2 = '\t :: atomic{\n'
-            s2 += '\t\t\t printf("State: ' +str(state) +'\\n");\n'
-            
-            # convention ! means negation
-            
-            missing_props = filter(lambda x: x[0] == '!', ap_label)
-            present_props = ap_label.difference(missing_props)
-            
-            assign_props = lambda x: str(x) + ' = 1;'
-            s2 += '\t\t\t '
-            if present_props:
-                s2 += '\n\t\t\t '.join(map(assign_props, present_props) )
-            
-            # rm "!"
-            assign_props = lambda x: str(x[1:] ) + ' = 0;'
-            if missing_props:
-                s2 += '\n\t\t\t '.join(map(assign_props, missing_props) )
-            
-            s2 += '\n'
-            return (s1, s2)
-        
-        def outgoing_trans2promela(transitions, s2):
-            s = '\t if\n'
-            for (from_state, to_state, sublabels_dict) in transitions:
-                s += s2
-                s += '\t\t\t printf("' +str(sublabels_dict) +'\\n");\n'
-                s += '\t\t\t goto ' +str(to_state) +'\n\t\t}\n'
-            s += '\t fi;\n\n'
-            return s
-        
-        if procname is None:
-            procname = self.name
-        
-        s = ''
-        for ap in self.atomic_propositions:
-            # convention "!" means negation
-            if ap[0] != '!':
-                s += 'bool ' +str(ap) +';\n'
-        
-        s += '\nactive proctype ' +procname +'(){\n'
-        
-        s += '\t if\n'
-        for initial_state in self.states.initial:
-            s += '\t :: goto ' +str(initial_state) +'\n'
-        s += '\t fi;\n'
-        
-        for state in self.states():
-            ap_alphabet = self.atomic_propositions
-            lst = self.states.find([state] )
-            (state_, ap_label) = lst[0]
-            (s1, s2) = state2promela(state, ap_label['ap'], ap_alphabet)
-            
-            s += s1
-            
-            outgoing_transitions = self.transitions.find(
-                {state}, as_dict=True
-            )
-            s += outgoing_trans2promela(outgoing_transitions, s2)
-        
-        s += '}\n'
-        return s
     
     def _save_pml(self, path, add_missing_extension=True):
         s = '/*\n * Promela file generated with TuLiP\n'
