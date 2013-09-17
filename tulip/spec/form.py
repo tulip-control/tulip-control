@@ -46,18 +46,13 @@ def mutex(varnames):
     of formulae {"a -> ! (c || b)", "b -> ! (a || c)", ...}.
     """
     mutex = set()
-    if len(varnames) > 1:
-        for p in varnames:
-            mut_str = p+' -> ! ('
-            first = True
-            for q in varnames:
-                if p != q:
-                    if not first:
-                        mut_str += ' || '
-                    first = False
-                    mut_str+=q
-            mut_str += ')'
-            mutex |= {mut_str}
+    numVars = len(varnames)
+    for i in range(0,numVars-1):
+        mut_str = varnames[i]+' -> ! ('+varnames[i+1]
+        for j in range(i+2,numVars):
+            mut_str += ' || '+varnames[j]
+        mut_str += ')'
+        mutex |= {mut_str}
     return mutex
 
 
