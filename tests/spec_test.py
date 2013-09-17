@@ -2,14 +2,14 @@
 """
 Unit tests for tulip.spec subpackage.
 
-SCL; 11 Sep 2013.
+SCL; 17 Sep 2013.
 """
 
 import copy
 import nose.tools as nt
 from pyparsing import ParseException
 
-from tulip.spec import LTL, GRSpec, parse
+from tulip.spec import LTL, GRSpec, parse, mutex
 
 
 def GR1specs_equal(s1, s2):
@@ -108,3 +108,16 @@ def parse_parse_test():
     for (formula, expected_len) in [("G p", 2),
                                     ("p G", None)]:
         yield parse_parse_check, formula, expected_len
+
+
+def form_mutex_check(varnames, expected_formulae):
+    # More like a regression test given fragility of formula strings.
+    assert mutex(varnames) == expected_formulae
+
+def form_mutex_test():
+    for (varnames, expected_form) in [({"a", "b", "c"}, {"a -> ! (c || b)",
+                                                         "b -> ! (a || c)",
+                                                         "c -> ! (a || b)"}),
+                                      (set(), set()),
+                                      ({"cat"}, set())]:
+        yield form_mutex_check, varnames, expected_form

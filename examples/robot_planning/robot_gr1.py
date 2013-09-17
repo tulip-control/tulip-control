@@ -58,23 +58,6 @@ env_prog = '!park'              # []<>(!park)
 # and what the system is required to do in response to an environmental
 # action.  
 #
-def mutex(varnames):
-    mutex = set()
-    if len(varnames) > 1:
-        for p in varnames:
-            mut_str = p+' -> ! ('
-            first = True
-            for q in varnames:
-                if p != q:
-                    if not first:
-                        mut_str += ' || '
-                    first = False
-                    mut_str+=q
-            mut_str += ')'
-            mutex |= {mut_str}
-    return mutex
-    
-    
 sys_vars = {'X0', 'X1', 'X2', 'X3', 'X4', 'X5'}
 sys_init = {'X0'}
 sys_safe = {
@@ -86,7 +69,7 @@ sys_safe = {
     'X5 -> X (X4 || X2)',
 }
 
-sys_safe |= mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
+sys_safe |= spec.mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
 
 sys_prog = set()                # empty set
 

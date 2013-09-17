@@ -39,6 +39,28 @@ import re, copy
 from tulip.spec import parse
 
 
+def mutex(varnames):
+    """Create mutual exclusion formulae from iterable of variables.
+
+    E.g., given a set of variable names {"a", "b", "c"}, return a set
+    of formulae {"a -> ! (c || b)", "b -> ! (a || c)", ...}.
+    """
+    mutex = set()
+    if len(varnames) > 1:
+        for p in varnames:
+            mut_str = p+' -> ! ('
+            first = True
+            for q in varnames:
+                if p != q:
+                    if not first:
+                        mut_str += ' || '
+                    first = False
+                    mut_str+=q
+            mut_str += ')'
+            mutex |= {mut_str}
+    return mutex
+
+
 class LTL(object):
     """LTL formula (specification)
 
