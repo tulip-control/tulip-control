@@ -44,7 +44,7 @@ import networkx as nx
 
 from mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique, dprint
-import save_d3
+from export import save_d3
 #from tulip import conxml
 
 hl = 60 *'-'
