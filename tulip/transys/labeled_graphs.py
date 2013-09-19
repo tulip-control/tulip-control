@@ -201,33 +201,51 @@ class LabelConsistency(object):
         for (typename, sublabel) in edge_label.iteritems():
             possible_labels = label_def[typename]
             
+            if isinstance(possible_labels, PowerSet):
+                # label with empty set
+                if sublabel is None:
+                    dprint('None given: label with empty set')
+                    edge_label[typename] = set()
+                    continue
+            
+            # discrete sublabel type ?
+            if check_label and isinstance(possible_labels, Iterable):
+                if sublabel in possible_labels:
+                    continue
+                
+                msg = 'Given SubLabel:\n\t' +str(sublabel) +'\n'
+                msg += 'not in possible SubLabels:\n\t'
+                msg += str(possible_labels) +'\n'
+                msg += 'Usual cause: when label comprised of\n'
+                msg += 'single SubLabel, pass the value itself,\n'
+                msg += 'instead of an Iterable like [value],\n'
+                msg += 'because it gets converted to [value] anyway.'
+                raise Exception(msg)
+            
+            if isinstance(possible_labels, PowerSet):
+                possible_labels.math_set |= sublabel
+                continue
+            
+            try:
+                possible_labels.add(sublabel)
+                continue
+            except:
+                dprint('no add method')
+            
+            try:
+                possible_labels.append(sublabel)
+                continue
+            except:
+                dprint('no append method')
+            
             # iterable sublabel description ? (i.e., discrete ?)
             if isinstance(possible_labels, Iterable):
-                if not check_label:
-                    if isinstance(possible_labels, PowerSet):
-                        possible_labels.math_set |= sublabel
-                    elif hasattr(possible_labels, 'add'):
-                        possible_labels.add(sublabel)
-                    elif hasattr(possible_labels, 'append'):
-                        possible_labels.append(sublabel)
-                    else:
-                        msg = 'Possible labels described by Iterable of type:\n'
-                        msg += str(type(possible_labels) ) +'\n'
-                        msg += 'but it is not a PowerSet, nor does it have'
-                        msg += 'an .add or .append method.\n'
-                        msg += 'Failed to add new label_value.'
-                        raise TypeError(msg)
-                elif sublabel not in possible_labels:
-                    msg = 'Given SubLabel:\n\t' +str(sublabel) +'\n'
-                    msg += 'not in possible SubLabels:\n\t'
-                    msg += str(possible_labels) +'\n'
-                    msg += 'Usual cause: when label comprised of\n'
-                    msg += 'single SubLabel, pass the value itself,\n'
-                    msg += 'instead of an Iterable like [value],\n'
-                    msg += 'because it gets converted to [value] anyway.'
-                    raise Exception(msg)
-                
-                continue
+                msg = 'Possible labels described by Iterable of type:\n'
+                msg += str(type(possible_labels) ) +'\n'
+                msg += 'but it is not a PowerSet, nor does it have'
+                msg += 'an .add or .append method.\n'
+                msg += 'Failed to add new label_value.'
+                raise TypeError(msg)
             
             # not iterable, check using convention:
             
@@ -362,7 +380,7 @@ class States(object):
         if accepting_states_type:
             self.accepting = accepting_states_type(self)
         
-        self.select_current([])
+        self.select_current([], warn=False)
     
     def __get__(self):
         return self.__call__()
@@ -765,7 +783,7 @@ class States(object):
             self.initial.remove(rm_state)
         
         # chain to parent (for accepting states etc)
-        if self._exist_accepting_states():
+        if self._exist_accepting_states(warn=False):
             if rm_state in self.accepting:
                 self.accepting.remove(rm_state)
     
@@ -2641,14 +2659,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             save_d3.labeled_digraph2d3(self, path)
             return True
         
-        method_name = '_save_' +fileformat
-        if hasattr(self, method_name):
-            method = getattr(self, method_name)
-            try:
-                method(path, add_missing_extension=add_missing_extension)
-                return True
-            except:
-                print('Own export method called: ' +method_name +', failed.')
+        try:
+            return self._save(path, fileformat)
+        except:
+            print('Method _save failed.')
         
         if prog is None:
             prog = self.default_layout

@@ -30,91 +30,94 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Convert graph to promela
+Convert state graphs to promela
 """
-hl = 60 *'-'
+from time import strftime
     
-def promela_str(self, procname=None):
-    """Convert an automaton to Promela source code.
+def fts2promela(graph, procname=None):
+    """Convert (possibly labeled) state graph to Promela str.
     
-    Creats a process which can be simulated as an independent
+    Creates a process which can be simulated as an independent
     thread in the SPIN model checker.
+    If atomic propositions label states,
+    then they are exported as bit variables.
     
-    see also
-    --------
-    save, plot
+    The state graph is exported to Promela using goto statements.
+    Goto statements avoid introducing additional states.
+    Using structured constructs (if, do) can create
+    extra states in certain cases.
     
-    @param fname: file name
-    @type fname: str
+    The structured program theorem ensures that avoiding goto
+    statements is always possible.
+    But this yields an equivalent algorithm only,
+    not an equivalent unfolding of the program graph.
     
-    @param procname: Promela process name, i.e., proctype procname())
-    @type procname: str (default: system's name)
+    Therefore verified properties can be affected,
+    especially if intermediate states are introduced in
+    one of multiple processes.
     
-    @param add_missing_extension: add file extension 'pml', if missing
-    @type add_missing_extension: bool
+    @param graph: networkx 
+    
+    @param procname: Promela process name (after proctype)
+    @type procname: str (default: system name)
     """
     def state2promela(state, ap_label, ap_alphabet):
-        s1 = str(state) +':\n'
+        s = str(state).replace(' ', '_') +':\n'
+        s += '\t atomic{\n'
+        s += '\t\t printf("State: ' +str(state) +'\\n");\n'
+        for prop in ap_alphabet:
+            if prop is True:
+                continue
+            
+            if prop in ap_label:
+                s += '\t\t ' +str(prop) +' = 1;\n'
+            else:
+                s += '\t\t ' +str(prop) +' = 0;\n'
         
-        s2 = '\t :: atomic{\n'
-        s2 += '\t\t\t printf("State: ' +str(state) +'\\n");\n'
-        
-        # convention ! means negation
-        
-        missing_props = filter(lambda x: x[0] == '!', ap_label)
-        present_props = ap_label.difference(missing_props)
-        
-        assign_props = lambda x: str(x) + ' = 1;'
-        s2 += '\t\t\t '
-        if present_props:
-            s2 += '\n\t\t\t '.join(map(assign_props, present_props) )
-        
-        # rm "!"
-        assign_props = lambda x: str(x[1:] ) + ' = 0;'
-        if missing_props:
-            s2 += '\n\t\t\t '.join(map(assign_props, missing_props) )
-        
-        s2 += '\n'
-        return (s1, s2)
+        s += '\t }\n'
+        return s
     
-    def outgoing_trans2promela(transitions, s2):
-        s = '\t if\n'
+    def outgoing_trans2promela(transitions):
+        s = '\t \n\t if\n'
         for (from_state, to_state, sublabels_dict) in transitions:
-            s += s2
-            s += '\t\t\t printf("' +str(sublabels_dict) +'\\n");\n'
-            s += '\t\t\t goto ' +str(to_state) +'\n\t\t}\n'
+            s += '\t :: atomic{\n'
+            s += '\t\t printf("' +str(sublabels_dict) +'\\n");\n'
+            s += '\t\t goto ' +str(to_state) +'\n'
+            s += '\t }\n'
         s += '\t fi;\n\n'
         return s
     
     if procname is None:
-        procname = self.name
+        procname = graph.name
     
-    s = ''
-    for ap in self.atomic_propositions:
+    s = '/*\n * Promela file generated with TuLiP\n'
+    s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
+    for ap in graph.atomic_propositions:
         # convention "!" means negation
-        if ap is not None:
+        if ap not in {None, True}:
             s += 'bool ' +str(ap) +';\n'
     
     s += '\nactive proctype ' +procname +'(){\n'
     
     s += '\t if\n'
-    for initial_state in self.states.initial:
+    for initial_state in graph.states.initial:
         s += '\t :: goto ' +str(initial_state) +'\n'
     s += '\t fi;\n'
     
-    for state in self.states():
-        ap_alphabet = self.atomic_propositions
-        lst = self.states.find([state] )
+    for state in graph.states():
+        ap_alphabet = graph.atomic_propositions
+        lst = graph.states.find([state] )
         (state_, ap_label) = lst[0]
-        (s1, s2) = state2promela(state, ap_label['ap'], ap_alphabet)
+        s += state2promela(state, ap_label['ap'], ap_alphabet)
         
-        s += s1
-        
-        outgoing_transitions = self.transitions.find(
+        outgoing_transitions = graph.transitions.find(
             {state}, as_dict=True
         )
-        s += outgoing_trans2promela(outgoing_transitions, s2)
+        s += outgoing_trans2promela(outgoing_transitions)
     
     s += '}\n'
     return s
-    
+
+def mealy2promela():
+    """Convert Mealy machine to Promela str.
+    """

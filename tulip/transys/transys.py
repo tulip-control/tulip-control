@@ -33,7 +33,6 @@
 Transition System Module
 """
 from collections import Iterable, OrderedDict
-from time import strftime
 from pprint import pformat
 import copy
 
@@ -42,6 +41,7 @@ from labeled_graphs import prepend_with, vprint
 from mathset import PowerSet, MathSet, unique
 import automata
 from executions import FTSSim
+from export import graph2promela
 
 hl = 60 *'-'
 
@@ -476,16 +476,26 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     def loadSPINAut():
         raise NotImplementedError
     
-    def _save_pml(self, path, add_missing_extension=True):
-        s = '/*\n * Promela file generated with TuLiP\n'
-        s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
+    def _save(self, path, fileformat):
+        """Export options available only for FTS systems.
         
-        s += self.promela_str()
+        Provides: pml (Promela)
+        
+        see also
+        --------
+        save, plot
+        """
+        if fileformat not in {'promela', 'Promela', 'pml'}:
+            raise Exception('Unknown file format.')
+        
+        if fileformat in {'promela', 'Promela', 'pml'}:
+            s = graph2promela.fts2promela(self, self.name)
         
         # dump to file
         f = open(path, 'w')
         f.write(s)
         f.close()
+        return True
 
 class FTS(FiniteTransitionSystem):
     """Alias to FiniteTransitionSystem.
@@ -571,30 +581,6 @@ class OpenFTS(OpenFiniteTransitionSystem):
     def __init__(self, **args):
         OpenFiniteTransitionSystem.__init__(self, **args)
 
-def negation_closure(atomic_propositions):
-    """Given: ['p', ...], return: [True, 'p', '!p', ...].
-    
-    @param atomic_propositions: AP set
-    @type atomic_propositions: iterable container of strings
-    """
-    def negate(x):
-        # starts with ! ?
-        if x.find('!') == 0:
-            x = x[1:]
-        else:
-            x = '!'+x
-        return x
-    
-    if not isinstance(atomic_propositions, Iterable):
-        msg = 'atomic_propositions must be Iterable.\n'
-        msg += 'Got:\n\t' +str(atomic_propositions) +'\ninstead.'
-        raise TypeError(msg)
-    
-    ap = [f(x)
-          for x in atomic_propositions
-          for f in (lambda x: x, negate) ] +[True]
-    return unique(ap)
-
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None, verbose=False):
     """Create a Finite Transition System from a tuple of fields.
@@ -657,9 +643,12 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         if isinstance(state_labeling[0], str):
             state_label_pairs = False
         
+        if state_labeling[0] is None:
+            state_label_pairs = False
+        
         try:
             (state, ap_label) = state_labeling[0]
-        except ValueError:
+        except:
             state_label_pairs = False
         
         if state_label_pairs:
@@ -761,7 +750,13 @@ def line_labeled_with(L, m=0):
     n = len(L)
     S = range(m, m+n)
     S0 = [] # user will define them
-    AP = negation_closure(L)
+    AP = set()
+    for ap_subset in L:
+        # skip empty label ?
+        if ap_subset is None:
+            continue
+        AP |= set(ap_subset)
+    AP = {True}
     Act = None
     from_states = range(m, m+n-1)
     to_states = range(m+1, m+n)
