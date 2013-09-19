@@ -2656,13 +2656,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                                   addext=add_missing_extension)
         
         if fileformat is 'html':
-            save_d3.labeled_digraph2d3(self, path)
-            return True
+            return save_d3.labeled_digraph2d3(self, path)
         
-        try:
-            return self._save(path, fileformat)
-        except:
-            print('Method _save failed.')
+        if self._save(path, fileformat):
+            return True
         
         if prog is None:
             prog = self.default_layout

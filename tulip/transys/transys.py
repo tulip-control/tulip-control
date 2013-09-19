@@ -486,7 +486,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         save, plot
         """
         if fileformat not in {'promela', 'Promela', 'pml'}:
-            raise Exception('Unknown file format.')
+            return False
         
         if fileformat in {'promela', 'Promela', 'pml'}:
             s = graph2promela.fts2promela(self, self.name)

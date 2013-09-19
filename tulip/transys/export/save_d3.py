@@ -246,3 +246,4 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
     
     html_file = open(html_file_name, 'w')
     html_file.write(s)
+    return True

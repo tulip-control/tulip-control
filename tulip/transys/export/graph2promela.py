@@ -61,10 +61,9 @@ def fts2promela(graph, procname=None):
     @param procname: Promela process name (after proctype)
     @type procname: str (default: system name)
     """
-    def state2promela(state, ap_label, ap_alphabet):
-        s = str(state).replace(' ', '_') +':\n'
-        s += '\t atomic{\n'
-        s += '\t\t printf("State: ' +str(state) +'\\n");\n'
+    def state_ap2promela(state, graph, ap_alphabet):
+        ap_label = get_label_of(state, graph)
+        s = ''
         for prop in ap_alphabet:
             if prop is True:
                 continue
@@ -74,18 +73,27 @@ def fts2promela(graph, procname=None):
             else:
                 s += '\t\t ' +str(prop) +' = 0;\n'
         
-        s += '\t }\n'
+        s += '\t\t printf("State: ' +str(state) +'\\n");\n'
+        s += '\t\n'
         return s
     
-    def outgoing_trans2promela(transitions):
-        s = '\t \n\t if\n'
+    def trans2promela(transitions, graph, ap_alphabet):
+        s = '\t if\n'
         for (from_state, to_state, sublabels_dict) in transitions:
             s += '\t :: atomic{\n'
             s += '\t\t printf("' +str(sublabels_dict) +'\\n");\n'
+            s += state_ap2promela(to_state, graph, ap_alphabet)
             s += '\t\t goto ' +str(to_state) +'\n'
             s += '\t }\n'
         s += '\t fi;\n\n'
         return s
+    
+    def get_label_of(state, graph):
+        state_label_pairs = graph.states.find([state] )
+        (state_, ap_label) = state_label_pairs[0]
+        print('state:\t' +str(state) )
+        print('ap label:\t' +str(ap_label) )
+        return ap_label['ap']
     
     if procname is None:
         procname = graph.name
@@ -104,16 +112,15 @@ def fts2promela(graph, procname=None):
         s += '\t :: goto ' +str(initial_state) +'\n'
     s += '\t fi;\n'
     
+    ap_alphabet = graph.atomic_propositions
     for state in graph.states():
-        ap_alphabet = graph.atomic_propositions
-        lst = graph.states.find([state] )
-        (state_, ap_label) = lst[0]
-        s += state2promela(state, ap_label['ap'], ap_alphabet)
-        
-        outgoing_transitions = graph.transitions.find(
+        out_transitions = graph.transitions.find(
             {state}, as_dict=True
         )
-        s += outgoing_trans2promela(outgoing_transitions)
+        
+        s += str(state).replace(' ', '_') +':'
+        s += trans2promela(out_transitions, graph,
+                           ap_alphabet)
     
     s += '}\n'
     return s
