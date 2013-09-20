@@ -57,7 +57,7 @@ class LtiSysDyn:
     A LtiSysDyn object contains the fields A, B, E, K, Uset, Wset and domain
     as defined above.
     
-    Note: For state dependent bounds on the input [u[t];s[t]] \in Uset can
+    Note: For state-dependent bounds on the input, [u[t];s[t]] \in Uset can
     be used.
     
     **Constructor**:
