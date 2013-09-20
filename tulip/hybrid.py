@@ -50,12 +50,15 @@ class LtiSysDyn:
     """LtiSysDyn class for specifying the continuous dynamics:
 
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
-        u[t] \in Uset or [u[t];s[t]] \in Uset - polytope object
+        u[t] \in Uset - polytope object
         d[t] \in Wset - polytope object
         s[t] \in domain -polytope object
 
     A LtiSysDyn object contains the fields A, B, E, K, Uset, Wset and domain
     as defined above.
+    
+    Note: For state dependent bounds on the input [u[t];s[t]] \in Uset can
+    be used.
     
     **Constructor**:
     
