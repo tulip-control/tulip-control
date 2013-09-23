@@ -750,13 +750,12 @@ def line_labeled_with(L, m=0):
     n = len(L)
     S = range(m, m+n)
     S0 = [] # user will define them
-    AP = set()
+    AP = {True}
     for ap_subset in L:
         # skip empty label ?
         if ap_subset is None:
             continue
         AP |= set(ap_subset)
-    AP = {True}
     Act = None
     from_states = range(m, m+n-1)
     to_states = range(m+1, m+n)

@@ -34,6 +34,7 @@ Automata Module
 """
 from collections import Iterable, OrderedDict
 from pprint import pformat
+import warnings
 #import warnings
 
 from labeled_graphs import LabeledStateDiGraph
@@ -510,6 +511,13 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     accepting_states_preimage = MathSet()
     
     dprint(hl +'\n' +' Product TS construction:\n' +hl +'\n')
+    
+    if not s0s:
+        msg = 'Transition System has no initial states !\n'
+        msg += '=> Empty product system.\n'
+        msg += 'Did you forget to define initial states ?'
+        warnings.warn(msg)
+    
     for s0 in s0s:
         dprint('Checking initial state:\t' +str(s0) )
         

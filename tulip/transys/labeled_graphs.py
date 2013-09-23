@@ -40,12 +40,10 @@ import copy
 from textwrap import fill
 
 import networkx as nx
-#from scipy.sparse import lil_matrix # is this really needed ?
 
 from mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique, dprint
 from export import save_d3
-#from tulip import conxml
 
 hl = 60 *'-'
 
@@ -53,7 +51,6 @@ try:
     import pydot
 except ImportError:
     warnings.warn('pydot package not found.\nHence dot export not unavailable.')
-    # python-graph package not found. Disable dependent methods.
     pydot = None
 
 try:
@@ -2658,8 +2655,13 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if fileformat is 'html':
             return save_d3.labeled_digraph2d3(self, path)
         
-        if self._save(path, fileformat):
-            return True
+        try:
+            if self._save(path, fileformat):
+                return True
+        except AttributeError:
+            pass
+        else:
+            raise
         
         if prog is None:
             prog = self.default_layout

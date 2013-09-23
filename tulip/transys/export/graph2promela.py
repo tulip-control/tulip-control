@@ -99,7 +99,7 @@ def fts2promela(graph, procname=None):
         procname = graph.name
     
     s = '/*\n * Promela file generated with TuLiP\n'
-    s += ' * Data: '+str(strftime('%x %X %z') ) +'\n */\n\n'
+    s += ' * Date: '+str(strftime('%x %X %z') ) +'\n */\n\n'
     for ap in graph.atomic_propositions:
         # convention "!" means negation
         if ap not in {None, True}:
