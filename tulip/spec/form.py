@@ -47,6 +47,7 @@ def mutex(varnames):
     """
     mutex = set()
     numVars = len(varnames)
+    varnames = list(varnames)
     for i in range(0,numVars-1):
         mut_str = varnames[i]+' -> ! ('+varnames[i+1]
         for j in range(i+2,numVars):
