@@ -2655,13 +2655,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if fileformat is 'html':
             return save_d3.labeled_digraph2d3(self, path)
         
-        try:
+        if hasattr(self, '_save'):
             if self._save(path, fileformat):
                 return True
-        except AttributeError:
-            pass
-        else:
-            raise
         
         if prog is None:
             prog = self.default_layout
