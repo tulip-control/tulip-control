@@ -151,7 +151,7 @@ def merge_example():
     
     L = n*['p']
     ts2 = trs.cycle_labeled_with(L)
-    ts2.states.label('s3', '!p')
+    ts2.states.label('s3', None)
     
     ts2.actions |= ['up', 'down']
     ts2.transitions.label('s0', 's1', 'up')

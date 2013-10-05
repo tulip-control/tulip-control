@@ -67,14 +67,14 @@ def test_mutable_ba():
     ba.states.initial.add(s0)
     ba.states.accepting.add(s1)
     
-    ba.alphabet.math_set |= {'p', '!p'}
+    ba.alphabet.math_set |= {'p'}
     ba.transitions.add(s0, s1)
     ba.transitions.remove(s0, s1)
     
-    ba.transitions.add_labeled(s0, s1, {'p', '!p'} )
+    ba.transitions.add_labeled(s0, s1, {'p'} )
     ba.plot()
     
-    ba.transitions.remove_labeled(s0, s1, {'p', '!p'} )
+    ba.transitions.remove_labeled(s0, s1, {'p'} )
     ba.plot()
 
 if __name__ == '__main__':

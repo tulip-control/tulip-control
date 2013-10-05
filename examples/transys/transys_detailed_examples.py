@@ -395,24 +395,24 @@ def label_per_state():
     
     fts = trs.FTS()
     fts.states.add_from(['s0', 's1'] )
-    fts.atomic_propositions.add_from(['p', '!p'] )
-    fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}] )
+    fts.atomic_propositions.add('p')
+    fts.states.labels(['s0', 's1'], [{'p'}, None] )
     fts.plot()
     
     fts = trs.FTS()
-    fts.states.labels(['s0', 's1'], [{'p'}, {'!p'}], check=False)
+    fts.states.labels(['s0', 's1'], [{'p'}, None], check=False)
     fts.plot()
     
     fts = trs.FTS()
-    fts.states.labels([1, 2], [{'p'}, {'!p'}], check=False)
+    fts.states.labels([1, 2], [{'p'}, None], check=False)
     fts.plot()
     
     fts = trs.FTS()
-    fts.states.labels(range(2), [{'p'}, {'!p'}], check=False)
+    fts.states.labels(range(2), [{'p'}, None], check=False)
     fts.plot()
     
     fts = trs.FTS()
-    fts.states.labels('create', [{'p'}, {'!p'}] )
+    fts.states.labels('create', [{'p'}, None] )
     fts.plot()
 
 if __name__ == '__main__':
