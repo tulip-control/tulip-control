@@ -58,7 +58,7 @@ def mealy2scxml(mealy):
         s = ''
         successors = mealy.states.post(from_state)
         for to_state in successors:
-            s = '\n' +2*'\t' +'<transition '
+            s += '\n' +2*'\t' +'<transition '
             trans = mealy.transitions.find([from_state], [to_state] )
             for (from_state_, to_state_, sublabel_dict) in trans:
                 s += 'event="input_present" '
