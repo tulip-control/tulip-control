@@ -420,6 +420,12 @@ def load_file(aut_file, spec, verbose=0):
                 transition[i] = int(transition[i])
 
             m.states.add(stateID)
+            
+            # mark initial states (states that do not appear in previous transitions)
+            seenSoFar = [t for (s,trans) in stateDict.values() for t in trans]
+            if stateID not in seenSoFar:
+                m.states.initial.add(stateID)
+                
             stateDict[stateID] = (state,transition)
 
     # add transitions with guards to the Mealy Machine
@@ -434,6 +440,8 @@ def load_file(aut_file, spec, verbose=0):
                 )
             except Exception, e:
                 raise Exception('Failed to add transition:\n' +str(e) )
+            
+            
     """
     # label states
     for to_state in m.states:
