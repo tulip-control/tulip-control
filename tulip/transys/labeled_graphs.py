@@ -43,7 +43,7 @@ import networkx as nx
 
 from mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique, dprint
-from export import save_d3
+from export import save_d3, machine2scxml
 
 hl = 60 *'-'
 
@@ -2617,9 +2617,9 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         plot, pydot.Dot.write
         
         @param fileformat: type of image file
-        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps'
+        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
             (for more, see pydot.write)
-            | 'html' (using d3.js for animation)
+            | 'scxml' | 'html' (using d3.js for animation)
         
         @param filename: path to image
             (extension C{.fileformat} appened if missing and
@@ -2654,6 +2654,12 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         if fileformat is 'html':
             return save_d3.labeled_digraph2d3(self, path)
+        if fileformat is 'scxml':
+            s = machine2scxml.mealy2scxml(self)
+            scxml_file = open(path, 'w')
+            scxml_file.write(s)
+            return True
+        
         
         if hasattr(self, '_save'):
             if self._save(path, fileformat):
