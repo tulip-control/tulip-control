@@ -40,7 +40,7 @@ def mealy2scxml(mealy):
     >>> from machine_examples import garage_counter
     >>> from tulip.transys.export import machine2scxml
     >>> m = garage_counter()
-    >>> s = machine2scxml(m)
+    >>> s = machine2scxml.mealy2scxml(m)
     >>> f = open('mealy.scxml', 'w')
     >>> f.write(s)
     >>> f.close()
@@ -54,16 +54,22 @@ def mealy2scxml(mealy):
     
     @rtype: SCXML str
     """
+    def indent(n):
+        return '\n' +n*'\t'
+    
     def transitions_str(from_state, mealy):
         s = ''
-        successors = mealy.states.post(from_state)
-        for to_state in successors:
-            s += '\n' +2*'\t' +'<transition '
-            trans = mealy.transitions.find([from_state], [to_state] )
-            for (from_state_, to_state_, sublabel_dict) in trans:
-                s += 'event="input_present" '
-                s += 'cond="' +str(sublabel_dict) +'" '
-                s += 'target="' +str(to_state) +'"/>'
+        trans = mealy.transitions.find([from_state] )
+        n = 2
+        
+        for (from_state_, to_state, sublabel_dict) in trans:
+            s += indent(n) +'<transition '
+            n = n +1
+            s += indent(n) +'event="input_present" '
+            s += indent(n) +'cond="' +str(sublabel_dict) +'" '
+            s += indent(n) +'target="' +str(to_state) +'"/>'
+            n = n -1
+            s += indent(n) +'</transition>'
         return s
     
     s = '<?xml version="1.0" encoding="UTF-8"?>\n'
