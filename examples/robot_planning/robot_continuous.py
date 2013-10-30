@@ -67,7 +67,7 @@ env_safe = set()                # empty set
 sys_vars = {'X0reach'}
 sys_init = {'X0reach'}          
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+sys_safe = {'X(X0reach) == lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create the specification
@@ -79,7 +79,7 @@ ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
 
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('png', 'robot_gr1.png'):
+if not ctrl.save('robot_continuous.png', 'png'):
     print(ctrl)
 
 # Simulation

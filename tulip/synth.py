@@ -42,8 +42,8 @@ from tulip import gr1cint
 
 
 def sys_to_spec(sys):
-    if not isinstance(sys, transys.FiniteTransitionSystem):
-        raise TypeError("synth.sys_to_spec only supports FiniteTransitionSystem objects")
+    if not isinstance(sys, (transys.FiniteTransitionSystem, transys.OpenFiniteTransitionSystem)):
+        raise TypeError("synth.sys_to_spec does not support " + str(type(sys)))
     # Assume everything is controlled; support for an environment
     # definition is forthcoming.
     sys_vars = list(sys.aps)
@@ -51,7 +51,11 @@ def sys_to_spec(sys):
     trans = []
 
     # Initial state, including enforcement of mutual exclusion
-    init = ["("+") || (".join(["("+str(current_state)+")"+" && "+ " && ".join(["!("+str(u)+")" for u in sys.states if u != current_state]) for current_state in sys.states.initial])+")"]
+    if (len(sys.states.initial) > 0):
+        init = ["("+") || (".join(["("+str(current_state)+")"+" && "+ " && ".join(["!("+str(u)+")" for u in sys.states if u != current_state]) for current_state in sys.states.initial])+")"]
+    else:
+        init = ""
+
     for state in sys.states.initial:
         init.append(" && ".join(["("+str(ap)+")" for ap in sys.aps if ap in sys.states.label_of(state)["ap"]]))
         if len(init[-1]) > 0:
