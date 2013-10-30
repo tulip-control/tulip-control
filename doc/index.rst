@@ -13,6 +13,7 @@ Contents:
    intro
    tutorial
    specifications
+   dev_guide
 
 Indices and tables
 ==================
