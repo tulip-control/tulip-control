@@ -124,5 +124,12 @@ BNF grammar, the formula syntax is descibed in the following.
    <http://spinroot.com/spin/Man/ltl.html>`_.  Furthermore, **W** (weak until)
    is not included.
 6. Space is required wherever its absence would cause parsing ambiguity.  E.g.,
-   `Xp` is always an identifier, whereas `X p` is a formula in which the next
-   operator is applied to the identifier `p`.
+   ``Xp`` is always an identifier, whereas ``X p`` is a formula in which the next
+   operator is applied to the identifier ``p``.
+7. Let ``u`` and ``v`` be variables over integer domains, and let ``k`` be an integer.
+   Then "basic comparisons" are ``u < v``, ``u = v``, ``u < k``, and ``u = k``. The
+   following derived operators are also available, with their meaning matching
+   that of the C language: ``<=``, ``>``, ``>=``, ``!=``.  Addition within comparisons,
+   given in the form ``u < v+k`` or ``u = v+k``, is available, along with derived
+   comparisons as in the previous item.  Subtraction is similarly supported;
+   replace ``+`` with ``-``.
