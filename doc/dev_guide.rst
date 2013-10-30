@@ -43,7 +43,7 @@ committers.
 	When debugging after months, the shorter the function, the faster it is loaded to working memory.
 
 - Avoid complicated conditions for if statements and other expressions.
-	Break them down into simpler ones. When possible chain them, so that they are checked in sequence.
+	Break them down into simpler ones. When possible write them in sequence (not nested), so that they are checked in an obvious order.
 	This way a function returns when a condition is False, so the conjunction is implicit and easier to follow, one check at a time.
 
 - Name things to minimize comments.
