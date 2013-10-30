@@ -115,7 +115,7 @@ def form_mutex_check(varnames, expected_formulae):
     assert mutex(varnames) == expected_formulae
 
 def form_mutex_test():
-    for (varnames, expected_form) in [({"a", "b", "c"}, {"a -> ! (b || c)",
+    for (varnames, expected_form) in [(["a", "b", "c"], {"a -> ! (b || c)",
                                                          "b -> ! (c)"}),
                                       (set(), set()),
                                       ({"cat"}, set())]:
