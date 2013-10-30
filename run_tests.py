@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Driver script for testing nu-TuLiP.  Try calling it with "-h" flag.
+Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
 SCL; 5 Sep 2013.
 """
