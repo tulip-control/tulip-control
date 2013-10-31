@@ -28,7 +28,7 @@ help:
 	@echo "  clean      delete build output"
 
 clean:
-	-rm -rf $(BUILDDIR)/* $(EPYBUILDDIR)/*
+	-rm -rf $(BUILDDIR)/*
 
 html:
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)/html
@@ -36,4 +36,5 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 api:
-	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.sourceforge.net -o $(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,polytope/__init__.py,polytope/esp.py,polytope/plot.py,polytope/polytope.py,polytope/quickhull.py,transys,spec,jtlvint.py,gr1cint.py,synth.py,abstract}
+	mkdir -p $(BUILDDIR)/$(EPYBUILDDIR)
+	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.sourceforge.net -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,polytope/__init__.py,polytope/esp.py,polytope/plot.py,polytope/polytope.py,polytope/quickhull.py,transys,spec,jtlvint.py,gr1cint.py,synth.py,abstract}
