@@ -25,6 +25,10 @@ be followed:
   using the `"_" prefix <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
 - API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.  Accordingly, docstrings should be marked up with `Epytext <http://epydoc.sourceforge.net/manual-epytext.html>`_.
 
+- When committing to the repository, you should write a summary line, at most 60
+  characters in length, and if elaboration is necessary, then first skip a line
+  (i.e., leave one blank) before beginning with details.
+
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
 committers.
@@ -56,6 +60,10 @@ committers.
 - Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.  Avoid `this <https://github.com/mdipierro/gluino/blob/master/gluino/dal.py>`_.
 
 Further reading, of general interest:
+
+- "`On commit messages
+  <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
+  Hutterer (28 Dec 2009).
 
 - Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide <https://www.kernel.org/doc/Documentation/CodingStyle>`_
 
