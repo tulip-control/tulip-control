@@ -39,6 +39,11 @@ sys_sws.env_actions.add('')
 #! NOTE: no env action so just leaving blank(?), the other alternative is to set
 # check_labels=False but I could not get it to work (Ioannis??)
 
+# str states
+n = 6
+states = transys.prepend_with(range(n), 's')
+sys_sws.states.add_from(set(states) )
+
 # mode1 transitions
 transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
@@ -46,7 +51,9 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat1), ('right',''))
+sys_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat1), states, ('right','')
+)
                       
 # mode2 transitions
 transmat2 = np.array([[0,0,0,1,0,0],
@@ -55,7 +62,9 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat2), ('up',''))
+sys_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat2), states, ('up','')
+)
                       
 # mode3 transitions
 transmat3 = np.array([[1,0,0,0,0,0],
@@ -64,7 +73,9 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [0,0,0,1,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
-sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat3), ('left',''))
+sys_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat3), states, ('left','')
+)
                       
 # mode4 transitions
 transmat4 = np.array([[1,0,0,0,0,0],
@@ -73,12 +84,16 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
-sys_sws.transitions.add_labeled_adj(sp.lil_matrix(transmat4), ('down',''))
+sys_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat4), states, ('down','')
+)
 
 
 # Decorate TS with state labels (aka atomic propositions)
 sys_sws.atomic_propositions.add_from(['home','lot'])
-sys_sws.states.labels(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+sys_sws.states.labels(
+    states, [{'home'},set(),set(),set(),set(),{'lot'}]
+)
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print sys_sws
@@ -135,3 +150,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.  Here we make use of JTLV.
 #
 ctrl = synth.synthesize('jtlv', specs, sys_sws)
+
+# Generate a graphical representation of the controller for viewing
+if not ctrl.save('robot_controlled_switching.png', 'png'):
+    print(ctrl)
