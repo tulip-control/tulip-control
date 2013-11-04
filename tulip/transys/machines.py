@@ -475,7 +475,36 @@ class MealyMachine(FiniteStateMachine):
             self._transition_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
     
-    def simulate(self, inputs_sequence='manual', iterations=100):
+    def simulate(
+            self, inputs_sequence='manual', iterations=100,
+            current_state=None
+        ):
+        """Manual, random or guided machine run.
+        
+        If the argument current_state is passed,
+        then simulation starts from there.
+        
+        Otherwise if MealyMachine.states.current is non-empty,
+        then simulation starts from there.
+        
+        If current states are empty,
+        then if MealyMachine.states.initial is non-empty,
+        then simulation starts from there.
+        
+        Otherwise an exception is raised.
+        
+        @param input_sequence: inputs for guided simulation
+        @type input_sequence: 'manual' | list of input valuations
+        
+        @param iterations: number of steps for manual or random simulation
+        @type iterations: int
+        
+        @param current_state: state from where to start the simulation
+        @type current_state: element in MealyMachine.states
+            Note that this allows simulating from any desired state,
+            irrespective of whether it is reachable from the subset of
+            initial states.
+        """
         max_count = iterations
         if inputs_sequence not in ['manual', 'random'] and \
         not isinstance(inputs_sequence, executions.MachineInputSequence):
@@ -484,7 +513,9 @@ class MealyMachine(FiniteStateMachine):
                 'manual, random, or guided by given MachineInputSequence.'
             )
         
-        if not self.states.current:
+        if current_state:
+            self.states.select_current([current_state] )
+        elif not self.states.current:
             print('Current state unset.')
             if not self.states.initial:
                 msg = 'Initial state(s) unset.\n'

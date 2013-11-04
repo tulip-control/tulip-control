@@ -112,12 +112,17 @@ ctrl = synth.synthesize('jtlv', specs)
 
 # if the spec is unrealizable, ctrl is a list of counterexamples
 if isinstance(ctrl, list):
-    print "Counterexample: environment winning initial states: \n",ctrl
+    print("Counterexample: environment winning initial states: \n", ctrl)
+    exit
 
-else:
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-    if not ctrl.save('robot_gr1.png', 'png'):
-        print(ctrl)
-    ctrl.states.select_current([0])
-    ctrl.simulate(inputs_sequence='random', iterations=100)
+if not ctrl.save('robot_gr1.png', 'png'):
+    print(ctrl)
+
+# either select current state before simulation
+ctrl.states.select_current([0] )
+ctrl.simulate(inputs_sequence='random', iterations=10)
+    
+# or pass it to simulate
+ctrl.simulate(inputs_sequence='random', iterations=10, current_state=0)
