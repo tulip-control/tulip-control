@@ -369,23 +369,45 @@ def scipy_sparse_labeled_adj():
     from scipy.sparse import lil_matrix
     from numpy.random import rand
     
-    A = lil_matrix((10, 10))
+    n = 10
+    
+    A = lil_matrix((n, n) )
     A[0, :3] = rand(3)
+    adj2states = range(n)
     
     print(A)
     
     ofts = trs.OpenFTS()
+    ofts.states.add_from(set(range(10) ) )
     
     # note: to avoid first defining actions, pass arg check_labels=False
     ofts.sys_actions.add('move')
     ofts.env_actions.add('rain')
     labels = ('move', 'rain')
-    ofts.transitions.add_labeled_adj(A, labels)
+    ofts.transitions.add_labeled_adj(A, adj2states, labels)
     #ofts.transitions.add_labeled_adj(A, labels, check_labels=False)
     
     print(30*'-' +'\n'+
           'Successfully added adjacency matrix transitions on guard: '
           +str(labels) +', to open FTS.\n' +30*'-' +'result:\n')
+    ofts.plot()
+    
+    """same thing as above, using A as a submatrix instead
+    """
+    A = lil_matrix((3, 3) )
+    A[0, :3] = rand(3)
+    adj2states = [0, 1, 2]
+    
+    print(A)
+    
+    ofts = trs.OpenFTS()
+    ofts.states.add_from(set(range(10) ) )
+    
+    # note: to avoid first defining actions, pass arg check_labels=False
+    ofts.sys_actions.add('move')
+    ofts.env_actions.add('rain')
+    labels = ('move', 'rain')
+    ofts.transitions.add_labeled_adj(A, adj2states, labels)
     ofts.plot()
     
     return ofts
