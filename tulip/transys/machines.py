@@ -611,7 +611,7 @@ class MealyMachine(FiniteStateMachine):
         
         if len(cur_states) > 1:
             state_selected = select_state(cur_states, mode)
-            if not state_selected:
+            if state_selected is None:
                 return None
         elif cur_states:
             state_selected = choice(cur_states)
@@ -630,7 +630,7 @@ class MealyMachine(FiniteStateMachine):
         
         if len(transitions) > 1:
             transition_selected = select_transition(transitions, mode)
-            if not transition_selected:
+            if transition_selected is None:
                 return None
         elif transitions:
             transition_selected = transitions[0]
