@@ -36,6 +36,11 @@ sys_hyb = transys.OpenFTS()
 sys_hyb.sys_actions.add_from({'gear0','gear1'})
 sys_hyb.env_actions.add_from({'slippery','normal'})
 
+# str states
+n = 6
+states = ['s'+str(i) for i in xrange(n) ]
+sys_hyb.states.add_from(states)
+
 # First environment chooses a mode, than the system chooses a mode and within
 # each mode there exists a low level controller to take any available transition
 # deterministically.
@@ -44,31 +49,39 @@ sys_hyb.env_actions.add_from({'slippery','normal'})
 # We take the transitions to be identity.
 trans1 = np.eye(6)
 
-sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(trans1),('gear0','normal'))
-sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(trans1),('gear0','slippery'))
+sys_hyb.transitions.add_labeled_adj(
+    sp.lil_matrix(trans1), states, ('gear0','normal')
+)
+sys_hyb.transitions.add_labeled_adj(
+    sp.lil_matrix(trans1), states, ('gear0','slippery')
+)
 
 # gear1 dynamics are similar to the environment switching example.
-transmat1 = np.array([[1,1,0,1,0,0],
-                     [1,1,1,0,1,0],
-                     [0,1,1,0,1,1],
-                     [1,0,0,1,1,0],
-                     [0,1,0,1,1,1],
-                     [0,0,1,0,1,1]])
+transmat1 = sp.lil_matrix(np.array(
+                [[1,1,0,1,0,0],
+                 [1,1,1,0,1,0],
+                 [0,1,1,0,1,1],
+                 [1,0,0,1,1,0],
+                 [0,1,0,1,1,1],
+                 [0,0,1,0,1,1]]
+            ))
 
-sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(transmat1),('gear1','normal'))
+sys_hyb.transitions.add_labeled_adj(transmat1, states, ('gear1','normal'))
 
-transmat2 = np.array([[0,0,1,1,0,0],
-                     [1,0,1,0,1,0],
-                     [1,0,0,0,1,1],
-                     [1,0,0,0,0,1],
-                     [0,1,0,1,0,1],
-                     [0,0,1,1,0,0]])
+transmat2 = sp.lil_matrix(np.array(
+                [[0,0,1,1,0,0],
+                 [1,0,1,0,1,0],
+                 [1,0,0,0,1,1],
+                 [1,0,0,0,0,1],
+                 [0,1,0,1,0,1],
+                 [0,0,1,1,0,0]]
+            ))
 
-sys_hyb.transitions.add_labeled_adj(sp.lil_matrix(transmat2),('gear1','slippery'))
+sys_hyb.transitions.add_labeled_adj(transmat2, states, ('gear1','slippery'))
 
 # Decorate TS with state labels (aka atomic propositions)
 sys_hyb.atomic_propositions |= ['home','lot']
-sys_hyb.states.labels(range(6),[{'home'},set(),set(),set(),set(),{'lot'}])
+sys_hyb.states.labels(states, [{'home'}, set(), set(), set(), set(), {'lot'}] )
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print sys_hyb
