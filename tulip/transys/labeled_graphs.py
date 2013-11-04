@@ -2094,15 +2094,31 @@ class LabeledTransitions(Transitions):
             for to_state in to_states:
                 self.add_labeled(from_state, to_state, labels, check=check)
     
-    def add_labeled_adj(self, adj, labels, check_labels=True, state_map='ordered'):
+    def add_labeled_adj(
+            self, adj, adj2states,
+            labels, check_labels=True
+        ):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are enabled when the given guard is active.        
         
         @param adj: new transitions represented by adjacency matrix.
-            Note that here adjacency is in the sense of nodes,
-            not spatial.
         @type adj: scipy.sparse.lil (list of lists)
+        
+        @param adj2states: correspondence between adjacency matrix
+            nodes and existing states.
+            
+            For example the 1st state in adj2states corresponds to
+            the first node in C{adj}.
+            
+            States must have been added using:
+            
+                - sys.states.add, or
+                - sys.states.add_from
+                
+            If adj2states includes a state not in sys.states,
+            no transition is added and an exception raised.
+        @type adj2states: list of valid states
         
         @param labels: combination of labels with which to annotate each of
             the new transitions created from matrix adj.
@@ -2110,43 +2126,40 @@ class LabeledTransitions(Transitions):
             transition labeling sets.
         @type labels: tuple of valid transition labels
         
-        @param check_labels: check validity of labels, or just add them as new
+        @param check_labels: check validity of labels,
+            or just add them as new
         @type check_labels: bool
-        """
-        # state order maintained ?
-        if self.graph.states.list is None:
-            raise Exception('System must have ordered states to ' +
-                            'use add_labeled_adj.')
         
+        see also
+        --------
+        add_labeled, Transitions.add_adj
+        """
         # square ?
         if adj.shape[0] != adj.shape[1]:
             raise Exception('Adjacency matrix must be square.')
         
-        n = adj.shape[0]
-        
-        # no existing states ?
-        if not self.graph.states():
-            new_states = range(n)
-            self.graph.states.add_from(new_states)
-            dprint('Added ordered list of states: ' +
-                   str(self.graph.states.list) )
+        # check states exist, before adding any transitions
+        for state in adj2states:
+            if state not in self.graph.states:
+                raise Exception(
+                    'State: ' +str(state) +' not found.'
+                    ' Consider adding it with sys.states.add'
+                )
         
         # convert to format friendly for edge iteration
-        nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
+        nx_adj = nx.from_scipy_sparse_matrix(
+            adj, create_using=nx.DiGraph()
+        )
         
         # add each edge using existing checks
-        states_list = self.graph.states.list
         for edge in nx_adj.edges_iter():
             (from_idx, to_idx) = edge
             
-            from_state = states_list[from_idx]
-            to_state = states_list[to_idx]
+            from_state = adj2states[from_idx]
+            to_state = adj2states[to_idx]
             
             self.add_labeled(from_state, to_state, labels,
                              check=check_labels)
-        
-        # in-place replace nodes, based on map
-        # compose graphs (vs union, vs disjoint union)
         
         # TODO add overwriting (=delete_labeled +add once more) capability
     
