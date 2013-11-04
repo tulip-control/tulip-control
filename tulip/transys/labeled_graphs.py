@@ -1568,7 +1568,7 @@ class Transitions(object):
             for to_state in to_states:
                 self.graph.add_edge(from_state, to_state)
     
-    def add_adj(self, adj):
+    def add_adj(self, adj, adj2states):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are not labeled.
@@ -1580,33 +1580,50 @@ class Transitions(object):
             Note that adjacency here is in the sense of nodes
             and not spatial.
         @type adj: scipy.sparse.lil (list of lists)
-        """
-        # state order maintained ?
-        if self.graph.states.list is None:
-            raise Exception('System must have ordered states to use add_labeled_adj.')
         
+        @param adj2states: correspondence between adjacency matrix
+            nodes and existing states.
+            
+            For example the 1st state in adj2states corresponds to
+            the first node in C{adj}.
+            
+            States must have been added using:
+            
+                - sys.states.add, or
+                - sys.states.add_from
+                
+            If adj2states includes a state not in sys.states,
+            no transition is added and an exception raised.
+        @type adj2states: list of valid states
+        
+        see also
+        --------
+        States.add, States.add_from,
+        LabeledTransitions.add_labeled_adj
+        """
         # square ?
         if adj.shape[0] != adj.shape[1]:
             raise Exception('Adjacency matrix must be square.')
         
-        n = adj.shape[0]
-        
-        # no existing states ?
-        if not self.graph.states():
-            new_states = range(n)
-            self.graph.states.add_from(new_states)
-            dprint('Added ordered list of states: ' +str(self.graph.states.list) )
+        # check states exist, before adding any transitions
+        for state in adj2states:
+            if state not in self.graph.states:
+                raise Exception(
+                    'State: ' +str(state) +' not found.'
+                    ' Consider adding it with sys.states.add'
+                )
         
         # convert to format friendly for edge iteration
-        nx_adj = nx.from_scipy_sparse_matrix(adj, create_using=nx.DiGraph())
+        nx_adj = nx.from_scipy_sparse_matrix(
+            adj, create_using=nx.DiGraph()
+        )
         
         # add each edge using existing checks
-        states_list = self.graph.states.list
         for edge in nx_adj.edges_iter():
             (from_idx, to_idx) = edge
             
-            from_state = states_list[from_idx]
-            to_state = states_list[to_idx]
+            from_state = adj2states[from_idx]
+            to_state = adj2states[to_idx]
             
             self.add(from_state, to_state)
     

@@ -53,7 +53,7 @@ from scipy import sparse as sp
 from cvxopt import matrix,solvers
 import itertools
 from tulip import polytope as pc
-from tulip import transys as ts
+from tulip import transys as trs
 from tulip.hybrid import *
 from prop2part import PropPreservingPartition, pwa_partition
 
@@ -359,8 +359,17 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                     list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)
     
     # Generate transition system and add transitions       
-    ofts = ts.OpenFTS()
-    ofts.transitions.add_adj(sp.lil_matrix(transitions))
+    ofts = trs.OpenFTS()
+    
+    adj = sp.lil_matrix(transitions)
+    n = adj.shape[0]
+    ofts_states = range(n)
+    ofts_states = trs.prepend_with(ofts_states, 's')
+    
+    # add set to destroy ordering
+    ofts.states.add_from(set(ofts_states) )
+    
+    ofts.transitions.add_adj(adj, ofts_states)
     
     # Decorate TS with state labels
     ofts.atomic_propositions.add_from(part.list_prop_symbol)
@@ -371,10 +380,19 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             if reg.list_prop[prop_ind]==1:
                 state_prop.add(part.list_prop_symbol[prop_ind]) 
         prop_list.append(state_prop)
-
-    ofts.states.labels(range(len(prop_list)),prop_list)
     
-    return AbstractSysDyn(ppp=new_part, ofts=ofts, orig_list_region=orig_list, orig=orig)
+    # temporary check for correctness
+    if len(prop_list) != n:
+        raise Exception('prop_list longer than n.')
+    
+    ofts.states.labels(ofts_states, prop_list)
+    
+    return AbstractSysDyn(
+        ppp=new_part,
+        ofts=ofts,
+        orig_list_region=orig_list,
+        orig=orig
+    )
 
 # DEFUNCT until further notice
 # def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
