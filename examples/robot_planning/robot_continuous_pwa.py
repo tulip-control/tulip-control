@@ -72,7 +72,7 @@ env_safe = set()                # empty set
 sys_vars = {'X0reach'}
 sys_init = {'X0reach'}          
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) == lot || (X0reach && !park)'}
+sys_safe = {'X(X0reach) == lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create the specification
