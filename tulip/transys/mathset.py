@@ -96,7 +96,7 @@ class MathSet(object):
     in a set and list, to optimize contains operations:
     
     >>> print(s)
-    set(['a', 1]) U [[1, 2], set(['a', 'b'])]
+    MathSet(['a', 1, [1, 2], set(['a', 'b'])])
     
     Set operations similar to the builtin type are supported:
     
@@ -108,7 +108,7 @@ class MathSet(object):
     >>> p.add_from([5, 6, '7', {8, 9} ] )
     >>> p.remove(1)
     >>> p
-    set([2, 3, 4, 5, 6, '5', '7']) U [[1, 2], {'a': 1}, set([8, 9])]
+    MathSet([2, 3, 4, 5, 6, '5', '7', [1, 2], {'a': 1}, set([8, 9])])
     
     see also
     --------
@@ -129,7 +129,11 @@ class MathSet(object):
         self.add_from(iterable)
     
     def __repr__(self):
-        return pformat(self._set) +' U ' +pformat(self._list)
+        return 'MathSet(' +pformat(list(self._set) +self._list) +')'
+    
+    def _debug_repr(self):
+        set_str = ', '.join([repr(i) for i in self._set] )
+        return 'MathSet({' +set_str +'} +' +str(self._list) +')'
     
     def __str__(self):
         return self.__repr__()
@@ -479,6 +483,13 @@ class SubSet(MathSet):
         self._superset = []
         super(SubSet, self).__init__([])
         self.superset = iterable_superset
+    
+    def __repr__(self):
+        return 'SubSet(' +pformat(list(self._set) +self._list) +')'
+    
+    def _debug_repr(self):
+        set_str = ', '.join([repr(i) for i in self._set] )
+        return 'SubSet({' +set_str +'} +' +str(self._list) +')'
     
     def _get_superset(self):
         return self._superset
