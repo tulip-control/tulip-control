@@ -1,10 +1,11 @@
 Introduction
 ============
 
-The Temporal Logic Planning (TuLiP) Toolbox is a collection of Python-based
-code for automatic synthesis of correct-by-construction embedded control
-software as discussed in [1]_, [2]_.  This chapter contains a brief overview
-of the toolbox, along with instructions on how to install the software.
+The Temporal Logic Planning (TuLiP) Toolbox is a collection of Python-based code
+for automatic synthesis of correct-by-construction embedded control software as
+discussed in [WonTopOzaXuMur2011]_, [WonTopMur2012]_.  This chapter contains a
+brief overview of the toolbox, along with instructions on how to install the
+software.
 
 Please also see `the wiki <http://tulip-control.sourceforge.net>`_ for
 additional information and related links.  Though installation should be
@@ -38,7 +39,7 @@ The procedure that we used is broken down into three primary steps:
 
   * Design a continuous controller that implements the discrete plan.
 
-More information on the solution strategy is available in [1].
+More information on the solution strategy is available in [WonTopOzaXuMur2011]_.
 
 .. include:: install.txt
 
@@ -48,15 +49,3 @@ Version 1.0 of TuLiP represents a major overhaul of the structure of the
 code to allow better support for integration with other tools and adding
 functionality.  Code and examples for version 0.x of TuLiP are not
 compatible with version 1.0+ and must be rewritten from scratch.
-
-References
-----------
-
-.. [1] `TuLiP: a software toolbox for receding horizon
-  temporal logic planning <http://www.cds.caltech.edu/~utopcu/images//d/d2/WTOXM-hscc11.pdf>`_, T. Wongpiromsarn, U. Topcu, N. Ozay, H. Xu,
-  and R. Murray, International Conference on Hybrid Systems:
-  Computation and Control, 2011.
-
-.. [2] `Receding horizon temporal logic planning <http://www.cds.caltech.edu/~utopcu/images/0/09/WTM-itac10.pdf>`_,
-  T. Wongpiromsarn, U. Topcu, and R. Murray, IEEE
-  Transactions on Automatic Control, 57(11):2817-2830, 2012.
