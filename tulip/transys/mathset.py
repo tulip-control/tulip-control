@@ -466,7 +466,7 @@ class SubSet(MathSet):
     >>> s = SubSet(superset)
     >>> s |= [1, 2]
     >>> print(s)
-    set([1, 2]) U []
+    SubSet([[1, 2]])
     >>> s.add(3)
     raises exception because 3 \\notin [1,2]
     

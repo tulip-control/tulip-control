@@ -13,19 +13,28 @@ NO, TuLiP 1.x discretization
 """
 import numpy as np
 
-from tulip import *
-from tulip import spec, synth
+from tulip import spec, synth, hybrid
 import tulip.polytope as pc
 from tulip.abstract import prop2part, discretize
 
 # Problem parameters
 input_bound = 1.0
 uncertainty = 0.01
+vizualize = False
 
+"""Quotient partition induced by propositions"""
 # Continuous state space
 cont_state_space = pc.Polytope.from_box(np.array([[0., 3.],[0., 2.]]))
 
+# Continuous propositions
+cont_props = {}
+cont_props['home'] = pc.Polytope.from_box(np.array([[0., 1.],[0., 1.]]))
+cont_props['lot'] = pc.Polytope.from_box(np.array([[2., 3.],[1., 2.]]))
 
+# Compute the proposition preserving partition of the continuous state space
+cont_partition = prop2part.prop2part(cont_state_space, cont_props)
+
+"""Dynamics abstracted to discrete transitions, given initial partition"""
 # Continuous dynamics
 A = np.array([[1.0, 0.],[ 0., 1.0]])
 B = np.array([[0.1, 0.],[ 0., 0.1]])
@@ -35,35 +44,28 @@ W = pc.Polytope.from_box(uncertainty*np.array([[-1., 1.],[-1., 1.]]))
 
 sys_dyn = hybrid.LtiSysDyn(A,B,E,[],U,W, cont_state_space)
 
-
-# Continuous proposition
-cont_props = {}
-cont_props['home'] = pc.Polytope.from_box(np.array([[0., 1.],[0., 1.]]))
-cont_props['lot'] = pc.Polytope.from_box(np.array([[2., 3.],[1., 2.]]))
-
-# Compute the proposition preserving partition of the continuous state space
-cont_partition = prop2part.prop2part(cont_state_space, cont_props)
+# Given dynamics & proposition-preserving partition, find feasible transitions
 disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
                 N=8, min_cell_volume=0.1, verbose=0)
 
-# TEST (optional visualization of transitions on cont. domain):
-# import networkx as nx
-# from tulip.polytope.plot import plot_partition
-# plot_partition(disc_dynamics.ppp, np.array(nx.to_numpy_matrix(disc_dynamics.ofts)))
-# print disc_dynamics.ofts
-# end of TEST
+"""Visualize transitions in continuous domain (optional)"""
+if vizualize:
+    import networkx as nx
+    from tulip.polytope.plot import plot_partition
+    plot_partition(
+        disc_dynamics.ppp,
+        np.array(nx.to_numpy_matrix(disc_dynamics.ofts) )
+    )
+    print(disc_dynamics.ofts)
 
-# Specifications
-
+"""Specifications"""
 # Environment variables and assumptions
-
 env_vars = {'park'}
 env_init = set()                # empty set
 env_prog = '!park'
 env_safe = set()                # empty set
 
 # System variables and requirements
-
 sys_vars = {'X0reach'}
 sys_init = {'X0reach'}          
 sys_prog = {'home'}               # []<>home
@@ -74,7 +76,7 @@ sys_prog |= {'X0reach'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
-# Synthesize
+"""Synthesize"""
 ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
 
 
