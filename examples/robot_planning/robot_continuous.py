@@ -17,10 +17,17 @@ from tulip import spec, synth, hybrid
 import tulip.polytope as pc
 from tulip.abstract import prop2part, discretize
 
+visualize = False
+if visualize:
+    import networkx as nx
+    from tulip.polytope.plot import plot_partition
+else:
+    def plot_partition(a, b=None):
+        return
+
 # Problem parameters
 input_bound = 1.0
 uncertainty = 0.01
-vizualize = False
 
 """Quotient partition induced by propositions"""
 # Continuous state space
@@ -33,6 +40,7 @@ cont_props['lot'] = pc.Polytope.from_box(np.array([[2., 3.],[1., 2.]]))
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part(cont_state_space, cont_props)
+plot_partition(cont_partition)
 
 """Dynamics abstracted to discrete transitions, given initial partition"""
 # Continuous dynamics
@@ -45,13 +53,13 @@ W = pc.Polytope.from_box(uncertainty*np.array([[-1., 1.],[-1., 1.]]))
 sys_dyn = hybrid.LtiSysDyn(A,B,E,[],U,W, cont_state_space)
 
 # Given dynamics & proposition-preserving partition, find feasible transitions
-disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
-                N=8, min_cell_volume=0.1, verbose=0)
+disc_dynamics = discretize.discretize(
+    cont_partition, sys_dyn, closed_loop=True,
+    N=8, min_cell_volume=0.1, verbose=0
+)
 
 """Visualize transitions in continuous domain (optional)"""
-if vizualize:
-    import networkx as nx
-    from tulip.polytope.plot import plot_partition
+if visualize:
     plot_partition(
         disc_dynamics.ppp,
         np.array(nx.to_numpy_matrix(disc_dynamics.ofts) )
@@ -78,7 +86,6 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 """Synthesize"""
 ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
-
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_continuous.png', 'png'):
