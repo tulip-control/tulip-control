@@ -3,9 +3,8 @@ Introduction
 
 The Temporal Logic Planning (TuLiP) Toolbox is a collection of Python-based code
 for automatic synthesis of correct-by-construction embedded control software as
-discussed in [WonTopOzaXuMur2011]_, [WonTopMur2012]_.  This chapter contains a
-brief overview of the toolbox, along with instructions on how to install the
-software.
+discussed in [WTOXM11]_, [WTM12]_.  This chapter contains a brief overview of
+the toolbox, along with instructions on how to install the software.
 
 Please also see `the wiki <http://tulip-control.sourceforge.net>`_ for
 additional information and related links.  Though installation should be

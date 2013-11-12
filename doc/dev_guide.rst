@@ -29,6 +29,16 @@ be followed:
   characters in length, and if elaboration is necessary, then first skip a line
   (i.e., leave one blank) before beginning with details.
 
+- When referring to publications, check for a corresponding entry in
+  ``doc/bibliography.rst`` and create one if needed, following the `BibTeX
+  alpha.bst style <http://sites.stat.psu.edu/~surajit/present/bib.htm#alpha>`_.
+  References in the Sphinx-built documentation are as usual, e.g.,
+  ``[WTOXM11]_``.  References in docstrings (in the code) should be to the URL
+  of the corresponding entry on the TuLiP website, using `Epydoc syntax
+  <http://epydoc.sourceforge.net/manual-epytext.html>`_, e.g., ::
+
+    U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
+
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
 committers.
