@@ -81,7 +81,6 @@ class AbstractSysDyn:
         self.ofts = ofts
         self.orig_list_region = orig_list_region
         self.orig = orig
-    
 
 def _block_diag2(A,B):
     """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
@@ -100,13 +99,15 @@ def _block_diag2(A,B):
     C[A.shape[0]:, A.shape[1]:] = B.copy()
     return C
 
-def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
-               conservative=True, max_num_poly=5, \
-               use_all_horizon=False, trans_length=1, remove_trans=False, 
-               abs_tol=1e-7, verbose=0):
-
-    """Refine the partition and establish transitions based on reachability
-    analysis.
+def discretize(
+    part, ssys, N=10, min_cell_volume=0.1,
+    closed_loop=True, conservative=True,
+    max_num_poly=5, use_all_horizon=False,
+    trans_length=1, remove_trans=False, 
+    abs_tol=1e-7, verbose=0
+):
+    """Refine the partition and establish transitions
+    based on reachability analysis.
     
     Input:
     
@@ -138,11 +139,15 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     @param abs_tol: maximum volume for an "empty" polytope
     @param verbose: level of verbosity
     @return: An AbstractSysDyn object
+    
+    see also
+    --------
+    prop2part.pwa_partition
     """
-
     orig_list = []
     
-    min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
+    min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
+        *np.finfo(np.double).eps)
     
     if isinstance(ssys,PwaSysDyn):
         part = pwa_partition(ssys, part)
@@ -155,15 +160,16 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             elif len(poly) == 1:
                 orig_list.append(poly.list_poly[0].copy())
             else:
-                raise Exception("solveFeasible: original list contains non-convex \
-                                polytope regions")
+                raise Exception("solveFeasible: "
+                    "original list contains non-convex"
+                    "polytope regions")
         orig = range(len(orig_list))
     else:
         orig_list = None
         orig = 0
     
-    
-    # Cheby radius of disturbance set (defined within the loop for pwa systems)
+    # Cheby radius of disturbance set
+    # (defined within the loop for pwa systems)
     if isinstance(ssys,LtiSysDyn):
         if len(ssys.E) > 0:
             rd,xd = pc.cheby_ball(ssys.Wset)
@@ -182,7 +188,10 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         IJ = (IJ > 0).astype(int)
         
     # Initialize output
-    transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
+    transitions = np.zeros(
+        [part.num_regions,part.num_regions],
+        dtype = int
+    )
     sol = deepcopy(part.list_region)
     adj = part.adj.copy()
     adj = adj.todense()
@@ -207,25 +216,35 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                 rd = 0.
         
         if verbose > 1:        
-            print "\n Working with states " + str(i) + " and " + str(j) \
-                  + " with lengths " + str(len(si)) + " and " + str(len(sj))
+            print(
+                "\n Working with states " +str(i) +" and " + str(j) +
+                " with lengths " + str(len(si)) + " and " + str(len(sj) )
+            )
             if isinstance(ssys,PwaSysDyn):
-                print "where subsystem " +  str(subsys_list[i]) + " is active."
-                  
-            
+                print("where subsystem "
+                    +str(subsys_list[i]) +" is active.")
         
         if conservative:
             # Don't use trans_set
-            S0 = solveFeasable(si,sj,ss,N, closed_loop=closed_loop, 
-                        max_num_poly=max_num_poly, use_all_horizon=use_all_horizon)
+            S0 = solveFeasable(
+                si, sj, ss, N,
+                closed_loop=closed_loop, 
+                max_num_poly=max_num_poly,
+                use_all_horizon=use_all_horizon
+            )
         else:
             # Use original cell as trans_set
-            S0 = solveFeasable(si,sj,ss,N, closed_loop=closed_loop,\
-                    trans_set=orig_list[orig[i]], use_all_horizon=use_all_horizon, \
-                    max_num_poly=max_num_poly)
+            S0 = solveFeasable(
+                si, sj, ss, N,
+                closed_loop=closed_loop,
+                trans_set=orig_list[orig[i]],
+                max_num_poly=max_num_poly,
+                use_all_horizon=use_all_horizon
+            )
         
         if verbose > 1:
-            print "Computed reachable set S0 with volume " + str(pc.volume(S0))
+            print("Computed reachable set S0 with volume " +
+                str(pc.volume(S0)) )
         
         isect = pc.intersect(si, S0)
         risect, xi = pc.cheby_ball(isect)
@@ -239,7 +258,9 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) & (vol2 > min_cell_volume) & (rdiff > rd) & \
+        if (vol1 > min_cell_volume) and \
+            (vol2 > min_cell_volume) and \
+            (rdiff > rd) and \
             (risect > rd):
         
             # Make sure new areas are Regions and add proposition lists
@@ -264,28 +285,54 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             size = len(sol)
             
             # Update transition matrix
-            transitions = np.hstack([transitions, np.zeros([size-num_new, num_new], dtype=int) ])
-            transitions = np.vstack([transitions, np.zeros([num_new, size], dtype=int) ])
+            transitions = np.hstack([
+                transitions,
+                np.zeros(
+                    [size-num_new, num_new],
+                    dtype=int
+                )
+            ])
+            transitions = np.vstack([
+                transitions,
+                np.zeros(
+                    [num_new, size],
+                    dtype=int)
+            ])
             
             transitions[i,:] = np.zeros(size)
-            for kk in range(num_new):
+            for kk in xrange(num_new):
             
-                #transitions[:,size-1-kk] = transitions[:,i] # All sets reachable from start are reachable from both part's
-                transitions[i,size-1-kk] = 0                # except possibly the new part
+                #transitions[:,size-1-kk] = transitions[:,i]
+                # All sets reachable from start are reachable from both part's
+                # except possibly the new part
+                transitions[i,size-1-kk] = 0
                 transitions[j,size-1-kk] = 0            
             
             if i != j:
-                transitions[j,i] = 1        # sol[j] is reachable from intersection of sol[i] and S0..
+                # sol[j] is reachable from intersection of sol[i] and S0..
+                transitions[j,i] = 1
             
             # Update adjacency matrix
             old_adj = np.nonzero(adj[i,:])[0]
             adj[i,:] = np.zeros([size-num_new])
             adj[:,i] = np.zeros([size-num_new])
             
-            adj = np.hstack([adj, np.zeros([size-num_new, num_new], dtype=int) ])
-            adj = np.vstack([adj, np.zeros([num_new, size], dtype=int) ])
+            adj = np.hstack([
+                adj,
+                np.zeros(
+                    [size-num_new, num_new],
+                    dtype=int
+                )
+            ])
+            adj = np.vstack([
+                adj,
+                np.zeros(
+                    [num_new, size],
+                    dtype=int
+                )
+            ])
             
-            for kk in range(num_new):
+            for kk in xrange(num_new):
                 adj[i,size-1-kk] = 1
                 adj[size-1-kk,i] = 1
                 adj[size-1-kk,size-1-kk] = 1
@@ -295,12 +342,13 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                         
             if verbose > 1:
                 output = "\n Adding states " + str(i) + " and "
-                for kk in range(num_new):
+                for kk in xrange(num_new):
                     output += str(size-1-kk) + " and "
-                print output + "\n"
+                print(output + "\n")
                         
             for k in np.setdiff1d(old_adj,[i,size-1]):
-                # Every "old" neighbor must be the neighbor of at least one of the new
+                # Every "old" neighbor must be the neighbor
+                # of at least one of the new
                 if pc.is_adjacent(sol[i],sol[k]):
                     adj[i,k] = 1
                     adj[k,i] = 1
@@ -308,7 +356,7 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                     # Actively remove transitions between non-neighbors
                     transitions[i,k] = 0
                     transitions[k,i] = 0
-                for kk in range(num_new):
+                for kk in xrange(num_new):
                     if pc.is_adjacent(sol[size-1-kk],sol[k]):
                         adj[size-1-kk,k] = 1
                         adj[k, size-1-kk] = 1
@@ -318,8 +366,15 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
                         transitions[k,size-1-kk] = 0
             
             # Update IJ matrix
-            IJ = np.hstack([IJ, np.zeros([size-num_new, num_new], dtype=int) ])
-            IJ = np.vstack([IJ, np.zeros([num_new, size], dtype=int) ])
+            IJ = np.hstack([
+                IJ,
+                np.zeros([size-num_new, num_new], dtype=int)
+            ])
+            IJ = np.vstack([
+                IJ,
+                np.zeros([num_new, size], dtype=int)
+            ])
+            
             adj_k = adj
             if trans_length > 1:
                 k = 1
@@ -332,31 +387,33 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
             verti1 = adj_k[:,i] - transitions[:,i] > 0
             IJ[i,:] = horiz1.astype(int)
             IJ[:,i] = verti1.astype(int)
-            for kk in range(num_new):      
+            for kk in xrange(num_new):      
                 horiz2 = adj_k[size-1-kk,:] - transitions[size-1-kk,:] > 0
                 verti2 = adj_k[:,size-1-kk] - transitions[:,size-1-kk] > 0
                 IJ[size-1-kk,:] = horiz2.astype(int)
                 IJ[:,size-1-kk] = verti2.astype(int)      
             
             if verbose > 1:
-                print "\n Updated adj: \n" + str(adj)
-                print "\n Updated trans: \n" + str(transitions)
-                print "\n Updated IJ: \n" + str(IJ)
+                print("\n Updated adj: \n" + str(adj) )
+                print("\n Updated trans: \n" + str(transitions) )
+                print("\n Updated IJ: \n" + str(IJ) )
             
         elif vol2 < abs_tol:
             if verbose > 1:
-                print "Transition found"
+                print("Transition found")
             transitions[j,i] = 1
         
         else:
             if verbose > 1:
-                print "No transition found, diff vol: " + str(vol2) + \
-                      ", intersect vol: " + str(vol1)
+                print("No transition found, diff vol: " + str(vol2) +
+                      ", intersect vol: " + str(vol1) )
             transitions[j,i] = 0
 
-    new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop, \
-                    list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj), \
-                    list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list)
+    new_part = PropPreservingPartition(
+        domain=part.domain, num_prop=part.num_prop,
+        list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+        list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list
+    )
     
     # Generate transition system and add transitions       
     ofts = trs.OpenFTS()
@@ -376,9 +433,11 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
     prop_list = []
     for reg in sol:
         state_prop = set()
-        for prop_ind in range(len(reg.list_prop)):
+        for prop_ind in xrange(len(reg.list_prop)):
             if reg.list_prop[prop_ind]==1:
-                state_prop.add(part.list_prop_symbol[prop_ind]) 
+                state_prop.add(
+                    part.list_prop_symbol[prop_ind]
+                )
         prop_list.append(state_prop)
     
     # temporary check for correctness
@@ -580,9 +639,11 @@ def discretize(part, ssys, N=10, min_cell_volume=0.1, closed_loop=True,  \
 #                                        orig_list_region=orig_list, orig=orig)                           
 #     return new_part
 
-def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
-            conservative=True, closed_loop = True, test_result=False):
- 
+def get_input(
+    x0, ssys, part, start, end, N, R=[], r=[], Q=[],
+    mid_weight=0., conservative=True,
+    closed_loop=True, test_result=False
+):
     """Calculate an input signal sequence taking the plant from state `start` 
     to state `end` in the partition part, such that 
     f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal. xc is
@@ -631,8 +692,8 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
     region).  If the original proposition preserving partition is not
     convex, safety can not be guaranteed.
     """
-    
-    if (len(R) == 0) and (len(Q) == 0) and (len(r) == 0) and (mid_weight == 0):
+    if (len(R) == 0) and (len(Q) == 0) and \
+    (len(r) == 0) and (mid_weight == 0):
         # Default behavior
         Q = np.eye(N*ssys.B.shape[1])
         R = np.zeros([N*x0.size, N*x0.size])
@@ -646,19 +707,25 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
         r = np.zeros([N*x0.size,1])
     
     if (R.shape[0] != R.shape[1]) or (R.shape[0] != N*x0.size):
-        raise Exception("get_input: R must be square and have side N * dim(state space)")
+        raise Exception("get_input: "
+            "R must be square and have side N * dim(state space)")
     
     if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N*ssys.B.shape[1]):
-        raise Exception("get_input: Q must be square and have side N * dim(input space)")
+        raise Exception("get_input: "
+            "Q must be square and have side N * dim(input space)")
     if part.trans != None:
         if part.trans[end,start] != 1:
-            raise Exception("get_input: no transition from state " + str(start) + \
-                " to state " + str(end))
+            raise Exception("get_input: "
+                "no transition from state " + str(start) +
+                " to state " + str(end)
+            )
     else:
-        print "get_input: Warning, no transition matrix found, assuming feasible"
+        print("get_input: "
+            "Warning, no transition matrix found, assuming feasible")
     
     if (not conservative) & (part.orig == None):
-        print "List of original proposition preserving partitions not given, reverting to conservative mode"
+        print("List of original proposition preserving "
+            "partitions not given, reverting to conservative mode")
         conservative = True
        
     P_start = part.list_region[start]
@@ -674,7 +741,10 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
                 # Take convex hull
                 vert = pc.extreme(P_start.list_poly[0])
                 for i in range(1, len(P_start.list_poly)):
-                    vert = np.hstack([vert, extreme(P_start.list_poly[i])])
+                    vert = np.hstack([
+                        vert,
+                        extreme(P_start.list_poly[i])
+                    ])
                 P1 = pc.qhull(vert)
             else:
                 P1 = P_start.list_poly[0]
@@ -691,11 +761,19 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
             P3 = P_end.list_poly[i]
             if mid_weight > 0:
                 rc, xc = pc.cheby_ball(P3)
-                R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
-                    mid_weight*np.eye(n)
+                R[
+                    np.ix_(
+                        range(n*(N-1), n*N),
+                        range(n*(N-1), n*N)
+                    )
+                ] += mid_weight*np.eye(n)
+                
                 r[range((N-1)*n, N*n), :] += -mid_weight*xc
             try:
-                u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+                u, cost = getInputHelper(
+                    x0, ssys, P1, P3, N, R, r, Q,
+                    closed_loop=closed_loop
+                )
                 r[range((N-1)*n, N*n), :] += mid_weight*xc
             except:
                 r[range((N-1)*n, N*n), :] += mid_weight*xc
@@ -709,21 +787,30 @@ def get_input(x0, ssys, part, start, end, N, R=[], r=[], Q=[], mid_weight=0., \
         P3 = P_end
         if mid_weight > 0:
             rc, xc = pc.cheby_ball(P3)
-            R[np.ix_(range(n*(N-1), n*N), range(n*(N-1), n*N))] += \
-                mid_weight*np.eye(n)
+            R[
+                np.ix_(
+                    range(n*(N-1), n*N),
+                    range(n*(N-1), n*N)
+                )
+            ] += mid_weight*np.eye(n)
             r[range((N-1)*n, N*n), :] += -mid_weight*xc
-        low_u, cost = getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=closed_loop)
+        low_u, cost = getInputHelper(
+            x0, ssys, P1, P3, N, R, r, Q,
+            closed_loop=closed_loop
+        )
         
     if test_result:
         good = is_seq_inside(x0, low_u, ssys, P1, P3)
         if not good:
-            print "Calculated sequence not good"
+            print("Calculated sequence not good")
     return low_u
     
-def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
-                  use_all_horizon=False, trans_set=None, max_num_poly=5):
+def solveFeasable(
+    P1, P2, ssys, N, max_cell=10, closed_loop=True,
+    use_all_horizon=False, trans_set=None, max_num_poly=5
+):
 
-    '''Computes the subset x0 of `P1' from which `P2' is reachable
+    """Computes the subset x0 of `P1' from which `P2' is reachable
     in horizon `N', with respect to system dynamics `ssys'. The closed
     loop algorithm solves for one step at a time, which keeps the dimension
     of the polytopes down.
@@ -745,7 +832,7 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
     Output:
     `x0`: A Polytope or Region object defining the set in P1 from which
           P2 is reachable
-    '''
+    """
     part1 = P1.copy() # Initial set
     part2 = P2.copy() # Terminal set
     
@@ -758,18 +845,26 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
             ttt = part1
         temp_part = part2
         for i in range(N,1,-1): 
-            x0 = solveFeasable(ttt, temp_part, ssys, 1, closed_loop=False,
-                                trans_set=trans_set)    
+            x0 = solveFeasable(
+                ttt, temp_part, ssys, 1,
+                closed_loop=False,
+                trans_set=trans_set
+            )
             if use_all_horizon:
-                temp_part = pc.union(x0, temp_part, check_convex=True)
+                temp_part = pc.union(x0, temp_part,
+                                     check_convex=True)
             else:
                 temp_part = x0
                 if not pc.is_fulldim(temp_part):
                     return pc.Polytope()
-        x0 = solveFeasable(part1, temp_part, ssys, 1, closed_loop=False,
-                                trans_set=trans_set)  
+        x0 = solveFeasable(
+            part1, temp_part, ssys, 1,
+            closed_loop=False,
+            trans_set=trans_set
+        )
         if use_all_horizon:
-            temp_part = pc.union(x0, temp_part, check_convex=True)
+            temp_part = pc.union(x0, temp_part,
+                                 check_convex=True)
         else:
             temp_part = x0
         return temp_part 
@@ -798,25 +893,33 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
     
     if len(part1) > 0:
         # Recursive union of sets
-        poly = solveFeasable(part1.list_poly[0], part2, ssys, N,\
-                               trans_set=trans_set, closed_loop=closed_loop, \
-                               use_all_horizon=use_all_horizon)
+        poly = solveFeasable(
+            part1.list_poly[0], part2, ssys, N,
+            trans_set=trans_set, closed_loop=closed_loop,
+            use_all_horizon=use_all_horizon
+        )
         for i in range(1, len(part1)):
-            s0 = solveFeasable(part1.list_poly[i], part2, ssys, N,\
-                               trans_set=trans_set, closed_loop=closed_loop, \
-                               use_all_horizon=use_all_horizon)
+            s0 = solveFeasable(
+                part1.list_poly[i], part2, ssys, N,
+                trans_set=trans_set, closed_loop=closed_loop,
+                use_all_horizon=use_all_horizon
+            )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
     
     if len(part2) > 0:
         # Recursive union of sets 
-        poly = solveFeasable(part1, part2.list_poly[0], ssys, N, \
-                             trans_set=trans_set, closed_loop=closed_loop, \
-                             use_all_horizon=use_all_horizon)
+        poly = solveFeasable(
+            part1, part2.list_poly[0], ssys, N,
+            trans_set=trans_set, closed_loop=closed_loop,
+            use_all_horizon=use_all_horizon
+        )
         for i in range(1, len(part2)):
-            s0 = solveFeasable(part1, part2.list_poly[i], ssys, N, \
-                               trans_set=trans_set, closed_loop=closed_loop, \
-                               use_all_horizon=use_all_horizon)
+            s0 = solveFeasable(
+                part1, part2.list_poly[i], ssys, N,
+                trans_set=trans_set, closed_loop=closed_loop,
+                use_all_horizon=use_all_horizon
+            )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
             
@@ -832,11 +935,11 @@ def solveFeasable(P1, P2, ssys, N, max_cell=10, closed_loop=True, \
     poly1 = pc.projection(poly1, range(1,n+1))
     return pc.reduce(poly1)
 
-
-
-def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
-    """
-    Calculates the sequence u_seq such that
+def getInputHelper(
+    x0, ssys, P1, P3, N, R, r, Q,
+    closed_loop=True
+):
+    """Calculates the sequence u_seq such that
     - x(t+1) = A x(t) + B u(t) + K
     - x(k) \in P1 for k = 0,...N
     - x(N) \in P3
@@ -852,8 +955,10 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
         temp_part = P3
         list_P.append(P3)
         for i in range(N-1,0,-1): 
-            temp_part = solveFeasable(P1, temp_part, ssys, 1, closed_loop=False,
-                                trans_set=P1)    
+            temp_part = solveFeasable(
+                P1, temp_part, ssys, 1,
+                closed_loop=False, trans_set=P1
+            )
             list_P.insert(0, temp_part)
         list_P.insert(0,P1)
         L,M = createLM(ssys, N, list_P, disturbance_ind=[1])
@@ -890,31 +995,48 @@ def getInputHelper(x0, ssys, P1, P3, N, R, r, Q, closed_loop=True):
 
     for i in range(N):
         A_row = np.dot(ssys.A, A_row)
-        A_row[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
+        A_row[np.ix_(
+            range(n),
+            range(i*n, (i+1)*n)
+        )] = np.eye(n)
 
-        A_N[np.ix_(range(i*n, (i+1)*n), range(n))] = A_it
-        A_K[np.ix_(range(i*n,(i+1)*n), range(A_K.shape[1]))] = A_row
+        A_N[np.ix_(
+            range(i*n, (i+1)*n),
+            range(n)
+        )] = A_it
+        
+        A_K[np.ix_(
+            range(i*n,(i+1)*n),
+            range(A_K.shape[1])
+        )] = A_row
         
         A_it = np.dot(ssys.A, A_it)
         
     Ct = np.dot(A_K, B_diag)
     P = matrix(Q + np.dot(Ct.T, np.dot(R, Ct)))
-    q = matrix(np.dot( np.dot(x0.reshape(1,x0.size), A_N.T) + \
-            np.dot(A_K, K_hat).T , np.dot(R, Ct) ) \
-            + np.dot(r.T, Ct )).T 
+    q = matrix(
+        np.dot(
+            np.dot(x0.reshape(1,x0.size), A_N.T) +
+            np.dot(A_K, K_hat).T , np.dot(R, Ct)
+        ) +
+        np.dot(r.T, Ct )
+    ).T 
     
     sol = solvers.qp(P,q,G,h)
     
     if sol['status'] != "optimal":
-        raise Exception("getInputHelper: QP solver finished with status " + \
-                        str(sol['status']))
+        raise Exception("getInputHelper: "
+            "QP solver finished with status " +
+            str(sol['status'])
+        )
     u = np.array(sol['x']).flatten()
     cost = sol['primal objective']
     
     return u.reshape(N, m), cost
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope L [x(0)' u(0)' ... u(N-1)']' <= M
+    """Compute the components of the polytope:
+        L [x(0)' u(0)' ... u(N-1)']' <= M
     which stacks the following constraints
     
     - x(t+1) = A x(t) + B u(t) + E d(t)
@@ -937,10 +1059,10 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     - `N`: horizon length
     - `list_P`: list of Polytopes or Polytope
     - `Pk, PN`: Polytopes
-    - `disturbance_ind`: list indicating which k's that disturbance should
-                    be taken into account. default is [1,2, ... N]
+    - `disturbance_ind`: list indicating which k's
+        that disturbance should be taken into account.
+        Default is [1,2, ... N]
     """
-    
     if isinstance(list_P, pc.Polytope):
         list = []
         list.append(list_P)
@@ -995,26 +1117,49 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         Li = list_P[i]
         ######### FOR L #########
         AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])
-        Lk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(0,Lk.shape[1])) ] = \
-            np.dot(Li.A, AB_line)
+        Lk[
+            np.ix_(
+                range(sum_vert, sum_vert + Li.A.shape[0]),
+                range(0,Lk.shape[1])
+            )
+        ] = np.dot(Li.A, AB_line)
+        
         if i < N:
             if PU.A.shape[1] == m:
-                LU[np.ix_(range(i*LUn, (i+1)*LUn), range(n + m*i, n + m*(i+1)))] = PU.A
+                LU[
+                    np.ix_(
+                        range(i*LUn, (i+1)*LUn),
+                        range(n + m*i, n + m*(i+1))
+                    )
+                ] = PU.A
             elif PU.A.shape[1] == m+n:
                 uk_line = np.zeros([m, n + m*N])
-                uk_line[np.ix_(range(m), range(n+m*i, n+m*(i+1)))] = np.eye(m)
+                uk_line[
+                    np.ix_(range(m), range(n+m*i, n+m*(i+1)))
+                ] = np.eye(m)
                 A_mult = np.vstack([uk_line, AB_line])
                 b_mult = np.zeros([m+n, 1])
                 b_mult[range(m, m+n), :] = np.dot(A_k, K_hat)
-                LU[np.ix_(range(i*LUn, (i+1)*LUn), range(n+m*N))] = np.dot(PU.A, A_mult)
+                LU[
+                    np.ix_(
+                        range(i*LUn, (i+1)*LUn),
+                        range(n+m*N)
+                    )
+                ] = np.dot(PU.A, A_mult)
                 MU[range(i*LUn, (i+1)*LUn), :] -= np.dot(PU.A, b_mult)
         ######### FOR M #########
-        Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = Li.b.reshape(Li.b.size,1) - \
-                np.dot(np.dot(Li.A,A_k), K_hat)
+        Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = \
+            Li.b.reshape(Li.b.size,1) - \
+            np.dot(np.dot(Li.A,A_k), K_hat)
         ######### FOR G #########
         if i in disturbance_ind:
-            Gk[np.ix_(range(sum_vert, sum_vert + Li.A.shape[0]), range(Gk.shape[1]) )] = \
-                np.dot(np.dot(Li.A,A_k), E_diag)
+            Gk[
+                np.ix_(
+                    range(sum_vert, sum_vert + Li.A.shape[0]),
+                    range(Gk.shape[1])
+                )
+            ] = np.dot(np.dot(Li.A,A_k), E_diag)
+            
             if (PU.A.shape[1] == m+n) & (i < N):
                 A_k_E_diag = np.dot(A_k, E_diag)
                 d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
@@ -1040,7 +1185,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     return L,M
 
 def get_max_extreme(G,D,N):
-    '''Calculate the array d_hat such that d_hat = max(G*DN_extreme),
+    """Calculate the array d_hat such that d_hat = max(G*DN_extreme),
     where DN_extreme are the vertices of the set D^N. 
     
     This is used to describe the polytope L*x <= M - G*d_hat. Calculating d_hat
@@ -1054,8 +1199,8 @@ def get_max_extreme(G,D,N):
     - `N`: Horizon length
     
     Output:
-    - `d_hat`: Array describing the maximum possible effect from disturbance'''
-    
+    - `d_hat`: Array describing the maximum possible effect from disturbance
+    """
     D_extreme = pc.extreme(D)
     nv = D_extreme.shape[0]
     dim = D_extreme.shape[1]
@@ -1071,22 +1216,22 @@ def get_max_extreme(G,D,N):
     return d_hat.reshape(d_hat.size,1)
 
 def is_seq_inside(x0, u_seq, ssys, P0, P1):
-    """Checks if the plant remains inside P0 for time t = 1, ... N-1 and 
-    that the plant reaches P1 for time t = N.
-    Used to test a computed input sequence. No disturbance is taken into
-    account.
+    """Checks if the plant remains inside P0 for time t = 1, ... N-1
+    and  that the plant reaches P1 for time t = N.
+    Used to test a computed input sequence.
+    No disturbance is taken into account.
     
-    Input:
-
-    - `x0`: initial point for execution
-    - `u_seq`: (N x m) array where row k is input for t = k
-    - `ssys`: LtiSysDyn dynamics
-    - `P0`: Polytope where we want x(k) to remain for k = 1, ... N-1
+    @param x0: initial point for execution
+    @param u_seq: (N x m) array where row k is input for t = k
     
-    Output:
-    - `True` if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1. False otherwise  
+    @param ssys: dynamics
+    @type ssys: LtiSysDyn
+    
+    @param P0: Polytope where we want x(k) to remain for k = 1, ... N-1
+    
+    @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
+        C{False} otherwise  
     """
-    
     N = u_seq.shape[0]
     x = x0.reshape(x0.size,1)
     
@@ -1111,21 +1256,23 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     return inside
     
 def get_cellID(x0, part):
- 
-    """Return an integer specifying in which discrete state the continuous state x0
-    belongs to.
+    """Return an integer specifying in which discrete state
+    the continuous state x0 belongs to.
         
     Input:
     - `x0`: initial continuous state
-    - `part`: PropPreservingPartition object specifying the state space partition
+    - `part`: PropPreservingPartition object specifying
+        the state space partition
     
     Output:
-    - cellID: int specifying the discrete state in `part` x0 belongs to, -1 if x0 does 
-    not belong to any discrete state.
+    - cellID: int specifying the discrete state in
+        `part` x0 belongs to, -1 if x0 does 
+        not belong to any discrete state.
     
-    Note1: If there are overlapping partitions (i.e., x0 can belong to more than one
-    discrete state), this just returns the first ID"""
-    
+    Note1: If there are overlapping partitions
+    (i.e., x0 can belong to more than one discrete state),
+    this just returns the first ID
+    """
     cellID = -1
     for i in range(part.num_regions):
         if pc.is_inside(part.list_region[i], x0):
