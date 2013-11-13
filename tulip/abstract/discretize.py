@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012 by California Institute of Technology
+# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,21 +46,18 @@ Helper functions:
     - createLM
     - get_max_extreme
 """
-
 from copy import deepcopy
 import numpy as np
 from scipy import sparse as sp
 from cvxopt import matrix,solvers
-import itertools
+#import itertools
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import *
 from prop2part import PropPreservingPartition, pwa_partition
 
-
 class AbstractSysDyn:
-    """
-    AbstractSysDyn class for discrete abstractions of continuous
+    """AbstractSysDyn class for discrete abstractions of continuous
     dynamics.
     
     An AbstractSysDyn object contains the fields:
@@ -76,7 +73,8 @@ class AbstractSysDyn:
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
-    def __init__(self, ppp=None, ofts=None, orig_list_region=None, orig=None):
+    def __init__(self, ppp=None, ofts=None,
+                 orig_list_region=None, orig=None):
         self.ppp = ppp
         self.ofts = ofts
         self.orig_list_region = orig_list_region
@@ -109,8 +107,6 @@ def discretize(
     """Refine the partition and establish transitions
     based on reachability analysis.
     
-    Input:
-    
     @param part: a PropPreservingPartition object
     @param ssys: a LtiSysDyn or PwaSysDyn object
     @param N: horizon length
@@ -138,22 +134,25 @@ def discretize(
         non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
     @param verbose: level of verbosity
-    @return: An AbstractSysDyn object
+    
+    @rtype: AbstractSysDyn
     
     see also
     --------
     prop2part.pwa_partition
     """
-    orig_list = []
-    
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
     
-    if isinstance(ssys,PwaSysDyn):
+    if isinstance(ssys, PwaSysDyn):
         part = pwa_partition(ssys, part)
     
     # Save original polytopes, require them to be convex 
-    if not conservative:
+    if conservative:
+        orig_list = None
+        orig = 0
+    else:
+        orig_list = []
         for poly in part.list_region:
             if len(poly) == 0:
                 orig_list.append(poly.copy())
@@ -164,13 +163,10 @@ def discretize(
                     "original list contains non-convex"
                     "polytope regions")
         orig = range(len(orig_list))
-    else:
-        orig_list = None
-        orig = 0
     
     # Cheby radius of disturbance set
     # (defined within the loop for pwa systems)
-    if isinstance(ssys,LtiSysDyn):
+    if isinstance(ssys, LtiSysDyn):
         if len(ssys.E) > 0:
             rd,xd = pc.cheby_ball(ssys.Wset)
         else:
@@ -798,29 +794,28 @@ def solveFeasable(
     P1, P2, ssys, N, max_cell=10, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-
-    """Computes the subset x0 of `P1' from which `P2' is reachable
-    in horizon `N', with respect to system dynamics `ssys'. The closed
+    """Computes the subset x0 of C{P1} from which C{P2} is reachable
+    in horizon C{N}, with respect to system dynamics C{ssys}. The closed
     loop algorithm solves for one step at a time, which keeps the dimension
     of the polytopes down.
     
-    Input:
-
-    - `P1`: A Polytope or Region object
-    - `P2`: A Polytope or Region object
-    - `ssys`: A LtiSysDyn object
-    - `N`: The horizon length
-    - `closed_loop`: If true, take 1 step at the time. This keeps down
-                   polytope dimension and handles disturbances
-                   better. Default: True.
-    - `use_all_horizon`: Used for closed loop algorithm. If true,
-                       allow reachability also in less than N steps.
-    - `trans_set`: If specified, force transitions to be in this
-                 set. If empty, P1 is used
-                
-    Output:
-    `x0`: A Polytope or Region object defining the set in P1 from which
-          P2 is reachable
+    @type P1: Polytope or Region
+    @type P2: Polytope or Region
+    @type ssys: LtiSysDyn
+    @param N: The horizon length
+    @param closed_loop: If true, take 1 step at the time.
+        This keeps down polytope dimension and
+        handles disturbances better.
+        Default: True
+    @type closed_loop: bool
+    @param use_all_horizon: Used for closed loop algorithm.
+        If true, then allow reachability also in less than N steps.
+    @param trans_set: If specified,
+        then force transitions to be in this set.
+        If empty, P1 is used.
+    
+    @return: C{x0}, defines the set in P1 from which P2 is reachable
+    @rtype: Polytope or Region
     """
     part1 = P1.copy() # Initial set
     part2 = P2.copy() # Terminal set
@@ -1044,11 +1039,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     The returned polytope describes the intersection of the polytopes
     for all possible Input:
 
-    - `ssys`: LtiSysDyn dynamics
-    - `N`: horizon length
-    - `list_P`: list of Polytopes or Polytope
-    - `Pk, PN`: Polytopes
-    - `disturbance_ind`: list indicating which k's
+    @param ssys: LtiSysDyn dynamics
+    @param N: horizon length
+    @param list_P: list of Polytopes or Polytope
+    @param Pk, PN: Polytopes
+    @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.
         Default is [1,2, ... N]
     """
