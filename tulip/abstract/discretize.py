@@ -41,7 +41,7 @@ Primary functions:
     - get_input
     
 Helper functions:
-    - solveFeasable
+    - solve_feasible
     - getInputHelper
     - createLM
     - get_max_extreme
@@ -218,7 +218,7 @@ def discretize(
         
         if conservative:
             # Don't use trans_set
-            S0 = solveFeasable(
+            S0 = solve_feasible(
                 si, sj, ss, N,
                 closed_loop=closed_loop, 
                 max_num_poly=max_num_poly,
@@ -226,7 +226,7 @@ def discretize(
             )
         else:
             # Use original cell as trans_set
-            S0 = solveFeasable(
+            S0 = solve_feasible(
                 si, sj, ss, N,
                 closed_loop=closed_loop,
                 trans_set=orig_list[orig[i]],
@@ -524,11 +524,11 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #             print "\n Working with states " + str(i) + " and " + str(j)
 #         
 #         if conservative:
-#             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop, 
+#             S0 = solve_feasible(si,sj,ssys,N, closed_loop=closed_loop, 
 #                         min_vol=min_cell_volume, max_num_poly=max_num_poly,\
 #                         use_all_horizon=use_all_horizon)
 #         else:
-#             S0 = solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
+#             S0 = solve_feasible(si,sj,ssys,N, closed_loop=closed_loop,\
 #                     min_vol=min_cell_volume, trans_set=orig_list[orig[i]], \
 #                     use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
 #         
@@ -790,7 +790,7 @@ def get_input(
             print("Calculated sequence not good")
     return low_u
     
-def solveFeasable(
+def solve_feasible(
     P1, P2, ssys, N, max_cell=10, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
@@ -829,7 +829,7 @@ def solveFeasable(
             ttt = part1
         temp_part = part2
         for i in xrange(N,1,-1): 
-            x0 = solveFeasable(
+            x0 = solve_feasible(
                 ttt, temp_part, ssys, 1,
                 closed_loop=False,
                 trans_set=trans_set
@@ -841,7 +841,7 @@ def solveFeasable(
                 temp_part = x0
                 if not pc.is_fulldim(temp_part):
                     return pc.Polytope()
-        x0 = solveFeasable(
+        x0 = solve_feasible(
             part1, temp_part, ssys, 1,
             closed_loop=False,
             trans_set=trans_set
@@ -877,13 +877,13 @@ def solveFeasable(
     
     if len(part1) > 0:
         # Recursive union of sets
-        poly = solveFeasable(
+        poly = solve_feasible(
             part1.list_poly[0], part2, ssys, N,
             trans_set=trans_set, closed_loop=closed_loop,
             use_all_horizon=use_all_horizon
         )
         for i in xrange(1, len(part1)):
-            s0 = solveFeasable(
+            s0 = solve_feasible(
                 part1.list_poly[i], part2, ssys, N,
                 trans_set=trans_set, closed_loop=closed_loop,
                 use_all_horizon=use_all_horizon
@@ -893,13 +893,13 @@ def solveFeasable(
     
     if len(part2) > 0:
         # Recursive union of sets 
-        poly = solveFeasable(
+        poly = solve_feasible(
             part1, part2.list_poly[0], ssys, N,
             trans_set=trans_set, closed_loop=closed_loop,
             use_all_horizon=use_all_horizon
         )
         for i in xrange(1, len(part2)):
-            s0 = solveFeasable(
+            s0 = solve_feasible(
                 part1, part2.list_poly[i], ssys, N,
                 trans_set=trans_set, closed_loop=closed_loop,
                 use_all_horizon=use_all_horizon
@@ -939,7 +939,7 @@ def getInputHelper(
         temp_part = P3
         list_P.append(P3)
         for i in xrange(N-1,0,-1): 
-            temp_part = solveFeasable(
+            temp_part = solve_feasible(
                 P1, temp_part, ssys, 1,
                 closed_loop=False, trans_set=P1
             )
