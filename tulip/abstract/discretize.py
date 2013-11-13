@@ -180,13 +180,10 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
-    if trans_length > 1:
-        k = 1
-        while k < trans_length:
-            IJ = np.dot(IJ, np.array(part.adj.todense()))
-            k += 1
-        IJ = (IJ > 0).astype(int)
-        
+    
+    IJ = reachable_within(trans_length, IJ,
+                          np.array(part.adj.todense()) )
+    
     # Initialize output
     transitions = np.zeros(
         [part.num_regions,part.num_regions],
@@ -349,13 +346,7 @@ def discretize(
             # Update IJ matrix
             IJ = adj_update(IJ, size, num_new)
             
-            adj_k = adj
-            if trans_length > 1:
-                k = 1
-                while k < trans_length:
-                    adj_k = np.dot(adj_k, adj)
-                    k += 1
-                adj_k = (adj_k > 0).astype(int)
+            adj_k = reachable_within(trans_length, adj, adj)
             
             horiz1 = adj_k[i, :] -transitions[i, :] > 0
             verti1 = adj_k[:, i] -transitions[:, i] > 0
@@ -445,6 +436,18 @@ def adj_update(adj, size, num_new):
             dtype=int)
     ])
     return adj
+
+def reachable_within(trans_length, adj_k, adj):
+    if trans_length <= 1:
+        return adj_k
+    
+    k = 1
+    while k < trans_length:
+        adj_k = np.dot(adj_k, adj)
+        k += 1
+    adj_k = (adj_k > 0).astype(int)
+    
+    return adj_k
 
 # DEFUNCT until further notice
 # def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
