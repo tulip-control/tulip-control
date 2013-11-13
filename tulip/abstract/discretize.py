@@ -827,26 +827,12 @@ def solve_feasible(
         )
         
     if len(part1) > max_num_poly:
-        # Just use the max_num_poly largest volumes for reachability
-        vol_list = np.zeros(len(part1))
-        for i in xrange(len(part1)):
-            vol_list[i] = pc.volume(part1.list_poly[i])
-        ind = np.argsort(-vol_list)
-        temp = []
-        for i in ind[range(max_num_poly)]:
-            temp.append(part1.list_poly[i])
-        part1 = pc.Region(temp, [])
+        # use the max_num_poly largest volumes for reachability
+        part1 = volumes_for_reachability(part1, max_num_poly)
 
     if len(part2) > max_num_poly:
-        # Just use the max_num_poly largest volumes for reachability
-        vol_list = np.zeros(len(part2))
-        for i in xrange(len(part2)):
-            vol_list[i] = pc.volume(part2.list_poly[i])
-        ind = np.argsort(-vol_list)
-        temp = []
-        for i in ind[range(max_num_poly)]:
-            temp.append(part2.list_poly[i])
-        part2 = pc.Region(temp, [])
+        # use the max_num_poly largest volumes for reachability
+        part2 = volumes_for_reachability(part2, max_num_poly)
     
     if len(part1) > 0:
         # Recursive union of sets
@@ -891,6 +877,19 @@ def solve_feasible(
     n = np.shape(ssys.A)[1]
     poly1 = pc.projection(poly1, range(1,n+1))
     return pc.reduce(poly1)
+
+def volumes_for_reachability(part, max_num_poly):
+    vol_list = np.zeros(len(part) )
+    for i in xrange(len(part) ):
+        vol_list[i] = pc.volume(part.list_poly[i] )
+    
+    ind = np.argsort(-vol_list)
+    temp = []
+    for i in ind[range(max_num_poly) ]:
+        temp.append(part.list_poly[i] )
+    
+    part = pc.Region(temp, [])
+    return part
 
 def solve_feasible_close_loop(
     part1, part2, ssys, N,
