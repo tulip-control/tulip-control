@@ -196,7 +196,11 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     @type ppp: PropPreservingPartition
     
     @return: object with subsystem assignments
-    @rtype: PropPreservingPartition 
+    @rtype: PropPreservingPartition
+    
+    see also
+    --------
+    discretize.discretize
     """
     if pc.is_fulldim(pc.mldivide(ppp.domain, pwa_sys.domain)):
         raise Exception("pwaPartition: "

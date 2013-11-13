@@ -821,37 +821,10 @@ def solve_feasible(
     part2 = P2.copy() # Terminal set
     
     if closed_loop:
-        if trans_set != None:
-            # The intermediate steps are allowed to be in trans_set, 
-            # if it is defined
-            ttt = trans_set
-        else:
-            ttt = part1
-        temp_part = part2
-        for i in xrange(N,1,-1): 
-            x0 = solve_feasible(
-                ttt, temp_part, ssys, 1,
-                closed_loop=False,
-                trans_set=trans_set
-            )
-            if use_all_horizon:
-                temp_part = pc.union(x0, temp_part,
-                                     check_convex=True)
-            else:
-                temp_part = x0
-                if not pc.is_fulldim(temp_part):
-                    return pc.Polytope()
-        x0 = solve_feasible(
-            part1, temp_part, ssys, 1,
-            closed_loop=False,
-            trans_set=trans_set
+        return solve_feasible_close_loop(
+            part1, part2, ssys, N,
+            use_all_horizon=use_all_horizon, trans_set=trans_set
         )
-        if use_all_horizon:
-            temp_part = pc.union(x0, temp_part,
-                                 check_convex=True)
-        else:
-            temp_part = x0
-        return temp_part 
         
     if len(part1) > max_num_poly:
         # Just use the max_num_poly largest volumes for reachability
@@ -918,6 +891,47 @@ def solve_feasible(
     n = np.shape(ssys.A)[1]
     poly1 = pc.projection(poly1, range(1,n+1))
     return pc.reduce(poly1)
+
+def solve_feasible_close_loop(
+    part1, part2, ssys, N,
+    use_all_horizon=False, trans_set=None
+):
+    if trans_set != None:
+        # The intermediate steps are allowed to be in trans_set, 
+        # if it is defined
+        ttt = trans_set
+    else:
+        ttt = part1
+    temp_part = part2
+    
+    for i in xrange(N,1,-1): 
+        x0 = solve_feasible(
+            ttt, temp_part, ssys, 1,
+            closed_loop=False,
+            trans_set=trans_set
+        )
+        
+        if use_all_horizon:
+            temp_part = pc.union(x0, temp_part,
+                                 check_convex=True)
+        else:
+            temp_part = x0
+            if not pc.is_fulldim(temp_part):
+                return pc.Polytope()
+    
+    x0 = solve_feasible(
+        part1, temp_part, ssys, 1,
+        closed_loop=False,
+        trans_set=trans_set
+    )
+    
+    if use_all_horizon:
+        temp_part = pc.union(x0, temp_part,
+                             check_convex=True)
+    else:
+        temp_part = x0
+    
+    return temp_part
 
 def getInputHelper(
     x0, ssys, P1, P3, N, R, r, Q,
