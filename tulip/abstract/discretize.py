@@ -50,10 +50,9 @@ from copy import deepcopy
 import numpy as np
 from scipy import sparse as sp
 from cvxopt import matrix,solvers
-#import itertools
 from tulip import polytope as pc
 from tulip import transys as trs
-from tulip.hybrid import *
+from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from prop2part import PropPreservingPartition, pwa_partition
 
 class AbstractSysDyn:
@@ -759,7 +758,7 @@ def get_input(
                 for i in range(1, len(P_start.list_poly)):
                     vert = np.hstack([
                         vert,
-                        extreme(P_start.list_poly[i])
+                        pc.extreme(P_start.list_poly[i])
                     ])
                 P1 = pc.qhull(vert)
             else:

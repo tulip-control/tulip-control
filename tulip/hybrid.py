@@ -39,9 +39,6 @@ Classes:
     
 NO, 2 Jul 2013.
 """
-
-import sys, os, time, subprocess
-from copy import deepcopy
 import numpy as np
 import itertools
 import polytope as pc
@@ -65,7 +62,6 @@ class LtiSysDyn:
 	**LtiSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `K` = [][, `Uset` = [][,
 	`Wset` = [][, `domain`[]]]]]]]])
     """
-
     def __init__(self, A=[], B=[], E=[], K=[], Uset=None,Wset=None,domain=None):
         
         if Uset == None:
@@ -123,14 +119,13 @@ class PwaSysDyn:
 	mutually exclusive (modulo intersections with empty interior) and cover the
 	domain.
     """
-
     def __init__(self, list_subsys=[], domain=None):
         
         if domain == None:
             print "Warning: domain not given in PwaSysDyn()"
         
         if (domain != None) and \
-               (not (isinstance(domain, pc.Polytope)| isinstance(domain, pc.Region))):
+               (not (isinstance(domain, pc.Polytope) or isinstance(domain, pc.Region))):
             raise Exception("PwaSysDyn: `domain` has to be a Polytope or Region")
 
         if len(list_subsys) > 0:
@@ -197,7 +192,7 @@ class HybridSysDyn:
 		if cts_ss is None:
 			print "Warning: continuous state space not given in HybridSysDyn()"
 		if (cts_ss is not None) and \
-               (not (isinstance(cts_ss, pc.Polytope)| isinstance(cts_ss, pc.Region))):
+               (not (isinstance(cts_ss, pc.Polytope) or isinstance(cts_ss, pc.Region))):
 			raise Exception("HybridSysDyn: `cts_ss` has to be a Polytope or Region")
 
 		# Get the labels and, if there are the right number of them, use them.
