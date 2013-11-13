@@ -75,7 +75,6 @@ Classes:
 	- Region
 	- Polytope
 """
-
 import numpy as np
 from cvxopt import matrix, solvers
 
@@ -87,8 +86,8 @@ try:
     import cvxopt.glpk
     lp_solver = 'glpk'
 except:
-    print "GLPK (Gnu Linear Programming Kit) solver for CVXOPT not found, \
-           reverting to CVXOPT's own solver. This may be slow"
+    print("GLPK (Gnu Linear Programming Kit) solver for CVXOPT not found, "
+           "reverting to CVXOPT's own solver. This may be slow")
     lp_solver = None
 
 # Hide optimizer output
@@ -114,8 +113,11 @@ class Polytope:
     - `normalize`: if True (default), normalize given A and b arrays;
                    else, use A and b without modification.
     """
-    
-    def __init__(self,A = np.array([]),b = np.array([]), minrep = False, chebR = 0, chebX = None, fulldim = None, volume = None, vertices = None, normalize=True):
+    def __init__(self,
+        A = np.array([]), b = np.array([]), minrep = False,
+        chebR = 0, chebX = None, fulldim = None,
+        volume = None, vertices = None, normalize=True
+    ):
         
         self.A = A.astype(float)
         self.b = b.astype(float).flatten()
@@ -166,8 +168,10 @@ class Polytope:
             output += A_rows[mid_ind]+' x <= '+b_rows[mid_ind]
             
             if mid_ind+1 < len(A_rows)-2:
-                output += '\n' + '\n'.join([A_rows[k]+spacer+b_rows[k] \
-                                                for k in range(mid_ind+1, len(A_rows)-1)])
+                output += '\n' +'\n'.join([
+                    A_rows[k]+spacer+b_rows[k]
+                    for k in range(mid_ind+1, len(A_rows)-1)
+                ])
             elif mid_ind+1 == len(A_rows)-2:
                 output += '\n' + A_rows[mid_ind+1]+spacer+b_rows[mid_ind+1]
             if len(A_rows) > 1:
@@ -195,7 +199,8 @@ class Polytope:
         return P
 
     def copy(self):
-        """Return copy of this Polytope."""
+        """Return copy of this Polytope.
+        """
         return self.__copy__()
         
     @classmethod
@@ -203,8 +208,9 @@ class Polytope:
         """Class method for easy construction of hyperrectangles.
         
         Input:
-        - `I` : an n by 2 numpy array representing intervals cross-product of
-                which defines the n dimensional hyperrectangle
+        - `I`: an n by 2 numpy array representing intervals,
+            the cross-product of which defines the
+            n-dimensional hyperrectangle
                 
         Output:
         - Polytope that corresponds to the hyperrectangle defined by I
@@ -218,15 +224,15 @@ class Polytope:
         b = np.zeros(2*n)
         for i in range(n):
             if I[i,0]>I[i,1]:
-                raise Exception("Polytope: invalid interval in from_box method.\
-                                 First element of an interval must\
-                                 not be larger than the second")
+                raise Exception("Polytope:"
+                    " invalid interval in from_box method."
+                    "First element of an interval must"
+                    " not be larger than the second")
             else:
                 b[i]=I[i,1]
                 b[i+n]=-I[i,0]
                 
-        return cls(A, b, minrep = True)
-        
+        return cls(A, b, minrep=True)
 
 class Region:
     """Class for lists of convex polytopes
@@ -242,7 +248,6 @@ class Region:
     - `chebXc`: coordinates of maximum chebyshev center (if calculated)
     - `chebR`: maximum chebyshev radius (if calculated)
     """
-    
     def __init__(self, list_poly=[], list_prop=[]):
     
         if isinstance(list_poly, str):
@@ -255,7 +260,8 @@ class Region:
                 dim = dimension(list_poly[0])    
                 for poly in list_poly:
                     if dimension(poly)!=dim:
-                        raise Exception("Region error: Polytopes must be of same dimension!")                    
+                        raise Exception("Region error:"
+                            " Polytopes must be of same dimension!")                    
             
             self.list_poly = list_poly[:]
             for poly in list_poly:
@@ -272,7 +278,8 @@ class Region:
     def __str__(self):
         output = ""
         for i in range(len(self.list_poly)):
-            output += "Polytope number " + str(i+1) + ":\n" + str(self.list_poly[i])+"\n"
+            output += "Polytope number " +str(i+1) +":\n"
+            output += str(self.list_poly[i]) +"\n"
         return output  
         
     def __len__(self):
@@ -322,7 +329,6 @@ def is_fulldim(polyreg, abs_tol=1e-7):
     - `result`: Boolean that is True if inner points found, False
                 otherwise.
     """
-
     if polyreg.fulldim != None:
         return polyreg.fulldim
         
@@ -354,7 +360,6 @@ def is_convex(reg, abs_tol = 1e-7):
                        convex the envelope describing the convex
                        polytope is returned.
     """
-    
     if not is_fulldim(reg):
         return True
     
@@ -371,7 +376,8 @@ def is_convex(reg, abs_tol = 1e-7):
     bboxP = np.hstack([Pl,Pu])
     bboxO = np.hstack([Ol,Ou])
     
-    if sum(abs(bboxP[:,0] - bboxO[:,0]) > abs_tol) > 0 | sum(abs(bboxP[:,1] - bboxO[:,1]) > abs_tol) > 0:
+    if sum(abs(bboxP[:,0] - bboxO[:,0]) > abs_tol) > 0 or \
+    sum(abs(bboxP[:,1] - bboxO[:,1]) > abs_tol) > 0:
         return False,None
     if is_fulldim(mldivide(outer,reg)):
         return False,None
@@ -385,8 +391,8 @@ def is_inside(poly1,p0,abs_tol=1e-7):
     `poly1`: Polytope or Region object.
     
     Output:
-    `result`: Boolean being True or False"""
-    
+    `result`: Boolean being True or False
+    """
     if len(poly1) > 0:
         for poly2 in poly1.list_poly:
             if is_inside(poly2,p0):
@@ -411,7 +417,6 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     Output:
     `poly_red`: Reduced Polytope or Region object
     """
-    
     if len(poly) > 0:
         list = []
         for poly2 in poly.list_poly:
@@ -440,7 +445,8 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     b_arr = b_arr[keep_row]
     
     neq = np.shape(A_arr)[0]
-    # first eliminate the linearly dependent rows corresponding to the same hyperplane
+    # first eliminate the linearly dependent rows
+    # corresponding to the same hyperplane
     M1 = np.hstack([A_arr,np.array([b_arr]).T]).T
     M1row = 1/np.sqrt(np.sum(M1**2,0))
     M1n = np.dot(M1,np.diag(M1row)) 
@@ -465,8 +471,13 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     # Now eliminate hyperplanes outside the bounding box
     if neq>3*nx:
         lb, ub = bounding_box(Polytope(A_arr,b_arr))
-        #cand = -(np.dot((A_arr>0)*A_arr,ub-lb)-(b_arr-np.dot(A_arr,lb).T).T<-1e-4)
-        cand = -(np.dot((A_arr>0)*A_arr,ub-lb)-(np.array([b_arr]).T-np.dot(A_arr,lb))<-1e-4)
+        #cand = -(np.dot((A_arr>0)*A_arr,ub-lb)
+        #-(b_arr-np.dot(A_arr,lb).T).T<-1e-4)
+        cand = -(
+            np.dot((A_arr>0)*A_arr,ub-lb)
+            -(np.array([b_arr]).T-np.dot(A_arr,lb))
+            < -1e-4
+        )
         A_arr = A_arr[cand.squeeze()]
         b_arr = b_arr[cand.squeeze()]
     
@@ -481,7 +492,10 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
         G = A_arr
         h = b_arr
         h[k] += 0.1
-        sol=solvers.lp(matrix(f),matrix(G),matrix(h),None,None,lp_solver)
+        sol=solvers.lp(
+            matrix(f), matrix(G), matrix(h),
+            None, None, lp_solver
+        )
         h[k] -= 0.1
         if sol['status'] == "optimal":
             obj = -sol['primal objective'] - h[k]
@@ -594,7 +608,6 @@ def cheby_ball(poly1):
     length of the longest line segment along the first coordinate axis
     inside polytope P
     """
-
     if (poly1.chebXc != None) and (poly1.chebR != None):
         #In case chebyshev ball already calculated and stored
         return poly1.chebR,poly1.chebXc
@@ -646,7 +659,8 @@ def dimension(polyreg):
     `polyreg`: Polytope or Region object
     
     Output:
-    `dim`: Dimension of input"""
+    `dim`: Dimension of input
+    """
     if len(polyreg) == 0:
         try:
             return np.shape(polyreg.A)[1]
@@ -656,8 +670,8 @@ def dimension(polyreg):
         return np.shape(polyreg.list_poly[0].A)[1]
     
 def bounding_box(polyreg):
-    """Compute the smallest hyperbox containing the polytope or region"""
-
+    """Compute the smallest hyperbox containing the polytope or region
+    """
     if polyreg.bbox != None:
         return polyreg.bbox
         
@@ -671,7 +685,7 @@ def bounding_box(polyreg):
         alllower = np.zeros([lenP,dimP])
         allupper = np.zeros([lenP,dimP])
         
-        for ii in range(0,lenP):
+        for ii in xrange(0,lenP):
             bbox = bounding_box(polyreg.list_poly[ii])            
             ll,uu = bbox
             alllower[ii,:]=ll.T
@@ -680,7 +694,7 @@ def bounding_box(polyreg):
         l = np.zeros([dimP,1])
         u = np.zeros([dimP,1])
         
-        for ii in range(0,dimP):
+        for ii in xrange(0,dimP):
             l[ii] = min(alllower[:,ii])
             u[ii] = max(allupper[:,ii])
         polyreg.bbox = l,u
@@ -696,7 +710,7 @@ def bounding_box(polyreg):
     l = np.zeros([n,1])
     u = np.zeros([n,1])
     
-    for i in range(0,n):
+    for i in xrange(0,n):
         c = matrix(np.array(In[:,i]))
         G = matrix(polyreg.A)
         h = matrix(polyreg.b)
@@ -705,7 +719,7 @@ def bounding_box(polyreg):
             x = sol['x']
             l[i] = x[i]
             
-    for i in range(0,n):
+    for i in xrange(0,n):
         c = matrix(-np.array(In[:,i]))
         G = matrix(polyreg.A)
         h = matrix(polyreg.b)
@@ -732,8 +746,7 @@ def envelope(reg, abs_tol=1e-7):
     
     Output:
     `envelope`: Envelope of input
-    """            
-    
+    """
     Ae = None
     be = None
         
@@ -747,7 +760,8 @@ def envelope(reg, abs_tol=1e-7):
                 # If inequality already discarded
                 continue
             for j in range(nP):
-                # Check for each polytope if it intersects with inequality ii
+                # Check for each polytope
+                # if it intersects with inequality ii
                 if i == j:
                     continue  
                 poly2 = reg.list_poly[j]
@@ -773,7 +787,7 @@ def envelope(reg, abs_tol=1e-7):
         return Polytope()
 
 def mldivide(poly1,poly2):
-    """Compute a set difference poly1 \ poly2 between two regions or polytopes
+    """Compute set difference poly1 \ poly2 between two regions or polytopes
     
     Input:
     
@@ -781,8 +795,8 @@ def mldivide(poly1,poly2):
     - `poly2`: Polytope to subtract
     
     Output:
-    - `region`: Region describing the set difference"""    
-
+    - `region`: Region describing the set difference
+    """
     P = Polytope()    
 
     if len(poly1) > 0:
@@ -801,8 +815,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     
     Output:
     - Intersection described by a polytope
-    """    
-    
+    """
     if (not is_fulldim(poly1)) or (not is_fulldim(poly2)):
         return Polytope()
         
@@ -841,15 +854,15 @@ def volume(polyreg):
     - `polyreg`: Polytope or Region
     
     Output:
-    - Volume of input"""
-
+    - Volume of input
+    """
     if not is_fulldim(polyreg):
         return 0.
     try:
         if polyreg.volume != None:
             return polyreg.volume
     except:
-        print "vol"
+        print("vol")
         
     if len(polyreg) > 0:
         tot_vol = 0.
@@ -869,8 +882,14 @@ def volume(polyreg):
         N = 10000
     
     l_b, u_b = bounding_box(polyreg)
-    x = np.tile(l_b,(1,N)) + np.random.rand(n,N)*np.tile(u_b-l_b,(1,N))
-    aux = np.dot(polyreg.A,x)-np.tile(np.array([polyreg.b]).T,(1,N))
+    x = np.tile(l_b,(1,N)) +\
+        np.random.rand(n,N) *\
+        np.tile(u_b-l_b,(1,N) )
+    aux = np.dot(polyreg.A, x) -\
+        np.tile(
+            np.array([polyreg.b]).T,
+            (1, N)
+        )
     aux = np.nonzero(np.all(((aux < 0)==True),0))[0].shape[0]
     vol = np.prod(u_b-l_b)*aux/N
     polyreg.volume = vol
@@ -885,7 +904,6 @@ def extreme(poly1):
     Output:
     - A (N x d) numpy array containing the N vertices of poly1
     """
-    
     if poly1.vertices != None:
         # In case vertices already stored
         return poly1.vertices
@@ -971,7 +989,8 @@ def qhull(vertices,abs_tol=1e-7):
     - `vertices`: A N x d array containing N vertices in dimension d
     
     Output:
-    - Polytope describing the convex hull"""
+    - Polytope describing the convex hull
+    """
     A,b,vert = quickhull(vertices,abs_tol=abs_tol)
     if A.size == 0:
         return Polytope()
@@ -1003,11 +1022,13 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     To project the polytope `P` onto the first three dimensions, use
         >>> P_proj = projection(P, [1,2,3])
     """
-    
     if len(poly1) > 0:
         ret = Polytope()
         for i in range(len(poly1.list_poly)):
-            p = projection(poly1.list_poly[i], dim, solver=solver, abs_tol=abs_tol)
+            p = projection(
+                poly1.list_poly[i], dim,
+                solver=solver, abs_tol=abs_tol
+            )
             ret = union(ret, p, check_convex=True)
         return ret
     
@@ -1042,19 +1063,20 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     elif solver == "iterhull": 
         return projection_iterhull(poly1,new_dim)
     elif solver is not None:
-        print "WARNING: unrecognized projection solver \""+str(solver)+"\"."
+        print("WARNING: "
+            "unrecognized projection solver \""+str(solver)+"\".")
     
     if len(del_dim) <= 2:
         if verbose > 0:
-            print "projection: using Fourier-Motzkin."
+            print("projection: using Fourier-Motzkin.")
         return projection_fm(poly1,new_dim,del_dim)
     elif len(org_dim) <= 4:
         if verbose > 0:
-            print "projection: using exthull."
+            print("projection: using exthull.")
         return projection_exthull(poly1,new_dim)
     else:
         if verbose > 0:
-            print "projection: using iterative hull."
+            print("projection: using iterative hull.")
         return projection_iterhull(poly1,new_dim)
         
 def separate(reg1, abs_tol=1e-7):
@@ -1075,13 +1097,19 @@ def separate(reg1, abs_tol=1e-7):
     
     while len(ind_left) > 0:
         ind_del = []
-        connected_reg = Region([reg1.list_poly[ind_left[0]]], [])
+        connected_reg = Region(
+            [reg1.list_poly[ind_left[0]]],
+            []
+        )
         ind_del.append(ind_left[0])
         for i in range(1,len(ind_left)):
             j = ind_left[i]
             if is_adjacent(connected_reg, reg1.list_poly[j]):
-                connected_reg = union(connected_reg, reg1.list_poly[j], 
-                                      check_convex = False)
+                connected_reg = union(
+                    connected_reg,
+                    reg1.list_poly[j],
+                    check_convex = False
+                )
                 ind_del.append(j)
         
         connected_reg.list_prop = prop_list
@@ -1101,10 +1129,11 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
                  True if polytopes are neighbors OR overlap
     
     Output:
-    True if polytopes are adjacent, False otherwise"""
-
+    True if polytopes are adjacent, False otherwise
+    """
     if dimension(poly1) != dimension(poly2):
-        raise Exception("is_adjacent: polytopes do not have the same dimension")
+        raise Exception("is_adjacent: "
+            "polytopes do not have the same dimension")
     
     if len(poly1) > 0:
         for i in range(len(poly1)):
@@ -1130,7 +1159,10 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
     if overlap:
         b1_arr += abs_tol
         b2_arr += abs_tol 
-        dummy = Polytope(np.concatenate((A1_arr,A2_arr)),np.concatenate((b1_arr,b2_arr)))
+        dummy = Polytope(
+            np.concatenate((A1_arr,A2_arr)),
+            np.concatenate((b1_arr,b2_arr))
+        )
         return is_fulldim(dummy, abs_tol=abs_tol/10)
         
     else: 
@@ -1153,16 +1185,20 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
         b1_arr[i] += abs_tol
         b2_arr[j] += abs_tol 
         
-        dummy = Polytope(np.concatenate((A1_arr,A2_arr)),np.concatenate((b1_arr,b2_arr)))
+        dummy = Polytope(
+            np.concatenate((A1_arr,A2_arr)),
+            np.concatenate((b1_arr,b2_arr))
+        )
         return is_fulldim(dummy, abs_tol=abs_tol/10)
       
 #### Helper functions ####
         
 def projection_fm(poly1, new_dim, del_dim, abs_tol=1e-7):
-    """Help function implementing Fourier Motzkin projection. Should
-    work well for eliminating few dimensions."""
-    
-    del_dim = -np.sort(-del_dim) # Remove last dim first to handle indices
+    """Help function implementing Fourier Motzkin projection.
+    Should work well for eliminating few dimensions.
+    """
+    # Remove last dim first to handle indices
+    del_dim = -np.sort(-del_dim)
      
     if not poly1.minrep:
         poly1 = reduce(poly1)
@@ -1188,8 +1224,14 @@ def projection_fm(poly1, new_dim, del_dim, abs_tol=1e-7):
         for j in null:
             C[row,j] = 1
             row += 1
-        keep_dim = np.setdiff1d(range(poly.A.shape[1]), np.array([i]))
-        poly = Polytope(np.dot(C,poly.A)[:,keep_dim], np.dot(C,poly.b))
+        keep_dim = np.setdiff1d(
+            range(poly.A.shape[1]),
+            np.array([i])
+        )
+        poly = Polytope(
+            np.dot(C,poly.A)[:,keep_dim],
+            np.dot(C,poly.b)
+        )
         if not is_fulldim(poly):
             return Polytope()
         poly = reduce(poly)
@@ -1197,32 +1239,40 @@ def projection_fm(poly1, new_dim, del_dim, abs_tol=1e-7):
     return poly
     
 def projection_exthull(poly1,new_dim):
-    """Help function implementing vertex projection. Efficient in low 
-    dimensions."""
+    """Help function implementing vertex projection.
+    Efficient in low dimensions.
+    """
     vert = extreme(poly1)
     if vert == None:
         # qhull failed
         return Polytope(fulldim=False, minrep=True)
     return reduce(qhull(vert[:,new_dim]))
     
-def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
-    '''Helper function implementing the "iterative hull" method. Works best 
-    when projecting _to_ lower dimensions.'''
-    
+def projection_iterhull(poly1, new_dim, max_iter=1000,
+                        verbose=0, abs_tol=1e-7):
+    """Helper function implementing the "iterative hull" method.
+    Works best when projecting _to_ lower dimensions.
+    """
     r,xc = cheby_ball(poly1)
     org_dim = poly1.A.shape[1]
             
     if verbose > 0:
-        print "Starting iterhull projection from dim " + str(org_dim) + \
-                " to dim " + str(len(new_dim))
+        print("Starting iterhull projection from dim "
+            +str(org_dim) + " to dim " + str(len(new_dim)) )
             
     if len(new_dim) == 1:
         f1 = np.zeros(poly1.A.shape[1])
         f1[new_dim] = 1
-        sol = solvers.lp(matrix(f1), matrix(poly1.A), matrix(poly1.b), None, None, lp_solver)
+        sol = solvers.lp(
+            matrix(f1), matrix(poly1.A), matrix(poly1.b),
+            None, None, lp_solver
+        )
         if sol['status'] == "optimal":
             vert1 = sol['x']
-        sol = solvers.lp(matrix(-f1), matrix(poly1.A), matrix(poly1.b), None, None, lp_solver)     
+        sol = solvers.lp(
+            matrix(-f1), matrix(poly1.A), matrix(poly1.b),
+            None, None, lp_solver
+        )
         if sol['status'] == "optimal":
             vert2 = sol['x']
         vert = np.vstack([vert1,vert2])
@@ -1237,12 +1287,16 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
             #to find a starting simplex
             cnt += 1
             if cnt > max_iter:  
-                raise Exception("iterative_hull: could not find starting simplex")
+                raise Exception("iterative_hull: "
+                    "could not find starting simplex")
             
             f1 = np.random.rand(len(new_dim)).flatten() - 0.5
             f = np.zeros(org_dim)
             f[new_dim]=f1
-            sol = solvers.lp(matrix(-f), matrix(poly1.A), matrix(poly1.b), None, None, lp_solver)
+            sol = solvers.lp(
+                matrix(-f), matrix(poly1.A), matrix(poly1.b),
+                None, None, lp_solver
+            )
             xopt = np.array(sol['x']).flatten()  
             if Vert == None:
                 Vert = xopt.reshape(1,xopt.size)
@@ -1257,14 +1311,17 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
                     Vert = np.vstack([Vert,xopt])
             
             if Vert.shape[0] > len(new_dim):
-                u, s, v = np.linalg.svd(np.transpose(Vert[:,new_dim] - Vert[0,new_dim]))
+                u, s, v = np.linalg.svd(
+                    np.transpose(Vert[:,new_dim] - Vert[0,new_dim])
+                )
                 rank = np.sum(s > abs_tol*10)
                 if rank == len(new_dim):
                     # If rank full we have found a starting simplex
                     OK = True
                     
         if verbose > 1:
-            print "Found starting simplex after " + str(cnt) + " iterations"
+            print("Found starting simplex after " +
+                str(cnt) +" iterations")
         
         cnt = 0
         P1 = qhull(Vert[:,new_dim])            
@@ -1276,10 +1333,11 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
             # Take convex hull of all vertices
             cnt += 1     
             if cnt > max_iter:
-                raise Exception("iterative_hull: maximum number of iterations reached")
+                raise Exception("iterative_hull: "
+                    "maximum number of iterations reached")
             
             if verbose > 1:
-                print "Iteration number " + str(cnt)
+                print("Iteration number " + str(cnt) )
             
             for ind in range(P1.A.shape[0]):
                 f1 = np.round(P1.A[ind,:]/abs_tol)*abs_tol
@@ -1298,12 +1356,21 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
                 
                 if k.size == 1:
                     # Already stored
-                    xopt = HP[k, range(np.shape(P1.A)[1]+1,np.shape(P1.A)[1] + np.shape(Vert)[1] + 1) ]
+                    xopt = HP[
+                        k,
+                        range(
+                            np.shape(P1.A)[1]+1,
+                            np.shape(P1.A)[1] + np.shape(Vert)[1] + 1
+                        )
+                    ]
                 else:
                     # Solving optimization to find new vertex
                     f = np.zeros(poly1.A.shape[1])
                     f[new_dim]=f1
-                    sol = solvers.lp(matrix(-f), matrix(poly1.A), matrix(poly1.b), None, None, lp_solver)
+                    sol = solvers.lp(
+                        matrix(-f), matrix(poly1.A), matrix(poly1.b),
+                        None, None, lp_solver
+                    )
                     if sol['status'] != 'optimal':
                         if verbose > 1:
                             print("iterhull: LP failure")
@@ -1321,29 +1388,33 @@ def projection_iterhull(poly1,new_dim,max_iter=1000,verbose=0,abs_tol=1e-7):
                     Vert = np.vstack([Vert, xopt])
             
             if verbose > 1:
-                print "Taking convex hull of new points"
+                print("Taking convex hull of new points")
             
             P2 = qhull(Vert[:,new_dim])
             
             if verbose > 1:
-                print "Checking if new points are inside convex hull"
+                print("Checking if new points are inside convex hull")
             
             OK = 1
             for i in range(np.shape(Vert)[0]):
                 if not is_inside(P1,Vert[i,new_dim],abs_tol=1e-5):
-                    # If all new points are inside old polytope -> Finished
+                    # If all new points are inside
+                    # old polytope -> Finished
                     OK = 0
                     break
             if OK == 1:
                 if verbose > 0:
-                    print "Returning projection after " + str(cnt) + " iterations\n"
+                    print("Returning projection after " +
+                        str(cnt) +" iterations\n")
                 return P2
             else:
                 # Iterate
                 P1 = P2
                 
 def projection_esp(poly1,keep_dim,del_dim):
-    '''Helper function implementing "Equality set projection". Very buggy.'''
+    """Helper function implementing "Equality set projection".
+    Very buggy.
+    """
     C = poly1.A[:,keep_dim]
     D = poly1.A[:,del_dim]
     if not is_fulldim(poly1):
@@ -1362,7 +1433,6 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     Output:
     - polytope or region containing non-overlapping polytopes
     """
-        
     Pdummy = poly
     res = Polytope() # Initiate output
     
@@ -1383,7 +1453,16 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     
     # Checking intersections to find intersecting regions
     for ii in range(N):        
-        dummy = Polytope(np.vstack([poly.A,reg.list_poly[ii].A]),np.hstack([poly.b,reg.list_poly[ii].b]))      
+        dummy = Polytope(
+            np.vstack([
+                poly.A,
+                reg.list_poly[ii].A
+            ]),
+            np.hstack([
+                poly.b,
+                reg.list_poly[ii].b
+            ])
+        )
         Rc[ii], xc = cheby_ball(dummy)
 
     N = np.sum(Rc>=intersect_tol)    
@@ -1446,7 +1525,10 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     while level!=-1:
         if counter[level] == 0:
             for j in range(level,N):
-                auxINDICES = np.hstack([INDICES, range(beg_mi[j],beg_mi[j]+mi[j])])
+                auxINDICES = np.hstack([
+                    INDICES,
+                    range(beg_mi[j],beg_mi[j]+mi[j])
+                ])
                 Adummy = A[auxINDICES,:]
                 bdummy = B[auxINDICES]
                 R,xopt = cheby_ball(Polytope(Adummy,bdummy))
@@ -1463,8 +1545,11 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
                 for jj in range(len(nzcount)-1,-1,-1):
 
                     if counter[level] <= mi[level]:
-                        INDICES[len(INDICES)-1] = INDICES[len(INDICES)-1] - M
-                        INDICES = np.hstack([INDICES, beg_mi[level] + counter[level] + M])
+                        INDICES[len(INDICES)-1] = INDICES[len(INDICES)-1] -M
+                        INDICES = np.hstack([
+                            INDICES,
+                            beg_mi[level] + counter[level] + M
+                        ])
                         break
                     else:
                         counter[level] = 0
@@ -1481,7 +1566,10 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
 
                 if counter[level] <= mi[level]:
                     INDICES[len(INDICES)-1] = INDICES[len(INDICES)-1] - M
-                    INDICES = np.hstack([INDICES, beg_mi[level]+counter[level]+M-1])
+                    INDICES = np.hstack([
+                        INDICES,
+                        beg_mi[level]+counter[level]+M-1
+                    ])
                     break
                 else:
                     counter[level] = 0
@@ -1505,4 +1593,3 @@ def num_bin(N, places=8):
     E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
     """
     return [(N>>k)&0x1  for k in range(places)]
-    
