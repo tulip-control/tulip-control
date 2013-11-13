@@ -285,19 +285,7 @@ def discretize(
             size = len(sol)
             
             # Update transition matrix
-            transitions = np.hstack([
-                transitions,
-                np.zeros(
-                    [size-num_new, num_new],
-                    dtype=int
-                )
-            ])
-            transitions = np.vstack([
-                transitions,
-                np.zeros(
-                    [num_new, size],
-                    dtype=int)
-            ])
+            transitions = adj_update(transitions, size, num_new)
             
             transitions[i,:] = np.zeros(size)
             for kk in xrange(num_new):
@@ -317,20 +305,7 @@ def discretize(
             adj[i,:] = np.zeros([size-num_new])
             adj[:,i] = np.zeros([size-num_new])
             
-            adj = np.hstack([
-                adj,
-                np.zeros(
-                    [size-num_new, num_new],
-                    dtype=int
-                )
-            ])
-            adj = np.vstack([
-                adj,
-                np.zeros(
-                    [num_new, size],
-                    dtype=int
-                )
-            ])
+            adj = adj_update(adj, size, num_new)
             
             for kk in xrange(num_new):
                 adj[i,size-1-kk] = 1
@@ -366,14 +341,7 @@ def discretize(
                         transitions[k,size-1-kk] = 0
             
             # Update IJ matrix
-            IJ = np.hstack([
-                IJ,
-                np.zeros([size-num_new, num_new], dtype=int)
-            ])
-            IJ = np.vstack([
-                IJ,
-                np.zeros([num_new, size], dtype=int)
-            ])
+            IJ = adj_update(IJ, size, num_new)
             
             adj_k = adj
             if trans_length > 1:
@@ -452,6 +420,22 @@ def discretize(
         orig_list_region=orig_list,
         orig=orig
     )
+
+def adj_update(adj, size, num_new):
+    adj = np.hstack([
+        adj,
+        np.zeros(
+            [size-num_new, num_new],
+            dtype=int
+        )
+    ])
+    adj = np.vstack([
+        adj,
+        np.zeros(
+            [num_new, size],
+            dtype=int)
+    ])
+    return adj
 
 # DEFUNCT until further notice
 # def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
