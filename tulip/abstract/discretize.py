@@ -186,7 +186,7 @@ def discretize(
     
     # Initialize output
     transitions = np.zeros(
-        [part.num_regions,part.num_regions],
+        [part.num_regions, part.num_regions],
         dtype = int
     )
     sol = deepcopy(part.list_region)
@@ -397,22 +397,20 @@ def discretize(
     ofts.transitions.add_adj(adj, ofts_states)
     
     # Decorate TS with state labels
-    ofts.atomic_propositions.add_from(part.list_prop_symbol)
+    prop_symbols = part.list_prop_symbol
+    ofts.atomic_propositions.add_from(prop_symbols)
     prop_list = []
-    for reg in sol:
-        state_prop = set()
-        for prop_ind in xrange(len(reg.list_prop)):
-            if reg.list_prop[prop_ind]==1:
-                state_prop.add(
-                    part.list_prop_symbol[prop_ind]
-                )
+    for region in sol:
+        state_prop = set([
+            prop for (prop, x) in
+            zip(prop_symbols, region.list_prop) if x == 1
+        ])
+        
         prop_list.append(state_prop)
     
-    # temporary check for correctness
-    if len(prop_list) != n:
-        raise Exception('prop_list longer than n.')
-    
     ofts.states.labels(ofts_states, prop_list)
+    
+    assert(len(prop_list) == n)
     
     return AbstractSysDyn(
         ppp=new_part,
