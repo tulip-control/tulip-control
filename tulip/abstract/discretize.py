@@ -204,11 +204,11 @@ def discretize(
         ind = np.nonzero(IJ)
         i = ind[1][0]
         j = ind[0][0]
-        IJ[j,i] = 0
+        IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
         
-        if isinstance(ssys,PwaSysDyn):
+        if isinstance(ssys, PwaSysDyn):
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
                 rd,xd = pc.cheby_ball(ss.Wset)
@@ -216,13 +216,12 @@ def discretize(
                 rd = 0.
         
         if verbose > 1:        
-            print(
-                "\n Working with states " +str(i) +" and " + str(j) +
-                " with lengths " + str(len(si)) + " and " + str(len(sj) )
-            )
-            if isinstance(ssys,PwaSysDyn):
-                print("where subsystem "
-                    +str(subsys_list[i]) +" is active.")
+            print("\n Working with states " +str(i) +" and " +str(j) +
+                " with lengths " +str(len(si)) +" and " +str(len(sj) ) )
+            
+            if isinstance(ssys, PwaSysDyn):
+                print("where subsystem " +
+                    str(subsys_list[i]) +" is active.")
         
         if conservative:
             # Don't use trans_set
@@ -280,40 +279,44 @@ def discretize(
             num_new = len(difflist)
             for reg in difflist:
                 sol.append(reg)
-                if isinstance(ssys,PwaSysDyn):
+                if isinstance(ssys, PwaSysDyn):
                     subsys_list.append(subsys_list[i])
             size = len(sol)
             
             # Update transition matrix
             transitions = adj_update(transitions, size, num_new)
             
-            transitions[i,:] = np.zeros(size)
+            transitions[i, :] = np.zeros(size)
             for kk in xrange(num_new):
-            
-                #transitions[:,size-1-kk] = transitions[:,i]
+                r = size -1 -kk
+                
+                #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
                 # except possibly the new part
-                transitions[i,size-1-kk] = 0
-                transitions[j,size-1-kk] = 0            
+                transitions[i, r] = 0
+                transitions[j, r] = 0            
             
             if i != j:
                 # sol[j] is reachable from intersection of sol[i] and S0..
-                transitions[j,i] = 1
+                transitions[j, i] = 1
             
             # Update adjacency matrix
-            old_adj = np.nonzero(adj[i,:])[0]
-            adj[i,:] = np.zeros([size-num_new])
-            adj[:,i] = np.zeros([size-num_new])
+            old_adj = np.nonzero(adj[i, :])[0]
+            adj[i, :] = np.zeros([size -num_new])
+            adj[:, i] = np.zeros([size -num_new])
             
             adj = adj_update(adj, size, num_new)
             
             for kk in xrange(num_new):
-                adj[i,size-1-kk] = 1
-                adj[size-1-kk,i] = 1
-                adj[size-1-kk,size-1-kk] = 1
+                r = size -1 -kk
+                
+                adj[i, r] = 1
+                adj[r, i] = 1
+                adj[r, r] = 1
+                
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-            adj[i,i] = 1
+            adj[i, i] = 1
                         
             if verbose > 1:
                 output = "\n Adding states " + str(i) + " and "
@@ -321,24 +324,27 @@ def discretize(
                     output += str(size-1-kk) + " and "
                 print(output + "\n")
                         
-            for k in np.setdiff1d(old_adj,[i,size-1]):
+            for k in np.setdiff1d(old_adj, [i,size-1]):
                 # Every "old" neighbor must be the neighbor
                 # of at least one of the new
-                if pc.is_adjacent(sol[i],sol[k]):
-                    adj[i,k] = 1
-                    adj[k,i] = 1
-                elif remove_trans & (trans_length == 1):
+                if pc.is_adjacent(sol[i], sol[k]):
+                    adj[i, k] = 1
+                    adj[k, i] = 1
+                elif remove_trans and (trans_length == 1):
                     # Actively remove transitions between non-neighbors
-                    transitions[i,k] = 0
-                    transitions[k,i] = 0
+                    transitions[i, k] = 0
+                    transitions[k, i] = 0
+                
                 for kk in xrange(num_new):
-                    if pc.is_adjacent(sol[size-1-kk],sol[k]):
-                        adj[size-1-kk,k] = 1
-                        adj[k, size-1-kk] = 1
-                    elif remove_trans & (trans_length == 1):
+                    r = size -1 -kk
+                    
+                    if pc.is_adjacent(sol[r], sol[k]):
+                        adj[r, k] = 1
+                        adj[k, r] = 1
+                    elif remove_trans and (trans_length == 1):
                         # Actively remove transitions between non-neighbors
-                        transitions[size-1-kk,k] = 0
-                        transitions[k,size-1-kk] = 0
+                        transitions[r, k] = 0
+                        transitions[k, r] = 0
             
             # Update IJ matrix
             IJ = adj_update(IJ, size, num_new)
@@ -351,36 +357,39 @@ def discretize(
                     k += 1
                 adj_k = (adj_k > 0).astype(int)
             
-            horiz1 = adj_k[i,:] - transitions[i,:] > 0
-            verti1 = adj_k[:,i] - transitions[:,i] > 0
-            IJ[i,:] = horiz1.astype(int)
-            IJ[:,i] = verti1.astype(int)
-            for kk in xrange(num_new):      
-                horiz2 = adj_k[size-1-kk,:] - transitions[size-1-kk,:] > 0
-                verti2 = adj_k[:,size-1-kk] - transitions[:,size-1-kk] > 0
-                IJ[size-1-kk,:] = horiz2.astype(int)
-                IJ[:,size-1-kk] = verti2.astype(int)      
+            horiz1 = adj_k[i, :] -transitions[i, :] > 0
+            verti1 = adj_k[:, i] -transitions[:, i] > 0
+            
+            IJ[i, :] = horiz1.astype(int)
+            IJ[:, i] = verti1.astype(int)
+            
+            for kk in xrange(num_new):
+                r = size -1 -kk
+                
+                horiz2 = adj_k[r, :] -transitions[r, :] > 0
+                verti2 = adj_k[:, r] -transitions[:, r] > 0
+                
+                IJ[r, :] = horiz2.astype(int)
+                IJ[:, r] = verti2.astype(int)
             
             if verbose > 1:
-                print("\n Updated adj: \n" + str(adj) )
-                print("\n Updated trans: \n" + str(transitions) )
-                print("\n Updated IJ: \n" + str(IJ) )
-            
+                print("\n Updated adj: \n" +str(adj) )
+                print("\n Updated trans: \n" +str(transitions) )
+                print("\n Updated IJ: \n" +str(IJ) )
         elif vol2 < abs_tol:
             if verbose > 1:
                 print("Transition found")
             transitions[j,i] = 1
-        
         else:
             if verbose > 1:
-                print("No transition found, diff vol: " + str(vol2) +
-                      ", intersect vol: " + str(vol1) )
+                print("No transition found, diff vol: " +str(vol2) +
+                      ", intersect vol: " +str(vol1) )
             transitions[j,i] = 0
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,
         list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
-        list_prop_symbol=part.list_prop_symbol, list_subsys = subsys_list
+        list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
     )
     
     # Generate transition system and add transitions       
@@ -828,7 +837,7 @@ def solveFeasable(
         else:
             ttt = part1
         temp_part = part2
-        for i in range(N,1,-1): 
+        for i in xrange(N,1,-1): 
             x0 = solveFeasable(
                 ttt, temp_part, ssys, 1,
                 closed_loop=False,
@@ -856,7 +865,7 @@ def solveFeasable(
     if len(part1) > max_num_poly:
         # Just use the max_num_poly largest volumes for reachability
         vol_list = np.zeros(len(part1))
-        for i in range(len(part1)):
+        for i in xrange(len(part1)):
             vol_list[i] = pc.volume(part1.list_poly[i])
         ind = np.argsort(-vol_list)
         temp = []
@@ -867,7 +876,7 @@ def solveFeasable(
     if len(part2) > max_num_poly:
         # Just use the max_num_poly largest volumes for reachability
         vol_list = np.zeros(len(part2))
-        for i in range(len(part2)):
+        for i in xrange(len(part2)):
             vol_list[i] = pc.volume(part2.list_poly[i])
         ind = np.argsort(-vol_list)
         temp = []
@@ -882,7 +891,7 @@ def solveFeasable(
             trans_set=trans_set, closed_loop=closed_loop,
             use_all_horizon=use_all_horizon
         )
-        for i in range(1, len(part1)):
+        for i in xrange(1, len(part1)):
             s0 = solveFeasable(
                 part1.list_poly[i], part2, ssys, N,
                 trans_set=trans_set, closed_loop=closed_loop,
@@ -898,7 +907,7 @@ def solveFeasable(
             trans_set=trans_set, closed_loop=closed_loop,
             use_all_horizon=use_all_horizon
         )
-        for i in range(1, len(part2)):
+        for i in xrange(1, len(part2)):
             s0 = solveFeasable(
                 part1, part2.list_poly[i], ssys, N,
                 trans_set=trans_set, closed_loop=closed_loop,
@@ -938,7 +947,7 @@ def getInputHelper(
     if closed_loop:
         temp_part = P3
         list_P.append(P3)
-        for i in range(N-1,0,-1): 
+        for i in xrange(N-1,0,-1): 
             temp_part = solveFeasable(
                 P1, temp_part, ssys, 1,
                 closed_loop=False, trans_set=P1
@@ -948,7 +957,7 @@ def getInputHelper(
         L,M = createLM(ssys, N, list_P, disturbance_ind=[1])
     else:
         list_P.append(P1)
-        for i in range(N-1,0,-1):
+        for i in xrange(N-1,0,-1):
             list_P.append(P1)
         list_P.append(P3)
         L,M = createLM(ssys, N, list_P)
@@ -968,7 +977,7 @@ def getInputHelper(
     h = matrix(M)
 
     B_diag = ssys.B
-    for i in range(N-1):
+    for i in xrange(N-1):
         B_diag = _block_diag2(B_diag,ssys.B)
     K_hat = np.tile(ssys.K, (N,1))
 
@@ -977,7 +986,7 @@ def getInputHelper(
     A_K = np.zeros([n*N, n*N])
     A_N = np.zeros([n*N, n])
 
-    for i in range(N):
+    for i in xrange(N):
         A_row = np.dot(ssys.A, A_row)
         A_row[np.ix_(
             range(n),
@@ -1050,7 +1059,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     if isinstance(list_P, pc.Polytope):
         list = []
         list.append(list_P)
-        for i in range(1,N):
+        for i in xrange(1,N):
             list.append(Pk)
         list.append(PN)
         list_P = list
@@ -1074,7 +1083,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
             E = np.zeros(K.shape)
            
     list_len = np.zeros(len(list_P))
-    for i in range(len(list_P)):
+    for i in xrange(len(list_P)):
         list_len[i] = list_P[i].A.shape[0]
 
     LUn = np.shape(PU.A)[0]
@@ -1091,13 +1100,13 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     K_hat = np.tile(K, (N,1))
     B_diag = B
     E_diag = E
-    for i in range(N-1):
+    for i in xrange(N-1):
         B_diag = _block_diag2(B_diag,B)
         E_diag = _block_diag2(E_diag,E)
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
     sum_vert = 0
-    for i in range(N+1):
+    for i in xrange(N+1):
         Li = list_P[i]
         ######### FOR L #########
         AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])
@@ -1190,10 +1199,10 @@ def get_max_extreme(G,D,N):
     dim = D_extreme.shape[1]
     DN_extreme = np.zeros([dim*N, nv**N])
     
-    for i in range(nv**N):
+    for i in xrange(nv**N):
         # Last N digits are indices we want!
         ind = np.base_repr(i, base=nv, padding=N)
-        for j in range(N):
+        for j in xrange(N):
             DN_extreme[range(j*dim,(j+1)*dim),i] = D_extreme[int(ind[-j-1]),:]
 
     d_hat = np.amax(np.dot(G,DN_extreme), axis=1)     
@@ -1227,7 +1236,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         K = ssys.K
     
     inside = True
-    for i in range(N-1):
+    for i in xrange(N-1):
         u = u_seq[i,:].reshape(u_seq[i,:].size,1)
         x = np.dot(A,x) + np.dot(B,u) + K       
         if not pc.is_inside(P0, x):
@@ -1258,7 +1267,7 @@ def get_cellID(x0, part):
     this just returns the first ID
     """
     cellID = -1
-    for i in range(part.num_regions):
+    for i in xrange(part.num_regions):
         if pc.is_inside(part.list_region[i], x0):
              cellID = i
              break
