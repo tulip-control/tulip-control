@@ -14,6 +14,7 @@ Contents:
    tutorial
    specifications
    dev_guide
+   bibliography
 
 Indices and tables
 ==================
