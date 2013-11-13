@@ -345,23 +345,11 @@ def discretize(
             
             # Update IJ matrix
             IJ = adj_update(IJ, size, num_new)
-            
             adj_k = reachable_within(trans_length, adj, adj)
-            
-            horiz1 = adj_k[i, :] -transitions[i, :] > 0
-            verti1 = adj_k[:, i] -transitions[:, i] > 0
-            
-            IJ[i, :] = horiz1.astype(int)
-            IJ[:, i] = verti1.astype(int)
+            sym_adj_change(IJ, adj_k, transitions, i)
             
             for kk in xrange(num_new):
-                r = size -1 -kk
-                
-                horiz2 = adj_k[r, :] -transitions[r, :] > 0
-                verti2 = adj_k[:, r] -transitions[:, r] > 0
-                
-                IJ[r, :] = horiz2.astype(int)
-                IJ[:, r] = verti2.astype(int)
+                sym_adj_change(IJ, adj_k, transitions, size -1 -kk)
             
             if verbose > 1:
                 print("\n Updated adj: \n" +str(adj) )
@@ -446,6 +434,13 @@ def reachable_within(trans_length, adj_k, adj):
     adj_k = (adj_k > 0).astype(int)
     
     return adj_k
+
+def sym_adj_change(IJ, adj_k, transitions, i):
+    horizontal = adj_k[i, :] -transitions[i, :] > 0
+    vertical = adj_k[:, i] -transitions[:, i] > 0
+    
+    IJ[i, :] = horizontal.astype(int)
+    IJ[:, i] = vertical.astype(int)
 
 # DEFUNCT until further notice
 # def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
