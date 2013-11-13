@@ -116,7 +116,7 @@ def plot(poly1, show=True):
         plt.show()
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
-                   show=True):
+                   show=True, ax=None, color_seed=None):
     """Plots 2D PropPreservingPartition using matplotlib
 
     @type ppp: PropPreservingPartition
@@ -127,6 +127,8 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     @param show: If True, then show the plot.
         Otherwise return axis object.
         Axis object is good for creating custom plots.
+    @param ax: axes where to plot
+    @param color_seed: seed for reproducible random coloring
     
     see also
     --------
@@ -136,21 +138,34 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     arr_size = (u[0,0]-l[0,0])/50.0
     reg_list = ppp.list_region
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    # new figure ?
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
     ax.set_xlim(l[0,0],u[0,0])
     ax.set_ylim(l[1,0],u[1,0])
-
-    for i in range(len(reg_list)):
-        reg = reg_list[i]        
+    
+    # repeatable coloring ?
+    if color_seed is not None:
+        np.random.seed(color_seed)
+    
+    # plot polytope patches
+    for i in xrange(len(reg_list)):
+        reg = reg_list[i]
+        
+        # select random color,
+        # same color for all polytopes in each region
+        col = np.random.rand(3)
+        
+        # single polytope or region ?
         if len(reg) == 0:
-            ax.add_patch(get_patch(reg, np.random.rand(3)))      
+            ax.add_patch(get_patch(reg, col) )
         else:
-            col = np.random.rand(3)
-            for poly2 in reg.list_poly:  
-                ax.add_patch(get_patch(poly2, color=col))
-
-    for i in range(len(reg_list)):
+            for poly2 in reg.list_poly:
+                ax.add_patch(get_patch(poly2, col) )
+    
+    # plot transition arrows between patches
+    for i in xrange(len(reg_list)):
         reg = reg_list[i]
         rc, xc = cheby_ball(reg)
         if trans is not None:

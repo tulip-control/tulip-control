@@ -102,7 +102,7 @@ def discretize(
     closed_loop=True, conservative=True,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7, verbose=0
+    abs_tol=1e-7, verbose=0, plotting=None
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -191,7 +191,21 @@ def discretize(
     adj = np.array(adj)
     subsys_list = deepcopy(part.list_subsys)
     ss = ssys
-
+    
+    # init graphics
+    if plotting is not None:
+        # here to avoid loading matplotlib unless requested
+        try:
+            from tulip.polytope.plot import plot_partition
+            import matplotlib.pyplot as plt
+        except:
+            plot_partition = None
+            print("polytope.plot_partition failed to import.\n"
+                "No plotting by discretize during partitioning.")
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    
     # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
@@ -360,6 +374,23 @@ def discretize(
                 print("No transition found, diff vol: " +str(vol2) +
                       ", intersect vol: " +str(vol1) )
             transitions[j,i] = 0
+        
+        # no plotting ?
+        if plotting is None:
+            continue
+        if plot_partition is None:
+            continue
+        
+        tmp_part = PropPreservingPartition(
+            domain=part.domain, num_prop=part.num_prop,
+            list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+            list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
+        )
+        
+        ax.clear()
+        plt.ion()
+        plot_partition(tmp_part, transitions, ax=ax, color_seed=23)
+        plt.pause(1)
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,
@@ -803,7 +834,7 @@ def solve_feasible(
     @type P2: Polytope or Region
     @type ssys: LtiSysDyn
     @param N: The horizon length
-    @param closed_loop: If true, take 1 step at the time.
+    @param closed_loop: If true, take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
         Default: True
@@ -1050,12 +1081,14 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     - x(k) \in list_P[k] for k= 0, 1 ... N
     
     The returned polytope describes the intersection of the polytopes
-    for all possible Input:
+    for all possible
 
-    @param ssys: LtiSysDyn dynamics
+    @param ssys: system dynamics
+    @type ssys: LtiSysDyn
     @param N: horizon length
-    @param list_P: list of Polytopes or Polytope
-    @param Pk, PN: Polytopes
+    @type list_P: list of Polytopes or Polytope
+    @type Pk: Polytope
+    @type PN: Polytope
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.
         Default is [1,2, ... N]
