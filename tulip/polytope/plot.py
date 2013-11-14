@@ -145,6 +145,8 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     # repeatable coloring ?
     if color_seed is not None:
         prng = np.random.RandomState(color_seed)
+    else:
+        prng = np.random.RandomState()
     
     # plot polytope patches
     for i in xrange(len(reg_list)):
