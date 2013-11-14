@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2011 by California Institute of Technology
 # All rights reserved.
 #
@@ -31,8 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
-
 """
 Functions for plotting Polytopes and Partitions.
 The functions can be accessed by
@@ -147,7 +144,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     # repeatable coloring ?
     if color_seed is not None:
-        np.random.seed(color_seed)
+        prng = np.random.RandomState(color_seed)
     
     # plot polytope patches
     for i in xrange(len(reg_list)):
@@ -155,7 +152,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         
         # select random color,
         # same color for all polytopes in each region
-        col = np.random.rand(3)
+        col = prng.rand(3)
         
         # single polytope or region ?
         if len(reg) == 0:
@@ -165,21 +162,23 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
                 ax.add_patch(get_patch(poly2, col) )
     
     # plot transition arrows between patches
-    for i in xrange(len(reg_list)):
+    for i in xrange(len(reg_list) ):
         reg = reg_list[i]
         rc, xc = cheby_ball(reg)
+        
         if trans is not None:
-            for j in np.nonzero(trans[:,i])[0]:
+            for j in np.nonzero(trans[:,i] )[0]:
                 reg1 = reg_list[j]
-                rc1,xc1 = cheby_ball(reg1)
+                rc1, xc1 = cheby_ball(reg1)
+                
                 if not np.sum(np.abs(xc1-xc)) < 1e-7:
                     x = xc[0]
                     y = xc[1]
                     dx = xc1[0] - xc[0]
                     dy = xc1[1] - xc[1]
                     arr = matplotlib.patches.Arrow(
-                        float(x),float(y),float(dx),float(dy),
-                        width=arr_size,color='black'
+                        float(x), float(y), float(dx), float(dy),
+                        width=arr_size, color='black'
                     )
                     ax.add_patch(arr)
         if plot_numbers:
