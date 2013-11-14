@@ -51,27 +51,29 @@ class LtiSysDyn:
         d[t] \in Wset - polytope object
         s[t] \in domain -polytope object
     
-    A LtiSysDyn object contains the fields A, B, E, K, Uset, Wset and domain
+    A LtiSysDyn object contains the fields:
+        A, B, E, K, Uset, Wset and domain
     as defined above.
     
-    Note: For state-dependent bounds on the input, [u[t];s[t]] \in Uset can
-    be used.
+    Note: For state-dependent bounds on the input,
+    [u[t];s[t]] \in Uset can be used.
     
     **Constructor**:
     
     **LtiSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `K` = [][, `Uset` = [][,
     `Wset` = [][, `domain`[]]]]]]]])
     """
-    def __init__(self, A=[], B=[], E=[], K=[], Uset=None,Wset=None,domain=None):
+    def __init__(self, A=[], B=[], E=[], K=[],
+                 Uset=None,Wset=None,domain=None):
         
         if Uset == None:
-            print "Warning: Uset not given in LtiSysDyn()"
+            print("Warning: Uset not given in LtiSysDyn()")
         
         if (Uset != None) & (not isinstance(Uset, pc.Polytope)):
             raise Exception("LtiSysDyn: `Uset` has to be a Polytope")
            
         if domain == None:
-            print "Warning: domain is not given in LtiSysDyn()"
+            print("Warning: domain is not given in LtiSysDyn()")
         
         if (domain != None) & (not isinstance(domain, pc.Polytope)):
             raise Exception("LtiSysDyn: `domain` has to be a Polytope")
@@ -123,8 +125,11 @@ class PwaSysDyn:
         if domain == None:
             print("Warning: domain not given in PwaSysDyn()")
         
-        if (domain != None) and \
-               (not (isinstance(domain, pc.Polytope) or isinstance(domain, pc.Region))):
+        if ((domain != None) and
+            (not (isinstance(domain, pc.Polytope) or
+                isinstance(domain, pc.Region))
+            )
+        ):
             raise Exception("PwaSysDyn: `domain` has to be a Polytope or Region")
 
         if len(list_subsys) > 0:
@@ -150,7 +155,8 @@ class PwaSysDyn:
         self.domain = domain
         
     @classmethod
-    def from_lti(cls, A=[], B=[], E=[], K=[], Uset=None, Wset=None,domain=None):
+    def from_lti(cls, A=[], B=[], E=[], K=[],
+                 Uset=None, Wset=None,domain=None):
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
 
@@ -185,14 +191,16 @@ class HybridSysDyn:
     Note: We assume that system and environment switching modes are independent
     	of one another. (Use LTL statement to make it not so.)
     """
-    def __init__(self, disc_domain_size=(1,1),dynamics=None,cts_ss=None,**args):
+    def __init__(self, disc_domain_size=(1,1),
+                 dynamics=None, cts_ss=None, **args):
         # check that the continuous domain is specified
         if cts_ss is None:
-            print "Warning: continuous state space not given in HybridSysDyn()"
+            print("Warning: " +
+                "continuous state space not given in HybridSysDyn()")
         if (cts_ss is not None) and \
         (not (isinstance(cts_ss, pc.Polytope) or \
         isinstance(cts_ss, pc.Region))):
-            raise Exception("HybridSysDyn: "
+            raise Exception("HybridSysDyn: " +
                "`cts_ss` has to be a Polytope or Region")
         
         # Get the labels and, if there are the right number of them, use them.
@@ -205,13 +213,15 @@ class HybridSysDyn:
         if (self.env_labels is not None) and \
         (len(self.env_labels) != disc_domain_size[0]):
             use_env_labels = False
-            print("Warning: number of environment labels is inconsistent with" +
+            print("Warning: " +
+                "number of environment labels is inconsistent with" +
                 "discrete domain size. Ignoring the environment labels.")
         if self.env_labels is None:
             use_env_labels = False
         if (self.disc_sys_labels is not None) and \
         (len(self.disc_sys_labels) != disc_domain_size[1]):
-            print("Warning: number of discrete system labels is inconsistent" +
+            print("Warning: " +
+                "number of discrete system labels is inconsistent" +
                 "with discrete domain size. Ignoring the system labels.")
             use_sys_labels = False
         if self.disc_sys_labels is None:
@@ -229,7 +239,8 @@ class HybridSysDyn:
                 sys_list = range(disc_domain_size[1])
             check_keys = [(a,b) for a in env_list for b in sys_list]
             if set(dynamics.keys()) != set(check_keys):
-                raise Exception("HybridSysDyn: keys in `dynamics` are " + 
+                raise Exception("HybridSysDyn: " +
+                    "keys in `dynamics` are " +
                     "inconsistent with discrete mode labels")
         self.dynamics = dynamics
         self.cts_ss = cts_ss
@@ -240,6 +251,8 @@ class HybridSysDyn:
         return cls((1,1), {(0,0):pwa_sys}, domain)
     
     @classmethod
-    def from_lti(cls, A=[], B=[], E=[], K=[], Uset=None, Wset=None,domain=None):
-        pwa_sys = PwaSysDyn.from_lti(A,B,E,K,Uset,Wset,domain)
+    def from_lti(cls, A=[], B=[], E=[], K=[],
+                 Uset=None, Wset=None,domain=None):
+        pwa_sys = PwaSysDyn.from_lti(A, B, E, K,
+                                     Uset, Wset, domain)
         return cls((1,1), {(0,0):pwa_sys}, domain)
