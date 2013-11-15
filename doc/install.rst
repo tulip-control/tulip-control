@@ -1,39 +1,43 @@
 Installation
 ------------
 
-The latest release of TuLiP can be downloaded from `SourceForge <http://sourceforge.net/projects/tulip-control/files/?source=navbar>`_.
+The latest release of TuLiP can be downloaded from `SourceForge <http://sourceforge.net/projects/tulip-control/files/>`_.
 
-TuLiP is designed to work with Python version 2.7, though it should also
-support Python version 3.2+.  The following additional packages are
-required to use the core functionality of TuLiP:
+TuLiP is designed to work with Python version 2.7, though it should also support
+Python version 3.2+.  The following additional Python packages are required to
+use the core functionality of TuLiP:
 
-  * `NumPy <http://numpy.org/>`_, `SciPy <http://www.scipy.org/>`_
-  * `CVXOPT <http://abel.ee.ucla.edu/cvxopt/>`_
+* `NumPy <http://numpy.org/>`_
+* `SciPy <http://www.scipy.org/>`_
+* `CVXOPT <http://abel.ee.ucla.edu/cvxopt/>`_
+* `NetworkX <http://networkx.lanl.gov/>`_
+* `pyparsing <http://pyparsing.wikispaces.com/>`_
 
-Except for cvxopt, all of these packages are available in the `Enthought
+Except for ``cvxopt``, all of these packages are available in the `Enthought
 Canopy <https://www.enthought.com/products/canopy/>`_ distribution.
 
-The default synthesis tool for GR[1] specifications is `gr1c
-<http://scottman.net/2012/gr1c>`_.  An alternative GR[1] synthesis tool used
-by TuLiP is implemented in `JTLV <http://jtlv.ysaar.net/>`_.  To use it, you
-must have Java version 1.6 (or later) installed.
+The default synthesis tool for GR[1] specifications is implemented in `JTLV
+<http://jtlv.ysaar.net/>`_ and distributed with TuLiP.  To use it, you must have
+Java version 1.6 (or later) installed. An alternative GR[1] synthesis tool used
+by TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_.
 
 For computing discrete abstractions from hybrid system descriptions, it is
 highly recommended---but not required---that you install `GLPK
-<http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that
-you need to install GLPK *before* installing CVXOPT and follow the
-instructions in CVXOPT installation to ensure it recognizes GLPK as a
-solver. If you are a `MacPorts <http://www.macports.org/>`_ user, please
-note that MacPorts does not do this linking automatically.
+<http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you
+need to install GLPK *before* installing CVXOPT and follow the instructions in
+CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
+`MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
+do this linking automatically.
 
-For receding horizon problems, you will need a tool for checking
-satisfiability.  At present only `Yices 1 <http://yices.csl.sri.com/>`_
-is supported.
+Besides ``gr1c`` and ``GLPK`` mentioned above, the following are optional Python
+packages, listed with a summary of dependent features:
 
-Once all of the above preparations are completed, you can install
-TuLiP.  As with most `Distutils
-<http://docs.python.org/install/index.html>`_-based packages,
-installation proceeds with::
+* `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
+* `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz dot <http://www.graphviz.org/>`_ export routines
+
+Once all of the above preparations are completed, you can install TuLiP.  As
+with most `Distutils <http://docs.python.org/install/index.html>`_-based
+packages, installation proceeds with::
 
   $ python setup.py install
 
@@ -47,32 +51,17 @@ Here are some optional advanced features that require installing additional
 dependencies. None of them is required to run the examples that come with
 the toolbox.
 
-External solvers
-````````````````
-
-If you wish to use functions depending on `SPIN
-<http://spinroot.com/spin/>`_ or `NuSMV <http://nusmv.fbk.eu/>`_, then you
-must create a directory called ``solvers`` within the tulip package and
-place there executables for (or links to) SPIN and NuSMV.  For instance, if
-you have TuLiP installed under ``/usr/local/lib/python2.7/site-packages``,
-the SPIN executable at ``/usr/bin/spin``, and the NuSMV executable at
-``/usr/bin/NuSMV``, then you would do ::
-
-  $ sudo mkdir /usr/local/lib/python2.7/site-packages/tulip/solvers
-  $ sudo ln -s /usr/bin/spin /usr/local/lib/python2.7/site-packages/tulip/solvers
-  $ sudo ln -s /usr/bin/NuSMV /usr/local/lib/python2.7/site-packages/tulip/solvers
-
 .. _epd-sec-label:
 
 New to Python?
 ~~~~~~~~~~~~~~
 
-If you don't already use Python for scientific computing, consider using 
+If you don't already use Python for scientific computing, consider using
 `Enthought Python Distribution (EPD) <http://enthought.com>`_ (now called
-Enthought Canopy). This will make the installation process a lot easier. 
-The EPD Free (now called Canopy Express) distribution comes with Python 
-and includes NumPy, SciPy, matplotlib. EPD Free together with cvxopt and 
-pyparsing is sufficient to run TuLiP. 
+`Enthought Canopy <https://www.enthought.com/products/canopy/>`_). This may make
+the installation process easier.  The EPD Free (now called Canopy Express)
+distribution comes with Python and includes NumPy, SciPy, matplotlib. EPD Free
+together with cvxopt and pyparsing is sufficient to run TuLiP.
 
 EPD seems to work fine on most platforms but if you cannot get it to work,  
 alternative packages for Mac OS X and Microsoft Windows are mentioned below. 
@@ -109,7 +98,10 @@ Ubuntu (or Debian) GNU/Linux
 
 To install the python package dependencies, try::
 
-  $ sudo apt-get install python-numpy python-scipy python-matplotlib python-cvxopt
+  $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-pyparsing
+
+Optionally packages can be obtained by appending ``python-matplotlib`` etc. to
+the above command.
 
 Mac OS X
 ````````
@@ -134,16 +126,15 @@ To check whether the packages has been installed, open a new terminal and try::
 
 If an error message occurs, the package might not be visible on the current path or may not be installed at all. When you cannot find a suitable package of NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying `Unofficial Windows Binaries for Python Extension Packages <http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ by Christoph Gohlke. 
 
-The package of Gr1c for Windows still cannot be found. But without this package, you can also run most TuLiP functions.
+The package of gr1c for Windows still cannot be found. But without this package, you can also run most TuLiP functions.
 
 Installing other Python dependencies
 ````````````````````````````````````
 
-The command ``pip install ...`` or ``easy_install ...`` will usually
-suffice. To get `python-graph
-<http://code.google.com/p/python-graph/>`_, try::
+The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
+get `pyparsing <http://pyparsing.wikispaces.com/>`_, try::
 
-  $ easy_install python-graph-core
+  $ easy_install pyparsing
 
 .. _venv-pydoc-sec-label:
 
@@ -151,23 +142,20 @@ virtualenv and pydoc
 ````````````````````
 
 If you have installed TuLiP into a `virtualenv
-<http://www.virtualenv.org/>`_-built environment, then the
-documentation may not be visible through `pydoc
-<http://docs.python.org/library/pydoc.html>`_ .  There are more
-sophisticated ways to fix this, but an easy solution is to augment the
-path used by pydoc with an alias.  E.g., suppose your username is
-"frodo", you are running Python v2.6, and your virtual environment is
-called "PY_scratch" under your home directory.  Then the appropriate
-alias is similar to::
+<http://www.virtualenv.org/>`_-built environment, then the documentation may not
+be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  There
+are more sophisticated ways to fix this, but an easy solution is to augment the
+path used by pydoc with an alias.  E.g., suppose your username is "frodo", you
+are running Python v2.6, and your virtual environment is called "PY_scratch"
+under your home directory.  Then the appropriate alias is similar to::
 
   $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
 
-To set this alias for every new terminal session, add the line to your
-shell startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc``
-for zsh.  To test it, try looking at the Automaton module by
-entering::
+To set this alias for every new terminal session, add the line to your shell
+startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc`` for zsh.  To test
+it, try looking at the polytope subpackage by entering::
 
-  $ pydoc tulip.automaton
+  $ pydoc tulip.polytope
 
 .. rubric:: Footnotes
 
