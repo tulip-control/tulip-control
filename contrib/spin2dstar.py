@@ -76,7 +76,7 @@ class AST(object):
         return "("+str(self.left)+str(self.sym)+str(self.right)+")"
 
     def infix_to_tree(self, toks):
-        print toks
+        print(toks)
 
     def to_dstar(self, pretty=False):
         try:
@@ -155,6 +155,6 @@ def spin_to_dstar(inform):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "Usage: "+str(sys.argv[0])+" FORMULA"
+        print("Usage: "+str(sys.argv[0])+" FORMULA")
         exit(1)
-    print spin_to_dstar(sys.argv[1])
+    print(spin_to_dstar(sys.argv[1]) )

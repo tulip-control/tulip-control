@@ -107,11 +107,15 @@ class Polytope:
     - `array`: python array in the case of a union of convex polytopes
     - `chebXc`: coordinates of chebyshev center (if calculated)
     - `chebR`: chebyshev radius (if calculated)
-    - `bbox`: bounding box (if caluclated)
+    - `bbox`: bounding box (if calculated)
     - `minrep`: if polytope is in minimal representation (after
                 running reduce)
     - `normalize`: if True (default), normalize given A and b arrays;
                    else, use A and b without modification.
+    
+    see also
+    --------
+    Region
     """
     def __init__(self,
         A = np.array([]), b = np.array([]), minrep = False,
@@ -140,7 +144,7 @@ class Polytope:
         self.volume = volume
         self.vertices = vertices
 
-    def __str__(self):
+    def __repr__(self):
         """Return pretty-formatted H-representation of polytope(s).
         """
         try:
@@ -183,7 +187,7 @@ class Polytope:
             
         except:
             return str(self.A) + str(self.b)
-        
+    
     def __len__(self):
         return 0
 
@@ -247,6 +251,10 @@ class Region:
     - `volume`: if calculated, volume of region
     - `chebXc`: coordinates of maximum chebyshev center (if calculated)
     - `chebR`: maximum chebyshev radius (if calculated)
+    
+    see also
+    --------
+    Polytope
     """
     def __init__(self, list_poly=[], list_prop=[]):
     
@@ -275,7 +283,7 @@ class Region:
             self.chebR = None
 
         
-    def __str__(self):
+    def __repr__(self):
         output = ""
         for i in range(len(self.list_poly)):
             output += "Polytope number " +str(i+1) +":\n"

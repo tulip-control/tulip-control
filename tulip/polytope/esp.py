@@ -123,7 +123,7 @@ def esp(CC,DD,bb,centered=False,abs_tol=1e-10,verbose=0):
     k = D.shape[1]
     
     if verbose > 0:
-        print "Projecting from dim " + str(d+k) + " to " + str(d)
+        print("Projecting from dim " + str(d+k) + " to " + str(d) )
     
     if k == 0:
         # Not projecting
@@ -173,7 +173,7 @@ def esp(CC,DD,bb,centered=False,abs_tol=1e-10,verbose=0):
         E_min = nonzerorows[E_min]
         
         if verbose > 0:
-           print "Returning projection from dim " + str(d+k) + " to dim 1 \n"
+           print("Returning projection from dim " + str(d+k) + " to dim 1 \n")
         return G,g,[E_max,E_min]
     
     E = []
@@ -190,22 +190,24 @@ def esp(CC,DD,bb,centered=False,abs_tol=1e-10,verbose=0):
     g = bf
     
     if verbose > 0:
-        print "\nStarting eq set " + str(E_0) + "\nStarting ridges "
+        print("\nStarting eq set " + str(E_0) + "\nStarting ridges ")
         for rr in L:
-            print str(rr.E_r)
+            print(str(rr.E_r) )
 
     E.append(E_0)  
     
     while len(L) > 0:
         rid_fac1 = L[0]
         if verbose > 0:
-            print "\nLooking for neighbors to " + str(rid_fac1.E_0) + " and " + str(rid_fac1.E_r) + " .."
+            print("\nLooking for neighbors to " + str(rid_fac1.E_0) +
+                " and " + str(rid_fac1.E_r) + " ..")
         E_adj,a_adj,b_adj = adjacent(C,D,b,rid_fac1,abs_tol=abs_tol)
         if verbose > 0:
-            print "found neighbor " + str(E_adj ) + ". \n\nLooking for ridges of neighbor.."
+            print("found neighbor " + str(E_adj ) +
+                ". \n\nLooking for ridges of neighbor..")
         ridge_list = ridge(C,D,b,E_adj,a_adj,b_adj,abs_tol=abs_tol,verbose=verbose)
         if verbose > 0:
-            print "found " + str(len(ridge_list)) + " ridges\n"
+            print("found " + str(len(ridge_list)) + " ridges\n")
         
         found_org = False
         for i in range(len(ridge_list)):
@@ -226,20 +228,22 @@ def esp(CC,DD,bb,centered=False,abs_tol=1e-10,verbose=0):
                     break
             if found:
                 if verbose > 0:
-                    print "Ridge " + str(E_r) + " already visited, removing from L.."
+                    print("Ridge " + str(E_r) +
+                        " already visited, removing from L..")
                 if rid_fac2 == rid_fac1:
                     found_org = True
                 L.remove(rid_fac2)
             else:
                 if verbose > 0:
-                    print "Adding ridge-facet " + str(E_adj) + " " + str(E_r) + ""
+                    print("Adding ridge-facet " + str(E_adj) +
+                        " " + str(E_r) + "")
                 L.append( Ridge_Facet(E_r,ar,br,E_adj,a_adj,b_adj))      
                 
         if not found_org:
-            print "Expected ridge " + str(rid_fac1.E_r)
-            print "but got ridges "
+            print("Expected ridge " + str(rid_fac1.E_r) )
+            print("but got ridges ")
             for rid in ridge_list:
-                print rid.E_r
+                print(rid.E_r)
             raise Exception("esp: ridge did not return neighboring ridge as expected")
             
         G = np.vstack([G, a_adj])
@@ -341,7 +345,7 @@ def ridge(C,D,b,E,af,bf,abs_tol=1e-7,verbose=0):
     t = b_Ec - np.dot(D_Ec , np.dot(linalg.pinv(D_E) ,  b_E) )
     if rank( np.hstack([C_E, D_E]) ) < k+1:
         if verbose > 1:
-            print "Doing recursive ESP call"
+            print("Doing recursive ESP call")
         u,s,v = linalg.svd(np.array([af]), full_matrices=1)
         sigma = s[0]
         v = v.T * u[0,0]    # Correct sign
@@ -381,7 +385,7 @@ def ridge(C,D,b,E,af,bf,abs_tol=1e-7,verbose=0):
     
     else:
         if verbose > 0:
-            print "Doing direct calculation of ridges"             
+            print("Doing direct calculation of ridges")
         X = np.arange(S.shape[0])
         while len(X) > 0:
             i = X[0]
@@ -475,13 +479,13 @@ def adjacent(C,D,b,rid_fac,abs_tol=1e-7):
     sol = solvers.lp(matrix(c), matrix(G) , matrix(h), matrix(A).T, matrix(bf*(1-0.01)), lp_solver)
     
     if sol['status'] != "optimal":
-        print G
-        print h
-        print af
-        print bf
-        print ar
-        print br
-        print np.dot(af,ar)
+        print(G)
+        print(h)
+        print(af)
+        print(bf)
+        print(ar)
+        print(br)
+        print(np.dot(af,ar) )
         from scipy import io as sio
         data = {}
         data["C"] = C
@@ -696,7 +700,7 @@ def unique_equalityset2(C,D,b,opt_sol,abs_tol=1e-7):
     x = opt_sol2[range(0,n)]
     s = opt_sol2[range(n,len(opt_sol2))]
     E = np.nonzero(s > abs_tol)[0]
-    print E
+    print(E)
     E = np.sort(E[np.nonzero(E < C.shape[0])])
     
     # Check that they define the same projection

@@ -31,7 +31,7 @@ def gen_uncertain_grid_T(num_rows, num_cols, name='s'):
             i = r*num_cols + c
             row.append('s' + str(i))
         names.append(row)
-    print names
+    print(names)
 
     # Attempt to grab the spec'd adj. name, if not valid coord's,
     # -default to returning argument name.
@@ -251,7 +251,7 @@ for s_i in Sr:
                 assert init_distance - final_distance == 1
                 mu_policy[s_i] = a
 #
-print "\npolicy one:"
+print("\npolicy one:")
 pprint(mu_policy)
 
 # Prelim.'s for (2)
@@ -279,7 +279,7 @@ def next_action_from(round_robin_dict, state):
     return round_robin_dict[state].next()
 #
 round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=('s1','q1'))
-print "\npolicy two:"
+print("\npolicy two:")
 pprint(round_robin_dict)
 
 # Run Simulation.
@@ -288,11 +288,11 @@ init_sq = deepcopy(prod.initial_states).pop()
 round_robin_dict = None
 generated_round_robin_dict = False
 for i in xrange(NUM_STEPS):
-    print "\nSimulation step: {}".format(i)
-    print "Init sq: {}".format(init_sq)
+    print("\nSimulation step: {}".format(i) )
+    print("Init sq: {}".format(init_sq) )
     # Choose which policy to use.
     if init_sq not in B:
-        print "Operating under policy 1, with action:",
+        print("Operating under policy 1, with action:")
         action = mu_policy[init_sq]
     else:
         # Only generate the round_robin_dict once, and using approp.
@@ -300,14 +300,14 @@ for i in xrange(NUM_STEPS):
         if not generated_round_robin_dict:
             round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=init_sq)
             generated_round_robin_dict = True
-        print "Operating under policy 2, with action: ",
+        print("Operating under policy 2, with action: ")
         action = next_action_from(round_robin_dict, init_sq)
-    print action
+    print(action)
     # Random'ly determine final_s (in the original MDP).
     # (This block would be replaced by 
     # -the random motion modeled by the MDP.)
     possible_final_s = [tup[0][0] for tup in prod.T[init_sq][action]] #SUGAR
-    print "potential next s: {}".format(possible_final_s)
+    print("potential next s: {}".format(possible_final_s) )
     random_draw = random.random()
     cumm_prob = 0.0
     # Fix the probabilies within their ranges.
@@ -325,7 +325,7 @@ for i in xrange(NUM_STEPS):
         if random_draw < cumm_prob:
             final_s = sq_tup[0]
             break
-    print "Next s: {}".format(final_s)
+    print("Next s: {}".format(final_s) )
     # Backtrack out the final_sq from the product MDP.
     # (This block would be replaced by e.g. IR LED query of state.)
     for sq_p_tup in prod.T[init_sq][action]:

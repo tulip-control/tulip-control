@@ -96,7 +96,7 @@ sys_sws.states.labels(
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
-print sys_sws
+print(sys_sws)
 
 #
 # Environment variables and specification

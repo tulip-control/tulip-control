@@ -379,15 +379,15 @@ if __name__ == "__main__":
     try:
         ast = parse(sys.argv[1])
     except ParseException as e:
-        print "Parse error: " + str(e)
+        print("Parse error: " + str(e) )
         sys.exit(1)
-    print "Parsed expression:", ast
-    print "Length:", len(ast)
-    print "Variables:", extract_vars(ast)
-    print "Safety:", issafety(ast)
+    print("Parsed expression: " + str(ast) )
+    print("Length: " +str( len(ast) ) )
+    print("Variables: " + str(extract_vars(ast) ) )
+    print("Safety: " +str(issafety(ast) ) )
     try:
-        print "JTLV syntax:", ast.to_jtlv()
-        print "SMV syntax:", ast.to_smv()
-        print "Promela syntax:", ast.to_promela()
+        print("JTLV syntax: " +str(ast.to_jtlv() ) )
+        print("SMV syntax: " +str(ast.to_smv() ) )
+        print("Promela syntax: " +str(ast.to_promela() ) )
     except LTLException as e:
-        print e.message
+        print(e.message)

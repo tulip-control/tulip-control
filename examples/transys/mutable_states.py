@@ -49,7 +49,7 @@ def test_mutable_fts():
     ts.states.initial.add(s0)
     
     ts.transitions.add(s0, s1)
-    print ts
+    print(ts)
     ts.plot()
     
     ts.states.remove(s0)

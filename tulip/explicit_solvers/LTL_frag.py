@@ -20,23 +20,23 @@ ti = time.time()
 
 
 TS_orig = TS.copy()
-print spec
+print(spec)
 
-print "Original TS ",len(TS)#, TS
+print("Original TS " +str(len(TS) ) ) #, TS
 
 ## Remove all actions that don't satisfy [](p --> X q) specs.
 t0 = time.time()
 TS = gr.remove_unsafe_actions(TS,spec['G_act'],prop2states)
 t1 = time.time()
-print "Safe actions",len(TS)#, TS
-print t1-t0,"(sec)"
+print("Safe actions " +str(len(TS) ) )#, TS
+print(str(t1-t0) +"(sec)")
 
 ## Determine all nodes that are blocking, i.e., don't have any valid actions left
 t0 = time.time()
 blockingNodes = gr.blocking_nodes(TS)
 t1 = time.time()
-print "blockingNodes:",len(blockingNodes)
-print t1-t0,"(sec)"
+print("blockingNodes: " +str(len(blockingNodes) ) )
+print(str(t1-t0) +" (sec)")
 
 
 ## Remove all states that don't satisfy safety [] specs (or must visit a state that doesn't)
@@ -44,18 +44,19 @@ if spec['G'] != '':
     t0 = time.time()
     unsafeNodes = gr.must_reach_target(TS, set(TS.states.values()) - prop2states[spec['G']])
     t1 = time.time()
-    print "must_reachTarget",t1-t0,"(sec)"
-    print "unsafeNodes:",len(unsafeNodes)
+    print("must_reachTarget " +str(t1-t0) +" (sec)")
+    print("unsafeNodes: " +str(len(unsafeNodes) ) )
     unsafeNodes.update(blockingNodes)   # add the blocking nodes to those that need to be removed
     t0 = time.time()
     TS = gr.subgraph(TS,unsafeNodes)
     t1 = time.time()
-    print "subgraph:",t1-t0,"(sec)"
-    print "Safe state",len(TS)#, TS
+    print("subgraph: " +str(t1-t0) +" (sec)")
+    print("Safe state " +str(len(TS) ) )#, TS
     
 ## At this point, I have incorporated the [] and [](a -- b) safety properties.  Check to see if subgraph is non-empty.
 if len(TS) == 0:
-    print "The specification is invalid.  The [] and/or [](p --> X q) specs are too constraining."
+    print("The specification is invalid." +
+        "The [] and/or [](p --> X q) specs are too constraining.")
     quit()
 
 
@@ -63,7 +64,7 @@ if len(TS) == 0:
 TS_per = TS.copy()
 if spec['FG'] != '':
     TS_per = gr.subgraph(TS_per, set(TS.states.values()) - prop2states[spec['FG']])
-    print "Persistence",len(TS_per)#, TS_per
+    print("Persistence " +str(len(TS_per) ) )#, TS_per
 
 
 if spec['GF'] != '':
@@ -81,7 +82,7 @@ if spec['GF'] != '':
     
     # Compute generalized Buchi winning sets
     while True:
-        print "working..."
+        print("working...")
         for i in taskInd[:-1]:
             t0 = time.time()
             if costs is None:
@@ -89,11 +90,13 @@ if spec['GF'] != '':
             else:
                 reachF[i] = gr.opt_reach_value(TS_per, F[i], costs)
             t1 = time.time()
-            print "reachF[",i,"] computed in",t1-t0,"sec."
+            print("reachF[" +str(i) +"] computed in " +
+                str(t1-t0) +" sec.")
             F[i+1] = F[i+1] & set(reachF[i].keys())
             assert isinstance(F[i+1],set)
             if len(F[i+1]) == 0:
-                print "The specification is invalid. The <>[] and/or []<> specs are too constraining."
+                print("The specification is invalid." +
+                    "The <>[] and/or []<> specs are too constraining.")
                 quit()
 
         # Compute reachValue for last task
@@ -105,7 +108,7 @@ if spec['GF'] != '':
         else:
             reachF[last] = gr.opt_reach_value(TS_per, F[i], costs)
         t1 = time.time()
-        print "reachF[",last,"] computed in",t1-t0,"sec."
+        print("reachF[" +str(last) +"] computed in " +str(t1-t0) +"sec.")
         
         F_new = F[first] & set(reachF[last].keys())
         
@@ -120,22 +123,25 @@ if spec['GF'] != '':
         F_dict[i].append(F[i])
         
     G_task, node2states, node2task, task2node = gr.task_graph(TS_per, F_dict, costs)
-    print task2node
+    print(task2node)
     
 #    # Determine an optimal ordering and subsets of task sets F*[j]
 #     1. Average cost per task cycle.  Here, I output the task graph and attempt to solve 
 #     it using a TSP solver.  Branch and bound techniques work nicely here.
 #    tcVal, tcOrder, tcNodeOrder = opt.task_cycle(G_task,taskInd,task2node,weight='weight')
-#    print "Task cycle optimal value:", tcVal,", order:",tcOrder,", and node order:",tcNodeOrder
+#    print("Task cycle optimal value: " +str(tcVal) +
+#        ", order: " +str(tcOrder) +", and node order: " +str(tcNodeOrder) )
 
 #    # 2. Bottleneck cost between tasks
 #    botVal,botStates = opt.bottleneck(G_task,taskInd,task2node)
-#    print "Bottleneck optimal value:", botVal,"and states:",botStates
+#    print("Bottleneck optimal value: " +str(botVal) +
+#        "and states:" +str(botStates) )
 
 else:
-    print "TODO"
+    print("TODO")
 
 
 tf = time.time()
-print "Total time (sec) =",tf-ti
-print "NEED TO UPDATE THE PARENTS DIRECTORY WHEN DELETING ACTIONS WHILE CREATING SUBGRAPHS AND SUCH."
+print("Total time (sec) = " +str(tf-ti) )
+print("NEED TO UPDATE THE PARENTS DIRECTORY WHEN DELETING ACTIONS " +
+    "WHILE CREATING SUBGRAPHS AND SUCH.")

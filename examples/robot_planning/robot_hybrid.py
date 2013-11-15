@@ -84,7 +84,7 @@ sys_hyb.atomic_propositions |= ['home','lot']
 sys_hyb.states.labels(states, [{'home'}, set(), set(), set(), set(), {'lot'}] )
 
 # This is what is visible to the outside world (and will go into synthesis method)
-print sys_hyb
+print(sys_hyb)
 
 #
 # Environment variables and specification

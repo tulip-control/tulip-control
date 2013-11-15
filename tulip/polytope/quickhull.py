@@ -164,7 +164,8 @@ def quickhull(POINTS, abs_tol=1e-7):
     rank = np.sum(s > 1e-15)
     
     if rank < dim:
-        print "Warning: convex hull is not fully dimensional, returning empty polytope"
+        print("Warning: " +
+            "convex hull is not fully dimensional, returning empty polytope")
         return np.array([]),np.array([]),None
     
     # Choose starting simplex by choosing maximum points in random directions

@@ -525,7 +525,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #     IJ = IJ.todense()
 #     IJ = np.array(IJ)
 #     if verbose > 1:
-#         print "\n Starting IJ: \n" + str(IJ)
+#         print("\n Starting IJ: \n" + str(IJ) )
 # 
 #     # Initialize output
 #     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
@@ -546,12 +546,12 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #                 
 #         IJ[i,j] = 0
 #         num_new_reg[i] += 1
-#         print num_new_reg
+#         print(num_new_reg)
 #         si = sol[i]
 #         sj = sol[j]
 #         
 #         if verbose > 1:        
-#             print "\n Working with states " + str(i) + " and " + str(j)
+#             print("\n Working with states " + str(i) + " and " + str(j) )
 #         
 #         if conservative:
 #             S0 = solve_feasible(si,sj,ssys,N, closed_loop=closed_loop, 
@@ -563,7 +563,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #                     use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
 #         
 #         if verbose > 1:
-#             print "Computed reachable set S0 with volume " + str(pc.volume(S0))
+#             print("Computed reachable set S0 with volume " + str(pc.volume(S0)) )
 #         
 #         isect = pc.intersect(si, S0)
 #         risect, xi = pc.cheby_ball(isect)
@@ -579,7 +579,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #         
 #         if rdiff < abs_tol:
 #             if verbose > 1:
-#                 print "Transition found"
+#                 print("Transition found")
 #             transitions[i,j] = 1
 #         
 #         elif (vol1 > min_cell_volume) & (risect > rd) & \
@@ -623,12 +623,12 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #             # Assign original proposition cell to new state and update counts
 #             if not conservative:
 #                 orig = np.hstack([orig, orig[i]])
-#             print num_new_reg
+#             print(num_new_reg)
 #             num_new_reg = np.hstack([num_new_reg, 0])
 #             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
 #             
 #             if verbose > 1:
-#                 print "\n Adding state" + str(size-1) + "\n"
+#                 print("\n Adding state " + str(size-1) + "\n")
 #             
 #             # Just add adjacent cells for checking, unless transition already found            
 #             IJ = np.hstack([IJ, np.zeros([size - 1, 1], dtype=int) ])
@@ -639,13 +639,13 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #             IJ[:,size-1] = verti2.astype(int)      
 #             
 #             #if verbose > 1:
-#                 #print "\n Updated adj: \n" + str(adj)
-#                 #print "\n Updated trans: \n" + str(transitions)
-#                 #print "\n Updated IJ: \n" + str(IJ)
+#                 #print("\n Updated adj: \n" + str(adj) )
+#                 #print("\n Updated trans: \n" + str(transitions) )
+#                 #print("\n Updated IJ: \n" + str(IJ) )
 #                     
 #         else:
 #             if verbose > 1:
-#                 print "No transition found, intersect vol: " + str(vol1)
+#                 print("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #                   
 #     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop,

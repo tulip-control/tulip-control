@@ -161,7 +161,7 @@ def productGraph(T_rob,loc2state_rob, T_obs,loc2state_obs):
                 trans2product[trans_loc].add(s)
                 
     t1 = time.time()
-    print "prod states",t1-t0,"sec"            
+    print("prod states " +str(t1-t0) +" sec")
                 
     # Create new actions between product states
     t0 = time.time()
@@ -185,7 +185,7 @@ def productGraph(T_rob,loc2state_rob, T_obs,loc2state_obs):
             prod_act[act_num] = nextStates
         s.newActs(prod_act)
     t1 = time.time()
-    print "prod act",t1-t0,"sec"
+    print("prod act " +str(t1-t0) +" sec")
         
     # Compute the parents of each node
     t0 = time.time()
@@ -199,7 +199,7 @@ def productGraph(T_rob,loc2state_rob, T_obs,loc2state_obs):
                 parents[t].add(s)
 
     t1 = time.time()
-    print "prod parents",t1-t0,"sec"
+    print("prod parents " +str(t1-t0) +" sec")
     
     # Update the parents of each node
     for s in S:
@@ -300,9 +300,8 @@ def opt_reach_value(G,targetSet,costs):
                     
 #        count += 1
 #        if np.mod(count,1000) == 0:
-#            print count, len(G.states)
-#            print "iteration:", time.time() - t_iter
-#            print ""
+#            print(str(count) +str(len(G.states) ) )
+#            print("iteration: " +str(time.time() - t_iter) +"\n")
 
     for s in dist.iterkeys():
         assert np.isfinite(dist[s])
@@ -321,9 +320,9 @@ def task_graph(G,F_dict,costs):
     for task in F_dict:
         task2node[task] = []
         for F_feas in F_dict[task]: # F_feas is a feasible subset of states that satisfies each task
-#            print "len(F_feas):",len(F_feas)
+#            print("len(F_feas): " +str(len(F_feas) ) )
             for r in xrange(len(F_feas),len(F_feas)+1):#xrange(len(F_feas)-1,len(F_feas)+1):
-#                print "  r:",r
+#                print("  r: " +str(r) )
                 for s_set in itertools.combinations(F_feas,r):
                     G_task.add_node(nodeID)
                     node2states[nodeID] = set(s_set)
@@ -333,7 +332,8 @@ def task_graph(G,F_dict,costs):
 
     # For each state in G_task, compute edges based on reachability
     for u in G_task.nodes_iter():
-        print "Computing transitions into state", u,"of",len(G_task.nodes())
+        print("Computing transitions into state " +str(u) +
+            "of" +str(len(G_task.nodes()) ) )
         u_states = node2states[u]
         if costs is None:
             dist = reach_value(G,u_states) 
@@ -358,9 +358,8 @@ def task_graph(G,F_dict,costs):
                 if np.isfinite(maxWeight):
                     G_task.add_edge(v, u, weight=maxWeight, minWeight=minWeight)
         
-#    print "Task graph:",G_task.nodes()
-#    print G_task.edges(None,True)
-#    print ""
+#    print("Task graph: " +str(G_task.nodes() ) )
+#    print(str(G_task.edges(None,True) ) +'\n')
     return G_task, node2states, node2task, task2node
 
 

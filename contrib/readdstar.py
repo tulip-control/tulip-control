@@ -199,7 +199,7 @@ def readdstar(getline):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or "-h" in sys.argv:
-        print "Usage: "+sys.argv[0]+" FILE"
+        print("Usage: "+sys.argv[0]+" FILE")
         exit(1)
 
     if sys.argv[1] == "-":  # Read from stdin
@@ -208,4 +208,4 @@ if __name__ == "__main__":
         f = open(sys.argv[1], "r")
         getline = f.readline
 
-    print readdstar(getline)
+    print(readdstar(getline) )

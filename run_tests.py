@@ -11,7 +11,7 @@ import nose
 
 if __name__ == "__main__":
     if ("-h" in sys.argv) or ("--help" in sys.argv):
-        print """Usage: run_tests.py [--cover] [--fast] [OPTIONS...] [[-]TESTFILES...]
+        print("""Usage: run_tests.py [--cover] [--fast] [OPTIONS...] [[-]TESTFILES...]
 
     TESTFILES... is space-separated list of test file names, where the
     suffix "_test.py" is added to each given name.  E.g.,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     tests that are marked as slow, use the flag "--fast".
     If TESTFILES... each have a prefix of "-", then all tests *except*
     those listed will be run.  OPTIONS... are passed on to nose.
-    """
+    """)
         exit(1)
 
     if len(sys.argv) == 1:
@@ -62,8 +62,8 @@ if __name__ == "__main__":
             else:
                 argv.append(basename)
     if len(testfiles) > 0 and len(excludefiles) > 0:
-        print "You can specify files to exclude or include, but not both."
-        print "Try calling it with \"-h\" flag."
+        print("You can specify files to exclude or include, but not both.")
+        print("Try calling it with \"-h\" flag.")
         exit(1)
     if len(excludefiles) > 0:
         argv.append("--exclude="+"|".join(excludefiles))

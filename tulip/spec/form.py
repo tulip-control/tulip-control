@@ -529,7 +529,7 @@ class GRSpec(LTL):
                     if propSymbol[-1] != "'":  # To handle gr1c primed variables
                         propSymbol += r"\b"
                     if (verbose > 2):
-                        print '\t' + propSymbol + ' -> ' + prop
+                        print('\t' + propSymbol + ' -> ' + prop)
                     for i in xrange(0, len(self.env_init)):
                         if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
                             self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')',

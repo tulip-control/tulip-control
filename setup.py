@@ -87,48 +87,48 @@ except ValueError:
     pass
 
 if check_deps:
-    print "Checking for dependencies..."
+    print('Checking for dependencies...')
 
     # Python package dependencies
     try:
         import numpy
     except:
-        print 'ERROR: NumPy not found.'
+        print('ERROR: NumPy not found.')
         raise
     try:
         import scipy
     except:
-        print 'ERROR: SciPy not found.'
+        print('ERROR: SciPy not found.')
         raise
     try:
         import pyparsing
     except:
-        print 'ERROR: pyparsing not found.'
+        print('ERROR: pyparsing not found.')
         raise
     try:
         import networkx
     except:
-        print 'ERROR: NetworkX not found.'
+        print('ERROR: NetworkX not found.')
         raise
     try:
         import cvxopt
     except:
-        print 'ERROR: CVXOPT not found.'
+        print('ERROR: CVXOPT not found.')
         raise
 
     # Other dependencies
     for (dep_key, dep_val) in other_depends.items():
         if not dep_val[0]():
-            print dep_val[1]
+            print(dep_val[1] )
             raise Exception('Failed dependency: '+dep_key)
 
     # Optional stuff
     for (opt_key, opt_val) in optionals.items():
-        print 'Probing for optional '+opt_key+'...'
+        print('Probing for optional '+opt_key+'...')
         if opt_val[0]():
-            print "\t"+opt_val[1]
+            print("\t"+opt_val[1] )
         else:
-            print "\t"+opt_val[2]
+            print("\t"+opt_val[2] )
 
 
 if perform_setup:

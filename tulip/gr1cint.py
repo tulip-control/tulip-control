@@ -295,7 +295,7 @@ def check_syntax(spec_str, verbose=0):
         return True
     else:
         if verbose > 0:
-            print p.stdout.read()
+            print(p.stdout.read() )
         return False
 
 
@@ -315,7 +315,7 @@ def check_realizable(spec, verbose=0):
         return True
     else:
         if verbose > 0:
-            print p.stdout.read()
+            print(p.stdout.read() )
         return False
 
 
@@ -334,7 +334,7 @@ def synthesize(spec, verbose=0):
         return aut
     else:
         if verbose > 0:
-            print stdoutdata
+            print(stdoutdata)
         return None
 
 

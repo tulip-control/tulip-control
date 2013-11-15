@@ -70,7 +70,7 @@ sys_swe.atomic_propositions.add_from(['home','lot'])
 sys_swe.states.labels(states, [{'home'}, set(), set(), set(), set(), {'lot'}] )
 
 # This is what is visible to the outside world (and will go into synthesis method)
-print sys_swe
+print(sys_swe)
 
 #
 # Environment variables and specification

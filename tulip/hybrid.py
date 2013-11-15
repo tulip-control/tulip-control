@@ -38,8 +38,11 @@ Classes:
     
 NO, 2 Jul 2013.
 """
-import numpy as np
 import itertools
+from warnings import warn
+
+import numpy as np
+
 import polytope as pc
 
 class LtiSysDyn:
@@ -114,7 +117,7 @@ class LtiSysDyn:
         self.Uset = Uset
         self.domain = domain
 
-    def __str__(self):
+    def __repr__(self):
         output = "A =\n"+str(self.A)
         output += "\nB =\n"+str(self.B)
         output += "\nE =\n"+str(self.E)

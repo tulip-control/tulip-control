@@ -160,7 +160,7 @@ def cst_min_cost_bi(ssys, H0, H1, xf, N, R, Q):
     if soln[3] == 0:      #soln = (out,fx,its,imode,smode)
         return soln[1]
     else:
-        print "Solver returned non-optimal solution!"
+        print("Solver returned non-optimal solution!")
         return None
 
 
@@ -239,7 +239,7 @@ def lqr_min_cost(ssys, H0, xf, N, R, Q):
     if sol['status'] == 'optimal':
         min_cost = sol['primal objective'] + np.dot(xf.T, np.dot(P0,xf)) #Coordinate shift
     else:
-        print "QP solver returned non-optimal solution!"
+        print("QP solver returned non-optimal solution!")
         return None
     return min_cost
 

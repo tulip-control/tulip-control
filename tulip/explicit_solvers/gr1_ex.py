@@ -20,17 +20,17 @@ ti = time.time()
 tf_model = time.time()
 
 TS_orig = TS.copy()
-print spec
+print(spec)
 
-print "Original TS ",len(TS)#, TS
+print("Original TS " +str(len(TS) ) )#, TS
 
 
 ## Determine all nodes that are blocking, i.e., don't have any valid actions left
 t0 = time.time()
 blockingNodes = gr.blocking_nodes(TS)
 t1 = time.time()
-print "blockingNodes:",len(blockingNodes)
-print t1-t0,"(sec)"
+print("blockingNodes: " +str(len(blockingNodes) ) )
+print(str(t1-t0) +" (sec)")
 
 
 # GR1 fixpoint from papers

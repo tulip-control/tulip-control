@@ -226,16 +226,17 @@ def get_priority(priority_kind):
 def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
     """Subprocess calls to JTLV."""
     if (verbose > 0):
-        print 'Calling jtlv with the following arguments:'
-        print '  heap size: ' + heap_size
-        print '  jtlv path: ' + JTLV_PATH
-        print '  priority_kind: ' + str(priority_kind) + '\n'
+        print('Calling jtlv with the following arguments:')
+        print('  heap size: ' + heap_size)
+        print('  jtlv path: ' + JTLV_PATH)
+        print('  priority_kind: ' + str(priority_kind) + '\n')
 
     if (len(JTLV_EXE) > 0):
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         if (verbose > 1):
-            print "  java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, \
-                fAUT, str(priority_kind), str(init_option)
+            print('  java ' +str(heap_size) +' -jar ' +str(jtlv_grgame) +' ' +
+                str(fSMV) +' ' +str(fLTL) +' ' +str(fAUT) +' ' +
+                str(priority_kind) +' ' +str(init_option) )
         cmd = subprocess.call( \
             ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
                  str(priority_kind), str(init_option)])
@@ -243,11 +244,13 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
         if (verbose > 1):
-            print "  java", heap_size, "-cp", classpath, "GRMain", fSMV, \
-                fLTL, fAUT, str(priority_kind), str(init_option)
-        cmd = subprocess.call( \
-            ["java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL, \
-                 fAUT, str(priority_kind), str(init_option)])
+            print('  java ' +str(heap_size) +' -cp ' +str(classpath) +
+                ' GRMain ' +str(fSMV) +' ' +str(fLTL) +' ' +
+                str(fAUT) +' ' +str(priority_kind) +' ' +str(init_option) )
+        cmd = subprocess.call([
+            "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
+            fAUT, str(priority_kind), str(init_option)
+        ])
 #         cmd = subprocess.Popen( \
 #             ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
 #                  aut_file, str(priority_kind), str(init_option)], \
@@ -406,12 +409,12 @@ def load_file(aut_file, spec, verbose=0):
                     state[var] = val
                 if (len(varnames) > 0):
                     if not var in varnames:
-                        print 'Unknown variable ' + var
+                        print('Unknown variable ' + var)
 
 
             for var in varnames:
                 if not var in state.keys():
-                    print 'Variable ' + var + ' not assigned'
+                    print('Variable ' + var + ' not assigned')
 
         # parse transitions
         if (line.find('successors') >= 0):
@@ -482,7 +485,7 @@ def get_counterexamples(aut_file, verbose=0):
                 counter_ex[var] = int(val)
             counter_examples.append(counter_ex)
             if (verbose > 0):
-                print counter_ex
+                print(counter_ex)
     return counter_examples
 
 
@@ -566,13 +569,13 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
     try:
         GR1_expression.parseString(assumption)
     except ParseException:
-        print "Assumption is not in GR(1) format."
+        print("Assumption is not in GR(1) format.")
         return False
         
     try:
         GR1_expression.parseString(guarantee)
     except ParseException:
-        print "Guarantee is not in GR(1) format"
+        print("Guarantee is not in GR(1) format")
         return False
     return True
 
@@ -593,13 +596,13 @@ def check_parentheses(spec):
 
     if open_parens != 0:
         if open_parens > 0:
-            print "The spec is missing " + str(open_parens) + " close-" + \
-              "parentheses or has " + str(open_parens) + " too many " + \
-              "open-parentheses"
+            print("The spec is missing " + str(open_parens) + " close-" +
+              "parentheses or has " + str(open_parens) + " too many " +
+              "open-parentheses")
         elif open_parens < 0:
-            print "The spec is missing " + str(-open_parens) + " open-" + \
-              "parentheses or has " + str(open_parens) + " too many " + \
-              "close-parentheses"
+            print("The spec is missing " + str(-open_parens) + " open-" +
+              "parentheses or has " + str(open_parens) + " too many " +
+              "close-parentheses")
         return False
 
     return True
@@ -611,14 +614,14 @@ def check_vars(varNames):
     for item in varNames:
         # Check that the vars are strings
         if type(item) != str:
-            print "Prop " + str(item) + " is invalid"
+            print("Prop " + str(item) + " is invalid")
             return False
 
         # Check that the keys are not numbers
         try:
             int(item)
             float(item)
-            print "Prop " + str(item) + " is invalid"
+            print("Prop " + str(item) + " is invalid")
             return False
         except ValueError:
             continue

@@ -36,7 +36,7 @@ def gen_grid_T(num_rows, num_cols, name='s'):
             i = r*num_cols + c
             row.append('s' + str(i))
         names.append(row)
-    print names
+    print(names)
 
     # Attempt to grab the spec'd adj. name, if not valid coord's,
     # -default to returning argument name.
@@ -170,7 +170,7 @@ mu_policy = gen_best_actions_dict(prod, V_for_memoryless, states=nonAMEC_states)
 pprint(mu_policy)
 #
 # # Demonstration of memoryless policy.
-print "\npolicy one:"
+print("\npolicy one:")
 pprint(mu_policy)
 
 # Part Two: round-robin to visit all states in AMEC.
@@ -192,13 +192,13 @@ def next_action_from(round_robin_dict, state):
 #
 # # Demonstration of a state exhibiting the desired cyclic behavior.
 round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=('s1','q1'))
-print "\npolicy two:"
+print("\npolicy two:")
 pprint(round_robin_dict)
 print
 for i in range(10):
     for state in round_robin_dict.keys():
-        print "state: " + str(state)
-        print "\taction: " + str(next_action_from(round_robin_dict, state))
+        print("state: " + str(state) )
+        print("\taction: " + str(next_action_from(round_robin_dict, state)) )
         break
 
 # Run Simulation.
@@ -207,11 +207,11 @@ init_sq = deepcopy(prod.initial_states).pop()
 round_robin_dict = None
 generated_round_robin_dict = False
 for i in xrange(NUM_STEPS):
-    print "\nSimulation step: {}".format(i)
-    print "Init sq: {}".format(init_sq)
+    print("\nSimulation step: {}".format(i) )
+    print("Init sq: {}".format(init_sq) )
     # Choose which policy to use.
     if init_sq not in AMEC_states:
-        print "Operating under policy 1, with action:",
+        print("Operating under policy 1, with action:")
         #FORNOW
         action = deepcopy(mu_policy[init_sq]).pop()
     else:
@@ -220,14 +220,14 @@ for i in xrange(NUM_STEPS):
         if not generated_round_robin_dict:
             round_robin_dict = gen_round_robin_dict(AMECs, AMEC_state=init_sq)
             generated_round_robin_dict = True
-        print "Operating under policy 2, with action: ",
+        print("Operating under policy 2, with action: ")
         action = next_action_from(round_robin_dict, init_sq)
     print action
     # Random'ly determine final_s (in the original MDP).
     # (This block would be replaced by 
     # -the random motion modeled by the MDP.)
     possible_final_s = [tup[0][0] for tup in prod.T[init_sq][action]] #SUGAR
-    print "potential next s: {}".format(possible_final_s)
+    print("potential next s: {}".format(possible_final_s) )
     random_draw = random.random()
     cumm_prob = 0.0
     for sq_p_tup in prod.T[init_sq][action]:
@@ -236,7 +236,7 @@ for i in xrange(NUM_STEPS):
         if random_draw < cumm_prob:
             final_s = sq_tup[0]
             break
-    print "Next s: {}".format(final_s)
+    print("Next s: {}".format(final_s) )
     # Backtrack out the final_sq from the product MDP.
     # (This block would be replaced by e.g. IR LED query of state.)
     for sq_p_tup in prod.T[init_sq][action]:
