@@ -30,7 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-
 """ 
 Classes:
     - LtiSysDyn
@@ -44,24 +43,40 @@ import itertools
 import polytope as pc
 
 class LtiSysDyn:
-    """LtiSysDyn class for specifying the continuous dynamics:
+    """LtiSysDyn class for specifying the discrete-time continuous dynamics:
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
-        u[t] \in Uset - polytope object
+    
+    subject to the constraints:
+    
+        u[t] \in Uset = polytope
         d[t] \in Wset - polytope object
-        s[t] \in domain -polytope object
+        s[t] \in domain - polytope object
+    
+    where:
+        - u[t] the control input
+        - d[t] the disturbance input
+        - s[t] the system state
     
     A LtiSysDyn object contains the fields:
-        A, B, E, K, Uset, Wset and domain
+    
+        - A, B, E, K, (matrices)
+        - Uset, Wset and domain (polytope.Polytope)
+    
     as defined above.
     
     Note: For state-dependent bounds on the input,
-    [u[t];s[t]] \in Uset can be used.
+        [u[t]; s[t]] \in Uset
+    can be used.
     
     **Constructor**:
     
     **LtiSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `K` = [][, `Uset` = [][,
     `Wset` = [][, `domain`[]]]]]]]])
+    
+    see also
+    --------
+    PwaSysDyn, HybridSysDyn, polytope.Polytope
     """
     def __init__(self, A=[], B=[], E=[], K=[],
                  Uset=None,Wset=None,domain=None):
@@ -109,17 +124,21 @@ class LtiSysDyn:
         return output
 
 class PwaSysDyn:
-    """PwaSysDyn class for specifying a piecewise affine system.
+    """PwaSysDyn class for specifying a polytopic piecewise affine system.
     A PwaSysDyn object contains the fields:
     
-    - `list_subsys`: list of LtiSysDyn
+    - C{list_subsys}: list of LtiSysDyn
     
-    - `domain`: domain over which piecewise affine system is defined, type:
-        polytope
+    - C{domain}: domain over which piecewise affine system is defined,
+        type: polytope.Polytope
     
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
     domain.
+    
+    see also
+    --------
+    LtiSysDyn, HybridSysDyn, polytope.Polytope
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain == None:
@@ -166,30 +185,34 @@ class HybridSysDyn:
     
     A HybridSysDyn object contains the fields:
     
-    	- `disc_domain_size`: A 2-tuple of integers showing the number of discrete
+    	- C{disc_domain_size}: A 2-tuple of integers showing the number of discrete
     	  environment (uncontrolled) and system (controlled) variables respectively
     	  (i.e., switching modes) 
     
-    	- `env_labels`: A list of length disc_domain_size[0], optional field for
+    	- C{env_labels}: A list of length disc_domain_size[0], optional field for
     	  definining labels for discrete environment variables
     
-    	- `disc_sys_labels`: A list of length disc_domain_size[1], optional field
+    	- C{disc_sys_labels}: A list of length disc_domain_size[1], optional field
     	  for definining labels for discrete system variables
     
-    - `dynamics`: a dictionary mapping (env_label, sys_label) -> PwaSysDyn. If
+    - C{dynamics}: a dictionary mapping (env_label, sys_label) -> PwaSysDyn. If
     	  we are not using env_label and sys_label, then it makes indices (i,j) to
     	  PwaSysDyn.
     
-    	- `cts_ss`: continuous state space over which hybrid system is defined,
-    	  type: Region
+    	- C{cts_ss}: continuous state space over which hybrid system is defined,
+    	  type: polytope.Region
     
-    	- `time_semantics`: TBD. Current default semantics are discrete-time. State
+    	- C{time_semantics}: TBD. Current default semantics are discrete-time. State
     	  s[t] and discrete environment env[t] are observed and continuous input
     	  u[t] and discrete system variable m[t] are determined based on env[t] and
     	  s[t] (synchronously at time t).
        
     Note: We assume that system and environment switching modes are independent
     	of one another. (Use LTL statement to make it not so.)
+    
+    see also
+    --------
+    LtiSysDyn, PwaSysDyn, polytope.Region
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None, **args):
