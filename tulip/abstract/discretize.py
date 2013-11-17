@@ -101,7 +101,8 @@ def discretize(
     closed_loop=True, conservative=True,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7, verbose=0, plotting=None
+    abs_tol=1e-7, verbose=0, plotting=False,
+    save_img=False
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -133,6 +134,14 @@ def discretize(
         non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
     @param verbose: level of verbosity
+    
+    @param plotting: plot partitioning as it evolves
+    @type plotting: boolean,
+        default = False
+    @param save_img: save snapshots of partitioning to PDF files,
+        requires plotting=True
+    @type save_img: boolean,
+        default = False
     
     @rtype: AbstractSysDyn
     
@@ -192,7 +201,7 @@ def discretize(
     ss = ssys
     
     # init graphics
-    if plotting is not None:
+    if plotting:
         # here to avoid loading matplotlib unless requested
         try:
             from tulip.polytope.plot import plot_partition
@@ -204,6 +213,7 @@ def discretize(
         
         fig = plt.figure()
         ax = fig.add_subplot(111)
+        iter_count = 0
     
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -369,7 +379,7 @@ def discretize(
             transitions[j,i] = 0
         
         # no plotting ?
-        if plotting is None:
+        if not plotting:
             continue
         if plot_partition is None:
             continue
@@ -383,6 +393,9 @@ def discretize(
         ax.clear()
         plt.ion()
         plot_partition(tmp_part, transitions, ax=ax, color_seed=23)
+        if save_img:
+            fig.savefig('movie' +str(iter_count) +'.pdf')
+        iter_count += 1
         plt.pause(1)
 
     new_part = PropPreservingPartition(
