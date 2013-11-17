@@ -231,42 +231,36 @@ def discretize(
         
         if conservative:
             # Don't use trans_set
-            S0 = solve_feasible(
-                si, sj, ss, N,
-                closed_loop=closed_loop, 
-                max_num_poly=max_num_poly,
-                use_all_horizon=use_all_horizon
-            )
+            trans_set = None
         else:
             # Use original cell as trans_set
-            S0 = solve_feasible(
-                si, sj, ss, N,
-                closed_loop=closed_loop,
-                trans_set=orig_list[orig[i]],
-                max_num_poly=max_num_poly,
-                use_all_horizon=use_all_horizon
-            )
+            trans_set = orig_list[orig[i]]
+        
+        S0 = solve_feasible(
+            si, sj, ss, N, closed_loop,
+            use_all_horizon, trans_set, max_num_poly
+        )
         
         if verbose > 1:
             print("Computed reachable set S0 with volume " +
                 str(pc.volume(S0)) )
         
+        # isect = si \cap S0
         isect = pc.intersect(si, S0)
-        risect, xi = pc.cheby_ball(isect)
         vol1 = pc.volume(isect)
-
+        risect, xi = pc.cheby_ball(isect)
+        
+        # diff = si \setminus S0
         diff = pc.mldivide(si, S0)
-        rdiff, xd = pc.cheby_ball(diff)
         vol2 = pc.volume(diff)
+        rdiff, xd = pc.cheby_ball(diff)
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) and \
-            (vol2 > min_cell_volume) and \
-            (rdiff > rd) and \
-            (risect > rd):
+        if (vol1 > min_cell_volume) and (risect > rd) and \
+           (vol2 > min_cell_volume) and (rdiff > rd):
         
             # Make sure new areas are Regions and add proposition lists
             if len(isect) == 0:
@@ -944,6 +938,7 @@ def solve_feasible_open_loop(
     if trans_set == None:
         trans_set = part1
 
+    # stack polytope constraints
     L, M = createLM(ssys, N, part1, trans_set, part2) 
     
     # Ready to make polytope
@@ -1090,23 +1085,21 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
     @param ssys: system dynamics
     @type ssys: LtiSysDyn
+    
     @param N: horizon length
+    
     @type list_P: list of Polytopes or Polytope
     @type Pk: Polytope
     @type PN: Polytope
+    
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.
         Default is [1,2, ... N]
     """
     if isinstance(list_P, pc.Polytope):
-        list = []
-        list.append(list_P)
-        for i in xrange(1,N):
-            list.append(Pk)
-        list.append(PN)
-        list_P = list
+        list_P = [list_P] +(N-1) *[Pk] +[PN]
         
-    if disturbance_ind == None:
+    if disturbance_ind is None:
         disturbance_ind = range(1,N+1)
     
     A = ssys.A
@@ -1120,23 +1113,23 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     m = B.shape[1]  # Input space dimension
     p = E.shape[1]  # Disturbance space dimension
     
-    if np.sum(np.abs(E)) > 0:  
+    # non-zero disturbance matrix E ?
+    if not np.all(E==0):
         if not pc.is_fulldim(D):
             E = np.zeros(K.shape)
-           
-    list_len = np.zeros(len(list_P))
-    for i in xrange(len(list_P)):
-        list_len[i] = list_P[i].A.shape[0]
+    
+    list_len = np.array([P.A.shape[0] for P in list_P])
+    sumlen = np.sum(list_len)
 
     LUn = np.shape(PU.A)[0]
     
-    Lk = np.zeros([np.sum(list_len), n+N*m])
+    Lk = np.zeros([sumlen, n+N*m])
     LU = np.zeros([LUn*N,n+N*m])
     
-    Mk = np.zeros([np.sum(list_len),1])
+    Mk = np.zeros([sumlen,1])
     MU = np.tile(PU.b.reshape(PU.b.size,1), (N,1))
   
-    Gk = np.zeros([np.sum(list_len), p*N])
+    Gk = np.zeros([sumlen, p*N])
     GU = np.zeros([LUn*N, p*N])
     
     K_hat = np.tile(K, (N,1))
@@ -1147,9 +1140,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         E_diag = _block_diag2(E_diag,E)
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
+    
     sum_vert = 0
     for i in xrange(N+1):
         Li = list_P[i]
+        
         ######### FOR L #########
         AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])
         Lk[
@@ -1182,10 +1177,12 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
                     )
                 ] = np.dot(PU.A, A_mult)
                 MU[range(i*LUn, (i+1)*LUn), :] -= np.dot(PU.A, b_mult)
+        
         ######### FOR M #########
         Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = \
             Li.b.reshape(Li.b.size,1) - \
             np.dot(np.dot(Li.A,A_k), K_hat)
+        
         ######### FOR G #########
         if i in disturbance_ind:
             Gk[
@@ -1200,6 +1197,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
                 d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
                 GU[np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))] = \
                    np.dot(PU.A, d_mult)
+        
         ####### Iterate #########
         if i < N:
             sum_vert += Li.A.shape[0]
@@ -1208,11 +1206,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
             A_k[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
                 
     # Get disturbance sets
-    if np.sum(np.abs(Gk)) > 0:  
-        G = np.vstack([Gk,GU])
-        D_hat = get_max_extreme(G,D,N)
+    if not np.all(Gk==0):  
+        G = np.vstack([Gk, GU])
+        D_hat = get_max_extreme(G, D, N)
     else:
-        D_hat = np.zeros([np.sum(list_len) + LUn*N,1])
+        D_hat = np.zeros([sumlen + LUn*N, 1])
 
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
