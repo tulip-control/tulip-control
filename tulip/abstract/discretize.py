@@ -921,11 +921,8 @@ def solve_feasible_open_loop(
     
     if len(part1) > 0:
         # Recursive union of sets
-        poly = solve_feasible_open_loop(
-            part1.list_poly[0], part2,
-            ssys, N, trans_set
-        )
-        for i in xrange(1, len(part1)):
+        poly = pc.Polytope()
+        for i in xrange(0, len(part1) ):
             s0 = solve_feasible_open_loop(
                 part1.list_poly[i], part2,
                 ssys, N, trans_set
@@ -934,12 +931,9 @@ def solve_feasible_open_loop(
         return poly
     
     if len(part2) > 0:
-        # Recursive union of sets 
-        poly = solve_feasible_open_loop(
-            part1, part2.list_poly[0],
-            ssys, N, trans_set
-        )
-        for i in xrange(1, len(part2)):
+        # Recursive union of sets
+        poly = pc.Polytope()
+        for i in xrange(0, len(part2) ):
             s0 = solve_feasible_open_loop(
                 part1, part2.list_poly[i],
                 ssys, N, trans_set
