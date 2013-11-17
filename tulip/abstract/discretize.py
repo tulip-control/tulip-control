@@ -859,14 +859,12 @@ def solve_feasible(
     else:
         return solve_feasible_open_loop(
             part1, part2, ssys, N,
-            use_all_horizon=use_all_horizon,
             trans_set=trans_set,
             max_num_poly=max_num_poly
         )
 
 def solve_feasible_open_loop(
     part1, part2, ssys, N,
-    use_all_horizon=False,
     trans_set=None, max_num_poly=5
 ):
     if len(part1) > max_num_poly:
@@ -881,14 +879,12 @@ def solve_feasible_open_loop(
         # Recursive union of sets
         poly = solve_feasible_open_loop(
             part1.list_poly[0], part2, ssys, N,
-            trans_set=trans_set,
-            use_all_horizon=use_all_horizon
+            trans_set=trans_set
         )
         for i in xrange(1, len(part1)):
             s0 = solve_feasible_open_loop(
                 part1.list_poly[i], part2, ssys, N,
-                trans_set=trans_set,
-                use_all_horizon=use_all_horizon
+                trans_set=trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
@@ -897,14 +893,12 @@ def solve_feasible_open_loop(
         # Recursive union of sets 
         poly = solve_feasible_open_loop(
             part1, part2.list_poly[0], ssys, N,
-            trans_set=trans_set,
-            use_all_horizon=use_all_horizon
+            trans_set=trans_set
         )
         for i in xrange(1, len(part2)):
             s0 = solve_feasible_open_loop(
                 part1, part2.list_poly[i], ssys, N,
-                trans_set=trans_set,
-                use_all_horizon=use_all_horizon
+                trans_set=trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
