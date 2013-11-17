@@ -853,9 +853,22 @@ def solve_feasible(
     if closed_loop:
         return solve_feasible_close_loop(
             part1, part2, ssys, N,
-            use_all_horizon=use_all_horizon, trans_set=trans_set
+            use_all_horizon=use_all_horizon,
+            trans_set=trans_set
         )
-        
+    else:
+        return solve_feasible_open_loop(
+            part1, part2, ssys, N,
+            use_all_horizon=use_all_horizon,
+            trans_set=trans_set,
+            max_num_poly=max_num_poly
+        )
+
+def solve_feasible_open_loop(
+    part1, part2, ssys, N,
+    use_all_horizon=False,
+    trans_set=None, max_num_poly=5
+):
     if len(part1) > max_num_poly:
         # use the max_num_poly largest volumes for reachability
         part1 = volumes_for_reachability(part1, max_num_poly)
@@ -866,15 +879,15 @@ def solve_feasible(
     
     if len(part1) > 0:
         # Recursive union of sets
-        poly = solve_feasible(
+        poly = solve_feasible_open_loop(
             part1.list_poly[0], part2, ssys, N,
-            trans_set=trans_set, closed_loop=closed_loop,
+            trans_set=trans_set,
             use_all_horizon=use_all_horizon
         )
         for i in xrange(1, len(part1)):
-            s0 = solve_feasible(
+            s0 = solve_feasible_open_loop(
                 part1.list_poly[i], part2, ssys, N,
-                trans_set=trans_set, closed_loop=closed_loop,
+                trans_set=trans_set,
                 use_all_horizon=use_all_horizon
             )
             poly = pc.union(poly, s0, check_convex=True)
@@ -882,15 +895,15 @@ def solve_feasible(
     
     if len(part2) > 0:
         # Recursive union of sets 
-        poly = solve_feasible(
+        poly = solve_feasible_open_loop(
             part1, part2.list_poly[0], ssys, N,
-            trans_set=trans_set, closed_loop=closed_loop,
+            trans_set=trans_set,
             use_all_horizon=use_all_horizon
         )
         for i in xrange(1, len(part2)):
-            s0 = solve_feasible(
+            s0 = solve_feasible_open_loop(
                 part1, part2.list_poly[i], ssys, N,
-                trans_set=trans_set, closed_loop=closed_loop,
+                trans_set=trans_set,
                 use_all_horizon=use_all_horizon
             )
             poly = pc.union(poly, s0, check_convex=True)
@@ -925,17 +938,19 @@ def solve_feasible_close_loop(
     part1, part2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
+    temp_part = part2
+    
     if trans_set != None:
-        # The intermediate steps are allowed to be in trans_set, 
-        # if it is defined
+        # if ttsnd_set is defined,
+        # then the intermediate steps are
+        # allowed to be in trans_set
         ttt = trans_set
     else:
         ttt = part1
-    temp_part = part2
     
     for i in xrange(N,1,-1): 
         x0 = solve_feasible(
-            ttt, temp_part, ssys, 1,
+            ttt, temp_part, ssys, N=1,
             closed_loop=False,
             trans_set=trans_set
         )
@@ -949,7 +964,7 @@ def solve_feasible_close_loop(
                 return pc.Polytope()
     
     x0 = solve_feasible(
-        part1, temp_part, ssys, 1,
+        part1, temp_part, ssys, N=1,
         closed_loop=False,
         trans_set=trans_set
     )
