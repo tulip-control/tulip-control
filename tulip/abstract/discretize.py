@@ -922,13 +922,13 @@ def solve_feasible_open_loop(
     if len(part1) > 0:
         # Recursive union of sets
         poly = solve_feasible_open_loop(
-            part1.list_poly[0], part2, ssys, N,
-            trans_set=trans_set
+            part1.list_poly[0], part2,
+            ssys, N, trans_set
         )
         for i in xrange(1, len(part1)):
             s0 = solve_feasible_open_loop(
-                part1.list_poly[i], part2, ssys, N,
-                trans_set=trans_set
+                part1.list_poly[i], part2,
+                ssys, N, trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
@@ -936,13 +936,13 @@ def solve_feasible_open_loop(
     if len(part2) > 0:
         # Recursive union of sets 
         poly = solve_feasible_open_loop(
-            part1, part2.list_poly[0], ssys, N,
-            trans_set=trans_set
+            part1, part2.list_poly[0],
+            ssys, N, trans_set
         )
         for i in xrange(1, len(part2)):
             s0 = solve_feasible_open_loop(
-                part1, part2.list_poly[i], ssys, N,
-                trans_set=trans_set
+                part1, part2.list_poly[i],
+                ssys, N, trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
@@ -950,13 +950,15 @@ def solve_feasible_open_loop(
     if trans_set == None:
         trans_set = part1
 
-    L,M = createLM(ssys, N, part1, trans_set, part2) 
+    L, M = createLM(ssys, N, part1, trans_set, part2) 
     
     # Ready to make polytope
-    poly1 = pc.reduce(pc.Polytope(L,M))
+    poly1 = pc.reduce(pc.Polytope(L, M) )
+    
     # Project poly1 onto lower dim
     n = np.shape(ssys.A)[1]
-    poly1 = pc.projection(poly1, range(1,n+1))
+    poly1 = pc.projection(poly1, range(1, n+1) )
+    
     return pc.reduce(poly1)
 
 def volumes_for_reachability(part, max_num_poly):
