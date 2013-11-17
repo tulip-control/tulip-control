@@ -821,7 +821,7 @@ def get_input(
     return low_u
     
 def solve_feasible(
-    P1, P2, ssys, N, max_cell=10, closed_loop=True,
+    P1, P2, ssys, N, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
     """Computes the subset x0 of C{P1} from which C{P2} is reachable
@@ -998,7 +998,7 @@ def getInputHelper(
         list_P.append(P3)
         for i in xrange(N-1,0,-1): 
             temp_part = solve_feasible(
-                P1, temp_part, ssys, 1,
+                P1, temp_part, ssys, N=1,
                 closed_loop=False, trans_set=P1
             )
             list_P.insert(0, temp_part)
