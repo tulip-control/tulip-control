@@ -946,9 +946,8 @@ def solve_feasible_closed_loop(
         ttt = part1
     
     for i in xrange(N,1,-1): 
-        x0 = solve_feasible(
+        x0 = solve_feasible_open_loop(
             ttt, temp_part, ssys, N=1,
-            closed_loop=False,
             trans_set=trans_set
         )
         
@@ -960,9 +959,8 @@ def solve_feasible_closed_loop(
             if not pc.is_fulldim(temp_part):
                 return pc.Polytope()
     
-    x0 = solve_feasible(
+    x0 = solve_feasible_open_loop(
         part1, temp_part, ssys, N=1,
-        closed_loop=False,
         trans_set=trans_set
     )
     
