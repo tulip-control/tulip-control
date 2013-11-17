@@ -847,26 +847,26 @@ def solve_feasible(
     @return: C{x0}, defines the set in P1 from which P2 is reachable
     @rtype: Polytope or Region
     """
-    part1 = P1.copy() # Initial set
-    part2 = P2.copy() # Terminal set
-    
     if closed_loop:
-        return solve_feasible_close_loop(
-            part1, part2, ssys, N,
+        return solve_feasible_closed_loop(
+            P1, P2, ssys, N,
             use_all_horizon=use_all_horizon,
             trans_set=trans_set
         )
     else:
         return solve_feasible_open_loop(
-            part1, part2, ssys, N,
+            P1, P2, ssys, N,
             trans_set=trans_set,
             max_num_poly=max_num_poly
         )
 
 def solve_feasible_open_loop(
-    part1, part2, ssys, N,
+    P1, P2, ssys, N,
     trans_set=None, max_num_poly=5
 ):
+    part1 = P1.copy() # Initial set
+    part2 = P2.copy() # Terminal set
+    
     if len(part1) > max_num_poly:
         # use the max_num_poly largest volumes for reachability
         part1 = volumes_for_reachability(part1, max_num_poly)
@@ -928,10 +928,13 @@ def volumes_for_reachability(part, max_num_poly):
     part = pc.Region(temp, [])
     return part
 
-def solve_feasible_close_loop(
-    part1, part2, ssys, N,
+def solve_feasible_closed_loop(
+    P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
+    part1 = P1.copy() # Initial set
+    part2 = P2.copy() # Terminal set
+    
     temp_part = part2
     
     if trans_set != None:
