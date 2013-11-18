@@ -206,13 +206,14 @@ def discretize(
         try:
             from tulip.polytope.plot import plot_partition
             import matplotlib.pyplot as plt
+            
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
         except:
             plot_partition = None
             print("polytope.plot_partition failed to import.\n"
                 "No plotting by discretize during partitioning.")
         
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
         iter_count = 0
     
     # Do the abstraction
