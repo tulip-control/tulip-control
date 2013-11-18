@@ -13,13 +13,13 @@ use the core functionality of TuLiP:
 * `NetworkX <http://networkx.lanl.gov/>`_
 * `pyparsing <http://pyparsing.wikispaces.com/>`_
 
-Except for ``cvxopt``, all of these packages are available in the `Enthought
-Canopy <https://www.enthought.com/products/canopy/>`_ distribution.
+Newcomers to scientific computing with Python should read
+:ref:`newbie-scipy-sec-label`.
 
-The default synthesis tool for GR[1] specifications is implemented in `JTLV
-<http://jtlv.ysaar.net/>`_ and distributed with TuLiP.  To use it, you must have
-Java version 1.6 (or later) installed. An alternative GR[1] synthesis tool used
-by TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_.
+The default synthesis tool for GR[1] specifications is implemented by Yaniv
+Sa'ar [BJPPS12]_ and distributed with TuLiP.  To use it, you must have Java
+version 1.6 (or later) installed. An alternative GR[1] synthesis tool used by
+TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_.
 
 For computing discrete abstractions from hybrid system descriptions, it is
 highly recommended---but not required---that you install `GLPK
@@ -34,6 +34,7 @@ packages, listed with a summary of dependent features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
 * `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz dot <http://www.graphviz.org/>`_ export routines
+* `Graphviz <http://www.graphviz.org/>`_  -- generation of images (e.g., PNG files) from dot code
 
 Once all of the above preparations are completed, you can install TuLiP.  As
 with most `Distutils <http://docs.python.org/install/index.html>`_-based
@@ -44,14 +45,7 @@ packages, installation proceeds with::
 This script will also check for dependencies, i.e. look for NumPy,
 CVXOPT, etc.
 
-Other features (optional)
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here are some optional advanced features that require installing additional
-dependencies. None of them is required to run the examples that come with
-the toolbox.
-
-.. _epd-sec-label:
+.. _newbie-scipy-sec-label:
 
 New to Python?
 ~~~~~~~~~~~~~~
@@ -61,10 +55,14 @@ If you don't already use Python for scientific computing, consider using
 `Enthought Canopy <https://www.enthought.com/products/canopy/>`_). This may make
 the installation process easier.  The EPD Free (now called Canopy Express)
 distribution comes with Python and includes NumPy, SciPy, matplotlib. EPD Free
-together with cvxopt and pyparsing is sufficient to run TuLiP.
+together with networkx, cvxopt, and pyparsing is sufficient to run TuLiP.
 
-EPD seems to work fine on most platforms but if you cannot get it to work,  
-alternative packages for Mac OS X and Microsoft Windows are mentioned below. 
+Alternatives to Enthought are listed on the `SciPy installation webpage
+<http://www.scipy.org/install.html>`_.  In particular, also try `Anaconda
+<http://docs.continuum.io/anaconda/>`_.
+
+EPD seems to work fine on most platforms but if you cannot get it to work, more
+alternative packages for Mac OS X and Microsoft Windows are mentioned below.
 
 .. _troubleshoot-sec-label:
 
