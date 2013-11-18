@@ -1523,7 +1523,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
         beg_mi = np.array([m])
     
     A = np.vstack([A, -A[range(m,m+M),:]])
-    B = np.hstack([B, -B[range(m,m+M),:]])
+    B = np.hstack([B, -B[range(m,m+M)]])
 
     counter = np.zeros([N,1], dtype=int)
     INDICES = np.arange(m, dtype=int)
