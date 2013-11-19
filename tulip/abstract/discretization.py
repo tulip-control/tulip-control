@@ -212,10 +212,12 @@ def discretize(
         # here to avoid loading matplotlib unless requested
         try:
             from tulip.polytope.plot import plot_partition
+            from tulip.polytope.plot import plot as polyplot
             import matplotlib.pyplot as plt
             
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
+            plt.ion()
+            
+            fig, (ax1, ax2) = plt.subplots(1, 2)
         except:
             plot_partition = None
             print("polytope.plot_partition failed to import.\n"
@@ -275,6 +277,13 @@ def discretize(
         if verbose > 1:
             print("Computed reachable set S0 with volume " +
                 str(pc.volume(S0)) )
+        
+        if plotit:
+            ax2.clear()
+            polyplot(si, ax=ax2, color="blue")
+            polyplot(sj, ax=ax2, color="red")
+            polyplot(S0, ax=ax2, color="green")
+            fig.canvas.draw()
         
         # isect = si \cap S0
         isect = pc.intersect(si, S0)
@@ -411,12 +420,35 @@ def discretize(
             list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
         )
         
-        ax.clear()
-        plt.ion()
-        plot_partition(tmp_part, transitions, ax=ax, color_seed=23)
+        #polyplot(si, ax=ax2)
+        #print('plotted: si = ' +str(si))
+        #polyplot(sj, ax=ax2)
+        #print('plotted: sj = ' +str(sj))
+        #polyplot(S0, ax=ax2)
+        #print('plotted: S0 = ' +str(S0))
+        
+        #fig2.canvas.draw()
+        
+        ax1.clear()
+        
+        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
         if save_img:
             fig.savefig('movie' +str(iter_count) +'.pdf')
+        
         iter_count += 1
+        
+        fig.canvas.draw()
+        
+        #ax1.relim()
+        #ax2.relim()
+        
+        #ax1.autoscale_view(True, True, True)
+        #ax2.autoscale_view(True, True, True)
+        
+        l,u = pc.bounding_box(part.domain)
+        ax2.set_xlim(l[0,0], u[0,0])
+        ax2.set_ylim(l[1,0], u[1,0])
+        
         plt.pause(1)
 
     new_part = PropPreservingPartition(
