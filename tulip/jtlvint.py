@@ -162,7 +162,8 @@ def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, v
     """
     fSMV, fLTL, fAUT = create_files(spec)
 
-    realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
+    realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
+                            priority_kind, init_option, verbose)
 
     # Build Automaton
     if (not realizable):

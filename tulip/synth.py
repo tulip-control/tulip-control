@@ -103,8 +103,10 @@ def synthesize(option, specs, sys=None):
     @type specs: L{spec.GRSpec}
     @param sys: NOT IMPLEMENTED YET.
 
-    @return: Return automaton implementing the strategy, or None if
-        error.
+    @return: If spec is realizable,
+        then return a Mealy machine implementing the strategy.
+        Otherwise return list of counterexamples.
+    @rtype: transys.Mealy or list
     """
     if sys is not None:
         sform = sys_to_spec(sys)
