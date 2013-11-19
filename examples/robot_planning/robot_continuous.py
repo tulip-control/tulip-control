@@ -20,7 +20,7 @@ from tulip.abstract import prop2part, discretize
 visualize = False
 if visualize:
     import networkx as nx
-    from tulip.polytope.plot import plot_partition
+    from tulip.abstract.plot import plot_partition
 else:
     def plot_partition(a, b=None):
         return

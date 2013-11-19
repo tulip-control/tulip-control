@@ -209,7 +209,7 @@ def discretize(
     if plotit:
         # here to avoid loading matplotlib unless requested
         try:
-            from tulip.polytope.plot import plot_partition
+            from plot import plot_partition
             from tulip.polytope.plot import plot as polyplot
             import matplotlib.pyplot as plt
             

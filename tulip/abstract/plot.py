@@ -43,8 +43,8 @@ Functions:
 import numpy as np
 import matplotlib
 
-from polytope import cheby_ball, bounding_box
-from polytope.plot import get_patch, newax
+from tulip.polytope import cheby_ball, bounding_box
+from tulip.polytope.plot import get_patch, newax
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
                    ax=None, color_seed=None):
