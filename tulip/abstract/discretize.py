@@ -232,13 +232,16 @@ def discretize(
             else:
                 rd = 0.
         
-        if verbose > 1:        
-            print("\n Working with states " +str(i) +" and " +str(j) +
-                " with lengths " +str(len(si)) +" and " +str(len(sj) ) )
+        if verbose > 1:
+            msg = '\n Working with states:\n\t'
+            msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
+            msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
             
             if isinstance(ssys, PwaSysDyn):
-                print("where subsystem " +
-                    str(subsys_list[i]) +" is active.")
+                msg += 'with active subsystem:\n\t'
+                msg += str(subsys_list[i])
+            
+            print(msg)
         
         if conservative:
             # Don't use trans_set

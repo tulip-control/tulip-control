@@ -32,6 +32,9 @@
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
+from copy import deepcopy
+from networkx import strongly_connected_components
+
 from tulip import transys
 from tulip.spec import GRSpec
 from tulip import jtlvint
@@ -139,6 +142,9 @@ def synthesize(option, specs, sys=None):
     @rtype: transys.Mealy or list
     """
     if sys is not None:
+        sys = deepcopy(sys)
+        keep_strongly_connected_components(sys)
+        
         sform = sys_to_spec(sys)
         specs = specs | sform
 
@@ -148,5 +154,35 @@ def synthesize(option, specs, sys=None):
         ctrl = jtlvint.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. '+\
-                        'Current options are \"jtlv\" and \"gr1c\"')
+                        'Current options are "jtlv" and "gr1c"')
     return ctrl
+
+def keep_strongly_connected_components(sys):
+    scc = strongly_connected_components(sys)
+    
+    print('strongly connected components: ' +str(scc) )
+    
+    not_scc_states = []
+    for component in scc:
+        # not single node ?
+        if len(component) > 1:
+            continue
+        
+        # connected to self ?
+        state = component[0]
+        if not sys.states.post(state):
+            not_scc_states += [state]
+    
+    # everything strongly connected ?
+    if not not_scc_states:
+        return
+    
+    print('states \notin scc: ' +str(not_scc_states) )
+    
+    # rm nodes \notin any strongly connected component
+    for state in not_scc_states:
+        print('removing state: ' +str(state) )
+        sys.states.remove(state)
+    
+    print('After keeping only strongly connected states:')
+    print(sys)
