@@ -32,17 +32,14 @@
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
-
-import os
-
 from tulip import transys
 from tulip.spec import GRSpec
 from tulip import jtlvint
 from tulip import gr1cint
 
-
 def sys_to_spec(sys):
-    if not isinstance(sys, (transys.FiniteTransitionSystem, transys.OpenFiniteTransitionSystem)):
+    if not isinstance(sys, (transys.FiniteTransitionSystem,
+                            transys.OpenFiniteTransitionSystem)):
         raise TypeError("synth.sys_to_spec does not support " + str(type(sys)))
     # Assume everything is controlled; support for an environment
     # definition is forthcoming.
@@ -52,40 +49,73 @@ def sys_to_spec(sys):
 
     # Initial state, including enforcement of mutual exclusion
     if (len(sys.states.initial) > 0):
-        init = ["("+") || (".join(["("+str(current_state)+")"+" && "+ " && ".join(["!("+str(u)+")" for u in sys.states if u != current_state]) for current_state in sys.states.initial])+")"]
+        init = ["("+") || (".join([
+            "("+str(current_state)+")"+" && "+
+                " && ".join([
+                        "!("+str(u)+")"
+                        for u in sys.states if u != current_state
+                    ])
+            for current_state in sys.states.initial
+        ])+")"]
     else:
         init = ""
 
     for state in sys.states.initial:
-        init.append(" && ".join(["("+str(ap)+")" for ap in sys.aps if ap in sys.states.label_of(state)["ap"]]))
+        init.append(" && ".join([
+            "("+str(ap)+")"
+            for ap in sys.aps
+            if ap in sys.states.label_of(state)["ap"]
+        ]))
         if len(init[-1]) > 0:
             init[-1] += " && "
-        init[-1] +=  " && ".join(["!("+str(ap)+")" for ap in sys.aps if ap not in sys.states.label_of(state)["ap"]])
+        init[-1] +=  " && ".join([
+            "!("+str(ap)+")"
+            for ap in sys.aps
+            if ap not in sys.states.label_of(state)["ap"]
+        ])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
 
     # Transitions
     for from_state in sys.states:
-        trans.append("("+str(from_state)+") -> X("+" || ".join(["("+str(v)+")" for (u,v,l) in sys.transitions.find(from_states=[from_state])])+")")
+        trans.append("("+str(from_state)+") -> X("+" || ".join([
+            "("+str(v)+")"
+            for (u,v,l) in sys.transitions.find(
+                from_states=[from_state]
+            )
+        ])+")")
 
     # Mutual exclusion of states
-    trans.append("X(("+") || (".join(["("+str(current_state)+")"+" && "+ " && ".join(["!("+str(u)+")" for u in sys.states if u != current_state]) for current_state in sys.states])+"))")
+    trans.append("X(("+") || (".join([
+        "("+str(current_state)+")"+" && "+ " && ".join([
+            "!("+str(u)+")"
+            for u in sys.states if u != current_state
+        ]) for current_state in sys.states])+"))")
 
     # Require atomic propositions to follow states according to label
     for state in sys.states:
         if sys.states.label_of(state).has_key("ap"):
-            trans.append(" && ".join([str(ap) for ap in sys.aps if ap in sys.states.label_of(state)["ap"]]))
+            trans.append(" && ".join([
+                str(ap) for ap in sys.aps
+                if ap in sys.states.label_of(state)["ap"]
+            ]))
         else:
             trans.append("")
         if len(trans[-1]) > 0:
             trans[-1] += " && "
         if not sys.states.label_of(state).has_key("ap"):
-            trans[-1] +=  " && ".join(["!"+str(ap) for ap in sys.aps])
+            trans[-1] +=  " && ".join([
+                "!"+str(ap)
+                for ap in sys.aps
+            ])
         else:
-            trans[-1] +=  " && ".join(["!"+str(ap) for ap in sys.aps if ap not in sys.states.label_of(state)["ap"]])
+            trans[-1] +=  " && ".join([
+                "!"+str(ap)
+                for ap in sys.aps
+                if ap not in sys.states.label_of(state)["ap"]
+            ])
         trans[-1] = "X(("+str(state)+") -> ("+trans[-1]+"))"
 
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
-
 
 def synthesize(option, specs, sys=None):
     """Function to call the appropriate synthesis tool on the spec.
