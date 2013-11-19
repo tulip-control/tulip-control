@@ -30,7 +30,14 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-"""TuLiP Toolbox Abstract module
-
-Main functions are in discretize.py and prop2part.py.
+"""TuLiP Toolbox Abstract subpackage
 """
+# avoid shadowing modules
+from discretization import discretize
+from prop2partition import prop2part
+
+from prop2partition import prop2partconvex, pwa_partition, add_grid
+from prop2partition import PropPreservingPartition
+
+from find_controller import get_input, get_cell_id
+    
