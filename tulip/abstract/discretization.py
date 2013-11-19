@@ -55,7 +55,7 @@ from cvxopt import matrix,solvers
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from prop2partition import PropPreservingPartition, pwa_partition
+from prop2partition import PropPreservingPartition, pwa_partition, part2convex
 
 class AbstractSysDyn:
     """AbstractSysDyn class for discrete abstractions of continuous
@@ -118,12 +118,8 @@ def discretize(
         algorithm should be used. default True.
     @param conservative: if true, force sequence in reachability analysis
         to stay inside starting cell. If false, safety
-        is ensured by keeping the sequence inside the
-        original proposition preserving cell which needs
-        to be convex. In order to use the value false,
-        ensure to have a convex initial partition or use
-        part2convex to postprocess the proposition
-        preserving partition before calling discretize.
+        is ensured by keeping the sequence inside a convexified
+        version of the original proposition preserving cell.
     @param max_num_poly: maximum number of polytopes in a region to use in 
         reachability analysis.
     @param use_all_horizon: in closed loop algorithm: if we should look
@@ -149,7 +145,8 @@ def discretize(
     
     see also
     --------
-    prop2part.pwa_partition
+    prop2partition.pwa_partition
+    prop2partition.part2convex
     """
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -162,6 +159,8 @@ def discretize(
         orig_list = None
         orig = 0
     else:
+        part = part2convex(part) # convexify
+        remove_trans = False # already allowed in nonconservative
         orig_list = []
         for poly in part.list_region:
             if len(poly) == 0:
@@ -169,9 +168,8 @@ def discretize(
             elif len(poly) == 1:
                 orig_list.append(poly.list_poly[0].copy())
             else:
-                raise Exception("solveFeasible: "
-                    "original list contains non-convex"
-                    "polytope regions")
+                raise Exception("discretize: "
+                    "problem in convexification")
         orig = range(len(orig_list))
     
     # Cheby radius of disturbance set
