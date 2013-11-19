@@ -81,8 +81,16 @@ def get_patch(poly1, color="blue"):
 
     patch = matplotlib.patches.Polygon(V[ind,:], True, color=color)
     return patch
-    
-def plot(poly1, show=True):
+
+def newax():
+    """Instantiate new figure and axes.
+    """
+    #TODO mv to pyvectorized
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    return ax
+
+def plot(poly1, show=True, ax=None):
     """Plots 2D polytope or region using matplotlib.
     
     @type: poly1: Polytope or Region
@@ -95,8 +103,8 @@ def plot(poly1, show=True):
         print("Cannot plot polytopes of dimension larger than 2")
         return
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    if ax is None:
+        ax = newax()
     
     if len(poly1) == 0:
         poly = get_patch(poly1)
@@ -106,9 +114,11 @@ def plot(poly1, show=True):
             poly = get_patch(poly2, color=np.random.rand(3))
             ax.add_patch(poly)
     
-    l,u = bounding_box(poly1)
-    ax.set_xlim(l[0,0],u[0,0])
-    ax.set_ylim(l[1,0],u[1,0])
+    # affect view
+    #l,u = bounding_box(poly1)
+    
+    #ax.set_xlim(l[0,0], u[0,0])
+    #ax.set_ylim(l[1,0], u[1,0])
     if show:
         plt.show()
 
@@ -137,8 +147,8 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     # new figure ?
     if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = newax()
+    
     ax.set_xlim(l[0,0],u[0,0])
     ax.set_ylim(l[1,0],u[1,0])
     

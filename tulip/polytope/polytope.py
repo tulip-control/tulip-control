@@ -208,34 +208,39 @@ class Polytope:
         return self.__copy__()
         
     @classmethod
-    def from_box(cls, I=np.array([])):
+    def from_box(cls, intervals=np.array([])):
         """Class method for easy construction of hyperrectangles.
         
-        Input:
-        - `I`: an n by 2 numpy array representing intervals,
-            the cross-product of which defines the
-            n-dimensional hyperrectangle
+        @param intervals: intervals,
+            the cross-product of which defines the polytope
+            as an n-dimensional hyperrectangle
+        @type intervals: [ndim x 2] numpy array
                 
-        Output:
-        - Polytope that corresponds to the hyperrectangle defined by I
+        @return: hyperrectangle defined by C{intervals}
+        @rtype: Polytope
         """
-        n = I.shape
-        if n[1]!=2:
-            raise Exception("Polytope: input to from_box must be n by 2")
-        else:
-            n = n[0]
+        if intervals.ndim != 2:
+            raise Exception('Polytope.from_box: ' +
+                'intervals must be 2 dimensional')
+        
+        n = intervals.shape
+        if n[1] != 2:
+            raise Exception('Polytope.from_box: ' +
+                'intervals must have 2 columns')
+        
+        n = n[0]
+        
+        # a <= b for each interval ?
+        if (intervals[:,0] > intervals[:,1]).any():
+            msg = 'Polytope: '
+            msg += 'Invalid interval in from_box method.\n'
+            msg += 'First element of an interval must'
+            msg += ' not be larger than the second.'
+            raise Exception(msg)
+        
         A = np.vstack([np.eye(n),-np.eye(n)])
-        b = np.zeros(2*n)
-        for i in range(n):
-            if I[i,0]>I[i,1]:
-                raise Exception("Polytope:"
-                    " invalid interval in from_box method."
-                    "First element of an interval must"
-                    " not be larger than the second")
-            else:
-                b[i]=I[i,1]
-                b[i+n]=-I[i,0]
-                
+        b = np.hstack([intervals[:,1], -intervals[:,0] ])
+        
         return cls(A, b, minrep=True)
 
 class Region:
