@@ -149,7 +149,7 @@ def prop2part(state_space, cont_props_dict):
     
     return mypartition
 
-def prop2partconvex(ppp):
+def prop2part_convex(ppp):
     """This function takes a proposition preserving partition and generates 
     another proposition preserving partition such that each part in the new 
     partition is a convex polytope
@@ -164,6 +164,7 @@ def prop2partconvex(ppp):
         num_prop=ppp.num_prop,
         list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol)
     )
+    subsys_list = []
     for i in xrange(ppp.num_regions):
         simplified_reg = pc.union(
             ppp.list_region[i],
@@ -176,6 +177,11 @@ def prop2partconvex(ppp):
                 ppp.list_region[i].list_prop
             )
             myconvexpartition.list_region.append(region_now)
+            if ppp.list_subsys is not None:
+                subsys_list.append(ppp.list_subsys[i])
+    
+    if ppp.list_subsys is not None:
+        myconvexpartition.list_subsys = subsys_list
     
     myconvexpartition.num_regions = len(myconvexpartition.list_region)
     myconvexpartition.adj = find_adjacent_regions(myconvexpartition).copy()
