@@ -107,7 +107,7 @@ def plot(poly1, show=True, ax=None):
         ax = newax()
     
     if len(poly1) == 0:
-        poly = get_patch(poly1)
+        poly = get_patch(poly1, color=np.random.rand(3))
         ax.add_patch(poly)
     else:
         for poly2 in poly1.list_poly:
@@ -119,8 +119,8 @@ def plot(poly1, show=True, ax=None):
     
     #ax.set_xlim(l[0,0], u[0,0])
     #ax.set_ylim(l[1,0], u[1,0])
-    if show:
-        plt.show()
+    #if show:
+    #    plt.show()
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
                    show=True, ax=None, color_seed=None):

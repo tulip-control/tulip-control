@@ -31,12 +31,12 @@ uncertainty = 0.01
 
 """Quotient partition induced by propositions"""
 # Continuous state space
-cont_state_space = pc.Polytope.from_box(np.array([[0., 3.],[0., 2.]]))
+cont_state_space = pc.Polytope.from_box([[0., 3.],[0., 2.]])
 
 # Continuous propositions
 cont_props = {}
-cont_props['home'] = pc.Polytope.from_box(np.array([[0., 1.],[0., 1.]]))
-cont_props['lot'] = pc.Polytope.from_box(np.array([[2., 3.],[1., 2.]]))
+cont_props['home'] = pc.Polytope.from_box([[0., 1.],[0., 1.]])
+cont_props['lot'] = pc.Polytope.from_box([[2., 3.],[1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part.prop2part(cont_state_space, cont_props)
@@ -47,10 +47,15 @@ plot_partition(cont_partition)
 A = np.array([[1.0, 0.],[ 0., 1.0]])
 B = np.array([[0.1, 0.],[ 0., 0.1]])
 E = np.array([[1,0],[0,1]])
-U = pc.Polytope.from_box(input_bound*np.array([[-1., 1.],[-1., 1.]]))
-W = pc.Polytope.from_box(uncertainty*np.array([[-1., 1.],[-1., 1.]]))
 
-sys_dyn = hybrid.LtiSysDyn(A,B,E,[],U,W, cont_state_space)
+# available control, possible disturbances
+U = input_bound *np.array([[-1., 1.],[-1., 1.]])
+W = uncertainty *np.array([[-1., 1.],[-1., 1.]])
+
+U = pc.Polytope.from_box(U)
+W = pc.Polytope.from_box(W)
+
+sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
 
 # Given dynamics & proposition-preserving partition, find feasible transitions
 disc_dynamics = discretize.discretize(
@@ -86,6 +91,12 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 """Synthesize"""
 ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
+
+# Unrealizable spec ?
+if isinstance(ctrl, list):
+    for counterexample in ctrl:
+        print('counterexamples: ' +str(ctrl) +'\n')
+    exit(1)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_continuous.png', 'png'):

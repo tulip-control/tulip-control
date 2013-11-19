@@ -208,17 +208,30 @@ class Polytope:
         return self.__copy__()
         
     @classmethod
-    def from_box(cls, intervals=np.array([])):
+    def from_box(cls, intervals=[]):
         """Class method for easy construction of hyperrectangles.
         
-        @param intervals: intervals,
+        @param intervals: intervals [xi_min, xi_max],
             the cross-product of which defines the polytope
-            as an n-dimensional hyperrectangle
-        @type intervals: [ndim x 2] numpy array
+            as an N-dimensional hyperrectangle
+        @type intervals: [ndim x 2] numpy array or
+            list of lists:
+                [[x0_min, x0_max],
+                 [x1_min, x1_max],
+                 ...
+                 [xN_min, xN_max]]
                 
         @return: hyperrectangle defined by C{intervals}
         @rtype: Polytope
         """
+        if not isinstance(intervals, np.ndarray):
+            try:
+                intervals = np.array(intervals)
+            except:
+                raise Exception('Polytope.from_box:' +
+                    'intervals must be a numpy ndarray or ' +
+                    'convertible as arg to numpy.array')
+        
         if intervals.ndim != 2:
             raise Exception('Polytope.from_box: ' +
                 'intervals must be 2 dimensional')
@@ -232,7 +245,7 @@ class Polytope:
         
         # a <= b for each interval ?
         if (intervals[:,0] > intervals[:,1]).any():
-            msg = 'Polytope: '
+            msg = 'Polytope.from_box: '
             msg += 'Invalid interval in from_box method.\n'
             msg += 'First element of an interval must'
             msg += ' not be larger than the second.'
