@@ -55,7 +55,7 @@ from cvxopt import matrix,solvers
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from prop2part import PropPreservingPartition, pwa_partition
+from prop2partition import PropPreservingPartition, pwa_partition
 
 class AbstractSysDyn:
     """AbstractSysDyn class for discrete abstractions of continuous

@@ -139,7 +139,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     see also
     --------
-    abstract.prop2part.PropPreservingPartition
+    abstract.prop2partition.PropPreservingPartition
     """
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0

@@ -57,8 +57,8 @@ cont_props['home'] = pc.Polytope.from_box([[0., 1.],[0., 1.]])
 cont_props['lot'] = pc.Polytope.from_box([[2., 3.],[1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
-cont_partition = prop2part.prop2part(cont_state_space, cont_props)
-disc_dynamics = discretize.discretize(cont_partition, sys_dyn, closed_loop=True, \
+cont_partition = prop2part(cont_state_space, cont_props)
+disc_dynamics = discretize(cont_partition, sys_dyn, closed_loop=True, \
                 N=8, min_cell_volume=0.1, verbose=0)
 
 

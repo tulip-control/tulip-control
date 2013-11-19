@@ -39,7 +39,7 @@ cont_props['home'] = pc.Polytope.from_box([[0., 1.],[0., 1.]])
 cont_props['lot'] = pc.Polytope.from_box([[2., 3.],[1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
-cont_partition = prop2part.prop2part(cont_state_space, cont_props)
+cont_partition = prop2part(cont_state_space, cont_props)
 plot_partition(cont_partition)
 
 """Dynamics abstracted to discrete transitions, given initial partition"""
@@ -58,7 +58,7 @@ W = pc.Polytope.from_box(W)
 sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
 
 # Given dynamics & proposition-preserving partition, find feasible transitions
-disc_dynamics = discretize.discretize(
+disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
     N=8, min_cell_volume=0.1, verbose=10, plotting=True
 )

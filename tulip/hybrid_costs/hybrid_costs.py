@@ -9,7 +9,7 @@ import random
 from scipy import optimize
 
 import polytope as pc
-from prop2part import PropPreservingPartition
+from tulip.abstract import PropPreservingPartition
 from errorprint import printWarning, printError, printInfo
 
 
