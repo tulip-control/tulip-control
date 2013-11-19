@@ -186,7 +186,10 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
+    if verbose > 1:
+        print("\n Starting IJ: \n" + str(IJ) )
     
+    # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
                           np.array(part.adj.todense()) )
     
@@ -199,6 +202,8 @@ def discretize(
     adj = part.adj.copy()
     adj = adj.todense()
     adj = np.array(adj)
+    
+    # next 2 lines omitted in discretize_overlap
     subsys_list = deepcopy(part.list_subsys)
     ss = ssys
     
@@ -218,14 +223,24 @@ def discretize(
         
         iter_count = 0
     
+    # List of how many "new" regions
+    # have been created for each region
+    # and a list of original number of neighbors
+    #num_new_reg = np.zeros(len(orig_list))
+    #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    
     # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
+        # i,j swapped in discretize_overlap
         i = ind[1][0]
         j = ind[0][0]
         IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
+        
+        #num_new_reg[i] += 1
+        #print(num_new_reg)
         
         if isinstance(ssys, PwaSysDyn):
             ss = ssys.list_subsys[subsys_list[i]]
@@ -482,113 +497,8 @@ def sym_adj_change(IJ, adj_k, transitions, i):
     IJ[:, i] = vertical.astype(int)
 
 # DEFUNCT until further notice
-# def discretize_overlap(part, ssys, N=10, min_cell_volume=0.1, closed_loop=False,\
-#                conservative=False, max_num_poly=5, \
-#                use_all_horizon=False, abs_tol=1e-7, verbose=0):
-# 
-#     """Refine the partition and establish transitions based on reachability
-#     analysis.
-#     
-#     Input:
-#     
-#     - `part`: a PropPreservingPartition object
-#     - `ssys`: a LtiSysDyn object
-#     - `N`: horizon length
-#     - `min_cell_volume`: the minimum volume of cells in the resulting
-#                          partition.
-#     - `closed_loop`: boolean indicating whether the `closed loop`
-#                      algorithm should be used. default False.
-#     - `conservative`: if true, force sequence in reachability analysis
-#                       to stay inside starting cell. If false, safety
-#                       is ensured by keeping the sequence inside the
-#                       original proposition preserving cell.
-#     - `max_num_poly`: maximum number of polytopes in a region to use
-#                       in reachability analysis.
-#     - `use_all_horizon`: in closed loop algorithm: if we should look
-#                          for reach- ability also in less than N steps.
-#     - `abs_tol`: maximum volume for an "empty" polytope
-#     
-#     Output:
-#     
-#     - A PropPreservingPartition object with transitions
-#     """
-#     min_cell_volume = (min_cell_volume/np.finfo(np.double).eps ) * np.finfo(np.double).eps
-#     
-#     orig_list = []
-#     
-#     for poly in part.list_region:
-#         if len(poly) == 0:
-#             orig_list.append(poly.copy())
-#         elif len(poly) == 1:
-#             orig_list.append(poly.list_poly[0].copy())
-#         else:
-#             raise Exception("solveFeasible: original list contains non-convex \
-#                             polytope regions")
-#     
-#     orig = range(len(orig_list))
-#     
-#     # Cheby radius of disturbance set
-#     if len(ssys.E) > 0:
-#         rd,xd = pc.cheby_ball(ssys.Wset)
-#     else:
-#         rd = 0.
-#     
-#     # Initialize matrix for pairs to check
-#     IJ = part.adj.copy()
-#     IJ = IJ.todense()
-#     IJ = np.array(IJ)
-#     if verbose > 1:
-#         print("\n Starting IJ: \n" + str(IJ) )
-# 
-#     # Initialize output
-#     transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
-#     sol = deepcopy(part.list_region)
-#     adj = part.adj.copy()
-#     adj = adj.todense()
-#     adj = np.array(adj)
-#     
-#     # List of how many "new" regions that have been created for each region
-#     # and a list of original number of neighbors
-#     num_new_reg = np.zeros(len(orig_list))
-#     num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
-# 
-#     while np.sum(IJ) > 0:
-#         ind = np.nonzero(IJ)
-#         i = ind[0][0]
-#         j = ind[1][0]
-#                 
-#         IJ[i,j] = 0
-#         num_new_reg[i] += 1
-#         print(num_new_reg)
-#         si = sol[i]
-#         sj = sol[j]
-#         
-#         if verbose > 1:        
-#             print("\n Working with states " + str(i) + " and " + str(j) )
-#         
-#         if conservative:
-#             S0 = solve_feasible(si,sj,ssys,N, closed_loop=closed_loop, 
-#                         min_vol=min_cell_volume, max_num_poly=max_num_poly,\
-#                         use_all_horizon=use_all_horizon)
-#         else:
-#             S0 = solve_feasible(si,sj,ssys,N, closed_loop=closed_loop,\
-#                     min_vol=min_cell_volume, trans_set=orig_list[orig[i]], \
-#                     use_all_horizon=use_all_horizon, max_num_poly=max_num_poly)
-#         
-#         if verbose > 1:
-#             print("Computed reachable set S0 with volume " + str(pc.volume(S0)) )
-#         
-#         isect = pc.intersect(si, S0)
-#         risect, xi = pc.cheby_ball(isect)
-#         vol1 = pc.volume(isect)
-# 
-#         diff = pc.mldivide(si, S0)
-#         rdiff, xd = pc.cheby_ball(diff)
-#         
-#         # We don't want our partitions to be smaller than the disturbance set
-#         # Could be a problem since cheby radius is calculated for smallest
-#         # convex polytope, so if we have a region we might throw away a good
-#         # cell.
+def discretize_overlap(closed_loop=False, conservative=False):
+    """default False."""
 #         
 #         if rdiff < abs_tol:
 #             if verbose > 1:
@@ -650,13 +560,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 #             horiz2 = adj[size-1,:] - transitions[size-1,:] > 0
 #             verti2 = adj[:,size-1] - transitions[:,size-1] > 0
 #             IJ[size-1,:] = horiz2.astype(int)
-#             IJ[:,size-1] = verti2.astype(int)      
-#             
-#             #if verbose > 1:
-#                 #print("\n Updated adj: \n" + str(adj) )
-#                 #print("\n Updated trans: \n" + str(transitions) )
-#                 #print("\n Updated IJ: \n" + str(IJ) )
-#                     
+#             IJ[:,size-1] = verti2.astype(int)
 #         else:
 #             if verbose > 1:
 #                 print("No transition found, intersect vol: " + str(vol1) )
