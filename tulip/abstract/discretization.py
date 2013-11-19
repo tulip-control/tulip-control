@@ -103,7 +103,7 @@ def discretize(
     closed_loop=True, conservative=True,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7, verbose=0, plotting=False,
+    abs_tol=1e-7, verbose=0, plotit=False,
     save_img=False
 ):
     """Refine the partition and establish transitions
@@ -137,11 +137,11 @@ def discretize(
     @param abs_tol: maximum volume for an "empty" polytope
     @param verbose: level of verbosity
     
-    @param plotting: plot partitioning as it evolves
-    @type plotting: boolean,
+    @param plotit: plot partitioning as it evolves
+    @type plotit: boolean,
         default = False
     @param save_img: save snapshots of partitioning to PDF files,
-        requires plotting=True
+        requires plotit=True
     @type save_img: boolean,
         default = False
     
@@ -208,7 +208,7 @@ def discretize(
     ss = ssys
     
     # init graphics
-    if plotting:
+    if plotit:
         # here to avoid loading matplotlib unless requested
         try:
             from tulip.polytope.plot import plot_partition
@@ -400,7 +400,7 @@ def discretize(
             transitions[j,i] = 0
         
         # no plotting ?
-        if not plotting:
+        if not plotit:
             continue
         if plot_partition is None:
             continue

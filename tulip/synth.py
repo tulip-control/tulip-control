@@ -164,20 +164,30 @@ def keep_strongly_connected_components(sys):
     
     not_scc_states = []
     for component in scc:
+        print('current component: ' +str(component) )
+        
         # not single node ?
         if len(component) > 1:
+            print('len > 1, skip...')
             continue
         
-        # connected to self ?
+        # singleton strongly connected iff self-loop
         state = component[0]
-        if not sys.states.post(state):
+        print('cur state: ' +str(state) )
+        
+        print('post: ' +str(sys.states.post(state)) )
+        print('pre: ' +str(sys.states.pre(state)) )
+        
+        
+        if state not in sys.states.post(state):
+            print('to be removed')
             not_scc_states += [state]
     
     # everything strongly connected ?
     if not not_scc_states:
         return
     
-    print('states \notin scc: ' +str(not_scc_states) )
+    print('states \\notin scc: ' +str(not_scc_states) )
     
     # rm nodes \notin any strongly connected component
     for state in not_scc_states:
