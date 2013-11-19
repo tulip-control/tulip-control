@@ -37,9 +37,9 @@ Primary functions:
     - get_input
     
 Helper functions:
-    - getInputHelper
+    - get_input_helper
     - is_seq_inside
-    - get_cellID
+    - get_cell_id
 
 see also
 --------
@@ -47,7 +47,9 @@ discretize
 """
 import numpy as np
 from cvxopt import matrix,solvers
+
 from tulip import polytope as pc
+from discretize import solve_feasible, createLM, _block_diag2
 
 def get_input(
     x0, ssys, part, start, end, N, R=[], r=[], Q=[],
@@ -180,7 +182,7 @@ def get_input(
                 
                 r[range((N-1)*n, N*n), :] += -mid_weight*xc
             try:
-                u, cost = getInputHelper(
+                u, cost = get_input_helper(
                     x0, ssys, P1, P3, N, R, r, Q,
                     closed_loop=closed_loop
                 )
@@ -204,7 +206,7 @@ def get_input(
                 )
             ] += mid_weight*np.eye(n)
             r[range((N-1)*n, N*n), :] += -mid_weight*xc
-        low_u, cost = getInputHelper(
+        low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q,
             closed_loop=closed_loop
         )
@@ -215,7 +217,7 @@ def get_input(
             print("Calculated sequence not good")
     return low_u
 
-def getInputHelper(
+def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q,
     closed_loop=True
 ):
@@ -354,7 +356,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
             
     return inside
     
-def get_cellID(x0, part):
+def get_cell_id(x0, part):
     """Return an integer specifying in which discrete state
     the continuous state x0 belongs to.
         
