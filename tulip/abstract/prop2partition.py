@@ -149,7 +149,7 @@ def prop2part(state_space, cont_props_dict):
     
     return mypartition
 
-def prop2part_convex(ppp):
+def part2convex(ppp):
     """This function takes a proposition preserving partition and generates 
     another proposition preserving partition such that each part in the new 
     partition is a convex polytope

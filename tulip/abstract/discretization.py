@@ -122,7 +122,7 @@ def discretize(
         original proposition preserving cell which needs
         to be convex. In order to use the value false,
         ensure to have a convex initial partition or use
-        prop2partconvex to postprocess the proposition
+        part2convex to postprocess the proposition
         preserving partition before calling discretize.
     @param max_num_poly: maximum number of polytopes in a region to use in 
         reachability analysis.

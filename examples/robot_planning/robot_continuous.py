@@ -60,7 +60,7 @@ sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
 # Given dynamics & proposition-preserving partition, find feasible transitions
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, verbose=10, plotting=True
+    N=8, min_cell_volume=0.1, verbose=10, plotit=False,
 )
 
 """Visualize transitions in continuous domain (optional)"""
