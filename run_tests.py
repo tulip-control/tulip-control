@@ -2,7 +2,7 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
-SCL; 5 Sep 2013.
+SCL; 19 Nov 2013.
 """
 
 import sys
@@ -20,10 +20,10 @@ if __name__ == "__main__":
 
     causes the automaton_test.py file to be used and no others.  If no
     arguments are given, then default is to run all tests.  To exclude
-    tests that are marked as slow, use the flag "--fast".
-    If TESTFILES... each have a prefix of "-", then all tests *except*
-    those listed will be run.  OPTIONS... are passed on to nose.
-    """)
+    tests that are marked as slow, use the flag "--fast".  To generate
+    a coverage report, use the flag "--cover".  If TESTFILES... each
+    have a prefix of "-", then all tests *except* those listed will be
+    run.  OPTIONS... are passed on to nose.""")
         exit(1)
 
     if len(sys.argv) == 1:

@@ -39,6 +39,12 @@ be followed:
 
     U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
 
+- A script for running tests is ``run_test.py`` in the root of the source tree.
+  It searches under the directory ``tests/`` for files with names ending in
+  "_test.py", and passes these to `nose <http://readthedocs.org/docs/nose/>`_.
+  Use the flag "--cover" to generate a coverage report, which will likely be
+  placed under ``tests/cover/``.
+
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
 committers.
