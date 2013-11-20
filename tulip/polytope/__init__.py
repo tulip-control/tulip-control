@@ -1,6 +1,3 @@
-#
-# This file contains the initialization information from the tulip package.
-#
 # Copyright (c) 2011 by California Institute of Technology
 # All rights reserved.
 #
