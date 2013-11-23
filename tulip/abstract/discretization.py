@@ -322,7 +322,7 @@ def discretize(
             size = len(sol)
             
             # Update transition matrix
-            transitions = adj_update(transitions, size, num_new)
+            transitions = np.pad(transitions, (0,num_new), 'constant')
             
             transitions[i, :] = np.zeros(size)
             for kk in xrange(num_new):
@@ -343,7 +343,7 @@ def discretize(
             adj[i, :] = np.zeros([size -num_new])
             adj[:, i] = np.zeros([size -num_new])
             
-            adj = adj_update(adj, size, num_new)
+            adj = np.pad(adj, (0,num_new), 'constant')
             
             for kk in xrange(num_new):
                 r = size -1 -kk
@@ -385,7 +385,7 @@ def discretize(
                         transitions[k, r] = 0
             
             # Update IJ matrix
-            IJ = adj_update(IJ, size, num_new)
+            IJ = np.pad(IJ, (0,num_new), 'constant')
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
             
@@ -490,22 +490,6 @@ def discretize(
         orig_list_region=orig_list,
         orig=orig
     )
-
-def adj_update(adj, size, num_new):
-    adj = np.hstack([
-        adj,
-        np.zeros(
-            [size-num_new, num_new],
-            dtype=int
-        )
-    ])
-    adj = np.vstack([
-        adj,
-        np.zeros(
-            [num_new, size],
-            dtype=int)
-    ])
-    return adj
 
 def reachable_within(trans_length, adj_k, adj):
     if trans_length <= 1:
