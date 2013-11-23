@@ -151,7 +151,6 @@ def synthesize(option, specs, sys=None):
     """
     if sys is not None:
         sys = deepcopy(sys)
-        #keep_strongly_connected_components(sys)
         
         sform = sys_to_spec(sys)
         specs = specs | sform
@@ -164,43 +163,3 @@ def synthesize(option, specs, sys=None):
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
     return ctrl
-
-def keep_strongly_connected_components(sys):
-    scc = strongly_connected_components(sys)
-    
-    print('strongly connected components: ' +str(scc) )
-    
-    not_scc_states = []
-    for component in scc:
-        print('current component: ' +str(component) )
-        
-        # not single node ?
-        if len(component) > 1:
-            print('len > 1, skip...')
-            continue
-        
-        # singleton strongly connected iff self-loop
-        state = component[0]
-        print('cur state: ' +str(state) )
-        
-        print('post: ' +str(sys.states.post(state)) )
-        print('pre: ' +str(sys.states.pre(state)) )
-        
-        
-        if state not in sys.states.post(state):
-            print('to be removed')
-            not_scc_states += [state]
-    
-    # everything strongly connected ?
-    if not not_scc_states:
-        return
-    
-    print('states \\notin scc: ' +str(not_scc_states) )
-    
-    # rm nodes \notin any strongly connected component
-    for state in not_scc_states:
-        print('removing state: ' +str(state) )
-        sys.states.remove(state)
-    
-    print('After keeping only strongly connected states:')
-    print(sys)
