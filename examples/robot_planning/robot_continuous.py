@@ -11,6 +11,7 @@ NO, system and cont. prop definitions based on TuLiP 1.x
 NO, TuLiP 1.x discretization
 17 Jul, 2013
 """
+import sys
 import numpy as np
 
 from tulip import spec, synth, hybrid
@@ -96,7 +97,7 @@ ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
 if isinstance(ctrl, list):
     for counterexample in ctrl:
         print('counterexamples: ' +str(counterexample) +'\n')
-    exit(1)
+    sys.exit()
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_continuous.png', 'png'):
