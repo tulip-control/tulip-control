@@ -80,12 +80,20 @@ def sys_to_spec(sys):
 
     # Transitions
     for from_state in sys.states:
-        trans.append("("+str(from_state)+") -> X("+" || ".join([
-            "("+str(v)+")"
-            for (u,v,l) in sys.transitions.find(
-                from_states=[from_state]
-            )
-        ])+")")
+        post = sys.states.post(from_state)
+        
+        # no successor state ?
+        if not post:
+            continue
+        
+        post_states = " || ".join([
+            "(" +str(to_state) +")"
+            for to_state in post
+        ])
+        
+        trans.append(
+            "(" +str(from_state) +") -> X(" +post_states +")"
+        )
 
     # Mutual exclusion of states
     trans.append("X(("+") || (".join([
@@ -143,7 +151,7 @@ def synthesize(option, specs, sys=None):
     """
     if sys is not None:
         sys = deepcopy(sys)
-        keep_strongly_connected_components(sys)
+        #keep_strongly_connected_components(sys)
         
         sform = sys_to_spec(sys)
         specs = specs | sform
