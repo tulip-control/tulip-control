@@ -935,9 +935,10 @@ def extreme(poly1):
         return poly1.vertices
 
     V = np.array([])
+    R = np.array([])
     
     if len(poly1) > 0:
-        raise Exception("'extreme' not executable for regions")
+        raise Exception("extreme: not executable for regions")
     
     poly1 = reduce(poly1) # Need to have polytope non-redundant!
 
@@ -957,6 +958,7 @@ def extreme(poly1):
             V = np.append(V,b[ii]/A[ii])
         if len(A) == 1:
             R = np.append(R,1)
+            raise Exception("extreme: polytope is unbounded")
     
     elif nx == 2:
         # Polytope is 2D
@@ -971,6 +973,7 @@ def extreme(poly1):
             KK = np.hstack([K[I[ii]],K[I[ii+1]]])
             if np.linalg.cond(HH) == np.inf:
                 R = np.append(R,1)
+                raise Exception("extreme: polytope is unbounded")
             else:
                 v = np.linalg.solve(HH, KK)
                 if len(V) == 0:
