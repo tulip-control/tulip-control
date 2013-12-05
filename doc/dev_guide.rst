@@ -25,6 +25,10 @@ be followed:
   using the `"_" prefix <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
 - API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.  Accordingly, docstrings should be marked up with `Epytext <http://epydoc.sourceforge.net/manual-epytext.html>`_.
 
+- The User's and Developer's Guides are built using `Sphinx <http://sphinx.pocoo.org/>`_.  It uses a small extension of `reStructuredText <http://docutils.sourceforge.net/rst.html>`_.  Consult the `reST quick reference <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
+
+- Besides the previous two sources, documentation can appear in plaintext files, notably in README files.  These should have line widths of at most 80 characters.  E.g., this can be achieved at the command-line using ``fold -s -w 80`` or in `Emacs <http://www.gnu.org/software/emacs>`_ by ``C-u 80 M-x set-fill-column``.
+
 - When committing to the repository, you should write a summary line, at most 60
   characters in length, and if elaboration is necessary, then first skip a line
   (i.e., leave one blank) before beginning with details.
@@ -44,6 +48,8 @@ be followed:
   "_test.py", and passes these to `nose <http://readthedocs.org/docs/nose/>`_.
   Use the flag "--cover" to generate a coverage report, which will likely be
   placed under ``tests/cover/``.
+
+----
 
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
