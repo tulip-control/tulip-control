@@ -11,7 +11,7 @@ PortSystem              1.0
 PortGroup               python 1.0
 PortGroup               github 1.0
 
-github.setup            tulip-control tulip-control tulip-0.4a
+github.setup            tulip-control tulip-control 0.4a tulip-
 fetch.type              git
 
 name                    py-tulip
@@ -37,7 +37,7 @@ checksums               rmd160  8bfab3e26055095475a02f3cf0e24103bf1597e7 \
 
 python.versions         27
 
-depends_lib             port:python27 \
+depends_lib-append      port:python27 \
                         port:py27-setuptools \
                         port:py27-numpy \
                         port:py27-scipy \
@@ -74,7 +74,6 @@ if {![file exists ${prefix}/Library/Frameworks/Python.framework/Versions/2.7/lib
 ****     cd /opt/local/var/macports/sources/rsync.macports.org/release/tarballs/ports/python/py-cvxopt/
 ****     patch < py-cvxopt_Portfile.2.diff
 ****     sudo port install py27-cvxopt -dsdp +atlas
-****     sudo port install cvxopt +python26
 ****
 
 "
