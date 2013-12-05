@@ -42,6 +42,7 @@ depends_lib             port:python27 \
                         port:py27-numpy \
                         port:py27-scipy \
                         port:py27-networkx \
+                        port:py27-parsing \
                         port:gr1c
                         #port:py27-cvxopt -dsdp +atlas \
                         #port:yices: http://yices.csl.sri.com/
@@ -55,7 +56,6 @@ variant complete description {install also optional dependencies} {
 	                   port:py27-pydot \
                        port:graphviz \
                        port:py27-ipython \
-                       port:py27-parsing \
 	                   port:glpk
 }
 
