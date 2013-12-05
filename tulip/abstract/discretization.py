@@ -51,7 +51,6 @@ find_controller
 from copy import deepcopy
 import numpy as np
 from scipy import sparse as sp
-from cvxopt import matrix,solvers
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
@@ -103,8 +102,7 @@ def discretize(
     closed_loop=True, conservative=True,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7, verbose=0, plotit=False,
-    save_img=False
+    abs_tol=1e-7, verbose=0
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -132,14 +130,6 @@ def discretize(
         non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
     @param verbose: level of verbosity
-    
-    @param plotit: plot partitioning as it evolves
-    @type plotit: boolean,
-        default = False
-    @param save_img: save snapshots of partitioning to PDF files,
-        requires plotit=True
-    @type save_img: boolean,
-        default = False
     
     @rtype: AbstractSysDyn
     
@@ -205,24 +195,6 @@ def discretize(
     subsys_list = deepcopy(part.list_subsys)
     ss = ssys
     
-    # init graphics
-    if plotit:
-        # here to avoid loading matplotlib unless requested
-        try:
-            from plot import plot_partition
-            from tulip.polytope.plot import plot as polyplot
-            import matplotlib.pyplot as plt
-            
-            plt.ion()
-            
-            fig, (ax1, ax2) = plt.subplots(1, 2)
-        except:
-            plot_partition = None
-            print("polytope.plot_partition failed to import.\n"
-                "No plotting by discretize during partitioning.")
-        
-        iter_count = 0
-    
     # List of how many "new" regions
     # have been created for each region
     # and a list of original number of neighbors
@@ -275,13 +247,6 @@ def discretize(
         if verbose > 1:
             print("Computed reachable set S0 with volume " +
                 str(pc.volume(S0)) )
-        
-        if plotit:
-            ax2.clear()
-            polyplot(si, ax=ax2, color="blue")
-            polyplot(sj, ax=ax2, color="red")
-            polyplot(S0, ax=ax2, color="green")
-            fig.canvas.draw()
         
         # isect = si \cap S0
         isect = pc.intersect(si, S0)
@@ -405,49 +370,6 @@ def discretize(
                 print("No transition found, diff vol: " +str(vol2) +
                       ", intersect vol: " +str(vol1) )
             transitions[j,i] = 0
-        
-        # no plotting ?
-        if not plotit:
-            continue
-        if plot_partition is None:
-            continue
-        
-        tmp_part = PropPreservingPartition(
-            domain=part.domain, num_prop=part.num_prop,
-            list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
-            list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
-        )
-        
-        #polyplot(si, ax=ax2)
-        #print('plotted: si = ' +str(si))
-        #polyplot(sj, ax=ax2)
-        #print('plotted: sj = ' +str(sj))
-        #polyplot(S0, ax=ax2)
-        #print('plotted: S0 = ' +str(S0))
-        
-        #fig2.canvas.draw()
-        
-        ax1.clear()
-        
-        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
-        if save_img:
-            fig.savefig('movie' +str(iter_count) +'.pdf')
-        
-        iter_count += 1
-        
-        fig.canvas.draw()
-        
-        #ax1.relim()
-        #ax2.relim()
-        
-        #ax1.autoscale_view(True, True, True)
-        #ax2.autoscale_view(True, True, True)
-        
-        l,u = pc.bounding_box(part.domain)
-        ax2.set_xlim(l[0,0], u[0,0])
-        ax2.set_ylim(l[1,0], u[1,0])
-        
-        plt.pause(1)
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,
