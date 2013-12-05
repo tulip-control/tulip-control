@@ -28,7 +28,7 @@ Sphinx and Epydoc generated documentation
 
 There are two main sources of documentation outside the code.  The "user"
 documentation is under ``doc/`` and is built with `Sphinx
-<http://sphinx.pocoo.org/>`_, so the usual steps apply, i.e. ::
+<http://sphinx.pocoo.org/>`_, so the usual steps apply, ::
 
   make html
 
@@ -44,6 +44,8 @@ API documentation is generated using `Epydoc <http://epydoc.sourceforge.net/>`_
 and can also be built from the ``doc`` directory, now by ::
 
   make api
+
+Command summaries are provided by ``make help``.
 
 
 Testing
