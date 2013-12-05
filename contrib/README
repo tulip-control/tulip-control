@@ -8,3 +8,6 @@ macports
 readdstar.py, spin2dstar.py
   interfacing with LTL2DSTAR <http://ltl2dstar.de/>.  These may later be
   incorporated into TuLiP, in particular the tulip.spec subpackage.
+
+AES
+  specification generation for an electric power system.  Consult AES/README.
