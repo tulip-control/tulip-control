@@ -9,7 +9,7 @@ directly in GR(1) form and then use TuLiP to synthesize a reactive
 controller.
 
 The system is modeled as a discrete transition system in which the
-robot can be located anyplace no a 2x3 grid of cells:
+robot can be located anyplace on a 2x3 grid of cells:
 
     +----+----+----+
     | X3 | X4 | X5 |
@@ -17,7 +17,7 @@ robot can be located anyplace no a 2x3 grid of cells:
     | X0 | X1 | X2 |
     +----+----+----+
 
-The robot is allowed to transitions between any two adjacent cells;
+The robot is allowed to transition between any two adjacent cells;
 diagonal motions are not allowed.  The robot should continuously
 revisit the cell X5.
 
@@ -28,11 +28,10 @@ The system specification in its simplest form is given by
 
   []<>park -> []<>X5 && [](park -> <>X0)
 
-We must convert this specification into GR(1) form, which in TuLiP
-will be a specification of the form:
+We must convert this specification into GR(1) form:
 
-  env_init && []env_safe && []<>env_prog ->
-      sys_init && []sys_safe && []<>sys_prog
+  env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
+      sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
 
 # Import the packages that we need
@@ -42,7 +41,7 @@ from tulip import spec, synth
 #
 # Environment specification
 #
-# The environment can issue a park signal that the robot just respond
+# The environment can issue a park signal that the robot must respond
 # to by moving to the lower left corner of the grid.  We assume that
 # the park signal is turned off infinitely often.
 #
