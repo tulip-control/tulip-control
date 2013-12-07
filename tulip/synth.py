@@ -142,12 +142,14 @@ def synthesize(option, specs, sys=None):
           - C{"gr1c"}: use gr1c for GR(1) synthesis via L{gr1cint}.
           - C{"jtlv"}: use JTLV for GR(1) synthesis via L{jtlvint}.
     @type specs: L{spec.GRSpec}
-    @param sys: NOT IMPLEMENTED YET.
+    @param sys: A transition system that should be expressed with the
+        specification (spec).
 
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return list of counterexamples.
     @rtype: transys.Mealy or list
+
     """
     if sys is not None:
         sys = deepcopy(sys)

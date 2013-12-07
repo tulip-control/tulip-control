@@ -38,4 +38,4 @@ for verifying and constructing control protocols.
 
 __all__ = ["abstract", "polytope", "hybrid", "transys"]
 
-__version__ = "1.0a"
+__version__ = "1.0b"

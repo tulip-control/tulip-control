@@ -1,3 +1,6 @@
+# WARNING: This example may not yet be working.  Please check again in
+#          the upcoming release.
+#
 # This is an example to demonstrate how the output of the TuLiP discretization 
 # for a system with uncontrollable switching (i.e., modes are controlled by the
 # environment) might look like.

@@ -1,3 +1,6 @@
+# WARNING: This example is not yet working.  Please check again in the
+#          upcoming release.
+#
 # This is an example to demonstrate how the output of a discretization algorithm
 # that abstracts a switched system, where the mode of the system depends on a 
 # combination of environment and system controlled variables, might look like. 

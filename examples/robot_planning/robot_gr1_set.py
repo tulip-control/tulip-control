@@ -1,3 +1,6 @@
+# WARNING: This example is not yet working.  Please check again in the
+#          upcoming release.
+#
 #!/usr/bin/env python
 # robot_gr1.py - example of direct GR(1) specification
 #
