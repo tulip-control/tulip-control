@@ -1,5 +1,5 @@
-This directory contains a simple robot planning planning example that
-illustrates the usage of the TuLiP toolbox.
+This directory contains a simple robot planning example that illustrates the
+usage of the TuLiP toolbox.
 
 robot_discrete.py - discrete transition model
 robot_gr1.py - alternative system description using GRSpec
@@ -7,8 +7,7 @@ robot_continuous.py - continuous dynamics (with abstraction)
 robot_continuous_pwa.py - modification to include pwa dynamics
 
 In each of the examples, the task involves repeatedly visiting a cell,
-responding to a parking signal, and avoiding an environmental
-obstacle.
+responding to a parking signal, and avoiding an environmental obstacle.
 
 RMM, 26 Jun 2013
 NO, 5 Sep 2013
