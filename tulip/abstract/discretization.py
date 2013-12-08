@@ -141,7 +141,10 @@ def discretize(
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
     
-    if isinstance(ssys, PwaSysDyn):
+    ispwa = isinstance(ssys, PwaSysDyn)
+    islti = isinstance(ssys, LtiSysDyn)
+    
+    if ispwa:
         part = pwa_partition(ssys, part)
     
     # Save original polytopes, require them to be convex 
@@ -164,7 +167,7 @@ def discretize(
     
     # Cheby radius of disturbance set
     # (defined within the loop for pwa systems)
-    if isinstance(ssys, LtiSysDyn):
+    if islti:
         if len(ssys.E) > 0:
             rd,xd = pc.cheby_ball(ssys.Wset)
         else:
@@ -214,7 +217,7 @@ def discretize(
         #num_new_reg[i] += 1
         #print(num_new_reg)
         
-        if isinstance(ssys, PwaSysDyn):
+        if ispwa:
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
                 rd,xd = pc.cheby_ball(ss.Wset)
@@ -226,7 +229,7 @@ def discretize(
             msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
             msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
             
-            if isinstance(ssys, PwaSysDyn):
+            if ispwa:
                 msg += 'with active subsystem:\n\t'
                 msg += str(subsys_list[i])
             
@@ -282,7 +285,7 @@ def discretize(
             num_new = len(difflist)
             for reg in difflist:
                 sol.append(reg)
-                if isinstance(ssys, PwaSysDyn):
+                if ispwa:
                     subsys_list.append(subsys_list[i])
             size = len(sol)
             
