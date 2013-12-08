@@ -1622,3 +1622,11 @@ def num_bin(N, places=8):
     E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
     """
     return [(N>>k)&0x1  for k in range(places)]
+
+def box2poly(box):
+    """Return new Polytope from box.
+    
+    @param box: defining the Polytope
+    @type box: [[x1min, x1max], [x2min, x2max],...]
+    """
+    return Polytope.from_box(box)
