@@ -19,7 +19,7 @@ import sys
 import numpy as np
 
 from tulip import spec, synth, hybrid
-import tulip.polytope as pc
+from tulip.polytope import box2poly
 from tulip.abstract import prop2part, discretize
 
 visualize = False
@@ -36,12 +36,12 @@ uncertainty = 0.01
 
 """Quotient partition induced by propositions"""
 # Continuous state space
-cont_state_space = pc.Polytope.from_box([[0., 3.],[0., 2.]])
+cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
 # Continuous propositions
 cont_props = {}
-cont_props['home'] = pc.Polytope.from_box([[0., 1.],[0., 1.]])
-cont_props['lot'] = pc.Polytope.from_box([[2., 3.],[1., 2.]])
+cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
+cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
@@ -49,16 +49,16 @@ plot_partition(cont_partition)
 
 """Dynamics abstracted to discrete transitions, given initial partition"""
 # Continuous dynamics
-A = np.array([[1.0, 0.],[ 0., 1.0]])
-B = np.array([[0.1, 0.],[ 0., 0.1]])
-E = np.array([[1,0],[0,1]])
+A = np.array([[1.0, 0.], [ 0., 1.0]])
+B = np.array([[0.1, 0.], [ 0., 0.1]])
+E = np.array([[1,0], [0,1]])
 
 # available control, possible disturbances
-U = input_bound *np.array([[-1., 1.],[-1., 1.]])
-W = uncertainty *np.array([[-1., 1.],[-1., 1.]])
+U = input_bound *np.array([[-1., 1.], [-1., 1.]])
+W = uncertainty *np.array([[-1., 1.], [-1., 1.]])
 
-U = pc.Polytope.from_box(U)
-W = pc.Polytope.from_box(W)
+U = box2poly(U)
+W = box2poly(W)
 
 sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
 

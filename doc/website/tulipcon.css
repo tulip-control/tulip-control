@@ -1,0 +1,65 @@
+/* TuLiP website stylesheet */
+
+body {
+    background: #ffe6d6;
+    color: #421a00;
+    font-family: sans-serif;
+    font-size: 16pt;
+}
+
+h1 {
+    font-size: 20pt;
+}
+
+h2 {
+    text-align: center;
+    font-size: 18pt;
+    background: #fff;
+}
+
+h3 {
+    font-style: italic;
+    margin-left: 1em;
+}
+h3:after {
+    content: ":";
+}
+
+a {
+    color: #f60;
+    text-decoration: none;
+}
+a:hover, a:active {
+    text-decoration: underline
+}
+
+li {
+    padding-bottom: .2em;
+}
+
+div.shellcode {
+    background-color: #000;
+    color: #aaa;
+    font-family: monospace;
+    font-size: 14pt;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+}
+
+blockquote#licensequote {
+    padding: 1em;
+    background-color: #f5f5f5;
+}
+
+blockquote#licensequote * {
+    font-size: 12pt;
+    color: #000;
+    font-family: serif;
+}
+
+span.user, span.domain {
+    font-family: monospace;
+    font-size: 14pt;
+    color: #f60;
+}

@@ -2,7 +2,12 @@ Developer's Guide
 =================
 
 The purpose of this page is to provide guidelines for contributors to the TuLiP
-project.  We begin with important organizational notes and **rules** that should
+project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_ and the `tulip-control-discuss mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_ (members only).
+
+Organization and Rules
+----------------------
+
+We begin with important organizational notes and **rules** that should
 be followed:
 
 - `PEP 8 <http://python.org/dev/peps/pep-0008/>`_.  Especially, you should
@@ -49,7 +54,30 @@ be followed:
   Use the flag "--cover" to generate a coverage report, which will likely be
   placed under ``tests/cover/``.
 
-----
+Version naming
+--------------
+
+(Copied verbatim from an email sent by Richard Murray on the TuLiP-discuss mailing list on 17 May 2011.)
+
+For version numbers, the style I like is N.mx where
+
+* N = major version; everything that worked before could break
+* m = revision; most functions should work, but might need (minor) modifications
+* x = minor revision; code that ran should continue running
+
+So, if you go from version 1.2c to 1.2d, then no interfaces should
+change, code should continue to run, etc.  If you go from 1.2d to
+1.3a, then there might be changes in some arguments lists or other
+small things, but previous functionality still in place (somewhow).
+If you go from 1.3a to 2.0a, then we can make whatever changes we
+want.
+
+None of these version numbers would go in individual files, but would
+be a label for the entire package.
+
+
+Advice
+------
 
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new

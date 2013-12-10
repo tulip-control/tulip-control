@@ -38,7 +38,7 @@ The procedure that we used is broken down into three primary steps:
 
   * Design a continuous controller that implements the discrete plan.
 
-More information on the solution strategy is available in [WonTopOzaXuMur2011]_.
+More information on the solution strategy is available in [WTOXM11]_.
 
 .. include:: install.txt
 
