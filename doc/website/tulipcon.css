@@ -37,11 +37,14 @@ li {
     padding-bottom: .2em;
 }
 
-pre.shellcode {
+div.shellcode {
     background-color: #000;
     color: #aaa;
+    font-family: monospace;
     font-size: 14pt;
     padding: 0.5em;
+    margin-top: 0.5em;
+    margin-bottom: 1em;
 }
 
 blockquote#licensequote {
@@ -53,4 +56,10 @@ blockquote#licensequote * {
     font-size: 12pt;
     color: #000;
     font-family: serif;
+}
+
+span.user, span.domain {
+    font-family: monospace;
+    font-size: 14pt;
+    color: #f60;
 }
