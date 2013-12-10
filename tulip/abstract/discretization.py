@@ -67,18 +67,21 @@ class AbstractSysDyn:
             that can be fed into discrete synthesis algorithms
     - orig_list_region: original proposition preserving regions
     - orig: list assigning an original proposition preserving region to each
-            new region 
+            new region
+    - disc_params: a dictionary of parameters used in discretization that 
+            should be passed to the controller refinement to ensure consistency 
             
     Note1: There could be some redundancy in ppp and ofts in that they are
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
     def __init__(self, ppp=None, ofts=None,
-                 orig_list_region=None, orig=None):
+                 orig_list_region=None, orig=None, disc_params={}):
         self.ppp = ppp
         self.ofts = ofts
         self.orig_list_region = orig_list_region
         self.orig = orig
+        self.disc_params = disc_params
 
 def _block_diag2(A,B):
     """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
@@ -99,7 +102,7 @@ def _block_diag2(A,B):
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
-    closed_loop=True, conservative=True,
+    closed_loop=True, conservative=False,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
     abs_tol=1e-7, verbose=0
@@ -404,13 +407,18 @@ def discretize(
     
     ofts.states.labels(ofts_states, prop_list)
     
+    param = {'N':N, 'closed_loop':closed_loop,
+        'conservative':conservative,
+        'use_all_horizon':use_all_horizon}
+    
     assert(len(prop_list) == n)
     
     return AbstractSysDyn(
         ppp=new_part,
         ofts=ofts,
         orig_list_region=orig_list,
-        orig=orig
+        orig=orig,
+        disc_params=param
     )
 
 def reachable_within(trans_length, adj_k, adj):
