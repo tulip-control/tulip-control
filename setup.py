@@ -138,7 +138,7 @@ if perform_setup:
           description = 'Temporal Logic Planning (TuLiP) Toolbox',
           author = 'Caltech Control and Dynamical Systems',
           author_email = 'murray@cds.caltech.edu',
-          url = 'http://tulip-control.sourceforge.net',
+          url = 'http://www.cds.caltech.edu/tulip',
           license = 'BSD',
           requires = ['numpy', 'scipy', 'pyparsing', 'networkx', 'cvxopt'],
           install_requires = ['networkx >= 1.6'],

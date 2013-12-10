@@ -66,7 +66,6 @@ Here, the assumption :math:`\varphi_{init}` on the initial condition of the syst
 is a propositional formula built from :math:`\Pi.`
 The assumption :math:`\varphi_e` on the environment and the desired behavior 
 :math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
-See our `wiki <http://tulip-control.sourceforge.net>`_ for more details on the form of :math:`\varphi_e, \varphi_s`.
 
 As described in the :doc:`intro`, our approach to this reactive control 
 system synthesis consists of the following main steps:
