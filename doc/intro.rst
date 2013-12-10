@@ -1,30 +1,28 @@
 Introduction
 ============
 
-The Temporal Logic Planning (TuLiP) Toolbox is a collection of Python-based code
-for automatic synthesis of correct-by-construction embedded control software as
-discussed in [WTOXM11]_, [WTM12]_.  This chapter contains a brief overview of
-the toolbox, along with instructions on how to install the software.
+The `Temporal Logic Planning (TuLiP) Toolbox
+<http://www.cds.caltech.edu/tulip>`_ is a collection of Python-based code for
+automatic synthesis of correct-by-construction embedded control software as
+discussed in [WTOXM11]_.  This chapter contains a brief overview of the toolbox,
+along with instructions on how to install the software.
 
-Please also see `the wiki <http://tulip-control.sourceforge.net>`_ for
-additional information and related links.  Though installation should be
-easy (and standardized) through setup.py, there are some dependencies that
-will need to be manually installed if not already available; details are
-provided in :doc:`install`.  Note that *this documentation is still under
-development*.  For help and support, please visit `our support page
-<http://sourceforge.net/projects/tulip-control/support>`_.
+Though installation should be easy (and standardized) through setup.py, there
+are some dependencies that will need to be manually installed if not already
+available; details are provided in :doc:`install`.  Note that *this
+documentation is still under development*.
 
 Package Overview
 ----------------
 
-TuLiP is designed to solve synthesize discrete-state controllers for hybrid
-systems operating in a (potentially dynamic and unknown) environment.  The
-system specification is given in terms of a temporal logic formula,
-typically written in LTL.
+TuLiP is designed to synthesize discrete-state controllers for hybrid systems
+operating in a (potentially dynamic and unknown) environment.  The system
+specification is given in terms of a temporal logic formula, typically written
+in LTL.
 
 The approach used by TuLiP is outlined in the figure below:
 
-.. image:: approach.*
+.. image:: approach.png
 
 The procedure that we used is broken down into three primary steps:
 
@@ -38,9 +36,8 @@ The procedure that we used is broken down into three primary steps:
 
   * Design a continuous controller that implements the discrete plan.
 
-More information on the solution strategy is available in [WTOXM11]_.
-
-.. include:: install.txt
+More information on the solution strategy is available in [WTOXM11]_ and
+:doc:`formulations`.
 
 Version 1.0 Release Notes
 -------------------------
