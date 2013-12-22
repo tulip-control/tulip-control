@@ -34,6 +34,10 @@ def check_mpl():
 def check_pydot():
     try:
         import pydot
+        from distutils.version import StrictVersion
+        if StrictVersion(pydot.__version__) < StrictVersion('1.0.28'):
+            print('Pydot version >= 1.0.28 required.' +
+                'found: ' +pydot.__version__)
     except ImportError:
         return False
     return True
