@@ -296,7 +296,12 @@ The python code to implement this logic is given by:
    :start-after: @specs_setup_section@
    :end-before: @specs_setup_section_end@
 
-Note the use of :literal:`<->` for equivalence (equality).
+Note the use of :literal:`<->` for equivalence (equality).  As in the case
+of the environmental specification, the system specification consists of
+four parts that provide additional discrete system variables
+(:literal:`sys_vars`), initial conditions (:literal:`sys_init`), progress
+conditions (:literal:`sys_prog`) and safety conditions
+(:literal:`sys_safe`). 
 
 Finally, we construct the full specification for the system and environment
 by creating a GR(1) specification consisting of the various pieces we have
@@ -306,7 +311,8 @@ constructed:
    :start-after: @specs_create_section@
    :end-before: @specs_create_section_end@
 
-To synthesize the controller, we use the 
+To synthesize the controller, we call the :literal:`synth.synthesize()`
+function. 
 
 .. literalinclude:: ../examples/robot_planning/robot_discrete.py
    :start-after: @synthesize@
