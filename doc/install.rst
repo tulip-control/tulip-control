@@ -108,6 +108,30 @@ For installing SciPy, NumPy, consider trying
 `Scipy Superpack for Mac OSX
 <http://fonnesbeck.github.com/ScipySuperpack/>`_ by Chris Fonnesbeck.
 
+When installing CVXOPT using MacPorts, there are some compatibility issues
+case CVXOPT to fail to install.  The following customizations will link
+numpy against Apple's implementation of LAPACK and BLAS and bypass this
+issue:
+
+* Uninstall atlas (if installed)::
+
+  $ sudo port uninstall atlas; sudo port clean atlas
+
+* Uninstall numpy (if installed)::
+
+  $ sudo port uninstall numpy; sudo port clean numpy
+
+* Install numpy without atlas::
+
+  $ sudo port install py27-numpy -atlas
+
+* Install cvxopt without atlas or dsdp::
+
+  $ sudo port install py27-cvxopt -atlas -dsdp
+
+Note that if you have packages that rely on numpy (such as scipy), you will
+have to uninstall and reinstall those packages as well.
+
 Microsoft Windows
 `````````````````
 
