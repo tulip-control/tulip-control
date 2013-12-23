@@ -145,7 +145,7 @@ if perform_setup:
           url = 'http://www.cds.caltech.edu/tulip',
           license = 'BSD',
           requires = ['numpy', 'scipy', 'pyparsing', 'networkx', 'cvxopt'],
-          install_requires = ['networkx >= 1.6'],
+          install_requires = ['networkx >= 1.6', 'numpy >= 1.7'],
           packages = ['tulip', 'tulip.transys', 'tulip.transys.export',
                       'tulip.abstract', 'tulip.polytope', 'tulip.spec'],
           package_dir = {'tulip' : 'tulip'},
