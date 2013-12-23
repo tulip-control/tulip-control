@@ -208,11 +208,11 @@ Also note that the domains of the variables can be either boolean or a list of i
 
 Example 1: Robot Motion Planning with only Discrete Decisions
 `````````````````````````````````````````````````````````````
-This example is provided in examples/robot_discrete_simple.py.
-It illustrates the use of the jtlvint module in synthesizing a planner
+This example is provided in examples/robot_planning/robot_discrete.py.
+It illustrates the use of the gr1c module in synthesizing a planner
 for a robot that only needs to make discrete decision.
 
-.. image:: robot_discrete_simple.*
+.. image:: robot_simple.*
    :align: center
 
 We consider the robot moving around the regions as shown in the above figure
@@ -223,95 +223,107 @@ The specification of the robot is
    \varphi = \square \diamond(\neg park) \implies (\square \diamond(s \in C_5)
    \wedge \square(park \implies \diamond(s \in C_0))).
 
-We cannot, however, deal with this specification directly since it is not in the form of 
-GR[1].
-An equivalent GR[1] specification of the above specification can be obtained
-by introducing an auxiliary discrete system variable :math:`X0reach,` initialized to 
-`True`. The transition relation of :math:`X0reach,` is given by
-:math:`\square(\text{next}(X0reach) = (s \in C_0 \vee (X0reach \wedge \neg park))).`
+We cannot, however, deal with this specification directly since it is not in
+the form of GR[1].  An equivalent GR[1] specification of the above
+specification can be obtained by introducing an auxiliary discrete system
+variable :math:`X0reach,` initialized to `True`. The transition relation of
+:math:`X0reach,` is given by :math:`\square(\text{next}(X0reach) = (s \in
+C_0 \vee (X0reach \wedge \neg park))).`
 
-To automatically synthesize a planner for this robot, we first import the necessary modules.
+To automatically synthesize a planner for this robot, we first import the
+necessary modules:
 
 .. highlight:: python
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
    :start-after: @import_section@
    :end-before: @import_section_end@
 
-Specify the smv file, spc file and aut file.
+We next define the dynamics of the system, modeled as a discrete transition
+system in which the robot can be located anyplace no a 2x3 grid of cells.
+Transitions between adjacent cells are allowed, which we model as a
+transition system in this example (it would also be possible to do this via
+a formula):
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @filename_section@
-   :end-before: @filename_section_end@
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @system_dynamics_section@
+   :end-before: @system_dynamics_section_end@
 
-Specify the environment variables.
+To create the specification, we label some of the states with names:
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @envvar_section@
-   :end-before: @envvar_section_end@
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @system_labels_section@
+   :end-before: @system_labels_section_end@
 
-Specify the discrete system variable.
+These names serve as atomic propositions that are true when the system is in
+the indicated states.
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @sysdiscvar_section@
-   :end-before: @sysdiscvar_section_end@
+The environment can issue a park signal that requires the robot to respond
+by moving to the lower left corner of the grid.  We assume that
+the park signal is turned off infinitely often.  We describe this using the
+following code:
 
-Specify the transition system representing the continuous dynamics.
-First, we list the propositions on the continuous states.
-Here, these propositions specify in which cell the robot is, 
-i.e., Xi means that the robot is in cell Ci.
-Then, we specify the regions.
-Note that the first argument of Region(poly, prop) should be a list of 
-polytopes. But since we are not dealing with the actual controller, we will 
-just fill it with a string (think of it as a name of the region).
-The second argument of Region(poly, prop) is a list that specifies which 
-propositions in cont_props above is satisfied. As specified below, regioni 
-satisfies proposition Xi.
-Finally, we specify the adjacency between regions. 
-disc_dynamics.adj[i][j] = 1 if starting from region j,
-the robot can move to region i while only staying in the union of region i 
-and region j.
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @environ_section@
+   :end-before: @environ_section_end@
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @ts_section@
-   :end-before: @ts_section_end@
+Here the specification is broken up into four pieces: a description of the
+discrete environment variables (:literal:`env_vars`), a specification for
+the initial condition for the environment (:literal:`env_init`), a progress
+formula (:literal:`env_prog`) that must be satisfied infinitely often, and
+a safety formula (:literal:`env_safe`) that must hold at all times during
+the execution.  The :literal:`set()` command is used to initialize one or
+more of these variables to the empty set.
 
-Specification.
+The system specification is that the robot should repeatedly revisit
+the upper right corner of the grid while at the same time responding
+to the park signal by visiting the lower left corner.  The LTL
+specification is given by 
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @specification@
-   :end-before: @specification_end@
+.. math::
+   \square\diamond home \wedge \square (park \implies \diamond lot)
 
-Generate input to JTLV.
+Since this specification is not in GR(1) form, we introduce the
+variable X0reach that is initialized to True and the specification
+:math:`\square(park \implies \diamond lot)` becomes
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @geninput@
-   :end-before: @geninput_end@
+.. math::
+     \square( (next(X0reach) = lot) \vee (X0reach \wedge \neg park))
 
-Check realizability.
+The python code to implement this logic is given by:
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @check@
-   :end-before: @check_end@
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @specs_setup_section@
+   :end-before: @specs_setup_section_end@
 
-Construct an automaton.
+Note the use of :literal:`<->` for equivalence (equality).
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @compaut@
-   :end-before: @compaut_end@
+Finally, we construct the full specification for the system and environment
+by creating a GR(1) specification consisting of the various pieces we have
+constructed:
 
-Run simulation.
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @specs_create_section@
+   :end-before: @specs_create_section_end@
 
-.. literalinclude:: ../examples/robot_discrete_simple.py
-   :start-after: @sim@
-   :end-before: @sim_end@
+To synthesize the controller, we use the 
 
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @synthesize@
+   :end-before: @synthesize_end@
+
+The controller can now be saved in graphical form, or printed if pydot package
+is not available:
+
+.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+   :start-after: @plot_print@
+   :end-before: @plot_print_end@
 
 .. _ssec:ex2:
 
 Example 2: Robot Motion Planning
 ````````````````````````````````
-This example is provided in examples/robot_simple.py.
+This example is provided in examples/robot_planning/robot_continuous.py.
 It is an extension of the previous example by including continuous dynamics.
 
 First, we import the necessary modules, 

@@ -7,9 +7,16 @@ This example illustrates the use of TuLiP to synthesize a reactive
 controller for system whose dynamics are described by a discrete
 transition system.
 """
+#
+# Note: This code is commented to allow components to be extracted into
+# the tutorial that is part of the users manual.  Comments containing
+# strings of the form @label@ are used for this purpose.
+#
 
+# @import_section@
 # Import the packages that we need
 from tulip import transys, spec, synth
+# @import_section_end@
 
 #
 # System dynamics
@@ -29,6 +36,7 @@ from tulip import transys, spec, synth
 #     +----+----+----+
 #
 
+# @system_dynamics_section@
 # Create a finite transition system
 sys = transys.FTS()          
 
@@ -46,11 +54,14 @@ sys.transitions.add_from({'X2'}, {'X1', 'X5'})
 sys.transitions.add_from({'X3'}, {'X0', 'X4'})
 sys.transitions.add_from({'X4'}, {'X3', 'X1', 'X5'})
 sys.transitions.add_from({'X5'}, {'X4', 'X2'})
+# @system_dynamics_section_end@
 
+# @system_labels_section@
 # Add atomic propositions to the states
 sys.atomic_propositions.add_from({'home', 'lot'})
 sys.states.label('X0', 'home')
 sys.states.label('X5', 'lot')
+# @system_labels_section_end@
 
 # if IPython and Matplotlib available
 #sys.plot()
@@ -62,10 +73,12 @@ sys.states.label('X5', 'lot')
 # to by moving to the lower left corner of the grid.  We assume that
 # the park signal is turned off infinitely often.
 #
+# @environ_section@
 env_vars = {'park'}
 env_init = set()                # empty set
 env_prog = '!park'
 env_safe = set()                # empty set
+# @environ_section_end@
 
 # 
 # System specification
@@ -84,6 +97,7 @@ env_safe = set()                # empty set
 #     [](next(X0reach) <-> lot || (X0reach && !park))
 #
 
+# @specs_setup_section@
 # Augment the system description to make it GR(1)
 #! TODO: create a function to convert this type of spec automatically
 sys_vars = {'X0reach'}          # infer the rest from TS 
@@ -91,21 +105,30 @@ sys_init = {'X0reach'}
 sys_prog = {'home'}             # []<>home
 sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'} 
+# @specs_setup_section_end@
 
+# @specs_create_section@
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+# @specs_create_section_end@
+
 #
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
+# @synthesize@
 ctrl = synth.synthesize('gr1c', specs, sys)
+# @synthesize_end@
 
 #
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
 #
+# @plot_print@
 if not ctrl.save('robot_discrete.png', 'png'):
     print(ctrl)
+# @plot_print_end@
+
