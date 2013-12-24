@@ -946,7 +946,7 @@ class States(object):
             Current state \\subseteq states
         """
         if not is_subset(self.initial, self() ):
-            warnings.warn('Ininital states \\not\\subseteq states.')
+            warnings.warn('Initial states \\not\\subseteq states.')
         
         if self.current is None:
             warnings.warn('Current state unset.')
