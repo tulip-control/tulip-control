@@ -45,7 +45,7 @@ import numpy as np
 
 import polytope as pc
 
-class LtiSysDyn:
+class LtiSysDyn(object):
     """LtiSysDyn class for specifying the discrete-time continuous dynamics:
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
@@ -126,7 +126,7 @@ class LtiSysDyn:
         output += "\nWset =\n"+str(self.Wset)
         return output
 
-class PwaSysDyn:
+class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
     A PwaSysDyn object contains the fields:
     
@@ -182,7 +182,7 @@ class PwaSysDyn:
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
 
-class HybridSysDyn:
+class HybridSysDyn(object):
     """HybridSysDyn class for specifying hybrid systems with discrete and
     	continuous variables.
     

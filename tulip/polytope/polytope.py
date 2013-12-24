@@ -97,7 +97,7 @@ solvers.options['LPX_K_MSGLEV'] = 0
 # Nicer numpy output
 np.set_printoptions(precision=5, suppress = True)
 
-class Polytope:
+class Polytope(object):
     """Polytope class with following fields
     
     - `A`: a numpy array for the hyperplane normals in hyperplane
@@ -256,7 +256,7 @@ class Polytope:
         
         return cls(A, b, minrep=True)
 
-class Region:
+class Region(object):
     """Class for lists of convex polytopes
     
     Contains the following fields:
