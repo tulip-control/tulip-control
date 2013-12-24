@@ -15,12 +15,19 @@ NO, system and cont. prop definitions based on TuLiP 1.x
 NO, TuLiP 1.x discretization
 17 Jul, 2013
 """
+#
+# Note: This code is commented to allow components to be extracted into
+# the tutorial that is part of the users manual.  Comments containing
+# strings of the form @label@ are used for this purpose.
+
+# @import_section@
 import sys
 import numpy as np
 
 from tulip import spec, synth, hybrid
 from tulip.polytope import box2poly
 from tulip.abstract import prop2part, discretize
+# @import_section_end@
 
 visualize = False
 if visualize:
@@ -30,15 +37,33 @@ else:
     def plot_partition(a, b=None):
         return
 
+# @dynamics_section@
 # Problem parameters
 input_bound = 1.0
 uncertainty = 0.01
 
-"""Quotient partition induced by propositions"""
 # Continuous state space
 cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
-# Continuous propositions
+# Continuous dynamics
+A = np.array([[1.0, 0.], [ 0., 1.0]])
+B = np.array([[0.1, 0.], [ 0., 0.1]])
+E = np.array([[1,0], [0,1]])
+
+# Available control, possible disturbances
+U = input_bound *np.array([[-1., 1.], [-1., 1.]])
+W = uncertainty *np.array([[-1., 1.], [-1., 1.]])
+
+# Convert to polyhedral representation
+U = box2poly(U)
+W = box2poly(W)
+
+# Construct the LTI system describing the dynamics
+sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
+# @dynamics_section_end@
+
+# @partition_section@
+# Define atomic propositions for relevant regions of state space
 cont_props = {}
 cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
 cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
@@ -46,27 +71,15 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
 plot_partition(cont_partition)
+# @partition_section_end@
 
-"""Dynamics abstracted to discrete transitions, given initial partition"""
-# Continuous dynamics
-A = np.array([[1.0, 0.], [ 0., 1.0]])
-B = np.array([[0.1, 0.], [ 0., 0.1]])
-E = np.array([[1,0], [0,1]])
-
-# available control, possible disturbances
-U = input_bound *np.array([[-1., 1.], [-1., 1.]])
-W = uncertainty *np.array([[-1., 1.], [-1., 1.]])
-
-U = box2poly(U)
-W = box2poly(W)
-
-sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
-
+# @discretize_section@
 # Given dynamics & proposition-preserving partition, find feasible transitions
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
     N=8, min_cell_volume=0.1, verbose=0,
 )
+# @discretize_section_end@
 
 """Visualize transitions in continuous domain (optional)"""
 if visualize:
@@ -94,6 +107,7 @@ sys_prog |= {'X0reach'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
+# @synthesize_section@
 """Synthesize"""
 ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
 
@@ -106,5 +120,6 @@ if isinstance(ctrl, list):
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_continuous.png', 'png'):
     print(ctrl)
+# @synthesize_section_end@
 
 # Simulation

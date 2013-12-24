@@ -1,5 +1,5 @@
-Problem Formulations
-====================
+Additional Problem Formulations
+===============================
 
 Discrete-time linear with disturbances
 --------------------------------------

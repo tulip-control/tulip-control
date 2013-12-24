@@ -1,17 +1,17 @@
 Tutorial and Examples
-=======================
+=====================
 
 TuLiP is developed for synthesis of discrete controllers for hybrid control
 systems, including supervisory controllers, switching controllers and
 receding horizon temporal logic planners.
 
-Discrete State Example
-----------------------
+Synthesis of Reactive Controllers
+---------------------------------
 To illustrate the basic synthesis capabilities of TuLiP, we synthesize a
 simple discrete state controller for a robotic motion control system.
 
-Synthesis of Reactive Controllers
----------------------------------
+Problem Formulation
+```````````````````
 We consider a system that comprises the physical component, which we refer
 to as the plant, and the (potentially dynamic and not a priori known)
 environment in which the plant operates.  The system may contain both
@@ -88,14 +88,13 @@ in :math:`\Pi_c`.
 
 This can be done using the following function call:
 
-     .. autofunction:: abstract.prop2part2
+     .. autofunction:: abstract.prop2part
 	:noindex:
 
 The above function returns a proposition preserving partition as a PropPreservingPartition object.
 
      .. autoclass:: abstract.PropPreservingPartition
 	:noindex:
-
 
 .. _ssec:disc:
 
@@ -107,34 +106,31 @@ we refine the partition based on the reachability relation between cells
 and obtain a finite state abstraction of the evolution of the continuous state, 
 represented by a finite transition system.
 
-CtsSysDyn class is used to define continuous dynamics.
+The LtiSysDyn class is used to define continuous dynamics.
 
-     .. autoclass:: discretize.CtsSysDyn
+     .. autoclass:: hybrid.LtiSysDyn
 	:noindex:
-
 
 Once we have the proposition preserving partition and the continuous dynamics,
 continuous state space discretization can be done using the following function call:
 
-     .. autofunction:: discretize.discretizeM
+     .. autofunction:: abstract.discretize
 	:noindex:
-
 
 .. _ssec:syn:
 
 Digital design synthesis
 ````````````````````````
-
-The continuous state space discretization generates a finite state abstraction
-of the continuous state, represented by a finite transition system.
-Each state in this finite transition system corresponds to a cell in the continuous
-domain.
-A transition :math:`c_i \to c_j` in this finite state system indicates that 
-from any continuous state :math:`s_0` that belongs to cell :math:`c_i`, 
-there exists a sequence of control inputs :math:`u_0, u_1, \ldots, u_{N-1}` 
-that takes the system to another continuous state :math:`s_{N}` in cell :math:`c_j`.
-Hence, under the assumption that the specification is stutter invariant,
-we can describe the continuous dynamics by an LTL formula of the form
+The continuous state space discretization generates a finite state
+abstraction of the continuous state, represented by a finite transition
+system.  Each state in this finite transition system corresponds to a cell
+in the continuous domain.  A transition :math:`c_i \to c_j` in this finite
+state system indicates that from any continuous state :math:`s_0` that
+belongs to cell :math:`c_i`, there exists a sequence of control inputs
+:math:`u_0, u_1, \ldots, u_{N-1}` that takes the system to another
+continuous state :math:`s_{N}` in cell :math:`c_j`.  Hence, under the
+assumption that the specification is stutter invariant, we can describe the
+continuous dynamics by an LTL formula of the form
 
 .. math::
    (v = c_i) \implies next(\bigvee_{j \text{ s.t. } c_i \to c_j} v = c_j),
@@ -142,40 +138,29 @@ we can describe the continuous dynamics by an LTL formula of the form
 where :math:`v` is a new discrete variable that describes in which cell
 the continuous state is.
 
-Since the partition is proposition preserving, all the continuous states that belong
-to the same cell satisfy exactly the same set of propositions on the continuous
-state. By the abuse of notation, we write :math:`c_j \models X_i` if all the continuous
-states in cell :math:`c_j` satisfy proposition :math:`X_i`.
-Then, we can replace any proposition :math:`X_i` on the continuous state variables
-by the formula :math:`\displaystyle{\bigvee_{j \text{ s.t. } c_j \models X_i} v = c_j}`.
+Since the partition is proposition preserving, all the continuous states
+that belong to the same cell satisfy exactly the same set of propositions on
+the continuous state. By the abuse of notation, we write :math:`c_j \models
+X_i` if all the continuous states in cell :math:`c_j` satisfy proposition
+:math:`X_i`.  Then, we can replace any proposition :math:`X_i` on the
+continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
+\text{ s.t. } c_j \models X_i} v = c_j}`.
 
-Putting everything together, we now obtain a specification of the form
-in :eq:`spec` (see also :ref:`ssec:spectips`).  We can then use the
-GR(1) Game implementation in `JTLV <http://jtlv.ysaar.net/>`_ to
-automatically synthesize a planner that ensures the satisfaction of
-the specification, taking into account all the possible behaviors of
-the environment.  This can be done using the following steps.
+Putting everything together, we now obtain a specification of the form in
+:eq:`spec` (see also :ref:`ssec:spectips`).  We can then use the GR(1) game
+implementation in `JTLV <http://jtlv.ysaar.net/>`_ or `gr1c
+<http://scottman.net/2012/gr1c>`_ to automatically synthesize a planner that
+ensures the satisfaction of the specification, taking into account all the
+possible behaviors of the environment.  This is done using the
+:literal:`synth.synthesize` function:
 
-    1. Generate input to JTLV
+    .. autofunction:: synth.synthesize
+	:noindex:
 
-        .. autofunction:: jtlvint.generateJTLVInput
-	   :noindex:
+The resulting output is a finite state machine (Mealy machine):
 
-    2. Synthesize the discrete planner
-
-        .. autofunction:: jtlvint.computeStrategy
-	   :noindex:
-
-    3. Construct the automaton
-
-        .. autoclass:: automaton.Automaton
-	   :noindex:
-
-
-Step 1 and 2 above can be combined using the following function:
-        .. autofunction:: jtlvint.synthesize
-	   :noindex:
-
+    .. autofunction:: transys.FiniteStateMachine
+	:noindex:
 
 .. _ssec:spectips:
 
@@ -206,8 +191,8 @@ Also note that the domains of the variables can be either boolean or a list of i
 
 .. _ssec:ex1:
 
-Example 1: Robot Motion Planning with only Discrete Decisions
-`````````````````````````````````````````````````````````````
+Example 1: Discrete State Robot Motion Planning
+```````````````````````````````````````````````
 This example is provided in examples/robot_planning/robot_discrete.py.
 It illustrates the use of the gr1c module in synthesizing a planner
 for a robot that only needs to make discrete decision.
@@ -327,8 +312,8 @@ is not available:
 
 .. _ssec:ex2:
 
-Example 2: Robot Motion Planning
-````````````````````````````````
+Example 2: Continuous State Robot Motion Planning
+`````````````````````````````````````````````````
 This example is provided in examples/robot_planning/robot_continuous.py.
 It is an extension of the previous example by including continuous dynamics.
 
@@ -337,96 +322,42 @@ specify the smv file, spc file and aut file,
 and specify the environment and the discrete system variables
 as in the previous example.
 
-.. literalinclude:: ../examples/robot_simple.py
-   :start-after: @importvar@
-   :end-before: @importvar_end@
+.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+   :start-after: @import_section@
+   :end-before: @import_section_end@
 
-Next, we specify the continuous dynamics.
-This includes specifying the continuous state space, propositions on continuous variables,
-and the dynamics.
-The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y} = u_y.`
+Next, we specify the continuous dynamics.  This includes specifying the
+continuous state space, propositions on continuous variables, and the
+dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y}
+= u_y.`
 
-.. literalinclude:: ../examples/robot_simple.py
-   :start-after: @contdyn@
-   :end-before: @contdyn_end@
+.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+   :start-after: @dynamics_section@
+   :end-before: @dynamics_section_end@
 
-Now, we can construct the proposition preserving partition of the continuous state space
-and discretize the continuous state space based on the dynamics.
+Now, we can construct the proposition preserving partition of the continuous
+state space and discretize the continuous state space based on the dynamics.
 
-.. literalinclude:: ../examples/robot_simple.py
-   :start-after: @discretize@
-   :end-before: @discretize_end@
+.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+   :start-after: @partition_section@
+   :end-before: @partition_section_end@
 
-The rest is the same as in the previous example. 
-We specify system specification, 
-generate input to JTLV,
-check realizability,
-construct an automaton, run simulation and write simulation results to a file.
+.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+   :start-after: @discretize_section@
+   :end-before: @discretize_section_end@
 
-.. literalinclude:: ../examples/robot_simple.py
-   :start-after: @gencheckcomp@
-   :end-before: @gencheckcomp_end@
-.. literalinclude:: ../examples/robot_simple.py
-   :start-after: @sim@
-   :end-before: @sim_end@
+The rest is the same as in the previous example.  We specify the
+environment, create a GR(1) system specification, and synthesize a
+controller.  Here we use the JTLV synthesis tool, which returns a counter
+example if no controller can be found:
 
-Defining a Synthesis Problem
-````````````````````````````
+.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+   :start-after: @synthesize_section@
+   :end-before: @synthesize_section_end@
 
-SynthesisProb class provides a self-contained structure for defining 
-an embedded control software synthesis problem.
-It contains several useful functions that allow the problem to be solved in one shot,
-combining the 3 steps as previously described.
-
-     .. autoclass:: rhtlp.SynthesisProb
-	:noindex:
-
-
-Example 3: Robot Motion Planning using SynthesisProb
-````````````````````````````````````````````````````
-This example is provided in examples/robot_simple2.py.
-It is exactly the same problem as :ref:`Example 2 <ssec:ex2>`
-but solved using SynthesisProb, instead of the jtlvint module.
-
-First, we import the necessary modules
-and specify the environment and the discrete system variables and
-the continuous dynamics.
-Note that we don't have to specify the smv file, spc file and aut file
-as in the previous examples.
-
-.. literalinclude:: ../examples/robot_simple2.py
-   :start-after: @importvardyn@
-   :end-before: @importvardyn_end@
-
-Next, we specify system specification. Here, specification is a GRSpec object,
-instead of a list of length 2 as in the previous examples.
-
-.. literalinclude:: ../examples/robot_simple2.py
-   :start-after: @specification@
-   :end-before: @specification_end@
-
-Now, we have all the necessary elements to construct a synthesis problem.
-
-.. literalinclude:: ../examples/robot_simple2.py
-   :start-after: @synprob@
-   :end-before: @synprob_end@
-
-Once a SynthesisProb object is constructed, we can check the realizability of this problem
-and construct the automaton.
-
-.. literalinclude:: ../examples/robot_simple2.py
-   :start-after: @checkcomp@
-   :end-before: @checkcomp_end@
-
-Finally, we can run the simulation as before.
-
-.. literalinclude:: ../examples/robot_simple2.py
-   :start-after: @sim@
-   :end-before: @sim_end@
 
 Working with Systems with Piecewise Affine Dynamics
-```````````````````````````````````````````````````
-
+---------------------------------------------------
 TuLiP can also handle piecewise affine dynamics of the form: 
 
 for :math:`t \in \{0,1,2,...\}`
@@ -438,20 +369,22 @@ for :math:`t \in \{0,1,2,...\}`
    s[t]	   &\in S_i
    :label: pwadynamics
 
-where :math:`S_i \subseteq \mathbb{R}^n` for :math:`i \in \{0,1,2, \ldots,n_s\}` form 
-a polytopic partition of the state space :math:`S`, in :eq:`dynamics`,
-:math:`U_i \subseteq \mathbb{R}^m` is the set of admissible control inputs, 
-:math:`D_i \subseteq \mathbb{R}^p` is the set of exogenous disturbances within :math:`S_i`, and
-:math:`s[t], u[t], d[t]` are the continuous state, the control signal and
-the exogenous disturbance, respectively, at time :math:`t`.
+where :math:`S_i \subseteq \mathbb{R}^n` for :math:`i \in \{0,1,2,
+\ldots,n_s\}` form a polytopic partition of the state space :math:`S`, in
+:eq:`dynamics`, :math:`U_i \subseteq \mathbb{R}^m` is the set of admissible
+control inputs, :math:`D_i \subseteq \mathbb{R}^p` is the set of exogenous
+disturbances within :math:`S_i`, and :math:`s[t], u[t], d[t]` are the
+continuous state, the control signal and the exogenous disturbance,
+respectively, at time :math:`t`.
 
-PwaSubsysDyn class is used to represent subsystems of the form :eq:`pwadynamics`.
+PwaSubsysDyn class is used to represent subsystems of the form
+:eq:`pwadynamics`.
 
      .. autoclass:: discretize.PwaSubsysDyn
 	:noindex:
 
-The subsystems can be put together to define a piecewise affine system which is represented 
-by PwaSysDyn class.
+The subsystems can be put together to define a piecewise affine system which
+is represented by PwaSysDyn class.
 
      .. autoclass:: discretize.PwaSysDyn
 	:noindex:
@@ -460,7 +393,7 @@ by PwaSysDyn class.
 Example 4: Robot Motion Planning with Piecewise Affine Dynamics
 ```````````````````````````````````````````````````````````````
 
-This example is provided in examples/robot_simple_pwa.py.
+This example is provided in examples/robot_planning/robot_continuous_pwa.py.
 It is an extension of the previous examples including a robot model
 with piecewise affine dynamics.
 
@@ -471,49 +404,47 @@ dynamics in different parts of the surface can be modeled as a piecewise
 affine system. When :math:`s[t] \in[0, 3]\times[0.5, 2]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_simple_pwa.py
+.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
    :start-after: @subsystem0@
    :end-before: @subsystem0_end@
 
 When :math:`s[t] \in[0, 3]\times[0, 0.5]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_simple_pwa.py
+.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
    :start-after: @subsystem1@
    :end-before: @subsystem1_end@
 
 Piecewise affine system can be formed from the dynamics of its subsystems.
 
-.. literalinclude:: ../examples/robot_simple_pwa.py
+.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
    :start-after: @pwasystem@
    :end-before: @pwasystem_end@
 
 Discretization and synthesis follow exactly as before.
 
-.. literalinclude:: ../examples/robot_simple_pwa.py
+.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
    :start-after: @synth@
    :end-before: @synth_end@
 
 Finally, we can simulate the continuous and discrete parts and plot the resulting trajectories.
 
-.. literalinclude:: ../examples/robot_simple_pwa.py
+.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
    :start-after: @sim@
    :end-before: @sim_end@
 
 Receding Horizon Temporal Logic Planning
 ----------------------------------------
 
-For systems with a certain structure, the computational complexity of
-the planner synthesis can be alleviated by solving the planning problems
-in a receding horizon fashion, i.e., compute the plan or strategy over
-a "shorter" horizon, starting from the current state,
-implement the initial portion of the plan,
-move the horizon one step ahead, and recompute.
-This approach essentially reduces the planner synthesis problem
-into a set of smaller problems.
-To ensure that this "receding horizon" framework preserves
-the desired system-level temporal properties, certain sufficient conditions
-need to be satisfied.
+For systems with a certain structure, the computational complexity of the
+planner synthesis can be alleviated by solving the planning problems in a
+receding horizon fashion, i.e., compute the plan or strategy over a
+"shorter" horizon, starting from the current state, implement the initial
+portion of the plan, move the horizon one step ahead, and recompute.  This
+approach essentially reduces the planner synthesis problem into a set of
+smaller problems.  To ensure that this "receding horizon" framework
+preserves the desired system-level temporal properties, certain sufficient
+conditions need to be satisfied.
 
 We consider a specification of the form
 
@@ -523,36 +454,35 @@ We consider a specification of the form
    \big(\square \psi_s \wedge \bigwedge_{i \in I_g} \psi_{g,i}\big).
    :label: GR1Spec
 
-Given a specification of this form, we first construct a finite state abstraction
-of the physical system.
-Then, for each :math:`i \in I_g`, we organize the system states
-into a partially ordered set :math:`\mathcal{P}^i = (\{\mathcal{W}_j^i\}, \preceq_{\psi_{g,i}})`
-where :math:`\mathcal{W}_0^i` are the set of states satisfying
-:math:`\psi_{g,i}.`
-For each :math:`j`, we define a short-horizon specification :math:`\Psi_j^i`
-associated with :math:`\mathcal{W}_j^i` as
+Given a specification of this form, we first construct a finite state
+abstraction of the physical system.  Then, for each :math:`i \in I_g`, we
+organize the system states into a partially ordered set :math:`\mathcal{P}^i
+= (\{\mathcal{W}_j^i\}, \preceq_{\psi_{g,i}})` where :math:`\mathcal{W}_0^i`
+are the set of states satisfying :math:`\psi_{g,i}.` For each :math:`j`, we
+define a short-horizon specification :math:`\Psi_j^i` associated with
+:math:`\mathcal{W}_j^i` as
 
 .. math::
    \Psi_j^i = \big((\nu \in \mathcal{W}_j^i) \wedge \Phi \wedge \square \psi_e^e \wedge 
    \bigwedge_{k \in I_f} \square\diamond \psi_{f,k}\big) \implies
    \big(\square \psi_s \wedge \square\diamond(\nu \in \mathcal{F}^i(\mathcal{W}_j^i)) \big).
 
-Here, :math:`\Phi` describes receding horizon invariants.
-:math:`\Phi` needs to be defined such that :math:`\psi_{init} \implies \Phi` is a tautology.
-:math:`\mathcal{F}^i : \{\mathcal{W}_j^i\} \to \{\mathcal{W}_j^i\}` is a mapping
-such that :math:`\mathcal{F}^i(\mathcal{W}_j^i) \prec_{\psi_{g,i}} \mathcal{W}_j^i, \forall j \not= 0.`
-:math:`\mathcal{F}^i(\mathcal{W}_j^i)` essentially defines intermediate goal for starting in
-:math:`\mathcal{W}^i_j.`
+Here, :math:`\Phi` describes receding horizon invariants.  :math:`\Phi`
+needs to be defined such that :math:`\psi_{init} \implies \Phi` is a
+tautology.  :math:`\mathcal{F}^i : \{\mathcal{W}_j^i\} \to
+\{\mathcal{W}_j^i\}` is a mapping such that
+:math:`\mathcal{F}^i(\mathcal{W}_j^i) \prec_{\psi_{g,i}} \mathcal{W}_j^i,
+\forall j \not= 0.` :math:`\mathcal{F}^i(\mathcal{W}_j^i)` essentially
+defines intermediate goal for starting in :math:`\mathcal{W}^i_j.`
 
 .. image:: rhtlp_strategy.*
 
-The above figure provides a graphical description of the receding horizon strategy 
-for a special case where for each 
-:math:`i \in I_g, \mathcal{W}^i_j \prec_{\psi_{g,i}} \mathcal{W}^i_k, \forall j < k`,
-:math:`\mathcal{F}^i(\mathcal{W}^i_j) = \mathcal{W}^i_{j-1}, \forall j > 0` 
-and :math:`F^i(\mathcal{W}^i_0) = \mathcal{W}^i_0.`
-Please refer to our `paper <http://www.cds.caltech.edu/~nok/doc/tac10.pdf>`_ for more details.
-
+The above figure provides a graphical description of the receding horizon
+strategy for a special case where for each :math:`i \in I_g, \mathcal{W}^i_j
+\prec_{\psi_{g,i}} \mathcal{W}^i_k, \forall j < k`,
+:math:`\mathcal{F}^i(\mathcal{W}^i_j) = \mathcal{W}^i_{j-1}, \forall j > 0`
+and :math:`F^i(\mathcal{W}^i_0) = \mathcal{W}^i_0.` Please refer to our
+`paper <http://www.cds.caltech.edu/~nok/doc/tac10.pdf>`_ for more details.
 
 Short-Horizon Problem
 `````````````````````
@@ -561,7 +491,6 @@ A short-horizon problem can be defined using the ShortHorizonProb class.
 
      .. autoclass:: rhtlp.ShortHorizonProb
 	:noindex:
-
 
 Receding Horizon Temporal Logic Planning Problem
 ````````````````````````````````````````````````
