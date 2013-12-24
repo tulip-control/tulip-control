@@ -430,27 +430,31 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
             
     return inside
     
-def get_cell_id(x0, part):
-    """Return an integer specifying in which discrete state
-    the continuous state x0 belongs to.
+def find_discrete_state(x0, part):
+    """Return index identifying the discrete state
+    to which the continuous state x0 belongs to.
+    
+    notes
+    -----
+    1. If there are overlapping partitions
+        (i.e., x0 belongs to more than one discrete state),
+        then return the first discrete state ID
+    
+    @param x0: initial continuous state
+    @type x0: numpy 1darray
+    
+    @param part: state space partition
+    @type part: PropPreservingPartition
+    
+    @return: if C{x0} belongs to some
+        discrete state in C{part},
+        then return the index of that state
         
-    Input:
-    - `x0`: initial continuous state
-    - `part`: PropPreservingPartition object specifying
-        the state space partition
-    
-    Output:
-    - cellID: int specifying the discrete state in
-        `part` x0 belongs to, -1 if x0 does 
-        not belong to any discrete state.
-    
-    Note1: If there are overlapping partitions
-    (i.e., x0 can belong to more than one discrete state),
-    this just returns the first ID
+        Otherwise return None, i.e., in case
+        C{x0} does not belong to any discrete state.
+    @rtype: int
     """
-    cellID = -1
-    for i in xrange(part.num_regions):
-        if pc.is_inside(part.list_region[i], x0):
-             cellID = i
-             break
-    return cellID
+    for (i, region) in enumerate(part.list_region):
+        if pc.is_inside(region, x0):
+             return i
+    return None
