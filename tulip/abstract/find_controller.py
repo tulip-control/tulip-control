@@ -52,9 +52,10 @@ from tulip import polytope as pc
 from discretization import solve_feasible, createLM, _block_diag2
 
 def get_input(
-    x0, ssys, part, start, end, N, R=[], r=[], Q=[],
-    mid_weight=0., conservative=True,
-    closed_loop=True, test_result=False
+    x0, ssys, abstraction,
+    start, end,
+    R=[], r=[], Q=[], mid_weight=0.0,
+    test_result=False
 ):
     """Compute continuous control input for discrete transition.
     
@@ -64,7 +65,7 @@ def get_input(
         - from state C{start}
         - to state C{end}
     
-    These are states of the partition C{part}.
+    These are states of the partition C{abstraction}.
     The computed control input is such that:
         
         f(x, u) = x'Rx +r'x +u'Qu +mid_weight *|xc-x(0)|_2
@@ -106,17 +107,14 @@ def get_input(
     @param ssys: system dynamics
     @type ssys: LtiSysDyn
     
-    @param part: state space partition
-    @type part: PropPreservingPartition
+    @param abstraction: state space partition
+    @type abstraction: AbstractSysDyn
     
-    @param start: number of the initial state in `part`
+    @param start: index of the initial state in C{abstraction.ofts}
     @type start: int >= 0
     
-    @param end: number of the end state in C{part}
+    @param end: index of the end state in C{abstraction.ofts}
     @type end: int >= 0
-    
-    @param N: horizon length
-    @type N: int >= 1
     
     @param R: state cost matrix for:
             x = [x(1)' x(2)' .. x(N)']'
@@ -134,19 +132,6 @@ def get_input(
     
     @param mid_weight: cost weight for |x(N)-xc|_2
     
-    @param conservative:
-        if True,
-        then force plant to stay inside initial
-        state during execution.
-        
-        Otherwise, plant is forced to stay inside
-        the original proposition preserving cell.
-    @type conservative: bool
-    
-    @param closed_loop: should be True
-        if closed loop discretization has been used.
-    @type closed_loop: bool
-    
     @param test_result: performs a simulation
         (without disturbance) to make sure that
         the calculated input sequence is safe.
@@ -157,6 +142,35 @@ def get_input(
         for k = 0,1 ... N-1
     @rtype: (N x m) numpy 2darray
     """
+    
+    #@param N: horizon length
+    #@type N: int >= 1
+    
+    #@param conservative:
+    #    if True,
+    #    then force plant to stay inside initial
+    #    state during execution.
+    #    
+    #    Otherwise, plant is forced to stay inside
+    #    the original proposition preserving cell.
+    #@type conservative: bool
+    
+    #@param closed_loop: should be True
+    #    if closed loop discretization has been used.
+    #@type closed_loop: bool
+    
+    part = abstraction.ppp
+    list_region = part.list_region
+    
+    ofts = abstraction.ofts
+    orig_list_region = abstraction.orig_list_region
+    orig = abstraction.orig
+    
+    params = abstraction.disc_params
+    N = params['N']
+    conservative = params['conservative']
+    closed_loop = params['closed_loop']
+    
     if (len(R) == 0) and (len(Q) == 0) and \
     (len(r) == 0) and (mid_weight == 0):
         # Default behavior
@@ -178,23 +192,26 @@ def get_input(
     if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N*ssys.B.shape[1]):
         raise Exception("get_input: "
             "Q must be square and have side N * dim(input space)")
-    if part.trans != None:
-        if part.trans[end,start] != 1:
-            raise Exception("get_input: "
-                "no transition from state " + str(start) +
-                " to state " + str(end)
+    if ofts is not None:
+        start_state = 's' +str(start)
+        end_state = 's' +str(end)
+        
+        if end_state not in ofts.states.post(start_state):
+            raise Exception('get_input: '
+                'no transition from state s' +str(start) +
+                ' to state s' +str(end)
             )
     else:
         print("get_input: "
             "Warning, no transition matrix found, assuming feasible")
     
-    if (not conservative) & (part.orig == None):
+    if (not conservative) & (orig == None):
         print("List of original proposition preserving "
             "partitions not given, reverting to conservative mode")
         conservative = True
        
-    P_start = part.list_region[start]
-    P_end = part.list_region[end]
+    P_start = list_region[start]
+    P_end = list_region[end]
     
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
@@ -217,7 +234,7 @@ def get_input(
             P1 = P_start
     else:
         # Take original proposition preserving cell as constraint
-        P1 = part.orig_list_region[part.orig[start]]
+        P1 = orig_list_region[orig[start]]
     
     if len(P_end) > 0:
         low_cost = np.inf
