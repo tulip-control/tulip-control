@@ -869,8 +869,7 @@ class States(object):
         try:
             state_ids = self._mutants2ints(states)
         except:
-            raise Exception('Not all states given are in the set of states.\n'+
-                            'Did you mean to use port_single() instead ?')
+            raise Exception('Not all states given are in the set of states.\n')
         
         successor_ids = list()
         for state_id in state_ids:
