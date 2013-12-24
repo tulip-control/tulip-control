@@ -756,7 +756,6 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         Li = list_P[i]
         
         if not isinstance(Li, pc.Polytope):
-            print(pc.Polytope)
             warn('createLM: Li of type: ' +str(type(Li) ) )
         
         ######### FOR L #########

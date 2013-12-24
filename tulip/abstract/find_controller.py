@@ -427,7 +427,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     xn = np.dot(A,x) + np.dot(B,un_1) + K
     if not pc.is_inside(P1, xn):
         inside = False
-            
+    
     return inside
     
 def find_discrete_state(x0, part):
