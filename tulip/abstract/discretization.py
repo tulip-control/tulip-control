@@ -49,8 +49,12 @@ see also
 find_controller
 """
 from copy import deepcopy
+from collections import Iterable
+from warnings import warn
+
 import numpy as np
 from scipy import sparse as sp
+
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
@@ -702,7 +706,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         that disturbance should be taken into account.
         Default is [1,2, ... N]
     """
-    if isinstance(list_P, pc.Polytope):
+    if not isinstance(list_P, Iterable):
         list_P = [list_P] +(N-1) *[Pk] +[PN]
         
     if disturbance_ind is None:
@@ -750,6 +754,10 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     sum_vert = 0
     for i in xrange(N+1):
         Li = list_P[i]
+        
+        if not isinstance(Li, pc.Polytope):
+            print(pc.Polytope)
+            warn('createLM: Li of type: ' +str(type(Li) ) )
         
         ######### FOR L #########
         AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])

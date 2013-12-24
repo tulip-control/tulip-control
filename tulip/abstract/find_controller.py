@@ -239,8 +239,9 @@ def get_input(
     if len(P_end) > 0:
         low_cost = np.inf
         low_u = np.zeros([N,m])
-        for i in range(len(P_end.list_poly)):
-            P3 = P_end.list_poly[i]
+        
+        # for each polytope in target region
+        for P3 in P_end.list_poly:
             if mid_weight > 0:
                 rc, xc = pc.cheby_ball(P3)
                 R[
@@ -251,6 +252,7 @@ def get_input(
                 ] += mid_weight*np.eye(n)
                 
                 r[range((N-1)*n, N*n), :] += -mid_weight*xc
+            
             try:
                 u, cost = get_input_helper(
                     x0, ssys, P1, P3, N, R, r, Q,
@@ -260,9 +262,11 @@ def get_input(
             except:
                 r[range((N-1)*n, N*n), :] += mid_weight*xc
                 continue
+            
             if cost < low_cost:
                 low_u = u
                 low_cost = cost
+        
         if low_cost == np.inf:
             raise Exception("get_input: Did not find any trajectory")
     else:
