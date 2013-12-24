@@ -56,53 +56,106 @@ def get_input(
     mid_weight=0., conservative=True,
     closed_loop=True, test_result=False
 ):
-    """Calculate an input signal sequence taking the plant from state `start` 
-    to state `end` in the partition part, such that 
-    f(x,u) = x'Rx + r'x + u'Qu + mid_weight*|xc-x(0)|_2 is minimal. xc is
-    the chebyshev center of the final cell.
-    If no cost parameters are given, Q = I and mid_weight=3 are used. 
+    """Compute continuous control input for discrete transition.
+    
+    Computes a continuous control input sequence
+    which takes the plant:
         
-    Input:
+        - from state C{start}
+        - to state C{end}
+    
+    These are states of the partition C{part}.
+    The computed control input is such that:
+        
+        f(x, u) = x'Rx +r'x +u'Qu +mid_weight *|xc-x(0)|_2
+    
+    be minimal.
+    
+    C{xc} is the chebyshev center of the final cell.
+    If no cost parameters are given, then the defaults are:
+    
+        - Q = I
+        - mid_weight = 3
+    
+    notes
+    -----
+    1. The same horizon length as in reachability analysis
+        should be used in order to guarantee feasibility.
+    
+    2. If the closed loop algorithm has been used
+        to compute reachability the input needs to be
+        recalculated for each time step
+        (with decreasing horizon length).
+        
+        In this case only u(0) should be used as
+        a control signal and u(1) ... u(N-1) discarded.
+    
+    3. The "conservative" calculation makes sure that
+        the plant remains inside the convex hull of the
+        starting region during execution, i.e.:
+        
+            x(1), x(2) ...  x(N-1) are
+            \in conv_hull(starting region).
+        
+        If the original proposition preserving partition
+        is not convex, then safety cannot be guaranteed.
 
-    - `x0`: initial continuous state
-    - `ssys`: LtiSysDyn object specifying system dynamics
-    - `part`: PropPreservingPartition object specifying the state
-              space partition.
-    - `start`: int specifying the number of the initial state in `part`
-    - `end`: int specifying the number of the end state in `part`
-    - `N`: the horizon length
-    - `R`: state cost matrix for x = [x(1)' x(2)' .. x(N)']', 
-           size (N*xdim x N*xdim). If empty, zero matrix is used.
-    - `r`: cost vector for x = [x(1)' x(2)' .. x(N)']', size (N*xdim x 1)
-    - `Q`: input cost matrix for u = [u(0)' u(1)' .. u(N-1)']', 
-           size (N*udim x N*udim). If empty, identity matrix is used.
-    - `mid_weight`: cost weight for |x(N)-xc|_2
-    - `conservative`: if True, force plant to stay inside initial
-                      state during execution. if False, plant is
-                      forced to stay inside the original proposition
-                      preserving cell.
-    - `closed_loop`: should be True if closed loop discretization has
-                     been used.
-    - `test_result`: performs a simulation (without disturbance) to
-                     make sure that the calculated input sequence is
-                     safe.
+    @param x0: initial continuous state
+    @type x0: numpy 1darray
     
-    Output:
-    - A (N x m) numpy array where row k contains u(k) for k = 0,1 ... N-1.
+    @param ssys: system dynamics
+    @type ssys: LtiSysDyn
     
-    Note1: The same horizon length as in reachability analysis should
-    be used in order to guarantee feasibility.
+    @param part: state space partition
+    @type part: PropPreservingPartition
     
-    Note2: If the closed loop algorithm has been used to compute
-    reachability the input needs to be recalculated for each time step
-    (with decreasing horizon length). In this case only u(0) should be
-    used as a control signal and u(1) ... u(N-1) thrown away.
+    @param start: number of the initial state in `part`
+    @type start: int >= 0
     
-    Note3: The "conservative" calculation makes sure that the plants
-    remains inside the convex hull of the starting region during
-    execution, i.e.  x(1), x(2) ...  x(N-1) are in conv_hull(starting
-    region).  If the original proposition preserving partition is not
-    convex, safety can not be guaranteed.
+    @param end: number of the end state in C{part}
+    @type end: int >= 0
+    
+    @param N: horizon length
+    @type N: int >= 1
+    
+    @param R: state cost matrix for:
+            x = [x(1)' x(2)' .. x(N)']'
+        If empty, zero matrix is used.
+    @type R: size (N*xdim x N*xdim)
+    
+    @param r: cost vector for state trajectory:
+        x = [x(1)' x(2)' .. x(N)']'
+    @type r: size (N*xdim x 1)
+    
+    @param Q: input cost matrix for control input:
+            u = [u(0)' u(1)' .. u(N-1)']'
+        If empty, identity matrix is used.
+    @type Q: size (N*udim x N*udim)
+    
+    @param mid_weight: cost weight for |x(N)-xc|_2
+    
+    @param conservative:
+        if True,
+        then force plant to stay inside initial
+        state during execution.
+        
+        Otherwise, plant is forced to stay inside
+        the original proposition preserving cell.
+    @type conservative: bool
+    
+    @param closed_loop: should be True
+        if closed loop discretization has been used.
+    @type closed_loop: bool
+    
+    @param test_result: performs a simulation
+        (without disturbance) to make sure that
+        the calculated input sequence is safe.
+    @type test_result: bool
+    
+    @return: array A where row k contains the
+        control input: u(k)
+        for k = 0,1 ... N-1
+    @rtype: (N x m) numpy 2darray
     """
     if (len(R) == 0) and (len(Q) == 0) and \
     (len(r) == 0) and (mid_weight == 0):
