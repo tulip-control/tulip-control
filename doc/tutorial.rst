@@ -377,16 +377,16 @@ disturbances within :math:`S_i`, and :math:`s[t], u[t], d[t]` are the
 continuous state, the control signal and the exogenous disturbance,
 respectively, at time :math:`t`.
 
-PwaSubsysDyn class is used to represent subsystems of the form
+LtiSysDyn class is used to represent subsystems of the form
 :eq:`pwadynamics`.
 
-     .. autoclass:: discretize.PwaSubsysDyn
+     .. autoclass:: hybrid.LtiSysDyn
 	:noindex:
 
 The subsystems can be put together to define a piecewise affine system which
 is represented by PwaSysDyn class.
 
-     .. autoclass:: discretize.PwaSysDyn
+     .. autoclass:: hybrid.PwaSysDyn
 	:noindex:
 
 
