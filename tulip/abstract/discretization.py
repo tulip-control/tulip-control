@@ -531,7 +531,7 @@ def solve_feasible(
     P1, P2, ssys, N, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-    """Compute S0 \subset P1 from which P2 is reachable in horizon N.
+    """Compute S0 \subseteq P1 from which P2 is reachable in horizon N.
     
     The system dynamics are C{ssys}.
     The closed-loop algorithm solves for one step at a time,
@@ -574,7 +574,7 @@ def solve_closed_loop(
     P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
-    """Computed closed-loop backward reachable set.
+    """Compute S0 \subseteq P1 from which P2 is N-step closed-loop reachable.
     
     @type P1: Polytope or Region
     @type P2: Polytope or Region
@@ -609,7 +609,7 @@ def solve_closed_loop(
         if i == 1:
             Pinit = p1
         
-        s0 = solve_open_loop(Pinit, p2, ssys, N=1, trans_set)
+        s0 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
         p2 = union_or_chain(s0, p2, use_all_horizon)
         
         # empty target polytope ?
@@ -629,51 +629,52 @@ def solve_open_loop(
     P1, P2, ssys, N,
     trans_set=None, max_num_poly=5
 ):
-    part1 = P1.copy() # Initial set
-    part2 = P2.copy() # Terminal set
+    p1 = P1.copy() # Initial set
+    p2 = P2.copy() # Terminal set
     
-    if len(part1) > max_num_poly:
+    if len(p1) > max_num_poly:
         # use the max_num_poly largest volumes for reachability
-        part1 = volumes_for_reachability(part1, max_num_poly)
+        p1 = volumes_for_reachability(p1, max_num_poly)
 
-    if len(part2) > max_num_poly:
+    if len(p2) > max_num_poly:
         # use the max_num_poly largest volumes for reachability
-        part2 = volumes_for_reachability(part2, max_num_poly)
+        part2 = volumes_for_reachability(p2, max_num_poly)
     
-    if len(part1) > 0:
+    if len(p1) > 0:
         # Recursive union of sets
         poly = pc.Polytope()
-        for i in xrange(0, len(part1) ):
+        for i in xrange(0, len(p1) ):
             s0 = solve_open_loop(
-                part1.list_poly[i], part2,
+                p1.list_poly[i], p2,
                 ssys, N, trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
     
-    if len(part2) > 0:
+    if len(p2) > 0:
         # Recursive union of sets
         poly = pc.Polytope()
-        for i in xrange(0, len(part2) ):
+        for i in xrange(0, len(p2) ):
             s0 = solve_open_loop(
-                part1, part2.list_poly[i],
+                p1, p2.list_poly[i],
                 ssys, N, trans_set
             )
             poly = pc.union(poly, s0, check_convex=True)
         return poly
             
     if trans_set == None:
-        trans_set = part1
+        trans_set = p1
 
     # stack polytope constraints
-    L, M = createLM(ssys, N, part1, trans_set, part2) 
+    L, M = createLM(ssys, N, p1, trans_set, part2) 
     
     # Ready to make polytope
     poly1 = pc.reduce(pc.Polytope(L, M) )
     
     # Project poly1 onto lower dim
     n = np.shape(ssys.A)[1]
-    poly1 = pc.projection(poly1, range(1, n+1) )
+    dims = range(1, n+1)
+    poly1 = pc.projection(poly1, dims)
     
     return pc.reduce(poly1)
 
