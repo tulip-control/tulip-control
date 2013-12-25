@@ -632,13 +632,9 @@ def solve_open_loop(
     p1 = P1.copy() # Initial set
     p2 = P2.copy() # Terminal set
     
-    if len(p1) > max_num_poly:
-        # use the max_num_poly largest volumes for reachability
-        p1 = volumes_for_reachability(p1, max_num_poly)
-
-    if len(p2) > max_num_poly:
-        # use the max_num_poly largest volumes for reachability
-        part2 = volumes_for_reachability(p2, max_num_poly)
+    # use the max_num_poly largest volumes for reachability
+    p1 = volumes_for_reachability(p1, max_num_poly)
+    p2 = volumes_for_reachability(p2, max_num_poly)
     
     if len(p1) > 0:
         # Recursive union of sets
@@ -666,7 +662,7 @@ def solve_open_loop(
         trans_set = p1
 
     # stack polytope constraints
-    L, M = createLM(ssys, N, p1, trans_set, part2) 
+    L, M = createLM(ssys, N, p1, trans_set, p2) 
     
     # Ready to make polytope
     poly1 = pc.reduce(pc.Polytope(L, M) )
@@ -679,6 +675,9 @@ def solve_open_loop(
     return pc.reduce(poly1)
 
 def volumes_for_reachability(part, max_num_poly):
+    if len(part) <= max_num_poly:
+        return part
+    
     vol_list = np.zeros(len(part) )
     for i in xrange(len(part) ):
         vol_list[i] = pc.volume(part.list_poly[i] )
