@@ -470,8 +470,10 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             size = len(sol)
 #             
 #             # Add transitions
-#             transitions = np.hstack([transitions, np.zeros([size - 1, 1], dtype=int) ])
-#             transitions = np.vstack([transitions, np.zeros([1, size], dtype=int) ])
+#             transitions = np.hstack([transitions, np.zeros([size - 1, 1],
+#                                     dtype=int) ])
+#             transitions = np.vstack([transitions, np.zeros([1, size],
+#                                     dtype=int) ])
 #             
 #             # All sets reachable from orig cell are reachable from both cells
 #             transitions[size-1,:] = transitions[i,:]
@@ -505,7 +507,8 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             if verbose > 1:
 #                 print("\n Adding state " + str(size-1) + "\n")
 #             
-#             # Just add adjacent cells for checking, unless transition already found            
+#             # Just add adjacent cells for checking,
+#             # unless transition already found            
 #             IJ = np.hstack([IJ, np.zeros([size - 1, 1], dtype=int) ])
 #             IJ = np.vstack([IJ, np.zeros([1, size], dtype=int) ])
 #             horiz2 = adj[size-1,:] - transitions[size-1,:] > 0
@@ -517,20 +520,22 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                 print("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #                   
-#     new_part = PropPreservingPartition(domain=part.domain, num_prop=part.num_prop,
-#                                        list_region=sol, num_regions=len(sol), adj=np.array([]), 
-#                                        trans=transitions, list_prop_symbol=part.list_prop_symbol,
-#                                        orig_list_region=orig_list, orig=orig)                           
+#     new_part = PropPreservingPartition(
+#                    domain=part.domain, num_prop=part.num_prop,
+#                    list_region=sol, num_regions=len(sol), adj=np.array([]), 
+#                    trans=transitions, list_prop_symbol=part.list_prop_symbol,
+#                    orig_list_region=orig_list, orig=orig)                           
 #     return new_part
     
 def solve_feasible(
     P1, P2, ssys, N, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-    """Computes the subset x0 of C{P1} from which C{P2} is reachable
-    in horizon C{N}, with respect to system dynamics C{ssys}. The closed
-    loop algorithm solves for one step at a time, which keeps the dimension
-    of the polytopes down.
+    """Compute S0 \subset P1 from which P2 is reachable in horizon N.
+    
+    The system dynamics are C{ssys}.
+    The closed-loop algorithm solves for one step at a time,
+    which keeps the dimension of the polytopes down.
     
     @type P1: Polytope or Region
     @type P2: Polytope or Region
@@ -539,15 +544,17 @@ def solve_feasible(
     @param closed_loop: If true, take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
-        Default: True
     @type closed_loop: bool
+    
     @param use_all_horizon: Used for closed loop algorithm.
         If true, then allow reachability also in less than N steps.
+    @type use_all_horizon: bool
+    
     @param trans_set: If specified,
         then force transitions to be in this set.
-        If empty, P1 is used.
+        Otherwise, P1 is used.
     
-    @return: C{x0}, defines the set in P1 from which P2 is reachable
+    @return: the subset S0 of P1 from which P2 is reachable
     @rtype: Polytope or Region
     """
     if closed_loop:
@@ -674,8 +681,10 @@ def volumes_for_reachability(part, max_num_poly):
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     """Compute the components of the polytope:
+    
         L [x(0)' u(0)' ... u(N-1)']' <= M
-    which stacks the following constraints
+    
+    which stacks the following constraints:
     
     - x(t+1) = A x(t) + B u(t) + E d(t)
     - [u(k); x(k)] \in ssys.Uset for all k
@@ -686,7 +695,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     - x(k) \in Pk for k= 1,2, .. N-1
     - x(N) \in PN
     
-    If list_P is a list of polytopes
+    If list_P is a list of polytopes:
 
     - x(k) \in list_P[k] for k= 0, 1 ... N
     
@@ -831,21 +840,29 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     return L,M
 
 def get_max_extreme(G,D,N):
-    """Calculate the array d_hat such that d_hat = max(G*DN_extreme),
-    where DN_extreme are the vertices of the set D^N. 
+    """Calculate the array d_hat such that:
     
-    This is used to describe the polytope L*x <= M - G*d_hat. Calculating d_hat
-    is equivalen to taking the intersection of the polytopes L*x <= M - G*d_i 
+        d_hat = max(G*DN_extreme),
+    
+    where DN_extreme are the vertices of the set D^N.
+    
+    This is used to describe the polytope:
+    
+        L*x <= M - G*d_hat.
+    
+    Calculating d_hat is equivalen to taking the intersection
+    of the polytopes:
+    
+        L*x <= M - G*d_i
+    
     for every possible d_i in the set of extreme points to D^N.
     
-    Input:
-
-    - `G`: The matrix to maximize with respect to
-    - `D`: Polytope describing the disturbance set
-    - `N`: Horizon length
+    @param G: The matrix to maximize with respect to
+    @param D: Polytope describing the disturbance set
+    @param N: Horizon length
     
-    Output:
-    - `d_hat`: Array describing the maximum possible effect from disturbance
+    @return: d_hat: Array describing the maximum possible
+        effect from the disturbance
     """
     D_extreme = pc.extreme(D)
     nv = D_extreme.shape[0]
