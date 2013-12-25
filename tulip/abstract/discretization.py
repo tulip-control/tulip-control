@@ -604,13 +604,9 @@ def solve_closed_loop(
         Pinit = p1
     
     # backwards in time
-    for i in xrange(N, 1, -1): 
+    for i in xrange(N, 1, -1):
         s0 = solve_open_loop(Pinit, p2, ssys, N=1, trans_set)
-        
-        if use_all_horizon:
-            p2 = pc.union(s0, p2, check_convex=True)
-        else:
-            p2 = s0
+        p2 = union_or_chain(s0, p2, use_all_horizon)
         
         # empty target polytope ?
         if not pc.is_fulldim(p2):
@@ -618,13 +614,16 @@ def solve_closed_loop(
     
     # first step from P1
     s0 = solve_open_loop(p1, p2, ssys, N=1, trans_set)
+    p2 = union_or_chain(s0, p2, use_all_horizon)
     
+    return p2
+
+def union_or_chain(s0, p2, use_all_horizon):
     if use_all_horizon:
         p2 = pc.union(s0, p2, check_convex=True)
     else:
         p2 = s0
-    
-    return P
+    return p2
 
 def solve_open_loop(
     P1, P2, ssys, N,
