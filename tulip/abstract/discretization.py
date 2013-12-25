@@ -639,22 +639,16 @@ def solve_open_loop(
     if len(p1) > 0:
         # Recursive union of sets
         poly = pc.Polytope()
-        for i in xrange(0, len(p1) ):
-            s0 = solve_open_loop(
-                p1.list_poly[i], p2,
-                ssys, N, trans_set
-            )
+        for p in p1.list_poly:
+            s0 = solve_open_loop(p, p2, ssys, N, trans_set)
             poly = pc.union(poly, s0, check_convex=True)
         return poly
     
     if len(p2) > 0:
         # Recursive union of sets
         poly = pc.Polytope()
-        for i in xrange(0, len(p2) ):
-            s0 = solve_open_loop(
-                p1, p2.list_poly[i],
-                ssys, N, trans_set
-            )
+        for p in p2.list_poly:
+            s0 = solve_open_loop(p1, p, ssys, N, trans_set)
             poly = pc.union(poly, s0, check_convex=True)
         return poly
             
