@@ -574,45 +574,40 @@ def solve_feasible_closed_loop(
     P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
-    part1 = P1.copy() # Initial set
-    part2 = P2.copy() # Terminal set
+    P0 = P1.copy() # Initial set
+    P = P2.copy() # Terminal set
     
-    temp_part = part2
-    
-    if trans_set != None:
-        # if ttsnd_set is defined,
-        # then the intermediate steps are
+    if trans_set is not None:
+        # intermediate steps are
         # allowed to be in trans_set
-        ttt = trans_set
+        Pinit = trans_set
     else:
-        ttt = part1
+        Pinit = P0
     
-    for i in xrange(N,1,-1): 
-        x0 = solve_feasible_open_loop(
-            ttt, temp_part, ssys, N=1,
-            trans_set=trans_set
+    # backwards in time
+    for i in xrange(N, 1, -1): 
+        s0 = solve_feasible_open_loop(
+            Pinit, P, ssys, N=1, trans_set
         )
         
         if use_all_horizon:
-            temp_part = pc.union(x0, temp_part,
-                                 check_convex=True)
+            P = pc.union(s0, P, check_convex=True)
         else:
-            temp_part = x0
-            if not pc.is_fulldim(temp_part):
+            P = s0
+            if not pc.is_fulldim(P):
                 return pc.Polytope()
     
-    x0 = solve_feasible_open_loop(
-        part1, temp_part, ssys, N=1,
-        trans_set=trans_set
+    # first step from P0
+    s0 = solve_feasible_open_loop(
+        P0, P, ssys, N=1, trans_set
     )
     
     if use_all_horizon:
-        temp_part = pc.union(x0, temp_part,
-                             check_convex=True)
+        P = pc.union(s0, P, check_convex=True)
     else:
-        temp_part = x0
+        P = s0
     
-    return temp_part
+    return P
 
 def solve_feasible_open_loop(
     P1, P2, ssys, N,
