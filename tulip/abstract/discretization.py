@@ -558,19 +558,19 @@ def solve_feasible(
     @rtype: Polytope or Region
     """
     if closed_loop:
-        return solve_feasible_closed_loop(
+        return solve_closed_loop(
             P1, P2, ssys, N,
             use_all_horizon=use_all_horizon,
             trans_set=trans_set
         )
     else:
-        return solve_feasible_open_loop(
+        return solve_open_loop(
             P1, P2, ssys, N,
             trans_set=trans_set,
             max_num_poly=max_num_poly
         )
 
-def solve_feasible_closed_loop(
+def solve_closed_loop(
     P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
@@ -586,7 +586,7 @@ def solve_feasible_closed_loop(
     
     # backwards in time
     for i in xrange(N, 1, -1): 
-        s0 = solve_feasible_open_loop(
+        s0 = solve_open_loop(
             Pinit, P, ssys, N=1, trans_set
         )
         
@@ -598,7 +598,7 @@ def solve_feasible_closed_loop(
                 return pc.Polytope()
     
     # first step from P0
-    s0 = solve_feasible_open_loop(
+    s0 = solve_open_loop(
         P0, P, ssys, N=1, trans_set
     )
     
@@ -609,7 +609,7 @@ def solve_feasible_closed_loop(
     
     return P
 
-def solve_feasible_open_loop(
+def solve_open_loop(
     P1, P2, ssys, N,
     trans_set=None, max_num_poly=5
 ):
@@ -628,7 +628,7 @@ def solve_feasible_open_loop(
         # Recursive union of sets
         poly = pc.Polytope()
         for i in xrange(0, len(part1) ):
-            s0 = solve_feasible_open_loop(
+            s0 = solve_open_loop(
                 part1.list_poly[i], part2,
                 ssys, N, trans_set
             )
@@ -639,7 +639,7 @@ def solve_feasible_open_loop(
         # Recursive union of sets
         poly = pc.Polytope()
         for i in xrange(0, len(part2) ):
-            s0 = solve_feasible_open_loop(
+            s0 = solve_open_loop(
                 part1, part2.list_poly[i],
                 ssys, N, trans_set
             )
