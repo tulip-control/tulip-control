@@ -574,38 +574,53 @@ def solve_closed_loop(
     P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
-    P0 = P1.copy() # Initial set
-    P = P2.copy() # Terminal set
+    """Computed closed-loop backward reachable set.
+    
+    @type P1: Polytope or Region
+    @type P2: Polytope or Region
+    
+    @param ssys: system dynamics
+    
+    @param N: horizon length
+    @type N: int > 0
+    
+    @param use_all_horizon:
+        - if True, then take union of S0 sets
+        - Otherwise, chain S0 sets (funnel-like)
+    @type use_all_horizon: bool
+    
+    @param trans_set: If provided,
+        then intermediate steps are allowed
+        to be in trans_set.
+        
+        Otherwise, P1 is used.
+    """
+    p1 = P1.copy() # Initial set
+    p2 = P2.copy() # Terminal set
     
     if trans_set is not None:
-        # intermediate steps are
-        # allowed to be in trans_set
         Pinit = trans_set
     else:
-        Pinit = P0
+        Pinit = p1
     
     # backwards in time
     for i in xrange(N, 1, -1): 
-        s0 = solve_open_loop(
-            Pinit, P, ssys, N=1, trans_set
-        )
+        s0 = solve_open_loop(Pinit, p2, ssys, N=1, trans_set)
         
         if use_all_horizon:
-            P = pc.union(s0, P, check_convex=True)
+            p2 = pc.union(s0, p2, check_convex=True)
         else:
-            P = s0
-            if not pc.is_fulldim(P):
+            p2 = s0
+            if not pc.is_fulldim(p2):
                 return pc.Polytope()
     
-    # first step from P0
-    s0 = solve_open_loop(
-        P0, P, ssys, N=1, trans_set
-    )
+    # first step from P1
+    s0 = solve_open_loop(p1, p2, ssys, N=1, trans_set)
     
     if use_all_horizon:
-        P = pc.union(s0, P, check_convex=True)
+        p2 = pc.union(s0, p2, check_convex=True)
     else:
-        P = s0
+        p2 = s0
     
     return P
 
