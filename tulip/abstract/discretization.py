@@ -611,8 +611,10 @@ def solve_closed_loop(
             p2 = pc.union(s0, p2, check_convex=True)
         else:
             p2 = s0
-            if not pc.is_fulldim(p2):
-                return pc.Polytope()
+        
+        # empty target polytope ?
+        if not pc.is_fulldim(p2):
+            return pc.Polytope()
     
     # first step from P1
     s0 = solve_open_loop(p1, p2, ssys, N=1, trans_set)
