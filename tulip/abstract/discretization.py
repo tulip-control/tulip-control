@@ -531,8 +531,9 @@ def solve_feasible(
     P1, P2, ssys, N, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-    """Compute S0 \subseteq P1 from which P2 is reachable in horizon N.
+    """Compute S0 \subseteq P1 from which P2 is N-reachable.
     
+    N-reachable = reachable in horizon n.
     The system dynamics are C{ssys}.
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
@@ -574,7 +575,7 @@ def solve_closed_loop(
     P1, P2, ssys, N,
     use_all_horizon=False, trans_set=None
 ):
-    """Compute S0 \subseteq P1 from which P2 is N-step closed-loop reachable.
+    """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
     
     @type P1: Polytope or Region
     @type P2: Polytope or Region
@@ -663,19 +664,19 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     
     if trans_set is None:
         trans_set = p1
-
+    
     # stack polytope constraints
-    L, M = createLM(ssys, N, p1, trans_set, p2) 
+    L, M = createLM(ssys, N, p1, trans_set, p2)
+    s0 = pc.Polytope(L, M)
+    s0 = pc.reduce(s0)
     
-    # Ready to make polytope
-    poly1 = pc.reduce(pc.Polytope(L, M) )
-    
-    # Project poly1 onto lower dim
+    # Project polytope s0 onto lower dim
     n = np.shape(ssys.A)[1]
     dims = range(1, n+1)
-    poly1 = pc.projection(poly1, dims)
     
-    return pc.reduce(poly1)
+    s0 = pc.projection(s0, dims)
+    
+    return pc.reduce(s0)
 
 def volumes_for_reachability(part, max_num_poly):
     if len(part) <= max_num_poly:
