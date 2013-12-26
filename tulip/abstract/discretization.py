@@ -785,41 +785,6 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         if not isinstance(Li, pc.Polytope):
             warn('createLM: Li of type: ' +str(type(Li) ) )
         
-        ######### FOR L #########
-        AB_line = np.hstack([A_n, A_k.dot(B_diag)])
-        
-        idx = np.ix_(
-            range(sum_vert, sum_vert + Li.A.shape[0]),
-            range(0,Lk.shape[1])
-        )
-        Lk[idx] = Li.A.dot(AB_line)
-        
-        if i < N:
-            if PU.A.shape[1] == m:
-                idx = np.ix_(
-                    range(i*LUn, (i+1)*LUn),
-                    range(n + m*i, n + m*(i+1))
-                )
-                LU[idx] = PU.A
-            elif PU.A.shape[1] == m+n:
-                uk_line = np.zeros([m, n + m*N])
-                
-                idx = np.ix_(range(m), range(n+m*i, n+m*(i+1)))
-                uk_line[idx] = np.eye(m)
-                
-                A_mult = np.vstack([uk_line, AB_line])
-                
-                b_mult = np.zeros([m+n, 1])
-                b_mult[range(m, m+n), :] = A_k.dot(K_hat)
-                
-                idx = np.ix_(
-                    range(i*LUn, (i+1)*LUn),
-                    range(n+m*N)
-                )
-                LU[idx] = PU.A.dot(A_mult)
-                
-                MU[range(i*LUn, (i+1)*LUn), :] -= PU.A.dot(b_mult)
-        
         ######### FOR M #########
         idx = range(sum_vert, sum_vert + Li.A.shape[0])
         Mk[idx, :] = Li.b.reshape(Li.b.size,1) - \
@@ -840,14 +805,50 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
                 idx = np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))
                 GU[idx] = PU.A.dot(d_mult)
         
-        ####### Iterate #########
-        if i < N:
-            sum_vert += Li.A.shape[0]
-            A_n = A.dot(A_n)
-            A_k = A.dot(A_k)
+        ######### FOR L #########
+        AB_line = np.hstack([A_n, A_k.dot(B_diag)])
+        
+        idx = np.ix_(
+            range(sum_vert, sum_vert + Li.A.shape[0]),
+            range(0,Lk.shape[1])
+        )
+        Lk[idx] = Li.A.dot(AB_line)
+        
+        if i >= N:
+            continue
+        
+        if PU.A.shape[1] == m:
+            idx = np.ix_(
+                range(i*LUn, (i+1)*LUn),
+                range(n + m*i, n + m*(i+1))
+            )
+            LU[idx] = PU.A
+        elif PU.A.shape[1] == m+n:
+            uk_line = np.zeros([m, n + m*N])
             
-            idx = np.ix_(range(n), range(i*n, (i+1)*n))
-            A_k[idx] = np.eye(n)
+            idx = np.ix_(range(m), range(n+m*i, n+m*(i+1)))
+            uk_line[idx] = np.eye(m)
+            
+            A_mult = np.vstack([uk_line, AB_line])
+            
+            b_mult = np.zeros([m+n, 1])
+            b_mult[range(m, m+n), :] = A_k.dot(K_hat)
+            
+            idx = np.ix_(
+                range(i*LUn, (i+1)*LUn),
+                range(n+m*N)
+            )
+            LU[idx] = PU.A.dot(A_mult)
+            
+            MU[range(i*LUn, (i+1)*LUn), :] -= PU.A.dot(b_mult)
+        
+        ####### Iterate #########
+        sum_vert += Li.A.shape[0]
+        A_n = A.dot(A_n)
+        A_k = A.dot(A_k)
+        
+        idx = np.ix_(range(n), range(i*n, (i+1)*n))
+        A_k[idx] = np.eye(n)
                 
     # Get disturbance sets
     if not np.all(Gk==0):  
