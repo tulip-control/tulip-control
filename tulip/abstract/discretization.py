@@ -629,30 +629,39 @@ def solve_open_loop(
     P1, P2, ssys, N,
     trans_set=None, max_num_poly=5
 ):
-    p1 = P1.copy() # Initial set
-    p2 = P2.copy() # Terminal set
+    r1 = P1.copy() # Initial set
+    r2 = P2.copy() # Terminal set
     
     # use the max_num_poly largest volumes for reachability
-    p1 = volumes_for_reachability(p1, max_num_poly)
-    p2 = volumes_for_reachability(p2, max_num_poly)
+    r1 = volumes_for_reachability(r1, max_num_poly)
+    r2 = volumes_for_reachability(r2, max_num_poly)
     
-    if len(p1) > 0:
-        # Recursive union of sets
-        poly = pc.Polytope()
-        for p in p1.list_poly:
-            s0 = solve_open_loop(p, p2, ssys, N, trans_set)
-            poly = pc.union(poly, s0, check_convex=True)
-        return poly
+    if len(r1) > 0:
+        start_polys = r1.list_poly
+    else:
+        start_polys = [r1]
     
-    if len(p2) > 0:
-        # Recursive union of sets
-        poly = pc.Polytope()
-        for p in p2.list_poly:
-            s0 = solve_open_loop(p1, p, ssys, N, trans_set)
-            poly = pc.union(poly, s0, check_convex=True)
-        return poly
-            
-    if trans_set == None:
+    if len(r2) > 0:
+        target_polys = r2.list_poly
+    else:
+        target_polys = [r2]
+    
+    # union of s0 over all polytope combinations
+    s0 = pc.Polytope()
+    for p1 in start_polys:
+        for p2 in target_polys:
+            cur_s0 = poly_to_poly(p1, p2, ssys, N, trans_set)
+            s0 = pc.union(s0, cur_s0, check_convex=True)
+    
+    return s0
+
+def poly_to_poly(p1, p2, ssys, N, trans_set=None):
+    """Compute s0 for open-loop polytope to polytope N-reachability.
+    """
+    p1 = p1.copy()
+    p2 = p2.copy()
+    
+    if trans_set is None:
         trans_set = p1
 
     # stack polytope constraints
