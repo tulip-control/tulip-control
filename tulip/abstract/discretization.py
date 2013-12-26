@@ -114,6 +114,11 @@ def discretize(
     """Refine the partition and establish transitions
     based on reachability analysis.
     
+    see also
+    --------
+    prop2partition.pwa_partition
+    prop2partition.part2convex
+    
     @param part: a PropPreservingPartition object
     @param ssys: a LtiSysDyn or PwaSysDyn object
     @param N: horizon length
@@ -139,11 +144,6 @@ def discretize(
     @param verbose: level of verbosity
     
     @rtype: AbstractSysDyn
-    
-    see also
-    --------
-    prop2partition.pwa_partition
-    prop2partition.part2convex
     """
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -739,8 +739,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     A = ssys.A
     B = ssys.B
     E = ssys.E
-    D = ssys.Wset
     K = ssys.K
+    
+    D = ssys.Wset
     PU = ssys.Uset
 
     n = A.shape[1]  # State space dimension
@@ -767,11 +768,13 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     GU = np.zeros([LUn*N, p*N])
     
     K_hat = np.tile(K, (N,1))
+    
     B_diag = B
     E_diag = E
     for i in xrange(N-1):
-        B_diag = _block_diag2(B_diag,B)
-        E_diag = _block_diag2(E_diag,E)
+        B_diag = _block_diag2(B_diag, B)
+        E_diag = _block_diag2(E_diag, E)
+    
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
     
@@ -784,63 +787,67 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         
         ######### FOR L #########
         AB_line = np.hstack([A_n, np.dot(A_k, B_diag)])
-        Lk[
-            np.ix_(
-                range(sum_vert, sum_vert + Li.A.shape[0]),
-                range(0,Lk.shape[1])
-            )
-        ] = np.dot(Li.A, AB_line)
+        
+        idx = np.ix_(
+            range(sum_vert, sum_vert + Li.A.shape[0]),
+            range(0,Lk.shape[1])
+        )
+        Lk[idx] = np.dot(Li.A, AB_line)
         
         if i < N:
             if PU.A.shape[1] == m:
-                LU[
-                    np.ix_(
-                        range(i*LUn, (i+1)*LUn),
-                        range(n + m*i, n + m*(i+1))
-                    )
-                ] = PU.A
+                idx = np.ix_(
+                    range(i*LUn, (i+1)*LUn),
+                    range(n + m*i, n + m*(i+1))
+                )
+                LU[idx] = PU.A
             elif PU.A.shape[1] == m+n:
                 uk_line = np.zeros([m, n + m*N])
-                uk_line[
-                    np.ix_(range(m), range(n+m*i, n+m*(i+1)))
-                ] = np.eye(m)
+                
+                idx = np.ix_(range(m), range(n+m*i, n+m*(i+1)))
+                uk_line[idx] = np.eye(m)
+                
                 A_mult = np.vstack([uk_line, AB_line])
+                
                 b_mult = np.zeros([m+n, 1])
                 b_mult[range(m, m+n), :] = np.dot(A_k, K_hat)
-                LU[
-                    np.ix_(
-                        range(i*LUn, (i+1)*LUn),
-                        range(n+m*N)
-                    )
-                ] = np.dot(PU.A, A_mult)
+                
+                idx = np.ix_(
+                    range(i*LUn, (i+1)*LUn),
+                    range(n+m*N)
+                )
+                LU[idx] = np.dot(PU.A, A_mult)
+                
                 MU[range(i*LUn, (i+1)*LUn), :] -= np.dot(PU.A, b_mult)
         
         ######### FOR M #########
-        Mk[range(sum_vert, sum_vert + Li.A.shape[0]), :] = \
-            Li.b.reshape(Li.b.size,1) - \
-            np.dot(np.dot(Li.A,A_k), K_hat)
+        idx = range(sum_vert, sum_vert + Li.A.shape[0])
+        Mk[idx, :] = Li.b.reshape(Li.b.size,1) - \
+                     np.dot(np.dot(Li.A, A_k), K_hat)
         
         ######### FOR G #########
         if i in disturbance_ind:
-            Gk[
-                np.ix_(
-                    range(sum_vert, sum_vert + Li.A.shape[0]),
-                    range(Gk.shape[1])
-                )
-            ] = np.dot(np.dot(Li.A,A_k), E_diag)
+            idx = np.ix_(
+                range(sum_vert, sum_vert + Li.A.shape[0]),
+                range(Gk.shape[1])
+            )
+            Gk[idx] = np.dot(np.dot(Li.A,A_k), E_diag)
             
-            if (PU.A.shape[1] == m+n) & (i < N):
+            if (PU.A.shape[1] == m+n) and (i < N):
                 A_k_E_diag = np.dot(A_k, E_diag)
                 d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
-                GU[np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))] = \
-                   np.dot(PU.A, d_mult)
+                
+                idx = np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))
+                GU[idx] = np.dot(PU.A, d_mult)
         
         ####### Iterate #########
         if i < N:
             sum_vert += Li.A.shape[0]
             A_n = np.dot(A, A_n)
             A_k = np.dot(A, A_k)
-            A_k[np.ix_(range(n), range(i*n, (i+1)*n))] = np.eye(n)
+            
+            idx = np.ix_(range(n), range(i*n, (i+1)*n))
+            A_k[idx] = np.eye(n)
                 
     # Get disturbance sets
     if not np.all(Gk==0):  
