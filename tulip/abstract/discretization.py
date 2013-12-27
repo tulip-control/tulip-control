@@ -759,15 +759,15 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     LUn = np.shape(PU.A)[0]
     
     Lk = np.zeros([sumlen, n+N*m])
-    LU = np.zeros([LUn*N,n+N*m])
+    LU = np.zeros([LUn*N, n+N*m])
     
-    Mk = np.zeros([sumlen,1])
-    MU = np.tile(PU.b.reshape(PU.b.size,1), (N,1))
+    Mk = np.zeros([sumlen, 1])
+    MU = np.tile(PU.b.reshape(PU.b.size, 1), (N, 1))
   
     Gk = np.zeros([sumlen, p*N])
     GU = np.zeros([LUn*N, p*N])
     
-    K_hat = np.tile(K, (N,1))
+    K_hat = np.tile(K, (N, 1))
     
     B_diag = B
     E_diag = E

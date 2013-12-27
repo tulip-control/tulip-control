@@ -216,6 +216,8 @@ def get_input(
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
     
+    idx = range((N-1)*n, N*n)
+    
     if conservative:
         # Take convex hull or P_start as constraint
         if len(P_start) > 0:
@@ -251,16 +253,16 @@ def get_input(
                     )
                 ] += mid_weight*np.eye(n)
                 
-                r[range((N-1)*n, N*n), :] += -mid_weight*xc
+                r[idx, :] += -mid_weight*xc
             
             try:
                 u, cost = get_input_helper(
                     x0, ssys, P1, P3, N, R, r, Q,
                     closed_loop=closed_loop
                 )
-                r[range((N-1)*n, N*n), :] += mid_weight*xc
+                r[idx, :] += mid_weight*xc
             except:
-                r[range((N-1)*n, N*n), :] += mid_weight*xc
+                r[idx, :] += mid_weight*xc
                 continue
             
             if cost < low_cost:
@@ -279,7 +281,7 @@ def get_input(
                     range(n*(N-1), n*N)
                 )
             ] += mid_weight*np.eye(n)
-            r[range((N-1)*n, N*n), :] += -mid_weight*xc
+            r[idx, :] += -mid_weight*xc
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q,
             closed_loop=closed_loop
@@ -295,7 +297,8 @@ def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q,
     closed_loop=True
 ):
-    """Calculates the sequence u_seq such that
+    """Calculates the sequence u_seq such that:
+    
     - x(t+1) = A x(t) + B u(t) + K
     - x(k) \in P1 for k = 0,...N
     - x(N) \in P3
@@ -333,7 +336,7 @@ def get_input_helper(
     Lx = L[:,range(n)]
     Lu = L[:,range(n,L.shape[1])] 
     
-    M = M - np.dot(Lx, x0).reshape(Lx.shape[0],1)
+    M = M - Lx.dot(x0).reshape(Lx.shape[0],1)
         
     # Constraints
     G = matrix(Lu)
@@ -350,7 +353,7 @@ def get_input_helper(
     A_N = np.zeros([n*N, n])
 
     for i in xrange(N):
-        A_row = np.dot(ssys.A, A_row)
+        A_row = ssys.A.dot(A_row)
         A_row[np.ix_(
             range(n),
             range(i*n, (i+1)*n)
@@ -366,19 +369,19 @@ def get_input_helper(
             range(A_K.shape[1])
         )] = A_row
         
-        A_it = np.dot(ssys.A, A_it)
+        A_it = ssys.A.dot(A_it)
         
-    Ct = np.dot(A_K, B_diag)
-    P = matrix(Q + np.dot(Ct.T, np.dot(R, Ct)))
+    Ct = A_K.dot(B_diag)
+    P = matrix(Q + Ct.T.dot(R).dot(Ct) )
     q = matrix(
         np.dot(
-            np.dot(x0.reshape(1,x0.size), A_N.T) +
-            np.dot(A_K, K_hat).T , np.dot(R, Ct)
+            np.dot(x0.reshape(1, x0.size), A_N.T) +
+            A_K.dot(K_hat).T, R.dot(Ct)
         ) +
-        np.dot(r.T, Ct )
+        r.T.dot(Ct)
     ).T 
     
-    sol = solvers.qp(P,q,G,h)
+    sol = solvers.qp(P, q, G, h)
     
     if sol['status'] != "optimal":
         raise Exception("getInputHelper: "
@@ -408,7 +411,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         C{False} otherwise  
     """
     N = u_seq.shape[0]
-    x = x0.reshape(x0.size,1)
+    x = x0.reshape(x0.size, 1)
     
     A = ssys.A
     B = ssys.B
@@ -419,12 +422,15 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     
     inside = True
     for i in xrange(N-1):
-        u = u_seq[i,:].reshape(u_seq[i,:].size,1)
-        x = np.dot(A,x) + np.dot(B,u) + K       
+        u = u_seq[i,:].reshape(u_seq[i, :].size, 1)
+        x = A.dot(x) + B.dot(u) + K
+        
         if not pc.is_inside(P0, x):
             inside = False
-    un_1 = u_seq[N-1,:].reshape(u_seq[N-1,:].size,1)
-    xn = np.dot(A,x) + np.dot(B,un_1) + K
+    
+    un_1 = u_seq[N-1,:].reshape(u_seq[N-1, :].size, 1)
+    xn = A.dot(x) + B.dot(un_1) + K
+    
     if not pc.is_inside(P1, xn):
         inside = False
     
