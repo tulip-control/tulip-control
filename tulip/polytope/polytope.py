@@ -201,7 +201,31 @@ class Polytope(object):
         P.bbox = self.bbox
         P.fulldim = self.fulldim
         return P
-
+    
+    def __add__(self, other):
+        """Return union with Polytope or Region.
+        
+        Applies convex simplification if possible.
+        To turn off this check,
+        use Polytope.union(other, check_convex=False).
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        """
+        return union(self, other, check_convex=True)
+    
+    def union(self, other, check_convex=False):
+        """Return union with Polytope or Region.
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        
+        For usage see function union.
+        """
+        return union(self, other, check_convex)
+    
     def copy(self):
         """Return copy of this Polytope.
         """
@@ -310,12 +334,36 @@ class Region(object):
         
     def __len__(self):
         return len(self.list_poly)
-
+    
+    def __add__(self, other):
+        """Return union with Polytope or Region.
+        
+        Applies convex simplification if possible.
+        To turn off this check,
+        use Region.union(other, check_convex=False).
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        """
+        return union(self, other, check_convex=True)
+    
+    def union(self, other, check_convex=False):
+        """Return union with Polytope or Region.
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        
+        For usage see function union.
+        """
+        return union(self, other, check_convex)
+    
     def __copy__(self):
         """Return copy of this Region."""
         return Region(list_poly=self.list_poly[:],
                       list_prop=self.list_prop[:])
-
+    
     def copy(self):
         """Return copy of this Region."""
         return self.__copy__()
