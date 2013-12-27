@@ -226,6 +226,37 @@ class Polytope(object):
         """
         return union(self, other, check_convex)
     
+    def __sub__(self, other):
+        """Return set difference with Polytope or Region.
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        """
+        return mldivide(self, other)
+        
+    def __and__(self, other):
+        """Return intersection with Polytope or Region.
+        
+        Absolute tolerance 1e-7 used.
+        To select the absolute tolerance use
+        method Polytope.intersect
+        
+        @type other: Polytope or Region
+        
+        @rtype: Polytope or Region
+        """
+        return intersect(self, other)
+    
+    def intersect(self, other, abs_tol=1e-7):
+        """Return intersection with Polytope or Region.
+        
+        @type other: Polytope or Region.
+        
+        @rtype: Polytope or Region
+        """
+        return intersect(self, other, abs_tol)
+    
     def copy(self):
         """Return copy of this Polytope.
         """
@@ -358,6 +389,37 @@ class Region(object):
         For usage see function union.
         """
         return union(self, other, check_convex)
+    
+    def __sub__(self, other):
+        """Return set difference with Polytope or Region.
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        """
+        return mldivide(self, other)
+        
+    def __and__(self, other):
+        """Return intersection with Polytope or Region.
+        
+        Absolute tolerance 1e-7 used.
+        To select the absolute tolerance use
+        method Region.intersect
+        
+        @type other: Polytope or Region
+        
+        @rtype: Polytope or Region
+        """
+        return intersect(self, other)
+    
+    def intersect(self, other, abs_tol=1e-7):
+        """Return intersection with Polytope or Region.
+        
+        @type other: Polytope or Region.
+        
+        @rtype: Polytope or Region
+        """
+        return intersect(self, other, abs_tol)
     
     def __copy__(self):
         """Return copy of this Region."""
