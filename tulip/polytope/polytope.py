@@ -313,6 +313,14 @@ class Polytope(object):
         
         return cls(A, b, minrep=True)
     
+    def project(self, dim, solver=None,
+                abs_tol=1e-7, verbose=0):
+        """Return Polytope projection on selected subspace.
+        
+        For usage details see function: projection.
+        """
+        projection(self, dim, solver, abs_tol, verbose)
+    
     @property
     def dim(self):
         """Return Polytope dimension.
