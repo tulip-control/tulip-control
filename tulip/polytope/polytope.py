@@ -319,7 +319,7 @@ class Polytope(object):
         
         For usage details see function: projection.
         """
-        projection(self, dim, solver, abs_tol, verbose)
+        return projection(self, dim, solver, abs_tol, verbose)
     
     @property
     def dim(self):
