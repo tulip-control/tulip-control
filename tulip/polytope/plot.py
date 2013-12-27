@@ -46,7 +46,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-from polytope import dimension, extreme, cheby_ball, is_fulldim
+from polytope import extreme, cheby_ball, is_fulldim
 
 def get_patch(poly1, color="blue"):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
@@ -102,7 +102,7 @@ def plot(poly1, ax=None, color=np.random.rand(3)):
         print("Cannot plot empty polytope")
         return
     
-    if dimension(poly1) != 2:
+    if poly1.dim != 2:
         print("Cannot plot polytopes of dimension larger than 2")
         return
     

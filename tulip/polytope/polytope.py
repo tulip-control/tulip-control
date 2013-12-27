@@ -112,6 +112,8 @@ class Polytope(object):
                 running reduce)
     - `normalize`: if True (default), normalize given A and b arrays;
                    else, use A and b without modification.
+    - `dim`: dimension
+    - `volume`: volume, computed on first call
     
     see also
     --------
@@ -312,6 +314,15 @@ class Polytope(object):
         return cls(A, b, minrep=True)
     
     @property
+    def dim(self):
+        """Return Polytope dimension.
+        """
+        try:
+            return np.shape(self.A)[1]
+        except:
+            return 0.0
+    
+    @property
     def volume(self):
         if self._volume is None:
             self._volume = volume(self)
@@ -327,7 +338,8 @@ class Region(object):
     - `bbox`: if calculated, bounding box of region (see bounding_box)
     - `fulldim`: if calculated, boolean indicating whether region is
                  fully dimensional
-    - `volume`: if calculated, volume of region
+    - `dim`: dimension
+    - `volume`: volume of region, calculated on first call
     - `chebXc`: coordinates of maximum chebyshev center (if calculated)
     - `chebR`: maximum chebyshev radius (if calculated)
     
@@ -344,9 +356,9 @@ class Region(object):
             self.list_prop = list_prop
         else:
             if len(list_poly) > 0:
-                dim = dimension(list_poly[0])    
+                dim = list_poly[0].dim
                 for poly in list_poly:
-                    if dimension(poly)!=dim:
+                    if poly.dim != dim:
                         raise Exception("Region error:"
                             " Polytopes must be of same dimension!")                    
             
@@ -435,6 +447,12 @@ class Region(object):
     def copy(self):
         """Return copy of this Region."""
         return self.__copy__()
+    
+    @property
+    def dim(self):
+        """Return Region dimension.
+        """
+        return np.shape(self.list_poly[0].A)[1]
     
     @property
     def volume(self):
@@ -799,23 +817,6 @@ def cheby_ball(poly1):
     poly1.chebXc = np.array(xc)
     poly1.chebR = np.double(r)
     return poly1.chebR,poly1.chebXc
-        
-def dimension(polyreg):
-    """Get the dimension of a polytope or region.
-    
-    Input:
-    `polyreg`: Polytope or Region object
-    
-    Output:
-    `dim`: Dimension of input
-    """
-    if len(polyreg) == 0:
-        try:
-            return np.shape(polyreg.A)[1]
-        except:
-            return 0
-    else:
-        return np.shape(polyreg.list_poly[0].A)[1]
     
 def bounding_box(polyreg):
     """Compute the smallest hyperbox containing the polytope or region
@@ -829,7 +830,7 @@ def bounding_box(polyreg):
     # convex polytope and take maximum
     
     if lenP>0:
-        dimP = dimension(polyreg)
+        dimP = polyreg.dim
         alllower = np.zeros([lenP,dimP])
         allupper = np.zeros([lenP,dimP])
         
@@ -967,7 +968,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     if (not is_fulldim(poly1)) or (not is_fulldim(poly2)):
         return Polytope()
         
-    if dimension(poly1) != dimension(poly2):
+    if poly1.dim != poly2.dim:
         raise Exception("polytopes have different dimension")
     
     if len(poly1) > 0:
@@ -1183,11 +1184,11 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
             ret = ret + p
         return ret
     
-    if (dimension(poly1) < len(dim)) or is_empty(poly1):
+    if (poly1.dim < len(dim)) or is_empty(poly1):
         return poly1
     
     dim = np.array(dim)
-    org_dim = range(dimension(poly1))
+    org_dim = range(poly1.dim)
     new_dim = dim.flatten() - 1
     del_dim = np.setdiff1d(org_dim,new_dim) # Index of dimensions to remove 
         
@@ -1282,7 +1283,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
     Output:
     True if polytopes are adjacent, False otherwise
     """
-    if dimension(poly1) != dimension(poly2):
+    if poly1.dim != poly2.dim:
         raise Exception("is_adjacent: "
             "polytopes do not have the same dimension")
     
