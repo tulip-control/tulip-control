@@ -166,11 +166,8 @@ def part2convex(ppp):
     )
     subsys_list = []
     for i in xrange(ppp.num_regions):
-        simplified_reg = pc.union(
-            ppp.list_region[i],
-            ppp.list_region[i],
-            check_convex=True
-        )
+        simplified_reg = ppp.list_region[i] + ppp.list_region[i]
+        
         for j in xrange(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg.list_poly[j]],

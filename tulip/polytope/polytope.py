@@ -1106,7 +1106,7 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
                 poly1.list_poly[i], dim,
                 solver=solver, abs_tol=abs_tol
             )
-            ret = union(ret, p, check_convex=True)
+            ret = ret + p
         return ret
     
     if (dimension(poly1) < len(dim)) or is_empty(poly1):

@@ -621,7 +621,7 @@ def solve_closed_loop(
 
 def union_or_chain(s0, p2, use_all_horizon):
     if use_all_horizon:
-        p2 = pc.union(s0, p2, check_convex=True)
+        p2 = s0 + p2
     else:
         p2 = s0
     return p2
@@ -652,7 +652,7 @@ def solve_open_loop(
     for p1 in start_polys:
         for p2 in target_polys:
             cur_s0 = poly_to_poly(p1, p2, ssys, N, trans_set)
-            s0 = pc.union(s0, cur_s0, check_convex=True)
+            s0 = s0 + cur_s0
     
     return s0
 
