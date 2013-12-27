@@ -207,7 +207,7 @@ class Polytope(object):
         
         Applies convex simplification if possible.
         To turn off this check,
-        use Polytope.union(other, check_convex=False).
+        use Polytope.union
         
         @type other: Polytope or Region
         
@@ -218,11 +218,11 @@ class Polytope(object):
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
         
+        For usage see function union.
+        
         @type other: Polytope or Region
         
         @rtype: Region
-        
-        For usage see function union.
         """
         return union(self, other, check_convex)
     
@@ -371,7 +371,7 @@ class Region(object):
         
         Applies convex simplification if possible.
         To turn off this check,
-        use Region.union(other, check_convex=False).
+        use Region.union
         
         @type other: Polytope or Region
         
@@ -382,11 +382,11 @@ class Region(object):
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
         
+        For usage see function union.
+        
         @type other: Polytope or Region
         
         @rtype: Region
-        
-        For usage see function union.
         """
         return union(self, other, check_convex)
     
