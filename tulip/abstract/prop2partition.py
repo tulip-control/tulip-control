@@ -90,10 +90,7 @@ def prop2part(state_space, cont_props_dict):
             prop_holds_reg.append(0)
             list_prop_now = mypartition.list_region[i].list_prop[:]
             
-            dummy = pc.intersect(
-                region_now,
-                cont_props[prop_count]
-            )
+            dummy = region_now & cont_props[prop_count]
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
                 dum_list_prop.append(1)
@@ -120,10 +117,8 @@ def prop2part(state_space, cont_props_dict):
                     list_prop=list_prop_now
                 )
             )
-            dummy = pc.mldivide(
-                region_now,
-                cont_props[prop_count]
-            )
+            dummy = region_now - cont_props[prop_count]
+            
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
                 dum_list_prop.append(0)
@@ -205,7 +200,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     --------
     discretize.discretize
     """
-    if pc.is_fulldim(pc.mldivide(ppp.domain, pwa_sys.domain)):
+    if pc.is_fulldim(ppp.domain - pwa_sys.domain):
         raise Exception("pwaPartition: "
             "pwa system is not defined everywhere in state space")
 
@@ -214,10 +209,9 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     parent = []
     for i in xrange(len(pwa_sys.list_subsys)):
         for j in xrange(ppp.num_regions):
-            isect = pc.intersect(
-                pwa_sys.list_subsys[i].domain,
+            isect = pwa_sys.list_subsys[i].domain & \
                 ppp.list_region[j]
-            )
+            
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
                 if rc < abs_tol:
@@ -348,11 +342,9 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             temp_list.append([re_list[i][j],re_list[i][j+1]])
             j=j+2
         for j in xrange(ppp.num_regions):
-            isect = pc.intersect(
-                pc.Polytope.from_box(np.array(temp_list)),
-                ppp.list_region[j],
-                abs_tol
-            )
+            tmp = pc.box2poly(temp_list)
+            isect = tmp.intersect(ppp.list_region[j], abs_tol)
+            
             #if pc.is_fulldim(isect):
             rc, xc = pc.cheby_ball(isect)
             if rc > abs_tol/2:

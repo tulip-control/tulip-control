@@ -259,12 +259,12 @@ def discretize(
                 str(S0.volume) )
         
         # isect = si \cap S0
-        isect = pc.intersect(si, S0)
+        isect = si & S0
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
         # diff = si \setminus S0
-        diff = pc.mldivide(si, S0)
+        diff = si - S0
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
         
@@ -674,7 +674,7 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     n = np.shape(ssys.A)[1]
     dims = range(1, n+1)
     
-    s0 = pc.projection(s0, dims)
+    s0 = s0.project(dims)
     
     return pc.reduce(s0)
 

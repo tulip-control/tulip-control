@@ -553,7 +553,7 @@ def is_convex(reg, abs_tol = 1e-7):
     if sum(abs(bboxP[:,0] - bboxO[:,0]) > abs_tol) > 0 or \
     sum(abs(bboxP[:,1] - bboxO[:,1]) > abs_tol) > 0:
         return False,None
-    if is_fulldim(mldivide(outer,reg)):
+    if is_fulldim(outer - reg):
         return False,None
     else:
         return True,outer
@@ -700,8 +700,8 @@ def union(polyreg1,polyreg2,check_convex=False):
     if check_convex:
         s1 = intersect(polyreg1, polyreg2)
         if is_fulldim(s1):
-            s2 = mldivide(polyreg2, polyreg1)
-            s3 = mldivide(polyreg1, polyreg2)
+            s2 = polyreg2 - polyreg1
+            s3 = polyreg1 - polyreg2
         else:
             s2 = polyreg1
             s3 = polyreg2

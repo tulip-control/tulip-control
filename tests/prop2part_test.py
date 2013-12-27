@@ -52,7 +52,7 @@ def prop2part_test():
     assert len(mypartition.list_region[2].list_poly) == 3
     dum = state_space.copy()
     for reg in mypartition.list_region[0:2]:
-        dum = pc.mldivide(dum,reg)
-    assert pc.is_empty(pc.mldivide(dum,mypartition.list_region[2]))
-    assert pc.is_empty(pc.mldivide(mypartition.list_region[2],dum))
+        dum = dum - reg
+    assert pc.is_empty(dum - mypartition.list_region[2])
+    assert pc.is_empty(mypartition.list_region[2] - dum)
 

@@ -160,7 +160,7 @@ class PwaSysDyn(object):
             m = list_subsys[0].B.shape[1]  # Input space dimension
             p = list_subsys[0].E.shape[1]  # Disturbance space dimension
             for subsys in list_subsys:
-                uncovered_dom = pc.mldivide(uncovered_dom, subsys.domain)
+                uncovered_dom = uncovered_dom - subsys.domain
                 if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or 
                     p!=subsys.E.shape[1]):
                     raise Exception("PwaSysDyn: state, input, disturbance " + 
@@ -169,7 +169,7 @@ class PwaSysDyn(object):
             if not pc.is_empty(uncovered_dom):
                 raise Exception("PwaSysDyn: subdomains must cover the domain")
             for x in itertools.combinations(list_subsys, 2):
-                if pc.is_fulldim(pc.intersect(x[0].domain,x[1].domain)):
+                if pc.is_fulldim(x[0].domain & x[1].domain):
                     raise Exception("PwaSysDyn: subdomains have to be mutually"+
                         " exclusive")
         
