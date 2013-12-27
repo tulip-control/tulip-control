@@ -52,28 +52,23 @@
 #  projection_exthull
 #
 """
-A computational geometry module for polytope computations. The module
-can be accessed by writing
+Computational geometry module for polytope computations.
+Can be accessed by:
 
-> import tulip.polytope as pc
+>>> import tulip.polytope as pc
 
-Primary functions: 
-	- is_adjacent
-	- reduce
-	- is_fulldim
-	- intersect
-	- mldivide
-	- cheby_ball
-	- union
-	- volume
-	- projection
-	- is_inside
-	- envelope
-	- extreme
-	
 Classes:
 	- Region
 	- Polytope
+
+Functions: 
+	- is_adjacent
+	- reduce
+	- is_fulldim
+	- cheby_ball
+	- is_inside
+	- envelope
+	- extreme
 """
 import numpy as np
 from cvxopt import matrix, solvers
