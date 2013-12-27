@@ -256,16 +256,16 @@ def discretize(
         
         if verbose > 1:
             print("Computed reachable set S0 with volume " +
-                str(pc.volume(S0)) )
+                str(S0.volume) )
         
         # isect = si \cap S0
         isect = pc.intersect(si, S0)
-        vol1 = pc.volume(isect)
+        vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
         # diff = si \setminus S0
         diff = pc.mldivide(si, S0)
-        vol2 = pc.volume(diff)
+        vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
         
         # We don't want our partitions to be smaller than the disturbance set
@@ -684,7 +684,7 @@ def volumes_for_reachability(part, max_num_poly):
     
     vol_list = np.zeros(len(part) )
     for i in xrange(len(part) ):
-        vol_list[i] = pc.volume(part.list_poly[i] )
+        vol_list[i] = part.list_poly[i].volume
     
     ind = np.argsort(-vol_list)
     temp = []

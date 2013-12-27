@@ -141,7 +141,7 @@ class Polytope(object):
         self.chebR = chebR
         self.bbox = None
         self.fulldim = fulldim
-        self.volume = volume
+        self._volume = volume
         self.vertices = vertices
 
     def __repr__(self):
@@ -310,6 +310,12 @@ class Polytope(object):
         b = np.hstack([intervals[:,1], -intervals[:,0] ])
         
         return cls(A, b, minrep=True)
+    
+    @property
+    def volume(self):
+        if self._volume is None:
+            self._volume = volume(self)
+        return self._volume
 
 class Region(object):
     """Class for lists of convex polytopes
@@ -351,7 +357,7 @@ class Region(object):
             self.list_prop = list_prop[:]
             self.bbox = None
             self.fulldim = None
-            self.volume = None
+            self._volume = None
             self.chebXc = None
             self.chebR = None
 
@@ -429,6 +435,12 @@ class Region(object):
     def copy(self):
         """Return copy of this Region."""
         return self.__copy__()
+    
+    @property
+    def volume(self):
+        if self._volume is None:
+            self._volume = volume(self)
+        return self._volume
     
 def is_empty(polyreg):
     """Check if the description of a polytope is empty
@@ -995,8 +1007,8 @@ def volume(polyreg):
     if not is_fulldim(polyreg):
         return 0.
     try:
-        if polyreg.volume != None:
-            return polyreg.volume
+        if polyreg._volume is not None:
+            return polyreg._volume
     except:
         print("vol")
         
@@ -1004,7 +1016,7 @@ def volume(polyreg):
         tot_vol = 0.
         for i in range(len(polyreg)):
             tot_vol += volume(polyreg.list_poly[i])
-        polyreg.volume = tot_vol
+        polyreg._volume = tot_vol
         return tot_vol
 
     n = polyreg.A.shape[1]
@@ -1028,7 +1040,7 @@ def volume(polyreg):
         )
     aux = np.nonzero(np.all(((aux < 0)==True),0))[0].shape[0]
     vol = np.prod(u_b-l_b)*aux/N
-    polyreg.volume = vol
+    polyreg._volume = vol
     return vol    
             
 def extreme(poly1):
