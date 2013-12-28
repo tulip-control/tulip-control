@@ -35,11 +35,11 @@ Transition System Module
 from collections import Iterable, OrderedDict
 from pprint import pformat
 import copy
+import warnings
 
 from .labeled_graphs import LabeledStateDiGraph, str2singleton
 from .labeled_graphs import prepend_with, vprint
-from .mathset import PowerSet, MathSet, unique
-import automata
+from .mathset import PowerSet, MathSet, unique, dprint
 from .executions import FTSSim
 from .export import graph2promela
 
@@ -354,11 +354,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         if isinstance(ts_or_ba, FiniteTransitionSystem):
             ts = ts_or_ba
             return self._sync_prod(ts)
-        elif isinstance(ts_or_ba, automata.BuchiAutomaton):
-            ba = ts_or_ba
-            return automata._ts_ba_sync_prod(self, ba)
         else:
-            raise Exception('Argument must be TS or BA.')
+            ba = ts_or_ba
+            return _ts_ba_sync_prod(self, ba)
     
     def _sync_prod(self, ts):
         """Synchronous (tensor) product with other FTS.
@@ -837,12 +835,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         
         return Sigma_dict
     
-    if not isinstance(transition_system, transys.FiniteTransitionSystem):
+    if not isinstance(transition_system, FiniteTransitionSystem):
         msg = 'transition_system not transys.FiniteTransitionSystem.\n'
         msg += 'Actual type passed: ' +str(type(transition_system) )
         raise TypeError(msg)
     
-    if not isinstance(buchi_automaton, BuchiAutomaton):
+    if not hasattr(buchi_automaton, 'alphabet'):
         msg = 'transition_system not transys.BuchiAutomaton.\n'
         msg += 'Actual type passed: ' +str(type(buchi_automaton) )
         raise TypeError(msg)
@@ -864,7 +862,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         mutable = False
     
     # using set() destroys order
-    prodts = transys.FiniteTransitionSystem(
+    prodts = FiniteTransitionSystem(
         name=prodts_name, mutable=mutable
     )
     prodts.states.add_from(set() )

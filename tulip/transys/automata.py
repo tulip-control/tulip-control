@@ -40,7 +40,7 @@ import warnings
 from .labeled_graphs import LabeledStateDiGraph
 from .labeled_graphs import vprint, prepend_with, str2singleton
 from .mathset import MathSet, SubSet, PowerSet, dprint
-import transys
+from .transys import _ts_ba_sync_prod
 
 hl = 60 *'-'
 
@@ -274,12 +274,9 @@ class BuchiAutomaton(OmegaAutomaton):
         """
         if isinstance(ts_or_ba, BuchiAutomaton):
             return self._ba_ba_sync_prod(ts_or_ba)
-        elif isinstance(ts_or_ba, transys.FiniteTransitionSystem):
+        else:
             ts = ts_or_ba
             return _ba_ts_sync_prod(self, ts)
-        else:
-            raise Exception('ts_or_ba should be an FTS or a BA.\n'+
-                            'Got type: ' +str(ts_or_ba) )
     
     def is_accepted(self, prefix, suffix):
         """Check if given infinite word over alphabet \Sigma is accepted.
