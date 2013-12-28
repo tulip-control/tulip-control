@@ -32,10 +32,10 @@
 """
 Finite State Machine examples
 """
-
 import networkx as nx
 from collections import OrderedDict
 import tulip.transys as trs
+import tulip.transys.machines as mc
 import warnings
 
 hl = 60*'='
@@ -254,21 +254,21 @@ def pedestrians():
     m = trs.Mealy()
     
     m.add_inputs([
-        ('sigR', trs.pure),
-        ('sigG', trs.pure),
-        ('sigY', trs.pure)
+        ('sigR', mc.pure),
+        ('sigG', mc.pure),
+        ('sigY', mc.pure)
     ])
     
     m.add_outputs([
-        ('pedestrian', trs.pure)
+        ('pedestrian', mc.pure)
     ])
     
     m.states.add_from(['none', 'waiting', 'crossing'] )
     m.states.initial.add('crossing')
     
-    for sigR in trs.pure:
-        for sigG in trs.pure:
-            for sigY in trs.pure:
+    for sigR in mc.pure:
+        for sigG in mc.pure:
+            for sigY in mc.pure:
                 m.transitions.add_labeled(
                     'none', 'none',
                     (sigR, sigG, sigY, 'absent')
