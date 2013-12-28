@@ -34,8 +34,6 @@ Classes for executions, traces, words, input port valuations, etc.
 """
 from collections import OrderedDict
 
-import machines
-
 class FiniteSequence(object):
     """Used to construct finite words."""
     def __init__(self, sequence):
@@ -300,10 +298,10 @@ class MachineInputSequence(object):
         @param machine: from where to copy the input port definitions
         @type machine: FiniteStateMachine
         """
-        if not isinstance(machine, machines.FiniteStateMachine):
+        if not hasattr(machine, 'inputs'):
             raise TypeError(
-                'machine must be a FiniteStateMachine\n.' +
-                'Got instead:\n\t' +str(type(machine) ) )
+                'machine has no inputs field\n.' +
+                'Got type:\n\t' +str(type(machine) ) )
         
         self.inputs = OrderedDict(machine.inputs)
         self._input_valuations = dict()

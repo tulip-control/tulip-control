@@ -39,7 +39,7 @@ from random import choice
 from textwrap import fill
 
 from .labeled_graphs import LabeledStateDiGraph
-import executions
+from . import executions
 
 hl = 60 *'-'
 
