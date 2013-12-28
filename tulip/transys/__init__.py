@@ -37,6 +37,8 @@ Suggested abbreviation:
 
     >>> from tulip import transys as trs
 """
+from .labeled_graphs import prepend_with
+
 from .transys import FiniteTransitionSystem, FTS
 from .transys import OpenFiniteTransitionSystem, OpenFTS
 from .transys import tuple2fts, line_labeled_with, cycle_labeled_with

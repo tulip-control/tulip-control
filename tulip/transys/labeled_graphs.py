@@ -41,9 +41,9 @@ from textwrap import fill
 
 import networkx as nx
 
-from mathset import MathSet, SubSet, PowerSet, \
+from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique, dprint
-from export import save_d3, machine2scxml
+from .export import save_d3, machine2scxml
 
 hl = 60 *'-'
 
