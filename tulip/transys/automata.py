@@ -37,9 +37,9 @@ from pprint import pformat
 import warnings
 #import warnings
 
-from labeled_graphs import LabeledStateDiGraph
-from labeled_graphs import vprint, prepend_with, str2singleton
-from mathset import MathSet, SubSet, PowerSet, dprint
+from .labeled_graphs import LabeledStateDiGraph
+from .labeled_graphs import vprint, prepend_with, str2singleton
+from .mathset import MathSet, SubSet, PowerSet, dprint
 import transys
 
 hl = 60 *'-'

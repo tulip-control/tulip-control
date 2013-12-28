@@ -38,7 +38,6 @@ import re, copy
 
 from tulip.spec import parse
 
-
 def mutex(varnames):
     """Create mutual exclusion formulae from iterable of variables.
 

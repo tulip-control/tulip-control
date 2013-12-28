@@ -32,5 +32,5 @@
 """
 Specification subpackage of TuLiP
 """
-
-from form import *
+from .form import LTL, GRSpec
+from .form import mutex

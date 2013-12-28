@@ -13,8 +13,7 @@ Necmiye Ozay, August 26, 2012
 
 import numpy as np
 
-from tulip import *
-from tulip import spec, synth
+from tulip import spec, synth, hybrid
 from tulip.polytope import box2poly
 from tulip.abstract import prop2part, discretize
 

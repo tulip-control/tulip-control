@@ -32,9 +32,6 @@
 #
 """
 Functions for plotting Partitions.
-The functions can be accessed by
-
->>> from tulip.abstract.plot import *
 
 Functions:
     - plot_partition

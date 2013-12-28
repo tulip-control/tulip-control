@@ -47,8 +47,8 @@ import os
 import xml.etree.ElementTree as ET
 import networkx as nx
 
-from spec import GRSpec
-from transys import MealyMachine
+from .spec import GRSpec
+from .transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
 

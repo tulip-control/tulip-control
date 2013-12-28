@@ -38,7 +38,7 @@ import warnings
 from random import choice
 from textwrap import fill
 
-from labeled_graphs import LabeledStateDiGraph
+from .labeled_graphs import LabeledStateDiGraph
 import executions
 
 hl = 60 *'-'

@@ -58,7 +58,7 @@ from scipy import sparse as sp
 from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from prop2partition import PropPreservingPartition, pwa_partition, part2convex
+from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 
 class AbstractSysDyn(object):
     """AbstractSysDyn class for discrete abstractions of continuous

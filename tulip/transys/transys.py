@@ -36,12 +36,12 @@ from collections import Iterable, OrderedDict
 from pprint import pformat
 import copy
 
-from labeled_graphs import LabeledStateDiGraph, str2singleton
-from labeled_graphs import prepend_with, vprint
-from mathset import PowerSet, MathSet, unique
+from .labeled_graphs import LabeledStateDiGraph, str2singleton
+from .labeled_graphs import prepend_with, vprint
+from .mathset import PowerSet, MathSet, unique
 import automata
-from executions import FTSSim
-from export import graph2promela
+from .executions import FTSSim
+from .export import graph2promela
 
 hl = 60 *'-'
 

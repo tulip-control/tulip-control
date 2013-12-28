@@ -32,7 +32,16 @@
 # 
 
 """TuLiP Toolbox Transition System module
+
+Suggested abbreviation:
+
+    >>> from tulip import transys as trs
 """
-from transys import *
-from automata import *
-from machines import *
+from .transys import FiniteTransitionSystem, FTS
+from .transys import OpenFiniteTransitionSystem, OpenFTS
+from .transys import tuple2fts, line_labeled_with, cycle_labeled_with
+
+from .automata import BuchiAutomaton, BA, tuple2ba
+from .automata import RabinAutomaton, DRA
+
+from .machines import MooreMachine, MealyMachine, Mealy

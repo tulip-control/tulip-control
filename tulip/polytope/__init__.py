@@ -37,4 +37,10 @@ Main functions are in polytope.py, which are imported automatically.
 Functions for plotting are in plot.py, requires matplotlib.
 """
 
-from polytope import *
+from .polytope import Polytope, Region
+from .polytope import is_empty, is_fulldim, is_convex, is_adjacent
+from .polytope import reduce, separate
+from .polytope import cheby_ball, bounding_box, envelope, extreme, qhull
+
+# to be moved to MPT namespace
+from .polytope import is_inside, union, mldivide, intersect, volume, projection

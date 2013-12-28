@@ -47,7 +47,7 @@ import warnings
 from collections import OrderedDict
 
 import transys
-from spec import GRSpec
+from .spec import GRSpec
 
 #for checking form of spec
 import pyparsing

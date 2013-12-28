@@ -20,8 +20,7 @@
 #     +---+---+---+
 #
 
-from tulip import *
-from tulip import spec, synth
+from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
 

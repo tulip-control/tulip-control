@@ -53,7 +53,7 @@
 #
 """
 Computational geometry module for polytope computations.
-Can be accessed by:
+Suggested abbreviation:
 
 >>> import tulip.polytope as pc
 
@@ -73,8 +73,8 @@ Functions:
 import numpy as np
 from cvxopt import matrix, solvers
 
-from quickhull import quickhull
-from esp import esp
+from .quickhull import quickhull
+from .esp import esp
 
 # Find a lp solver to use
 try:

@@ -32,9 +32,6 @@
 #
 """
 Functions for plotting Polytopes.
-The functions can be accessed by
-
->>> from tulip.polytope.plot import *
 
 Functions:
 
@@ -46,7 +43,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-from polytope import extreme, cheby_ball, is_fulldim
+from .polytope import extreme, cheby_ball, is_fulldim
 
 def get_patch(poly1, color="blue"):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
