@@ -34,7 +34,7 @@ Base classes for labeled directed graphs
 """
 from pprint import pformat
 from collections import Iterable
-from cStringIO import StringIO
+from io import StringIO
 import warnings
 import copy
 from textwrap import fill
