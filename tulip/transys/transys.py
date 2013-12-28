@@ -39,7 +39,7 @@ import warnings
 
 from .labeled_graphs import LabeledStateDiGraph, str2singleton
 from .labeled_graphs import prepend_with, vprint
-from .mathset import PowerSet, MathSet, unique, dprint
+from .mathset import PowerSet, MathSet, dprint
 from .executions import FTSSim
 from .export import graph2promela
 
