@@ -92,8 +92,8 @@ class Facet:
         self.distance = -d
     
     def get_furthest(self):
-    	"""Returns the point in outside the furthest away from the facet"""
-    	N = len(self.outside)
+        """Returns the point in outside the furthest away from the facet"""
+        N = len(self.outside)
         if N == 1:
             ret = self.outside[0]
             del self.outside[0]
