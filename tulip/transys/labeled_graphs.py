@@ -1022,103 +1022,6 @@ class LabeledStates(States):
             dprint(msg)
             return False
     
-    def _dot_str(self, to_pydot_graph, wrap=10):
-        """Copy nodes to given Pydot graph, with attributes for dot export."""
-        
-        def add_incoming_edge(g, state):
-            phantom_node = 'phantominit' +str(state)
-            
-            g.add_node(phantom_node, label='""', shape='none', width='0')
-            g.add_edge(phantom_node, state)
-        
-        def form_node_label(state, state_data, label_def,
-                            label_format, width=10):
-            # node itself
-            state_str = fill(str(state), width=width)
-            state_str.replace('\n', '\\n')
-            node_dot_label = '"' +state_str +'\\n'
-            
-            # add node annotations from action, AP sets etc
-            # other key,values in state attr_dict ignored
-            sep_label_sets = label_format['separator']
-            for (label_type, label_value) in state_data.iteritems():
-                if label_type in label_def:
-                    # label formatting
-                    type_name = label_format[label_type]
-                    sep_type_value = label_format['type?label']
-                    
-                    # avoid turning strings to lists,
-                    # or non-iterables to lists
-                    if isinstance(label_value, str):
-                        label_str = fill(label_value, width=width)
-                    elif isinstance(label_value, Iterable): # and not str
-                        label_str = fill(str(list(label_value) ), width=width)
-                    else:
-                        label_str = fill(str(label_value), width=width)
-                    label_str.replace('\n', '\\n')
-                    
-                    node_dot_label += type_name +sep_type_value
-                    node_dot_label += label_str +sep_label_sets
-            node_dot_label += '"'
-            
-            return node_dot_label  
-        
-        def decide_node_shape(graph, state):
-            node_shape = graph.dot_node_shape['normal']
-            
-            # check if accepting states defined
-            if not self._exist_accepting_states(warn=False):
-                return node_shape
-            
-            # check for accepting states
-            if state in self.accepting:
-                node_shape = graph.dot_node_shape['accepting']
-                
-            return node_shape
-        
-        # get labeling def        
-        if self._exist_labels():
-            label_def = self.graph._state_label_def
-            label_format = self.graph._state_dot_label_format
-        
-        for (state_id, state_data) in self.graph.nodes_iter(data=True):
-            state = self._int2mutant(state_id)
-            
-            if state in self.initial:
-                add_incoming_edge(to_pydot_graph, state_id)
-            
-            node_shape = decide_node_shape(self.graph, state)
-            
-            # state annotation
-            if self._exist_labels():
-                node_dot_label = form_node_label(
-                    state, state_data, label_def, label_format, wrap
-                )
-            else:
-                node_dot_label = fill(str(state), width=wrap)
-                node_dot_label.replace('\n', '\\n')
-            
-            # state boundary color
-            if state_data.has_key('color'):
-                node_color = state_data['color']
-            else:
-                node_color = '"black"'
-            
-            # state interior color
-            node_style = '"rounded'
-            if state_data.has_key('fillcolor'):
-                node_style += ',filled"'
-                fill_color = state_data['fillcolor']
-            else:
-                node_style += '"'
-                fill_color = "none"
-            
-            # TODO option to replace with int to reduce size,
-            # TODO generate separate LaTeX legend table (PNG option ?)
-            to_pydot_graph.add_node(
-                state_id, label=node_dot_label, shape=node_shape,
-                style=node_style, color=node_color, fillcolor=fill_color)
-    
     def _check_state(self, state, check=True):
         if not check:
             # add only if absent, to avoid order-preserving exceptions
@@ -1820,42 +1723,6 @@ class LabeledTransitions(Transitions):
         if to_state not in self.graph.states:
             msg = str(to_state) +' = to_state \\notin state'
             raise Exception(msg)
-        
-    def _dot_str(self, to_pydot_graph):
-        """Return label for dot export.
-        """        
-        def form_edge_label(edge_data, label_def, label_format):
-            edge_dot_label = '"'
-            sep_label_sets = label_format['separator']
-            for (label_type, label_value) in edge_data.iteritems():
-                if label_type in label_def:
-                    # label formatting
-                    type_name = label_format[label_type]
-                    sep_type_value = label_format['type?label']
-                    
-                    # avoid turning strings to lists
-                    if isinstance(label_value, str):
-                        label_str = label_value
-                    elif isinstance(label_value, Iterable):
-                        label_str = str(list(label_value) )
-                    else:
-                        label_str = str(label_value)
-                    
-                    edge_dot_label += type_name +sep_type_value
-                    edge_dot_label += label_str +sep_label_sets
-            edge_dot_label += '"'
-            
-            return edge_dot_label
-        
-        self._exist_labels()
-        
-        # get labeling def
-        label_def = self.graph._transition_label_def
-        label_format = self.graph._transition_dot_label_format
-        
-        for (u, v, key, edge_data) in self.graph.edges_iter(data=True, keys=True):
-            edge_dot_label = form_edge_label(edge_data, label_def, label_format)
-            to_pydot_graph.add_edge(u, v, key=key, label=edge_dot_label)
     
     def _mutable2ints(self, from_states, to_states):
         """Convert possibly unhashable states to internal ones.
@@ -2351,30 +2218,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             path = self._add_missing_extension(path, file_type)
         
         return path
-    
-    def _pydot_missing(self):
-        if pydot is None:
-            msg = 'Attempted calling _to_pydot.\n'
-            msg += 'Unavailable due to pydot not installed.\n'
-            warnings.warn(msg)
-            return True
-        
-        return False
-    
-    def _to_pydot(self, wrap=10):
-        """Convert to properly annotated pydot graph."""
-        if self._pydot_missing():
-            return None
-        
-        dummy_nx_graph = nx.MultiDiGraph()
-        
-        self.states._dot_str(dummy_nx_graph, wrap)
-        self.transitions._dot_str(dummy_nx_graph)
-        
-        pydot_graph = nx.to_pydot(dummy_nx_graph)
-        pydot_graph.set_overlap(False)
-        
-        return pydot_graph
     
     def __eq__(self, other):
         """Check finite-transition system equality.
