@@ -33,8 +33,19 @@
 Convert labeled graph to dot using
 pydot and custom filtering
 """
-    
-def _dot_str(self, to_pydot_graph, wrap=10):
+from warnings import warn
+from collections import Iterable
+from textwrap import fill
+
+import networkx as nx
+
+try:
+    import pydot
+except ImportError:
+    warn('pydot package not found.\nHence dot export not unavailable.')
+    pydot = None
+
+def _states2str(self, to_pydot_graph, wrap=10):
         """Copy nodes to given Pydot graph, with attributes for dot export."""
         
         def add_incoming_edge(g, state):
@@ -131,7 +142,7 @@ def _dot_str(self, to_pydot_graph, wrap=10):
                 state_id, label=node_dot_label, shape=node_shape,
                 style=node_style, color=node_color, fillcolor=fill_color)
 
-def _dot_str(self, to_pydot_graph):
+def _transitions2str(self, to_pydot_graph):
         """Return label for dot export.
         """        
         def form_edge_label(edge_data, label_def, label_format):
@@ -171,7 +182,7 @@ def _pydot_missing(self):
         if pydot is None:
             msg = 'Attempted calling _to_pydot.\n'
             msg += 'Unavailable due to pydot not installed.\n'
-            warnings.warn(msg)
+            warn(msg)
             return True
         
         return False

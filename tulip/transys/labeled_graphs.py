@@ -37,7 +37,6 @@ from collections import Iterable
 from io import StringIO
 import warnings
 import copy
-from textwrap import fill
 
 import networkx as nx
 
