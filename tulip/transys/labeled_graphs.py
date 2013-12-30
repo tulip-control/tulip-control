@@ -2515,7 +2515,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        graph2dot.save_dot(self, fileformat, rankdir, prog, wrap)
+        graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
         
         return True
     
@@ -2551,7 +2551,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        return graph2dot.plot_pydot(self, prog, rankdir)
+        return graph2dot.plot_pydot(self, prog, rankdir, wrap)
 
 def str2singleton(ap_label, verbose=False):
         """If string, convert to set(string).

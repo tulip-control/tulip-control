@@ -36,7 +36,7 @@ pydot and custom filtering
 from warnings import warn
 from collections import Iterable
 from textwrap import fill
-from io import StringIO
+from cStringIO import StringIO
 
 import networkx as nx
 
@@ -51,15 +51,17 @@ try:
     import matplotlib.image as mpimg
     matplotlib = True
 except ImportError:
-    warnings.warn('matplotlib package not found.\nSo no loading of dot plots.')
+    warn('matplotlib package not found.\nSo no loading of dot plots.')
     matplotlib = None
 
 try:
     from IPython.display import display, Image
     IPython = True
 except ImportError:
-    warnings.warn('IPython not found.\nSo loaded dot images not inline.')
+    warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
+
+from ..mathset import dprint
 
 def _states2dot_str(states, to_pydot_graph, wrap=10):
         """Copy nodes to given Pydot graph, with attributes for dot export.
@@ -239,7 +241,7 @@ def graph2dot_str(graph, wrap=10):
     
     return pydot_graph.to_string()
 
-def save_dot(graph, fileformat, rankdir, prog, wrap):
+def save_dot(graph, path, fileformat, rankdir, prog, wrap):
     """Save state graph to dot file.
     
     @type graph: LabeledStateDiGraph
@@ -253,10 +255,10 @@ def save_dot(graph, fileformat, rankdir, prog, wrap):
         return False
     pydot_graph.set_rankdir(rankdir)
     pydot_graph.set_splines('true')
-    pydot_graph.write(path, format=fileformat, prog)
+    pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 
-def plot_pydot(graph, prog='dot', rankdir='LR'):
+def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     """Plot a networkx or pydot graph using dot.
     
     No files written or deleted from the disk.
@@ -280,13 +282,13 @@ def plot_pydot(graph, prog='dot', rankdir='LR'):
     """
     if pydot is None:
         msg = 'Using plot_pydot requires that pydot be installed.'
-        warnings.warn(msg)
+        warn(msg)
         return
     
     try:
         pydot_graph = _graph2pydot(graph, wrap=wrap)
     except:
-        if isinstance(pydot_graph, nx.Graph):
+        if isinstance(graph, nx.Graph):
             pydot_graph = nx.to_pydot(graph)
         else:
             raise TypeError('graph not networkx or pydot class.' +
@@ -334,5 +336,5 @@ def plot_pydot(graph, prog='dot', rankdir='LR'):
     else:
         dprint('Matplotlib not installed.')
     
-    warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
+    warn('Neither IPython QtConsole nor Matplotlib available.')
     return None
