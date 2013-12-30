@@ -34,7 +34,6 @@ Base classes for labeled directed graphs
 """
 from pprint import pformat
 from collections import Iterable
-from io import StringIO
 import warnings
 import copy
 
@@ -45,27 +44,6 @@ from .mathset import MathSet, SubSet, PowerSet, \
 from .export import save_d3, machine2scxml, graph2dot
 
 hl = 60 *'-'
-
-try:
-    import pydot
-except ImportError:
-    warnings.warn('pydot package not found.\nHence dot export not unavailable.')
-    pydot = None
-
-try:
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-    matplotlib = True
-except ImportError:
-    warnings.warn('matplotlib package not found.\nSo no loading of dot plots.')
-    matplotlib = None
-
-try:
-    from IPython.display import display, Image
-    IPython = True
-except ImportError:
-    warnings.warn('IPython not found.\nSo loaded dot images not inline.')
-    IPython = None
 
 def vprint(string, verbose=True):
     if verbose:
@@ -2573,9 +2551,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        pydot_graph = self._to_pydot(wrap=wrap)
-        
-        return plot_pydot(pydot_graph, prog, rankdir)
+        return graph2dot.plot_pydot(self, prog, rankdir)
 
 def str2singleton(ap_label, verbose=False):
         """If string, convert to set(string).

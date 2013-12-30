@@ -36,6 +36,7 @@ pydot and custom filtering
 from warnings import warn
 from collections import Iterable
 from textwrap import fill
+from io import StringIO
 
 import networkx as nx
 
@@ -44,6 +45,21 @@ try:
 except ImportError:
     warn('pydot package not found.\nHence dot export not unavailable.')
     pydot = None
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    matplotlib = True
+except ImportError:
+    warnings.warn('matplotlib package not found.\nSo no loading of dot plots.')
+    matplotlib = None
+
+try:
+    from IPython.display import display, Image
+    IPython = True
+except ImportError:
+    warnings.warn('IPython not found.\nSo loaded dot images not inline.')
+    IPython = None
 
 def _states2dot_str(states, to_pydot_graph, wrap=10):
         """Copy nodes to given Pydot graph, with attributes for dot export.
@@ -267,14 +283,14 @@ def plot_pydot(graph, prog='dot', rankdir='LR'):
         warnings.warn(msg)
         return
     
-    if isinstance(graph, nx.Graph):
-        pydot_graph = nx.to_pydot(graph)
-    elif isinstance(graph, pydot.Graph):
-        pydot_graph = graph
-    else:
-        raise TypeError('graph not networkx or pydot class.' +
-            'Got instead: ' +str(type(graph) ) )
-    
+    try:
+        pydot_graph = _graph2pydot(graph, wrap=wrap)
+    except:
+        if isinstance(pydot_graph, nx.Graph):
+            pydot_graph = nx.to_pydot(graph)
+        else:
+            raise TypeError('graph not networkx or pydot class.' +
+                'Got instead: ' +str(type(graph) ) )
     pydot_graph.set_rankdir(rankdir)
     pydot_graph.set_splines('true')
     pydot_graph.set_bgcolor('gray')
