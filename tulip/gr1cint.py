@@ -267,10 +267,20 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                        mode=mode, rgrad=rgrad)
             for next_node in this_child_list:
                 A.add_edge(this_id, next_node)
-
+        
+        # show port only when true
+        mask_func = lambda x: bool(x)
+        
         mach = MealyMachine()
         mach.add_inputs([(k,{0,1}) if v == "boolean" else (k,v) for (k,v) in env_vars.items()])
-        mach.add_outputs([(k,{0,1}) if v == "boolean" else (k,v) for (k,v) in sys_vars.items()])
+        
+        outputs = [
+            (k,{0,1}) if v == "boolean"
+            else (k,v) for (k,v) in sys_vars.items()
+        ]
+        masks = {k:mask_func for k in sys_vars}
+        mach.add_outputs(outputs, masks)
+        
         mach.states.add_from(A.nodes())
         for u in A.nodes_iter():
             for v in A.successors_iter(u):

@@ -377,7 +377,10 @@ def load_file(aut_file, spec, verbose=0):
 
     #build Mealy Machine
     m = transys.MealyMachine()
-
+    
+    # show port only when true
+    mask_func = lambda x: bool(x)
+    
     # input defs
     inputs = OrderedDict([list(a) for a in \
                           zip(env_vars, itertools.repeat({0, 1}))])
@@ -386,7 +389,8 @@ def load_file(aut_file, spec, verbose=0):
     # outputs def
     outputs = OrderedDict([list(a) for a in \
                            zip(sys_vars, itertools.repeat({0, 1}))])
-    m.add_outputs(outputs)
+    masks = {k:mask_func for k in sys_vars}
+    m.add_outputs(outputs, masks)
 
     # state variables def
     state_vars = outputs
