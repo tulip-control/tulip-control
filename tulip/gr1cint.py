@@ -39,7 +39,7 @@ interacting with the gr1c executable.
 Most functions have a "verbose" argument.  0 means silent (the default
 setting), positive means provide some status updates.
 """
-
+from warnings import warn
 import copy
 import subprocess
 import tempfile
@@ -259,7 +259,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             if tag_name != ns_prefix+"state":
                 raise ValueError("failure of consistency check while processing aut XML string.")
             if this_id in id_list:
-                printWarning("duplicate nodes found: "+str(this_id)+"; ignoring...")
+                warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
                 continue
             id_list.append(this_id)
             A.add_node(this_id, state=copy.copy(this_state),
