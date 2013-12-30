@@ -45,9 +45,9 @@ except ImportError:
     warn('pydot package not found.\nHence dot export not unavailable.')
     pydot = None
 
-def _states2str(self, to_pydot_graph, wrap=10):
-        """Copy nodes to given Pydot graph, with attributes for dot export."""
-        
+def _states2dot_str(states, to_pydot_graph, wrap=10):
+        """Copy nodes to given Pydot graph, with attributes for dot export.
+        """
         def add_incoming_edge(g, state):
             phantom_node = 'phantominit' +str(state)
             
@@ -90,30 +90,30 @@ def _states2str(self, to_pydot_graph, wrap=10):
             node_shape = graph.dot_node_shape['normal']
             
             # check if accepting states defined
-            if not self._exist_accepting_states(warn=False):
+            if not states._exist_accepting_states(warn=False):
                 return node_shape
             
             # check for accepting states
-            if state in self.accepting:
+            if state in states.accepting:
                 node_shape = graph.dot_node_shape['accepting']
                 
             return node_shape
         
-        # get labeling def        
-        if self._exist_labels():
-            label_def = self.graph._state_label_def
-            label_format = self.graph._state_dot_label_format
+        # get labeling def
+        if states._exist_labels():
+            label_def = states.graph._state_label_def
+            label_format = states.graph._state_dot_label_format
         
-        for (state_id, state_data) in self.graph.nodes_iter(data=True):
-            state = self._int2mutant(state_id)
+        for (state_id, state_data) in states.graph.nodes_iter(data=True):
+            state = states._int2mutant(state_id)
             
-            if state in self.initial:
+            if state in states.initial:
                 add_incoming_edge(to_pydot_graph, state_id)
             
-            node_shape = decide_node_shape(self.graph, state)
+            node_shape = decide_node_shape(states.graph, state)
             
             # state annotation
-            if self._exist_labels():
+            if states._exist_labels():
                 node_dot_label = form_node_label(
                     state, state_data, label_def, label_format, wrap
                 )
@@ -142,7 +142,7 @@ def _states2str(self, to_pydot_graph, wrap=10):
                 state_id, label=node_dot_label, shape=node_shape,
                 style=node_style, color=node_color, fillcolor=fill_color)
 
-def _transitions2str(self, to_pydot_graph):
+def _transitions2dot_str(trans, to_pydot_graph):
         """Return label for dot export.
         """        
         def form_edge_label(edge_data, label_def, label_format):
@@ -168,15 +168,18 @@ def _transitions2str(self, to_pydot_graph):
             
             return edge_dot_label
         
-        self._exist_labels()
+        trans._exist_labels()
         
         # get labeling def
-        label_def = self.graph._transition_label_def
-        label_format = self.graph._transition_dot_label_format
+        label_def = trans.graph._transition_label_def
+        label_format = trans.graph._transition_dot_label_format
         
-        for (u, v, key, edge_data) in self.graph.edges_iter(data=True, keys=True):
-            edge_dot_label = form_edge_label(edge_data, label_def, label_format)
-            to_pydot_graph.add_edge(u, v, key=key, label=edge_dot_label)
+        for (u, v, key, edge_data) in \
+        trans.graph.edges_iter(data=True, keys=True):
+            edge_dot_label = form_edge_label(edge_data,
+                                             label_def, label_format)
+            to_pydot_graph.add_edge(u, v, key=key,
+                                    label=edge_dot_label)
 
 def _pydot_missing(self):
         if pydot is None:
@@ -187,15 +190,16 @@ def _pydot_missing(self):
         
         return False
     
-def _to_pydot(self, wrap=10):
-    """Convert to properly annotated pydot graph."""
-    if self._pydot_missing():
+def _to_pydot(graph, wrap=10):
+    """Convert to properly annotated pydot graph.
+    """
+    if graph._pydot_missing():
         return None
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    self.states._dot_str(dummy_nx_graph, wrap)
-    self.transitions._dot_str(dummy_nx_graph)
+    _states2dot_str(graph.states, dummy_nx_graph, wrap)
+    _transitions2dot_str(graph.transitions, dummy_nx_graph)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
     pydot_graph.set_overlap(False)

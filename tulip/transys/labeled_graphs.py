@@ -2531,7 +2531,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             scxml_file.write(s)
             return True
         
-        
+        # subclass has extra export formats ?
         if hasattr(self, '_save'):
             if self._save(path, fileformat):
                 return True
