@@ -206,6 +206,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self._transition_dot_label_format = {'actions':'',
                                                 'type?label':'',
                                                 'separator':'\\n'}
+        self._transition_dot_mask = dict()
         
         LabeledStateDiGraph.__init__(self, *args, **kwargs)
         

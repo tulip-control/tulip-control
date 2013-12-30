@@ -199,6 +199,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
         self._transition_label_def = OrderedDict()
         self._transition_dot_label_format = {'type?label':':',
                                              'separator':'\\n'}
+        self._transition_dot_mask = dict()
         
         self.default_export_fname = 'fsm'
         
@@ -216,12 +217,24 @@ class FiniteStateMachine(LabeledStateDiGraph):
                                 'or be directly convertible to an OrderedDict.')
         return x
     
-    def add_inputs(self, new_inputs):
+    def add_inputs(self, new_inputs, masks={}):
         """Create new inputs.
         
-        @param new_inputs: pairs of port_name : port_type
-        @type new_inputs: OrderedDict
-            | [(port_name, port_type), ...]
+        @param new_inputs: ordered pairs of port_name : port_type
+        @type new_inputs: OrderedDict | list, of:
+                (port_name, port_type)
+            where:
+                - port_name: str
+                - port_type: Iterable | check class
+        
+        @param masks: custom mask functions, for each sublabel
+            based on its current value
+            each such function returns:
+                - True, if the sublabel should be shown
+                - False, otherwise (to hide it)
+        @type masks: dict of functions
+            keys are port_names (see arg: new_outputs)
+            each function returns bool
         """
         new_inputs = self._to_ordered_dict(new_inputs)
         
@@ -234,6 +247,10 @@ class FiniteStateMachine(LabeledStateDiGraph):
             
             # printing format
             self._transition_dot_label_format[in_port_name] = str(in_port_name)
+            
+            if in_port_name in masks:
+                mask_func = masks[in_port_name]
+                self._transition_dot_mask[in_port_name] = mask_func
     
     def add_state_vars(self, new_state_vars):
         new_state_vars = self._to_ordered_dict(new_state_vars)
@@ -460,7 +477,25 @@ class MealyMachine(FiniteStateMachine):
     def __str__(self):
         return self.__repr__()
     
-    def add_outputs(self, new_outputs):
+    def add_outputs(self, new_outputs, masks={}):
+        """Add new outputs.
+        
+        @param new_outputs: ordered pairs of port_name : port_type
+        @type new_outputs: OrderedDict | list, of:
+                (port_name, port_type)
+            where:
+                - port_name: str
+                - port_type: Iterable | check class
+        
+        @param masks: custom mask functions, for each sublabel
+            based on its current value
+            each such function returns:
+                - True, if the sublabel should be shown
+                - False, otherwise (to hide it)
+        @type masks: dict of functions
+            keys are port_names (see arg: new_outputs)
+            each function returns bool
+        """
         new_outputs = self._to_ordered_dict(new_outputs)
         
         for (out_port_name, out_port_type) in new_outputs.iteritems():
@@ -474,6 +509,10 @@ class MealyMachine(FiniteStateMachine):
             # printing format
             self._transition_dot_label_format[out_port_name] = \
                 '/out:' +str(out_port_name)
+            
+            if out_port_name in masks:
+                mask_func = masks[out_port_name]
+                self._transition_dot_mask[out_port_name] = mask_func
     
     def simulate(
             self, inputs_sequence='manual', iterations=100,
