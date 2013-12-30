@@ -196,10 +196,12 @@ def _form_edge_label(edge_data, label_def, label_format, label_mask):
         if label_type not in label_def:
             continue
         
-        # not show ?
+        # masking defined ?
         # custom filter hiding based on value
-        if not label_mask[label_type](label_value):
-            continue
+        if label_type in label_mask:
+            # not show ?
+            if not label_mask[label_type](label_value):
+                continue
         
         # label formatting
         type_name = label_format[label_type]
