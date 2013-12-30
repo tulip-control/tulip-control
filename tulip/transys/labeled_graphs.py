@@ -2464,9 +2464,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Requires pydot.        
         """
-        pydot_graph = graph2dot._graph2pydot(self, wrap=wrap)
-        
-        return pydot_graph.to_string()        
+        return graph2dot.graph2dot_str(self, wrap)
     
     def save(self, filename='default', fileformat='pdf',
              add_missing_extension=True, rankdir='LR', prog=None,

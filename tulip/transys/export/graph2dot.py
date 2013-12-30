@@ -209,7 +209,20 @@ def _graph2pydot(graph, wrap=10):
     pydot_graph.set_overlap(False)
     
     return pydot_graph
+
+def graph2dot_str(graph, wrap=10):
+    """Convert graph to dot string.
     
+    Requires pydot.
+    
+    @type graph: LabeledStateDiGraph
+    
+    @rtype: str
+    """
+    pydot_graph = _graph2pydot(graph, wrap=wrap)
+    
+    return pydot_graph.to_string()
+
 def save_dot(graph, fileformat, rankdir, prog, wrap):
     """Save state graph to dot file.
     
