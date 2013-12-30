@@ -190,7 +190,7 @@ def _pydot_missing(self):
         
         return False
     
-def graph2dot(graph, wrap=10):
+def _graph2pydot(graph, wrap=10):
     """Convert (possibly labeled) state graph to dot str.
     
     @type graph: LabeledStateDiGraph 
@@ -218,7 +218,7 @@ def save_dot(graph, fileformat, rankdir, prog, wrap):
     @return: True upon success
     @rtype: bool
     """
-    pydot_graph = graph2dot(graph, wrap=wrap)
+    pydot_graph = _graph2pydot(graph, wrap=wrap)
     if pydot_graph is None:
         # graph2dot must have printed warning already
         return False
