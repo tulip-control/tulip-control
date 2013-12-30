@@ -239,3 +239,84 @@ def save_dot(graph, fileformat, rankdir, prog, wrap):
     pydot_graph.set_splines('true')
     pydot_graph.write(path, format=fileformat, prog)
     return True
+
+def plot_pydot(graph, prog='dot', rankdir='LR'):
+    """Plot a networkx or pydot graph using dot.
+    
+    No files written or deleted from the disk.
+    
+    Note that all networkx graph classes are inherited
+    from networkx.Graph
+    
+    see also
+    --------
+    dot & pydot documentation
+    
+    @param graph: to plot
+    @type graph: networkx.Graph | pydot.Graph
+    
+    @param prog: GraphViz programto use
+    @type prog: 'dot' | 'neato' | 'circo' | 'twopi'
+        | 'fdp' | 'sfdp' | etc
+    
+    @param rankdir: direction to layout nodes
+    @type rankdir: 'LR' | 'TB'
+    """
+    if pydot is None:
+        msg = 'Using plot_pydot requires that pydot be installed.'
+        warnings.warn(msg)
+        return
+    
+    if isinstance(graph, nx.Graph):
+        pydot_graph = nx.to_pydot(graph)
+    elif isinstance(graph, pydot.Graph):
+        pydot_graph = graph
+    else:
+        raise TypeError('graph not networkx or pydot class.' +
+            'Got instead: ' +str(type(graph) ) )
+    
+    pydot_graph.set_rankdir(rankdir)
+    pydot_graph.set_splines('true')
+    pydot_graph.set_bgcolor('gray')
+    
+    png_str = pydot_graph.create_png(prog=prog)
+    
+    # installed ?
+    if IPython:
+        dprint('IPython installed.')
+        
+        # called by IPython ?
+        try:
+            cfg = get_ipython().config
+            dprint('Script called by IPython.')
+            
+            # Caution!!! : not ordinary dict, but IPython.config.loader.Config
+            
+            # qtconsole ?
+            if cfg['IPKernelApp']:
+                dprint('Within IPython QtConsole.')
+                display(Image(data=png_str) )
+                return True
+        except:
+            print('IPython installed, but not called from it.')
+    else:
+        dprint('IPython not installed.')
+    
+    # not called from IPython QtConsole, try Matplotlib...
+    
+    # installed ?
+    if matplotlib:
+        dprint('Matplotlib installed.')
+        
+        sio = StringIO()
+        sio.write(png_str)
+        sio.seek(0)
+        img = mpimg.imread(sio)
+        imgplot = plt.imshow(img, aspect='equal')
+        plt.show(block=False)
+        return imgplot
+    else:
+        dprint('Matplotlib not installed.')
+    
+    warnings.warn('Neither IPython QtConsole nor Matplotlib available.')
+    return None
