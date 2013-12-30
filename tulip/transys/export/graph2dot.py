@@ -126,23 +126,25 @@ def _form_node_label(state, state_data, label_def,
     # other key,values in state attr_dict ignored
     sep_label_sets = label_format['separator']
     for (label_type, label_value) in state_data.iteritems():
-        if label_type in label_def:
-            # label formatting
-            type_name = label_format[label_type]
-            sep_type_value = label_format['type?label']
-            
-            # avoid turning strings to lists,
-            # or non-iterables to lists
-            if isinstance(label_value, str):
-                label_str = fill(label_value, width=width)
-            elif isinstance(label_value, Iterable): # and not str
-                label_str = fill(str(list(label_value) ), width=width)
-            else:
-                label_str = fill(str(label_value), width=width)
-            label_str.replace('\n', '\\n')
-            
-            node_dot_label += type_name +sep_type_value
-            node_dot_label += label_str +sep_label_sets
+        if label_type not in label_def:
+            continue
+        
+        # label formatting
+        type_name = label_format[label_type]
+        sep_type_value = label_format['type?label']
+        
+        # avoid turning strings to lists,
+        # or non-iterables to lists
+        if isinstance(label_value, str):
+            label_str = fill(label_value, width=width)
+        elif isinstance(label_value, Iterable): # and not str
+            label_str = fill(str(list(label_value) ), width=width)
+        else:
+            label_str = fill(str(label_value), width=width)
+        label_str.replace('\n', '\\n')
+        
+        node_dot_label += type_name +sep_type_value
+        node_dot_label += label_str +sep_label_sets
     node_dot_label += '"'
     
     return node_dot_label
@@ -179,22 +181,25 @@ def _transitions2dot_str(trans, to_pydot_graph):
 def _form_edge_label(edge_data, label_def, label_format):
     edge_dot_label = '"'
     sep_label_sets = label_format['separator']
+    
     for (label_type, label_value) in edge_data.iteritems():
-        if label_type in label_def:
-            # label formatting
-            type_name = label_format[label_type]
-            sep_type_value = label_format['type?label']
-            
-            # avoid turning strings to lists
-            if isinstance(label_value, str):
-                label_str = label_value
-            elif isinstance(label_value, Iterable):
-                label_str = str(list(label_value) )
-            else:
-                label_str = str(label_value)
-            
-            edge_dot_label += type_name +sep_type_value
-            edge_dot_label += label_str +sep_label_sets
+        if label_type not in label_def:
+            continue
+        
+        # label formatting
+        type_name = label_format[label_type]
+        sep_type_value = label_format['type?label']
+        
+        # avoid turning strings to lists
+        if isinstance(label_value, str):
+            label_str = label_value
+        elif isinstance(label_value, Iterable):
+            label_str = str(list(label_value) )
+        else:
+            label_str = str(label_value)
+        
+        edge_dot_label += type_name +sep_type_value
+        edge_dot_label += label_str +sep_label_sets
     edge_dot_label += '"'
     
     return edge_dot_label
