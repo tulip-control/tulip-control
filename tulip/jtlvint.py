@@ -42,12 +42,12 @@ based on code from:
 @author: Vasu Raman
 """
 
-import copy, itertools, os, re, subprocess, tempfile, textwrap
+import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
 import transys
-from .spec import GRSpec
+#from .spec import GRSpec
 
 #for checking form of spec
 import pyparsing

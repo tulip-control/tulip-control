@@ -43,7 +43,6 @@ setting), positive means provide some status updates.
 import copy
 import subprocess
 import tempfile
-import os
 import xml.etree.ElementTree as ET
 import networkx as nx
 
