@@ -106,8 +106,13 @@ def _states2dot_str(states, to_pydot_graph, wrap=10):
         # TODO option to replace with int to reduce size,
         # TODO generate separate LaTeX legend table (PNG option ?)
         to_pydot_graph.add_node(
-            state_id, label=node_dot_label, shape=node_shape,
-            style=node_style, color=node_color, fillcolor=fill_color)
+            state_id,
+            label=node_dot_label,
+            shape=node_shape,
+            style=node_style,
+            color=node_color,
+            fillcolor=fill_color
+        )
 
 def _add_incoming_edge(g, state):
     phantom_node = 'phantominit' +str(state)
@@ -163,7 +168,9 @@ def _decide_node_shape(graph, state):
     return node_shape
 
 def _transitions2dot_str(trans, to_pydot_graph):
-    """Return label for dot export.
+    """Convert transitions to dot str.
+    
+    @rtype: str
     """
     trans._exist_labels()
     
@@ -190,8 +197,8 @@ def _form_edge_label(edge_data, label_def, label_format):
         type_name = label_format[label_type]
         sep_type_value = label_format['type?label']
         
-        # avoid turning strings to lists
         if isinstance(label_value, str):
+            # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
             label_str = str(list(label_value) )
@@ -313,7 +320,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
             cfg = get_ipython().config
             dprint('Script called by IPython.')
             
-            # Caution!!! : not ordinary dict, but IPython.config.loader.Config
+            # Caution!!! : not ordinary dict,
+            # but IPython.config.loader.Config
             
             # qtconsole ?
             if cfg['IPKernelApp']:
