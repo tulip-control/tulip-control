@@ -221,7 +221,7 @@ def _form_edge_label(edge_data, label_def, label_format, label_mask):
     
     return edge_dot_label
 
-def _pydot_missing(self):
+def _pydot_missing():
     if pydot is None:
         msg = 'Attempted calling _to_pydot.\n'
         msg += 'Unavailable due to pydot not installed.\n'
@@ -237,7 +237,7 @@ def _graph2pydot(graph, wrap=10):
     
     @rtype: str
     """
-    if graph._pydot_missing():
+    if _pydot_missing():
         return None
     
     dummy_nx_graph = nx.MultiDiGraph()
