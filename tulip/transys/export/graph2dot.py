@@ -190,8 +190,12 @@ def _pydot_missing(self):
         
         return False
     
-def _to_pydot(graph, wrap=10):
-    """Convert to properly annotated pydot graph.
+def graph2dot(graph, wrap=10):
+    """Convert (possibly labeled) state graph to dot str.
+    
+    @type graph: LabeledStateDiGraph 
+    
+    @rtype: str
     """
     if graph._pydot_missing():
         return None
@@ -205,12 +209,20 @@ def _to_pydot(graph, wrap=10):
     pydot_graph.set_overlap(False)
     
     return pydot_graph
-
-def graph2dot(graph):
-    """Convert (possibly labeled) state graph to dot str.
     
-    @type graph: LabeledStateDiGraph 
+def save_dot(graph, fileformat, rankdir, prog, wrap):
+    """Save state graph to dot file.
     
-    @rtype: str
+    @type graph: LabeledStateDiGraph
+    
+    @return: True upon success
+    @rtype: bool
     """
-    
+    pydot_graph = graph2dot(graph, wrap=wrap)
+    if pydot_graph is None:
+        # graph2dot must have printed warning already
+        return False
+    pydot_graph.set_rankdir(rankdir)
+    pydot_graph.set_splines('true')
+    pydot_graph.write(path, format=fileformat, prog)
+    return True

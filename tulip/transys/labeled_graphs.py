@@ -42,7 +42,7 @@ import networkx as nx
 
 from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique, dprint
-from .export import save_d3, machine2scxml
+from .export import save_d3, machine2scxml, graph2dot
 
 hl = 60 *'-'
 
@@ -2464,7 +2464,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Requires pydot.        
         """
-        pydot_graph = self._to_pydot(wrap=wrap)
+        pydot_graph = graph2dot.graph2dot(self, wrap=wrap)
         
         return pydot_graph.to_string()        
     
@@ -2539,13 +2539,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        pydot_graph = self._to_pydot(wrap=wrap)
-        if pydot_graph is None:
-            # A warning message should have been printed under _to_pydot()
-            return False
-        pydot_graph.set_rankdir(rankdir)
-        pydot_graph.set_splines('true')
-        pydot_graph.write(path, format=fileformat, prog=prog)
+        graph2dot.save_dot(self, fileformat, rankdir, prog, wrap)
+        
         return True
     
     def dump_dot_color(self):
