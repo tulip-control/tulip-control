@@ -177,20 +177,28 @@ def _transitions2dot_str(trans, to_pydot_graph):
     # get labeling def
     label_def = trans.graph._transition_label_def
     label_format = trans.graph._transition_dot_label_format
+    label_mask = trans.graph._transition_dot_mask
     
     for (u, v, key, edge_data) in \
     trans.graph.edges_iter(data=True, keys=True):
-        edge_dot_label = _form_edge_label(edge_data,
-                                         label_def, label_format)
+        edge_dot_label = _form_edge_label(
+            edge_data, label_def,
+            label_format, label_mask
+        )
         to_pydot_graph.add_edge(u, v, key=key,
                                 label=edge_dot_label)
 
-def _form_edge_label(edge_data, label_def, label_format):
+def _form_edge_label(edge_data, label_def, label_format, label_mask):
     edge_dot_label = '"'
     sep_label_sets = label_format['separator']
     
     for (label_type, label_value) in edge_data.iteritems():
         if label_type not in label_def:
+            continue
+        
+        # not show ?
+        # custom filter hiding based on value
+        if not label_mask[label_type](label_value):
             continue
         
         # label formatting

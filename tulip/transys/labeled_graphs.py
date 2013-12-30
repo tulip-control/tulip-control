@@ -2139,8 +2139,19 @@ class LabeledTransitions(Transitions):
         #self.actions.remove(action)
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
-    """Species: System & Automaton."""
+    """Species: System & Automaton.
     
+    For dot export subclasses must define:
+        
+        - _state_label_def
+        - _state_dot_label_format
+        
+        - _transition_label_def
+        - _transition_dot_label_format
+        - _transition_dot_mask
+    
+    Note: this interface will be improved in the future.
+    """
     def __init__(
             self, name='', mutable=False,
             deterministic=False,
