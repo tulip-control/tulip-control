@@ -37,14 +37,21 @@ Functions:
     - plot_partition
     - plot_trajectory
 """
+from warnings import warn
+
 import numpy as np
-import matplotlib
+import networkx as nx
 
 from tulip.polytope import cheby_ball, bounding_box
-from tulip.polytope.plot import get_patch, newax
+
+try:
+    import matplotlib
+    from tulip.polytope.plot import get_patch, newax
+except:
+    matplotlib = None
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
-                   ax=None, color_seed=None):
+                   ax=None, color_seed=None, show=False):
     """Plots 2D PropPreservingPartition using matplotlib
 
     @type ppp: PropPreservingPartition
@@ -57,11 +64,19 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         Axis object is good for creating custom plots.
     @param ax: axes where to plot
     @param color_seed: seed for reproducible random coloring
+    @param show: call mpl.pyplot.show before returning
     
     see also
     --------
     abstract.prop2partition.PropPreservingPartition, plot_trajectory
     """
+    if matplotlib is None:
+        warn('matplotlib not found')
+        return
+    
+    if isinstance(trans, nx.MultiDiGraph):
+        trans = np.array(nx.to_numpy_matrix(trans) )
+    
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
     reg_list = ppp.list_region
@@ -116,6 +131,9 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
                     ax.add_patch(arr)
         if plot_numbers:
             ax.text(xc[0], xc[1], str(i),color='red')            
+    
+    if show:
+        matplotlib.pyplot.show()
     
     return ax
     

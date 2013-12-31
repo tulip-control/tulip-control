@@ -30,12 +30,7 @@ from tulip.abstract import prop2part, discretize
 # @import_section_end@
 
 visualize = False
-if visualize:
-    import networkx as nx
-    from tulip.abstract.plot import plot_partition
-else:
-    def plot_partition(a, b=None):
-        return
+from tulip.abstract.plot import plot_partition
 
 # @dynamics_section@
 # Problem parameters
@@ -70,7 +65,7 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
-plot_partition(cont_partition)
+plot_partition(cont_partition, show=visualize)
 # @partition_section_end@
 
 # @discretize_section@
@@ -82,12 +77,7 @@ disc_dynamics = discretize(
 # @discretize_section_end@
 
 """Visualize transitions in continuous domain (optional)"""
-if visualize:
-    plot_partition(
-        disc_dynamics.ppp,
-        np.array(nx.to_numpy_matrix(disc_dynamics.ofts) )
-    )
-    print(disc_dynamics.ofts)
+plot_partition(disc_dynamics.ppp, disc_dynamics.ofts, show=visualize)
 
 """Specifications"""
 # Environment variables and assumptions
