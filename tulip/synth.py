@@ -114,11 +114,14 @@ def sys_to_spec(sys):
         init = ""
 
     for state in sys.states.initial:
+        label = sys.states.label_of(state)
+        
         init.append(_conj_intersection(sys.aps,
-                                       sys.states.label_of(state)["ap"]) )
+                                       label["ap"]) )
+        
         if len(init[-1]) > 0:
             init[-1] += " && "
-        init[-1] += _conj_neg_diff(sys.aps, sys.states.label_of(state)["ap"])
+        init[-1] += _conj_neg_diff(sys.aps, label["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
 
     # Transitions
@@ -145,19 +148,23 @@ def sys_to_spec(sys):
 
     # Require atomic propositions to follow states according to label
     for state in sys.states:
-        if sys.states.label_of(state).has_key("ap"):
+        label = sys.states.label_of(state)
+        
+        if label.has_key("ap"):
             trans.append(_conj_intersection(
-                sys.aps, sys.states.label_of(state)["ap"], parenth=False))
+                sys.aps, label["ap"], parenth=False))
         else:
             trans.append("")
+        
         if len(trans[-1]) > 0:
             trans[-1] += " && "
-        if not sys.states.label_of(state).has_key("ap"):
+        
+        if not label.has_key("ap"):
             trans[-1] += _conj_neg(sys.aps, parenth=False)
         else:
             trans[-1] += _conj_neg_diff(
                 sys.aps,
-                sys.states.label_of(state)["ap"],
+                label["ap"],
                 parenth=False
             )
         trans[-1] = "X(("+str(state)+") -> ("+trans[-1]+"))"
