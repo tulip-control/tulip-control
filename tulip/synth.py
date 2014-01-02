@@ -39,6 +39,52 @@ from tulip.spec import GRSpec
 from tulip import jtlvint
 from tulip import gr1cint
 
+def _disj(set0):
+    return " || ".join([
+        "(" +str(x) +")"
+        for x in set0
+    ])
+
+def _conj_intersection(set0, set1, parenth=True):
+    if parenth:
+        return " && ".join([
+            "("+str(x)+")"
+            for x in set0
+            if x in set1
+        ])
+    else:
+        return " && ".join([
+            str(x)
+            for x in set0
+            if x in set1
+        ])
+
+def _conj_neg(set0, parenth=True):
+    if parenth:
+        return " && ".join([
+            "!("+str(x)+")"
+            for x in set0
+        ])
+    else:
+        return " && ".join([
+            "!"+str(x)
+            for x in set0
+        ])
+
+def _conj_neg_diff(set0, set1, parenth=True):
+    if parenth:
+        return " && ".join([
+            "!("+str(x)+")"
+            for x in set0
+            if x not in set1
+        ])
+    else:
+        return " && ".join([
+            "!"+str(x)
+            for x in set0
+            if x not in set1
+        ])
+
 def sys_to_spec(sys):
     """Convert finite transition system to GR(1) specification.
     
@@ -60,30 +106,20 @@ def sys_to_spec(sys):
 
     # Initial state, including enforcement of mutual exclusion
     if (len(sys.states.initial) > 0):
-        init = ["("+") || (".join([
-            "("+str(current_state)+")"+" && "+
-                " && ".join([
-                        "!("+str(u)+")"
-                        for u in sys.states if u != current_state
-                    ])
+        init = [" || ".join(["(" +
+            "("+str(current_state)+")" +" && " +
+            _conj_neg_diff(sys.states, [current_state]) +")"
             for current_state in sys.states.initial
-        ])+")"]
+        ])]
     else:
         init = ""
 
     for state in sys.states.initial:
-        init.append(" && ".join([
-            "("+str(ap)+")"
-            for ap in sys.aps
-            if ap in sys.states.label_of(state)["ap"]
-        ]))
+        init.append(_conj_intersection(sys.aps,
+                                       sys.states.label_of(state)["ap"]) )
         if len(init[-1]) > 0:
             init[-1] += " && "
-        init[-1] +=  " && ".join([
-            "!("+str(ap)+")"
-            for ap in sys.aps
-            if ap not in sys.states.label_of(state)["ap"]
-        ])
+        init[-1] += _conj_neg_diff(sys.aps, sys.states.label_of(state)["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
 
     # Transitions
@@ -94,44 +130,38 @@ def sys_to_spec(sys):
         if not post:
             continue
         
-        post_states = " || ".join([
-            "(" +str(to_state) +")"
-            for to_state in post
-        ])
+        post_states = _disj(post)
         
         trans.append(
             "(" +str(from_state) +") -> X(" +post_states +")"
         )
 
     # Mutual exclusion of states
-    trans.append("X(("+") || (".join([
-        "("+str(current_state)+")"+" && "+ " && ".join([
-            "!("+str(u)+")"
-            for u in sys.states if u != current_state
-        ]) for current_state in sys.states])+"))")
+    trans.append(
+        "X(("+") || (".join([
+            "("+str(current_state)+")"+" && " +
+            _conj_neg_diff(sys.states, [current_state])
+            for current_state in sys.states
+        ])+"))"
+    )
 
     # Require atomic propositions to follow states according to label
     for state in sys.states:
         if sys.states.label_of(state).has_key("ap"):
-            trans.append(" && ".join([
-                str(ap) for ap in sys.aps
-                if ap in sys.states.label_of(state)["ap"]
-            ]))
+            trans.append(_conj_intersection(
+                sys.aps, sys.states.label_of(state)["ap"], parenth=False))
         else:
             trans.append("")
         if len(trans[-1]) > 0:
             trans[-1] += " && "
         if not sys.states.label_of(state).has_key("ap"):
-            trans[-1] +=  " && ".join([
-                "!"+str(ap)
-                for ap in sys.aps
-            ])
+            trans[-1] += _conj_neg(sys.aps, parenth=False)
         else:
-            trans[-1] +=  " && ".join([
-                "!"+str(ap)
-                for ap in sys.aps
-                if ap not in sys.states.label_of(state)["ap"]
-            ])
+            trans[-1] += _conj_neg_diff(
+                sys.aps,
+                sys.states.label_of(state)["ap"],
+                parenth=False
+            )
         trans[-1] = "X(("+str(state)+") -> ("+trans[-1]+"))"
 
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
