@@ -98,36 +98,39 @@ def sys_to_spec(sys):
                             transys.OpenFiniteTransitionSystem)):
         raise TypeError("synth.sys_to_spec does not support " + str(type(sys)))
     
+    aps = sys.aps
+    states = sys.states
+    
     # Assume everything is controlled; support for an environment
     # definition is forthcoming.
-    sys_vars = list(sys.aps)
-    sys_vars.extend([s for s in sys.states])
+    sys_vars = list(aps)
+    sys_vars.extend([s for s in states])
     trans = []
 
     # Initial state, including enforcement of mutual exclusion
-    if (len(sys.states.initial) > 0):
+    if (len(states.initial) > 0):
         init = [_disj([
-            "("+str(x)+")" +" && " +_conj_neg_diff(sys.states, [x])
-            for x in sys.states.initial
+            "("+str(x)+")" +" && " +_conj_neg_diff(states, [x])
+            for x in states.initial
         ])]
     else:
         init = ""
 
-    for state in sys.states.initial:
-        label = sys.states.label_of(state)
+    for state in states.initial:
+        label = states.label_of(state)
         
-        ap_init = _conj_intersection(sys.aps, label["ap"])
+        ap_init = _conj_intersection(aps, label["ap"])
         init.append(ap_init)
         
         if len(init[-1]) > 0:
             init[-1] += " && "
         
-        init[-1] += _conj_neg_diff(sys.aps, label["ap"])
+        init[-1] += _conj_neg_diff(aps, label["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
 
     # Transitions
-    for from_state in sys.states:
-        post = sys.states.post(from_state)
+    for from_state in states:
+        post = states.post(from_state)
         
         # no successor states ?
         if not post:
@@ -139,17 +142,17 @@ def sys_to_spec(sys):
     # Mutual exclusion of states
     trans.append(
         "X("+_disj([
-            "("+str(x)+")"+" && " +_conj_neg_diff(sys.states, [x])
-            for x in sys.states
+            "("+str(x)+")"+" && " +_conj_neg_diff(states, [x])
+            for x in states
         ])+")"
     )
-
+    
     # Require atomic propositions to follow states according to label
-    for state in sys.states:
-        label = sys.states.label_of(state)
+    for state in states:
+        label = states.label_of(state)
         
         if label.has_key("ap"):
-            tmp = _conj_intersection(sys.aps, label["ap"], parenth=False)
+            tmp = _conj_intersection(aps, label["ap"], parenth=False)
         else:
             tmp = ""
         
@@ -157,9 +160,9 @@ def sys_to_spec(sys):
             tmp += " && "
         
         if label.has_key("ap"):
-            tmp += _conj_neg_diff(sys.aps, label["ap"], parenth=False)
+            tmp += _conj_neg_diff(aps, label["ap"], parenth=False)
         else:
-            tmp += _conj_neg(sys.aps, parenth=False)
+            tmp += _conj_neg(aps, parenth=False)
         
         trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
 
@@ -186,7 +189,6 @@ def synthesize(option, specs, sys=None):
         then return a Mealy machine implementing the strategy.
         Otherwise return list of counterexamples.
     @rtype: transys.Mealy or list
-
     """
     if sys is not None:
         sys = deepcopy(sys)
