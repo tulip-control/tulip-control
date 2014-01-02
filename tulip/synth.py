@@ -149,19 +149,19 @@ def sys_to_spec(sys):
         label = sys.states.label_of(state)
         
         if label.has_key("ap"):
-            trans += [_conj_intersection(sys.aps, label["ap"], parenth=False) ]
+            tmp = _conj_intersection(sys.aps, label["ap"], parenth=False)
         else:
-            trans.append("")
+            tmp = ""
         
-        if len(trans[-1]) > 0:
-            trans[-1] += " && "
+        if len(tmp) > 0:
+            tmp += " && "
         
-        if not label.has_key("ap"):
-            trans[-1] += _conj_neg(sys.aps, parenth=False)
+        if label.has_key("ap"):
+            tmp += _conj_neg_diff(sys.aps, label["ap"], parenth=False)
         else:
-            trans[-1] += _conj_neg_diff(sys.aps, label["ap"], parenth=False)
+            tmp += _conj_neg(sys.aps, parenth=False)
         
-        trans[-1] = "X(("+str(state)+") -> ("+trans[-1]+"))"
+        trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
 
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
