@@ -106,10 +106,9 @@ def sys_to_spec(sys):
 
     # Initial state, including enforcement of mutual exclusion
     if (len(sys.states.initial) > 0):
-        init = [" || ".join(["(" +
-            "("+str(current_state)+")" +" && " +
-            _conj_neg_diff(sys.states, [current_state]) +")"
-            for current_state in sys.states.initial
+        init = [_disj([
+            "("+str(x)+")" +" && " +_conj_neg_diff(sys.states, [x])
+            for x in sys.states.initial
         ])]
     else:
         init = ""
@@ -138,11 +137,10 @@ def sys_to_spec(sys):
 
     # Mutual exclusion of states
     trans.append(
-        "X(("+") || (".join([
-            "("+str(current_state)+")"+" && " +
-            _conj_neg_diff(sys.states, [current_state])
-            for current_state in sys.states
-        ])+"))"
+        "X("+_disj([
+            "("+str(x)+")"+" && " +_conj_neg_diff(sys.states, [x])
+            for x in sys.states
+        ])+")"
     )
 
     # Require atomic propositions to follow states according to label
