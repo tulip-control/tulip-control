@@ -116,11 +116,12 @@ def sys_to_spec(sys):
     for state in sys.states.initial:
         label = sys.states.label_of(state)
         
-        init.append(_conj_intersection(sys.aps,
-                                       label["ap"]) )
+        ap_init = _conj_intersection(sys.aps, label["ap"])
+        init.append(ap_init)
         
         if len(init[-1]) > 0:
             init[-1] += " && "
+        
         init[-1] += _conj_neg_diff(sys.aps, label["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
 
@@ -128,15 +129,12 @@ def sys_to_spec(sys):
     for from_state in sys.states:
         post = sys.states.post(from_state)
         
-        # no successor state ?
+        # no successor states ?
         if not post:
             continue
         
         post_states = _disj(post)
-        
-        trans.append(
-            "(" +str(from_state) +") -> X(" +post_states +")"
-        )
+        trans += ["(" +str(from_state) +") -> X(" +post_states +")"]
 
     # Mutual exclusion of states
     trans.append(
@@ -151,8 +149,7 @@ def sys_to_spec(sys):
         label = sys.states.label_of(state)
         
         if label.has_key("ap"):
-            trans.append(_conj_intersection(
-                sys.aps, label["ap"], parenth=False))
+            trans += [_conj_intersection(sys.aps, label["ap"], parenth=False) ]
         else:
             trans.append("")
         
@@ -162,11 +159,8 @@ def sys_to_spec(sys):
         if not label.has_key("ap"):
             trans[-1] += _conj_neg(sys.aps, parenth=False)
         else:
-            trans[-1] += _conj_neg_diff(
-                sys.aps,
-                label["ap"],
-                parenth=False
-            )
+            trans[-1] += _conj_neg_diff(sys.aps, label["ap"], parenth=False)
+        
         trans[-1] = "X(("+str(state)+") -> ("+trans[-1]+"))"
 
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
