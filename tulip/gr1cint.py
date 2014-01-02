@@ -36,8 +36,9 @@ In general, functions defined here will raise CalledProcessError (from
 the subprocess module) or OSError if an exception occurs while
 interacting with the gr1c executable.
 
-Most functions have a "verbose" argument.  0 means silent (the default
-setting), positive means provide some status updates.
+Most functions have a "verbose" argument.
+0 means silent (the default setting),
+positive means provide some status updates.
 """
 from warnings import warn
 import copy
@@ -72,7 +73,8 @@ def _untaglist(x, cast_f=float,
     and the list obtained from it.
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+        raise TypeError("tag to be parsed must be given as" +
+            " a string or ElementTree._ElementInterface.")
 
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -120,7 +122,8 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     third is the list of keys in the order they were found.
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+        raise TypeError("tag to be parsed must be given " +
+            "as a string or ElementTree._ElementInterface.")
 
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -151,7 +154,6 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return GRSpec and MealyMachine constructed from output of gr1c.
 
@@ -159,7 +161,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     xml.etree.ElementTree._ElementInterface
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given as a string or ElementTree._ElementInterface.")
+        raise TypeError("tag to be parsed must be given " +
+            "as a string or ElementTree._ElementInterface.")
 
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -176,43 +179,57 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     if ("version" not in elem.attrib.keys()):
         raise ValueError("unversioned tulipcon XML string.")
     if int(elem.attrib["version"]) != 1:
-        raise ValueError("unsupported tulipcon XML version: "+str(elem.attrib["version"]))
+        raise ValueError("unsupported tulipcon XML version: "+
+            str(elem.attrib["version"]))
 
     # Extract discrete variables and LTL specification
-    (tag_name, env_vardict, env_vars) = _untagdict(elem.find(ns_prefix+"env_vars"), get_order=True)
-    (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(ns_prefix+"sys_vars"), get_order=True)
+    (tag_name, env_vardict, env_vars) = _untagdict(elem.find(
+        ns_prefix+"env_vars"), get_order=True)
+    (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
+        ns_prefix+"sys_vars"), get_order=True)
     env_domains = []
     for v in env_vars:
         dom = env_vardict[v]
         if dom[0] == "[":
             end_ind = dom.find("]")
             if end_ind < 0:
-                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
             dom_parts = dom[1:end_ind].split(",")
             if len(dom_parts) != 2:
-                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
             env_domains.append((int(dom_parts[0]), int(dom_parts[1])))
         elif dom == "boolean":
             env_domains.append("boolean")
         else:
-            raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
-    env_vars = dict([(env_vars[i], env_domains[i]) for i in range(len(env_vars))])
+            raise ValueError("unrecognized type of domain for variable \""+
+                str(v)+"\": "+str(dom))
+    env_vars = dict([
+        (env_vars[i], env_domains[i])
+        for i in range(len(env_vars))
+    ])
     sys_domains = []
     for v in sys_vars:
         dom = sys_vardict[v]
         if dom[0] == "[":
             end_ind = dom.find("]")
             if end_ind < 0:
-                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
             dom_parts = dom[1:end_ind].split(",")
             if len(dom_parts) != 2:
-                raise ValueError("invalid domain for variable \""+str(v)+"\": "+str(dom))
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
             sys_domains.append((int(dom_parts[0]), int(dom_parts[1])))
         elif dom == "boolean":
             sys_domains.append("boolean")
         else:
-            raise ValueError("unrecognized type of domain for variable \""+str(v)+"\": "+str(dom))
-    sys_vars = dict([(sys_vars[i], sys_domains[i]) for i in range(len(sys_vars))])
+            raise ValueError("unrecognized type of domain for variable \""+
+                str(v)+"\": "+str(dom))
+    sys_vars = dict([
+        (sys_vars[i], sys_domains[i]) for i in range(len(sys_vars))
+    ])
     s_elem = elem.find(ns_prefix+"spec")
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
@@ -227,8 +244,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         setattr(spec, spec_tag, li)
 
     aut_elem = elem.find(ns_prefix+"aut")
-    if aut_elem is None \
-            or ((aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
+    if aut_elem is None or (
+        (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         aut = None
     else:
         # Assume version 1 of tulipcon XML
@@ -246,18 +263,22 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                 (mode, rgrad) = this_name_list
             else:
                 (mode, rgrad) = (-1, -1)
-            (tag_name, this_child_list) = _untaglist(node.find(ns_prefix+"child_list"),
-                                                     cast_f=int)
+            (tag_name, this_child_list) = _untaglist(
+                node.find(ns_prefix+"child_list"),
+                cast_f=int
+            )
             if tag_name != ns_prefix+"child_list":
                 # This really should never happen and may not even be
                 # worth checking.
-                raise ValueError("failure of consistency check while processing aut XML string.")
+                raise ValueError("failure of consistency check " +
+                    "while processing aut XML string.")
             (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
                                                 cast_f_values=int,
                                                 namespace=namespace)
 
             if tag_name != ns_prefix+"state":
-                raise ValueError("failure of consistency check while processing aut XML string.")
+                raise ValueError("failure of consistency check " +
+                    "while processing aut XML string.")
             if this_id in id_list:
                 warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
                 continue
@@ -271,7 +292,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         mask_func = lambda x: bool(x)
         
         mach = MealyMachine()
-        mach.add_inputs([(k,{0,1}) if v == "boolean" else (k,v) for (k,v) in env_vars.items()])
+        mach.add_inputs([
+            (k,{0,1}) if v == "boolean" else (k,v)
+            for (k,v) in env_vars.items()
+        ])
         
         outputs = [
             (k,{0,1}) if v == "boolean"
@@ -286,7 +310,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                 mach.transitions.add_labeled(u, v, A.node[v]["state"])
 
     return (spec, mach)
-
 
 def check_syntax(spec_str, verbose=0):
     """Check whether given string has correct gr1c specification syntax.
@@ -307,7 +330,6 @@ def check_syntax(spec_str, verbose=0):
             print(p.stdout.read() )
         return False
 
-
 def check_realizable(spec, verbose=0):
     """Decide realizability of specification defined by given GRSpec object.
 
@@ -327,7 +349,6 @@ def check_realizable(spec, verbose=0):
             print(p.stdout.read() )
         return False
 
-
 def synthesize(spec, verbose=0):
     """Synthesize strategy.
 
@@ -345,7 +366,6 @@ def synthesize(spec, verbose=0):
         if verbose > 0:
             print(stdoutdata)
         return None
-
 
 class GR1CSession:
     """Manage interactive session with gr1c.
@@ -381,7 +401,6 @@ class GR1CSession:
         else:
             self.p = None
 
-
     def iswinning(self, state):
         """Return True if given state is in winning set, False otherwise.
 
@@ -394,12 +413,14 @@ class GR1CSession:
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        self.p.stdin.write("winning "+" ".join([str(i) for i in state_vector])+"\n")
+        self.p.stdin.write(
+            "winning " +
+            " ".join([str(i) for i in state_vector])+"\n"
+        )
         if "True\n" in self.p.stdout.readline():
             return True
         else:
             return False
-
 
     def getindex(self, state, goal_mode):
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
@@ -409,7 +430,10 @@ class GR1CSession:
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        self.p.stdin.write("getindex "+" ".join([str(i) for i in state_vector])+" "+str(goal_mode)+"\n")
+        self.p.stdin.write("getindex "+" ".join(
+            [str(i) for i in state_vector]) +" " +
+            str(goal_mode) +"\n"
+        )
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
@@ -427,7 +451,9 @@ class GR1CSession:
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        self.p.stdin.write("envnext "+" ".join([str(i) for i in state_vector])+"\n")
+        self.p.stdin.write(
+            "envnext " +" ".join([str(i) for i in state_vector]) +"\n"
+        )
         env_moves = []
         line = self.p.stdout.readline()
         while "---\n" not in line:
@@ -435,10 +461,12 @@ class GR1CSession:
                 loc = line.find(self.prompt)
                 if loc >= 0:
                     line = line[len(self.prompt):]
-            env_moves.append(dict([(k, int(s)) for (k,s) in zip(self.env_vars, line.split())]))
+            env_moves.append(dict([
+                (k, int(s)) for (k,s) in
+                zip(self.env_vars, line.split())
+            ]))
             line = self.p.stdout.readline()
         return env_moves
-
 
     def sys_nextfeas(self, state, env_move, goal_mode):
         """Return list of next system moves consistent with some strategy.
@@ -456,7 +484,11 @@ class GR1CSession:
         emove_vector = range(len(env_move))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
-        self.p.stdin.write("sysnext "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+" "+str(goal_mode)+"\n")
+        self.p.stdin.write("sysnext "+" ".join(
+            [str(i) for i in state_vector]
+        )+" "+" ".join(
+            [str(i) for i in emove_vector]
+        )+" "+str(goal_mode)+"\n")
         sys_moves = []
         line = self.p.stdout.readline()
         while "---\n" not in line:
@@ -464,10 +496,12 @@ class GR1CSession:
                 loc = line.find(self.prompt)
                 if loc >= 0:
                     line = line[len(self.prompt):]
-            sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
+            sys_moves.append(dict([
+                (k, int(s)) for (k,s)
+                in zip(self.sys_vars, line.split())
+            ]))
             line = self.p.stdout.readline()
         return sys_moves
-
 
     def sys_nexta(self, state, env_move):
         """Return list of possible next system moves, whether or not winning.
@@ -483,7 +517,11 @@ class GR1CSession:
         emove_vector = range(len(env_move))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
-        self.p.stdin.write("sysnexta "+" ".join([str(i) for i in state_vector])+" "+" ".join([str(i) for i in emove_vector])+"\n")
+        self.p.stdin.write("sysnexta "+" ".join(
+            [str(i) for i in state_vector]
+        )+" "+" ".join(
+            [str(i) for i in emove_vector])+"\n"
+        )
         sys_moves = []
         line = self.p.stdout.readline()
         while "---\n" not in line:
@@ -491,10 +529,12 @@ class GR1CSession:
                 loc = line.find(self.prompt)
                 if loc >= 0:
                     line = line[len(self.prompt):]
-            sys_moves.append(dict([(k, int(s)) for (k,s) in zip(self.sys_vars, line.split())]))
+            sys_moves.append(dict([
+                (k, int(s)) for (k,s) in
+                zip(self.sys_vars, line.split())
+            ]))
             line = self.p.stdout.readline()
         return sys_moves
-
 
     def getvars(self):
         """Return string of environment and system variable names in order.
@@ -533,17 +573,20 @@ class GR1CSession:
         if spec_filename is not None:
             self.spec_filename = spec_filename
         if self.spec_filename is not None:
-            self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
-                                       "-i", self.spec_filename],
-                                      stdin=subprocess.PIPE,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT)
+            self.p = subprocess.Popen(
+                [GR1C_BIN_PREFIX+"gr1c",
+                "-i", self.spec_filename],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
         else:
             self.p = None
         return True
 
     def close(self):
-        """End session, and kill gr1c child process."""
+        """End session, and kill gr1c child process.
+        """
         self.p.stdin.write("quit\n")
         returncode = self.p.wait()
         self.p = None
