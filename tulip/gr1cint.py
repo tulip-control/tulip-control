@@ -187,49 +187,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         ns_prefix+"env_vars"), get_order=True)
     (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
         ns_prefix+"sys_vars"), get_order=True)
-    env_domains = []
-    for v in env_vars:
-        dom = env_vardict[v]
-        if dom[0] == "[":
-            end_ind = dom.find("]")
-            if end_ind < 0:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
-            dom_parts = dom[1:end_ind].split(",")
-            if len(dom_parts) != 2:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
-            env_domains.append((int(dom_parts[0]), int(dom_parts[1])))
-        elif dom == "boolean":
-            env_domains.append("boolean")
-        else:
-            raise ValueError("unrecognized type of domain for variable \""+
-                str(v)+"\": "+str(dom))
-    env_vars = dict([
-        (env_vars[i], env_domains[i])
-        for i in range(len(env_vars))
-    ])
-    sys_domains = []
-    for v in sys_vars:
-        dom = sys_vardict[v]
-        if dom[0] == "[":
-            end_ind = dom.find("]")
-            if end_ind < 0:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
-            dom_parts = dom[1:end_ind].split(",")
-            if len(dom_parts) != 2:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
-            sys_domains.append((int(dom_parts[0]), int(dom_parts[1])))
-        elif dom == "boolean":
-            sys_domains.append("boolean")
-        else:
-            raise ValueError("unrecognized type of domain for variable \""+
-                str(v)+"\": "+str(dom))
-    sys_vars = dict([
-        (sys_vars[i], sys_domains[i]) for i in range(len(sys_vars))
-    ])
+    
+    env_vars = _parse_vars(env_vars, env_vardict)
+    sys_vars = _parse_vars(sys_vars, sys_vardict)
+    
     s_elem = elem.find(ns_prefix+"spec")
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
@@ -310,6 +271,33 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                 mach.transitions.add_labeled(u, v, A.node[v]["state"])
 
     return (spec, mach)
+
+def _parse_vars(variables, vardict):
+    """Helper for parsing env, sys variables.
+    """
+    domains = []
+    for v in variables:
+        dom = vardict[v]
+        if dom[0] == "[":
+            end_ind = dom.find("]")
+            if end_ind < 0:
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
+            dom_parts = dom[1:end_ind].split(",")
+            if len(dom_parts) != 2:
+                raise ValueError("invalid domain for variable \""+
+                    str(v)+"\": "+str(dom))
+            domains.append((int(dom_parts[0]), int(dom_parts[1])))
+        elif dom == "boolean":
+            domains.append("boolean")
+        else:
+            raise ValueError("unrecognized type of domain for variable \""+
+                str(v)+"\": "+str(dom))
+    variables = dict([
+        (variables[i], domains[i])
+        for i in range(len(variables))
+    ])
+    return variables
 
 def check_syntax(spec_str, verbose=0):
     """Check whether given string has correct gr1c specification syntax.
