@@ -41,9 +41,18 @@ from tulip import jtlvint
 from tulip import gr1cint
 
 def sys_to_spec(sys):
+    """Convert finite transition system to GR(1) specification.
+    
+    Forthcoming: support for OpenFiniteTransitionSystem.
+    
+    @type sys: transys.FiniteTransitionSystem
+    
+    @rtype: GRSpec
+    """
     if not isinstance(sys, (transys.FiniteTransitionSystem,
                             transys.OpenFiniteTransitionSystem)):
         raise TypeError("synth.sys_to_spec does not support " + str(type(sys)))
+    
     # Assume everything is controlled; support for an environment
     # definition is forthcoming.
     sys_vars = list(sys.aps)
