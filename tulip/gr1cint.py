@@ -208,67 +208,68 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     if aut_elem is None or (
         (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         mach = None
-    else:
-        # Assume version 1 of tulipcon XML
-        if aut_elem.attrib["type"] != "basic":
-            raise ValueError("Automaton class only recognizes type \"basic\".")
-        node_list = aut_elem.findall(ns_prefix+"node")
-        id_list = []  # For more convenient searching, and to catch redundancy
-        A = nx.DiGraph()
-        for node in node_list:
-            this_id = int(node.find(ns_prefix+"id").text)
-            this_name = node.find(ns_prefix+"anno").text  # Assume version 1
-            (tag_name, this_name_list) = _untaglist(node.find(ns_prefix+"anno"),
-                                                    cast_f=int)
-            if len(this_name_list) == 2:
-                (mode, rgrad) = this_name_list
-            else:
-                (mode, rgrad) = (-1, -1)
-            (tag_name, this_child_list) = _untaglist(
-                node.find(ns_prefix+"child_list"),
-                cast_f=int
-            )
-            if tag_name != ns_prefix+"child_list":
-                # This really should never happen and may not even be
-                # worth checking.
-                raise ValueError("failure of consistency check " +
-                    "while processing aut XML string.")
-            (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
-                                                cast_f_values=int,
-                                                namespace=namespace)
+        return (spec, mach)
+        
+    # Assume version 1 of tulipcon XML
+    if aut_elem.attrib["type"] != "basic":
+        raise ValueError("Automaton class only recognizes type \"basic\".")
+    node_list = aut_elem.findall(ns_prefix+"node")
+    id_list = []  # For more convenient searching, and to catch redundancy
+    A = nx.DiGraph()
+    for node in node_list:
+        this_id = int(node.find(ns_prefix+"id").text)
+        this_name = node.find(ns_prefix+"anno").text  # Assume version 1
+        (tag_name, this_name_list) = _untaglist(node.find(ns_prefix+"anno"),
+                                                cast_f=int)
+        if len(this_name_list) == 2:
+            (mode, rgrad) = this_name_list
+        else:
+            (mode, rgrad) = (-1, -1)
+        (tag_name, this_child_list) = _untaglist(
+            node.find(ns_prefix+"child_list"),
+            cast_f=int
+        )
+        if tag_name != ns_prefix+"child_list":
+            # This really should never happen and may not even be
+            # worth checking.
+            raise ValueError("failure of consistency check " +
+                "while processing aut XML string.")
+        (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
+                                            cast_f_values=int,
+                                            namespace=namespace)
 
-            if tag_name != ns_prefix+"state":
-                raise ValueError("failure of consistency check " +
-                    "while processing aut XML string.")
-            if this_id in id_list:
-                warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
-                continue
-            id_list.append(this_id)
-            A.add_node(this_id, state=copy.copy(this_state),
-                       mode=mode, rgrad=rgrad)
-            for next_node in this_child_list:
-                A.add_edge(this_id, next_node)
-        
-        # show port only when true
-        mask_func = lambda x: bool(x)
-        
-        mach = MealyMachine()
-        mach.add_inputs([
-            (k,{0,1}) if v == "boolean" else (k,v)
-            for (k,v) in env_vars.items()
-        ])
-        
-        outputs = [
-            (k,{0,1}) if v == "boolean"
-            else (k,v) for (k,v) in sys_vars.items()
-        ]
-        masks = {k:mask_func for k in sys_vars}
-        mach.add_outputs(outputs, masks)
-        
-        mach.states.add_from(A.nodes())
-        for u in A.nodes_iter():
-            for v in A.successors_iter(u):
-                mach.transitions.add_labeled(u, v, A.node[v]["state"])
+        if tag_name != ns_prefix+"state":
+            raise ValueError("failure of consistency check " +
+                "while processing aut XML string.")
+        if this_id in id_list:
+            warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
+            continue
+        id_list.append(this_id)
+        A.add_node(this_id, state=copy.copy(this_state),
+                   mode=mode, rgrad=rgrad)
+        for next_node in this_child_list:
+            A.add_edge(this_id, next_node)
+    
+    # show port only when true
+    mask_func = lambda x: bool(x)
+    
+    mach = MealyMachine()
+    mach.add_inputs([
+        (k,{0,1}) if v == "boolean" else (k,v)
+        for (k,v) in env_vars.items()
+    ])
+    
+    outputs = [
+        (k,{0,1}) if v == "boolean"
+        else (k,v) for (k,v) in sys_vars.items()
+    ]
+    masks = {k:mask_func for k in sys_vars}
+    mach.add_outputs(outputs, masks)
+    
+    mach.states.add_from(A.nodes())
+    for u in A.nodes_iter():
+        for v in A.successors_iter(u):
+            mach.transitions.add_labeled(u, v, A.node[v]["state"])
 
     return (spec, mach)
 
