@@ -33,7 +33,6 @@
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
 from copy import deepcopy
-from networkx import strongly_connected_components
 
 from tulip import transys
 from tulip.spec import GRSpec
