@@ -207,7 +207,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     aut_elem = elem.find(ns_prefix+"aut")
     if aut_elem is None or (
         (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
-        aut = None
+        mach = None
     else:
         # Assume version 1 of tulipcon XML
         if aut_elem.attrib["type"] != "basic":
