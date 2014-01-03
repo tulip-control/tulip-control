@@ -32,7 +32,6 @@
 """ 
 Formulae constituting specifications
 """
-
 import time
 import re, copy
 
@@ -54,7 +53,6 @@ def mutex(varnames):
         mut_str += ')'
         mutex |= {mut_str}
     return mutex
-
 
 class LTL(object):
     """LTL formula (specification)
@@ -88,7 +86,8 @@ class LTL(object):
     finite_set.  However, a range domain must be a C{tuple} of length
     2; otherwise it is ambiguous with finite_set.
     """
-    def __init__(self, formula=None, input_variables=None, output_variables=None):
+    def __init__(self, formula=None, input_variables=None,
+                 output_variables=None):
         """Instantiate an LTL object.
 
         Any non-None arguments are saved to the corresponding
@@ -124,7 +123,8 @@ class LTL(object):
             current time in UTC.
         """
         if timestamp:
-            output = "# Generated at "+time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())+"\n"
+            output = "# Generated at "+time.strftime(
+                "%Y-%m-%d %H:%M:%S UTC", time.gmtime() )+"\n"
         else:
             output = ""
         output += "0  # Version\n%%\n"
@@ -145,7 +145,6 @@ class LTL(object):
         """
         raise NotImplementedError
 
-
     @staticmethod
     def loads(s):
         """Create LTL object from TuLiP LTL file string."""
@@ -160,7 +159,8 @@ class LTL(object):
                 except ValueError:
                     raise ValueError("Malformed version number.")
                 if version != 0:
-                    raise ValueError("Unrecognized version number: "+str(version))
+                    raise ValueError("Unrecognized version number: " +
+                        str(version))
                 break
         try:
             s = re.sub(r"#.*(\n|$)", "", s)  # Strip comments
@@ -192,7 +192,8 @@ class LTL(object):
                     domain = domain.lstrip().rstrip(";")
                     if domain[0] == "[":  # Range-type domain
                         domain = domain.split(",")
-                        variables[i][name] = (int(domain[0][1:]), int(domain[1][:domain[1].index("]")]))
+                        variables[i][name] = (int(domain[0][1:]),
+                            int(domain[1][:domain[1].index("]")]))
                     elif domain[0] == "{":  # Finite set domain
                         domain.strip()
                         assert domain[-1] == "}"
@@ -212,8 +213,11 @@ class LTL(object):
         except ValueError, TypeError:
             raise ValueError("Malformed TuLiP LTL specification string.")
 
-        return LTL(formula=formula, input_variables=variables[0], output_variables=variables[1])
-
+        return LTL(
+            formula=formula,
+            input_variables=variables[0],
+            output_variables=variables[1]
+        )
 
     @staticmethod
     def load(f):
@@ -225,7 +229,6 @@ class LTL(object):
         if isinstance(f, str):
             f = open(f, "rU")
         return LTL.loads(f.read())
-
 
 class GRSpec(LTL):
     """GR(1) specification
@@ -398,16 +401,19 @@ class GRSpec(LTL):
         """Create union of two specifications."""
         result = self.copy()
         for varname in other.env_vars.keys():
-            if result.env_vars.has_key(varname) and other[varname] != result.env_vars[varname]:
+            if result.env_vars.has_key(varname) and \
+                other[varname] != result.env_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         for varname in other.sys_vars.keys():
-            if result.sys_vars.has_key(varname) and other[varname] != result.sys_vars[varname]:
+            if result.sys_vars.has_key(varname) and \
+                other[varname] != result.sys_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
         for formula_component in ["env_init", "env_safety", "env_prog",
                                   "sys_init", "sys_safety", "sys_prog"]:
-            getattr(result, formula_component).extend(getattr(other, formula_component))
+            getattr(result, formula_component).extend(
+                getattr(other, formula_component))
         return result
 
     def to_canon(self):
@@ -442,7 +448,8 @@ class GRSpec(LTL):
         else:
             return "True"
 
-    def import_PropPreservingPartition(self, disc_dynamics, cont_varname="cellID"):
+    def import_PropPreservingPartition(self, disc_dynamics,
+                                       cont_varname="cellID"):
         """Append results of discretization (abstraction) to specification.
 
         disc_dynamics is an instance of PropPreservingPartition, such
@@ -480,8 +487,12 @@ class GRSpec(LTL):
                 subformula = "False"
                 subformula_next = "False"
             else:
-                subformula = " | ".join([cont_varname+str(regID) for regID in reg])
-                subformula_next = " | ".join([cont_varname+str(regID)+"'" for regID in reg])
+                subformula = " | ".join([
+                    cont_varname+str(regID) for regID in reg
+                ])
+                subformula_next = " | ".join([
+                    cont_varname+str(regID)+"'" for regID in reg
+                ])
             prop_sym_next = prop_sym+"'"
             self.sym_to_prop(props={prop_sym_next:subformula_next})
             self.sym_to_prop(props={prop_sym:subformula})
@@ -490,7 +501,8 @@ class GRSpec(LTL):
         for from_region in range(len(disc_dynamics.list_region)):
             to_regions = [i for i in range(len(disc_dynamics.list_region))
                           if disc_dynamics.trans[i][from_region] != 0]
-            self.sys_safety.append(cont_varname+str(from_region) + " -> (" + " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
+            self.sys_safety.append(cont_varname+str(from_region) + " -> (" +
+                " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
 
         # Mutex
         self.sys_init.append("")
@@ -501,14 +513,19 @@ class GRSpec(LTL):
                 self.sys_safety[-1] += "\n| "
             self.sys_init[-1] += "(" + cont_varname+str(regID)
             if len(disc_dynamics.list_region) > 1:
-                self.sys_init[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+")" for i in range(len(disc_dynamics.list_region)) if i != regID])
+                self.sys_init[-1] += " & " + " & ".join([
+                    "(!"+cont_varname+str(i)+")"
+                    for i in range(len(disc_dynamics.list_region)) if i != regID
+                ])
             self.sys_init[-1] += ")"
             self.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
             if len(disc_dynamics.list_region) > 1:
-                self.sys_safety[-1] += " & " + " & ".join(["(!"+cont_varname+str(i)+"')" for i in range(len(disc_dynamics.list_region)) if i != regID])
+                self.sys_safety[-1] += " & " + " & ".join([
+                    "(!"+cont_varname+str(i)+"')"
+                    for i in range(len(disc_dynamics.list_region)) if i != regID
+                ])
             self.sys_safety[-1] += ")"
-
-
+    
     def sym_to_prop(self, props, verbose=0):
         """Replace the symbols of propositions with the actual propositions.
 
@@ -586,7 +603,7 @@ class GRSpec(LTL):
                     spec[0] += '-- safety assumption on environment\n'
                     desc_added = True
                 env_safety = parse.parse(env_safety).to_jtlv()
-                spec[0] += '\t[](' + re.sub(r"next\s*\(", "next(", env_safety) + ')'
+                spec[0] += '\t[](' +re.sub(r"next\s*\(", "next(", env_safety) +')'
 
         desc_added = False
         for prog in self.env_prog:
@@ -617,7 +634,7 @@ class GRSpec(LTL):
                     spec[1] += '-- safety requirement on system\n'
                     desc_added = True
                 sys_safety = parse.parse(sys_safety).to_jtlv()
-                spec[1] += '\t[](' + re.sub(r"next\s*\(", "next(", sys_safety) + ')'
+                spec[1] += '\t[](' +re.sub(r"next\s*\(", "next(", sys_safety) +')'
 
         desc_added = False
         for prog in self.sys_prog:
@@ -630,7 +647,6 @@ class GRSpec(LTL):
                 spec[1] += '\t[]<>(' + parse.parse(prog).to_jtlv() + ')'
         return spec
 
-
     def to_gr1c(self):
         """Dump to gr1c specification string.
 
@@ -642,32 +658,52 @@ class GRSpec(LTL):
                 if domain == "boolean":
                     output += " "+variable
                 elif isinstance(domain, tuple) and len(domain) == 2:
-                    output += " "+variable+" ["+str(domain[0])+", "+str(domain[1])+"]"
+                    output += " "+variable+" ["+str(domain[0]) +\
+                        ", "+str(domain[1])+"]"
                 else:
-                    raise ValueError("Domain type unsupported by gr1c: "+str(domain))
+                    raise ValueError("Domain type unsupported by gr1c: " +
+                        str(domain))
             return output
         output = "ENV:"+_to_gr1c_print_vars(self.env_vars)+";\n"
         output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
 
-        output += "ENVINIT: "+"\n& ".join(["("+parse.parse(s).to_gr1c()+")" for s in self.env_init])+";\n"
+        output += "ENVINIT: "+"\n& ".join([
+            "("+parse.parse(s).to_gr1c()+")"
+            for s in self.env_init
+        ]) + ";\n"
         if len(self.env_safety) == 0:
             output += "ENVTRANS:;\n"
         else:
-            output += "ENVTRANS: "+"\n& ".join(["[]("+parse.parse(s).to_gr1c()+")" for s in self.env_safety])+";\n"
+            output += "ENVTRANS: "+"\n& ".join([
+                "[]("+parse.parse(s).to_gr1c()+")"
+                for s in self.env_safety
+            ]) + ";\n"
         if len(self.env_prog) == 0:
             output += "ENVGOAL:;\n\n"
         else:
-            output += "ENVGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.env_prog])+";\n\n"
+            output += "ENVGOAL: "+"\n& ".join([
+                "[]<>("+parse.parse(s).to_gr1c()+")"
+                for s in self.env_prog
+            ]) + ";\n\n"
         
-        output += "SYSINIT: "+"\n& ".join(["("+parse.parse(s).to_gr1c()+")" for s in self.sys_init])+";\n"
+        output += "SYSINIT: "+"\n& ".join([
+            "("+parse.parse(s).to_gr1c()+")"
+            for s in self.sys_init
+        ]) + ";\n"
         if len(self.sys_safety) == 0:
             output += "SYSTRANS:;\n"
         else:
-            output += "SYSTRANS: "+"\n& ".join(["[]("+parse.parse(s).to_gr1c()+")" for s in self.sys_safety])+";\n"
+            output += "SYSTRANS: "+"\n& ".join([
+                "[]("+parse.parse(s).to_gr1c()+")"
+                for s in self.sys_safety
+            ]) + ";\n"
         if len(self.sys_prog) == 0:
             output += "SYSGOAL:;\n"
         else:
-            output += "SYSGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.sys_prog])+";\n"
+            output += "SYSGOAL: "+"\n& ".join([
+                "[]<>("+parse.parse(s).to_gr1c()+")"
+                for s in self.sys_prog
+            ]) + ";\n"
         return output
     
     def evaluate(self, var_values):
