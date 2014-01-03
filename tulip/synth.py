@@ -337,11 +337,7 @@ def synthesize(option, specs, sys=None, verbose=0):
         Otherwise return list of counterexamples.
     @rtype: transys.Mealy or list
     """
-    if sys is not None:
-        sys = deepcopy(sys)
-        
-        sform = sys_to_spec(sys)
-        specs = specs | sform
+    specs = spec_plus_sys(specs, sys)
 
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs, verbose=verbose)
@@ -351,3 +347,27 @@ def synthesize(option, specs, sys=None, verbose=0):
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
     return ctrl
+
+def is_realizable(option, specs, sys=None, verbose=0):
+    """Check realizability.
+    
+    For details see synthesize.
+    """
+    specs = spec_plus_sys(specs, sys)
+    
+    if option == 'gr1c':
+        r = gr1cint.check_realizable(specs, verbose=verbose)
+    elif option == 'jtlv':
+        r = jtlvint.check_realizable(specs, verbose=verbose)
+    else:
+        raise Exception('Undefined synthesis option. '+\
+                        'Current options are "jtlv" and "gr1c"')
+    return r
+
+def spec_plus_sys(specs, sys=None):
+    if sys is not None:
+        sys = deepcopy(sys)
+        
+        sform = sys_to_spec(sys)
+        specs = specs | sform
+    return specs
