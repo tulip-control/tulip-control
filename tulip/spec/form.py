@@ -420,18 +420,18 @@ class GRSpec(LTL):
         conj_cstr = lambda s: " && " if len(s) > 0 else ""
         assumption = ""
         if len(self.env_init) > 0:
-            assumption += " && ".join(["("+s+")" for s in self.env_init])
+            assumption += _conj(self.env_init)
         if len(self.env_safety) > 0:
-            assumption += conj_cstr(assumption)+" && ".join(["[]("+s+")" for s in self.env_safety])
+            assumption += conj_cstr(assumption) + _conj(self.env_safety, '[]')
         if len(self.env_prog) > 0:
-            assumption += conj_cstr(assumption)+" && ".join(["[]<>("+s+")" for s in self.env_prog])
+            assumption += conj_cstr(assumption) + _conj(self.env_prog, '[]<>')
         guarantee = ""
         if len(self.sys_init) > 0:
-            guarantee += conj_cstr(guarantee)+" && ".join(["("+s+")" for s in self.sys_init])
+            guarantee += conj_cstr(guarantee) + _conj(self.sys_init)
         if len(self.sys_safety) > 0:
-            guarantee += conj_cstr(guarantee)+" && ".join(["[]("+s+")" for s in self.sys_safety])
+            guarantee += conj_cstr(guarantee) + _conj(self.sys_safety, '[]')
         if len(self.sys_prog) > 0:
-            guarantee += conj_cstr(guarantee)+" && ".join(["[]<>("+s+")" for s in self.sys_prog])
+            guarantee += conj_cstr(guarantee) + _conj(self.sys_prog, '[]<>')
 
         # Put the parts together, simplifying in special cases
         if len(guarantee) > 0:
@@ -441,7 +441,6 @@ class GRSpec(LTL):
                 return guarantee
         else:
             return "True"
-
 
     def import_PropPreservingPartition(self, disc_dynamics, cont_varname="cellID"):
         """Append results of discretization (abstraction) to specification.
@@ -679,3 +678,6 @@ def _sub_all(formula, propSymbol, prop):
                                       formula[i])
             symfound = True
     return symfound
+
+def _conj(iterable, unary=''):
+    return ' && '.join([unary + '(' + s + ')' for s in iterable])
