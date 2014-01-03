@@ -39,6 +39,7 @@ System specification
 ********************
 
 The system specification :math:`\varphi` consists of the following components:
+
 * the assumption :math:`\varphi_{init}` on the initial condition of the system, 
 * the assumption :math:`\varphi_e` on the environment, and 
 * the desired behavior :math:`\varphi_s` of the system.
