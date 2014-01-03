@@ -218,7 +218,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     A = nx.DiGraph()
     for node in node_list:
         this_id = int(node.find(ns_prefix+"id").text)
-        this_name = node.find(ns_prefix+"anno").text  # Assume version 1
+        #this_name = node.find(ns_prefix+"anno").text  # Assume version 1
         (tag_name, this_name_list) = _untaglist(node.find(ns_prefix+"anno"),
                                                 cast_f=int)
         if len(this_name_list) == 2:
