@@ -45,6 +45,12 @@ def _disj(set0):
         for x in set0
     ])
 
+def _conj(set0):
+    return " && ".join([
+        "(" +str(x) +")"
+        for x in set0
+    ])
+
 def _conj_intersection(set0, set1, parenth=True):
     if parenth:
         return " && ".join([
@@ -181,7 +187,7 @@ def open_fts2spec(ofts):
     sys_trans += sys_state_mutex(states)
     
     env_trans = env_trans_from_open_ts(states, trans, env_vars)
-    env_trans += sys_state_mutex(env_vars)
+    env_trans += pure_mutex(env_vars)
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
@@ -243,6 +249,14 @@ def sys_state_mutex(states):
         ])+")"
     ]
     return trans
+
+def pure_mutex(iterable):
+    """Mutual exclusion.
+    """
+    return [_conj([
+        '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
+        for x in iterable
+    ]) ]
 
 def sys_trans_from_open_ts(states, trans, env_vars):
     """Convert sys transitions and env actions to GR(1) sys_safety.
