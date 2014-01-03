@@ -669,6 +669,45 @@ class GRSpec(LTL):
         else:
             output += "SYSGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.sys_prog])+";\n"
         return output
+    
+    def evaluate(self, var_values):
+        """Evaluate env_init, sys_init, given a valuation of variables.
+        
+        Returns the Boolean value of the subformulas env_init, sys_init,
+        resulting from substitution of env_vars and sys_vars symbols
+        by the given assignment var_values of values to them.
+        
+        Note: variable value type checking not implemented yet.
+        
+        @param var_values: valuation of env_vars and sys_vars
+        @type var_values: {'var_name':'var_value', ...}
+        
+        @return: truth values of spec parts:
+        
+            {'env_init' : env_init[var_values],
+             'sys_init' : sys_init[var_values] }
+        
+        @rtype: dict
+        """
+        cp = self.copy()
+        cp.sym_to_prop(var_values, verbose=10)
+        
+        env_init = _eval_formula(_conj(cp.env_init) )
+        sys_init = _eval_formula(_conj(cp.sys_init) )
+        
+        return {'env_init':env_init, 'sys_init':sys_init}
+
+def _eval_formula(f):
+    f = re.sub(r'\|\|', '|', f)
+    f = re.sub(r'&&', '&', f)
+    
+    if re.findall(r'->', f) or re.findall(r'<->', f):
+            raise NotImplementedError('todo: Eval of -> and <->')
+    
+    if len(f) > 0:
+        return eval(f)
+    else:
+        return True
 
 def _sub_all(formula, propSymbol, prop):
     symfound = False
