@@ -525,48 +525,20 @@ class GRSpec(LTL):
         
         symfound = True
         while (symfound):
-            symfound = False
             for propSymbol, prop in props.iteritems():
                 if propSymbol[-1] != "'":  # To handle gr1c primed variables
                     propSymbol += r"\b"
                 if (verbose > 2):
                     print('\t' + propSymbol + ' -> ' + prop)
-                for i in xrange(0, len(self.env_init)):
-                    if (len(re.findall(r'\b'+propSymbol, self.env_init[i])) > 0):
-                        self.env_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                  self.env_init[i])
-                        symfound = True
-
-                for i in xrange(0, len(self.sys_init)):
-                    if (len(re.findall(r'\b'+propSymbol, self.sys_init[i])) > 0):
-                        self.sys_init[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                  self.sys_init[i])
-                        symfound = True
-
-                for i in xrange(0, len(self.env_safety)):
-                    if (len(re.findall(r'\b'+propSymbol, self.env_safety[i])) > 0):
-                        self.env_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                    self.env_safety[i])
-                        symfound = True
-
-                for i in xrange(0, len(self.sys_safety)):
-                    if (len(re.findall(r'\b'+propSymbol, self.sys_safety[i])) > 0):
-                        self.sys_safety[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                    self.sys_safety[i])
-                        symfound = True
-
-                for i in xrange(0, len(self.env_prog)):
-                    if (len(re.findall(r'\b'+propSymbol, self.env_prog[i])) > 0):
-                        self.env_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                  self.env_prog[i])
-                        symfound = True
-
-                for i in xrange(0, len(self.sys_prog)):
-                    if (len(re.findall(r'\b'+propSymbol, self.sys_prog[i])) > 0):
-                        self.sys_prog[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                                  self.sys_prog[i])
-                        symfound = True
-
+                
+                symfound  = _sub_all(self.env_init, propSymbol, prop)
+                symfound |= _sub_all(self.env_safety, propSymbol, prop)
+                symfound |= _sub_all(self.env_prog, propSymbol, prop)
+                
+                symfound |= _sub_all(self.sys_init, propSymbol, prop)
+                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
+                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
+    
     def to_smv(self):
         raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
         # trees = []
@@ -698,3 +670,12 @@ class GRSpec(LTL):
         else:
             output += "SYSGOAL: "+"\n& ".join(["[]<>("+parse.parse(s).to_gr1c()+")" for s in self.sys_prog])+";\n"
         return output
+
+def _sub_all(formula, propSymbol, prop):
+    symfound = False
+    for i in xrange(0, len(formula)):
+        if (len(re.findall(r'\b'+propSymbol, formula[i])) > 0):
+            formula[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
+                                      formula[i])
+            symfound = True
+    return symfound
