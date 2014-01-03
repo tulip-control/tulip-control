@@ -33,6 +33,7 @@
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
 from copy import deepcopy
+from warnings import warn
 
 from tulip import transys
 from tulip.spec import GRSpec
@@ -91,26 +92,33 @@ def _conj_neg_diff(set0, set1, parenth=True):
             if x not in set1
         ])
 
-def sys_to_spec(sys):
+def sys_to_spec(sys, ignore_initial=False):
     """Convert finite transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
     because an FTS can represent sys_init, sys_safety, but
     not other spec forms.
     
-    @type sys: transys.FiniteTransitionSystem
+    @type sys: transys.FiniteTransitionSystem |
+               transys.OpenFiniteTransitionSystem
+    
+    @param ignore_initial: Do not include initial state info from TS.
+        Enable this to mask absence of OpenFTS initial states.
+        Useful when initial states are specified in another way,
+        e.g., directly augmenting the spec part.
+    @type check_initial_exist: bool
     
     @rtype: GRSpec
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        return fts2spec(sys)
+        return fts2spec(sys, ignore_initial)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
-        return open_fts2spec(sys)
+        return open_fts2spec(sys, ignore_initial)
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def fts2spec(fts):
+def fts2spec(fts, ignore_initial=False):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -128,7 +136,7 @@ def fts2spec(fts):
     sys_vars = list(aps)
     sys_vars.extend([s for s in states])
     
-    init = sys_init_from_ts(states, aps)
+    init = sys_init_from_ts(states, aps, ignore_initial)
     
     trans = sys_trans_from_ts(states)
     trans += ap_trans_from_ts(states, aps)
@@ -136,7 +144,7 @@ def fts2spec(fts):
     
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
-def open_fts2spec(ofts):
+def open_fts2spec(ofts, ignore_initial=False):
     """Convert OpenFTS to GR(1) representation.
     
     Note that not any GR(1) can be represented by an OpenFTS,
@@ -180,7 +188,7 @@ def open_fts2spec(ofts):
     
     env_vars = list(ofts.env_actions)
     
-    sys_init = sys_init_from_ts(states, aps)
+    sys_init = sys_init_from_ts(states, aps, ignore_initial)
     
     sys_trans = sys_trans_from_open_ts(states, trans, env_vars)
     sys_trans += ap_trans_from_ts(states, aps)
@@ -196,17 +204,14 @@ def open_fts2spec(ofts):
         sys_safety=sys_trans
     )
 
-def sys_init_from_ts(states, aps):
-    """Initial state, including enforcement of mutual exclusion.
+def sys_init_from_ts(states, aps, ignore_initial=False):
+    """Initial state, including enforcement of exactly one.
+    
+    APs also considered for the initial state.
     """
-    if (len(states.initial) > 0):
-        init = [_disj([
-            "("+str(x)+")" +" && " +_conj_neg_diff(states, [x])
-            for x in states.initial
-        ])]
-    else:
-        init = ""
-
+    init = []
+    
+    # don't ignore labeling info
     for state in states.initial:
         label = states.label_of(state)
         
@@ -218,6 +223,24 @@ def sys_init_from_ts(states, aps):
         
         init[-1] += _conj_neg_diff(aps, label["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
+    
+    # skip ?
+    if ignore_initial:
+        return init
+    
+    if not states.initial:
+        msg = 'FTS has no initial states.\n'
+        msg += 'Enforcing this renders False the GR(1) guarantee.'
+        warn(msg)
+        
+        init += [_conj_neg(states) ]
+        init += [exactly_one(states) ]
+        return init
+        
+    init += [_disj([
+        "("+str(x)+")" +" && " +_conj_neg_diff(states, [x])
+        for x in states.initial
+    ])]
     return init
 
 def sys_trans_from_ts(states):
@@ -347,7 +370,8 @@ def ap_trans_from_ts(states, aps):
         trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
     return trans
 
-def synthesize(option, specs, sys=None, verbose=0):
+def synthesize(option, specs, sys=None, ignore_ts_init=False,
+               verbose=0):
     """Function to call the appropriate synthesis tool on the spec.
 
     Beware!  This function provides a generic interface to a variety
@@ -364,6 +388,10 @@ def synthesize(option, specs, sys=None, verbose=0):
     @param sys: A transition system that should be expressed with the
         specification (spec).
     
+    @param ignore_ts_init: Ignore any initial state information
+        contained in the ts.
+    @type ignore_ts_init: bool
+    
     @type verbose: bool
     
     @return: If spec is realizable,
@@ -371,7 +399,7 @@ def synthesize(option, specs, sys=None, verbose=0):
         Otherwise return list of counterexamples.
     @rtype: transys.Mealy or list
     """
-    specs = spec_plus_sys(specs, sys)
+    specs = spec_plus_sys(specs, sys, ignore_ts_init)
 
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs, verbose=verbose)
@@ -382,12 +410,13 @@ def synthesize(option, specs, sys=None, verbose=0):
                         'Current options are "jtlv" and "gr1c"')
     return ctrl
 
-def is_realizable(option, specs, sys=None, verbose=0):
+def is_realizable(option, specs, sys=None, ignore_ts_init=False,
+                  verbose=0):
     """Check realizability.
     
     For details see synthesize.
     """
-    specs = spec_plus_sys(specs, sys)
+    specs = spec_plus_sys(specs, sys, ignore_ts_init)
     
     if option == 'gr1c':
         r = gr1cint.check_realizable(specs, verbose=verbose)
@@ -398,10 +427,10 @@ def is_realizable(option, specs, sys=None, verbose=0):
                         'Current options are "jtlv" and "gr1c"')
     return r
 
-def spec_plus_sys(specs, sys=None):
+def spec_plus_sys(specs, sys=None, ignore_ts_init=False):
     if sys is not None:
         sys = deepcopy(sys)
         
-        sform = sys_to_spec(sys)
+        sform = sys_to_spec(sys, ignore_ts_init)
         specs = specs | sform
     return specs
