@@ -91,40 +91,41 @@ except ValueError:
     pass
 
 if check_deps:
-    print('Checking for dependencies...')
+    if not perform_setup:
+        print('Checking for required dependencies...')
 
-    # Python package dependencies
-    try:
-        import numpy
-    except:
-        print('ERROR: NumPy not found.')
-        raise
-    try:
-        import scipy
-    except:
-        print('ERROR: SciPy not found.')
-        raise
-    try:
-        import pyparsing
-    except:
-        print('ERROR: pyparsing not found.')
-        raise
-    try:
-        import networkx
-    except:
-        print('ERROR: NetworkX not found.')
-        raise
-    try:
-        import cvxopt
-    except:
-        print('ERROR: CVXOPT not found.')
-        raise
+        # Python package dependencies
+        try:
+            import numpy
+        except:
+            print('ERROR: NumPy not found.')
+            raise
+        try:
+            import scipy
+        except:
+            print('ERROR: SciPy not found.')
+            raise
+        try:
+            import pyparsing
+        except:
+            print('ERROR: pyparsing not found.')
+            raise
+        try:
+            import networkx
+        except:
+            print('ERROR: NetworkX not found.')
+            raise
+        try:
+            import cvxopt
+        except:
+            print('ERROR: CVXOPT not found.')
+            raise
 
-    # Other dependencies
-    for (dep_key, dep_val) in other_depends.items():
-        if not dep_val[0]():
-            print(dep_val[1] )
-            raise Exception('Failed dependency: '+dep_key)
+        # Other dependencies
+        for (dep_key, dep_val) in other_depends.items():
+            if not dep_val[0]():
+                print(dep_val[1] )
+                raise Exception('Failed dependency: '+dep_key)
 
     # Optional stuff
     for (opt_key, opt_val) in optionals.items():
@@ -145,7 +146,7 @@ if perform_setup:
           url = 'http://www.cds.caltech.edu/tulip',
           license = 'BSD',
           requires = ['numpy', 'scipy', 'pyparsing', 'networkx', 'cvxopt'],
-          install_requires = ['networkx >= 1.6', 'numpy >= 1.7'],
+          install_requires = ['numpy >= 1.7', 'pyparsing', 'networkx >= 1.6', 'cvxopt'],
           packages = ['tulip', 'tulip.transys', 'tulip.transys.export',
                       'tulip.abstract', 'tulip.polytope', 'tulip.spec'],
           package_dir = {'tulip' : 'tulip'},
