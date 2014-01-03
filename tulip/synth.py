@@ -313,7 +313,7 @@ def ap_trans_from_ts(states, aps):
         trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
     return trans
 
-def synthesize(option, specs, sys=None):
+def synthesize(option, specs, sys=None, verbose=0):
     """Function to call the appropriate synthesis tool on the spec.
 
     Beware!  This function provides a generic interface to a variety
@@ -329,7 +329,9 @@ def synthesize(option, specs, sys=None):
     @type specs: L{spec.GRSpec}
     @param sys: A transition system that should be expressed with the
         specification (spec).
-
+    
+    @type verbose: bool
+    
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return list of counterexamples.
@@ -342,9 +344,9 @@ def synthesize(option, specs, sys=None):
         specs = specs | sform
 
     if option == 'gr1c':
-        ctrl = gr1cint.synthesize(specs)
+        ctrl = gr1cint.synthesize(specs, verbose=verbose)
     elif option == 'jtlv':
-        ctrl = jtlvint.synthesize(specs)
+        ctrl = jtlvint.synthesize(specs, verbose=verbose)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
