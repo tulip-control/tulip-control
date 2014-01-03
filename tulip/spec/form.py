@@ -690,7 +690,7 @@ class GRSpec(LTL):
         @rtype: dict
         """
         cp = self.copy()
-        cp.sym_to_prop(var_values, verbose=10)
+        cp.sym_to_prop(var_values)
         
         env_init = _eval_formula(_conj(cp.env_init) )
         sys_init = _eval_formula(_conj(cp.sys_init) )
@@ -698,8 +698,9 @@ class GRSpec(LTL):
         return {'env_init':env_init, 'sys_init':sys_init}
 
 def _eval_formula(f):
-    f = re.sub(r'\|\|', '|', f)
-    f = re.sub(r'&&', '&', f)
+    f = re.sub(r'\|\|', ' or ', f)
+    f = re.sub(r'&&', ' and ', f)
+    f = re.sub(r'!', ' not ', f)
     
     if re.findall(r'->', f) or re.findall(r'<->', f):
             raise NotImplementedError('todo: Eval of -> and <->')
