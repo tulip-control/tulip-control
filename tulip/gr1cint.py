@@ -154,7 +154,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
+def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     """Return GRSpec and MealyMachine constructed from output of gr1c.
 
     x can be a string or an instance of
@@ -270,7 +270,25 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     for u in A.nodes_iter():
         for v in A.successors_iter(u):
             mach.transitions.add_labeled(u, v, A.node[v]["state"])
-
+    
+    if spec0 is None:
+        return (spec, mach)
+    
+    # special initial state, for first input
+    initial_state = 'Sinit'
+    mach.states.add(initial_state)
+    mach.states.initial |= [initial_state]
+    
+    # Mealy reaction to initial env input
+    for v in A.nodes_iter():
+        var_values = A.node[v]['state']
+        bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
+        
+        t = spec0.evaluate(bool_values)
+        
+        if t['env_init'] and t['sys_init']:
+            mach.transitions.add_labeled(initial_state, v, var_values)
+    
     return (spec, mach)
 
 def _parse_vars(variables, vardict):
@@ -349,7 +367,7 @@ def synthesize(spec, verbose=0):
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     if p.returncode == 0:
-        (spec, aut) = load_aut_xml(stdoutdata)
+        (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
         return aut
     else:
         if verbose > 0:
