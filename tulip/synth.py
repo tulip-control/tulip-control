@@ -231,7 +231,10 @@ def sys_trans_from_ts(states):
     return trans
 
 def sys_state_mutex(states):
-    """Mutual exclusion of states.
+    """Mutual exclusion of states and require at least one True.
+    
+    Contrast with the pure mutual exclusion implemented by:
+        spec.form.mutex
     """
     trans = [
         "X("+_disj([
