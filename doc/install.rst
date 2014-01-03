@@ -42,8 +42,10 @@ packages, installation proceeds with::
 
   $ python setup.py install
 
-This script will also check for dependencies, i.e. look for NumPy,
-CVXOPT, etc.
+This script will also check for dependencies, i.e. look for NumPy, CVXOPT, etc.
+To only check for required and optional dependencies, but not install TuLiP, use ::
+
+  $ python setup.py dry-check
 
 .. _newbie-scipy-sec-label:
 
