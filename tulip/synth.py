@@ -298,17 +298,19 @@ def ap_trans_from_ts(states, aps):
         label = states.label_of(state)
         
         if label.has_key("ap"):
-            tmp = _conj_intersection(aps, label["ap"], parenth=False)
+            tmp0 = _conj_intersection(aps, label["ap"], parenth=False)
         else:
-            tmp = ""
-        
-        if len(tmp) > 0:
-            tmp += " && "
+            tmp0 = ""
         
         if label.has_key("ap"):
-            tmp += _conj_neg_diff(aps, label["ap"], parenth=False)
+            tmp1 = _conj_neg_diff(aps, label["ap"], parenth=False)
         else:
-            tmp += _conj_neg(aps, parenth=False)
+            tmp1 = _conj_neg(aps, parenth=False)
+        
+        if len(tmp0) > 0 and len(tmp1) > 0:
+            tmp = tmp0 +' && '+ tmp1
+        else:
+            tmp = tmp0 + tmp1
         
         trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
     return trans
