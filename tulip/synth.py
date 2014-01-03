@@ -86,28 +86,113 @@ def _conj_neg_diff(set0, set1, parenth=True):
         ])
 
 def sys_to_spec(sys):
-    """Convert finite transition system to GR(1) specification.
+    """Convert finite transition system to GR(1) representation.
     
-    Forthcoming: support for OpenFiniteTransitionSystem.
+    The term GR(1) representation is preferred to GR(1) spec,
+    because an FTS can represent sys_init, sys_safety, but
+    not other spec forms.
     
     @type sys: transys.FiniteTransitionSystem
     
     @rtype: GRSpec
     """
-    if not isinstance(sys, (transys.FiniteTransitionSystem,
-                            transys.OpenFiniteTransitionSystem)):
-        raise TypeError("synth.sys_to_spec does not support " + str(type(sys)))
+    if isinstance(sys, transys.FiniteTransitionSystem):
+        return fts2spec(sys)
+    elif isinstance(sys, transys.OpenFiniteTransitionSystem):
+        return open_fts2spec(sys)
+    else:
+        raise TypeError('synth.sys_to_spec does not support ' +
+            str(type(sys)) +'. Use FTS or OpenFTS.')
+
+def fts2spec(fts):
+    """Convert closed FTS to GR(1) representation.
     
-    aps = sys.aps
-    states = sys.states
+    So fts on its own is not the complete problem spec.
     
-    # Assume everything is controlled; support for an environment
-    # definition is forthcoming.
+    @param fts: transys.FiniteTransitionSystem
+    
+    @rtype: GRSpec
+    """
+    assert(isinstance(fts, transys.FiniteTransitionSystem))
+    
+    aps = fts.aps
+    states = fts.states    
+    
+    # everything is controlled
     sys_vars = list(aps)
     sys_vars.extend([s for s in states])
-    trans = []
+    
+    init = sys_init_from_ts(states, aps)
+    
+    trans = sys_trans_from_ts(states)
+    trans += ap_trans_from_ts(states, aps)
+    trans += sys_state_mutex(states)
+    
+    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
-    # Initial state, including enforcement of mutual exclusion
+def open_fts2spec(ofts):
+    """Convert OpenFTS to GR(1) representation.
+    
+    Note that not any GR(1) can be represented by an OpenFTS,
+    as the OpenFTS is currently defined.
+    A GameStructure would be needed instead.
+    
+    Use the spec to add more information,
+    for example to specify env_init, sys_init that
+    involve both sys_vars and env_vars.
+    
+    For example, an OpenFTS cannot represent how the
+    initial valuation of env_vars affects the allowable
+    initial valuation of sys_vars, which is represented
+    by the state of OpenFTS.
+    
+    Either OpenFTS can be extended in the future,
+    or a game structure added.
+    
+    notes
+    -----
+    
+    1. Currently each env_action becomes a bool env_var.
+        In the future a candidate option is to represent the
+        env_actions as an enumeration.
+        This would avoid the exponential cost incurred by bools.
+        A map between the enum and named env_actions
+        will probably also be needed.
+    
+    @para ofts: transys.OpenFiniteTransitionSystem
+    
+    @rtype: GRSpec
+    """
+    assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
+    
+    aps = ofts.aps
+    states = ofts.states
+    trans = ofts.transitions
+    
+    sys_vars = list(aps)
+    sys_vars.extend([s for s in states])
+    
+    env_vars = list(ofts.env_actions)
+    
+    sys_init = sys_init_from_ts(states, aps)
+    
+    sys_trans = sys_trans_from_open_ts(states, trans, env_vars)
+    sys_trans += ap_trans_from_ts(states, aps)
+    sys_trans += sys_state_mutex(states)
+    
+    env_trans = env_trans_from_open_ts(states, trans, env_vars)
+    env_trans += sys_state_mutex(env_vars)
+    
+    return GRSpec(
+        sys_vars=sys_vars, env_vars=env_vars,
+        sys_init=sys_init,
+        env_safety=env_trans,
+        sys_safety=sys_trans
+    )
+
+def sys_init_from_ts(states, aps):
+    """Initial state, including enforcement of mutual exclusion.
+    """
     if (len(states.initial) > 0):
         init = [_disj([
             "("+str(x)+")" +" && " +_conj_neg_diff(states, [x])
@@ -127,8 +212,13 @@ def sys_to_spec(sys):
         
         init[-1] += _conj_neg_diff(aps, label["ap"])
         init[-1] = "("+str(state)+") -> ("+init[-1]+")"
+    return init
 
-    # Transitions
+def sys_trans_from_ts(states):
+    """Convert environment actions to GR(1) representation.
+    """
+    trans = []
+    
     for from_state in states:
         post = states.post(from_state)
         
@@ -138,16 +228,72 @@ def sys_to_spec(sys):
         
         post_states = _disj(post)
         trans += ["(" +str(from_state) +") -> X(" +post_states +")"]
+    return trans
 
-    # Mutual exclusion of states
-    trans.append(
+def sys_state_mutex(states):
+    """Mutual exclusion of states.
+    """
+    trans = [
         "X("+_disj([
             "("+str(x)+")"+" && " +_conj_neg_diff(states, [x])
             for x in states
         ])+")"
-    )
+    ]
+    return trans
+
+def sys_trans_from_open_ts(states, trans, env_vars):
+    """Convert sys transitions and env actions to GR(1) sys_safety.
     
-    # Require atomic propositions to follow states according to label
+    Mutexes not enforced by this function:
+        
+        - among sys states
+        - among env actions
+    """
+    sys_trans = []
+    
+    # Transitions
+    for from_state in states:
+        cur_trans = trans.find([from_state])
+        
+        # no successor states ?
+        if not cur_trans:
+            continue
+        
+        for (from_state, to_state, label) in cur_trans:
+            env_action = label['env_actions']
+            
+            precond = "(" +str(from_state) +")"
+            precond = precond +" && X(" + str(env_action) + ")"
+            sys_trans += ["(" + precond + ") -> X(" +str(to_state) +")"]
+    return sys_trans
+
+def env_trans_from_open_ts(states, trans, env_vars):
+    """Convert environment actions to GR(1) env_safety.
+    """
+    env_trans = []
+    
+    for from_state in states:
+        cur_trans = trans.find([from_state])
+        
+        # no successor states ?
+        if not cur_trans:
+            continue
+        
+        # collect possible next env actions
+        next_env_actions = set()
+        for (from_state, to_state, label) in cur_trans:
+            env_action = label['env_actions']
+            next_env_actions.add(env_action)
+        next_env_actions = _disj(next_env_actions)
+        
+        env_trans += ["(" +str(from_state) +") -> X("+ next_env_actions +")"]
+    return env_trans
+
+def ap_trans_from_ts(states, aps):
+    """Require atomic propositions to follow states according to label.
+    """
+    trans = []
+    
     for state in states:
         label = states.label_of(state)
         
@@ -165,8 +311,7 @@ def sys_to_spec(sys):
             tmp += _conj_neg(aps, parenth=False)
         
         trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
-
-    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
+    return trans
 
 def synthesize(option, specs, sys=None):
     """Function to call the appropriate synthesis tool on the spec.
