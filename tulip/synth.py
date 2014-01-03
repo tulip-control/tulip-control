@@ -238,26 +238,31 @@ def sys_trans_from_ts(states):
     return trans
 
 def sys_state_mutex(states):
-    """Mutual exclusion of states and require at least one True.
+    """Require next exactly one.
+    
+    Combined with [] requires exactly one
+    for all time except initially.
     
     Contrast with the pure mutual exclusion implemented by:
         spec.form.mutex
     """
-    trans = [
-        "X("+_disj([
-            "("+str(x)+")"+" && " +_conj_neg_diff(states, [x])
-            for x in states
-        ])+")"
-    ]
-    return trans
+    return ['X(' + exactly_one(states) + ')']
 
 def pure_mutex(iterable):
-    """Mutual exclusion.
+    """Mutual exclusion for all time.
     """
     return [_conj([
         '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
         for x in iterable
     ]) ]
+
+def exactly_one(iterable):
+    """N-ary xor.
+    """
+    return _disj([
+        '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
+        for x in iterable
+    ])
 
 def sys_trans_from_open_ts(states, trans, env_vars):
     """Convert sys transitions and env actions to GR(1) sys_safety.
