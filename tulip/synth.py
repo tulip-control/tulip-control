@@ -230,6 +230,7 @@ def sys_trans_from_ts(states):
         
         # no successor states ?
         if not post:
+            trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
             continue
         
         post_states = _disj(post)
@@ -274,6 +275,7 @@ def sys_trans_from_open_ts(states, trans, env_vars):
         
         # no successor states ?
         if not cur_trans:
+            sys_trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
             continue
         
         for (from_state, to_state, label) in cur_trans:
@@ -286,6 +288,12 @@ def sys_trans_from_open_ts(states, trans, env_vars):
 
 def env_trans_from_open_ts(states, trans, env_vars):
     """Convert environment actions to GR(1) env_safety.
+    
+    This constrains the actions available next to the environment
+    based on the system OpenFTS.
+    
+    Might become optional in the future,
+    depending on the desired way of defining env behavior.
     """
     env_trans = []
     
@@ -294,6 +302,8 @@ def env_trans_from_open_ts(states, trans, env_vars):
         
         # no successor states ?
         if not cur_trans:
+            env_trans += ['(' +str(from_state) +') -> X(' +
+                _conj_neg(env_vars) + ')']
             continue
         
         # collect possible next env actions
