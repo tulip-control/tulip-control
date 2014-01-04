@@ -793,6 +793,26 @@ def cycle_labeled_with(L):
     #trans += [(n-1, 0)] # close cycle
     return ts
 
+def add_initial_states(ts, ap_labels):
+    """Make initial any state of ts labeled with any label in ap_labels.
+    
+    For example if isinstance(disc_dynamics, AbstractSysDyn):
+    
+    >>> from tulip.transys.transys import add_initial_states
+    >>> initial_labels = [{'home'}]
+    >>> add_initial_states(disc_dynamics.ofts, initial_labels)
+    
+    @type ts: transys.FiniteTransitionSystem,
+        transys.OpenFiniteTransitionSystem
+    
+    @param ap_labels: labels, each comprised of atomic propositions
+    @type ap_labels: iterable of sets of elements from
+        ts.atomic_propositions
+    """
+    for label in ap_labels:
+        new_init_states = ts.states.labeled_with({'ap':label})
+        ts.states.initial |= new_init_states
+
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
     
