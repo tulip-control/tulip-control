@@ -274,6 +274,9 @@ def sys_state_mutex(states):
 def pure_mutex(iterable):
     """Mutual exclusion for all time.
     """
+    if not iterable:
+        return []
+    
     return [_conj([
         '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
         for x in iterable
@@ -306,12 +309,17 @@ def sys_trans_from_open_ts(states, trans, env_vars):
             sys_trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
             continue
         
+        cur_str = []
         for (from_state, to_state, label) in cur_trans:
-            env_action = label['env_actions']
-            
             precond = "(" +str(from_state) +")"
-            precond = precond +" && X(" + str(env_action) + ")"
-            sys_trans += ["(" + precond + ") -> X(" +str(to_state) +")"]
+            
+            if 'env_actions' in label:
+                env_action = label['env_actions']
+                precond = precond +" && X(" + str(env_action) + ")"
+            
+            cur_str += ["(" + precond + ") -> X(" +str(to_state) +")"]
+            
+        sys_trans += [_disj(cur_str) ]
     return sys_trans
 
 def env_trans_from_open_ts(states, trans, env_vars):
@@ -324,6 +332,8 @@ def env_trans_from_open_ts(states, trans, env_vars):
     depending on the desired way of defining env behavior.
     """
     env_trans = []
+    if not env_vars:
+        return env_trans
     
     for from_state in states:
         cur_trans = trans.find([from_state])
@@ -337,6 +347,9 @@ def env_trans_from_open_ts(states, trans, env_vars):
         # collect possible next env actions
         next_env_actions = set()
         for (from_state, to_state, label) in cur_trans:
+            if 'env_actions' not in label:
+                continue
+            
             env_action = label['env_actions']
             next_env_actions.add(env_action)
         next_env_actions = _disj(next_env_actions)
