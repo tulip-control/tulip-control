@@ -89,7 +89,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
 # Synthesize
-ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts)
+ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts, ignore_ts_init=True)
 
 # Generate graphical representation of controller for viewing
 if not ctrl.save('robot_continuous_pwa.png', 'png'):

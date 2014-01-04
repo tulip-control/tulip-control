@@ -151,7 +151,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys_sws)
+ctrl = synth.synthesize('jtlv', specs, sys_sws, ignore_ts_init=True)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_controlled_switching.png', 'png'):

@@ -120,7 +120,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.  Here we make use of JTLV.
 #
 # @synthesize@
-ctrl = synth.synthesize('gr1c', specs, sys)
+ctrl = synth.synthesize('gr1c', specs, sys, ignore_ts_init=True)
 # @synthesize_end@
 
 #

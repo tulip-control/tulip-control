@@ -125,4 +125,9 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys_swe)
+ctrl = synth.synthesize('jtlv', specs, sys_swe, ignore_ts_init=True)
+
+# @plot_print@
+if not ctrl.save('robot_environment_switching.png', 'png'):
+    print(ctrl)
+# @plot_print_end@
