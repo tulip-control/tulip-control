@@ -89,13 +89,13 @@ sys_prog = set()                # empty set
 # environment variable X0reach that is initialized to True and the
 # specification [](park -> <>(loc=0)) becomes
 #
-#     [](next(X0reach) == (loc=0) || (X0reach && !park))
+#     [](next(X0reach) <-> (loc=0) || (X0reach && !park))
 #
 
 # Augment the system description to make it GR(1)
 sys_vars['X0reach'] = 'boolean'
 sys_init |= {'X0reach'}
-sys_safe |= {'next(X0reach) == (loc=0) || (X0reach && !park)'}
+sys_safe |= {'next(X0reach) <-> (loc=0) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create a GR(1) specification
