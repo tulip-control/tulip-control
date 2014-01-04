@@ -222,7 +222,7 @@ def sys_init_from_ts(states, aps, ignore_initial=False):
             init[-1] += " && "
         
         init[-1] += _conj_neg_diff(aps, label["ap"])
-        init[-1] = "("+str(state)+") -> ("+init[-1]+")"
+        init[-1] = "!("+str(state)+") || ("+init[-1]+")"
     
     # skip ?
     if ignore_initial:
