@@ -237,10 +237,7 @@ def sys_init_from_ts(states, aps, ignore_initial=False):
         init += [exactly_one(states) ]
         return init
         
-    init += [_disj([
-        "("+str(x)+")" +" && " +_conj_neg_diff(states, [x])
-        for x in states.initial
-    ])]
+    init += [_disj(states.initial)]
     return init
 
 def sys_trans_from_ts(states):
@@ -269,7 +266,7 @@ def sys_state_mutex(states):
     Contrast with the pure mutual exclusion implemented by:
         spec.form.mutex
     """
-    return ['X(' + exactly_one(states) + ')']
+    return ['(' + exactly_one(states) + ')']
 
 def pure_mutex(iterable):
     """Mutual exclusion for all time.
