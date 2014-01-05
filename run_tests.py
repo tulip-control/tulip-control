@@ -2,7 +2,7 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
-SCL; 19 Nov 2013.
+SCL; 4 Jan 2014.
 """
 
 import sys
@@ -11,23 +11,22 @@ import nose
 
 if __name__ == "__main__":
     if ("-h" in sys.argv) or ("--help" in sys.argv):
-        print("""Usage: run_tests.py [--cover] [--fast] [OPTIONS...] [[-]TESTFILES...]
+        print("""Usage: run_tests.py [OPTIONS...] [[-]TESTFILES...]
 
-    TESTFILES... is space-separated list of test file names, where the
-    suffix "_test.py" is added to each given name.  E.g.,
+    TESTFILES... is space-separated list of test file names, where the suffix
+    "_test.py" is added to each given name.  E.g.,
 
       run_tests.py automaton
 
-    causes the automaton_test.py file to be used and no others.  If no
-    arguments are given, then default is to run all tests.  To exclude
-    tests that are marked as slow, use the flag "--fast".  To generate
-    a coverage report, use the flag "--cover".  If TESTFILES... each
-    have a prefix of "-", then all tests *except* those listed will be
-    run.  OPTIONS... are passed on to nose.""")
-        exit(1)
+    causes the automaton_test.py file to be used and no others.  If no arguments
+    are given, then default is to run all tests.  If TESTFILES... each have a
+    prefix of "-", then all tests *except* those listed will be run.  Besides
+    what is below, OPTIONS... are passed on to nose.
 
-    if len(sys.argv) == 1:
-        nose.main()
+    --fast           exclude tests that are marked as slow
+    --cover          generate a coverage report
+    --outofsource    import tulip from outside the current directory""")
+        exit(1)
 
     if "--fast" in sys.argv:
         skip_slow = True
@@ -40,6 +39,22 @@ if __name__ == "__main__":
         sys.argv.remove("--cover")
     else:
         measure_coverage = False
+
+    if "--outofsource" in sys.argv:
+        require_nonlocaldir_tulip = True
+        sys.argv.remove("--outofsource")
+    else:
+        require_nonlocaldir_tulip = False
+
+    if require_nonlocaldir_tulip:
+        sys.path.pop(0)
+    try:
+        import tulip
+    except ImportError:
+        if require_nonlocaldir_tulip:
+            raise ImportError("tulip package not found, besides in the local directory")
+        else:
+            raise
 
     argv = [sys.argv[0]]
     if skip_slow:
