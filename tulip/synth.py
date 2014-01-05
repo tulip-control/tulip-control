@@ -135,12 +135,14 @@ def fts2spec(fts, ignore_initial=False):
     # everything is controlled
     sys_vars = list(aps)
     sys_vars.extend([s for s in states])
+    sys_vars.extend([a for a in fts.actions])
     
     init = sys_init_from_ts(states, aps, ignore_initial)
     
-    trans = sys_trans_from_ts(states)
+    trans = sys_trans_from_ts(states, fts.transitions)
     trans += ap_trans_from_ts(states, aps)
     trans += sys_state_mutex(states)
+    trans += pure_mutex(fts.actions)
     
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
@@ -185,6 +187,7 @@ def open_fts2spec(ofts, ignore_initial=False):
     
     sys_vars = list(aps)
     sys_vars.extend([s for s in states])
+    sys_vars.extend([a for a in ofts.sys_actions])
     
     env_vars = list(ofts.env_actions)
     
@@ -193,6 +196,7 @@ def open_fts2spec(ofts, ignore_initial=False):
     sys_trans = sys_trans_from_open_ts(states, trans, env_vars)
     sys_trans += ap_trans_from_ts(states, aps)
     sys_trans += sys_state_mutex(states)
+    sys_trans += pure_mutex(ofts.sys_actions)
     
     env_trans = env_trans_from_open_ts(states, trans, env_vars)
     env_trans += pure_mutex(env_vars)
@@ -240,22 +244,33 @@ def sys_init_from_ts(states, aps, ignore_initial=False):
     init += [_disj(states.initial)]
     return init
 
-def sys_trans_from_ts(states):
+def sys_trans_from_ts(states, trans):
     """Convert environment actions to GR(1) representation.
     """
-    trans = []
+    sys_trans = []
     
     for from_state in states:
         post = states.post(from_state)
         
         # no successor states ?
         if not post:
-            trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
+            sys_trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
             continue
         
-        post_states = _disj(post)
-        trans += ["(" +str(from_state) +") -> X(" +post_states +")"]
-    return trans
+        cur_trans = trans.find([from_state])
+        cur_str = []
+        for (from_state, to_state, label) in cur_trans:
+            precond = '(' + str(from_state) + ')'
+            postcond = '(' + str(to_state) + ')'
+            
+            if 'actions' in label:
+                sys_action = label['actions']
+                postcond += ' && (' +str(sys_action) +')'
+            
+            cur_str += ['(' + precond + ') -> X( ' + postcond + ')']
+        
+        sys_trans += [_disj(cur_str) ]
+    return sys_trans
 
 def sys_state_mutex(states):
     """Require next exactly one.
@@ -308,13 +323,18 @@ def sys_trans_from_open_ts(states, trans, env_vars):
         
         cur_str = []
         for (from_state, to_state, label) in cur_trans:
-            precond = "(" +str(from_state) +")"
+            precond = '(' + str(from_state) + ')'
+            postcond = '(' + str(to_state) +')'
             
             if 'env_actions' in label:
                 env_action = label['env_actions']
-                precond = precond +" && X(" + str(env_action) + ")"
+                postcond += ' && (' + str(env_action) + ')'
             
-            cur_str += ["(" + precond + ") -> X(" +str(to_state) +")"]
+            if 'sys_actions' in label:
+                sys_action = label['sys_actions']
+                postcond += ' && (' + str(sys_action) + ')'
+            
+            cur_str += ['(' + precond + ') -> X(' + postcond + ')']
             
         sys_trans += [_disj(cur_str) ]
     return sys_trans
