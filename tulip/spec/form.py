@@ -737,6 +737,7 @@ def _eval_formula(f):
     f = re.sub(r'\|\|', ' or ', f)
     f = re.sub(r'&&', ' and ', f)
     f = re.sub(r'!', ' not ', f)
+    f = re.sub(r'=', ' == ', f)
     
     if re.findall(r'->', f) or re.findall(r'<->', f):
             raise NotImplementedError('todo: Eval of -> and <->')

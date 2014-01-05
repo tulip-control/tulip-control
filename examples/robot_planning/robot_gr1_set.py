@@ -62,7 +62,7 @@ env_prog = '!park'              # []<>(!park)
 # action.  
 #
 sys_vars = {}
-sys_vars['loc'] = set([0,1,2,3,4,5])
+sys_vars['loc'] = (0, 5)
 
 sys_init = {'loc=0'}
 sys_safe = {
@@ -109,9 +109,9 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.  Here we make use of gr1c.
 #
 
-ctrl = synth.synthesize('jtlv', specs)
+ctrl = synth.synthesize('gr1c', specs)
 
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('png', 'robot_gr1.png'):
+if not ctrl.save('robot_gr1_set.png', 'png'):
     print(ctrl)
