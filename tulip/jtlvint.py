@@ -31,17 +31,12 @@
 # SUCH DAMAGE.
 """ 
 Interface to the JTLV implementation of GR(1) synthesis
-
-JTLV: http://jtlv.ysaar.net/
-
-
+    JTLV: http://jtlv.ysaar.net/
 based on code from:
     grgameint.py, jtlvint.py, rhtlp.py by Nok Wongpiromsarn 
 
-
 @author: Vasu Raman
 """
-
 import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
@@ -57,8 +52,8 @@ from tulip.spec import parse
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
-
-def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1, init_option=1, verbose=0):
+def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
+                     init_option=1, verbose=0):
     """Decide realizability of specification defined by given GRSpec object.
 
     ...for standalone use
@@ -66,13 +61,16 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1, init_option=1
     Return True if realizable, False if not, or an error occurs.
     """
     fSMV, fLTL, fAUT = create_files(spec)
-    return solve_game(spec, fSMV, fLTL, fAUT, heap_size, priority_kind, init_option, verbose)
+    return solve_game(spec, fSMV, fLTL, fAUT, heap_size,
+                      priority_kind, init_option, verbose)
     os.unlink(fSMV)
     os.unlink(fLTL)
     os.unlink(fAUT)
-    
 
-def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, init_option=1, verbose=0):
+def solve_game(
+    spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m',
+    priority_kind=3, init_option=1, verbose=0
+):
     """Decide realizability of specification defined by given GRSpec object.
 
     Return True if realizable, False if not, or an error occurs.
@@ -103,18 +101,24 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
 
     @param init_option: an integer in that specifies how to handle the
         initial state of the system. Possible values of C{init_option}
-        are
+        are:
 
-            - 0 - The system has to be able to handle all the possible initial system
-              states specified on the guarantee side of the specification.
-            - 1 (default) - The system can choose its initial state, in response to the initial
-              environment state. For each initial environment state, the resulting
-              automaton contains exactly one initial system state, starting from which
-              the system can satisfy the specification.
-            - 2 - The system can choose its initial state, in response to the initial
-              environment state. For each initial environment state, the resulting
-              automaton contain all the possible initial system states, starting from which
-              the system can satisfy the specification.
+            - 0 - The system has to be able to handle all
+                the possible initial system
+                states specified on the guarantee side of the specification.
+                
+            - 1 (default) - The system can choose its initial state,
+                in response to the initial
+                environment state. For each initial environment state,
+                the resulting automaton contains
+                exactly one initial system state,
+                starting from which the system can satisfy the specification.
+                
+            - 2 - The system can choose its initial state,
+                in response to the initial environment state.
+                For each initial environment state, the resulting
+                automaton contain all the possible initial system states,
+                starting from which the system can satisfy the specification.
 
     @param verbose: an integer that specifies the level of verbosity.
     """
@@ -150,9 +154,10 @@ def solve_game(spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m', priority_kind=3, in
 
     return realizable
 
-
-
-def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, verbose=0):
+def synthesize(
+    spec, heap_size='-Xmx128m', priority_kind = 3,
+    init_option = 1, verbose=0
+):
     """Synthesize a strategy satisfying the spec.
 
     Arguments are described in documentation for L{solve_game}.
@@ -178,7 +183,6 @@ def synthesize(spec, heap_size='-Xmx128m', priority_kind = 3, init_option = 1, v
         os.unlink(fLTL)
         os.unlink(fAUT)
         return aut
-
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
@@ -211,13 +215,17 @@ def get_priority(priority_kind):
         elif (priority_kind == 'XYZ'):
             priority_kind = 23
         else:
-            warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
+            warnings.warn('Unknown priority_kind.' +
+                'Setting it to the default (ZYX)')
             priority_kind = 3
     elif (isinstance(priority_kind, int)):
-        if (priority_kind > 0 and priority_kind != 3 and priority_kind != 7 and \
-                priority_kind != 11 and priority_kind != 15 and priority_kind != 19 and \
-                priority_kind != 23):
-            warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
+        if (priority_kind > 0 and priority_kind != 3 and \
+            priority_kind != 7 and priority_kind != 11 and \
+            priority_kind != 15 and priority_kind != 19 and \
+            priority_kind != 23
+        ):
+            warnings.warn("Unknown priority_kind." +
+                " Setting it to the default (ZYX)")
             priority_kind = 3
     else:
         warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
@@ -252,11 +260,10 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
             "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
             fAUT, str(priority_kind), str(init_option)
         ])
-#         cmd = subprocess.Popen( \
-#             ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
-#                  aut_file, str(priority_kind), str(init_option)], \
-#                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
-
+#       cmd = subprocess.Popen( \
+#           ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
+#                aut_file, str(priority_kind), str(init_option)], \
+#               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
 def generate_JTLV_SMV(spec, verbose=0):
     """Return the SMV module definitions needed by JTLV.
@@ -308,7 +315,8 @@ def generate_JTLV_LTL(spec, verbose=0):
     assumption = specLTL[0]
     guarantee = specLTL[1]
     
-    if not check_gr1(assumption, guarantee, spec.env_vars.keys(), spec.sys_vars.keys()):
+    if not check_gr1(assumption, guarantee, spec.env_vars.keys(),
+                     spec.sys_vars.keys()):
         raise Exception('Spec not in GR(1) format')
     
     assumption = re.sub(r'\b'+'True'+r'\b', 'TRUE', assumption)
@@ -429,7 +437,8 @@ def load_file(aut_file, spec, verbose=0):
 
             m.states.add(stateID)
             
-            # mark initial states (states that do not appear in previous transitions)
+            # mark initial states (states that
+            # do not appear in previous transitions)
             seenSoFar = [t for (s,trans) in stateDict.values() for t in trans]
             if stateID not in seenSoFar:
                 m.states.initial.add(stateID)
@@ -448,7 +457,6 @@ def load_file(aut_file, spec, verbose=0):
                 )
             except Exception, e:
                 raise Exception('Failed to add transition:\n' +str(e) )
-            
             
     """
     # label states
@@ -531,21 +539,28 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
 
     # Literals cannot start with G, F or X unless quoted
     restricted_alphas = filter(lambda x: x not in "GFX", alphas)
-    # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
+    # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]*
+    # so we can have X0 etc.
     bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
     var = ~bool_keyword + (Word(restricted_alphas, alphanums + "._:") | \
-                           Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')).setParseAction(parse.ASTVar)
+                           Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | \
+                           QuotedString('"')).setParseAction(parse.ASTVar)
     atom = var | bool_keyword.setParseAction(parse.ASTBool)
     number = var | Word(nums).setParseAction(parse.ASTNum)
 
     # arithmetic expression
-    arith_expr = operatorPrecedence(number,
-                                    [(oneOf("* /"), 2, opAssoc.LEFT, parse.ASTArithmetic),
-                                     (oneOf("+ -"), 2, opAssoc.LEFT, parse.ASTArithmetic),
-                                     ("mod", 2, opAssoc.LEFT, parse.ASTArithmetic)])
+    arith_expr = operatorPrecedence(
+        number,
+        [(oneOf("* /"), 2, opAssoc.LEFT, parse.ASTArithmetic),
+         (oneOf("+ -"), 2, opAssoc.LEFT, parse.ASTArithmetic),
+         ("mod", 2, opAssoc.LEFT, parse.ASTArithmetic)]
+    )
 
     # integer comparison expression
-    comparison_expr = Group(arith_expr + oneOf("< <= > >= != = ==") + arith_expr).setParseAction(parse.ASTComparator)
+    comparison_expr = Group(
+        arith_expr + oneOf("< <= > >= != = ==") +
+        arith_expr
+    ).setParseAction(parse.ASTComparator)
 
     proposition = comparison_expr | atom
 
@@ -584,7 +599,6 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
         return False
     return True
 
-
 def check_parentheses(spec):
     """Check whether all the parentheses in a spec are closed.
 
@@ -612,7 +626,6 @@ def check_parentheses(spec):
 
     return True
 
-
 def check_vars(varNames):
     """Complain if any variable name is a number or not a string.
     """
@@ -631,7 +644,6 @@ def check_vars(varNames):
         except ValueError:
             continue
     return True
-
 
 def check_spec(spec, varNames):
     """Verify that all non-operators in "spec" are in the list of vars.
