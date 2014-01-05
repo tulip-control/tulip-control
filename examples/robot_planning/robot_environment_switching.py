@@ -27,8 +27,6 @@ from scipy import sparse as sp
 
 sys_swe = transys.OpenFTS()
 
-sys_swe.sys_actions.add('')
-
 # We assume robots ability to transition between cells depends on the surface
 # characteristics which could be slippery or normal. This is controlled by the
 # environment.
@@ -53,7 +51,7 @@ transmat1 = sp.lil_matrix(np.array(
                  [0,0,1,0,1,1]]
             ))
                      
-sys_swe.transitions.add_labeled_adj(transmat1, states, ('','normal') )
+sys_swe.transitions.add_labeled_adj(transmat1, states, {'env_actions':'normal'})
 
 # In slippery mode, the robot can't stay still and makes larger jumps.
 transmat2 = sp.lil_matrix(np.array(
@@ -65,7 +63,7 @@ transmat2 = sp.lil_matrix(np.array(
                  [0,0,1,1,0,0]]
             ))
 
-sys_swe.transitions.add_labeled_adj(transmat2, states, ('','slippery') )
+sys_swe.transitions.add_labeled_adj(transmat2, states, {'env_actions':'slippery'})
 
 # Decorate TS with state labels (aka atomic propositions)
 sys_swe.atomic_propositions.add_from(['home','lot'])

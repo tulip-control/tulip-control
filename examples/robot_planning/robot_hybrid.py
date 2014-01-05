@@ -132,7 +132,7 @@ sys_prog |= {'X0reach'}
 
 # Possible additional specs
 # It is unsafe to "break" (switch to gear0) when road is slippery
-sys_safe |= {'gear1 && slippery -> next(gear1)'}
+sys_safe |= {'(gear1 && slippery) -> next(gear1)'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
@@ -143,4 +143,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys_hyb)
+ctrl = synth.synthesize('jtlv', specs, sys_hyb, ignore_ts_init=True)
+
+if not ctrl.save('robot_hybrid.png', 'png'):
+    print(ctrl)

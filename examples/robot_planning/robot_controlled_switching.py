@@ -34,12 +34,9 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-sys_sws = transys.OpenFTS()
+sys_sws = transys.FTS()
 
-sys_sws.sys_actions.add_from({'right','up','left','down'})
-sys_sws.env_actions.add('') 
-#! NOTE: no env action so just leaving blank(?), the other alternative is to set
-# check_labels=False but I could not get it to work (Ioannis??)
+sys_sws.actions.add_from({'right','up','left','down'})
 
 # str states
 n = 6
@@ -54,7 +51,7 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
 sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat1), states, ('right','')
+    sp.lil_matrix(transmat1), states, 'right'
 )
                       
 # mode2 transitions
@@ -65,7 +62,7 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
 sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat2), states, ('up','')
+    sp.lil_matrix(transmat2), states, 'up'
 )
                       
 # mode3 transitions
@@ -76,7 +73,7 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
 sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat3), states, ('left','')
+    sp.lil_matrix(transmat3), states, 'left'
 )
                       
 # mode4 transitions
@@ -87,7 +84,7 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
 sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat4), states, ('down','')
+    sp.lil_matrix(transmat4), states, 'down'
 )
 
 
