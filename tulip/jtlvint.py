@@ -457,9 +457,27 @@ def load_file(aut_file, spec, verbose=0):
                 )
             except Exception, e:
                 raise Exception('Failed to add transition:\n' +str(e) )
-            
+    
+    initial_state = 'Sinit'
+    m.states.add(initial_state)
+    m.states.initial |= [initial_state]
+    
+    # Mealy reaction to initial env input
+    for v in m.states:
+        if v is 'Sinit':
+            continue
+        
+        var_values = stateDict[v][0]
+        print(var_values)
+        bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
+        
+        t = spec.evaluate(bool_values)
+        
+        if t['env_init'] and t['sys_init']:
+            m.transitions.add_labeled(initial_state, v, var_values)
     """
-    # label states
+    # label states with variable valuations
+    # TODO: consider adding typed states to Mealy machines
     for to_state in m.states:
         predecessors = m.states.pre(to_state)
 
