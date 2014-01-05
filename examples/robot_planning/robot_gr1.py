@@ -102,10 +102,10 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # Controller synthesis
 #
-# At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# At this point we can synthesize the controller
+# using one of the available methods.
+# Here we make use of jtlv.
 #
-
 ctrl = synth.synthesize('jtlv', specs)
 
 
