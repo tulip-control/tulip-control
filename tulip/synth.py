@@ -161,12 +161,12 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
     sys_vars = list(aps)
     sys_vars.extend([a for a in fts.actions])
     
-    trans = []
+    sys_trans = []
     
     if bool_states:
         state_ids = states2bools(states)
         sys_vars.extend([s for s in states])
-        trans += sys_state_mutex(states)
+        sys_trans += sys_state_mutex(states)
     else:
         state_ids = states2ints(states)
         n_states = len(states)
@@ -174,12 +174,12 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
     
     init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    trans += sys_trans_from_ts(states, state_ids, fts.transitions)
-    trans += ap_trans_from_ts(states, state_ids, aps)
+    sys_trans += sys_trans_from_ts(states, state_ids, fts.transitions)
+    sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
-    trans += pure_mutex(fts.actions)
+    sys_trans += pure_mutex(fts.actions)
     
-    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
+    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=sys_trans)
 
 def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """Convert OpenFTS to GR(1) representation.
