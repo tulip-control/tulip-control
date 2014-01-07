@@ -238,7 +238,7 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     
     sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_open_ts(states, state_ids, trans, env_vars)
+    sys_trans += sys_trans_from_ts(states, state_ids, trans)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     sys_trans += pure_mutex(ofts.sys_actions)
     
@@ -289,37 +289,6 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_trans_from_ts(states, state_ids, trans):
-    """Convert environment actions to GR(1) representation.
-    """
-    sys_trans = []
-    
-    for from_state in states:
-        post = states.post(from_state)
-        from_state_id = state_ids[from_state]
-        
-        # no successor states ?
-        if not post:
-            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(state_ids.itervalues() ) +')']
-            continue
-        
-        cur_trans = trans.find([from_state])
-        cur_str = []
-        for (from_state, to_state, label) in cur_trans:
-            precond = '(' + str(from_state_id) + ')'
-            
-            to_state_id = state_ids[to_state]
-            postcond = '(' + str(to_state_id) + ')'
-            
-            if 'actions' in label:
-                sys_action = label['actions']
-                postcond += ' && (' +str(sys_action) +')'
-            
-            cur_str += ['(' + precond + ') -> X( ' + postcond + ')']
-        
-        sys_trans += [_disj(cur_str) ]
-    return sys_trans
-
 def sys_state_mutex(states):
     """Require next exactly one.
     
@@ -350,13 +319,19 @@ def exactly_one(iterable):
         for x in iterable
     ])
 
-def sys_trans_from_open_ts(states, state_ids, trans, env_vars):
-    """Convert sys transitions and env actions to GR(1) sys_safety.
+def sys_trans_from_ts(states, state_ids, trans):
+    """Convert transition relation to GR(1) sys_safety.
     
-    Mutexes not enforced by this function:
+    The transition relation may be closed or open,
+    i.e., depend only on system, or also on environment actions.
+    
+    @type trans: FiniteTransitionSystem.transitions |
+        OpenFiniteTransitionSystem.transitions
+    
+    No mutexes enforced by this function among:
         
-        - among sys states
-        - among env actions
+        - sys states
+        - env actions
     """
     sys_trans = []
     
@@ -383,6 +358,10 @@ def sys_trans_from_open_ts(states, state_ids, trans, env_vars):
             
             if 'sys_actions' in label:
                 sys_action = label['sys_actions']
+                postcond += ' && (' + str(sys_action) + ')'
+            
+            if 'actions' in label:
+                sys_action = label['actions']
                 postcond += ' && (' + str(sys_action) + ')'
             
             cur_str += ['(' + precond + ') -> X(' + postcond + ')']
