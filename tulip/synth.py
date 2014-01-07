@@ -166,7 +166,7 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
     if bool_states:
         state_ids = states2bools(states)
         sys_vars.extend([s for s in states])
-        sys_trans += sys_state_mutex(states)
+        sys_trans += exactly_one(states)
     else:
         state_ids = states2ints(states)
         n_states = len(states)
@@ -177,7 +177,7 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
     sys_trans += sys_trans_from_ts(states, state_ids, fts.transitions)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
-    sys_trans += pure_mutex(fts.actions)
+    sys_trans += mutex(fts.actions)
     
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=sys_trans)
 
@@ -228,7 +228,7 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     if bool_states:
         state_ids = states2bools(states)
         sys_vars.extend([s for s in states])
-        sys_trans += sys_state_mutex(states)
+        sys_trans += exactly_one(states)
     else:
         state_ids = states2ints(states)
         n_states = len(states)
@@ -240,10 +240,10 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     
     sys_trans += sys_trans_from_ts(states, state_ids, trans)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
-    sys_trans += pure_mutex(ofts.sys_actions)
+    sys_trans += mutex(ofts.sys_actions)
     
     env_trans = env_trans_from_open_ts(states, state_ids, trans, env_vars)
-    env_trans += pure_mutex(env_vars)
+    env_trans += mutex(env_vars)
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
@@ -289,18 +289,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_state_mutex(states):
-    """Require next exactly one.
-    
-    Combined with [] requires exactly one
-    for all time except initially.
-    
-    Contrast with the pure mutual exclusion implemented by:
-        spec.form.mutex
-    """
-    return ['(' + exactly_one(states) + ')']
-
-def pure_mutex(iterable):
+def mutex(iterable):
     """Mutual exclusion for all time.
     """
     if not iterable:
@@ -313,11 +302,13 @@ def pure_mutex(iterable):
 
 def exactly_one(iterable):
     """N-ary xor.
+    
+    Contrast with pure mutual exclusion.
     """
-    return _disj([
+    return ['(' + _disj([
         '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
         for x in iterable
-    ])
+    ]) + ')']
 
 def sys_trans_from_ts(states, state_ids, trans):
     """Convert transition relation to GR(1) sys_safety.
