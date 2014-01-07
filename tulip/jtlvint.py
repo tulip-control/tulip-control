@@ -439,9 +439,9 @@ def load_file(aut_file, spec, verbose=0):
             
             # mark initial states (states that
             # do not appear in previous transitions)
-            seenSoFar = [t for (s,trans) in stateDict.values() for t in trans]
-            if stateID not in seenSoFar:
-                m.states.initial.add(stateID)
+            #seenSoFar = [t for (s,trans) in stateDict.values() for t in trans]
+            #if stateID not in seenSoFar:
+                #m.states.initial.add(stateID)
                 
             stateDict[stateID] = (state,transition)
 
@@ -468,7 +468,6 @@ def load_file(aut_file, spec, verbose=0):
             continue
         
         var_values = stateDict[v][0]
-        print(var_values)
         bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
         
         t = spec.evaluate(bool_values)
