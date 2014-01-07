@@ -92,7 +92,7 @@ def _conj_neg_diff(set0, set1, parenth=True):
             if x not in set1
         ])
 
-def sys_to_spec(sys, ignore_initial=False):
+def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     """Convert finite transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
@@ -108,17 +108,43 @@ def sys_to_spec(sys, ignore_initial=False):
         e.g., directly augmenting the spec part.
     @type check_initial_exist: bool
     
+    @param bool_states: if True,
+        then use one bool variable for each state,
+        otherwise use an int variable called loc.
+    @type bool_states: bool
+    
     @rtype: GRSpec
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        return fts2spec(sys, ignore_initial)
+        return fts2spec(sys, ignore_initial, bool_states)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
-        return open_fts2spec(sys, ignore_initial)
+        return open_fts2spec(sys, ignore_initial, bool_states)
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def fts2spec(fts, ignore_initial=False):
+def states2bools(states):
+    """Return dict(state : state).
+    
+    @rtype: {state : state_id}
+    """
+    return {x:x for x in states}
+
+def states2ints(states):
+    """Return states of form 'loc = #'.
+    
+    where # is obtained by dropping the 1st char
+    of each given state.
+    
+    @type states: iterable of str,
+        each str of the form: letter + number
+    
+    @rtype: {state : state_id}
+    """
+    strip_letter = lambda x: 'loc = ' + x[1:]
+    return {x:strip_letter(x) for x in states}
+
+def fts2spec(fts, ignore_initial=False, bool_states=False):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -130,23 +156,32 @@ def fts2spec(fts, ignore_initial=False):
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
     aps = fts.aps
-    states = fts.states    
+    states = fts.states
     
-    # everything is controlled
     sys_vars = list(aps)
-    sys_vars.extend([s for s in states])
     sys_vars.extend([a for a in fts.actions])
     
-    init = sys_init_from_ts(states, aps, ignore_initial)
+    trans = []
     
-    trans = sys_trans_from_ts(states, fts.transitions)
-    trans += ap_trans_from_ts(states, aps)
-    trans += sys_state_mutex(states)
+    if bool_states:
+        state_ids = states2bools(states)
+        sys_vars.extend([s for s in states])
+        trans += sys_state_mutex(states)
+    else:
+        state_ids = states2ints(states)
+        n_states = len(states)
+        sys_vars += ['loc [0,' +str(n_states-1) +']']
+    
+    init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    
+    trans += sys_trans_from_ts(states, state_ids, fts.transitions)
+    trans += ap_trans_from_ts(states, state_ids, aps)
+    
     trans += pure_mutex(fts.actions)
     
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=trans)
 
-def open_fts2spec(ofts, ignore_initial=False):
+def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """Convert OpenFTS to GR(1) representation.
     
     Note that not any GR(1) can be represented by an OpenFTS,
@@ -175,7 +210,7 @@ def open_fts2spec(ofts, ignore_initial=False):
         A map between the enum and named env_actions
         will probably also be needed.
     
-    @para ofts: transys.OpenFiniteTransitionSystem
+    @param ofts: transys.OpenFiniteTransitionSystem
     
     @rtype: GRSpec
     """
@@ -186,19 +221,28 @@ def open_fts2spec(ofts, ignore_initial=False):
     trans = ofts.transitions
     
     sys_vars = list(aps)
-    sys_vars.extend([s for s in states])
     sys_vars.extend([a for a in ofts.sys_actions])
+    
+    sys_trans = []    
+    
+    if bool_states:
+        state_ids = states2bools(states)
+        sys_vars.extend([s for s in states])
+        sys_trans += sys_state_mutex(states)
+    else:
+        state_ids = states2ints(states)
+        n_states = len(states)
+        sys_vars += ['loc [0,' +str(n_states-1) +']']
     
     env_vars = list(ofts.env_actions)
     
-    sys_init = sys_init_from_ts(states, aps, ignore_initial)
+    sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans = sys_trans_from_open_ts(states, trans, env_vars)
-    sys_trans += ap_trans_from_ts(states, aps)
-    sys_trans += sys_state_mutex(states)
+    sys_trans += sys_trans_from_open_ts(states, state_ids, trans, env_vars)
+    sys_trans += ap_trans_from_ts(states, state_ids, aps)
     sys_trans += pure_mutex(ofts.sys_actions)
     
-    env_trans = env_trans_from_open_ts(states, trans, env_vars)
+    env_trans = env_trans_from_open_ts(states, state_ids, trans, env_vars)
     env_trans += pure_mutex(env_vars)
     
     return GRSpec(
@@ -208,7 +252,7 @@ def open_fts2spec(ofts, ignore_initial=False):
         sys_safety=sys_trans
     )
 
-def sys_init_from_ts(states, aps, ignore_initial=False):
+def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """Initial state, including enforcement of exactly one.
     
     APs also considered for the initial state.
@@ -226,7 +270,9 @@ def sys_init_from_ts(states, aps, ignore_initial=False):
             init[-1] += " && "
         
         init[-1] += _conj_neg_diff(aps, label["ap"])
-        init[-1] = "!("+str(state)+") || ("+init[-1]+")"
+        
+        state_id = state_ids[state]
+        init[-1] = "!("+str(state_id)+") || ("+init[-1]+")"
     
     # skip ?
     if ignore_initial:
@@ -237,31 +283,33 @@ def sys_init_from_ts(states, aps, ignore_initial=False):
         msg += 'Enforcing this renders False the GR(1) guarantee.'
         warn(msg)
         
-        init += [_conj_neg(states) ]
-        init += [exactly_one(states) ]
+        init += [_conj_neg(states.intervalues() ) ]
         return init
         
-    init += [_disj(states.initial)]
+    init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_trans_from_ts(states, trans):
+def sys_trans_from_ts(states, state_ids, trans):
     """Convert environment actions to GR(1) representation.
     """
     sys_trans = []
     
     for from_state in states:
         post = states.post(from_state)
+        from_state_id = state_ids[from_state]
         
         # no successor states ?
         if not post:
-            sys_trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
+            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(state_ids.itervalues() ) +')']
             continue
         
         cur_trans = trans.find([from_state])
         cur_str = []
         for (from_state, to_state, label) in cur_trans:
-            precond = '(' + str(from_state) + ')'
-            postcond = '(' + str(to_state) + ')'
+            precond = '(' + str(from_state_id) + ')'
+            
+            to_state_id = state_ids[to_state]
+            postcond = '(' + str(to_state_id) + ')'
             
             if 'actions' in label:
                 sys_action = label['actions']
@@ -302,7 +350,7 @@ def exactly_one(iterable):
         for x in iterable
     ])
 
-def sys_trans_from_open_ts(states, trans, env_vars):
+def sys_trans_from_open_ts(states, state_ids, trans, env_vars):
     """Convert sys transitions and env actions to GR(1) sys_safety.
     
     Mutexes not enforced by this function:
@@ -314,17 +362,20 @@ def sys_trans_from_open_ts(states, trans, env_vars):
     
     # Transitions
     for from_state in states:
+        from_state_id = state_ids[from_state]
         cur_trans = trans.find([from_state])
         
         # no successor states ?
         if not cur_trans:
-            sys_trans += ['('+str(from_state) +') -> X('+ _conj_neg(states) +')']
+            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(states) +')']
             continue
         
         cur_str = []
         for (from_state, to_state, label) in cur_trans:
-            precond = '(' + str(from_state) + ')'
-            postcond = '(' + str(to_state) +')'
+            to_state_id = state_ids[to_state]
+            
+            precond = '(' + str(from_state_id) + ')'
+            postcond = '(' + str(to_state_id) +')'
             
             if 'env_actions' in label:
                 env_action = label['env_actions']
@@ -339,7 +390,7 @@ def sys_trans_from_open_ts(states, trans, env_vars):
         sys_trans += [_disj(cur_str) ]
     return sys_trans
 
-def env_trans_from_open_ts(states, trans, env_vars):
+def env_trans_from_open_ts(states, state_ids, trans, env_vars):
     """Convert environment actions to GR(1) env_safety.
     
     This constrains the actions available next to the environment
@@ -353,11 +404,12 @@ def env_trans_from_open_ts(states, trans, env_vars):
         return env_trans
     
     for from_state in states:
+        from_state_id = state_ids[from_state]
         cur_trans = trans.find([from_state])
         
         # no successor states ?
         if not cur_trans:
-            env_trans += ['(' +str(from_state) +') -> X(' +
+            env_trans += ['(' +str(from_state_id) +') -> X(' +
                 _conj_neg(env_vars) + ')']
             continue
         
@@ -371,16 +423,17 @@ def env_trans_from_open_ts(states, trans, env_vars):
             next_env_actions.add(env_action)
         next_env_actions = _disj(next_env_actions)
         
-        env_trans += ["(" +str(from_state) +") -> X("+ next_env_actions +")"]
+        env_trans += ["(" +str(from_state_id) +") -> X("+ next_env_actions +")"]
     return env_trans
 
-def ap_trans_from_ts(states, aps):
+def ap_trans_from_ts(states, state_ids, aps):
     """Require atomic propositions to follow states according to label.
     """
     trans = []
     
     for state in states:
         label = states.label_of(state)
+        state_id = state_ids[state]
         
         if label.has_key("ap"):
             tmp0 = _conj_intersection(aps, label["ap"], parenth=False)
@@ -397,11 +450,11 @@ def ap_trans_from_ts(states, aps):
         else:
             tmp = tmp0 + tmp1
         
-        trans += ["X(("+ str(state) +") -> ("+ tmp +"))"]
+        trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
     return trans
 
 def synthesize(option, specs, sys=None, ignore_ts_init=False,
-               verbose=0):
+               bool_states=False, verbose=0):
     """Function to call the appropriate synthesis tool on the spec.
 
     Beware!  This function provides a generic interface to a variety
@@ -422,6 +475,13 @@ def synthesize(option, specs, sys=None, ignore_ts_init=False,
         contained in the ts.
     @type ignore_ts_init: bool
     
+    @param bool_states: if True,
+        then use one bool variable for each state.
+        Otherwise use a single int variable for all states.
+        
+        Currently int state implemented only for gr1c.
+    @type bool_states: bool
+    
     @type verbose: bool
     
     @return: If spec is realizable,
@@ -429,8 +489,14 @@ def synthesize(option, specs, sys=None, ignore_ts_init=False,
         Otherwise return list of counterexamples.
     @rtype: transys.Mealy or list
     """
-    specs = spec_plus_sys(specs, sys, ignore_ts_init)
-
+    # not yet implemented for jtlv
+    if bool_states is False and option is 'jtlv':
+        warn('Int state not yet available for jtlv solver.\n' +
+             'Using bool states.')
+        bool_states = True
+    
+    specs = spec_plus_sys(specs, sys, ignore_ts_init, bool_states)
+    
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs, verbose=verbose)
     elif option == 'jtlv':
@@ -457,10 +523,10 @@ def is_realizable(option, specs, sys=None, ignore_ts_init=False,
                         'Current options are "jtlv" and "gr1c"')
     return r
 
-def spec_plus_sys(specs, sys=None, ignore_ts_init=False):
+def spec_plus_sys(specs, sys=None, ignore_ts_init=False, bool_states=True):
     if sys is not None:
         sys = deepcopy(sys)
         
-        sform = sys_to_spec(sys, ignore_ts_init)
+        sform = sys_to_spec(sys, ignore_ts_init, bool_states)
         specs = specs | sform
     return specs

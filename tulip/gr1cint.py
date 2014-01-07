@@ -255,12 +255,12 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     
     mach = MealyMachine()
     mach.add_inputs([
-        (k,{0,1}) if v == "boolean" else (k,set(range(*v) ) )
+        (k,{0,1}) if v == "boolean" else (k,set(range(v[0], v[1]+1) ) )
         for (k,v) in env_vars.items()
     ])
     
     outputs = [
-        (k,{0,1}) if v == "boolean" else (k, set(range(*v) ) )
+        (k,{0,1}) if v == "boolean" else (k, set(range(v[0], v[1]+1) ) )
         for (k,v) in sys_vars.items()
     ]
     masks = {k:mask_func for k in sys_vars}
