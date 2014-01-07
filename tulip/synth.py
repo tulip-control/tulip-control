@@ -367,7 +367,7 @@ def sys_trans_from_open_ts(states, state_ids, trans, env_vars):
         
         # no successor states ?
         if not cur_trans:
-            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(states) +')']
+            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(state_ids.itervalues() ) +')']
             continue
         
         cur_str = []
