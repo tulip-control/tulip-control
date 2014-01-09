@@ -32,7 +32,6 @@
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
-from copy import deepcopy
 from warnings import warn
 
 from tulip import transys
@@ -651,13 +650,9 @@ def spec_plus_sys(specs, env=None, sys=None,
                   ignore_env_init=False, ignore_sys_init=False,
                   bool_states=True):
     if sys is not None:
-        sys = deepcopy(sys)
-        
         sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states)
         specs = specs | sys_formula
     if env is not None:
-        env = deepcopy(env)
-        
         env_formula = env_to_spec(env, ignore_env_init, bool_states)
         specs = specs | env_formula
     return specs
