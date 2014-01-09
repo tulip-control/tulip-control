@@ -143,7 +143,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys_hyb, ignore_ts_init=True)
+ctrl = synth.synthesize('jtlv', specs, sys=sys_hyb, ignore_sys_init=True)
 
 if not ctrl.save('robot_hybrid.png', 'png'):
     print(ctrl)

@@ -99,7 +99,8 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 # @synthesize_section@
 """Synthesize"""
-ctrl = synth.synthesize('jtlv', specs, disc_dynamics.ofts, ignore_ts_init=True)
+ctrl = synth.synthesize('jtlv', specs,
+                        sys=disc_dynamics.ofts, ignore_sys_init=True)
 
 # Unrealizable spec ?
 if isinstance(ctrl, list):
