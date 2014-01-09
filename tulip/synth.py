@@ -319,25 +319,9 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     
     APs also considered for the initial state.
     """
-    init = []
-    
-    # don't ignore labeling info
-    for state in states.initial:
-        label = states.label_of(state)
-        
-        ap_init = _conj_intersection(aps, label["ap"])
-        init.append(ap_init)
-        
-        if len(init[-1]) > 0:
-            init[-1] += " && "
-        
-        init[-1] += _conj_neg_diff(aps, label["ap"])
-        
-        state_id = state_ids[state]
-        init[-1] = "!("+str(state_id)+") || ("+init[-1]+")"
-    
     # skip ?
     if ignore_initial:
+        init = []
         return init
     
     if not states.initial:
@@ -349,10 +333,10 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += '   so the spec becomes trivially True.'
         warn(msg)
         
-        init += [_conj_neg(state_ids.itervalues() ) ]
+        init = [_conj_neg(state_ids.itervalues() ) ]
         return init
         
-    init += [_disj([state_ids[s] for s in states.initial])]
+    init = [_disj([state_ids[s] for s in states.initial])]
     return init
 
 def mutex(iterable):
@@ -552,7 +536,7 @@ def ap_trans_from_ts(states, state_ids, aps):
         else:
             tmp = tmp0 + tmp1
         
-        trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
+        trans += ['('+ pstr(state_id) +' -> ('+ tmp +'))']
     return trans
 
 def synthesize(option, specs, env=None, sys=None,
