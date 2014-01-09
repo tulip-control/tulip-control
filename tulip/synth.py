@@ -163,9 +163,9 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     @rtype: GRSpec
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        return fts2spec(sys, ignore_initial, bool_states)
+        return sys_fts2spec(sys, ignore_initial, bool_states)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
-        return open_fts2spec(sys, ignore_initial, bool_states)
+        return sys_open_fts2spec(sys, ignore_initial, bool_states)
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
@@ -187,7 +187,7 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
 
-def fts2spec(fts, ignore_initial=False, bool_states=False):
+def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -225,7 +225,7 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
     
     return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=sys_trans)
 
-def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
+def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """Convert OpenFTS to GR(1) representation.
     
     Note that not any GR(1) can be represented by an OpenFTS,
@@ -288,7 +288,7 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     sys_trans += sys_trans_from_ts(states, state_ids, trans)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
-    env_trans += env_trans_from_open_ts(states, state_ids, trans, env_vars)
+    env_trans += env_trans_from_sys_ts(states, state_ids, trans, env_vars)
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
@@ -415,7 +415,7 @@ def sys_trans_from_ts(states, state_ids, trans):
         sys_trans += [_disj(cur_str) ]
     return sys_trans
 
-def env_trans_from_open_ts(states, state_ids, trans, env_vars):
+def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
     """Convert environment actions to GR(1) env_safety.
     
     This constrains the actions available next to the environment
