@@ -188,7 +188,8 @@ def fts2spec(fts, ignore_initial=False, bool_states=False):
         sys_vars.extend([s for s in states])
         sys_trans += exactly_one(states)
     else:
-        state_ids = states2ints(states)
+        statevar = 'loc'
+        state_ids = states2ints(states, statevar)
         n_states = len(states)
         sys_vars += ['loc [0,' +str(n_states-1) +']']
     
