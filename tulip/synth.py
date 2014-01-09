@@ -93,14 +93,13 @@ def _conj_neg_diff(set0, set1, parenth=True):
         ])
 
 def sys_to_spec(sys, ignore_initial=False, bool_states=False):
-    """Convert finite transition system to GR(1) representation.
+    """Convert system's transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
     because an FTS can represent sys_init, sys_safety, but
     not other spec forms.
     
-    @type sys: transys.FiniteTransitionSystem |
-               transys.OpenFiniteTransitionSystem
+    @type sys: transys.FTS | transys.OpenFTS
     
     @param ignore_initial: Do not include initial state info from TS.
         Enable this to mask absence of OpenFTS initial states.
@@ -130,8 +129,8 @@ def states2bools(states):
     """
     return {x:x for x in states}
 
-def states2ints(states):
-    """Return states of form 'loc = #'.
+def states2ints(states, statevar):
+    """Return states of form 'statevar = #'.
     
     where # is obtained by dropping the 1st char
     of each given state.
@@ -139,9 +138,13 @@ def states2ints(states):
     @type states: iterable of str,
         each str of the form: letter + number
     
+    @param statevar: name of int variable representing
+        the current state
+    @type statevar: str
+    
     @rtype: {state : state_id}
     """
-    strip_letter = lambda x: 'loc = ' + x[1:]
+    strip_letter = lambda x: statevar + ' = ' + x[1:]
     return {x:strip_letter(x) for x in states}
 
 def fts2spec(fts, ignore_initial=False, bool_states=False):
@@ -219,37 +222,37 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
+    env_actions = ofts.env_actions
+    sys_actions = ofts.sys_actions
     
     sys_vars = list(aps)
-    sys_vars.extend([a for a in ofts.sys_actions])
+    sys_vars += list(sys_actions)
+    sys_trans = mutex(sys_actions)
     
-    sys_trans = []    
+    env_vars = list(env_actions)
+    env_trans = mutex(env_actions)
     
     if bool_states:
         state_ids = states2bools(states)
         sys_vars.extend([s for s in states])
         sys_trans += exactly_one(states)
     else:
-        state_ids = states2ints(states)
+        statevar = 'loc'
+        state_ids = states2ints(states, statevar)
         n_states = len(states)
-        sys_vars += ['loc [0,' +str(n_states-1) +']']
-    
-    env_vars = list(ofts.env_actions)
+        sys_vars += [statevar + ' [0,' +str(n_states-1) +']']
     
     sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
     sys_trans += sys_trans_from_ts(states, state_ids, trans)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
-    sys_trans += mutex(ofts.sys_actions)
     
-    env_trans = env_trans_from_open_ts(states, state_ids, trans, env_vars)
-    env_trans += mutex(env_vars)
+    env_trans += env_trans_from_open_ts(states, state_ids, trans, env_vars)
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
         sys_init=sys_init,
-        env_safety=env_trans,
-        sys_safety=sys_trans
+        env_safety=env_trans, sys_safety=sys_trans
     )
 
 def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
