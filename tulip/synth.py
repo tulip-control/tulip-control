@@ -122,6 +122,23 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False):
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
+def env_to_spec(env, ignore_initial=False, bool_states=False):
+    """Convert environment transition system to GR(1) representation.
+    
+    For details see also sys_to_spec.
+    
+    @type env: transys.FTS | transys.OpenFTS
+    
+    @type bool_states: bool
+    """
+    if isinstance(env, transys.FiniteTransitionSystem):
+        raise NotImplementedError
+    elif isinstance(env, transys.OpenFiniteTransitionSystem):
+        return env_open_fts2spec(env, ignore_initial, bool_states)
+    else:
+        raise TypeError('synth.env_to_spec does not support ' +
+            str(type(env)) +'. Use FTS or OpenFTS.')
+
 def states2bools(states):
     """Return dict(state : state).
     
@@ -255,6 +272,48 @@ def open_fts2spec(ofts, ignore_initial=False, bool_states=False):
         env_safety=env_trans, sys_safety=sys_trans
     )
 
+def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
+    assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
+    
+    aps = ofts.aps
+    states = ofts.states
+    trans = ofts.transitions
+    env_actions = ofts.env_actions
+    sys_actions = ofts.sys_actions
+    
+    # since APs are tied to env states, let them be env variables
+    env_vars = list(aps)
+    env_vars += list(env_actions)
+    env_trans = mutex(env_actions)
+    
+    sys_vars = list(sys_actions)
+    # some duplication here, because we don't know
+    # whether the user will provide a system TS as well
+    # and whether that TS will contain all the system actions
+    # defined in the environment TS
+    sys_trans = exactly_one(ofts.sys_actions)
+    
+    if bool_states:
+        state_ids = states2bools(states)
+        env_vars += list(states)
+        env_trans += exactly_one(states)
+    else:
+        statevar = 'eloc'
+        state_ids = states2ints(states, statevar)
+        n_states = len(states)
+        env_vars += [statevar + ' [0,' + str(n_states-1) +']']
+    
+    env_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    
+    env_trans += env_trans_from_env_ts(states, state_ids, trans, sys_actions)
+    env_trans += ap_trans_from_ts(states, state_ids, aps)
+    
+    return GRSpec(
+        sys_vars=sys_vars, env_vars=env_vars,
+        env_init=env_init,
+        env_safety=env_trans, sys_safety=sys_trans
+    )
+
 def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """Initial state, including enforcement of exactly one.
     
@@ -283,7 +342,11 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     
     if not states.initial:
         msg = 'FTS has no initial states.\n'
-        msg += 'Enforcing this renders False the GR(1) guarantee.'
+        msg += 'Enforcing this renders False the GR(1):\n'
+        msg += ' - guarantee if this is a system TS,\n'
+        msg += '   so the spec becomes trivially False.\n'
+        msg += ' - assumption if this is an environment TS,\n'
+        msg += '   so the spec becomes trivially True.'
         warn(msg)
         
         init += [_conj_neg(state_ids.itervalues() ) ]
@@ -354,6 +417,7 @@ def sys_trans_from_ts(states, state_ids, trans):
                 sys_action = label['sys_actions']
                 postcond += ' && (' + str(sys_action) + ')'
             
+            # system FTS given
             if 'actions' in label:
                 sys_action = label['actions']
                 postcond += ' && (' + str(sys_action) + ')'
@@ -399,6 +463,71 @@ def env_trans_from_open_ts(states, state_ids, trans, env_vars):
         env_trans += ["(" +str(from_state_id) +") -> X("+ next_env_actions +")"]
     return env_trans
 
+def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
+    """Convert environment TS transitions to GR(1) representation.
+    
+    This contributes to the \rho_e(X, Y, X') part of the spec,
+    i.e., constrains the next environment state variables' valuation
+    depending on the previous environment state variables valuation
+    and the previous system action (system output).
+    """
+    env_trans = []
+    
+    for from_state in states:
+        from_state_id = state_ids[from_state]
+        cur_trans = trans.find([from_state])
+        
+        # no successor states ?
+        if not cur_trans:
+            env_trans += [pstr(from_state_id) +' -> X(' +
+                _conj_neg(state_ids.itervalues() ) + ')']
+                
+            msg = 'Environment dead-end found.\n'
+            msg += 'If sys can force env to dead-end,\n'
+            msg += 'then GR(1) assumption becomes False,\n'
+            msg += 'and spec trivially True.'
+            warn(msg)
+            
+            continue
+        
+        cur_list = []
+        found_free = False # any environment transition
+        # not conditioned on the previous system output ?
+        for (from_state, to_state, label) in cur_trans:
+            to_state_id = state_ids[to_state]
+            
+            precond = pstr(from_state_id)
+            postcond = 'X' + pstr(to_state_id)
+            
+            if 'env_actions' in label:
+                env_action = label['env_actions']
+                postcond += ' && X' + pstr(env_action)
+            
+            # environment FTS given
+            if 'actions' in label:
+                sys_action = label['actions']
+                postcond += ' && X' + pstr(sys_action)
+            
+            if 'sys_actions' in label:
+                sys_action = label['sys_actions']
+                postcond += ' && ' + pstr(sys_action)
+            else:
+                found_free = True
+            
+            cur_list += [pstr(postcond) ]
+        
+        # can sys kill env by setting all previous sys outputs to False ?
+        # then env assumption becomes False,
+        # so the spec trivially True: avoid this
+        if not found_free:
+            cur_list += [_conj_neg(sys_actions)]
+        
+        env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
+    return env_trans
+
+def pstr(s):
+    return '(' +str(s) +')'
+
 def ap_trans_from_ts(states, state_ids, aps):
     """Require atomic propositions to follow states according to label.
     """
@@ -426,7 +555,8 @@ def ap_trans_from_ts(states, state_ids, aps):
         trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
     return trans
 
-def synthesize(option, specs, sys=None, ignore_ts_init=False,
+def synthesize(option, specs, env=None, sys=None,
+               ignore_env_init=False, ignore_sys_init=False,
                bool_states=False, verbose=0):
     """Function to call the appropriate synthesis tool on the spec.
 
@@ -441,12 +571,39 @@ def synthesize(option, specs, sys=None, ignore_ts_init=False,
           - C{"gr1c"}: use gr1c for GR(1) synthesis via L{gr1cint}.
           - C{"jtlv"}: use JTLV for GR(1) synthesis via L{jtlvint}.
     @type specs: L{spec.GRSpec}
-    @param sys: A transition system that should be expressed with the
-        specification (spec).
     
-    @param ignore_ts_init: Ignore any initial state information
-        contained in the ts.
-    @type ignore_ts_init: bool
+    @param env: A transition system describing the environment:
+        
+            - states controlled by environment
+            - input: sys_actions
+            - output: env_actions
+            - initial states constrain the environment
+        
+        This constrains the transitions available to
+        the environment, given the outputs from the system.
+        
+        Note that an OpenFTS with only sys_actions is
+        equivalent to an FTS for the environment.
+    @type env: transys.FTS | transys.OpenFTS
+    
+    @param sys: A transition system describing the system:
+        
+            - states controlled by the system
+            - input: env_actions
+            - output: sys_actions
+            - initial states constrain the system
+        
+        Note that an OpenFTS with only sys_actions is
+        equivalent to an FTS for the system.
+    @type sys: transys.FTS | transys.OpenFTS
+    
+    @param ignore_sys_init: Ignore any initial state information
+        contained in env.
+    @type ignore_sys_init: bool
+    
+    @param ignore_env_init: Ignore any initial state information
+        contained in sys.
+    @type ignore_env_init: bool
     
     @param bool_states: if True,
         then use one bool variable for each state.
@@ -468,7 +625,9 @@ def synthesize(option, specs, sys=None, ignore_ts_init=False,
              'Using bool states.')
         bool_states = True
     
-    specs = spec_plus_sys(specs, sys, ignore_ts_init, bool_states)
+    specs = spec_plus_sys(specs, env, sys,
+                          ignore_env_init, ignore_sys_init,
+                          bool_states)
     
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs, verbose=verbose)
@@ -477,6 +636,13 @@ def synthesize(option, specs, sys=None, ignore_ts_init=False,
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
+    
+    try:
+        if verbose:
+            print('Mealy machine has: n = ' +str(len(ctrl.states) ) +' states.')
+    except:
+        pass
+    
     return ctrl
 
 def is_realizable(option, specs, sys=None, ignore_ts_init=False,
@@ -496,10 +662,17 @@ def is_realizable(option, specs, sys=None, ignore_ts_init=False,
                         'Current options are "jtlv" and "gr1c"')
     return r
 
-def spec_plus_sys(specs, sys=None, ignore_ts_init=False, bool_states=True):
+def spec_plus_sys(specs, env=None, sys=None,
+                  ignore_env_init=False, ignore_sys_init=False,
+                  bool_states=True):
     if sys is not None:
         sys = deepcopy(sys)
         
-        sform = sys_to_spec(sys, ignore_ts_init, bool_states)
-        specs = specs | sform
+        sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states)
+        specs = specs | sys_formula
+    if env is not None:
+        env = deepcopy(env)
+        
+        env_formula = env_to_spec(env, ignore_env_init, bool_states)
+        specs = specs | env_formula
     return specs
