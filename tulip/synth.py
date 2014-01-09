@@ -39,6 +39,9 @@ from tulip.spec import GRSpec
 from tulip import jtlvint
 from tulip import gr1cint
 
+def pstr(s):
+    return '(' +str(s) +')'
+
 def _disj(set0):
     return " || ".join([
         "(" +str(x) +")"
@@ -91,6 +94,52 @@ def _conj_neg_diff(set0, set1, parenth=True):
             if x not in set1
         ])
 
+def mutex(iterable):
+    """Mutual exclusion for all time.
+    """
+    if not iterable:
+        return []
+    
+    return [_conj([
+        '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
+        for x in iterable
+    ]) ]
+
+def exactly_one(iterable):
+    """N-ary xor.
+    
+    Contrast with pure mutual exclusion.
+    """
+    return ['(' + _disj([
+        '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
+        for x in iterable
+    ]) + ')']
+
+def states2bools(states):
+    """Return dict(state : state).
+    
+    @rtype: {state : state_id}
+    """
+    return {x:x for x in states}
+
+def states2ints(states, statevar):
+    """Return states of form 'statevar = #'.
+    
+    where # is obtained by dropping the 1st char
+    of each given state.
+    
+    @type states: iterable of str,
+        each str of the form: letter + number
+    
+    @param statevar: name of int variable representing
+        the current state
+    @type statevar: str
+    
+    @rtype: {state : state_id}
+    """
+    strip_letter = lambda x: statevar + ' = ' + x[1:]
+    return {x:strip_letter(x) for x in states}
+
 def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     """Convert system's transition system to GR(1) representation.
     
@@ -137,31 +186,6 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
-
-def states2bools(states):
-    """Return dict(state : state).
-    
-    @rtype: {state : state_id}
-    """
-    return {x:x for x in states}
-
-def states2ints(states, statevar):
-    """Return states of form 'statevar = #'.
-    
-    where # is obtained by dropping the 1st char
-    of each given state.
-    
-    @type states: iterable of str,
-        each str of the form: letter + number
-    
-    @param statevar: name of int variable representing
-        the current state
-    @type statevar: str
-    
-    @rtype: {state : state_id}
-    """
-    strip_letter = lambda x: statevar + ' = ' + x[1:]
-    return {x:strip_letter(x) for x in states}
 
 def fts2spec(fts, ignore_initial=False, bool_states=False):
     """Convert closed FTS to GR(1) representation.
@@ -339,27 +363,6 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init = [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def mutex(iterable):
-    """Mutual exclusion for all time.
-    """
-    if not iterable:
-        return []
-    
-    return [_conj([
-        '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
-        for x in iterable
-    ]) ]
-
-def exactly_one(iterable):
-    """N-ary xor.
-    
-    Contrast with pure mutual exclusion.
-    """
-    return ['(' + _disj([
-        '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
-        for x in iterable
-    ]) + ')']
-
 def sys_trans_from_ts(states, state_ids, trans):
     """Convert transition relation to GR(1) sys_safety.
     
@@ -383,7 +386,8 @@ def sys_trans_from_ts(states, state_ids, trans):
         
         # no successor states ?
         if not cur_trans:
-            sys_trans += ['('+str(from_state_id) +') -> X('+ _conj_neg(state_ids.itervalues() ) +')']
+            sys_trans += ['('+str(from_state_id) +') -> X(' +
+                _conj_neg(state_ids.itervalues() ) +')']
             continue
         
         cur_str = []
@@ -508,9 +512,6 @@ def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
         
         env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
-
-def pstr(s):
-    return '(' +str(s) +')'
 
 def ap_trans_from_ts(states, state_ids, aps):
     """Require atomic propositions to follow states according to label.
