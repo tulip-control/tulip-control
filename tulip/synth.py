@@ -286,7 +286,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += 'Enforcing this renders False the GR(1) guarantee.'
         warn(msg)
         
-        init += [_conj_neg(states.intervalues() ) ]
+        init += [_conj_neg(state_ids.itervalues() ) ]
         return init
         
     init += [_disj([state_ids[s] for s in states.initial])]
