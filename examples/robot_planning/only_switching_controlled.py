@@ -2,9 +2,8 @@
 #          the upcoming release.
 #
 # This is an example to demonstrate how the output of abstracting a switched
-# system, where the dynamics are controlled through switching and
-# if multiple transitions are possible from a state in some mode,
-# then the system controls which one is taken.
+# system, where the only control over the dynamics is through mode switching
+# might look like.
 
 # NO, 26 Jul 2013.
 
@@ -28,17 +27,22 @@ from scipy import sparse as sp
 ###############################
 
 # In this scenario we have limited actions "left, right, up, down" with 
-# certain (nondeterministic) outcomes
+# uncertain (nondeterministics) outcomes (e.g., due to bad actuators or 
+# bad low-level feedback controllers)
+
+# Only control over the dynamics is through mode switching
+# Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-sys_sws = transys.FTS()
+env_sws = transys.OpenFTS()
 
-sys_sws.actions.add_from({'right','up','left','down'})
+env_sws.sys_actions.add_from({'right','up','left','down'})
 
 # str states
 n = 6
 states = transys.prepend_with(range(n), 's')
-sys_sws.states.add_from(set(states) )
+env_sws.states.add_from(set(states) )
+env_sws.states.initial.add('s0')
 
 # mode1 transitions
 transmat1 = np.array([[0,1,0,0,1,0],
@@ -47,8 +51,8 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat1), states, 'right'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat1), states, {'sys_actions':'right'}
 )
                       
 # mode2 transitions
@@ -58,8 +62,8 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat2), states, 'up'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat2), states, {'sys_actions':'up'}
 )
                       
 # mode3 transitions
@@ -69,8 +73,8 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [0,0,0,1,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat3), states, 'left'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat3), states, {'sys_actions':'left'}
 )
                       
 # mode4 transitions
@@ -80,19 +84,19 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat4), states, 'down'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat4), states, {'sys_actions':'down'}
 )
 
 
 # Decorate TS with state labels (aka atomic propositions)
-sys_sws.atomic_propositions.add_from(['home','lot'])
-sys_sws.states.labels(
+env_sws.atomic_propositions.add_from(['home','lot'])
+env_sws.states.labels(
     states, [{'home'},set(),set(),set(),set(),{'lot'}]
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
-print(sys_sws)
+print(env_sws)
 
 #
 # Environment variables and specification
@@ -102,7 +106,7 @@ print(sys_sws)
 # the park signal is turned off infinitely often.
 #
 env_vars = {'park'}
-env_init = set()                # empty set
+env_init = {'park'}
 env_prog = {'!park'}
 env_safe = set()                # empty set
 
@@ -131,7 +135,7 @@ env_safe = set()                # empty set
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach'}          
+sys_init = {'X0reach','right'}          
 sys_prog = {'home'}               # []<>home
 sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
@@ -145,8 +149,8 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys=sys_sws, ignore_sys_init=True)
+ctrl = synth.synthesize('gr1c', specs, env=env_sws)
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('robot_controlled_switching.png', 'png'):
+if not ctrl.save('only_switching_controlled.png', 'png'):
     print(ctrl)

@@ -34,22 +34,22 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-sys_sws = transys.FTS()
+env_sws = transys.OpenFTS()
 
-sys_sws.actions.add_from({'right','left'})
+env_sws.sys_actions.add_from({'right','left'})
 
 # str states
 n = 4
 states = transys.prepend_with(range(n), 's')
-sys_sws.states.add_from(set(states) )
+env_sws.states.add_from(set(states) )
 
 # mode1 transitions
 transmat1 = np.array([[0,1,0,1],
                       [0,1,0,0],
                       [0,1,0,1],
                       [0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat1), states, 'right'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat1), states, {'sys_actions':'right'}
 )
                       
 # mode2 transitions
@@ -57,19 +57,19 @@ transmat2 = np.array([[1,0,0,0],
                       [1,0,1,0],
                       [0,0,1,0],
                       [1,0,1,0]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat2), states, 'left'
+env_sws.transitions.add_labeled_adj(
+    sp.lil_matrix(transmat2), states, {'sys_actions':'left'}
 )
 
 
 # Decorate TS with state labels (aka atomic propositions)
-sys_sws.atomic_propositions.add_from(['home','lot'])
-sys_sws.states.labels(
+env_sws.atomic_propositions.add_from(['home','lot'])
+env_sws.states.labels(
     states, [set(),set(),{'home'},{'lot'}]
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
-print(sys_sws)
+print(env_sws)
 
 #
 # Environment variables and specification
@@ -79,7 +79,7 @@ print(sys_sws)
 # the park signal is turned off infinitely often.
 #
 env_vars = {'park'}
-env_init = set()                # empty set
+env_init = {'eloc = 0', 'park'}
 env_prog = {'!park'}
 env_safe = set()                # empty set
 
@@ -122,7 +122,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys_sws, ignore_ts_init=True)
+ctrl = synth.synthesize('gr1c', specs, env=env_sws, ignore_env_init=True)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('robot_controlled_switching.png', 'png'):
