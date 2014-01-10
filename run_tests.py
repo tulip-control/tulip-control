@@ -70,10 +70,9 @@ if __name__ == "__main__":
                 testfiles.append(relname)
         except IOError:
             if basename[0] == "-":
-                relname = os.path.join("tests", basename[1:]+"_test.py")
                 try:
-                    with open(relname, "r") as f:
-                        excludefiles.append(relname)
+                    with open(os.path.join("tests", basename[1:]+"_test.py"), "r") as f:
+                        excludefiles.append(basename[1:]+"_test.py")
                 except IOError:
                     argv.append(basename)
             else:
