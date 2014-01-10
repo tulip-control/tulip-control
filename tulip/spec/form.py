@@ -799,7 +799,7 @@ def _sub_var(spec, vars_dict):
             continue
         
         # the order provided will be the map to ints
-        vars_dict[variable] = (0, len(domain))
+        vars_dict[variable] = (0, len(domain)-1)
         values2ints = {var:str(i) for i, var in enumerate(domain)}
         
         # replace symbols by ints
