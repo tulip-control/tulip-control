@@ -66,6 +66,18 @@ Alternatives to Enthought are listed on the `SciPy installation webpage
 EPD seems to work fine on most platforms but if you cannot get it to work, more
 alternative packages for Mac OS X and Microsoft Windows are mentioned below.
 
+Testing your installation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TuLiP is distributed with tests for itself that, like those for NumPy, provide a
+way to check that TuLiP is behaving as expected.  To perform all tests from the
+command-line, try ::
+
+  $ ./run_tests.py
+
+Use the flag "-h" to see driver script options.  More details about testing
+TuLiP oriented for developers are provided in the :doc:`dev_guide`.
+
 .. _troubleshoot-sec-label:
 
 Troubleshooting
