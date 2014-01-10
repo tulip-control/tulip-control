@@ -518,6 +518,10 @@ def ap_trans_from_ts(states, state_ids, aps):
     """
     trans = []
     
+    # no AP labels ?
+    if not aps:
+        return trans
+    
     for state in states:
         label = states.label_of(state)
         state_id = state_ids[state]
