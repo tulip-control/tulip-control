@@ -250,26 +250,33 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         for next_node in this_child_list:
             A.add_edge(this_id, next_node)
     
-    # show port only when true
+    # show port only when true (or non-zero for int-valued vars)
     mask_func = lambda x: bool(x)
     
     mach = MealyMachine()
-    mach.add_inputs([
-        (k,{0,1}) if v == "boolean" else (k,set(range(v[0], v[1]+1) ) )
-        for (k,v) in env_vars.items()
-    ])
     
-    outputs = [
-        (k,{0,1}) if v == "boolean" else (k, set(range(v[0], v[1]+1) ) )
-        for (k,v) in sys_vars.items()
-    ]
+    inputs = _create_machine_ports(mach, env_vars, spec0.env_vars)
+    mach.add_inputs(inputs)
+    
+    outputs = _create_machine_ports(mach, sys_vars, spec0.sys_vars)
     masks = {k:mask_func for k in sys_vars}
     mach.add_outputs(outputs, masks)
+    
+    arbitrary_domains  = {
+        k:v for k, v in spec0.env_vars.items()
+        if isinstance(v, list)
+    }
+    arbitrary_domains.update({
+        k:v for k, v in spec0.sys_vars.items()
+        if isinstance(v, list)
+    })
     
     mach.states.add_from(A.nodes())
     for u in A.nodes_iter():
         for v in A.successors_iter(u):
-            mach.transitions.add_labeled(u, v, A.node[v]["state"])
+            label = _map_int2dom(A.node[v]["state"],
+                                 arbitrary_domains)
+            mach.transitions.add_labeled(u, v, label)
     
     if spec0 is None:
         return (spec, mach)
@@ -279,17 +286,51 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     mach.states.add(initial_state)
     mach.states.initial |= [initial_state]
     
+    # replace values of arbitrary variables by ints
+    spec1 = spec0.copy()
+    for variable, domain in arbitrary_domains.items():
+        values2ints = {var:str(i) for i, var in enumerate(domain)}
+        
+        # replace symbols by ints
+        spec1.sym_to_prop(values2ints, verbose=10)
+    
     # Mealy reaction to initial env input
     for v in A.nodes_iter():
         var_values = A.node[v]['state']
         bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
         
-        t = spec0.evaluate(bool_values)
+        t = spec1.evaluate(bool_values)
         
         if t['env_init'] and t['sys_init']:
-            mach.transitions.add_labeled(initial_state, v, var_values)
+            label = _map_int2dom(var_values, arbitrary_domains)
+            mach.transitions.add_labeled(initial_state, v, label)
     
     return (spec, mach)
+
+def _create_machine_ports(mach, vars_dict, spec0_vars):
+    """Create proper port domains of valuations, given port types.
+    """
+    print(spec0_vars)
+    ports = []
+    for env_var, var_type in vars_dict.items():
+        if var_type == 'boolean':
+            domain = {0,1}
+        elif isinstance(spec0_vars[env_var], tuple):
+            domain = set(range(var_type[0], var_type[1]+1))
+        elif isinstance(spec0_vars[env_var], list):
+            domain = set(spec0_vars[env_var])
+        ports += [(env_var, domain)]
+    return ports
+
+def _map_int2dom(label, arbitrary_domains):
+    """For custom finite domains map int values to domain elements.
+    """
+    label = dict(label)
+    
+    for var, value in label.items():
+        if var in arbitrary_domains:
+            label[var] = arbitrary_domains[var][int(value)]
+    return label
 
 def _parse_vars(variables, vardict):
     """Helper for parsing env, sys variables.

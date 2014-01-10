@@ -286,7 +286,7 @@ class GRSpec(LTL):
             then assume all environment variables are C{boolean} (or
             "atomic propositions").  Cf. L{GRSpec} for details.
 
-        @type sys_vars: set or dict
+        @type sys_vars: dict or iterable
         @param sys_vars: Mutatis mutandis, env_vars.
 
         @param env_init, env_safety, env_prog, sys_init, sys_safety, sys_prog:
@@ -664,6 +664,11 @@ class GRSpec(LTL):
                     raise ValueError("Domain type unsupported by gr1c: " +
                         str(domain))
             return output
+        
+        tmp = finite_domain2ints(self)
+        if tmp is not None:
+            return tmp.to_gr1c()
+        
         output = "ENV:"+_to_gr1c_print_vars(self.env_vars)+";\n"
         output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
 
@@ -758,3 +763,44 @@ def _sub_all(formula, propSymbol, prop):
 
 def _conj(iterable, unary=''):
     return ' && '.join([unary + '(' + s + ')' for s in iterable])
+
+def finite_domain2ints(spec):
+    """Replace arbitrary finite vars with int vars.
+    
+    Returns spec itself if it contains only int vars.
+    Otherwise it returns a copy of spec with all arbitrary
+    finite vars replaced by int-valued vars.
+    """
+    ints_only = True
+    for domain in spec.env_vars.itervalues():
+        if isinstance(domain, list):
+            ints_only = False
+            break
+    if ints_only:
+        for domain in spec.sys_vars.itervalues():
+            if isinstance(domain, list):
+                ints_only = False
+                break
+    
+    # nothing todo ?
+    if ints_only:
+        return None
+    
+    spec0 = spec.copy()
+    
+    _sub_var(spec0, spec0.env_vars)
+    _sub_var(spec0, spec0.sys_vars)
+    
+    return spec0
+    
+def _sub_var(spec, vars_dict):
+    for variable, domain in vars_dict.items():
+        if not isinstance(domain, list):
+            continue
+        
+        # the order provided will be the map to ints
+        vars_dict[variable] = (0, len(domain))
+        values2ints = {var:str(i) for i, var in enumerate(domain)}
+        
+        # replace symbols by ints
+        spec.sym_to_prop(values2ints, verbose=10)

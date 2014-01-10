@@ -201,20 +201,20 @@ def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
     aps = fts.aps
     states = fts.states
     
-    sys_vars = list(aps)
-    sys_vars.extend([a for a in fts.actions])
+    sys_vars = {ap:'boolean' for ap in aps}
+    sys_vars.update({act:'boolean' for act in fts.actions})
     
     sys_trans = []
     
     if bool_states:
         state_ids = states2bools(states)
-        sys_vars.extend([s for s in states])
+        sys_vars.update({s:'boolean' for s in states})
         sys_trans += exactly_one(states)
     else:
         statevar = 'loc'
         state_ids = states2ints(states, statevar)
         n_states = len(states)
-        sys_vars += ['loc [0,' +str(n_states-1) +']']
+        sys_vars['loc'] = (0, n_states-1)
     
     init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -266,8 +266,8 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     env_actions = ofts.env_actions
     sys_actions = ofts.sys_actions
     
-    sys_vars = list(aps)
-    sys_vars += list(sys_actions)
+    sys_vars = {ap:'boolean' for ap in aps}
+    sys_vars.update({act:'boolean' for act in sys_actions})
     sys_trans = mutex(sys_actions)
     
     env_vars = list(env_actions)
@@ -275,13 +275,13 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     
     if bool_states:
         state_ids = states2bools(states)
-        sys_vars.extend([s for s in states])
+        sys_vars.update({s:'boolean' for s in states})
         sys_trans += exactly_one(states)
     else:
         statevar = 'loc'
         state_ids = states2ints(states, statevar)
         n_states = len(states)
-        sys_vars += [statevar + ' [0,' +str(n_states-1) +']']
+        sys_vars[statevar] = (0, n_states-1)
     
     sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -306,8 +306,8 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     sys_actions = ofts.sys_actions
     
     # since APs are tied to env states, let them be env variables
-    env_vars = list(aps)
-    env_vars += list(env_actions)
+    env_vars = {ap:'boolean' for ap in aps}
+    env_vars.update({act:'boolean' for act in env_actions})
     env_trans = mutex(env_actions)
     
     sys_vars = list(sys_actions)
@@ -319,13 +319,13 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     
     if bool_states:
         state_ids = states2bools(states)
-        env_vars += list(states)
+        env_vars += {s:'boolean' for s in states}
         env_trans += exactly_one(states)
     else:
         statevar = 'eloc'
         state_ids = states2ints(states, statevar)
         n_states = len(states)
-        env_vars += [statevar + ' [0,' + str(n_states-1) +']']
+        env_vars[statevar] = (0, n_states-1)
     
     env_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
