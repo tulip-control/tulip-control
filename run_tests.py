@@ -65,13 +65,15 @@ if __name__ == "__main__":
     excludefiles = []
     for basename in sys.argv[1:]:  # Only add extant file names
         try:
-            with open(os.path.join("tests", basename+"_test.py"), "r") as f:
-                testfiles.append(basename+"_test.py")
+            relname = os.path.join("tests", basename+"_test.py")
+            with open(relname, "r") as f:
+                testfiles.append(relname)
         except IOError:
             if basename[0] == "-":
+                relname = os.path.join("tests", basename[1:]+"_test.py")
                 try:
-                    with open(os.path.join("tests", basename[1:]+"_test.py"), "r") as f:
-                        excludefiles.append(basename[1:]+"_test.py")
+                    with open(relname, "r") as f:
+                        excludefiles.append(relname)
                 except IOError:
                     argv.append(basename)
             else:
