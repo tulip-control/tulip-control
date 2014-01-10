@@ -137,8 +137,26 @@ def states2ints(states, statevar):
     
     @rtype: {state : state_id}
     """
-    strip_letter = lambda x: statevar + ' = ' + x[1:]
-    return {x:strip_letter(x) for x in states}
+    letter_int = True
+    for state in states:
+        try:
+            int(state[1:])
+        except:
+            letter_int = False
+            break
+    
+    if letter_int:
+        # this allows the user to control numbering
+        strip_letter = lambda x: statevar + ' = ' + x[1:]
+        state_ids = {x:strip_letter(x) for x in states}
+        n_states = len(states)
+        domain = (0, n_states-1)
+    else:
+        setloc = lambda s: statevar + ' = ' + s
+        state_ids = {s:setloc(s) for s in states}
+        domain = list(states)
+    
+    return (state_ids, domain)
 
 def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     """Convert system's transition system to GR(1) representation.
@@ -212,9 +230,8 @@ def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
         sys_trans += exactly_one(states)
     else:
         statevar = 'loc'
-        state_ids = states2ints(states, statevar)
-        n_states = len(states)
-        sys_vars['loc'] = (0, n_states-1)
+        state_ids, domain = states2ints(states, statevar)
+        sys_vars[statevar] = domain
     
     init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -279,9 +296,8 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
         sys_trans += exactly_one(states)
     else:
         statevar = 'loc'
-        state_ids = states2ints(states, statevar)
-        n_states = len(states)
-        sys_vars[statevar] = (0, n_states-1)
+        state_ids, domain = states2ints(states, statevar)
+        sys_vars[statevar] = domain
     
     sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -323,9 +339,8 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
         env_trans += exactly_one(states)
     else:
         statevar = 'eloc'
-        state_ids = states2ints(states, statevar)
-        n_states = len(states)
-        env_vars[statevar] = (0, n_states-1)
+        state_ids, domain = states2ints(states, statevar)
+        env_vars[statevar] = domain
     
     env_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
