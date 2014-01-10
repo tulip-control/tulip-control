@@ -35,6 +35,8 @@ We must convert this specification into GR(1) form:
 """
 
 # Import the packages that we need
+import sys
+
 from tulip import spec, synth
 
 
@@ -110,9 +112,8 @@ ctrl = synth.synthesize('jtlv', specs)
 
 
 # if the spec is unrealizable, ctrl is a list of counterexamples
-if isinstance(ctrl, list):
-    print("Counterexample: environment winning initial states: \n", ctrl)
-    exit
+if ctrl is None:
+    sys.exit()
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.

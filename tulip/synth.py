@@ -601,8 +601,8 @@ def synthesize(option, specs, env=None, sys=None,
     
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
-        Otherwise return list of counterexamples.
-    @rtype: transys.Mealy or list
+        Otherwise return None.
+    @rtype: transys.MealyMachine | None
     """
     # not yet implemented for jtlv
     if bool_states is False and option is 'jtlv':
@@ -627,6 +627,12 @@ def synthesize(option, specs, env=None, sys=None,
             print('Mealy machine has: n = ' +str(len(ctrl.states) ) +' states.')
     except:
         pass
+    
+    # no controller found ?
+    # exploring unrealizability with counterexamples or other means
+    # can be done by calling a dedicated other function, not this
+    if not isinstance(ctrl, transys.MealyMachine):
+        return None
     
     return ctrl
 

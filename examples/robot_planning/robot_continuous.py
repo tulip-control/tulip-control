@@ -103,9 +103,7 @@ ctrl = synth.synthesize('jtlv', specs,
                         sys=disc_dynamics.ofts, ignore_sys_init=True)
 
 # Unrealizable spec ?
-if isinstance(ctrl, list):
-    for counterexample in ctrl:
-        print('counterexamples: ' +str(counterexample) +'\n')
+if ctrl is None:
     sys.exit()
 
 # Generate a graphical representation of the controller for viewing
