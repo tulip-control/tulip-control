@@ -100,6 +100,7 @@ def _conj_neg_diff(set0, set1, parenth=True):
 def mutex(iterable):
     """Mutual exclusion for all time.
     """
+    iterable = filter(lambda x: x != '', iterable)
     if not iterable:
         return []
     if len(iterable) <= 1:
@@ -119,6 +120,17 @@ def exactly_one(iterable):
         '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
         for x in iterable
     ]) + ')']
+
+def _conj_action(label, action_type, nxt=False):
+    if action_type not in label:
+        return ''
+    action = label[action_type]
+    if action is '':
+        return ''
+    if nxt:
+        return ' && X' + pstr(action)
+    else:
+        return ' && ' + pstr(action)
 
 def states2bools(states):
     """Return dict(state : state).
@@ -435,18 +447,10 @@ def sys_trans_from_ts(states, state_ids, trans):
             precond = '(' + str(from_state_id) + ')'
             postcond = '(' + str(to_state_id) +')'
             
-            if 'env_actions' in label:
-                env_action = label['env_actions']
-                postcond += ' && (' + str(env_action) + ')'
-            
-            if 'sys_actions' in label:
-                sys_action = label['sys_actions']
-                postcond += ' && (' + str(sys_action) + ')'
-            
+            postcond += _conj_action(label, 'env_actions')
+            postcond += _conj_action(label, 'sys_actions', nxt=True)
             # system FTS given
-            if 'actions' in label:
-                sys_action = label['actions']
-                postcond += ' && (' + str(sys_action) + ')'
+            postcond += _conj_action(label, 'actions', nxt=True)
             
             cur_str += ['(' + precond + ') -> X(' + postcond + ')']
             
@@ -486,7 +490,8 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
             next_env_actions.add(env_action)
         next_env_actions = _disj(next_env_actions)
         
-        env_trans += ["(" +str(from_state_id) +") -> X("+ next_env_actions +")"]
+        env_trans += ["(" +str(from_state_id) +") -> X(" +
+                      next_env_actions +")"]
     return env_trans
 
 def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
@@ -525,19 +530,13 @@ def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
             precond = pstr(from_state_id)
             postcond = 'X' + pstr(to_state_id)
             
-            if 'env_actions' in label:
-                env_action = label['env_actions']
-                postcond += ' && X' + pstr(env_action)
+            postcond += _conj_action(label, 'env_actions', nxt=True)
             
             # environment FTS given
-            if 'actions' in label:
-                sys_action = label['actions']
-                postcond += ' && X' + pstr(sys_action)
+            postcond += _conj_action(label, 'actions', nxt=True)
+            postcond += _conj_action(label, 'sys_actions')
             
-            if 'sys_actions' in label:
-                sys_action = label['sys_actions']
-                postcond += ' && ' + pstr(sys_action)
-            else:
+            if not _conj_action(label, 'sys_actions'):
                 found_free = True
             
             cur_list += [pstr(postcond) ]
