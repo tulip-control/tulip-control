@@ -34,9 +34,7 @@ Finite State Machines Module
 """
 from collections import OrderedDict
 from pprint import pformat
-import warnings
 from random import choice
-from textwrap import fill
 
 from .labeled_graphs import LabeledStateDiGraph
 from . import executions

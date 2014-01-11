@@ -32,19 +32,12 @@
 """
 Mathematical Sets and Power Sets
 """
+import logging
 from itertools import chain, combinations
 from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 import warnings
-#from scipy.sparse import lil_matrix # is this really needed ?
-
-debug = False
-def dprint(s):
-    """Debug mode print."""
-    if not debug:
-        return
-    print(s)
 
 hl = 60 *'-'
 
@@ -264,7 +257,7 @@ class MathSet(object):
             try:
                 return item in self._set
             except:
-                dprint('UnHashable items within Hashable.')
+                logging.error('UnHashable items within Hashable.')
         
         return item in self._list
     
@@ -307,13 +300,12 @@ class MathSet(object):
                 self._set.add(item)
                 return
             except TypeError:
-                dprint('UnHashable items within Hashable.')
+                logging.error('UnHashable items within Hashable.')
         
         if item not in self._list:
             self._list.append(item)
         else:
-            if debug:
-                warnings.warn('item already in MathSet.')
+            logging.warn('item already in MathSet.')
     
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.
@@ -389,7 +381,7 @@ class MathSet(object):
                 self._set.remove(item)
                 return
             except:
-                dprint('item: ' +str(item) +', contains unhashables.')
+                logging.debug('item: ' +str(item) +', contains unhashables.')
             
         self._list.remove(item)
     
@@ -675,7 +667,7 @@ def is_subset(small_iterable, big_iterable):
                 # avoid object duplication
                 big_iterable = list(big_iterable)
         except:
-            dprint('Could not convert big_iterable to list.')
+            logging.error('Could not convert big_iterable to list.')
         
         for item in small_iterable:
             if item not in big_iterable:

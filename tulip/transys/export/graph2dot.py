@@ -61,8 +61,6 @@ except ImportError:
     warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
-from ..mathset import dprint
-
 def _states2dot_str(states, to_pydot_graph, wrap=10):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
@@ -323,31 +321,31 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     
     # installed ?
     if IPython:
-        dprint('IPython installed.')
+        logging.debug('IPython installed.')
         
         # called by IPython ?
         try:
             cfg = get_ipython().config
-            dprint('Script called by IPython.')
+            logging.debug('Script called by IPython.')
             
             # Caution!!! : not ordinary dict,
             # but IPython.config.loader.Config
             
             # qtconsole ?
             if cfg['IPKernelApp']:
-                dprint('Within IPython QtConsole.')
+                logging.debug('Within IPython QtConsole.')
                 display(Image(data=png_str) )
                 return True
         except:
             print('IPython installed, but not called from it.')
     else:
-        dprint('IPython not installed.')
+        logging.debug('IPython not installed.')
     
     # not called from IPython QtConsole, try Matplotlib...
     
     # installed ?
     if matplotlib:
-        dprint('Matplotlib installed.')
+        logging.debug('Matplotlib installed.')
         
         sio = StringIO()
         sio.write(png_str)
@@ -357,7 +355,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
         plt.show(block=False)
         return imgplot
     else:
-        dprint('Matplotlib not installed.')
+        logging.debug('Matplotlib not installed.')
     
     warn('Neither IPython QtConsole nor Matplotlib available.')
     return None
