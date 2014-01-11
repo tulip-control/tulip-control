@@ -329,7 +329,7 @@ def discretize(
                     orig = np.hstack([orig, orig[i]])
             adj[i, i] = 1
                         
-            if logger.getLogger().getEffectiveLevel() >= logging.INFO:
+            if logger.getEffectiveLevel() >= logging.INFO:
                 output = "\n Adding states " + str(i) + " and "
                 for kk in xrange(num_new):
                     output += str(size-1-kk) + " and "
