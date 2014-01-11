@@ -51,19 +51,29 @@ except:
     matplotlib = None
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
-                   ax=None, color_seed=None, show=False):
+                   ax=None, color_seed=None, nodelist=None,
+                   show=False):
     """Plots 2D PropPreservingPartition using matplotlib
 
     @type ppp: PropPreservingPartition
+    
     @param trans: Transition matrix. If used,
         then transitions in C{ppp}are shown with arrows.
+    
     @param plot_numbers: If True,
         then annotate each Region center with its number.
+    
     @param show: If True, then show the plot.
         Otherwise return axis object.
         Axis object is good for creating custom plots.
+    
     @param ax: axes where to plot
+    
     @param color_seed: seed for reproducible random coloring
+    
+    @param nodelist: order mapping ppp indices to trans states
+    @type nodelist: list of trans states
+    
     @param show: call mpl.pyplot.show before returning
     
     see also
@@ -75,7 +85,11 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         return
     
     if isinstance(trans, nx.MultiDiGraph):
-        trans = np.array(nx.to_numpy_matrix(trans) )
+        if nodelist is None:
+            n = len(trans.states)
+            nodelist = ['s' +str(x) for x in xrange(n)]
+        trans = np.array(nx.to_numpy_matrix(trans,
+                         nodelist=nodelist) )
     
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
