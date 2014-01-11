@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ from .spec import GRSpec
 from .transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
-hl = '\n' +60*'-'
+_hl = '\n' +60*'-'
 
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
 
@@ -156,7 +156,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
         return (elem.tag, di)
 
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
-    """Return GRSpec and MealyMachine constructed from output of gr1c.
+    """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
     x can be a string or an instance of
     xml.etree.ElementTree._ElementInterface
@@ -400,20 +400,20 @@ def check_realizable(spec, verbose=0):
 def synthesize(spec, verbose=0):
     """Synthesize strategy.
 
-    Return strategy as instance of Automaton class, or None if
-    unrealizable or error occurs.
+    Return strategy as L{MealyMachine},
+    or None if unrealizable or error occurs.
     """
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
-    logging.debug('gr1c input:\n' + spec.to_gr1c() +hl)
+    logging.debug('gr1c input:\n' + spec.to_gr1c() +_hl)
     
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     
     logging.debug('gr1c returned:\n' + str(p.returncode) )
-    logging.debug('gr1c stdout:\n' + str(stdoutdata) +hl)
-    logging.debug('gr1c stderr:\n' + str(stderrdata) +hl)
+    logging.debug('gr1c stdout:\n' + str(stdoutdata) +_hl)
+    logging.debug('gr1c stderr:\n' + str(stderrdata) +_hl)
     
     if p.returncode == 0:
         (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)

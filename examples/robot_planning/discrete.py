@@ -128,7 +128,7 @@ ctrl = synth.synthesize('gr1c', specs, sys=sys)
 # or a textual representation if pydot is missing.
 #
 # @plot_print@
-if not ctrl.save('robot_discrete.png', 'png'):
+if not ctrl.save('discrete.png', 'png'):
     print(ctrl)
 # @plot_print_end@
 

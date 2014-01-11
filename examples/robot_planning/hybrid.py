@@ -145,5 +145,5 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 ctrl = synth.synthesize('jtlv', specs, sys=sys_hyb, ignore_sys_init=True)
 
-if not ctrl.save('robot_hybrid.png', 'png'):
+if not ctrl.save('hybrid.png', 'png'):
     print(ctrl)

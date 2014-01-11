@@ -148,5 +148,5 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('jtlv', specs, sys=sys_sws, ignore_sys_init=True)
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('robot_controlled_switching.png', 'png'):
+if not ctrl.save('controlled_switching.png', 'png'):
     print(ctrl)

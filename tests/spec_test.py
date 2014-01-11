@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-Unit tests for tulip.spec subpackage.
-
-SCL; 17 Sep 2013.
+Tests for the tulip.spec subpackage.
 """
 
 import copy

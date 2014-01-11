@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2013 by California Institute of Technology
+# Copyright (c) 2012-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,7 @@
 Interface to the JTLV implementation of GR(1) synthesis
     JTLV: http://jtlv.ysaar.net/
 based on code from:
-    grgameint.py, jtlvint.py, rhtlp.py by Nok Wongpiromsarn 
-
-@author: Vasu Raman
+    grgameint.py, jtlvint.py, rhtlp.py by Nok Wongpiromsarn
 """
 import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
@@ -61,11 +59,12 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
     Return True if realizable, False if not, or an error occurs.
     """
     fSMV, fLTL, fAUT = create_files(spec)
-    return solve_game(spec, fSMV, fLTL, fAUT, heap_size,
-                      priority_kind, init_option, verbose)
+    realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
+                            priority_kind, init_option, verbose)
     os.unlink(fSMV)
     os.unlink(fLTL)
     os.unlink(fAUT)
+    return realizable
 
 def solve_game(
     spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m',

@@ -99,7 +99,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 # @synthesize_section@
 """Synthesize"""
-ctrl = synth.synthesize('jtlv', specs,
+ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ofts, ignore_sys_init=True)
 
 # Unrealizable spec ?
@@ -107,7 +107,7 @@ if ctrl is None:
     sys.exit()
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('robot_continuous.png', 'png'):
+if not ctrl.save('continuous.png', 'png'):
     print(ctrl)
 # @synthesize_section_end@
 
