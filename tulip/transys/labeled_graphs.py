@@ -46,6 +46,9 @@ from .export import save_d3, machine2scxml, graph2dot
 
 hl = 60 *'-'
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+
 def vprint(string, verbose=True):
     if verbose:
         print(string)
@@ -159,10 +162,10 @@ class LabelConsistency(object):
                 if label_def.has_key('ap'):
                     sublabel_values = str2singleton(sublabel_values)
                 
-                logging.debug('Replaced sublabel value:\n\t' +
+                logger.debug('Replaced sublabel value:\n\t' +
                        str(sublabel_values) )
                 sublabel_values = [sublabel_values]
-                logging.debug('with the singleton:\n\t' +str(sublabel_values) )
+                logger.debug('with the singleton:\n\t' +str(sublabel_values) )
             
             # constuct label dict
             try:
@@ -179,7 +182,7 @@ class LabelConsistency(object):
             if isinstance(possible_labels, PowerSet):
                 # label with empty set
                 if sublabel is None:
-                    logging.debug('None given: label with empty set')
+                    logger.debug('None given: label with empty set')
                     edge_label[typename] = set()
                     continue
             
@@ -205,13 +208,13 @@ class LabelConsistency(object):
                 possible_labels.add(sublabel)
                 continue
             except:
-                logging.debug('no add method')
+                logger.debug('no add method')
             
             try:
                 possible_labels.append(sublabel)
                 continue
             except:
-                logging.debug('no append method')
+                logger.debug('no append method')
             
             # iterable sublabel description ? (i.e., discrete ?)
             if isinstance(possible_labels, Iterable):
@@ -253,16 +256,16 @@ class LabelConsistency(object):
                raise Exception(msg)
         
         def evaluate_guard(eval_guard, guard, input_port_value):
-            logging.debug('Found guard semantics:\n\t')
-            logging.debug(eval_guard)
+            logger.debug('Found guard semantics:\n\t')
+            logger.debug(eval_guard)
             
             guard_value = eval_guard(guard, input_port_value)
             
             return guard_value
         
         def match_singleton_guard(cur_val, desired_val):
-            logging.debug('Actual SubLabel value:\n\t' +str(cur_val) )
-            logging.debug('Desired SubLabel value:\n\t' +str(desired_val) )
+            logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
+            logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
             
             return cur_val == desired_val or True in cur_val
         
@@ -271,7 +274,7 @@ class LabelConsistency(object):
             cur_val = attr_dict[type_name]
             type_def = label_def[type_name]
             
-            logging.debug('Checking SubLabel type:\n\t' +str(type_name) )
+            logger.debug('Checking SubLabel type:\n\t' +str(type_name) )
             
             # guard semantics ?
             if hasattr(type_def, 'eval_guard'):
@@ -524,16 +527,16 @@ class States(object):
         if not self._is_mutable():
             #logging.debug('Immutable states (must be hashable): classic NetworkX.\n')
             return state
-        logging.debug('Mutable states.')
+        logger.debug('Mutable states.')
         
         mutants = self.mutants
         state_id = [x for x in mutants if mutants[x] == state]
         
-        logging.debug('Converted: state = ' +str(state) +' ---> ' +str(state_id) )
+        logger.debug('Converted: state = ' +str(state) +' ---> ' +str(state_id) )
         
         # found state ?
         if not state_id:
-            logging.debug('No states matching. State is new.\n')
+            logger.debug('No states matching. State is new.\n')
         elif len(state_id) == 1:
             return state_id[0]
         else:
@@ -590,12 +593,12 @@ class States(object):
         # found ID ?
         if state_id in mutants:
             state = mutants[state_id]
-            logging.debug('For ID:\n\t' +str(state_id) +'\n'
+            logger.debug('For ID:\n\t' +str(state_id) +'\n'
                    +'Found state:\n\t' +str(state) )
             return state
         
         # mutable, but ID unused
-        logging.debug('Mutable states, but this ID is currently unused.')
+        logger.debug('Mutable states, but this ID is currently unused.')
         return None
     
     def _mutants2ints(self, states):
@@ -620,7 +623,7 @@ class States(object):
             if self.list is not None:
                 raise Exception('State exists and ordering enabled: ambiguous.')
             else:
-                logging.debug('State already exists.')
+                logger.debug('State already exists.')
                 return
     
     def _single_state2singleton(self, state):
@@ -658,7 +661,7 @@ class States(object):
         new_state_id = self._mutant2int(new_state)
         self._warn_if_state_exists(new_state)
         
-        logging.debug('Adding new id: ' +str(new_state_id) )
+        logger.debug('Adding new id: ' +str(new_state_id) )
         self.graph.add_node(new_state_id)
         
         # mutant ?
@@ -997,7 +1000,7 @@ class LabeledStates(States):
             # don't prevent dot export
             msg = 'No state labeling defined for class:\n\t'
             msg += str(type(self.graph) )
-            logging.error(msg)
+            logger.error(msg)
             return False
     
     def _check_state(self, state, check=True):
@@ -1275,34 +1278,34 @@ class LabeledStates(States):
                 states = [state]
                 msg += 'Replaced given states = ' +str(state)
                 msg += ' with states = ' +str(states)
-                logging.debug(msg)
+                logger.debug(msg)
                 
             state_ids = self._mutants2ints(states)
-            logging.debug(state_ids)
+            logger.debug(state_ids)
         
         found_state_label_pairs = []
         for state_id, attr_dict in self.graph.nodes_iter(data=True):
-            logging.debug('Checking state_id = ' +str(state_id) +
+            logger.debug('Checking state_id = ' +str(state_id) +
                           ', with attr_dict = ' +str(attr_dict) )
             
             if state_ids is not 'any':
                 if state_id not in state_ids:
-                    logging.debug('state_id = ' +str(state_id) +', not desired.')
+                    logger.debug('state_id = ' +str(state_id) +', not desired.')
                     continue
             
             msg = 'Checking state label:\n\t attr_dict = '
             msg += str(attr_dict)
             msg += '\n vs:\n\t desired_label = ' + str(desired_label)
-            logging.debug(msg)
+            logger.debug(msg)
             
             if desired_label is 'any':
-                logging.debug('Any label acceptable.')
+                logger.debug('Any label acceptable.')
                 ok = True
             else:
                 ok = self._label_check.label_is_desired(attr_dict, desired_label)
             
             if ok:
-                logging.debug('Label Matched:\n\t' +str(attr_dict) +
+                logger.debug('Label Matched:\n\t' +str(attr_dict) +
                               ' == ' +str(desired_label) )
                 
                 state = self._int2mutant(state_id)
@@ -1312,7 +1315,7 @@ class LabeledStates(States):
                 
                 found_state_label_pairs.append(state_label_pair)
             else:
-                logging.debug('No match for label---> state discarded.')
+                logger.debug('No match for label---> state discarded.')
         
         return found_state_label_pairs
         
@@ -1419,7 +1422,7 @@ class Transitions(object):
         
         (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
         
-        logging.debug('Adding transition:\n\t' +
+        logger.debug('Adding transition:\n\t' +
                       str(from_state_id) +'--->' +str(to_state_id) )
         
         # if another un/labeled edge already exists between these nodes,
@@ -1760,13 +1763,13 @@ class LabeledTransitions(Transitions):
         
         found_one = 0
         for (edge_key, label) in edge_set.iteritems():
-            logging.debug('Checking edge with:\n\t key = ' +
+            logger.debug('Checking edge with:\n\t key = ' +
                           str(edge_key) + '\n')
-            logging.debug('\n\t label = ' +str(label) +'\n')
-            logging.debug('\n against: ' +str(edge_label) )
+            logger.debug('\n\t label = ' +str(label) +'\n')
+            logger.debug('\n against: ' +str(edge_label) )
             
             if label == edge_label:
-                logging.debug('Matched. Removing...')
+                logger.debug('Matched. Removing...')
                 self.graph.remove_edge(from_state_id, to_state_id, key=edge_key)
                 found_one = 1
         
@@ -2101,19 +2104,19 @@ class LabeledTransitions(Transitions):
                     continue
             
             if desired_label is 'any':
-                logging.debug('Any label is allowed.')
+                logger.debug('Any label is allowed.')
                 ok = True
             elif not attr_dict:
-                logging.debug('No guard defined.')
+                logger.debug('No guard defined.')
                 ok = True
             else:
-                logging.debug('Checking guard.')
+                logger.debug('Checking guard.')
                 ok = self._label_check.label_is_desired(
                     attr_dict, desired_label
                 )
             
             if ok:
-                logging.debug('Transition label matched desired label.')
+                logger.debug('Transition label matched desired label.')
                 
                 from_state = self.graph.states._int2mutant(from_state_id)
                 to_state = self.graph.states._int2mutant(to_state_id)

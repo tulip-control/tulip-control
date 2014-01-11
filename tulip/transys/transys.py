@@ -46,6 +46,8 @@ from .export import graph2promela
 
 hl = 60 *'-'
 
+logger = logging.getLogger(__name__)
+
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System modeling a closed system.
     
@@ -848,12 +850,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         @rtype: dict {'in_alphabet' : edge_label_value}
             Note: edge_label_value is the BA edge "guard"
         """
-        logging.debug('Ls0:\t' +str(state_label_dict) )
+        logger.debug('Ls0:\t' +str(state_label_dict) )
         
         (s0_, label_dict) = state_label_dict[0]
         Sigma_dict = {'in_alphabet': label_dict['ap'] }
         
-        logging.debug('State label of: ' +str(s0) +
+        logger.debug('State label of: ' +str(s0) +
                       ', is: ' +str(Sigma_dict) )
         
         return Sigma_dict
@@ -898,7 +900,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     accepting_states_preimage = MathSet()
     
-    logging.debug(hl +'\n' +' Product TS construction:\n' +hl +'\n')
+    logger.debug(hl +'\n' +' Product TS construction:\n' +hl +'\n')
     
     if not s0s:
         msg = 'Transition System has no initial states !\n'
@@ -907,7 +909,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         warnings.warn(msg)
     
     for s0 in s0s:
-        logging.debug('Checking initial state:\t' +str(s0) )
+        logger.debug('Checking initial state:\t' +str(s0) )
         
         Ls0 = fts.states.find(s0)
         
@@ -921,11 +923,11 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             
             # q0 blocked ?
             if not enabled_ba_trans:
-                logging.debug('blocked q0 = ' +str(q0) )
+                logger.debug('blocked q0 = ' +str(q0) )
                 continue
             
             # which q next ?     (note: curq0 = q0)
-            logging.debug('enabled_ba_trans = ' +str(enabled_ba_trans) )
+            logger.debug('enabled_ba_trans = ' +str(enabled_ba_trans) )
             for (curq0, q, sublabels) in enabled_ba_trans:
                 new_sq0 = (s0, q)                
                 prodts.states.add(new_sq0)
@@ -936,7 +938,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 if q in ba.states.accepting:
                     accepting_states_preimage.add(new_sq0)
     
-    logging.debug(prodts)
+    logger.debug(prodts)
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
@@ -947,13 +949,13 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         visited.add(sq)
         (s, q) = sq
         
-        logging.debug('Current product state:\n\t' +str(sq) )
+        logger.debug('Current product state:\n\t' +str(sq) )
         
         # get next states
         next_ss = fts.states.post(s)
         next_sqs = MathSet()
         for next_s in next_ss:
-            logging.debug('Next state:\n\t' +str(next_s) )
+            logger.debug('Next state:\n\t' +str(next_s) )
             
             Ls = fts.states.find(next_s)
             if not Ls:
@@ -963,12 +965,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 )
             
             Sigma_dict = convert_ts2ba_label(Ls)
-            logging.debug("Next state's label:\n\t" +str(Sigma_dict) )
+            logger.debug("Next state's label:\n\t" +str(Sigma_dict) )
             
             enabled_ba_trans = ba.transitions.find(
                 [q], desired_label=Sigma_dict
             )
-            logging.debug('Enabled BA transitions:\n\t' +
+            logger.debug('Enabled BA transitions:\n\t' +
                           str(enabled_ba_trans) )
             
             if not enabled_ba_trans:
@@ -977,18 +979,18 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             for (q, next_q, sublabels) in enabled_ba_trans:
                 new_sq = (next_s, next_q)
                 next_sqs.add(new_sq)
-                logging.debug('Adding state:\n\t' + str(new_sq) )
+                logger.debug('Adding state:\n\t' + str(new_sq) )
                 
                 prodts.states.add(new_sq)
                 
                 if next_q in ba.states.accepting:
                     accepting_states_preimage.add(new_sq)
-                    logging.debug(str(new_sq) +
+                    logger.debug(str(new_sq) +
                                   ' contains an accepting state.')
                 
                 prodts.states.label(new_sq, {next_q} )
                 
-                logging.debug('Adding transitions:\n\t' +
+                logger.debug('Adding transitions:\n\t' +
                               str(sq) + '--->' + str(new_sq) )
                 
                 # is fts transition labeled with an action ?
@@ -999,7 +1001,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
                     assert(from_s == s)
                     assert(to_s == next_s)
-                    logging.debug('Sublabel value:\n\t' +
+                    logger.debug('Sublabel value:\n\t' +
                                   str(sublabel_values) )
                     
                     # labeled transition ?

@@ -33,7 +33,9 @@
 Convert labeled graph to dot using
 pydot and custom filtering
 """
-from warnings import warn
+import logging
+logger = logging.getLogger(__name__)
+
 from collections import Iterable
 from textwrap import fill
 from cStringIO import StringIO
@@ -43,7 +45,7 @@ import networkx as nx
 try:
     import pydot
 except ImportError:
-    warn('pydot package not found.\nHence dot export not unavailable.')
+    logger.warn('pydot package not found.\nHence dot export not unavailable.')
     pydot = None
 
 try:
@@ -51,14 +53,14 @@ try:
     import matplotlib.image as mpimg
     matplotlib = True
 except ImportError:
-    warn('matplotlib package not found.\nSo no loading of dot plots.')
+    logger.warn('matplotlib package not found.\nSo no loading of dot plots.')
     matplotlib = None
 
 try:
     from IPython.display import display, Image
     IPython = True
 except ImportError:
-    warn('IPython not found.\nSo loaded dot images not inline.')
+    logger.warn('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
 def _states2dot_str(states, to_pydot_graph, wrap=10):
@@ -223,7 +225,7 @@ def _pydot_missing():
     if pydot is None:
         msg = 'Attempted calling _to_pydot.\n'
         msg += 'Unavailable due to pydot not installed.\n'
-        warn(msg)
+        logger.warn(msg)
         return True
     
     return False
@@ -302,7 +304,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     """
     if pydot is None:
         msg = 'Using plot_pydot requires that pydot be installed.'
-        warn(msg)
+        logger.warn(msg)
         return
     
     try:
@@ -321,31 +323,31 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     
     # installed ?
     if IPython:
-        logging.debug('IPython installed.')
+        logger.debug('IPython installed.')
         
         # called by IPython ?
         try:
             cfg = get_ipython().config
-            logging.debug('Script called by IPython.')
+            logger.debug('Script called by IPython.')
             
             # Caution!!! : not ordinary dict,
             # but IPython.config.loader.Config
             
             # qtconsole ?
             if cfg['IPKernelApp']:
-                logging.debug('Within IPython QtConsole.')
+                logger.debug('Within IPython QtConsole.')
                 display(Image(data=png_str) )
                 return True
         except:
             print('IPython installed, but not called from it.')
     else:
-        logging.debug('IPython not installed.')
+        logger.debug('IPython not installed.')
     
     # not called from IPython QtConsole, try Matplotlib...
     
     # installed ?
     if matplotlib:
-        logging.debug('Matplotlib installed.')
+        logger.debug('Matplotlib installed.')
         
         sio = StringIO()
         sio.write(png_str)
@@ -355,7 +357,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
         plt.show(block=False)
         return imgplot
     else:
-        logging.debug('Matplotlib not installed.')
+        logger.debug('Matplotlib not installed.')
     
-    warn('Neither IPython QtConsole nor Matplotlib available.')
+    logger.warn('Neither IPython QtConsole nor Matplotlib available.')
     return None

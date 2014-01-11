@@ -43,6 +43,8 @@ from .transys import _ts_ba_sync_prod
 
 hl = 60 *'-'
 
+logger = logging.getLogger(__name__)
+
 # future: may become an abc
 class FiniteStateAutomaton(LabeledStateDiGraph):
     """Generic automaton.
@@ -413,7 +415,7 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         ts_to_state = to_state[0]
         msg = 'prod_TS: to_state =\n\t' +str(to_state) +'\n'
         msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
-        logging.debug(msg)
+        logger.debug(msg)
         
         state_label_pairs = transition_system.states.find(ts_to_state)
         (ts_to_state_, transition_label_dict) = state_label_pairs[0]
