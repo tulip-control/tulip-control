@@ -66,7 +66,7 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 cont_partition = prop2part(cont_state_space, cont_props)
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, verbose=0
+    N=8, min_cell_volume=0.1
 )
 
 # Specifications
