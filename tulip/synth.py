@@ -102,6 +102,8 @@ def mutex(iterable):
     """
     if not iterable:
         return []
+    if len(iterable) <= 1:
+        return []
     
     return [_conj([
         '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
@@ -376,6 +378,8 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         state_id = state_ids[state]
         label = states.label_of(state)
         ap_str = sprint_aps(label, aps)
+        if not ap_str:
+            continue
         init += ['!(' + pstr(state_id) + ') || (' + ap_str +')']
     
     # skip ?
@@ -561,6 +565,8 @@ def ap_trans_from_ts(states, state_ids, aps):
         state_id = state_ids[state]
         
         tmp = sprint_aps(label, aps)
+        if not tmp:
+            continue
         
         trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
     return trans
@@ -569,7 +575,7 @@ def sprint_aps(label, aps):
     if label.has_key("ap"):
         tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
     else:
-        tmp0 = ""
+        tmp0 = ''
     
     if label.has_key("ap"):
         tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
