@@ -184,7 +184,7 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     @rtype: GRSpec
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        (sys_vars, sys_init, sys_trans) = sys_fts2spec(
+        (sys_vars, sys_init, sys_trans) = fts2spec(
             sys, ignore_initial, bool_states, 'loc'
         )
         return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
@@ -205,7 +205,7 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
     @type bool_states: bool
     """
     if isinstance(env, transys.FiniteTransitionSystem):
-        (env_vars, env_init, env_trans) = sys_fts2spec(
+        (env_vars, env_init, env_trans) = fts2spec(
             env, ignore_initial, bool_states, 'eloc'
         )
         return GRSpec(env_vars=env_vars, env_init=env_init,
@@ -216,8 +216,8 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
 
-def sys_fts2spec(fts, ignore_initial=False, bool_states=False,
-                 statevar='loc'):
+def fts2spec(fts, ignore_initial=False, bool_states=False,
+             statevar='loc'):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
