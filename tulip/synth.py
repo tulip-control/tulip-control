@@ -149,7 +149,13 @@ def create_states(states, variables, trans, statevar, bool_states):
     
     @param bool_states: if True, then use bool variables.
         Otherwise use int-valued variable.
+        The latter is overridden in case < 3 states exist,
+        to avoid issues with gr1c.
     """
+    # too few states for a gr1c int variable ?
+    if len(states) < 3:
+        bool_states = True
+    
     if bool_states:
         state_ids = states2bools(states)
         variables.update({s:'boolean' for s in states})
