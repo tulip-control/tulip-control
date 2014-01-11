@@ -9,8 +9,7 @@ In most cases, it suffices to::
 
   python setup.py install
 
-To avoid checking for required, recommended, and optional dependencies, add the
-option "nocheck"::
+To avoid checking for optional dependencies, add the option "nocheck"::
 
   python setup.py install nocheck
 

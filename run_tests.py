@@ -2,7 +2,7 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
-SCL; 4 Jan 2014.
+SCL; 10 Jan 2014.
 """
 
 import sys
@@ -16,9 +16,9 @@ if __name__ == "__main__":
     TESTFILES... is space-separated list of test file names, where the suffix
     "_test.py" is added to each given name.  E.g.,
 
-      run_tests.py automaton
+      run_tests.py gr1cint
 
-    causes the automaton_test.py file to be used and no others.  If no arguments
+    causes the gr1cint_test.py file to be used and no others.  If no arguments
     are given, then default is to run all tests.  If TESTFILES... each have a
     prefix of "-", then all tests *except* those listed will be run.  Besides
     what is below, OPTIONS... are passed on to nose.
@@ -65,8 +65,9 @@ if __name__ == "__main__":
     excludefiles = []
     for basename in sys.argv[1:]:  # Only add extant file names
         try:
-            with open(os.path.join("tests", basename+"_test.py"), "r") as f:
-                testfiles.append(basename+"_test.py")
+            relname = os.path.join("tests", basename+"_test.py")
+            with open(relname, "r") as f:
+                testfiles.append(relname)
         except IOError:
             if basename[0] == "-":
                 try:

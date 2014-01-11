@@ -51,8 +51,15 @@ be followed:
 - A script for running tests is ``run_test.py`` in the root of the source tree.
   It searches under the directory ``tests/`` for files with names ending in
   "_test.py", and passes these to `nose <http://readthedocs.org/docs/nose/>`_.
-  Use the flag "--cover" to generate a coverage report, which will likely be
-  placed under ``tests/cover/``.
+  Use the flag "-h" to see driver script options.  Extra details about options:
+
+  * The flag "--cover" to generate a coverage report, which will likely be
+    placed under ``tests/cover/``.  It uses `Ned Batchelder's coverage module
+    <http://www.nedbatchelder.com/code/modules/coverage.html>`_.
+
+  * The flag "--outofsource" will cause ``tulip`` to be imported from outside
+    the current directory.  This is useful for testing against the installed
+    form of TuLiP.
 
 Version naming
 --------------
