@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 """
-Test the interface with JTLV.
-
-SCL; 11 Sep 2013.
-Vasu Raman; 4 Sept 2013
+Tests for the interface with JTLV.
 """
 
 from tulip.spec import GRSpec

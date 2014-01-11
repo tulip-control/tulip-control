@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-Test the interface with gr1c.
-
-SCL; 11 Jan 2014.
+Tests for the interface with gr1c.
 """
 
 import os
