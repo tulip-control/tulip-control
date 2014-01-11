@@ -373,18 +373,10 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     
     # don't ignore labeling info
     for state in states.initial:
-        label = states.label_of(state)
-        
-        ap_init = _conj_intersection(aps, label["ap"])
-        init.append(ap_init)
-        
-        if len(init[-1]) > 0:
-            init[-1] += " && "
-        
-        init[-1] += _conj_neg_diff(aps, label["ap"])
-        
         state_id = state_ids[state]
-        init[-1] = "!("+str(state_id)+") || ("+init[-1]+")"
+        label = states.label_of(state)
+        ap_str = sprint_aps(label, aps)
+        init += ['!(' + pstr(state_id) + ') || (' + ap_str +')']
     
     # skip ?
     if ignore_initial:
@@ -568,23 +560,27 @@ def ap_trans_from_ts(states, state_ids, aps):
         label = states.label_of(state)
         state_id = state_ids[state]
         
-        if label.has_key("ap"):
-            tmp0 = _conj_intersection(aps, label["ap"], parenth=False)
-        else:
-            tmp0 = ""
-        
-        if label.has_key("ap"):
-            tmp1 = _conj_neg_diff(aps, label["ap"], parenth=False)
-        else:
-            tmp1 = _conj_neg(aps, parenth=False)
-        
-        if len(tmp0) > 0 and len(tmp1) > 0:
-            tmp = tmp0 +' && '+ tmp1
-        else:
-            tmp = tmp0 + tmp1
+        tmp = sprint_aps(label, aps)
         
         trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
     return trans
+
+def sprint_aps(label, aps):
+    if label.has_key("ap"):
+        tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
+    else:
+        tmp0 = ""
+    
+    if label.has_key("ap"):
+        tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
+    else:
+        tmp1 = _conj_neg(aps, parenth=False)
+    
+    if len(tmp0) > 0 and len(tmp1) > 0:
+        tmp = tmp0 +' && '+ tmp1
+    else:
+        tmp = tmp0 + tmp1
+    return tmp
 
 def synthesize(option, specs, env=None, sys=None,
                ignore_env_init=False, ignore_sys_init=False,
