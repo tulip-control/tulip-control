@@ -419,6 +419,15 @@ class Region(object):
         @rtype: Region
         """
         return mldivide(self, other)
+    
+    def diff(self, other):
+        """Return set difference with Polytope or Region.
+        
+        @type other: Polytope or Region
+        
+        @rtype: Region
+        """
+        return mldivide(self, other)
         
     def __and__(self, other):
         """Return intersection with Polytope or Region.
