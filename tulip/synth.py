@@ -184,7 +184,11 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     @rtype: GRSpec
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        return sys_fts2spec(sys, ignore_initial, bool_states)
+        (sys_vars, sys_init, sys_trans) = sys_fts2spec(
+            sys, ignore_initial, bool_states, 'loc'
+        )
+        return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                      sys_safety=sys_trans)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
         return sys_open_fts2spec(sys, ignore_initial, bool_states)
     else:
@@ -201,14 +205,19 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
     @type bool_states: bool
     """
     if isinstance(env, transys.FiniteTransitionSystem):
-        raise NotImplementedError
+        (env_vars, env_init, env_trans) = sys_fts2spec(
+            env, ignore_initial, bool_states, 'eloc'
+        )
+        return GRSpec(env_vars=env_vars, env_init=env_init,
+                      env_safety=env_trans)
     elif isinstance(env, transys.OpenFiniteTransitionSystem):
         return env_open_fts2spec(env, ignore_initial, bool_states)
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
 
-def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
+def sys_fts2spec(fts, ignore_initial=False, bool_states=False,
+                 statevar='loc'):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -232,7 +241,6 @@ def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
         sys_vars.update({s:'boolean' for s in states})
         sys_trans += exactly_one(states)
     else:
-        statevar = 'loc'
         state_ids, domain = states2ints(states, statevar)
         sys_vars[statevar] = domain
     
@@ -243,7 +251,7 @@ def sys_fts2spec(fts, ignore_initial=False, bool_states=False):
     
     sys_trans += mutex(fts.actions)
     
-    return GRSpec(sys_vars=sys_vars, sys_init=init, sys_safety=sys_trans)
+    return (sys_vars, init, sys_trans)
 
 def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """Convert OpenFTS to GR(1) representation.
