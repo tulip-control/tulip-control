@@ -259,12 +259,12 @@ def discretize(
                 str(S0.volume) )
         
         # isect = si \cap S0
-        isect = si & S0
+        isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
         # diff = si \setminus S0
-        diff = si - S0
+        diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
         
@@ -621,7 +621,7 @@ def solve_closed_loop(
 
 def union_or_chain(s0, p2, use_all_horizon):
     if use_all_horizon:
-        p2 = s0 + p2
+        p2 = s0.union(p2)
     else:
         p2 = s0
     return p2
@@ -652,7 +652,7 @@ def solve_open_loop(
     for p1 in start_polys:
         for p2 in target_polys:
             cur_s0 = poly_to_poly(p1, p2, ssys, N, trans_set)
-            s0 = s0 + cur_s0
+            s0 = s0.union(cur_s0)
     
     return s0
 

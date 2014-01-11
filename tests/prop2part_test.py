@@ -55,7 +55,7 @@ def prop2part_test():
     assert len(mypartition.list_region[2].list_poly) == 3
     dum = state_space.copy()
     for reg in mypartition.list_region[0:2]:
-        dum = dum - reg
-    assert pc.is_empty(dum - mypartition.list_region[2])
-    assert pc.is_empty(mypartition.list_region[2] - dum)
+        dum = dum.diff(reg)
+    assert pc.is_empty(dum.diff(mypartition.list_region[2]) )
+    assert pc.is_empty(mypartition.list_region[2].diff(dum) )
 

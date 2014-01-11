@@ -90,7 +90,8 @@ def prop2part(state_space, cont_props_dict):
             prop_holds_reg.append(0)
             list_prop_now = mypartition.list_region[i].list_prop[:]
             
-            dummy = region_now & cont_props[prop_count]
+            dummy = region_now.intersect(cont_props[prop_count])
+            
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
                 dum_list_prop.append(1)
@@ -117,7 +118,7 @@ def prop2part(state_space, cont_props_dict):
                     list_prop=list_prop_now
                 )
             )
-            dummy = region_now - cont_props[prop_count]
+            dummy = region_now.diff(cont_props[prop_count])
             
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
@@ -200,7 +201,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     --------
     discretize.discretize
     """
-    if pc.is_fulldim(ppp.domain - pwa_sys.domain):
+    if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
         raise Exception("pwaPartition: "
             "pwa system is not defined everywhere in state space")
 
@@ -209,8 +210,9 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     parent = []
     for i in xrange(len(pwa_sys.list_subsys)):
         for j in xrange(ppp.num_regions):
-            isect = pwa_sys.list_subsys[i].domain & \
+            isect = pwa_sys.list_subsys[i].domain.intersect(
                 ppp.list_region[j]
+            )
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)

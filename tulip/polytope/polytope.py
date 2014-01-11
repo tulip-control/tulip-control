@@ -199,19 +199,6 @@ class Polytope(object):
         P.fulldim = self.fulldim
         return P
     
-    def __add__(self, other):
-        """Return union with Polytope or Region.
-        
-        Applies convex simplification if possible.
-        To turn off this check,
-        use Polytope.union
-        
-        @type other: Polytope or Region
-        
-        @rtype: Region
-        """
-        return union(self, other, check_convex=True)
-    
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
         
@@ -223,7 +210,7 @@ class Polytope(object):
         """
         return union(self, other, check_convex)
     
-    def __sub__(self, other):
+    def diff(self, other):
         """Return set difference with Polytope or Region.
         
         @type other: Polytope or Region
@@ -231,19 +218,6 @@ class Polytope(object):
         @rtype: Region
         """
         return mldivide(self, other)
-        
-    def __and__(self, other):
-        """Return intersection with Polytope or Region.
-        
-        Absolute tolerance 1e-7 used.
-        To select the absolute tolerance use
-        method Polytope.intersect
-        
-        @type other: Polytope or Region
-        
-        @rtype: Polytope or Region
-        """
-        return intersect(self, other)
     
     def intersect(self, other, abs_tol=1e-7):
         """Return intersection with Polytope or Region.
@@ -557,7 +531,7 @@ def is_convex(reg, abs_tol = 1e-7):
     if sum(abs(bboxP[:,0] - bboxO[:,0]) > abs_tol) > 0 or \
     sum(abs(bboxP[:,1] - bboxO[:,1]) > abs_tol) > 0:
         return False,None
-    if is_fulldim(outer - reg):
+    if is_fulldim(outer.diff(reg)):
         return False,None
     else:
         return True,outer
@@ -704,8 +678,8 @@ def union(polyreg1,polyreg2,check_convex=False):
     if check_convex:
         s1 = intersect(polyreg1, polyreg2)
         if is_fulldim(s1):
-            s2 = polyreg2 - polyreg1
-            s3 = polyreg1 - polyreg2
+            s2 = polyreg2.diff(polyreg1)
+            s3 = polyreg1.diff(polyreg2)
         else:
             s2 = polyreg1
             s3 = polyreg2
