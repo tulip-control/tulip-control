@@ -126,6 +126,6 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('jtlv', specs, sys=sys_swe, ignore_sys_init=True)
 
 # @plot_print@
-if not ctrl.save('robot_environment_switching.png', 'png'):
+if not ctrl.save('environment_switching.png', 'png'):
     print(ctrl)
 # @plot_print_end@

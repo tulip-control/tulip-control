@@ -107,7 +107,7 @@ if ctrl is None:
     sys.exit()
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('robot_continuous.png', 'png'):
+if not ctrl.save('continuous.png', 'png'):
     print(ctrl)
 # @synthesize_section_end@
 

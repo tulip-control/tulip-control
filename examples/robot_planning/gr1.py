@@ -117,7 +117,7 @@ if ctrl is None:
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-if not ctrl.save('robot_gr1.png', 'png'):
+if not ctrl.save('gr1.png', 'png'):
     print(ctrl)
 
 # either select current state before simulation
