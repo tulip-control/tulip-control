@@ -116,6 +116,9 @@ def exactly_one(iterable):
     
     Contrast with pure mutual exclusion.
     """
+    if len(iterable) <= 1:
+        return [pstr(x) for x in iterable]
+    
     return ['(' + _disj([
         '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
         for x in iterable
