@@ -132,6 +132,33 @@ def _conj_action(label, action_type, nxt=False):
     else:
         return ' && ' + pstr(action)
 
+def create_states(states, variables, trans, statevar, bool_states):
+    """Create bool or int state variables in GR(1).
+    
+    Return map of TS states to spec variable valuations.
+    
+    @param states: TS states
+    
+    @param variables: to be augmented with state variables
+    
+    @param trans: to be augmented with state variable constraints.
+        Such a constraint is necessary only in case of bool states.
+        It requires that exactly one bool variable be True at a time.
+    
+    @param statevar: name to use for int-valued state variabe.
+    
+    @param bool_states: if True, then use bool variables.
+        Otherwise use int-valued variable.
+    """
+    if bool_states:
+        state_ids = states2bools(states)
+        variables.update({s:'boolean' for s in states})
+        trans += exactly_one(states)
+    else:
+        state_ids, domain = states2ints(states, statevar)
+        variables[statevar] = domain
+    return state_ids
+
 def states2bools(states):
     """Return dict(state : state).
     
@@ -249,14 +276,9 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     sys_vars.update({act:'boolean' for act in fts.actions})
     
     sys_trans = []
-    
-    if bool_states:
-        state_ids = states2bools(states)
-        sys_vars.update({s:'boolean' for s in states})
-        sys_trans += exactly_one(states)
-    else:
-        state_ids, domain = states2ints(states, statevar)
-        sys_vars[statevar] = domain
+    statevar = 'loc'
+    state_ids = create_states(states, sys_vars, sys_trans,
+                              statevar, bool_states)
     
     init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -315,14 +337,9 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     env_vars = list(env_actions)
     env_trans = mutex(env_actions)
     
-    if bool_states:
-        state_ids = states2bools(states)
-        sys_vars.update({s:'boolean' for s in states})
-        sys_trans += exactly_one(states)
-    else:
-        statevar = 'loc'
-        state_ids, domain = states2ints(states, statevar)
-        sys_vars[statevar] = domain
+    statevar = 'loc'
+    state_ids = create_states(states, sys_vars, sys_trans,
+                              statevar, bool_states)
     
     sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -358,14 +375,9 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     # defined in the environment TS
     sys_trans = exactly_one(ofts.sys_actions)
     
-    if bool_states:
-        state_ids = states2bools(states)
-        env_vars.update({s:'boolean' for s in states})
-        env_trans += exactly_one(states)
-    else:
-        statevar = 'eloc'
-        state_ids, domain = states2ints(states, statevar)
-        env_vars[statevar] = domain
+    statevar = 'eloc'
+    state_ids = create_states(states, env_vars, env_trans,
+                              statevar, bool_states)
     
     env_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
