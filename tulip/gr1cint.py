@@ -292,7 +292,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         values2ints = {var:str(i) for i, var in enumerate(domain)}
         
         # replace symbols by ints
-        spec1.sym_to_prop(values2ints, verbose=10)
+        spec1.sym_to_prop(values2ints)
     
     # Mealy reaction to initial env input
     for v in A.nodes_iter():
@@ -310,7 +310,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
 def _create_machine_ports(mach, vars_dict, spec0_vars):
     """Create proper port domains of valuations, given port types.
     """
-    print(spec0_vars)
     ports = []
     for env_var, var_type in vars_dict.items():
         if var_type == 'boolean':

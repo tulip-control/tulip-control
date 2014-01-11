@@ -803,4 +803,4 @@ def _sub_var(spec, vars_dict):
         values2ints = {var:str(i) for i, var in enumerate(domain)}
         
         # replace symbols by ints
-        spec.sym_to_prop(values2ints, verbose=10)
+        spec.sym_to_prop(values2ints)
