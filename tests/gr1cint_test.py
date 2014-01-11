@@ -2,7 +2,7 @@
 """
 Test the interface with gr1c.
 
-SCL; 11 Sep 2013.
+SCL; 11 Jan 2014.
 """
 
 import os
@@ -80,16 +80,16 @@ class gr1cint_test:
         
     def test_synthesize(self):
         self.f_un.sys_safety = []  # Make it realizable
-        aut = gr1cint.synthesize(self.f_un)
-        assert aut is not None
-        assert len(aut.inputs) == 1 and aut.inputs.has_key("x")
-        assert len(aut.outputs) == 1 and aut.outputs.has_key("y")
+        mach = gr1cint.synthesize(self.f_un)
+        assert mach is not None
+        assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
+        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
 
-        aut = gr1cint.synthesize(self.dcounter)
-        assert aut is not None
-        assert len(aut.inputs) == 0
-        assert len(aut.outputs) == 1 and aut.outputs.has_key("y")
-        assert len(aut.states) == 2
+        mach = gr1cint.synthesize(self.dcounter)
+        assert mach is not None
+        assert len(mach.inputs) == 0
+        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+        assert len(mach.states) == 3
 
 
 class GR1CSession_test:
