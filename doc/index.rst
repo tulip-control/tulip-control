@@ -8,6 +8,7 @@ reactive controllers for hybrid systems and perform related functions.
 Contents:
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
 
    intro
@@ -19,10 +20,7 @@ Contents:
    dev_guide
    bibliography
 
-Indices and tables
-==================
+Special pages:
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
-
