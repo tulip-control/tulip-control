@@ -32,12 +32,15 @@
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
+import logging
 from warnings import warn
 
 from tulip import transys
 from tulip.spec import GRSpec
 from tulip import jtlvint
 from tulip import gr1cint
+
+hl = '\n' +60*'-'
 
 def pstr(s):
     return '(' +str(s) +')'
@@ -642,10 +645,10 @@ def synthesize(option, specs, env=None, sys=None,
                         'Current options are "jtlv" and "gr1c"')
     
     try:
-        if verbose:
-            print('Mealy machine has: n = ' +str(len(ctrl.states) ) +' states.')
+        logging.debug('Mealy machine has: n = ' +
+            str(len(ctrl.states) ) +' states.')
     except:
-        pass
+        logging.debug('No Mealy machine returned.')
     
     # no controller found ?
     # exploring unrealizability with counterexamples or other means
@@ -678,7 +681,10 @@ def spec_plus_sys(specs, env=None, sys=None,
     if sys is not None:
         sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states)
         specs = specs | sys_formula
+        logging.debug('sys TS:\n' + str(sys_formula.pretty() ) + hl)
     if env is not None:
         env_formula = env_to_spec(env, ignore_env_init, bool_states)
         specs = specs | env_formula
+        logging.debug('env TS:\n' + str(env_formula.pretty() ) + hl)
+    
     return specs

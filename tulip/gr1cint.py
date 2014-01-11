@@ -40,6 +40,7 @@ Most functions have a "verbose" argument.
 0 means silent (the default setting),
 positive means provide some status updates.
 """
+import logging
 from warnings import warn
 import copy
 import subprocess
@@ -51,7 +52,7 @@ from .spec import GRSpec
 from .transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
-
+hl = '\n' +60*'-'
 
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
 
@@ -405,7 +406,15 @@ def synthesize(spec, verbose=0):
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    logging.debug('gr1c input:\n' + spec.to_gr1c() +hl)
+    
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
+    
+    logging.debug('gr1c returned:\n' + str(p.returncode) )
+    logging.debug('gr1c stdout:\n' + str(stdoutdata) +hl)
+    logging.debug('gr1c stderr:\n' + str(stderrdata) +hl)
+    
     if p.returncode == 0:
         (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
         return aut
