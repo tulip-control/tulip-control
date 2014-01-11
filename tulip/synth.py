@@ -335,7 +335,7 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     
     if bool_states:
         state_ids = states2bools(states)
-        env_vars += {s:'boolean' for s in states}
+        env_vars.update({s:'boolean' for s in states})
         env_trans += exactly_one(states)
     else:
         statevar = 'eloc'
