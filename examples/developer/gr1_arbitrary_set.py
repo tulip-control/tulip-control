@@ -35,7 +35,7 @@ specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     env_prog=env_prog, sys_prog=sys_prog)
 
 ctrl = synth.synthesize('gr1c', specs)
-ctrl.save('robot_gr1_arbitrary_set.png', 'png')
+ctrl.save('gr1_arbitrary_set0.png', 'png')
 
 """
 2nd example
@@ -73,4 +73,4 @@ specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     env_prog=env_prog, sys_prog=sys_prog)
 
 ctrl = synth.synthesize('gr1c', specs, sys=sys)
-ctrl.save('robot_gr1_arbitrary_set2.png', 'png')
+ctrl.save('gr1_arbitrary_set1.png', 'png')
