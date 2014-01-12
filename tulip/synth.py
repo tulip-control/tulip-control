@@ -469,9 +469,9 @@ def sys_trans_from_ts(states, state_ids, trans):
             postcond = '(' + str(to_state_id) +')'
             
             postcond += _conj_action(label, 'env_actions')
-            postcond += _conj_action(label, 'sys_actions', nxt=True)
+            postcond += _conj_action(label, 'sys_actions')
             # system FTS given
-            postcond += _conj_action(label, 'actions', nxt=True)
+            postcond += _conj_action(label, 'actions')
             
             cur_str += ['(' + precond + ') -> X(' + postcond + ')']
             
