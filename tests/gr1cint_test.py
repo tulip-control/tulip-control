@@ -49,7 +49,7 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class gr1cint_test:
+class basic_test:
     def setUp(self):
         self.f_un = GRSpec(env_vars="x", sys_vars="y",
                            env_init="x", env_prog="x",
