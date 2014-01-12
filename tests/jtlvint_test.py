@@ -5,6 +5,7 @@ Tests for the interface with JTLV.
 
 from tulip.spec import GRSpec
 from tulip.jtlvint import check_gr1, check_realizable, synthesize
+from tulip.transys import MealyMachine
 
 
 class basic_test:
@@ -35,6 +36,9 @@ class basic_test:
         assert check_realizable(self.f_un)
 
     def test_synthesize(self):
+        mach = synthesize(self.f_un)
+        assert not isinstance(mach, MealyMachine)
+
         mach = synthesize(self.f)
         # There is more than one possible strategy realizing this
         # specification.  Checking only for one here makes this more like
