@@ -17,10 +17,12 @@
 #     +---+---+
 #
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
-
 
 ###############################
 # Switched system with 2 modes:
@@ -122,8 +124,5 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('gr1c', specs, env=env_sws, ignore_env_init=True)
-
-# Generate a graphical representation of the controller for viewing
-if not ctrl.save('robot_controlled_switching.png', 'png'):
-    print(ctrl)
+r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
+assert(not r)
