@@ -704,13 +704,21 @@ def synthesize(option, specs, env=None, sys=None,
     
     return ctrl
 
-def is_realizable(option, specs, sys=None, ignore_ts_init=False,
-                  verbose=0):
+def is_realizable(option, specs, env=None, sys=None,
+                  ignore_env_init=False, ignore_sys_init=False,
+                  bool_states=False, verbose=0):
     """Check realizability.
     
     For details see synthesize.
     """
-    specs = spec_plus_sys(specs, sys, ignore_ts_init)
+    if bool_states is False and option is 'jtlv':
+        warn('Int state not yet available for jtlv solver.\n' +
+             'Using bool states.')
+        bool_states = True
+    
+    specs = spec_plus_sys(specs, env, sys,
+                          ignore_env_init, ignore_sys_init,
+                          bool_states)
     
     if option == 'gr1c':
         r = gr1cint.check_realizable(specs, verbose=verbose)
