@@ -161,8 +161,8 @@ def synthesize(
 
     Arguments are described in documentation for L{solve_game}.
     
-    Return strategy as instance of Automaton class, or None if
-    unrealizable or error occurs.
+    Return strategy as instance of Automaton class, or a list of
+    counter-examples as returned by L{get_counterexamples}.
     """
     fSMV, fLTL, fAUT = create_files(spec)
 
