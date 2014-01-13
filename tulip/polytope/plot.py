@@ -40,7 +40,7 @@ Functions:
 """
 import numpy as np
 
-import matplotlib
+import mpl
 
 from .polytope import extreme, cheby_ball, is_fulldim
 from tulip.graphics import newax
@@ -74,7 +74,7 @@ def get_patch(poly1, color="blue"):
     angle = angle*corr
     ind = np.argsort(angle) 
 
-    patch = matplotlib.patches.Polygon(V[ind,:], True, color=color)
+    patch = mpl.patches.Polygon(V[ind,:], True, color=color)
     return patch
 
 def plot(poly1, ax=None, color=np.random.rand(3)):
