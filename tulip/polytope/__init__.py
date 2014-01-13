@@ -39,7 +39,7 @@ Functions for plotting are in plot.py, requires matplotlib.
 
 from .polytope import Polytope, Region
 from .polytope import is_empty, is_fulldim, is_convex, is_adjacent
-from .polytope import reduce, separate, box2poly
+from .polytope import reduce, separate, box2poly, grid_region
 from .polytope import cheby_ball, bounding_box, envelope, extreme, qhull
 
 # to be moved to MPT namespace
