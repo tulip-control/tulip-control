@@ -70,11 +70,19 @@ Functions:
 	- envelope
 	- extreme
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy as np
 from cvxopt import matrix, solvers
 
-import matplotlib as mpl
-from tulip.graphics import newax
+try:
+    import matplotlib as mpl
+    from tulip.graphics import newax
+except Exception, e:
+    logger.error(e)
+    mpl = None
+    newax = None
 
 from .quickhull import quickhull
 from .esp import esp
@@ -84,7 +92,7 @@ try:
     import cvxopt.glpk
     lp_solver = 'glpk'
 except:
-    print("GLPK (Gnu Linear Programming Kit) solver for CVXOPT not found, "
+    logger.warn("GLPK (Gnu Linear Programming Kit) solver for CVXOPT not found, "
            "reverting to CVXOPT's own solver. This may be slow")
     lp_solver = None
 
