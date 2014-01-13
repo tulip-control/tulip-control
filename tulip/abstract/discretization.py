@@ -187,7 +187,7 @@ def discretize(
     # (defined within the loop for pwa systems)
     if islti:
         if len(ssys.E) > 0:
-            rd,xd = pc.cheby_ball(ssys.Wset)
+            rd, xd = pc.cheby_ball(ssys.Wset)
         else:
             rd = 0.
     
@@ -255,19 +255,9 @@ def discretize(
         if ispwa:
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
-                rd,xd = pc.cheby_ball(ss.Wset)
+                rd, xd = pc.cheby_ball(ss.Wset)
             else:
                 rd = 0.
-        
-        msg = '\n Working with states:\n\t'
-        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
-            
-        if ispwa:
-            msg += 'with active subsystem:\n\t'
-            msg += str(subsys_list[i])
-            
-        logger.info(msg)
         
         if conservative:
             # Don't use trans_set
@@ -281,8 +271,17 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        logger.info("Computed reachable set S0 with volume " +
-            str(S0.volume) )
+        msg = '\n Working with states:\n\t'
+        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
+        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
+            
+        if ispwa:
+            msg += 'with active subsystem:\n\t'
+            msg += str(subsys_list[i])
+            
+        msg += "Computed reachable set S0 with volume " + str(S0.volume)
+        
+        logger.info(msg)
         
         # isect = si \cap S0
         isect = si.intersect(S0)
@@ -358,10 +357,10 @@ def discretize(
             adj[i, i] = 1
                         
             if logger.getEffectiveLevel() >= logging.INFO:
-                output = "\n Adding states " + str(i) + " and "
+                msg = '\n Adding states ' + str(i) + ' and '
                 for kk in xrange(num_new):
-                    output += str(size-1-kk) + " and "
-                logger.info(output + "\n")
+                    msg += str(size-1-kk) + ' and '
+                msg += '\n'
                         
             for k in np.setdiff1d(old_adj, [i,size-1]):
                 # Every "old" neighbor must be the neighbor
@@ -393,16 +392,18 @@ def discretize(
             for kk in xrange(num_new):
                 sym_adj_change(IJ, adj_k, transitions, size -1 -kk)
             
-            logger.info("\n Updated adj: \n" +str(adj) )
-            logger.info("\n Updated trans: \n" +str(transitions) )
-            logger.info("\n Updated IJ: \n" +str(IJ) )
+            msg += '\n\n Updated adj: \n' + str(adj)
+            msg += '\n\n Updated trans: \n' + str(transitions)
+            msg += '\n\n Updated IJ: \n' + str(IJ)
         elif vol2 < abs_tol:
-            logger.info("Transition found")
+            msg += 'Transition found'
             transitions[j,i] = 1
         else:
-            logger.info("No transition found, diff vol: " +str(vol2) +
-                         ", intersect vol: " +str(vol1) )
+            msg += 'No transition found, diff vol: ' + str(vol2)
+            msg += ', intersect vol: ' + str(vol1)
             transitions[j,i] = 0
+        
+        logger.info(msg)
     
         # no plotting ?
         if not plotit:
