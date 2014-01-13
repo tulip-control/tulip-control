@@ -112,7 +112,7 @@ def discretize(
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
     abs_tol=1e-7,
-    plotit=False, save_img=False
+    plotit=False, save_img=False, cont_props=None
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -153,6 +153,9 @@ def discretize(
         requires plotit=True
     @type save_img: boolean,
         default = False
+    
+    @param cont_props: continuous propositions to plot
+    @type cont_props: list of Polytopes
     
     @rtype: AbstractSysDyn
     """
@@ -435,6 +438,11 @@ def discretize(
             for subsystem_idx in subsys_list:
                 subsystem = ssys.list_subsys[subsystem_idx]
                 subsystem.plot(ax1, show_domain=False)
+        
+        # plot hatched continuous propositions
+        for (prop, poly) in cont_props.iteritems():
+            poly.plot(ax1, color='none', hatch='/')
+            poly.text(prop, ax1, color='yellow')
         
         fig.canvas.draw()
         
