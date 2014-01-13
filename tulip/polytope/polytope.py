@@ -349,7 +349,8 @@ class Polytope(object):
             self.bbox = bounding_box(self)
         return self.bbox
     
-    def plot(self, ax=None, color=np.random.rand(3)):
+    def plot(self, ax=None, color=np.random.rand(3),
+             hatch=None, alpha=1.0):
         if newax is None:
             logger.warn('newax not imported. No Polytope plotting.')
             return
@@ -366,7 +367,7 @@ class Polytope(object):
         if ax is None:
             ax, fig = newax()
         
-        poly = _get_patch(self, color=color)
+        poly = _get_patch(self, color, hatch, alpha)
         ax.add_patch(poly)
         
         return ax
@@ -535,7 +536,8 @@ class Region(object):
             self.bbox = bounding_box(self)
         return self.bbox
     
-    def plot(self, ax=None, color=np.random.rand(3)):
+    def plot(self, ax=None, color=np.random.rand(3),
+             hatch=None, alpha=1.0):
         if newax is None:
             warn('pyvectorized not found. No plotting.')
             return None
@@ -554,7 +556,7 @@ class Region(object):
         
         for poly2 in self.list_poly:
             # TODO hatched polytopes in same region
-            poly2.plot(ax, color)
+            poly2.plot(ax, color, hatch, alpha)
         
         return ax 
     
@@ -1868,7 +1870,7 @@ def box2poly(box):
     """
     return Polytope.from_box(box)
 
-def _get_patch(poly1, color="blue"):
+def _get_patch(poly1, color="blue", hatch=None, alpha=1.0):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
     that can be added to a plot
     
@@ -1901,7 +1903,8 @@ def _get_patch(poly1, color="blue"):
     angle = angle*corr
     ind = np.argsort(angle) 
 
-    patch = mpl.patches.Polygon(V[ind,:], True, color=color)
+    patch = mpl.patches.Polygon(V[ind,:], True, color=color,
+                                hatch=hatch, alpha=alpha)
     patch.set_zorder(0)
     return patch
 
