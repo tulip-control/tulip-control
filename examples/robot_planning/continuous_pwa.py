@@ -13,7 +13,8 @@ Necmiye Ozay, August 26, 2012
 
 import numpy as np
 
-from tulip import spec, synth, hybrid
+from tulip import spec, synth
+from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from tulip.polytope import box2poly
 from tulip.abstract import prop2part, discretize
 
@@ -31,30 +32,33 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 # of the surface can be modeled as a piecewise affine system as
 # follows:
 
-# subsystem0
-A0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
-B0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
-E0 = np.array([[1,0], [0,1]])
+def subsys0():
+    A0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    B0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    E0 = np.array([[1,0], [0,1]])
+    
+    U0 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
+    W0 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
+    dom0 = box2poly([[0., 3.], [0.5, 2.]])
+    
+    return LtiSysDyn(A0, B0, E0, [], U0, W0, dom0)
 
-U0 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
-W0 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
-dom0 = box2poly([[0., 3.], [0.5, 2.]])
+def subsys1():
+    A1 = np.array([[0.9948, 0.], [0., 1.1052]])
+    B1 = np.array([[-1.1052, 0.], [0., 1.1052]])
+    E1 = np.array([[1, 0], [0, 1]])
+    
+    U1 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
+    W1 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
+    
+    dom1 = box2poly([[0., 3.],[0., 0.5]])
+    
+    return LtiSysDyn(A1, B1, E1, [], U1, W1, dom1)
 
-sys_dyn0 = hybrid.LtiSysDyn(A0, B0, E0, [], U0, W0, dom0)
-
-# subsystem1
-A1 = np.array([[0.9948, 0.], [0., 1.1052]])
-B1 = np.array([[-1.1052, 0.], [0., 1.1052]])
-E1 = np.array([[1, 0], [0, 1]])
-
-U1 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
-W1 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
-
-dom1 = box2poly([[0., 3.],[0., 0.5]])
-sys_dyn1 = hybrid.LtiSysDyn(A1, B1, E1, [], U1, W1, dom1)
+subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
-sys_dyn = hybrid.PwaSysDyn([sys_dyn0, sys_dyn1], cont_state_space)
+sys_dyn = PwaSysDyn(subsystems, cont_state_space)
 
 # Continuous proposition
 cont_props = {}
