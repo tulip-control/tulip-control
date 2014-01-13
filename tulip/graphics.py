@@ -35,10 +35,11 @@ Convenience functions for plotting
 from here:
     https://github.com/johnyf/pyvectorized
 """
+from __future__ import division
+
 import logging
 logger = logging.getLogger(__name__)
 
-from __future__ import division
 from warnings import warn
 from itertools import izip_longest
 
