@@ -284,13 +284,6 @@ def discretize(
         logger.info("Computed reachable set S0 with volume " +
             str(S0.volume) )
         
-        if plotit:
-            ax2.clear()
-            polyplot(si, ax=ax2, color="blue")
-            polyplot(sj, ax=ax2, color="red")
-            polyplot(S0, ax=ax2, color="green")
-            fig.canvas.draw()
-        
         # isect = si \cap S0
         isect = si.intersect(S0)
         vol1 = isect.volume
@@ -423,35 +416,27 @@ def discretize(
             list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
         )
         
-        #polyplot(si, ax=ax2)
-        #print('plotted: si = ' +str(si))
-        #polyplot(sj, ax=ax2)
-        #print('plotted: sj = ' +str(sj))
-        #polyplot(S0, ax=ax2)
-        #print('plotted: S0 = ' +str(S0))
-        
-        #fig2.canvas.draw()
+        ax2.clear()
+        polyplot(si, ax=ax2, color="blue")
+        polyplot(sj, ax=ax2, color="red")
+        polyplot(S0, ax=ax2, color="green")
+        fig.canvas.draw()
         
         ax1.clear()
         
         plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
-        if save_img:
-            fig.savefig('movie' +str(iter_count) +'.pdf')
-        
-        iter_count += 1
         
         fig.canvas.draw()
         
-        #ax1.relim()
-        #ax2.relim()
-        
-        #ax1.autoscale_view(True, True, True)
-        #ax2.autoscale_view(True, True, True)
-        
+        # scale view based on domain,
+        # not only the current polytopes si, sj
         l,u = pc.bounding_box(part.domain)
         ax2.set_xlim(l[0,0], u[0,0])
         ax2.set_ylim(l[1,0], u[1,0])
         
+        if save_img:
+            fig.savefig('movie' +str(iter_count) +'.pdf')
+        iter_count += 1
         plt.pause(1)
 
     new_part = PropPreservingPartition(
