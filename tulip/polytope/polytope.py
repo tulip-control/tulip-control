@@ -606,22 +606,20 @@ def is_convex(reg, abs_tol = 1e-7):
     else:
         return True,outer
 
-def is_inside(poly1,p0,abs_tol=1e-7):
-    """Checks if the point p0 satisfies all the inequalities of poly1.
+def is_inside(polyreg, point, abs_tol=1e-7):
+    """Checks if point satisfies all the inequalities of polyreg.
     
-    Input:
-    `poly1`: Polytope or Region object.
+    @param polyreg: Polytope or Region.
     
-    Output:
-    `result`: Boolean being True or False
+    @rtype result: bool
     """
-    if len(poly1) > 0:
-        for poly2 in poly1.list_poly:
-            if is_inside(poly2,p0):
+    if len(polyreg) > 0:
+        for poly in polyreg.list_poly:
+            if is_inside(poly, point):
                 return True
         return False
         
-    test = np.dot(poly1.A,p0.flatten()) - poly1.b < abs_tol
+    test = np.dot(polyreg.A, point.flatten()) - polyreg.b < abs_tol
     return np.all(test)
         
 def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):  
