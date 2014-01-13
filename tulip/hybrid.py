@@ -38,11 +38,20 @@ Classes:
     
 NO, 2 Jul 2013.
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import itertools
 
 import numpy as np
 
 import polytope as pc
+
+try:
+    from tulip.graphics import newax, quiver
+except Exception, e:
+    logger.error(e)
+    quiver = None
 
 class LtiSysDyn(object):
     """Represent discrete-time continuous dynamics:
@@ -121,7 +130,20 @@ class LtiSysDyn(object):
         return output
     
     def plot(self, ax=None, color=np.random.rand(3)):
+        if quiver is None:
+            logger.warn('pyvectorized not found. No plotting.')
+            return
+        
+        x = pc.grid_region(self.domain)
+        v = self.A.dot(x)
+        
+        if ax is None:
+            ax, fig = newax()
+        
         self.domain.plot(ax, color)
+        quiver(x, v, ax)
+        
+        return ax
 
 class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
