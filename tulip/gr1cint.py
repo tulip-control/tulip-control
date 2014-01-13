@@ -161,8 +161,22 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
-    x can be a string or an instance of
-    xml.etree.ElementTree._ElementInterface
+    @param x: a string or an instance of
+        xml.etree.ElementTree._ElementInterface
+
+    @type spec0: L{GRSpec}
+
+    @param spec0: GR(1) specification with which to interpret the
+        output of gr1c while constructing a MealyMachine, or None if
+        the output from gr1c should be used as is.  Note that spec0
+        may differ from the specification in the given tulipcon XML
+        string x.  If you are unsure what to do, try setting spec0 to
+        whatever L{gr1cint.synthesize} was invoked with.
+
+    @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
+        or both can be None if the corresponding part is missing.
+        Note that the returned GRSpec instance depends only on what is
+        in the given tulipcon XML string x, not on the argument spec0.
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
         raise TypeError("tag to be parsed must be given " +
@@ -253,6 +267,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
                    mode=mode, rgrad=rgrad)
         for next_node in this_child_list:
             A.add_edge(this_id, next_node)
+
+    if spec0 is None:
+        spec0 = spec
     
     # show port only when true (or non-zero for int-valued vars)
     mask_func = lambda x: bool(x)
