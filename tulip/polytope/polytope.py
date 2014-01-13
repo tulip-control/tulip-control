@@ -330,11 +330,11 @@ class Polytope(object):
             ax, fig = newax()
         
         if len(poly1) == 0:
-            poly = get_patch(poly1, color=color)
+            poly = _get_patch(poly1, color=color)
             ax.add_patch(poly)
         else:
             for poly2 in poly1.list_poly:
-                poly = get_patch(poly2, color=color)
+                poly = _get_patch(poly2, color=color)
                 ax.add_patch(poly)
         
         # affect view
@@ -1780,7 +1780,7 @@ def box2poly(box):
     """
     return Polytope.from_box(box)
 
-def get_patch(poly1, color="blue"):
+def _get_patch(poly1, color="blue"):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
     that can be added to a plot
     
@@ -1790,8 +1790,8 @@ def get_patch(poly1, color="blue"):
     > import matplotlib.pyplot as plt
     > fig = plt.figure()
     > ax = fig.add_subplot(111)
-    > p1 = get_patch(poly1, color="blue")
-    > p2 = get_patch(poly2, color="yellow")
+    > p1 = _get_patch(poly1, color="blue")
+    > p2 = _get_patch(poly2, color="yellow")
     > ax.add_patch(p1)
     > ax.add_patch(p2)
     > ax.set_xlim(xl, xu) # Optional: set axis max/min

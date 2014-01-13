@@ -53,7 +53,7 @@ except Exception, e:
     matplotlib = None
 
 try:
-    from tulip.polytope.plot import get_patch
+    from tulip.polytope.polytope import _get_patch
 except Exception, e:
     logger.error(e)
     matplotlib = None
