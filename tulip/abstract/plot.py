@@ -37,6 +37,8 @@ Functions:
     - plot_partition
     - plot_trajectory
 """
+import logging
+logger = logging.getLogger(__name__)
 from warnings import warn
 
 import numpy as np
@@ -46,8 +48,20 @@ from tulip.polytope import cheby_ball, bounding_box
 
 try:
     import matplotlib
-    from tulip.polytope.plot import get_patch, newax
-except:
+except Exception, e:
+    logger.error(e)
+    matplotlib = None
+
+try:
+    from tulip.polytope.plot import get_patch
+except Exception, e:
+    logger.error(e)
+    matplotlib = None
+
+try:
+    from tulip.graphics import newax
+except Exception, e:
+    logger.error(e)
     matplotlib = None
 
 def plot_partition(ppp, trans=None, plot_numbers=True,
@@ -97,7 +111,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     # new figure ?
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     ax.set_xlim(l[0,0],u[0,0])
     ax.set_ylim(l[1,0],u[1,0])
@@ -169,7 +183,7 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     plot_partition, plot
     """
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     plot_partition(plot_numbers=False, ax=ax, show=False)
     

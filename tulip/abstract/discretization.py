@@ -111,7 +111,8 @@ def discretize(
     closed_loop=True, conservative=False,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7
+    abs_tol=1e-7,
+    plotit=False, save_img=False
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -143,6 +144,15 @@ def discretize(
     @param remove_trans: if True, remove found transitions between
         non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
+    
+    @param plotit: plot partitioning as it evolves
+    @type plotit: boolean,
+        default = False
+    
+    @param save_img: save snapshots of partitioning to PDF files,
+        requires plotit=True
+    @type save_img: boolean,
+        default = False
     
     @rtype: AbstractSysDyn
     """
@@ -177,7 +187,7 @@ def discretize(
     # (defined within the loop for pwa systems)
     if islti:
         if len(ssys.E) > 0:
-            rd,xd = pc.cheby_ball(ssys.Wset)
+            rd, xd = pc.cheby_ball(ssys.Wset)
         else:
             rd = 0.
     
@@ -205,6 +215,31 @@ def discretize(
     subsys_list = deepcopy(part.list_subsys)
     ss = ssys
     
+    # init graphics
+    if plotit:
+        # here to avoid loading matplotlib unless requested
+        try:
+            from plot import plot_partition
+        except Exception, e:
+            logger.error(e)
+            plot_partition = None
+        
+        try:
+            from tulip.polytope.plot import plot as polyplot
+        except Exception, e:
+            logger.error(e)
+            plot_partition = None
+        
+        try:
+            import matplotlib.pyplot as plt
+            plt.ion()
+            fig, (ax1, ax2) = plt.subplots(1, 2)
+        except Exception, e:
+            logger.error(e)
+            plot_partition = None
+        
+        iter_count = 0    
+    
     # List of how many "new" regions
     # have been created for each region
     # and a list of original number of neighbors
@@ -227,19 +262,9 @@ def discretize(
         if ispwa:
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
-                rd,xd = pc.cheby_ball(ss.Wset)
+                rd, xd = pc.cheby_ball(ss.Wset)
             else:
                 rd = 0.
-        
-        msg = '\n Working with states:\n\t'
-        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
-            
-        if ispwa:
-            msg += 'with active subsystem:\n\t'
-            msg += str(subsys_list[i])
-            
-        logger.info(msg)
         
         if conservative:
             # Don't use trans_set
@@ -253,8 +278,17 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        logger.info("Computed reachable set S0 with volume " +
-            str(S0.volume) )
+        msg = '\n Working with states:\n\t'
+        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
+        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
+            
+        if ispwa:
+            msg += 'with active subsystem:\n\t'
+            msg += str(subsys_list[i])
+            
+        msg += "Computed reachable set S0 with volume " + str(S0.volume)
+        
+        logger.info(msg)
         
         # isect = si \cap S0
         isect = si.intersect(S0)
@@ -330,10 +364,10 @@ def discretize(
             adj[i, i] = 1
                         
             if logger.getEffectiveLevel() >= logging.INFO:
-                output = "\n Adding states " + str(i) + " and "
+                msg = '\n Adding states ' + str(i) + ' and '
                 for kk in xrange(num_new):
-                    output += str(size-1-kk) + " and "
-                logger.info(output + "\n")
+                    msg += str(size-1-kk) + ' and '
+                msg += '\n'
                         
             for k in np.setdiff1d(old_adj, [i,size-1]):
                 # Every "old" neighbor must be the neighbor
@@ -365,16 +399,53 @@ def discretize(
             for kk in xrange(num_new):
                 sym_adj_change(IJ, adj_k, transitions, size -1 -kk)
             
-            logger.info("\n Updated adj: \n" +str(adj) )
-            logger.info("\n Updated trans: \n" +str(transitions) )
-            logger.info("\n Updated IJ: \n" +str(IJ) )
+            msg += '\n\n Updated adj: \n' + str(adj)
+            msg += '\n\n Updated trans: \n' + str(transitions)
+            msg += '\n\n Updated IJ: \n' + str(IJ)
         elif vol2 < abs_tol:
-            logger.info("Transition found")
+            msg += 'Transition found'
             transitions[j,i] = 1
         else:
-            logger.info("No transition found, diff vol: " +str(vol2) +
-                         ", intersect vol: " +str(vol1) )
+            msg += 'No transition found, diff vol: ' + str(vol2)
+            msg += ', intersect vol: ' + str(vol1)
             transitions[j,i] = 0
+        
+        logger.info(msg)
+    
+        # no plotting ?
+        if not plotit:
+            continue
+        if plot_partition is None:
+            continue
+        
+        tmp_part = PropPreservingPartition(
+            domain=part.domain, num_prop=part.num_prop,
+            list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+            list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
+        )
+        
+        ax2.clear()
+        polyplot(si, ax=ax2, color="blue")
+        polyplot(sj, ax=ax2, color="red")
+        polyplot(S0, ax=ax2, color="green")
+        fig.canvas.draw()
+        
+        ax1.clear()
+        
+        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        
+        fig.canvas.draw()
+        
+        # scale view based on domain,
+        # not only the current polytopes si, sj
+        l,u = pc.bounding_box(part.domain)
+        ax2.set_xlim(l[0,0], u[0,0])
+        ax2.set_ylim(l[1,0], u[1,0])
+        
+        if save_img:
+            fig.savefig('movie' +str(iter_count) +'.pdf')
+        iter_count += 1
+        plt.pause(1)
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,

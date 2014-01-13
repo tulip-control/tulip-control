@@ -40,10 +40,10 @@ Functions:
 """
 import numpy as np
 
-import matplotlib.pyplot as plt
 import matplotlib
 
 from .polytope import extreme, cheby_ball, is_fulldim
+from tulip.graphics import newax
 
 def get_patch(poly1, color="blue"):
     """Takes a Polytope and returns a Matplotlib Patch Polytope 
@@ -77,14 +77,6 @@ def get_patch(poly1, color="blue"):
     patch = matplotlib.patches.Polygon(V[ind,:], True, color=color)
     return patch
 
-def newax():
-    """Instantiate new figure and axes.
-    """
-    #TODO mv to pyvectorized
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    return ax
-
 def plot(poly1, ax=None, color=np.random.rand(3)):
     """Plots 2D polytope or region using matplotlib.
     
@@ -104,7 +96,7 @@ def plot(poly1, ax=None, color=np.random.rand(3)):
         return
     
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     if len(poly1) == 0:
         poly = get_patch(poly1, color=color)

@@ -45,7 +45,7 @@ import networkx as nx
 try:
     import pydot
 except ImportError:
-    logger.warn('pydot package not found.\nHence dot export not unavailable.')
+    logger.error('pydot package not found.\nHence dot export not unavailable.')
     pydot = None
 
 try:
@@ -53,14 +53,14 @@ try:
     import matplotlib.image as mpimg
     matplotlib = True
 except ImportError:
-    logger.warn('matplotlib package not found.\nSo no loading of dot plots.')
+    logger.error('matplotlib package not found.\nSo no loading of dot plots.')
     matplotlib = None
 
 try:
     from IPython.display import display, Image
     IPython = True
 except ImportError:
-    logger.warn('IPython not found.\nSo loaded dot images not inline.')
+    logger.error('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
 def _states2dot_str(states, to_pydot_graph, wrap=10):
