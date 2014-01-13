@@ -52,6 +52,18 @@ except Exception, e:
 
 #from mayavi import mlab
 
+def dimension(ndarray):
+    """dimension of ndarray
+    
+    - ndim == 1:
+        dimension = 1
+    - ndim == 2:
+        dimension = shape[0]
+    """
+    if ndarray.ndim < 2:
+        return ndarray.ndim
+    return ndarray.shape[0]
+
 def newax(subplots=(1,1), fig=None,
           mode='list', dim=2):
     """Create (possibly multiple) new axes handles.
@@ -129,6 +141,107 @@ def newax(subplots=(1,1), fig=None,
         ax = ax[0]
     
     return (ax, fig)
+
+def dom2vec(domain, resolution):
+    """Matrix of column vectors for meshgrid points.
+    
+    Returns a matrix of column vectors for the meshgrid
+    point coordinates over a parallelepiped domain
+    with the given resolution.
+    
+    example
+    -------
+    >>> domain = [0, 1, 0,2]
+    >>> resolution = [4, 5]
+    >>> q = domain2vec(domain, resolution)
+    
+    @param domain: extremal values of parallelepiped
+    @type domain: [xmin, xmax, ymin, ymax, ...]
+    
+    @param resolution: # points /dimension
+    @type resolution: [nx, ny, ...]
+    
+    @return: q = matrix of column vectors (meshgrid point coordinates)
+    @rtype: [#dim x #points]
+        
+    See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
+    """
+    domain = _grouper(2, domain)
+    lambda_linspace = lambda (dom, res): np.linspace(dom[0], dom[1], res)
+    axis_grids = map(lambda_linspace, zip(domain, resolution) )
+    pnt_coor = np.meshgrid(*axis_grids)
+    q = np.vstack(map(np.ravel, pnt_coor) )
+    
+    return q
+
+def quiver(x, v, ax=None, **kwargs):
+    """Multi-dimensional quiver.
+    
+    Plot v columns at points in columns of x
+    in axes ax with plot formatting options in kwargs.
+    
+    >>> import numpy as np
+    >>> import matplotlib as mpl
+    >>> from pyvectorized import quiver, dom2vec
+    >>> x = dom2vec([0, 10, 0, 11], [20, 20])
+    >>> v = np.vstack(np.sin(x[1, :] ), np.cos(x[2, :] ) )
+    >>> quiver(mpl.gca(), x, v)
+    
+    see also
+        matplotlib.quiver, mayavi.quiver3
+    
+    @param x: points where vectors are based
+        each column is a coordinate tuple
+    @type x: 2d lil | numpy.ndarray
+    
+    @param v: vectors which to base at points x
+    @type v: 2d lil | numpy.ndarray
+    
+    @param ax: axes handle, e.g., ax = gca())
+    
+    @param x: matrix of points where vectors are plotted
+    @type x: [#dim x #points]
+    
+    @param v: matrix of column vectors to plot at points x
+    @type v: [#dim x #points]
+    
+    @param kwargs: plot formatting
+    
+    @return: handle to plotted object(s)
+    """
+    # multiple axes ?
+    try:
+        fields = [quiver(x, v, i, **kwargs) for i in ax]
+        return fields
+    except:
+        pass
+    
+    if not ax:
+        ax = plt.gca()
+    
+    dim = dimension(x)
+    
+    if dim < 2:
+        raise Exception('ndim < 2')
+    elif dim < 3:
+        h = ax.quiver(x[0, :], x[1, :],
+                      v[0, :], v[1, :], **kwargs)
+    else:
+        raise NotImplementedError
+        
+        from mayavi.mlab import quiver3d
+        
+        if ax:
+            print('axes arg ignored, mayavi used')
+        
+        h = quiver3d(x[0, :], x[1, :], x[2, :],
+                     v[0, :], v[1, :], v[2, :], **kwargs)
+    
+    if dim > 3:
+        warn('quiver:ndim #dimensions > 3,' +
+             'plotting only 3D component.')
+    
+    return h
 
 def _grouper(n, iterable, fillvalue=None):
     """grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
