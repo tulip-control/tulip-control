@@ -625,10 +625,14 @@ def is_convex(reg, abs_tol = 1e-7):
 def is_inside(polyreg, point, abs_tol=1e-7):
     """Checks if point satisfies all the inequalities of polyreg.
     
-    @param polyreg: Polytope or Region.
+    @param polyreg: Polytope | Region
+    @type point: tuple | 1d array | 2d array (a vector)
     
     @rtype result: bool
     """
+    if not isinstance(point, np.ndarray):
+        point = np.array(point)
+    
     if len(polyreg) > 0:
         for poly in polyreg.list_poly:
             if is_inside(poly, point):
