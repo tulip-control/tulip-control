@@ -219,7 +219,7 @@ def discretize(
     if plotit:
         # here to avoid loading matplotlib unless requested
         try:
-            from plot import plot_partition
+            from plot import plot_partition, plot_transition_arrow
         except Exception, e:
             logger.error(e)
             plot_partition = None
@@ -422,8 +422,10 @@ def discretize(
         
         ax2.clear()
         si.plot(ax=ax2, color="blue")
-        sj.plot(ax=ax2, color="red")
-        S0.plot(ax=ax2, color="green")
+        sj.plot(ax2, color="red", hatch='o', alpha=0.5)
+        plot_transition_arrow(si, sj, ax2)
+        
+        S0.plot(ax2, color="yellow", hatch='/', alpha=0.3)
         fig.canvas.draw()
         
         ax1.clear()
