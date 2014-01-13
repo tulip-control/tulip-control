@@ -39,7 +39,6 @@ Classes:
 NO, 2 Jul 2013.
 """
 import itertools
-from warnings import warn
 
 import numpy as np
 
