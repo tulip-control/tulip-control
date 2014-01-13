@@ -228,6 +228,8 @@ def discretize(
             import matplotlib.pyplot as plt
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
+            ax1.axis('scaled')
+            ax2.axis('scaled')
         except Exception, e:
             logger.error(e)
             plot_partition = None
