@@ -98,7 +98,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     # new figure ?
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     ax.set_xlim(l[0,0],u[0,0])
     ax.set_ylim(l[1,0],u[1,0])
@@ -170,7 +170,7 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     plot_partition, plot
     """
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     plot_partition(plot_numbers=False, ax=ax, show=False)
     

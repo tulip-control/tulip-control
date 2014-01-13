@@ -96,7 +96,7 @@ def plot(poly1, ax=None, color=np.random.rand(3)):
         return
     
     if ax is None:
-        ax = newax()
+        ax, fig = newax()
     
     if len(poly1) == 0:
         poly = get_patch(poly1, color=color)
