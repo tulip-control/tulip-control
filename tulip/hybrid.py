@@ -119,6 +119,9 @@ class LtiSysDyn(object):
         output += "\nUset =\n"+str(self.Uset)
         output += "\nWset =\n"+str(self.Wset)
         return output
+    
+    def plot(self, ax=None, color=np.random.rand(3)):
+        self.domain.plot(ax, color)
 
 class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
