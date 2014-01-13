@@ -78,7 +78,7 @@ from cvxopt import matrix, solvers
 
 try:
     import matplotlib as mpl
-    from tulip.graphics import newax
+    from tulip.graphics import newax, dom2vec
 except Exception, e:
     logger.error(e)
     mpl = None
@@ -220,6 +220,10 @@ class Polytope(object):
             point = np.array(point)
         test = self.A.dot(point.flatten() ) - self.b < abs_tol
         return np.all(test)
+    
+    def are_inside(self, points, abs_tol=1e-7):
+        test = self.A.dot(points) -self.b[:,np.newaxis] < abs_tol
+        return np.all(test, axis=0)
     
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
@@ -1891,3 +1895,18 @@ def _get_patch(poly1, color="blue"):
 
     patch = mpl.patches.Polygon(V[ind,:], True, color=color)
     return patch
+
+def grid_region(polyreg):
+    """Grid within polytope or region.
+    
+    @type polyreg: Polytope or Region
+    """
+    bbox = polyreg.bounding_box()
+    bbox = np.hstack(bbox)
+    dom = bbox.flatten()
+    
+    res = dom.size /2 *[10]
+    x = dom2vec(dom, res)
+    x = x[:, polyreg.are_inside(x) ]
+    
+    return x
