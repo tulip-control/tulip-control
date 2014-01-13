@@ -316,6 +316,15 @@ class Polytope(object):
             self._volume = volume(self)
         return self._volume
     
+    def bounding_box(self):
+        """Wrapper of polytope.bounding_box.
+        
+        Computes the bounding box on first call.
+        """
+        if self.bbox is None:
+            self.bbox = bounding_box(self)
+        return self.bbox
+    
     def plot(poly1, ax=None, color=np.random.rand(3)):
         """Plots 2D polytope or region using matplotlib.
         
@@ -497,6 +506,15 @@ class Region(object):
         if self._volume is None:
             self._volume = volume(self)
         return self._volume
+    
+    def bounding_box(self):
+        """Wrapper of polytope.bounding_box.
+        
+        Computes the bounding box on first call.
+        """
+        if self.bbox is None:
+            self.bbox = bounding_box(self)
+        return self.bbox
     
 def is_empty(polyreg):
     """Check if the description of a polytope is empty
