@@ -298,9 +298,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
                                  arbitrary_domains)
             mach.transitions.add_labeled(u, v, label)
     
-    if spec0 is None:
-        return (spec, mach)
-    
     # special initial state, for first input
     initial_state = 'Sinit'
     mach.states.add(initial_state)
