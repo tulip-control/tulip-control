@@ -423,17 +423,20 @@ def discretize(
             list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
         )
         
+        # plot pair under reachability check
         ax2.clear()
-        si.plot(ax=ax2, color="blue")
-        sj.plot(ax2, color="red", hatch='o', alpha=0.5)
+        si.plot(ax=ax2, color='green')
+        sj.plot(ax2, color='red', hatch='o', alpha=0.5)
         plot_transition_arrow(si, sj, ax2)
         
-        S0.plot(ax2, color="yellow", hatch='/', alpha=0.3)
+        S0.plot(ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         
+        # plot partition
         ax1.clear()
-        
         plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        
+        # plot dynamics
         if subsys_list is not None:
             for subsystem_idx in subsys_list:
                 subsystem = ssys.list_subsys[subsystem_idx]
