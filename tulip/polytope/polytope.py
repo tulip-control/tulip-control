@@ -141,7 +141,7 @@ class Polytope(object):
             self.b = self.b[pos]
             Anorm = Anorm[pos]           
             mult = 1/Anorm
-            for i in range(self.A.shape[0]):
+            for i in xrange(self.A.shape[0]):
                 self.A[i,:] = self.A[i,:]*mult[i]
             self.b = self.b.flatten()*mult
         self.minrep = minrep
@@ -171,7 +171,7 @@ class Polytope(object):
                     
             if mid_ind > 1:
                 output += '\n'.join([A_rows[k]+spacer+b_rows[k] \
-                                        for k in range(mid_ind)]) + '\n'
+                                        for k in xrange(mid_ind)]) + '\n'
             elif mid_ind == 1:
                 output += A_rows[0]+spacer+b_rows[0] + '\n'
             else:
@@ -182,7 +182,7 @@ class Polytope(object):
             if mid_ind+1 < len(A_rows)-2:
                 output += '\n' +'\n'.join([
                     A_rows[k]+spacer+b_rows[k]
-                    for k in range(mid_ind+1, len(A_rows)-1)
+                    for k in xrange(mid_ind+1, len(A_rows)-1)
                 ])
             elif mid_ind+1 == len(A_rows)-2:
                 output += '\n' + A_rows[mid_ind+1]+spacer+b_rows[mid_ind+1]
@@ -419,7 +419,7 @@ class Region(object):
         
     def __repr__(self):
         output = ""
-        for i in range(len(self.list_poly)):
+        for i in xrange(len(self.list_poly)):
             output += "Polytope number " +str(i+1) +":\n"
             output += str(self.list_poly[i]) +"\n"
         return output  
@@ -575,7 +575,7 @@ def is_empty(polyreg):
             return True
     else:
         N = np.zeros(n, dtype=int)
-        for i in range(n):
+        for i in xrange(n):
             N[i] = is_empty(polyreg.list_poly[i])
         if np.all(N):
             return True
@@ -604,7 +604,7 @@ def is_fulldim(polyreg, abs_tol=1e-7):
     
     else:
         status = np.zeros(lenP)
-        for ii in range(lenP):
+        for ii in xrange(lenP):
             rc,xc = cheby_ball(polyreg.list_poly[ii])
             status[ii] = rc > abs_tol
         status = np.sum(status)
@@ -708,9 +708,9 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     M1n = np.dot(M1,np.diag(M1row)) 
     M1n = M1n.T
     keep_row = []
-    for i in range(neq):
+    for i in xrange(neq):
         keep_i = 1
-        for j in range(i+1,neq):
+        for j in xrange(i+1,neq):
             if np.dot(M1n[i].T,M1n[j])>1-abs_tol:
                 keep_i = 0
         if keep_i:
@@ -743,7 +743,7 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
             return Polytope(A_arr,b_arr)
          
     del keep_row[:]
-    for k in range(A_arr.shape[0]):
+    for k in xrange(A_arr.shape[0]):
         f = -A_arr[k,:]
         G = A_arr
         h = b_arr
@@ -825,7 +825,7 @@ def union(polyreg1,polyreg2,check_convex=False):
             # Check convexity for each pair of polytopes
             while N>0:
                 templist = [list[0]]
-                for ii in range(1,N):
+                for ii in xrange(1,N):
                     templist.append(list[ii])
                     is_conv, env = is_convex(Region(templist,[]))
                     if not is_conv:
@@ -1016,14 +1016,14 @@ def envelope(reg, abs_tol=1e-7):
         
     nP = len(reg.list_poly)
     
-    for i in range(nP):
+    for i in xrange(nP):
         poly1 = reg.list_poly[i]
         outer_i = np.ones(poly1.A.shape[0])
-        for ii in range(poly1.A.shape[0]):
+        for ii in xrange(poly1.A.shape[0]):
             if outer_i[ii] == 0:
                 # If inequality already discarded
                 continue
-            for j in range(nP):
+            for j in xrange(nP):
                 # Check for each polytope
                 # if it intersects with inequality ii
                 if i == j:
@@ -1064,7 +1064,7 @@ def mldivide(poly1,poly2):
     P = Polytope()    
 
     if len(poly1) > 0:
-        for ii in range(len(poly1.list_poly)):
+        for ii in xrange(len(poly1.list_poly)):
             Pdiff = region_diff(poly1.list_poly[ii],poly2)
             P = union(P,Pdiff, False)        
     else:
@@ -1130,7 +1130,7 @@ def volume(polyreg):
         
     if len(polyreg) > 0:
         tot_vol = 0.
-        for i in range(len(polyreg)):
+        for i in xrange(len(polyreg)):
             tot_vol += volume(polyreg.list_poly[i])
         polyreg._volume = tot_vol
         return tot_vol
@@ -1192,7 +1192,7 @@ def extreme(poly1):
     
     if nx == 1:
         # Polytope is a 1-dim line
-        for ii in range(nc):
+        for ii in xrange(nc):
             V = np.append(V,b[ii]/A[ii])
         if len(A) == 1:
             R = np.append(R,1)
@@ -1206,7 +1206,7 @@ def extreme(poly1):
         H = np.vstack([A, A[0,:]])
         K = np.hstack([b, b[0]])
         I = np.hstack([I,I[0]])
-        for ii in range(nc):
+        for ii in xrange(nc):
             HH = np.vstack([H[I[ii],:],H[I[ii+1],:]])
             KK = np.hstack([K[I[ii]],K[I[ii+1]]])
             if np.linalg.cond(HH) == np.inf:
@@ -1228,7 +1228,7 @@ def extreme(poly1):
         sh = np.shape(A)
         Ai = np.zeros(sh)
         
-        for ii in range(sh[0]):
+        for ii in xrange(sh[0]):
             Ai[ii,:] = A[ii,:]/(b[ii]-np.dot(A[ii,:],xmid))
         
         Q = reduce(qhull(Ai))
@@ -1242,8 +1242,8 @@ def extreme(poly1):
         sh = np.shape(H)
         nx = sh[1]
         V = np.zeros(sh)
-        for iv in range(sh[0]):
-            for ix in range(nx):
+        for iv in xrange(sh[0]):
+            for ix in xrange(nx):
                 V[iv,ix] = H[iv,ix]/K[iv] + xmid[ix]
     
     poly1.vertices = V
@@ -1291,7 +1291,7 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     """
     if len(poly1) > 0:
         ret = Polytope()
-        for i in range(len(poly1.list_poly)):
+        for i in xrange(len(poly1.list_poly)):
             p = projection(
                 poly1.list_poly[i], dim,
                 solver=solver, abs_tol=abs_tol
@@ -1303,7 +1303,7 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
         return poly1
     
     dim = np.array(dim)
-    org_dim = range(poly1.dim)
+    org_dim = xrange(poly1.dim)
     new_dim = dim.flatten() - 1
     del_dim = np.setdiff1d(org_dim,new_dim) # Index of dimensions to remove 
         
@@ -1358,7 +1358,7 @@ def separate(reg1, abs_tol=1e-7):
     List [] of connected Regions
     """
     final = []
-    ind_left = range(len(reg1))
+    ind_left = xrange(len(reg1))
     
     prop_list = reg1.list_prop
     
@@ -1369,7 +1369,7 @@ def separate(reg1, abs_tol=1e-7):
             []
         )
         ind_del.append(ind_left[0])
-        for i in range(1,len(ind_left)):
+        for i in xrange(1,len(ind_left)):
             j = ind_left[i]
             if is_adjacent(connected_reg, reg1.list_poly[j]):
                 connected_reg = union(
@@ -1403,7 +1403,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
             "polytopes do not have the same dimension")
     
     if len(poly1) > 0:
-        for i in range(len(poly1)):
+        for i in xrange(len(poly1)):
             adj = is_adjacent(poly1.list_poly[i], poly2, \
                               overlap=overlap, abs_tol=abs_tol)
             if adj:
@@ -1411,7 +1411,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
         return False
     
     if len(poly2) > 0:
-        for j in range(len(poly2)):
+        for j in xrange(len(poly2)):
             adj = is_adjacent(poly1, poly2.list_poly[j], \
                               overlap=overlap, abs_tol=abs_tol)
             if adj:
@@ -1606,7 +1606,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
             if verbose > 1:
                 print("Iteration number " + str(cnt) )
             
-            for ind in range(P1.A.shape[0]):
+            for ind in xrange(P1.A.shape[0]):
                 f1 = np.round(P1.A[ind,:]/abs_tol)*abs_tol
                 f2 = np.hstack([np.round(P1.A[ind,:]/abs_tol)*abs_tol, \
                      np.round(P1.b[ind]/abs_tol)*abs_tol])
@@ -1615,7 +1615,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                 k = np.array([])
                 if HP != None:
                     k = np.nonzero( HP[:,0] == f2[0] )[0]
-                    for j in range(1,np.shape(P1.A)[1]+1):
+                    for j in xrange(1,np.shape(P1.A)[1]+1):
                         ii = np.nonzero(HP[k,j] == f2[j])[0]
                         k = k[ii]
                         if k.size == 0:
@@ -1663,7 +1663,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                 print("Checking if new points are inside convex hull")
             
             OK = 1
-            for i in range(np.shape(Vert)[0]):
+            for i in xrange(np.shape(Vert)[0]):
                 if not is_inside(P1,Vert[i,new_dim],abs_tol=1e-5):
                     # If all new points are inside
                     # old polytope -> Finished
@@ -1719,7 +1719,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     Rc = np.zeros(N)
     
     # Checking intersections to find intersecting regions
-    for ii in range(N):        
+    for ii in xrange(N):        
         dummy = Polytope(
             np.vstack([
                 poly.A,
@@ -1750,14 +1750,14 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     
     # Finding contraints that are not in original polytope
     HK = np.hstack([H,np.array([K]).T])
-    for ii in range(N): 
+    for ii in xrange(N): 
         i = ind[ii]
         if not is_fulldim(reg.list_poly[i]):
             continue
         Hni = reg.list_poly[i].A.copy()
         Kni = reg.list_poly[i].b.copy()   
         
-        for j in range(np.shape(Hni)[0]):
+        for j in xrange(np.shape(Hni)[0]):
             HKnij = np.hstack([Hni[j,:], Kni[j]])
             HK2 = np.tile(HKnij,[m,1])
             abs = np.abs(HK-HK2)
@@ -1791,7 +1791,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
     
     while level!=-1:
         if counter[level] == 0:
-            for j in range(level,N):
+            for j in xrange(level,N):
                 auxINDICES = np.hstack([
                     INDICES,
                     range(beg_mi[j],beg_mi[j]+mi[j])
@@ -1809,7 +1809,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
                 level = level - 1
                 res = union(res, Polytope(A[INDICES,:],B[INDICES]), False)
                 nzcount = np.nonzero(counter)[0]
-                for jj in range(len(nzcount)-1,-1,-1):
+                for jj in xrange(len(nzcount)-1,-1,-1):
 
                     if counter[level] <= mi[level]:
                         INDICES[len(INDICES)-1] = INDICES[len(INDICES)-1] -M
@@ -1827,7 +1827,7 @@ def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
             # counter(level) > 0
             nzcount = np.nonzero(counter)[0]
             
-            for jj in range(len(nzcount)-1,-1,-1):
+            for jj in xrange(len(nzcount)-1,-1,-1):
                 level = nzcount[jj]
                 counter[level] = counter[level] + 1
 
@@ -1859,7 +1859,7 @@ def num_bin(N, places=8):
 
     E.g., given N=7, num_bin returns [1, 1, 1, 0, 0, 0, 0, 0].
     """
-    return [(N>>k)&0x1  for k in range(places)]
+    return [(N>>k)&0x1  for k in xrange(places)]
 
 def box2poly(box):
     """Return new Polytope from box.
