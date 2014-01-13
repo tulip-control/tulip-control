@@ -201,6 +201,14 @@ class PwaSysDyn(object):
                  Uset=None, Wset=None,domain=None):
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
+    
+    def plot(self, ax=None, show_domain=True):
+        if ax is None:
+            ax, fig = newax()
+        
+        for subsystem in self.list_subsys:
+            subsystem.plot(ax, color=np.random.rand(3),
+                           show_domain=show_domain)
 
 class HybridSysDyn(object):
     """HybridSysDyn class for specifying hybrid systems with discrete and
