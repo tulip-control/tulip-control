@@ -73,6 +73,9 @@ Functions:
 import numpy as np
 from cvxopt import matrix, solvers
 
+import matplotlib as mpl
+from tulip.graphics import newax
+
 from .quickhull import quickhull
 from .esp import esp
 
@@ -304,6 +307,43 @@ class Polytope(object):
         if self._volume is None:
             self._volume = volume(self)
         return self._volume
+    
+    def plot(poly1, ax=None, color=np.random.rand(3)):
+        """Plots 2D polytope or region using matplotlib.
+        
+        @type: poly1: Polytope or Region
+        
+        see also
+        --------
+        plot_partition
+        """
+        #TODO optional arg for text label
+        if not is_fulldim(poly1):
+            print("Cannot plot empty polytope")
+            return
+        
+        if poly1.dim != 2:
+            print("Cannot plot polytopes of dimension larger than 2")
+            return
+        
+        if ax is None:
+            ax, fig = newax()
+        
+        if len(poly1) == 0:
+            poly = get_patch(poly1, color=color)
+            ax.add_patch(poly)
+        else:
+            for poly2 in poly1.list_poly:
+                poly = get_patch(poly2, color=color)
+                ax.add_patch(poly)
+        
+        # affect view
+        #l,u = bounding_box(poly1)
+        
+        #ax.set_xlim(l[0,0], u[0,0])
+        #ax.set_ylim(l[1,0], u[1,0])
+        
+        return ax
 
 class Region(object):
     """Class for lists of convex polytopes
@@ -1739,3 +1779,35 @@ def box2poly(box):
     @type box: [[x1min, x1max], [x2min, x2max],...]
     """
     return Polytope.from_box(box)
+
+def get_patch(poly1, color="blue"):
+    """Takes a Polytope and returns a Matplotlib Patch Polytope 
+    that can be added to a plot
+    
+    Example::
+
+    > # Plot Polytope objects poly1 and poly2 in the same plot
+    > import matplotlib.pyplot as plt
+    > fig = plt.figure()
+    > ax = fig.add_subplot(111)
+    > p1 = get_patch(poly1, color="blue")
+    > p2 = get_patch(poly2, color="yellow")
+    > ax.add_patch(p1)
+    > ax.add_patch(p2)
+    > ax.set_xlim(xl, xu) # Optional: set axis max/min
+    > ax.set_ylim(yl, yu) 
+    > plt.show()
+    """
+    V = extreme(poly1)
+    rc,xc = cheby_ball(poly1)
+    x = V[:,1] - xc[1]
+    y = V[:,0] - xc[0]
+    mult = np.sqrt(x**2 + y**2)
+    x = x/mult
+    angle = np.arccos(x)
+    corr = np.ones(y.size) - 2*(y < 0)
+    angle = angle*corr
+    ind = np.argsort(angle) 
+
+    patch = mpl.patches.Polygon(V[ind,:], True, color=color)
+    return patch
