@@ -1916,8 +1916,12 @@ def grid_region(polyreg, res=None):
     bbox = np.hstack(bbox)
     dom = bbox.flatten()
     
+    density = 8
     if not res:
-        res = dom.size /2 *[10]
+        res = []
+        for i in xrange(0, dom.size, 2):
+            L = dom[i+1] -dom[i]
+            res += [density *L]
     x = dom2vec(dom, res)
     x = x[:, polyreg.are_inside(x) ]
     
