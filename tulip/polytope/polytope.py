@@ -901,7 +901,7 @@ def bounding_box(polyreg):
         - l = 2d array
         - u = 2d array
     """
-    if polyreg.bbox != None:
+    if polyreg.bbox is not None:
         return polyreg.bbox
         
     lenP = len(polyreg)
@@ -909,7 +909,7 @@ def bounding_box(polyreg):
     # For regions, calculate recursively for each
     # convex polytope and take maximum
     
-    if lenP>0:
+    if lenP > 0:
         dimP = polyreg.dim
         alllower = np.zeros([lenP,dimP])
         allupper = np.zeros([lenP,dimP])
@@ -927,13 +927,13 @@ def bounding_box(polyreg):
             l[ii] = min(alllower[:,ii])
             u[ii] = max(allupper[:,ii])
         polyreg.bbox = l,u
+        
         return l,u
         
     # For one convex polytope, solve an optimization
     # problem
     
-    m = np.shape(polyreg.A)[0]
-    n = np.shape(polyreg.A)[1]
+    (m, n) = np.shape(polyreg.A)
     
     In = np.eye(n)
     l = np.zeros([n,1])
@@ -957,6 +957,7 @@ def bounding_box(polyreg):
             x = sol['x']
             u[i] = x[i]
     polyreg.bbox = l,u
+    
     return l,u
     
 def envelope(reg, abs_tol=1e-7):
