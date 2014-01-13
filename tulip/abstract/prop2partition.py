@@ -437,8 +437,9 @@ class PropPreservingPartition:
     - adj: a sparse matrix showing which regions are adjacent,
         type scipy lil sparse
     - list_prop_symbol: list of symbols of propositions
-    - list_subsys: list assigning the subsystem of the piecewise affine system that 
-              is active in that region to each region in ppp
+    - list_subsys: list of indices
+        assigning the subsystem of the piecewise affine system that 
+        is active in that region to each region in ppp
     
     see also
     --------
