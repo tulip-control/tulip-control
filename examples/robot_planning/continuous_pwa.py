@@ -5,12 +5,13 @@
 #
 """
 This example is an extension of the robot_continuous.py
-code by Petter Nilsson and Nok Wongpiromsarn. It demonstrates 
-the use of TuLiP for systems with piecewise affine dynamics.
+code by Petter Nilsson and Nok Wongpiromsarn.
+
+It demonstrates  the use of TuLiP for systems with
+piecewise affine dynamics.
 
 Necmiye Ozay, August 26, 2012
 """
-
 import numpy as np
 
 from tulip import spec, synth
@@ -25,12 +26,17 @@ uncertainty = 0.05
 # Continuous state space
 cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
-# Assume, for instance, our robot is traveling on a nonhomogenous
-# surface (xy plane), resulting in different dynamics at different
-# parts of the plane.  Since the continuous state space in this
-# example is just xy position, different dynamics in different parts
-# of the surface can be modeled as a piecewise affine system as
-# follows:
+# Assume, for instance, our robot is traveling on
+# a nonhomogenous surface (xy plane),
+# resulting in different dynamics at different
+# parts of the plane.
+#
+# Since the continuous state space in this example
+# is just xy position, different dynamics in
+# different parts of the surface can be modeled
+# using LtiSysDyn subsystems subsys0 and subsys1.
+#
+# Togetger they comprise a Piecewise Affine System:
 
 def subsys0():
     A = np.array([[1.1052, 0.], [ 0., 1.1052]])
@@ -54,7 +60,7 @@ def subsys1():
     U = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
     W = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
     
-    dom = box2poly([[0., 3.],[0., 0.5]])
+    dom = box2poly([[0., 3.], [0., 0.5]])
     
     sys_dyn = LtiSysDyn(A, B, E, [], U, W, dom)
     #sys_dyn.plot()
@@ -89,8 +95,12 @@ env_safe = set()                # empty set
 
 # System variables and requirements
 sys_vars = {'X0reach'}
-sys_init = {'X0reach'}          
-sys_prog = {'home'}               # []<>home
+
+# []<>home
+sys_prog = {'home'}
+
+# [](park -> <> lot)
+sys_init = {'X0reach'}
 sys_safe = {'X(X0reach) <-> lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
@@ -102,7 +112,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ofts, ignore_sys_init=True)
 
-# Generate graphical representation of controller for viewing
+# Save graphical representation of controller for viewing
 if not ctrl.save('continuous_pwa.png', 'png'):
     print(ctrl)
 
