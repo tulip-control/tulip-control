@@ -316,6 +316,15 @@ class Polytope(object):
         """
         return projection(self, dim, solver, abs_tol, verbose)
     
+    def scale(self, factor):
+        """Multiply polytope by scalar factor.
+        
+        A x <= b, becomes: A x <= (factor * b)
+        
+        @type factor: float
+        """
+        self.b = factor * self.b
+    
     @property
     def dim(self):
         """Return Polytope dimension.
