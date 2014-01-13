@@ -1906,17 +1906,20 @@ def _get_patch(poly1, color="blue"):
     patch.set_zorder(0)
     return patch
 
-def grid_region(polyreg):
+def grid_region(polyreg, res=None):
     """Grid within polytope or region.
     
     @type polyreg: Polytope or Region
+    
+    @param res: resolution of grid
     """
     bbox = polyreg.bounding_box()
     bbox = np.hstack(bbox)
     dom = bbox.flatten()
     
-    res = dom.size /2 *[10]
+    if not res:
+        res = dom.size /2 *[10]
     x = dom2vec(dom, res)
     x = x[:, polyreg.are_inside(x) ]
     
-    return x
+    return (x, res)

@@ -134,7 +134,7 @@ class LtiSysDyn(object):
             logger.warn('pyvectorized not found. No plotting.')
             return
         
-        x = pc.grid_region(self.domain)
+        (x, res) = pc.grid_region(self.domain)
         v = self.A.dot(x)
         
         if ax is None:
