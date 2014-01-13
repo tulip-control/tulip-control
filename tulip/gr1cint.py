@@ -165,7 +165,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         xml.etree.ElementTree._ElementInterface
 
     @type spec0: L{GRSpec}
-
     @param spec0: GR(1) specification with which to interpret the
         output of gr1c while constructing a MealyMachine, or None if
         the output from gr1c should be used as is.  Note that spec0
