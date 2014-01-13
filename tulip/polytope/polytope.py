@@ -336,44 +336,25 @@ class Polytope(object):
             self.bbox = bounding_box(self)
         return self.bbox
     
-    def plot(poly1, ax=None, color=np.random.rand(3)):
-        """Plots 2D polytope or region using matplotlib.
-        
-        @type: poly1: Polytope or Region
-        
-        see also
-        --------
-        plot_partition
-        """
+    def plot(self, ax=None, color=np.random.rand(3)):
         if newax is None:
             logger.warn('newax not imported. No Polytope plotting.')
             return
         
         #TODO optional arg for text label
-        if not is_fulldim(poly1):
+        if not is_fulldim(self):
             print("Cannot plot empty polytope")
             return
         
-        if poly1.dim != 2:
+        if self.dim != 2:
             print("Cannot plot polytopes of dimension larger than 2")
             return
         
         if ax is None:
             ax, fig = newax()
         
-        if len(poly1) == 0:
-            poly = _get_patch(poly1, color=color)
-            ax.add_patch(poly)
-        else:
-            for poly2 in poly1.list_poly:
-                poly = _get_patch(poly2, color=color)
-                ax.add_patch(poly)
-        
-        # affect view
-        #l,u = bounding_box(poly1)
-        
-        #ax.set_xlim(l[0,0], u[0,0])
-        #ax.set_ylim(l[1,0], u[1,0])
+        poly = _get_patch(self, color=color)
+        ax.add_patch(poly)
         
         return ax
 
@@ -540,6 +521,29 @@ class Region(object):
         if self.bbox is None:
             self.bbox = bounding_box(self)
         return self.bbox
+    
+    def plot(self, ax=None, color=np.random.rand(3)):
+        if newax is None:
+            warn('pyvectorized not found. No plotting.')
+            return None
+        
+        #TODO optional arg for text label
+        if not is_fulldim(self):
+            print("Cannot plot empty region")
+            return
+        
+        if self.dim != 2:
+            print("Cannot plot region of dimension larger than 2")
+            return
+        
+        if ax is None:
+            ax, fig = newax()
+        
+        for poly2 in self.list_poly:
+            # TODO hatched polytopes in same region
+            poly2.plot(ax, color)
+        
+        return ax 
     
 def is_empty(polyreg):
     """Check if the description of a polytope is empty
