@@ -48,9 +48,11 @@ see also
 --------
 find_controller
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from copy import deepcopy
 from collections import Iterable
-from warnings import warn
 
 import numpy as np
 from scipy import sparse as sp
@@ -109,7 +111,7 @@ def discretize(
     closed_loop=True, conservative=False,
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
-    abs_tol=1e-7, verbose=0
+    abs_tol=1e-7
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -141,7 +143,6 @@ def discretize(
     @param remove_trans: if True, remove found transitions between
         non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
-    @param verbose: level of verbosity
     
     @rtype: AbstractSysDyn
     """
@@ -184,8 +185,7 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
-    if verbose > 1:
-        print("\n Starting IJ: \n" + str(IJ) )
+    logger.info("\n Starting IJ: \n" + str(IJ) )
     
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
@@ -231,16 +231,15 @@ def discretize(
             else:
                 rd = 0.
         
-        if verbose > 1:
-            msg = '\n Working with states:\n\t'
-            msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-            msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
+        msg = '\n Working with states:\n\t'
+        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
+        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
             
-            if ispwa:
-                msg += 'with active subsystem:\n\t'
-                msg += str(subsys_list[i])
+        if ispwa:
+            msg += 'with active subsystem:\n\t'
+            msg += str(subsys_list[i])
             
-            print(msg)
+        logger.info(msg)
         
         if conservative:
             # Don't use trans_set
@@ -254,9 +253,8 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        if verbose > 1:
-            print("Computed reachable set S0 with volume " +
-                str(S0.volume) )
+        logger.info("Computed reachable set S0 with volume " +
+            str(S0.volume) )
         
         # isect = si \cap S0
         isect = si.intersect(S0)
@@ -331,11 +329,11 @@ def discretize(
                     orig = np.hstack([orig, orig[i]])
             adj[i, i] = 1
                         
-            if verbose > 1:
+            if logger.getEffectiveLevel() >= logging.INFO:
                 output = "\n Adding states " + str(i) + " and "
                 for kk in xrange(num_new):
                     output += str(size-1-kk) + " and "
-                print(output + "\n")
+                logger.info(output + "\n")
                         
             for k in np.setdiff1d(old_adj, [i,size-1]):
                 # Every "old" neighbor must be the neighbor
@@ -367,18 +365,15 @@ def discretize(
             for kk in xrange(num_new):
                 sym_adj_change(IJ, adj_k, transitions, size -1 -kk)
             
-            if verbose > 1:
-                print("\n Updated adj: \n" +str(adj) )
-                print("\n Updated trans: \n" +str(transitions) )
-                print("\n Updated IJ: \n" +str(IJ) )
+            logger.info("\n Updated adj: \n" +str(adj) )
+            logger.info("\n Updated trans: \n" +str(transitions) )
+            logger.info("\n Updated IJ: \n" +str(IJ) )
         elif vol2 < abs_tol:
-            if verbose > 1:
-                print("Transition found")
+            logger.info("Transition found")
             transitions[j,i] = 1
         else:
-            if verbose > 1:
-                print("No transition found, diff vol: " +str(vol2) +
-                      ", intersect vol: " +str(vol1) )
+            logger.info("No transition found, diff vol: " +str(vol2) +
+                         ", intersect vol: " +str(vol1) )
             transitions[j,i] = 0
 
     new_part = PropPreservingPartition(
@@ -452,8 +447,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
     """default False."""
 #         
 #         if rdiff < abs_tol:
-#             if verbose > 1:
-#                 print("Transition found")
+#             logger.info("Transition found")
 #             transitions[i,j] = 1
 #         
 #         elif (vol1 > min_cell_volume) & (risect > rd) & \
@@ -504,8 +498,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             num_new_reg = np.hstack([num_new_reg, 0])
 #             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
 #             
-#             if verbose > 1:
-#                 print("\n Adding state " + str(size-1) + "\n")
+#             logger.info("\n Adding state " + str(size-1) + "\n")
 #             
 #             # Just add adjacent cells for checking,
 #             # unless transition already found            
@@ -516,8 +509,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             IJ[size-1,:] = horiz2.astype(int)
 #             IJ[:,size-1] = verti2.astype(int)
 #         else:
-#             if verbose > 1:
-#                 print("No transition found, intersect vol: " + str(vol1) )
+#             logger.info("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #                   
 #     new_part = PropPreservingPartition(
@@ -783,7 +775,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         Li = list_P[i]
         
         if not isinstance(Li, pc.Polytope):
-            warn('createLM: Li of type: ' +str(type(Li) ) )
+            logger.warn('createLM: Li of type: ' +str(type(Li) ) )
         
         ######### FOR M #########
         idx = range(sum_vert, sum_vert + Li.A.shape[0])
