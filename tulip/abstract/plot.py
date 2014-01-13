@@ -139,11 +139,8 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     # plot transition arrows between patches
     for (i, reg) in enumerate(reg_list):
-        rc, xc = cheby_ball(reg)
-        
-        
         if plot_numbers:
-            ax.text(xc[0], xc[1], str(i), color='red')
+            reg.text(str(i), ax, color='red')
         
         if trans is None:
             continue
