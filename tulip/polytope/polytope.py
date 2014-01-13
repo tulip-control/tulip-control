@@ -875,7 +875,31 @@ def cheby_ball(poly1):
     return poly1.chebR,poly1.chebXc
     
 def bounding_box(polyreg):
-    """Compute the smallest hyperbox containing the polytope or region
+    """Return smallest hyperbox containing polytope or region.
+    
+    If polyreg.bbox is not None,
+    then it is returned without update.
+    
+    @type polyreg: Polytope or Region
+    
+    @param recompute: Recompute bounding box,
+        even if polyreg.bbox is not None
+    
+    @return: (l, u) where:
+        
+        - l = [x1min,
+               x2min,
+               ...
+               xNmin]
+        
+        - u = [x1max,
+               x2max,
+               ...
+               xNmax]
+        
+    @rtype:
+        - l = 2d array
+        - u = 2d array
     """
     if polyreg.bbox != None:
         return polyreg.bbox
