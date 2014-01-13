@@ -674,13 +674,13 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     `poly_red`: Reduced Polytope or Region object
     """
     if isinstance(poly, Region):
-        list = []
+        lst = []
         for poly2 in poly.list_poly:
             red = reduce(poly2)
             if is_fulldim(red):
-                list.append(red)
-        if len(list) > 0:
-            return Region(list, poly.list_prop)
+                lst.append(red)
+        if len(lst) > 0:
+            return Region(lst, poly.list_prop)
         else:
             return Polytope()
             
@@ -792,55 +792,55 @@ def union(polyreg1,polyreg2,check_convex=False):
         s2 = polyreg2
         s3 = None
         
-    list = []
+    lst = []
     if len(s1) == 0:
         if not is_empty(s1):
-            list.append(s1)
+            lst.append(s1)
     else:
         for poly in s1.list_poly:
             if not is_empty(poly):
-                list.append(poly)
+                lst.append(poly)
             
     if len(s2) == 0:
         if not is_empty(s2):
-            list.append(s2)
+            lst.append(s2)
     else:
         for poly in s2.list_poly:
             if not is_empty(poly):
-                list.append(poly)
+                lst.append(poly)
             
     if s3 != None:
         if len(s3) == 0:
             if not is_empty(s3):
-                list.append(s3)
+                lst.append(s3)
         else:
             for poly in s3.list_poly:
                 if not is_empty(poly):
-                    list.append(poly)
+                    lst.append(poly)
     
     if check_convex:
         final = []
-        N = len(list)
+        N = len(lst)
         if N > 1:
             # Check convexity for each pair of polytopes
             while N>0:
-                templist = [list[0]]
+                templist = [lst[0]]
                 for ii in xrange(1,N):
-                    templist.append(list[ii])
+                    templist.append(lst[ii])
                     is_conv, env = is_convex(Region(templist,[]))
                     if not is_conv:
-                        templist.remove(list[ii])
+                        templist.remove(lst[ii])
                 for poly in templist:
-                    list.remove(poly)
+                    lst.remove(poly)
                 cvxpoly = reduce(envelope(Region(templist,[])))
                 if not is_empty(cvxpoly):
                     final.append(reduce(cvxpoly))
-                N = len(list)
+                N = len(lst)
         else:
-            final = list
+            final = lst
         ret = Region(final, [])
     else:
-        ret = Region(list, [])
+        ret = Region(lst, [])
     return ret
 
 def cheby_ball(poly1):
