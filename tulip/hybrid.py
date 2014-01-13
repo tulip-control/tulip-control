@@ -76,18 +76,18 @@ class LtiSysDyn(object):
     PwaSysDyn, HybridSysDyn, polytope.Polytope
     """
     def __init__(self, A=[], B=[], E=[], K=[],
-                 Uset=None,Wset=None,domain=None):
+                 Uset=None,Wset=None, domain=None):
         
         if Uset == None:
             print("Warning: Uset not given in LtiSysDyn()")
         
-        if (Uset != None) & (not isinstance(Uset, pc.Polytope)):
+        if (Uset != None) and (not isinstance(Uset, pc.Polytope)):
             raise Exception("LtiSysDyn: `Uset` has to be a Polytope")
            
         if domain == None:
             print("Warning: domain is not given in LtiSysDyn()")
         
-        if (domain != None) & (not isinstance(domain, pc.Polytope)):
+        if (domain != None) and (not isinstance(domain, pc.Polytope)):
             raise Exception("LtiSysDyn: `domain` has to be a Polytope")
 
         self.A = A
