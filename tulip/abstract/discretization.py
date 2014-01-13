@@ -225,12 +225,6 @@ def discretize(
             plot_partition = None
         
         try:
-            from tulip.polytope.plot import plot as polyplot
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
-        
-        try:
             import matplotlib.pyplot as plt
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -425,9 +419,9 @@ def discretize(
         )
         
         ax2.clear()
-        polyplot(si, ax=ax2, color="blue")
-        polyplot(sj, ax=ax2, color="red")
-        polyplot(S0, ax=ax2, color="green")
+        si.plot(ax=ax2, color="blue")
+        sj.plot(ax=ax2, color="red")
+        S0.plot(ax=ax2, color="green")
         fig.canvas.draw()
         
         ax1.clear()
