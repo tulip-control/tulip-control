@@ -132,10 +132,10 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         
         # single polytope or region ?
         if len(reg) == 0:
-            ax.add_patch(get_patch(reg, col) )
+            ax.add_patch(_get_patch(reg, col) )
         else:
             for poly2 in reg.list_poly:
-                ax.add_patch(get_patch(poly2, col) )
+                ax.add_patch(_get_patch(poly2, col) )
     
     # plot transition arrows between patches
     for i in xrange(len(reg_list) ):
