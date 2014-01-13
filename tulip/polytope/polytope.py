@@ -216,7 +216,10 @@ class Polytope(object):
         see also
             is_inside
         """
-        return is_inside(self, point, abs_tol)
+        if not isinstance(point, np.ndarray):
+            point = np.array(point)
+        test = self.A.dot(point.flatten() ) - self.b < abs_tol
+        return np.all(test)
     
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
@@ -436,7 +439,13 @@ class Region(object):
         see also
             is_inside
         """
-        return is_inside(self, point, abs_tol)
+        if not isinstance(point, np.ndarray):
+            point = np.array(point)
+        
+        for poly in self.list_poly:
+            if poly.__contains__(point, abs_tol):
+                return True
+        return False
     
     def __add__(self, other):
         """Return union with Polytope or Region.
@@ -630,17 +639,7 @@ def is_inside(polyreg, point, abs_tol=1e-7):
     
     @rtype result: bool
     """
-    if not isinstance(point, np.ndarray):
-        point = np.array(point)
-    
-    if len(polyreg) > 0:
-        for poly in polyreg.list_poly:
-            if is_inside(poly, point):
-                return True
-        return False
-        
-    test = np.dot(polyreg.A, point.flatten()) - polyreg.b < abs_tol
-    return np.all(test)
+    return polyreg.__contains__(point, abs_tol)
         
 def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):  
     """Removes redundant inequalities in the hyperplane representation
