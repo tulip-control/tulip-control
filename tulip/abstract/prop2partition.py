@@ -155,7 +155,7 @@ def part2convex(ppp):
     @return: refinement into convex polytopes
     @rtype: PropPreservingPartition
     """
-    myconvexpartition = PropPreservingPartition(
+    cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
         num_prop=ppp.num_prop,
         list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol)
@@ -169,17 +169,17 @@ def part2convex(ppp):
                 [simplified_reg.list_poly[j]],
                 ppp.list_region[i].list_prop
             )
-            myconvexpartition.list_region.append(region_now)
+            cvxpart.list_region.append(region_now)
             if ppp.list_subsys is not None:
                 subsys_list.append(ppp.list_subsys[i])
     
     if ppp.list_subsys is not None:
-        myconvexpartition.list_subsys = subsys_list
+        cvxpart.list_subsys = subsys_list
     
-    myconvexpartition.num_regions = len(myconvexpartition.list_region)
-    myconvexpartition.adj = find_adjacent_regions(myconvexpartition).copy()
+    cvxpart.num_regions = len(cvxpart.list_region)
+    cvxpart.adj = find_adjacent_regions(cvxpart).copy()
     
-    return myconvexpartition
+    return cvxpart
     
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     """This function takes a piecewise affine system pwa_sys and a proposition 
@@ -445,9 +445,9 @@ class PropPreservingPartition:
     prop2part
     """
     def __init__(self,
-            domain=None, num_prop=0, list_region=[], num_regions=0,
-            adj=0, list_prop_symbol=None, list_subsys=None
-        ):
+        domain=None, num_prop=0, list_region=[], num_regions=0,
+        adj=0, list_prop_symbol=None, list_subsys=None
+    ):
         self.domain = domain
         self.num_prop = num_prop
         self.list_region = list_region[:]
