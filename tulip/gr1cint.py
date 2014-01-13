@@ -32,6 +32,9 @@
 """
 Interface to gr1c
 
+  - U{http://scottman.net/2012/gr1c}
+  - release documentation at U{http://slivingston.github.io/gr1c/}
+
 In general, functions defined here will raise CalledProcessError (from
 the subprocess module) or OSError if an exception occurs while
 interacting with the gr1c executable.
