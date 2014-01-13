@@ -210,6 +210,14 @@ class Polytope(object):
         P.fulldim = self.fulldim
         return P
     
+    def __contains__(self, point, abs_tol=1e-7):
+        """Return True if polytope contains point.
+        
+        see also
+            is_inside
+        """
+        return is_inside(self, point, abs_tol)
+    
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
         
@@ -421,6 +429,14 @@ class Region(object):
         
     def __len__(self):
         return len(self.list_poly)
+    
+    def __contains__(self, point, abs_tol=1e-7):
+        """Return True if Region contains point.
+        
+        see also
+            is_inside
+        """
+        return is_inside(self, point, abs_tol)
     
     def __add__(self, other):
         """Return union with Polytope or Region.
