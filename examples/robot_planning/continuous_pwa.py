@@ -33,27 +33,33 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 # follows:
 
 def subsys0():
-    A0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    B0 = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    E0 = np.array([[1,0], [0,1]])
+    A = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    B = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    E = np.array([[1,0], [0,1]])
     
-    U0 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
-    W0 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
-    dom0 = box2poly([[0., 3.], [0.5, 2.]])
+    U = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
+    W = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
+    dom = box2poly([[0., 3.], [0.5, 2.]])
     
-    return LtiSysDyn(A0, B0, E0, [], U0, W0, dom0)
+    sys_dyn = LtiSysDyn(A, B, E, [], U, W, dom)
+    #sys_dyn.plot()
+    
+    return sys_dyn
 
 def subsys1():
-    A1 = np.array([[0.9948, 0.], [0., 1.1052]])
-    B1 = np.array([[-1.1052, 0.], [0., 1.1052]])
-    E1 = np.array([[1, 0], [0, 1]])
+    A = np.array([[0.9948, 0.], [0., 1.1052]])
+    B = np.array([[-1.1052, 0.], [0., 1.1052]])
+    E = np.array([[1, 0], [0, 1]])
     
-    U1 = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
-    W1 = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
+    U = box2poly(input_bound * np.array([[-1., 1.], [-1., 1.]]))
+    W = box2poly(uncertainty * np.array([[-1., 1.], [-1., 1.]]))
     
-    dom1 = box2poly([[0., 3.],[0., 0.5]])
+    dom = box2poly([[0., 3.],[0., 0.5]])
     
-    return LtiSysDyn(A1, B1, E1, [], U1, W1, dom1)
+    sys_dyn = LtiSysDyn(A, B, E, [], U, W, dom)
+    #sys_dyn.plot()
+    
+    return sys_dyn
 
 subsystems = [subsys0(), subsys1()]
 
