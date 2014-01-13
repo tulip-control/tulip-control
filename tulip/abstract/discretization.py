@@ -220,16 +220,23 @@ def discretize(
         # here to avoid loading matplotlib unless requested
         try:
             from plot import plot_partition
-            from tulip.polytope.plot import plot as polyplot
-            import matplotlib.pyplot as plt
-            
-            plt.ion()
-            
-            fig, (ax1, ax2) = plt.subplots(1, 2)
-        except:
+        except Exception, e:
+            logger.error(e)
             plot_partition = None
-            print("polytope.plot_partition failed to import.\n"
-                "No plotting by discretize during partitioning.")
+        
+        try:
+            from tulip.polytope.plot import plot as polyplot
+        except Exception, e:
+            logger.error(e)
+            plot_partition = None
+        
+        try:
+            import matplotlib.pyplot as plt
+            plt.ion()
+            fig, (ax1, ax2) = plt.subplots(1, 2)
+        except Exception, e:
+            logger.error(e)
+            plot_partition = None
         
         iter_count = 0    
     

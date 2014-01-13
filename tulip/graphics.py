@@ -35,13 +35,19 @@ Convenience functions for plotting
 from here:
     https://github.com/johnyf/pyvectorized
 """
+import logging
+logger = logging.getLogger(__name__)
+
 from __future__ import division
 from warnings import warn
 from itertools import izip_longest
 
 import numpy as np
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
+try:
+    from matplotlib import pyplot as plt
+    from mpl_toolkits.mplot3d import axes3d
+except Exception, e:
+    logger.error(e)
 
 #from mayavi import mlab
 
