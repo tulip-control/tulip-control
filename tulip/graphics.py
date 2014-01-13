@@ -35,11 +35,96 @@ Convenience functions for plotting
 from here:
     https://github.com/johnyf/pyvectorized
 """
-import matplotlib.pyplot as plt
+from __future__ import division
+from warnings import warn
+from itertools import izip_longest
 
-def newax():
-    """Instantiate new figure and axes.
+import numpy as np
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+
+#from mayavi import mlab
+
+def newax(subplots=(1,1), fig=None,
+          mode='list', dim=2):
+    """Create (possibly multiple) new axes handles.
+    
+    @param fig: attach axes to this figure
+    @type fig: figure object,
+        should be consistent with C{dim}
+    
+    @param subplots: number or layout of subplots
+    @type subplots: int or
+        2-tuple of subplot layout
+    
+    @param mode: return the axes shaped as a
+        vector or as a matrix.
+        This is a convenience for later iterations
+        over the axes.
+    @type mode: 'matrix' | ['list']
+    
+    @param dim: plot dimension:
+        
+            - if dim == 2, then use matplotlib
+            - if dim == 3, then use mayavi
+        
+        So the figure type depends on dim.
+    
+    @return: C{(ax, fig)} where:
+        - C{ax}: axes created
+        - C{fig}: parent of ax
+    @rtype: list or list of lists,
+        depending on C{mode} above
     """
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    return ax
+    # layout or number of axes ?
+    try:
+        subplot_layout = tuple(subplots)
+    except:
+        subplot_layout = (1, subplots)
+    
+    # reasonable layout ?
+    if len(subplot_layout) != 2:
+        raise Exception('newax:' +
+            'subplot layout should be 2-tuple or int.')
+    
+    # which figure ?
+    if fig is None:
+        fig = plt.figure()
+    
+    # create subplot(s)
+    (nv, nh) = subplot_layout
+    n = np.prod(subplot_layout)
+    
+    try:
+        dim = tuple(dim)
+    except:
+        # all same dim
+        dim = [dim] *n
+    
+    # matplotlib (2D) or mayavi (3D) ?
+    ax = []
+    for (i, curdim) in enumerate(dim):
+        if curdim == 2:
+            curax = fig.add_subplot(nv, nh, i+1)
+            ax.append(curax)
+        else:
+            curax = fig.add_subplot(nv, nh, i+1, projection='3d')
+            ax.append(curax)
+                      
+        if curdim > 3:
+            warn('ndim > 3, but plot limited to 3.')
+    
+    if mode is 'matrix':
+        ax = list(_grouper(nh, ax) )
+    
+    # single axes ?
+    if subplot_layout == (1,1):
+        ax = ax[0]
+    
+    return (ax, fig)
+
+def _grouper(n, iterable, fillvalue=None):
+    """grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
+    """
+    args = [iter(iterable)] * n
+    return izip_longest(fillvalue=fillvalue, *args)
