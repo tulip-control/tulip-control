@@ -1894,6 +1894,7 @@ def _get_patch(poly1, color="blue"):
     ind = np.argsort(angle) 
 
     patch = mpl.patches.Polygon(V[ind,:], True, color=color)
+    patch.set_zorder(0)
     return patch
 
 def grid_region(polyreg):
