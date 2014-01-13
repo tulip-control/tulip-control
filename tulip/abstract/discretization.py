@@ -427,6 +427,10 @@ def discretize(
         ax1.clear()
         
         plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        if subsys_list is not None:
+            for subsystem_idx in subsys_list:
+                subsystem = ssys.list_subsys[subsystem_idx]
+                subsystem.plot(ax1, show_domain=False)
         
         fig.canvas.draw()
         
