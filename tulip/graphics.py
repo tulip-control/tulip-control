@@ -35,4 +35,11 @@ Convenience functions for plotting
 from here:
     https://github.com/johnyf/pyvectorized
 """
+import matplotlib.pyplot as plt
 
+def newax():
+    """Instantiate new figure and axes.
+    """
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    return ax

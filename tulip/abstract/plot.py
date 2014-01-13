@@ -46,7 +46,8 @@ from tulip.polytope import cheby_ball, bounding_box
 
 try:
     import matplotlib
-    from tulip.polytope.plot import get_patch, newax
+    from tulip.polytope import get_patch
+    from tulip.graphics import newax
 except:
     matplotlib = None
 
