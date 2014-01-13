@@ -371,6 +371,11 @@ class Polytope(object):
         ax.add_patch(poly)
         
         return ax
+    
+    def text(self, txt, ax=None, color='black'):
+        """Plot text at chebyshev center.
+        """
+        _plot_text(self, txt, ax, color)
 
 class Region(object):
     """Class for lists of convex polytopes
@@ -558,7 +563,12 @@ class Region(object):
             # TODO hatched polytopes in same region
             poly2.plot(ax, color, hatch, alpha)
         
-        return ax 
+        return ax
+    
+    def text(self, txt, ax=None, color='black'):
+        """Plot text at chebyshev center.
+        """
+        _plot_text(self, txt, ax, color)
     
 def is_empty(polyreg):
     """Check if the description of a polytope is empty
@@ -1929,3 +1939,14 @@ def grid_region(polyreg, res=None):
     x = x[:, polyreg.are_inside(x) ]
     
     return (x, res)
+
+def _plot_text(polyreg, txt, ax, color):
+    if newax is None:
+        logger.warn('pyvectorized not found. No plotting.')
+        return None
+    
+    if ax is None:
+        ax, fig = newax()
+    
+    rc, xc = cheby_ball(polyreg)
+    ax.text(xc[0], xc[1], txt, color=color)
