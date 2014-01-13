@@ -129,7 +129,7 @@ class LtiSysDyn(object):
         output += "\nWset =\n"+str(self.Wset)
         return output
     
-    def plot(self, ax=None, color=np.random.rand(3)):
+    def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
         if quiver is None:
             logger.warn('pyvectorized not found. No plotting.')
             return
@@ -140,7 +140,8 @@ class LtiSysDyn(object):
         if ax is None:
             ax, fig = newax()
         
-        self.domain.plot(ax, color)
+        if show_domain:
+            self.domain.plot(ax, color)
         quiver(x, v, ax)
         
         return ax
