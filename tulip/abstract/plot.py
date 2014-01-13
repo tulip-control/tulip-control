@@ -138,27 +138,34 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
                 ax.add_patch(_get_patch(poly2, col) )
     
     # plot transition arrows between patches
-    for i in xrange(len(reg_list) ):
-        reg = reg_list[i]
+    for (i, reg) in enumerate(reg_list):
         rc, xc = cheby_ball(reg)
         
-        if trans is not None:
-            for j in np.nonzero(trans[:,i] )[0]:
-                reg1 = reg_list[j]
-                rc1, xc1 = cheby_ball(reg1)
-                
-                if not np.sum(np.abs(xc1-xc)) < 1e-7:
-                    x = xc[0]
-                    y = xc[1]
-                    dx = xc1[0] - xc[0]
-                    dy = xc1[1] - xc[1]
-                    arr = matplotlib.patches.Arrow(
-                        float(x), float(y), float(dx), float(dy),
-                        width=arr_size, color='black'
-                    )
-                    ax.add_patch(arr)
+        
         if plot_numbers:
-            ax.text(xc[0], xc[1], str(i),color='red')            
+            ax.text(xc[0], xc[1], str(i), color='red')
+        
+        if trans is None:
+            continue
+        
+        for j in np.nonzero(trans[:,i] )[0]:
+            reg1 = reg_list[j]
+            
+            rc, xc = cheby_ball(reg)
+            rc1, xc1 = cheby_ball(reg1)
+            
+            if np.sum(np.abs(xc1-xc)) < 1e-7:
+                continue
+            
+            x = xc[0]
+            y = xc[1]
+            dx = xc1[0] - xc[0]
+            dy = xc1[1] - xc[1]
+            arr = matplotlib.patches.Arrow(
+                float(x), float(y), float(dx), float(dy),
+                width=arr_size, color='black'
+            )
+            ax.add_patch(arr)
     
     if show:
         matplotlib.pyplot.show()
