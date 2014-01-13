@@ -398,7 +398,7 @@ class Region(object):
             self.list_poly = list_poly
             self.list_prop = list_prop
         else:
-            if len(list_poly) > 0:
+            if isinstance(list_poly, Region):
                 dim = list_poly[0].dim
                 for poly in list_poly:
                     if poly.dim != dim:
@@ -673,7 +673,7 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):
     Output:
     `poly_red`: Reduced Polytope or Region object
     """
-    if len(poly) > 0:
+    if isinstance(poly, Region):
         list = []
         for poly2 in poly.list_poly:
             red = reduce(poly2)
@@ -868,7 +868,7 @@ def cheby_ball(poly1):
         #In case chebyshev ball already calculated and stored
         return poly1.chebR,poly1.chebXc
 
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         maxr = 0
         maxx = None
         for poly in poly1.list_poly:
@@ -937,13 +937,12 @@ def bounding_box(polyreg):
     """
     if polyreg.bbox is not None:
         return polyreg.bbox
-        
-    lenP = len(polyreg)
     
     # For regions, calculate recursively for each
     # convex polytope and take maximum
     
-    if lenP > 0:
+    if isinstance(polyreg, Region):
+        lenP = len(polyreg)
         dimP = polyreg.dim
         alllower = np.zeros([lenP,dimP])
         allupper = np.zeros([lenP,dimP])
@@ -1063,7 +1062,7 @@ def mldivide(poly1,poly2):
     """
     P = Polytope()    
 
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         for ii in xrange(len(poly1.list_poly)):
             Pdiff = region_diff(poly1.list_poly[ii],poly2)
             P = union(P,Pdiff, False)        
@@ -1086,7 +1085,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
     if poly1.dim != poly2.dim:
         raise Exception("polytopes have different dimension")
     
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         P = Polytope()
         for poly in poly1.list_poly:
             int_p = intersect(poly, poly2, abs_tol)
@@ -1095,7 +1094,7 @@ def intersect(poly1,poly2,abs_tol=1e-7):
                 P = union(P, int_p, check_convex=False)
         return P
         
-    if len(poly2) > 0:
+    if isinstance(poly2, Region):
         P = Polytope()
         for poly in poly2.list_poly:
             int_p = intersect(poly1, poly, abs_tol)
@@ -1128,7 +1127,7 @@ def volume(polyreg):
     except:
         print("vol")
         
-    if len(polyreg) > 0:
+    if isinstance(polyreg, Region):
         tot_vol = 0.
         for i in xrange(len(polyreg)):
             tot_vol += volume(polyreg.list_poly[i])
@@ -1175,7 +1174,7 @@ def extreme(poly1):
     V = np.array([])
     R = np.array([])
     
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         raise Exception("extreme: not executable for regions")
     
     poly1 = reduce(poly1) # Need to have polytope non-redundant!
@@ -1289,7 +1288,7 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     To project the polytope `P` onto the first three dimensions, use
         >>> P_proj = projection(P, [1,2,3])
     """
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         ret = Polytope()
         for i in xrange(len(poly1.list_poly)):
             p = projection(
@@ -1402,7 +1401,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
         raise Exception("is_adjacent: "
             "polytopes do not have the same dimension")
     
-    if len(poly1) > 0:
+    if isinstance(poly1, Region):
         for i in xrange(len(poly1)):
             adj = is_adjacent(poly1.list_poly[i], poly2, \
                               overlap=overlap, abs_tol=abs_tol)
@@ -1410,7 +1409,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
                 return True
         return False
     
-    if len(poly2) > 0:
+    if isinstance(poly2, Region):
         for j in xrange(len(poly2)):
             adj = is_adjacent(poly1, poly2.list_poly[j], \
                               overlap=overlap, abs_tol=abs_tol)
