@@ -325,6 +325,10 @@ class Polytope(object):
         --------
         plot_partition
         """
+        if newax is None:
+            logger.warn('newax not imported. No Polytope plotting.')
+            return
+        
         #TODO optional arg for text label
         if not is_fulldim(poly1):
             print("Cannot plot empty polytope")
@@ -1806,6 +1810,10 @@ def _get_patch(poly1, color="blue"):
     > ax.set_ylim(yl, yu) 
     > plt.show()
     """
+    if mpl is None:
+        logger.warn('matplotlib not found, no plotting.')
+        return
+    
     V = extreme(poly1)
     rc,xc = cheby_ball(poly1)
     x = V[:,1] - xc[1]
