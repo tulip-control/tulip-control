@@ -45,15 +45,15 @@ import numpy as np
 import polytope as pc
 
 class LtiSysDyn(object):
-    """LtiSysDyn class for specifying the discrete-time continuous dynamics:
+    """Represent discrete-time continuous dynamics:
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
     
     subject to the constraints:
     
-        u[t] \in Uset = polytope
-        d[t] \in Wset - polytope object
-        s[t] \in domain - polytope object
+        u[t] \in Uset
+        d[t] \in Wset
+        s[t] \in domain
     
     where:
         - u[t] the control input
@@ -63,18 +63,13 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (polytope.Polytope)
+        - Uset, Wset and domain (each a polytope.Polytope)
     
     as defined above.
     
     Note: For state-dependent bounds on the input,
         [u[t]; s[t]] \in Uset
     can be used.
-    
-    **Constructor**:
-    
-    **LtiSysDyn** ([ `A` = [][, `B` = [][, `E` = [][, `K` = [][, `Uset` = [][,
-    `Wset` = [][, `domain`[]]]]]]]])
     
     see also
     --------
