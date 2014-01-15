@@ -425,7 +425,7 @@ def find_adjacent_regions(partition):
     return adj
 ################################
 
-class PropPreservingPartition:
+class PropPreservingPartition(object):
     """Partition class with following fields:
     
     - domain: the domain we want to partition,
