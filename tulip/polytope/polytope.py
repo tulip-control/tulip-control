@@ -349,8 +349,11 @@ class Polytope(object):
             self.bbox = bounding_box(self)
         return self.bbox
     
-    def plot(self, ax=None, color=np.random.rand(3),
+    def plot(self, ax=None, color=None,
              hatch=None, alpha=1.0):
+        if color is None:
+            color = np.random.rand(3)
+        
         if newax is None:
             logger.warn('newax not imported. No Polytope plotting.')
             return
@@ -541,8 +544,11 @@ class Region(object):
             self.bbox = bounding_box(self)
         return self.bbox
     
-    def plot(self, ax=None, color=np.random.rand(3),
+    def plot(self, ax=None, color=None,
              hatch=None, alpha=1.0):
+        if color is None:
+            color = np.random.rand(3)
+        
         if newax is None:
             warn('pyvectorized not found. No plotting.')
             return None
