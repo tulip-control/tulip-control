@@ -314,7 +314,21 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     # Mealy reaction to initial env input
     for v in A.nodes_iter():
         var_values = A.node[v]['state']
-        bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
+        
+        bool_values = {}
+        for k, v in var_values.iteritems():
+            is_bool = False
+            if k in env_vars:
+                if env_vars[k] == 'boolean':
+                    is_bool = True
+            if k in sys_vars:
+                if sys_vars[k] == 'boolean':
+                    is_bool = True
+            
+            if is_bool:
+                bool_values.update({k:str(bool(v) )})
+            else:
+                bool_values.update({k:str(v)})
         
         t = spec1.evaluate(bool_values)
         
