@@ -2,9 +2,10 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
-SCL; 10 Jan 2014.
+SCL; 15 Jan 2014.
 """
 
+import imp
 import sys
 import os.path
 import nose
@@ -47,9 +48,21 @@ if __name__ == "__main__":
         require_nonlocaldir_tulip = False
 
     if require_nonlocaldir_tulip:
-        sys.path.pop(0)
+        # Scrub local directory from search path for modules
+        import os
+        try:
+            while True:
+                sys.path.remove("")
+        except ValueError:
+            pass
+        try:
+            while True:
+                sys.path.remove(os.path.abspath(os.curdir))
+        except ValueError:
+            pass
     try:
-        import tulip
+        modtuple = imp.find_module("tulip", sys.path)
+        imp.load_module("tulip", *modtuple)
     except ImportError:
         if require_nonlocaldir_tulip:
             raise ImportError("tulip package not found, besides in the local directory")
