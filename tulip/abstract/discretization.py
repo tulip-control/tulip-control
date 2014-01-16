@@ -112,7 +112,8 @@ def discretize(
     max_num_poly=5, use_all_horizon=False,
     trans_length=1, remove_trans=False, 
     abs_tol=1e-7,
-    plotit=False, save_img=False, cont_props=None
+    plotit=False, save_img=False, cont_props=None,
+    plot_every=10
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
@@ -410,11 +411,15 @@ def discretize(
             transitions[j,i] = 0
         
         logger.info(msg)
-    
+        
+        iter_count += 1
+        
         # no plotting ?
         if not plotit:
             continue
         if plot_partition is None:
+            continue
+        if iter_count % plot_every != 0:
             continue
         
         tmp_part = PropPreservingPartition(
@@ -458,7 +463,6 @@ def discretize(
         
         if save_img:
             fig.savefig('movie' +str(iter_count) +'.pdf')
-        iter_count += 1
         plt.pause(1)
 
     new_part = PropPreservingPartition(
