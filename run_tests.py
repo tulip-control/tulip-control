@@ -2,7 +2,7 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 
-SCL; 15 Jan 2014.
+SCL; 16 Jan 2014.
 """
 
 import imp
@@ -26,7 +26,9 @@ if __name__ == "__main__":
 
     --fast           exclude tests that are marked as slow
     --cover          generate a coverage report
-    --outofsource    import tulip from outside the current directory""")
+    --outofsource    import tulip from outside the current directory
+    --where=DIR      search for tests in directory DIR; default is "tests"
+                     (this is exactly the "-w" or "--where" option of nose)""")
         exit(1)
 
     if "--fast" in sys.argv:
@@ -46,6 +48,20 @@ if __name__ == "__main__":
         sys.argv.remove("--outofsource")
     else:
         require_nonlocaldir_tulip = False
+
+    # Try to find test directory among command-line arguments
+    given_tests_dir = False
+    for i in range(len(sys.argv[1:])):
+        if sys.argv[i+1] == "-w":
+            given_tests_dir = True
+            tests_dir = sys.argv[i+2]
+            break
+        if sys.argv[i+1].startswith("--where="):
+            given_tests_dir = True
+            tests_dir = sys.argv[i+1][len("--where="):]
+            break
+    if not given_tests_dir:
+        tests_dir = "tests"
 
     if require_nonlocaldir_tulip:
         # Scrub local directory from search path for modules
@@ -69,7 +85,7 @@ if __name__ == "__main__":
         else:
             raise
 
-    argv = [sys.argv[0]]
+    argv = ["nosetests"]
     if skip_slow:
         argv.append("--attr=!slow")
     if measure_coverage:
@@ -77,19 +93,15 @@ if __name__ == "__main__":
     testfiles = []
     excludefiles = []
     for basename in sys.argv[1:]:  # Only add extant file names
-        try:
-            relname = os.path.join("tests", basename+"_test.py")
-            with open(relname, "r") as f:
-                testfiles.append(relname)
-        except IOError:
-            if basename[0] == "-":
-                try:
-                    with open(os.path.join("tests", basename[1:]+"_test.py"), "r") as f:
-                        excludefiles.append(basename[1:]+"_test.py")
-                except IOError:
-                    argv.append(basename)
+        if os.path.exists(os.path.join(tests_dir, basename+"_test.py")):
+            testfiles.append(basename+"_test.py")
+        elif basename[0] == "-":
+            if os.path.exists(os.path.join(tests_dir, basename[1:]+"_test.py")):
+                excludefiles.append(basename[1:]+"_test.py")
             else:
                 argv.append(basename)
+        else:
+            argv.append(basename)
     if len(testfiles) > 0 and len(excludefiles) > 0:
         print("You can specify files to exclude or include, but not both.")
         print("Try calling it with \"-h\" flag.")
@@ -97,4 +109,6 @@ if __name__ == "__main__":
     if len(excludefiles) > 0:
         argv.append("--exclude="+"|".join(excludefiles))
     argv.extend(testfiles)
-    nose.main(argv=argv)
+    if not given_tests_dir:
+        argv += ["--where="+tests_dir]
+    nose.main(argv=argv+["--verbosity=3", "--exe"])
