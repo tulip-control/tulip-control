@@ -443,9 +443,10 @@ def discretize(
                 subsystem.plot(ax1, show_domain=False)
         
         # plot hatched continuous propositions
-        for (prop, poly) in cont_props.iteritems():
-            poly.plot(ax1, color='none', hatch='/')
-            poly.text(prop, ax1, color='yellow')
+        if cont_props is not None:
+	        for (prop, poly) in cont_props.iteritems():
+	            poly.plot(ax1, color='none', hatch='/')
+	            poly.text(prop, ax1, color='yellow')
         
         fig.canvas.draw()
         
