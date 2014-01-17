@@ -221,7 +221,7 @@ def discretize(
             logger.error(e)
             plot_partition = None
         
-        iter_count = 0    
+    iter_count = 0    
     
     # List of how many "new" regions
     # have been created for each region
