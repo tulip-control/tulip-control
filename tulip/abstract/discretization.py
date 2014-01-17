@@ -96,7 +96,7 @@ def discretize(
     trans_length=1, remove_trans=False, 
     abs_tol=1e-7,
     plotit=False, save_img=False, cont_props=None,
-    plot_every=10
+    plot_every=1
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
