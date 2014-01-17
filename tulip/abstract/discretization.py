@@ -217,11 +217,12 @@ def discretize(
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
+            file_extension = 'png'
         except Exception, e:
             logger.error(e)
             plot_partition = None
         
-    iter_count = 0    
+    iter_count = 0
     
     # List of how many "new" regions
     # have been created for each region
@@ -442,7 +443,9 @@ def discretize(
         ax2.set_ylim(l[1,0], u[1,0])
         
         if save_img:
-            fig.savefig('movie' +str(iter_count) +'.pdf')
+            fname = 'movie' +str(iter_count).zfill(3)
+            fname += '.' + file_extension
+            fig.savefig(fname)
         plt.pause(1)
 
     new_part = PropPreservingPartition(
