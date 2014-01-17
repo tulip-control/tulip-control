@@ -312,8 +312,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         spec1.sym_to_prop(values2ints)
     
     # Mealy reaction to initial env input
-    for v in A.nodes_iter():
-        var_values = A.node[v]['state']
+    for node in A.nodes_iter():
+        var_values = A.node[node]['state']
         
         bool_values = {}
         for k, v in var_values.iteritems():
@@ -334,7 +334,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         
         if t['env_init'] and t['sys_init']:
             label = _map_int2dom(var_values, arbitrary_domains)
-            mach.transitions.add_labeled(initial_state, v, label)
+            mach.transitions.add_labeled(initial_state, node, label)
     
     return (spec, mach)
 
