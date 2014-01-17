@@ -44,7 +44,8 @@ Most functions have a "verbose" argument.
 positive means provide some status updates.
 """
 import logging
-from warnings import warn
+logger = logging.getLogger(__name__)
+
 import copy
 import subprocess
 import tempfile
@@ -259,9 +260,12 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
             raise ValueError("failure of consistency check " +
                 "while processing aut XML string.")
         if this_id in id_list:
-            warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
+            logger.warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
             continue
         id_list.append(this_id)
+        
+        logger.info('loaded from gr1c result:\n\t' +str(this_state) )
+        
         A.add_node(this_id, state=copy.copy(this_state),
                    mode=mode, rgrad=rgrad)
         for next_node in this_child_list:
@@ -294,6 +298,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     mach.states.add_from(A.nodes())
     for u in A.nodes_iter():
         for v in A.successors_iter(u):
+            logger.info('node: ' +str(v) +', state: ' +
+                        str(A.node[v]["state"]) )
+            
             label = _map_int2dom(A.node[v]["state"],
                                  arbitrary_domains)
             mach.transitions.add_labeled(u, v, label)
@@ -330,7 +337,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
             else:
                 bool_values.update({k:str(v)})
         
+        logger.info('Boolean values: ' +str(bool_values) )
         t = spec1.evaluate(bool_values)
+        logger.info('evaluates to: ' +str(t) )
         
         if t['env_init'] and t['sys_init']:
             label = _map_int2dom(var_values, arbitrary_domains)
@@ -437,13 +446,13 @@ def synthesize(spec, verbose=0):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
-    logging.debug('gr1c input:\n' + spec.to_gr1c() +_hl)
+    logger.debug('gr1c input:\n' + spec.to_gr1c() +_hl)
     
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     
-    logging.debug('gr1c returned:\n' + str(p.returncode) )
-    logging.debug('gr1c stdout:\n' + str(stdoutdata) +_hl)
-    logging.debug('gr1c stderr:\n' + str(stderrdata) +_hl)
+    logger.debug('gr1c returned:\n' + str(p.returncode) )
+    logger.debug('gr1c stdout:\n' + str(stdoutdata) +_hl)
+    logger.debug('gr1c stderr:\n' + str(stderrdata) +_hl)
     
     if p.returncode == 0:
         (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
