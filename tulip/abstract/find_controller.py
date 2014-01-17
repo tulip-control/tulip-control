@@ -49,7 +49,7 @@ import numpy as np
 from cvxopt import matrix, solvers
 
 from tulip import polytope as pc
-from .discretization import solve_feasible, createLM, _block_diag2
+from .feasible import solve_feasible, createLM, _block_diag2
 
 def get_input(
     x0, ssys, abstraction,
