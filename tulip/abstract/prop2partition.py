@@ -36,6 +36,8 @@ Proposition preserving partition module.
 
 Restructured by NO, 30 Jun 2013.
 """
+from itertools import compress
+
 import numpy as np
 from scipy import sparse as sp
 import copy
@@ -464,18 +466,20 @@ class PropPreservingPartition(object):
     def __str__(self):
         output = 'Domain: ' + str(self.domain) + '\n'
         
-        for j in xrange(len(self.list_region)):
-            output += 'Region' + str(j)
+        for j, region in enumerate(self.list_region):
+            output += 'Region: ' + str(j) +'\n'
             
             if self.list_prop_symbol is not None:
-                output += ', propositions: '
-                output += ' '.join(
-                    [self.list_prop_symbol[i] for i in
-                     xrange(len(self.list_prop_symbol))
-                     if self.list_region[j].list_prop[i] != 0]
-                ) + '\n'
+                output += '\t Propositions: '
+                
+                active_props = ' '.join(compress(
+                    self.list_prop_symbol,
+                    region.list_prop
+                ))
+                
+                output += active_props + '\n'
             
-            output += str(self.list_region[j])
+            output += str(region)
         
         if hasattr(self.adj, 'todense'):
             output += 'Adjacency matrix:\n'
