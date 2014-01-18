@@ -1339,11 +1339,33 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
     if (poly1.dim < len(dim)) or is_empty(poly1):
         return poly1
     
+    poly_dim = poly1.dim
     dim = np.array(dim)
-    org_dim = xrange(poly1.dim)
+    org_dim = xrange(poly_dim)
     new_dim = dim.flatten() - 1
     del_dim = np.setdiff1d(org_dim,new_dim) # Index of dimensions to remove 
+    
+    logger.info('polytope dim = ' + str(poly_dim))
+    logger.info('project on dims = ' + str(new_dim))
+    logger.info('original dims = ' + str(org_dim))
+    logger.info('dims to delete = ' + str(del_dim))
+    
+    mA, nA = poly1.A.shape
+    
+    if mA < poly_dim:
+        msg = 'fewer rows in A: ' + str(mA)
+        msg += ', than polytope dimension: ' + str(poly_dim)
+        logger.warn(msg)
         
+        # enlarge A, b with zeros
+        A = poly1.A.copy()
+        poly1.A = np.zeros((poly_dim, poly_dim) )
+        poly1.A[0:mA, 0:nA] = A
+        
+        poly1.b = np.hstack([poly1.b, np.zeros(poly_dim - mA)])
+    
+    logger.info('m, n = ' +str((mA, nA)) )
+    
     # Compute cheby ball in lower dim to see if projection exists
     norm = np.sum(poly1.A*poly1.A, axis=1).flatten()
     norm[del_dim] = 0
