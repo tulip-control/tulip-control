@@ -462,15 +462,20 @@ class PropPreservingPartition(object):
                 self.list_region[region].list_prop) if p]
 
     def __str__(self):
-        output = "Domain: "+str(self.domain)+"\n"
+        output = 'Domain: ' + str(self.domain) + '\n'
+        
         if self.list_prop_symbol is not None:
             for j in xrange(len(self.list_region)):
-                output += "Region "+str(j)+", propositions: "+" ".join(
-                        [self.list_prop_symbol[i] for i in
-                         xrange(len(self.list_prop_symbol))
-                         if self.list_region[j].list_prop[i] != 0]
-                    )+"\n"
+                output += 'Region' + str(j)
+                output += ', propositions: '
+                output += ' '.join(
+                    [self.list_prop_symbol[i] for i in
+                     xrange(len(self.list_prop_symbol))
+                     if self.list_region[j].list_prop[i] != 0]
+                ) + '\n'
                 output += str(self.list_region[j])
-        if hasattr(self.adj, "shape"):
-            output +="Adjacency matrix:\n"+str(self.adj.todense())+"\n"
+        
+        if hasattr(self.adj, 'shape'):
+            output += 'Adjacency matrix:\n'
+            output += str(self.adj.todense()) + '\n'
         return output
