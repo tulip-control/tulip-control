@@ -477,7 +477,10 @@ class PropPreservingPartition(object):
                     region.list_prop
                 ))
                 
-                output += active_props + '\n'
+                if active_props:
+                    output += active_props + '\n'
+                else:
+                    output += '{}\n'
             
             output += str(region)
         
