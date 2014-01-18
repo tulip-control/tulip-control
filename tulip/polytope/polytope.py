@@ -145,8 +145,8 @@ class Polytope(object):
                 self.A[i,:] = self.A[i,:]*mult[i]
             self.b = self.b.flatten()*mult
         self.minrep = minrep
-        self.chebXc = chebX
-        self.chebR = chebR
+        self._chebXc = chebX
+        self._chebR = chebR
         self.bbox = None
         self.fulldim = fulldim
         self._volume = volume
@@ -203,8 +203,8 @@ class Polytope(object):
         A = self.A.copy()
         b = self.b.copy()
         P = Polytope(A,b)
-        P.chebXc = self.chebXc
-        P.chebR = self.chebR
+        P._chebXc = self._chebXc
+        P._chebR = self._chebR
         P.minrep = self.minrep
         P.bbox = self.bbox
         P.fulldim = self.fulldim
@@ -340,6 +340,16 @@ class Polytope(object):
             self._volume = volume(self)
         return self._volume
     
+    @property
+    def chebR(self):
+        r, xc = cheby_ball(self)
+        return self._chebR
+    
+    @property
+    def chebXc(self):
+        r, xc = cheby_ball(self)
+        return self._chebXc
+    
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
         
@@ -422,8 +432,8 @@ class Region(object):
             self.bbox = None
             self.fulldim = None
             self._volume = None
-            self.chebXc = None
-            self.chebR = None
+            self._chebXc = None
+            self._chebR = None
 
         
     def __repr__(self):
@@ -534,6 +544,16 @@ class Region(object):
         if self._volume is None:
             self._volume = volume(self)
         return self._volume
+    
+    @property
+    def chebR(self):
+        r, xc = cheby_ball(self)
+        return self._chebR
+    
+    @property
+    def chebXc(self):
+        r, xc = cheby_ball(self)
+        return self._chebXc
     
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
@@ -882,9 +902,9 @@ def cheby_ball(poly1):
     length of the longest line segment along the first coordinate axis
     inside polytope P
     """
-    if (poly1.chebXc != None) and (poly1.chebR != None):
+    if (poly1._chebXc != None) and (poly1._chebR != None):
         #In case chebyshev ball already calculated and stored
-        return poly1.chebR,poly1.chebXc
+        return poly1._chebR,poly1._chebXc
 
     if isinstance(poly1, Region):
         maxr = 0
@@ -894,8 +914,8 @@ def cheby_ball(poly1):
             if rc > maxr:
                 maxr = rc
                 maxx = xc
-        poly1.chebXc = maxx
-        poly1.chebR = maxr
+        poly1._chebXc = maxx
+        poly1._chebR = maxr
         return maxr,maxx
         
     if is_empty(poly1):
@@ -922,9 +942,9 @@ def cheby_ball(poly1):
         # Polytope is empty
         poly1 = Polytope(fulldim = False)
         return 0,None   
-    poly1.chebXc = np.array(xc)
-    poly1.chebR = np.double(r)
-    return poly1.chebR,poly1.chebXc
+    poly1._chebXc = np.array(xc)
+    poly1._chebR = np.double(r)
+    return poly1._chebR,poly1._chebXc
     
 def bounding_box(polyreg):
     """Return smallest hyperbox containing polytope or region.
