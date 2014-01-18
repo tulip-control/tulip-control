@@ -475,7 +475,7 @@ class PropPreservingPartition(object):
                 ) + '\n'
                 output += str(self.list_region[j])
         
-        if hasattr(self.adj, 'shape'):
+        if hasattr(self.adj, 'todense'):
             output += 'Adjacency matrix:\n'
             output += str(self.adj.todense()) + '\n'
         return output
