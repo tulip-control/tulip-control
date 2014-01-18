@@ -43,6 +43,7 @@ from scipy import sparse as sp
 import copy
 
 from tulip import polytope as pc
+from .plot import plot_partition
 
 def prop2part(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of
@@ -488,3 +489,8 @@ class PropPreservingPartition(object):
             output += 'Adjacency matrix:\n'
             output += str(self.adj.todense()) + '\n'
         return output
+    
+    def plot(self, **kwargs):
+        """For details see plot.plot_partition.
+        """
+        plot_partition(self, **kwargs)
