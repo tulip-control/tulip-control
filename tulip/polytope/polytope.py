@@ -895,7 +895,7 @@ def cheby_ball(poly1):
                 maxr = rc
                 maxx = xc
         poly1.chebXc = maxx
-        poly1.chabR = maxr
+        poly1.chebR = maxr
         return maxr,maxx
         
     if is_empty(poly1):
