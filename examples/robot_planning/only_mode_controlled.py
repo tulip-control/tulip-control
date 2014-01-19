@@ -152,5 +152,5 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('gr1c', specs, env=env_sws)
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('only_switching_controlled.png', 'png'):
+if not ctrl.save('only_mode_controlled.png', 'png'):
     print(ctrl)
