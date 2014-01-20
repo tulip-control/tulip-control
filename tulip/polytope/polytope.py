@@ -103,6 +103,11 @@ solvers.options['LPX_K_MSGLEV'] = 0
 # Nicer numpy output
 np.set_printoptions(precision=5, suppress = True)
 
+# global default absolute tolerance,
+# to enable changing it code w/o passing arguments,
+# so that magic methods can still be used
+ABS_TOL = 1e-7
+
 class Polytope(object):
     """Polytope class with following fields
     
@@ -210,7 +215,7 @@ class Polytope(object):
         P.fulldim = self.fulldim
         return P
     
-    def __contains__(self, point, abs_tol=1e-7):
+    def __contains__(self, point, abs_tol=ABS_TOL):
         """Return True if polytope contains point.
         
         see also
@@ -221,7 +226,7 @@ class Polytope(object):
         test = self.A.dot(point.flatten() ) - self.b < abs_tol
         return np.all(test)
     
-    def are_inside(self, points, abs_tol=1e-7):
+    def are_inside(self, points, abs_tol=ABS_TOL):
         test = self.A.dot(points) -self.b[:,np.newaxis] < abs_tol
         return np.all(test, axis=0)
     
@@ -251,7 +256,7 @@ class Polytope(object):
         """
         return mldivide(self, other)
     
-    def intersect(self, other, abs_tol=1e-7):
+    def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
         @type other: Polytope or Region.
@@ -315,7 +320,7 @@ class Polytope(object):
         return cls(A, b, minrep=True)
     
     def project(self, dim, solver=None,
-                abs_tol=1e-7, verbose=0):
+                abs_tol=ABS_TOL, verbose=0):
         """Return Polytope projection on selected subspace.
         
         For usage details see function: projection.
@@ -452,7 +457,7 @@ class Region(object):
     def __len__(self):
         return len(self.list_poly)
     
-    def __contains__(self, point, abs_tol=1e-7):
+    def __contains__(self, point, abs_tol=ABS_TOL):
         """Return True if Region contains point.
         
         see also
@@ -527,7 +532,7 @@ class Region(object):
         """
         return intersect(self, other)
     
-    def intersect(self, other, abs_tol=1e-7):
+    def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
         @type other: Polytope or Region.
@@ -632,7 +637,7 @@ def is_empty(polyreg):
         else:
             return False
             
-def is_fulldim(polyreg, abs_tol=1e-7):
+def is_fulldim(polyreg, abs_tol=ABS_TOL):
     """Check if a polytope or region has inner points.
     
     Input:
@@ -663,7 +668,7 @@ def is_fulldim(polyreg, abs_tol=1e-7):
     polyreg.fulldim = status
     return status
       
-def is_convex(reg, abs_tol = 1e-7):
+def is_convex(reg, abs_tol=ABS_TOL):
     """Check if a region is convex.
     
     Input:
@@ -698,7 +703,7 @@ def is_convex(reg, abs_tol = 1e-7):
     else:
         return True,outer
 
-def is_inside(polyreg, point, abs_tol=1e-7):
+def is_inside(polyreg, point, abs_tol=ABS_TOL):
     """Checks if point satisfies all the inequalities of polyreg.
     
     @param polyreg: Polytope | Region
@@ -708,7 +713,7 @@ def is_inside(polyreg, point, abs_tol=1e-7):
     """
     return polyreg.__contains__(point, abs_tol)
         
-def is_subset(small, big, abs_tol=1e-7):
+def is_subset(small, big, abs_tol=ABS_TOL):
     """Return True if small \subseteq big.
     
     @type small, big: Polytope, Region
@@ -723,7 +728,7 @@ def is_subset(small, big, abs_tol=1e-7):
     else:
         return False
 
-def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):  
+def reduce(poly,nonEmptyBounded=1, abs_tol=ABS_TOL):  
     """Removes redundant inequalities in the hyperplane representation
     of the polytope with the algorithm described at
     http://www.ifor.math.ethz.ch/~fukuda/polyfaq/node24.html
@@ -1058,7 +1063,7 @@ def bounding_box(polyreg):
     
     return l,u
     
-def envelope(reg, abs_tol=1e-7):
+def envelope(reg, abs_tol=ABS_TOL):
     """Compute envelope of a region.
 
     The envelope is the polytope defined by all "outer" inequalities a
@@ -1135,7 +1140,7 @@ def mldivide(poly1,poly2):
         P = region_diff(poly1,poly2)
     return P
     
-def intersect(poly1,poly2,abs_tol=1e-7):
+def intersect(poly1,poly2,abs_tol=ABS_TOL):
     """Compute the intersection between two polytopes or regions
     
     Input:
@@ -1313,7 +1318,7 @@ def extreme(poly1):
     poly1.vertices = V
     return V.reshape(V.size/nx,nx)
     
-def qhull(vertices,abs_tol=1e-7):
+def qhull(vertices,abs_tol=ABS_TOL):
     """Use quickhull to compute a convex hull.
     
     Input:
@@ -1327,7 +1332,7 @@ def qhull(vertices,abs_tol=1e-7):
         return Polytope()
     return Polytope(A,b,minrep=True,vertices=vert)
 
-def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
+def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
     """Projects a polytope onto lower dimensions.
     
     Input:
@@ -1432,7 +1437,7 @@ def projection(poly1, dim, solver=None, abs_tol=1e-7, verbose=0):
             print("projection: using iterative hull.")
         return projection_iterhull(poly1,new_dim)
         
-def separate(reg1, abs_tol=1e-7):
+def separate(reg1, abs_tol=ABS_TOL):
     """Divide a region into several regions such that they are
     all connected.
     
@@ -1471,7 +1476,7 @@ def separate(reg1, abs_tol=1e-7):
     
     return final
         
-def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
+def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
     """Checks if two polytopes or regions are adjacent 
     by enlarging both slightly and checking the intersection
     
@@ -1546,7 +1551,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=1e-7):
       
 #### Helper functions ####
         
-def projection_fm(poly1, new_dim, del_dim, abs_tol=1e-7):
+def projection_fm(poly1, new_dim, del_dim, abs_tol=ABS_TOL):
     """Help function implementing Fourier Motzkin projection.
     Should work well for eliminating few dimensions.
     """
@@ -1602,7 +1607,7 @@ def projection_exthull(poly1,new_dim):
     return reduce(qhull(vert[:,new_dim]))
     
 def projection_iterhull(poly1, new_dim, max_iter=1000,
-                        verbose=0, abs_tol=1e-7):
+                        verbose=0, abs_tol=ABS_TOL):
     """Helper function implementing the "iterative hull" method.
     Works best when projecting _to_ lower dimensions.
     """
@@ -1775,7 +1780,7 @@ def projection_esp(poly1,keep_dim,del_dim):
     G,g,E = esp(C,D,poly1.b)
     return Polytope(G,g)
 
-def region_diff(poly,reg, abs_tol=1e-7, intersect_tol=1e-7):
+def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
     """Subtract a region from a polytope
     
     Input:
