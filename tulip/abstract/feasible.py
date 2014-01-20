@@ -50,7 +50,20 @@ from collections import Iterable
 import numpy as np
 
 from tulip import polytope as pc
-    
+
+def is_feasible(
+    from_region, to_region, sys, N,
+    closed_loop=True,
+    use_all_horizon=False,
+    trans_set=None
+):
+    S0 = solve_feasible(
+        from_region, to_region, sys, N,
+        closed_loop, use_all_horizon,
+        trans_set
+    )
+    return from_region <= S0
+
 def solve_feasible(
     P1, P2, ssys, N, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
