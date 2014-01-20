@@ -225,6 +225,12 @@ class Polytope(object):
         test = self.A.dot(points) -self.b[:,np.newaxis] < abs_tol
         return np.all(test, axis=0)
     
+    def __le__(self, other):
+        return is_subset(self, other)
+    
+    def __ge__(self, other):
+        return is_subset(other, self)
+    
     def union(self, other, check_convex=False):
         """Return union with Polytope or Region.
         
@@ -459,6 +465,12 @@ class Region(object):
             if poly.__contains__(point, abs_tol):
                 return True
         return False
+    
+    def __le__(self, other):
+        return is_subset(self, other)
+    
+    def __ge__(self, other):
+        return is_subset(other, self)
     
     def __add__(self, other):
         """Return union with Polytope or Region.
@@ -696,6 +708,21 @@ def is_inside(polyreg, point, abs_tol=1e-7):
     """
     return polyreg.__contains__(point, abs_tol)
         
+def is_subset(small, big, abs_tol=1e-7):
+    """Return True if small \subseteq big.
+    
+    @type small, big: Polytope, Region
+    
+    @rtype: bool
+    """
+    diff = small.diff(big)
+    volume = diff.volume
+    
+    if volume < abs_tol:
+        return True
+    else:
+        return False
+
 def reduce(poly,nonEmptyBounded=1, abs_tol=1e-7):  
     """Removes redundant inequalities in the hyperplane representation
     of the polytope with the algorithm described at
