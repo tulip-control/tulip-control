@@ -2030,3 +2030,26 @@ def _plot_text(polyreg, txt, ax, color):
     
     rc, xc = cheby_ball(polyreg)
     ax.text(xc[0], xc[1], txt, color=color)
+
+def simplices2polytopes(points, triangles):
+    """Convert a simplicial mesh to polytope H-representation.
+    
+    @type points: N x d
+    
+    @type triangles: NT x 3
+    """
+    polytopes = []
+    for triangle in triangles:
+        logger.info('Triangle: ' + str(triangle))
+        
+        triangle_vertices = points[triangle, :]
+        
+        logger.info('\t triangle points: ' +
+                    str(triangle_vertices))
+        
+        poly = qhull(triangle_vertices)
+        
+        logger.info('\n Polytope:\n:' + str(poly))
+        
+        polytopes += [poly]
+    return polytopes
