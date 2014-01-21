@@ -135,7 +135,9 @@ class LtiSysDyn(object):
             return
         
         (x, res) = pc.grid_region(self.domain)
-        v = self.A.dot(x)
+        n = self.A.shape[0]
+        DA = self.A - np.eye(n)
+        v = DA.dot(x)
         
         if ax is None:
             ax, fig = newax()
