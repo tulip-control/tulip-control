@@ -86,6 +86,7 @@ except Exception, e:
 
 from .quickhull import quickhull
 from .esp import esp
+from tulip import rvachev
 
 # Find a lp solver to use
 try:
@@ -361,6 +362,21 @@ class Polytope(object):
         r, xc = cheby_ball(self)
         return self._chebXc
     
+    def distance(self, points):
+        """Return for each point minimal signed distance.
+        
+        The distance is from the Polytope boundary.
+        Note that distance is negative inside the Polytope.
+        
+        @type points: 2d-array, each column a point
+        """
+        d = self.A.dot(points) -self.b.reshape((self.b.size, 1))
+        d = -d
+        x = d[0]
+        for y in d[1:]:
+            x = rvachev.conj(x, y)
+        return -x
+    
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
         
@@ -571,6 +587,14 @@ class Region(object):
     def chebXc(self):
         r, xc = cheby_ball(self)
         return self._chebXc
+    
+    def distance(self, points):
+        d = self.list_poly[0].distance(points)
+        for poly in self.list_poly:
+            d1 = poly.distance(points)
+            
+            d = np.vstack([d, d1]).min(axis=0)
+        return d
     
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
