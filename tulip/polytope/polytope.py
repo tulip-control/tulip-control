@@ -397,11 +397,11 @@ class Polytope(object):
         
         #TODO optional arg for text label
         if not is_fulldim(self):
-            print("Cannot plot empty polytope")
+            logger.error("Cannot plot empty polytope")
             return
         
         if self.dim != 2:
-            print("Cannot plot polytopes of dimension larger than 2")
+            logger.error("Cannot plot polytopes of dimension larger than 2")
             return
         
         if ax is None:
@@ -611,16 +611,16 @@ class Region(object):
             color = np.random.rand(3)
         
         if newax is None:
-            warn('pyvectorized not found. No plotting.')
+            logger.warn('pyvectorized not found. No plotting.')
             return None
         
         #TODO optional arg for text label
         if not is_fulldim(self):
-            print("Cannot plot empty region")
+            logger.error("Cannot plot empty region")
             return
         
         if self.dim != 2:
-            print("Cannot plot region of dimension larger than 2")
+            logger.error("Cannot plot region of dimension larger than 2")
             return
         
         if ax is None:
@@ -1219,7 +1219,7 @@ def volume(polyreg):
         if polyreg._volume is not None:
             return polyreg._volume
     except:
-        print("vol")
+        logger.info('computing volume...')
         
     if isinstance(polyreg, Region):
         tot_vol = 0.
@@ -1401,10 +1401,10 @@ def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
     new_dim = dim.flatten() - 1
     del_dim = np.setdiff1d(org_dim,new_dim) # Index of dimensions to remove 
     
-    logger.info('polytope dim = ' + str(poly_dim))
-    logger.info('project on dims = ' + str(new_dim))
-    logger.info('original dims = ' + str(org_dim))
-    logger.info('dims to delete = ' + str(del_dim))
+    logger.debug('polytope dim = ' + str(poly_dim))
+    logger.debug('project on dims = ' + str(new_dim))
+    logger.debug('original dims = ' + str(org_dim))
+    logger.debug('dims to delete = ' + str(del_dim))
     
     mA, nA = poly1.A.shape
     
@@ -1420,7 +1420,7 @@ def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
         
         poly1.b = np.hstack([poly1.b, np.zeros(poly_dim - mA)])
     
-    logger.info('m, n = ' +str((mA, nA)) )
+    logger.debug('m, n = ' +str((mA, nA)) )
     
     # Compute cheby ball in lower dim to see if projection exists
     norm = np.sum(poly1.A*poly1.A, axis=1).flatten()
@@ -1445,20 +1445,17 @@ def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
     elif solver == "iterhull": 
         return projection_iterhull(poly1,new_dim)
     elif solver is not None:
-        print("WARNING: "
-            "unrecognized projection solver \""+str(solver)+"\".")
+        logger.warn('unrecognized projection solver "' +
+                    str(solver) + '".')
     
     if len(del_dim) <= 2:
-        if verbose > 0:
-            print("projection: using Fourier-Motzkin.")
+        logger.info("projection: using Fourier-Motzkin.")
         return projection_fm(poly1,new_dim,del_dim)
     elif len(org_dim) <= 4:
-        if verbose > 0:
-            print("projection: using exthull.")
+        logger.info("projection: using exthull.")
         return projection_exthull(poly1,new_dim)
     else:
-        if verbose > 0:
-            print("projection: using iterative hull.")
+        logger.info("projection: using iterative hull.")
         return projection_iterhull(poly1,new_dim)
         
 def separate(reg1, abs_tol=ABS_TOL):
@@ -1638,9 +1635,8 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
     r,xc = cheby_ball(poly1)
     org_dim = poly1.A.shape[1]
             
-    if verbose > 0:
-        print("Starting iterhull projection from dim "
-            +str(org_dim) + " to dim " + str(len(new_dim)) )
+    logger.info("Starting iterhull projection from dim " +
+                str(org_dim) + " to dim " + str(len(new_dim)) )
             
     if len(new_dim) == 1:
         f1 = np.zeros(poly1.A.shape[1])
@@ -1701,9 +1697,8 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                     # If rank full we have found a starting simplex
                     OK = True
                     
-        if verbose > 1:
-            print("Found starting simplex after " +
-                str(cnt) +" iterations")
+        logger.debug("Found starting simplex after " +
+                     str(cnt) +" iterations")
         
         cnt = 0
         P1 = qhull(Vert[:,new_dim])            
@@ -1718,8 +1713,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                 raise Exception("iterative_hull: "
                     "maximum number of iterations reached")
             
-            if verbose > 1:
-                print("Iteration number " + str(cnt) )
+            logger.debug("Iteration number " + str(cnt) )
             
             for ind in xrange(P1.A.shape[0]):
                 f1 = np.round(P1.A[ind,:]/abs_tol)*abs_tol
@@ -1754,8 +1748,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                         None, None, lp_solver
                     )
                     if sol['status'] != 'optimal':
-                        if verbose > 1:
-                            print("iterhull: LP failure")
+                        logger.error("iterhull: LP failure")
                         continue
                     xopt = np.array(sol['x']).flatten()
                     add = np.hstack([f2, np.round(xopt/abs_tol)*abs_tol])
@@ -1769,13 +1762,11 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                         
                     Vert = np.vstack([Vert, xopt])
             
-            if verbose > 1:
-                print("Taking convex hull of new points")
+            logger.debug("Taking convex hull of new points")
             
             P2 = qhull(Vert[:,new_dim])
             
-            if verbose > 1:
-                print("Checking if new points are inside convex hull")
+            logger.debug("Checking if new points are inside convex hull")
             
             OK = 1
             for i in xrange(np.shape(Vert)[0]):
@@ -1785,9 +1776,8 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                     OK = 0
                     break
             if OK == 1:
-                if verbose > 0:
-                    print("Returning projection after " +
-                        str(cnt) +" iterations\n")
+                logger.debug("Returning projection after " +
+                             str(cnt) +" iterations\n")
                 return P2
             else:
                 # Iterate
@@ -2064,16 +2054,16 @@ def simplices2polytopes(points, triangles):
     """
     polytopes = []
     for triangle in triangles:
-        logger.info('Triangle: ' + str(triangle))
+        logger.debug('Triangle: ' + str(triangle))
         
         triangle_vertices = points[triangle, :]
         
-        logger.info('\t triangle points: ' +
+        logger.debug('\t triangle points: ' +
                     str(triangle_vertices))
         
         poly = qhull(triangle_vertices)
         
-        logger.info('\n Polytope:\n:' + str(poly))
+        logger.debug('\n Polytope:\n:' + str(poly))
         
         polytopes += [poly]
     return polytopes
