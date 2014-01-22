@@ -32,8 +32,10 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
         sj = part.list_region[j]
         
         # Use original cell as trans_set
-        S0 = abstract.discretize.solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,
-                trans_set=part.orig_list_region[part.orig[i]])
+        S0 = abstract.discretize.solveFeasable(
+            si,sj,ssys,N, closed_loop=closed_loop,
+            trans_set=part.orig_list_region[part.orig[i]]
+        )
         
         diff = pc.mldivide(si, S0)
         vol2 = pc.volume(diff)
@@ -64,7 +66,8 @@ def merge_partitions(abstract1, abstract2):
         msg += " number of original regions"
         raise Exception(msg)
     
-    if part1.domain != part2.domain:
+    if not (part1.domain.A == part2.domain.A).all() or \
+    not (part1.domain.b == part2.domain.b).all():
         raise Exception('merge: partitions have different domains')
 
     new_list = []
@@ -83,10 +86,10 @@ def merge_partitions(abstract1, abstract2):
                 new_list.append(isect)
                 parent_1.append(i)
                 parent_2.append(j)
-                if part1.orig[i] != part2.orig[j]:
+                if abstract1.orig[i] != abstract2.orig[j]:
                     raise Exception("not same orig, partitions don't have the \
                                       same origin.")
-                orig.append(part1.orig[i])
+                orig.append(abstract1.orig[i])
     
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in range(len(new_list)):
@@ -99,17 +102,22 @@ def merge_partitions(abstract1, abstract2):
                     adj[i,j] = 1
                     adj[j,i] = 1
         adj[i,i] = 1
-            
-    return abstract.PropPreservingPartition(
+    
+    ppp = abstract.PropPreservingPartition(
         domain=part1.domain,
         num_prop=part1.num_prop,
         list_region=new_list,
         num_regions=len(new_list),
+        list_prop_symbol=part1.list_prop_symbol,
         adj=adj,
-        trans=None,
-        list_prop_symbol=part1.list_prop_symbol, 
-        orig_list_region=abstract1.orig_list_region,
-        orig=np.array(orig)
+        #list_subsys
+    )
+    
+    return abstract.discretization.AbstractSysDyn(
+        ppp = ppp,
+        ofts = None,
+        orig_list_region = abstract1.orig_list_region,
+        orig = np.array(orig)
     )
 
 def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars,
