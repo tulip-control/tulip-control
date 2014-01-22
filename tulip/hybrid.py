@@ -302,6 +302,14 @@ class HybridSysDyn(object):
                 msg += ' with discrete mode labels.\n'
                 msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)
+            
+            missing_modes = set(modes).difference(dynamics.keys())
+            
+            if missing_modes:
+                msg = 'Missing the modes:\n' + str(missing_modes)
+                msg += '\n Make sure you did not forget any modes,\n'
+                msg += 'otherwise this is fine.'
+                logger.warn(msg)
         
         self.dynamics = dynamics
         self.cts_ss = cts_ss
