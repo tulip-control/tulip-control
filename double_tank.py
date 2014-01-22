@@ -55,8 +55,6 @@ fast = False             # Use smaller domain to increase speed
 
 fontsize = 18
 
-start = time.time()
-
 """Dynamics"""
 A = np.eye(2)
 B = np.array([[-1],[1]])
@@ -96,6 +94,8 @@ ppp = abstract.prop2part(cont_ss, cont_props)
 ppp = abstract.part2convex(ppp)
 
 """Discretize to establish transitions"""
+start = time.time()
+
 disc_ss_normal = abstract.discretize(
     ppp, cont_dyn_normal, N=N,
     trans_length=2,
@@ -110,6 +110,19 @@ disc_ss_refuel = abstract.discretize(
     plotit=False
 )
 
+# Merge partitions and get transition matrices for both dynamic modes
+# in the merged partition
+new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
+
+logger.info(new_part.num_regions)
+
+trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
+trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
+
+elapsed = (time.time() - start)
+logger.info('Discretization lasted: ' + str(elapsed))
+
+"""Plot partitions"""
 ax, fig = newax()
 def plotidy(ax):
     for tick in ax.xaxis.get_major_ticks():
@@ -127,21 +140,9 @@ disc_ss_refuel.ppp.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_refuel.pdf')
 
-# Merge partitions and get transition matrices for both dynamic modes
-# in the merged partition
-new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
-
 new_part.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_merged.pdf')
-
-logger.info(new_part.num_regions)
-
-trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
-trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
-
-elapsed = (time.time() - start)
-logger.info("Discretization took " + str(elapsed))
 
 """Specs"""
 # Variable dictionaries
@@ -169,9 +170,8 @@ specs = spec.GRSpec(env_vars, sys_disc_vars,
 
 print(specs.pretty())
 
-asd = raw_input("Starting discretization")
+asd = raw_input("Starting synthesis")
 start = time.time()
-
 
 # Create JTLV files
 tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars,
@@ -179,13 +179,12 @@ tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars,
 
 # Check realizability
 realizability = synth.is_realizable()
-                                           
-synth.synthesize()
-                        
-elapsed = (time.time() - start)
-logger.info("Synthesis took " + str(elapsed))
 
-                        
+synth.synthesize()
+
+elapsed = (time.time() - start)
+logger.info('Synthesis lasted: ' + str(elapsed))
+
 aut = automaton.Automaton([], 3)          
 
 """Simulate"""
