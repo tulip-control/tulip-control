@@ -213,93 +213,131 @@ class PwaSysDyn(object):
                            show_domain=show_domain)
 
 class HybridSysDyn(object):
-    """HybridSysDyn class for specifying hybrid systems with discrete and
-    	continuous variables.
+    """Represent hybrid systems switching between dynamic modes.
+    
+    A HybridSysDyn represents a system with switching modes
+    that depend on both discrete:
+    
+        - n_env environment variables (uncontrolled)
+        - n_sys system variables (controlled)
     
     A HybridSysDyn object contains the fields:
     
-    	- C{disc_domain_size}: A 2-tuple of integers showing the number of discrete
-    	  environment (uncontrolled) and system (controlled) variables respectively
-    	  (i.e., switching modes) 
+     - C{disc_domain_size}: 2-tuple of numbers of modes
+       type: (n_env, n_sys)
     
-    	- C{env_labels}: A list of length disc_domain_size[0], optional field for
-    	  definining labels for discrete environment variables
+     - C{env_labels}: (optional) labels for discrete environment variables
+       type: list of len(n_env)
+       default: range(n_env)
     
-    	- C{disc_sys_labels}: A list of length disc_domain_size[1], optional field
-    	  for definining labels for discrete system variables
+     - C{disc_sys_labels}: (optional) labels for discrete system variables
+       type: list of len(n_sys)
+       default: range(n_sys)
     
-    - C{dynamics}: a dictionary mapping (env_label, sys_label) -> PwaSysDyn. If
-    	  we are not using env_label and sys_label, then it makes indices (i,j) to
-    	  PwaSysDyn.
-    
-    	- C{cts_ss}: continuous state space over which hybrid system is defined,
-    	  type: polytope.Region
-    
-    	- C{time_semantics}: TBD. Current default semantics are discrete-time. State
-    	  s[t] and discrete environment env[t] are observed and continuous input
-    	  u[t] and discrete system variable m[t] are determined based on env[t] and
-    	  s[t] (synchronously at time t).
+     - C{dynamics}: mapping mode 2-tuples to active dynamics:
+         
+         (env_label, sys_label) -> PwaSysDyn
        
-    Note: We assume that system and environment switching modes are independent
-    	of one another. (Use LTL statement to make it not so.)
+       type: dict
+       default: If no env_label or sys_label passed,
+                then default to int indices (i,j) PwaSysDyn.
+    
+     - C{cts_ss}: continuous state space over which hybrid system is defined.
+       type: polytope.Region
+    
+     - C{time_semantics}: TBD. Current default semantics are discrete-time.
+       
+           - State s[t] and
+           - discrete environment env[t]
+       
+       are observed and:
+       
+           - continuous input u[t] and
+           - discrete system variable m[t]
+       
+       are determined based on:
+       
+           - env[t] and
+           - s[t] (synchronously at time t).
+       
+    Note: We assume that system and environment switching modes
+        are independent of one another.
+        (Use LTL statement to make it not so.)
     
     see also
     --------
     LtiSysDyn, PwaSysDyn, polytope.Region
     """
     def __init__(self, disc_domain_size=(1,1),
-                 dynamics=None, cts_ss=None, **args):
+                 dynamics=None, cts_ss=None,
+                 env_labels=None, disc_sys_labels=None):
         # check that the continuous domain is specified
         if cts_ss is None:
-            print("Warning: " +
-                "continuous state space not given in HybridSysDyn()")
-        if (cts_ss is not None) and \
-        (not (isinstance(cts_ss, pc.Polytope) or \
-        isinstance(cts_ss, pc.Region))):
-            raise Exception("HybridSysDyn: " +
-               "`cts_ss` has to be a Polytope or Region")
+            logger.warn('continuous state space not given to HybridSysDyn')
+        else:
+            if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
+                raise Exception('HybridSysDyn: ' +
+                   '`cts_ss` must be a Polytope or Region')
         
-        # Get the labels and, if there are the right number of them, use them.
+        self.disc_domain_size = disc_domain_size
+        
+        # If label numbers agree with disc_domain_size, then use them.
         # Otherwise, ignore the labels.
-        self.env_labels = args.get('env_labels', range(disc_domain_size[0]))
-        self.disc_sys_labels = args.get('disc_sys_labels', 
-                                        range(disc_domain_size[1]))
-        use_env_labels = True
-        use_sys_labels = True
-        if (self.env_labels is not None) and \
-        (len(self.env_labels) != disc_domain_size[0]):
-            use_env_labels = False
-            print("Warning: " +
-                "number of environment labels is inconsistent with" +
-                "discrete domain size. Ignoring the environment labels.")
-        if self.env_labels is None:
-            use_env_labels = False
-        if (self.disc_sys_labels is not None) and \
-        (len(self.disc_sys_labels) != disc_domain_size[1]):
-            print("Warning: " +
-                "number of discrete system labels is inconsistent" +
-                "with discrete domain size. Ignoring the system labels.")
-            use_sys_labels = False
-        if self.disc_sys_labels is None:
-            use_sys_labels = False
+        n_env = disc_domain_size[0]
+        n_sys = disc_domain_size[1]
         
-        # Check that the keys of the dynamics hash line up
+        self._env_labels = self._check_labels(n_env, env_labels)
+        self._disc_sys_labels = self._check_labels(n_sys, disc_sys_labels)
+        
+        # Check each dynamics key is a valid mode,
+        # i.e., a valid combination of env and sys labels.
         if dynamics is not None:
-            if use_env_labels:
-                env_list = self.env_labels
-            else:
-                env_list = range(disc_domain_size[0])
-            if use_sys_labels:
-                sys_list = self.disc_sys_labels
-            else:
-                sys_list = range(disc_domain_size[1])
-            check_keys = [(a,b) for a in env_list for b in sys_list]
-            if set(dynamics.keys()) != set(check_keys):
-                raise Exception("HybridSysDyn: " +
-                    "keys in `dynamics` are " +
-                    "inconsistent with discrete mode labels")
+            modes = [(a,b) for a in self.env_labels
+                           for b in self.disc_sys_labels]
+            
+            if set(dynamics.keys()) != set(modes):
+                msg = 'HybridSysDyn: `dynamics` keys inconsistent'
+                msg += ' with discrete mode labels'
+                raise ValueError(msg)
+        
         self.dynamics = dynamics
         self.cts_ss = cts_ss
+    
+    def _check_labels(self, n, labels):
+        # don't complain for default
+        if labels is None:
+            return None
+        
+        # len exists ?
+        try:
+            # is len correct ?
+            if len(labels) != n:
+                msg = 'number of environment labels is inconsistent'
+                msg += ' with discrete domain size.\n'
+                msg += 'Ignoring given environment labels.\n'
+                msg += 'Defaulting to integer labels.'
+                logger.warn(msg)
+                
+                return None
+        except:
+            logger.warn('Environment labels of type: ' +
+                        type(labels) + 'have no len()')
+            return None
+        return labels
+    
+    @property
+    def env_labels(self):
+        if self._env_labels is None:
+            return range(self._env_labels)
+        else:
+            return self._env_labels
+    
+    @property
+    def disc_sys_labels(self):
+        if self._disc_sys_labels is None:
+            return range(self._disc_sys_labels)
+        else:
+            return self._disc_sys_labels
     
     @classmethod
     def from_pwa(cls, list_subsys=[], domain=None):
