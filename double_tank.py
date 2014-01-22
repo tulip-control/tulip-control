@@ -83,9 +83,12 @@ ppp = abstract.part2convex(ppp)
 
 # Discretize to establish transitions
 
-disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N,
-                                trans_length=2, use_mpt=False,
-                                min_cell_volume=.01)
+disc_ss_normal = abstract.discretize(
+    ppp, cont_dyn_normal, N=N,
+    trans_length=2,
+    min_cell_volume=0.01,
+    plotit=False
+)
 
 # ax = plot_partition(disc_ss_normal, plot_numbers=False, show=False)
 # for tick in ax.xaxis.get_major_ticks():
@@ -97,9 +100,12 @@ disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N,
 #plt.ylabel('$v_2$', fontsize=fontsize+6)
 #plt.savefig('part_normal.eps')
 
-disc_ss_refuel = abstract.discretize(ppp, cont_dyn_refuel, N=N,
-                                trans_length=3, use_mpt=False,
-                                min_cell_volume=.01)
+disc_ss_refuel = abstract.discretize(
+    ppp, cont_dyn_refuel, N=N,
+    trans_length=3,
+    min_cell_volume=0.01,
+    plotit=False
+)
 
 # ax = plot_partition(disc_ss_refuel, plot_numbers=False, show=False)
 # for tick in ax.xaxis.get_major_ticks():
