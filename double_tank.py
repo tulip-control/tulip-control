@@ -56,12 +56,6 @@ fontsize = 18
 
 start = time.time()
 
-# Specify where the smv file, spc file and aut file will go
-testfile = 'fuel_tank'
-smvfile = testfile+'.smv'
-spcfile = testfile+'.spc'
-autfile = testfile+'.aut'
-
 # Dynamics
 A = np.eye(2)
 B = np.array([[-1],[1]])
@@ -178,20 +172,18 @@ start = time.time()
 
 # Create JTLV files
 tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars,
-            sys_disc_vars, [assumption, guarantee], smvfile, spcfile) 
+            sys_disc_vars, [assumption, guarantee]) 
 
 # Check realizability
-realizability = synth.is_realizable(smv_file=smvfile, spc_file=spcfile,
-                                           aut_file=autfile, verbose=3)
+realizability = synth.is_realizable()
                                            
-synth.synthesize(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
-                        priority_kind=3, verbose=3)
+synth.synthesize()
                         
 elapsed = (time.time() - start)
 logger.info("Synthesis took " + str(elapsed))
 
                         
-aut = automaton.Automaton(autfile, [], 3)          
+aut = automaton.Automaton([], 3)          
 
 # Simulate
 num_it = 25
