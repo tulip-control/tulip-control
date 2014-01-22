@@ -32,7 +32,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from tulip.graphics import newax
 
-from tulip import hybrid, abstract, synth
+from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
 from tulip.abstract.plot import plot_partition
 
@@ -145,19 +145,29 @@ logger.info("Discretization took " + str(elapsed))
 
 """Specs"""
 # Variable dictionaries
-env_vars = {'u_in': "{0, 2}"}
+env_vars = {'u_in': [0, 2]}
 sys_disc_vars = {}
 
-# assumption = 'initial'
-assumption = ' (u_in=0)'
-assumption += '& ([](no_refuel -> next(u_in = 0)))'
-#assumption += '& ([]<> (u_in = 2))'
-assumption += '& ([]( (critical & (u_in=0)) -> next(u_in = 2)))'
-assumption += '& ([]((!critical & u_in=0) -> next(u_in=0)))'
-assumption += '& ([]((!no_refuel & u_in=2) -> next(u_in=2)))'
-guarantee = 'initial & ([]vol_diff) & ([]<>vol_diff2)'
-#guarantee = 'initial & ([]vol_diff)'
+env_init = {'u_in=0'}
+#env_init |= {'initial'}
 
+env_safe = {'no_refuel -> next(u_in = 0)',
+            '(critical & (u_in=0)) -> next(u_in = 2)',
+            '(!critical & u_in=0) -> next(u_in=0)',
+            '(!no_refuel & u_in=2) -> next(u_in=2)'}
+env_prog = {}
+#env_prog |= {'u_in = 2'}
+
+sys_init = {'initial'}
+sys_safe = {'vol_diff'}
+sys_prog = {'vol_diff2'}
+
+specs = spec.GRSpec(env_vars, sys_disc_vars,
+                    env_init, sys_init,
+                    env_safe, sys_safe,
+                    env_prog, sys_prog)
+
+print(specs.pretty())
 
 asd = raw_input("Starting discretization")
 start = time.time()
