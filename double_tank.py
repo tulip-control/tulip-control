@@ -77,14 +77,14 @@ U2 = pc.Polytope(
     ]),
     np.array([input_ub,-input_lb, refill_rate])
 )
-D = pc.Polytope(np.array([[1],[-1]]),
+W = pc.Polytope(np.array([[1],[-1]]),
                 np.array([disturbance, disturbance]))
 
 # Normal operation dynamics
-cont_dyn_normal = hybrid.LtiSysDyn(A, B, E, K1, U1, D)
+cont_dyn_normal = hybrid.LtiSysDyn(A, B, E, K1, U1, W)
 
 # Aerial refueling mode dynamics
-cont_dyn_refuel = hybrid.LtiSysDyn(A, B, E, K2, U2, D)
+cont_dyn_refuel = hybrid.LtiSysDyn(A, B, E, K2, U2, W)
 
 """State space and propositions"""
 if fast:
