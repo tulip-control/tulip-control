@@ -45,14 +45,27 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
             
     return transitions
     
-def merge_partitions(part1, part2):
-
-    if (part1.num_prop != part2.num_prop) or \
-        (len(part1.orig_list_region) != len(part2.orig_list_region)):
-        raise Exception("merge: partitions don't have the same origin")
+def merge_partitions(abstract1, abstract2):
+    part1 = abstract1.ppp
+    part2 = abstract2.ppp
     
-    if (part1.domain != part2.domain) or (part1.list_prop_symbol != part2.list_prop_symbol):
-        raise Exception("merge: partitions don't have the same origin")
+    if part1.num_prop != part2.num_prop:
+        msg = "merge: partitions have different"
+        msg += " number of propositions."
+        raise Exception(msg)
+    
+    if part1.list_prop_symbol != part2.list_prop_symbol:
+        msg = 'merge: partitions have different propositions'
+        raise Exception(msg)
+    
+    if len(abstract1.orig_list_region) != \
+    len(abstract2.orig_list_region):
+        msg = "merge: partitions have different"
+        msg += " number of original regions"
+        raise Exception(msg)
+    
+    if part1.domain != part2.domain:
+        raise Exception('merge: partitions have different domains')
 
     new_list = []
     orig = []
@@ -87,10 +100,17 @@ def merge_partitions(part1, part2):
                     adj[j,i] = 1
         adj[i,i] = 1
             
-    return abstract.PropPreservingPartition(domain=part1.domain,
-                    num_prop=part1.num_prop, list_region=new_list, num_regions=len(new_list),
-                    adj=adj, trans=None, list_prop_symbol=part1.list_prop_symbol, 
-                    orig_list_region=part1.orig_list_region, orig=np.array(orig))
+    return abstract.PropPreservingPartition(
+        domain=part1.domain,
+        num_prop=part1.num_prop,
+        list_region=new_list,
+        num_regions=len(new_list),
+        adj=adj,
+        trans=None,
+        list_prop_symbol=part1.list_prop_symbol, 
+        orig_list_region=abstract1.orig_list_region,
+        orig=np.array(orig)
+    )
 
 def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars,
                  sys_disc_vars, spec, smvfile, spcfile):
