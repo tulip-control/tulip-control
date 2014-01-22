@@ -1,12 +1,8 @@
 import numpy as np
 import re
 
-import matplotlib.pyplot as plt
-import matplotlib
-
-from tulip import *
+from tulip import abstract
 import tulip.polytope as pc
-from tulip.polytope.plot import get_patch
 
 def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=1e-7):
     
@@ -33,7 +29,7 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
         sj = part.list_region[j]
         
         # Use original cell as trans_set
-        S0 = discretize.solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
+        S0 = abstract.discretize.solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
                 trans_set=part.orig_list_region[part.orig[i]])
         
         diff = pc.mldivide(si, S0)
@@ -88,7 +84,7 @@ def merge_partitions(part1, part2):
                     adj[j,i] = 1
         adj[i,i] = 1
             
-    return prop2part.PropPreservingPartition(domain=part1.domain,\
+    return abstract.PropPreservingPartition(domain=part1.domain,\
                     num_prop=part1.num_prop, list_region=new_list, num_regions=len(new_list), \
                     adj=adj, trans=None, list_prop_symbol=part1.list_prop_symbol, 
                     orig_list_region=part1.orig_list_region, orig=np.array(orig))
@@ -249,4 +245,3 @@ def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars, \
     
     f.write('\n;')
     f.close()
-    

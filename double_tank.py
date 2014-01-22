@@ -7,20 +7,16 @@ at a constant rate. The objective is to keep the fuel levels in the tanks
 close to each other.'''
 
 import numpy as np
-import os, sys
-from subprocess import call
-import re
-from copy import deepcopy
 import time
 
 import matplotlib
 import matplotlib.pyplot as plt
 
-from tulip import *
-import tulip.polytope as pc
-from tulip.polytope.plot import *
+from tulip import hybrid, abstract, synth
+from tulip import polytope as pc
+from tulip.abstract.plot import plot_partition
 
-from tank_functions import *
+import tank_functions as tf
 
 # Problem variables
 tank_capacity = 10      # Maximum tank capacity
@@ -58,8 +54,8 @@ U1 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]), \
 U2 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]), \
                 np.array([input_ub,-input_lb, refill_rate]))
 D = pc.Polytope(np.array([[1],[-1]]), np.array([disturbance, disturbance]))
-cont_dyn_normal = discretize.CtsSysDyn(A,B,E,K1,U1,D)    # Normal operation dynamics
-cont_dyn_refuel = discretize.CtsSysDyn(A,B,E,K2,U2,D)    # Aerial refueling mode dynamics
+cont_dyn_normal = hybrid.LtiSysDyn(A,B,E,K1,U1,D)    # Normal operation dynamics
+cont_dyn_refuel = hybrid.LtiSysDyn(A,B,E,K2,U2,D)    # Aerial refueling mode dynamics
 
 # State space and propositions
 if fast:
@@ -82,12 +78,12 @@ cont_props['critical'] = pc.Polytope(np.array([[-1,0],[0,-1],[1,1]]), \
                                      np.array([0,0,2*fuel_consumption]))
 
 # Create convex proposition preserving partition                      
-ppp = prop2part.prop2part2(cont_ss, cont_props)
-ppp = prop2part.prop2partconvex(ppp)
+ppp = abstract.prop2part(cont_ss, cont_props)
+ppp = abstract.part2convex(ppp)
 
 # Discretize to establish transitions
 
-disc_ss_normal = discretize.discretize(ppp, cont_dyn_normal, N=N, \
+disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N, \
                                 trans_length=2, use_mpt=False, \
                                 min_cell_volume=.01)
                                 
@@ -101,7 +97,7 @@ disc_ss_normal = discretize.discretize(ppp, cont_dyn_normal, N=N, \
 #plt.ylabel('$v_2$', fontsize=fontsize+6)
 #plt.savefig('part_normal.eps')
                                       
-disc_ss_refuel = discretize.discretize(ppp, cont_dyn_refuel, N=N, \
+disc_ss_refuel = abstract.discretize(ppp, cont_dyn_refuel, N=N, \
                                 trans_length=3, use_mpt=False, \
                                 min_cell_volume=.01)
 
@@ -116,7 +112,7 @@ disc_ss_refuel = discretize.discretize(ppp, cont_dyn_refuel, N=N, \
 
 # Merge partitions and get transition matrices for both dynamic modes
 # in the merged partition
-new_part = merge_partitions(disc_ss_normal, disc_ss_refuel)
+new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
 
 # ax = plot_partition(new_part, plot_numbers=False, show=False)
 # for tick in ax.xaxis.get_major_ticks():
@@ -129,8 +125,8 @@ new_part = merge_partitions(disc_ss_normal, disc_ss_refuel)
 
 print new_part.num_regions
 
-trans_normal = get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
-trans_refuel = get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
+trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
+trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
 
 elapsed = (time.time() - start)
 print "Discretization took " + str(elapsed)
@@ -156,14 +152,14 @@ start = time.time()
 
 
 # Create JTLV files
-create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars, \
+tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars, \
             sys_disc_vars, [assumption, guarantee], smvfile, spcfile) 
 
 # Check realizability
-realizability = jtlvint.checkRealizability(smv_file=smvfile, spc_file=spcfile,
+realizability = synth.is_realizable(smv_file=smvfile, spc_file=spcfile,
                                            aut_file=autfile, verbose=3)
                                            
-jtlvint.computeStrategy(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
+synth.synthesize(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
                         priority_kind=3, verbose=3)
                         
 elapsed = (time.time() - start)
@@ -196,12 +192,12 @@ x_arr = x.copy()
 u_arr = np.zeros(1)
 for i in range(1, len(cellid_arr)):
     if uin_arr[i-1] == 0:
-        u = discretize.get_input(x, cont_dyn_normal, new_part, \
+        u = abstract.get_input(x, cont_dyn_normal, new_part, \
             cellid_arr[i-1], cellid_arr[i], 1, mid_weight=10)
         x = np.dot(cont_dyn_normal.A,x).flatten() + np.dot(cont_dyn_normal.B,u).flatten() + \
             cont_dyn_normal.K.flatten()
     else:
-        u = discretize.get_input(x, cont_dyn_refuel, new_part, cellid_arr[i-1], \
+        u = abstract.get_input(x, cont_dyn_refuel, new_part, cellid_arr[i-1], \
             cellid_arr[i], 1, Q=[], mid_weight=10)
         x = np.dot(cont_dyn_refuel.A,x).flatten() + np.dot(cont_dyn_refuel.B,u).flatten() + \
             cont_dyn_refuel.K.flatten()
