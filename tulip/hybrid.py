@@ -283,8 +283,7 @@ class HybridSysDyn(object):
         
         # If label numbers agree with disc_domain_size, then use them.
         # Otherwise, ignore the labels.
-        n_env = disc_domain_size[0]
-        n_sys = disc_domain_size[1]
+        n_env, n_sys = disc_domain_size
         
         self._env_labels = self._check_labels(n_env, env_labels)
         self._disc_sys_labels = self._check_labels(n_sys, disc_sys_labels)
@@ -310,6 +309,12 @@ class HybridSysDyn(object):
                 msg += '\n Make sure you did not forget any modes,\n'
                 msg += 'otherwise this is fine.'
                 logger.warn(msg)
+            
+            if not all([isinstance(sys, PwaSysDyn)
+                        for sys in dynamics.values()]):
+                msg = 'For each mode dynamics must be PwaSysDyn.\n'
+                msg += 'Got instead: ' +str(type(sys))
+                raise Exception(msg)
         
         self.dynamics = dynamics
         self.cts_ss = cts_ss
