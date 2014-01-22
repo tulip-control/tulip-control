@@ -21,6 +21,10 @@ reference
      with an Application in Fuel Balancing
     2012 American Control Conference
 """
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 import numpy as np
 import time
 
@@ -144,13 +148,13 @@ new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
 #plt.ylabel('$v_2$', fontsize=fontsize+6)
 #plt.savefig('part_merged.eps')
 
-print new_part.num_regions
+logger.info(new_part.num_regions)
 
 trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
 trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
 
 elapsed = (time.time() - start)
-print "Discretization took " + str(elapsed)
+logger.info("Discretization took " + str(elapsed))
 
 # Variable dictionaries
 env_vars = {'u_in': "{0, 2}"}
@@ -184,7 +188,7 @@ synth.synthesize(smv_file=smvfile, spc_file=spcfile, aut_file=autfile,
                         priority_kind=3, verbose=3)
                         
 elapsed = (time.time() - start)
-print "Synthesis took " + str(elapsed)
+logger.info("Synthesis took " + str(elapsed))
 
                         
 aut = automaton.Automaton(autfile, [], 3)          
