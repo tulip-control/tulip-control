@@ -61,33 +61,89 @@ B = np.array([[-1],[1]])
 E = np.array([[0],[1]])
 K1 = np.array([[0.],[-fuel_consumption]])
 K2 = np.array([[refill_rate],[-fuel_consumption]])
-U1 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]),
-                np.array([input_ub,-input_lb, 0]))
-U2 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]),
-                np.array([input_ub,-input_lb, refill_rate]))
-D = pc.Polytope(np.array([[1],[-1]]), np.array([disturbance, disturbance]))
-cont_dyn_normal = hybrid.LtiSysDyn(A,B,E,K1,U1,D)    # Normal operation dynamics
-cont_dyn_refuel = hybrid.LtiSysDyn(A,B,E,K2,U2,D)    # Aerial refueling mode dynamics
+U1 = pc.Polytope(
+    np.array([
+        [1,0,0],
+        [-1,0,0],
+        [1,-1,0]
+    ]),
+    np.array([input_ub, -input_lb, 0])
+)
+U2 = pc.Polytope(
+    np.array([
+        [1,0,0],
+        [-1,0,0],
+        [1,-1,0]
+    ]),
+    np.array([input_ub,-input_lb, refill_rate])
+)
+D = pc.Polytope(np.array([[1],[-1]]),
+                np.array([disturbance, disturbance]))
+
+# Normal operation dynamics
+cont_dyn_normal = hybrid.LtiSysDyn(A, B, E, K1, U1, D)
+
+# Aerial refueling mode dynamics
+cont_dyn_refuel = hybrid.LtiSysDyn(A, B, E, K2, U2, D)
 
 """State space and propositions"""
 if fast:
-    cont_ss = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1],[1,-1],[-1,1]]),
-                      np.array([tank_capacity,1,tank_capacity,1,2*max_vol_diff,
-                      2*max_vol_diff]))
+    cont_ss = pc.Polytope(
+        np.array([
+            [1,0], [-1,0], [0,1],
+            [0,-1], [1,-1], [-1,1]
+        ]),
+        np.array([
+            tank_capacity, 1, tank_capacity,
+            1, 2*max_vol_diff, 2*max_vol_diff
+        ])
+    )
 else:
-    cont_ss = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
-                      np.array([tank_capacity,0,tank_capacity,0]))
+    cont_ss = pc.Polytope(
+        np.array([
+            [1,0], [-1,0], [0,1], [0,-1]
+        ]),
+        np.array([
+            tank_capacity, 0, tank_capacity, 0
+        ])
+    )
+
 cont_props = {}
-cont_props['no_refuel'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
-                np.array([tank_capacity,0,tank_capacity,-max_refuel_level]))
-cont_props['vol_diff'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
-                                     np.array([0,0,max_vol_diff,max_vol_diff]))
-cont_props['vol_diff2'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
-                                     np.array([0,0,fin_vol_diff,fin_vol_diff]))
-cont_props['initial'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
-                        np.array([init_upper,-init_lower,init_upper,-init_lower]))
-cont_props['critical'] = pc.Polytope(np.array([[-1,0],[0,-1],[1,1]]),
-                                     np.array([0,0,2*fuel_consumption]))
+cont_props['no_refuel'] = pc.Polytope(
+    np.array([
+        [1,0], [-1,0], [0,1], [0,-1]
+    ]),
+    np.array([
+        tank_capacity, 0, tank_capacity, -max_refuel_level
+    ])
+)
+cont_props['vol_diff'] = pc.Polytope(
+    np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
+    np.array([0,0,max_vol_diff,max_vol_diff])
+)
+cont_props['vol_diff2'] = pc.Polytope(
+    np.array([
+        [-1,0], [0,-1], [-1,1], [1,-1]
+    ]),
+    np.array([
+        0,0,fin_vol_diff,fin_vol_diff
+    ])
+)
+cont_props['initial'] = pc.Polytope(
+    np.array([
+        [1,0], [-1,0], [0,1], [0,-1]
+    ]),
+    np.array([
+        init_upper, -init_lower, init_upper, -init_lower
+    ])
+)
+cont_props['critical'] = pc.Polytope(
+    np.array([
+        [-1,0], [0,-1], [1,1]
+    ]),
+    np.array([
+        0, 0, 2*fuel_consumption
+    ]))
 
 """Create convex proposition preserving partition"""
 ppp = abstract.prop2part(cont_ss, cont_props)
