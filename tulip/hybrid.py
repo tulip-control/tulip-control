@@ -42,6 +42,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import itertools
+from pprint import pformat
 
 import numpy as np
 
@@ -318,6 +319,27 @@ class HybridSysDyn(object):
         
         self.dynamics = dynamics
         self.cts_ss = cts_ss
+    
+    def __repr__(self):
+        n_env, n_sys = self.disc_domain_size
+        
+        s = 'Hybrid System Dynamics\n'
+        s += 30 * '-' + '\n'
+        
+        s += 'Modes:\n'
+        s += 4*' ' + 'Environment (' + str(n_env) + ' modes):\n'
+        s += 6*' ' + pformat(self.env_labels, indent=3) + 2*'\n'
+        s += 4*' ' + 'System: (' + str(n_sys) + ' modes)\n'
+        s += 6*' ' + pformat(self.disc_sys_labels, indent=3) + 2*'\n'
+        
+        s += 'Continuous State Space:\n\n'
+        s += pformat(self.cts_ss) + '\n'
+        
+        s += 'Dynamics:\n'
+        for mode, pwa in self.dynamics.iteritems():
+            s += ' mode: ' + str(mode) + '\n'
+            s += ' dynamics: ' + pformat(pwa, indent=3) +'\n\n'
+        return s
     
     def _check_labels(self, n, labels):
         # don't complain for default

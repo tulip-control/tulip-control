@@ -44,6 +44,8 @@ hyb = hybrid.HybridSysDyn(
     disc_sys_labels=sys_labels
 )
 
+print(hyb)
+
 assert(hyb.disc_domain_size == dom)
 assert(hyb.dynamics == dyn)
 assert(hyb.env_labels == env_labels)
