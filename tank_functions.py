@@ -7,7 +7,9 @@ import re
 from tulip import abstract
 import tulip.polytope as pc
 
-def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=1e-7):
+def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
+                    trans_length=1, abs_tol=1e-7):
+    part = abstract_sys.ppp
     
     # Initialize matrix for pairs to check
     IJ = part.adj.copy()
@@ -19,8 +21,9 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
         IJ = (IJ > 0).astype(int)
         
     # Initialize output
-    transitions = np.zeros([part.num_regions,part.num_regions], dtype = int)
-
+    transitions = np.zeros([part.num_regions,part.num_regions],
+                           dtype = int)
+    
     # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
@@ -32,9 +35,10 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
         sj = part.list_region[j]
         
         # Use original cell as trans_set
-        S0 = abstract.discretize.solveFeasable(
-            si,sj,ssys,N, closed_loop=closed_loop,
-            trans_set=part.orig_list_region[part.orig[i]]
+        S0 = abstract.feasible.solve_feasible(
+            si, sj, ssys, N,
+            closed_loop = closed_loop,
+            trans_set = abstract_sys.orig_list_region[abstract_sys.orig[i]]
         )
         
         diff = pc.mldivide(si, S0)
