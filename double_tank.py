@@ -49,9 +49,9 @@ B = np.array([[-1],[1]])
 E = np.array([[0],[1]])
 K1 = np.array([[0.],[-fuel_consumption]])
 K2 = np.array([[refill_rate],[-fuel_consumption]])
-U1 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]), \
+U1 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]),
                 np.array([input_ub,-input_lb, 0]))
-U2 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]), \
+U2 = pc.Polytope(np.array([[1,0,0],[-1,0,0],[1,-1,0]]),
                 np.array([input_ub,-input_lb, refill_rate]))
 D = pc.Polytope(np.array([[1],[-1]]), np.array([disturbance, disturbance]))
 cont_dyn_normal = hybrid.LtiSysDyn(A,B,E,K1,U1,D)    # Normal operation dynamics
@@ -68,13 +68,13 @@ else:
 cont_props = {}
 cont_props['no_refuel'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
                 np.array([tank_capacity,0,tank_capacity,-max_refuel_level]))
-cont_props['vol_diff'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]), \
+cont_props['vol_diff'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
                                      np.array([0,0,max_vol_diff,max_vol_diff]))
-cont_props['vol_diff2'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]), \
+cont_props['vol_diff2'] = pc.Polytope(np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
                                      np.array([0,0,fin_vol_diff,fin_vol_diff]))
-cont_props['initial'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]), \
+cont_props['initial'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
                         np.array([init_upper,-init_lower,init_upper,-init_lower]))
-cont_props['critical'] = pc.Polytope(np.array([[-1,0],[0,-1],[1,1]]), \
+cont_props['critical'] = pc.Polytope(np.array([[-1,0],[0,-1],[1,1]]),
                                      np.array([0,0,2*fuel_consumption]))
 
 # Create convex proposition preserving partition                      
@@ -83,10 +83,10 @@ ppp = abstract.part2convex(ppp)
 
 # Discretize to establish transitions
 
-disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N, \
-                                trans_length=2, use_mpt=False, \
+disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N,
+                                trans_length=2, use_mpt=False,
                                 min_cell_volume=.01)
-                                
+
 # ax = plot_partition(disc_ss_normal, plot_numbers=False, show=False)
 # for tick in ax.xaxis.get_major_ticks():
 #     tick.label1.set_fontsize(fontsize)
@@ -96,9 +96,9 @@ disc_ss_normal = abstract.discretize(ppp, cont_dyn_normal, N=N, \
 #plt.xlabel('$v_1$', fontsize=fontsize+6)
 #plt.ylabel('$v_2$', fontsize=fontsize+6)
 #plt.savefig('part_normal.eps')
-                                      
-disc_ss_refuel = abstract.discretize(ppp, cont_dyn_refuel, N=N, \
-                                trans_length=3, use_mpt=False, \
+
+disc_ss_refuel = abstract.discretize(ppp, cont_dyn_refuel, N=N,
+                                trans_length=3, use_mpt=False,
                                 min_cell_volume=.01)
 
 # ax = plot_partition(disc_ss_refuel, plot_numbers=False, show=False)
@@ -152,7 +152,7 @@ start = time.time()
 
 
 # Create JTLV files
-tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars, \
+tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars,
             sys_disc_vars, [assumption, guarantee], smvfile, spcfile) 
 
 # Check realizability
@@ -192,12 +192,12 @@ x_arr = x.copy()
 u_arr = np.zeros(1)
 for i in range(1, len(cellid_arr)):
     if uin_arr[i-1] == 0:
-        u = abstract.get_input(x, cont_dyn_normal, new_part, \
+        u = abstract.get_input(x, cont_dyn_normal, new_part,
             cellid_arr[i-1], cellid_arr[i], 1, mid_weight=10)
         x = np.dot(cont_dyn_normal.A,x).flatten() + np.dot(cont_dyn_normal.B,u).flatten() + \
             cont_dyn_normal.K.flatten()
     else:
-        u = abstract.get_input(x, cont_dyn_refuel, new_part, cellid_arr[i-1], \
+        u = abstract.get_input(x, cont_dyn_refuel, new_part, cellid_arr[i-1],
             cellid_arr[i], 1, Q=[], mid_weight=10)
         x = np.dot(cont_dyn_refuel.A,x).flatten() + np.dot(cont_dyn_refuel.B,u).flatten() + \
             cont_dyn_refuel.K.flatten()

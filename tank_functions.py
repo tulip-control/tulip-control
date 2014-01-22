@@ -29,7 +29,7 @@ def get_transitions(part, ssys, N=10, closed_loop=True, trans_length=1, abs_tol=
         sj = part.list_region[j]
         
         # Use original cell as trans_set
-        S0 = abstract.discretize.solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,\
+        S0 = abstract.discretize.solveFeasable(si,sj,ssys,N, closed_loop=closed_loop,
                 trans_set=part.orig_list_region[part.orig[i]])
         
         diff = pc.mldivide(si, S0)
@@ -57,7 +57,7 @@ def merge_partitions(part1, part2):
     parent_2 = []
     for i in range(part1.num_regions):
         for j in range(part2.num_regions):
-            isect = pc.intersect(part1.list_region[i], \
+            isect = pc.intersect(part1.list_region[i],
                                  part2.list_region[j])
             rc, xc = pc.cheby_ball(isect)
             if rc > 1e-5:
@@ -84,16 +84,16 @@ def merge_partitions(part1, part2):
                     adj[j,i] = 1
         adj[i,i] = 1
             
-    return abstract.PropPreservingPartition(domain=part1.domain,\
-                    num_prop=part1.num_prop, list_region=new_list, num_regions=len(new_list), \
+    return abstract.PropPreservingPartition(domain=part1.domain,
+                    num_prop=part1.num_prop, list_region=new_list, num_regions=len(new_list),
                     adj=adj, trans=None, list_prop_symbol=part1.list_prop_symbol, 
                     orig_list_region=part1.orig_list_region, orig=np.array(orig))
 
-def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars, \
+def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars,
                  sys_disc_vars, spec, smvfile, spcfile):
     
     prob = rhtlp.SynthesisProb()
-    prob.createProbFromDiscDynamics(disc_dynamics=ppp, env_vars=env_vars, \
+    prob.createProbFromDiscDynamics(disc_dynamics=ppp, env_vars=env_vars,
                                     sys_disc_vars=sys_disc_vars, spec=spec)
                                 
     env_vars = prob.getEnvVars()
@@ -207,7 +207,7 @@ def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars, \
             f.write(' &\n')
         if (from_region == 0):
             f.write('-- transition relations for continuous dynamics\n')
-        f.write('\t[](((e.' + control_var + ' = ' + str(val1) + ') & (s.' + disc_cont_var + ' = ' + \
+        f.write('\t[](((e.' + control_var + ' = ' + str(val1) + ') & (s.' + disc_cont_var + ' = ' +
                     str(from_region) + ')) -> next(')
         if (len(to_regions) == 0):
             f.write('FALSE')
@@ -223,7 +223,7 @@ def create_files(ppp, trans1, trans2, control_var, val1, val2, env_vars, \
                           trans2[j][from_region]]
         if (addAnd):
             f.write(' &\n')
-        f.write('\t[](((e.' + control_var + ' = ' + str(val2) + ') & (s.' + disc_cont_var + ' = ' + \
+        f.write('\t[](((e.' + control_var + ' = ' + str(val2) + ') & (s.' + disc_cont_var + ' = ' +
                     str(from_region) + ')) -> next(')
         if (len(to_regions) == 0):
             f.write('FALSE')
