@@ -30,6 +30,7 @@ import time
 
 import matplotlib
 import matplotlib.pyplot as plt
+from tulip.graphics import newax
 
 from tulip import hybrid, abstract, synth
 from tulip import polytope as pc
@@ -102,16 +103,6 @@ disc_ss_normal = abstract.discretize(
     plotit=False
 )
 
-# ax = plot_partition(disc_ss_normal, plot_numbers=False, show=False)
-# for tick in ax.xaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-# for tick in ax.yaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-
-#plt.xlabel('$v_1$', fontsize=fontsize+6)
-#plt.ylabel('$v_2$', fontsize=fontsize+6)
-#plt.savefig('part_normal.eps')
-
 disc_ss_refuel = abstract.discretize(
     ppp, cont_dyn_refuel, N=N,
     trans_length=3,
@@ -119,27 +110,30 @@ disc_ss_refuel = abstract.discretize(
     plotit=False
 )
 
-# ax = plot_partition(disc_ss_refuel, plot_numbers=False, show=False)
-# for tick in ax.xaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-# for tick in ax.yaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-#plt.xlabel('$v_1$', fontsize=fontsize+6)
-#plt.ylabel('$v_2$', fontsize=fontsize+6)
-#plt.savefig('part_refuel.eps')
+ax, fig = newax()
+def plotidy(ax):
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label1.set_fontsize(fontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(fontsize)
+    ax.set_xlabel('$v_1$', fontsize=fontsize+6)
+    ax.set_ylabel('$v_2$', fontsize=fontsize+6)
+
+disc_ss_normal.ppp.plot(plot_numbers=False, ax=ax)
+plotidy(ax)
+fig.savefig('part_normal.pdf')
+
+disc_ss_refuel.ppp.plot(plot_numbers=False, ax=ax)
+plotidy(ax)
+fig.savefig('part_refuel.pdf')
 
 # Merge partitions and get transition matrices for both dynamic modes
 # in the merged partition
 new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
 
-# ax = plot_partition(new_part, plot_numbers=False, show=False)
-# for tick in ax.xaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-# for tick in ax.yaxis.get_major_ticks():
-#     tick.label1.set_fontsize(fontsize)
-#plt.xlabel('$v_1$', fontsize=fontsize+6)
-#plt.ylabel('$v_2$', fontsize=fontsize+6)
-#plt.savefig('part_merged.eps')
+new_part.plot(plot_numbers=False, ax=ax)
+plotidy(ax)
+fig.savefig('part_merged.pdf')
 
 logger.info(new_part.num_regions)
 
