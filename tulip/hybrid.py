@@ -198,7 +198,19 @@ class PwaSysDyn(object):
         
         self.list_subsys = list_subsys
         self.domain = domain
+    
+    def __repr__(self):
+        s = 'Piecewise-Affine System Dynamics\n'
+        s += 30 * '-' + 2*'\n'
         
+        s += 'Domain:\n\n'
+        s += pformat(self.domain) + '\n'
+    
+        for i, sys in enumerate(self.list_subsys):
+            s += 'Subsystem: ' + str(i) +'\n'
+            s += str(sys) +2*'\n'
+        return s
+    
     @classmethod
     def from_lti(cls, A=[], B=[], E=[], K=[],
                  Uset=None, Wset=None,domain=None):
