@@ -170,7 +170,7 @@ disc_ss_refuel = abstract.discretize(
 # in the merged partition
 new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
 
-logger.info(new_part.num_regions)
+logger.info(new_part.ppp.num_regions)
 
 trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
 trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
@@ -196,7 +196,7 @@ disc_ss_refuel.ppp.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_refuel.pdf')
 
-new_part.plot(plot_numbers=False, ax=ax)
+new_part.ppp.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_merged.pdf')
 
