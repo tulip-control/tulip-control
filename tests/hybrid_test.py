@@ -32,7 +32,6 @@ dyn = {
     ('a', 'c'):pwa,
     ('a', 'd'):pwa,
     ('b', 'c'):pwa,
-    ('b', 'd'):pwa
 }
 env_labels = ['a', 'b']
 sys_labels = ['c', 'd']

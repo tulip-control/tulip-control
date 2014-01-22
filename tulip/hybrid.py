@@ -295,9 +295,12 @@ class HybridSysDyn(object):
             modes = [(a,b) for a in self.env_labels
                            for b in self.disc_sys_labels]
             
-            if set(dynamics.keys()) != set(modes):
+            undefined_modes = set(dynamics.keys()).difference(modes)
+            
+            if undefined_modes:
                 msg = 'HybridSysDyn: `dynamics` keys inconsistent'
-                msg += ' with discrete mode labels'
+                msg += ' with discrete mode labels.\n'
+                msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)
         
         self.dynamics = dynamics
