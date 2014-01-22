@@ -1,11 +1,26 @@
-'''TuLiP double tank example. 
+"""
+Aerial refueling double tank balancing example. 
 
 The system consists of two fuel tanks, T1 and T2.
-Fuel is drawn at a constant rate from T2. There are two dynamic modes, 'normal
-operation' and 'air refuel mode'. In 'air refuel mode' fuel is added to T1
-at a constant rate. The objective is to keep the fuel levels in the tanks
-close to each other.'''
+Fuel is drawn at a constant rate from T2.
+There are two dynamic modes:
 
+    - 'normal operation' and
+    - 'air refuel mode'.
+
+In 'air refuel mode' fuel is added
+to T1 at a constant rate.
+
+The objective is to keep the fuel levels in
+the tanks close to each other.
+
+reference
+=========
+    Nilsson P.; Ozay N.; Topcu U.; Murray R.M.
+     Temporal Logic Control of Switched Affine Systems
+     with an Application in Fuel Balancing
+    2012 American Control Conference
+"""
 import numpy as np
 import time
 

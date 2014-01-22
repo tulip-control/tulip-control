@@ -1,3 +1,6 @@
+"""
+Auxiliary discretization and specification functions
+"""
 import numpy as np
 import re
 
