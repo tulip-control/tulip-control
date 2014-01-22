@@ -37,7 +37,7 @@ from tulip.abstract.plot import plot_partition
 
 import tank_functions as tf
 
-# Problem variables
+"""Problem variables"""
 tank_capacity = 10      # Maximum tank capacity
 fuel_consumption = 1    # Rate at which fuel is drawn from tank 2
 refill_rate = 3         # Rate at which fuel is refilled in tank 1 during refuel mode
@@ -56,7 +56,7 @@ fontsize = 18
 
 start = time.time()
 
-# Dynamics
+"""Dynamics"""
 A = np.eye(2)
 B = np.array([[-1],[1]])
 E = np.array([[0],[1]])
@@ -70,7 +70,7 @@ D = pc.Polytope(np.array([[1],[-1]]), np.array([disturbance, disturbance]))
 cont_dyn_normal = hybrid.LtiSysDyn(A,B,E,K1,U1,D)    # Normal operation dynamics
 cont_dyn_refuel = hybrid.LtiSysDyn(A,B,E,K2,U2,D)    # Aerial refueling mode dynamics
 
-# State space and propositions
+"""State space and propositions"""
 if fast:
     cont_ss = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1],[1,-1],[-1,1]]),
                       np.array([tank_capacity,1,tank_capacity,1,2*max_vol_diff,
@@ -90,12 +90,11 @@ cont_props['initial'] = pc.Polytope(np.array([[1,0],[-1,0],[0,1],[0,-1]]),
 cont_props['critical'] = pc.Polytope(np.array([[-1,0],[0,-1],[1,1]]),
                                      np.array([0,0,2*fuel_consumption]))
 
-# Create convex proposition preserving partition                      
+"""Create convex proposition preserving partition"""
 ppp = abstract.prop2part(cont_ss, cont_props)
 ppp = abstract.part2convex(ppp)
 
-# Discretize to establish transitions
-
+"""Discretize to establish transitions"""
 disc_ss_normal = abstract.discretize(
     ppp, cont_dyn_normal, N=N,
     trans_length=2,
@@ -150,11 +149,11 @@ trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4
 elapsed = (time.time() - start)
 logger.info("Discretization took " + str(elapsed))
 
+"""Specs"""
 # Variable dictionaries
 env_vars = {'u_in': "{0, 2}"}
 sys_disc_vars = {}
 
-# Specs
 # assumption = 'initial'
 assumption = ' (u_in=0)'
 assumption += '& ([](no_refuel -> next(u_in = 0)))'
@@ -185,7 +184,7 @@ logger.info("Synthesis took " + str(elapsed))
                         
 aut = automaton.Automaton([], 3)          
 
-# Simulate
+"""Simulate"""
 num_it = 25
 init_state = {}
 init_state['u_in'] = 0
