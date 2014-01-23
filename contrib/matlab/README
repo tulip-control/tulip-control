@@ -38,6 +38,10 @@ generated park signal.
 
 KNOWN ISSUES
 
-1) Initial values of variable inputs and outputs not set.
+1) Graphs are unreadable. Once graphs are readable, then users should pick the
+   initial state themselves through Stateflow. Currently, the script makes
+   "Sinit" the initial state, which only works when the first environment input
+   can pick the correct transition out of Sinit, which is the cases in the
+   problem in discrete.py.
 
 2) Doesn't support continuous controllers.
