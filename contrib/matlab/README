@@ -1,0 +1,43 @@
+MATLAB Export
+Stephanie Tsuei, January 2013
+
+This folder contains the files required to export controllers to Simulink
+blocks and a couple examples for reference. Tulip, MATLAB, Simulink, and
+Stateflow must all be installed. Provided files below:
+
+	-aut_to_stateflow.py - Converts Mealy Machines to Stateflow charts
+
+
+
+USAGE
+
+1) Run the converter after synthesis:
+
+	import aut_to_stateflow
+	...
+	ctrl = synth.synthesize(...)                       # returns a Mealy Machine
+	aut_to_stateflow.to_stateflow(ctrl, 'machine.m')   # writes machine.m
+
+2) In MATLAB, run machine.m. A new Simulink model containing the Mealy
+   Machine should appear. Note that for the moment, exported Stateflow 
+   charts are not very readable.
+
+
+
+EXAMPLES
+
+discrete.py is a modified version of /examples/robot_planning/discrete.py that
+contains a line at the end for generating a Stateflow chart from the Mealy
+Machine "ctrl".
+
+discrete.slx is a Simulink Model (Probably requires MATLAB/Simulink R2012b or
+higher) that shows the working Mealy Machine interacting with a randomly
+generated park signal.
+
+
+
+KNOWN ISSUES
+
+1) Initial values of variable inputs and outputs not set.
+
+2) Doesn't support continuous controllers.
