@@ -160,20 +160,13 @@ def create_states(states, variables, trans, statevar, bool_states):
         bool_states = True
     
     if bool_states:
-        state_ids = states2bools(states)
+        state_ids = {x:x for x in states}
         variables.update({s:'boolean' for s in states})
         trans += exactly_one(states)
     else:
         state_ids, domain = states2ints(states, statevar)
         variables[statevar] = domain
     return state_ids
-
-def states2bools(states):
-    """Return dict(state : state).
-    
-    @rtype: {state : state_id}
-    """
-    return {x:x for x in states}
 
 def states2ints(states, statevar):
     """Return states of form 'statevar = #'.
