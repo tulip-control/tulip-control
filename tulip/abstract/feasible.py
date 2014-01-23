@@ -397,6 +397,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
     M = np.vstack([Mk, MU]) - D_hat
+    
+    msg = 'Computed S0 polytope: L x <= M, where:\n\t L = \n'
+    msg += str(L) +'\n\t M = \n' + str(M) +'\n'
+    logger.info(msg)
+    
     return L,M
 
 def get_max_extreme(G,D,N):

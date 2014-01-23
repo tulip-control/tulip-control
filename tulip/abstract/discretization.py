@@ -174,7 +174,7 @@ def discretize(
     # (defined within the loop for pwa systems)
     if islti:
         if len(ssys.E) > 0:
-            rd, xd = pc.cheby_ball(ssys.Wset)
+            rd = ssys.Wset.chebR
         else:
             rd = 0.
     
@@ -270,7 +270,8 @@ def discretize(
             msg += 'with active subsystem:\n\t'
             msg += str(subsys_list[i])
             
-        msg += "Computed reachable set S0 with volume " + str(S0.volume)
+        msg += 'Computed reachable set S0 with volume: '
+        msg += str(S0.volume) + '\n'
         
         logger.info(msg)
         
@@ -445,7 +446,7 @@ def discretize(
         if save_img:
             fname = 'movie' +str(iter_count).zfill(3)
             fname += '.' + file_extension
-            fig.savefig(fname)
+            fig.savefig(fname, dpi=250)
         plt.pause(1)
 
     new_part = PropPreservingPartition(
@@ -496,6 +497,8 @@ def discretize(
     )
 
 def reachable_within(trans_length, adj_k, adj):
+    """Find cells reachable within trans_length hops.
+    """
     if trans_length <= 1:
         return adj_k
     
