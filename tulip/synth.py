@@ -278,7 +278,7 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     sys_vars.update({act:'boolean' for act in fts.actions})
     
     sys_trans = []
-    statevar = 'loc'
+    
     state_ids = create_states(states, sys_vars, sys_trans,
                               statevar, bool_states)
     
