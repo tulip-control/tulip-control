@@ -444,6 +444,11 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
+    # options for modeling actions
+    bool_actions = False
+    use_mutex = True
+    min_one = False
+    
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
@@ -456,11 +461,17 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     env_trans = []
     
     sys_vars = {ap:'boolean' for ap in aps}
-    sys_vars.update({act:'boolean' for act in sys_actions})
-    sys_trans += mutex(sys_actions)
+    env_vars = dict()
     
-    env_vars = list(env_actions)
-    env_trans += mutex(env_actions)
+    sys_action_ids = create_actions(
+        sys_actions, sys_vars, sys_trans, sys_init,
+        'act', bool_actions, use_mutex, min_one
+    )
+    
+    env_action_ids = create_actions(
+        env_actions, env_vars, env_trans, env_init,
+        'eact', bool_actions, use_mutex, min_one
+    )
     
     statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
@@ -468,10 +479,15 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     
     sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_ts(states, state_ids, trans)
+    sys_trans += sys_trans_from_ts(
+        states, state_ids, trans,
+        sys_action_ids=sys_action_ids, env_action_ids=env_action_ids
+    )
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
-    env_trans += env_trans_from_sys_ts(states, state_ids, trans, env_vars)
+    env_trans += env_trans_from_sys_ts(
+        states, state_ids, trans, env_action_ids
+    )
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
