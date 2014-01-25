@@ -85,7 +85,14 @@ def test_sys_fts_bool_states():
     """
     sys = sys_fts_2_states()
     
-    spec = synth.sys_to_spec(sys)
+    spec = synth.sys_to_spec(
+        sys,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('loc' not in spec.sys_vars)
     assert('eloc' not in spec.sys_vars)
@@ -101,7 +108,14 @@ def test_env_fts_bool_states():
     """
     env = env_fts_2_states()
     
-    spec = synth.env_to_spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('loc' not in spec.env_vars)
     assert('eloc' not in spec.env_vars)
@@ -118,7 +132,14 @@ def test_sys_fts_int_states():
     sys = sys_fts_2_states()
     sys.states.add('X2')
     
-    spec = synth.sys_to_spec(sys)
+    spec = synth.sys_to_spec(
+        sys,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('X0' not in spec.sys_vars)
     assert('X1' not in spec.sys_vars)
@@ -134,7 +155,14 @@ def test_env_fts_int_states():
     env = env_fts_2_states()
     env.states.add('e2')
     
-    spec = synth.env_to_spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('e0' not in spec.env_vars)
     assert('e1' not in spec.env_vars)
@@ -149,16 +177,30 @@ def test_sys_fts_no_actions():
     """
     sys = sys_fts_2_states()
     
-    spec = synth.sys_to_spec(sys)
+    spec = synth.sys_to_spec(
+        sys,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('act' not in spec.sys_vars)
 
 def test_env_fts_bool_actions():
-    """Env FTS has 2 actions, must become 2 bool vars in GR(1).
+    """Env FTS has 2 actions, bools requested.
     """
     env = env_fts_2_states()
     
-    spec = synth.env_to_spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=True,
+        actions_must='mutex'
+    )
     
     assert('act' not in spec.env_vars)
     assert('eact' not in spec.env_vars)
@@ -168,14 +210,21 @@ def test_env_fts_bool_actions():
     
     assert('go' in spec.env_vars)
     assert(spec.env_vars['go'] == 'boolean')
- 
+
 def test_env_fts_int_actions():
-    """Env FTS has 3 actions, must become 1 int var in GR(1).
+    """Env FTS actions must become 1 int var in GR(1).
     """
     env = env_fts_2_states()
     env.actions.add('stop')
     
-    spec = synth.env_to_spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
     
     assert('park' not in spec.env_vars)
     assert('go' not in spec.env_vars)
@@ -187,23 +236,39 @@ def test_env_fts_int_actions():
     assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'eactnone'})
 
 def test_env_ofts_bool_actions():
-    """Env OpenFTS has 2 actions, must become 2 bool vars in GR(1).
+    """Env OpenFTS has 2 actions, bools requested.
     """
     env = env_ofts_int_actions()
     env.env_actions.remove('stop')
     env.sys_actions.remove('hover')
     
-    spec = synth.env_open_fts2spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=True,
+        actions_must='mutex'
+    )
+    
     _check_ofts_bool_actions(spec)
 
 def test_sys_ofts_bool_actions():
-    """Sys OpenFTS has 2 actions, must become 2 bool vars in GR(1).
+    """Sys OpenFTS has 2 actions, bools requested.
     """
     sys = env_ofts_int_actions()
     sys.env_actions.remove('stop')
     sys.sys_actions.remove('hover')
     
-    spec = synth.sys_open_fts2spec(sys)
+    spec = synth.sys_to_spec(
+        sys,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=True,
+        actions_must='mutex'
+    )
+    
     _check_ofts_bool_actions(spec)
 
 def _check_ofts_bool_actions(spec):
@@ -225,19 +290,35 @@ def _check_ofts_bool_actions(spec):
     assert('act' not in spec.sys_vars)
 
 def test_env_ofts_int_actions():
-    """Env OpenFTS has 3 actions, must become 1 int var in GR(1).
+    """Env OpenFTS actions must become 1 int var in GR(1).
     """
     env = env_ofts_int_actions()
     
-    spec = synth.env_open_fts2spec(env)
+    spec = synth.env_to_spec(
+        env,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
+    
     _check_ofts_int_actions(spec)
 
 def test_sys_ofts_int_actions():
-    """Sys OpenFTS has 3 actions, must become 1 int var in GR(1).
+    """Sys OpenFTS actions must become 1 int var in GR(1).
     """
     sys = env_ofts_int_actions()
     
-    spec = synth.sys_open_fts2spec(sys)
+    spec = synth.sys_to_spec(
+        sys,
+        ignore_initial=False,
+        bool_states=False,
+        action_vars=('eact', 'act'),
+        bool_actions=False,
+        actions_must='mutex'
+    )
+    
     _check_ofts_int_actions(spec)
 
 def _check_ofts_int_actions(spec):
