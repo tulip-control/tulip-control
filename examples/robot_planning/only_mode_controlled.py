@@ -135,7 +135,7 @@ env_safe = set()                # empty set
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach','right'}          
+sys_init = {'X0reach','act = right'}          
 sys_prog = {'home'}               # []<>home
 sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
