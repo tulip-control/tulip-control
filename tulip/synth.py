@@ -597,7 +597,7 @@ def sys_trans_from_ts(
         sys_trans += [_disj(cur_str) ]
     return sys_trans
 
-def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
+def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     """Convert environment actions to GR(1) env_safety.
     
     This constrains the actions available next to the environment
@@ -607,7 +607,7 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
     depending on the desired way of defining env behavior.
     """
     env_trans = []
-    if not env_vars:
+    if not env_action_ids:
         return env_trans
     
     for from_state in states:
@@ -617,7 +617,7 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
         # no successor states ?
         if not cur_trans:
             env_trans += ['(' +str(from_state_id) +') -> X(' +
-                _conj_neg(env_vars) + ')']
+                _conj_neg(env_action_ids.values() ) + ')']
             continue
         
         # collect possible next env actions
@@ -627,7 +627,8 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_vars):
                 continue
             
             env_action = label['env_actions']
-            next_env_actions.add(env_action)
+            env_action_id = env_action_ids[env_action]
+            next_env_actions.add(env_action_id)
         next_env_actions = _disj(next_env_actions)
         
         env_trans += ["(" +str(from_state_id) +") -> X(" +
