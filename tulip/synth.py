@@ -397,7 +397,10 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     
     sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_ts(states, state_ids, fts.transitions, action_ids)
+    sys_trans += sys_trans_from_ts(
+        states, state_ids, fts.transitions,
+        action_ids=action_ids
+    )
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
     return (sys_vars, sys_init, sys_trans)
@@ -548,7 +551,9 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_trans_from_ts(states, state_ids, trans, action_ids):
+def sys_trans_from_ts(
+    states, state_ids, trans,
+    action_ids=None, sys_action_ids=None, env_action_ids=None):
     """Convert transition relation to GR(1) sys_safety.
     
     The transition relation may be closed or open,
@@ -582,8 +587,8 @@ def sys_trans_from_ts(states, state_ids, trans, action_ids):
             precond = '(' + str(from_state_id) + ')'
             postcond = '(' + str(to_state_id) +')'
             
-            postcond += _conj_action(label, 'env_actions')
-            postcond += _conj_action(label, 'sys_actions')
+            postcond += _conj_action(label, 'env_actions', ids=env_action_ids)
+            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
             # system FTS given
             postcond += _conj_action(label, 'actions', ids=action_ids)
             
