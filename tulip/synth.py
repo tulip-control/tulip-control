@@ -219,10 +219,15 @@ def create_actions(
     
     Similar to the int representation of states.
     
-    If an FTS:
-       - has > 2 actions
-       - they are mutually exclusive
-    then an int variable represents them in GR(1).
+    If the actions are:
+    
+       - mutually exclusive (use_mutex == True)
+       - bool actions have not been requested (bool_actions == False)
+      
+    then an int variable represents actions in GR(1).
+    
+    If actions are not mutually exclusive,
+    then only bool variables can represent them.
     
     Suppose N actions are defined.
     The int variable is allowed to take N+1 values.
@@ -240,9 +245,6 @@ def create_actions(
     This requires that at least one action be True each time.
     Combined with a mutex constraint, it yields an n-ary xor constraint.
     
-    If actions are not mutually exclusive,
-    then only bool vars can represent them.
-    
     @return: mapping from FTS actions, to GR(1) actions.
         If bools are used, then GR(1) are the same.
         Otherwise, they map to e.g. 'act = wait'
@@ -254,8 +256,8 @@ def create_actions(
     logger.debug('create actions:' + str(actions) )
     
     # too few values for gr1c ?
-    if len(actions) < 3:
-        bool_actions = True
+    #if len(actions) < 3:
+    #    bool_actions = True
     
     # no mutex -> cannot use int variable
     if not use_mutex:
