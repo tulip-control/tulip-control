@@ -14,7 +14,7 @@ Matlab/Simulink/Stateflow. See the very last line
 
 # Import the packages that we need
 from tulip import transys, spec, synth
-import aut_to_stateflow # import file that contains to_stateflow
+import StateflowExport # import file that contains to_stateflow
 
 #
 # System dynamics
@@ -108,4 +108,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('gr1c', specs, sys=sys)
 
 # Generate a MATLAB script that generates a Mealy Machine
-aut_to_stateflow.to_stateflow(ctrl, 'robot_discrete.m')
+StateflowExport.to_stateflow(ctrl, 'robot_discrete.m')
