@@ -495,8 +495,13 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
         env_safety=env_trans, sys_safety=sys_trans
     )
 
-def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
+def env_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
+    
+    # options for modeling actions
+    bool_actions = False
+    use_mutex = True
+    min_one = False
     
     aps = ofts.aps
     states = ofts.states
@@ -511,15 +516,21 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     
     # since APs are tied to env states, let them be env variables
     env_vars = {ap:'boolean' for ap in aps}
-    env_vars.update({act:'boolean' for act in env_actions})
-    env_trans += mutex(env_actions)
+    sys_vars = dict()
     
-    sys_vars = list(sys_actions)
+    env_action_ids = create_actions(
+        env_actions, env_vars, env_trans, env_init,
+        'eact', bool_actions, use_mutex, min_one
+    )
+    
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
     # and whether that TS will contain all the system actions
     # defined in the environment TS
-    sys_trans += exactly_one(ofts.sys_actions)
+    sys_action_ids = create_actions(
+        sys_actions, sys_vars, sys_trans, sys_init,
+        'act', bool_actions, use_mutex, min_one
+    )
     
     statevar = 'eloc'
     state_ids = create_states(states, env_vars, env_trans,
@@ -527,7 +538,10 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     
     env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    env_trans += env_trans_from_env_ts(states, state_ids, trans, sys_actions)
+    env_trans += env_trans_from_env_ts(
+        states, state_ids, trans,
+        env_action_ids=env_action_ids, sys_action_ids=sys_action_ids
+    )
     env_trans += ap_trans_from_ts(states, state_ids, aps)
     
     return GRSpec(
