@@ -635,7 +635,10 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
                       next_env_actions +")"]
     return env_trans
 
-def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
+def env_trans_from_env_ts(
+    states, state_ids, trans,
+    action_ids=None, env_action_ids=None, sys_action_ids=None
+):
     """Convert environment TS transitions to GR(1) representation.
     
     This contributes to the \rho_e(X, Y, X') part of the spec,
@@ -671,13 +674,14 @@ def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
             precond = pstr(from_state_id)
             postcond = 'X' + pstr(to_state_id)
             
-            postcond += _conj_action(label, 'env_actions', nxt=True)
+            postcond += _conj_action(label, 'env_actions', nxt=True,
+                                     ids=env_action_ids)
             
             # environment FTS given
-            postcond += _conj_action(label, 'actions', nxt=True)
-            postcond += _conj_action(label, 'sys_actions')
+            postcond += _conj_action(label, 'actions', nxt=True, ids=action_ids)
+            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
             
-            if not _conj_action(label, 'sys_actions'):
+            if not _conj_action(label, 'sys_actions', ids=sys_action_ids):
                 found_free = True
             
             cur_list += [pstr(postcond) ]
@@ -686,7 +690,7 @@ def env_trans_from_env_ts(states, state_ids, trans, sys_actions):
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free:
-            cur_list += [_conj_neg(sys_actions)]
+            cur_list += [_conj_neg(sys_action_ids.values() )]
         
         env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
