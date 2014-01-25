@@ -210,7 +210,7 @@ class LTL(object):
                     else:
                         raise TypeError
 
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             raise ValueError("Malformed TuLiP LTL specification string.")
 
         return LTL(
