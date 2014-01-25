@@ -58,8 +58,10 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
                     
 # Controller synthesis
-synth.is_realizable('gr1c', specs, sys_swe, verbose=1)
-ctrl = synth.synthesize('gr1c', specs, sys_swe, verbose=1)
+synth.is_realizable('gr1c', specs, sys=sys_swe,
+                    ignore_sys_init=True, verbose=1)
+ctrl = synth.synthesize('gr1c', specs, sys=sys_swe,
+                        ignore_sys_init=True, verbose=1)
 
 if not ctrl.save('switch.pdf', 'pdf'):
     print(ctrl)
