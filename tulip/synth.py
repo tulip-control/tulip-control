@@ -107,7 +107,7 @@ def mutex(iterable):
         return []
     
     return [_conj([
-        '(' + str(x) + ') -> (' + _conj_neg_diff(iterable, [x]) +')'
+        '!(' + str(x) + ') || (' + _conj_neg_diff(iterable, [x]) +')'
         for x in iterable
     ]) ]
 
