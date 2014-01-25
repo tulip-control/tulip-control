@@ -37,6 +37,30 @@ def env_fts_2_states():
     #env.plot()
     return env
 
+def env_ofts_bool_actions():
+    env = transys.OpenFTS()
+    env.states.add_from({'e0', 'e1', 'e2'})
+    env.states.initial.add('e0')
+    
+    env.env_actions.add_from({'park', 'go'})
+    env.sys_actions.add_from({'up', 'down'})
+    
+    env.transitions.add_labeled('e0', 'e1',
+                                {'env_actions':'park', 'sys_actions':'up'})
+    env.transitions.add_labeled('e1', 'e2',
+                                {'env_actions':'go', 'sys_actions':'down'})
+    
+    #env.plot()
+    return env
+
+def env_ofts_int_actions():
+    env = env_ofts_bool_actions()
+    
+    env.env_actions.add('stop')
+    env.sys_actions.add('hover')
+    
+    return env
+
 def parking_spec():
     # barely realizable: assumption necessary
     env_prog = '! (eact = park)'
@@ -160,7 +184,79 @@ def test_env_fts_int_actions():
     assert('act' not in spec.env_vars)
     assert('eact' in spec.env_vars)    
     
-    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'none'})
+    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'eactnone'})
+
+def test_env_ofts_bool_actions():
+    """Env OpenFTS has 2 actions, must become 2 bool vars in GR(1).
+    """
+    env = env_ofts_int_actions()
+    env.env_actions.remove('stop')
+    env.sys_actions.remove('hover')
+    
+    spec = synth.env_open_fts2spec(env)
+    _check_ofts_bool_actions(spec)
+
+def test_sys_ofts_bool_actions():
+    """Sys OpenFTS has 2 actions, must become 2 bool vars in GR(1).
+    """
+    sys = env_ofts_int_actions()
+    sys.env_actions.remove('stop')
+    sys.sys_actions.remove('hover')
+    
+    spec = synth.sys_open_fts2spec(sys)
+    _check_ofts_bool_actions(spec)
+
+def _check_ofts_bool_actions(spec):
+    """Common assertion checking for 2 functions above.
+    """
+    assert('park' in spec.env_vars)
+    assert(spec.env_vars['park'] == 'boolean')
+    
+    assert('go' in spec.env_vars)
+    assert(spec.env_vars['go'] == 'boolean')
+    
+    assert('up' in spec.sys_vars)
+    assert(spec.sys_vars['up'] == 'boolean')
+    
+    assert('down' in spec.sys_vars)
+    assert(spec.sys_vars['down'] == 'boolean')
+    
+    assert('eact' not in spec.env_vars)
+    assert('act' not in spec.sys_vars)
+
+def test_env_ofts_int_actions():
+    """Env OpenFTS has 3 actions, must become 1 int var in GR(1).
+    """
+    env = env_ofts_int_actions()
+    
+    spec = synth.env_open_fts2spec(env)
+    _check_ofts_int_actions(spec)
+
+def test_sys_ofts_int_actions():
+    """Sys OpenFTS has 3 actions, must become 1 int var in GR(1).
+    """
+    sys = env_ofts_int_actions()
+    
+    spec = synth.sys_open_fts2spec(sys)
+    _check_ofts_int_actions(spec)
+
+def _check_ofts_int_actions(spec):
+    """Common assertion checking for 2 function above.
+    """
+    print(spec.env_vars)
+    assert('park' not in spec.env_vars)
+    assert('go' not in spec.env_vars)
+    assert('stop' not in spec.env_vars)
+    
+    assert('up' not in spec.sys_vars)
+    assert('down' not in spec.sys_vars)
+    assert('hover' not in spec.sys_vars)
+    
+    assert('eact' in spec.env_vars)
+    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'eactnone'})
+    
+    assert('act' in spec.sys_vars)
+    assert(set(spec.sys_vars['act']) == {'up', 'down', 'hover', 'actnone'})
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
