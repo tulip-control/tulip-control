@@ -20,6 +20,7 @@ sys_swe.env_actions.add_from({'sun','rain'})
 n = 2
 states = ['s'+str(i) for i in xrange(n) ]
 sys_swe.states.add_from(states)
+sys_swe.states.initial |= ['s0']
 
 # different transitions possible, depending on weather
 transmat1 = sp.lil_matrix(np.array(

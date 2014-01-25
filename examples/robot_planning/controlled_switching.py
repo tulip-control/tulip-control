@@ -39,6 +39,7 @@ sys_sws.actions.add_from({'right','up','left','down'})
 n = 6
 states = transys.prepend_with(range(n), 's')
 sys_sws.states.add_from(set(states) )
+sys_sws.states.initial.add_from({'s0', 's3'})
 
 # mode1 transitions
 transmat1 = np.array([[0,1,0,0,1,0],
@@ -145,7 +146,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('jtlv', specs, sys=sys_sws, ignore_sys_init=True)
+ctrl = synth.synthesize('gr1c', specs, sys=sys_sws)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('controlled_switching.png', 'png'):
