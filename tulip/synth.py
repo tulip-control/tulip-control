@@ -126,10 +126,12 @@ def exactly_one(iterable):
         for x in iterable
     ]) + ')']
 
-def _conj_action(label, action_type, nxt=False):
+def _conj_action(label, action_type, nxt=False, ids=None):
     if action_type not in label:
         return ''
     action = label[action_type]
+    if ids is not None:
+        action = ids[action]
     if action is '':
         return ''
     if nxt:
@@ -185,6 +187,8 @@ def states2ints(states, statevar):
     
     @rtype: {state : state_id}
     """
+    # TODO: merge with actions2ints, don't strip letter
+    
     letter_int = True
     for state in states:
         try:
@@ -205,6 +209,102 @@ def states2ints(states, statevar):
         domain = list(states)
     
     return (state_ids, domain)
+
+def create_actions(
+    actions, variables, trans, init,
+    actionvar, bool_actions=False,
+    use_mutex=True, min_one=False
+):
+    """Represent actions by bool or int GR(1) variables.
+    
+    Similar to the int representation of states.
+    
+    If an FTS:
+       - has > 2 actions
+       - they are mutually exclusive
+    then an int variable represents them in GR(1).
+    
+    Suppose N actions are defined.
+    The int variable is allowed to take N+1 values.
+    The additional value corresponds to all actions being False.
+    
+    If FTS actions are integers,
+    then the additional action is an int value.
+    
+    If FTS actions are strings (e.g., 'park', 'wait'),
+    then the additional action is 'none'.
+    They are treated by gr1cint as an arbitrary finite domain.
+    
+    An option 'min_one' is internally available,
+    in order to allow only N values of the action variable.
+    This requires that at least one action be True each time.
+    Combined with a mutex constraint, it yields an n-ary xor constraint.
+    
+    If actions are not mutually exclusive,
+    then only bool vars can represent them.
+    
+    @return: mapping from FTS actions, to GR(1) actions.
+        If bools are used, then GR(1) are the same.
+        Otherwise, they map to e.g. 'act = wait'
+    @rtype: dict
+    """
+    if not actions:
+        return
+    
+    logger.debug('create actions:' + str(actions) )
+    
+    # too few values for gr1c ?
+    if len(actions) < 3:
+        bool_actions = True
+    
+    # no mutex -> cannot use int variable
+    if not use_mutex:
+        bool_actions = True
+    
+    if bool_actions:
+        logger.debug('bool actions')
+        
+        action_ids = {x:x for x in actions}
+        variables.update({a:'boolean' for a in actions})
+        
+        if use_mutex and not min_one:
+            trans += ['X (' + mutex(action_ids.values())[0] + ')']
+            init += mutex(action_ids.values())
+        elif use_mutex and min_one:
+            trans += ['X (' + exactly_one(action_ids.values())[0] + ')']
+            init += exactly_one(action_ids.values())
+        elif min_one:
+            raise Exception('min_one requires mutex')
+    else:
+        assert(use_mutex)
+        action_ids, domain = actions2ints(actions, actionvar, min_one)
+        variables[actionvar] = domain
+    return action_ids
+
+def actions2ints(actions, actionvar, min_one=False):
+    int_actions = True
+    for action in actions:
+        if not isinstance(action, int):
+            int_actions = False
+            break
+    if int_actions:
+        action_ids = {x:x for x in actions}
+        n_actions = len(actions)
+        
+        # extra value modeling all False ?
+        if min_one:
+            n = n_actions -1
+        else:
+            n = n_actions
+        domain = (0, n)
+    else:
+        setact = lambda s: actionvar + ' = ' + s
+        action_ids = {s:setact(s) for s in actions}
+        domain = list(actions)
+        if not min_one:
+            domain += ['none']
+        
+    return (action_ids, domain)
 
 def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     """Convert system's transition system to GR(1) representation.
@@ -230,7 +330,7 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False):
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
         (sys_vars, sys_init, sys_trans) = fts2spec(
-            sys, ignore_initial, bool_states, 'loc'
+            sys, ignore_initial, bool_states, 'loc', 'act'
         )
         return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                       sys_safety=sys_trans)
@@ -251,7 +351,7 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
     """
     if isinstance(env, transys.FiniteTransitionSystem):
         (env_vars, env_init, env_trans) = fts2spec(
-            env, ignore_initial, bool_states, 'eloc'
+            env, ignore_initial, bool_states, 'eloc', 'eact'
         )
         return GRSpec(env_vars=env_vars, env_init=env_init,
                       env_safety=env_trans)
@@ -262,7 +362,7 @@ def env_to_spec(env, ignore_initial=False, bool_states=False):
             str(type(env)) +'. Use FTS or OpenFTS.')
 
 def fts2spec(fts, ignore_initial=False, bool_states=False,
-             statevar='loc'):
+             statevar='loc', actionvar='act'):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -273,25 +373,34 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     """
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
+    # options for modeling actions
+    bool_actions = False
+    use_mutex = True
+    min_one = False
+    
     aps = fts.aps
     states = fts.states
+    actions = fts.actions
+    
+    sys_init = []
+    sys_trans = []
     
     sys_vars = {ap:'boolean' for ap in aps}
-    sys_vars.update({act:'boolean' for act in fts.actions})
     
-    sys_trans = []
+    action_ids = create_actions(
+        actions, sys_vars, sys_trans, sys_init,
+        actionvar, bool_actions, use_mutex, min_one
+    )
     
     state_ids = create_states(states, sys_vars, sys_trans,
                               statevar, bool_states)
     
-    init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_ts(states, state_ids, fts.transitions)
+    sys_trans += sys_trans_from_ts(states, state_ids, fts.transitions, action_ids)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
     
-    sys_trans += mutex(fts.actions)
-    
-    return (sys_vars, init, sys_trans)
+    return (sys_vars, sys_init, sys_trans)
 
 def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     """Convert OpenFTS to GR(1) representation.
@@ -429,7 +538,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_trans_from_ts(states, state_ids, trans):
+def sys_trans_from_ts(states, state_ids, trans, action_ids):
     """Convert transition relation to GR(1) sys_safety.
     
     The transition relation may be closed or open,
@@ -466,7 +575,7 @@ def sys_trans_from_ts(states, state_ids, trans):
             postcond += _conj_action(label, 'env_actions')
             postcond += _conj_action(label, 'sys_actions')
             # system FTS given
-            postcond += _conj_action(label, 'actions')
+            postcond += _conj_action(label, 'actions', ids=action_ids)
             
             cur_str += ['(' + precond + ') -> X(' + postcond + ')']
             

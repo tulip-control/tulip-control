@@ -126,3 +126,157 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
 assert(not r)
+
+def sys_fts_2_states():
+    sys = transys.FTS()
+    sys.states.add_from(['X0', 'X1'])
+    sys.states.initial.add_from(['X0', 'X1'])
+    
+    sys.transitions.add_from({'X0'}, {'X1'})
+    sys.transitions.add_from({'X1'}, {'X0', 'X1'})
+    
+    sys.atomic_propositions.add_from({'home', 'lot'})
+    sys.states.label('X0', 'home')
+    sys.states.label('X1', 'lot')
+    
+    #sys.plot()
+    return sys
+
+def env_fts_2_states():
+    env = transys.FTS()
+    env.states.add_from({'e0', 'e1'})
+    env.states.initial.add('e0')
+    
+    # Park as an env action
+    env.actions.add_from({'park', 'go'})
+    
+    env.transitions.add_labeled('e0', 'e0', 'park')
+    env.transitions.add_labeled('e0', 'e0', 'go')
+    
+    #env.plot()
+    return env
+
+def parking_spec():
+    # barely realizable: assumption necessary
+    env_prog = '! (eact = park)'
+    
+    sys_vars = {'X0reach'}
+    sys_init = {'X0reach'}
+    sys_prog = {'home'}
+    
+    # one additional requirement: if in lot,
+    # then stay there until park signal is turned off
+    sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !(eact = park) )',
+                '((lot & (eact = park) ) -> X(lot))'}
+    sys_prog |= {'X0reach'}
+    
+    specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                        sys_safety=sys_safe,
+                        env_prog=env_prog, sys_prog=sys_prog)
+    return specs
+
+def test_sys_fts_bool_states():
+    """Sys FTS has 2 states, must become 2 bool vars in GR(1)
+    """
+    sys = sys_fts_2_states()
+    
+    spec = synth.sys_to_spec(sys)
+    
+    assert('loc' not in spec.sys_vars)
+    assert('eloc' not in spec.sys_vars)
+    
+    assert('X0' in spec.sys_vars)
+    assert(spec.sys_vars['X0'] == 'boolean')
+    
+    assert('X1' in spec.sys_vars)
+    assert(spec.sys_vars['X1'] == 'boolean')
+
+def test_env_fts_bool_states():
+    """Env FTS has 2 states, must become 2 bool vars in GR(1).
+    """
+    env = env_fts_2_states()
+    
+    spec = synth.env_to_spec(env)
+    
+    assert('loc' not in spec.env_vars)
+    assert('eloc' not in spec.env_vars)
+    
+    assert('e0' in spec.env_vars)
+    assert(spec.env_vars['e0'] == 'boolean')
+    
+    assert('e1' in spec.env_vars)
+    assert(spec.env_vars['e1'] == 'boolean')
+
+def test_sys_fts_int_states():
+    """Sys FTS has 3 states, must become 1 int var in GR(1).
+    """
+    sys = sys_fts_2_states()
+    sys.states.add('X2')
+    
+    spec = synth.sys_to_spec(sys)
+    
+    assert('X0' not in spec.sys_vars)
+    assert('X1' not in spec.sys_vars)
+    assert('X2' not in spec.sys_vars)
+    
+    assert('eloc' not in spec.sys_vars)
+    assert('loc' in spec.sys_vars)
+    assert(spec.sys_vars['loc'] == (0, 2))
+
+def test_env_fts_int_states():
+    """Env FTS has 3 states, must become 1 int var in GR(1).
+    """
+    env = env_fts_2_states()
+    env.states.add('e2')
+    
+    spec = synth.env_to_spec(env)
+    
+    assert('e0' not in spec.env_vars)
+    assert('e1' not in spec.env_vars)
+    assert('e2' not in spec.env_vars)
+    
+    assert('loc' not in spec.env_vars)
+    assert('eloc' in spec.env_vars)
+    assert(spec.env_vars['eloc'] == (0, 2))
+
+def test_sys_fts_no_actions():
+    """sys FTS has no actions.
+    """
+    sys = sys_fts_2_states()
+    
+    spec = synth.sys_to_spec(sys)
+    
+    assert('act' not in spec.sys_vars)
+
+def test_env_fts_bool_actions():
+    """Env FTS has 2 actions, must become 2 bool vars in GR(1).
+    """
+    env = env_fts_2_states()
+    
+    spec = synth.env_to_spec(env)
+    
+    assert('act' not in spec.env_vars)
+    assert('eact' not in spec.env_vars)
+    
+    assert('park' in spec.env_vars)
+    assert(spec.env_vars['park'] == 'boolean')
+    
+    assert('go' in spec.env_vars)
+    assert(spec.env_vars['go'] == 'boolean')
+ 
+def test_env_fts_int_actions():
+    """Env FTS has 3 actions, must become 1 int var in GR(1).
+    """
+    env = env_fts_2_states()
+    env.actions.add('stop')
+    
+    spec = synth.env_to_spec(env)
+    
+    assert('park' not in spec.env_vars)
+    assert('go' not in spec.env_vars)
+    assert('stop' not in spec.env_vars)
+    
+    assert('act' not in spec.env_vars)
+    assert('eact' in spec.env_vars)    
+    
+    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'none'})
