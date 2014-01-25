@@ -312,8 +312,7 @@ def actions2ints(actions, actionvar, min_one=False):
         
     return (action_ids, domain)
 
-def sys_to_spec(sys, ignore_initial=False, bool_states=False,
-                action_vars=None):
+def sys_to_spec(sys, ignore_initial, bool_states, action_vars):
     """Convert system's transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
@@ -347,8 +346,7 @@ def sys_to_spec(sys, ignore_initial=False, bool_states=False,
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def env_to_spec(env, ignore_initial=False, bool_states=False,
-                action_vars=None):
+def env_to_spec(env, ignore_initial, bool_states, action_vars):
     """Convert environment transition system to GR(1) representation.
     
     For details see also sys_to_spec.
@@ -910,9 +908,11 @@ def is_realizable(option, specs, env=None, sys=None,
                         'Current options are "jtlv" and "gr1c"')
     return r
 
-def spec_plus_sys(specs, env=None, sys=None,
-                  ignore_env_init=False, ignore_sys_init=False,
-                  bool_states=True, action_vars=None):
+def spec_plus_sys(
+    specs, env, sys,
+    ignore_env_init, ignore_sys_init,
+    bool_states, action_vars
+):
     if sys is not None:
         sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states,
                                   action_vars)
