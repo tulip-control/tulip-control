@@ -443,18 +443,23 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     env_actions = ofts.env_actions
     sys_actions = ofts.sys_actions
     
+    sys_init = []
+    sys_trans = []
+    env_init = []
+    env_trans = []
+    
     sys_vars = {ap:'boolean' for ap in aps}
     sys_vars.update({act:'boolean' for act in sys_actions})
-    sys_trans = mutex(sys_actions)
+    sys_trans += mutex(sys_actions)
     
     env_vars = list(env_actions)
-    env_trans = mutex(env_actions)
+    env_trans += mutex(env_actions)
     
     statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
                               statevar, bool_states)
     
-    sys_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
     sys_trans += sys_trans_from_ts(states, state_ids, trans)
     sys_trans += ap_trans_from_ts(states, state_ids, aps)
@@ -463,7 +468,7 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False):
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
-        sys_init=sys_init,
+        env_init=env_init, sys_init=sys_init,
         env_safety=env_trans, sys_safety=sys_trans
     )
 
@@ -476,30 +481,35 @@ def env_open_fts2spec(ofts, ignore_initial, bool_states=False):
     env_actions = ofts.env_actions
     sys_actions = ofts.sys_actions
     
+    sys_init = []
+    sys_trans = []
+    env_init = []
+    env_trans = []
+    
     # since APs are tied to env states, let them be env variables
     env_vars = {ap:'boolean' for ap in aps}
     env_vars.update({act:'boolean' for act in env_actions})
-    env_trans = mutex(env_actions)
+    env_trans += mutex(env_actions)
     
     sys_vars = list(sys_actions)
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
     # and whether that TS will contain all the system actions
     # defined in the environment TS
-    sys_trans = exactly_one(ofts.sys_actions)
+    sys_trans += exactly_one(ofts.sys_actions)
     
     statevar = 'eloc'
     state_ids = create_states(states, env_vars, env_trans,
                               statevar, bool_states)
     
-    env_init = sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
     env_trans += env_trans_from_env_ts(states, state_ids, trans, sys_actions)
     env_trans += ap_trans_from_ts(states, state_ids, aps)
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
-        env_init=env_init,
+        env_init=env_init, sys_init=sys_init,
         env_safety=env_trans, sys_safety=sys_trans
     )
 
