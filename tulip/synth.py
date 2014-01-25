@@ -883,7 +883,7 @@ def synthesize(
     @rtype: transys.MealyMachine | None
     """
     if action_vars is None:
-        action_vars = ('eact', 'act')
+        action_vars = _default_action_vars()
     
     # not yet implemented for jtlv
     if bool_states is False and option is 'jtlv':
@@ -918,21 +918,30 @@ def synthesize(
     
     return ctrl
 
-def is_realizable(option, specs, env=None, sys=None,
-                  ignore_env_init=False, ignore_sys_init=False,
-                  bool_states=False, verbose=0):
+def is_realizable(
+    option, specs, env=None, sys=None,
+    ignore_env_init=False, ignore_sys_init=False,
+    bool_states=False, action_vars=None,
+    bool_actions=False, actions_must='xor',
+    verbose=0
+):
     """Check realizability.
     
     For details see synthesize.
     """
+    if action_vars is None:
+        action_vars = _default_action_vars()
+    
     if bool_states is False and option is 'jtlv':
         warn('Int state not yet available for jtlv solver.\n' +
              'Using bool states.')
         bool_states = True
     
-    specs = spec_plus_sys(specs, env, sys,
-                          ignore_env_init, ignore_sys_init,
-                          bool_states)
+    specs = spec_plus_sys(
+        specs, env, sys,
+        ignore_env_init, ignore_sys_init,
+        bool_states, action_vars, bool_actions, actions_must
+    )
     
     if option == 'gr1c':
         r = gr1cint.check_realizable(specs, verbose=verbose)
@@ -942,6 +951,9 @@ def is_realizable(option, specs, env=None, sys=None,
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
     return r
+
+def _default_action_vars():
+    return ('eact', 'act')
 
 def spec_plus_sys(
     specs, env, sys,
