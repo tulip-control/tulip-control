@@ -723,7 +723,7 @@ def env_trans_from_env_ts(
         # can sys kill env by setting all previous sys outputs to False ?
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
-        if not found_free:
+        if not found_free and sys_action_ids:
             cur_list += [_conj_neg(sys_action_ids.values() )]
         
         env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
