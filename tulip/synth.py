@@ -212,8 +212,7 @@ def states2ints(states, statevar):
 
 def create_actions(
     actions, variables, trans, init,
-    actionvar, bool_actions=False,
-    use_mutex=True, min_one=False
+    actionvar, bool_actions, actions_must
 ):
     """Represent actions by bool or int GR(1) variables.
     
@@ -254,6 +253,20 @@ def create_actions(
         return
     
     logger.debug('create actions:' + str(actions) )
+    
+    # options for modeling actions
+    if actions_must is None:
+        use_mutex = False
+        min_one = False
+    elif actions_must == 'mutex':
+        use_mutex = True
+        min_one = False
+    elif actions_must == 'xor':
+        use_mutex = True
+        min_one = True
+    else:
+        raise Exception('Unknown value: actions_must = ' +
+                        str(actions_must) )
     
     # too few values for gr1c ?
     #if len(actions) < 3:
@@ -312,7 +325,10 @@ def actions2ints(actions, actionvar, min_one=False):
         
     return (action_ids, domain)
 
-def sys_to_spec(sys, ignore_initial, bool_states, action_vars):
+def sys_to_spec(
+    sys, ignore_initial, bool_states,
+    action_vars, bool_actions, actions_must
+):
     """Convert system's transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
@@ -336,17 +352,24 @@ def sys_to_spec(sys, ignore_initial, bool_states, action_vars):
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
         (sys_vars, sys_init, sys_trans) = fts2spec(
-            sys, ignore_initial, bool_states, 'loc', action_vars[1]
+            sys, ignore_initial, bool_states, 'loc',
+            action_vars[1], bool_actions, actions_must
         )
         return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                       sys_safety=sys_trans)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
-        return sys_open_fts2spec(sys, ignore_initial, bool_states, action_vars)
+        return sys_open_fts2spec(
+            sys, ignore_initial, bool_states,
+            action_vars, bool_actions, actions_must
+        )
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def env_to_spec(env, ignore_initial, bool_states, action_vars):
+def env_to_spec(
+    env, ignore_initial, bool_states,
+    action_vars, bool_actions, actions_must
+):
     """Convert environment transition system to GR(1) representation.
     
     For details see also sys_to_spec.
@@ -357,18 +380,25 @@ def env_to_spec(env, ignore_initial, bool_states, action_vars):
     """
     if isinstance(env, transys.FiniteTransitionSystem):
         (env_vars, env_init, env_trans) = fts2spec(
-            env, ignore_initial, bool_states, 'eloc', action_vars[0]
+            env, ignore_initial, bool_states, 'eloc',
+            action_vars[0], bool_actions, actions_must
         )
         return GRSpec(env_vars=env_vars, env_init=env_init,
                       env_safety=env_trans)
     elif isinstance(env, transys.OpenFiniteTransitionSystem):
-        return env_open_fts2spec(env, ignore_initial, bool_states, action_vars)
+        return env_open_fts2spec(
+            env, ignore_initial, bool_states,
+            action_vars, bool_actions, actions_must
+        )
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
 
-def fts2spec(fts, ignore_initial=False, bool_states=False,
-             statevar='loc', actionvar='act'):
+def fts2spec(
+    fts, ignore_initial=False, bool_states=False,
+    statevar='loc', actionvar='act',
+    bool_actions=False, actions_must=None
+):
     """Convert closed FTS to GR(1) representation.
     
     So fts on its own is not the complete problem spec.
@@ -378,11 +408,6 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     @rtype: GRSpec
     """
     assert(isinstance(fts, transys.FiniteTransitionSystem))
-    
-    # options for modeling actions
-    bool_actions = False
-    use_mutex = True
-    min_one = False
     
     aps = fts.aps
     states = fts.states
@@ -395,7 +420,7 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     
     action_ids = create_actions(
         actions, sys_vars, sys_trans, sys_init,
-        actionvar, bool_actions, use_mutex, min_one
+        actionvar, bool_actions, actions_must
     )
     
     state_ids = create_states(states, sys_vars, sys_trans,
@@ -411,8 +436,10 @@ def fts2spec(fts, ignore_initial=False, bool_states=False,
     
     return (sys_vars, sys_init, sys_trans)
 
-def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
-                      action_vars=None):
+def sys_open_fts2spec(
+    ofts, ignore_initial=False, bool_states=False,
+    action_vars=None, bool_actions=False, actions_must=None
+):
     """Convert OpenFTS to GR(1) representation.
     
     Note that not any GR(1) can be represented by an OpenFTS,
@@ -447,11 +474,6 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
     """
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
-    # options for modeling actions
-    bool_actions = False
-    use_mutex = True
-    min_one = False
-    
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
@@ -468,12 +490,12 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
     
     sys_action_ids = create_actions(
         sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, use_mutex, min_one
+        action_vars[1], bool_actions, actions_must
     )
     
     env_action_ids = create_actions(
         env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, use_mutex, min_one
+        action_vars[0], bool_actions, actions_must
     )
     
     statevar = 'loc'
@@ -498,14 +520,11 @@ def sys_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
         env_safety=env_trans, sys_safety=sys_trans
     )
 
-def env_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
-                      action_vars=None):
+def env_open_fts2spec(
+    ofts, ignore_initial=False, bool_states=False,
+    action_vars=None, bool_actions=False, actions_must=None
+):
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
-    
-    # options for modeling actions
-    bool_actions = False
-    use_mutex = True
-    min_one = False
     
     aps = ofts.aps
     states = ofts.states
@@ -524,7 +543,7 @@ def env_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
     
     env_action_ids = create_actions(
         env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, use_mutex, min_one
+        action_vars[0], bool_actions, actions_must
     )
     
     # some duplication here, because we don't know
@@ -533,7 +552,7 @@ def env_open_fts2spec(ofts, ignore_initial=False, bool_states=False,
     # defined in the environment TS
     sys_action_ids = create_actions(
         sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, use_mutex, min_one
+        action_vars[1], bool_actions, actions_must
     )
     
     statevar = 'eloc'
@@ -774,6 +793,7 @@ def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
+    bool_actions=False, actions_must='xor',
     verbose=0
 ):
     """Function to call the appropriate synthesis tool on the spec.
@@ -841,6 +861,20 @@ def synthesize(
         
         (must be valid variable name)
     
+    @param bool_actions: model actions using bool variables
+    @type bool_actions: bool
+    
+    @param actions_must: select constraint one actions. Options:
+        
+            - 'mutex': at most 1 action True each time
+            - 'xor': exactly 1 action True each time
+            - None: no constraint on action values
+        
+        The xor constraint can prevent the environment from
+        blocking the system by setting all its actions to False.
+    
+    @type actions_must: 'mutex' | 'xor' | None
+    
     @type verbose: bool
     
     @return: If spec is realizable,
@@ -859,7 +893,8 @@ def synthesize(
     
     specs = spec_plus_sys(specs, env, sys,
                           ignore_env_init, ignore_sys_init,
-                          bool_states, action_vars)
+                          bool_states, action_vars,
+                          bool_actions, actions_must)
     
     if option == 'gr1c':
         ctrl = gr1cint.synthesize(specs, verbose=verbose)
@@ -911,16 +946,16 @@ def is_realizable(option, specs, env=None, sys=None,
 def spec_plus_sys(
     specs, env, sys,
     ignore_env_init, ignore_sys_init,
-    bool_states, action_vars
+    bool_states, action_vars, bool_actions, actions_must
 ):
     if sys is not None:
         sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states,
-                                  action_vars)
+                                  action_vars, bool_actions, actions_must)
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + hl)
     if env is not None:
         env_formula = env_to_spec(env, ignore_env_init, bool_states,
-                                  action_vars)
+                                  action_vars, bool_actions, actions_must)
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty() ) + hl)
         
