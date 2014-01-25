@@ -267,6 +267,10 @@ def create_actions(
         action_ids = {x:x for x in actions}
         variables.update({a:'boolean' for a in actions})
         
+        # single action ?
+        if not mutex(action_ids.values()):
+            return action_ids
+        
         if use_mutex and not min_one:
             trans += ['X (' + mutex(action_ids.values())[0] + ')']
             init += mutex(action_ids.values())
