@@ -602,7 +602,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += '   so the spec becomes trivially True.'
         warn(msg)
         
-        init += [_conj_neg(state_ids.itervalues() ) ]
+        init += ['False']
         return init
         
     init += [_disj([state_ids[s] for s in states.initial])]
@@ -633,8 +633,7 @@ def sys_trans_from_ts(
         
         # no successor states ?
         if not cur_trans:
-            sys_trans += ['('+str(from_state_id) +') -> X(' +
-                _conj_neg(state_ids.itervalues() ) +')']
+            sys_trans += ['('+str(from_state_id) +') -> X(False)']
             continue
         
         cur_str = []
@@ -711,8 +710,7 @@ def env_trans_from_env_ts(
         
         # no successor states ?
         if not cur_trans:
-            env_trans += [pstr(from_state_id) +' -> X(' +
-                _conj_neg(state_ids.itervalues() ) + ')']
+            env_trans += [pstr(from_state_id) +' -> X(False)']
                 
             msg = 'Environment dead-end found.\n'
             msg += 'If sys can force env to dead-end,\n'
