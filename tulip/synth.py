@@ -302,7 +302,7 @@ def actions2ints(actions, actionvar, min_one=False):
         action_ids = {s:setact(s) for s in actions}
         domain = list(actions)
         if not min_one:
-            domain += ['none']
+            domain += [actionvar + 'none']
         
     return (action_ids, domain)
 
