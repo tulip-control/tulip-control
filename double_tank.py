@@ -225,20 +225,20 @@ sys_ts.transitions.add_labeled_adj(
 )
 
 """Specs"""
-# Variable dictionaries
-env_vars = {'u_in': [0, 2]}
-sys_disc_vars = {}
+env_vars = set()
+sys_disc_vars = set()
 
-env_init = {'u_in=0'}
+env_init = {'u_in = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> next(u_in = 0)',
-            '(critical & (u_in=0)) -> next(u_in = 2)',
-            '(!critical & u_in=0) -> next(u_in=0)',
-            '(!no_refuel & u_in=2) -> next(u_in=2)'}
+env_safe = {'no_refuel -> next(u_in = normal)',
+            '(critical & (u_in = normal)) -> next(u_in = refuel)',
+            '(!critical & u_in = normal) -> next(u_in = normal)',
+            '(!no_refuel & u_in = refuel) -> next(u_in = refuel)'}
 env_prog = {}
 #env_prog |= {'u_in = 2'}
 
+# relate switching actions to u_in
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
 sys_prog = {'vol_diff2'}
