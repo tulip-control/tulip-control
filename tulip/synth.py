@@ -922,8 +922,8 @@ def is_realizable(
     
     For details see synthesize.
     """
-    action_vars, bool_states = _check_solver_options(
-        option, bool_states, action_vars
+    bool_states, action_vars, bool_actions = _check_solver_options(
+        option, bool_states, action_vars, bool_actions
     )
     
     specs = spec_plus_sys(
@@ -941,7 +941,7 @@ def is_realizable(
                         'Current options are "jtlv" and "gr1c"')
     return r
 
-def _check_solver_options(option, bool_states, action_vars):
+def _check_solver_options(option, bool_states, action_vars, bool_actions):
     if action_vars is None:
         action_vars = _default_action_vars()
     
@@ -950,7 +950,12 @@ def _check_solver_options(option, bool_states, action_vars):
              'Using bool states.')
         bool_states = True
     
-    return (action_vars, bool_states)
+    if bool_actions is False and option is 'jtlv':
+        warn('Int action modeling not yet available for jtlv solver.\n' +
+             'Using bool actions.')
+        bool_actions = True
+    
+    return (bool_states, action_vars, bool_actions)
 
 def _default_action_vars():
     return ('eact', 'act')
