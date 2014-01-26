@@ -34,6 +34,7 @@ from tulip.graphics import newax
 
 from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
+from tulip import transys as trs
 from tulip.abstract.plot import plot_partition
 
 import tank_functions as tf
@@ -177,6 +178,8 @@ trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
+n = trans_normal.shape[0]
+logger.info('Merged partition has: n = ' + str(n) + 'states')
 
 """Plot partitions"""
 ax, fig = newax()
@@ -199,6 +202,27 @@ fig.savefig('part_refuel.pdf')
 new_part.ppp.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_merged.pdf')
+
+"""Transition system abstracting switched dynamics"""
+sys_ts = trs.OpenFTS()
+
+# 2 env modes
+sys_ts.env_actions.add_from({'normal', 'refuel'})
+
+states = ['s'+str(i) for i in xrange(n) ]
+sys_ts.states.add_from(states)
+
+sys_ts.transitions.add_labeled_adj(
+    adj = trans_normal,
+    adj2states = states,
+    labels = {'env_actions':'normal'}
+)
+
+sys_ts.transitions.add_labeled_adj(
+    adj = trans_refuel,
+    adj2states = states,
+    labels = {'env_actions':'refuel'}
+)
 
 """Specs"""
 # Variable dictionaries

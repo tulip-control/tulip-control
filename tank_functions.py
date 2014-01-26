@@ -2,7 +2,7 @@
 Auxiliary discretization and specification functions
 """
 import numpy as np
-import re
+from scipy import sparse as sp
 
 from tulip import abstract
 import tulip.polytope as pc
@@ -19,10 +19,10 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
             IJ = np.dot(IJ, part.adj)
             k += 1
         IJ = (IJ > 0).astype(int)
-        
+    
     # Initialize output
-    transitions = np.zeros([part.num_regions,part.num_regions],
-                           dtype = int)
+    n = part.num_regions
+    transitions = sp.lil_matrix((n, n), dtype=int)
     
     # Do the abstraction
     while np.sum(IJ) > 0:
