@@ -247,25 +247,21 @@ specs = spec.GRSpec(env_vars, sys_disc_vars,
                     env_init, sys_init,
                     env_safe, sys_safe,
                     env_prog, sys_prog)
-
 print(specs.pretty())
 
+"""Synthesis"""
 asd = raw_input("Starting synthesis")
 start = time.time()
 
-# Create JTLV files
-tf.create_files(new_part, trans_normal, trans_refuel, 'u_in', 0, 2, env_vars,
-            sys_disc_vars, [assumption, guarantee]) 
-
-# Check realizability
-realizability = synth.is_realizable()
-
-synth.synthesize()
+ctrl = synth.synthesize(
+    'gr1c', specs, sys=sys_ts, ignore_env_init=True,
+    actions_must='xor', action_vars=('u_in', 'act')
+)
 
 elapsed = (time.time() - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
 
-aut = automaton.Automaton([], 3)          
+exit
 
 """Simulate"""
 num_it = 25
