@@ -880,14 +880,9 @@ def synthesize(
         Otherwise return None.
     @rtype: transys.MealyMachine | None
     """
-    if action_vars is None:
-        action_vars = _default_action_vars()
-    
-    # not yet implemented for jtlv
-    if bool_states is False and option is 'jtlv':
-        warn('Int state not yet available for jtlv solver.\n' +
-             'Using bool states.')
-        bool_states = True
+    action_vars, bool_states = _check_solver_options(
+        option, bool_states, action_vars
+    )
     
     specs = spec_plus_sys(specs, env, sys,
                           ignore_env_init, ignore_sys_init,
@@ -927,13 +922,9 @@ def is_realizable(
     
     For details see synthesize.
     """
-    if action_vars is None:
-        action_vars = _default_action_vars()
-    
-    if bool_states is False and option is 'jtlv':
-        warn('Int state not yet available for jtlv solver.\n' +
-             'Using bool states.')
-        bool_states = True
+    action_vars, bool_states = _check_solver_options(
+        option, bool_states, action_vars
+    )
     
     specs = spec_plus_sys(
         specs, env, sys,
@@ -949,6 +940,17 @@ def is_realizable(
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
     return r
+
+def _check_solver_options(option, bool_states, action_vars):
+    if action_vars is None:
+        action_vars = _default_action_vars()
+    
+    if bool_states is False and option is 'jtlv':
+        warn('Int state not yet available for jtlv solver.\n' +
+             'Using bool states.')
+        bool_states = True
+    
+    return (action_vars, bool_states)
 
 def _default_action_vars():
     return ('eact', 'act')
