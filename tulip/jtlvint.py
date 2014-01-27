@@ -43,8 +43,7 @@ import transys
 #from .spec import GRSpec
 
 #for checking form of spec
-import pyparsing
-#from pyparsing import *
+import pyparsing as pp
 from tulip.spec import ast
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -554,63 +553,63 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
         return False
 
     # Literals cannot start with G, F or X unless quoted
-    restricted_alphas = filter(lambda x: x not in "GFX", alphas)
+    restricted_alphas = filter(lambda x: x not in "GFX", pp.alphas)
     # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]*
     # so we can have X0 etc.
-    bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
-    var = ~bool_keyword + (Word(restricted_alphas, alphanums + "._:") | \
-                           Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | \
-                           QuotedString('"')).setParseAction(ast.ASTVar)
+    bool_keyword = pp.CaselessKeyword("TRUE") | pp.CaselessKeyword("FALSE")
+    var = ~bool_keyword + (pp.Word(restricted_alphas, pp.alphanums + "._:") | \
+                           pp.Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | \
+                           pp.QuotedString('"')).setParseAction(ast.ASTVar)
     atom = var | bool_keyword.setParseAction(ast.ASTBool)
-    number = var | Word(nums).setParseAction(ast.ASTNum)
+    number = var | pp.Word(pp.nums).setParseAction(ast.ASTNum)
 
     # arithmetic expression
-    arith_expr = operatorPrecedence(
+    arith_expr = pp.operatorPrecedence(
         number,
-        [(oneOf("* /"), 2, opAssoc.LEFT, ast.ASTArithmetic),
-         (oneOf("+ -"), 2, opAssoc.LEFT, ast.ASTArithmetic),
-         ("mod", 2, opAssoc.LEFT, ast.ASTArithmetic)]
+        [(pp.oneOf("* /"), 2, pp.opAssoc.LEFT, ast.ASTArithmetic),
+         (pp.oneOf("+ -"), 2, pp.opAssoc.LEFT, ast.ASTArithmetic),
+         ("mod", 2, pp.opAssoc.LEFT, ast.ASTArithmetic)]
     )
 
     # integer comparison expression
-    comparison_expr = Group(
-        arith_expr + oneOf("< <= > >= != = ==") +
+    comparison_expr = pp.Group(
+        arith_expr + pp.oneOf("< <= > >= != = ==") +
         arith_expr
     ).setParseAction(parse.ASTComparator)
 
     proposition = comparison_expr | atom
 
     # Check that the syntax is GR(1). This uses pyparsing
-    UnaryTemporalOps = ~bool_keyword + oneOf("next") + ~Word(nums + "_")
-    next_ltl_expr = operatorPrecedence(proposition,
-        [("'", 1, opAssoc.LEFT, ast.ASTUnTempOp),
-        ("!", 1, opAssoc.RIGHT, ast.ASTNot),
-        (UnaryTemporalOps, 1, opAssoc.RIGHT, ast.ASTUnTempOp),
-        (oneOf("& &&"), 2, opAssoc.LEFT, ast.ASTAnd),
-        (oneOf("| ||"), 2, opAssoc.LEFT, ast.ASTOr),
-        (oneOf("xor ^"), 2, opAssoc.LEFT, ast.ASTXor),
-        ("->", 2, opAssoc.RIGHT, ast.ASTImp),
-        ("<->", 2, opAssoc.RIGHT, ast.ASTBiImp),
-        (oneOf("= !="), 2, opAssoc.RIGHT, ast.ASTComparator),
+    UnaryTemporalOps = ~bool_keyword + pp.oneOf("next") + ~pp.Word(pp.nums + "_")
+    next_ltl_expr = pp.operatorPrecedence(proposition,
+        [("'", 1, pp.opAssoc.LEFT, ast.ASTUnTempOp),
+        ("!", 1, pp.opAssoc.RIGHT, ast.ASTNot),
+        (UnaryTemporalOps, 1, pp.opAssoc.RIGHT, ast.ASTUnTempOp),
+        (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ast.ASTAnd),
+        (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ast.ASTOr),
+        (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ast.ASTXor),
+        ("->", 2, pp.opAssoc.RIGHT, ast.ASTImp),
+        ("<->", 2, pp.opAssoc.RIGHT, ast.ASTBiImp),
+        (pp.oneOf("= !="), 2, pp.opAssoc.RIGHT, ast.ASTComparator),
         ])
-    always_expr = pyparsing.Literal("[]") + next_ltl_expr
-    always_eventually_expr = pyparsing.Literal("[]") + \
-      pyparsing.Literal("<>") + next_ltl_expr
+    always_expr = pp.Literal("[]") + next_ltl_expr
+    always_eventually_expr = pp.Literal("[]") + \
+      pp.Literal("<>") + next_ltl_expr
     gr1_expr = next_ltl_expr | always_expr | always_eventually_expr
 
     # Final Check
-    GR1_expression = pyparsing.operatorPrecedence(gr1_expr,
-     [("&", 2, pyparsing.opAssoc.RIGHT)])
+    GR1_expression = pp.operatorPrecedence(gr1_expr,
+     [("&", 2, pp.opAssoc.RIGHT)])
         
     try:
         GR1_expression.parseString(assumption)
-    except ParseException:
+    except pp.ParseException:
         print("Assumption is not in GR(1) format.")
         return False
         
     try:
         GR1_expression.parseString(guarantee)
-    except ParseException:
+    except pp.ParseException:
         print("Guarantee is not in GR(1) format")
         return False
     return True
