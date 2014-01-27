@@ -87,8 +87,8 @@ def merge_partitions(abstract1, abstract2):
 
     new_list = []
     orig = []
-    parent_1 = []
-    parent_2 = []
+    parent_1 = dict()
+    parent_2 = dict()
     for i in range(part1.num_regions):
         for j in range(part2.num_regions):
             logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
@@ -107,8 +107,11 @@ def merge_partitions(abstract1, abstract2):
             
             isect.list_prop = part1.list_region[i].list_prop
             new_list.append(isect)
-            parent_1.append(i)
-            parent_2.append(j)
+            
+            idx = new_list.index(isect)
+            
+            parent_1[idx] = i
+            parent_2[idx] = j
             
             if abstract1.orig[i] != abstract2.orig[j]:
                 raise Exception("not same orig, partitions don't have the \
