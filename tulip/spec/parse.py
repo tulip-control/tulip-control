@@ -35,7 +35,6 @@ LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
-
 from pyparsing import *
 import sys
 
@@ -127,7 +126,8 @@ class ASTNum(ASTNode):
         return str(self)
     
     def dump_dot(self):
-        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
+        return str(id(self)) + "\n" + \
+               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
 
 class ASTVar(ASTNode):
     def init(self, t):
@@ -153,7 +153,8 @@ class ASTVar(ASTNode):
         return str(self)
         
     def dump_dot(self):
-        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
+        return str(id(self)) + "\n" + \
+               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
         
 class ASTBool(ASTNode):
     def init(self, t):
@@ -175,16 +176,23 @@ class ASTBool(ASTNode):
         try:
             return GR1C_MAP[str(self)]
         except KeyError:
-            raise LTLException("Reserved word \"" + self.op() + "\" not supported in gr1c syntax map")
+            raise LTLException(
+                "Reserved word \"" + self.op() +
+                "\" not supported in gr1c syntax map"
+            )
     
     def to_jtlv(self):
         try:
             return JTLV_MAP[str(self)]
         except KeyError:
-            raise LTLException("Reserved word \"" + self.op() + "\" not supported in JTLV syntax map")
+            raise LTLException(
+                "Reserved word \"" + self.op() +
+                "\" not supported in JTLV syntax map"
+            )
     
     def dump_dot(self):
-        return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
+        return str(id(self)) + "\n" + \
+               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
 
 class ASTUnary(ASTNode):
     @classmethod
@@ -207,7 +215,8 @@ class ASTUnary(ASTNode):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
     
     def flatten(self, flattener=str, op=None, **args):
-        if op is None: op = self.op()
+        if op is None:
+            op = self.op()
         try:
             o = flattener(self.operand, **args)
         except AttributeError:
@@ -227,7 +236,8 @@ class ASTUnary(ASTNode):
         return 1 + len(self.operand)
 
 class ASTNot(ASTUnary):
-    def op(self): return "!"
+    def op(self):
+        return "!"
 
 class ASTUnTempOp(ASTUnary):
     def op(self):
@@ -237,22 +247,33 @@ class ASTUnTempOp(ASTUnary):
         try:
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
-            raise LTLException("Operator " + self.op() + " not supported in Promela syntax map")
+            raise LTLException(
+                "Operator " + self.op() +
+                " not supported in Promela syntax map"
+            )
     
     def to_gr1c(self, primed=False):
         if self.op() == "X":
             return self.flatten(_flatten_gr1c, "", primed=True)
         else:
             try:
-                return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()], primed=primed)
+                return self.flatten(
+                    _flatten_gr1c, GR1C_MAP[self.op()], primed=primed
+                )
             except KeyError:
-                raise LTLException("Operator " + self.op() + " not supported in gr1c syntax map")
+                raise LTLException(
+                    "Operator " + self.op() +
+                    " not supported in gr1c syntax map"
+                )
     
     def to_jtlv(self):
         try:
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
-            raise LTLException("Operator " + self.op() + " not supported in JTLV syntax map")
+            raise LTLException(
+                "Operator " + self.op() +
+                " not supported in JTLV syntax map"
+            )
     
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
@@ -345,19 +366,28 @@ class ASTBiTempOp(ASTBinary):
         try:
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
-            raise LTLException("Operator " + self.op() + " not supported in Promela syntax map")
+            raise LTLException(
+                "Operator " + self.op() +
+                " not supported in Promela syntax map"
+            )
     
     def to_gr1c(self, primed=False):
         try:
             return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()])
         except KeyError:
-            raise LTLException("Operator " + self.op() + " not supported in gr1c syntax map")
+            raise LTLException(
+                "Operator " + self.op() +
+                " not supported in gr1c syntax map"
+            )
     
     def to_jtlv(self):
         try:
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
-            raise LTLException("Operator " + self.op() + " not supported in JTLV syntax map")
+            raise LTLException(
+                "Operator " + self.op() +
+                " not supported in JTLV syntax map"
+            )
     
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
@@ -378,27 +408,41 @@ class ASTArithmetic(ASTBinary):
 
 # Literals cannot start with G, F or X unless quoted
 _restricted_alphas = filter(lambda x: x not in "GFX", alphas)
-# Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]* so we can have X0 etc.
+
+# Quirk: allow literals of the form:
+#   (G|F|X)[0-9_][A-Za-z0-9._]*
+# so we can have X0 etc.
 _bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
-_var = ~_bool_keyword + (Word(_restricted_alphas, alphanums + "._:") | \
-        Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')).setParseAction(ASTVar)
+
+_var = ~_bool_keyword + (
+    Word(_restricted_alphas, alphanums + "._:") | \
+    Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')
+).setParseAction(ASTVar)
+
 _atom = _var | _bool_keyword.setParseAction(ASTBool)
 _number = _var | Word(nums).setParseAction(ASTNum)
 
 # arithmetic expression
-_arith_expr = operatorPrecedence(_number,
-                                 [(oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
-                                  (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
-                                  ("mod", 2, opAssoc.LEFT, ASTArithmetic)])
+_arith_expr = operatorPrecedence(
+    _number,
+    [
+        (oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
+        (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
+        ("mod", 2, opAssoc.LEFT, ASTArithmetic)
+    ]
+)
 
 # integer comparison expression
-_comparison_expr = Group(_arith_expr + oneOf("< <= > >= != = ==") + _arith_expr).setParseAction(ASTComparator)
+_comparison_expr = Group(
+    _arith_expr + oneOf("< <= > >= != = ==") + _arith_expr
+).setParseAction(ASTComparator)
 
 _proposition = _comparison_expr | _atom
 
-# hack so G/F/X doesn't mess with keywords (i.e. FALSE) or variables like X0, X_0_1
-_UnaryTempOps = ~_bool_keyword + oneOf("G F X [] <> next") + ~Word(nums + "_")
-
+# hack so G/F/X doesn't mess with keywords
+#(i.e. FALSE) or variables like X0, X_0_1
+_UnaryTempOps = ~_bool_keyword + \
+    oneOf("G F X [] <> next") + ~Word(nums + "_")
 
 def extract_vars(tree):
     v = []
@@ -447,7 +491,10 @@ def parse(formula):
     try:
         return _ltl_expr.parseString(formula, parseAll=True)[0]
     except RuntimeError:
-        raise ParseException("Maximum recursion depth exceeded, could not parse")
+        raise ParseException(
+            "Maximum recursion depth exceeded,"
+            "could not parse"
+        )
 
 if __name__ == "__main__":
     try:
