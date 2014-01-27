@@ -884,8 +884,8 @@ def synthesize(
         Otherwise return None.
     @rtype: transys.MealyMachine | None
     """
-    action_vars, bool_states = _check_solver_options(
-        option, bool_states, action_vars
+    bool_states, action_vars, bool_actions = _check_solver_options(
+        option, bool_states, action_vars, bool_actions
     )
     
     specs = spec_plus_sys(specs, env, sys,
