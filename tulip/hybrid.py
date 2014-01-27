@@ -41,6 +41,8 @@ NO, 2 Jul 2013.
 import logging
 logger = logging.getLogger(__name__)
 
+from warnings import warn
+
 import itertools
 from pprint import pformat
 
@@ -89,13 +91,13 @@ class LtiSysDyn(object):
                  Uset=None,Wset=None, domain=None):
         
         if Uset == None:
-            print("Warning: Uset not given in LtiSysDyn()")
+            warn("Uset not given to LtiSysDyn()")
         
         if (Uset != None) and (not isinstance(Uset, pc.Polytope)):
             raise Exception("LtiSysDyn: `Uset` has to be a Polytope")
            
         if domain == None:
-            print("Warning: domain is not given in LtiSysDyn()")
+            warn("Domain is not given in LtiSysDyn()")
         
         if (domain != None) and (not isinstance(domain, pc.Polytope)):
             raise Exception("LtiSysDyn: `domain` has to be a Polytope")
@@ -132,7 +134,7 @@ class LtiSysDyn(object):
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
         if quiver is None:
-            logger.warn('pyvectorized not found. No plotting.')
+            warn('pyvectorized not found. No plotting.')
             return
         
         (x, res) = pc.grid_region(self.domain)
@@ -168,7 +170,7 @@ class PwaSysDyn(object):
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain == None:
-            print("Warning: domain not given in PwaSysDyn()")
+            warn("Domain not given to PwaSysDyn()")
         
         if ((domain != None) and
             (not (isinstance(domain, pc.Polytope) or
@@ -286,7 +288,7 @@ class HybridSysDyn(object):
                  env_labels=None, disc_sys_labels=None):
         # check that the continuous domain is specified
         if cts_ss is None:
-            logger.warn('continuous state space not given to HybridSysDyn')
+            warn('continuous state space not given to HybridSysDyn')
         else:
             if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
                 raise Exception('HybridSysDyn: ' +
@@ -307,6 +309,8 @@ class HybridSysDyn(object):
             modes = [(a,b) for a in self.env_labels
                            for b in self.disc_sys_labels]
             
+            logger.debug('Available modes: ' + str(modes) )
+            
             undefined_modes = set(dynamics.keys()).difference(modes)
             
             if undefined_modes:
@@ -321,7 +325,7 @@ class HybridSysDyn(object):
                 msg = 'Missing the modes:\n' + str(missing_modes)
                 msg += '\n Make sure you did not forget any modes,\n'
                 msg += 'otherwise this is fine.'
-                logger.warn(msg)
+                warn(msg)
             
             if not all([isinstance(sys, PwaSysDyn)
                         for sys in dynamics.values()]):
@@ -366,12 +370,12 @@ class HybridSysDyn(object):
                 msg += ' with discrete domain size.\n'
                 msg += 'Ignoring given environment labels.\n'
                 msg += 'Defaulting to integer labels.'
-                logger.warn(msg)
+                warn(msg)
                 
                 return None
         except:
-            logger.warn('Environment labels of type: ' +
-                        type(labels) + 'have no len()')
+            warn('Environment labels of type: ' +
+                 type(labels) + 'have no len()')
             return None
         return labels
     
