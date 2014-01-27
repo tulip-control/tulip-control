@@ -64,7 +64,7 @@ def issafety(tree):
 if __name__ == "__main__":
     try:
         ast = parse(sys.argv[1])
-    except pp.ParseException as e:
+    except Exception as e:
         print("Parse error: " + str(e) )
         sys.exit(1)
     print("Parsed expression: " + str(ast) )
