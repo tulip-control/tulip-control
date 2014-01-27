@@ -96,15 +96,20 @@ def merge_partitions(abstract1, abstract2):
             isect = pc.intersect(part1.list_region[i],
                                  part2.list_region[j])
             rc, xc = pc.cheby_ball(isect)
+            
+            # no intersection ?
             if rc < 1e-5:
                 continue
             
+            # if Polytope, make it Region
             if len(isect) == 0:
                 isect = pc.Region([isect], [])
+            
             isect.list_prop = part1.list_region[i].list_prop
             new_list.append(isect)
             parent_1.append(i)
             parent_2.append(j)
+            
             if abstract1.orig[i] != abstract2.orig[j]:
                 raise Exception("not same orig, partitions don't have the \
                                   same origin.")
@@ -113,10 +118,11 @@ def merge_partitions(abstract1, abstract2):
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in range(len(new_list)):
         for j in range(i+1, len(new_list)):
+            
             if (part1.adj[parent_1[i], parent_1[j]] == 1) or \
-                    (part2.adj[parent_2[i], parent_2[j]] == 1) or \
-                    (parent_1[i] == parent_1[j]) or \
-                    (parent_2[i] == parent_2[j]):
+               (part2.adj[parent_2[i], parent_2[j]] == 1) or \
+               (parent_1[i] == parent_1[j]) or \
+               (parent_2[i] == parent_2[j]):
                 if pc.is_adjacent(new_list[i], new_list[j]):
                     adj[i,j] = 1
                     adj[j,i] = 1
