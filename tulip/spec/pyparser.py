@@ -31,15 +31,15 @@
 # SUCH DAMAGE.
 # 
 """
-LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
+Pyparsing-based parser for TuLiP LTL syntax
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
 import pyparsing as pp
 import sys
 
-from .ast import LTLException, ASTVar, ASTNum, ASTBool, ASTArithmetic, \
-    ASTComparator, ASTUnTempOp, ASTBiTempOp, ASTUnary, ASTBinary, \
+from .ast import ASTVar, ASTNum, ASTBool, ASTArithmetic, \
+    ASTComparator, ASTUnTempOp, ASTBiTempOp, \
     ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp
 
 # Packrat parsing - it's much faster
@@ -83,29 +83,6 @@ _proposition = _comparison_expr | _atom
 _UnaryTempOps = ~_bool_keyword + \
     pp.oneOf("G F X [] <> next") + ~pp.Word(pp.nums + "_")
 
-def extract_vars(tree):
-    v = []
-    def f(t):
-        if isinstance(t, ASTVar):
-            v.append(t.val)
-        return t
-    tree.map(f)
-    return v
-    
-# Crude test for safety spec
-def issafety(tree):
-    def f(t):
-        if isinstance(t, ASTUnTempOp) and not t.operator == "G":
-            return False
-        if isinstance(t, ASTBiTempOp):
-            return False
-        if isinstance(t, ASTUnary):
-            return t.operand
-        if isinstance(t, ASTBinary):
-            return (t.op_l and t.op_r)
-        return True
-    return tree.map(f)
-
 def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
@@ -134,20 +111,3 @@ def parse(formula):
             "Maximum recursion depth exceeded,"
             "could not parse"
         )
-
-if __name__ == "__main__":
-    try:
-        ast = parse(sys.argv[1])
-    except pp.ParseException as e:
-        print("Parse error: " + str(e) )
-        sys.exit(1)
-    print("Parsed expression: " + str(ast) )
-    print("Length: " +str( len(ast) ) )
-    print("Variables: " + str(extract_vars(ast) ) )
-    print("Safety: " +str(issafety(ast) ) )
-    try:
-        print("JTLV syntax: " +str(ast.to_jtlv() ) )
-        print("SMV syntax: " +str(ast.to_smv() ) )
-        print("Promela syntax: " +str(ast.to_promela() ) )
-    except LTLException as e:
-        print(e.message)
