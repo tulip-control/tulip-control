@@ -400,7 +400,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     
     msg = 'Computed S0 polytope: L x <= M, where:\n\t L = \n'
     msg += str(L) +'\n\t M = \n' + str(M) +'\n'
-    logger.info(msg)
+    logger.debug(msg)
     
     return L,M
 

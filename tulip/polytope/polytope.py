@@ -1195,7 +1195,7 @@ def volume(polyreg):
         if polyreg._volume is not None:
             return polyreg._volume
     except:
-        logger.info('computing volume...')
+        logger.debug('computing volume...')
         
     if isinstance(polyreg, Region):
         tot_vol = 0.
@@ -1425,13 +1425,13 @@ def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
                     str(solver) + '".')
     
     if len(del_dim) <= 2:
-        logger.info("projection: using Fourier-Motzkin.")
+        logger.debug("projection: using Fourier-Motzkin.")
         return projection_fm(poly1,new_dim,del_dim)
     elif len(org_dim) <= 4:
-        logger.info("projection: using exthull.")
+        logger.debug("projection: using exthull.")
         return projection_exthull(poly1,new_dim)
     else:
-        logger.info("projection: using iterative hull.")
+        logger.debug("projection: using iterative hull.")
         return projection_iterhull(poly1,new_dim)
         
 def separate(reg1, abs_tol=ABS_TOL):
@@ -1611,8 +1611,8 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
     r,xc = cheby_ball(poly1)
     org_dim = poly1.A.shape[1]
             
-    logger.info("Starting iterhull projection from dim " +
-                str(org_dim) + " to dim " + str(len(new_dim)) )
+    logger.debug("Starting iterhull projection from dim " +
+                 str(org_dim) + " to dim " + str(len(new_dim)) )
             
     if len(new_dim) == 1:
         f1 = np.zeros(poly1.A.shape[1])

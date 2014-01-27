@@ -425,6 +425,7 @@ def check_realizable(spec, verbose=0):
     f = tempfile.TemporaryFile()
     f.write(spec.to_gr1c())
     f.seek(0)
+    logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-r"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -446,7 +447,7 @@ def synthesize(spec, verbose=0):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
-    logger.debug('gr1c input:\n' + spec.to_gr1c() +_hl)
+    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
     
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     

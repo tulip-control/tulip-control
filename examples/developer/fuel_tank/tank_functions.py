@@ -1,6 +1,9 @@
 """
 Auxiliary discretization and specification functions
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import numpy as np
 from scipy import sparse as sp
 
@@ -9,6 +12,7 @@ import tulip.polytope as pc
 
 def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
+    logger.info('checking which transitions remain feasible after merging')
     part = abstract_sys.ppp
     
     # Initialize matrix for pairs to check
@@ -31,6 +35,8 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         j = ind[0][0]
         IJ[j,i] = 0
         
+        logger.info('checking transition: ' + str(i) + ' -> ' + str(j))
+        
         si = part.list_region[i]
         sj = part.list_region[j]
         
@@ -45,13 +51,18 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         vol2 = pc.volume(diff)
                     
         if vol2 < abs_tol:
-            transitions[j,i] = 1        
+            transitions[j,i] = 1 
+            msg = '\t Feasible transition.'
         else:
             transitions[j,i] = 0
+            msg = '\t Not feasible transition.'
+        logger.info(msg)
             
     return transitions
     
 def merge_partitions(abstract1, abstract2):
+    logger.info('merging partitions')
+    
     part1 = abstract1.ppp
     part2 = abstract2.ppp
     
@@ -80,6 +91,8 @@ def merge_partitions(abstract1, abstract2):
     parent_2 = []
     for i in range(part1.num_regions):
         for j in range(part2.num_regions):
+            logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
+            
             isect = pc.intersect(part1.list_region[i],
                                  part2.list_region[j])
             rc, xc = pc.cheby_ball(isect)

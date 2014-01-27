@@ -980,5 +980,5 @@ def spec_plus_sys(
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty() ) + hl)
         
-    logger.debug('Overall Spec:\n' + str(specs.pretty() ) +hl)
+    logger.info('Overall Spec:\n' + str(specs.pretty() ) +hl)
     return specs
