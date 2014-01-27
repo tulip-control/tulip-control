@@ -63,7 +63,7 @@ def issafety(tree):
         return True
     return tree.map(f)
 
-def parse(formula, parser='pyparsing'):
+def parse(formula, parser='ply'):
     """Parse formula string and create abstract syntax tree (AST).
     
     Both PyParsing and PLY are available for the parsing.
