@@ -73,10 +73,17 @@ def dump_dot(ast):
     return "digraph AST {\n"+ast.dump_dot()+"}\n"
 
 # Flattener helpers
-def _flatten_gr1c(node, **args): return node.to_gr1c(**args)
-def _flatten_JTLV(node): return node.to_jtlv()
-def _flatten_SMV(node): return node.to_smv()
-def _flatten_Promela(node): return node.to_promela()
+def _flatten_gr1c(node, **args):
+    return node.to_gr1c(**args)
+
+def _flatten_JTLV(node):
+    return node.to_jtlv()
+
+def _flatten_SMV(node):
+    return node.to_smv()
+
+def _flatten_Promela(node):
+    return node.to_promela()
 
 class ASTNode(object):
     def __init__(self, s, l, t):
@@ -92,41 +99,59 @@ class ASTNode(object):
         self.init(tok)
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
-    def to_jtlv(self): return self.flatten(_flatten_JTLV)
-    def to_smv(self): return self.flatten(_flatten_SMV)
-    def to_promela(self): return self.flatten(_flatten_Promela)
+    
+    def to_jtlv(self):
+        return self.flatten(_flatten_JTLV)
+    
+    def to_smv(self):
+        return self.flatten(_flatten_SMV)
+    
+    def to_promela(self):
+        return self.flatten(_flatten_Promela)
+    
     def map(self, f):
         n = self.__class__(None, None, [str(self.val)])
         return f(n)
-    def __len__(self): return 1
+    
+    def __len__(self):
+        return 1
     
 class ASTNum(ASTNode):
     def init(self, t):
         self.val = int(t[0])
+    
     def __repr__(self):
         return str(self.val)
+    
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
+    
     def dump_dot(self):
         return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
 
 class ASTVar(ASTNode):
     def init(self, t):
         self.val = t[0]
+    
     def __repr__(self):
         return self.val
+    
     def flatten(self, flattener=str, op=None, **args):
         # just return variable name (quoted?)
         return str(self)
+        
     def to_gr1c(self, primed=False):
         if primed:
             return str(self)+"'"
         else:
             return str(self)
+        
     def to_jtlv(self):
         return "(" + str(self) + ")"
+        
     def to_smv(self):
         return str(self)
+        
     def dump_dot(self):
         return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
         
@@ -136,21 +161,28 @@ class ASTBool(ASTNode):
             self.val = True
         else:
             self.val = False
+    
     def __repr__(self):
-        if self.val: return "True"
-        else: return "False"
+        if self.val:
+            return "True"
+        else:
+            return "False"
+    
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
+    
     def to_gr1c(self, primed=False):
         try:
             return GR1C_MAP[str(self)]
         except KeyError:
             raise LTLException("Reserved word \"" + self.op() + "\" not supported in gr1c syntax map")
+    
     def to_jtlv(self):
         try:
             return JTLV_MAP[str(self)]
         except KeyError:
             raise LTLException("Reserved word \"" + self.op() + "\" not supported in JTLV syntax map")
+    
     def dump_dot(self):
         return str(id(self))+"\n"+str(id(self))+" [label=\""+str(self.val)+"\"]\n"
 
@@ -158,6 +190,7 @@ class ASTUnary(ASTNode):
     @classmethod
     def new(cls, op_node, operator=None):
         return cls(None, None, [operator, op_node])
+    
     def init(self, tok):
         if tok[1] == "'":
             if len(tok) > 2:
@@ -172,6 +205,7 @@ class ASTUnary(ASTNode):
                 self.operator = TEMPORAL_OP_MAP[tok[0]]
     def __repr__(self):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
+    
     def flatten(self, flattener=str, op=None, **args):
         if op is None: op = self.op()
         try:
@@ -179,25 +213,32 @@ class ASTUnary(ASTNode):
         except AttributeError:
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
+    
     def dump_dot(self):
         return (str(id(self))+"\n"
                 + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
                 + str(id(self))+" -> "+self.operand.dump_dot())
+    
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op())
         return f(n)
+    
     def __len__(self):
         return 1 + len(self.operand)
 
 class ASTNot(ASTUnary):
     def op(self): return "!"
+
 class ASTUnTempOp(ASTUnary):
-    def op(self): return self.operator
+    def op(self):
+        return self.operator
+    
     def to_promela(self):
         try:
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in Promela syntax map")
+    
     def to_gr1c(self, primed=False):
         if self.op() == "X":
             return self.flatten(_flatten_gr1c, "", primed=True)
@@ -206,11 +247,13 @@ class ASTUnTempOp(ASTUnary):
                 return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()], primed=primed)
             except KeyError:
                 raise LTLException("Operator " + self.op() + " not supported in gr1c syntax map")
+    
     def to_jtlv(self):
         try:
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV syntax map")
+    
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
 
@@ -218,6 +261,7 @@ class ASTBinary(ASTNode):
     @classmethod
     def new(cls, op_l, op_r, operator=None):
         return cls(None, None, [op_l, operator, op_r])
+    
     def init(self, tok):
         # handle left-associative chains e.g. x && y && z
         if len(tok) > 3:
@@ -235,6 +279,7 @@ class ASTBinary(ASTNode):
                 self.operator = tok[1]
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
+    
     def flatten(self, flattener=str, op=None, **args):
         if not op: op = self.op()
         try:
@@ -246,63 +291,90 @@ class ASTBinary(ASTNode):
         except AttributeError:
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
+    
     def dump_dot(self):
         return (str(id(self))+"\n"
                 + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
                 + str(id(self))+" -> "+self.op_l.dump_dot()
                 + str(id(self))+" -> "+self.op_r.dump_dot())
+    
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op())
         return f(n)
+    
     def __len__(self):
         return 1 + len(self.op_l) + len(self.op_r)
 
 class ASTAnd(ASTBinary):
-    def op(self): return "&"
+    def op(self):
+        return "&"
+    
     def to_jtlv(self):
         return self.flatten(_flatten_JTLV, "&&")
+    
     def to_promela(self):
         return self.flatten(_flatten_Promela, "&&")
+
 class ASTOr(ASTBinary):
-    def op(self): return "|"
+    def op(self):
+        return "|"
+    
     def to_jtlv(self):
         return self.flatten(_flatten_JTLV, "||")
+    
     def to_promela(self):
         return self.flatten(_flatten_Promela, "||")
+
 class ASTXor(ASTBinary):
-    def op(self): return "xor"
+    def op(self):
+        return "xor"
+    
 class ASTImp(ASTBinary):
-    def op(self): return "->"
+    def op(self):
+        return "->"
+
 class ASTBiImp(ASTBinary):
-    def op(self): return "<->"
+    def op(self):
+        return "<->"
+
 class ASTBiTempOp(ASTBinary):
-    def op(self): return self.operator
+    def op(self):
+        return self.operator
+    
     def to_promela(self):
         try:
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in Promela syntax map")
+    
     def to_gr1c(self, primed=False):
         try:
             return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in gr1c syntax map")
+    
     def to_jtlv(self):
         try:
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException("Operator " + self.op() + " not supported in JTLV syntax map")
+    
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
+    
 class ASTComparator(ASTBinary):
-    def op(self): return self.operator
+    def op(self):
+        return self.operator
+    
     def to_promela(self):
         if self.operator == "=":
             return self.flatten(_flatten_Promela, "==")
         else:
             return self.flatten(_flatten_Promela)
+    
 class ASTArithmetic(ASTBinary):
-    def op(self): return self.operator
+    def op(self):
+        return self.operator
 
 # Literals cannot start with G, F or X unless quoted
 _restricted_alphas = filter(lambda x: x not in "GFX", alphas)
@@ -355,17 +427,19 @@ def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
     # LTL expression
-    _ltl_expr = operatorPrecedence(_proposition,
-                                   [("'", 1, opAssoc.LEFT, ASTUnTempOp),
-                                    ("!", 1, opAssoc.RIGHT, ASTNot),
-                                    (_UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
-                                    (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
-                                    (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
-                                    (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
-                                    ("->", 2, opAssoc.RIGHT, ASTImp),
-                                    ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-                                    (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
-                                    (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp)])
+    _ltl_expr = operatorPrecedence(
+        _proposition,
+       [("'", 1, opAssoc.LEFT, ASTUnTempOp),
+        ("!", 1, opAssoc.RIGHT, ASTNot),
+        (_UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
+        (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
+        (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
+        (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
+        ("->", 2, opAssoc.RIGHT, ASTImp),
+        ("<->", 2, opAssoc.RIGHT, ASTBiImp),
+        (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
+        (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp)]
+    )
     _ltl_expr.ignore(LineStart() + "--" + restOfLine)
 
     # Increase recursion limit for complex formulae
