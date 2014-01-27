@@ -37,6 +37,8 @@ import sys
 
 from .ast import LTLException, ASTVar, ASTUnTempOp, \
     ASTBiTempOp, ASTUnary, ASTBinary
+from .pyparser import parse as pyparse
+from .plyparser import parse as plyparse
 
 def extract_vars(tree):
     v = []
@@ -61,9 +63,28 @@ def issafety(tree):
         return True
     return tree.map(f)
 
+def parse(formula, parser='pyparsing'):
+    """Parse formula string and create abstract syntax tree (AST).
+    
+    Both PyParsing and PLY are available for the parsing.
+    For large formulae and repeated parsing PLY is faster.
+    
+    @param parser: python package to use for generating lexer and parser
+    @type parser: 'pyparsing' | 'ply'
+    """
+    if parser == 'pyparsing':
+        return pyparse(formula)
+    elif parser == 'ply':
+        return plyparse(formula)
+    else:
+        raise ValueError(
+            'Unknown parser: ' + str(parser) + '\n' +
+            "Available options: 'ply' | 'pyparsing'"
+        )
+
 if __name__ == "__main__":
     try:
-        ast = parse(sys.argv[1])
+        ast = pyparse(sys.argv[1])
     except Exception as e:
         print("Parse error: " + str(e) )
         sys.exit(1)
