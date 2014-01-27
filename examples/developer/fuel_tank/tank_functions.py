@@ -96,17 +96,19 @@ def merge_partitions(abstract1, abstract2):
             isect = pc.intersect(part1.list_region[i],
                                  part2.list_region[j])
             rc, xc = pc.cheby_ball(isect)
-            if rc > 1e-5:
-                if len(isect) == 0:
-                    isect = pc.Region([isect], [])
-                isect.list_prop = part1.list_region[i].list_prop
-                new_list.append(isect)
-                parent_1.append(i)
-                parent_2.append(j)
-                if abstract1.orig[i] != abstract2.orig[j]:
-                    raise Exception("not same orig, partitions don't have the \
-                                      same origin.")
-                orig.append(abstract1.orig[i])
+            if rc < 1e-5:
+                continue
+            
+            if len(isect) == 0:
+                isect = pc.Region([isect], [])
+            isect.list_prop = part1.list_region[i].list_prop
+            new_list.append(isect)
+            parent_1.append(i)
+            parent_2.append(j)
+            if abstract1.orig[i] != abstract2.orig[j]:
+                raise Exception("not same orig, partitions don't have the \
+                                  same origin.")
+            orig.append(abstract1.orig[i])
     
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in range(len(new_list)):
