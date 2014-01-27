@@ -66,8 +66,8 @@ t_UNTIL = r'U'
 t_RELEASE = r'R'
 
 t_NOT = r'\!'
-t_AND = r'\&|\&\&'
-t_OR = r'\||\|\|'
+t_AND = r'\&\&|\&'
+t_OR = r'\|\||\|'
 t_XOR = r'\^'
 
 t_EQUALS = r'\=|\=\='
