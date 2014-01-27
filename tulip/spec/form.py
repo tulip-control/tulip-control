@@ -35,7 +35,7 @@ Formulae constituting specifications
 import time
 import re, copy
 
-from tulip.spec import parse
+from tulip.spec import parser
 
 def mutex(varnames):
     """Create mutual exclusion formulae from iterable of variables.

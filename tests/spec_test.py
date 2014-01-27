@@ -7,7 +7,8 @@ import copy
 import nose.tools as nt
 from pyparsing import ParseException
 
-from tulip.spec import LTL, GRSpec, parse, mutex
+from tulip.spec import LTL, GRSpec, mutex
+from tulip.spec.parser import parse
 
 
 def GR1specs_equal(s1, s2):
