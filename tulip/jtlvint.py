@@ -575,7 +575,7 @@ def check_gr1(assumption, guarantee, env_vars, sys_vars):
     comparison_expr = pp.Group(
         arith_expr + pp.oneOf("< <= > >= != = ==") +
         arith_expr
-    ).setParseAction(parse.ASTComparator)
+    ).setParseAction(ast.ASTComparator)
 
     proposition = comparison_expr | atom
 
