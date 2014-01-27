@@ -629,28 +629,29 @@ def sys_trans_from_ts(
     # Transitions
     for from_state in states:
         from_state_id = state_ids[from_state]
+        precond = pstr(from_state_id)
+        
         cur_trans = trans.find([from_state])
         
         # no successor states ?
         if not cur_trans:
-            sys_trans += ['('+str(from_state_id) +') -> X(False)']
+            sys_trans += [precond + ' -> X(False)']
             continue
         
         cur_str = []
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            precond = '(' + str(from_state_id) + ')'
-            postcond = '(' + str(to_state_id) +')'
+            postcond = pstr(to_state_id)
             
             postcond += _conj_action(label, 'env_actions', ids=env_action_ids)
             postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
             # system FTS given
             postcond += _conj_action(label, 'actions', ids=action_ids)
             
-            cur_str += ['(' + precond + ') -> X(' + postcond + ')']
+            cur_str += [postcond]
             
-        sys_trans += [_disj(cur_str) ]
+        sys_trans += [precond + ' -> X(' + _disj(cur_str) + ')']
     return sys_trans
 
 def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
@@ -668,11 +669,13 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     
     for from_state in states:
         from_state_id = state_ids[from_state]
+        precond = pstr(from_state_id)
+        
         cur_trans = trans.find([from_state])
         
         # no successor states ?
         if not cur_trans:
-            env_trans += ['(' +str(from_state_id) +') -> X(' +
+            env_trans += [precond + ' -> X(' +
                 _conj_neg(env_action_ids.values() ) + ')']
             continue
         
@@ -687,8 +690,8 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
             next_env_actions.add(env_action_id)
         next_env_actions = _disj(next_env_actions)
         
-        env_trans += ["(" +str(from_state_id) +") -> X(" +
-                      next_env_actions +")"]
+        env_trans += [precond + ' -> X(' +
+                      next_env_actions + ')']
     return env_trans
 
 def env_trans_from_env_ts(
@@ -706,11 +709,13 @@ def env_trans_from_env_ts(
     
     for from_state in states:
         from_state_id = state_ids[from_state]
+        precond = pstr(from_state_id)
+        
         cur_trans = trans.find([from_state])
         
         # no successor states ?
         if not cur_trans:
-            env_trans += [pstr(from_state_id) +' -> X(False)']
+            env_trans += [precond + ' -> X(False)']
                 
             msg = 'Environment dead-end found.\n'
             msg += 'If sys can force env to dead-end,\n'
@@ -726,7 +731,6 @@ def env_trans_from_env_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            precond = pstr(from_state_id)
             postcond = 'X' + pstr(to_state_id)
             
             postcond += _conj_action(label, 'env_actions', nxt=True,
