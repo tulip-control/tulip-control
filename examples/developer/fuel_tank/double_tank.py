@@ -231,17 +231,16 @@ sys_disc_vars = set()
 env_init = {'u_in = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> next(u_in = normal)',
-            '(critical & (u_in = normal)) -> next(u_in = refuel)',
-            '(!critical & u_in = normal) -> next(u_in = normal)',
-            '(!no_refuel & u_in = refuel) -> next(u_in = refuel)'}
-env_prog = {}
-#env_prog |= {'u_in = 2'}
+env_safe = {'no_refuel -> X(u_in = normal)',
+            '(critical & (u_in = normal)) -> X(u_in = refuel)',
+            '(!critical & u_in = normal) -> X(u_in = normal)',
+            '(!no_refuel & u_in = refuel) -> X(u_in = refuel)'}
+env_prog = {'u_in = refuel'}
 
 # relate switching actions to u_in
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
-sys_prog = {'vol_diff2'}
+#sys_prog = {'vol_diff2'}
 
 specs = spec.GRSpec(env_vars, sys_disc_vars,
                     env_init, sys_init,
@@ -250,11 +249,11 @@ specs = spec.GRSpec(env_vars, sys_disc_vars,
 print(specs.pretty())
 
 """Synthesis"""
-asd = raw_input("Starting synthesis")
+print("Starting synthesis")
 start = time.time()
 
 ctrl = synth.synthesize(
-    'gr1c', specs, sys=sys_ts, ignore_env_init=True,
+    'gr1c', specs, sys=sys_ts, ignore_sys_init=True,
     actions_must='xor', action_vars=('u_in', 'act')
 )
 
