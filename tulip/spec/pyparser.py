@@ -31,7 +31,8 @@
 # SUCH DAMAGE.
 # 
 """
-Pyparsing-based parser for TuLiP LTL syntax
+Pyparsing-based parser for TuLiP LTL syntax,
+using AST classes from spec.ast
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
