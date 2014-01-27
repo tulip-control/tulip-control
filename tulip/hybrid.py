@@ -306,10 +306,7 @@ class HybridSysDyn(object):
         # Check each dynamics key is a valid mode,
         # i.e., a valid combination of env and sys labels.
         if dynamics is not None:
-            modes = [(a,b) for a in self.env_labels
-                           for b in self.disc_sys_labels]
-            
-            logger.debug('Available modes: ' + str(modes) )
+            modes = self.all_mode_combs
             
             undefined_modes = set(dynamics.keys()).difference(modes)
             
@@ -378,6 +375,23 @@ class HybridSysDyn(object):
                  type(labels) + 'have no len()')
             return None
         return labels
+    
+    @property
+    def all_mode_combs(self):
+        """Return all possible combinations of modes.
+        """
+        modes = [(a,b) for a in self.env_labels
+                           for b in self.disc_sys_labels]
+            
+        logger.debug('Available modes: ' + str(modes) )
+        return modes
+    
+    @property
+    def modes(self):
+        if self.dynamics is None:
+            warn('No dynamics defined (None).')
+            return None
+        return self.dynamics.keys()
     
     @property
     def env_labels(self):
