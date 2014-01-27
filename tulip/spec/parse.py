@@ -35,7 +35,7 @@ LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
-from pyparsing import *
+import pyparsing as pp
 import sys
 
 from .ast import LTLException, ASTVar, ASTNum, ASTBool, ASTArithmetic, \
@@ -43,37 +43,37 @@ from .ast import LTLException, ASTVar, ASTNum, ASTBool, ASTArithmetic, \
     ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp
 
 # Packrat parsing - it's much faster
-ParserElement.enablePackrat()
+pp.ParserElement.enablePackrat()
 
 # Literals cannot start with G, F or X unless quoted
-_restricted_alphas = filter(lambda x: x not in "GFX", alphas)
+_restricted_alphas = filter(lambda x: x not in "GFX", pp.alphas)
 
 # Quirk: allow literals of the form:
 #   (G|F|X)[0-9_][A-Za-z0-9._]*
 # so we can have X0 etc.
-_bool_keyword = CaselessKeyword("TRUE") | CaselessKeyword("FALSE")
+_bool_keyword = pp.CaselessKeyword("TRUE") | pp.CaselessKeyword("FALSE")
 
 _var = ~_bool_keyword + (
-    Word(_restricted_alphas, alphanums + "._:") | \
-    Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | QuotedString('"')
+    pp.Word(_restricted_alphas, pp.alphanums + "._:") | \
+    pp.Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | pp.QuotedString('"')
 ).setParseAction(ASTVar)
 
 _atom = _var | _bool_keyword.setParseAction(ASTBool)
-_number = _var | Word(nums).setParseAction(ASTNum)
+_number = _var | pp.Word(pp.nums).setParseAction(ASTNum)
 
 # arithmetic expression
-_arith_expr = operatorPrecedence(
+_arith_expr = pp.operatorPrecedence(
     _number,
     [
-        (oneOf("* /"), 2, opAssoc.LEFT, ASTArithmetic),
-        (oneOf("+ -"), 2, opAssoc.LEFT, ASTArithmetic),
-        ("mod", 2, opAssoc.LEFT, ASTArithmetic)
+        (pp.oneOf("* /"), 2, pp.opAssoc.LEFT, ASTArithmetic),
+        (pp.oneOf("+ -"), 2, pp.opAssoc.LEFT, ASTArithmetic),
+        ("mod", 2, pp.opAssoc.LEFT, ASTArithmetic)
     ]
 )
 
 # integer comparison expression
-_comparison_expr = Group(
-    _arith_expr + oneOf("< <= > >= != = ==") + _arith_expr
+_comparison_expr = pp.Group(
+    _arith_expr + pp.oneOf("< <= > >= != = ==") + _arith_expr
 ).setParseAction(ASTComparator)
 
 _proposition = _comparison_expr | _atom
@@ -81,7 +81,7 @@ _proposition = _comparison_expr | _atom
 # hack so G/F/X doesn't mess with keywords
 #(i.e. FALSE) or variables like X0, X_0_1
 _UnaryTempOps = ~_bool_keyword + \
-    oneOf("G F X [] <> next") + ~Word(nums + "_")
+    pp.oneOf("G F X [] <> next") + ~pp.Word(pp.nums + "_")
 
 def extract_vars(tree):
     v = []
@@ -110,27 +110,27 @@ def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
     # LTL expression
-    _ltl_expr = operatorPrecedence(
+    _ltl_expr = pp.operatorPrecedence(
         _proposition,
-       [("'", 1, opAssoc.LEFT, ASTUnTempOp),
-        ("!", 1, opAssoc.RIGHT, ASTNot),
-        (_UnaryTempOps, 1, opAssoc.RIGHT, ASTUnTempOp),
-        (oneOf("& &&"), 2, opAssoc.LEFT, ASTAnd),
-        (oneOf("| ||"), 2, opAssoc.LEFT, ASTOr),
-        (oneOf("xor ^"), 2, opAssoc.LEFT, ASTXor),
-        ("->", 2, opAssoc.RIGHT, ASTImp),
-        ("<->", 2, opAssoc.RIGHT, ASTBiImp),
-        (oneOf("= == !="), 2, opAssoc.RIGHT, ASTComparator),
-        (oneOf("U V R"), 2, opAssoc.RIGHT, ASTBiTempOp)]
+       [("'", 1, pp.opAssoc.LEFT, ASTUnTempOp),
+        ("!", 1, pp.opAssoc.RIGHT, ASTNot),
+        (_UnaryTempOps, 1, pp.opAssoc.RIGHT, ASTUnTempOp),
+        (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ASTAnd),
+        (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ASTOr),
+        (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ASTXor),
+        ("->", 2, pp.opAssoc.RIGHT, ASTImp),
+        ("<->", 2, pp.opAssoc.RIGHT, ASTBiImp),
+        (pp.oneOf("= == !="), 2, pp.opAssoc.RIGHT, ASTComparator),
+        (pp.oneOf("U V R"), 2, pp.opAssoc.RIGHT, ASTBiTempOp)]
     )
-    _ltl_expr.ignore(LineStart() + "--" + restOfLine)
+    _ltl_expr.ignore(pp.LineStart() + "--" + pp.restOfLine)
 
     # Increase recursion limit for complex formulae
     sys.setrecursionlimit(2000)
     try:
         return _ltl_expr.parseString(formula, parseAll=True)[0]
     except RuntimeError:
-        raise ParseException(
+        raise pp.ParseException(
             "Maximum recursion depth exceeded,"
             "could not parse"
         )
@@ -138,7 +138,7 @@ def parse(formula):
 if __name__ == "__main__":
     try:
         ast = parse(sys.argv[1])
-    except ParseException as e:
+    except pp.ParseException as e:
         print("Parse error: " + str(e) )
         sys.exit(1)
     print("Parsed expression: " + str(ast) )
