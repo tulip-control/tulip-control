@@ -9,6 +9,91 @@ from scipy import sparse as sp
 
 from tulip import abstract
 import tulip.polytope as pc
+from tulip import transys as trs
+
+def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
+    
+    print('discretizing hybrid system')
+    
+    modes = hybrid_sys.modes
+    
+    abstractions = dict()
+    for mode in modes:
+        print(30*'-'+'\n')
+        print('Abstracting mode: ' + str(mode))
+        
+        cont_dyn = hybrid_sys.dynamics[mode]
+        
+        abstractions[mode] = abstract.discretize(
+            ppp, cont_dyn, N=N,
+            trans_length=trans_len,
+            min_cell_volume=0.01,
+            plotit=False
+        )
+        print('completed abstracting: ' + str(mode) +'\n')
+    
+    (merged_abstr, ap_labeling) = merge_partitions(abstractions)
+    n = len(merged_abstr.ppp.num_regions)
+    logger.info('Merged partition has: ' + str(n) + ', states')
+    
+    trans = dict()
+    for mode in modes:
+        cont_dyn = hybrid_sys.dynamics[mode]
+        
+        trans[mode] = get_transitions(
+            merged_abstr, cont_dyn,
+            N=N, trans_length=trans_len
+        )
+    
+    merge_abstractions(merged_abstr, trans, abstractions, modes)
+
+def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
+    """Construct merged transitions.
+    
+    @type merged_part: AbstractSysDyn
+    
+    @type abstr: list of AbstractSysDyn
+    
+    @type hybrid_sys: HybridSysDyn
+    """
+    # allow for different AP sets
+    aps1 = abstr[0].ofts.atomic_propositions
+    aps2 = abstr[1].ofts.atomic_propositions
+    all_aps = aps1 | aps2
+    logger.info('all APs: ' + str(all_aps))
+    
+    sys_ts = trs.OpenFTS()
+    sys_ts.atomic_propositions.add_from(all_aps)
+    
+    # copy AP labels from parents
+    
+    
+    # ignore singleton modes
+    if mode_nums[0]:
+        str_modes = [str(s) for e,s in modes]
+    elif mode_nums[1]:
+        str_modes = [str(e) for e,s in modes]
+    else:
+        str_modes = [str(e) + '_' + str(s) for e,s in modes]
+    
+    sys_ts.env_actions.add_from(str_modes)
+    
+    n = len(merged_abstr.list_reg)
+    states = ['s'+str(i) for i in xrange(n) ]
+    sys_ts.states.add_from(states)
+    
+    
+    for mode in modes:
+        str_mode = str_modes[mode]
+        adj = trans[mode]
+        
+        sys_ts.transitions.add_labeled_adj(
+            adj = adj,
+            adj2states = states,
+            labels = {'env_actions':str_mode}
+        )
+    
+    merged_abstr.ofts = sys_ts
 
 def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
@@ -60,8 +145,10 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
             
     return transitions
     
-def merge_partitions(abstract1, abstract2):
+def merge_partitions(abstractions):
     logger.info('merging partitions')
+    
+    abstract1, abstract2 = abstractions.values()
     
     part1 = abstract1.ppp
     part2 = abstract2.ppp

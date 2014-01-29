@@ -22,19 +22,18 @@ reference
     2012 American Control Conference
 """
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 import numpy as np
 import time
 
-import matplotlib
-import matplotlib.pyplot as plt
-from tulip.graphics import newax
+#import matplotlib
+#import matplotlib.pyplot as plt
+#from tulip.graphics import newax
 
 from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
-from tulip import transys as trs
 from tulip.abstract.plot import plot_partition
 
 import tank_functions as tf
@@ -55,37 +54,6 @@ init_upper = 8          # Upper bound for possible initial volumes
 fast = False             # Use smaller domain to increase speed
 
 fontsize = 18
-
-"""Dynamics"""
-A = np.eye(2)
-B = np.array([[-1],[1]])
-E = np.array([[0],[1]])
-K1 = np.array([[0.],[-fuel_consumption]])
-K2 = np.array([[refill_rate],[-fuel_consumption]])
-U1 = pc.Polytope(
-    np.array([
-        [1,0,0],
-        [-1,0,0],
-        [1,-1,0]
-    ]),
-    np.array([input_ub, -input_lb, 0])
-)
-U2 = pc.Polytope(
-    np.array([
-        [1,0,0],
-        [-1,0,0],
-        [1,-1,0]
-    ]),
-    np.array([input_ub,-input_lb, refill_rate])
-)
-W = pc.Polytope(np.array([[1],[-1]]),
-                np.array([disturbance, disturbance]))
-
-# Normal operation dynamics
-cont_dyn_normal = hybrid.LtiSysDyn(A, B, E, K1, U1, W)
-
-# Aerial refueling mode dynamics
-cont_dyn_refuel = hybrid.LtiSysDyn(A, B, E, K2, U2, W)
 
 """State space and propositions"""
 if fast:
@@ -146,6 +114,57 @@ cont_props['critical'] = pc.Polytope(
         0, 0, 2*fuel_consumption
     ]))
 
+"""Dynamics"""
+A = np.eye(2)
+B = np.array([[-1],[1]])
+E = np.array([[0],[1]])
+K1 = np.array([[0.],[-fuel_consumption]])
+K2 = np.array([[refill_rate],[-fuel_consumption]])
+U1 = pc.Polytope(
+    np.array([
+        [1,0,0],
+        [-1,0,0],
+        [1,-1,0]
+    ]),
+    np.array([input_ub, -input_lb, 0])
+)
+U2 = pc.Polytope(
+    np.array([
+        [1,0,0],
+        [-1,0,0],
+        [1,-1,0]
+    ]),
+    np.array([input_ub,-input_lb, refill_rate])
+)
+W = pc.Polytope(np.array([[1],[-1]]),
+                np.array([disturbance, disturbance]))
+
+# Normal operation dynamics
+cont_dyn_normal = hybrid.LtiSysDyn(A, B, E, K1, U1, W, domain=cont_ss)
+
+# Aerial refueling mode dynamics
+cont_dyn_refuel = hybrid.LtiSysDyn(A, B, E, K2, U2, W, domain=cont_ss)
+
+"""Switched Dynamics"""
+env_modes = ('normal', 'refuel')
+sys_modes = ('fly',)
+
+pwa_normal = hybrid.PwaSysDyn([cont_dyn_normal], domain=cont_ss)
+pwa_refuel = hybrid.PwaSysDyn([cont_dyn_refuel], domain=cont_ss)
+
+dynamics_dict = {
+    ('normal', 'fly') : pwa_normal,
+    ('refuel', 'fly') : pwa_refuel
+}
+
+switched_dynamics = hybrid.HybridSysDyn(
+    disc_domain_size=(len(env_modes), len(sys_modes)),
+    dynamics=dynamics_dict,
+    env_labels=env_modes,
+    disc_sys_labels=sys_modes
+)
+exit()
+
 """Create convex proposition preserving partition"""
 ppp = abstract.prop2part(cont_ss, cont_props)
 ppp = abstract.part2convex(ppp)
@@ -153,35 +172,13 @@ ppp = abstract.part2convex(ppp)
 """Discretize to establish transitions"""
 start = time.time()
 
-disc_ss_normal = abstract.discretize(
-    ppp, cont_dyn_normal, N=N,
-    trans_length=2,
-    min_cell_volume=0.01,
-    plotit=False
-)
-
-disc_ss_refuel = abstract.discretize(
-    ppp, cont_dyn_refuel, N=N,
-    trans_length=3,
-    min_cell_volume=0.01,
-    plotit=False
-)
-
-# Merge partitions and get transition matrices for both dynamic modes
-# in the merged partition
-new_part = tf.merge_partitions(disc_ss_normal, disc_ss_refuel)
-
-logger.info(new_part.ppp.num_regions)
-
-trans_normal = tf.get_transitions(new_part, cont_dyn_normal, N=1, trans_length=3)
-trans_refuel = tf.get_transitions(new_part, cont_dyn_refuel, N=1, trans_length=4)
+sys_ts = tf.discretize_hybrid(ppp, switched_dynamics, N)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
-n = trans_normal.shape[0]
-logger.info('Merged partition has: n = ' + str(n) + 'states')
 
 """Plot partitions"""
+"""
 ax, fig = newax()
 def plotidy(ax):
     for tick in ax.xaxis.get_major_ticks():
@@ -202,27 +199,7 @@ fig.savefig('part_refuel.pdf')
 new_part.ppp.plot(plot_numbers=False, ax=ax)
 plotidy(ax)
 fig.savefig('part_merged.pdf')
-
-"""Transition system abstracting switched dynamics"""
-sys_ts = trs.OpenFTS()
-
-# 2 env modes
-sys_ts.env_actions.add_from({'normal', 'refuel'})
-
-states = ['s'+str(i) for i in xrange(n) ]
-sys_ts.states.add_from(states)
-
-sys_ts.transitions.add_labeled_adj(
-    adj = trans_normal,
-    adj2states = states,
-    labels = {'env_actions':'normal'}
-)
-
-sys_ts.transitions.add_labeled_adj(
-    adj = trans_refuel,
-    adj2states = states,
-    labels = {'env_actions':'refuel'}
-)
+"""
 
 """Specs"""
 env_vars = set()
