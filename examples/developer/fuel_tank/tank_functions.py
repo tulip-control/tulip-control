@@ -131,7 +131,7 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         S0 = abstract.feasible.solve_feasible(
             si, sj, ssys, N,
             closed_loop = closed_loop,
-            trans_set = abstract_sys.orig_list_region[abstract_sys.orig[i]]
+            trans_set = abstract_sys.original_regions[abstract_sys.orig[i]]
         )
         
         diff = pc.mldivide(si, S0)
@@ -164,8 +164,8 @@ def merge_partitions(abstractions):
         msg = 'merge: partitions have different propositions'
         raise Exception(msg)
     
-    if len(abstract1.orig_list_region) != \
-    len(abstract2.orig_list_region):
+    if len(abstract1.original_regions) != \
+    len(abstract2.original_regions):
         msg = "merge: partitions have different"
         msg += " number of original regions"
         raise Exception(msg)
@@ -243,7 +243,7 @@ def merge_partitions(abstractions):
     abstraction = abstract.discretization.AbstractSysDyn(
         ppp = ppp,
         ofts = None,
-        orig_list_region = abstract1.orig_list_region,
+        original_regions = abstract1.original_regions,
         orig = np.array(orig)
     )
     

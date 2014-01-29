@@ -71,7 +71,7 @@ class AbstractSysDyn(object):
            corresponds to a discrete state of the abstraction
     - ofts: a finite transition system, abstracting the continuous system,
             that can be fed into discrete synthesis algorithms
-    - orig_list_region: original proposition preserving regions
+    - original_regions: original proposition preserving regions
     - orig: list assigning an original proposition preserving region to each
             new region
     - disc_params: a dictionary of parameters used in discretization that 
@@ -82,10 +82,10 @@ class AbstractSysDyn(object):
     them as functional units on their own (possible to change later). 
     """
     def __init__(self, ppp=None, ofts=None,
-                 orig_list_region=None, orig=None, disc_params={}):
+                 original_regions=None, orig=None, disc_params={}):
         self.ppp = ppp
         self.ofts = ofts
-        self.orig_list_region = orig_list_region
+        self.original_regions = original_regions
         self.orig = orig
         self.disc_params = disc_params
     
@@ -95,7 +95,7 @@ class AbstractSysDyn(object):
         
         s += 30 * '-' + '\n'
         s += 'Original Regions List:\n\n'
-        for i, region in enumerate(self.orig_list_region):
+        for i, region in enumerate(self.original_regions):
             s += 'Region: ' + str(i) + '\n'
             s += str(region) + '\n'
         
@@ -510,7 +510,7 @@ def discretize(
     return AbstractSysDyn(
         ppp=new_part,
         ofts=ofts,
-        orig_list_region=orig_list,
+        original_regions=orig_list,
         orig=orig,
         disc_params=param
     )
@@ -610,5 +610,5 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    domain=part.domain, num_prop=part.num_prop,
 #                    list_region=sol, num_regions=len(sol), adj=np.array([]), 
 #                    trans=transitions, list_prop_symbol=part.list_prop_symbol,
-#                    orig_list_region=orig_list, orig=orig)                           
+#                    original_regions=orig_list, orig=orig)                           
 #     return new_part

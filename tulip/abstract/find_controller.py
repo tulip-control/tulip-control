@@ -163,7 +163,7 @@ def get_input(
     list_region = part.list_region
     
     ofts = abstraction.ofts
-    orig_list_region = abstraction.orig_list_region
+    original_regions = abstraction.original_regions
     orig = abstraction.orig
     
     params = abstraction.disc_params
@@ -236,7 +236,7 @@ def get_input(
             P1 = P_start
     else:
         # Take original proposition preserving cell as constraint
-        P1 = orig_list_region[orig[start]]
+        P1 = original_regions[orig[start]]
     
     if len(P_end) > 0:
         low_cost = np.inf
