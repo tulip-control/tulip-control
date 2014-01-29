@@ -41,7 +41,7 @@ from .labeled_graphs import vprint, prepend_with, str2singleton
 from .mathset import SubSet, PowerSet
 from .transys import _ts_ba_sync_prod
 
-hl = 60 *'-'
+hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 

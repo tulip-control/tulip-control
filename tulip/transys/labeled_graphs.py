@@ -44,7 +44,7 @@ from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique
 from .export import save_d3, machine2scxml, graph2dot
 
-hl = 60 *'-'
+hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)

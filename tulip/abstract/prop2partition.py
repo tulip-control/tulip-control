@@ -45,6 +45,8 @@ import copy
 from tulip import polytope as pc
 from .plot import plot_partition
 
+hl = 40 * '-'
+
 def prop2part(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of
     propositions (cont_props), and returns a proposition preserving
@@ -465,9 +467,9 @@ class PropPreservingPartition(object):
                 self.list_region[region].list_prop) if p]
 
     def __str__(self):
-        s = '\n' + 30 * '-' + '\n'
+        s = '\n' + hl + '\n'
         s += 'Proposition Preserving Partition:\n'
-        s += 30 * '-' + 2*'\n'
+        s += hl + 2*'\n'
         
         s += 'Domain: ' + str(self.domain) + '\n'
         

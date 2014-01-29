@@ -44,7 +44,7 @@ from .mathset import PowerSet, MathSet
 from .executions import FTSSim
 from .export import graph2promela
 
-hl = 60 *'-'
+hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 

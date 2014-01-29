@@ -39,7 +39,7 @@ from pprint import pformat
 from random import randint
 import warnings
 
-hl = 60 *'-'
+hl = 40 *'-'
 
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.

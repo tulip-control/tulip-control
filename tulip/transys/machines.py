@@ -39,7 +39,7 @@ from random import choice
 from .labeled_graphs import LabeledStateDiGraph
 from . import executions
 
-hl = 60 *'-'
+hl = 40 *'-'
 
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
