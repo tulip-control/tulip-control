@@ -465,7 +465,11 @@ class PropPreservingPartition(object):
                 self.list_region[region].list_prop) if p]
 
     def __str__(self):
-        output = 'Domain: ' + str(self.domain) + '\n'
+        output = '\n' + 30 * '-' + '\n'
+        output += 'Proposition Preserving Partition:\n'
+        output += 30 * '-' + 2*'\n'
+        
+        output += 'Domain: ' + str(self.domain) + '\n'
         
         for j, region in enumerate(self.list_region):
             output += 'Region: ' + str(j) +'\n'
