@@ -465,17 +465,17 @@ class PropPreservingPartition(object):
                 self.list_region[region].list_prop) if p]
 
     def __str__(self):
-        output = '\n' + 30 * '-' + '\n'
-        output += 'Proposition Preserving Partition:\n'
-        output += 30 * '-' + 2*'\n'
+        s = '\n' + 30 * '-' + '\n'
+        s += 'Proposition Preserving Partition:\n'
+        s += 30 * '-' + 2*'\n'
         
-        output += 'Domain: ' + str(self.domain) + '\n'
+        s += 'Domain: ' + str(self.domain) + '\n'
         
         for j, region in enumerate(self.list_region):
-            output += 'Region: ' + str(j) +'\n'
+            s += 'Region: ' + str(j) +'\n'
             
             if self.list_prop_symbol is not None:
-                output += '\t Propositions: '
+                s += '\t Propositions: '
                 
                 active_props = ' '.join(compress(
                     self.list_prop_symbol,
@@ -483,16 +483,16 @@ class PropPreservingPartition(object):
                 ))
                 
                 if active_props:
-                    output += active_props + '\n'
+                    s += active_props + '\n'
                 else:
-                    output += '{}\n'
+                    s += '{}\n'
             
-            output += str(region)
+            s += str(region)
         
         if hasattr(self.adj, 'todense'):
-            output += 'Adjacency matrix:\n'
-            output += str(self.adj.todense()) + '\n'
-        return output
+            s += 'Adjacency matrix:\n'
+            s += str(self.adj.todense()) + '\n'
+        return s
     
     def plot(self, **kwargs):
         """For details see plot.plot_partition.
