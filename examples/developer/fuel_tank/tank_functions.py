@@ -24,13 +24,15 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
         
         cont_dyn = hybrid_sys.dynamics[mode]
         
-        abstractions[mode] = abstract.discretize(
+        absys = abstract.discretize(
             ppp, cont_dyn, N=N,
             trans_length=trans_len,
             min_cell_volume=0.01,
             plotit=False
         )
-        print('completed abstracting: ' + str(mode) +'\n')
+        print('Mode Abstraction:\n' + str(absys) +'\n')
+        
+        abstractions[mode] = absys
     
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp.num_regions)

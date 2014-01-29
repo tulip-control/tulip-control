@@ -88,6 +88,25 @@ class AbstractSysDyn(object):
         self.orig_list_region = orig_list_region
         self.orig = orig
         self.disc_params = disc_params
+    
+    def __str__(self):
+        s = str(self.ppp)
+        s += str(self.ofts)
+        
+        s += 30 * '-' + '\n'
+        s += 'Original Regions List:\n\n'
+        for i, region in enumerate(self.orig_list_region):
+            s += 'Region: ' + str(i) + '\n'
+            s += str(region) + '\n'
+        
+        s += 'Map New to Original Regions:\n\n'
+        for i, original_region in enumerate(self.orig):
+            s += str(i) + ' -> ' + str(original_region) + '\n'
+        
+        s += 'Discretization Options:\n\t'
+        s += str(self.disc_params) +'\n'
+        
+        return s
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
