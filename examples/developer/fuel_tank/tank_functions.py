@@ -176,6 +176,7 @@ def merge_partitions(abstractions):
     orig = []
     parent_1 = dict()
     parent_2 = dict()
+    ap_labeling = dict()
     for i in range(part1.num_regions):
         for j in range(part2.num_regions):
             logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
@@ -204,6 +205,15 @@ def merge_partitions(abstractions):
                 raise Exception("not same orig, partitions don't have the \
                                   same origin.")
             orig.append(abstract1.orig[i])
+            
+            # union of AP labels from parent states
+            ap_label_1 = abstract1.ofts.states.label_of('s'+str(i))
+            ap_label_2 = abstract2.ofts.states.label_of('s'+str(j))
+            
+            logger.debug('AP label 1: ' + str(ap_label_1))
+            logger.debug('AP label 2: ' + str(ap_label_2))
+            
+            ap_labeling[idx] = ap_label_1 | ap_label_2
     
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in range(len(new_list)):
@@ -228,9 +238,11 @@ def merge_partitions(abstractions):
         #list_subsys
     )
     
-    return abstract.discretization.AbstractSysDyn(
+    abstraction = abstract.discretization.AbstractSysDyn(
         ppp = ppp,
         ofts = None,
         orig_list_region = abstract1.orig_list_region,
         orig = np.array(orig)
     )
+    
+    return (abstraction, ap_labeling)
