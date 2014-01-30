@@ -130,9 +130,12 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         
         orig_region_idx = abstract_sys.ppp2orig[mode][i]
         
+        subsys_idx = abstract_sys.ppp.subsystems[mode][i]
+        active_subsystem = ssys.list_subsys[subsys_idx]
+        
         # Use original cell as trans_set
         S0 = abstract.feasible.solve_feasible(
-            si, sj, ssys, N,
+            si, sj, active_subsystem, N,
             closed_loop = closed_loop,
             trans_set = abstract_sys.original_regions[mode][orig_region_idx]
         )
@@ -176,6 +179,7 @@ def merge_partitions(abstractions):
 
     new_list = []
     orig = {mode:[] for mode in abstractions}
+    subsystems = {mode:[] for mode in abstractions}
     
     parent_1 = dict()
     parent_2 = dict()
@@ -208,6 +212,9 @@ def merge_partitions(abstractions):
             orig[mode1] += [abstract1.ppp2orig[i] ]
             orig[mode2] += [abstract2.ppp2orig[j] ]
             
+            subsystems[mode1] += [abstract1.ppp.subsystems[i] ]
+            subsystems[mode2] += [abstract2.ppp.subsystems[j] ]
+            
             # union of AP labels from parent states
             ap_label_1 = abstract1.ts.states.label_of('s'+str(i))['ap']
             ap_label_2 = abstract2.ts.states.label_of('s'+str(j))['ap']
@@ -235,7 +242,7 @@ def merge_partitions(abstractions):
         regions=new_list,
         prop_symbols=part1.prop_symbols,
         adj=adj,
-        #subsystems
+        subsystems=subsystems
     )
     
     # check equality of original partitions
