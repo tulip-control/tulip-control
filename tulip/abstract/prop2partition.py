@@ -81,7 +81,7 @@ def prop2part(state_space, cont_props_dict):
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
         regions = regions,
-        list_prop_symbol = copy.deepcopy(cont_props_dict.keys() )
+        prop_symbols = copy.deepcopy(cont_props_dict.keys() )
     )
     
     for prop_count in xrange(num_props):
@@ -160,7 +160,7 @@ def part2convex(ppp):
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
-        list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol)
+        prop_symbols=copy.deepcopy(ppp.prop_symbols)
     )
     subsys_list = []
     for i in xrange(len(ppp.regions)):
@@ -242,7 +242,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        list_prop_symbol = ppp.list_prop_symbol,
+        prop_symbols = ppp.prop_symbols,
         list_subsys = subsys_list
     )
                 
@@ -373,7 +373,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        list_prop_symbol = ppp.list_prop_symbol
+        prop_symbols = ppp.prop_symbols
     )
 
 #### Helper functions ####
@@ -431,7 +431,7 @@ class PropPreservingPartition(object):
         type: list of Region
     - adj: a sparse matrix showing which regions are adjacent,
         type scipy lil sparse
-    - list_prop_symbol: list of symbols of propositions
+    - prop_symbols: list of symbols of propositions
     - list_subsys: list of indices
         assigning the subsystem of the piecewise affine system that 
         is active in that region to each region in ppp
@@ -442,16 +442,16 @@ class PropPreservingPartition(object):
     """
     def __init__(self,
         domain=None, regions=[],
-        adj=0, list_prop_symbol=None, list_subsys=None
+        adj=0, prop_symbols=None, list_subsys=None
     ):
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
-        self.list_prop_symbol = list_prop_symbol
+        self.prop_symbols = prop_symbols
         self.list_subsys = list_subsys
         
     def reg2props(self, region):
-        return [self.list_prop_symbol[n] for (n,p) in enumerate(
+        return [self.prop_symbols[n] for (n,p) in enumerate(
                 self.regions[region].list_prop) if p]
 
     def __str__(self):
@@ -464,11 +464,11 @@ class PropPreservingPartition(object):
         for j, region in enumerate(self.regions):
             s += 'Region: ' + str(j) +'\n'
             
-            if self.list_prop_symbol is not None:
+            if self.prop_symbols is not None:
                 s += '\t Propositions: '
                 
                 active_props = ' '.join(compress(
-                    self.list_prop_symbol,
+                    self.prop_symbols,
                     region.list_prop
                 ))
                 

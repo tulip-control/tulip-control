@@ -43,8 +43,8 @@ def prop2part_test():
         i = [i for i in range(len(reg.list_prop)) if reg.list_prop[i] == 1]
         assert len(i) == 1
         i = i[0]
-        assert cont_props_dict.has_key(mypartition.list_prop_symbol[i])
-        ref_V = pc.extreme(cont_props_dict[mypartition.list_prop_symbol[i]])
+        assert cont_props_dict.has_key(mypartition.prop_symbols[i])
+        ref_V = pc.extreme(cont_props_dict[mypartition.prop_symbols[i]])
         ref_V = set([(v[0],v[1]) for v in ref_V.tolist()])
         actual_V = pc.extreme(reg.list_poly[0])
         actual_V = set([(v[0],v[1]) for v in actual_V.tolist()])
