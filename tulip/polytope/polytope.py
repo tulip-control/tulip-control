@@ -430,7 +430,7 @@ class Region(object):
             # Hack to be able to use the Region class also for discrete
             # problems.
             self.list_poly = list_poly
-            self.props = props.copy()
+            self.props = set(props)
         else:
             if isinstance(list_poly, Region):
                 dim = list_poly[0].dim
@@ -443,7 +443,7 @@ class Region(object):
             for poly in list_poly:
                 if is_empty(poly):
                     self.list_poly.remove(poly)
-            self.props = props.copy()
+            self.props = set(props)
             self.bbox = None
             self.fulldim = None
             self._volume = None
