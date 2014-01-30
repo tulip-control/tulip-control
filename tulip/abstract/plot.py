@@ -72,7 +72,10 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     @type ppp: PropPreservingPartition
     
     @param trans: Transition matrix. If used,
-        then transitions in C{ppp}are shown with arrows.
+        then transitions in C{ppp} are shown with arrows.
+        Otherwise C{ppp.adj} is plotted.
+        
+        To hide C{ppp.adj}, pass: trans = 'none'
     
     @param plot_numbers: If True,
         then annotate each Region center with its number.
@@ -113,6 +116,13 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     if ax is None:
         ax, fig = newax()
     
+    # no trans given: use partition's
+    if trans is None and ppp.adj is not None:
+        ax.set_title('Adjacency from Partition')
+        trans = ppp.adj
+    else:
+        ax.set_title('Adjacency from given Transitions')
+    
     ax.set_xlim(l[0,0],u[0,0])
     ax.set_ylim(l[1,0],u[1,0])
     
@@ -142,7 +152,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         if plot_numbers:
             reg.text(str(i), ax, color='red')
         
-        if trans is None:
+        if trans is 'none':
             continue
         
         for j in np.nonzero(trans[:,i] )[0]:

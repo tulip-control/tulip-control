@@ -468,7 +468,7 @@ class PropPreservingPartition(object):
     """
     def __init__(self,
         domain=None, regions=[],
-        adj=0, prop_symbols=None, subsystems=None
+        adj=None, prop_symbols=None, subsystems=None
     ):
         self.domain = domain
         self.regions = regions[:]
