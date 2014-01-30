@@ -983,7 +983,7 @@ def spec_plus_sys(
     logger.info('Overall Spec:\n' + str(specs.pretty() ) +hl)
     return specs
 
-def ppp2spec(spec, disc_dynamics, cont_varname="cellID"):
+def ppp2spec(spec, ppp, cont_varname="cellID"):
     """Append results of discretization (abstraction) to specification.
 
     Notes
@@ -992,7 +992,7 @@ def ppp2spec(spec, disc_dynamics, cont_varname="cellID"):
         approach taken in the createProbFromDiscDynamics method of
         the SynthesisProb class.
 
-      - Any name in disc_dynamics.list_prop_symbol matching a system
+      - Any name in ppp.list_prop_symbol matching a system
         variable is removed from sys_vars, and its occurrences in
         the specification are replaced by a disjunction of
         corresponding cells.
@@ -1005,19 +1005,19 @@ def ppp2spec(spec, disc_dynamics, cont_varname="cellID"):
     
     @type disc_dynamics: abstract.PropPreservingPartition
     """
-    if len(disc_dynamics.list_region) == 0:  # Vacuous call?
+    if len(ppp.list_region) == 0:  # Vacuous call?
         return
     cont_varname += "_"  # ...to make cell number easier to read
-    for i in range(len(disc_dynamics.list_region)):
+    for i in range(len(ppp.list_region)):
         if (cont_varname+str(i)) not in spec.sys_vars:
             spec.sys_vars.append(cont_varname+str(i))
 
     # The substitution code and transition code below are mostly
     # from createProbFromDiscDynamics and toJTLVInput,
     # respectively, in the rhtlp module, with some style updates.
-    for prop_ind, prop_sym in enumerate(disc_dynamics.list_prop_symbol):
-        reg = [j for j in range(len(disc_dynamics.list_region))
-               if disc_dynamics.list_region[j].list_prop[prop_ind] != 0]
+    for prop_ind, prop_sym in enumerate(ppp.list_prop_symbol):
+        reg = [j for j in range(len(ppp.list_region))
+               if ppp.list_region[j].list_prop[prop_ind] != 0]
         if len(reg) == 0:
             subformula = "False"
             subformula_next = "False"
@@ -1033,30 +1033,30 @@ def ppp2spec(spec, disc_dynamics, cont_varname="cellID"):
         spec.sym_to_prop(props={prop_sym:subformula})
 
     # Transitions
-    for from_region in range(len(disc_dynamics.list_region)):
-        to_regions = [i for i in range(len(disc_dynamics.list_region))
-                      if disc_dynamics.trans[i][from_region] != 0]
+    for from_region in range(len(ppp.list_region)):
+        to_regions = [i for i in range(len(ppp.list_region))
+                      if ppp.trans[i][from_region] != 0]
         spec.sys_safety.append(cont_varname+str(from_region) + " -> (" +
             " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
 
     # Mutex
     spec.sys_init.append("")
     spec.sys_safety.append("")
-    for regID in range(len(disc_dynamics.list_region)):
+    for regID in range(len(ppp.list_region)):
         if len(spec.sys_safety[-1]) > 0:
             spec.sys_init[-1] += "\n| "
             spec.sys_safety[-1] += "\n| "
         spec.sys_init[-1] += "(" + cont_varname+str(regID)
-        if len(disc_dynamics.list_region) > 1:
+        if len(ppp.list_region) > 1:
             spec.sys_init[-1] += " & " + " & ".join([
                 "(!"+cont_varname+str(i)+")"
-                for i in range(len(disc_dynamics.list_region)) if i != regID
+                for i in range(len(ppp.list_region)) if i != regID
             ])
         spec.sys_init[-1] += ")"
         spec.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
-        if len(disc_dynamics.list_region) > 1:
+        if len(ppp.list_region) > 1:
             spec.sys_safety[-1] += " & " + " & ".join([
                 "(!"+cont_varname+str(i)+"')"
-                for i in range(len(disc_dynamics.list_region)) if i != regID
+                for i in range(len(ppp.list_region)) if i != regID
             ])
         spec.sys_safety[-1] += ")"
