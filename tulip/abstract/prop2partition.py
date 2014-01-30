@@ -477,12 +477,42 @@ class PropPreservingPartition(object):
     """
     def __init__(self,
         domain=None, regions=[],
-        adj=None, prop_symbols=None, subsystems=None
+        adj=None, prop_symbols=None, subsystems=None,
+        check=True
     ):
+        if prop_symbols is None:
+            self.prop_symbols = set()
+        else:
+            self.prop_symbols = set(prop_symbols)
+        
+        n = len(regions)
+        
+        if hasattr(adj, 'shape'):
+            (m, k) = adj.shape
+            if m != k:
+                raise ValueError('adj must be square')
+            if m != n:
+                msg = "adj size doesn't agree with number of regions"
+                raise ValueError(msg)
+        
+        if check:
+            for region in regions:
+                if not region <= domain:
+                    msg = 'Partition: Region:\n\n' + str(region) + '\n'
+                    msg += 'is not subset of given domain:\n\t'
+                    msg += str(domain)
+                    raise ValueError(msg)
+                
+                if not region.props <= self.prop_symbols:
+                    msg = 'Partitions: Region labeled with propositions:\n\t'
+                    msg += str(region.props) + '\n'
+                    msg += 'not all of which are in prop_symbols:\n\t'
+                    msg += str(self.prop_symbols)
+                    raise ValueError(msg)
+        
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
-        self.prop_symbols = set(prop_symbols)
         self.subsystems = subsystems
         
     def reg2props(self, region_index):
