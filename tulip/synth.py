@@ -983,12 +983,8 @@ def spec_plus_sys(
     logger.info('Overall Spec:\n' + str(specs.pretty() ) +hl)
     return specs
 
-def import_PropPreservingPartition(self, disc_dynamics,
-                                       cont_varname="cellID"):
+def ppp2spec(spec, disc_dynamics, cont_varname="cellID"):
     """Append results of discretization (abstraction) to specification.
-
-    disc_dynamics is an instance of PropPreservingPartition, such
-    as returned by the function discretize in module discretize.
 
     Notes
     =====
@@ -1004,13 +1000,17 @@ def import_PropPreservingPartition(self, disc_dynamics,
       - gr1c does not (yet) support variable domains beyond Boolean,
         so we treat each cell as a separate Boolean variable and
         explicitly enforce mutual exclusion.
+    
+    @type grspec: spec.GRSpec
+    
+    @type disc_dynamics: abstract.PropPreservingPartition
     """
     if len(disc_dynamics.list_region) == 0:  # Vacuous call?
         return
     cont_varname += "_"  # ...to make cell number easier to read
     for i in range(len(disc_dynamics.list_region)):
-        if (cont_varname+str(i)) not in self.sys_vars:
-            self.sys_vars.append(cont_varname+str(i))
+        if (cont_varname+str(i)) not in spec.sys_vars:
+            spec.sys_vars.append(cont_varname+str(i))
 
     # The substitution code and transition code below are mostly
     # from createProbFromDiscDynamics and toJTLVInput,
@@ -1029,34 +1029,34 @@ def import_PropPreservingPartition(self, disc_dynamics,
                 cont_varname+str(regID)+"'" for regID in reg
             ])
         prop_sym_next = prop_sym+"'"
-        self.sym_to_prop(props={prop_sym_next:subformula_next})
-        self.sym_to_prop(props={prop_sym:subformula})
+        spec.sym_to_prop(props={prop_sym_next:subformula_next})
+        spec.sym_to_prop(props={prop_sym:subformula})
 
     # Transitions
     for from_region in range(len(disc_dynamics.list_region)):
         to_regions = [i for i in range(len(disc_dynamics.list_region))
                       if disc_dynamics.trans[i][from_region] != 0]
-        self.sys_safety.append(cont_varname+str(from_region) + " -> (" +
+        spec.sys_safety.append(cont_varname+str(from_region) + " -> (" +
             " | ".join([cont_varname+str(i)+"'" for i in to_regions]) + ")")
 
     # Mutex
-    self.sys_init.append("")
-    self.sys_safety.append("")
+    spec.sys_init.append("")
+    spec.sys_safety.append("")
     for regID in range(len(disc_dynamics.list_region)):
-        if len(self.sys_safety[-1]) > 0:
-            self.sys_init[-1] += "\n| "
-            self.sys_safety[-1] += "\n| "
-        self.sys_init[-1] += "(" + cont_varname+str(regID)
+        if len(spec.sys_safety[-1]) > 0:
+            spec.sys_init[-1] += "\n| "
+            spec.sys_safety[-1] += "\n| "
+        spec.sys_init[-1] += "(" + cont_varname+str(regID)
         if len(disc_dynamics.list_region) > 1:
-            self.sys_init[-1] += " & " + " & ".join([
+            spec.sys_init[-1] += " & " + " & ".join([
                 "(!"+cont_varname+str(i)+")"
                 for i in range(len(disc_dynamics.list_region)) if i != regID
             ])
-        self.sys_init[-1] += ")"
-        self.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
+        spec.sys_init[-1] += ")"
+        spec.sys_safety[-1] += "(" + cont_varname+str(regID)+"'"
         if len(disc_dynamics.list_region) > 1:
-            self.sys_safety[-1] += " & " + " & ".join([
+            spec.sys_safety[-1] += " & " + " & ".join([
                 "(!"+cont_varname+str(i)+"')"
                 for i in range(len(disc_dynamics.list_region)) if i != regID
             ])
-        self.sys_safety[-1] += ")"
+        spec.sys_safety[-1] += ")"
