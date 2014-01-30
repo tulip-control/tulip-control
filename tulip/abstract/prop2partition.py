@@ -91,7 +91,7 @@ def prop2part(state_space, cont_props_dict):
             region_now = mypartition.regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
-            list_prop_now = mypartition.regions[i].list_prop[:]
+            list_prop_now = mypartition.regions[i].props[:]
             
             dummy = region_now.intersect(cur_prop_poly)
             
@@ -104,13 +104,13 @@ def prop2part(state_space, cont_props_dict):
                         dum_list_prop
                     )
                 else:
-                    dummy.list_prop = dum_list_prop
+                    dummy.props = dum_list_prop
                     mypartition.regions[i] = dummy.copy()
                 prop_holds_reg[-1] = 1
             else:
                 #does not hold in the whole region
                 # (-> no need for the 2nd loop)
-                region_now.list_prop.append(0)
+                region_now.props.append(0)
                 mypartition.regions.append(region_now)
                 continue
                 
@@ -118,7 +118,7 @@ def prop2part(state_space, cont_props_dict):
             mypartition.regions.append(
                 pc.Region(
                     list_poly=[],
-                    list_prop=list_prop_now
+                    props=list_prop_now
                 )
             )
             dummy = region_now.diff(cur_prop_poly)
@@ -132,7 +132,7 @@ def prop2part(state_space, cont_props_dict):
                         dum_list_prop
                     )
                 else:
-                    dummy.list_prop = dum_list_prop
+                    dummy.props = dum_list_prop
                     mypartition.regions[-1] = dummy.copy()
             else:
                 mypartition.regions.pop()
@@ -168,7 +168,7 @@ def part2convex(ppp):
         for j in xrange(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg.list_poly[j]],
-                ppp.regions[i].list_prop
+                ppp.regions[i].props
             )
             cvxpart.regions.append(region_now)
             if ppp.subsystems is not None:
@@ -222,7 +222,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
                 
-                isect.list_prop = ppp.regions[j].list_prop
+                isect.props = ppp.regions[j].props
                 subsys_list.append(i)
                 new_list.append(isect)
                 parent.append(j)
@@ -354,7 +354,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                         ", this may cause numerical problems")
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
-                isect.list_prop = ppp.regions[j].list_prop
+                isect.props = ppp.regions[j].props
                 new_list.append(isect)
                 parent.append(j)   
     
@@ -472,7 +472,7 @@ class PropPreservingPartition(object):
         
     def reg2props(self, region):
         return [self.prop_symbols[n] for (n,p) in enumerate(
-                self.regions[region].list_prop) if p]
+                self.regions[region].props) if p]
 
     def __str__(self):
         s = '\n' + hl + '\n'
@@ -489,7 +489,7 @@ class PropPreservingPartition(object):
                 
                 active_props = ' '.join(compress(
                     self.prop_symbols,
-                    region.list_prop
+                    region.props
                 ))
                 
                 if active_props:

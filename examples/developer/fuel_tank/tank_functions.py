@@ -196,7 +196,7 @@ def merge_partitions(abstractions):
             if len(isect) == 0:
                 isect = pc.Region([isect], [])
             
-            isect.list_prop = part1.regions[i].list_prop
+            isect.props = part1.regions[i].props
             new_list.append(isect)
             
             idx = new_list.index(isect)

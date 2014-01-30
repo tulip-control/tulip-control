@@ -346,14 +346,14 @@ def discretize(
         
             # Make sure new areas are Regions and add proposition lists
             if len(isect) == 0:
-                isect = pc.Region([isect], si.list_prop)
+                isect = pc.Region([isect], si.props)
             else:
-                isect.list_prop = si.list_prop
+                isect.props = si.props
         
             if len(diff) == 0:
-                diff = pc.Region([diff], si.list_prop)
+                diff = pc.Region([diff], si.props)
             else:
-                diff.list_prop = si.list_prop
+                diff.props = si.props
         
             # Add new states
             sol[i] = isect
@@ -527,7 +527,7 @@ def discretize(
     for region in sol:
         state_prop = set([
             prop for (prop, x) in
-            zip(prop_symbols, region.list_prop) if x == 1
+            zip(prop_symbols, region.props) if x == 1
         ])
         
         prop_list.append(state_prop)
@@ -583,9 +583,9 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #         
 #             # Make sure new cell is Region and add proposition lists
 #             if len(isect) == 0:
-#                 isect = pc.Region([isect], si.list_prop)
+#                 isect = pc.Region([isect], si.props)
 #             else:
-#                 isect.list_prop = si.list_prop
+#                 isect.props = si.props
 #         
 #             # Add new state
 #             sol.append(isect)

@@ -407,7 +407,7 @@ class Region(object):
     Contains the following fields:
     
     - `list_poly`: list of Polytope objects
-    - `list_prop`: list of propositions inside region
+    - `props`: list of propositions inside region
     - `bbox`: if calculated, bounding box of region (see bounding_box)
     - `fulldim`: if calculated, boolean indicating whether region is
                  fully dimensional
@@ -420,13 +420,13 @@ class Region(object):
     --------
     Polytope
     """
-    def __init__(self, list_poly=[], list_prop=[]):
+    def __init__(self, list_poly=[], props=[]):
     
         if isinstance(list_poly, str):
             # Hack to be able to use the Region class also for discrete
             # problems.
             self.list_poly = list_poly
-            self.list_prop = list_prop
+            self.props = props
         else:
             if isinstance(list_poly, Region):
                 dim = list_poly[0].dim
@@ -439,7 +439,7 @@ class Region(object):
             for poly in list_poly:
                 if is_empty(poly):
                     self.list_poly.remove(poly)
-            self.list_prop = list_prop[:]
+            self.props = props[:]
             self.bbox = None
             self.fulldim = None
             self._volume = None
@@ -544,7 +544,7 @@ class Region(object):
     def __copy__(self):
         """Return copy of this Region."""
         return Region(list_poly=self.list_poly[:],
-                      list_prop=self.list_prop[:])
+                      props=self.props[:])
     
     def copy(self):
         """Return copy of this Region."""
@@ -750,7 +750,7 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=ABS_TOL):
             if is_fulldim(red):
                 lst.append(red)
         if len(lst) > 0:
-            return Region(lst, poly.list_prop)
+            return Region(lst, poly.props)
         else:
             return Polytope()
             
@@ -1448,7 +1448,7 @@ def separate(reg1, abs_tol=ABS_TOL):
     final = []
     ind_left = xrange(len(reg1))
     
-    prop_list = reg1.list_prop
+    props = reg1.props
     
     while len(ind_left) > 0:
         ind_del = []
@@ -1467,7 +1467,7 @@ def separate(reg1, abs_tol=ABS_TOL):
                 )
                 ind_del.append(j)
         
-        connected_reg.list_prop = prop_list
+        connected_reg.props = props
         final.append(connected_reg)
         ind_left = np.setdiff1d(ind_left, ind_del)
     

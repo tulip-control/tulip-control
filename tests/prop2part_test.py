@@ -38,9 +38,9 @@ def prop2part_test():
     assert len(mypartition.regions) == 3
     
     for reg in mypartition.regions[0:2]:
-        assert len(reg.list_prop) == 2
+        assert len(reg.props) == 2
         assert len(reg.list_poly) == 1
-        i = [i for i in range(len(reg.list_prop)) if reg.list_prop[i] == 1]
+        i = [i for i in range(len(reg.props)) if reg.props[i] == 1]
         assert len(i) == 1
         i = i[0]
         assert cont_props_dict.has_key(mypartition.prop_symbols[i])
@@ -50,8 +50,8 @@ def prop2part_test():
         actual_V = set([(v[0],v[1]) for v in actual_V.tolist()])
         assert ref_V == actual_V
         
-    assert len(mypartition.regions[2].list_prop) == 2
-    assert sum(mypartition.regions[2].list_prop) == 0
+    assert len(mypartition.regions[2].props) == 2
+    assert sum(mypartition.regions[2].props) == 0
     assert len(mypartition.regions[2].list_poly) == 3
     dum = state_space.copy()
     for reg in mypartition.regions[0:2]:
