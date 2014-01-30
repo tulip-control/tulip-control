@@ -228,7 +228,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                     print("Warning: One of the regions in the refined PPP is "
                           "too small, this may cause numerical problems")
                 if len(isect) == 0:
-                    isect = pc.Region([isect], [])
+                    isect = pc.Region([isect])
                 
                 isect.props = ppp.regions[j].props.copy()
                 subsys_list.append(i)

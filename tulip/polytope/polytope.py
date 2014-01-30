@@ -901,20 +901,20 @@ def union(polyreg1,polyreg2,check_convex=False):
                 templist = [lst[0]]
                 for ii in xrange(1,N):
                     templist.append(lst[ii])
-                    is_conv, env = is_convex(Region(templist,[]))
+                    is_conv, env = is_convex(Region(templist))
                     if not is_conv:
                         templist.remove(lst[ii])
                 for poly in templist:
                     lst.remove(poly)
-                cvxpoly = reduce(envelope(Region(templist,[])))
+                cvxpoly = reduce(envelope(Region(templist)))
                 if not is_empty(cvxpoly):
                     final.append(reduce(cvxpoly))
                 N = len(lst)
         else:
             final = lst
-        ret = Region(final, [])
+        ret = Region(final)
     else:
-        ret = Region(lst, [])
+        ret = Region(lst)
     return ret
 
 def cheby_ball(poly1):
@@ -1792,7 +1792,7 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
     
     if N == 0:
         # Hack if reg happens to be a polytope
-        reg = Region([reg],[])
+        reg = Region([reg])
         N = 1
         
     if is_empty(reg):
