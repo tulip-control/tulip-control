@@ -91,8 +91,12 @@ class AbstractSysDyn(object):
             Used for non-conservative planning.
         type: list of Region
     
-    - orig: map of original Region to new Regions
-        type: list of Region
+    - orig: map of new Regions to original Regions:
+            
+            - i-th new Region in C{ppp.list_region}
+            - orig[i]-th original Region in C{original_regions}
+            
+        type: list of indices
     
     - disc_params: parameters used in discretization that 
             should be passed to the controller refinement
