@@ -36,8 +36,6 @@ from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
 from tulip.abstract.plot import plot_partition
 
-import tank_functions as tf
-
 """Problem variables"""
 tank_capacity = 10      # Maximum tank capacity
 fuel_consumption = 1    # Rate at which fuel is drawn from tank 2
@@ -172,7 +170,7 @@ ppp = abstract.part2convex(ppp)
 """Discretize to establish transitions"""
 start = time.time()
 
-sys_ts = tf.discretize_switched(ppp, switched_dynamics, N)
+sys_ts = abstract.discretize_switched(ppp, switched_dynamics, N)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))

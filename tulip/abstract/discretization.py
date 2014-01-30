@@ -681,7 +681,7 @@ def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
         
         cont_dyn = hybrid_sys.dynamics[mode]
         
-        absys = abstract.discretize(
+        absys = discretize(
             ppp, cont_dyn, N=N,
             trans_length=trans_len,
             min_cell_volume=0.01,
@@ -796,7 +796,7 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         active_subsystem = ssys.list_subsys[subsys_idx]
         
         # Use original cell as trans_set
-        S0 = abstract.feasible.solve_feasible(
+        S0 = solve_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
             trans_set = abstract_sys.original_regions[mode][orig_region_idx]
@@ -909,7 +909,7 @@ def merge_partitions(abstractions):
                     adj[j,i] = 1
         adj[i,i] = 1
     
-    ppp = abstract.PropPreservingPartition(
+    ppp = PropPreservingPartition(
         domain=part1.domain,
         regions=new_list,
         prop_regions=part1.prop_regions,
@@ -925,7 +925,7 @@ def merge_partitions(abstractions):
         mode:abstractions[mode].original_regions for mode in abstractions
     }
     
-    abstraction = abstract.discretization.AbstractSysDyn(
+    abstraction = AbstractSysDyn(
         ppp = ppp,
         original_regions = switched_original_regions,
         ppp2orig = orig

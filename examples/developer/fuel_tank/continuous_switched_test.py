@@ -8,8 +8,6 @@ import numpy as np
 from tulip import abstract, hybrid
 from tulip.polytope import box2poly
 
-import tank_functions as tf
-
 input_bound = 0.4
 uncertainty = 0.05
 
@@ -133,8 +131,9 @@ start = time.time()
 
 N = 8
 trans_len=1
-sys_ts = tf.discretize_switched(ppp, switched_dynamics,
-                              N, trans_len)
+sys_ts = abstract.discretize_switched(
+    ppp, switched_dynamics, N, trans_len)
+
 print(sys_ts)
 sys_ts.ppp.plot()
 sys_ts.ts.plot()

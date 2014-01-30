@@ -33,7 +33,7 @@
 """TuLiP Toolbox Abstract subpackage
 """
 # avoid shadowing modules
-from .discretization import discretize
+from .discretization import discretize, discretize_switched
 from .prop2partition import prop2part
 
 from .prop2partition import part2convex, pwa_partition, add_grid
