@@ -436,9 +436,9 @@ class PropPreservingPartition(object):
         type: scipy lil sparse
     
     - prop_symbols: symbols of propositions
-        e.g., ['home', 'lot']
+        e.g., {'home', 'lot'}
         
-        type: list
+        type: set
     
     - subsystems: list of indices
         Each partition corresponds to some mode.
@@ -467,12 +467,11 @@ class PropPreservingPartition(object):
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
-        self.prop_symbols = prop_symbols
+        self.prop_symbols = set(prop_symbols)
         self.subsystems = subsystems
         
-    def reg2props(self, region):
-        return [self.prop_symbols[n] for (n,p) in enumerate(
-                self.regions[region].props) if p]
+    def reg2props(self, region_index):
+        return self.regions[region_index].props.copy()
 
     def __str__(self):
         s = '\n' + hl + '\n'
@@ -487,10 +486,7 @@ class PropPreservingPartition(object):
             if self.prop_symbols is not None:
                 s += '\t Propositions: '
                 
-                active_props = ' '.join(compress(
-                    self.prop_symbols,
-                    region.props
-                ))
+                active_props = ' '.join(region.props)
                 
                 if active_props:
                     s += active_props + '\n'
