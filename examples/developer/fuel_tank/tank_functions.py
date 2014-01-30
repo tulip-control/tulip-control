@@ -156,7 +156,7 @@ def merge_partitions(abstractions):
     part1 = abstract1.ppp
     part2 = abstract2.ppp
     
-    if part1.num_prop != part2.num_prop:
+    if len(part1.list_prop_symbol) != len(part2.list_prop_symbol):
         msg = "merge: partitions have different"
         msg += " number of propositions."
         raise Exception(msg)
@@ -233,7 +233,6 @@ def merge_partitions(abstractions):
     
     ppp = abstract.PropPreservingPartition(
         domain=part1.domain,
-        num_prop=part1.num_prop,
         regions=new_list,
         list_prop_symbol=part1.list_prop_symbol,
         adj=adj,

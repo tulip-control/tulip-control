@@ -80,7 +80,6 @@ def prop2part(state_space, cont_props_dict):
     # init partition
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
-        num_prop = num_props,
         regions = regions,
         list_prop_symbol = copy.deepcopy(cont_props_dict.keys() )
     )
@@ -161,7 +160,6 @@ def part2convex(ppp):
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
-        num_prop=ppp.num_prop,
         list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol)
     )
     subsys_list = []
@@ -242,7 +240,6 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
             
     return PropPreservingPartition(
         domain = ppp.domain,
-        num_prop = ppp.num_prop,
         regions = new_list,
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol,
@@ -374,7 +371,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             
     return PropPreservingPartition(
         domain = ppp.domain,
-        num_prop = ppp.num_prop,
         regions = new_list,
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol
@@ -431,7 +427,6 @@ class PropPreservingPartition(object):
     
     - domain: the domain we want to partition,
         type: polytope
-    - num_prop: number of propositions
     - regions: proposition preserving regions,
         type: list of Region
     - adj: a sparse matrix showing which regions are adjacent,
@@ -446,11 +441,10 @@ class PropPreservingPartition(object):
     prop2part
     """
     def __init__(self,
-        domain=None, num_prop=0, regions=[],
+        domain=None, regions=[],
         adj=0, list_prop_symbol=None, list_subsys=None
     ):
         self.domain = domain
-        self.num_prop = num_prop
         self.regions = regions[:]
         self.adj = adj
         self.list_prop_symbol = list_prop_symbol
