@@ -66,9 +66,6 @@ def prop2part(state_space, cont_props_dict):
     PropPreservingPartition,
     polytope.Polytope
     """
-    cont_props = cont_props_dict.values()
-    num_props = len(cont_props)
-    
     first_poly = [] #Initial Region's list_poly atribute 
     first_poly.append(state_space)
     
@@ -84,8 +81,8 @@ def prop2part(state_space, cont_props_dict):
         prop_symbols = copy.deepcopy(cont_props_dict.keys() )
     )
     
-    for prop_count in xrange(num_props):
-        cur_prop = cont_props[prop_count]
+    for cur_prop in cont_props_dict:
+        cur_prop_poly = cont_props_dict[cur_prop]
         
         num_reg = len(mypartition.regions)
         prop_holds_reg = []
@@ -96,7 +93,7 @@ def prop2part(state_space, cont_props_dict):
             prop_holds_reg.append(0)
             list_prop_now = mypartition.regions[i].list_prop[:]
             
-            dummy = region_now.intersect(cur_prop)
+            dummy = region_now.intersect(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
@@ -124,7 +121,7 @@ def prop2part(state_space, cont_props_dict):
                     list_prop=list_prop_now
                 )
             )
-            dummy = region_now.diff(cur_prop)
+            dummy = region_now.diff(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
