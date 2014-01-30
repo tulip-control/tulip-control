@@ -425,16 +425,37 @@ def find_adjacent_regions(partition):
 class PropPreservingPartition(object):
     """Partition class with following fields:
     
-    - domain: the domain we want to partition,
-        type: polytope
-    - regions: proposition preserving regions,
+    - domain: the domain we want to partition
+        type: Polytope
+    
+    - regions: Regions of proposition-preserving partition
         type: list of Region
-    - adj: a sparse matrix showing which regions are adjacent,
-        type scipy lil sparse
-    - prop_symbols: list of symbols of propositions
+    
+    - adj: a sparse matrix showing which regions are adjacent
+        order of Regions same as in list C{regions}
+        
+        type: scipy lil sparse
+    
+    - prop_symbols: symbols of propositions
+        e.g., ['home', 'lot']
+        
+        type: list
+    
     - subsystems: list of indices
-        assigning the subsystem of the piecewise affine system that 
-        is active in that region to each region in ppp
+        Each partition corresponds to some mode.
+        (for switched systems)
+        
+        In each mode a PwaSubSys is active.
+        This PwaSubSys comprises of subsystems,
+        which are listed in PwaSubSys.list_subsys.
+        
+        The list C{subsystems} means:
+        
+            - i-th Region in C{regions}
+            - subsystems[i]-th system in PwaSubSys.list_subsys
+                is active in the i-th Region
+        
+        type: list
     
     see also
     --------
