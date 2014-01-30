@@ -466,7 +466,7 @@ def discretize(
         tmp_part = PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
-            prop_symbols=part.prop_symbols, subsystems=subsys_list
+            prop_regions=part.prop_regions, subsystems=subsys_list
         )
         
         # plot pair under reachability check
@@ -508,7 +508,7 @@ def discretize(
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
-        prop_symbols=part.prop_symbols, subsystems=subsys_list
+        prop_regions=part.prop_regions, subsystems=subsys_list
     )
     
     # Generate transition system and add transitions       
@@ -644,6 +644,6 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #     new_part = PropPreservingPartition(
 #                    domain=part.domain,
 #                    regions=sol, adj=np.array([]),
-#                    trans=transitions, prop_symbols=part.prop_symbols,
+#                    trans=transitions, prop_regions=part.prop_regions,
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part

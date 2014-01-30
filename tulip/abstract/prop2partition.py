@@ -36,7 +36,7 @@ Proposition preserving partition module.
 
 Restructured by NO, 30 Jun 2013.
 """
-from itertools import compress
+from warnings import warn
 
 import numpy as np
 from scipy import sparse as sp
@@ -78,7 +78,7 @@ def prop2part(state_space, cont_props_dict):
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
         regions = regions,
-        prop_symbols = copy.deepcopy(cont_props_dict.keys() )
+        prop_regions = copy.deepcopy(cont_props_dict)
     )
     
     for cur_prop in cont_props_dict:
@@ -165,7 +165,7 @@ def part2convex(ppp):
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
-        prop_symbols=copy.deepcopy(ppp.prop_symbols)
+        prop_regions=copy.deepcopy(ppp.prop_regions)
     )
     subsys_list = []
     for i in xrange(len(ppp.regions)):
@@ -247,7 +247,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        prop_symbols = ppp.prop_symbols,
+        prop_regions = ppp.prop_regions,
         subsystems = subsys_list
     )
                 
@@ -378,7 +378,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        prop_symbols = ppp.prop_symbols
+        prop_regions = ppp.prop_regions
     )
 
 #### Helper functions ####

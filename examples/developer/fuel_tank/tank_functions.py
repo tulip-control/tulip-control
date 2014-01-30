@@ -240,7 +240,7 @@ def merge_partitions(abstractions):
     ppp = abstract.PropPreservingPartition(
         domain=part1.domain,
         regions=new_list,
-        prop_symbols=part1.prop_symbols,
+        prop_regions=part1.prop_regions,
         adj=adj,
         subsystems=subsystems
     )
