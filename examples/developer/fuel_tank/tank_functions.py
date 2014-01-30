@@ -16,6 +16,7 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
     print('discretizing hybrid system')
     
     modes = hybrid_sys.modes
+    mode_nums = hybrid_sys.disc_domain_size
     
     abstractions = dict()
     for mode in modes:
@@ -47,7 +48,7 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
             N=N, trans_length=trans_len
         )
     
-    merge_abstractions(merged_abstr, trans, abstractions, modes)
+    merge_abstractions(merged_abstr, trans, abstractions, modes, mode_nums)
 
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
