@@ -85,6 +85,8 @@ def prop2part(state_space, cont_props_dict):
     )
     
     for prop_count in xrange(num_props):
+        cur_prop = cont_props[prop_count]
+        
         num_reg = len(mypartition.regions)
         prop_holds_reg = []
         
@@ -94,7 +96,7 @@ def prop2part(state_space, cont_props_dict):
             prop_holds_reg.append(0)
             list_prop_now = mypartition.regions[i].list_prop[:]
             
-            dummy = region_now.intersect(cont_props[prop_count])
+            dummy = region_now.intersect(cur_prop)
             
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
@@ -122,7 +124,7 @@ def prop2part(state_space, cont_props_dict):
                     list_prop=list_prop_now
                 )
             )
-            dummy = region_now.diff(cont_props[prop_count])
+            dummy = region_now.diff(cur_prop)
             
             if pc.is_fulldim(dummy):
                 dum_list_prop = list_prop_now[:]
