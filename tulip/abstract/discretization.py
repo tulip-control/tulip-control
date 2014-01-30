@@ -107,11 +107,14 @@ class AbstractSysDyn(object):
     them as functional units on their own (possible to change later). 
     """
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
-                 original_regions=None, orig=None, disc_params={}):
+                 original_regions=None, orig=None, disc_params=None):
         self.ppp = ppp
         self.ts = ts
         self.original_regions = original_regions
         self.orig = orig
+        
+        if disc_params is None:
+            disc_params = dict()
         self.disc_params = disc_params
     
     def __str__(self):
