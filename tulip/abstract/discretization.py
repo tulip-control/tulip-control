@@ -348,12 +348,12 @@ def discretize(
             if len(isect) == 0:
                 isect = pc.Region([isect], si.props)
             else:
-                isect.props = si.props
+                isect.props = si.props.copy()
         
             if len(diff) == 0:
                 diff = pc.Region([diff], si.props)
             else:
-                diff.props = si.props
+                diff.props = si.props.copy()
         
             # Add new states
             sol[i] = isect
@@ -525,10 +525,7 @@ def discretize(
     ofts.atomic_propositions.add_from(prop_symbols)
     prop_list = []
     for region in sol:
-        state_prop = set([
-            prop for (prop, x) in
-            zip(prop_symbols, region.props) if x == 1
-        ])
+        state_prop = region.props.copy()
         
         prop_list.append(state_prop)
     
@@ -585,7 +582,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             if len(isect) == 0:
 #                 isect = pc.Region([isect], si.props)
 #             else:
-#                 isect.props = si.props
+#                 isect.props = si.props.copy()
 #         
 #             # Add new state
 #             sol.append(isect)

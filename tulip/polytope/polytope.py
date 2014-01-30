@@ -430,7 +430,7 @@ class Region(object):
             # Hack to be able to use the Region class also for discrete
             # problems.
             self.list_poly = list_poly
-            self.props = props
+            self.props = props.copy()
         else:
             if isinstance(list_poly, Region):
                 dim = list_poly[0].dim
@@ -1471,7 +1471,7 @@ def separate(reg1, abs_tol=ABS_TOL):
                 )
                 ind_del.append(j)
         
-        connected_reg.props = props
+        connected_reg.props = props.copy()
         final.append(connected_reg)
         ind_left = np.setdiff1d(ind_left, ind_del)
     
