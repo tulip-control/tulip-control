@@ -420,8 +420,12 @@ class Region(object):
     --------
     Polytope
     """
-    def __init__(self, list_poly=[], props=[]):
-    
+    def __init__(self, list_poly=None, props=None):
+        if list_poly is None:
+            list_poly = []
+        if props is None:
+            props = []
+        
         if isinstance(list_poly, str):
             # Hack to be able to use the Region class also for discrete
             # problems.
