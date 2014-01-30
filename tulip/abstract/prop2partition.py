@@ -441,6 +441,11 @@ class PropPreservingPartition(object):
         
         type: scipy lil sparse
     
+    - prop_regions: continuous subsets associated to
+        each proposition symbol in C{prop_symbols}
+        
+        type: dict of Polytope or Region
+    
     - prop_symbols: symbols of propositions
         e.g., {'home', 'lot'}
         
@@ -475,15 +480,20 @@ class PropPreservingPartition(object):
     ========
     prop2part
     """
+    # TODO: proposition preservation check
+    
     def __init__(self,
         domain=None, regions=[],
-        adj=None, prop_symbols=None, subsystems=None,
+        adj=None, prop_regions=None, subsystems=None,
         check=True
     ):
-        if prop_symbols is None:
-            self.prop_symbols = set()
+        # derive prop_symbols from continuous propositions
+        if prop_regions is None:
+            self.cont_props = None
+            self.prop_symbols = None
         else:
-            self.prop_symbols = set(prop_symbols)
+            self.prop_regions = copy.deepcopy(prop_regions)
+            self.prop_symbols = set(self.prop_regions)
         
         n = len(regions)
         
@@ -502,6 +512,9 @@ class PropPreservingPartition(object):
                     msg += 'is not subset of given domain:\n\t'
                     msg += str(domain)
                     raise ValueError(msg)
+                
+                if self.prop_symbols is None:
+                    warn('No prop_symbols defined.')
                 
                 if not region.props <= self.prop_symbols:
                     msg = 'Partitions: Region labeled with propositions:\n\t'
