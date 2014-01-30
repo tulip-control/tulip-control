@@ -548,7 +548,7 @@ class PropPreservingPartition(object):
     def plot(self, **kwargs):
         """For details see plot.plot_partition.
         """
-        plot_partition(self, **kwargs)
+        return plot_partition(self, **kwargs)
 
 class PPP(PropPreservingPartition):
     """Alias to PropPreservingPartition.

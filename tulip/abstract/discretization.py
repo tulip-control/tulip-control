@@ -114,6 +114,8 @@ class AbstractSysDyn(object):
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
+    # TODO: implement checks for what can be dict
+    # TODO: move subsystems attribute from PPP here
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
                  original_regions=None, ppp2orig=None, disc_params=None):
         self.ppp = ppp
@@ -143,6 +145,23 @@ class AbstractSysDyn(object):
         s += str(self.disc_params) +'\n'
         
         return s
+    
+    def plot(self):
+        if self.ppp is None or self.ts is None:
+            return
+        
+        if isinstance(self.ppp, dict):
+            for mode, ppp in self.ppp.iteritems():
+                ax = ppp.plot()
+                ax.set_title('Partition for mode: ' + str(mode))
+        else:
+            self.ppp.plot(trans=self.ts)
+        
+        if isinstance(self.ts, dict):
+            for ts in self.ts:
+                ts.plot()
+        else:
+            self.ts.plot()
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
