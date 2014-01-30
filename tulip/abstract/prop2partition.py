@@ -99,7 +99,7 @@ def prop2part(state_space, cont_props_dict):
             # does cur_prop hold in dummy ?
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
-                dum_prop.append(1)
+                dum_prop.add(cur_prop)
                 
                 # is dummy a Polytope ?
                 if len(dummy) == 0:
@@ -115,7 +115,6 @@ def prop2part(state_space, cont_props_dict):
             else:
                 #does not hold in the whole region
                 # (-> no need for the 2nd loop)
-                region_now.props.append(0)
                 mypartition.regions.append(region_now)
                 continue
                 
@@ -130,7 +129,6 @@ def prop2part(state_space, cont_props_dict):
             
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
-                dum_prop.append(0)
                 
                 # is dummy a Polytope ?
                 if len(dummy) == 0:
