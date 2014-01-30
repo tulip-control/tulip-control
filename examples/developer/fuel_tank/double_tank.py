@@ -257,7 +257,7 @@ for (autID, state) in states:
 uin_arr = np.array(uin_arr)
 cellid_arr = np.array(cellid_arr)
 
-rc, x = pc.cheby_ball(new_part.list_region[cellid_arr[0]])
+rc, x = pc.cheby_ball(new_part.regions[cellid_arr[0]])
 x = x.flatten()
 x_arr = x.copy()
 u_arr = np.zeros(1)

@@ -107,7 +107,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
     
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
-    reg_list = ppp.list_region
+    reg_list = ppp.regions
     
     # new figure ?
     if ax is None:

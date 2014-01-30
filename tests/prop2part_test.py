@@ -35,9 +35,9 @@ def prop2part_test():
     ref_adjacency = np.array([[1,0,1],[0,1,1],[1,1,1]])
     assert np.all(mypartition.adj.todense() == ref_adjacency)
 
-    assert len(mypartition.list_region) == 3
+    assert len(mypartition.regions) == 3
     
-    for reg in mypartition.list_region[0:2]:
+    for reg in mypartition.regions[0:2]:
         assert len(reg.list_prop) == 2
         assert len(reg.list_poly) == 1
         i = [i for i in range(len(reg.list_prop)) if reg.list_prop[i] == 1]
@@ -50,12 +50,12 @@ def prop2part_test():
         actual_V = set([(v[0],v[1]) for v in actual_V.tolist()])
         assert ref_V == actual_V
         
-    assert len(mypartition.list_region[2].list_prop) == 2
-    assert sum(mypartition.list_region[2].list_prop) == 0
-    assert len(mypartition.list_region[2].list_poly) == 3
+    assert len(mypartition.regions[2].list_prop) == 2
+    assert sum(mypartition.regions[2].list_prop) == 0
+    assert len(mypartition.regions[2].list_poly) == 3
     dum = state_space.copy()
-    for reg in mypartition.list_region[0:2]:
+    for reg in mypartition.regions[0:2]:
         dum = dum.diff(reg)
-    assert pc.is_empty(dum.diff(mypartition.list_region[2]) )
-    assert pc.is_empty(mypartition.list_region[2].diff(dum) )
+    assert pc.is_empty(dum.diff(mypartition.regions[2]) )
+    assert pc.is_empty(mypartition.regions[2].diff(dum) )
 

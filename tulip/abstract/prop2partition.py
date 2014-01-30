@@ -72,8 +72,8 @@ def prop2part(state_space, cont_props_dict):
     first_poly = [] #Initial Region's list_poly atribute 
     first_poly.append(state_space)
     
-    list_regions = []
-    list_regions.append(
+    regions = []
+    regions.append(
         pc.Region(list_poly=first_poly)
     )
     
@@ -81,7 +81,7 @@ def prop2part(state_space, cont_props_dict):
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
         num_prop = num_props,
-        list_region = list_regions,
+        regions = regions,
         list_prop_symbol = copy.deepcopy(cont_props_dict.keys() )
     )
     
@@ -90,10 +90,10 @@ def prop2part(state_space, cont_props_dict):
         prop_holds_reg = []
         
         for i in xrange(num_reg): #i region counter
-            region_now = mypartition.list_region[i].copy()
+            region_now = mypartition.regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
-            list_prop_now = mypartition.list_region[i].list_prop[:]
+            list_prop_now = mypartition.regions[i].list_prop[:]
             
             dummy = region_now.intersect(cont_props[prop_count])
             
@@ -101,23 +101,23 @@ def prop2part(state_space, cont_props_dict):
                 dum_list_prop = list_prop_now[:]
                 dum_list_prop.append(1)
                 if len(dummy) == 0:
-                    mypartition.list_region[i] = pc.Region(
+                    mypartition.regions[i] = pc.Region(
                         [dummy],
                         dum_list_prop
                     )
                 else:
                     dummy.list_prop = dum_list_prop
-                    mypartition.list_region[i] = dummy.copy()
+                    mypartition.regions[i] = dummy.copy()
                 prop_holds_reg[-1] = 1
             else:
                 #does not hold in the whole region
                 # (-> no need for the 2nd loop)
                 region_now.list_prop.append(0)
-                mypartition.list_region.append(region_now)
+                mypartition.regions.append(region_now)
                 continue
                 
             #loop for prop does not hold
-            mypartition.list_region.append(
+            mypartition.regions.append(
                 pc.Region(
                     list_poly=[],
                     list_prop=list_prop_now
@@ -129,22 +129,22 @@ def prop2part(state_space, cont_props_dict):
                 dum_list_prop = list_prop_now[:]
                 dum_list_prop.append(0)
                 if len(dummy) == 0:
-                    mypartition.list_region[-1] = pc.Region(
+                    mypartition.regions[-1] = pc.Region(
                         [pc.reduce(dummy)],
                         dum_list_prop
                     )
                 else:
                     dummy.list_prop = dum_list_prop
-                    mypartition.list_region[-1] = dummy.copy()
+                    mypartition.regions[-1] = dummy.copy()
             else:
-                mypartition.list_region.pop()
+                mypartition.regions.pop()
         
         count = 0
         for hold_count in xrange(len(prop_holds_reg)):
             if prop_holds_reg[hold_count]==0:
-                mypartition.list_region.pop(hold_count-count)
+                mypartition.regions.pop(hold_count-count)
                 count+=1
-        mypartition.num_regions = len(mypartition.list_region)
+        mypartition.num_regions = len(mypartition.regions)
     
     mypartition.adj = find_adjacent_regions(mypartition).copy()
     
@@ -167,21 +167,21 @@ def part2convex(ppp):
     )
     subsys_list = []
     for i in xrange(ppp.num_regions):
-        simplified_reg = ppp.list_region[i] + ppp.list_region[i]
+        simplified_reg = ppp.regions[i] + ppp.regions[i]
         
         for j in xrange(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg.list_poly[j]],
-                ppp.list_region[i].list_prop
+                ppp.regions[i].list_prop
             )
-            cvxpart.list_region.append(region_now)
+            cvxpart.regions.append(region_now)
             if ppp.list_subsys is not None:
                 subsys_list.append(ppp.list_subsys[i])
     
     if ppp.list_subsys is not None:
         cvxpart.list_subsys = subsys_list
     
-    cvxpart.num_regions = len(cvxpart.list_region)
+    cvxpart.num_regions = len(cvxpart.regions)
     cvxpart.adj = find_adjacent_regions(cvxpart).copy()
     
     return cvxpart
@@ -216,7 +216,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     for i in xrange(len(pwa_sys.list_subsys)):
         for j in xrange(ppp.num_regions):
             isect = pwa_sys.list_subsys[i].domain.intersect(
-                ppp.list_region[j]
+                ppp.regions[j]
             )
             
             if pc.is_fulldim(isect):
@@ -227,7 +227,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
                 
-                isect.list_prop = ppp.list_region[j].list_prop
+                isect.list_prop = ppp.regions[j].list_prop
                 subsys_list.append(i)
                 new_list.append(isect)
                 parent.append(j)
@@ -245,7 +245,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     return PropPreservingPartition(
         domain = ppp.domain,
         num_prop = ppp.num_prop,
-        list_region = new_list,
+        regions = new_list,
         num_regions = len(new_list),
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol,
@@ -350,7 +350,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             j=j+2
         for j in xrange(ppp.num_regions):
             tmp = pc.box2poly(temp_list)
-            isect = tmp.intersect(ppp.list_region[j], abs_tol)
+            isect = tmp.intersect(ppp.regions[j], abs_tol)
             
             #if pc.is_fulldim(isect):
             rc, xc = pc.cheby_ball(isect)
@@ -361,7 +361,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                         ", this may cause numerical problems")
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
-                isect.list_prop = ppp.list_region[j].list_prop
+                isect.list_prop = ppp.regions[j].list_prop
                 new_list.append(isect)
                 parent.append(j)   
     
@@ -378,7 +378,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     return PropPreservingPartition(
         domain = ppp.domain,
         num_prop = ppp.num_prop,
-        list_region = new_list,
+        regions = new_list,
         num_regions = len(new_list),
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol
@@ -422,8 +422,8 @@ def find_adjacent_regions(partition):
         adj[i,i] = 1
         for j in xrange(i+1, num_reg):
             adj[i, j] = pc.is_adjacent(
-                partition.list_region[i],
-                partition.list_region[j]
+                partition.regions[i],
+                partition.regions[j]
             )
             adj[j,i] = adj[i,j]
         
@@ -436,7 +436,7 @@ class PropPreservingPartition(object):
     - domain: the domain we want to partition,
         type: polytope
     - num_prop: number of propositions
-    - list_region: proposition preserving regions,
+    - regions: proposition preserving regions,
         type: list of Region
     - num_regions: length of the above list
     - adj: a sparse matrix showing which regions are adjacent,
@@ -451,20 +451,20 @@ class PropPreservingPartition(object):
     prop2part
     """
     def __init__(self,
-        domain=None, num_prop=0, list_region=[], num_regions=0,
+        domain=None, num_prop=0, regions=[], num_regions=0,
         adj=0, list_prop_symbol=None, list_subsys=None
     ):
         self.domain = domain
         self.num_prop = num_prop
-        self.list_region = list_region[:]
-        self.num_regions = len(list_region)
+        self.regions = regions[:]
+        self.num_regions = len(regions)
         self.adj = adj
         self.list_prop_symbol = list_prop_symbol
         self.list_subsys = list_subsys
         
     def reg2props(self, region):
         return [self.list_prop_symbol[n] for (n,p) in enumerate(
-                self.list_region[region].list_prop) if p]
+                self.regions[region].list_prop) if p]
 
     def __str__(self):
         s = '\n' + hl + '\n'
@@ -473,7 +473,7 @@ class PropPreservingPartition(object):
         
         s += 'Domain: ' + str(self.domain) + '\n'
         
-        for j, region in enumerate(self.list_region):
+        for j, region in enumerate(self.regions):
             s += 'Region: ' + str(j) +'\n'
             
             if self.list_prop_symbol is not None:

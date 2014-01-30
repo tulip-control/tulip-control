@@ -160,7 +160,7 @@ def get_input(
     #@type closed_loop: bool
     
     part = abstraction.ppp
-    list_region = part.list_region
+    regions = part.regions
     
     ofts = abstraction.ts
     original_regions = abstraction.original_regions
@@ -210,8 +210,8 @@ def get_input(
             "partitions not given, reverting to conservative mode")
         conservative = True
        
-    P_start = list_region[start]
-    P_end = list_region[end]
+    P_start = regions[start]
+    P_end = regions[end]
     
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
@@ -460,7 +460,7 @@ def find_discrete_state(x0, part):
         C{x0} does not belong to any discrete state.
     @rtype: int
     """
-    for (i, region) in enumerate(part.list_region):
+    for (i, region) in enumerate(part.regions):
         if pc.is_inside(region, x0):
              return i
     return None

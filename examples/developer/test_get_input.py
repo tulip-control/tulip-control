@@ -37,8 +37,8 @@ x0 = np.array([0.5, 0.6])
 start = find_discrete_state(x0, disc_dynamics.ppp)
 end = 14
 
-start_poly = disc_dynamics.ppp.list_region[start]
-end_poly = disc_dynamics.ppp.list_region[end]
+start_poly = disc_dynamics.ppp.regions[start]
+end_poly = disc_dynamics.ppp.regions[end]
 
 if not is_inside(start_poly, x0):
     raise Exception('x0 \\notin start_poly')

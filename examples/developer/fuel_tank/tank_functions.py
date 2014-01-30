@@ -125,8 +125,8 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         
         logger.info('checking transition: ' + str(i) + ' -> ' + str(j))
         
-        si = part.list_region[i]
-        sj = part.list_region[j]
+        si = part.regions[i]
+        sj = part.regions[j]
         
         # Use original cell as trans_set
         S0 = abstract.feasible.solve_feasible(
@@ -184,8 +184,8 @@ def merge_partitions(abstractions):
         for j in range(part2.num_regions):
             logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
             
-            isect = pc.intersect(part1.list_region[i],
-                                 part2.list_region[j])
+            isect = pc.intersect(part1.regions[i],
+                                 part2.regions[j])
             rc, xc = pc.cheby_ball(isect)
             
             # no intersection ?
@@ -196,7 +196,7 @@ def merge_partitions(abstractions):
             if len(isect) == 0:
                 isect = pc.Region([isect], [])
             
-            isect.list_prop = part1.list_region[i].list_prop
+            isect.list_prop = part1.regions[i].list_prop
             new_list.append(isect)
             
             idx = new_list.index(isect)
@@ -234,7 +234,7 @@ def merge_partitions(abstractions):
     ppp = abstract.PropPreservingPartition(
         domain=part1.domain,
         num_prop=part1.num_prop,
-        list_region=new_list,
+        regions=new_list,
         num_regions=len(new_list),
         list_prop_symbol=part1.list_prop_symbol,
         adj=adj,

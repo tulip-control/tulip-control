@@ -81,7 +81,7 @@ class AbstractSysDyn(object):
     - ppp2ts: map Regions to states of the transition system
         Each index denotes the Region with same index in:
             
-            ppp.list_region
+            ppp.regions
             
         type: list of states
             (usually each state is a str)
@@ -93,7 +93,7 @@ class AbstractSysDyn(object):
     
     - ppp2orig: map of new Regions to original Regions:
             
-            - i-th new Region in C{ppp.list_region}
+            - i-th new Region in C{ppp.regions}
             - ppp2orig[i]-th original Region in C{original_regions}
             
         type: list of indices
@@ -211,7 +211,7 @@ def discretize(
         part = part2convex(part) # convexify
         remove_trans = False # already allowed in nonconservative
         orig_list = []
-        for poly in part.list_region:
+        for poly in part.regions:
             if len(poly) == 0:
                 orig_list.append(poly.copy())
             elif len(poly) == 1:
@@ -244,7 +244,7 @@ def discretize(
         [part.num_regions, part.num_regions],
         dtype = int
     )
-    sol = deepcopy(part.list_region)
+    sol = deepcopy(part.regions)
     adj = part.adj.copy()
     adj = adj.todense()
     adj = np.array(adj)
@@ -460,7 +460,7 @@ def discretize(
         
         tmp_part = PropPreservingPartition(
             domain=part.domain, num_prop=part.num_prop,
-            list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+            regions=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
             list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
         )
         
@@ -502,7 +502,7 @@ def discretize(
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,
-        list_region=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+        regions=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
         list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
     )
     
@@ -641,7 +641,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                   
 #     new_part = PropPreservingPartition(
 #                    domain=part.domain, num_prop=part.num_prop,
-#                    list_region=sol, num_regions=len(sol), adj=np.array([]), 
+#                    regions=sol, num_regions=len(sol), adj=np.array([]), 
 #                    trans=transitions, list_prop_symbol=part.list_prop_symbol,
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
