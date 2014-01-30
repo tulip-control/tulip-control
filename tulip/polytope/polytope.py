@@ -730,6 +730,12 @@ def is_subset(small, big, abs_tol=ABS_TOL):
     
     @rtype: bool
     """
+    for x in [small, big]:
+        if not isinstance(x, (Polytope, Region)):
+            msg = 'Not a Polytope or Region, got instead:\n\t'
+            msg += str(type(x))
+            raise TypeError(msg)
+    
     diff = small.diff(big)
     volume = diff.volume
     
