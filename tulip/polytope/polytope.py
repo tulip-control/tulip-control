@@ -230,6 +230,9 @@ class Polytope(object):
         test = self.A.dot(points) -self.b[:,np.newaxis] < abs_tol
         return np.all(test, axis=0)
     
+    def __eq__(self, other):
+        return self <= other and other <= self
+    
     def __le__(self, other):
         return is_subset(self, other)
     
@@ -474,6 +477,9 @@ class Region(object):
             if poly.__contains__(point, abs_tol):
                 return True
         return False
+    
+    def __eq__(self, other):
+        return self <= other and other <= self
     
     def __le__(self, other):
         return is_subset(self, other)
