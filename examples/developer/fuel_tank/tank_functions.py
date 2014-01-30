@@ -11,7 +11,7 @@ from tulip import abstract
 import tulip.polytope as pc
 from tulip import transys as trs
 
-def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
+def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
     
     print('discretizing hybrid system')
     

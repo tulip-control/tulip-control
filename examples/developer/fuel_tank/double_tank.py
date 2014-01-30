@@ -172,7 +172,7 @@ ppp = abstract.part2convex(ppp)
 """Discretize to establish transitions"""
 start = time.time()
 
-sys_ts = tf.discretize_hybrid(ppp, switched_dynamics, N)
+sys_ts = tf.discretize_switched(ppp, switched_dynamics, N)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
