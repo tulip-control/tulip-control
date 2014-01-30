@@ -78,6 +78,14 @@ class AbstractSysDyn(object):
             It can be fed into discrete synthesis algorithms.
         type: OpenFTS
     
+    - ppp2ts: map Regions to states of the transition system
+        Each index denotes the Region with same index in:
+            
+            ppp.list_region
+            
+        type: list of states
+            (usually each state is a str)
+    
     - original_regions: Regions of original
             proposition preserving partition
             Used for non-conservative planning.
@@ -98,7 +106,7 @@ class AbstractSysDyn(object):
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
-    def __init__(self, ppp=None, ts=None,
+    def __init__(self, ppp=None, ts=None, ppp2ts=None,
                  original_regions=None, orig=None, disc_params={}):
         self.ppp = ppp
         self.ts = ts
@@ -527,6 +535,7 @@ def discretize(
     return AbstractSysDyn(
         ppp=new_part,
         ts=ofts,
+        ppp2ts=ofts_states,
         original_regions=orig_list,
         orig=orig,
         disc_params=param

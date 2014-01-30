@@ -96,6 +96,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         )
     
     merged_abstr.ts = sys_ts
+    merged_abstr.ppp2ts = states
 
 def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
