@@ -218,7 +218,18 @@ def merge_partitions(abstractions):
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
             
-            ap_labeling[idx] = ap_label_1 | ap_label_2
+            # original partitions may be different if pwa_partition used
+            # but must originate from same initial partition,
+            # i.e., have same continuous propositions, checked above
+            #
+            # so no two intersecting regions can have different AP labels,
+            # checked here
+            if ap_label_1 != ap_label_2:
+                msg = 'Inconsistent AP labels between intersecting regions\n'
+                msg += 'of partitions of switched system.'
+                raise Exception(msg)
+            
+            ap_labeling[idx] = ap_label_1
     
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in range(len(new_list)):
