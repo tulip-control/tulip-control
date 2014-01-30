@@ -525,8 +525,8 @@ def discretize(
     ofts.transitions.add_adj(adj, ofts_states)
     
     # Decorate TS with state labels
-    prop_symbols = part.prop_symbols
-    ofts.atomic_propositions.add_from(prop_symbols)
+    atomic_propositions = set(part.prop_regions)
+    ofts.atomic_propositions.add_from(atomic_propositions)
     prop_list = []
     for region in sol:
         state_prop = region.props.copy()

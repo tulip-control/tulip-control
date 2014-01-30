@@ -164,13 +164,9 @@ def merge_partitions(abstractions):
     part1 = abstract1.ppp
     part2 = abstract2.ppp
     
-    if len(part1.prop_symbols) != len(part2.prop_symbols):
-        msg = "merge: partitions have different"
-        msg += " number of propositions."
-        raise Exception(msg)
-    
-    if part1.prop_symbols != part2.prop_symbols:
-        msg = 'merge: partitions have different propositions'
+    if part1.prop_regions != part2.prop_regions:
+        msg = 'merge: partitions have different sets '
+        msg += 'of continuous propositions'
         raise Exception(msg)
     
     if not (part1.domain.A == part2.domain.A).all() or \

@@ -441,15 +441,10 @@ class PropPreservingPartition(object):
         
         type: scipy lil sparse
     
-    - prop_regions: continuous subsets associated to
-        each proposition symbol in C{prop_symbols}
+    - prop_regions: map from atomic proposition symbols
+        to continuous subsets
         
         type: dict of Polytope or Region
-    
-    - prop_symbols: symbols of propositions
-        e.g., {'home', 'lot'}
-        
-        type: set
     
     - subsystems: list of indices
         Each partition corresponds to some mode.
@@ -467,15 +462,6 @@ class PropPreservingPartition(object):
         
         type: list
     
-    note
-    ====
-    Named C{prop_symbols} and not C{alphabet} to
-    distinguish it from automaton letters,
-    which are elements from the powerset of
-    atomic propositions.
-    This distinction is the same for transition systems,
-    which have C{atomic_propositions} but not an C{alphabet}.
-    
     see also
     ========
     prop2part
@@ -487,13 +473,10 @@ class PropPreservingPartition(object):
         adj=None, prop_regions=None, subsystems=None,
         check=True
     ):
-        # derive prop_symbols from continuous propositions
         if prop_regions is None:
             self.cont_props = None
-            self.prop_symbols = None
         else:
             self.prop_regions = copy.deepcopy(prop_regions)
-            self.prop_symbols = set(self.prop_regions)
         
         n = len(regions)
         
@@ -506,6 +489,8 @@ class PropPreservingPartition(object):
                 raise ValueError(msg)
         
         if check:
+            atomic_propositions = set(self.prop_regions)
+            
             for region in regions:
                 if not region <= domain:
                     msg = 'Partition: Region:\n\n' + str(region) + '\n'
@@ -513,14 +498,16 @@ class PropPreservingPartition(object):
                     msg += str(domain)
                     raise ValueError(msg)
                 
-                if self.prop_symbols is None:
-                    warn('No prop_symbols defined.')
+                if self.prop_regions is None:
+                    warn('No continuous propositions defined.')
+                    continue
                 
-                if not region.props <= self.prop_symbols:
+                if not region.props <= atomic_propositions:
                     msg = 'Partitions: Region labeled with propositions:\n\t'
                     msg += str(region.props) + '\n'
-                    msg += 'not all of which are in prop_symbols:\n\t'
-                    msg += str(self.prop_symbols)
+                    msg += 'not all of which are in the '
+                    msg += 'continuous atomic propositions:\n\t'
+                    msg += str(atomic_propositions)
                     raise ValueError(msg)
         
         self.domain = domain
@@ -541,7 +528,7 @@ class PropPreservingPartition(object):
         for j, region in enumerate(self.regions):
             s += 'Region: ' + str(j) +'\n'
             
-            if self.prop_symbols is not None:
+            if self.prop_regions is not None:
                 s += '\t Propositions: '
                 
                 active_props = ' '.join(region.props)
