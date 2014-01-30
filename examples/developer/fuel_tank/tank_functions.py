@@ -59,17 +59,13 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     @type hybrid_sys: HybridSysDyn
     """
-    # allow for different AP sets
-    aps1 = abstr[0].ts.atomic_propositions
-    aps2 = abstr[1].ts.atomic_propositions
-    all_aps = aps1 | aps2
-    logger.info('all APs: ' + str(all_aps))
+    # TODO: check equality of atomic proposition sets
+    aps = abstr[modes[0]].ts.atomic_propositions
+    
+    logger.info('APs: ' + str(aps))
     
     sys_ts = trs.OpenFTS()
-    sys_ts.atomic_propositions.add_from(all_aps)
-    
-    # copy AP labels from parents
-    
+    sys_ts.atomic_propositions.add_from(aps)
     
     # ignore singleton modes
     if mode_nums[0]:
@@ -81,10 +77,15 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     sys_ts.env_actions.add_from(str_modes)
     
-    n = len(merged_abstr.list_reg)
+    n = len(merged_abstr.ppp.regions)
     states = ['s'+str(i) for i in xrange(n) ]
     sys_ts.states.add_from(states)
     
+    # copy AP labels from regions to discrete states
+    ppp2ts = states
+    for (i, state) in enumerate(ppp2ts):
+        props =  merged_abstr.ppp.regions[i].props
+        sys_ts.states.label(state, props)
     
     for mode in modes:
         str_mode = str_modes[mode]
@@ -97,7 +98,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         )
     
     merged_abstr.ts = sys_ts
-    merged_abstr.ppp2ts = states
+    merged_abstr.ppp2ts = ppp2ts
 
 def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
@@ -196,11 +197,12 @@ def merge_partitions(abstractions):
             
             # if Polytope, make it Region
             if len(isect) == 0:
-                isect = pc.Region([isect], [])
+                isect = pc.Region([isect])
             
-            isect.props = part1.regions[i].props
+            # label the Region with propositions
+            isect.props = part1.regions[i].props.copy()
+            
             new_list.append(isect)
-            
             idx = new_list.index(isect)
             
             parent_1[idx] = i
