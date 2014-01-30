@@ -69,13 +69,15 @@ class AbstractSysDyn(object):
     An AbstractSysDyn object contains the fields:
     
     - ppp: Partition into Regions.
-            Each Region corresponds to
-            a discrete state of the abstraction
+        Each Region corresponds to
+        a discrete state of the abstraction
+        
         type: PropPreservingPartition
     
     - ts: Finite transition system abstracting the continuous system.
-            Each state corresponds to a Region in ppp.
-            It can be fed into discrete synthesis algorithms.
+        Each state corresponds to a Region in ppp.
+        It can be fed into discrete synthesis algorithms.
+        
         type: OpenFTS
     
     - ppp2ts: map Regions to states of the transition system
@@ -87,8 +89,9 @@ class AbstractSysDyn(object):
             (usually each state is a str)
     
     - original_regions: Regions of original
-            proposition preserving partition
-            Used for non-conservative planning.
+        proposition preserving partition
+        Used for non-conservative planning.
+        
         type: list of Region
     
     - ppp2orig: map of new Regions to original Regions:
@@ -99,8 +102,9 @@ class AbstractSysDyn(object):
         type: list of indices
     
     - disc_params: parameters used in discretization that 
-            should be passed to the controller refinement
-            to ensure consistency
+        should be passed to the controller refinement
+        to ensure consistency
+        
         type: dict
     
     If any of the above is not given,
