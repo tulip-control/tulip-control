@@ -91,12 +91,12 @@ def prop2part(state_space, cont_props_dict):
             region_now = mypartition.regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
-            prop_now = mypartition.regions[i].props[:]
+            prop_now = mypartition.regions[i].props.copy()
             
             dummy = region_now.intersect(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
-                dum_prop = prop_now[:]
+                dum_prop = prop_now.copy()
                 dum_prop.append(1)
                 if len(dummy) == 0:
                     mypartition.regions[i] = pc.Region(
@@ -104,7 +104,7 @@ def prop2part(state_space, cont_props_dict):
                         dum_prop
                     )
                 else:
-                    dummy.props = dum_prop
+                    dummy.props = dum_prop.copy()
                     mypartition.regions[i] = dummy.copy()
                 prop_holds_reg[-1] = 1
             else:
@@ -124,7 +124,7 @@ def prop2part(state_space, cont_props_dict):
             dummy = region_now.diff(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
-                dum_prop = prop_now[:]
+                dum_prop = prop_now.copy()
                 dum_prop.append(0)
                 if len(dummy) == 0:
                     mypartition.regions[-1] = pc.Region(
@@ -132,7 +132,7 @@ def prop2part(state_space, cont_props_dict):
                         dum_prop
                     )
                 else:
-                    dummy.props = dum_prop
+                    dummy.props = dum_prop.copy()
                     mypartition.regions[-1] = dummy.copy()
             else:
                 mypartition.regions.pop()
@@ -222,7 +222,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
                 
-                isect.props = ppp.regions[j].props
+                isect.props = ppp.regions[j].props.copy()
                 subsys_list.append(i)
                 new_list.append(isect)
                 parent.append(j)
@@ -354,7 +354,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                         ", this may cause numerical problems")
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
-                isect.props = ppp.regions[j].props
+                isect.props = ppp.regions[j].props.copy()
                 new_list.append(isect)
                 parent.append(j)   
     
