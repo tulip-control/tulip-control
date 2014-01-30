@@ -407,7 +407,7 @@ class Region(object):
     Contains the following fields:
     
     - `list_poly`: list of Polytope objects
-    - `props`: list of propositions inside region
+    - `props`: set of propositions inside region
     - `bbox`: if calculated, bounding box of region (see bounding_box)
     - `fulldim`: if calculated, boolean indicating whether region is
                  fully dimensional
@@ -424,7 +424,7 @@ class Region(object):
         if list_poly is None:
             list_poly = []
         if props is None:
-            props = []
+            props = set()
         
         if isinstance(list_poly, str):
             # Hack to be able to use the Region class also for discrete
@@ -443,7 +443,7 @@ class Region(object):
             for poly in list_poly:
                 if is_empty(poly):
                     self.list_poly.remove(poly)
-            self.props = props[:]
+            self.props = props.copy()
             self.bbox = None
             self.fulldim = None
             self._volume = None
@@ -548,7 +548,7 @@ class Region(object):
     def __copy__(self):
         """Return copy of this Region."""
         return Region(list_poly=self.list_poly[:],
-                      props=self.props[:])
+                      props=self.props.copy())
     
     def copy(self):
         """Return copy of this Region."""
