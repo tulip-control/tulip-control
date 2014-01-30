@@ -236,7 +236,7 @@ def merge_partitions(abstractions):
         regions=new_list,
         prop_symbols=part1.prop_symbols,
         adj=adj,
-        #list_subsys
+        #subsystems
     )
     
     abstraction = abstract.discretization.AbstractSysDyn(

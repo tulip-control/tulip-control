@@ -172,11 +172,11 @@ def part2convex(ppp):
                 ppp.regions[i].list_prop
             )
             cvxpart.regions.append(region_now)
-            if ppp.list_subsys is not None:
-                subsys_list.append(ppp.list_subsys[i])
+            if ppp.subsystems is not None:
+                subsys_list.append(ppp.subsystems[i])
     
-    if ppp.list_subsys is not None:
-        cvxpart.list_subsys = subsys_list
+    if ppp.subsystems is not None:
+        cvxpart.subsystems = subsys_list
     
     cvxpart.adj = find_adjacent_regions(cvxpart).copy()
     
@@ -243,7 +243,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         regions = new_list,
         adj = adj,
         prop_symbols = ppp.prop_symbols,
-        list_subsys = subsys_list
+        subsystems = subsys_list
     )
                 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
@@ -432,7 +432,7 @@ class PropPreservingPartition(object):
     - adj: a sparse matrix showing which regions are adjacent,
         type scipy lil sparse
     - prop_symbols: list of symbols of propositions
-    - list_subsys: list of indices
+    - subsystems: list of indices
         assigning the subsystem of the piecewise affine system that 
         is active in that region to each region in ppp
     
@@ -442,13 +442,13 @@ class PropPreservingPartition(object):
     """
     def __init__(self,
         domain=None, regions=[],
-        adj=0, prop_symbols=None, list_subsys=None
+        adj=0, prop_symbols=None, subsystems=None
     ):
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
         self.prop_symbols = prop_symbols
-        self.list_subsys = list_subsys
+        self.subsystems = subsystems
         
     def reg2props(self, region):
         return [self.prop_symbols[n] for (n,p) in enumerate(

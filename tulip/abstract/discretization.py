@@ -251,7 +251,7 @@ def discretize(
     adj = np.array(adj)
     
     # next 2 lines omitted in discretize_overlap
-    subsys_list = deepcopy(part.list_subsys)
+    subsys_list = deepcopy(part.subsystems)
     ss = ssys
     
     # init graphics
@@ -462,7 +462,7 @@ def discretize(
         tmp_part = PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
-            prop_symbols=part.prop_symbols, list_subsys=subsys_list
+            prop_symbols=part.prop_symbols, subsystems=subsys_list
         )
         
         # plot pair under reachability check
@@ -504,7 +504,7 @@ def discretize(
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
-        prop_symbols=part.prop_symbols, list_subsys=subsys_list
+        prop_symbols=part.prop_symbols, subsystems=subsys_list
     )
     
     # Generate transition system and add transitions       
