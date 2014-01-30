@@ -86,7 +86,7 @@ def prop2part(state_space, cont_props_dict):
     )
     
     for prop_count in xrange(num_props):
-        num_reg = mypartition.num_regions
+        num_reg = len(mypartition.regions)
         prop_holds_reg = []
         
         for i in xrange(num_reg): #i region counter
@@ -166,7 +166,7 @@ def part2convex(ppp):
         list_prop_symbol=copy.deepcopy(ppp.list_prop_symbol)
     )
     subsys_list = []
-    for i in xrange(ppp.num_regions):
+    for i in xrange(len(ppp.regions)):
         simplified_reg = ppp.regions[i] + ppp.regions[i]
         
         for j in xrange(len(simplified_reg)):
@@ -214,7 +214,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     subsys_list = []
     parent = []
     for i in xrange(len(pwa_sys.list_subsys)):
-        for j in xrange(ppp.num_regions):
+        for j in xrange(len(ppp.regions)):
             isect = pwa_sys.list_subsys[i].domain.intersect(
                 ppp.regions[j]
             )
@@ -348,7 +348,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         while j<dim*2:
             temp_list.append([re_list[i][j],re_list[i][j+1]])
             j=j+2
-        for j in xrange(ppp.num_regions):
+        for j in xrange(len(ppp.regions)):
             tmp = pc.box2poly(temp_list)
             isect = tmp.intersect(ppp.regions[j], abs_tol)
             
@@ -411,7 +411,7 @@ def product_interval(list1, list2):
 def find_adjacent_regions(partition):
     """Return region pairs that are spatially adjacent.
     """
-    num_reg = partition.num_regions
+    num_reg = len(partition.regions)
     
     adj = sp.lil_matrix(
         (num_reg, num_reg),

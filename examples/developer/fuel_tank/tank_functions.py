@@ -35,7 +35,7 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
         abstractions[mode] = absys
     
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
-    n = len(merged_abstr.ppp.num_regions)
+    n = len(merged_abstr.ppp.regions)
     logger.info('Merged partition has: ' + str(n) + ', states')
     
     trans = dict()
@@ -113,7 +113,7 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         IJ = (IJ > 0).astype(int)
     
     # Initialize output
-    n = part.num_regions
+    n = len(part.regions)
     transitions = sp.lil_matrix((n, n), dtype=int)
     
     # Do the abstraction
@@ -180,8 +180,8 @@ def merge_partitions(abstractions):
     parent_1 = dict()
     parent_2 = dict()
     ap_labeling = dict()
-    for i in range(part1.num_regions):
-        for j in range(part2.num_regions):
+    for i in range(len(part1.regions)):
+        for j in range(len(part2.regions)):
             logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
             
             isect = pc.intersect(part1.regions[i],

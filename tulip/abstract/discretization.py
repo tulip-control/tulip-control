@@ -240,8 +240,9 @@ def discretize(
                           np.array(part.adj.todense()) )
     
     # Initialize output
+    num_regions = len(part.regions)
     transitions = np.zeros(
-        [part.num_regions, part.num_regions],
+        [num_regions, num_regions],
         dtype = int
     )
     sol = deepcopy(part.regions)
