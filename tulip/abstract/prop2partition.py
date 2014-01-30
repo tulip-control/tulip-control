@@ -96,15 +96,15 @@ def prop2part(state_space, cont_props_dict):
             dummy = region_now.intersect(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
-                dum_list_prop = prop_now[:]
-                dum_list_prop.append(1)
+                dum_prop = prop_now[:]
+                dum_prop.append(1)
                 if len(dummy) == 0:
                     mypartition.regions[i] = pc.Region(
                         [dummy],
-                        dum_list_prop
+                        dum_prop
                     )
                 else:
-                    dummy.props = dum_list_prop
+                    dummy.props = dum_prop
                     mypartition.regions[i] = dummy.copy()
                 prop_holds_reg[-1] = 1
             else:
@@ -124,15 +124,15 @@ def prop2part(state_space, cont_props_dict):
             dummy = region_now.diff(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
-                dum_list_prop = prop_now[:]
-                dum_list_prop.append(0)
+                dum_prop = prop_now[:]
+                dum_prop.append(0)
                 if len(dummy) == 0:
                     mypartition.regions[-1] = pc.Region(
                         [pc.reduce(dummy)],
-                        dum_list_prop
+                        dum_prop
                     )
                 else:
-                    dummy.props = dum_list_prop
+                    dummy.props = dum_prop
                     mypartition.regions[-1] = dummy.copy()
             else:
                 mypartition.regions.pop()
