@@ -164,7 +164,7 @@ def get_input(
     
     ofts = abstraction.ts
     original_regions = abstraction.original_regions
-    orig = abstraction.orig
+    orig = abstraction.ppp2orig
     
     params = abstraction.disc_params
     N = params['N']

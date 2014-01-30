@@ -132,7 +132,7 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         S0 = abstract.feasible.solve_feasible(
             si, sj, ssys, N,
             closed_loop = closed_loop,
-            trans_set = abstract_sys.original_regions[abstract_sys.orig[i]]
+            trans_set = abstract_sys.original_regions[abstract_sys.ppp2orig[i]]
         )
         
         diff = pc.mldivide(si, S0)
@@ -204,10 +204,10 @@ def merge_partitions(abstractions):
             parent_1[idx] = i
             parent_2[idx] = j
             
-            if abstract1.orig[i] != abstract2.orig[j]:
+            if abstract1.ppp2orig[i] != abstract2.ppp2orig[j]:
                 raise Exception("not same orig, partitions don't have the \
                                   same origin.")
-            orig.append(abstract1.orig[i])
+            orig.append(abstract1.ppp2orig[i])
             
             # union of AP labels from parent states
             ap_label_1 = abstract1.ts.states.label_of('s'+str(i))
@@ -245,7 +245,7 @@ def merge_partitions(abstractions):
         ppp = ppp,
         ofts = None,
         original_regions = abstract1.original_regions,
-        orig = np.array(orig)
+        ppp2orig = np.array(orig)
     )
     
     return (abstraction, ap_labeling)

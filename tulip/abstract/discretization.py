@@ -91,10 +91,10 @@ class AbstractSysDyn(object):
             Used for non-conservative planning.
         type: list of Region
     
-    - orig: map of new Regions to original Regions:
+    - ppp2orig: map of new Regions to original Regions:
             
             - i-th new Region in C{ppp.list_region}
-            - orig[i]-th original Region in C{original_regions}
+            - ppp2orig[i]-th original Region in C{original_regions}
             
         type: list of indices
     
@@ -111,11 +111,11 @@ class AbstractSysDyn(object):
     them as functional units on their own (possible to change later). 
     """
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
-                 original_regions=None, orig=None, disc_params=None):
+                 original_regions=None, ppp2orig=None, disc_params=None):
         self.ppp = ppp
         self.ts = ts
         self.original_regions = original_regions
-        self.orig = orig
+        self.ppp2orig = ppp2orig
         
         if disc_params is None:
             disc_params = dict()
@@ -132,7 +132,7 @@ class AbstractSysDyn(object):
             s += str(region) + '\n'
         
         s += 'Map New to Original Regions:\n\n'
-        for i, original_region in enumerate(self.orig):
+        for i, original_region in enumerate(self.ppp2orig):
             s += str(i) + ' -> ' + str(original_region) + '\n'
         
         s += 'Discretization Options:\n\t'
@@ -544,7 +544,7 @@ def discretize(
         ts=ofts,
         ppp2ts=ofts_states,
         original_regions=orig_list,
-        orig=orig,
+        ppp2orig=orig,
         disc_params=param
     )
 
