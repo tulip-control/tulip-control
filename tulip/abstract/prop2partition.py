@@ -91,19 +91,24 @@ def prop2part(state_space, cont_props_dict):
             region_now = mypartition.regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
+            
             prop_now = mypartition.regions[i].props.copy()
             
             dummy = region_now.intersect(cur_prop_poly)
             
+            # does cur_prop hold in dummy ?
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
                 dum_prop.append(1)
+                
+                # is dummy a Polytope ?
                 if len(dummy) == 0:
                     mypartition.regions[i] = pc.Region(
                         [dummy],
                         dum_prop
                     )
                 else:
+                    # dummy is a Region
                     dummy.props = dum_prop.copy()
                     mypartition.regions[i] = dummy.copy()
                 prop_holds_reg[-1] = 1
@@ -126,12 +131,15 @@ def prop2part(state_space, cont_props_dict):
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
                 dum_prop.append(0)
+                
+                # is dummy a Polytope ?
                 if len(dummy) == 0:
                     mypartition.regions[-1] = pc.Region(
                         [pc.reduce(dummy)],
                         dum_prop
                     )
                 else:
+                    # dummy is a Region
                     dummy.props = dum_prop.copy()
                     mypartition.regions[-1] = dummy.copy()
             else:
