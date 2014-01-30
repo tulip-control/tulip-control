@@ -462,8 +462,17 @@ class PropPreservingPartition(object):
         
         type: list
     
+    note
+    ====
+    Named C{prop_symbols} and not C{alphabet} to
+    distinguish it from automaton letters,
+    which are elements from the powerset of
+    atomic propositions.
+    This distinction is the same for transition systems,
+    which have C{atomic_propositions} but not an C{alphabet}.
+    
     see also
-    --------
+    ========
     prop2part
     """
     def __init__(self,
