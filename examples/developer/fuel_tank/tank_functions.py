@@ -151,7 +151,10 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
 def merge_partitions(abstractions):
     logger.info('merging partitions')
     
-    abstract1, abstract2 = abstractions.values()
+    mode1, mode2 = abstractions
+    
+    abstract1 = abstractions[mode1]
+    abstract2 = abstractions[mode2]
     
     part1 = abstract1.ppp
     part2 = abstract2.ppp
@@ -165,20 +168,16 @@ def merge_partitions(abstractions):
         msg = 'merge: partitions have different propositions'
         raise Exception(msg)
     
-    if len(abstract1.original_regions) != \
-    len(abstract2.original_regions):
-        msg = "merge: partitions have different"
-        msg += " number of original regions"
-        raise Exception(msg)
-    
     if not (part1.domain.A == part2.domain.A).all() or \
     not (part1.domain.b == part2.domain.b).all():
         raise Exception('merge: partitions have different domains')
 
     new_list = []
-    orig = []
+    orig = {mode:[] for mode in abstractions}
+    
     parent_1 = dict()
     parent_2 = dict()
+    
     ap_labeling = dict()
     for i in range(len(part1.regions)):
         for j in range(len(part2.regions)):
@@ -204,10 +203,8 @@ def merge_partitions(abstractions):
             parent_1[idx] = i
             parent_2[idx] = j
             
-            if abstract1.ppp2orig[i] != abstract2.ppp2orig[j]:
-                raise Exception("not same orig, partitions don't have the \
-                                  same origin.")
-            orig.append(abstract1.ppp2orig[i])
+            orig[mode1] += [abstract1.ppp2orig[i] ]
+            orig[mode2] += [abstract2.ppp2orig[j] ]
             
             # union of AP labels from parent states
             ap_label_1 = abstract1.ts.states.label_of('s'+str(i))
@@ -239,11 +236,18 @@ def merge_partitions(abstractions):
         #subsystems
     )
     
+    # check equality of original partitions
+    if abstract1.original_regions == abstract2.original_regions:
+        print('original partitions happen to be equal')
+    
+    switched_original_regions = {
+        mode:abstractions[mode].original_regions for mode in abstractions
+    }
+    
     abstraction = abstract.discretization.AbstractSysDyn(
         ppp = ppp,
-        ofts = None,
-        original_regions = abstract1.original_regions,
-        ppp2orig = np.array(orig)
+        original_regions = switched_original_regions,
+        ppp2orig = orig
     )
     
     return (abstraction, ap_labeling)
