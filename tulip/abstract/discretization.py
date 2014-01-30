@@ -461,7 +461,7 @@ def discretize(
         
         tmp_part = PropPreservingPartition(
             domain=part.domain, num_prop=part.num_prop,
-            regions=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+            regions=sol, adj=sp.lil_matrix(adj),
             list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
         )
         
@@ -503,7 +503,7 @@ def discretize(
 
     new_part = PropPreservingPartition(
         domain=part.domain, num_prop=part.num_prop,
-        regions=sol, num_regions=len(sol), adj=sp.lil_matrix(adj),
+        regions=sol, adj=sp.lil_matrix(adj),
         list_prop_symbol=part.list_prop_symbol, list_subsys=subsys_list
     )
     
@@ -642,7 +642,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                   
 #     new_part = PropPreservingPartition(
 #                    domain=part.domain, num_prop=part.num_prop,
-#                    regions=sol, num_regions=len(sol), adj=np.array([]), 
+#                    regions=sol, adj=np.array([]),
 #                    trans=transitions, list_prop_symbol=part.list_prop_symbol,
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part

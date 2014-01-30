@@ -144,7 +144,6 @@ def prop2part(state_space, cont_props_dict):
             if prop_holds_reg[hold_count]==0:
                 mypartition.regions.pop(hold_count-count)
                 count+=1
-        mypartition.num_regions = len(mypartition.regions)
     
     mypartition.adj = find_adjacent_regions(mypartition).copy()
     
@@ -181,7 +180,6 @@ def part2convex(ppp):
     if ppp.list_subsys is not None:
         cvxpart.list_subsys = subsys_list
     
-    cvxpart.num_regions = len(cvxpart.regions)
     cvxpart.adj = find_adjacent_regions(cvxpart).copy()
     
     return cvxpart
@@ -246,7 +244,6 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         domain = ppp.domain,
         num_prop = ppp.num_prop,
         regions = new_list,
-        num_regions = len(new_list),
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol,
         list_subsys = subsys_list
@@ -379,7 +376,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         domain = ppp.domain,
         num_prop = ppp.num_prop,
         regions = new_list,
-        num_regions = len(new_list),
         adj = adj,
         list_prop_symbol = ppp.list_prop_symbol
     )
@@ -438,7 +434,6 @@ class PropPreservingPartition(object):
     - num_prop: number of propositions
     - regions: proposition preserving regions,
         type: list of Region
-    - num_regions: length of the above list
     - adj: a sparse matrix showing which regions are adjacent,
         type scipy lil sparse
     - list_prop_symbol: list of symbols of propositions
@@ -451,13 +446,12 @@ class PropPreservingPartition(object):
     prop2part
     """
     def __init__(self,
-        domain=None, num_prop=0, regions=[], num_regions=0,
+        domain=None, num_prop=0, regions=[],
         adj=0, list_prop_symbol=None, list_subsys=None
     ):
         self.domain = domain
         self.num_prop = num_prop
         self.regions = regions[:]
-        self.num_regions = len(regions)
         self.adj = adj
         self.list_prop_symbol = list_prop_symbol
         self.list_subsys = list_subsys

@@ -235,7 +235,6 @@ def merge_partitions(abstractions):
         domain=part1.domain,
         num_prop=part1.num_prop,
         regions=new_list,
-        num_regions=len(new_list),
         list_prop_symbol=part1.list_prop_symbol,
         adj=adj,
         #list_subsys
