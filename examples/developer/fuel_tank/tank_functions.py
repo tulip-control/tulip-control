@@ -65,27 +65,29 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     logger.info('APs: ' + str(aps))
     
     sys_ts = trs.OpenFTS()
-    sys_ts.atomic_propositions.add_from(aps)
     
-    # ignore singleton modes
-    if mode_nums[0]:
-        str_modes = [str(s) for e,s in modes]
-    elif mode_nums[1]:
-        str_modes = [str(e) for e,s in modes]
-    else:
-        str_modes = [str(e) + '_' + str(s) for e,s in modes]
-    
-    sys_ts.env_actions.add_from(str_modes)
-    
+    # create stats
     n = len(merged_abstr.ppp.regions)
     states = ['s'+str(i) for i in xrange(n) ]
     sys_ts.states.add_from(states)
+    
+    sys_ts.atomic_propositions.add_from(aps)
     
     # copy AP labels from regions to discrete states
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
         props =  merged_abstr.ppp.regions[i].props
         sys_ts.states.label(state, props)
+    
+    # ignore singleton modes
+    if mode_nums[0] == 0:
+        str_modes = {(e,s):str(s) for e,s in modes}
+    elif mode_nums[1] == 0:
+        str_modes = {(e,s):str(e) for e,s in modes}
+    else:
+        str_modes = {(e,s):str(e) + '_' + str(s) for e,s in modes}
+    
+    sys_ts.env_actions.add_from(str_modes.values() )
     
     for mode in modes:
         str_mode = str_modes[mode]
