@@ -43,7 +43,7 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
         cont_dyn = hybrid_sys.dynamics[mode]
         
         trans[mode] = get_transitions(
-            merged_abstr, cont_dyn,
+            merged_abstr, mode, cont_dyn,
             N=N, trans_length=trans_len
         )
     
@@ -98,7 +98,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     merged_abstr.ts = sys_ts
     merged_abstr.ppp2ts = states
 
-def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
+def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
     logger.info('checking which transitions remain feasible after merging')
     part = abstract_sys.ppp
@@ -128,11 +128,13 @@ def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
         si = part.regions[i]
         sj = part.regions[j]
         
+        orig_region_idx = abstract_sys.ppp2orig[mode][i]
+        
         # Use original cell as trans_set
         S0 = abstract.feasible.solve_feasible(
             si, sj, ssys, N,
             closed_loop = closed_loop,
-            trans_set = abstract_sys.original_regions[abstract_sys.ppp2orig[i]]
+            trans_set = abstract_sys.original_regions[mode][orig_region_idx]
         )
         
         diff = pc.mldivide(si, S0)
