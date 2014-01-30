@@ -207,8 +207,8 @@ def merge_partitions(abstractions):
             orig[mode2] += [abstract2.ppp2orig[j] ]
             
             # union of AP labels from parent states
-            ap_label_1 = abstract1.ts.states.label_of('s'+str(i))
-            ap_label_2 = abstract2.ts.states.label_of('s'+str(j))
+            ap_label_1 = abstract1.ts.states.label_of('s'+str(i))['ap']
+            ap_label_2 = abstract2.ts.states.label_of('s'+str(j))['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
