@@ -59,8 +59,8 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     @type hybrid_sys: HybridSysDyn
     """
     # allow for different AP sets
-    aps1 = abstr[0].ofts.atomic_propositions
-    aps2 = abstr[1].ofts.atomic_propositions
+    aps1 = abstr[0].ts.atomic_propositions
+    aps2 = abstr[1].ts.atomic_propositions
     all_aps = aps1 | aps2
     logger.info('all APs: ' + str(all_aps))
     
@@ -95,7 +95,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
             labels = {'env_actions':str_mode}
         )
     
-    merged_abstr.ofts = sys_ts
+    merged_abstr.ts = sys_ts
 
 def get_transitions(abstract_sys, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
@@ -209,8 +209,8 @@ def merge_partitions(abstractions):
             orig.append(abstract1.orig[i])
             
             # union of AP labels from parent states
-            ap_label_1 = abstract1.ofts.states.label_of('s'+str(i))
-            ap_label_2 = abstract2.ofts.states.label_of('s'+str(j))
+            ap_label_1 = abstract1.ts.states.label_of('s'+str(i))
+            ap_label_2 = abstract2.ts.states.label_of('s'+str(j))
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))

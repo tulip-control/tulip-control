@@ -110,10 +110,10 @@ def get_input(
     @param abstraction: state space partition
     @type abstraction: AbstractSysDyn
     
-    @param start: index of the initial state in C{abstraction.ofts}
+    @param start: index of the initial state in C{abstraction.ts}
     @type start: int >= 0
     
-    @param end: index of the end state in C{abstraction.ofts}
+    @param end: index of the end state in C{abstraction.ts}
     @type end: int >= 0
     
     @param R: state cost matrix for:
@@ -162,7 +162,7 @@ def get_input(
     part = abstraction.ppp
     list_region = part.list_region
     
-    ofts = abstraction.ofts
+    ofts = abstraction.ts
     original_regions = abstraction.original_regions
     orig = abstraction.orig
     

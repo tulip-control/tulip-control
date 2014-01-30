@@ -73,7 +73,7 @@ class AbstractSysDyn(object):
             a discrete state of the abstraction
         type: PropPreservingPartition
     
-    - ofts: Finite transition system abstracting the continuous system.
+    - ts: Finite transition system abstracting the continuous system.
             Each state corresponds to a Region in ppp.
             It can be fed into discrete synthesis algorithms.
         type: OpenFTS
@@ -98,17 +98,17 @@ class AbstractSysDyn(object):
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
-    def __init__(self, ppp=None, ofts=None,
+    def __init__(self, ppp=None, ts=None,
                  original_regions=None, orig=None, disc_params={}):
         self.ppp = ppp
-        self.ofts = ofts
+        self.ts = ts
         self.original_regions = original_regions
         self.orig = orig
         self.disc_params = disc_params
     
     def __str__(self):
         s = str(self.ppp)
-        s += str(self.ofts)
+        s += str(self.ts)
         
         s += 30 * '-' + '\n'
         s += 'Original Regions List:\n\n'
@@ -526,7 +526,7 @@ def discretize(
     
     return AbstractSysDyn(
         ppp=new_part,
-        ofts=ofts,
+        ts=ofts,
         original_regions=orig_list,
         orig=orig,
         disc_params=param

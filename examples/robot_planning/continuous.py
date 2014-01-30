@@ -77,7 +77,7 @@ disc_dynamics = discretize(
 # @discretize_section_end@
 
 """Visualize transitions in continuous domain (optional)"""
-plot_partition(disc_dynamics.ppp, disc_dynamics.ofts, show=visualize)
+plot_partition(disc_dynamics.ppp, disc_dynamics.ts, show=visualize)
 
 """Specifications"""
 # Environment variables and assumptions
@@ -100,7 +100,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # @synthesize_section@
 """Synthesize"""
 ctrl = synth.synthesize('gr1c', specs,
-                        sys=disc_dynamics.ofts, ignore_sys_init=True)
+                        sys=disc_dynamics.ts, ignore_sys_init=True)
 
 # Unrealizable spec ?
 if ctrl is None:

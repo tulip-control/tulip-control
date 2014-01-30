@@ -46,7 +46,7 @@ if not is_inside(start_poly, x0):
 start_state = 's' +str(start)
 end_state = 's' +str(end)
 
-post = disc_dynamics.ofts.states.post(start_state)
+post = disc_dynamics.ts.states.post(start_state)
 print(post)
 if not end_state in post:
     raise Exception('end \\notin post(start)')

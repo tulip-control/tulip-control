@@ -118,7 +118,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 # Synthesize
 ctrl = synth.synthesize('gr1c', specs,
-                        sys=disc_dynamics.ofts, ignore_sys_init=True)
+                        sys=disc_dynamics.ts, ignore_sys_init=True)
 
 # Save graphical representation of controller for viewing
 if not ctrl.save('pwa.png', 'png'):
