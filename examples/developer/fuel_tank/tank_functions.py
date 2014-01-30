@@ -48,7 +48,9 @@ def discretize_hybrid(ppp, hybrid_sys, N=1, trans_len=1):
             N=N, trans_length=trans_len
         )
     
-    merge_abstractions(merged_abstr, trans, abstractions, modes, mode_nums)
+    merge_abstractions(merged_abstr, trans,
+                       abstractions, modes, mode_nums)
+    return merged_abstr
 
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
@@ -158,6 +160,8 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     return transitions
     
 def merge_partitions(abstractions):
+    # TODO: track initial states: better done automatically with AP 'init'
+    
     logger.info('merging partitions')
     
     mode1, mode2 = abstractions
