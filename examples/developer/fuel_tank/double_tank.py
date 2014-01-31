@@ -164,12 +164,12 @@ dynamics_dict = {
 }
 
 switched_dynamics = hybrid.HybridSysDyn(
+    cts_ss=cont_ss,
     disc_domain_size=(len(env_modes), len(sys_modes)),
     dynamics=dynamics_dict,
     env_labels=env_modes,
     disc_sys_labels=sys_modes
 )
-exit()
 
 """Create convex proposition preserving partition"""
 ppp = abstract.prop2part(cont_ss, cont_props)
@@ -236,9 +236,10 @@ print("Starting synthesis")
 start = time.time()
 
 ctrl = synth.synthesize(
-    'gr1c', specs, sys=sys_ts, ignore_sys_init=True,
+    'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
     actions_must='xor', action_vars=('u_in', 'act')
 )
+print(ctrl)
 
 elapsed = (time.time() - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
