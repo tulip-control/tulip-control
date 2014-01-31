@@ -446,22 +446,6 @@ class PropPreservingPartition(object):
         
         type: dict of Polytope or Region
     
-    - subsystems: list of indices
-        Each partition corresponds to some mode.
-        (for switched systems)
-        
-        In each mode a PwaSubSys is active.
-        This PwaSubSys comprises of subsystems,
-        which are listed in PwaSubSys.list_subsys.
-        
-        The list C{subsystems} means:
-        
-            - i-th Region in C{regions}
-            - subsystems[i]-th system in PwaSubSys.list_subsys
-                is active in the i-th Region
-        
-        type: list
-    
     see also
     ========
     prop2part
@@ -470,8 +454,7 @@ class PropPreservingPartition(object):
     
     def __init__(self,
         domain=None, regions=[],
-        adj=None, prop_regions=None, subsystems=None,
-        check=True
+        adj=None, prop_regions=None, check=True
     ):
         if prop_regions is None:
             self.cont_props = None
@@ -513,7 +496,6 @@ class PropPreservingPartition(object):
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
-        self.subsystems = subsystems
         
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()

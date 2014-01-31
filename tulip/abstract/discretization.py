@@ -103,6 +103,22 @@ class AbstractSysDyn(object):
             
         type: list of indices
     
+    - ppp2pwa: map Regions to PwaSubSys.list_subsys
+        Each partition corresponds to some mode.
+        (for switched systems)
+        
+        In each mode a PwaSubSys is active.
+        This PwaSubSys comprises of subsystems,
+        which are listed in PwaSubSys.list_subsys.
+        
+        The list C{ppp2pwa} means:
+        
+            - i-th Region in C{regions}
+            - ppp2pwa[i]-th system in PwaSubSys.list_subsys
+                is active in the i-th Region
+        
+        type: list
+    
     - disc_params: parameters used in discretization that 
         should be passed to the controller refinement
         to ensure consistency
@@ -117,13 +133,14 @@ class AbstractSysDyn(object):
     them as functional units on their own (possible to change later). 
     """
     # TODO: implement checks for what can be dict
-    # TODO: move subsystems attribute from PPP here
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
-                 original_regions=None, ppp2orig=None, disc_params=None):
+                 original_regions=None, ppp2orig=None,
+                 ppp2pwa=None, disc_params=None):
         self.ppp = ppp
         self.ts = ts
         self.original_regions = original_regions
         self.ppp2orig = ppp2orig
+        self.ppp2pwa = ppp2pwa
         
         if disc_params is None:
             disc_params = dict()
