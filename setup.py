@@ -148,8 +148,9 @@ if perform_setup:
           requires = ['numpy', 'scipy', 'pyparsing', 'networkx', 'cvxopt'],
           install_requires = ['numpy >= 1.7', 'pyparsing', 'networkx >= 1.6', 'cvxopt'],
           packages = ['tulip', 'tulip.transys', 'tulip.transys.export',
-                      'tulip.abstract', 'tulip.polytope', 'tulip.spec'],
+                      'tulip.abstract', 'tulip.polytope', 'tulip.spec',
+                      'tulip.interfaces'],
           package_dir = {'tulip' : 'tulip'},
-          package_data={'tulip': ['jtlv_grgame.jar'],
+          package_data={'tulip.interfaces': ['jtlv_grgame.jar'],
                         'tulip.transys' : ['d3.v3.min.js']},
     )

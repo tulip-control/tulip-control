@@ -39,8 +39,8 @@ from warnings import warn
 
 from tulip import transys
 from tulip.spec import GRSpec
-from tulip import jtlvint
-from tulip import gr1cint
+from tulip.interfaces import jtlvint
+from tulip.interfaces import gr1cint
 
 hl = '\n' +60*'-'
 

@@ -4,7 +4,7 @@ Tests for the interface with JTLV.
 """
 
 from tulip.spec import GRSpec
-from tulip.jtlvint import check_gr1, check_realizable, synthesize
+from tulip.interfaces.jtlv import check_gr1, check_realizable, synthesize
 from tulip.transys import MealyMachine
 
 

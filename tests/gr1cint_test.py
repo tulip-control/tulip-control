@@ -6,7 +6,7 @@ Tests for the interface with gr1c.
 import os
 
 from tulip.spec import GRSpec
-from tulip import gr1cint
+from tulip.interfaces import gr1cint
 
 
 REFERENCE_SPECFILE = """

@@ -39,12 +39,12 @@ import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
-import transys
-#from .spec import GRSpec
-
 #for checking form of spec
 import pyparsing as pp
+
+from tulip import transys
 from tulip.spec import ast
+#from tulip.spec import GRSpec
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
