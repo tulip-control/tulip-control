@@ -51,6 +51,8 @@ find_controller
 import logging
 logger = logging.getLogger(__name__)
 
+import warnings
+
 from copy import deepcopy
 
 import numpy as np
@@ -667,7 +669,7 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
 
-def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
+def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1, plot=False):
     
     logger.info('discretizing hybrid system')
     
@@ -706,7 +708,41 @@ def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
     
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
+    
+    if plot:
+        plot_mode_partitions(abstractions, merged_abstr)
+    
     return merged_abstr
+
+def plot_mode_partitions(abstractions, merged_abs):
+    try:
+        from tulip.graphics import newax
+    except:
+        warnings.warn('could not import newax, no partitions plotted.')
+        return
+    
+    ax, fig = newax()
+    
+    for mode, ab in abstractions.iteritems():
+        ab.ppp.plot(plot_numbers=False, ax=ax, trans=ab.ts)
+        plot_annot(ax)
+        fname = 'part_' + str(mode) + '.pdf'
+        fig.savefig(fname)
+    
+    merged_abs.ppp.plot(plot_numbers=False, trans=merged_abs.ts, ax=ax)
+    plot_annot
+    fname = 'part_merged' + '.pdf'
+    fig.savefig(fname)
+
+def plot_annot(ax):
+    fontsize = 5
+    
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label1.set_fontsize(fontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label1.set_fontsize(fontsize)
+    ax.set_xlabel('$v_1$', fontsize=fontsize+6)
+    ax.set_ylabel('$v_2$', fontsize=fontsize+6)
 
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.

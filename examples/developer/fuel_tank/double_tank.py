@@ -178,34 +178,11 @@ ppp = abstract.part2convex(ppp)
 """Discretize to establish transitions"""
 start = time.time()
 
-sys_ts = abstract.discretize_switched(ppp, switched_dynamics, N)
+sys_ts = abstract.discretize_switched(ppp, switched_dynamics, N=N,
+                                      trans_len=3, plot=True)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
-
-"""Plot partitions"""
-"""
-ax, fig = newax()
-def plotidy(ax):
-    for tick in ax.xaxis.get_major_ticks():
-        tick.label1.set_fontsize(fontsize)
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label1.set_fontsize(fontsize)
-    ax.set_xlabel('$v_1$', fontsize=fontsize+6)
-    ax.set_ylabel('$v_2$', fontsize=fontsize+6)
-
-disc_ss_normal.ppp.plot(plot_numbers=False, ax=ax)
-plotidy(ax)
-fig.savefig('part_normal.pdf')
-
-disc_ss_refuel.ppp.plot(plot_numbers=False, ax=ax)
-plotidy(ax)
-fig.savefig('part_refuel.pdf')
-
-new_part.ppp.plot(plot_numbers=False, ax=ax)
-plotidy(ax)
-fig.savefig('part_merged.pdf')
-"""
 
 """Specs"""
 env_vars = set()
