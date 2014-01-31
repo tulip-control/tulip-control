@@ -28,30 +28,24 @@ def prop2part_test():
     b.append(np.array([[2., -1.5, 2., -1.5]]).T)
     cont_props.append(pc.Polytope(A[1], b[1]))
     
-    cont_props_dict = dict([("C"+str(i), pc.Polytope(A[i], b[i])) for i in range(2)])
-    
+    cont_props_dict = {"C"+str(i) : pc.Polytope(A[i], b[i]) for i in range(2)}
     
     mypartition = prop2part(state_space, cont_props_dict)
+    print(mypartition)
+    
     ref_adjacency = np.array([[1,0,1],[0,1,1],[1,1,1]])
     assert np.all(mypartition.adj.todense() == ref_adjacency)
 
     assert len(mypartition.regions) == 3
     
     for reg in mypartition.regions[0:2]:
-        assert len(reg.props) == 2
+        assert len(reg.props) == 1
         assert len(reg.list_poly) == 1
-        i = [i for i in range(len(reg.props)) if reg.props[i] == 1]
-        assert len(i) == 1
-        i = i[0]
-        assert cont_props_dict == mypartition.cont_props
-        ref_V = pc.extreme(mypartition.cont_props)
-        ref_V = set([(v[0],v[1]) for v in ref_V.tolist()])
-        actual_V = pc.extreme(reg.list_poly[0])
-        actual_V = set([(v[0],v[1]) for v in actual_V.tolist()])
-        assert ref_V == actual_V
         
-    assert len(mypartition.regions[2].props) == 2
-    assert sum(mypartition.regions[2].props) == 0
+        assert cont_props_dict == mypartition.prop_regions
+        
+    assert len(mypartition.regions[2].props) == 0
+    
     assert len(mypartition.regions[2].list_poly) == 3
     dum = state_space.copy()
     for reg in mypartition.regions[0:2]:
