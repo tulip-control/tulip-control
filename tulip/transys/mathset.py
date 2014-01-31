@@ -33,11 +33,13 @@
 Mathematical Sets and Power Sets
 """
 import logging
+logger = logging.getLogger(__name__)
+
+import warnings
 from itertools import chain, combinations
 from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
-import warnings
 
 hl = 40 *'-'
 
@@ -257,7 +259,7 @@ class MathSet(object):
             try:
                 return item in self._set
             except:
-                logging.error('UnHashable items within Hashable.')
+                logger.error('UnHashable items within Hashable.')
         
         return item in self._list
     
@@ -300,12 +302,12 @@ class MathSet(object):
                 self._set.add(item)
                 return
             except TypeError:
-                logging.error('UnHashable items within Hashable.')
+                logger.error('UnHashable items within Hashable.')
         
         if item not in self._list:
             self._list.append(item)
         else:
-            logging.warn('item already in MathSet.')
+            logger.warn('item already in MathSet.')
     
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.
@@ -381,7 +383,7 @@ class MathSet(object):
                 self._set.remove(item)
                 return
             except:
-                logging.debug('item: ' +str(item) +', contains unhashables.')
+                logger.debug('item: ' +str(item) +', contains unhashables.')
             
         self._list.remove(item)
     
@@ -667,7 +669,7 @@ def is_subset(small_iterable, big_iterable):
                 # avoid object duplication
                 big_iterable = list(big_iterable)
         except:
-            logging.error('Could not convert big_iterable to list.')
+            logger.error('Could not convert big_iterable to list.')
         
         for item in small_iterable:
             if item not in big_iterable:

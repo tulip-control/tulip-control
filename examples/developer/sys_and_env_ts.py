@@ -5,6 +5,7 @@ an environment and a system transition system.
 import logging
 logging.basicConfig(filename='sys_and_env_ts.log',
                     level=logging.DEBUG, filemode='w')
+logger = logging.getLogger(__name__)
 
 from tulip import transys, spec, synth
 
@@ -41,7 +42,7 @@ env0.atomic_propositions.add('park')
 env0.states.label('e0', 'park')
 
 env0.transitions.add_from({'e0', 'e1'}, {'e0', 'e1'})
-logging.info(env0)
+logger.info(env0)
 
 # barely realizable: assumption necessary
 env_prog = '!park'
@@ -62,7 +63,7 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
 
 ctrl = synth.synthesize('gr1c', specs, sys=sys, env=env0)
 ctrl.save('sys_and_env_ts0.pdf')
-logging.info(ctrl)
+logger.info(ctrl)
 
 """Park as an env action
 """
@@ -74,7 +75,7 @@ env1.actions.add_from({'park', ''})
 
 env1.transitions.add_labeled('e0', 'e0', 'park')
 env1.transitions.add_labeled('e0', 'e0', '')
-logging.info(env1)
+logger.info(env1)
 
 specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     sys_safety=sys_safe,
@@ -82,4 +83,4 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
 
 ctrl = synth.synthesize('gr1c', specs, sys=sys, env=env1)
 ctrl.save('sys_and_env_ts1.pdf')
-logging.info(ctrl)
+logger.info(ctrl)

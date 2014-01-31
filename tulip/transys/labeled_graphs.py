@@ -33,6 +33,9 @@
 Base classes for labeled directed graphs
 """
 import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+
 from pprint import pformat
 from collections import Iterable
 import warnings
@@ -45,9 +48,6 @@ from .mathset import MathSet, SubSet, PowerSet, \
 from .export import save_d3, machine2scxml, graph2dot
 
 hl = 40 *'-'
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 
 def vprint(string, verbose=True):
     if verbose:
@@ -525,7 +525,7 @@ class States(object):
         
         # classic NetworkX ?
         if not self._is_mutable():
-            #logging.debug('Immutable states (must be hashable): classic NetworkX.\n')
+            #logger.debug('Immutable states (must be hashable): classic NetworkX.\n')
             return state
         logger.debug('Mutable states.')
         

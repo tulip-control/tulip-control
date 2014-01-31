@@ -26,10 +26,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 polylogger = logging.getLogger('tulip.polytope')
-polylogger.setLevel(logging.WARN)
+polylogger.setLevel(logging.WARNING)
 
 abs_logger = logging.getLogger('tulip.abstract')
-abs_logger.setLevel(logging.WARN)
+abs_logger.setLevel(logging.WARNING)
 
 logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
 
