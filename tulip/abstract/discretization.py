@@ -52,7 +52,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import warnings
-
+import pprint
 from copy import deepcopy
 
 import numpy as np
@@ -161,7 +161,7 @@ class AbstractSysDyn(object):
             s += str(i) + ' -> ' + str(original_region) + '\n'
         
         s += 'Discretization Options:\n\t'
-        s += str(self.disc_params) +'\n'
+        s += pprint.pformat(self.disc_params) +'\n'
         
         return s
     
