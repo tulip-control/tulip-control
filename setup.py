@@ -152,5 +152,5 @@ if perform_setup:
                       'tulip.interfaces'],
           package_dir = {'tulip' : 'tulip'},
           package_data={'tulip.interfaces': ['jtlv_grgame.jar'],
-                        'tulip.transys' : ['d3.v3.min.js']},
+                        'tulip.transys.export' : ['d3.v3.min.js']},
     )
