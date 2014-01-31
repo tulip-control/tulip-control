@@ -173,7 +173,7 @@ switched_dynamics = hybrid.HybridSysDyn(
 
 """Create convex proposition preserving partition"""
 ppp = abstract.prop2part(cont_ss, cont_props)
-ppp = abstract.part2convex(ppp)
+ppp, new2old = abstract.part2convex(ppp)
 
 """Discretize to establish transitions"""
 start = time.time()
@@ -200,7 +200,7 @@ env_prog = {'u_in = refuel_fly'}
 # relate switching actions to u_in
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
-#sys_prog = {'vol_diff2'}
+sys_prog = {'True'} #{'vol_diff2'}
 
 specs = spec.GRSpec(env_vars, sys_disc_vars,
                     env_init, sys_init,

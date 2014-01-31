@@ -160,14 +160,15 @@ def part2convex(ppp):
     
     @type ppp: PropPreservingPartition
     
-    @return: refinement into convex polytopes
-    @rtype: PropPreservingPartition
+    @return: refinement into convex polytopes and
+        map from new to old Regions
+    @rtype: (PropPreservingPartition, list)
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
         prop_regions=copy.deepcopy(ppp.prop_regions)
     )
-    subsys_list = []
+    new2old = []
     for i in xrange(len(ppp.regions)):
         simplified_reg = ppp.regions[i] + ppp.regions[i]
         
@@ -177,15 +178,11 @@ def part2convex(ppp):
                 ppp.regions[i].props
             )
             cvxpart.regions.append(region_now)
-            if ppp.subsystems is not None:
-                subsys_list.append(ppp.subsystems[i])
-    
-    if ppp.subsystems is not None:
-        cvxpart.subsystems = subsys_list
+            new2old += [i]
     
     cvxpart.adj = find_adjacent_regions(cvxpart).copy()
     
-    return cvxpart
+    return (cvxpart, new2old)
     
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     """This function takes a piecewise affine system pwa_sys and a proposition 
@@ -200,8 +197,10 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     @type pwa_sys: hybrid.PwaSysDyn
     @type ppp: PropPreservingPartition
     
-    @return: object with subsystem assignments
-    @rtype: PropPreservingPartition
+    @return: partition and assignmend of its regions to PWA subsystems
+    @rtype: (PropPreservingPartition, list)
+        where the list contains indices referring to subsystems
+        by their order in C{pwa_sys}
     
     see also
     --------
@@ -243,13 +242,13 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                     adj[j,i] = 1
         adj[i,i] = 1
             
-    return PropPreservingPartition(
+    ppp = PropPreservingPartition(
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        prop_regions = ppp.prop_regions,
-        subsystems = subsys_list
+        prop_regions = ppp.prop_regions
     )
+    return (ppp, subsys_list)
                 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     """ This function takes a proposition preserving partition ppp and the size 

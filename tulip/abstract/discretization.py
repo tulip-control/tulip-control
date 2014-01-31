@@ -243,14 +243,19 @@ def discretize(
     islti = isinstance(ssys, LtiSysDyn)
     
     if ispwa:
-        part = pwa_partition(ssys, part)
+        (part, ppp2pwa) = pwa_partition(ssys, part)
     
     # Save original polytopes, require them to be convex 
     if conservative:
         orig_list = None
         orig = 0
     else:
-        part = part2convex(part) # convexify
+        (part, new2old) = part2convex(part) # convexify
+        
+        # map new regions to pwa subsystems
+        if ispwa:
+            ppp2pwa = [ppp2pwa[i] for i in new2old]
+        
         remove_trans = False # already allowed in nonconservative
         orig_list = []
         for poly in part.regions:
@@ -293,7 +298,7 @@ def discretize(
     adj = np.array(adj)
     
     # next 2 lines omitted in discretize_overlap
-    subsys_list = deepcopy(part.subsystems)
+    subsys_list = list(ppp2pwa)
     ss = ssys
     
     # init graphics
@@ -850,7 +855,7 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         
         orig_region_idx = abstract_sys.ppp2orig[mode][i]
         
-        subsys_idx = abstract_sys.ppp.subsystems[mode][i]
+        subsys_idx = abstract_sys.ppp2pwa[mode][i]
         active_subsystem = ssys.list_subsys[subsys_idx]
         
         # Use original cell as trans_set
@@ -934,8 +939,8 @@ def merge_partitions(abstractions):
             orig[mode1] += [abstract1.ppp2orig[i] ]
             orig[mode2] += [abstract2.ppp2orig[j] ]
             
-            subsystems[mode1] += [abstract1.ppp.subsystems[i] ]
-            subsystems[mode2] += [abstract2.ppp.subsystems[j] ]
+            subsystems[mode1] += [abstract1.ppp2pwa[i] ]
+            subsystems[mode2] += [abstract2.ppp2pwa[j] ]
             
             # union of AP labels from parent states
             ap_label_1 = abstract1.ts.states.label_of('s'+str(i))['ap']
