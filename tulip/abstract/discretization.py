@@ -132,18 +132,33 @@ class AbstractSysDyn(object):
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later). 
     """
-    # TODO: implement checks for what can be dict
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
                  original_regions=None, ppp2orig=None,
                  ppp2pwa=None, disc_params=None):
+        if disc_params is None:
+            disc_params = dict()
+        
+        # check consistency
+        group0 = [ppp, ts, ppp2ts]
+        names0 = 'ppp, ts, ppp2ts'
+        all_dict0 = _all_dict(group0, names0)
+        
+        # disc_aprams excluded, because it is always a dict
+        group1 = [original_regions, ppp2orig, ppp2pwa]
+        names1 = 'original_regions, ppp2orig, ppp2pwa'
+        all_dict1 = _all_dict(group1, names1)
+        
+        # prohibited combination
+        if all_dict0 and not all_dict1:
+            msg = 'if ' + names0 + ' are dict,\n'
+            msg += 'so must ' + names1 + ' be.'
+            raise Exception(msg)
+        
         self.ppp = ppp
         self.ts = ts
         self.original_regions = original_regions
         self.ppp2orig = ppp2orig
         self.ppp2pwa = ppp2pwa
-        
-        if disc_params is None:
-            disc_params = dict()
         self.disc_params = disc_params
     
     def __str__(self):
@@ -1010,3 +1025,16 @@ def merge_partitions(abstractions):
     )
     
     return (abstraction, ap_labeling)
+
+def _all_dict(r, names='?'):
+    f = lambda x: isinstance(x, dict)
+    
+    n_dict = len(filter(f, r))
+    
+    if n_dict == 0:
+        return False
+    elif n_dict == len(r):
+        return True
+    else:
+        msg = 'Mixed dicts with non-dicts among: ' + str(names)
+        raise Exception(msg)
