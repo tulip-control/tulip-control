@@ -306,16 +306,13 @@ class MachineInputSequence(object):
         self.inputs = OrderedDict(machine.inputs)
         self._input_valuations = dict()
     
-    def __repr__(self):
+    def __str__(self):
         s = ''
         for i in range(len(self) ):
             cur_port_values = [values[i]
                                for values in self._input_valuations.values() ]
             s += str(zip(self.inputs, cur_port_values) )
         return s
-    
-    def __str__(self):
-        return self.__str__()
     
     def __getitem__(self, num):
         return [self._input_valuations[port_name][num]

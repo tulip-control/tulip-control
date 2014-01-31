@@ -123,7 +123,7 @@ class LtiSysDyn(object):
         self.Uset = Uset
         self.domain = domain
 
-    def __repr__(self):
+    def __str__(self):
         output = "A =\n"+str(self.A)
         output += "\nB =\n"+str(self.B)
         output += "\nE =\n"+str(self.E)
@@ -201,7 +201,7 @@ class PwaSysDyn(object):
         self.list_subsys = list_subsys
         self.domain = domain
     
-    def __repr__(self):
+    def __str__(self):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
         
@@ -333,7 +333,7 @@ class HybridSysDyn(object):
         self.dynamics = dynamics
         self.cts_ss = cts_ss
     
-    def __repr__(self):
+    def __str__(self):
         n_env, n_sys = self.disc_domain_size
         
         s = 'Hybrid System Dynamics\n'

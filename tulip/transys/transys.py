@@ -216,7 +216,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'fts'
 
-    def __repr__(self):
+    def __str__(self):
         s = hl +'\nFinite Transition System (closed) : '
         s += self.name +'\n' +hl +'\n'
         s += 'Atomic Propositions:\n\t'
@@ -231,9 +231,6 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s += '\n' +hl +'\n'
         
         return s
-    
-    def __str__(self):
-        return self.__repr__()
     
     def __mul__(self, ts_or_ba):
         """Synchronous product TS * BA or TS * TS2.
@@ -555,7 +552,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'ofts'
         
-    def __repr__(self):
+    def __str__(self):
         s = hl +'\nFinite Transition System (open) : '
         s += self.name +'\n' +hl +'\n'
         s += 'Atomic Propositions:\n'
@@ -573,9 +570,6 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         s += '\n' +hl +'\n'
         
         return s
-    
-    def __str__(self):
-        return self.__repr__()
 
 class OpenFTS(OpenFiniteTransitionSystem):
     """Alias to transys.OpenFiniteTransitionSystem.

@@ -157,7 +157,7 @@ class Polytope(object):
         self._volume = volume
         self.vertices = vertices
 
-    def __repr__(self):
+    def __str__(self):
         """Return pretty-formatted H-representation of polytope(s).
         """
         try:
@@ -454,7 +454,7 @@ class Region(object):
             self._chebR = None
 
         
-    def __repr__(self):
+    def __str__(self):
         output = ""
         for i in xrange(len(self.list_poly)):
             output += "Polytope number " +str(i+1) +":\n"

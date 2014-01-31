@@ -324,7 +324,7 @@ class MooreMachine(FiniteStateMachine):
         
         raise NotImplementedError
     
-    def __repr__(self):
+    def __str__(self):
         #TODO: improve port formatting
         s = hl +'\nMoore Machine: ' +self.name +'\n' +hl +'\n'
         s += 'State Variables:\n\t' +pformat(self.state_vars) +'\n'
@@ -338,9 +338,6 @@ class MooreMachine(FiniteStateMachine):
         s += str(self.transitions(labeled=True) ) +'\n' +hl +'\n'
         
         return s
-    
-    def __str__(self):
-        return self.__repr__()
     
     def add_outputs(self, new_outputs):
         new_outputs = self._to_ordered_dict(new_outputs)
@@ -428,7 +425,7 @@ class MealyMachine(FiniteStateMachine):
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'mealy'
     
-    def __repr__(self):
+    def __str__(self):
         def print_ports(port_dict):
             s = ''
             for (port_name, port_type) in port_dict.iteritems():
@@ -471,9 +468,6 @@ class MealyMachine(FiniteStateMachine):
         s += hl +'\n'
         
         return s
-    
-    def __str__(self):
-        return self.__repr__()
     
     def add_outputs(self, new_outputs, masks={}):
         """Add new outputs.

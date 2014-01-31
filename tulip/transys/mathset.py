@@ -130,9 +130,6 @@ class MathSet(object):
         set_str = ', '.join([repr(i) for i in self._set] )
         return 'MathSet({' +set_str +'} +' +str(self._list) +')'
     
-    def __str__(self):
-        return self.__repr__()
-    
     def __call__(self):
         return list(self._set) +self._list
     
@@ -736,9 +733,6 @@ class PowerSet(object):
     
     def __repr__(self):
         return 'PowerSet(' +str(self.math_set) +' )'
-    
-    def __str__(self):
-        return self.__repr__()
     
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""

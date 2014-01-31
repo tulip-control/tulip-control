@@ -124,7 +124,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.default_export_fname = 'fsa'
         self.automaton_type = 'Finite State Automaton'
     
-    def __repr__(self):
+    def __str__(self):
         s = hl +'\n' +self.automaton_type +': '
         s += self.name +'\n' +hl +'\n'
         s += 'States:\n'
@@ -144,9 +144,6 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         s += '\n' +hl +'\n'
         
         return s
-    
-    def __str__(self):
-        return self.__repr__()
     
     def is_accepted(self, word):
         """Check if automaton accepts input word.
@@ -480,15 +477,12 @@ class RabinPairs(object):
         self._states = automaton_states
         self._pairs = []
     
-    def __repr__(self):
+    def __str__(self):
         s = 'L = Good states, U = Bad states\n' +30*'-' +'\n'
         for index, (good, bad) in enumerate(self._pairs):
             s += 'Pair: ' +str(index) +', L = ' +str(good)
             s += ', U = ' +str(bad) +'\n'
         return s
-    
-    def __str__(self):
-        return self.__repr__()
     
     def __getitem__(self, index):
         return self._pairs[index]
