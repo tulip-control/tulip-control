@@ -449,8 +449,6 @@ class PropPreservingPartition(object):
     ========
     prop2part
     """
-    # TODO: proposition preservation check
-    
     def __init__(self,
         domain=None, regions=[],
         adj=None, prop_regions=None, check=True
@@ -508,6 +506,27 @@ class PropPreservingPartition(object):
         
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()
+    
+    def is_preserving(self):
+        """Return True if each Region <= Continuous Prop for its props
+        """
+        all_props = set(self.prop_regions)
+        
+        for region in self.regions:
+            # Propositions True in Region
+            for prop in region.props:
+                preimage = self.prop_regions[prop]
+                
+                if not region <= preimage:
+                    return False
+            
+            # Propositions False in Region
+            for prop in all_props.difference(region.props):
+                preimage = self.prop_regions[prop]
+                
+                if region.intersect(preimage).volume > pc.polytope.ABS_TOL:
+                    return False
+        return True
 
     def __str__(self):
         s = '\n' + hl + '\n'
