@@ -37,8 +37,6 @@ import sys
 
 from .ast import LTLException, ASTVar, ASTUnTempOp, \
     ASTBiTempOp, ASTUnary, ASTBinary
-from .pyparser import parse as pyparse
-from .plyparser import parse as plyparse
 
 def extract_vars(tree):
     v = []
@@ -73,8 +71,10 @@ def parse(formula, parser='ply'):
     @type parser: 'pyparsing' | 'ply'
     """
     if parser == 'pyparsing':
+        from .pyparser import parse as pyparse
         spec = pyparse(formula)
     elif parser == 'ply':
+        from .plyparser import parse as plyparse
         spec = plyparse(formula)
     else:
         raise ValueError(
@@ -90,6 +90,7 @@ def parse(formula, parser='ply'):
 
 if __name__ == "__main__":
     try:
+        from .pyparser import parse as pyparse
         ast = pyparse(sys.argv[1])
     except Exception as e:
         print("Parse error: " + str(e) )
