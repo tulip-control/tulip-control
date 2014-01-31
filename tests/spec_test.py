@@ -5,7 +5,6 @@ Tests for the tulip.spec subpackage.
 
 import copy
 import nose.tools as nt
-from pyparsing import ParseException
 
 from tulip.spec import LTL, GRSpec, mutex
 from tulip.spec.parser import parse
@@ -99,9 +98,9 @@ def parse_parse_check(formula, expected_length):
     # If expected_length is None, then the formula is malformed, and
     # thus we expect parsing to fail.
     if expected_length is not None:
-        assert len(parse.parse(formula)) == expected_length
+        assert len(parse(formula)) == expected_length
     else:
-        nt.assert_raises(ParseException, parse.parse, formula)
+        nt.assert_raises(Exception, parse, formula)
 
 def parse_parse_test():
     for (formula, expected_len) in [("G p", 2),

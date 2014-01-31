@@ -73,14 +73,20 @@ def parse(formula, parser='ply'):
     @type parser: 'pyparsing' | 'ply'
     """
     if parser == 'pyparsing':
-        return pyparse(formula)
+        spec = pyparse(formula)
     elif parser == 'ply':
-        return plyparse(formula)
+        spec = plyparse(formula)
     else:
         raise ValueError(
             'Unknown parser: ' + str(parser) + '\n' +
             "Available options: 'ply' | 'pyparsing'"
         )
+    
+    # did ply fail merely printing warnings ?
+    if spec is None:
+        raise Exception('Parsing formula:\n' +
+                        str(formula) + 'failed.')
+    return spec
 
 if __name__ == "__main__":
     try:
