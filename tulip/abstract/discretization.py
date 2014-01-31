@@ -669,15 +669,15 @@ def discretize_overlap(closed_loop=False, conservative=False):
 
 def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
     
-    print('discretizing hybrid system')
+    logger.info('discretizing hybrid system')
     
     modes = hybrid_sys.modes
     mode_nums = hybrid_sys.disc_domain_size
     
     abstractions = dict()
     for mode in modes:
-        print(30*'-'+'\n')
-        print('Abstracting mode: ' + str(mode))
+        logger.debug(30*'-'+'\n')
+        logger.info('Abstracting mode: ' + str(mode))
         
         cont_dyn = hybrid_sys.dynamics[mode]
         
@@ -687,7 +687,7 @@ def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1):
             min_cell_volume=0.01,
             plotit=False
         )
-        print('Mode Abstraction:\n' + str(absys) +'\n')
+        logger.debug('Mode Abstraction:\n' + str(absys) +'\n')
         
         abstractions[mode] = absys
     
@@ -779,13 +779,17 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     transitions = sp.lil_matrix((n, n), dtype=int)
     
     # Do the abstraction
+    n_checked = 0
+    n_found = 0
     while np.sum(IJ) > 0:
+        n_checked + 1
+        
         ind = np.nonzero(IJ)
         i = ind[1][0]
         j = ind[0][0]
         IJ[j,i] = 0
         
-        logger.info('checking transition: ' + str(i) + ' -> ' + str(j))
+        logger.debug('checking transition: ' + str(i) + ' -> ' + str(j))
         
         si = part.regions[i]
         sj = part.regions[j]
@@ -808,10 +812,13 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         if vol2 < abs_tol:
             transitions[j,i] = 1 
             msg = '\t Feasible transition.'
+            n_found += 1
         else:
             transitions[j,i] = 0
             msg = '\t Not feasible transition.'
-        logger.info(msg)
+        logger.debug(msg)
+    logger.info('Checked: ' + str(n_checked))
+    logger.info('Found: ' + str(n_found))
             
     return transitions
     
@@ -847,8 +854,6 @@ def merge_partitions(abstractions):
     ap_labeling = dict()
     for i in range(len(part1.regions)):
         for j in range(len(part2.regions)):
-            logger.info('mergin region: A' + str(i) + ', with: B' + str(j))
-            
             isect = pc.intersect(part1.regions[i],
                                  part2.regions[j])
             rc, xc = pc.cheby_ball(isect)
@@ -856,6 +861,7 @@ def merge_partitions(abstractions):
             # no intersection ?
             if rc < 1e-5:
                 continue
+            logger.info('merging region: A' + str(i) + ', with: B' + str(j))
             
             # if Polytope, make it Region
             if len(isect) == 0:
@@ -919,7 +925,7 @@ def merge_partitions(abstractions):
     
     # check equality of original partitions
     if abstract1.original_regions == abstract2.original_regions:
-        print('original partitions happen to be equal')
+        logger.info('original partitions happen to be equal')
     
     switched_original_regions = {
         mode:abstractions[mode].original_regions for mode in abstractions

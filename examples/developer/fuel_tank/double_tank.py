@@ -22,8 +22,16 @@ reference
     2012 American Control Conference
 """
 import logging
-logging.basicConfig(level=logging.WARN)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+polylogger = logging.getLogger('tulip.polytope')
+polylogger.setLevel(logging.WARN)
+
+abs_logger = logging.getLogger('tulip.abstract')
+abs_logger.setLevel(logging.WARN)
+
+logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
 
 import numpy as np
 import time
