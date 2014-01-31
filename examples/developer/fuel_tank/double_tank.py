@@ -178,8 +178,12 @@ ppp, new2old = abstract.part2convex(ppp)
 """Discretize to establish transitions"""
 start = time.time()
 
-sys_ts = abstract.discretize_switched(ppp, switched_dynamics, N=N,
-                                      trans_len=3, plot=True)
+disc_params = {}
+disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
+disc_params[('refuel', 'fly')] = {'N':N, 'trans_length':3}
+
+sys_ts = abstract.discretize_switched(ppp, switched_dynamics,
+                                      disc_params, plot=True)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))

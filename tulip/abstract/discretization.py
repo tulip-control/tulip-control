@@ -578,9 +578,15 @@ def discretize(
     
     ofts.states.labels(ofts_states, prop_list)
     
-    param = {'N':N, 'closed_loop':closed_loop,
+    param = {
+        'N':N,
+        'trans_length':trans_length,
+        'closed_loop':closed_loop,
         'conservative':conservative,
-        'use_all_horizon':use_all_horizon}
+        'use_all_horizon':use_all_horizon,
+        'min_cell_volume':min_cell_volume,
+        'max_num_poly':max_num_poly
+    }
     
     assert(len(prop_list) == n)
     
@@ -692,7 +698,10 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
 
-def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1, plot=False):
+def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
+    
+    if disc_params is None:
+        disc_params = {'N':1, 'trans_length':1}
     
     logger.info('discretizing hybrid system')
     
@@ -707,10 +716,10 @@ def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1, plot=False):
         cont_dyn = hybrid_sys.dynamics[mode]
         
         absys = discretize(
-            ppp, cont_dyn, N=N,
-            trans_length=trans_len,
+            ppp, cont_dyn,
             min_cell_volume=0.01,
-            plotit=False
+            plotit=False,
+            **disc_params[mode]
         )
         logger.debug('Mode Abstraction:\n' + str(absys) +'\n')
         
@@ -724,13 +733,16 @@ def discretize_switched(ppp, hybrid_sys, N=1, trans_len=1, plot=False):
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
         
+        params = disc_params[mode]
+        
         trans[mode] = get_transitions(
             merged_abstr, mode, cont_dyn,
-            N=N, trans_length=trans_len
+            N=params['N'], trans_length=params['trans_length']
         )
     
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
+    merged_abstr.disc_params = disc_params
     
     if plot:
         plot_mode_partitions(abstractions, merged_abstr)
