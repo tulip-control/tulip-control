@@ -818,7 +818,7 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     n_checked = 0
     n_found = 0
     while np.sum(IJ) > 0:
-        n_checked + 1
+        n_checked += 1
         
         ind = np.nonzero(IJ)
         i = ind[1][0]
