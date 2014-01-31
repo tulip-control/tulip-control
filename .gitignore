@@ -1,5 +1,8 @@
 *~
 *.log
+*.out
+parsetab.py
+*.gr1
 *.pyc
 *.egg-info
 .DS_Store
