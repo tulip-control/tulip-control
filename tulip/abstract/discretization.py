@@ -855,6 +855,7 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         logger.debug(msg)
     logger.info('Checked: ' + str(n_checked))
     logger.info('Found: ' + str(n_found))
+    logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
             
     return transitions
     
