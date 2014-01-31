@@ -458,6 +458,16 @@ class PropPreservingPartition(object):
         if prop_regions is None:
             self.cont_props = None
         else:
+            try:
+                # don't call it
+                # use try because it should work
+                # vs hasattr, which would look like normal selection
+                prop_regions.keys
+            except:
+                msg = 'prop_regions must be dict.'
+                msg += 'Got instead: ' + str(type(prop_regions))
+                raise TypeError(msg)
+            
             self.prop_regions = copy.deepcopy(prop_regions)
         
         n = len(regions)
