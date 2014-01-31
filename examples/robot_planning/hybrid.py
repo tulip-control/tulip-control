@@ -134,6 +134,9 @@ sys_prog |= {'X0reach'}
 # It is unsafe to "break" (switch to gear0) when road is slippery
 sys_safe |= {'(gear1 && slippery) -> next(gear1)'}
 
+# to use int actions with gr1c:
+# sys_safe |= {'((act = gear1) && (eact = slippery)) -> next(act = gear1)'}
+
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
