@@ -504,7 +504,7 @@ def discretize(
         tmp_part = PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
-            prop_regions=part.prop_regions, subsystems=subsys_list
+            prop_regions=part.prop_regions
         )
         
         # plot pair under reachability check
@@ -546,7 +546,7 @@ def discretize(
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
-        prop_regions=part.prop_regions, subsystems=subsys_list
+        prop_regions=part.prop_regions
     )
     
     # Generate transition system and add transitions       
@@ -585,6 +585,7 @@ def discretize(
         ppp2ts=ofts_states,
         original_regions=orig_list,
         ppp2orig=orig,
+        ppp2pwa=subsys_list,
         disc_params=param
     )
 
@@ -973,8 +974,7 @@ def merge_partitions(abstractions):
         domain=part1.domain,
         regions=new_list,
         prop_regions=part1.prop_regions,
-        adj=adj,
-        subsystems=subsystems
+        adj=adj
     )
     
     # check equality of original partitions
@@ -988,7 +988,8 @@ def merge_partitions(abstractions):
     abstraction = AbstractSysDyn(
         ppp = ppp,
         original_regions = switched_original_regions,
-        ppp2orig = orig
+        ppp2orig = orig,
+        ppp2pwa=subsystems
     )
     
     return (abstraction, ap_labeling)
