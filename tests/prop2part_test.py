@@ -56,5 +56,5 @@ def prop2part_test():
     assert(mypartition.is_preserving())
     
     # invalidate it
-    mypartition.regions += pc.Region([pc.Polytope(A[0], b[0])], {})
+    mypartition.regions += [pc.Region([pc.Polytope(A[0], b[0])], {})]
     assert(not mypartition.is_preserving())
