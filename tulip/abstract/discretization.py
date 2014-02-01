@@ -845,24 +845,40 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         props =  merged_abstr.ppp.regions[i].props
         sys_ts.states.label(state, props)
     
-    # ignore singleton modes
-    if mode_nums[0] == 0:
-        str_modes = {(e,s):str(s) for e,s in modes}
-    elif mode_nums[1] == 0:
-        str_modes = {(e,s):str(e) for e,s in modes}
-    else:
-        str_modes = {(e,s):str(e) + '_' + str(s) for e,s in modes}
+    # create mode actions
+    sys_actions = [str(s) for e,s in modes]
+    env_actions = [str(e) for e,s in modes]
     
-    sys_ts.env_actions.add_from(str_modes.values() )
+    # no env actions ?
+    if mode_nums[0] == 0:
+        actions_per_mode = {
+            (e,s):{'sys_actions':str(s)}
+            for e,s in modes
+        }
+        sys_ts.sys_actions.add_from(sys_actions)
+    elif mode_nums[1] == 0:
+        # no sys actions
+        actions_per_mode = {
+            (e,s):{'env_actions':str(e)}
+            for e,s in modes
+        }
+        sys_ts.env_actions.add_from(env_actions)
+    else:
+        actions_per_mode = {
+            (e,s):{'env_actions':str(e), 'sys_actions':str(s)}
+            for e,s in modes
+        }
+        sys_ts.env_actions.add_from([str(e) for e,s in modes])
+        sys_ts.sys_actions.add_from([str(s) for e,s in modes])
     
     for mode in modes:
-        str_mode = str_modes[mode]
+        env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
         
         sys_ts.transitions.add_labeled_adj(
             adj = adj,
             adj2states = states,
-            labels = {'env_actions':str_mode}
+            labels = env_sys_actions
         )
     
     merged_abstr.ts = sys_ts
