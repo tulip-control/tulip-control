@@ -166,19 +166,41 @@ class AbstractSysDyn(object):
         s += str(self.ts)
         
         s += 30 * '-' + '\n'
-        s += 'Original Regions List:\n\n'
-        for i, region in enumerate(self.original_regions):
-            s += 'Region: ' + str(i) + '\n'
-            s += str(region) + '\n'
+        if isinstance(self.original_regions, dict):
+            s += 'Original Regions:\n\n'
+            for mode, orig_reg in self.original_regions.iteritems():
+                s += 'mode: ' + str(mode)
+                s += ', has: ' + str(len(orig_reg)) + ' Regions\n'
+        else:
+            s += 'Original Regions: ' + str(len(self.original_regions))
         
-        s += 'Map New to Original Regions:\n\n'
-        for i, original_region in enumerate(self.ppp2orig):
-            s += str(i) + ' -> ' + str(original_region) + '\n'
+        s += 'Map of New to Original Regions:\n'
+        if isinstance(self.ppp2orig, dict):
+            for mode, ppp2orig in self.ppp2orig.iteritems():
+                s += '\t mode: ' + str(mode) + '\n'
+                s += self._ppp2orig_str(ppp2orig) + '\n'
+        else:
+            s += self._ppp2orig_str(self.ppp2orig) + '\n'
         
         s += 'Discretization Options:\n\t'
         s += pprint.pformat(self.disc_params) +'\n'
         
         return s
+    
+    def _ppp2orig_str(self, ppp2orig):
+        s = ''
+        for i, original_region in enumerate(ppp2orig):
+            s += '\t\t' + str(i) + ' -> ' + str(original_region) + '\n'
+        return s
+    
+    def _debug_str_(self):
+        s = str(self.ppp)
+        s += str(self.ts)
+        
+        s += 'Original Regions List:\n\n'
+        for i, region in enumerate(self.original_regions):
+            s += 'Region: ' + str(i) + '\n'
+            s += str(region) + '\n'
     
     def plot(self):
         if self.ppp is None or self.ts is None:
