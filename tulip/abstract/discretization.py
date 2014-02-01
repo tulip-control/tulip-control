@@ -1027,17 +1027,25 @@ def merge_partitions(abstractions):
             
             ap_labeling[idx] = ap_label_1
     
+    # build adjacency
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
     for i in xrange(len(new_list)):
+        pi1 = parent_1[i]
+        pi2 = parent_2[i]
+        
         for j in xrange(i+1, len(new_list)):
+            pj1 = parent_1[j]
+            pj2 = parent_2[j]
             
-            if (part1.adj[parent_1[i], parent_1[j]] == 1) or \
-               (part2.adj[parent_2[i], parent_2[j]] == 1) or \
-               (parent_1[i] == parent_1[j]) or \
-               (parent_2[i] == parent_2[j]):
-                if pc.is_adjacent(new_list[i], new_list[j]):
-                    adj[i,j] = 1
-                    adj[j,i] = 1
+            if not (
+                (part1.adj[pi1, pj1] == 1) or (pi1 == pj1) or \
+                (part2.adj[pi2, pj2] == 1) or (pi2 == pj2)
+            ):
+                continue
+            
+            if pc.is_adjacent(new_list[i], new_list[j]):
+                adj[i,j] = 1
+                adj[j,i] = 1
         adj[i,i] = 1
     
     ppp = PropPreservingPartition(
