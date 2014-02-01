@@ -948,6 +948,42 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     return transitions
     
 def merge_partitions(abstractions):
+    if len(abstractions) == 0:
+        warnings.warn('Abstractions empty, nothing to merge.')
+        return
+    
+    init_mode = abstractions.keys()[0]
+    all_modes = set(abstractions)
+    remaining_modes = all_modes.difference(set([init_mode]))
+    
+    print('init mode: ' + str(init_mode))
+    print('all modes: ' + str(all_modes))
+    print('remaining modes: ' + str(remaining_modes))
+    
+    # initialize iteration data
+    prev_modes = [init_mode]
+    
+    ab0 = abstractions[init_mode]
+    regions = ab0.ppp.regions
+    parents = range(len(regions) )
+    ppp2orig = ab0.ppp2orig
+    ppp2pwa = ab0.ppp2pwa
+    ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
+    
+    for cur_mode in remaining_modes:
+        ab2 = abstractions[cur_mode]
+        
+        r = merge_partition_pair(
+            regions, ab2, cur_mode, prev_modes,
+            parents, ap_labeling,
+            ppp2orig, ppp2pwa
+        )
+        regions, parents, ap_labeling, ppp2orig, ppp2pwa = r
+        
+        prev_modes += [cur_mode]
+    
+    new_list = regions
+    
     # build adjacency based on spatial adjacencies of
     # component abstractions.
     # which justifies the assumed symmetry of part1.adj, part2.adj
@@ -976,9 +1012,9 @@ def merge_partitions(abstractions):
         adj[i,i] = 1
     
     ppp = PropPreservingPartition(
-        domain=part1.domain,
+        domain=ab0.ppp.domain,
         regions=new_list,
-        prop_regions=part1.prop_regions,
+        prop_regions=ab0.ppp.prop_regions,
         adj=adj
     )
     
@@ -989,24 +1025,24 @@ def merge_partitions(abstractions):
     abstraction = AbstractSysDyn(
         ppp = ppp,
         original_regions = switched_original_regions,
-        ppp2orig = orig,
-        ppp2pwa=subsystems
+        ppp2orig = ppp2orig,
+        ppp2pwa=ppp2pwa
     )
     
     return (abstraction, ap_labeling)
 
-def merge_partition_pair():
+def merge_partition_pair(
+    ab1, ab2,
+    cur_mode, prev_modes,
+    old_parents, old_ap_labeling,
+    ppp2orig, ppp2pwa
+):
     # TODO: track initial states: better done automatically with AP 'init'
     
     logger.info('merging partitions')
     
-    mode1, mode2 = abstractions
-    
-    abstract1 = abstractions[mode1]
-    abstract2 = abstractions[mode2]
-    
-    part1 = abstract1.ppp
-    part2 = abstract2.ppp
+    part1 = ab1.ppp
+    part2 = ab2.ppp
     
     if part1.prop_regions != part2.prop_regions:
         msg = 'merge: partitions have different sets '
@@ -1018,17 +1054,17 @@ def merge_partition_pair():
         raise Exception('merge: partitions have different domains')
     
     # check equality of original partitions
-    if abstract1.original_regions == abstract2.original_regions:
+    if ab1.original_regions == ab2.original_regions:
         logger.info('original partitions happen to be equal')
     
+    modes = prev_modes + [cur_mode]
+    
     new_list = []
-    orig = {mode:[] for mode in abstractions}
-    
-    subsystems = {mode:[] for mode in abstractions}
-    
-    parents = {mode:dict() for mode in abstractions}
-    
+    orig = {mode:[] for mode in modes}
+    subsystems = {mode:[] for mode in modes}
+    parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
+    
     for i in xrange(len(part1.regions)):
         for j in xrange(len(part2.regions)):
             isect = pc.intersect(part1.regions[i],
@@ -1050,18 +1086,24 @@ def merge_partition_pair():
             new_list.append(isect)
             idx = new_list.index(isect)
             
-            parents[mode1][idx] = i
-            parents[mode2][idx] = j
+            # keep track of parents
+            for mode in old_parents:
+                parents[mode][idx] = i
+            parents[cur_mode][idx] = j
             
-            orig[mode1] += [abstract1.ppp2orig[i] ]
-            orig[mode2] += [abstract2.ppp2orig[j] ]
+            # keep track of original regions
+            for mode in ppp2orig:
+                orig[mode] += [ppp2orig[mode][i] ]
+            orig[cur_mode] += [ab2.ppp2orig[j] ]
             
-            subsystems[mode1] += [abstract1.ppp2pwa[i] ]
-            subsystems[mode2] += [abstract2.ppp2pwa[j] ]
+            # keep track of subsystems
+            for mode in ppp2pwa:
+                subsystems[mode] += [ppp2pwa[mode][i] ]
+            subsystems[cur_mode] += [ab2.ppp2pwa[j] ]
             
             # union of AP labels from parent states
-            ap_label_1 = abstract1.ts.states.label_of('s'+str(i))['ap']
-            ap_label_2 = abstract2.ts.states.label_of('s'+str(j))['ap']
+            ap_label_1 = old_ap_labeling[i]
+            ap_label_2 = ab2.ts.states.label_of('s'+str(j))['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
@@ -1078,6 +1120,8 @@ def merge_partition_pair():
                 raise Exception(msg)
             
             ap_labeling[idx] = ap_label_1
+    
+    return new_list, parents, ap_labeling, ppp2orig, ppp2pwa
 
 def _all_dict(r, names='?'):
     f = lambda x: isinstance(x, dict)
