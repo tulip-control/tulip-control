@@ -1033,17 +1033,19 @@ def merge_partitions(abstractions):
     
     adj = np.zeros([n_reg, n_reg], dtype=int)
     for i, reg_i in enumerate(new_list):
-        pi1 = parents[mode1][i]
-        pi2 = parents[mode2][i]
-        
         for j, reg_j in enumerate(new_list[(i+1):]):
-            pj1 = parents[mode1][j]
-            pj2 = parents[mode2][j]
+            touching = False
+            for mode in abstractions:
+                pi = parents[mode][i]
+                pj = parents[mode][j]
+                
+                part = abstractions[mode].ppp
+                
+                if (part.adj[pi, pj] == 1) or (pi == pj):
+                    touching = True
+                    break
             
-            if not (
-                (part1.adj[pi1, pj1] == 1) or (pi1 == pj1) or \
-                (part2.adj[pi2, pj2] == 1) or (pi2 == pj2)
-            ):
+            if not touching:
                 continue
             
             if pc.is_adjacent(reg_i, reg_j):
