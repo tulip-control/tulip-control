@@ -192,14 +192,14 @@ logger.info('Discretization lasted: ' + str(elapsed))
 env_vars = set()
 sys_disc_vars = set()
 
-env_init = {'u_in = normal_fly'}
+env_init = {'u_in = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> X(u_in = normal_fly)',
-            '(critical & (u_in = normal_fly)) -> X(u_in = refuel_fly)',
-            '(!critical & u_in = normal_fly) -> X(u_in = normal_fly)',
-            '(!no_refuel & u_in = refuel_fly) -> X(u_in = refuel_fly)'}
-env_prog = {'u_in = refuel_fly'}
+env_safe = {'no_refuel -> X(u_in = normal)',
+            '(critical & (u_in = normal)) -> X(u_in = refuel)',
+            '(!critical & u_in = normal) -> X(u_in = normal)',
+            '(!no_refuel & u_in = refuel) -> X(u_in = refuel)'}
+env_prog = {'u_in = refuel'}
 
 # relate switching actions to u_in
 sys_init = {'initial'}
