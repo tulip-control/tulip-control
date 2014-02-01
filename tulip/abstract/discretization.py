@@ -1010,7 +1010,7 @@ def merge_partitions(abstractions):
     
     adj = np.zeros([n_reg, n_reg], dtype=int)
     for i, reg_i in enumerate(new_list):
-        for j, reg_j in enumerate(new_list[(i+1):]):
+        for j, reg_j in enumerate(new_list[0:i]):
             touching = False
             for mode in abstractions:
                 pi = parents[mode][i]
