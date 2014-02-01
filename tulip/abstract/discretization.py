@@ -973,8 +973,7 @@ def merge_partitions(abstractions):
     orig = {mode:[] for mode in abstractions}
     subsystems = {mode:[] for mode in abstractions}
     
-    parent_1 = dict()
-    parent_2 = dict()
+    parents = {mode:dict() for mode in abstractions}
     
     ap_labeling = dict()
     for i in xrange(len(part1.regions)):
@@ -998,8 +997,8 @@ def merge_partitions(abstractions):
             new_list.append(isect)
             idx = new_list.index(isect)
             
-            parent_1[idx] = i
-            parent_2[idx] = j
+            parents[mode1][idx] = i
+            parents[mode2][idx] = j
             
             orig[mode1] += [abstract1.ppp2orig[i] ]
             orig[mode2] += [abstract2.ppp2orig[j] ]
@@ -1034,12 +1033,12 @@ def merge_partitions(abstractions):
     
     adj = np.zeros([n_reg, n_reg], dtype=int)
     for i, reg_i in enumerate(new_list):
-        pi1 = parent_1[i]
-        pi2 = parent_2[i]
+        pi1 = parents[mode1][i]
+        pi2 = parents[mode2][i]
         
         for j, reg_j in enumerate(new_list[(i+1):]):
-            pj1 = parent_1[j]
-            pj2 = parent_2[j]
+            pj1 = parents[mode1][j]
+            pj2 = parents[mode2][j]
             
             if not (
                 (part1.adj[pi1, pj1] == 1) or (pi1 == pj1) or \
