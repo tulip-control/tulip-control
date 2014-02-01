@@ -19,12 +19,15 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 
 sys_dyn = dict()
 
+allh = [0.5, 1.1, 1.5]
+
 modes = []
 modes.append(('normal', 'fly'))
 modes.append(('refuel', 'fly'))
+modes.append(('emergency', 'fly'))
 
 """First PWA mode"""
-def subsys0():
+def subsys0(h):
     A = np.array([[1.1052, 0.], [ 0., 1.1052]])
     B = np.array([[1.1052, 0.], [ 0., 1.1052]])
     E = np.array([[1,0], [0,1]])
@@ -35,14 +38,14 @@ def subsys0():
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
     
-    dom = box2poly([[0., 3.], [0.5, 2.]])
+    dom = box2poly([[0., 3.], [h, 2.]])
     
     sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn
 
-def subsys1():
+def subsys1(h):
     A = np.array([[0.9948, 0.], [0., 1.1052]])
     B = np.array([[-1.1052, 0.], [0., 1.1052]])
     E = np.array([[1, 0], [0, 1]])
@@ -53,57 +56,16 @@ def subsys1():
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
     
-    dom = box2poly([[0., 3.], [0., 0.5]])
+    dom = box2poly([[0., 3.], [0., h]])
     
     sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn
 
-subsystems0 = [subsys0(), subsys1()]
-sys_dyn[modes[0]] = hybrid.PwaSysDyn(subsystems0, cont_state_space)
-
-"""Second PWA mode"""
-def subsys2():
-    A = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    B = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    E = np.array([[1,0], [0,1]])
-    
-    U = box2poly([[-1., 1.], [-1., 1.]])
-    U.scale(input_bound)
-    
-    W = box2poly([[-1., 1.], [-1., 1.]])
-    W.scale(uncertainty)
-    
-    dom = box2poly([[0., 3.], [1.0, 2.]])
-    
-    sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
-    #sys_dyn.plot()
-    
-    return sys_dyn
-
-def subsys3():
-    A = np.array([[0.9948, 0.], [0., 1.1052]])
-    B = np.array([[-1.1052, 0.], [0., 1.1052]])
-    E = np.array([[1, 0], [0, 1]])
-    
-    U = box2poly([[-1., 1.], [-1., 1.]])
-    U.scale(input_bound)
-    
-    W = box2poly([[-1., 1.], [-1., 1.]])
-    W.scale(uncertainty)
-    
-    # the only difference is here
-    dom = box2poly([[0., 3.], [0., 1.0]])
-    
-    sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
-    #sys_dyn.plot()
-    
-    return sys_dyn
-
-subsystems1 = [subsys2(), subsys3()]
-sys_dyn[modes[1]] = hybrid.PwaSysDyn(subsystems1, cont_state_space)
-
+for mode, h in zip(modes, allh):
+    subsystems = [subsys0(h), subsys1(h)]
+    sys_dyn[mode] = hybrid.PwaSysDyn(subsystems, cont_state_space)
 
 """Switched Dynamics"""
 
