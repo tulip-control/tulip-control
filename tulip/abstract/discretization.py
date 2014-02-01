@@ -952,6 +952,25 @@ def merge_partitions(abstractions):
         warnings.warn('Abstractions empty, nothing to merge.')
         return
     
+    # consistency check
+    for ab1 in abstractions.itervalues():
+        for ab2 in abstractions.itervalues():
+            p1 = ab1.ppp
+            p2 = ab2.ppp
+            
+            if p1.prop_regions != p2.prop_regions:
+                msg = 'merge: partitions have different sets '
+                msg += 'of continuous propositions'
+                raise Exception(msg)
+            
+            if not (p1.domain.A == p2.domain.A).all() or \
+            not (p1.domain.b == p2.domain.b).all():
+                raise Exception('merge: partitions have different domains')
+            
+            # check equality of original partitions
+            if ab1.original_regions == ab2.original_regions:
+                logger.info('original partitions happen to be equal')
+    
     init_mode = abstractions.keys()[0]
     all_modes = set(abstractions)
     remaining_modes = all_modes.difference(set([init_mode]))
@@ -1043,19 +1062,6 @@ def merge_partition_pair(
     
     part1 = ab1.ppp
     part2 = ab2.ppp
-    
-    if part1.prop_regions != part2.prop_regions:
-        msg = 'merge: partitions have different sets '
-        msg += 'of continuous propositions'
-        raise Exception(msg)
-    
-    if not (part1.domain.A == part2.domain.A).all() or \
-    not (part1.domain.b == part2.domain.b).all():
-        raise Exception('merge: partitions have different domains')
-    
-    # check equality of original partitions
-    if ab1.original_regions == ab2.original_regions:
-        logger.info('original partitions happen to be equal')
     
     modes = prev_modes + [cur_mode]
     
