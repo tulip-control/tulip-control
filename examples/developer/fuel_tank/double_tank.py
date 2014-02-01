@@ -218,7 +218,7 @@ start = time.time()
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
-    actions_must='xor', action_vars=('u_in', 'act')
+    action_vars=('u_in', 'act')
 )
 print(ctrl)
 

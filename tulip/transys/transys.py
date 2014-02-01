@@ -88,6 +88,15 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     The state labels are subsets of atomic_propositions, so \in 2^AP.
     The transition labels are actions.
     
+    sys.actions_must: select constraint on actions. Options:
+        
+        - 'mutex': at most 1 action True each time
+        - 'xor': exactly 1 action True each time
+        - 'none': no constraint on action values
+    
+    The xor constraint can prevent the environment from
+    blocking the system by setting all its actions to False.
+    
     example
     -------
     In the following C{None} represents the empty set, subset of AP.
@@ -210,6 +219,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                                                 'type?label':'',
                                                 'separator':'\\n'}
         self._transition_dot_mask = dict()
+        
+        self.actions_must = 'xor'
         
         LabeledStateDiGraph.__init__(self, *args, **kwargs)
         
@@ -519,6 +530,15 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         - The first sublabel is a system action,
         - the second an environment action.
     
+    Constrains on actions can be defined
+    similarly to FTS actions by setting the fields:
+    
+        - ofts.env_actions_must
+        - ofts.sys_actions_must
+    
+    The default constraint is 'xor'.
+    For more details see FTS.
+    
     see also
     --------
     FiniteTransitionSystem
@@ -546,6 +566,9 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
                                                 'env_actions':'env',
                                                 'type?label':':',
                                                 'separator':'\\n'}
+        # action constraint used in synth.synthesize
+        self.env_actions_must = 'xor'
+        self.sys_actions_must = 'xor'
         
         LabeledStateDiGraph.__init__(self, **args)
         
