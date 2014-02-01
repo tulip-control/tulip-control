@@ -977,8 +977,8 @@ def merge_partitions(abstractions):
     parent_2 = dict()
     
     ap_labeling = dict()
-    for i in range(len(part1.regions)):
-        for j in range(len(part2.regions)):
+    for i in xrange(len(part1.regions)):
+        for j in xrange(len(part2.regions)):
             isect = pc.intersect(part1.regions[i],
                                  part2.regions[j])
             rc, xc = pc.cheby_ball(isect)
@@ -1028,8 +1028,8 @@ def merge_partitions(abstractions):
             ap_labeling[idx] = ap_label_1
     
     adj = np.zeros([len(new_list), len(new_list)], dtype=int)
-    for i in range(len(new_list)):
-        for j in range(i+1, len(new_list)):
+    for i in xrange(len(new_list)):
+        for j in xrange(i+1, len(new_list)):
             
             if (part1.adj[parent_1[i], parent_1[j]] == 1) or \
                (part2.adj[parent_2[i], parent_2[j]] == 1) or \
