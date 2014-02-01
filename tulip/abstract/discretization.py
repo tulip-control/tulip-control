@@ -1027,13 +1027,17 @@ def merge_partitions(abstractions):
             
             ap_labeling[idx] = ap_label_1
     
-    # build adjacency
-    adj = np.zeros([len(new_list), len(new_list)], dtype=int)
-    for i in xrange(len(new_list)):
+    # build adjacency based on spatial adjacencies of
+    # component abstractions.
+    # which justifies the assumed symmetry of part1.adj, part2.adj
+    n_reg = len(new_list)
+    
+    adj = np.zeros([n_reg, n_reg], dtype=int)
+    for i, reg_i in enumerate(new_list):
         pi1 = parent_1[i]
         pi2 = parent_2[i]
         
-        for j in xrange(i+1, len(new_list)):
+        for j, reg_j in enumerate(new_list[(i+1):]):
             pj1 = parent_1[j]
             pj2 = parent_2[j]
             
@@ -1043,7 +1047,7 @@ def merge_partitions(abstractions):
             ):
                 continue
             
-            if pc.is_adjacent(new_list[i], new_list[j]):
+            if pc.is_adjacent(reg_i, reg_j):
                 adj[i,j] = 1
                 adj[j,i] = 1
         adj[i,i] = 1
