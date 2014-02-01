@@ -948,6 +948,54 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     return transitions
     
 def merge_partitions(abstractions):
+    # build adjacency based on spatial adjacencies of
+    # component abstractions.
+    # which justifies the assumed symmetry of part1.adj, part2.adj
+    n_reg = len(new_list)
+    
+    adj = np.zeros([n_reg, n_reg], dtype=int)
+    for i, reg_i in enumerate(new_list):
+        for j, reg_j in enumerate(new_list[(i+1):]):
+            touching = False
+            for mode in abstractions:
+                pi = parents[mode][i]
+                pj = parents[mode][j]
+                
+                part = abstractions[mode].ppp
+                
+                if (part.adj[pi, pj] == 1) or (pi == pj):
+                    touching = True
+                    break
+            
+            if not touching:
+                continue
+            
+            if pc.is_adjacent(reg_i, reg_j):
+                adj[i,j] = 1
+                adj[j,i] = 1
+        adj[i,i] = 1
+    
+    ppp = PropPreservingPartition(
+        domain=part1.domain,
+        regions=new_list,
+        prop_regions=part1.prop_regions,
+        adj=adj
+    )
+    
+    switched_original_regions = {
+        mode:abstractions[mode].original_regions for mode in abstractions
+    }
+    
+    abstraction = AbstractSysDyn(
+        ppp = ppp,
+        original_regions = switched_original_regions,
+        ppp2orig = orig,
+        ppp2pwa=subsystems
+    )
+    
+    return (abstraction, ap_labeling)
+
+def merge_partition_pair():
     # TODO: track initial states: better done automatically with AP 'init'
     
     logger.info('merging partitions')
@@ -968,9 +1016,14 @@ def merge_partitions(abstractions):
     if not (part1.domain.A == part2.domain.A).all() or \
     not (part1.domain.b == part2.domain.b).all():
         raise Exception('merge: partitions have different domains')
-
+    
+    # check equality of original partitions
+    if abstract1.original_regions == abstract2.original_regions:
+        logger.info('original partitions happen to be equal')
+    
     new_list = []
     orig = {mode:[] for mode in abstractions}
+    
     subsystems = {mode:[] for mode in abstractions}
     
     parents = {mode:dict() for mode in abstractions}
@@ -1025,57 +1078,6 @@ def merge_partitions(abstractions):
                 raise Exception(msg)
             
             ap_labeling[idx] = ap_label_1
-    
-    # build adjacency based on spatial adjacencies of
-    # component abstractions.
-    # which justifies the assumed symmetry of part1.adj, part2.adj
-    n_reg = len(new_list)
-    
-    adj = np.zeros([n_reg, n_reg], dtype=int)
-    for i, reg_i in enumerate(new_list):
-        for j, reg_j in enumerate(new_list[(i+1):]):
-            touching = False
-            for mode in abstractions:
-                pi = parents[mode][i]
-                pj = parents[mode][j]
-                
-                part = abstractions[mode].ppp
-                
-                if (part.adj[pi, pj] == 1) or (pi == pj):
-                    touching = True
-                    break
-            
-            if not touching:
-                continue
-            
-            if pc.is_adjacent(reg_i, reg_j):
-                adj[i,j] = 1
-                adj[j,i] = 1
-        adj[i,i] = 1
-    
-    ppp = PropPreservingPartition(
-        domain=part1.domain,
-        regions=new_list,
-        prop_regions=part1.prop_regions,
-        adj=adj
-    )
-    
-    # check equality of original partitions
-    if abstract1.original_regions == abstract2.original_regions:
-        logger.info('original partitions happen to be equal')
-    
-    switched_original_regions = {
-        mode:abstractions[mode].original_regions for mode in abstractions
-    }
-    
-    abstraction = AbstractSysDyn(
-        ppp = ppp,
-        original_regions = switched_original_regions,
-        ppp2orig = orig,
-        ppp2pwa=subsystems
-    )
-    
-    return (abstraction, ap_labeling)
 
 def _all_dict(r, names='?'):
     f = lambda x: isinstance(x, dict)
