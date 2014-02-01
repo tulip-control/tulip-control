@@ -233,9 +233,11 @@ init_state = {}
 init_state['u_in'] = 0
 
 destfile = 'rsdisturbance_example.gexf'
-states = grsim.grsim([aut], env_states=[init_state], num_it=num_it,
-                     deterministic_env=False, graph_vis=False,
-                     destfile=destfile)
+states = grsim.grsim(
+    [aut], env_states=[init_state], num_it=num_it,
+    deterministic_env=False, graph_vis=False,
+    destfile=destfile
+)
 
 uin_arr = []
 cellid_arr = []
@@ -251,15 +253,22 @@ x_arr = x.copy()
 u_arr = np.zeros(1)
 for i in range(1, len(cellid_arr)):
     if uin_arr[i-1] == 0:
-        u = abstract.get_input(x, cont_dyn_normal, new_part,
-            cellid_arr[i-1], cellid_arr[i], 1, mid_weight=10)
-        x = np.dot(cont_dyn_normal.A,x).flatten() + np.dot(cont_dyn_normal.B,u).flatten() + \
+        u = abstract.get_input(
+            x, cont_dyn_normal, new_part,
+            cellid_arr[i-1], cellid_arr[i], 1, mid_weight=10
+        )
+        x = np.dot(cont_dyn_normal.A,x).flatten() + \
+            np.dot(cont_dyn_normal.B,u).flatten() + \
             cont_dyn_normal.K.flatten()
     else:
-        u = abstract.get_input(x, cont_dyn_refuel, new_part, cellid_arr[i-1],
-            cellid_arr[i], 1, Q=[], mid_weight=10)
-        x = np.dot(cont_dyn_refuel.A,x).flatten() + np.dot(cont_dyn_refuel.B,u).flatten() + \
+        u = abstract.get_input(
+            x, cont_dyn_refuel, new_part, cellid_arr[i-1],
+            cellid_arr[i], 1, Q=[], mid_weight=10
+        )
+        x = np.dot(cont_dyn_refuel.A,x).flatten() + \
+            np.dot(cont_dyn_refuel.B,u).flatten() + \
             cont_dyn_refuel.K.flatten()
+    
     u_arr = np.hstack([u_arr, u.flatten()])
     x_arr = np.vstack([x_arr, x])
     
@@ -285,7 +294,10 @@ for i in range(1,x_arr.shape[0]):
     y = x_arr[i-1,1]
     dx = x_arr[i,0] - x
     dy = x_arr[i,1] - y
-    arr = matplotlib.patches.Arrow(float(x),float(y),float(dx),float(dy),width=arr_size)
+    arr = matplotlib.patches.Arrow(
+        float(x), float(y), float(dx),
+        float(dy), width=arr_size
+    )
     ax.add_patch(arr)
 
 ax.plot(x_arr[0,0], x_arr[0,1], 'og')
