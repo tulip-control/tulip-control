@@ -984,9 +984,9 @@ def merge_partitions(abstractions):
     
     ab0 = abstractions[init_mode]
     regions = ab0.ppp.regions
-    parents = range(len(regions) )
-    ppp2orig = ab0.ppp2orig
-    ppp2pwa = ab0.ppp2pwa
+    parents = {init_mode:range(len(regions) )}
+    ppp2orig = {init_mode:ab0.ppp2orig}
+    ppp2pwa = {init_mode:ab0.ppp2pwa}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
     
     for cur_mode in remaining_modes:
@@ -1051,29 +1051,28 @@ def merge_partitions(abstractions):
     return (abstraction, ap_labeling)
 
 def merge_partition_pair(
-    ab1, ab2,
+    old_regions, ab2,
     cur_mode, prev_modes,
     old_parents, old_ap_labeling,
-    ppp2orig, ppp2pwa
+    old_ppp2orig, old_ppp2pwa
 ):
     # TODO: track initial states: better done automatically with AP 'init'
     
     logger.info('merging partitions')
     
-    part1 = ab1.ppp
     part2 = ab2.ppp
     
     modes = prev_modes + [cur_mode]
     
     new_list = []
-    orig = {mode:[] for mode in modes}
-    subsystems = {mode:[] for mode in modes}
+    ppp2orig = {mode:[] for mode in modes}
+    ppp2pwa = {mode:[] for mode in modes}
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
     
-    for i in xrange(len(part1.regions)):
+    for i in xrange(len(old_regions)):
         for j in xrange(len(part2.regions)):
-            isect = pc.intersect(part1.regions[i],
+            isect = pc.intersect(old_regions[i],
                                  part2.regions[j])
             rc, xc = pc.cheby_ball(isect)
             
@@ -1087,25 +1086,25 @@ def merge_partition_pair(
                 isect = pc.Region([isect])
             
             # label the Region with propositions
-            isect.props = part1.regions[i].props.copy()
+            isect.props = old_regions[i].props.copy()
             
             new_list.append(isect)
             idx = new_list.index(isect)
             
             # keep track of parents
-            for mode in old_parents:
-                parents[mode][idx] = i
+            for mode in prev_modes:
+                parents[mode][idx] = old_parents[mode][i]
             parents[cur_mode][idx] = j
             
             # keep track of original regions
-            for mode in ppp2orig:
-                orig[mode] += [ppp2orig[mode][i] ]
-            orig[cur_mode] += [ab2.ppp2orig[j] ]
+            for mode in old_ppp2orig:
+                ppp2orig[mode] += [old_ppp2orig[mode][i] ]
+            ppp2orig[cur_mode] += [ab2.ppp2orig[j] ]
             
             # keep track of subsystems
-            for mode in ppp2pwa:
-                subsystems[mode] += [ppp2pwa[mode][i] ]
-            subsystems[cur_mode] += [ab2.ppp2pwa[j] ]
+            for mode in old_ppp2pwa:
+                ppp2pwa[mode] += [old_ppp2pwa[mode][i] ]
+            ppp2pwa[cur_mode] += [ab2.ppp2pwa[j] ]
             
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
