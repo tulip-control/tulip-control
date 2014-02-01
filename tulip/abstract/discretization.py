@@ -736,7 +736,25 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #     return new_part
 
 def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
+    """Abstract switched dynamics over given partition.
     
+    @type ppp: PropPreservingPartition
+    
+    @param hybrid_sys: dynamics of switching modes
+    @type hybrid_sys: hybrid.HybSysDyn
+    
+    @param disc_params: discretization parameters
+        passed to C{discretize},
+        see that for details
+    @type disc_params: dict (keyed by mode) of dicts
+    
+    @param plot: save partition images
+    @type plot: bool
+    
+    @return: abstracted dynamics,
+        some attributes are dict keyed by mode
+    @rtype: AbstractSysDyn
+    """
     if disc_params is None:
         disc_params = {'N':1, 'trans_length':1}
     
@@ -787,6 +805,8 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     return merged_abstr
 
 def plot_mode_partitions(abstractions, merged_abs):
+    """Save each mode's partition and final merged partition.
+    """
     try:
         from tulip.graphics import newax
     except:
@@ -820,9 +840,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
     
     @type merged_part: AbstractSysDyn
-    
     @type abstr: list of AbstractSysDyn
-    
     @type hybrid_sys: HybridSysDyn
     """
     # TODO: check equality of atomic proposition sets
@@ -886,6 +904,12 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
 
 def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
                     trans_length=1, abs_tol=1e-7):
+    """Find which transitions are feasible in given mode.
+    
+    Used for the candidate transitions of the merged partition.
+    
+    @rtype: scipy.sparse.lil_matrix
+    """
     logger.info('checking which transitions remain feasible after merging')
     part = abstract_sys.ppp
     
@@ -948,6 +972,16 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     return transitions
     
 def merge_partitions(abstractions):
+    """Merge multiple abstractions.
+    
+    @param abstractions: keyed by mode
+    @type abstractions: dict of AbstractSysDyn
+    
+    @rtype: (merged_abstraction, ap_labeling)
+        where:
+            - merged_abstraction: AbstractSysDyn
+            - ap_labeling: dict
+    """
     if len(abstractions) == 0:
         warnings.warn('Abstractions empty, nothing to merge.')
         return
@@ -1056,8 +1090,8 @@ def merge_partition_pair(
     old_parents, old_ap_labeling,
     old_ppp2orig, old_ppp2pwa
 ):
-    # TODO: track initial states: better done automatically with AP 'init'
-    
+    """Merge an Abstraction with the current partition iterate.
+    """
     logger.info('merging partitions')
     
     part2 = ab2.ppp
@@ -1129,6 +1163,11 @@ def merge_partition_pair(
     return new_list, parents, ap_labeling, ppp2orig, ppp2pwa
 
 def _all_dict(r, names='?'):
+    """Return True if all elements in r are dict.
+    
+    False if all elements are not dict.
+    Otherwise raise Exception mentioning C{names}.
+    """
     f = lambda x: isinstance(x, dict)
     
     n_dict = len(filter(f, r))
