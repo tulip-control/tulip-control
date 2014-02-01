@@ -455,10 +455,15 @@ class Region(object):
 
         
     def __str__(self):
-        output = ""
+        output = ''
         for i in xrange(len(self.list_poly)):
-            output += "Polytope number " +str(i+1) +":\n"
-            output += str(self.list_poly[i]) +"\n"
+            output += '\t Polytope number ' + str(i+1) + ':\n'
+            
+            poly_str = str(self.list_poly[i])
+            poly_str = poly_str.replace('\n', '\n\t\t')
+            
+            output += '\t ' + poly_str + '\n'
+        output += '\n'
         return output  
         
     def __len__(self):
