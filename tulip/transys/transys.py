@@ -498,8 +498,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         if fileformat not in {'promela', 'Promela', 'pml'}:
             return False
         
-        if fileformat in {'promela', 'Promela', 'pml'}:
-            s = graph2promela.fts2promela(self, self.name)
+        s = graph2promela.fts2promela(self, self.name)
         
         # dump to file
         f = open(path, 'w')

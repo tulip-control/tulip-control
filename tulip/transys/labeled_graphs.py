@@ -45,7 +45,7 @@ import networkx as nx
 
 from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique
-from .export import save_d3, machine2scxml, graph2dot
+from .export import save_d3, graph2dot
 
 hl = 40 *'-'
 
@@ -2520,11 +2520,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         if fileformat is 'html':
             return save_d3.labeled_digraph2d3(self, path)
-        if fileformat is 'scxml':
-            s = machine2scxml.mealy2scxml(self)
-            scxml_file = open(path, 'w')
-            scxml_file.write(s)
-            return True
         
         # subclass has extra export formats ?
         if hasattr(self, '_save'):

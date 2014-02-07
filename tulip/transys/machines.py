@@ -38,6 +38,7 @@ from random import choice
 
 from .labeled_graphs import LabeledStateDiGraph
 from . import executions
+from .export import machine2scxml
 
 hl = 40 *'-'
 
@@ -468,6 +469,22 @@ class MealyMachine(FiniteStateMachine):
         s += hl +'\n'
         
         return s
+    
+    def _save(self, path, fileformat):
+        """Export options available only for Mealy machines.
+        
+        @type fileformat: 'scxml'
+        """
+        if fileformat != 'scxml':
+            return False
+        
+        s = machine2scxml.mealy2scxml(self)
+        
+        # dump to file
+        f = open(path, 'w')
+        f.write(s)
+        f.close()
+        return True
     
     def add_outputs(self, new_outputs, masks={}):
         """Add new outputs.
