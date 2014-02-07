@@ -5,7 +5,7 @@ This folder contains the files required to export controllers to Simulink
 blocks and a couple examples for reference. Tulip, MATLAB, Simulink, and
 Stateflow must all be installed. Provided files below:
 
-	-StateflowExport.py - Converts Mealy Machines to Stateflow charts
+	- stateflow_export.py - Converts Mealy Machines to Stateflow charts
 
 
 
@@ -16,7 +16,7 @@ USAGE
 	import StateflowExport
 	...
 	ctrl = synth.synthesize(...)                       # returns a Mealy Machine
-	StateflowExport.to_stateflow(ctrl, 'machine.m')   # writes machine.m
+	stateflow_export.to_stateflow(ctrl, 'machine.m')   # writes machine.m
 
 2) In MATLAB, run machine.m. A new Simulink model containing the Mealy
    Machine should appear. Note that for the moment, exported Stateflow 
