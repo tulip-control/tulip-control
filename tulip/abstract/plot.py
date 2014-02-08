@@ -75,7 +75,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         then transitions in C{ppp} are shown with arrows.
         Otherwise C{ppp.adj} is plotted.
         
-        To hide C{ppp.adj}, pass: trans = 'none'
+        To show C{ppp.adj}, pass: trans = True
     
     @param plot_numbers: If True,
         then annotate each Region center with its number.
@@ -117,9 +117,11 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         ax, fig = newax()
     
     # no trans given: use partition's
-    if trans is None and ppp.adj is not None:
+    if trans is True and ppp.adj is not None:
         ax.set_title('Adjacency from Partition')
         trans = ppp.adj
+    elif trans is None:
+        trans = 'none'
     else:
         ax.set_title('Adjacency from given Transitions')
     
@@ -157,7 +159,6 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         
         for j in np.nonzero(trans[:,i] )[0]:
             reg1 = reg_list[j]
-            
             plot_transition_arrow(reg, reg1, ax, arr_size)
     
     if show:
