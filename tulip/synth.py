@@ -432,7 +432,9 @@ def fts2spec(
         states, state_ids, fts.transitions,
         action_ids=action_ids
     )
-    sys_trans += ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    sys_init += tmp_init
+    sys_trans += tmp_trans
     
     return (sys_vars, sys_init, sys_trans)
 
@@ -498,7 +500,9 @@ def sys_open_fts2spec(
         states, state_ids, trans,
         sys_action_ids=sys_action_ids, env_action_ids=env_action_ids
     )
-    sys_trans += ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    sys_init += tmp_init
+    sys_trans += tmp_trans
     
     env_trans += env_trans_from_sys_ts(
         states, state_ids, trans, env_action_ids
@@ -555,7 +559,9 @@ def env_open_fts2spec(
         states, state_ids, trans,
         env_action_ids=env_action_ids, sys_action_ids=sys_action_ids
     )
-    env_trans += ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    env_init += tmp_init
+    env_trans += tmp_trans
     
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
@@ -565,19 +571,8 @@ def env_open_fts2spec(
 
 def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """Initial state, including enforcement of exactly one.
-    
-    APs also considered for the initial state.
     """
     init = []
-    
-    # don't ignore labeling info
-    for state in states.initial:
-        state_id = state_ids[state]
-        label = states.label_of(state)
-        ap_str = sprint_aps(label, aps)
-        if not ap_str:
-            continue
-        init += ['!(' + pstr(state_id) + ') || (' + ap_str +')']
     
     # skip ?
     if ignore_initial:
@@ -753,6 +748,17 @@ def ap_trans_from_ts(states, state_ids, aps):
     if not aps:
         return trans
     
+    # initial labeling
+    init = []
+    for state in states:
+        state_id = state_ids[state]
+        label = states.label_of(state)
+        ap_str = sprint_aps(label, aps)
+        if not ap_str:
+            continue
+        init += ['!(' + pstr(state_id) + ') || (' + ap_str +')']
+    
+    # transitions of labels
     for state in states:
         label = states.label_of(state)
         state_id = state_ids[state]
@@ -762,7 +768,8 @@ def ap_trans_from_ts(states, state_ids, aps):
             continue
         
         trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
-    return trans
+    
+    return (init, trans)
 
 def sprint_aps(label, aps):
     if label.has_key("ap"):
