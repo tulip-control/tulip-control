@@ -442,22 +442,28 @@ def discretize(
             else:
                 diff.props = si.props.copy()
         
-            # Add new states
+            # replace si by intersection (single state)
             sol[i] = isect
-            difflist = pc.separate(diff)    # Separate the difference
+            
+            # cut difference into connected pieces
+            difflist = pc.separate(diff)
             num_new = len(difflist)
-            for reg in difflist:
-                sol.append(reg)
+            
+            # add each piece, as a new state
+            for region in difflist:
+                sol.append(region)
+                
+                # keep track of PWA subsystems map to new states
                 if ispwa:
                     subsys_list.append(subsys_list[i])
-            size = len(sol)
+            n_cells = len(sol)
             
             # Update transition matrix
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
-            transitions[i, :] = np.zeros(size)
+            transitions[i, :] = np.zeros(n_cells)
             for kk in xrange(num_new):
-                r = size -1 -kk
+                r = n_cells -1 -kk
                 
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
@@ -471,13 +477,13 @@ def discretize(
             
             # Update adjacency matrix
             old_adj = np.nonzero(adj[i, :])[0]
-            adj[i, :] = np.zeros([size -num_new])
-            adj[:, i] = np.zeros([size -num_new])
+            adj[i, :] = np.zeros([n_cells -num_new])
+            adj[:, i] = np.zeros([n_cells -num_new])
             
             adj = np.pad(adj, (0,num_new), 'constant')
             
             for kk in xrange(num_new):
-                r = size -1 -kk
+                r = n_cells -1 -kk
                 
                 adj[i, r] = 1
                 adj[r, i] = 1
@@ -490,10 +496,10 @@ def discretize(
             if logger.getEffectiveLevel() >= logging.INFO:
                 msg = '\n Adding states ' + str(i) + ' and '
                 for kk in xrange(num_new):
-                    msg += str(size-1-kk) + ' and '
+                    msg += str(n_cells-1-kk) + ' and '
                 msg += '\n'
                         
-            for k in np.setdiff1d(old_adj, [i,size-1]):
+            for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                 # Every "old" neighbor must be the neighbor
                 # of at least one of the new
                 if pc.is_adjacent(sol[i], sol[k]):
@@ -505,7 +511,7 @@ def discretize(
                     transitions[k, i] = 0
                 
                 for kk in xrange(num_new):
-                    r = size -1 -kk
+                    r = n_cells -1 -kk
                     
                     if pc.is_adjacent(sol[r], sol[k]):
                         adj[r, k] = 1
@@ -521,7 +527,7 @@ def discretize(
             sym_adj_change(IJ, adj_k, transitions, i)
             
             for kk in xrange(num_new):
-                sym_adj_change(IJ, adj_k, transitions, size -1 -kk)
+                sym_adj_change(IJ, adj_k, transitions, n_cells -1 -kk)
             
             msg += '\n\n Updated adj: \n' + str(adj)
             msg += '\n\n Updated trans: \n' + str(transitions)
