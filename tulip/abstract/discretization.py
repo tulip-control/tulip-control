@@ -335,7 +335,10 @@ def discretize(
     adj = np.array(adj)
     
     # next 2 lines omitted in discretize_overlap
-    subsys_list = list(ppp2pwa)
+    if ispwa:
+        subsys_list = list(ppp2pwa)
+    else:
+        subsys_list = None
     ss = ssys
     
     # init graphics
