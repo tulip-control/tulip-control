@@ -36,6 +36,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
+import os
 from pprint import pformat
 from collections import Iterable
 import warnings
@@ -2463,7 +2464,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """
         return graph2dot.graph2dot_str(self, wrap)
     
-    def save(self, filename='default', fileformat='pdf',
+    def save(self, filename='default', fileformat=None,
              add_missing_extension=True, rankdir='LR', prog=None,
              wrap=10):
         """Save image to file.
@@ -2515,6 +2516,12 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         @rtype: bool
         @return: True if saving completed successfully, False otherwise.
         """
+        if fileformat is None:
+            fname, fextension = os.path.splitext(filename)
+            if not fextension:
+                fextension = '.pdf'
+            fileformat = fextension[1:]
+        
         path = self._export_fname(filename, fileformat,
                                   addext=add_missing_extension)
         
