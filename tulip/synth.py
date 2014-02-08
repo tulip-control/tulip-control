@@ -742,14 +742,14 @@ def env_trans_from_env_ts(
 def ap_trans_from_ts(states, state_ids, aps):
     """Require atomic propositions to follow states according to label.
     """
+    init = []
     trans = []
     
     # no AP labels ?
     if not aps:
-        return trans
+        return (init, trans)
     
     # initial labeling
-    init = []
     for state in states:
         state_id = state_ids[state]
         label = states.label_of(state)
