@@ -1495,17 +1495,16 @@ def separate(reg1, abs_tol=ABS_TOL):
     return final
         
 def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
-    """Checks if two polytopes or regions are adjacent 
-    by enlarging both slightly and checking the intersection
+    """Return True if the two polytopes or regions are adjacent.
     
-    Input:
-    - `poly1,poly2`: Polytopes or Regions to check
-    - `abs_tol`: absolute tolerance
-    - `overlap`: used for overlapping polytopes, functions returns
+    Check by enlarging both slightly and checking for intersection.
+    
+    @param poly1, poly2: Polytopes or Regions to check
+    @param abs_tol: absolute tolerance
+    @param overlap: used for overlapping polytopes, functions returns
                  True if polytopes are neighbors OR overlap
     
-    Output:
-    True if polytopes are adjacent, False otherwise
+    @return: True if polytopes are adjacent, False otherwise
     """
     if poly1.dim != poly2.dim:
         raise Exception("is_adjacent: "
