@@ -121,7 +121,7 @@ ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 
 # Save graphical representation of controller for viewing
-if not ctrl.save('pwa.png', 'png'):
+if not ctrl.save('pwa.png'):
     print(ctrl)
 
 # Simulation

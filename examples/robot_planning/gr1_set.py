@@ -113,5 +113,5 @@ ctrl = synth.synthesize('gr1c', specs)
 
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('gr1_set.png', 'png'):
+if not ctrl.save('gr1_set.png'):
     print(ctrl)
