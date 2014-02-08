@@ -53,8 +53,8 @@ sys_prog = {'home'}
 
 # one additional requirement: if in lot,
 # then stay there until park signal is turned off
-sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)',
-            '((lot & park) -> X(lot))'}
+sys_safe = {'(X(X0reach) <-> lot) || (X0reach && !park)',
+            '((lot && park) -> X(lot))'}
 sys_prog |= {'X0reach'}
 
 specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
@@ -81,6 +81,6 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     sys_safety=sys_safe,
                     env_prog=env_prog, sys_prog=sys_prog)
 
-ctrl = synth.synthesize('gr1c', specs, sys=sys, env=env1)
+ctrl = synth.synthesize('gr1c', specs, sys=sys, env=env1, bool_actions=True)
 ctrl.save('sys_and_env_ts1.pdf')
 logger.info(ctrl)
