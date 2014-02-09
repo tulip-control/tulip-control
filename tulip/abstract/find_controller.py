@@ -205,7 +205,7 @@ def get_input(
         print("get_input: "
             "Warning, no transition matrix found, assuming feasible")
     
-    if (not conservative) & (orig == None):
+    if (not conservative) & (orig is None):
         print("List of original proposition preserving "
             "partitions not given, reverting to conservative mode")
         conservative = True

@@ -297,7 +297,7 @@ def quickhull(POINTS, abs_tol=1e-7):
             # Move points from facets in V to the set unassigned_points
             N = len(fac1.outside)
             for ii in range(N):
-                if unassigned_points == None:
+                if unassigned_points is None:
                     unassigned_points = np.array([fac1.outside[ii].coordinates])
                 else:
                     unassigned_points = np.vstack([unassigned_points,fac1.outside[ii].coordinates])
@@ -338,7 +338,7 @@ def quickhull(POINTS, abs_tol=1e-7):
         # Assign unassigned points to facets in NV,
         # and add facets to F or Forg
         for fac1 in NV:
-            if unassigned_points == None:
+            if unassigned_points is None:
                 Forg.append(fac1)
                 continue
             npt = np.shape(unassigned_points)[0]

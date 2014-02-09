@@ -546,7 +546,7 @@ def proj_aff(Ce,De,be,expected_dim=None,abs_tol=1e-7):
         a = Ce
         b = be
         a_n, b_n = normalize(a,b)
-        if expected_dim != None:
+        if expected_dim is not None:
             if expected_dim != b_n.size:
                 raise Exception("proj_aff: wrong dimension calculated in 1")
         return a_n.flatten(), b_n
@@ -561,7 +561,7 @@ def proj_aff(Ce,De,be,expected_dim=None,abs_tol=1e-7):
     
     a_n,b_n = normalize(a,b)
     
-    if expected_dim != None:
+    if expected_dim is not None:
         if expected_dim != b_n.size:
             raise Exception("proj_aff: wrong dimension calculated in 2")
     
@@ -612,7 +612,7 @@ def is_dual_degenerate(c,G,h,A,b,x_opt,z_opt,abs_tol=1e-7):
         
     dual = 0
     
-    if A == None:
+    if A is None:
         test = DI
     else:
         test = np.vstack([DI,A])
@@ -620,7 +620,7 @@ def is_dual_degenerate(c,G,h,A,b,x_opt,z_opt,abs_tol=1e-7):
         return True
     else:
         if len(L) > 0:
-            if A == None:
+            if A is None:
                 Ae = DJ
             else:
                 Ae = np.vstack([DJ,A])
@@ -645,7 +645,7 @@ def unique_equalityset(C,D,b,af,bf,abs_tol=1e-7,verbose=0):
     The inequalities have to be satisfied with equality everywhere on
     the face defined by af and bf.'''
     
-    if D != None:
+    if D is not None:
         A = np.hstack([C,D])
         a = np.hstack([af, np.zeros(D.shape[1]) ])
     else:

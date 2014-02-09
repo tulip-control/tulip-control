@@ -227,7 +227,7 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     A = ssys.A
     B = ssys.B
     
-    if ssys.K != None:
+    if ssys.K is not None:
         K = ssys.K
     else:
         K = np.zeros(x0.shape)

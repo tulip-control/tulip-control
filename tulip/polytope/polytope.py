@@ -680,7 +680,7 @@ def is_fulldim(polyreg, abs_tol=ABS_TOL):
     - `result`: Boolean that is True if inner points found, False
                 otherwise.
     """
-    if polyreg.fulldim != None:
+    if polyreg.fulldim is not None:
         return polyreg.fulldim
         
     lenP = len(polyreg)
@@ -917,7 +917,7 @@ def union(polyreg1,polyreg2,check_convex=False):
             if not is_empty(poly):
                 lst.append(poly)
             
-    if s3 != None:
+    if s3 is not None:
         if len(s3) == 0:
             if not is_empty(s3):
                 lst.append(s3)
@@ -972,7 +972,7 @@ def cheby_ball(poly1):
     length of the longest line segment along the first coordinate axis
     inside polytope P
     """
-    if (poly1._chebXc != None) and (poly1._chebR != None):
+    if (poly1._chebXc is not None) and (poly1._chebR is not None):
         #In case chebyshev ball already calculated and stored
         return poly1._chebR,poly1._chebXc
 
@@ -1145,7 +1145,7 @@ def envelope(reg, abs_tol=ABS_TOL):
                     # can not be in envelope
                     outer_i[ii] = 0
         ind_i = np.nonzero(outer_i)[0]
-        if Ae == None:
+        if Ae is None:
             Ae = poly1.A[ind_i,:]
             be = poly1.b[ind_i]
         else:
@@ -1275,7 +1275,7 @@ def extreme(poly1):
     Output:
     - A (N x d) numpy array containing the N vertices of poly1
     """
-    if poly1.vertices != None:
+    if poly1.vertices is not None:
         # In case vertices already stored
         return poly1.vertices
 
@@ -1660,7 +1660,7 @@ def projection_exthull(poly1,new_dim):
     Efficient in low dimensions.
     """
     vert = extreme(poly1)
-    if vert == None:
+    if vert is None:
         # qhull failed
         return Polytope(fulldim=False, minrep=True)
     return reduce(qhull(vert[:,new_dim]))
@@ -1714,7 +1714,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                 None, None, lp_solver
             )
             xopt = np.array(sol['x']).flatten()  
-            if Vert == None:
+            if Vert is None:
                 Vert = xopt.reshape(1,xopt.size)
             else:
                 k = np.nonzero( Vert[:,new_dim[0]] == xopt[new_dim[0]] )[0]
@@ -1760,7 +1760,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                                 
                 # See if already stored
                 k = np.array([])
-                if HP != None:
+                if HP is not None:
                     k = np.nonzero( HP[:,0] == f2[0] )[0]
                     for j in xrange(1,np.shape(P1.A)[1]+1):
                         ii = np.nonzero(HP[k,j] == f2[j])[0]
@@ -1793,7 +1793,7 @@ def projection_iterhull(poly1, new_dim, max_iter=1000,
                     
                     # Add new half plane information
                     # HP format: [ P1.Ai P1.bi xopt]
-                    if HP == None:
+                    if HP is None:
                         HP = add.reshape(1,add.size)
                     else:
                         HP = np.vstack([HP,add])

@@ -229,7 +229,7 @@ class LabelConsistency(object):
             # not iterable, check using convention:
             
             # sublabel type not defined ?
-            if possible_labels == None:
+            if possible_labels is None:
                 print('Undefined sublabel type')
                 continue
             
