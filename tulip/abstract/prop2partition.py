@@ -489,7 +489,16 @@ class PropPreservingPartition(object):
         self.domain = domain
         self.regions = regions[:]
         self.adj = adj
-        
+    
+    def __len__(self):
+        return len(self.regions)
+    
+    def __iter__(self):
+        return iter(self.regions)
+    
+    def __getitem__(self, key):
+        return self.regions[key]
+    
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()
     
