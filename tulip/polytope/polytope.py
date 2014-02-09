@@ -233,6 +233,9 @@ class Polytope(object):
     def __eq__(self, other):
         return self <= other and other <= self
     
+    def __ne__(self, other):
+        return not self == other
+    
     def __le__(self, other):
         return is_subset(self, other)
     
@@ -493,6 +496,9 @@ class Region(object):
     
     def __eq__(self, other):
         return self <= other and other <= self
+    
+    def __ne__(self, other):
+        return not self == other
     
     def __le__(self, other):
         return is_subset(self, other)
