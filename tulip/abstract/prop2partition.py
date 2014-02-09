@@ -439,7 +439,7 @@ class PropPreservingPartition(object):
         adj=None, prop_regions=None, check=True
     ):
         if prop_regions is None:
-            self.cont_props = None
+            self.prop_regions = None
         else:
             try:
                 # don't call it
@@ -464,8 +464,6 @@ class PropPreservingPartition(object):
                 raise ValueError(msg)
         
         if check:
-            atomic_propositions = set(self.prop_regions)
-            
             for region in regions:
                 if not region <= domain:
                     msg = 'Partition: Region:\n\n' + str(region) + '\n'
@@ -477,12 +475,15 @@ class PropPreservingPartition(object):
                     warn('No continuous propositions defined.')
                     continue
                 
-                if not region.props <= atomic_propositions:
+                if self.prop_regions is None:
+                    continue
+                
+                if not region.props <= set(self.prop_regions):
                     msg = 'Partitions: Region labeled with propositions:\n\t'
                     msg += str(region.props) + '\n'
                     msg += 'not all of which are in the '
                     msg += 'continuous atomic propositions:\n\t'
-                    msg += str(atomic_propositions)
+                    msg += str(set(self.prop_regions) )
                     raise ValueError(msg)
         
         self.domain = domain
