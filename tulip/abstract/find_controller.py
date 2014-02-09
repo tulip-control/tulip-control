@@ -460,7 +460,7 @@ def find_discrete_state(x0, part):
         C{x0} does not belong to any discrete state.
     @rtype: int
     """
-    for (i, region) in enumerate(part.regions):
+    for (i, region) in enumerate(part):
         if pc.is_inside(region, x0):
              return i
     return None

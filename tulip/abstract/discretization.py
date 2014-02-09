@@ -85,7 +85,7 @@ class AbstractSysDyn(object):
     - ppp2ts: map Regions to states of the transition system
         Each index denotes the Region with same index in:
             
-            ppp.regions
+            ppp
             
         type: list of states
             (usually each state is a str)
@@ -98,7 +98,7 @@ class AbstractSysDyn(object):
     
     - ppp2orig: map of new Regions to original Regions:
             
-            - i-th new Region in C{ppp.regions}
+            - i-th new Region in C{ppp}
             - ppp2orig[i]-th original Region in C{original_regions}
             
         type: list of indices
@@ -295,7 +295,7 @@ def discretize(
         
         remove_trans = False # already allowed in nonconservative
         orig_list = []
-        for poly in part.regions:
+        for poly in part:
             if len(poly) == 0:
                 orig_list.append(poly.copy())
             elif len(poly) == 1:
@@ -324,7 +324,7 @@ def discretize(
                           np.array(part.adj.todense()) )
     
     # Initialize output
-    num_regions = len(part.regions)
+    num_regions = len(part)
     transitions = np.zeros(
         [num_regions, num_regions],
         dtype = int
@@ -786,7 +786,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
         abstractions[mode] = absys
     
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
-    n = len(merged_abstr.ppp.regions)
+    n = len(merged_abstr.ppp)
     logger.info('Merged partition has: ' + str(n) + ', states')
     
     trans = dict()
@@ -856,7 +856,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     sys_ts = trs.OpenFTS()
     
     # create stats
-    n = len(merged_abstr.ppp.regions)
+    n = len(merged_abstr.ppp)
     states = ['s'+str(i) for i in xrange(n) ]
     sys_ts.states.add_from(states)
     
@@ -865,7 +865,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     # copy AP labels from regions to discrete states
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
-        props =  merged_abstr.ppp.regions[i].props
+        props =  merged_abstr.ppp[i].props
         sys_ts.states.label(state, props)
     
     # create mode actions
@@ -928,7 +928,7 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         IJ = (IJ > 0).astype(int)
     
     # Initialize output
-    n = len(part.regions)
+    n = len(part)
     transitions = sp.lil_matrix((n, n), dtype=int)
     
     # Do the abstraction
@@ -944,8 +944,8 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         
         logger.debug('checking transition: ' + str(i) + ' -> ' + str(j))
         
-        si = part.regions[i]
-        sj = part.regions[j]
+        si = part[i]
+        sj = part[j]
         
         orig_region_idx = abstract_sys.ppp2orig[mode][i]
         
@@ -1022,7 +1022,7 @@ def merge_partitions(abstractions):
     prev_modes = [init_mode]
     
     ab0 = abstractions[init_mode]
-    regions = ab0.ppp.regions
+    regions = list(ab0.ppp)
     parents = {init_mode:range(len(regions) )}
     ppp2orig = {init_mode:ab0.ppp2orig}
     ppp2pwa = {init_mode:ab0.ppp2pwa}
@@ -1110,9 +1110,9 @@ def merge_partition_pair(
     ap_labeling = dict()
     
     for i in xrange(len(old_regions)):
-        for j in xrange(len(part2.regions)):
+        for j in xrange(len(part2)):
             isect = pc.intersect(old_regions[i],
-                                 part2.regions[j])
+                                 part2[j])
             rc, xc = pc.cheby_ball(isect)
             
             # no intersection ?
