@@ -457,13 +457,13 @@ def discretize(
                 if ispwa:
                     subsys_list.append(subsys_list[i])
             n_cells = len(sol)
+            new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
             
             # Update transition matrix
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
             transitions[i, :] = np.zeros(n_cells)
-            for kk in xrange(num_new):
-                r = n_cells -1 -kk
+            for r in new_idx:
                 
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
@@ -482,9 +482,7 @@ def discretize(
             
             adj = np.pad(adj, (0,num_new), 'constant')
             
-            for kk in xrange(num_new):
-                r = n_cells -1 -kk
-                
+            for r in new_idx:
                 adj[i, r] = 1
                 adj[r, i] = 1
                 adj[r, r] = 1
@@ -495,8 +493,8 @@ def discretize(
                         
             if logger.getEffectiveLevel() >= logging.INFO:
                 msg = '\n Adding states ' + str(i) + ' and '
-                for kk in xrange(num_new):
-                    msg += str(n_cells-1-kk) + ' and '
+                for r in new_idx:
+                    msg += str(r) + ' and '
                 msg += '\n'
                         
             for k in np.setdiff1d(old_adj, [i,n_cells-1]):
@@ -510,9 +508,7 @@ def discretize(
                     transitions[i, k] = 0
                     transitions[k, i] = 0
                 
-                for kk in xrange(num_new):
-                    r = n_cells -1 -kk
-                    
+                for r in new_idx:
                     if pc.is_adjacent(sol[r], sol[k]):
                         adj[r, k] = 1
                         adj[k, r] = 1
@@ -526,8 +522,8 @@ def discretize(
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
             
-            for kk in xrange(num_new):
-                sym_adj_change(IJ, adj_k, transitions, n_cells -1 -kk)
+            for r in new_idx:
+                sym_adj_change(IJ, adj_k, transitions, r)
             
             msg += '\n\n Updated adj: \n' + str(adj)
             msg += '\n\n Updated trans: \n' + str(transitions)
