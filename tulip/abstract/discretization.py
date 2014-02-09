@@ -821,12 +821,12 @@ def plot_mode_partitions(abstractions, merged_abs):
     ax, fig = newax()
     
     for mode, ab in abstractions.iteritems():
-        ab.ppp.plot(plot_numbers=False, ax=ax, trans=ab.ts)
+        ab.ppp.plot(plot_numbers=False, ax=ax, trans=ab.ppp.adj)
         plot_annot(ax)
         fname = 'part_' + str(mode) + '.pdf'
         fig.savefig(fname)
     
-    merged_abs.ppp.plot(plot_numbers=False, trans=merged_abs.ts, ax=ax)
+    merged_abs.ppp.plot(plot_numbers=False, ax=ax, trans=merged_abs.ppp.adj)
     plot_annot
     fname = 'part_merged' + '.pdf'
     fig.savefig(fname)
