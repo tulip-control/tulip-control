@@ -299,7 +299,7 @@ def discretize(
             if len(poly) == 0:
                 orig_list.append(poly.copy())
             elif len(poly) == 1:
-                orig_list.append(poly.list_poly[0].copy())
+                orig_list.append(poly[0].copy())
             else:
                 raise Exception("discretize: "
                     "problem in convexification")

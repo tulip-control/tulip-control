@@ -221,17 +221,17 @@ def get_input(
     if conservative:
         # Take convex hull or P_start as constraint
         if len(P_start) > 0:
-            if len(P_start.list_poly) > 1:
+            if len(P_start) > 1:
                 # Take convex hull
-                vert = pc.extreme(P_start.list_poly[0])
-                for i in range(1, len(P_start.list_poly)):
+                vert = pc.extreme(P_start[0])
+                for i in range(1, len(P_start)):
                     vert = np.hstack([
                         vert,
-                        pc.extreme(P_start.list_poly[i])
+                        pc.extreme(P_start[i])
                     ])
                 P1 = pc.qhull(vert)
             else:
-                P1 = P_start.list_poly[0]
+                P1 = P_start[0]
         else:
             P1 = P_start
     else:
@@ -243,7 +243,7 @@ def get_input(
         low_u = np.zeros([N,m])
         
         # for each polytope in target region
-        for P3 in P_end.list_poly:
+        for P3 in P_end:
             if mid_weight > 0:
                 rc, xc = pc.cheby_ball(P3)
                 R[

@@ -66,10 +66,10 @@ def prop2part(state_space, cont_props_dict):
     PropPreservingPartition,
     polytope.Polytope
     """
-    first_poly = [] #Initial Region's list_poly atribute 
+    first_poly = [] #Initial Region's polytopes
     first_poly.append(state_space)
     
-    regions = [pc.Region(list_poly=first_poly)]
+    regions = [pc.Region(first_poly)]
     
     for cur_prop in cont_props_dict:
         cur_prop_poly = cont_props_dict[cur_prop]
@@ -106,7 +106,7 @@ def prop2part(state_space, cont_props_dict):
                 continue
                 
             #loop for prop does not hold
-            regions.append(pc.Region(list_poly=[], props=prop_now) )
+            regions.append(pc.Region([], props=prop_now) )
             dummy = region_now.diff(cur_prop_poly)
             
             if pc.is_fulldim(dummy):
@@ -159,7 +159,7 @@ def part2convex(ppp):
         
         for j in xrange(len(simplified_reg)):
             region_now = pc.Region(
-                [simplified_reg.list_poly[j]],
+                [simplified_reg[j]],
                 ppp.regions[i].props
             )
             cvxpart.regions.append(region_now)

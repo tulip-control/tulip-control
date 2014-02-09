@@ -146,7 +146,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         if len(reg) == 0:
             ax.add_patch(_get_patch(reg, col) )
         else:
-            for poly2 in reg.list_poly:
+            for poly2 in reg:
                 ax.add_patch(_get_patch(poly2, col) )
     
     # plot transition arrows between patches

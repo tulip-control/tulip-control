@@ -175,12 +175,12 @@ def solve_open_loop(
     r2 = volumes_for_reachability(r2, max_num_poly)
     
     if len(r1) > 0:
-        start_polys = r1.list_poly
+        start_polys = r1
     else:
         start_polys = [r1]
     
     if len(r2) > 0:
-        target_polys = r2.list_poly
+        target_polys = r2
     else:
         target_polys = [r2]
     
@@ -221,12 +221,12 @@ def volumes_for_reachability(part, max_num_poly):
     
     vol_list = np.zeros(len(part) )
     for i in xrange(len(part) ):
-        vol_list[i] = part.list_poly[i].volume
+        vol_list[i] = part[i].volume
     
     ind = np.argsort(-vol_list)
     temp = []
     for i in ind[range(max_num_poly) ]:
-        temp.append(part.list_poly[i] )
+        temp.append(part[i] )
     
     part = pc.Region(temp, [])
     return part

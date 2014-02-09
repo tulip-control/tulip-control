@@ -40,13 +40,13 @@ def prop2part_test():
     
     for reg in mypartition.regions[0:2]:
         assert len(reg.props) == 1
-        assert len(reg.list_poly) == 1
+        assert len(reg) == 1
         
         assert cont_props_dict == mypartition.prop_regions
         
     assert len(mypartition.regions[2].props) == 0
     
-    assert len(mypartition.regions[2].list_poly) == 3
+    assert len(mypartition.regions[2]) == 3
     dum = state_space.copy()
     for reg in mypartition.regions[0:2]:
         dum = dum.diff(reg)
