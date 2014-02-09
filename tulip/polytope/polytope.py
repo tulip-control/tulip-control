@@ -455,7 +455,12 @@ class Region(object):
             self._volume = None
             self._chebXc = None
             self._chebR = None
-
+    
+    def __iter__(self):
+        return iter(self.list_poly)
+    
+    def __getitem__(self, key):
+        return self.list_poly[key]
         
     def __str__(self):
         output = ''
