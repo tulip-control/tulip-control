@@ -1576,7 +1576,32 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
             np.concatenate((b1_arr,b2_arr))
         )
         return is_fulldim(dummy, abs_tol=abs_tol/10)
-      
+
+def is_interior(r0, r1, abs_tol=ABS_TOL):
+    """Return True if r1 is strictly in the interior of r0.
+    
+    Checks if r1 enlarged by abs_tol
+    is a subset of r0.
+    
+    @type r0, r1: Polytope | Region
+    
+    @rtype: bool
+    """
+    if isinstance(r0, Polytope):
+        r0 = Region([r0])
+    if isinstance(r1, Polytope):
+        r1 = Region([r1])
+    
+    for p in r1:
+        A = p.A.copy()
+        b = p.b.copy() + abs_tol
+        
+        dummy = Polytope(A, b)
+        
+        if not dummy <= r0:
+            return True
+    return False
+    
 #### Helper functions ####
         
 def projection_fm(poly1, new_dim, del_dim, abs_tol=ABS_TOL):
