@@ -777,8 +777,6 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
         
         absys = discretize(
             ppp, cont_dyn,
-            min_cell_volume=0.01,
-            plotit=False,
             **disc_params[mode]
         )
         logger.debug('Mode Abstraction:\n' + str(absys) +'\n')
