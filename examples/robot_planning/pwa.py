@@ -51,7 +51,7 @@ def subsys0():
     
     dom = box2poly([[0., 3.], [0.5, 2.]])
     
-    sys_dyn = LtiSysDyn(A, B, E, [], U, W, dom)
+    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn
@@ -69,7 +69,7 @@ def subsys1():
     
     dom = box2poly([[0., 3.], [0., 0.5]])
     
-    sys_dyn = LtiSysDyn(A, B, E, [], U, W, dom)
+    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn

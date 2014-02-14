@@ -54,7 +54,7 @@ U = box2poly(U)
 W = box2poly(W)
 
 # Construct the LTI system describing the dynamics
-sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, cont_state_space)
+sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, cont_state_space)
 # @dynamics_section_end@
 
 # @partition_section@
