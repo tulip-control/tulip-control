@@ -87,7 +87,7 @@ class LtiSysDyn(object):
     --------
     PwaSysDyn, HybridSysDyn, polytope.Polytope
     """
-    def __init__(self, A=[], B=[], E=[], K=[],
+    def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None):
         
         if Uset is None:
@@ -101,20 +101,55 @@ class LtiSysDyn(object):
         
         if (domain is not None) and (not isinstance(domain, pc.Polytope)):
             raise Exception("LtiSysDyn: `domain` has to be a Polytope")
-
+        
+        # check dimensions agree
+        try:
+            nA, mA = A.shape
+        except:
+            raise TypeError('A matrix must be 2d array')
+        if nA != mA:
+            raise ValueError('A must be square')
+        
+        if B is not None:
+            try:
+                nB, mB = B.shape
+            except:
+                raise TypeError('B matrix must be 2d array')
+            if nA != nB:
+                raise ValueError('A and B must have same number of rows')
+        
+        if E is not None:
+            try:
+                nE, mE = E.shape
+            except:
+                raise TypeError('E matrix must be 2d array')
+            if nA != nE:
+                raise ValueError('A and E must have same number of rows')
+        
+        if K is not None:
+            try:
+                nK, mK = K.shape
+            except:
+                raise TypeError('K column vector must be 2d array')
+            
+            if nA != nK:
+                raise ValueError('A and K must have same number of rows')
+            if mK != 1:
+                raise ValueError('K must be a column vector')
+        
         self.A = A
         self.B = B
         
-        if len(K) == 0:
+        if K is None:
             if len(A) != 0:
-                self.K = np.zeros([A.shape[1], 1])
+                self.K = np.zeros([mA, 1])
             else:
                 self.K = K
         else:
             self.K = K.reshape(K.size,1)
 
-        if (len(E) == 0) & (len(A) != 0):
-            self.E = np.zeros([A.shape[1], 1])
+        if E is None and (len(A) != 0):
+            self.E = np.zeros([mA, 1])
             self.Wset = pc.Polytope()
         else:
             self.E = E
