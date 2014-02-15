@@ -388,7 +388,6 @@ class Polytope(object):
             logger.warn('newax not imported. No Polytope plotting.')
             return
         
-        #TODO optional arg for text label
         if not is_fulldim(self):
             logger.error("Cannot plot empty polytope")
             return
@@ -400,7 +399,11 @@ class Polytope(object):
         if ax is None:
             ax, fig = newax()
         
-        poly = _get_patch(self, color, hatch, alpha)
+        poly = _get_patch(
+            self, facecolor=color, hatch=hatch,
+            alpha=alpha, linestyle='dashed', linewidth=3,
+            edgecolor='black'
+        )
         ax.add_patch(poly)
         
         return ax
@@ -636,7 +639,7 @@ class Region(object):
         
         for poly2 in self.list_poly:
             # TODO hatched polytopes in same region
-            poly2.plot(ax, color, hatch, alpha)
+            poly2.plot(ax, color=color, hatch=hatch, alpha=alpha)
         
         return ax
     
@@ -2012,9 +2015,12 @@ def box2poly(box):
     """
     return Polytope.from_box(box)
 
-def _get_patch(poly1, color="blue", hatch=None, alpha=1.0):
-    """Takes a Polytope and returns a Matplotlib Patch Polytope 
-    that can be added to a plot
+def _get_patch(poly1, **kwargs):
+    """Return matplotlib patch for given Polytope.
+    
+    @param poly1: Polytope
+    @param kwargs: any keyword arguments valid for
+        matplotlib.patches.Polygon
     
     Example::
 
@@ -2045,8 +2051,7 @@ def _get_patch(poly1, color="blue", hatch=None, alpha=1.0):
     angle = angle*corr
     ind = np.argsort(angle) 
 
-    patch = mpl.patches.Polygon(V[ind,:], True, color=color,
-                                hatch=hatch, alpha=alpha)
+    patch = mpl.patches.Polygon(V[ind,:], True, **kwargs)
     patch.set_zorder(0)
     return patch
 
