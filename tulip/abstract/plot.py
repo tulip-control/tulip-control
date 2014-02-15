@@ -53,12 +53,6 @@ except Exception, e:
     matplotlib = None
 
 try:
-    from tulip.polytope.polytope import _get_patch
-except Exception, e:
-    logger.error(e)
-    matplotlib = None
-
-try:
     from tulip.graphics import newax
 except Exception, e:
     logger.error(e)
@@ -143,11 +137,7 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         col = prng.rand(3)
         
         # single polytope or region ?
-        if len(reg) == 0:
-            ax.add_patch(_get_patch(reg, col) )
-        else:
-            for poly2 in reg:
-                ax.add_patch(_get_patch(poly2, col) )
+        reg.plot(color=col, ax=ax)
     
     # plot transition arrows between patches
     for (i, reg) in enumerate(reg_list):
