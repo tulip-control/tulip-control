@@ -343,7 +343,7 @@ class States(object):
     def __init__(self, graph, mutable=False,
                  accepting_states_type=None):
         self.graph = graph
-        self.list = list() # None when list disabled
+        self.list = None # None when list disabled
         
         # biject mutable states <-> ints ?
         if mutable:
