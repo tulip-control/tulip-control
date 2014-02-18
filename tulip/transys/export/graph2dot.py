@@ -288,8 +288,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     Note that all networkx graph classes are inherited
     from networkx.Graph
     
-    see also
-    --------
+    See Also
+    ========
     dot & pydot documentation
     
     @param graph: to plot

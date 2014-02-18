@@ -58,14 +58,14 @@ def is_valuation(ports, valuations):
 class FiniteStateMachine(LabeledStateDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
-    inputs
-    ------
+    Inputs
+    ======
     P = {p1, p2,...} is the set of input ports.
     An input port p takes values in a set Vp.
     Set Vp is called the "type" of input port p.
     A "valuation" is an assignment of values to the input ports in P.
     
-    We call "inputs" the set of pairs:
+    We call "inputs" the set of pairs::
     
         {(p_i, Vp_i),...}
     
@@ -73,113 +73,113 @@ class FiniteStateMachine(LabeledStateDiGraph):
     
     A guard is a predicate (bool-valued) used as sub-label for a transition.
     A guard is defined by a set and evaluated using set membership.
-    So given an input port value p=x, then if:
+    So given an input port value p=x, then if::
     
         x \in guard_set
     
     then the guard is True, otherwise it is False.
     
-    The "inputs" are defined by an OrderedDict:
+    The "inputs" are defined by an OrderedDict::
     
         {'p1':explicit, 'p2':check, 'p3':None, ...}
     
     where:
         - C{explicit}:
-            is an iterable representation of Vp,
-            possible only for discrete Vp.
-            If 'p1' is explicitly typed, then guards are evaluated directly:
+          is an iterable representation of Vp,
+          possible only for discrete Vp.
+          If 'p1' is explicitly typed, then guards are evaluated directly::
             
                 input_port_value == guard_value ?
         
         - C{check}:
-            is a class with methods:
+          is a class with methods:
             
                 - C{.is_valid(x) }:
-                    check if value given to input port 'p1' is
-                    in the set of possible values Vp.
+                  check if value given to input port 'p1' is
+                  in the set of possible values Vp.
                 
                 - C{.contains(guard_set, input_port_value) }:
-                    check if C{input_port_value} \\in C{guard_set}
-                    This allows flexible type definitions.
+                  check if C{input_port_value} \\in C{guard_set}
+                  This allows flexible type definitions.
                     
-                    For example, C{input_port_value} might be assigned
-                    int values, but the C{guard_set} be defined by
-                    a symbolic expression as the str: 'x<=5'.
+                  For example, C{input_port_value} might be assigned
+                  int values, but the C{guard_set} be defined by
+                  a symbolic expression as the str: 'x<=5'.
                     
-                    Then the user is responsible for providing
-                    the appropriate method to the Mealy Machine,
-                    using the custom C{check} class described here.
+                  Then the user is responsible for providing
+                  the appropriate method to the Mealy Machine,
+                  using the custom C{check} class described here.
                     
-                    Note that we could provide a rudimentary library
-                    for the basic types of checks, e.g., for
-                    the above simple symbolic case, where using
-                    function eval() is sufficient.
+                  Note that we could provide a rudimentary library
+                  for the basic types of checks, e.g., for
+                  the above simple symbolic case, where using
+                  function eval() is sufficient.
             
         - C{None}:
-            signifies that no type is currently defined for
-            this input port, so input type checking and guard
-            evaluation are disabled.
+          signifies that no type is currently defined for
+          this input port, so input type checking and guard
+          evaluation are disabled.
             
-            This can be used to skip type definitions when
-            they are not needed by the user.
+          This can be used to skip type definitions when
+          they are not needed by the user.
             
-            However, since Machines are in general the output
-            of synthesis, it follows that they are constructed
-            by code, so the benefits of typedefs will be
-            considerable compared to the required coding effort.
+          However, since Machines are in general the output
+          of synthesis, it follows that they are constructed
+          by code, so the benefits of typedefs will be
+          considerable compared to the required coding effort.
     
     An OrderedDict is used to allow setting guards using tuples
     (so order of inputs) or dicts, to avoid writing dicts for each
     guard definition (which would be quite cumbersome).
     
-    Guards annotate transitions:
+    Guards annotate transitions::
         
         Guards: States x States ---> Input_Predicates
     
-    outputs
-    -------
+    Outputs
+    =======
     Similarly defined to inputs, but:
     
         - for Mealy Machines they annotate transitions
         - for Moore Machines they annotate states
     
-    state variables
-    ---------------
+    State Variables
+    ===============
     Similarly defined to inputs, they annotate states,
-    for both Mealy and Moore machines:
+    for both Mealy and Moore machines::
     
         States ---> State_Variables
     
-    update function
-    ---------------
+    Update Function
+    ===============
     The transition relation:
     
-        - for Mealy Machines:
+        - for Mealy Machines::
         
                 States x Input_Valuations ---> Output_Valuations x States
                 
-            Note that in the range Output_Valuations are ordered before States
-            to emphasize that an output_valuation is produced
-            during the transition, NOT at the next state.
+          Note that in the range Output_Valuations are ordered before States
+          to emphasize that an output_valuation is produced
+          during the transition, NOT at the next state.
             
-            The data structure representation of the update function is
-            by storage of the Guards function and definition of Guard
-            evaluation for each input port via the OrderedDict discussed above.
+          The data structure representation of the update function is
+          by storage of the Guards function and definition of Guard
+          evaluation for each input port via the OrderedDict discussed above.
         
-        - for Moore Machines:
+        - for Moore Machines::
         
             States x Input_Valuations ---> States
             States ---> Output_valuations
     
-    note
-    ----
+    Note
+    ====
     A transducer may operate on either finite or infinite words, i.e.,
     it is not equipped with interpretation semantics on the words,
     so it does not "care" about word length.
     It continues as long as its input is fed with letters.
     
-    see also
-    --------
+    See Also
+    ========
     FSM, MealyMachine, MooreMachine
     """
     def __init__(self, **args):
@@ -220,7 +220,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
         """Create new inputs.
         
         @param new_inputs: ordered pairs of port_name : port_type
-        @type new_inputs: OrderedDict | list, of:
+        @type new_inputs: OrderedDict | list, of::
                 (port_name, port_type)
             where:
                 - port_name: str
@@ -300,21 +300,21 @@ class FSM(FiniteStateMachine):
 class MooreMachine(FiniteStateMachine):
     """Moore machine.
     
-    A Moore machine implements the discrete dynamics:
+    A Moore machine implements the discrete dynamics::
         x[k+1] = f(x[k], u[k] )
         y[k] = g(x[k] )
     where:
-        -k: discrete time = sequence index
-        -x: state = valuation of state variables
-        -X: set of states = S
-        -u: inputs = valuation of input ports
-        -y: output actions = valuation of output ports
-        -f: X-> 2^X, transition function
-        -g: X-> Out, output function
+      - k: discrete time = sequence index
+      - x: state = valuation of state variables
+      - X: set of states = S
+      - u: inputs = valuation of input ports
+      - y: output actions = valuation of output ports
+      - f: X-> 2^X, transition function
+      - g: X-> Out, output function
     Observe that the output depends only on the state.
     
-    note
-    ----
+    Note
+    ====
     valuation: assignment of values to each port
     """
     def __init__(self, **args):
@@ -358,8 +358,8 @@ class MooreMachine(FiniteStateMachine):
 class MealyMachine(FiniteStateMachine):
     """Mealy machine.
     
-    examples
-    --------
+    Examples
+    ========
     Traffic Light: Fig. 3.14, p.72 [Lee-Seshia]
     
     >>> m = MealyMachine()
@@ -400,23 +400,23 @@ class MealyMachine(FiniteStateMachine):
     >>> label = {'go':p, 'tick':p, 'stop':a}
     >>> m.transitions.add_labeled('red', 'green', label)
     
-    theory
-    ------
-    A Mealy machine implements the discrete dynamics:
+    Theory
+    ======
+    A Mealy machine implements the discrete dynamics::
         x[k+1] = f(x[k], u[k] )
         y[k] = g(x[k], u[k] )
     where:
-        -k: discrete time = sequence index
-        -x: state = valuation of state variables
-        -X: set of states = S
-        -u: inputs = valuation of input ports
-        -y: output actions = valuation of output ports
-        -f: X-> 2^X, transition function
-        -g: X-> Out, output function
+      - k: discrete time = sequence index
+      - x: state = valuation of state variables
+      - X: set of states = S
+      - u: inputs = valuation of input ports
+      - y: output actions = valuation of output ports
+      - f: X-> 2^X, transition function
+      - g: X-> Out, output function
     Observe that the output is defined when a reaction occurs to an input.
     
-    note
-    ----
+    Note
+    ====
     valuation: assignment of values to each port
     """
     def __init__(self, **args):
@@ -490,7 +490,7 @@ class MealyMachine(FiniteStateMachine):
         """Add new outputs.
         
         @param new_outputs: ordered pairs of port_name : port_type
-        @type new_outputs: OrderedDict | list, of:
+        @type new_outputs: OrderedDict | list, of::
                 (port_name, port_type)
             where:
                 - port_name: str
@@ -541,8 +541,8 @@ class MealyMachine(FiniteStateMachine):
         
         Otherwise an exception is raised.
         
-        @param input_sequence: inputs for guided simulation
-        @type input_sequence: 'manual' | list of input valuations
+        @param inputs_sequence: inputs for guided simulation
+        @type inputs_sequence: 'manual' | list of input valuations
         
         @param iterations: number of steps for manual or random simulation
         @type iterations: int

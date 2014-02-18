@@ -41,8 +41,8 @@ Helper functions:
     - is_seq_inside
     - get_cell_id
 
-see also
---------
+See Also
+========
 discretize
 """
 import numpy as np
@@ -66,7 +66,7 @@ def get_input(
         - to state C{end}
     
     These are states of the partition C{abstraction}.
-    The computed control input is such that:
+    The computed control input is such that::
         
         f(x, u) = x'Rx +r'x +u'Qu +mid_weight *|xc-x(0)|_2
     
@@ -78,8 +78,8 @@ def get_input(
         - Q = I
         - mid_weight = 3
     
-    notes
-    -----
+    Notes
+    =====
     1. The same horizon length as in reachability analysis
         should be used in order to guarantee feasibility.
     
@@ -93,7 +93,7 @@ def get_input(
     
     3. The "conservative" calculation makes sure that
         the plant remains inside the convex hull of the
-        starting region during execution, i.e.:
+        starting region during execution, i.e.::
         
             x(1), x(2) ...  x(N-1) are
             \in conv_hull(starting region).
@@ -116,7 +116,7 @@ def get_input(
     @param end: index of the end state in C{abstraction.ts}
     @type end: int >= 0
     
-    @param R: state cost matrix for:
+    @param R: state cost matrix for::
             x = [x(1)' x(2)' .. x(N)']'
         If empty, zero matrix is used.
     @type R: size (N*xdim x N*xdim)
@@ -125,7 +125,7 @@ def get_input(
         x = [x(1)' x(2)' .. x(N)']'
     @type r: size (N*xdim x 1)
     
-    @param Q: input cost matrix for control input:
+    @param Q: input cost matrix for control input::
             u = [u(0)' u(1)' .. u(N-1)']'
         If empty, identity matrix is used.
     @type Q: size (N*udim x N*udim)
@@ -299,10 +299,10 @@ def get_input_helper(
 ):
     """Calculates the sequence u_seq such that:
     
-    - x(t+1) = A x(t) + B u(t) + K
-    - x(k) \in P1 for k = 0,...N
-    - x(N) \in P3
-    - [u(k); x(k)] \in PU
+      - x(t+1) = A x(t) + B u(t) + K
+      - x(k) \in P1 for k = 0,...N
+      - x(N) \in P3
+      - [u(k); x(k)] \in PU
     
     and minimizes x'Rx + 2*r'x + u'Qu
     """
@@ -440,8 +440,8 @@ def find_discrete_state(x0, part):
     """Return index identifying the discrete state
     to which the continuous state x0 belongs to.
     
-    notes
-    -----
+    Notes
+    =====
     1. If there are overlapping partitions
         (i.e., x0 belongs to more than one discrete state),
         then return the first discrete state ID

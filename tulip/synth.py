@@ -341,7 +341,6 @@ def sys_to_spec(
         Enable this to mask absence of OpenFTS initial states.
         Useful when initial states are specified in another way,
         e.g., directly augmenting the spec part.
-    @type check_initial_exist: bool
     
     @param bool_states: if True,
         then use one bool variable for each state,
@@ -601,13 +600,13 @@ def sys_trans_from_ts(
     The transition relation may be closed or open,
     i.e., depend only on system, or also on environment actions.
     
-    @type trans: FiniteTransitionSystem.transitions |
-        OpenFiniteTransitionSystem.transitions
-    
     No mutexes enforced by this function among:
         
         - sys states
         - env actions
+
+    @type trans: FiniteTransitionSystem.transitions |
+        OpenFiniteTransitionSystem.transitions
     """
     sys_trans = []
     
@@ -853,7 +852,7 @@ def synthesize(
         Effective only when >2 actions for each player.
     @type action_vars: 2-tuple of str:
         
-            (env_action_var_name, sys_action_var_name)
+        (env_action_var_name, sys_action_var_name)
         
         Default: ('eact', 'act')
         

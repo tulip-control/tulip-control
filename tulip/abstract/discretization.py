@@ -44,8 +44,8 @@ Helper functions:
     - createLM
     - get_max_extreme
 
-see also
---------
+See Also
+========
 find_controller
 """
 import logging
@@ -70,60 +70,58 @@ class AbstractSysDyn(object):
     
     An AbstractSysDyn object contains the fields:
     
-    - ppp: Partition into Regions.
-        Each Region corresponds to
-        a discrete state of the abstraction
-        
-        type: PropPreservingPartition
-    
-    - ts: Finite transition system abstracting the continuous system.
-        Each state corresponds to a Region in ppp.
-        It can be fed into discrete synthesis algorithms.
-        
-        type: OpenFTS
-    
-    - ppp2ts: map Regions to states of the transition system
-        Each index denotes the Region with same index in:
-            
-            ppp
-            
-        type: list of states
-            (usually each state is a str)
-    
-    - original_regions: Regions of original
-        proposition preserving partition
-        Used for non-conservative planning.
-        
-        type: list of Region
-    
-    - ppp2orig: map of new Regions to original Regions:
-            
-            - i-th new Region in C{ppp}
-            - ppp2orig[i]-th original Region in C{original_regions}
-            
-        type: list of indices
-    
-    - ppp2pwa: map Regions to PwaSubSys.list_subsys
-        Each partition corresponds to some mode.
-        (for switched systems)
-        
-        In each mode a PwaSubSys is active.
-        This PwaSubSys comprises of subsystems,
-        which are listed in PwaSubSys.list_subsys.
-        
-        The list C{ppp2pwa} means:
-        
-            - i-th Region in C{regions}
-            - ppp2pwa[i]-th system in PwaSubSys.list_subsys
-                is active in the i-th Region
-        
-        type: list
-    
-    - disc_params: parameters used in discretization that 
-        should be passed to the controller refinement
-        to ensure consistency
-        
-        type: dict
+      - ppp: Partition into Regions.
+          Each Region corresponds to
+          a discrete state of the abstraction
+
+          type: PropPreservingPartition
+
+      - ts: Finite transition system abstracting the continuous system.
+          Each state corresponds to a Region in ppp.
+          It can be fed into discrete synthesis algorithms.
+
+          type: OpenFTS
+
+      - ppp2ts: map Regions to states of the transition system
+          Each index denotes the Region with same index in ppp.
+
+          type: list of states
+          (usually each state is a str)
+
+      - original_regions: Regions of original
+          proposition preserving partition
+          Used for non-conservative planning.
+
+          type: list of Region
+
+      - ppp2orig: map of new Regions to original Regions:
+
+              - i-th new Region in C{ppp}
+              - ppp2orig[i]-th original Region in C{original_regions}
+
+          type: list of indices
+
+      - ppp2pwa: map Regions to PwaSubSys.list_subsys
+          Each partition corresponds to some mode.
+          (for switched systems)
+
+          In each mode a PwaSubSys is active.
+          This PwaSubSys comprises of subsystems,
+          which are listed in PwaSubSys.list_subsys.
+
+          The list C{ppp2pwa} means:
+
+              - i-th Region in C{regions}
+              - ppp2pwa[i]-th system in PwaSubSys.list_subsys
+                  is active in the i-th Region
+
+          type: list
+
+      - disc_params: parameters used in discretization that 
+          should be passed to the controller refinement
+          to ensure consistency
+
+          type: dict
     
     If any of the above is not given,
     then it is initialized to None.
@@ -231,8 +229,8 @@ def discretize(
     """Refine the partition and establish transitions
     based on reachability analysis.
     
-    see also
-    --------
+    See Also
+    ========
     prop2partition.pwa_partition
     prop2partition.part2convex
     
@@ -842,9 +840,8 @@ def plot_annot(ax):
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
     
-    @type merged_part: AbstractSysDyn
+    @type merged_abstr: AbstractSysDyn
     @type abstr: list of AbstractSysDyn
-    @type hybrid_sys: HybridSysDyn
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions

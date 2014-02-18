@@ -45,8 +45,8 @@ def mealy2scxml(mealy):
     >>> f.write(s)
     >>> f.close()
     
-    see also
-    --------
+    See Also
+    ========
     transys.machines.mealy
     
     @param mealy: machine to export as SCXML

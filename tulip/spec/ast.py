@@ -63,7 +63,7 @@ def dump_dot(ast):
     """Create Graphiz DOT string from given AST.
 
     @param ast: L{ASTNode}, etc., that has a dump_dot() method; for
-        example, the return value of a successful call to L{parse}.
+        example, the return value of a successful call to L{parser}.
     """
     return "digraph AST {\n"+ast.dump_dot()+"}\n"
 

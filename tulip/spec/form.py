@@ -503,7 +503,7 @@ class GRSpec(LTL):
     def to_jtlv(self):
         """Return specification as list of two strings [assumption, guarantee].
 
-        Format is that of JTLV.  Cf. L{jtlvint}.
+        Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
         spec = ['', '']
         desc_added = False
@@ -572,7 +572,7 @@ class GRSpec(LTL):
     def to_gr1c(self):
         """Dump to gr1c specification string.
 
-        Cf. L{gr1cint}.
+        Cf. L{interfaces.gr1c}.
         """
         def _to_gr1c_print_vars(vardict):
             output = ""
@@ -645,7 +645,7 @@ class GRSpec(LTL):
         @param var_values: valuation of env_vars and sys_vars
         @type var_values: {'var_name':'var_value', ...}
         
-        @return: truth values of spec parts:
+        @return: truth values of spec parts::
         
             {'env_init' : env_init[var_values],
              'sys_init' : sys_init[var_values] }

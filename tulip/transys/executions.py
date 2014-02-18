@@ -81,20 +81,24 @@ class InfiniteSequence(object):
 
 class FiniteTransitionSystemSimulation(object):
     """Stores execution, path, trace.
+
+    Attributes::
     
-    execution = s0, a1, s1, a1, ..., aN, sN (Prefix)
-                sN, a(N+1), ..., aM, sN (Suffix)
-    path = s0, s1, ..., sN (Prefix)
-           sN, s(N+1), ..., sN (Suffix)
-    trace = L(s0), L(s1), ..., L(sN) (Prefix)
-            L(sN), L(s(N+1) ), ..., L(sN) (Suffix)
+        execution = s0, a1, s1, a1, ..., aN, sN (Prefix)
+                    sN, a(N+1), ..., aM, sN (Suffix)
+        path = s0, s1, ..., sN (Prefix)
+               sN, s(N+1), ..., sN (Suffix)
+        trace = L(s0), L(s1), ..., L(sN) (Prefix)
+                L(sN), L(s(N+1) ), ..., L(sN) (Suffix)
     
-    where:
+    where::
         sI \in States
         aI \in Actions (=Transition_Labels =Edge_Labels)
         L(sI) \in State_Labels
     
-    Note: trace computation avoided because it requires definitin of
+    Note
+    ====
+    trace computation avoided because it requires definition of
     the whole transition system
     """
     
@@ -200,12 +204,15 @@ class InfiniteWord(InfiniteSequence):
 class FiniteStateAutomatonSimulation(object):
     """Store automaton input word and run.
 
-    input_word = w1, w2, ...wN (Prefix)
-                 wN, ..., wM (Suffix)
-    run = s0, s1, ..., sN (Prefix)
-          sN, ..., sM (Suffix)
+    Attributes::
+
+        input_word = w1, w2, ...wN (Prefix)
+                     wN, ..., wM (Suffix)
+        run = s0, s1, ..., sN (Prefix)
+              sN, ..., sM (Suffix)
     
-    s(i-1) --w(i)--> s(i)
+    These are interpreted as occurring in alternation::
+        s(i-1) --w(i)--> s(i)
     """
     
     def __init__(self, input_word=InfiniteWord(), run=InfiniteSequence() ):
@@ -324,8 +331,8 @@ class MachineInputSequence(object):
     def set_input_sequence(self, input_port_name, values_sequence):
         """Define sequence of input values for single port.
         
-        @param input_port: name of input port
-        @type input_port: str in C{self.input_ports}
+        @param input_port_name: name of input port
+        @type input_port_name: str in C{self.input_ports}
         
         @param values_sequence: history of input values for C{input_port}
         @type values_sequence: Iterable of values for this port.

@@ -78,11 +78,14 @@ class Ridge:
 class Ridge_Facet:
     '''Contains the following information:
     
-    `E_r`: Equality set of a ridge
-    `ar,br`: Affine hull of the ridge s.t. P_{E_f} intersection {x | ar x = br} defines the ridge,
-           where E_f is the equality set of the facet.
-    `E_0`: Equality set of a facet
-    `af,bf`: Affine hull of the facet.
+        - `E_r`: Equality set of a ridge
+
+        - `ar,br`: Affine hull of the ridge s.t. P_{E_f} intersection {x | ar x = br}
+                 defines the ridge, where E_f is the equality set of the facet.
+
+        - `E_0`: Equality set of a facet
+
+        - `af,bf`: Affine hull of the facet.
     '''
     def __init__(self,E_r,ar,br,E_0,af,bf):
         self.E_r = E_r
@@ -95,7 +98,7 @@ class Ridge_Facet:
 def esp(CC,DD,bb,centered=False,abs_tol=1e-10,verbose=0):
     '''
     Compute the projection of the polytope [C D] x <= b onto the coordinates corresponding
-    to C. The projection of the polytope P = {[C D]x <= b where C is M x D and D is M x K is 
+    to C. The projection of the polytope P = {[C D]x <= b} where C is M x D and D is M x K is 
     defined as proj(P) = {x in R^d | exist y in R^k s.t Cx + Dy < b}
     '''
     # Remove zero columns and rows
@@ -443,16 +446,15 @@ def ridge(C,D,b,E,af,bf,abs_tol=1e-7,verbose=0):
     return Er_list
         
 def adjacent(C,D,b,rid_fac,abs_tol=1e-7):
-    '''
-    Compute the (unique) adjacent facet.
+    '''Compute the (unique) adjacent facet.
 
-    Input:
-    `rid_fac`: A Ridge_Facet object containing the parameters for a facet and one of
-               its ridges.
+    @param rid_fac: A Ridge_Facet object containing the parameters for
+        a facet and one of its ridges.
     
-    Output:
-    `E_adj,a_adj,b_adj`: The equality set and parameters for the adjacent facet such that 
-                         P_{E_adj} = P intersection {x | a_adj x = b_adj}
+    @return: (E_adj,a_adj,b_adj): The equality set and parameters for
+        the adjacent facet such that::
+
+            P_{E_adj} = P intersection {x | a_adj x = b_adj}
     '''
         
     E = rid_fac.E_0
@@ -568,11 +570,11 @@ def proj_aff(Ce,De,be,expected_dim=None,abs_tol=1e-7):
     return a_n,b_n
         
 def is_dual_degenerate(c,G,h,A,b,x_opt,z_opt,abs_tol=1e-7):
-    '''Checks if the pair of dual problems
+    '''Checks if the pair of dual problems::
     
-    (P): min c'x        (D): max h'z + b'y
-         s.t Gx <= h         s.t G'z + A'y = c
-             Ax = b                z <= 0
+      (P): min c'x        (D): max h'z + b'y
+           s.t Gx <= h         s.t G'z + A'y = c
+               Ax = b                z <= 0
     
     is dual degenerate, i.e. if (P) has several optimal solutions.
     Optimal solutions x* and z* are required.

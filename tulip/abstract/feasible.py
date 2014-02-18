@@ -38,8 +38,8 @@ Primary functions:
     - createLM
     - get_max_extreme
 
-see also
---------
+See Also
+========
 find_controller
 """
 import logging
@@ -232,24 +232,24 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope:
+    """Compute the components of the polytope::
     
         L [x(0)' u(0)' ... u(N-1)']' <= M
     
     which stacks the following constraints:
     
-    - x(t+1) = A x(t) + B u(t) + E d(t)
-    - [u(k); x(k)] \in ssys.Uset for all k
+      - x(t+1) = A x(t) + B u(t) + E d(t)
+      - [u(k); x(k)] \in ssys.Uset for all k
     
     If list_P is a Polytope:
 
-    - x(0) \in list_P if list_P
-    - x(k) \in Pk for k= 1,2, .. N-1
-    - x(N) \in PN
+      - x(0) \in list_P if list_P
+      - x(k) \in Pk for k= 1,2, .. N-1
+      - x(N) \in PN
     
     If list_P is a list of polytopes:
 
-    - x(k) \in list_P[k] for k= 0, 1 ... N
+      - x(k) \in list_P[k] for k= 0, 1 ... N
     
     The returned polytope describes the intersection of the polytopes
     for all possible
@@ -405,18 +405,18 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     return L,M
 
 def get_max_extreme(G,D,N):
-    """Calculate the array d_hat such that:
+    """Calculate the array d_hat such that::
     
         d_hat = max(G*DN_extreme),
     
     where DN_extreme are the vertices of the set D^N.
     
-    This is used to describe the polytope:
+    This is used to describe the polytope::
     
         L*x <= M - G*d_hat.
     
     Calculating d_hat is equivalen to taking the intersection
-    of the polytopes:
+    of the polytopes::
     
         L*x <= M - G*d_i
     

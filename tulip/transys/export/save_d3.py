@@ -59,8 +59,8 @@ def format_label(label_def, label_dot_format):
 def labeled_digraph2d3(graph, html_file_name='index.html'):
     """Export to SVG embedded in HTML, animated with d3.js
     
-    example
-    -------
+    Example
+    =======
     From C{examples/transys/machine_examples.py} call:
     
     >>> m = garage_counter_with_state_vars()
@@ -69,8 +69,8 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
     
     >>> m.save('index.html', 'html')
     
-    see also
-    --------
+    See Also
+    ========
     FSM, BA, Mealy
     
     @param graph: labeled graph to export
