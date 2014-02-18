@@ -30,13 +30,8 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-""" 
-Classes:
-    - LtiSysDyn
-    - PwaSysDyn
-    - HybridSysDyn
-    
-NO, 2 Jul 2013.
+"""
+Classes representing hybrid dynamical systems.
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -75,7 +70,7 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a polytope.Polytope)
+        - Uset, Wset and domain (each a L{polytope.Polytope})
     
     as defined above.
     
@@ -87,7 +82,7 @@ class LtiSysDyn(object):
     
     See Also
     ========
-    PwaSysDyn, HybridSysDyn, polytope.Polytope
+    L{PwaSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None):
@@ -192,7 +187,7 @@ class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
     A PwaSysDyn object contains the fields:
     
-      - C{list_subsys}: list of LtiSysDyn
+      - C{list_subsys}: list of L{LtiSysDyn}
 
       - C{domain}: domain over which piecewise affine system is defined,
           type: polytope.Polytope
@@ -203,7 +198,7 @@ class PwaSysDyn(object):
     
     See Also
     ========
-    LtiSysDyn, HybridSysDyn, polytope.Polytope
+    L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain is None:
@@ -292,10 +287,10 @@ class HybridSysDyn(object):
        
        type: dict
        default: If no env_label or sys_label passed,
-       then default to int indices (i,j) PwaSysDyn.
+       then default to int indices (i,j) L{PwaSysDyn}.
     
      - C{cts_ss}: continuous state space over which hybrid system is defined.
-       type: polytope.Region
+       type: L{polytope.Region}
     
      - C{time_semantics}: TBD. Current default semantics are discrete-time.
        
@@ -319,7 +314,7 @@ class HybridSysDyn(object):
     
     See Also
     ========
-    LtiSysDyn, PwaSysDyn, polytope.Region
+    L{LtiSysDyn}, L{PwaSysDyn}, L{polytope.Region}
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,

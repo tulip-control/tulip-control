@@ -34,13 +34,13 @@
 Check Linear Discrete-Time-Invariant System reachability between polytopes
     
 Primary functions:
-    - solve_feasible
-    - createLM
-    - get_max_extreme
+    - L{solve_feasible}
+    - L{createLM}
+    - L{get_max_extreme}
 
 See Also
 ========
-find_controller
+L{find_controller}
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -75,9 +75,9 @@ def solve_feasible(
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
     
-    @type P1: Polytope or Region
-    @type P2: Polytope or Region
-    @type ssys: LtiSysDyn
+    @type P1: L{Polytope} or L{Region}
+    @type P2: L{Polytope} or L{Region}
+    @type ssys: L{LtiSysDyn}
     @param N: The horizon length
     @param closed_loop: If true, take 1 step at a time.
         This keeps down polytope dimension and
@@ -93,7 +93,7 @@ def solve_feasible(
         Otherwise, P1 is used.
     
     @return: the subset S0 of P1 from which P2 is reachable
-    @rtype: Polytope or Region
+    @rtype: L{Polytope} or L{Region}
     """
     if closed_loop:
         return solve_closed_loop(
@@ -114,8 +114,8 @@ def solve_closed_loop(
 ):
     """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
     
-    @type P1: Polytope or Region
-    @type P2: Polytope or Region
+    @type P1: L{Polytope} or L{Region}
+    @type P2: L{Polytope} or L{Region}
     
     @param ssys: system dynamics
     
@@ -241,7 +241,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
       - x(t+1) = A x(t) + B u(t) + E d(t)
       - [u(k); x(k)] \in ssys.Uset for all k
     
-    If list_P is a Polytope:
+    If list_P is a L{Polytope}:
 
       - x(0) \in list_P if list_P
       - x(k) \in Pk for k= 1,2, .. N-1
@@ -255,13 +255,13 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     for all possible
 
     @param ssys: system dynamics
-    @type ssys: LtiSysDyn
+    @type ssys: L{LtiSysDyn}
     
     @param N: horizon length
     
-    @type list_P: list of Polytopes or Polytope
-    @type Pk: Polytope
-    @type PN: Polytope
+    @type list_P: list of Polytopes or L{Polytope}
+    @type Pk: L{Polytope}
+    @type PN: L{Polytope}
     
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.

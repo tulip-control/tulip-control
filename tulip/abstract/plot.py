@@ -32,10 +32,6 @@
 #
 """
 Functions for plotting Partitions.
-
-Functions:
-    - plot_partition
-    - plot_trajectory
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -65,9 +61,9 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
 
     See Also
     ========
-    abstract.prop2partition.PropPreservingPartition, plot_trajectory
+    L{abstract.prop2partition.PropPreservingPartition}, L{plot_trajectory}
 
-    @type ppp: PropPreservingPartition
+    @type ppp: L{PropPreservingPartition}
     
     @param trans: Transition matrix. If used,
         then transitions in C{ppp} are shown with arrows.
@@ -159,8 +155,8 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
 def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
     """Plot arrow starting from polyreg0 and ending at polyreg1.
     
-    @type polyreg0: Polytope or Region
-    @type polyreg1: Polytope or Region
+    @type polyreg0: L{Polytope} or L{Region}
+    @type polyreg1: L{Polytope} or L{Region}
     @param ax: axes where to plot
     
     @return: arrow object
@@ -199,13 +195,13 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
 
     See Also
     ========
-    plot_partition, plot
+    L{plot_partition}, plot
 
-    @type ppp: PropPreservingPartition
+    @type ppp: L{PropPreservingPartition}
     @param x0: initial state
     @param u_seq: matrix where each row contains an input
     @param ssys: system dynamics
-    @param color_seed: see polt_partition
+    @param color_seed: see L{plot_partition}
     @return: axis object
     """
     if ax is None:

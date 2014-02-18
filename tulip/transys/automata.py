@@ -77,18 +77,18 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     assuming a transition system with a complete digraph.
     
     For constructively representing a language,
-    use a Finite Transition System.
+    use a L{FiniteTransitionSystem}.
     A transition system operates only in generator mode,
     producing a language (possibly non-deterministically).
     
-    For controllers, use a Finite State Machine,
+    For controllers, use a L{FiniteStateMachine},
     because it maps input words (input port valuations) to
     outputs (output port valuations).
     
     See Also
     ========
-    NFA, DFA, BA, RabinAutomaton, DRA, StreettAutomaton,
-    MullerAutomaton, ParityAutomaton
+    L{NFA}, L{DFA}, L{BA}, L{RabinAutomaton}, L{DRA}, L{StreettAutomaton},
+    L{MullerAutomaton}, L{ParityAutomaton}
     """
     def __init__(
             self, name='', mutable=False, deterministic=False,
@@ -238,15 +238,15 @@ class BuchiAutomaton(OmegaAutomaton):
     def sync_prod(self, ts_or_ba):
         """Synchronous product between (BA, TS), or (BA1, BA2).
         
-        The result is always a Buchi Automaton:
+        The result is always a L{BuchiAutomaton}:
         
-            - If C{ts_or_ba} is a Finite Transition System TS,
+            - If C{ts_or_ba} is a L{FiniteTransitionSystem} TS,
                 then return the synchronous product BA * TS.
                 
                 The accepting states of BA * TS are those which
                 project on accepting states of BA.
             
-            - If C{ts_or_ba} is a Buchi Automaton BA2,
+            - If C{ts_or_ba} is a L{BuchiAutomaton} BA2,
                 then return the synchronous product BA * BA2.
         
                 The accepting states of BA * BA2 are those which
@@ -263,13 +263,13 @@ class BuchiAutomaton(OmegaAutomaton):
         
         See Also
         ========
-        ts_ba_sync_prod
+        L{transys._ts_ba_sync_prod}
         
         @param ts_or_ba: other with which to take synchronous product
-        @type ts_or_ba: FiniteTransitionSystem or BuchiAutomaton
+        @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
         
         @return: self * ts_or_ba
-        @rtype: BuchiAutomaton
+        @rtype: L{BuchiAutomaton}
         """
         if isinstance(ts_or_ba, BuchiAutomaton):
             return self._ba_ba_sync_prod(ts_or_ba)
@@ -282,7 +282,7 @@ class BuchiAutomaton(OmegaAutomaton):
         """
 
 class BA(BuchiAutomaton):
-    """Alias to BuchiAutomaton.
+    """Alias to L{BuchiAutomaton}.
     """
     def __init__(self, **args):
         BuchiAutomaton.__init__(self, **args)
@@ -308,6 +308,8 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
 
     @param name: used for file export
     @type name: str
+
+    @rtype: L{BuchiAutomaton}
     """
     # args
     if not isinstance(S, Iterable):
@@ -361,9 +363,9 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     
     See Also
     ========
-    _ts_ba_sync_prod, BuchiAutomaton.sync_prod
+    L{transys._ts_ba_sync_prod}, L{BuchiAutomaton.sync_prod}
 
-    @return: C{prod_ba}, the product Buchi Automaton.
+    @return: C{prod_ba}, the product L{BuchiAutomaton}.
     """
     (prod_ts, persistent) = _ts_ba_sync_prod(
         transition_system, buchi_automaton
@@ -465,9 +467,9 @@ class RabinPairs(object):
     
     See Also
     ========
-    RabinAutomaton
-    Def. 10.53, p.801, [Baier 2008]
-    ltl2dstar documentation
+      - L{RabinAutomaton}
+      - Def. 10.53, p.801, [Baier 2008]
+      - U{ltl2dstar<http://ltl2dstar.de/>} documentation
     """
     def __init__(self, automaton_states):
         self._states = automaton_states
@@ -579,7 +581,7 @@ class RabinAutomaton(OmegaAutomaton):
     
     See Also
     ========
-    DRA, BuchiAutomaton
+    L{DRA}, L{BuchiAutomaton}
     """    
     def __init__(self, name='', mutable=False, deterministic=False,
                  atomic_proposition_based=False):
@@ -597,7 +599,7 @@ class DRA(RabinAutomaton):
     
     See Also
     ========
-    RabinAutomaton
+    L{RabinAutomaton}
     """
     def __init__(self, name='', mutable=False,
                  atomic_proposition_based=True):

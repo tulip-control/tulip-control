@@ -268,15 +268,11 @@ def shoot(C,D,b,maxiter=1000,abs_tol=1e-7):
     '''Returns a randomly selected equality set E_0 of P such
     that the projection of the equality set is a facet of the projection
     
-    Input:
+    @param C: Matrix defining the polytope Cx+Dy <= b
+    @param D: Matrix defining the polytope Cx+Dy <= b
+    @param b: Vector defining the polytope Cx+Dy <= b
     
-    `C`: Matrix defining the polytope Cx+Dy <= b
-    `D`: Matrix defining the polytope Cx+Dy <= b
-    `b`: Vector defining the polytope Cx+Dy <= b
-    
-    Output:
-    
-    `E_0,af,bf`: Equality set and affine hull
+    @return: `E_0,af,bf`: Equality set and affine hull
     '''
 
     d = C.shape[1]

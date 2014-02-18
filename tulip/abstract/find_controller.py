@@ -34,16 +34,15 @@
 Algorithms related to controller synthesis for discretized dynamics.
     
 Primary functions:
-    - get_input
+    - L{get_input}
     
 Helper functions:
-    - get_input_helper
-    - is_seq_inside
-    - get_cell_id
+    - L{get_input_helper}
+    - L{is_seq_inside}
 
 See Also
 ========
-discretize
+L{discretize}
 """
 import numpy as np
 from cvxopt import matrix, solvers
@@ -105,10 +104,10 @@ def get_input(
     @type x0: numpy 1darray
     
     @param ssys: system dynamics
-    @type ssys: LtiSysDyn
+    @type ssys: L{LtiSysDyn}
     
     @param abstraction: state space partition
-    @type abstraction: AbstractSysDyn
+    @type abstraction: L{AbstractSysDyn}
     
     @param start: index of the initial state in C{abstraction.ts}
     @type start: int >= 0
@@ -403,9 +402,9 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     @param u_seq: (N x m) array where row k is input for t = k
     
     @param ssys: dynamics
-    @type ssys: LtiSysDyn
+    @type ssys: L{LtiSysDyn}
     
-    @param P0: Polytope where we want x(k) to remain for k = 1, ... N-1
+    @param P0: L{Polytope} where we want x(k) to remain for k = 1, ... N-1
     
     @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
         C{False} otherwise  
@@ -450,7 +449,7 @@ def find_discrete_state(x0, part):
     @type x0: numpy 1darray
     
     @param part: state space partition
-    @type part: PropPreservingPartition
+    @type part: L{PropPreservingPartition}
     
     @return: if C{x0} belongs to some
         discrete state in C{part},

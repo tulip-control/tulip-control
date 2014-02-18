@@ -335,7 +335,7 @@ def sys_to_spec(
     because an FTS can represent sys_init, sys_safety, but
     not other spec forms.
     
-    @type sys: transys.FTS | transys.OpenFTS
+    @type sys: L{transys.FTS} or L{transys.OpenFTS}
     
     @param ignore_initial: Do not include initial state info from TS.
         Enable this to mask absence of OpenFTS initial states.
@@ -347,7 +347,7 @@ def sys_to_spec(
         otherwise use an int variable called loc.
     @type bool_states: bool
     
-    @rtype: GRSpec
+    @rtype: L{GRSpec}
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
         (sys_vars, sys_init, sys_trans) = fts2spec(
@@ -371,9 +371,9 @@ def env_to_spec(
 ):
     """Convert environment transition system to GR(1) representation.
     
-    For details see also sys_to_spec.
+    For details see also L{sys_to_spec}.
     
-    @type env: transys.FTS | transys.OpenFTS
+    @type env: L{transys.FTS} or L{transys.OpenFTS}
     
     @type bool_states: bool
     """
@@ -402,9 +402,9 @@ def fts2spec(
     
     So fts on its own is not the complete problem spec.
     
-    @param fts: transys.FiniteTransitionSystem
+    @param fts: L{transys.FiniteTransitionSystem}
     
-    @rtype: GRSpec
+    @rtype: L{GRSpec}
     """
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
@@ -459,9 +459,9 @@ def sys_open_fts2spec(
     Either OpenFTS can be extended in the future,
     or a game structure added.
     
-    @param ofts: transys.OpenFiniteTransitionSystem
+    @param ofts: L{transys.OpenFiniteTransitionSystem}
     
-    @rtype: GRSpec
+    @rtype: L{GRSpec}
     """
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
@@ -605,8 +605,9 @@ def sys_trans_from_ts(
         - sys states
         - env actions
 
-    @type trans: FiniteTransitionSystem.transitions |
-        OpenFiniteTransitionSystem.transitions
+    @param trans: L{LabeledTransitions} as from the transitions
+        attribute of L{FiniteTransitionSystem} or
+        L{OpenFiniteTransitionSystem}.
     """
     sys_trans = []
     
@@ -817,9 +818,9 @@ def synthesize(
         This constrains the transitions available to
         the environment, given the outputs from the system.
         
-        Note that an OpenFTS with only sys_actions is
-        equivalent to an FTS for the environment.
-    @type env: transys.FTS | transys.OpenFTS
+        Note that an L{OpenFTS} with only sys_actions is
+        equivalent to an L{FTS} for the environment.
+    @type env: L{transys.FTS} or L{transys.OpenFTS}
     
     @param sys: A transition system describing the system:
         
@@ -830,7 +831,7 @@ def synthesize(
         
         Note that an OpenFTS with only sys_actions is
         equivalent to an FTS for the system.
-    @type sys: transys.FTS | transys.OpenFTS
+    @type sys: L{transys.FTS} L{transys.OpenFTS}
     
     @param ignore_sys_init: Ignore any initial state information
         contained in env.
@@ -866,7 +867,7 @@ def synthesize(
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return None.
-    @rtype: transys.MealyMachine | None
+    @rtype: L{transys.MealyMachine} or None
     """
     bool_states, action_vars, bool_actions = _check_solver_options(
         option, bool_states, action_vars, bool_actions
@@ -907,7 +908,7 @@ def is_realizable(
 ):
     """Check realizability.
     
-    For details see synthesize.
+    For details see L{synthesize}.
     """
     bool_states, action_vars, bool_actions = _check_solver_options(
         option, bool_states, action_vars, bool_actions

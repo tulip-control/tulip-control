@@ -57,12 +57,12 @@ def vprint(string, verbose=True):
 class LabelConsistency(object):
     """Container of methods for checking sublabel consistency.
     
-    Used by both LabeledStates and LabeledTransitions
+    Used by both L{LabeledStates} and L{LabeledTransitions}
     to verify that sublabels on states and edges are in their
     corresponding (math) sets.
     
     For example, if the 'actions' sublabel set has type: {'yes', 'no'},
-    an attempt to label an FTS transition with 'not sure' will fail.
+    an attempt to label an L{FTS} transition with 'not sure' will fail.
     """
     def __init__(self, label_def):
         """Link to the label definition from within the systems.
@@ -83,11 +83,11 @@ class LabelConsistency(object):
             {sublabel_type : sublabel_value, ...}
         Otherwise return list of sublabel values::
             [sublabel_value, ...]
-        ordered by _attr_dict2sublabels_list.
+        ordered by L{_attr_dict2sublabels_list}.
         
         See Also
         ========
-        _attr_dict2sublabels_list
+        L{_attr_dict2sublabels_list}
         """
         if as_dict:
             sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
@@ -109,7 +109,7 @@ class LabelConsistency(object):
         
         See Also
         ========
-        _attr_dict2sublabels_list
+        L{_attr_dict2sublabels_list}
         
         @return: sublabel types with their values
         @rtype: {C{sublabel_type} : C{sublabel_value},...}
@@ -130,7 +130,7 @@ class LabelConsistency(object):
         
         See Also
         ========
-        _sublabels_list2dict
+        L{_sublabels_list2dict}
         """
         #self._exist_labels()
         
@@ -145,7 +145,7 @@ class LabelConsistency(object):
         
         See Also
         ========
-        _sublabels_dict2list
+        L{_sublabels_dict2list}
         
         @param sublabel_values: ordered sublabel values
         @type sublabel_values: tuple
@@ -335,7 +335,7 @@ class States(object):
     
     See Also
     ========
-    LabeledStateDiGraph, LabeledTransitions, Transitions
+    L{LabeledStateDiGraph}, L{LabeledTransitions}, L{Transitions}
     
     @param mutable: enable storage of unhashable states
     @type mutable: bool (default: False)
@@ -511,7 +511,7 @@ class States(object):
         
         See Also
         ========
-        _int2mutant
+        L{_int2mutant}
         
         @param state: state to check for
         
@@ -563,7 +563,7 @@ class States(object):
         
         See Also
         ========
-        _mutant2int_
+        L{_mutant2int}
         
         @param state_id: ID number to check for
         @type state_id:
@@ -843,8 +843,8 @@ class States(object):
         
         See Also
         ========
-        pre
-        Def. 2.3, p.23 [Baier 2008]
+          - L{pre}
+          - Def. 2.3, p.23 [Baier 2008]
         """
         states = self._single_state2singleton(states)
         
@@ -867,8 +867,8 @@ class States(object):
         
         See Also
         ========
-        post
-        Def. 2.3, p.23 [Baier 2008]
+          - L{post}
+          - Def. 2.3, p.23 [Baier 2008]
         """
         states = self._single_state2singleton(states)
         
@@ -955,7 +955,7 @@ class States(object):
 class LabeledStates(States):
     """States with annotation.
     
-    For FTS and OpenFTS each state label consists of a single sublabel,
+    For L{FTS} and L{OpenFTS} each state label consists of a single sublabel,
     which a subset of AP, the set of atomic propositions.
     
     For Machines, each state label consists of (possibly multiple) sublabels,
@@ -1018,7 +1018,7 @@ class LabeledStates(States):
         
         See Also
         ========
-        labels, find
+        L{labels}, L{find}
         
         @param state: added to set of states
         @type state: for mutable system states any type,
@@ -1106,7 +1106,8 @@ class LabeledStates(States):
         
         See Also
         ========
-        label, find, LabeledTransitions, States, FTS, BA, FSM
+        L{label}, L{find}, L{LabeledTransitions}, L{States}, L{FTS},
+        L{BA}, L{FSM}
         
         @param states: existing states to be labeled with ap_label_list,
             or string 'create' to cause creation of new int ID states
@@ -1121,6 +1122,7 @@ class LabeledStates(States):
             If C{check=False}, then each state passed is added to system,
             and each AP is added to the APs of the system.
         @type check: bool
+
         """
         if states == 'create':
             n = len(label_list)
@@ -1148,7 +1150,7 @@ class LabeledStates(States):
 
         See Also
         ========
-        find, label_of
+        L{find}, L{label_of}
         
         @param desired_label: search for states with this label
         @type desired_label: dict of form:
@@ -1168,7 +1170,7 @@ class LabeledStates(States):
         
         See Also
         ========
-        find, labeled_with
+        L{find}, L{labeled_with}
         
         @param state: single system state
         
@@ -1234,7 +1236,8 @@ class LabeledStates(States):
         
         See Also
         ========
-        label_of, labeled_with, label, labels, LabeledTransitions.find
+        L{label_of}, L{labeled_with}, L{label}, L{labels},
+        L{LabeledTransitions.find}
         
         @param states: subset of states over which to search
         @type states: 'any' (default)
@@ -1259,6 +1262,7 @@ class LabeledStates(States):
                 - C{label}: dict
                     | tuple of edge annotation,
                     determined by C{as_dict}.
+
         """
         #TODO support tuples as desired_labels, using available conversion
         if states is 'any':
@@ -1373,7 +1377,7 @@ class Transitions(object):
         
         See Also
         ========
-        LabeledTransitions.__call__
+        L{LabeledTransitions.__call__}
         """
         return self.graph.edges(data=False)
     
@@ -1429,10 +1433,12 @@ class Transitions(object):
         
         No labeling at this level of structuring.
                 
-        label(), relabel(), add_labeled() manipulate labeled transitions.
+        L{LabeledTransitions.label}, L{LabeledTransitions.relabel},
+        L{LabeledTransitions.add_labeled} manipulate labeled
+        transitions.
         
-        They become available only if set of actions, or an alphabet are defined,
-        so can be used only in FTS, open FTS, automaton, etc.
+        They become available only if set of actions, or an alphabet
+        are defined, so can be used only in FTS, open FTS, automaton, etc.
         """
         if not check_states:
             self.graph.states.add_from(from_states)
@@ -1452,13 +1458,13 @@ class Transitions(object):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are not labeled.
-        To label then, use either LabeledTransitions.relabel(),
-        or remove() and then LabeledTransitions.add_labeled_adj().
+        To label then, use either L{LabeledTransitions.relabel},
+        or L{remove} and then L{LabeledTransitions.add_labeled_adj}.
 
         See Also
         ========
-        States.add, States.add_from,
-        LabeledTransitions.add_labeled_adj
+        L{States.add}, L{States.add_from},
+        L{LabeledTransitions.add_labeled_adj}
         
         @param adj: new transitions, represented by the
             non-zero elements of an adjacency matrix.
@@ -1528,7 +1534,7 @@ class Transitions(object):
     def remove_from(self, from_states, to_states):
         """Delete all unlabeled transitions between multiple state pairs.
         
-        See also remove().        
+        See also L{remove}.
         """
         for from_state in from_states:
             for to_state in to_states:
@@ -1539,7 +1545,8 @@ class Transitions(object):
         
         Filtering the edge set E is based on end-point states of edge,
         because edges are not yet labeled.
-        To search over labeled edges = transitions, see LabeledTransitions.find
+        To search over labeled edges = transitions,
+        see L{LabeledTransitions.find}
         
         Note
         ====
@@ -1547,7 +1554,7 @@ class Transitions(object):
         
         See Also
         ========
-        LabeledTransitions.find
+        L{LabeledTransitions.find}
         
         @param from_states: from where transition should start
         @type from_states: valid states
@@ -1596,8 +1603,8 @@ class LabeledTransitions(Transitions):
     Caution
     =======
     Before removal of a sublabel value from the sublabel type V,
-    remember to check using sys.transitions.check_sublabeling()
-    that the value is not currently used by any edges.
+    remember to check using L{_check_sublabeling} that the value is
+    not currently used by any edges.
     
     Example
     =======
@@ -1608,21 +1615,21 @@ class LabeledTransitions(Transitions):
     Each copy is annotated using a different action,
     the actions must belong to the same action set.
     That action set is defined as a ser instance.
-    This description is a (closed) FTS.
+    This description is a (closed) L{FTS}.
     
     The system and environment actions associated with an edge
     of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same (open) FTS.
+    and their sets are encapsulated within the same (open) L{FTS}.
     
     In more detail, the following classes encapsulate this one:
-      - FiniteTransitionSystem (closed)
-      - OpenFiniteTransitionSystem
-      - FiniteStateAutomaton
-      - FiniteStateMachine
+      - L{FiniteTransitionSystem} (closed)
+      - L{OpenFiniteTransitionSystem}
+      - L{FiniteStateAutomaton}
+      - L{FiniteStateMachine}
     
     See Also
     ========
-    Transitions
+    L{Transitions}
     """
     def __init__(self, graph, deterministic=False):
         Transitions.__init__(self, graph)
@@ -1642,12 +1649,12 @@ class LabeledTransitions(Transitions):
         Note
         ====
         __call__(labeled=True, as_dict=True) is equivalent to find(),
-        i.e., find without any restrictions on the desired
+        i.e., L{find} without any restrictions on the desired
         from_state, to_state, nor sublabels.
         
         See Also
         ========
-        find
+        L{find}
         
         @param labeled: If C{True}, then return labeled edges
         @type labeled: bool
@@ -1849,7 +1856,7 @@ class LabeledTransitions(Transitions):
         
         See Also
         ========
-        add, label, relabel, add_labeled_adj
+        L{add}, L{label}, L{relabel}, L{add_labeled_adj}
         
         @param from_state: start state of the transition
         @type from_state: valid system state
@@ -1933,7 +1940,7 @@ class LabeledTransitions(Transitions):
         
         Adds transitions between all states in set from_states,
         to all states in set to_states, annotating them with the same labels.
-        For more details, see add_labeled().
+        For more details, see L{add_labeled}.
         """
         for from_state in from_states:
             for to_state in to_states:
@@ -1949,7 +1956,7 @@ class LabeledTransitions(Transitions):
 
         See Also
         ========
-        add_labeled, Transitions.add_adj
+        L{add_labeled}, L{Transitions.add_adj}
         
         @param adj: new transitions represented by adjacency matrix.
         @type adj: scipy.sparse.lil (list of lists)
@@ -2029,7 +2036,7 @@ class LabeledTransitions(Transitions):
         
         Note
         ====
-          -  __call__
+          -  L{__call__}
 
           - If called with C{from_states} = all states,
             then the labels annotating returned edges are those which
@@ -2045,7 +2052,7 @@ class LabeledTransitions(Transitions):
         
         See Also
         ========
-        label, relabel, add_labeled, add_labeled_adj, __call__
+        L{label}, L{relabel}, L{add_labeled}, L{add_labeled_adj}, L{__call__}
         
         @param from_states: subset of states from which transition must start
         @type from_states: 'any' (default)
@@ -2404,8 +2411,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         References
         ==========
-        http://en.wikipedia.org/wiki/Cartesian_product_of_graphs
-        nx.algorithms.operators.product.cartesian_product
+          - U{http://en.wikipedia.org/wiki/Cartesian_product_of_graphs}
+          - networkx.algorithms.operators.product.cartesian_product
         """
         prod_graph = nx.product.cartesian_product(self, other)
         
@@ -2428,8 +2435,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Reference
         =========
-        http://en.wikipedia.org/wiki/Strong_product_of_graphs
-        nx.algorithms.operators.product.strong_product
+          - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
+          - networkx.algorithms.operators.product.strong_product
         """
         raise NotImplementedError
         # An issue here is that transitions are possible both
@@ -2446,7 +2453,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         The reason is that edge labels do not have any semantics at this level,
         so they are not yet regarded as guards.
-        For more semantics, use a FiniteStateMachine.
+        For more semantics, use a L{FiniteStateMachine}.
         """
         for state in self.states():
             if self.states.is_terminal(state):
@@ -2477,7 +2484,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         See Also
         ========
-        plot, pydot.Dot.write
+        L{plot}, pydot.Dot.write
         
         @param fileformat: type of image file
         @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
@@ -2554,7 +2561,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         See Also
         ========
-        save
+        L{save}
         
         Depends
         =======
@@ -2595,7 +2602,7 @@ def prepend_with(states, prepend_str):
     
     See Also
     ========
-    tuple2ba, tuple2fts
+    L{tuple2ba}, L{tuple2fts}
     
     @param states: items prepended with string C{prepend_str}
     @type states: iterable

@@ -185,7 +185,7 @@ class FiniteTransitionSystemSimulation(object):
         raise NotImplementedError
 
 class FTSSim(FiniteTransitionSystemSimulation):
-    """Alias for Finite Transition System Simulation."""
+    """Alias for L{FiniteTransitionSystemSimulation}."""
     
     def __init__(self, **args):
         FiniteTransitionSystemSimulation.__init__(self, **args)
