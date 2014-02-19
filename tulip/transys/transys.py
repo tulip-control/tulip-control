@@ -56,30 +56,31 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         - states.initial = S_0 \subseteq S
         - atomic_propositions = AP
         - actions = Act
-        - transitions = the transition relation ->
+        - transitions::
+              the transition relation ->
                 = edge set + edge labeling function
                 (labels \in actions)
-            Unlabeled edges are defined using:
+          Unlabeled edges are defined using:
                 - sys.transitions.add
                 - sys.transitions.add_from
                 - sys.transitions.add_adj
-            Labeled edges (=transitions) are defined using:
+          Labeled edges (=transitions) are defined using:
                 - sys.transitions.add_labeled
                 - sys.transitions.add_labeled_from
                 - sys.transitions.add_labeled_adj
-            and accessed using:
+          and accessed using:
                 - sys.transitions.find
                 - sys.transitions.between
-            To convert an unlabeled edge to a labeled edge use:
+          To convert an unlabeled edge to a labeled edge use:
                 - sys.transitions.label
-            and to change the label of an existing labeled edge:
+          and to change the label of an existing labeled edge:
                 - sys.transitions.relabel
-        - the state labeling function
+        - the state labeling function::
                 L: S-> 2^AP
-            can be defined using:
+          can be defined using:
                 - sys.states.label
                 - sys.states.labels
-            and accessed using methods:
+          and accessed using methods:
                 - sys.states(data=True)
                 - sys.states.label_of
                 - sys.states.labeled_with
@@ -97,8 +98,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     The xor constraint can prevent the environment from
     blocking the system by setting all its actions to False.
     
-    example
-    -------
+    Example
+    =======
     In the following C{None} represents the empty set, subset of AP.
     First create an empty transition system and add some states to it:
     
@@ -146,7 +147,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     or method C{sys.transitions.label} is used instead,
     to convert the unlabeled into a labeled transition.
     
-    Using C{tuple2fts} offers a more convenient constructor
+    Using L{tuple2fts} offers a more convenient constructor
     for transition systems.
     
     The user can still invoke NetworkX functions to set custom node
@@ -164,9 +165,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     directly, because that can result in an inconsistent system,
     since it skips all checks performed by transys.
     
-    dot export
-    ----------
-    Format transition labels using C{_transition_dot_label_format}
+    dot Export
+    ==========
+    Format transition labels using _transition_dot_label_format
     which is a dict with values:
         - 'actions' (=name of transitions attribute):
             type before separator
@@ -175,15 +176,15 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             (e.g. sys, env). Not used for closed FTS,
             because it has single set of actions.
     
-    note
-    ----
+    Note
+    ====
     The attributes atomic_propositions and aps are equal.
     When you want to produce readable code, use atomic_propositions.
     Otherwise, aps offers shorthand access to the APs.
     
-    see also
-    --------
-    OpenFTS, tuple2fts, line_labeled_with, cycle_labeled_with
+    See Also
+    ========
+    L{OpenFTS}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
     """
     def __init__(self, *args, **kwargs):
         """Initialize Finite Transition System.
@@ -195,7 +196,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         @param actions: actions used to label transitions
         @type actions: iterable of str
         
-        For other arguments, see LabeledStateDiGraph
+        For other arguments, see L{LabeledStateDiGraph}
         """
         atomic_propositions = []
         actions = []
@@ -248,12 +249,12 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         TS is this transition system, TS2 another one and
         BA a Buchi Automaton.
+
+        See Also
+        ========
+        L{self.sync_prod}
         
-        @rtype: FiniteTransitionSystem
-        
-        see also
-        --------
-        self.sync_prod
+        @rtype: L{FiniteTransitionSystem}
         """
         return self.sync_prod(ts_or_ba)
     
@@ -265,11 +266,11 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         are merged into the first and take precedence, overwriting
         existing labeling.
         
-        example
-        -------
-        This can be useful to construct systems quickly by
-        creating standard "pieces" using the functions:
-            line_labeled_with, cycle_labeled_with
+        Example
+        =======
+        This can be useful to construct systems quickly by creating
+        standard "pieces" using the functions: line_labeled_with,
+        cycle_labeled_with
         
         >>> n = 4
         >>> L = n*['p'] # state labeling
@@ -286,9 +287,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         >>> ts3.default_layout = 'circo'
         >>> ts3.plot()
         
-        see also
-        --------
-        line_labeled_with, cycle_labeled_with
+        See Also
+        ========
+        L{line_labeled_with}, L{cycle_labeled_with}
         
         @param other: system to merge with
         @type other: C{FiniteTransitionSystem}
@@ -296,7 +297,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         @return: merge of C{self} with C{other}, union of states,
             initial states, atomic propositions, actions, edges and
             labelings, those of C{other} taking precedence over C{self}.
-        @rtype: FiniteTransitionSystem
+        @rtype: L{FiniteTransitionSystem}
         """
         if not isinstance(other, FiniteTransitionSystem):
             msg = 'other class must be FiniteTransitionSystem.\n'
@@ -334,11 +335,11 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     def __or__(self, ts):
         """Asynchronous product self * ts.
         
-        see also
-        --------
+        See Also
+        ========
         async_prod
         
-        @type ts: FiniteTransitionSystem
+        @type ts: L{FiniteTransitionSystem}
         """
         return self.async_prod(ts)
     
@@ -351,17 +352,17 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         Changing term order, i.e., BA * TS, returns the
         synchronous product as a BA.
         
-        see also
-        --------
+        See Also
+        ========
         __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
         Def. 2.42, pp. 75--76 [Baier 2008]
         Def. 4.62, p.200 [Baier 2008]
         
         @param ts_or_ba: system with which to take synchronous product
-        @type ts_or_ba: FiniteTransitionSystem or BuchiAutomaton
+        @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
         
         @return: synchronous product C{self} x C{ts_or_ba}
-        @rtype: FiniteTransitionSystem
+        @rtype: L{FiniteTransitionSystem}
         """
         if isinstance(ts_or_ba, FiniteTransitionSystem):
             ts = ts_or_ba
@@ -374,7 +375,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         """Synchronous (tensor) product with other FTS.
         
         @param ts: other FTS with which to take synchronous product
-        @type ts: FiniteTransitionSystem
+        @type ts: L{FiniteTransitionSystem}
         """
         # type check done by caller: sync_prod
         if self.states.mutants or ts.states.mutants:
@@ -400,8 +401,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     def async_prod(self, ts):
         """Asynchronous product TS1 x TS2 between FT Systems.
         
-        see also
-        --------
+        See Also
+        ========
         __or__, sync_prod, cartesian_product
         Def. 2.18, p.38 [Baier 2008]
         """
@@ -450,36 +451,36 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
             - If C{None}, then project on subgraph, i.e., using states
             - If C{int}, then project on the designated element of
                 the tuple comprising each state
-        @type factor: None | int
+        @type factor: None or int
         """
         raise NotImplementedError
     
     def simulate(self, state_sequence="random"):
         """Simulate Finite Transition System.
+
+        See Also
+        ========
+        L{is_simulation}
         
         @type state_sequence: inputs="random"
             | given array
-        
-        see also
-        --------
-        is_simulation
         """
         raise NotImplementedError
     
     def is_simulation(self, simulation=FTSSim() ):
         """Check path, execution, trace or simulation given.
         
-        terminology
-        -----------
-        - A path is a sequence of states.
-        - An execution is a sequence of alternating states, actions.
-        - A trace is the lift of a path by the labeling.
-            (Caution: a single trace may project on multiple paths)
-        - A bundle of the above is here called a simulation.
+        Terminology
+        ===========
+          - A path is a sequence of states.
+          - An execution is a sequence of alternating states, actions.
+          - A trace is the lift of a path by the labeling.
+              (Caution: a single trace may project on multiple paths)
+          - A bundle of the above is here called a simulation.
         
-        see also
-        --------
-        simulate
+        See Also
+        ========
+        L{simulate}
         """
         raise NotImplementedError
     
@@ -491,9 +492,9 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         
         Provides: pml (Promela)
         
-        see also
-        --------
-        save, plot
+        See Also
+        ========
+        L{save}, L{plot}
         """
         if fileformat not in {'promela', 'Promela', 'pml'}:
             return False
@@ -507,7 +508,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         return True
 
 class FTS(FiniteTransitionSystem):
-    """Alias to FiniteTransitionSystem.
+    """Alias to L{FiniteTransitionSystem}.
     """    
     def __init__(self, *args, **kwargs):
         FiniteTransitionSystem.__init__(self, *args, **kwargs)
@@ -515,10 +516,10 @@ class FTS(FiniteTransitionSystem):
 class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     """Open Finite Transitin System modeling an open system.
     
-    Analogous to FTS, but for open systems comprised of
+    Analogous to L{FTS}, but for open systems comprised of
     the system and its environment.
     
-    Please refer to FiniteTransitionSystem for usage details.
+    Please refer to L{FiniteTransitionSystem} for usage details.
     
     The only significant difference is in transition labeling.
     For closed systems, each transition is labeled with a system action.
@@ -530,17 +531,17 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         - the second an environment action.
     
     Constrains on actions can be defined
-    similarly to FTS actions by setting the fields:
+    similarly to L{FTS} actions by setting the fields:
     
         - ofts.env_actions_must
         - ofts.sys_actions_must
     
     The default constraint is 'xor'.
-    For more details see FTS.
+    For more details see L{FTS}.
     
-    see also
-    --------
-    FiniteTransitionSystem
+    See Also
+    ========
+    L{FiniteTransitionSystem}
     """
     def __init__(self, atomic_propositions=[], sys_actions=[],
                  env_actions=[], **args):
@@ -594,7 +595,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         return s
 
 class OpenFTS(OpenFiniteTransitionSystem):
-    """Alias to transys.OpenFiniteTransitionSystem.
+    """Alias to L{transys.OpenFiniteTransitionSystem}.
     """
     def __init__(self, **args):
         OpenFiniteTransitionSystem.__init__(self, **args)
@@ -603,8 +604,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None, verbose=False):
     """Create a Finite Transition System from a tuple of fields.
 
-    hint
-    ----
+    Hint
+    ====
     To rememeber the arg order:
 
     1) it starts with states (S0 requires S before it is defined)
@@ -617,15 +618,15 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     3) ends with the pair (Act, trans), because transitions in trans
     require actions in Act to be defined.
 
-    see also
-    --------
+    See Also
+    ========
     L{tuple2ba}
 
     @param S: set of states
     @type S: iterable of hashables
     
-    @param S_0: set of initial states, must be \\subset S
-    @type S_0: iterable of elements from S
+    @param S0: set of initial states, must be \\subset S
+    @type S0: iterable of elements from S
     
     @param AP: set of Atomic Propositions for state labeling:
             L: S-> 2^AP
@@ -743,23 +744,24 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 def line_labeled_with(L, m=0):
     """Return linear FTS with given labeling.
     
-    The resulting system will be a terminating sequence:
+    The resulting system will be a terminating sequence::
         s0-> s1-> ... -> sN
     where: N = C{len(L) -1}.
     
-    see also
-    --------
-    cycle_labeled_with
+    See Also
+    ========
+    L{cycle_labeled_with}
     
     @param L: state labeling
-    @type L: iterable of state labels, e.g., [{'p', '!p', 'q',...]
+    @type L: iterable of state labels, e.g.,::
+            [{'p', '!p', 'q',...]
         Single strings are identified with singleton Atomic Propositions,
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
     @param m: starting index
     @type m: int
     
-    @return: FTS with:
+    @return: L{FTS} with:
         - states ['s0', ..., 'sN'], where N = len(L) -1
         - state labels defined by L, so s0 is labeled with L[0], etc.
         - transitions forming a sequence:
@@ -785,20 +787,20 @@ def line_labeled_with(L, m=0):
 def cycle_labeled_with(L):
     """Return cycle FTS with given labeling.
     
-    The resulting system will be a cycle:
+    The resulting system will be a cycle::
         s0-> s1-> ... -> sN -> s0
     where: N = C{len(L) -1}.
     
-    see also
-    --------
-    line_labeled_with
+    See Also
+    ========
+    L{line_labeled_with}
     
     @param L: state labeling
     @type L: iterable of state labels, e.g., [{'p', 'q'}, ...]
         Single strings are identified with singleton Atomic Propositions,
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
-    @return: FTS with:
+    @return: L{FTS} with:
         - states ['s0', ..., 'sN'], where N = len(L) -1
         - state labels defined by L, so s0 is labeled with L[0], etc.
         - transitions forming a cycle:
@@ -815,14 +817,14 @@ def cycle_labeled_with(L):
 def add_initial_states(ts, ap_labels):
     """Make initial any state of ts labeled with any label in ap_labels.
     
-    For example if isinstance(disc_dynamics, AbstractSysDyn):
+    For example if isinstance(disc_dynamics, L{AbstractSysDyn}):
     
     >>> from tulip.transys.transys import add_initial_states
     >>> initial_labels = [{'home'}]
     >>> add_initial_states(disc_dynamics.ofts, initial_labels)
     
-    @type ts: transys.FiniteTransitionSystem,
-        transys.OpenFiniteTransitionSystem
+    @type ts: L{transys.FiniteTransitionSystem},
+        L{transys.OpenFiniteTransitionSystem}
     
     @param ap_labels: labels, each comprised of atomic propositions
     @type ap_labels: iterable of sets of elements from
@@ -837,21 +839,21 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     Def. 4.62, p.200 [Baier]
     
-    erratum
-    -------
+    Erratum
+    =======
     note the erratum: P_{pers}(A) is ^_{q\in F} !q, verified from:
-        http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf
+    http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf
     
-    see also
-    --------
-    _ba_ts_sync_prod, FiniteTransitionSystem.sync_prod
+    See Also
+    ========
+    L{automata._ba_ts_sync_prod}, L{FiniteTransitionSystem.sync_prod}
     
     @return: C{(product_ts, persistent_states)}, where:
         - C{product_ts} is the synchronous product TS * BA
         - C{persistent_states} are those in TS * BA which
             project on accepting states of BA.
     @rtype:
-        - C{product_TS} is a FiniteTransitionSystem
+        - C{product_TS} is a L{FiniteTransitionSystem}
         - C{persistent_states} is the set of states which project
             on accepting states of the Buchi Automaton BA.
     """

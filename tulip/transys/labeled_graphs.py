@@ -57,12 +57,12 @@ def vprint(string, verbose=True):
 class LabelConsistency(object):
     """Container of methods for checking sublabel consistency.
     
-    Used by both LabeledStates and LabeledTransitions
+    Used by both L{LabeledStates} and L{LabeledTransitions}
     to verify that sublabels on states and edges are in their
     corresponding (math) sets.
     
     For example, if the 'actions' sublabel set has type: {'yes', 'no'},
-    an attempt to label an FTS transition with 'not sure' will fail.
+    an attempt to label an L{FTS} transition with 'not sure' will fail.
     """
     def __init__(self, label_def):
         """Link to the label definition from within the systems.
@@ -79,15 +79,15 @@ class LabelConsistency(object):
     def _attr_dict2sublabels(self, attr_dict, as_dict):
         """Extract sublabels representation from edge attribute dict.
         
-        - If C{as_dict==True}, then return dict of:
+        If C{as_dict==True}, then return dict of::
             {sublabel_type : sublabel_value, ...}
-        Otherwise return list of sublabel values:
+        Otherwise return list of sublabel values::
             [sublabel_value, ...]
-        ordered by _attr_dict2sublabels_list.
+        ordered by L{_attr_dict2sublabels_list}.
         
-        see also
-        --------
-        _attr_dict2sublabels_list
+        See Also
+        ========
+        L{_attr_dict2sublabels_list}
         """
         if as_dict:
             sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
@@ -107,9 +107,9 @@ class LabelConsistency(object):
     def _attr_dict2sublabels_dict(self, attr_dict):
         """Filter the edge attributes which are not labels.
         
-        see also
-        --------
-        _attr_dict2sublabels_list
+        See Also
+        ========
+        L{_attr_dict2sublabels_list}
         
         @return: sublabel types with their values
         @rtype: {C{sublabel_type} : C{sublabel_value},...}
@@ -128,9 +128,9 @@ class LabelConsistency(object):
         Sublabel values are ordered according to sublabel ordering
         defined in graph._transition_label_def, which is an OrderedDict.
         
-        see also
-        --------
-        _sublabels_list2dict
+        See Also
+        ========
+        L{_sublabels_list2dict}
         """
         #self._exist_labels()
         
@@ -143,12 +143,12 @@ class LabelConsistency(object):
     def _sublabels_list2dict(self, sublabel_values, check_label=True):
         """Return sublabel values dict from tuple.
         
-        see also
-        --------
-        _sublabels_dict2list
+        See Also
+        ========
+        L{_sublabels_dict2list}
         
-        @param sublabels_tuple: ordered sublabel values
-        @type sublabels_tuple: tuple
+        @param sublabel_values: ordered sublabel values
+        @type sublabel_values: tuple
         
         @param check_label: verify existence of label
         @type check_label: bool
@@ -302,8 +302,8 @@ class States(object):
         
     add, remove, count, test membership
     
-    mutable states
-    --------------
+    Mutable States
+    ==============
     During language parsing, LTL->BA converion or partition refinement
     it is convenient to keep revisiting states and replacing them by others
     which refine them.
@@ -316,10 +316,10 @@ class States(object):
     However, we cannot store ['a', '||', 'b'] as a NetworkX state, because
     a list is not hashable. There are two solutions:
     
-    - recursively freeze everything
-    - store actual states as labels of int states
-    - maintain a bijection between states and ints,
-      using the later as NetworkX states
+      - recursively freeze everything
+      - store actual states as labels of int states
+      - maintain a bijection between states and ints,
+        using the later as NetworkX states
     
     The first alternative is painful and requires that each user write their
     custom freezing code, depending on the particular data structure stored.
@@ -333,9 +333,9 @@ class States(object):
     refinement are hashable without special arrangements (e.g. strings).
     So the final result would then be storable in an ordinary NetworkX graph.
     
-    see also
-    --------
-    LabeledStateDiGraph, LabeledTransitions, Transitions
+    See Also
+    ========
+    L{LabeledStateDiGraph}, L{LabeledTransitions}, L{Transitions}
     
     @param mutable: enable storage of unhashable states
     @type mutable: bool (default: False)
@@ -379,12 +379,12 @@ class States(object):
             List is always returned anyway, to avoid issues with mutable states.
         
         @return:
-            If C{data==True},
-                then return [(state, attr_dict),...]
-            If C{data==False} and C{listed==True} and state order maintained,
-                then return [state_i,...]
-            If C{data==False} and C{listed==True} but no order maintained,
-                then return [state_i,...] (RANDOM ORDER)
+            - If C{data==True},
+              then return [(state, attr_dict),...]
+            - If C{data==False} and C{listed==True} and state order maintained,
+              then return [state_i,...]
+            - If C{data==False} and C{listed==True} but no order maintained,
+              then return [state_i,...] (RANDOM ORDER)
         """
         if (data != True) and (data != False):
             raise Exception('Functionality of States() changed.')
@@ -504,24 +504,24 @@ class States(object):
         Otherwise return the smallest available int ID, if mutable,
         or the given state, if immutable.
         
-        note
-        ----
+        Note
+        ====
         If not mutable, no check that given state is valid,
         because this direction (also) inputs to the data structure new states.
         
-        see also
-        --------
-        _int2mutant
+        See Also
+        ========
+        L{_int2mutant}
         
         @param state: state to check for
         
         @return:
-            If states not mutable,
-                then return given C{state}.
-            If C{state} does not exist and states mutable,
-                then return min free int ID.
-            If C{state} does exist and states mutable,
-                then return its int ID.
+            - If states not mutable,
+              then return given C{state}.
+            - If C{state} does not exist and states mutable,
+              then return min free int ID.
+            - If C{state} does exist and states mutable,
+              then return its int ID.
         """
         
         # classic NetworkX ?
@@ -556,14 +556,14 @@ class States(object):
         If C{state_id} \\in used IDs, then return corresponding state.
         Otherwise return None, or the given state, if not mutable.
         
-        note
-        ----
+        Note
+        ====
         If not mutable, given int checked to be valid state,
         because this direction outputs to the world.
         
-        see also
-        --------
-        _mutant2int_
+        See Also
+        ========
+        L{_mutant2int}
         
         @param state_id: ID number to check for
         @type state_id:
@@ -571,12 +571,12 @@ class States(object):
             valid state, if immutable
         
         @return:
-            If states not mutable,
-                then return given argument, because it is the actual state.
-            If states are mutable and C{state_id} is used,
-                then return corresponding C{state}.
-            If states are mutable but C{state_id} is free,
-                then return None.
+            - If states not mutable,
+              then return given argument, because it is the actual state.
+            - If states are mutable and C{state_id} is used,
+              then return corresponding C{state}.
+            - If states are mutable but C{state_id} is free,
+              then return None.
         """
         
         # classic NetworkX ?
@@ -648,16 +648,16 @@ class States(object):
         or other (custom) annotation, use the functions provided by
         AtomicPropositions, or directly the NetworkX.MultiDiGraph.add_node method.
         
-        see also
-        --------
+        See Also
+        ========
         networkx.MultiDiGraph.add_node
         
         @param new_state:
             Single new state to add.
         @type new_state:
-            If states immutable, then C{state} must be a hashable object.
-                Any hashable allowed, except for None (see nx add_node below).
-            If states mutable, then C{state} can be unhashable.
+            - If states immutable, then C{state} must be a hashable object.
+              Any hashable allowed, except for None (see nx add_node below).
+            - If states mutable, then C{state} can be unhashable.
         """
         new_state_id = self._mutant2int(new_state)
         self._warn_if_state_exists(new_state)
@@ -684,8 +684,8 @@ class States(object):
     def add_from(self, new_states, destroy_order=False):
         """Add multiple states from iterable container.
         
-        see also
-        --------
+        See Also
+        ========
         networkx.MultiDiGraph.add_nodes_from.
         """
         def check_order(new_states):
@@ -814,8 +814,8 @@ class States(object):
     def is_terminal(self, state):
         """Check if state has no outgoing transitions.
         
-        see also
-        --------
+        See Also
+        ========
         Def. 2.4, p.23 [Baier 2008]
         """
         successors = self.post(state)
@@ -841,10 +841,10 @@ class States(object):
         If multiple stats provided,
         then union Post(s) for s in states provided.
         
-        see also
-        --------
-        pre
-        Def. 2.3, p.23 [Baier 2008]
+        See Also
+        ========
+          - L{pre}
+          - Def. 2.3, p.23 [Baier 2008]
         """
         states = self._single_state2singleton(states)
         
@@ -865,10 +865,10 @@ class States(object):
     def pre(self, states):
         """Return direct predecessors (1-hop) of given state.
         
-        see also
-        --------
-        post
-        Def. 2.3, p.23 [Baier 2008]
+        See Also
+        ========
+          - L{post}
+          - Def. 2.3, p.23 [Baier 2008]
         """
         states = self._single_state2singleton(states)
         
@@ -906,15 +906,13 @@ class States(object):
     
     def rename(self, new_states_dict):
         """Map states in place, based on dict.
-        
-        input
-        -----
-        - C{new_states_dict}: {old_state : new_state}
-        (partial allowed, i.e., projection)
-        
-        See also
-        --------
+
+        See Also
+        ========
         networkx.relabel_nodes
+        
+        @param new_states_dict: {old_state : new_state}
+            (partial allowed, i.e., projection)
         """
         return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
     
@@ -922,9 +920,9 @@ class States(object):
         """Check sanity of various state sets.
         
         Checks if:
-            Initial states \\subseteq states
-            Current state is set
-            Current state \\subseteq states
+            - Initial states \\subseteq states
+            - Current state is set
+            - Current state \\subseteq states
         """
         if not is_subset(self.initial, self() ):
             warnings.warn('Initial states \\not\\subseteq states.')
@@ -957,7 +955,7 @@ class States(object):
 class LabeledStates(States):
     """States with annotation.
     
-    For FTS and OpenFTS each state label consists of a single sublabel,
+    For L{FTS} and L{OpenFTS} each state label consists of a single sublabel,
     which a subset of AP, the set of atomic propositions.
     
     For Machines, each state label consists of (possibly multiple) sublabels,
@@ -1018,9 +1016,9 @@ class LabeledStates(States):
     def label(self, state, label, check=True):
         """Add single state with its label.
         
-        see also
-        --------
-        labels, find
+        See Also
+        ========
+        L{labels}, L{find}
         
         @param state: added to set of states
         @type state: for mutable system states any type,
@@ -1052,8 +1050,8 @@ class LabeledStates(States):
     def labels(self, states, label_list='paired', check=True):
         """Label multiple states, each with a (possibly) different AP label.
         
-        input formats
-        -------------
+        Input Formats
+        =============
         Two ways of passing the state labeling:
             - separately:
                 - C{states = [s0, s1, ...] }
@@ -1078,14 +1076,14 @@ class LabeledStates(States):
             To reduce the user's load, by default
             C{label_list} is C{'paired'}.
         
-        creating states
-        ---------------
+        Creating States
+        ===============
         If no states currently exist and C{states='create'},
         then new states 0,...,N-1 are created,
         where: N = C{len(label_list) }.
         
-        examples
-        --------
+        Examples
+        ========
         >>> from tulip import transys as trs
         >>> fts = trs.FTS()
         >>> fts.states.add_from(['s0', 's1'] )
@@ -1106,23 +1104,25 @@ class LabeledStates(States):
         >>> fts.states.labels(range(2), [{'p'}, {'!p'}], check=False)
         >>> fts.states.labels('create', [{'p'}, {'!p'}] )
         
-        see also
-        --------
-        label, find, LabeledTransitions, States, FTS, BA, FSM
+        See Also
+        ========
+        L{label}, L{find}, L{LabeledTransitions}, L{States}, L{FTS},
+        L{BA}, L{FSM}
         
         @param states: existing states to be labeled with ap_label_list,
             or string 'create' to cause creation of new int ID states
         @type states: interable container of existing states
             | str 'create'
         
-        @param ap_label_list: valid AP labels for annotating C{states}
-        @type ap_label_list: list of valid labels
+        @param label_list: valid AP labels for annotating C{states}
+        @type label_list: list of valid labels
             | 'paired' (see "input formats" above)
         
         @param check: check if given states and given labels already exist.
             If C{check=False}, then each state passed is added to system,
             and each AP is added to the APs of the system.
         @type check: bool
+
         """
         if states == 'create':
             n = len(label_list)
@@ -1147,6 +1147,10 @@ class LabeledStates(States):
         """Return states with given label.
         
         Convenience method for calling find.
+
+        See Also
+        ========
+        L{find}, L{label_of}
         
         @param desired_label: search for states with this label
         @type desired_label: dict of form:
@@ -1154,10 +1158,6 @@ class LabeledStates(States):
         
         @return: states with C{desired_label}
         @rtype: list
-        
-        see also
-        --------
-        find, label_of
         """
         state_label_pairs = self.find(desired_label=desired_label)
         states = [state for (state, label) in state_label_pairs]
@@ -1168,9 +1168,9 @@ class LabeledStates(States):
         
         Convenience method for calling find.
         
-        see also
-        --------
-        find, labeled_with
+        See Also
+        ========
+        L{find}, L{labeled_with}
         
         @param state: single system state
         
@@ -1178,7 +1178,7 @@ class LabeledStates(States):
         @type as_dict: bool
         
         @return: label of C{state}
-        @rtype: If C{as_dict is True}, then C{dict} of the form:
+        @rtype: If C{as_dict is True}, then C{dict} of the form::
                 {sublabel_type : sublabel_value}
             Otherwise list: C{(sublabel1_value, sublabel2_value, ...) }
         """
@@ -1189,8 +1189,8 @@ class LabeledStates(States):
     def find(self, states='any', desired_label='any', as_dict=True):
         """Filter by desired states and by desired state labels.
         
-        examples
-        --------
+        Examples
+        ========
         Assume that the system is:
         
         >>> import transys as trs
@@ -1199,44 +1199,45 @@ class LabeledStates(States):
         >>> ts.states.add('s0')
         >>> ts.states.label('s0', {'p'} )
         
-        - To find the label of a single state C{'s0'}:
-            
-            >>> a = ts.states.find(['s0'] )
-            >>> (s0_, label) = a[0]
-            >>> print(label)
-            {'ap': set(['p'])}
+          - To find the label of a single state C{'s0'}:
+
+              >>> a = ts.states.find(['s0'] )
+              >>> (s0_, label) = a[0]
+              >>> print(label)
+              {'ap': set(['p'])}
+
+              equivalently, but asking for a list instead of a dict:
+
+              >>> a = ts.states.find(['s0'], as_dict=False)
+              >>> (s0_, label) = a[0]
+              >>> print(label)
+              [set(['p'])]
+
+              Calling C{label_of} is a shortcut for the above.
+
+          - To find all states with a specific label C{{'p'}}:
+
+              >>> ts.states.label('s1', {'p'}, check=False)
+              >>> b = ts.states.find(desired_label={'ap':{'p'} } )
+              >>> states = [state for (state, label_) in b]
+              >>> print(set(states) )
+              {'s0', 's1'}
+
+              Calling C{labeled_with} is a shortcut for the above.
+
+          - To find all states in subset C{M} labeled with C{{'p'}}:
+
+              >>> ts.states.label('s2', {'p'}, check=False)
+              >>> M = {'s0', 's2'}
+              >>> b = ts.states.find(M, {'ap': {'p'} } )
+              >>> states = [state for (state, label_) in b]
+              >>> print(set(states) )
+              {'s0', 's2'}
         
-            equivalently, but asking for a list instead of a dict:
-            
-            >>> a = ts.states.find(['s0'], as_dict=False)
-            >>> (s0_, label) = a[0]
-            >>> print(label)
-            [set(['p'])]
-            
-            Calling C{label_of} is a shortcut for the above.
-        
-        - To find all states with a specific label C{{'p'}}:
-            
-            >>> ts.states.label('s1', {'p'}, check=False)
-            >>> b = ts.states.find(desired_label={'ap':{'p'} } )
-            >>> states = [state for (state, label_) in b]
-            >>> print(set(states) )
-            {'s0', 's1'}
-            
-            Calling C{labeled_with} is a shortcut for the above.
-        
-        - To find all states in subset C{M} labeled with C{{'p'}}:
-            
-            >>> ts.states.label('s2', {'p'}, check=False)
-            >>> M = {'s0', 's2'}
-            >>> b = ts.states.find(M, {'ap': {'p'} } )
-            >>> states = [state for (state, label_) in b]
-            >>> print(set(states) )
-            {'s0', 's2'}
-        
-        see also
-        --------
-        label_of, labeled_with, label, labels, LabeledTransitions.find
+        See Also
+        ========
+        L{label_of}, L{labeled_with}, L{label}, L{labels},
+        L{LabeledTransitions.find}
         
         @param states: subset of states over which to search
         @type states: 'any' (default)
@@ -1254,18 +1255,14 @@ class LabeledStates(States):
               the list order based on graph._transition_label_def
         @type as_dict: bool
         
-        @return: set of labeled states:
-                (C{state}, label)
-            such that:
-                C{state} \\in C{states} given as first argument
-                
         @rtype: list of labeled states
-                = [(C{state}, C{label}),...]
+        @return: [(C{state}, C{label}),...]
             where:
                 - C{state} \\in C{states}
                 - C{label}: dict
                     | tuple of edge annotation,
                     determined by C{as_dict}.
+
         """
         #TODO support tuples as desired_labels, using available conversion
         if states is 'any':
@@ -1378,9 +1375,9 @@ class Transitions(object):
         LabeledTransitions overload this to return transitions,
         i.e., labeled edges = triples: (s1, s2, label).
         
-        see also
-        --------
-        LabeledTransitions.__call__
+        See Also
+        ========
+        L{LabeledTransitions.__call__}
         """
         return self.graph.edges(data=False)
     
@@ -1436,10 +1433,12 @@ class Transitions(object):
         
         No labeling at this level of structuring.
                 
-        label(), relabel(), add_labeled() manipulate labeled transitions.
+        L{LabeledTransitions.label}, L{LabeledTransitions.relabel},
+        L{LabeledTransitions.add_labeled} manipulate labeled
+        transitions.
         
-        They become available only if set of actions, or an alphabet are defined,
-        so can be used only in FTS, open FTS, automaton, etc.
+        They become available only if set of actions, or an alphabet
+        are defined, so can be used only in FTS, open FTS, automaton, etc.
         """
         if not check_states:
             self.graph.states.add_from(from_states)
@@ -1459,8 +1458,13 @@ class Transitions(object):
         """Add multiple transitions from adjacency matrix.
         
         These transitions are not labeled.
-        To label then, use either LabeledTransitions.relabel(),
-        or remove() and then LabeledTransitions.add_labeled_adj().
+        To label then, use either L{LabeledTransitions.relabel},
+        or L{remove} and then L{LabeledTransitions.add_labeled_adj}.
+
+        See Also
+        ========
+        L{States.add}, L{States.add_from},
+        L{LabeledTransitions.add_labeled_adj}
         
         @param adj: new transitions, represented by the
             non-zero elements of an adjacency matrix.
@@ -1482,11 +1486,6 @@ class Transitions(object):
             If adj2states includes a state not in sys.states,
             no transition is added and an exception raised.
         @type adj2states: list of valid states
-        
-        see also
-        --------
-        States.add, States.add_from,
-        LabeledTransitions.add_labeled_adj
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -1535,7 +1534,7 @@ class Transitions(object):
     def remove_from(self, from_states, to_states):
         """Delete all unlabeled transitions between multiple state pairs.
         
-        See also remove().        
+        See also L{remove}.
         """
         for from_state in from_states:
             for to_state in to_states:
@@ -1546,28 +1545,29 @@ class Transitions(object):
         
         Filtering the edge set E is based on end-point states of edge,
         because edges are not yet labeled.
-        To search over labeled edges = transitions, see LabeledTransitions.find
+        To search over labeled edges = transitions,
+        see L{LabeledTransitions.find}
         
-        note
-        ----
+        Note
+        ====
         filter around NetworkX.MultiDiGraph.edges()
         
-        see also
-        --------
-        LabeledTransitions.find
+        See Also
+        ========
+        L{LabeledTransitions.find}
         
-        @param start_states: from where transition should start
-        @type start_states: valid states
+        @param from_states: from where transition should start
+        @type from_states: valid states
         
-        @param end_states: where transition should end
-        @type end_states: valid states
+        @param to_states: where transition should end
+        @type to_states: valid states
         
         @return: Edges between given subsets of states
-        @rtype: list of state pairs as tuples:
-            [(C{from_state}, C{to_state}), ...]
-        such that:
-            - C{from_state} \\in C{from_states} and
-            - C{to_state} \\in C{to_states}
+        @rtype: list of state pairs as tuples::
+                [(C{from_state}, C{to_state}), ...]
+            such that:
+              - C{from_state} \\in C{from_states} and
+              - C{to_state} \\in C{to_states}
         """
         edges = []
         for (from_state, to_state) in self.graph.edges_iter(
@@ -1590,8 +1590,8 @@ class LabeledTransitions(Transitions):
     Note that in case an edge label comprises of a single sub-label,
     then the notions of label and sub-label are identical.
     
-    But for systems with more sub-labels,
-        e.g., {system_actions, environment_actions}
+    But for systems with more sub-labels, e.g.,::
+        {system_actions, environment_actions}
     a label consists of two sub-labels, each of which can be selected
     from the set of available system actions and environment actions.
     Each of these sets is defined using this class.
@@ -1600,14 +1600,14 @@ class LabeledTransitions(Transitions):
     without the need to re-write keyword-value management of
     NetworkX edge dictionaries every time this is needed.
     
-    caution
-    -------
+    Caution
+    =======
     Before removal of a sublabel value from the sublabel type V,
-    remember to check using sys.transitions.check_sublabeling()
-    that the value is not currently used by any edges.
+    remember to check using L{_check_sublabeling} that the value is
+    not currently used by any edges.
     
-    example
-    -------
+    Example
+    =======
     The action taken when traversing an edge.
     Each edge is annotated by a single action.
     If an edge (s1, s2) can be taken on two transitions,
@@ -1615,21 +1615,21 @@ class LabeledTransitions(Transitions):
     Each copy is annotated using a different action,
     the actions must belong to the same action set.
     That action set is defined as a ser instance.
-    This description is a (closed) FTS.
+    This description is a (closed) L{FTS}.
     
     The system and environment actions associated with an edge
     of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same (open) FTS.
+    and their sets are encapsulated within the same (open) L{FTS}.
     
     In more detail, the following classes encapsulate this one:
-        FiniteTransitionSystem (closed)
-        OpenFiniteTransitionSystem
-        FiniteStateAutomaton
-        FiniteStateMachine
+      - L{FiniteTransitionSystem} (closed)
+      - L{OpenFiniteTransitionSystem}
+      - L{FiniteStateAutomaton}
+      - L{FiniteStateMachine}
     
-    see also
-    --------
-    Transitions
+    See Also
+    ========
+    L{Transitions}
     """
     def __init__(self, graph, deterministic=False):
         Transitions.__init__(self, graph)
@@ -1646,15 +1646,15 @@ class LabeledTransitions(Transitions):
     def __call__(self, labeled=False, as_dict=True):
         """Return all edges, optionally paired with labels.
         
-        note
-        ----
+        Note
+        ====
         __call__(labeled=True, as_dict=True) is equivalent to find(),
-        i.e., find without any restrictions on the desired
+        i.e., L{find} without any restrictions on the desired
         from_state, to_state, nor sublabels.
         
-        see also
-        --------
-        find
+        See Also
+        ========
+        L{find}
         
         @param labeled: If C{True}, then return labeled edges
         @type labeled: bool
@@ -1821,7 +1821,7 @@ class LabeledTransitions(Transitions):
         
         Need to identify existing transition by providing old label.
         
-        A labeled transition is (uniquely) identified by the list:
+        A labeled transition is (uniquely) identified by the list::
             [from_state, to_state, old_label]
         However disagrees will have to work directly using int IDs for edges,
         or any other type desired as edge key.
@@ -1854,9 +1854,9 @@ class LabeledTransitions(Transitions):
         and if same edge with identical label already exists,
         a warning is issued.
         
-        see also
-        --------
-        add, label, relabel, add_labeled_adj
+        See Also
+        ========
+        L{add}, L{label}, L{relabel}, L{add_labeled_adj}
         
         @param from_state: start state of the transition
         @type from_state: valid system state
@@ -1940,7 +1940,7 @@ class LabeledTransitions(Transitions):
         
         Adds transitions between all states in set from_states,
         to all states in set to_states, annotating them with the same labels.
-        For more details, see add_labeled().
+        For more details, see L{add_labeled}.
         """
         for from_state in from_states:
             for to_state in to_states:
@@ -1952,7 +1952,11 @@ class LabeledTransitions(Transitions):
         ):
         """Add multiple transitions from adjacency matrix.
         
-        These transitions are enabled when the given guard is active.        
+        These transitions are enabled when the given guard is active.
+
+        See Also
+        ========
+        L{add_labeled}, L{Transitions.add_adj}
         
         @param adj: new transitions represented by adjacency matrix.
         @type adj: scipy.sparse.lil (list of lists)
@@ -1981,10 +1985,6 @@ class LabeledTransitions(Transitions):
         @param check_labels: check validity of labels,
             or just add them as new
         @type check_labels: bool
-        
-        see also
-        --------
-        add_labeled, Transitions.add_adj
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -2029,29 +2029,30 @@ class LabeledTransitions(Transitions):
         attempting to reduce duplication of effort by the user.
         
         Preimage under edge labeling function L of given label,
-        intersected with given subset of edges:
+        intersected with given subset of edges::
             L^{-1}(desired_label) \\cap (from_states x to_states)
         
         TODO support partial labels
         
-        note
-        ----
-        -  __call__
+        Note
+        ====
+          -  L{__call__}
+
+          - If called with C{from_states} = all states,
+            then the labels annotating returned edges are those which
+            appear at least once as edge annotations.
+            This may not be the set of all possible
+            labels, in case there valid but yet unused edge labels.
+
+          - find could have been named ".from...", but it would
+            elongate its name w/o adding information. Since you search
+            for transitions, there are underlying states and this
+            function naturally provides the option to restrict those
+            states to a subset of the possible ones.
         
-        - If called with C{from_states} = all states,
-        then the labels annotating returned edges are those which
-        appear at least once as edge annotations.
-        This may not be the set of all possible
-        labels, in case there valid but yet unused edge labels.
-        
-        - find could have been named ".from...", but it would elongate its
-        name w/o adding information. Since you search for transitions, there
-        are underlying states and this function naturally provides the option
-        to restrict those states to a subset of the possible ones.
-        
-        see also
-        --------
-        label, relabel, add_labeled, add_labeled_adj, __call__
+        See Also
+        ========
+        L{label}, L{relabel}, L{add_labeled}, L{add_labeled_adj}, L{__call__}
         
         @param from_states: subset of states from which transition must start
         @type from_states: 'any' (default)
@@ -2074,13 +2075,14 @@ class LabeledTransitions(Transitions):
               the list order based on graph._transition_label_def
         @type as_dict: bool
         
-        @return: set of transitions = labeled edges:
+        @return: set of transitions = labeled edges::
                 (C{from_state}, C{to_state}, label)
-            such that:
+            such that::
                 (C{from_state}, C{to_state} )
                 \\in C{from_states} x C{to_states}
                 
-        @rtype: list of transitions = list of labeled edges
+        @rtype: list of transitions::
+                = list of labeled edges
                 = [(C{from_state}, C{to_state}, C{label}),...]
             where:
                 - C{from_state} \\in C{from_states}
@@ -2088,6 +2090,7 @@ class LabeledTransitions(Transitions):
                 - C{label}: dict
                     | tuple of edge annotation,
                     determined by C{as_dict}.
+
         """
         (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
                                                             to_states)
@@ -2222,10 +2225,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         A == B
         
         4 sets should match:
-            1) nodes  IDs
-            2) node attributes (include labels)
-            3) transitions
-            4) transition attributes (include labels)
+            1. nodes  IDs
+            2. node attributes (include labels)
+            3. transitions
+            4. transition attributes (include labels)
         """
         raise NotImplementedError
     
@@ -2239,10 +2242,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         A is a sub-finite-transition-system of B
         
         A should have a subset of B's:
-            1) node IDs
-            2) node attributes (includes labels)
-            2) transitions (between same node IDs)
-            3) transition attributes (includes labels).
+            1. node IDs
+            2. node attributes (includes labels)
+            2. transitions (between same node IDs)
+            3. transition attributes (includes labels).
         """
         raise NotImplementedError
     
@@ -2357,8 +2360,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def tensor_product(self, other, prod_sys=None):
         """Return strong product with given graph.
         
-        reference
-        ---------
+        Reference
+        =========
         http://en.wikipedia.org/wiki/Strong_product_of_graphs
         nx.algorithms.operators.product.strong_product
         """
@@ -2406,10 +2409,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         would accurately model the existence of multiple cores,
         not just multiple processes executing on a single core.
         
-        references
-        ----------
-        http://en.wikipedia.org/wiki/Cartesian_product_of_graphs
-        nx.algorithms.operators.product.cartesian_product
+        References
+        ==========
+          - U{http://en.wikipedia.org/wiki/Cartesian_product_of_graphs}
+          - networkx.algorithms.operators.product.cartesian_product
         """
         prod_graph = nx.product.cartesian_product(self, other)
         
@@ -2430,10 +2433,10 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def strong_product(self, other):
         """Return strong product with given graph.
         
-        reference
-        ---------
-        http://en.wikipedia.org/wiki/Strong_product_of_graphs
-        nx.algorithms.operators.product.strong_product
+        Reference
+        =========
+          - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
+          - networkx.algorithms.operators.product.strong_product
         """
         raise NotImplementedError
         # An issue here is that transitions are possible both
@@ -2450,7 +2453,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         The reason is that edge labels do not have any semantics at this level,
         so they are not yet regarded as guards.
-        For more semantics, use a FiniteStateMachine.
+        For more semantics, use a L{FiniteStateMachine}.
         """
         for state in self.states():
             if self.states.is_terminal(state):
@@ -2471,17 +2474,17 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         Recommended: pdf, html, svg (can render LaTeX labels with inkscape export)
         
-        caution
-        -------
+        Caution
+        =======
         rankdir experimental argument
         
-        depends
-        -------
+        Depends
+        =======
         dot, pydot
         
-        see also
-        --------
-        plot, pydot.Dot.write
+        See Also
+        ========
+        L{plot}, pydot.Dot.write
         
         @param fileformat: type of image file
         @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
@@ -2490,16 +2493,16 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         @param filename: path to image
             (extension C{.fileformat} appened if missing and
-             C{add_missing_extension==True} )
-             Default:
+            C{add_missing_extension==True} )
+            Default:
             
-            - If C{self.name} is not set and no C{path} given,
-                then use C{self.default_export_fname} prepended with
-                C{self.default_export_fname}.
-            - If C{self.name} is set, but no C{path} given,
-                then use C{self.name} prepended with
-                C{self.default_export_fname}.
-            - If C{path} is given, use that.
+              - If C{self.name} is not set and no C{path} given,
+                  then use C{self.default_export_fname} prepended with
+                  C{self.default_export_fname}.
+              - If C{self.name} is set, but no C{path} given,
+                  then use C{self.name} prepended with
+                  C{self.default_export_fname}.
+              - If C{path} is given, use that.
         @type filename: str
         
         @param add_missing_extension: if extension C{.fileformat} missing,
@@ -2556,12 +2559,12 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         This method fixes that issue, so users don't need to look at files
         in a separate viewer during development.
         
-        see also
-        --------
-        save
+        See Also
+        ========
+        L{save}
         
-        depends
-        -------
+        Depends
+        =======
         dot and either of IPython or Matplotlib
         """
         # anything to plot ?
@@ -2590,16 +2593,16 @@ def str2singleton(ap_label, verbose=False):
 def prepend_with(states, prepend_str):
     """Prepend items with given string.
     
-    example
-    -------
+    Example
+    =======
     states = [0, 1]
     prepend_str = 's'
     states = prepend_with(states, prepend_str)
     assert(states == ['s0', 's1'] )
     
-    see also
-    --------
-    tuple2ba, tuple2fts
+    See Also
+    ========
+    L{tuple2ba}, L{tuple2fts}
     
     @param states: items prepended with string C{prepend_str}
     @type states: iterable

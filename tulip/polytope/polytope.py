@@ -56,19 +56,6 @@ Computational geometry module for polytope computations.
 Suggested abbreviation:
 
 >>> import tulip.polytope as pc
-
-Classes:
-	- Region
-	- Polytope
-
-Functions: 
-	- is_adjacent
-	- reduce
-	- is_fulldim
-	- cheby_ball
-	- is_inside
-	- envelope
-	- extreme
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -111,24 +98,24 @@ ABS_TOL = 1e-7
 class Polytope(object):
     """Polytope class with following fields
     
-    - `A`: a numpy array for the hyperplane normals in hyperplane
-           representation of a polytope
-    - `b`: a numpy array for the hyperplane offsets in hyperplane
-           representation of a polytope
-    - `array`: python array in the case of a union of convex polytopes
-    - `chebXc`: coordinates of chebyshev center (if calculated)
-    - `chebR`: chebyshev radius (if calculated)
-    - `bbox`: bounding box (if calculated)
-    - `minrep`: if polytope is in minimal representation (after
-                running reduce)
-    - `normalize`: if True (default), normalize given A and b arrays;
-                   else, use A and b without modification.
-    - `dim`: dimension
-    - `volume`: volume, computed on first call
+      - `A`: a numpy array for the hyperplane normals in hyperplane
+             representation of a polytope
+      - `b`: a numpy array for the hyperplane offsets in hyperplane
+             representation of a polytope
+      - `array`: python array in the case of a union of convex polytopes
+      - `chebXc`: coordinates of chebyshev center (if calculated)
+      - `chebR`: chebyshev radius (if calculated)
+      - `bbox`: bounding box (if calculated)
+      - `minrep`: if polytope is in minimal representation (after
+                  running reduce)
+      - `normalize`: if True (default), normalize given A and b arrays;
+                     else, use A and b without modification.
+      - `dim`: dimension
+      - `volume`: volume, computed on first call
     
-    see also
-    --------
-    Region
+    See Also
+    ========
+    L{Region}
     """
     def __init__(self,
         A = np.array([]), b = np.array([]), minrep = False,
@@ -218,8 +205,9 @@ class Polytope(object):
     def __contains__(self, point, abs_tol=ABS_TOL):
         """Return True if polytope contains point.
         
-        see also
-            is_inside
+        See Also
+        ========
+        L{is_inside}
         """
         if not isinstance(point, np.ndarray):
             point = np.array(point)
@@ -250,27 +238,27 @@ class Polytope(object):
         
         For usage see function union.
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return union(self, other, check_convex)
     
     def diff(self, other):
         """Return set difference with Polytope or Region.
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return mldivide(self, other)
     
     def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
-        @type other: Polytope or Region.
+        @type other: L{Polytope} or L{Region}.
         
-        @rtype: Polytope or Region
+        @rtype: L{Polytope} or L{Region}
         """
         return intersect(self, other, abs_tol)
     
@@ -287,14 +275,15 @@ class Polytope(object):
             the cross-product of which defines the polytope
             as an N-dimensional hyperrectangle
         @type intervals: [ndim x 2] numpy array or
-            list of lists:
+            list of lists::
+
                 [[x0_min, x0_max],
                  [x1_min, x1_max],
                  ...
                  [xN_min, xN_max]]
                 
         @return: hyperrectangle defined by C{intervals}
-        @rtype: Polytope
+        @rtype: L{Polytope}
         """
         if not isinstance(intervals, np.ndarray):
             try:
@@ -332,7 +321,7 @@ class Polytope(object):
                 abs_tol=ABS_TOL, verbose=0):
         """Return Polytope projection on selected subspace.
         
-        For usage details see function: projection.
+        For usage details see function: L{projection}.
         """
         return projection(self, dim, solver, abs_tol, verbose)
     
@@ -371,7 +360,7 @@ class Polytope(object):
         return self._chebXc
     
     def bounding_box(self):
-        """Wrapper of polytope.bounding_box.
+        """Wrapper of L{polytope.bounding_box}.
         
         Computes the bounding box on first call.
         """
@@ -418,19 +407,19 @@ class Region(object):
     
     Contains the following fields:
     
-    - `list_poly`: list of Polytope objects
-    - `props`: set of propositions inside region
-    - `bbox`: if calculated, bounding box of region (see bounding_box)
-    - `fulldim`: if calculated, boolean indicating whether region is
-                 fully dimensional
-    - `dim`: dimension
-    - `volume`: volume of region, calculated on first call
-    - `chebXc`: coordinates of maximum chebyshev center (if calculated)
-    - `chebR`: maximum chebyshev radius (if calculated)
+      - `list_poly`: list of Polytope objects
+      - `props`: set of propositions inside region
+      - `bbox`: if calculated, bounding box of region (see bounding_box)
+      - `fulldim`: if calculated, boolean indicating whether region is
+                   fully dimensional
+      - `dim`: dimension
+      - `volume`: volume of region, calculated on first call
+      - `chebXc`: coordinates of maximum chebyshev center (if calculated)
+      - `chebR`: maximum chebyshev radius (if calculated)
     
-    see also
-    --------
-    Polytope
+    See Also
+    ========
+    L{Polytope}
     """
     def __init__(self, list_poly=None, props=None):
         if list_poly is None:
@@ -486,8 +475,9 @@ class Region(object):
     def __contains__(self, point, abs_tol=ABS_TOL):
         """Return True if Region contains point.
         
-        see also
-            is_inside
+        See Also
+        ========
+        L{is_inside}
         """
         if not isinstance(point, np.ndarray):
             point = np.array(point)
@@ -516,9 +506,9 @@ class Region(object):
         To turn off this check,
         use Region.union
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return union(self, other, check_convex=True)
     
@@ -530,27 +520,27 @@ class Region(object):
         
         For usage see function union.
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return union(self, other, check_convex)
     
     def __sub__(self, other):
         """Return set difference with Polytope or Region.
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return mldivide(self, other)
     
     def diff(self, other):
         """Return set difference with Polytope or Region.
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Region
+        @rtype: L{Region}
         """
         return mldivide(self, other)
         
@@ -561,18 +551,18 @@ class Region(object):
         To select the absolute tolerance use
         method Region.intersect
         
-        @type other: Polytope or Region
+        @type other: L{Polytope} or L{Region}
         
-        @rtype: Polytope or Region
+        @rtype: L{Polytope} or L{Region}
         """
         return intersect(self, other)
     
     def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
-        @type other: Polytope or Region.
+        @type other: L{Polytope} or L{Region}.
         
-        @rtype: Polytope or Region
+        @rtype: L{Polytope} or L{Region}
         """
         return intersect(self, other, abs_tol)
     
@@ -651,11 +641,9 @@ class Region(object):
 def is_empty(polyreg):
     """Check if the description of a polytope is empty
     
-    Input:
-    `polyreg`: Polytope or Region instance
+    @param polyreg: L{Polytope} or L{Region} instance
     
-    Output:
-    `result`: Boolean indicating whether polyreg is empty
+    @return: Boolean indicating whether polyreg is empty
     """
     n = len(polyreg)
     if len(polyreg) == 0:
@@ -675,13 +663,10 @@ def is_empty(polyreg):
 def is_fulldim(polyreg, abs_tol=ABS_TOL):
     """Check if a polytope or region has inner points.
     
-    Input:
-    - `polyreg`: Polytope or Region instance
+    @param polyreg: L{Polytope} or L{Region} instance
     
-    Output:
-
-    - `result`: Boolean that is True if inner points found, False
-                otherwise.
+    @return: Boolean that is True if inner points found, False
+        otherwise.
     """
     if polyreg.fulldim is not None:
         return polyreg.fulldim
@@ -706,13 +691,11 @@ def is_fulldim(polyreg, abs_tol=ABS_TOL):
 def is_convex(reg, abs_tol=ABS_TOL):
     """Check if a region is convex.
     
-    Input:
-    `reg`: Region object
+    @type reg: L{Region}
     
-    Output:
-    `result,envelope`: result indicating if convex. if found to be
-                       convex the envelope describing the convex
-                       polytope is returned.
+    @return: result,envelope: result indicating if convex. if found to
+        be convex the envelope describing the convex polytope is
+        returned.
     """
     if not is_fulldim(reg):
         return True
@@ -741,17 +724,18 @@ def is_convex(reg, abs_tol=ABS_TOL):
 def is_inside(polyreg, point, abs_tol=ABS_TOL):
     """Checks if point satisfies all the inequalities of polyreg.
     
-    @param polyreg: Polytope | Region
-    @type point: tuple | 1d array | 2d array (a vector)
+    @param polyreg: L{Polytope} or L{Region}
+    @type point: tuple, 1d array, or 2d array (a vector)
     
-    @rtype result: bool
+    @rtype: bool
     """
     return polyreg.__contains__(point, abs_tol)
         
 def is_subset(small, big, abs_tol=ABS_TOL):
     """Return True if small \subseteq big.
     
-    @type small, big: Polytope, Region
+    @type small: L{Polytope} or L{Region}
+    @type big:   L{Polytope} or L{Region}
     
     @rtype: bool
     """
@@ -776,13 +760,11 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=ABS_TOL):
     by solving one LP for each facet
 
     Warning:
-    - nonEmptyBounded == 0 case is not tested much.
+      - nonEmptyBounded == 0 case is not tested much.
     
-    Input:
-    `poly`: Polytope or Region object
+    @type poly: L{Polytope} or L{Region}
     
-    Output:
-    `poly_red`: Reduced Polytope or Region object
+    @return: Reduced L{Polytope} or L{Region} object
     """
     if isinstance(poly, Region):
         lst = []
@@ -878,12 +860,11 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=ABS_TOL):
 def union(polyreg1,polyreg2,check_convex=False):
     """Compute the union of polytopes or regions
     
-    Input:
-    - `polyreg1, polyreg2`: polytopes or regions
-    - `check_convex`: if True, look for convex unions and simplify
+    @type polyreg1: L{Polytope} or L{Region}
+    @type polyreg2: L{Polytope} or L{Region}
+    @param check_convex: if True, look for convex unions and simplify
     
-    Output:
-    - region of non-overlapping polytopes describing the union
+    @return: region of non-overlapping polytopes describing the union
     """
     if is_empty(polyreg1):
         return polyreg2
@@ -959,13 +940,6 @@ def cheby_ball(poly1):
 
     If input is a region the largest Chebyshev ball is returned.
     
-    Input:
-    `poly1`: A Polytope object
-    
-    Output:
-
-    `rc,xc`: Chebyshev radius rc (float) and center xc (numpy array)
-
     N.B., this function will return whatever it finds in attributes
     chebR and chbXc if not None, without (re)computing the Chebyshev ball.
     
@@ -974,6 +948,10 @@ def cheby_ball(poly1):
     r1,x1 = cheby_ball(P, [1]) calculates the center and half the
     length of the longest line segment along the first coordinate axis
     inside polytope P
+
+    @type poly1: L{Polytope}
+    
+    @return: rc,xc: Chebyshev radius rc (float) and center xc (numpy array)
     """
     if (poly1._chebXc is not None) and (poly1._chebR is not None):
         #In case chebyshev ball already calculated and stored
@@ -1025,10 +1003,7 @@ def bounding_box(polyreg):
     If polyreg.bbox is not None,
     then it is returned without update.
     
-    @type polyreg: Polytope or Region
-    
-    @param recompute: Recompute bounding box,
-        even if polyreg.bbox is not None
+    @type polyreg: L{Polytope} or L{Region}
     
     @return: (l, u) where:
         
@@ -1114,12 +1089,10 @@ def envelope(reg, abs_tol=ABS_TOL):
     
     If envelope can't be computed an empty polytope is returned
     
-    Input:
-    `polyreg`: Polytope or Region
-    `abs_tol`: Absolute tolerance for calculations
+    @type reg: L{Region}
+    @param abs_tol: Absolute tolerance for calculations
     
-    Output:
-    `envelope`: Envelope of input
+    @return: Envelope of input
     """
     Ae = None
     be = None
@@ -1163,13 +1136,10 @@ def envelope(reg, abs_tol=ABS_TOL):
 def mldivide(poly1,poly2):
     """Compute set difference poly1 \ poly2 between two regions or polytopes
     
-    Input:
+    @param poly1: Starting L{Polytope} or L{Region}
+    @param poly2: L{Polytope} to subtract
     
-    - `poly1`: Starting polytope
-    - `poly2`: Polytope to subtract
-    
-    Output:
-    - `region`: Region describing the set difference
+    @return: L{Region} describing the set difference
     """
     P = Polytope()    
 
@@ -1184,11 +1154,10 @@ def mldivide(poly1,poly2):
 def intersect(poly1,poly2,abs_tol=ABS_TOL):
     """Compute the intersection between two polytopes or regions
     
-    Input:
-    - `poly1`,`poly2`: Polytopes to intersect
+    @type poly1: L{Polytope} or L{Region}
+    @type poly2: L{Polytope} or L{Region}
     
-    Output:
-    - Intersection described by a polytope
+    @return: Intersection of poly1 and poly2 described by a polytope
     """
     if (not is_fulldim(poly1)) or (not is_fulldim(poly2)):
         return Polytope()
@@ -1224,11 +1193,9 @@ def volume(polyreg):
     
     A randomized algorithm is used.
     
-    Input:
-    - `polyreg`: Polytope or Region
+    @type polyreg: L{Polytope} or L{Region}
     
-    Output:
-    - Volume of input
+    @return: Volume of input
     """
     if not is_fulldim(polyreg):
         return 0.
@@ -1272,11 +1239,9 @@ def volume(polyreg):
 def extreme(poly1):
     """Compute the extreme points of a _bounded_ polytope
     
-    Input:
-    - `poly1`: Polytope in dimension d
+    @param poly1: Polytope in dimension d
     
-    Output:
-    - A (N x d) numpy array containing the N vertices of poly1
+    @return: A (N x d) numpy array containing the N vertices of poly1
     """
     if poly1.vertices is not None:
         # In case vertices already stored
@@ -1362,11 +1327,9 @@ def extreme(poly1):
 def qhull(vertices,abs_tol=ABS_TOL):
     """Use quickhull to compute a convex hull.
     
-    Input:
-    - `vertices`: A N x d array containing N vertices in dimension d
+    @param vertices: A N x d array containing N vertices in dimension d
     
-    Output:
-    - Polytope describing the convex hull
+    @return: L{Polytope} describing the convex hull
     """
     A,b,vert = quickhull(vertices,abs_tol=abs_tol)
     if A.size == 0:
@@ -1376,28 +1339,26 @@ def qhull(vertices,abs_tol=ABS_TOL):
 def projection(poly1, dim, solver=None, abs_tol=ABS_TOL, verbose=0):
     """Projects a polytope onto lower dimensions.
     
-    Input:
-
-    - `poly1`: Polytope to project
-    - `dim`: Dimensions on which to project
-    - `solver`: A solver can be specified, if left blank an attempt is
-                made to choose the most suitable solver.
-    - `verbose`: if positive, print solver used in case of guessing;
-                 default is 0 (be silent).
-
     Available solvers are:
 
-    - "esp": Equality Set Projection;
-    - "exthull": vertex projection;
-    - "fm": Fourier-Motzkin projection;
-    - "iterhull": iterative hull method.
-    
-    Output:
-    - Projected polytope in lower dimension
+      - "esp": Equality Set Projection;
+      - "exthull": vertex projection;
+      - "fm": Fourier-Motzkin projection;
+      - "iterhull": iterative hull method.
     
     Example:
     To project the polytope `P` onto the first three dimensions, use
         >>> P_proj = projection(P, [1,2,3])
+
+    @param poly1: Polytope to project
+    @param dim: Dimensions on which to project
+    @param solver: A solver can be specified, if left blank an attempt
+        is made to choose the most suitable solver.
+    @param verbose: if positive, print solver used in case of
+        guessing; default is 0 (be silent).
+
+    @rtype: L{Polytope}
+    @return: Projected polytope in lower dimension
     """
     if isinstance(poly1, Region):
         ret = Polytope()
@@ -1479,12 +1440,10 @@ def separate(reg1, abs_tol=ABS_TOL):
     """Divide a region into several regions such that they are
     all connected.
     
-    Input:
-    - `reg1`: Region object
-    - `abs_tol`: Absolute tolerance
+    @type reg1: L{Region}
+    @param abs_tol: Absolute tolerance
     
-    Output:
-    List [] of connected Regions
+    @return: List [] of connected Regions
     """
     final = []
     ind_left = xrange(len(reg1))
@@ -1519,7 +1478,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
     
     Check by enlarging both slightly and checking for intersection.
     
-    @param poly1, poly2: Polytopes or Regions to check
+    @param poly1, poly2: L{Polytope}s or L{Region}s to check
     @param abs_tol: absolute tolerance
     @param overlap: used for overlapping polytopes, functions returns
                  True if polytopes are neighbors OR overlap
@@ -1592,7 +1551,8 @@ def is_interior(r0, r1, abs_tol=ABS_TOL):
     Checks if r1 enlarged by abs_tol
     is a subset of r0.
     
-    @type r0, r1: Polytope | Region
+    @type r0: L{Polytope} or L{Region}
+    @type r1: L{Polytope} or L{Region}
     
     @rtype: bool
     """
@@ -1838,13 +1798,11 @@ def projection_esp(poly1,keep_dim,del_dim):
 def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
     """Subtract a region from a polytope
     
-    Input:
-    - `poly`: polytope from which to subtract a region
-    - `reg`: region which should be subtracted
-    - `abs_tol`: absolute tolerance
+    @param poly: polytope from which to subtract a region
+    @param reg: region which should be subtracted
+    @param abs_tol: absolute tolerance
     
-    Output:
-    - polytope or region containing non-overlapping polytopes
+    @return: polytope or region containing non-overlapping polytopes
     """
     Pdummy = poly
     res = Polytope() # Initiate output
@@ -2017,11 +1975,7 @@ def box2poly(box):
 
 def _get_patch(poly1, **kwargs):
     """Return matplotlib patch for given Polytope.
-    
-    @param poly1: Polytope
-    @param kwargs: any keyword arguments valid for
-        matplotlib.patches.Polygon
-    
+
     Example::
 
     > # Plot Polytope objects poly1 and poly2 in the same plot
@@ -2035,6 +1989,10 @@ def _get_patch(poly1, **kwargs):
     > ax.set_xlim(xl, xu) # Optional: set axis max/min
     > ax.set_ylim(yl, yu) 
     > plt.show()
+
+    @type poly1: L{Polytope}
+    @param kwargs: any keyword arguments valid for
+        matplotlib.patches.Polygon
     """
     if mpl is None:
         logger.warn('matplotlib not found, no plotting.')
@@ -2058,7 +2016,7 @@ def _get_patch(poly1, **kwargs):
 def grid_region(polyreg, res=None):
     """Grid within polytope or region.
     
-    @type polyreg: Polytope or Region
+    @type polyreg: L{Polytope} or L{Region}
     
     @param res: resolution of grid
     """

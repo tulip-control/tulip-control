@@ -55,11 +55,11 @@ class Facet:
     following fields:
     N.B. Polyhedron is assumed to contain the origin (inside and outside are defined accordingly)
     
-    - `outside`: a list of points outside the facet
-    - `vertices`: the vertices of the facet in a n*n matrix where each row denotes a vertex
-    - `neighbors`: a list of other facets with which the facet shares n-1 vertices
-    - `normal`: a normalized vector perpendicular to the facet, pointing "out"
-    - `distance`: the normal distance of the facet from origo
+      - `outside`: a list of points outside the facet
+      - `vertices`: the vertices of the facet in a n*n matrix where each row denotes a vertex
+      - `neighbors`: a list of other facets with which the facet shares n-1 vertices
+      - `normal`: a normalized vector perpendicular to the facet, pointing "out"
+      - `distance`: the normal distance of the facet from origo
     """
     
     
@@ -141,13 +141,11 @@ def is_neighbor(fac1, fac2, abs_tol=1e-7):
 def quickhull(POINTS, abs_tol=1e-7):
     """Compute the convex hull of a set of points
     
-    Input:
-    - `points`: a n*d np array where each row denotes a point
+    @param POINTS: a n*d np array where each row denotes a point
     
-    Output:
-    - `A,b,vertices`: `A` and `b describing the convex hull polytope as
-                      A x <= b (H-representation). `vertices is a list of all 
-                      the points in the convex hull (V-representation).
+    @return: A,b,vertices: `A` and `b describing the convex hull
+        polytope as A x <= b (H-representation). `vertices is a list
+        of all the points in the convex hull (V-representation).
     """
     
     POINTS = POINTS.astype('float')

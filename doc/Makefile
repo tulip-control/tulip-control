@@ -37,4 +37,4 @@ html:
 
 api:
 	mkdir -p $(BUILDDIR)/$(EPYBUILDDIR)
-	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://www.cds.caltech.edu/tulip -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,polytope/__init__.py,polytope/plot.py,polytope/polytope.py,transys,spec,jtlvint.py,gr1cint.py,synth.py,abstract}
+	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://www.cds.caltech.edu/tulip -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,polytope,transys,spec,interfaces,synth.py,abstract,hybrid.py}

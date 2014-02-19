@@ -48,8 +48,8 @@ def compare_lists(list1, list2):
     
     Hashability of elements not assumed, incurring O(N**2)
     
-    see also
-    --------
+    See Also
+    ========
     MathSet
     
     @type list1: list
@@ -83,8 +83,8 @@ def compare_lists(list1, list2):
 class MathSet(object):
     """Mathematical set, allows unhashable elements.
     
-    examples
-    --------
+    Examples
+    ========
     >>> s = MathSet(['a', 1, [1,2], {'a', 'b'} ] )
     
     Then print(s) shows how the elements were separately stored
@@ -105,15 +105,15 @@ class MathSet(object):
     >>> p
     MathSet([2, 3, 4, 5, 6, '5', '7', [1, 2], {'a': 1}, set([8, 9])])
     
-    see also
-    --------
+    See Also
+    ========
     SubSet, PowerSet, set
     """    
     def __init__(self, iterable=[]):
         """Initialize by adding elements from iterable.
         
-        example
-        -------
+        Example
+        =======
         >>> s = MathSet([1, 2, 'a', {3, 4} ] )
         
         @param iterable: iterable from which to initialize the set S
@@ -143,8 +143,8 @@ class MathSet(object):
     def __or__(self, other):
         """Union with another mathematical set.
         
-        see also
-        --------
+        See Also
+        ========
         __ior__
         
         @param other: any other mathematical set.
@@ -164,8 +164,8 @@ class MathSet(object):
         This representation is internally more efficient,
         because it is implicit (product not explicitly stored).
         
-        see also
-        --------
+        See Also
+        ========
         CartesianProduct, __mul__
         """
         raise NotImplementedError
@@ -173,8 +173,8 @@ class MathSet(object):
     def __mul__(self, other):
         """Return the Cartesian product with another C{MathSet}.
         
-        example
-        -------
+        Example
+        =======
         >>> a = MathSet([1, 2] )
         >>> b = MathSet([3, 4] )
         >>> c = a *b
@@ -186,8 +186,8 @@ class MathSet(object):
         If we prefer a CartesianProduct returned instead:
         >>> c = a.cartesian(b)
         
-        see also
-        --------
+        See Also
+        ========
         cartesian
         
         @param other: set with which to take Cartesian product
@@ -203,15 +203,15 @@ class MathSet(object):
     def __ior__(self, iterable):
         """Union with of MathSet with iterable.
         
-        example
-        -------
+        Example
+        =======
         >>> s = MathSet([1, 2] )
         >>> s |= [3, 4] # much cleaner & familiar
         >>> print(s)
         set([1, 2, 3, 4]) U []
         
-        see also
-        --------
+        See Also
+        ========
         __or__
         
         @param iterable: any mathematical set.
@@ -280,14 +280,14 @@ class MathSet(object):
     def add(self, item):
         """Add element to mathematical set.
         
-        example
-        -------
+        Example
+        =======
         >>> s = MathSet()
         >>> s.add(1)
         set([1]) U []
         
-        see also
-        --------
+        See Also
+        ========
         add_from, __ior__, remove
         
         @param item: the new set element
@@ -311,8 +311,8 @@ class MathSet(object):
         
         Equivalent to |=
         
-        example
-        -------
+        Example
+        =======
         >>> s = MathSet()
         >>> s.add_from([1, 2, {3} ] )
         
@@ -321,8 +321,8 @@ class MathSet(object):
         >>> s = MathSet()
         >>> s |= [1, 2, {3} ]
         
-        see also
-        --------
+        See Also
+        ========
         add, __ior__, remove
         
         @param iterable: new MathSet elements
@@ -355,15 +355,15 @@ class MathSet(object):
     def remove(self, item):
         """Remove existing element from mathematical set.
         
-        example
-        -------
+        Example
+        =======
         >>> p = MathSet([1, 2] )
         >>> p.remove(1)
         >>> p
         set([2]) U []
         
-        see also
-        --------
+        See Also
+        ========
         add, add_from, __or__
         
         @param item: An item already in the set.
@@ -451,8 +451,8 @@ class SubSet(MathSet):
     Prior to adding new elements,
     it checks that they are in its superset.
     
-    example
-    -------
+    Example
+    =======
     >>> superset = [1, 2]
     >>> s = SubSet(superset)
     >>> s |= [1, 2]
@@ -461,15 +461,15 @@ class SubSet(MathSet):
     >>> s.add(3)
     raises exception because 3 \\notin [1,2]
     
-    see also
-    --------
+    See Also
+    ========
     MathSet, PowerSet
     """
     def __init__(self, iterable_superset):
         """Define the superset with respect to maintain consistency.
         
-        @param superset: This SubSet checked vs C{superset}
-        @type superset: Iterable
+        @param iterable_superset: This SubSet checked vs C{superset}
+        @type iterable_superset: Iterable
         """
         self._superset = []
         super(SubSet, self).__init__([])
@@ -505,14 +505,14 @@ class SubSet(MathSet):
         
         Extends MathSet.add with subset relation checking.
         
-        example
-        -------
+        Example
+        =======
         C{new_initial_state} should already be a state.
         First use states.add to include it in set of states,
         then states.add_initial.
         
-        see also
-        --------
+        See Also
+        ========
         MathSet.add
         """
         if not new_element in self.superset:
@@ -530,16 +530,16 @@ class SubSet(MathSet):
         
         Extends MathSet.add_from with subset relation checking.
         
-        note
-        ----
+        Note
+        ====
         It would be sufficient to extend only .add provided
         MathSet.add_from called .add iteratively.
         However MathSet.add_from filters states, which is
         arguably more efficient. So both .add and .add_from
         need to be extended here.
         
-        see also
-        --------
+        See Also
+        ========
         add, __ior__
         """
         if not is_subset(new_elements, self._superset):
@@ -594,8 +594,8 @@ class CartesianProduct(object):
 def unique(iterable):
     """Return unique elements.
     
-    note
-    ----
+    Note
+    ====
     Always returning a list for consistency was tempting,
     however this defeats the purpose of creating this function
     to achieve brevity elsewhere in the code.
@@ -678,10 +678,8 @@ def is_subset(small_iterable, big_iterable):
 def powerset(iterable):
         """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
         
-        From:
-            http://docs.python.org/2/library/itertools.html,
-        also in:
-            https://pypi.python.org/pypi/more-itertools
+        From http://docs.python.org/2/library/itertools.html,
+        also in https://pypi.python.org/pypi/more-itertools
         """
         s = list(iterable)
         return chain.from_iterable(combinations(s, r) for r in range(len(s)+1) )
@@ -692,8 +690,8 @@ class PowerSet(object):
     Set here isn't necessarily a Python set,
     i.e., it may comprise of unhashable elements.
       
-    example
-    -------
+    Example
+    =======
     Specify the mathematical set S underlying the PowerSet.
     >>> S = [[1, 2], '3', {'a':1}, 1]
     >>> p = PowerSet(S)
@@ -711,8 +709,8 @@ class PowerSet(object):
     Remove existing element from set S.
     >>> p.remove(1)
     
-    see also
-    --------
+    See Also
+    ========
     MathSet, SubSet, is_subset
     
     @param iterable: mathematical set S of elements, on which this 2^S defined.

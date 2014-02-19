@@ -30,11 +30,8 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-
 """ 
 Proposition preserving partition module.
-
-Restructured by NO, 30 Jun 2013.
 """
 from warnings import warn
 
@@ -51,20 +48,20 @@ def prop2part(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of
     propositions (cont_props), and returns a proposition preserving
     partition of the state space.
+
+    See Also
+    ========
+    L{PropPreservingPartition},
+    L{polytope.Polytope}
     
     @param state_space: problem domain
-    @type state_space: polytope.Polytope
+    @type state_space: L{polytope.Polytope}
     
     @param cont_props_dict: propositions
-    @type cont_props_dict: dict of polytope.Polytope
+    @type cont_props_dict: dict of L{polytope.Polytope}
     
     @return: state space quotient partition induced by propositions
-    @rtype: PropPreservingPartition
-    
-    see also
-    --------
-    PropPreservingPartition,
-    polytope.Polytope
+    @rtype: L{PropPreservingPartition}
     """
     first_poly = [] #Initial Region's polytopes
     first_poly.append(state_space)
@@ -143,11 +140,11 @@ def part2convex(ppp):
     another proposition preserving partition such that each part in the new 
     partition is a convex polytope
     
-    @type ppp: PropPreservingPartition
+    @type ppp: L{PropPreservingPartition}
     
     @return: refinement into convex polytopes and
         map from new to old Regions
-    @rtype: (PropPreservingPartition, list)
+    @rtype: (L{PropPreservingPartition}, list)
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
@@ -178,18 +175,18 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     Modified from Petter Nilsson's code implementing merge algorithm in 
     Nilsson et al. `Temporal Logic Control of Switched Affine Systems with an
     Application in Fuel Balancing`, ACC 2012.
+
+    See Also
+    ========
+    L{discretize}
     
-    @type pwa_sys: hybrid.PwaSysDyn
-    @type ppp: PropPreservingPartition
+    @type pwa_sys: L{hybrid.PwaSysDyn}
+    @type ppp: L{PropPreservingPartition}
     
     @return: partition and assignmend of its regions to PWA subsystems
-    @rtype: (PropPreservingPartition, list)
+    @rtype: (L{PropPreservingPartition}, list)
         where the list contains indices referring to subsystems
         by their order in C{pwa_sys}
-    
-    see also
-    --------
-    discretize.discretize
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
         raise Exception("pwaPartition: "
@@ -242,15 +239,15 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
      
     Input:
     
-    - `ppp`: a PropPreservingPartition object
-    - `grid_size`: the size of the grid,
-        type: float or list of float
-    - `num_grid_pnts`: the number of grids for each dimension,
-        type: integer or list of integer
+      - `ppp`: a L{PropPreservingPartition} object
+      - `grid_size`: the size of the grid,
+          type: float or list of float
+      - `num_grid_pnts`: the number of grids for each dimension,
+          type: integer or list of integer
     
     Output:
     
-    - A PropPreservingPartition object with grids
+      - A L{PropPreservingPartition} object with grids
         
     Note: There could be numerical instabilities when the continuous 
     propositions in ppp do not align well with the grid resulting in very small 
@@ -414,25 +411,25 @@ def find_adjacent_regions(partition):
 class PropPreservingPartition(object):
     """Partition class with following fields:
     
-    - domain: the domain we want to partition
-        type: Polytope
+      - domain: the domain we want to partition
+          type: L{Polytope}
+
+      - regions: Regions of proposition-preserving partition
+          type: list of L{Region}
+
+      - adj: a sparse matrix showing which regions are adjacent
+          order of L{Region}s same as in list C{regions}
+
+          type: scipy lil sparse
+
+      - prop_regions: map from atomic proposition symbols
+          to continuous subsets
+
+          type: dict of L{Polytope} or L{Region}
     
-    - regions: Regions of proposition-preserving partition
-        type: list of Region
-    
-    - adj: a sparse matrix showing which regions are adjacent
-        order of Regions same as in list C{regions}
-        
-        type: scipy lil sparse
-    
-    - prop_regions: map from atomic proposition symbols
-        to continuous subsets
-        
-        type: dict of Polytope or Region
-    
-    see also
+    See Also
     ========
-    prop2part
+    L{prop2part}
     """
     def __init__(self,
         domain=None, regions=[],
@@ -556,7 +553,7 @@ class PropPreservingPartition(object):
         return plot_partition(self, **kwargs)
 
 class PPP(PropPreservingPartition):
-    """Alias to PropPreservingPartition.
+    """Alias to L{PropPreservingPartition}.
     
     See that for details.
     """

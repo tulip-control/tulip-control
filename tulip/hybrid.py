@@ -30,13 +30,8 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-""" 
-Classes:
-    - LtiSysDyn
-    - PwaSysDyn
-    - HybridSysDyn
-    
-NO, 2 Jul 2013.
+"""
+Classes representing hybrid dynamical systems.
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -57,11 +52,11 @@ except Exception, e:
     quiver = None
 
 class LtiSysDyn(object):
-    """Represent discrete-time continuous dynamics:
+    """Represent discrete-time continuous dynamics::
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
     
-    subject to the constraints:
+    subject to the constraints::
     
         u[t] \in Uset
         d[t] \in Wset
@@ -75,17 +70,19 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a polytope.Polytope)
+        - Uset, Wset and domain (each a L{polytope.Polytope})
     
     as defined above.
     
-    Note: For state-dependent bounds on the input,
+    Note
+    ====
+    For state-dependent bounds on the input,::
         [u[t]; s[t]] \in Uset
     can be used.
     
-    see also
-    --------
-    PwaSysDyn, HybridSysDyn, polytope.Polytope
+    See Also
+    ========
+    L{PwaSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None):
@@ -190,18 +187,18 @@ class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
     A PwaSysDyn object contains the fields:
     
-    - C{list_subsys}: list of LtiSysDyn
-    
-    - C{domain}: domain over which piecewise affine system is defined,
-        type: polytope.Polytope
+      - C{list_subsys}: list of L{LtiSysDyn}
+
+      - C{domain}: domain over which piecewise affine system is defined,
+          type: polytope.Polytope
     
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
     domain.
     
-    see also
-    --------
-    LtiSysDyn, HybridSysDyn, polytope.Polytope
+    See Also
+    ========
+    L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain is None:
@@ -284,16 +281,16 @@ class HybridSysDyn(object):
        type: list of len(n_sys)
        default: range(n_sys)
     
-     - C{dynamics}: mapping mode 2-tuples to active dynamics:
+     - C{dynamics}: mapping mode 2-tuples to active dynamics::
          
          (env_label, sys_label) -> PwaSysDyn
        
        type: dict
        default: If no env_label or sys_label passed,
-                then default to int indices (i,j) PwaSysDyn.
+       then default to int indices (i,j) L{PwaSysDyn}.
     
      - C{cts_ss}: continuous state space over which hybrid system is defined.
-       type: polytope.Region
+       type: L{polytope.Region}
     
      - C{time_semantics}: TBD. Current default semantics are discrete-time.
        
@@ -310,13 +307,14 @@ class HybridSysDyn(object):
            - env[t] and
            - s[t] (synchronously at time t).
        
-    Note: We assume that system and environment switching modes
-        are independent of one another.
-        (Use LTL statement to make it not so.)
+    Note
+    ====
+    We assume that system and environment switching modes are
+    independent of one another.  (Use LTL statement to make it not so.)
     
-    see also
-    --------
-    LtiSysDyn, PwaSysDyn, polytope.Region
+    See Also
+    ========
+    L{LtiSysDyn}, L{PwaSysDyn}, L{polytope.Region}
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,

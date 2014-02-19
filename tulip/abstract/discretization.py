@@ -33,20 +33,9 @@
 """ 
 Algorithms related to discretization of continuous dynamics.
 
-Class:
-    - AbstractSysDyn
-    
-Primary functions:
-    - discretize
-    
-Helper functions:
-    - solve_feasible
-    - createLM
-    - get_max_extreme
-
-see also
---------
-find_controller
+See Also
+========
+L{find_controller}
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -65,72 +54,70 @@ from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import solve_feasible
 
 class AbstractSysDyn(object):
-    """AbstractSysDyn class for discrete abstractions of continuous
-    dynamics.
+    """Class for discrete abstractions of continuous dynamics.
     
     An AbstractSysDyn object contains the fields:
     
-    - ppp: Partition into Regions.
-        Each Region corresponds to
-        a discrete state of the abstraction
-        
-        type: PropPreservingPartition
-    
-    - ts: Finite transition system abstracting the continuous system.
-        Each state corresponds to a Region in ppp.
-        It can be fed into discrete synthesis algorithms.
-        
-        type: OpenFTS
-    
-    - ppp2ts: map Regions to states of the transition system
-        Each index denotes the Region with same index in:
-            
-            ppp
-            
-        type: list of states
-            (usually each state is a str)
-    
-    - original_regions: Regions of original
-        proposition preserving partition
-        Used for non-conservative planning.
-        
-        type: list of Region
-    
-    - ppp2orig: map of new Regions to original Regions:
-            
-            - i-th new Region in C{ppp}
-            - ppp2orig[i]-th original Region in C{original_regions}
-            
-        type: list of indices
-    
-    - ppp2pwa: map Regions to PwaSubSys.list_subsys
-        Each partition corresponds to some mode.
-        (for switched systems)
-        
-        In each mode a PwaSubSys is active.
-        This PwaSubSys comprises of subsystems,
-        which are listed in PwaSubSys.list_subsys.
-        
-        The list C{ppp2pwa} means:
-        
-            - i-th Region in C{regions}
-            - ppp2pwa[i]-th system in PwaSubSys.list_subsys
-                is active in the i-th Region
-        
-        type: list
-    
-    - disc_params: parameters used in discretization that 
-        should be passed to the controller refinement
-        to ensure consistency
-        
-        type: dict
+      - ppp: Partition into Regions.
+          Each Region corresponds to
+          a discrete state of the abstraction
+
+          type: L{PropPreservingPartition}
+
+      - ts: Finite transition system abstracting the continuous system.
+          Each state corresponds to a Region in ppp.
+          It can be fed into discrete synthesis algorithms.
+
+          type: L{transys.OpenFTS}
+
+      - ppp2ts: map Regions to states of the transition system
+          Each index denotes the Region with same index in ppp.
+
+          type: list of states
+          (usually each state is a str)
+
+      - original_regions: Regions of original
+          proposition preserving partition
+          Used for non-conservative planning.
+
+          type: list of Region
+
+      - ppp2orig: map of new Regions to original Regions:
+
+              - i-th new Region in C{ppp}
+              - ppp2orig[i]-th original Region in C{original_regions}
+
+          type: list of indices
+
+      - ppp2pwa: map Regions to PwaSubSys.list_subsys
+          Each partition corresponds to some mode.
+          (for switched systems)
+
+          In each mode a PwaSubSys is active.
+          This PwaSubSys comprises of subsystems,
+          which are listed in PwaSubSys.list_subsys.
+
+          The list C{ppp2pwa} means:
+
+              - i-th Region in C{regions}
+              - ppp2pwa[i]-th system in PwaSubSys.list_subsys
+                  is active in the i-th Region
+
+          type: list
+
+      - disc_params: parameters used in discretization that 
+          should be passed to the controller refinement
+          to ensure consistency
+
+          type: dict
     
     If any of the above is not given,
     then it is initialized to None.
             
     Note1: There could be some redundancy in ppp and ofts in that they are
     both decorated with propositions. This might be useful to keep each of 
-    them as functional units on their own (possible to change later). 
+    them as functional units on their own (possible to change later).
+
     """
     def __init__(self, ppp=None, ts=None, ppp2ts=None,
                  original_regions=None, ppp2orig=None,
@@ -231,13 +218,12 @@ def discretize(
     """Refine the partition and establish transitions
     based on reachability analysis.
     
-    see also
-    --------
-    prop2partition.pwa_partition
-    prop2partition.part2convex
+    See Also
+    ========
+    L{prop2partition.pwa_partition}, L{prop2partition.part2convex}
     
-    @param part: a PropPreservingPartition object
-    @param ssys: a LtiSysDyn or PwaSysDyn object
+    @param part: L{PropPreservingPartition} object
+    @param ssys: L{LtiSysDyn} or L{PwaSysDyn} object
     @param N: horizon length
     @param min_cell_volume: the minimum volume of cells in the resulting
         partition.
@@ -269,9 +255,9 @@ def discretize(
         default = False
     
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of Polytopes
+    @type cont_props: list of L{Polytope}
     
-    @rtype: AbstractSysDyn
+    @rtype: L{AbstractSysDyn}
     """
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -743,13 +729,13 @@ def discretize_overlap(closed_loop=False, conservative=False):
 def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     """Abstract switched dynamics over given partition.
     
-    @type ppp: PropPreservingPartition
+    @type ppp: L{PropPreservingPartition}
     
     @param hybrid_sys: dynamics of switching modes
-    @type hybrid_sys: hybrid.HybSysDyn
+    @type hybrid_sys: L{HybridSysDyn}
     
     @param disc_params: discretization parameters
-        passed to C{discretize},
+        passed to L{discretize},
         see that for details
     @type disc_params: dict (keyed by mode) of dicts
     
@@ -758,7 +744,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     
     @return: abstracted dynamics,
         some attributes are dict keyed by mode
-    @rtype: AbstractSysDyn
+    @rtype: L{AbstractSysDyn}
     """
     if disc_params is None:
         disc_params = {'N':1, 'trans_length':1}
@@ -842,9 +828,8 @@ def plot_annot(ax):
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
     
-    @type merged_part: AbstractSysDyn
-    @type abstr: list of AbstractSysDyn
-    @type hybrid_sys: HybridSysDyn
+    @type merged_abstr: L{AbstractSysDyn}
+    @type abstr: list of L{AbstractSysDyn}
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
@@ -978,11 +963,11 @@ def merge_partitions(abstractions):
     """Merge multiple abstractions.
     
     @param abstractions: keyed by mode
-    @type abstractions: dict of AbstractSysDyn
+    @type abstractions: dict of L{AbstractSysDyn}
     
-    @rtype: (merged_abstraction, ap_labeling)
+    @return: (merged_abstraction, ap_labeling)
         where:
-            - merged_abstraction: AbstractSysDyn
+            - merged_abstraction: L{AbstractSysDyn}
             - ap_labeling: dict
     """
     if len(abstractions) == 0:

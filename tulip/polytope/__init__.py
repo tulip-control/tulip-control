@@ -30,11 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
-
-"""TuLiP Toolbox Polytope module
-
-Main functions are in polytope.py, which are imported automatically.
-Functions for plotting are in plot.py, requires matplotlib.
+"""TuLiP Toolbox Polytope subpackage
 """
 
 from .polytope import Polytope, Region

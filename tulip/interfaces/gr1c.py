@@ -418,9 +418,10 @@ def check_syntax(spec_str, verbose=0):
         return False
 
 def check_realizable(spec, verbose=0):
-    """Decide realizability of specification defined by given GRSpec object.
+    """Decide realizability of specification.
 
-    Return True if realizable, False if not, or an error occurs.
+    @type spec: L{GRSpec}
+    @return: True if realizable, False if not, or an error occurs.
     """
     f = tempfile.TemporaryFile()
     f.write(spec.to_gr1c())
@@ -440,8 +441,10 @@ def check_realizable(spec, verbose=0):
 def synthesize(spec, verbose=0):
     """Synthesize strategy.
 
-    Return strategy as L{MealyMachine},
-    or None if unrealizable or error occurs.
+    @type spec: L{GRSpec}
+
+    @return: strategy as L{MealyMachine},
+        or None if unrealizable or error occurs.
     """
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
                          stdin=subprocess.PIPE,

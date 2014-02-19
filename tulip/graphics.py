@@ -149,8 +149,8 @@ def dom2vec(domain, resolution):
     point coordinates over a parallelepiped domain
     with the given resolution.
     
-    example
-    -------
+    Example
+    =======
     >>> domain = [0, 1, 0,2]
     >>> resolution = [4, 5]
     >>> q = domain2vec(domain, resolution)

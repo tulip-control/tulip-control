@@ -34,13 +34,13 @@
 Check Linear Discrete-Time-Invariant System reachability between polytopes
     
 Primary functions:
-    - solve_feasible
-    - createLM
-    - get_max_extreme
+    - L{solve_feasible}
+    - L{createLM}
+    - L{get_max_extreme}
 
-see also
---------
-find_controller
+See Also
+========
+L{find_controller}
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -75,9 +75,9 @@ def solve_feasible(
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
     
-    @type P1: Polytope or Region
-    @type P2: Polytope or Region
-    @type ssys: LtiSysDyn
+    @type P1: L{Polytope} or L{Region}
+    @type P2: L{Polytope} or L{Region}
+    @type ssys: L{LtiSysDyn}
     @param N: The horizon length
     @param closed_loop: If true, take 1 step at a time.
         This keeps down polytope dimension and
@@ -93,7 +93,7 @@ def solve_feasible(
         Otherwise, P1 is used.
     
     @return: the subset S0 of P1 from which P2 is reachable
-    @rtype: Polytope or Region
+    @rtype: L{Polytope} or L{Region}
     """
     if closed_loop:
         return solve_closed_loop(
@@ -114,8 +114,8 @@ def solve_closed_loop(
 ):
     """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
     
-    @type P1: Polytope or Region
-    @type P2: Polytope or Region
+    @type P1: L{Polytope} or L{Region}
+    @type P2: L{Polytope} or L{Region}
     
     @param ssys: system dynamics
     
@@ -232,36 +232,36 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope:
+    """Compute the components of the polytope::
     
         L [x(0)' u(0)' ... u(N-1)']' <= M
     
     which stacks the following constraints:
     
-    - x(t+1) = A x(t) + B u(t) + E d(t)
-    - [u(k); x(k)] \in ssys.Uset for all k
+      - x(t+1) = A x(t) + B u(t) + E d(t)
+      - [u(k); x(k)] \in ssys.Uset for all k
     
-    If list_P is a Polytope:
+    If list_P is a L{Polytope}:
 
-    - x(0) \in list_P if list_P
-    - x(k) \in Pk for k= 1,2, .. N-1
-    - x(N) \in PN
+      - x(0) \in list_P if list_P
+      - x(k) \in Pk for k= 1,2, .. N-1
+      - x(N) \in PN
     
     If list_P is a list of polytopes:
 
-    - x(k) \in list_P[k] for k= 0, 1 ... N
+      - x(k) \in list_P[k] for k= 0, 1 ... N
     
     The returned polytope describes the intersection of the polytopes
     for all possible
 
     @param ssys: system dynamics
-    @type ssys: LtiSysDyn
+    @type ssys: L{LtiSysDyn}
     
     @param N: horizon length
     
-    @type list_P: list of Polytopes or Polytope
-    @type Pk: Polytope
-    @type PN: Polytope
+    @type list_P: list of Polytopes or L{Polytope}
+    @type Pk: L{Polytope}
+    @type PN: L{Polytope}
     
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.
@@ -405,18 +405,18 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     return L,M
 
 def get_max_extreme(G,D,N):
-    """Calculate the array d_hat such that:
+    """Calculate the array d_hat such that::
     
         d_hat = max(G*DN_extreme),
     
     where DN_extreme are the vertices of the set D^N.
     
-    This is used to describe the polytope:
+    This is used to describe the polytope::
     
         L*x <= M - G*d_hat.
     
     Calculating d_hat is equivalen to taking the intersection
-    of the polytopes:
+    of the polytopes::
     
         L*x <= M - G*d_i
     
