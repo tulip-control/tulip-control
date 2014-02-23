@@ -278,11 +278,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     mask_func = lambda x: bool(x)
     
     mach = MealyMachine()
-    
-    inputs = _create_machine_ports(mach, env_vars, spec0.env_vars)
+    inputs = _create_machine_ports(spec0.env_vars)
     mach.add_inputs(inputs)
     
-    outputs = _create_machine_ports(mach, sys_vars, spec0.sys_vars)
+    outputs = _create_machine_ports(spec0.sys_vars)
     masks = {k:mask_func for k in sys_vars}
     mach.add_outputs(outputs, masks)
     
@@ -347,18 +346,27 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     
     return (spec, mach)
 
-def _create_machine_ports(mach, vars_dict, spec0_vars):
+def _create_machine_ports(spec0_vars):
     """Create proper port domains of valuations, given port types.
+    
+    @param spec0_vars: port names and types inside tulip.
+        For arbitrary finite types the type can be a list of strings,
+        instead of a range of integers.
+        These are as originally defined by the user or synth.
     """
-    ports = []
-    for env_var, var_type in vars_dict.items():
+    ports = OrderedDict()
+    for env_var, var_type in spec0_vars.items():
         if var_type == 'boolean':
             domain = {0,1}
-        elif isinstance(spec0_vars[env_var], tuple):
-            domain = set(range(var_type[0], var_type[1]+1))
-        elif isinstance(spec0_vars[env_var], list):
-            domain = set(spec0_vars[env_var])
-        ports += [(env_var, domain)]
+        elif isinstance(var_type, tuple):
+            # integer domain
+            start, end = var_type
+            domain = set(range(start, end+1))
+        elif isinstance(var_type, list):
+            # arbitrary finite domain defined by list var_type
+            domain = set(var_type)
+        
+        ports[env_var] = domain
     return ports
 
 def _map_int2dom(label, arbitrary_domains):
