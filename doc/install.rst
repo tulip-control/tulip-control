@@ -11,7 +11,7 @@ use the core functionality of TuLiP:
 * `SciPy <http://www.scipy.org/>`_
 * `CVXOPT <http://abel.ee.ucla.edu/cvxopt/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
-* `pyparsing <http://pyparsing.wikispaces.com/>`_
+* `ply <http://www.dabeaz.com/ply/>`_
 
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
@@ -57,7 +57,7 @@ If you don't already use Python for scientific computing, consider using
 `Enthought Canopy <https://www.enthought.com/products/canopy/>`_). This may make
 the installation process easier.  The EPD Free (now called Canopy Express)
 distribution comes with Python and includes NumPy, SciPy, matplotlib. EPD Free
-together with networkx, cvxopt, and pyparsing is sufficient to run TuLiP.
+together with networkx, cvxopt, and ply is sufficient to run TuLiP.
 
 Alternatives to Enthought are listed on the `SciPy installation webpage
 <http://www.scipy.org/install.html>`_.  In particular, also try `Anaconda
@@ -110,7 +110,7 @@ Ubuntu (or Debian) GNU/Linux
 
 To install the python package dependencies, try::
 
-  $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-pyparsing
+  $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-ply
 
 Optionally packages can be obtained by appending ``python-matplotlib`` etc. to
 the above command.
@@ -168,9 +168,9 @@ Installing other Python dependencies
 ````````````````````````````````````
 
 The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
-get `pyparsing <http://pyparsing.wikispaces.com/>`_, try::
+get `ply <http://www.dabeaz.com/ply/>`_, try::
 
-  $ easy_install pyparsing
+  $ easy_install ply
 
 .. _venv-pydoc-sec-label:
 
