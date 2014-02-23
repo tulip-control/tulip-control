@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-#from distutils.core import setup
 from setuptools import setup
-
 
 ###########################################
 # Dependency or optional-checking functions
@@ -42,7 +40,6 @@ def check_pydot():
         return False
     return True
 
-
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
 # "install" is given, unless both "install" and "nocheck" are given
@@ -58,6 +55,20 @@ def check_pydot():
 #           True to be success, and False failure.
 other_depends = {}
 
+glpk_msg = 'GLPK seems to be missing\n' +\
+    'and thus apparently not used by your installation of CVXOPT.\n' +\
+    'If you\'re interested, see http://www.gnu.org/s/glpk/'
+gr1c_msg = 'gr1c not found.\n' +\
+    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
+    'see http://scottman.net/2012/gr1c'
+mpl_msg = 'matplotlib not found.\n' +\
+    'For many graphics drawing features in TuLiP, you must install\n' +\
+    'matplotlib (http://matplotlib.org/).'
+pydot_msg = 'pydot not found.\n' +\
+    'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
+    'export routines will be unavailable unless you install\n' +\
+    'pydot (http://code.google.com/p/pydot/).'
+
 # These are nice to have but not necessary. Each item is of the form
 #
 #   keys   : name of optional package;
@@ -65,10 +76,10 @@ other_depends = {}
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'],
-             'gr1c' : [check_gr1c, 'gr1c found.', 'gr1c not found.\nIf you\'re interested in a GR(1) synthesis tool besides JTLV,\nsee http://scottman.net/2012/gr1c'],
-             'matplotlib' : [check_mpl, 'matplotlib found.', 'matplotlib not found.\nFor many graphics drawing features in TuLiP, you must install\nmatplotlib (http://matplotlib.org/).'],
-             'pydot' : [check_pydot, 'pydot found.', 'pydot not found.\nSeveral graph image file creation and dot (http://www.graphviz.org/)\nexport routines will be unavailable unless you install\npydot (http://code.google.com/p/pydot/).']}
+optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+             'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
+             'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
+             'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 import sys
 perform_setup = True
@@ -106,9 +117,9 @@ if check_deps:
             print('ERROR: SciPy not found.')
             raise
         try:
-            import pyparsing
+            import ply
         except:
-            print('ERROR: pyparsing not found.')
+            print('ERROR: ply not found.')
             raise
         try:
             import networkx
@@ -138,19 +149,27 @@ if check_deps:
 
 if perform_setup:
     from tulip import __version__ as tulip_version
-    setup(name = 'tulip',
-          version = tulip_version,
-          description = 'Temporal Logic Planning (TuLiP) Toolbox',
-          author = 'Caltech Control and Dynamical Systems',
-          author_email = 'murray@cds.caltech.edu',
-          url = 'http://www.cds.caltech.edu/tulip',
-          license = 'BSD',
-          requires = ['numpy', 'scipy', 'ply', 'networkx', 'cvxopt'],
-          install_requires = ['numpy >= 1.7', 'ply >= 3.4', 'networkx >= 1.6', 'cvxopt'],
-          packages = ['tulip', 'tulip.transys', 'tulip.transys.export',
-                      'tulip.abstract', 'tulip.polytope', 'tulip.spec',
-                      'tulip.interfaces'],
-          package_dir = {'tulip' : 'tulip'},
-          package_data={'tulip.interfaces': ['jtlv_grgame.jar'],
-                        'tulip.transys.export' : ['d3.v3.min.js']},
+    setup(
+        name = 'tulip',
+        version = tulip_version,
+        description = 'Temporal Logic Planning (TuLiP) Toolbox',
+        author = 'Caltech Control and Dynamical Systems',
+        author_email = 'murray@cds.caltech.edu',
+        url = 'http://www.cds.caltech.edu/tulip',
+        license = 'BSD',
+        requires = ['numpy', 'scipy', 'ply', 'networkx', 'cvxopt'],
+        install_requires = [
+            'numpy >= 1.7', 'ply >= 3.4',
+            'networkx >= 1.6', 'cvxopt'
+        ],
+        packages = [
+            'tulip', 'tulip.transys', 'tulip.transys.export',
+            'tulip.abstract', 'tulip.polytope', 'tulip.spec',
+            'tulip.interfaces'
+        ],
+        package_dir = {'tulip' : 'tulip'},
+        package_data={
+            'tulip.interfaces': ['jtlv_grgame.jar'],
+            'tulip.transys.export' : ['d3.v3.min.js']
+        },
     )
