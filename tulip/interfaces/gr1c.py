@@ -48,6 +48,7 @@ logger = logging.getLogger(__name__)
 
 import copy
 import subprocess
+from collections import OrderedDict
 import tempfile
 import xml.etree.ElementTree as ET
 import networkx as nx
@@ -294,7 +295,26 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         if isinstance(v, list)
     })
     
+    state_vars = OrderedDict()
+    varname = 'loc'
+    if varname in outputs:
+        state_vars[varname] = outputs[varname]
+    varname = 'eloc'
+    if varname in inputs:
+        state_vars[varname] = inputs[varname]
+    mach.add_state_vars(state_vars)
+    
+    # states and state variables
     mach.states.add_from(A.nodes())
+    for state in mach.states:
+        label = _map_int2dom(A.node[state]["state"],
+                                 arbitrary_domains)
+        
+        label = {k:v for k,v in label.iteritems()
+                 if k in {'loc', 'eloc'}}
+        mach.states.label(state, label)
+    
+    # transitions labeled with I/O
     for u in A.nodes_iter():
         for v in A.successors_iter(u):
             logger.info('node: ' +str(v) +', state: ' +
