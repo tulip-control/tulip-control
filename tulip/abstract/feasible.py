@@ -57,6 +57,10 @@ def is_feasible(
     use_all_horizon=False,
     trans_set=None
 ):
+    """Return True if to_region is reachable from_region.
+    
+    For details see solve_feasible.
+    """
     S0 = solve_feasible(
         from_region, to_region, sys, N,
         closed_loop, use_all_horizon,
