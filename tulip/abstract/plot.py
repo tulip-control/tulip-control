@@ -54,9 +54,12 @@ except Exception, e:
     logger.error(e)
     matplotlib = None
 
-def plot_partition(ppp, trans=None, plot_numbers=True,
-                   ax=None, color_seed=None, nodelist=None,
-                   show=False):
+
+
+def plot_partition(
+    ppp, trans=None, ppp2trans=None,
+    ax=None, plot_numbers=True, color_seed=None, show=False
+):
     """Plots 2D PropPreservingPartition using matplotlib
 
     See Also
@@ -91,12 +94,16 @@ def plot_partition(ppp, trans=None, plot_numbers=True,
         warn('matplotlib not found')
         return
     
+    # needs to be converted to adjacency matrix ?
     if isinstance(trans, nx.MultiDiGraph):
-        if nodelist is None:
-            n = len(trans.states)
-            nodelist = ['s' +str(x) for x in xrange(n)]
-        trans = np.array(nx.to_numpy_matrix(trans,
-                         nodelist=nodelist) )
+        if trans is not None and ppp2trans is None:
+            msg = 'trans is a networkx MultiDiGraph, '
+            msg += 'so ppp2trans required to define state order,\n'
+            msg += 'used when converting the graph to an adjacency matrix.'
+            raise Exception(msg)
+        
+        trans = nx.to_numpy_matrix(trans, nodelist=ppp2trans)
+        trans = np.array(trans)
     
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
