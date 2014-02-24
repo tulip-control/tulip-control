@@ -51,7 +51,7 @@ from tulip import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
-from .feasible import solve_feasible
+from .feasible import is_feasible, solve_feasible
 
 class AbstractSysDyn(object):
     """Class for discrete abstractions of continuous dynamics.
@@ -901,8 +901,11 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     merged_abstr.ts = sys_ts
     merged_abstr.ppp2ts = ppp2ts
 
-def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
-                    trans_length=1, abs_tol=1e-7):
+def get_transitions(
+    abstract_sys, mode, ssys, N=10,
+    closed_loop=True,
+    trans_length=1
+):
     """Find which transitions are feasible in given mode.
     
     Used for the candidate transitions of the merged partition.
@@ -945,18 +948,16 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         
         subsys_idx = abstract_sys.ppp2pwa[mode][i]
         active_subsystem = ssys.list_subsys[subsys_idx]
-        
         # Use original cell as trans_set
-        S0 = solve_feasible(
+        trans_set = abstract_sys.original_regions[mode][orig_region_idx]
+        
+        trans_feasible = is_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
-            trans_set = abstract_sys.original_regions[mode][orig_region_idx]
+            trans_set = trans_set
         )
-        
-        diff = pc.mldivide(si, S0)
-        vol2 = pc.volume(diff)
                     
-        if vol2 < abs_tol:
+        if trans_feasible:
             transitions[j,i] = 1 
             msg = '\t Feasible transition.'
             n_found += 1
