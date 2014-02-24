@@ -280,7 +280,7 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap):
     pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 
-def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
+def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     """Plot a networkx or pydot graph using dot.
     
     No files written or deleted from the disk.
@@ -301,6 +301,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     
     @param rankdir: direction to layout nodes
     @type rankdir: 'LR' | 'TB'
+    
+    @param ax: axes
     """
     if pydot is None:
         msg = 'Using plot_pydot requires that pydot be installed.'
@@ -349,13 +351,18 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     if matplotlib:
         logger.debug('Matplotlib installed.')
         
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        
         sio = StringIO()
         sio.write(png_str)
         sio.seek(0)
         img = mpimg.imread(sio)
-        imgplot = plt.imshow(img, aspect='equal')
+        ax.imshow(img, aspect='equal')
         plt.show(block=False)
-        return imgplot
+        
+        return ax
     else:
         logger.debug('Matplotlib not installed.')
     

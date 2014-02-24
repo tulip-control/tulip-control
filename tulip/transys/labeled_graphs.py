@@ -2549,7 +2549,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
     def write_dot_color_file(self):
         raise NotImplementedError
     
-    def plot(self, rankdir='LR', prog=None, wrap=10):
+    def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
         """Plot image using dot.
         
         No file I/O involved.
@@ -2575,7 +2575,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
-        return graph2dot.plot_pydot(self, prog, rankdir, wrap)
+        return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
 def str2singleton(ap_label, verbose=False):
         """If string, convert to set(string).
