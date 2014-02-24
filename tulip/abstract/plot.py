@@ -54,8 +54,6 @@ except Exception, e:
     logger.error(e)
     matplotlib = None
 
-
-
 def plot_partition(
     ppp, trans=None, ppp2trans=None,
     ax=None, plot_numbers=True, color_seed=None, show=False
@@ -132,9 +130,7 @@ def plot_partition(
         prng = np.random.RandomState()
     
     # plot polytope patches
-    for i in xrange(len(reg_list)):
-        reg = reg_list[i]
-        
+    for reg in reg_list:
         # select random color,
         # same color for all polytopes in each region
         col = prng.rand(3)

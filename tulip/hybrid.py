@@ -258,6 +258,7 @@ class PwaSysDyn(object):
         for subsystem in self.list_subsys:
             subsystem.plot(ax, color=np.random.rand(3),
                            show_domain=show_domain)
+        return ax
 
 class HybridSysDyn(object):
     """Represent hybrid systems switching between dynamic modes.

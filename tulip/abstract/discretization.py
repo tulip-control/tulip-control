@@ -192,6 +192,7 @@ class AbstractSysDyn(object):
     
     def plot(self):
         if self.ppp is None or self.ts is None:
+            warnings.warn('Either ppp or ts is None.')
             return
         
         axs = []
@@ -203,7 +204,7 @@ class AbstractSysDyn(object):
                 ax.set_title('Partition for mode: ' + str(mode))
                 axs += [ax]
         else:
-            ax = self.ppp.plot(trans=self.ts)
+            ax = self.ppp.plot(trans=self.ts, ppp2trans=self.ppp2ts)
             axs += [ax]
         
         if isinstance(self.ts, dict):
