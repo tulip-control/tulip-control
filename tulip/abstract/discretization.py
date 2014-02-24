@@ -193,18 +193,27 @@ class AbstractSysDyn(object):
         if self.ppp is None or self.ts is None:
             return
         
+        axs = []
+        
+        # different partition per mode ?
         if isinstance(self.ppp, dict):
             for mode, ppp in self.ppp.iteritems():
                 ax = ppp.plot()
                 ax.set_title('Partition for mode: ' + str(mode))
+                axs += [ax]
         else:
-            self.ppp.plot(trans=self.ts)
+            ax = self.ppp.plot(trans=self.ts)
+            axs += [ax]
         
         if isinstance(self.ts, dict):
             for ts in self.ts:
-                ts.plot()
+                ax = ts.plot()
+                axs += [ax]
         else:
-            self.ts.plot()
+            ax = self.ts.plot()
+            axs += [ax]
+        
+        return axs
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
