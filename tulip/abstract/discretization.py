@@ -143,6 +143,7 @@ class AbstractSysDyn(object):
         
         self.ppp = ppp
         self.ts = ts
+        self.ppp2ts = ppp2ts
         self.original_regions = original_regions
         self.ppp2orig = ppp2orig
         self.ppp2pwa = ppp2pwa
