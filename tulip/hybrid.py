@@ -88,16 +88,14 @@ class LtiSysDyn(object):
                  Uset=None,Wset=None, domain=None):
         
         if Uset is None:
-            warn("Uset not given to LtiSysDyn()")
-        
-        if (Uset is not None) and (not isinstance(Uset, pc.Polytope)):
-            raise Exception("LtiSysDyn: `Uset` has to be a Polytope")
+            warn('Uset not given to LtiSysDyn()')
+        elif not isinstance(Uset, pc.Polytope):
+            raise Exception('`Uset` has to be a Polytope')
            
         if domain is None:
-            warn("Domain is not given in LtiSysDyn()")
-        
-        if (domain is not None) and (not isinstance(domain, pc.Polytope)):
-            raise Exception("LtiSysDyn: `domain` has to be a Polytope")
+            warn('Domain is not given in LtiSysDyn()')
+        elif not isinstance(domain, pc.Polytope):
+            raise Exception('`domain` has to be a Polytope')
         
         # check dimensions agree
         try:
@@ -106,6 +104,9 @@ class LtiSysDyn(object):
             raise TypeError('A matrix must be 2d array')
         if nA != mA:
             raise ValueError('A must be square')
+        if domain is not None:
+            if domain.dim != mA:
+                raise Exception('domain.dim != A.size[1]')
         
         if B is not None:
             try:
@@ -114,6 +115,9 @@ class LtiSysDyn(object):
                 raise TypeError('B matrix must be 2d array')
             if nA != nB:
                 raise ValueError('A and B must have same number of rows')
+            if Uset is not None:
+                if Uset.dim != mB:
+                    raise Exception('Uset.dim != B.size[1]')
         
         if E is not None:
             try:
@@ -122,6 +126,9 @@ class LtiSysDyn(object):
                 raise TypeError('E matrix must be 2d array')
             if nA != nE:
                 raise ValueError('A and E must have same number of rows')
+            if Wset is not None:
+                if Wset.dim != mE:
+                    raise Exception('Wset.dim != E.size[1]')
         
         if K is not None:
             try:
