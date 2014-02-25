@@ -1268,7 +1268,7 @@ def extreme(poly1):
     if nx == 1:
         # Polytope is a 1-dim line
         for ii in xrange(nc):
-            V = np.append(V,b[ii]/A[ii])
+            V = np.append(V, b[ii]/A[ii])
         if len(A) == 1:
             R = np.append(R,1)
             raise Exception("extreme: polytope is unbounded")
@@ -1321,8 +1321,8 @@ def extreme(poly1):
             for ix in xrange(nx):
                 V[iv,ix] = H[iv,ix]/K[iv] + xmid[ix]
     
-    poly1.vertices = V
-    return V.reshape(V.size/nx,nx)
+    poly1.vertices = V.reshape((V.size/nx, nx))
+    return poly1.vertices
     
 def qhull(vertices,abs_tol=ABS_TOL):
     """Use quickhull to compute a convex hull.
