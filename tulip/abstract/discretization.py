@@ -190,7 +190,7 @@ class AbstractSysDyn(object):
             s += 'Region: ' + str(i) + '\n'
             s += str(region) + '\n'
     
-    def plot(self):
+    def plot(self, color_seed=None):
         if self.ppp is None or self.ts is None:
             warnings.warn('Either ppp or ts is None.')
             return
@@ -200,20 +200,20 @@ class AbstractSysDyn(object):
         # different partition per mode ?
         if isinstance(self.ppp, dict):
             for mode, ppp in self.ppp.iteritems():
-                ax = ppp.plot()
+                ax = ppp.plot(color_seed=color_seed)
                 ax.set_title('Partition for mode: ' + str(mode))
                 axs += [ax]
         else:
             ax = self.ppp.plot(trans=self.ts, ppp2trans=self.ppp2ts)
             axs += [ax]
         
-        if isinstance(self.ts, dict):
-            for ts in self.ts:
-                ax = ts.plot()
-                axs += [ax]
-        else:
-            ax = self.ts.plot()
-            axs += [ax]
+        #if isinstance(self.ts, dict):
+        #    for ts in self.ts:
+        #        ax = ts.plot()
+        #        axs += [ax]
+        #else:
+        #    ax = self.ts.plot()
+        #    axs += [ax]
         
         return axs
 
