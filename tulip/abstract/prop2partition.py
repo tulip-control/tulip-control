@@ -193,10 +193,13 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     @type pwa_sys: L{hybrid.PwaSysDyn}
     @type ppp: L{PropPreservingPartition}
     
-    @return: partition and assignmend of its regions to PWA subsystems
-    @rtype: (L{PropPreservingPartition}, list)
-        where the list contains indices referring to subsystems
-        by their order in C{pwa_sys}
+    @return: new partition and associated maps:
+        
+        - new partition C{new_ppp}
+        - map of C{new_ppp.regions} to C{pwa_sys.list_subsys}
+        - map of C{new_ppp.regions} to C{ppp.regions}
+    
+    @rtype: C{(L{PropPreservingPartition}, list, list)}
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
         raise Exception('pwa system is not defined everywhere ' +
@@ -207,7 +210,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     # a unique Region in ppp.regions
     new_list = []
     subsys_list = []
-    parent = []
+    parents = []
     for i, subsys in enumerate(pwa_sys.list_subsys):
         for j, region in enumerate(ppp.regions):
             isect = subsys.domain.intersect(region)
@@ -231,7 +234,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 new_list.append(isect)
                 
                 # keep track of original Region in ppp.regions
-                parent.append(j)
+                parents.append(j)
                 
                 # index of subsystem active within isect
                 subsys_list.append(i)
@@ -240,9 +243,9 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     n = len(new_list)
     adj = sp.lil_matrix((n, n), dtype=np.int8)
     for i, ri in enumerate(new_list):
-        pi = parent[i]
+        pi = parents[i]
         for j, rj in enumerate(new_list[0:i]):
-            pj = parent[j]
+            pj = parents[j]
             
             if (ppp.adj[pi, pj] == 1) or (pi == pj):
                 if pc.is_adjacent(ri, rj):
@@ -250,13 +253,13 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                     adj[j, i] = 1
         adj[i, i] = 1
             
-    ppp = PropPreservingPartition(
+    new_ppp = PropPreservingPartition(
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
         prop_regions = ppp.prop_regions
     )
-    return (ppp, subsys_list)
+    return (new_ppp, subsys_list, parents)
                 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     """ This function takes a proposition preserving partition ppp and the size 
