@@ -109,9 +109,9 @@ class AbstractSwitched(object):
         
         @param i: Region index in common partition C{ppp.regions}.
         
-        @return: tuple (j, region) of:
+        @return: tuple C{(j, region)} of:
             
-                - index of L{Region} and
+                - index C{j} of L{Region} and
                 - L{Region} object
             
             in C{modes[mode].ppp.regions}
@@ -131,10 +131,15 @@ class AbstractSwitched(object):
         
         @param i: Region index in common partition C{ppp.regions}.
         
-        @return: index of PWA subsystem
+        @return: tuple C{(j, subsystem)} of:
+                
+                - index C{j} of PWA C{subsystem}
+                - L{LtiSysDyn} object C{subsystem}
         """
         region_idx = self.ppp2modes[mode][i]
-        return self.modes[mode].ppp2sys[region_idx]
+        subsystem_idx = self.modes[mode].ppp2sys[region_idx]
+        subsystem = self.modes[mode].pwa.list_subsys[subsystem_idx]
+        return (subsystem_idx, subsystem)
     
     def plot(self, color_seed=None):
         # different partition per mode ?
@@ -229,7 +234,7 @@ class AbstractPwa(object):
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
-        pwa_ppp=None, ppp2pwa=None, ppp2sys=None,
+        pwa=None, pwa_ppp=None, ppp2pwa=None, ppp2sys=None,
         orig_ppp=None, ppp2orig=None,
         disc_params=None
     ):
@@ -240,6 +245,7 @@ class AbstractPwa(object):
         self.ts = ts
         self.ppp2ts = ppp2ts
         
+        self.pwa = pwa
         self.pwa_ppp = pwa_ppp
         self.ppp2pwa = ppp2pwa
         self.ppp2sys = ppp2sys
@@ -722,6 +728,7 @@ def discretize(
         ppp=new_part,
         ts=ofts,
         ppp2ts=ofts_states,
+        pwa=ssys,
         pwa_ppp=part,
         ppp2pwa=orig,
         ppp2sys=subsys_list,
@@ -1035,12 +1042,9 @@ def get_transitions(
         si = part[i]
         sj = part[j]
         
-        orig_region_idx = abstract_sys.ppp2orig[mode][i]
-        
-        subsys_idx = abstract_sys.ppp2pwa[mode][i]
-        active_subsystem = ssys.list_subsys[subsys_idx]
         # Use original cell as trans_set
-        trans_set = abstract_sys.original_regions[mode][orig_region_idx]
+        trans_set = abstract_sys.ppp2pwa(mode, i)[1]
+        active_subsystem = abstract_sys.ppp2sys(mode, i)[1]
         
         trans_feasible = is_feasible(
             si, sj, active_subsystem, N,
