@@ -199,9 +199,12 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         by their order in C{pwa_sys}
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
-        raise Exception("pwaPartition: "
-            "pwa system is not defined everywhere in state space")
-
+        raise Exception('pwa system is not defined everywhere ' +
+                        'in state space')
+    
+    # for each subsystem's domain, cut it into pieces
+    # each piece is the intersection with
+    # a unique Region in ppp.regions
     new_list = []
     subsys_list = []
     parent = []
@@ -211,18 +214,31 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
+                
                 if rc < abs_tol:
-                    print("Warning: One of the regions in the refined PPP is "
-                          "too small, this may cause numerical problems")
+                    msg = 'One of the regions in the refined PPP is '
+                    msg += 'too small, this may cause numerical problems'
+                    warn(msg)
+                
+                # not Region yet, but Polytope ?
                 if len(isect) == 0:
                     isect = pc.Region([isect])
                 
+                # label with AP
                 isect.props = region.props.copy()
-                subsys_list.append(i)
+                
+                # store new Region
                 new_list.append(isect)
+                
+                # keep track of original Region in ppp.regions
                 parent.append(j)
+                
+                # index of subsystem active within isect
+                subsys_list.append(i)
     
-    adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
+    # compute spatial adjacency matrix
+    n = len(new_list)
+    adj = sp.lil_matrix((n, n), dtype=np.int8)
     for i, ri in enumerate(new_list):
         pi = parent[i]
         for j, rj in enumerate(new_list[0:i]):
