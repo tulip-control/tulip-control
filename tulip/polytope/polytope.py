@@ -1288,7 +1288,13 @@ def extreme(poly1):
                 R = np.append(R,1)
                 raise Exception("extreme: polytope is unbounded")
             else:
-                v = np.linalg.solve(HH, KK)
+                try:
+                    v = np.linalg.solve(HH, KK)
+                except:
+                    msg = 'Finding extreme points failed, '
+                    msg += 'Check if any unbounded Polytope '
+                    msg += 'is causing this.'
+                    raise Exception(msg)
                 if len(V) == 0:
                     V = np.append(V,v)
                 else:
