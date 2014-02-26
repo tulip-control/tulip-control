@@ -585,10 +585,17 @@ class PropPreservingPartition(object):
             s += str(self.adj.todense()) + '\n'
         return s
     
-    def plot(self, **kwargs):
+    def plot(
+        self, ppp, trans=None, ppp2trans=None,
+        ax=None, plot_numbers=True, color_seed=None,
+        show=False
+    ):
         """For details see plot.plot_partition.
         """
-        return plot_partition(self, **kwargs)
+        return plot_partition(
+            self, ppp, trans, ppp2trans,
+            ax, plot_numbers, color_seed, show
+        )
     
     def plot_props(self, ax=None):
         """Plot labeled regions of continuous propositions.
