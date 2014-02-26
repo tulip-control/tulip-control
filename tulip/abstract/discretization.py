@@ -264,7 +264,9 @@ class AbstractPwa(object):
         s += str(self.ts)
         
         s += 30 * '-' + '\n'
-        s += 'Original Regions: ' + str(len(self.original_regions))
+        
+        s += 'Map PPP Regions ---> TS states:\n'
+        s += self._ppp2other_str(self.ppp2ts) + '\n'
         
         s += 'Map PPP Regions ---> PWA PPP Regions:\n'
         s += self._ppp2other_str(self.ppp2pwa) + '\n'
@@ -495,11 +497,11 @@ def discretize(
         
         msg = '\n Working with states:\n\t'
         msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
+        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')\n\t'
             
         if ispwa:
-            msg += 'with active subsystem:\n\t'
-            msg += str(subsys_list[i])
+            msg += 'with active subsystem: '
+            msg += str(subsys_list[i]) + '\n\t'
             
         msg += 'Computed reachable set S0 with volume: '
         msg += str(S0.volume) + '\n'
@@ -863,6 +865,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     modes = hybrid_sys.modes
     mode_nums = hybrid_sys.disc_domain_size
     
+    # discretize each abstraction separately
     abstractions = dict()
     for mode in modes:
         logger.debug(30*'-'+'\n')
@@ -878,10 +881,12 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
         
         abstractions[mode] = absys
     
+    # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
     logger.info('Merged partition has: ' + str(n) + ', states')
     
+    # find feasible transitions over merged partition
     trans = dict()
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
@@ -893,6 +898,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
             N=params['N'], trans_length=params['trans_length']
         )
     
+    # merge the abstractions, creating a common TS
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
     merged_abstr.disc_params = disc_params
@@ -1208,7 +1214,8 @@ def merge_partition_pair(
             # no intersection ?
             if rc < 1e-5:
                 continue
-            logger.info('merging region: A' + str(i) + ', with: B' + str(j))
+            logger.info('merging region: A' + str(i) +
+                        ', with: B' + str(j))
             
             # if Polytope, make it Region
             if len(isect) == 0:
