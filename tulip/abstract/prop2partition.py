@@ -33,7 +33,10 @@
 """ 
 Proposition preserving partition module.
 """
-from warnings import warn
+import logging
+logger = logging.getLogger(__name__)
+
+import warnings
 
 import numpy as np
 from scipy import sparse as sp
@@ -41,6 +44,12 @@ import copy
 
 from tulip import polytope as pc
 from .plot import plot_partition
+
+try:
+    import matplotlib as mpl
+except Exception, e:
+    logger.error(e)
+    mpl = None
 
 hl = 40 * '-'
 
@@ -221,7 +230,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 if rc < abs_tol:
                     msg = 'One of the regions in the refined PPP is '
                     msg += 'too small, this may cause numerical problems'
-                    warn(msg)
+                    warnings.warn(msg)
                 
                 # not Region yet, but Polytope ?
                 if len(isect) == 0:
@@ -580,6 +589,27 @@ class PropPreservingPartition(object):
         """For details see plot.plot_partition.
         """
         return plot_partition(self, **kwargs)
+    
+    def plot_props(self, ax=None):
+        """Plot labeled regions of continuous propositions.
+        """
+        if mpl is None:
+            warnings.warn('No matplotlib')
+            return
+        
+        if ax is None:
+            ax = mpl.pyplot.subplot()
+        
+        l, u = pc.bounding_box(self.domain)
+        ax.set_xlim(l[0,0], u[0,0])
+        ax.set_ylim(l[1,0], u[1,0])
+        
+        for (prop, poly) in self.prop_regions.iteritems():
+            isect_poly = poly.intersect(self.domain)
+            
+            isect_poly.plot(ax, color='none', hatch='/')
+            isect_poly.text(prop, ax, color='yellow')
+        return ax
 
 class PPP(PropPreservingPartition):
     """Alias to L{PropPreservingPartition}.
