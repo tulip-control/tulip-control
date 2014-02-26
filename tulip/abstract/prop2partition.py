@@ -205,11 +205,9 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     new_list = []
     subsys_list = []
     parent = []
-    for i in xrange(len(pwa_sys.list_subsys)):
-        for j in xrange(len(ppp.regions)):
-            isect = pwa_sys.list_subsys[i].domain.intersect(
-                ppp.regions[j]
-            )
+    for i, subsys in enumerate(pwa_sys.list_subsys):
+        for j, region in enumerate(ppp.regions):
+            isect = subsys.domain.intersect(region)
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
@@ -219,20 +217,22 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
                 if len(isect) == 0:
                     isect = pc.Region([isect])
                 
-                isect.props = ppp.regions[j].props.copy()
+                isect.props = region.props.copy()
                 subsys_list.append(i)
                 new_list.append(isect)
                 parent.append(j)
     
     adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
-    for i in xrange(len(new_list)):
-        for j in xrange(i+1, len(new_list)):
-            if (ppp.adj[parent[i], parent[j]] == 1) or \
-                    (parent[i] == parent[j]):
-                if pc.is_adjacent(new_list[i], new_list[j]):
-                    adj[i,j] = 1
-                    adj[j,i] = 1
-        adj[i,i] = 1
+    for i, ri in enumerate(new_list):
+        pi = parent[i]
+        for j, rj in enumerate(new_list[0:i]):
+            pj = parent[j]
+            
+            if (ppp.adj[pi, pj] == 1) or (pi == pj):
+                if pc.is_adjacent(ri, rj):
+                    adj[i, j] = 1
+                    adj[j, i] = 1
+        adj[i, i] = 1
             
     ppp = PropPreservingPartition(
         domain = ppp.domain,
