@@ -167,14 +167,24 @@ def part2convex(ppp):
     return (cvxpart, new2old)
     
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
-    """This function takes a piecewise affine system pwa_sys and a proposition 
-    preserving partition ppp whose domain is a subset of the domain of pwa_sys
-    and returns a refined proposition preserving partition where in each
-    region a unique subsystem of pwa_sys is active.
+    """This function takes:
     
-    Modified from Petter Nilsson's code implementing merge algorithm in 
-    Nilsson et al. `Temporal Logic Control of Switched Affine Systems with an
-    Application in Fuel Balancing`, ACC 2012.
+      - a piecewise affine system C{pwa_sys} and
+      - a proposition-preserving partition C{ppp}
+          whose domain is a subset of the domain of C{pwa_sys}
+    
+    and returns a *refined* proposition preserving partition
+    where in each region a unique subsystem of pwa_sys is active.
+    
+    Reference
+    =========
+    Modified from Petter Nilsson's code
+    implementing merge algorithm in:
+        Nilsson et al.
+            `Temporal Logic Control of
+            Switched Affine Systems with an
+            Application in Fuel Balancing`,
+        ACC 2012.
 
     See Also
     ========
