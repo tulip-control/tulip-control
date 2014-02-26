@@ -817,11 +817,11 @@ def cycle_labeled_with(L):
 def add_initial_states(ts, ap_labels):
     """Make initial any state of ts labeled with any label in ap_labels.
     
-    For example if isinstance(disc_dynamics, L{AbstractSysDyn}):
+    For example if isinstance(ofts, OpenFTS):
     
     >>> from tulip.transys.transys import add_initial_states
     >>> initial_labels = [{'home'}]
-    >>> add_initial_states(disc_dynamics.ofts, initial_labels)
+    >>> add_initial_states(ofts, initial_labels)
     
     @type ts: L{transys.FiniteTransitionSystem},
         L{transys.OpenFiniteTransitionSystem}

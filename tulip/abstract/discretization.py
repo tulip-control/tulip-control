@@ -63,7 +63,7 @@ class AbstractSwitched(object):
     
       - ts: common TS, if any
       
-      - modes: dict of {mode: AbstractSysDyn}
+      - modes: dict of {mode: AbstractPwa}
     """
     def __init__(self, ppp, ts, modes):
         if modes is None:
@@ -96,10 +96,8 @@ class AbstractSwitched(object):
         #        axs += [ax]
         return axs
 
-class AbstractSysDyn(object):
-    """Class for discrete abstractions of continuous dynamics.
-    
-    An AbstractSysDyn object contains the fields:
+class AbstractPwa(object):
+    """Discrete abstraction of PWA dynamics, with attributes:
     
       - ppp: Partition into Regions.
           Each Region corresponds to
@@ -160,7 +158,9 @@ class AbstractSysDyn(object):
     Note1: There could be some redundancy in ppp and ofts in that they are
     both decorated with propositions. This might be useful to keep each of 
     them as functional units on their own (possible to change later).
-
+    
+    Note2: The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
+        as a special case.
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
@@ -287,7 +287,7 @@ def discretize(
     @param cont_props: continuous propositions to plot
     @type cont_props: list of L{Polytope}
     
-    @rtype: L{AbstractSysDyn}
+    @rtype: L{AbstractPwa}
     """
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -648,7 +648,7 @@ def discretize(
     
     assert(len(prop_list) == n)
     
-    return AbstractSysDyn(
+    return AbstractPwa(
         ppp=new_part,
         ts=ofts,
         ppp2ts=ofts_states,
@@ -774,7 +774,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     
     @return: abstracted dynamics,
         some attributes are dict keyed by mode
-    @rtype: L{AbstractSysDyn}
+    @rtype: L{AbstractSwitched}
     """
     if disc_params is None:
         disc_params = {'N':1, 'trans_length':1}
@@ -858,8 +858,8 @@ def plot_annot(ax):
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
     
-    @type merged_abstr: L{AbstractSysDyn}
-    @type abstr: list of L{AbstractSysDyn}
+    @type merged_abstr: L{AbstractSwitched}
+    @type abstr: dict of L{AbstractPwa}
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
@@ -994,11 +994,11 @@ def merge_partitions(abstractions):
     """Merge multiple abstractions.
     
     @param abstractions: keyed by mode
-    @type abstractions: dict of L{AbstractSysDyn}
+    @type abstractions: dict of L{AbstractPwa}
     
     @return: (merged_abstraction, ap_labeling)
         where:
-            - merged_abstraction: L{AbstractSysDyn}
+            - merged_abstraction: L{AbstractSwitched}
             - ap_labeling: dict
     """
     if len(abstractions) == 0:
@@ -1094,7 +1094,7 @@ def merge_partitions(abstractions):
         mode:abstractions[mode].original_regions for mode in abstractions
     }
     
-    abstraction = AbstractSysDyn(
+    abstraction = AbstractSwitched(
         ppp = ppp,
         original_regions = switched_original_regions,
         ppp2orig = ppp2orig,

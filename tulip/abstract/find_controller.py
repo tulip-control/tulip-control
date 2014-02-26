@@ -107,7 +107,7 @@ def get_input(
     @type ssys: L{LtiSysDyn}
     
     @param abstraction: state space partition
-    @type abstraction: L{AbstractSysDyn}
+    @type abstraction: L{AbstractPwa}
     
     @param start: index of the initial state in C{abstraction.ts}
     @type start: int >= 0
