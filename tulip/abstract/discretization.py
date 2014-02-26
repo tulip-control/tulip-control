@@ -901,7 +901,6 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     # merge the abstractions, creating a common TS
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
-    merged_abstr.disc_params = disc_params
     
     if plot:
         plot_mode_partitions(abstractions, merged_abstr)
@@ -1102,8 +1101,8 @@ def merge_partitions(abstractions):
             not (p1.domain.b == p2.domain.b).all():
                 raise Exception('merge: partitions have different domains')
             
-            # check equality of original partitions
-            if ab1.original_regions == ab2.original_regions:
+            # check equality of original PPP partitions
+            if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info('original partitions happen to be equal')
     
     init_mode = abstractions.keys()[0]
@@ -1120,8 +1119,6 @@ def merge_partitions(abstractions):
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
     parents = {init_mode:range(len(regions) )}
-    ppp2orig = {init_mode:ab0.ppp2orig}
-    ppp2pwa = {init_mode:ab0.ppp2pwa}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
     
     for cur_mode in remaining_modes:
@@ -1129,10 +1126,9 @@ def merge_partitions(abstractions):
         
         r = merge_partition_pair(
             regions, ab2, cur_mode, prev_modes,
-            parents, ap_labeling,
-            ppp2orig, ppp2pwa
+            parents, ap_labeling
         )
-        regions, parents, ap_labeling, ppp2orig, ppp2pwa = r
+        regions, parents, ap_labeling = r
         
         prev_modes += [cur_mode]
     
@@ -1172,15 +1168,10 @@ def merge_partitions(abstractions):
         adj=adj
     )
     
-    switched_original_regions = {
-        mode:abstractions[mode].original_regions for mode in abstractions
-    }
-    
     abstraction = AbstractSwitched(
-        ppp = ppp,
-        original_regions = switched_original_regions,
-        ppp2orig = ppp2orig,
-        ppp2pwa=ppp2pwa
+        ppp=ppp,
+        modes=abstractions,
+        ppp2modes=parents,
     )
     
     return (abstraction, ap_labeling)
@@ -1188,8 +1179,7 @@ def merge_partitions(abstractions):
 def merge_partition_pair(
     old_regions, ab2,
     cur_mode, prev_modes,
-    old_parents, old_ap_labeling,
-    old_ppp2orig, old_ppp2pwa
+    old_parents, old_ap_labeling
 ):
     """Merge an Abstraction with the current partition iterate.
     """
@@ -1200,8 +1190,6 @@ def merge_partition_pair(
     modes = prev_modes + [cur_mode]
     
     new_list = []
-    ppp2orig = {mode:[] for mode in modes}
-    ppp2pwa = {mode:[] for mode in modes}
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
     
@@ -1232,16 +1220,6 @@ def merge_partition_pair(
                 parents[mode][idx] = old_parents[mode][i]
             parents[cur_mode][idx] = j
             
-            # keep track of original regions
-            for mode in old_ppp2orig:
-                ppp2orig[mode] += [old_ppp2orig[mode][i] ]
-            ppp2orig[cur_mode] += [ab2.ppp2orig[j] ]
-            
-            # keep track of subsystems
-            for mode in old_ppp2pwa:
-                ppp2pwa[mode] += [old_ppp2pwa[mode][i] ]
-            ppp2pwa[cur_mode] += [ab2.ppp2pwa[j] ]
-            
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
             ap_label_2 = ab2.ts.states.label_of('s'+str(j))['ap']
@@ -1262,7 +1240,7 @@ def merge_partition_pair(
             
             ap_labeling[idx] = ap_label_1
     
-    return new_list, parents, ap_labeling, ppp2orig, ppp2pwa
+    return new_list, parents, ap_labeling
 
 def _all_dict(r, names='?'):
     """Return True if all elements in r are dict.
