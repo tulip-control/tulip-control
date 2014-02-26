@@ -43,16 +43,16 @@ import networkx as nx
 from tulip.polytope import cheby_ball, bounding_box
 
 try:
-    import matplotlib
+    import matplotlib as mpl
 except Exception, e:
     logger.error(e)
-    matplotlib = None
+    mpl = None
 
 try:
     from tulip.graphics import newax
 except Exception, e:
     logger.error(e)
-    matplotlib = None
+    mpl = None
 
 def plot_partition(
     ppp, trans=None, ppp2trans=None,
@@ -88,7 +88,7 @@ def plot_partition(
     
     @param show: call mpl.pyplot.show before returning
     """
-    if matplotlib is None:
+    if mpl is None:
         warn('matplotlib not found')
         return
     
@@ -151,7 +151,7 @@ def plot_partition(
             plot_transition_arrow(reg, reg1, ax, arr_size)
     
     if show:
-        matplotlib.pyplot.show()
+        mpl.pyplot.show()
     
     return ax
 
@@ -183,7 +183,7 @@ def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
     y = xc0[1]
     dx = xc1[0] - xc0[0]
     dy = xc1[1] - xc0[1]
-    arrow = matplotlib.patches.Arrow(
+    arrow = mpl.patches.Arrow(
         float(x), float(y), float(dx), float(dy),
         width=arr_size, color='black'
     )
