@@ -53,6 +53,49 @@ from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
 
+class AbstractSwitched(object):
+    """Abstraction of HybridSysDyn, with mode-specific and common info.
+    
+    Attributes:
+    
+      - ppp: merged partition, if any
+          Preserves both propositions and dynamics
+    
+      - ts: common TS, if any
+      
+      - modes: dict of {mode: AbstractSysDyn}
+    """
+    def __init__(self, ppp, ts, modes):
+        if modes is None:
+            modes = dict()
+        
+        self.ppp = ppp
+        self.ts = ts
+        self.modes = modes
+    
+    def __str__(self):
+        s = 'Abstraction of switched system\n'
+        s += str('common PPP:\n') + str(self.ppp)
+        s += str('common ts:\n') + str(self.ts)
+        
+        for mode, ab in self.modes.iteritems():
+            s += 'mode: ' + str(mode)
+            s += ', with abstraction:\n' + str(ab)
+    
+    def plot(self, color_seed=None):
+        # different partition per mode ?
+        axs = []
+        for mode, ab in self.modes.iteritems():
+            ax = ab.plot(color_seed=color_seed)
+            ax.set_title('Abstraction for mode: ' + str(mode))
+            axs += [ax]
+        
+        #if isinstance(self.ts, dict):
+        #    for ts in self.ts:
+        #        ax = ts.plot()
+        #        axs += [ax]
+        return axs
+
 class AbstractSysDyn(object):
     """Class for discrete abstractions of continuous dynamics.
     
