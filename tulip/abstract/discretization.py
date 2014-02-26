@@ -119,34 +119,30 @@ class AbstractSysDyn(object):
     them as functional units on their own (possible to change later).
 
     """
-    def __init__(self, ppp=None, ts=None, ppp2ts=None,
-                 original_regions=None, ppp2orig=None,
-                 ppp2pwa=None, disc_params=None):
+    def __init__(
+        self, ppp=None, ts=None, ppp2ts=None,
+        pwa_ppp=None, ppp2pwa=None, ppp2sys=None,
+        orig_ppp=None, ppp2orig=None,
+        disc_params=None
+    ):
         if disc_params is None:
             disc_params = dict()
-        
-        # check consistency
-        group0 = [ppp, ts, ppp2ts]
-        names0 = 'ppp, ts, ppp2ts'
-        all_dict0 = _all_dict(group0, names0)
-        
-        # disc_aprams excluded, because it is always a dict
-        group1 = [original_regions, ppp2orig, ppp2pwa]
-        names1 = 'original_regions, ppp2orig, ppp2pwa'
-        all_dict1 = _all_dict(group1, names1)
-        
-        # prohibited combination
-        if all_dict0 and not all_dict1:
-            msg = 'if ' + names0 + ' are dict,\n'
-            msg += 'so must ' + names1 + ' be.'
-            raise Exception(msg)
         
         self.ppp = ppp
         self.ts = ts
         self.ppp2ts = ppp2ts
-        self.original_regions = original_regions
-        self.ppp2orig = ppp2orig
+        
+        self.pwa_ppp = pwa_ppp
         self.ppp2pwa = ppp2pwa
+        self.ppp2sys = ppp2sys
+        
+        self.orig_ppp = orig_ppp
+        self.ppp2orig = ppp2orig
+        
+        # original_regions -> pwa_ppp
+        # ppp2orig -> ppp2pwa_ppp
+        # ppp2pwa -> ppp2pwa_sys
+        
         self.disc_params = disc_params
     
     def __str__(self):
@@ -154,68 +150,48 @@ class AbstractSysDyn(object):
         s += str(self.ts)
         
         s += 30 * '-' + '\n'
-        if isinstance(self.original_regions, dict):
-            s += 'Original Regions:\n\n'
-            for mode, orig_reg in self.original_regions.iteritems():
-                s += 'mode: ' + str(mode)
-                s += ', has: ' + str(len(orig_reg)) + ' Regions\n'
-        else:
-            s += 'Original Regions: ' + str(len(self.original_regions))
+        s += 'Original Regions: ' + str(len(self.original_regions))
         
-        s += 'Map of New to Original Regions:\n'
-        if isinstance(self.ppp2orig, dict):
-            for mode, ppp2orig in self.ppp2orig.iteritems():
-                s += '\t mode: ' + str(mode) + '\n'
-                s += self._ppp2orig_str(ppp2orig) + '\n'
-        else:
-            s += self._ppp2orig_str(self.ppp2orig) + '\n'
+        s += 'Map PPP Regions ---> PWA PPP Regions:\n'
+        s += self._ppp2other_str(self.ppp2pwa) + '\n'
+        
+        s += 'Map PPP Regions ---> PWA Subsystems:\n'
+        s += self._ppp2other_str(self.ppp2sys) + '\n'
+        
+        s += 'Map PPP Regions ---> Original PPP Regions:\n'
+        s += self._ppp2other_str(self.ppp2orig) + '\n'
         
         s += 'Discretization Options:\n\t'
         s += pprint.pformat(self.disc_params) +'\n'
         
         return s
     
-    def _ppp2orig_str(self, ppp2orig):
+    def _ppp2other_str(self, ppp2other):
         s = ''
-        for i, original_region in enumerate(ppp2orig):
-            s += '\t\t' + str(i) + ' -> ' + str(original_region) + '\n'
+        for i, other in enumerate(ppp2other):
+            s += '\t\t' + str(i) + ' -> ' + str(other) + '\n'
         return s
     
     def _debug_str_(self):
         s = str(self.ppp)
         s += str(self.ts)
         
-        s += 'Original Regions List:\n\n'
-        for i, region in enumerate(self.original_regions):
-            s += 'Region: ' + str(i) + '\n'
-            s += str(region) + '\n'
+        s += '(PWA + Prop)-Preserving Partition'
+        s += str(self.pwa_ppp)
+        
+        s += 'Original Prop-Preserving Partition'
+        s += str(self.orig_ppp)
+        return s
     
     def plot(self, color_seed=None):
         if self.ppp is None or self.ts is None:
             warnings.warn('Either ppp or ts is None.')
             return
         
-        axs = []
+        ax = self.ppp.plot(trans=self.ts, ppp2trans=self.ppp2ts)
+        #ax = self.ts.plot()
         
-        # different partition per mode ?
-        if isinstance(self.ppp, dict):
-            for mode, ppp in self.ppp.iteritems():
-                ax = ppp.plot(color_seed=color_seed)
-                ax.set_title('Partition for mode: ' + str(mode))
-                axs += [ax]
-        else:
-            ax = self.ppp.plot(trans=self.ts, ppp2trans=self.ppp2ts)
-            axs += [ax]
-        
-        #if isinstance(self.ts, dict):
-        #    for ts in self.ts:
-        #        ax = ts.plot()
-        #        axs += [ax]
-        #else:
-        #    ax = self.ts.plot()
-        #    axs += [ax]
-        
-        return axs
+        return ax
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
