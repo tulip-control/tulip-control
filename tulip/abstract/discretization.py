@@ -913,15 +913,15 @@ def plot_mode_partitions(abstractions, merged_abs):
         warnings.warn('could not import newax, no partitions plotted.')
         return
     
-    ax, fig = newax()
-    
     for mode, ab in abstractions.iteritems():
-        ab.ppp.plot(plot_numbers=False, ax=ax, trans=ab.ppp.adj)
+        ax, fig = newax()
+        ab.ppp.plot(plot_numbers=True, ax=ax)
         plot_annot(ax)
         fname = 'part_' + str(mode) + '.pdf'
         fig.savefig(fname)
     
-    merged_abs.ppp.plot(plot_numbers=False, ax=ax, trans=merged_abs.ppp.adj)
+    ax, fig = newax()
+    merged_abs.ppp.plot(plot_numbers=True, ax=ax)
     plot_annot
     fname = 'part_merged' + '.pdf'
     fig.savefig(fname)
