@@ -64,6 +64,11 @@ class AbstractSwitched(object):
       - ts: common TS, if any
       
       - modes: dict of {mode: AbstractPwa}
+    
+    Each partition corresponds to some mode.
+    (for switched systems)
+    
+    In each mode a L{PwaSubSys} is active.
     """
     def __init__(self, ppp, ts, modes):
         if modes is None:
@@ -106,45 +111,52 @@ class AbstractPwa(object):
           type: L{PropPreservingPartition}
 
       - ts: Finite transition system abstracting the continuous system.
-          Each state corresponds to a Region in ppp.
+          Each state corresponds to a Region in C{ppp.regions}.
           It can be fed into discrete synthesis algorithms.
 
           type: L{transys.OpenFTS}
 
-      - ppp2ts: map Regions to states of the transition system
-          Each index denotes the Region with same index in ppp.
-
-          type: list of states
+      - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
+          Has common indices with C{ppp.regions}.
+          Elements are states in C{ts.states}.
           (usually each state is a str)
 
-      - original_regions: Regions of original
-          proposition preserving partition
+          type: list of states
+
+      - pwa_ppp: partition preserving both:
+            
+            - propositions and
+            - domains of PWA subsystems
+          
           Used for non-conservative planning.
+          
+          type: L{PropPreservingPartition}
+      
+      - ppp2pwa: map of C{ppp.regions} to C{pwa_ppp.regions}.
+          Has common indices with C{ppp.regions}.
+          Elements are indices in C{pwa_ppp.regions}.
+          
+          type: list of integers
 
-          type: list of Region
+      - ppp2sys: map of C{ppp.regions} to C{PwaSubSys.list_subsys}.
+          Has common indices with C{ppp.regions}.
+          Elements are indices of sub-systems in C{PwaSubSys.list_subsys}.
+          
+          Semantics: j-th sub-system is active in i-th Region,
+              where C{j = ppp2pwa[i]}
 
-      - ppp2orig: map of new Regions to original Regions:
+          type: list of integers
+      
+      - orig_ppp: partition preserving only propositions
+          i.e., agnostic of dynamics
+          
+          type: L{PropPreservingPartition}
+      
+      - ppp2orig: map of C{ppp.regions} to C{orig_ppp.regions}:
+          Has common indices with C{ppp.regions}.
+          Elements are indices in C{orig_ppp.regions}.
 
-              - i-th new Region in C{ppp}
-              - ppp2orig[i]-th original Region in C{original_regions}
-
-          type: list of indices
-
-      - ppp2pwa: map Regions to PwaSubSys.list_subsys
-          Each partition corresponds to some mode.
-          (for switched systems)
-
-          In each mode a PwaSubSys is active.
-          This PwaSubSys comprises of subsystems,
-          which are listed in PwaSubSys.list_subsys.
-
-          The list C{ppp2pwa} means:
-
-              - i-th Region in C{regions}
-              - ppp2pwa[i]-th system in PwaSubSys.list_subsys
-                  is active in the i-th Region
-
-          type: list
+          type: list of integers
 
       - disc_params: parameters used in discretization that 
           should be passed to the controller refinement
@@ -155,9 +167,11 @@ class AbstractPwa(object):
     If any of the above is not given,
     then it is initialized to None.
             
-    Note1: There could be some redundancy in ppp and ofts in that they are
-    both decorated with propositions. This might be useful to keep each of 
-    them as functional units on their own (possible to change later).
+    Note1: There could be some redundancy in ppp and ofts,
+        in that they are both decorated with propositions.
+        This might be useful to keep each of 
+        them as functional units on their own
+        (possible to change later).
     
     Note2: The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
         as a special case.
