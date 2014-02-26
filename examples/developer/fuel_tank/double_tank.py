@@ -29,12 +29,13 @@ polylogger = logging.getLogger('tulip.polytope')
 polylogger.setLevel(logging.WARNING)
 
 abs_logger = logging.getLogger('tulip.abstract')
-abs_logger.setLevel(logging.WARNING)
+abs_logger.setLevel(logging.INFO)
 
 logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
 
-import numpy as np
 import time
+import numpy as np
+from scipy import io as sio
 
 #import matplotlib
 #import matplotlib.pyplot as plt
@@ -64,61 +65,59 @@ fontsize = 18
 """State space and propositions"""
 if fast:
     cont_ss = pc.Polytope(
-        np.array([
-            [1,0], [-1,0], [0,1],
-            [0,-1], [1,-1], [-1,1]
-        ]),
-        np.array([
-            tank_capacity, 1, tank_capacity,
-            1, 2*max_vol_diff, 2*max_vol_diff
-        ])
+        np.array([[1,0],
+                  [-1,0],
+                  [0,1],
+                  [0,-1],
+                  [1,-1],
+                  [-1,1]]),
+        np.array([tank_capacity, 1, tank_capacity,
+                  1, 2*max_vol_diff, 2*max_vol_diff])
     )
 else:
     cont_ss = pc.Polytope(
-        np.array([
-            [1,0], [-1,0], [0,1], [0,-1]
-        ]),
-        np.array([
-            tank_capacity, 0, tank_capacity, 0
-        ])
+        np.array([[1,0],
+                  [-1,0],
+                  [0,1],
+                  [0,-1]]),
+        np.array([tank_capacity, 0, tank_capacity, 0])
     )
 
 cont_props = {}
 cont_props['no_refuel'] = pc.Polytope(
-    np.array([
-        [1,0], [-1,0], [0,1], [0,-1]
-    ]),
-    np.array([
-        tank_capacity, 0, tank_capacity, -max_refuel_level
-    ])
+    np.array([[1,0],
+              [-1,0],
+              [0,1],
+              [0,-1]]),
+    np.array([tank_capacity, 0, tank_capacity, -max_refuel_level])
 )
 cont_props['vol_diff'] = pc.Polytope(
-    np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
+    np.array([[-1,0],
+              [0,-1],
+              [-1,1],
+              [1,-1]]),
     np.array([0,0,max_vol_diff,max_vol_diff])
 )
 cont_props['vol_diff2'] = pc.Polytope(
-    np.array([
-        [-1,0], [0,-1], [-1,1], [1,-1]
-    ]),
-    np.array([
-        0,0,fin_vol_diff,fin_vol_diff
-    ])
+    np.array([[-1,0],
+              [0,-1],
+              [-1,1],
+              [1,-1]]),
+    np.array([0,0,fin_vol_diff,fin_vol_diff])
 )
 cont_props['initial'] = pc.Polytope(
-    np.array([
-        [1,0], [-1,0], [0,1], [0,-1]
-    ]),
-    np.array([
-        init_upper, -init_lower, init_upper, -init_lower
-    ])
+    np.array([[1,0],
+             [-1,0],
+             [0, 1],
+             [0,-1]]),
+    np.array([init_upper, -init_lower, init_upper, -init_lower])
 )
 cont_props['critical'] = pc.Polytope(
-    np.array([
-        [-1,0], [0,-1], [1,1]
-    ]),
-    np.array([
-        0, 0, 2*fuel_consumption
-    ]))
+    np.array([[-1,0],
+              [0,-1],
+              [1,1]]),
+    np.array([0, 0, 2*fuel_consumption])
+)
 
 """Dynamics"""
 A = np.eye(2)
@@ -221,13 +220,12 @@ ctrl = synth.synthesize(
     action_vars=('u_in', 'act')
 )
 print(ctrl)
+ctrl.save('double_tank.pdf')
 
 elapsed = (time.time() - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
 
-exit
-
-"""Simulate"""
+"""Simulate""
 num_it = 25
 init_state = {}
 init_state['u_in'] = 0
@@ -276,7 +274,7 @@ data = {}
 data['x'] = x_arr
 data['u'] = u_arr[range(1,u_arr.shape[0]), :]
 data['u_in'] = uin_arr
-from scipy import io as sio
+
 sio.savemat("matlabdata", data)
 
 ax = plot_partition(new_part, plot_numbers=False, show=False)
@@ -303,4 +301,5 @@ for i in range(1,x_arr.shape[0]):
 ax.plot(x_arr[0,0], x_arr[0,1], 'og')
 ax.plot(x_arr[-1,0], x_arr[-1,1], 'or')
 
-plt.savefig('simulation.eps')
+plt.savefig('simulation.pdf')
+"""
