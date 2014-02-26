@@ -64,19 +64,34 @@ class AbstractSwitched(object):
       - ts: common TS, if any
       
       - modes: dict of {mode: AbstractPwa}
+      
+      - ppp2modes: map from C{ppp.regions} to C{modes[mode].ppp.regions}
+          of the form:
+          
+              {mode: list}
+          
+          where C{list} has same indices as C{ppp.regions} and
+          elements in each C{list} are indices of regions in
+          each C{modes[mode].ppp.regions}.
+          
+          type: dict
     
     Each partition corresponds to some mode.
     (for switched systems)
     
     In each mode a L{PwaSubSys} is active.
     """
-    def __init__(self, ppp, ts, modes):
+    def __init__(
+        self, ppp=None, ts=None, modes=None,
+        ppp2modes=None
+    ):
         if modes is None:
             modes = dict()
         
         self.ppp = ppp
         self.ts = ts
         self.modes = modes
+        self.ppp2modes = ppp2modes
     
     def __str__(self):
         s = 'Abstraction of switched system\n'
@@ -86,6 +101,40 @@ class AbstractSwitched(object):
         for mode, ab in self.modes.iteritems():
             s += 'mode: ' + str(mode)
             s += ', with abstraction:\n' + str(ab)
+    
+    def ppp2pwa(self, mode, i):
+        """Return original L{Region} containing C{Region} C{i} in C{mode}.
+        
+        @param mode: key of C{modes}
+        
+        @param i: Region index in common partition C{ppp.regions}.
+        
+        @return: tuple (j, region) of:
+            
+                - index of L{Region} and
+                - L{Region} object
+            
+            in C{modes[mode].ppp.regions}
+        """
+        region_idx = self.ppp2modes[mode][i]
+        
+        ab = self.modes[mode]
+        
+        j = ab.ppp2pwa[region_idx]
+        pwa_region = ab.pwa_ppp[j]
+        return (j, pwa_region)
+        
+    def ppp2sys(self, mode, i):
+        """Return index of active PWA subsystem in C{mode},
+        
+        @param mode: key of C{modes}
+        
+        @param i: Region index in common partition C{ppp.regions}.
+        
+        @return: index of PWA subsystem
+        """
+        region_idx = self.ppp2modes[mode][i]
+        return self.modes[mode].ppp2sys[region_idx]
     
     def plot(self, color_seed=None):
         # different partition per mode ?
