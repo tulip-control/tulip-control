@@ -129,6 +129,8 @@ class AbstractPwa(object):
             - domains of PWA subsystems
           
           Used for non-conservative planning.
+          If just L{LtiSysDyn}, then the only difference
+          of C{pwa_ppp} from C{orig_ppp} is convexification.
           
           type: L{PropPreservingPartition}
       
@@ -303,6 +305,7 @@ def discretize(
     
     @rtype: L{AbstractPwa}
     """
+    orig_ppp = part
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
     
@@ -310,14 +313,18 @@ def discretize(
     islti = isinstance(ssys, LtiSysDyn)
     
     if ispwa:
-        (part, ppp2pwa) = pwa_partition(ssys, part)
+        (part, ppp2pwa, part2orig) = pwa_partition(ssys, part)
+    else:
+        part2orig = range(len(part))
     
     # Save original polytopes, require them to be convex 
     if conservative:
         orig_list = None
         orig = 0
+        ppp2orig = part2orig
     else:
         (part, new2old) = part2convex(part) # convexify
+        ppp2orig = [part2orig[i] for i in new2old]
         
         # map new regions to pwa subsystems
         if ispwa:
@@ -666,9 +673,11 @@ def discretize(
         ppp=new_part,
         ts=ofts,
         ppp2ts=ofts_states,
-        original_regions=orig_list,
-        ppp2orig=orig,
-        ppp2pwa=subsys_list,
+        pwa_ppp=part,
+        ppp2pwa=orig,
+        ppp2sys=subsys_list,
+        orig_ppp=orig_ppp,
+        ppp2orig=ppp2orig,
         disc_params=param
     )
 
