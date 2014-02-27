@@ -553,7 +553,7 @@ def discretize(
         msg = '\n Working with states:\n\t'
         msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
         msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')\n\t'
-            
+        
         if ispwa:
             msg += 'with active subsystem: '
             msg += str(subsys_list[i]) + '\n\t'
@@ -561,7 +561,7 @@ def discretize(
         msg += 'Computed reachable set S0 with volume: '
         msg += str(S0.volume) + '\n'
         
-        logger.info(msg)
+        logger.debug(msg)
         
         # isect = si \cap S0
         isect = si.intersect(S0)
@@ -639,9 +639,10 @@ def discretize(
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
             adj[i, i] = 1
-                        
-            if logger.getEffectiveLevel() >= logging.INFO:
-                msg = '\n Adding states ' + str(i) + ' and '
+            
+            msg = ''
+            if logger.getEffectiveLevel() <= logging.DEBUG:
+                msg += '\n Adding states ' + str(i) + ' and '
                 for r in new_idx:
                     msg += str(r) + ' and '
                 msg += '\n'
@@ -674,14 +675,18 @@ def discretize(
             for r in new_idx:
                 sym_adj_change(IJ, adj_k, transitions, r)
             
-            msg += '\n\n Updated adj: \n' + str(adj)
-            msg += '\n\n Updated trans: \n' + str(transitions)
-            msg += '\n\n Updated IJ: \n' + str(IJ)
+            if logger.getEffectiveLevel() <= logging.DEBUG:
+                msg += '\n\n Updated adj: \n' + str(adj)
+                msg += '\n\n Updated trans: \n' + str(transitions)
+                msg += '\n\n Updated IJ: \n' + str(IJ)
+            
+            msg += 'Divided region: ' + str(i)
         elif vol2 < abs_tol:
-            msg += 'Transition found'
+            msg = 'Found: ' + str(i) + ' ---> ' + str(j)
             transitions[j,i] = 1
         else:
-            msg += 'No transition found, diff vol: ' + str(vol2)
+            msg = 'Unreachable: ' + str(i) + ' --X--> ' + str(j)
+            msg += ',\n\t diff vol: ' + str(vol2)
             msg += ', intersect vol: ' + str(vol1)
             transitions[j,i] = 0
         

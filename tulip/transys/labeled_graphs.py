@@ -34,7 +34,6 @@ Base classes for labeled directed graphs
 """
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
 
 import os
 from pprint import pformat
