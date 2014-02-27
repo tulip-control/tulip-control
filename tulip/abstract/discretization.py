@@ -83,14 +83,15 @@ class AbstractSwitched(object):
     In each mode a L{PwaSubSys} is active.
     """
     def __init__(
-        self, ppp=None, ts=None, modes=None,
-        ppp2modes=None
+        self, ppp=None, ts=None, ppp2ts=None,
+        modes=None, ppp2modes=None
     ):
         if modes is None:
             modes = dict()
         
         self.ppp = ppp
         self.ts = ts
+        self.ppp2ts = ppp2ts
         self.modes = modes
         self.ppp2modes = ppp2modes
     
@@ -102,6 +103,8 @@ class AbstractSwitched(object):
         for mode, ab in self.modes.iteritems():
             s += 'mode: ' + str(mode)
             s += ', with abstraction:\n' + str(ab)
+        
+        return s
     
     def ppp2pwa(self, mode, i):
         """Return original L{Region} containing C{Region} C{i} in C{mode}.
