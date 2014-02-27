@@ -72,12 +72,13 @@ plot_partition(cont_partition, show=visualize)
 # Given dynamics & proposition-preserving partition, find feasible transitions
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1
+    N=8, min_cell_volume=0.1, plotit=visualize
 )
 # @discretize_section_end@
 
 """Visualize transitions in continuous domain (optional)"""
-plot_partition(disc_dynamics.ppp, disc_dynamics.ts, show=visualize)
+plot_partition(disc_dynamics.ppp, disc_dynamics.ts,
+               disc_dynamics.ppp2ts, show=visualize)
 
 """Specifications"""
 # Environment variables and assumptions

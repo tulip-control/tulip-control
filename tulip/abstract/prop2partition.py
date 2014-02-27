@@ -507,10 +507,7 @@ class PropPreservingPartition(object):
                     raise ValueError(msg)
                 
                 if self.prop_regions is None:
-                    warn('No continuous propositions defined.')
-                    continue
-                
-                if self.prop_regions is None:
+                    warnings.warn('No continuous propositions defined.')
                     continue
                 
                 if not region.props <= set(self.prop_regions):

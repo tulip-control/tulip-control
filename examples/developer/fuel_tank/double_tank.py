@@ -174,6 +174,13 @@ switched_dynamics = hybrid.HybridSysDyn(
 ppp = abstract.prop2part(cont_ss, cont_props)
 ppp, new2old = abstract.part2convex(ppp)
 
+
+ax = ppp.plot_props()
+ax.figure.savefig('cprops.pdf')
+
+ax = ppp.plot()
+ax.figure.savefig('ppp.pdf')
+
 """Discretize to establish transitions"""
 start = time.time()
 

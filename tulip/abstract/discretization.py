@@ -176,6 +176,10 @@ class AbstractPwa(object):
           (usually each state is a str)
 
           type: list of states
+      
+      - pwa: system dynamics
+          
+          type: L{PwaSysDyn}
 
       - pwa_ppp: partition preserving both:
             
@@ -194,9 +198,9 @@ class AbstractPwa(object):
           
           type: list of integers
 
-      - ppp2sys: map of C{ppp.regions} to C{PwaSubSys.list_subsys}.
+      - ppp2sys: map of C{ppp.regions} to C{pwa.list_subsys}.
           Has common indices with C{ppp.regions}.
-          Elements are indices of sub-systems in C{PwaSubSys.list_subsys}.
+          Elements are indices of sub-systems in C{pwa.list_subsys}.
           
           Semantics: j-th sub-system is active in i-th Region,
               where C{j = ppp2pwa[i]}
