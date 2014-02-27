@@ -58,7 +58,9 @@ def plot_partition(
     ppp, trans=None, ppp2trans=None, only_adjacent=False,
     ax=None, plot_numbers=True, color_seed=None, show=False
 ):
-    """Plots 2D PropPreservingPartition using matplotlib
+    """Plot partition with arrows from digraph.
+    
+    For filtering edges based on label use L{plot_ts_on_partition}.
 
     See Also
     ========
