@@ -55,7 +55,7 @@ except Exception, e:
     mpl = None
 
 def plot_partition(
-    ppp, trans=None, ppp2trans=None,
+    ppp, trans=None, ppp2trans=None, only_adjacent=False,
     ax=None, plot_numbers=True, color_seed=None, show=False
 ):
     """Plots 2D PropPreservingPartition using matplotlib
@@ -83,10 +83,8 @@ def plot_partition(
     
     @param color_seed: seed for reproducible random coloring
     
-    @param nodelist: order mapping ppp indices to trans states
-    @type nodelist: list of trans states
-    
-    @param show: call mpl.pyplot.show before returning
+    @param ppp2trans: order mapping ppp indices to trans states
+    @type ppp2trans: list of trans states
     """
     if mpl is None:
         warn('matplotlib not found')
@@ -130,25 +128,33 @@ def plot_partition(
         prng = np.random.RandomState()
     
     # plot polytope patches
-    for reg in reg_list:
+    for i, reg in enumerate(reg_list):
         # select random color,
         # same color for all polytopes in each region
         col = prng.rand(3)
         
         # single polytope or region ?
         reg.plot(color=col, ax=ax)
+        if plot_numbers:
+            reg.text(str(i), ax, color='red')
+    
+    # not show trans ?
+    if trans is 'none':
+        if show:
+            mpl.pyplot.show()
+        return ax
     
     # plot transition arrows between patches
     for (i, reg) in enumerate(reg_list):
-        if plot_numbers:
-            reg.text(str(i), ax, color='red')
-        
-        if trans is 'none':
-            continue
-        
-        for j in np.nonzero(trans[:,i] )[0]:
-            reg1 = reg_list[j]
-            plot_transition_arrow(reg, reg1, ax, arr_size)
+        ri = reg_list[i]
+        for j in np.nonzero(trans[:, i])[0]:
+            # mask non-adjacent cell transitions ?
+            if only_adjacent:
+                if ppp.adj[j, i] == 0:
+                    continue
+            
+            rj = reg_list[j]
+            plot_transition_arrow(ri, rj, ax, arr_size)
     
     if show:
         mpl.pyplot.show()

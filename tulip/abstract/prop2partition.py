@@ -583,14 +583,14 @@ class PropPreservingPartition(object):
         return s
     
     def plot(
-        self, ppp, trans=None, ppp2trans=None,
+        self, trans=None, ppp2trans=None, only_adjacent=False,
         ax=None, plot_numbers=True, color_seed=None,
         show=False
     ):
         """For details see plot.plot_partition.
         """
         return plot_partition(
-            self, ppp, trans, ppp2trans,
+            self, trans, ppp2trans, only_adjacent,
             ax, plot_numbers, color_seed, show
         )
     
