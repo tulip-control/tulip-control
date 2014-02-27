@@ -148,10 +148,10 @@ def plot_partition(
     for i, j in zip(rows, cols):
         # mask non-adjacent cell transitions ?
         if only_adjacent:
-            if ppp.adj[j, i] == 0:
+            if ppp.adj[i, j] == 0:
                 continue
         
-        plot_transition_arrow(ppp.regions[j], ppp.regions[i], ax, arr_size)
+        plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)
     
     if show:
         mpl.pyplot.show()
@@ -176,7 +176,7 @@ def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
         j = ts2ppp[to_state]
         
         if only_adjacent:
-            if ppp.adj[j, i] == 0:
+            if ppp.adj[i, j] == 0:
                 continue
         
         plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)

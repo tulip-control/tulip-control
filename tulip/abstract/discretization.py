@@ -753,7 +753,7 @@ def discretize(
     # Generate transition system and add transitions       
     ofts = trs.OpenFTS()
     
-    adj = sp.lil_matrix(transitions)
+    adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
@@ -1128,11 +1128,11 @@ def get_transitions(
         )
                     
         if trans_feasible:
-            transitions[j,i] = 1 
+            transitions[i, j] = 1 
             msg = '\t Feasible transition.'
             n_found += 1
         else:
-            transitions[j,i] = 0
+            transitions[i, j] = 0
             msg = '\t Not feasible transition.'
         logger.debug(msg)
     logger.info('Checked: ' + str(n_checked))
