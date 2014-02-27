@@ -103,7 +103,6 @@ def plot_partition(
     
     l,u = bounding_box(ppp.domain)
     arr_size = (u[0,0]-l[0,0])/50.0
-    reg_list = ppp.regions
     
     # new figure ?
     if ax is None:
@@ -128,7 +127,7 @@ def plot_partition(
         prng = np.random.RandomState()
     
     # plot polytope patches
-    for i, reg in enumerate(reg_list):
+    for i, reg in enumerate(ppp.regions):
         # select random color,
         # same color for all polytopes in each region
         col = prng.rand(3)
@@ -145,16 +144,14 @@ def plot_partition(
         return ax
     
     # plot transition arrows between patches
-    for (i, reg) in enumerate(reg_list):
-        ri = reg_list[i]
-        for j in np.nonzero(trans[:, i])[0]:
-            # mask non-adjacent cell transitions ?
-            if only_adjacent:
-                if ppp.adj[j, i] == 0:
-                    continue
-            
-            rj = reg_list[j]
-            plot_transition_arrow(ri, rj, ax, arr_size)
+    rows, cols = np.nonzero(trans)
+    for i, j in zip(rows, cols):
+        # mask non-adjacent cell transitions ?
+        if only_adjacent:
+            if ppp.adj[j, i] == 0:
+                continue
+        
+        plot_transition_arrow(ppp.regions[j], ppp.regions[i], ax, arr_size)
     
     if show:
         mpl.pyplot.show()
