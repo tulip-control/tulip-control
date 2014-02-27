@@ -161,6 +161,29 @@ def plot_partition(
     
     return ax
 
+def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
+    """Plot partition and arrows from labeled digraph.
+    
+    Edges can be filtered by selecting an edge_label.
+    So it can plot transitions of a single mode for a switched system.
+    
+    @param edge_label: desired label
+    @type edge_label: dict
+    """
+    l,u = bounding_box(ppp.domain)
+    arr_size = (u[0,0]-l[0,0])/50.0
+    
+    ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
+    for from_state, to_state, label in ts.transitions.find(desired_label=edge_label):
+        i = ts2ppp[from_state]
+        j = ts2ppp[to_state]
+        
+        if only_adjacent:
+            if ppp.adj[j, i] == 0:
+                continue
+        
+        plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)
+
 def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
     """Plot arrow starting from polyreg0 and ending at polyreg1.
     
