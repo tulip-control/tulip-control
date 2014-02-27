@@ -246,7 +246,7 @@ def _graph2pydot(graph, wrap=10):
     _transitions2dot_str(graph.transitions, dummy_nx_graph)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
-    pydot_graph.set_overlap(False)
+    pydot_graph.set_overlap('false')
     
     return pydot_graph
 
