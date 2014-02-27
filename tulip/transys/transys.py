@@ -674,7 +674,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             return state_labeling
         
         logger.debug('State labeling L not tuples (state, ap_label),\n'
-                   'zipping with states S...\n', verbose)
+                   'zipping with states S...\n')
         state_labeling = zip(states, state_labeling)
         return state_labeling
     
@@ -697,7 +697,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # prepending states with given str
     if prepend_str:
         logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.', verbose)
+               'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     
@@ -714,11 +714,11 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # state labeling assigned ?
     if state_labeling is not None:
         for (state, ap_label) in state_labeling:
-            ap_label = str2singleton(ap_label, verbose=verbose)
+            ap_label = str2singleton(ap_label)
             (state,) = prepend_with([state], prepend_str)
             
             logger.debug('Labeling state:\n\t' +str(state) +'\n' +
-                  'with label:\n\t' +str(ap_label) +'\n', verbose)
+                  'with label:\n\t' +str(ap_label) +'\n')
             ts.states.label(state, ap_label)
     
     # any transition labeling ?
@@ -727,7 +727,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
             logger.debug('Added unlabeled edge:\n\t' +str(from_state) +
-                   '--->' +str(to_state) +'\n', verbose)
+                   '--->' +str(to_state) +'\n')
             ts.transitions.add(from_state, to_state)
     else:
         ts.actions |= actions
@@ -736,7 +736,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                                                   prepend_str)
             logger.debug('Added labeled edge (=transition):\n\t' +
                    str(from_state) +'---[' +str(act) +']--->' +
-                   str(to_state) +'\n', verbose)
+                   str(to_state) +'\n')
             ts.transitions.add_labeled(from_state, to_state, act)
     
     return ts

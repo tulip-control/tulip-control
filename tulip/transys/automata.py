@@ -288,7 +288,7 @@ class BA(BuchiAutomaton):
         BuchiAutomaton.__init__(self, **args)
 
 def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
-             atomic_proposition_based=True, verbose=False):
+             atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by a tuple (S, S0, Sa, \\Sigma, trans)
@@ -331,7 +331,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     # prepending states with given str
     if prepend_str:
         logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.', verbose)
+               'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     accepting_states = prepend_with(accepting_states, prepend_str)

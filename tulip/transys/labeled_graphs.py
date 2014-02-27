@@ -2577,17 +2577,16 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
-def str2singleton(ap_label, verbose=False):
+def str2singleton(ap_label):
         """If string, convert to set(string).
         
         Convention: singleton str {'*'}
         can be passed as str '*' instead.
         """
         if isinstance(ap_label, str):
-            logger.debug('Saw str state label:\n\t' +ap_label, verbose)
+            logger.debug('Saw str state label:\n\t' +str(ap_label))
             ap_label = {ap_label}
-            logger.debug('Replaced with singleton:\n\t' +str(ap_label) +'\n',
-                   verbose=verbose)
+            logger.debug('Replaced with singleton:\n\t' +str(ap_label) +'\n')
         return ap_label
 
 def prepend_with(states, prepend_str):
