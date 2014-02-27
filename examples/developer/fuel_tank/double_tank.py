@@ -35,15 +35,14 @@ logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
 
 import time
 import numpy as np
-from scipy import io as sio
-
+#from scipy import io as sio
 #import matplotlib
 #import matplotlib.pyplot as plt
-#from tulip.graphics import newax
 
 from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
-from tulip.abstract.plot import plot_partition
+#from tulip.abstract.plot import plot_partition
+#from tulip.graphics import newax
 
 """Problem variables"""
 tank_capacity = 10      # Maximum tank capacity
@@ -58,8 +57,9 @@ N = 1                   # Horizon length
 disturbance = 0.0       # Absolute uncertainty in fuel consumption
 init_lower = 6          # Lower bound for possible initial volumes
 init_upper = 8          # Upper bound for possible initial volumes
-fast = False             # Use smaller domain to increase speed
+fast = True             # Use smaller domain to increase speed
 
+imgpath = './img/'
 fontsize = 18
 
 """State space and propositions"""
@@ -174,12 +174,11 @@ switched_dynamics = hybrid.HybridSysDyn(
 ppp = abstract.prop2part(cont_ss, cont_props)
 ppp, new2old = abstract.part2convex(ppp)
 
-
 ax = ppp.plot_props()
-ax.figure.savefig('cprops.pdf')
+ax.figure.savefig(imgpath + 'cprops.pdf')
 
 ax = ppp.plot()
-ax.figure.savefig('ppp.pdf')
+ax.figure.savefig(imgpath + 'ppp.pdf')
 
 """Discretize to establish transitions"""
 start = time.time()
@@ -226,11 +225,15 @@ ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
     action_vars=('u_in', 'act')
 )
-print(ctrl)
-ctrl.save('double_tank.pdf')
-
 elapsed = (time.time() - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
+
+print(ctrl)
+ctrl.save(imgpath + 'double_tank.pdf')
+
+from overlap import plot_strategy
+ax = plot_strategy(sys_ts, ctrl)
+ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 
 """Simulate""
 num_it = 25
@@ -308,5 +311,5 @@ for i in range(1,x_arr.shape[0]):
 ax.plot(x_arr[0,0], x_arr[0,1], 'og')
 ax.plot(x_arr[-1,0], x_arr[-1,1], 'or')
 
-plt.savefig('simulation.pdf')
+plt.savefig(imgpath + 'simulation.pdf')
 """
