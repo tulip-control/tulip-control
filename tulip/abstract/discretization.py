@@ -52,6 +52,7 @@ from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
+from .plot import plot_ts_on_partition
 
 class AbstractSwitched(object):
     """Abstraction of HybridSysDyn, with mode-specific and common info.
@@ -151,9 +152,20 @@ class AbstractSwitched(object):
         
         # merged partition exists ?
         if self.ppp is not None:
-            ax = _plot_abstraction(self, show_ts, only_adjacent,
-                                   color_seed)
-            axs += [ax]
+            for mode in self.modes:
+                env_mode, sys_mode = mode
+                edge_label = {'env_actions':env_mode,
+                              'sys_actions':sys_mode}
+                
+                ax = _plot_abstraction(
+                    self, show_ts=False, only_adjacent=False,
+                    color_seed=color_seed
+                )
+                plot_ts_on_partition(
+                    self.ppp, self.ts, self.ppp2ts,
+                    edge_label, only_adjacent, ax
+                )
+                axs += [ax]
         
         # plot mode partitions
         for mode, ab in self.modes.iteritems():
@@ -956,26 +968,28 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
     try:
-        from tulip.graphics import newax
+        import matplotlib
     except:
-        warnings.warn('could not import newax, no partitions plotted.')
+        warnings.warn('could not import matplotlib, no partitions plotted.')
         return
     
     axs = swab.plot(show_ts, only_adjacent)
+    n = len(swab.modes)
+    assert(len(axs) == 2*n)
     
     # annotate
     for ax in axs:
         plot_annot(ax)
     
     # save mode partitions
-    for ax, mode in zip(axs[1:], swab.modes):
-        fname = 'part_' + str(mode) + '.pdf'
+    for ax, mode in zip(axs[:n], swab.modes):
+        fname = 'merged_' + str(mode) + '.pdf'
         ax.figure.savefig(fname)
     
     # save merged partition
-    ax = axs[0]
-    fname = 'part_merged' + '.pdf'
-    ax.figure.savefig(fname)
+    for ax, mode in zip(axs[n:], swab.modes):
+        fname = 'part_' + str(mode) + '.pdf'
+        ax.figure.savefig(fname)
 
 def plot_annot(ax):
     fontsize = 5

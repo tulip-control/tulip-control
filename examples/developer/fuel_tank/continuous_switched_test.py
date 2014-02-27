@@ -100,7 +100,7 @@ for mode in modes:
 
 swab = abstract.discretize_switched(
     ppp, switched_dynamics, disc_params,
-    plot=True, show_ts=True, only_adjacent=True
+    plot=True, show_ts=True
 )
 print(swab)
 
