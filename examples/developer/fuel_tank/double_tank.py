@@ -41,7 +41,7 @@ import numpy as np
 
 from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc
-#from tulip.abstract.plot import plot_partition
+from tulip.abstract.plot import plot_strategy
 #from tulip.graphics import newax
 
 """Problem variables"""
@@ -231,7 +231,6 @@ logger.info('Synthesis lasted: ' + str(elapsed))
 print(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')
 
-from overlap import plot_strategy
 ax = plot_strategy(sys_ts, ctrl)
 ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 

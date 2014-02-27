@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 from warnings import warn
 
 import numpy as np
+from scipy import sparse as sp
 import networkx as nx
 
 from tulip.polytope import cheby_ball, bounding_box
@@ -182,6 +183,43 @@ def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
                 continue
         
         plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)
+
+def project_strategy_on_partition(ppp, mealy):
+    """Return an FTS with the PPP (spatial) transitions used by Mealy strategy.
+    
+    @type ppp: L{PropPreservingPartition}
+    
+    @type: mealy: L{transys.MealyMachine}
+    """
+    n = len(ppp)
+    proj_adj = sp.lil_matrix((n, n))
+    
+    for (from_state, to_state, label) in mealy.transitions.find():
+        from_label = mealy.states.label_of(from_state)
+        to_label = mealy.states.label_of(to_state)
+        
+        if 'loc' not in from_label or 'loc' not in to_label:
+            continue
+        
+        from_loc = from_label['loc']
+        to_loc = to_label['loc']
+        
+        proj_adj[from_loc, to_loc] = 1
+    
+    return proj_adj
+
+def plot_strategy(ab, mealy):
+    """Plot strategic transitions on PPP.
+    
+    Assumes that mealy is feasible for ab.
+    
+    @type ab: L{AbstractPwa} or L{AbstractSwitched}
+    
+    @type mealy: L{transys.MealyMachine}
+    """
+    proj_mealy = project_strategy_on_partition(ab.ppp, mealy)
+    ax = plot_partition(ab.ppp, proj_mealy, color_seed=0)
+    return ax
 
 def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
     """Plot arrow starting from polyreg0 and ending at polyreg1.
