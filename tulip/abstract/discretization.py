@@ -141,11 +141,23 @@ class AbstractSwitched(object):
         subsystem = self.modes[mode].pwa.list_subsys[subsystem_idx]
         return (subsystem_idx, subsystem)
     
-    def plot(self, color_seed=None):
-        # different partition per mode ?
+    def plot(self, show_ts=False, only_adjacent=False):
+        """Plot mode partitions and merged partition, if one exists.
+        
+        For details see L{AbstractPwa.plot}.
+        """
         axs = []
+        color_seed = 0
+        
+        # merged partition exists ?
+        if self.ppp is not None:
+            ax = _plot_abstraction(self, show_ts, only_adjacent,
+                                   color_seed)
+            axs += [ax]
+        
+        # plot mode partitions
         for mode, ab in self.modes.iteritems():
-            ax = ab.plot(color_seed=color_seed)
+            ax = ab.plot(show_ts, only_adjacent, color_seed)
             ax.set_title('Abstraction for mode: ' + str(mode))
             axs += [ax]
         
@@ -303,15 +315,42 @@ class AbstractPwa(object):
         s += str(self.orig_ppp)
         return s
     
-    def plot(self, color_seed=None):
-        if self.ppp is None or self.ts is None:
-            warnings.warn('Either ppp or ts is None.')
-            return
+    def plot(self, show_ts=False, only_adjacent=False,
+             color_seed=None):
+        """Plot partition and optionally feasible transitions.
         
-        ax = self.ppp.plot(trans=self.ts, ppp2trans=self.ppp2ts)
-        #ax = self.ts.plot()
+        @param show_ts: plot feasible transitions on partition
+        @type show_ts: bool
         
+        @param only_adjacent: plot feasible transitions only
+            between adjacent regions. This reduces clutter,
+            but if horizon > 1 and not all horizon used,
+            then some transitions could be hidden.
+        @param only_adjacent: bool
+        """
+        ax = _plot_abstraction(self, show_ts, only_adjacent,
+                               color_seed)
         return ax
+
+def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
+    if ab.ppp is None or ab.ts is None:
+        warnings.warn('Either ppp or ts is None.')
+        return
+    
+    if show_ts:
+        ts = ab.ts
+        ppp2ts = ab.ppp2ts
+    else:
+        ts = None
+        ppp2ts = None
+    
+    ax = ab.ppp.plot(
+        ts, ppp2ts, only_adjacent=only_adjacent,
+        color_seed=color_seed
+    )
+    #ax = self.ts.plot()
+    
+    return ax
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
@@ -838,7 +877,10 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
 
-def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
+def discretize_switched(
+    ppp, hybrid_sys, disc_params=None,
+    plot=False, show_ts=False, only_adjacent=True
+):
     """Abstract switched dynamics over given partition.
     
     @type ppp: L{PropPreservingPartition}
@@ -853,6 +895,8 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     
     @param plot: save partition images
     @type plot: bool
+    
+    @param show_ts, only_adjacent: see L{AbstractPwa.plot}.
     
     @return: abstracted dynamics,
         some attributes are dict keyed by mode
@@ -904,11 +948,11 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
                        abstractions, modes, mode_nums)
     
     if plot:
-        plot_mode_partitions(abstractions, merged_abstr)
+        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
     
     return merged_abstr
 
-def plot_mode_partitions(abstractions, merged_abs):
+def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
     try:
@@ -917,18 +961,21 @@ def plot_mode_partitions(abstractions, merged_abs):
         warnings.warn('could not import newax, no partitions plotted.')
         return
     
-    for mode, ab in abstractions.iteritems():
-        ax, fig = newax()
-        ab.ppp.plot(plot_numbers=True, ax=ax)
-        plot_annot(ax)
-        fname = 'part_' + str(mode) + '.pdf'
-        fig.savefig(fname)
+    axs = swab.plot(show_ts, only_adjacent)
     
-    ax, fig = newax()
-    merged_abs.ppp.plot(plot_numbers=True, ax=ax)
-    plot_annot
+    # annotate
+    for ax in axs:
+        plot_annot(ax)
+    
+    # save mode partitions
+    for ax, mode in zip(axs[1:], swab.modes):
+        fname = 'part_' + str(mode) + '.pdf'
+        ax.figure.savefig(fname)
+    
+    # save merged partition
+    ax = axs[0]
     fname = 'part_merged' + '.pdf'
-    fig.savefig(fname)
+    ax.figure.savefig(fname)
 
 def plot_annot(ax):
     fontsize = 5

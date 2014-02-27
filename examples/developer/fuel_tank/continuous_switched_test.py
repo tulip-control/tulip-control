@@ -98,12 +98,13 @@ disc_params = {}
 for mode in modes:
     disc_params[mode] = {'N':N, 'trans_length':trans_len}
 
-sys_ts = abstract.discretize_switched(
-    ppp, switched_dynamics, disc_params)
+swab = abstract.discretize_switched(
+    ppp, switched_dynamics, disc_params,
+    plot=True, show_ts=True, only_adjacent=True
+)
+print(swab)
 
-print(sys_ts)
-sys_ts.ppp.plot()
-sys_ts.ts.plot()
+#ax = sys_ts.ts.plot()
 
 elapsed = (time.time() - start)
 print('Discretization lasted: ' + str(elapsed))
