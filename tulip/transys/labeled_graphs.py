@@ -49,10 +49,6 @@ from .export import save_d3, graph2dot
 
 hl = 40 *'-'
 
-def vprint(string, verbose=True):
-    if verbose:
-        print(string)
-
 class LabelConsistency(object):
     """Container of methods for checking sublabel consistency.
     
@@ -2205,7 +2201,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.default_layout = 'dot'
         
     def _add_missing_extension(self, path, file_type):
-        import os
         filename, file_extension = os.path.splitext(path)
         desired_extension = os.path.extsep +file_type
         if file_extension != desired_extension:
@@ -2589,9 +2584,9 @@ def str2singleton(ap_label, verbose=False):
         can be passed as str '*' instead.
         """
         if isinstance(ap_label, str):
-            vprint('Saw str state label:\n\t' +ap_label, verbose)
+            logger.debug('Saw str state label:\n\t' +ap_label, verbose)
             ap_label = {ap_label}
-            vprint('Replaced with singleton:\n\t' +str(ap_label) +'\n',
+            logger.debug('Replaced with singleton:\n\t' +str(ap_label) +'\n',
                    verbose=verbose)
         return ap_label
 

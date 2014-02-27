@@ -37,7 +37,7 @@ from collections import Iterable, OrderedDict
 from pprint import pformat
 
 from .labeled_graphs import LabeledStateDiGraph
-from .labeled_graphs import vprint, prepend_with, str2singleton
+from .labeled_graphs import prepend_with, str2singleton
 from .mathset import SubSet, PowerSet
 from .transys import _ts_ba_sync_prod
 
@@ -330,7 +330,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     
     # prepending states with given str
     if prepend_str:
-        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
+        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
                'will be prepended to all states.', verbose)
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)

@@ -39,7 +39,7 @@ import copy
 import warnings
 
 from .labeled_graphs import LabeledStateDiGraph, str2singleton
-from .labeled_graphs import prepend_with, vprint
+from .labeled_graphs import prepend_with
 from .mathset import PowerSet, MathSet
 from .executions import FTSSim
 from .export import graph2promela
@@ -673,7 +673,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         if state_label_pairs:
             return state_labeling
         
-        vprint('State labeling L not tuples (state, ap_label),\n'
+        logger.debug('State labeling L not tuples (state, ap_label),\n'
                    'zipping with states S...\n', verbose)
         state_labeling = zip(states, state_labeling)
         return state_labeling
@@ -696,7 +696,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     
     # prepending states with given str
     if prepend_str:
-        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
+        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
                'will be prepended to all states.', verbose)
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
@@ -717,7 +717,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             ap_label = str2singleton(ap_label, verbose=verbose)
             (state,) = prepend_with([state], prepend_str)
             
-            vprint('Labeling state:\n\t' +str(state) +'\n' +
+            logger.debug('Labeling state:\n\t' +str(state) +'\n' +
                   'with label:\n\t' +str(ap_label) +'\n', verbose)
             ts.states.label(state, ap_label)
     
@@ -726,7 +726,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         for (from_state, to_state) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            vprint('Added unlabeled edge:\n\t' +str(from_state) +
+            logger.debug('Added unlabeled edge:\n\t' +str(from_state) +
                    '--->' +str(to_state) +'\n', verbose)
             ts.transitions.add(from_state, to_state)
     else:
@@ -734,7 +734,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         for (from_state, to_state, act) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            vprint('Added labeled edge (=transition):\n\t' +
+            logger.debug('Added labeled edge (=transition):\n\t' +
                    str(from_state) +'---[' +str(act) +']--->' +
                    str(to_state) +'\n', verbose)
             ts.transitions.add_labeled(from_state, to_state, act)
