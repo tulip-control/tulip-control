@@ -37,7 +37,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from warnings import warn
-
 import itertools
 from pprint import pformat
 
@@ -50,6 +49,11 @@ try:
 except Exception, e:
     logger.error(e)
     quiver = None
+
+def indent(s, n):
+    s = s.split('\n')
+    w = n*' '
+    return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
     """Represent discrete-time continuous dynamics::
@@ -165,12 +169,13 @@ class LtiSysDyn(object):
         self.domain = domain
 
     def __str__(self):
-        output = "A =\n"+str(self.A)
-        output += "\nB =\n"+str(self.B)
-        output += "\nE =\n"+str(self.E)
-        output += "\nK =\n"+str(self.K)
-        output += "\nUset =\n"+str(self.Uset)
-        output += "\nWset =\n"+str(self.Wset)
+        n = 3
+        output = 'A =\n' + indent(str(self.A), n)
+        output += '\nB =\n' + indent(str(self.B), n)
+        output += '\nE =\n' + indent(str(self.E), n)
+        output += '\nK =\n' + indent(str(self.K), n)
+        output += '\nUset =\n' + indent(str(self.Uset), n)
+        output += '\nWset =\n' + indent(str(self.Wset), n)
         return output
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
@@ -246,12 +251,12 @@ class PwaSysDyn(object):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
         
-        s += 'Domain:\n\n'
-        s += pformat(self.domain) + '\n'
+        s += 3*' ' + 'Domain:\n\n'
+        s += indent(str(self.domain), n=6) + '\n'
     
         for i, sys in enumerate(self.list_subsys):
-            s += 'Subsystem: ' + str(i) +'\n'
-            s += str(sys) +2*'\n'
+            s += 3*' ' + 'Subsystem: ' + str(i) +'\n'
+            s += indent(str(sys), n=6)
         return s
     
     @classmethod
@@ -389,12 +394,12 @@ class HybridSysDyn(object):
         s += 6*' ' + pformat(self.disc_sys_labels, indent=3) + 2*'\n'
         
         s += 'Continuous State Space:\n\n'
-        s += pformat(self.cts_ss) + '\n'
+        s += indent(str(self.cts_ss), 4) + '\n'
         
         s += 'Dynamics:\n'
         for mode, pwa in self.dynamics.iteritems():
-            s += ' mode: ' + str(mode) + '\n'
-            s += ' dynamics: ' + pformat(pwa, indent=3) +'\n\n'
+            s += 4*' ' + 'mode: ' + str(mode) + '\n'
+            s += 4*' ' + 'dynamics:\n' + indent(str(pwa), 8) +'\n\n'
         return s
     
     def _check_labels(self, n, labels):
