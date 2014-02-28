@@ -25,13 +25,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-polylogger = logging.getLogger('tulip.polytope')
-polylogger.setLevel(logging.WARNING)
+tulip_logger = logging.getLogger('tulip')
+tulip_logger.setLevel(logging.ERROR)
 
-abs_logger = logging.getLogger('tulip.abstract')
-abs_logger.setLevel(logging.INFO)
-
-logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
+log = logging.getLogger('multiprocessing')
+#log.setLevel(logging.ERROR)
 
 import time
 import numpy as np
@@ -187,8 +185,9 @@ disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
 disc_params[('refuel', 'fly')] = {'N':N, 'trans_length':3}
 
-sys_ts = abstract.discretize_switched(ppp, switched_dynamics,
-                                      disc_params, plot=True)
+sys_ts = abstract.multiproc_discretize_switched(
+    ppp, switched_dynamics, disc_params, plot=False
+)
 
 elapsed = (time.time() - start)
 logger.info('Discretization lasted: ' + str(elapsed))

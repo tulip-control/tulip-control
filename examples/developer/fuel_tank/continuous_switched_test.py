@@ -96,7 +96,7 @@ disc_params = {}
 for mode in modes:
     disc_params[mode] = {'N':N, 'trans_length':trans_len}
 
-swab = abstract.discretize_switched(
+swab = abstract.multiproc_discretize_switched(
     ppp, switched_dynamics, disc_params,
     plot=True, show_ts=True
 )

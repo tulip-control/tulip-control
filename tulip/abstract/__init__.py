@@ -33,7 +33,8 @@
 """TuLiP Toolbox Abstract subpackage
 """
 # avoid shadowing modules
-from .discretization import discretize, discretize_switched
+from .discretization import discretize, discretize_switched, \
+    multiproc_discretize_switched
 from .feasible import is_feasible, solve_feasible
 
 from .prop2partition import prop2part

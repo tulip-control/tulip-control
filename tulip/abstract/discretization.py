@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 import warnings
 import pprint
 from copy import deepcopy
+import multiprocessing as mp
 
 import numpy as np
 from scipy import sparse as sp
@@ -897,6 +898,99 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
 
+def multiproc_discretize(q, mode, ppp, cont_dyn, disc_params):
+    global logger
+    logger = mp.log_to_stderr()
+    
+    name = mp.current_process().name
+    print('Abstracting mode: ' + str(mode) + ', on: ' + str(name))
+    
+    absys = discretize(ppp, cont_dyn, **disc_params)
+    
+    q.put((mode, absys))
+    print('Worker: ' + str(name) + 'finished.')
+
+def multiproc_get_transitions(
+    q, absys, mode, ssys, params
+):
+    global logger
+    logger = mp.log_to_stderr()
+    
+    name = mp.current_process().name
+    print('Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
+    
+    trans = get_transitions(absys, mode, ssys, **params)
+    
+    q.put((mode, trans))
+    print('Worker: ' + str(name) + 'finished.')
+
+def multiproc_discretize_switched(
+    ppp, hybrid_sys, disc_params=None,
+    plot=False, show_ts=False, only_adjacent=True
+):
+    """Parallel implementation of discretize_switched.
+    
+    Uses the multiprocessing package.
+    """
+    logger.info('parallel discretize_switched started')
+    
+    modes = hybrid_sys.modes
+    mode_nums = hybrid_sys.disc_domain_size
+    
+    q = mp.Queue()
+    
+    mode_args = dict()
+    for mode in modes:
+        cont_dyn = hybrid_sys.dynamics[mode]
+        mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
+    
+    jobs = [mp.Process(target=multiproc_discretize, args=args)
+            for args in mode_args.itervalues()]
+    for job in jobs:
+        job.start()
+    
+    # flush before join:
+    #   http://stackoverflow.com/questions/19071529/
+    abstractions = dict()
+    for job in jobs:
+        mode, absys = q.get()
+        abstractions[mode] = absys
+    
+    for job in jobs:
+        job.join()
+    
+    # merge their domains
+    (merged_abstr, ap_labeling) = merge_partitions(abstractions)
+    n = len(merged_abstr.ppp)
+    logger.info('Merged partition has: ' + str(n) + ', states')
+    
+    # find feasible transitions over merged partition
+    for mode in modes:
+        cont_dyn = hybrid_sys.dynamics[mode]
+        params = disc_params[mode]
+        
+        mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
+    
+    jobs = [mp.Process(target=multiproc_get_transitions, args=args)
+            for args in mode_args.itervalues()]
+    
+    for job in jobs:
+        job.start()
+    
+    trans = dict()
+    for job in jobs:
+        mode, t = q.get()
+        trans[mode] = t
+    
+    # merge the abstractions, creating a common TS
+    merge_abstractions(merged_abstr, trans,
+                       abstractions, modes, mode_nums)
+    
+    if plot:
+        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
+    
+    return merged_abstr
+
 def discretize_switched(
     ppp, hybrid_sys, disc_params=None,
     plot=False, show_ts=False, only_adjacent=True
@@ -1140,7 +1234,14 @@ def get_transitions(
     logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
             
     return transitions
+
+def multiproc_merge_partitions(abstractions):
+    """LOGTIME in #processors parallel merging.
     
+    Assuming sufficient number of processors.
+    """
+    raise NotImplementedError
+
 def merge_partitions(abstractions):
     """Merge multiple abstractions.
     
