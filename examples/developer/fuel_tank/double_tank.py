@@ -35,7 +35,8 @@ import time
 import numpy as np
 #from scipy import io as sio
 #import matplotlib
-#import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.use('Agg')
 
 from tulip import hybrid, abstract, spec, synth
 from tulip import polytope as pc

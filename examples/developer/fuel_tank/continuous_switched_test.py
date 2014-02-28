@@ -5,6 +5,9 @@ logging.basicConfig(level=logging.INFO)
 import time
 import numpy as np
 
+import matplotlib as mpl
+mpl.use('Agg')
+
 from tulip import abstract, hybrid
 from tulip.polytope import box2poly
 
