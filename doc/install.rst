@@ -198,3 +198,8 @@ it, try looking at the polytope subpackage by entering::
 .. [#f1] On Unix systems, in particular GNU/Linux and Mac OS X, the
          terminal shell treats ``~`` as a special symbol representing
          the home directory of the current user.
+
+remote server installation
+``````````````````````````
+
+Instructions for installing ``tulip`` and its dependencies from scratch on a Unix server can be found `here <https://github.com/tulip-control/tulip-control/blob/master/contrib/nessainstall/instructions.md>`_.
