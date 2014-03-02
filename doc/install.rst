@@ -58,10 +58,10 @@ New to Python?
 ~~~~~~~~~~~~~~
 
 If you don't already use Python for scientific computing, consider using
-`Enthought Python Distribution (EPD) <http://enthought.com>`_ (now called
-`Enthought Canopy <https://www.enthought.com/products/canopy/>`_). This may make
-the installation process easier.  The EPD Free (now called Canopy Express)
-distribution comes with Python and includes NumPy, SciPy, matplotlib. EPD Free
+`Enthought Python Distribution (EPD) <http://enthought.com>`_ or `Enthought
+Canopy <https://www.enthought.com/products/canopy/>`_. This may make the
+installation process easier.  The EPD Free and Canopy Express distributions come
+with Python and includes NumPy, SciPy, matplotlib. EPD Free or Canopy Express
 together with networkx, cvxopt, and ply is sufficient to run TuLiP.
 
 Alternatives to Enthought are listed on the `SciPy installation webpage
