@@ -816,7 +816,8 @@ class States(object):
         
         See Also
         ========
-        Def. 2.4, p.23 [Baier 2008]
+        Def. 2.4, p.23 U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
         successors = self.post(state)
         if successors:
@@ -844,7 +845,8 @@ class States(object):
         See Also
         ========
           - L{pre}
-          - Def. 2.3, p.23 [Baier 2008]
+          - Def. 2.3, p.23 U{[BK08]
+            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
         states = self._single_state2singleton(states)
         
@@ -868,7 +870,8 @@ class States(object):
         See Also
         ========
           - L{post}
-          - Def. 2.3, p.23 [Baier 2008]
+          - Def. 2.3, p.23 U{[BK08]
+            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
         states = self._single_state2singleton(states)
         
