@@ -48,8 +48,6 @@ from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique
 from .export import save_d3, graph2dot
 
-hl = 40 *'-'
-
 def vprint(string, verbose=True):
     if verbose:
         print(string)

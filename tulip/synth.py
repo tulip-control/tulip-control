@@ -42,7 +42,7 @@ from tulip.spec import GRSpec
 from tulip.interfaces import jtlvint
 from tulip.interfaces import gr1cint
 
-hl = '\n' +60*'-'
+_hl = '\n' +60*'-'
 
 def pstr(s):
     return '(' +str(s) +')'
@@ -957,12 +957,12 @@ def spec_plus_sys(
         sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states,
                                   action_vars, bool_actions)
         specs = specs | sys_formula
-        logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + hl)
+        logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
     if env is not None:
         env_formula = env_to_spec(env, ignore_env_init, bool_states,
                                   action_vars, bool_actions)
         specs = specs | env_formula
-        logger.debug('env TS:\n' + str(env_formula.pretty() ) + hl)
+        logger.debug('env TS:\n' + str(env_formula.pretty() ) + _hl)
         
-    logger.info('Overall Spec:\n' + str(specs.pretty() ) +hl)
+    logger.info('Overall Spec:\n' + str(specs.pretty() ) +_hl)
     return specs
