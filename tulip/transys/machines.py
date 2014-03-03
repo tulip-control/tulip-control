@@ -40,7 +40,7 @@ from .labeled_graphs import LabeledStateDiGraph
 from . import executions
 from .export import machine2scxml
 
-hl = 40 *'-'
+_hl = 40 *'-'
 
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
@@ -327,7 +327,7 @@ class MooreMachine(FiniteStateMachine):
     
     def __str__(self):
         #TODO: improve port formatting
-        s = hl +'\nMoore Machine: ' +self.name +'\n' +hl +'\n'
+        s = _hl +'\nMoore Machine: ' +self.name +'\n' +_hl +'\n'
         s += 'State Variables:\n\t' +pformat(self.state_vars) +'\n'
         s += 'Output ports:\n\t' +pformat(self.outputs) +'\n'
         s += 'States & labeling w/ State Vars & Output Ports:\n\t'
@@ -336,7 +336,7 @@ class MooreMachine(FiniteStateMachine):
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Input ports:\n\t' +pformat(self.inputs) +'\n'
         s += 'Transitions & labeling w/ Input Port guards:\n\t'
-        s += str(self.transitions(labeled=True) ) +'\n' +hl +'\n'
+        s += str(self.transitions(labeled=True) ) +'\n' +_hl +'\n'
         
         return s
     
@@ -442,7 +442,7 @@ class MealyMachine(FiniteStateMachine):
             s += '\n'
             return s
         
-        s = hl +'\nMealy Machine: ' +self.name +'\n' +hl +'\n'
+        s = _hl +'\nMealy Machine: ' +self.name +'\n' +_hl +'\n'
         s += 'State Variables:\n\t(name : type)\n'
         s += print_ports(self.state_vars)
         
@@ -466,7 +466,7 @@ class MealyMachine(FiniteStateMachine):
             s += '\t' +str(from_state) +' ---> '
             s += str(to_state) +' :\n'
             s += print_label(label_dict)
-        s += hl +'\n'
+        s += _hl +'\n'
         
         return s
     

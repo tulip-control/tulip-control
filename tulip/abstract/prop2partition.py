@@ -51,7 +51,7 @@ except Exception, e:
     logger.error(e)
     mpl = None
 
-hl = 40 * '-'
+_hl = 40 * '-'
 
 def prop2part(state_space, cont_props_dict):
     """Main function that takes a domain (state_space) and a list of
@@ -556,9 +556,9 @@ class PropPreservingPartition(object):
         return True
 
     def __str__(self):
-        s = '\n' + hl + '\n'
+        s = '\n' + _hl + '\n'
         s += 'Proposition Preserving Partition:\n'
-        s += hl + 2*'\n'
+        s += _hl + 2*'\n'
         
         s += 'Domain: ' + str(self.domain) + '\n'
         

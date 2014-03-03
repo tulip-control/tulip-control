@@ -41,7 +41,7 @@ from .labeled_graphs import prepend_with, str2singleton
 from .mathset import SubSet, PowerSet
 from .transys import _ts_ba_sync_prod
 
-hl = 40 *'-'
+_hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 
@@ -125,8 +125,8 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         self.automaton_type = 'Finite State Automaton'
     
     def __str__(self):
-        s = hl +'\n' +self.automaton_type +': '
-        s += self.name +'\n' +hl +'\n'
+        s = _hl +'\n' +self.automaton_type +': '
+        s += self.name +'\n' +_hl +'\n'
         s += 'States:\n'
         s += pformat(self.states(data=False), indent=3) +2*'\n'
         s += 'Initial States:\n'
@@ -141,7 +141,7 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
         s += str(self.alphabet) +2*'\n'
         s += 'Transitions & labeling w/ Input Letters:\n'
         s += pformat(self.transitions(labeled=True), indent=3)
-        s += '\n' +hl +'\n'
+        s += '\n' +_hl +'\n'
         
         return s
     

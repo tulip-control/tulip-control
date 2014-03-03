@@ -47,8 +47,6 @@ from .mathset import MathSet, SubSet, PowerSet, \
     is_subset, unique
 from .export import save_d3, graph2dot
 
-hl = 40 *'-'
-
 class LabelConsistency(object):
     """Container of methods for checking sublabel consistency.
     
