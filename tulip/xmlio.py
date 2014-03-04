@@ -69,6 +69,7 @@ N_ITEM = 'item'
 
 
 # data types used in xml file (attributes)
+T_SET = 'set'
 T_STRING = 'str'
 T_INT = 'int'
 T_FLOAT = 'float'
@@ -84,6 +85,8 @@ T_LIST = 'list'
 T_LTISYS = 'LtiSysDyn'
 T_PWASYS = 'PwaSysDyn'
 T_HYBRIDSYS = 'HybridSysDyn'
+T_FTS = 'FiniteTransitionSystem'
+T_OFTS = 'OpenFiniteTransitionSystem'
 
 
 def _make_pretty(tree, indent=1):
@@ -382,7 +385,7 @@ def _import_hybridsys(node):
 
 
 
-def _export_xml(data, parent=None, tag=None):
+def _export_xml(data, parent=None, tag=None, tag_list=[]):
 	"""Exports Tulip data structures to XML structures for later import. This
 	function is called both internal
 
@@ -436,6 +439,18 @@ def _export_xml(data, parent=None, tag=None):
 		else:
 			_export_hybridsys(data, parent, tag)
 
+	elif isinstance(data, transys.transys.FTS):
+		if parent is None:
+			return _export_fts(data, parent, tag, type_str=T_FTS)
+		else:
+			_export_fts(data, parent, tag, type_str=T_FTS)
+	
+	elif isinstance(data, transys.transys.OpenFTS):
+		if parent is None:
+			return _export_fts(data, parent, tag, type_str=T_OFTS)
+		else:
+			_export_fts(data, parent, tag, type_str=T_OFTS)
+
 
 	# parent will always not be none
 	elif (isinstance(data, int) or isinstance(data, numpy.int32)):
@@ -472,20 +487,86 @@ def _export_xml(data, parent=None, tag=None):
 		new_node.text = str(data.tolist())
 	
 	elif isinstance(data, tuple):
-		_export_tuple(data, parent, tag)
+		#_export_tuple(data, parent, tag)
+		_export_list(data, parent, tag, type_str=T_TUPLE, tag_list=tag_list)
 
 	elif isinstance(data, list):
-		_export_list(data, parent, tag)
+		_export_list(data, parent, tag, type_str=T_LIST, tag_list=tag_list)
 
 	elif isinstance(data, scipy.sparse.lil.lil_matrix):
 		_export_adj(data, parent, tag)
 
 	elif isinstance(data, set):
-		_export_set(data, parent, tag)
+		#_export_set(data, parent, tag)
+		_export_list(data, parent, tag, type_str=T_SET, tag_list=tag_list)
 
 	# Type not found
 	else:
 		raise TypeError('Type ' + str(type(data)) + ' is not supported.')
+
+
+
+def _export_fts(fts, parent, tag, type_str=T_OFTS):
+	if tag is None:
+		tag = "TransitionSystem"
+	if parent is None:
+		tree = ET.Element(tag, type=type_str)
+	else:
+		tree = ET.SubElement(parent, tag, type=type_str)
+
+	# List of atomic propositions
+	_export_list(fts.aps, tree, 'APs', type_str=T_SET)
+
+	# List of states with labels
+	N = len(fts.states.find())
+	tag_list0 = [ 'state' for i in range(N) ]
+	states_list_node = ET.SubElement(tree, 'states')
+	for state in fts.states.find():
+		state_node = ET.SubElement(states_list_node, 'state')
+		name = state[0]
+		ap_list = state[1]['ap']
+		_export_xml(state[0], state_node, 'name')
+		_export_xml(ap_list, state_node, 'aps')
+#	_export_list(fts.states.find(), tree, 'states', tag_list=tag_list0)
+
+	# List of initial states
+	M = len(fts.states.initial)
+	tag_list1 = [ 'state' for i in range(M) ]
+	_export_list(fts.states.initial, tree, 'initial_states', tag_list=tag_list1)
+
+	# List of actions
+	if hasattr(fts, 'env_actions'):
+		_export_list(fts.env_actions, tree, 'env_actions')
+	if hasattr(fts, 'sys_actions'):
+		_export_list(fts.sys_actions, tree, 'sys_actions')
+
+	# List of transitions with actions. We're not going to use the usual export
+	# list function to make things more clear
+	transitions_list_node = ET.SubElement(tree, 'transitions')
+	for transition in fts.transitions.find():
+		transition_node = ET.SubElement(transitions_list_node, 'transition')
+		state1 = transition[0]
+		state2 = transition[1]
+		actions_dict = transition[2]
+		_export_xml(state1, transition_node, 'start_state')
+		_export_xml(state2, transition_node, 'end_state')
+#		start_node = ET.SubElement(transition_node, 'start_state')
+#		start_node.text = state1
+#		end_node = ET.SubElement(transition_node, 'end_state')
+#		end_node.text = state2
+		if 'sys_actions' in actions_dict.keys():
+			_export_xml(actions_dict['sys_actions'], transition_node,
+ 				tag='sys_action')
+		if 'env_actions' in actions_dict.keys():
+			_export_xml(actions_dict['env_actions'], transition_node,
+				tag='env_action')
+
+		
+#	_export_list(fts.transitions.find(), tree, 'transitions')
+#	label_list = ['
+
+	if parent is None:
+		return tree
 
 
 
@@ -725,41 +806,6 @@ def _export_region(reg, parent, tag=None):
 
 
 
-def _export_fts(fts, parent, tag):
-	"""Converts a FiniteTransitionSystem or an OpenFiniteTransitionSystem into
-	an xml tree.
-
-	@type fts: L{FiniteTransitionSystem} or L{OpenFiniteTransitionSystem}
-	@type parent:
-	@type tag: L{None} or L{string}
-
-	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
-	"""
-
-	if tag is None:
-		if type(fts) == transys.transys.OpenFiniteTransitionSystem:
-			tag = "OFTS"
-		elif type(fts) == transys.transys.FiniteTransitionSystem:
-			tag = "FTS"
-	if parent is None:
-		if type(fts) == transys.transys.OpenFiniteTransitionSystem:
-			tree = ET.Element(tag, type=T_OFTS)
-		elif type(fts) == transys.transys.FiniteTransitionSystem:
-			tree = ET.SubElement(parent, tag, type=T_FTS)
-	
-	# Export states
-
-	# make and export transition matrix
-
-	# 
-
-	if parent is None:
-		return tree
-	
-
-
 def _export_adj(matrix, parent, tag=None):
 	"""Converts an adjacency matrix (scipy.sparse.lil.lil_matrix) into an xml
 	tree.
@@ -828,50 +874,24 @@ def _export_dict(dictionary, parent, tag=None):
 		return tree
 
 
-def _export_tuple(tup, parent, tag=None):
+def _export_list(lst, parent, tag=None, type_str=T_LIST, tag_list=[]):
+	# Tag list is either a list of labels or a list of lists
 
-	if tag is None:
-		tag = "tuple"
-	if parent is None:
-		tree = ET.Element(tag, type=T_TUPLE)
-	else:
-		tree = ET.SubElement(parent, tag, type=T_TUPLE)
-
-	for item in tup:
-		_export_xml(item, parent=tree, tag=N_ITEM)
-
-	if parent is None:
-		return tree
-
-
-
-def _export_list(lst, parent, tag=None):
 
 	if tag is None:
 		tag = "list"
 	if parent is None:
-		tree = ET.Element(tag, type=T_LIST)
+		tree = ET.Element(tag, type=type_str)
 	else:
-		tree = ET.SubElement(parent, tag, type=T_LIST)
+		tree = ET.SubElement(parent, tag, type=type_str)
 
-	for item in lst:
-		_export_xml(item, parent=tree, tag=N_ITEM)
+	if (tag_list and (len(tag_list) != len(lst))):
+		raise ValueError('len(tag_list) != len(lst).')
+	elif not tag_list:
+		tag_list = [ N_ITEM for item in lst ]
 
-	if parent is None:
-		return tree
-
-
-def _export_set(s, parent, tag=None):
-
-	if tag is None:
-		tag = "set"
-	if parent is None:
-		tree = ET.Element(tag, type="set")
-	else:
-		tree = ET.SubElement(parent, tag, type="set")
-
-	for item in s:
-		_export_xml(item, parent=tree, tag=N_ITEM)
+	for ind, item in enumerate(lst):
+		_export_xml(item, parent=tree, tag=tag_list[ind])
 
 	if parent is None:
 		return tree
