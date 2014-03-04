@@ -65,6 +65,8 @@ class AbstractSwitched(object):
     
       - ts: common TS, if any
       
+      - ppp2ts: map from C{ppp.regions} to C{ts.states}
+      
       - modes: dict of {mode: AbstractPwa}
       
       - ppp2modes: map from C{ppp.regions} to C{modes[mode].ppp.regions}
@@ -122,12 +124,8 @@ class AbstractSwitched(object):
             in C{modes[mode].ppp.regions}
         """
         region_idx = self.ppp2modes[mode][i]
-        
         ab = self.modes[mode]
-        
-        j = ab.ppp2pwa[region_idx]
-        pwa_region = ab.pwa_ppp[j]
-        return (j, pwa_region)
+        return ab.ppp2pwa(region_idx)
         
     def ppp2sys(self, mode, i):
         """Return index of active PWA subsystem in C{mode},
@@ -142,9 +140,8 @@ class AbstractSwitched(object):
                 - L{LtiSysDyn} object C{subsystem}
         """
         region_idx = self.ppp2modes[mode][i]
-        subsystem_idx = self.modes[mode].ppp2sys[region_idx]
-        subsystem = self.modes[mode].pwa.list_subsys[subsystem_idx]
-        return (subsystem_idx, subsystem)
+        ab = self.modes[mode]
+        return ab.ppp2sys(region_idx)
     
     def plot(self, show_ts=False, only_adjacent=False):
         """Plot mode partitions and merged partition, if one exists.
@@ -220,31 +217,10 @@ class AbstractPwa(object):
           
           type: L{PropPreservingPartition}
       
-      - ppp2pwa: map of C{ppp.regions} to C{pwa_ppp.regions}.
-          Has common indices with C{ppp.regions}.
-          Elements are indices in C{pwa_ppp.regions}.
-          
-          type: list of integers
-
-      - ppp2sys: map of C{ppp.regions} to C{pwa.list_subsys}.
-          Has common indices with C{ppp.regions}.
-          Elements are indices of sub-systems in C{pwa.list_subsys}.
-          
-          Semantics: j-th sub-system is active in i-th Region,
-              where C{j = ppp2pwa[i]}
-
-          type: list of integers
-      
       - orig_ppp: partition preserving only propositions
           i.e., agnostic of dynamics
           
           type: L{PropPreservingPartition}
-      
-      - ppp2orig: map of C{ppp.regions} to C{orig_ppp.regions}:
-          Has common indices with C{ppp.regions}.
-          Elements are indices in C{orig_ppp.regions}.
-
-          type: list of integers
 
       - disc_params: parameters used in discretization that 
           should be passed to the controller refinement
@@ -279,11 +255,11 @@ class AbstractPwa(object):
         
         self.pwa = pwa
         self.pwa_ppp = pwa_ppp
-        self.ppp2pwa = ppp2pwa
-        self.ppp2sys = ppp2sys
+        self._ppp2pwa = ppp2pwa
+        self._ppp2sys = ppp2sys
         
         self.orig_ppp = orig_ppp
-        self.ppp2orig = ppp2orig
+        self._ppp2orig = ppp2orig
         
         # original_regions -> pwa_ppp
         # ppp2orig -> ppp2pwa_ppp
@@ -301,20 +277,66 @@ class AbstractPwa(object):
         s += self._ppp2other_str(self.ppp2ts) + '\n'
         
         s += 'Map PPP Regions ---> PWA PPP Regions:\n'
-        s += self._ppp2other_str(self.ppp2pwa) + '\n'
+        s += self._ppp2other_str(self._ppp2pwa) + '\n'
         
         s += 'Map PPP Regions ---> PWA Subsystems:\n'
-        s += self._ppp2other_str(self.ppp2sys) + '\n'
+        s += self._ppp2other_str(self._ppp2sys) + '\n'
         
         s += 'Map PPP Regions ---> Original PPP Regions:\n'
-        s += self._ppp2other_str(self.ppp2orig) + '\n'
+        s += self._ppp2other_str(self._ppp2orig) + '\n'
         
         s += 'Discretization Options:\n\t'
         s += pprint.pformat(self.disc_params) +'\n'
         
         return s
     
+    def ppp2pwa(self, region_index):
+        """Return index and region of active PWA subsystem in indexed region.
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, pwa.regions[i])}
+        """
+        j = self._ppp2pwa[region_index]
+        pwa_region = self.pwa_ppp[j]
+        return (j, pwa_region)
+    
+    def ppp2sys(self, region_index):
+        """Return index and PWA subsystem active in indexed region.
+        
+        Semantics: j-th sub-system is active in i-th Region,
+            where C{j = ppp2pwa[i]}
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, pwa.list_subsys[i])}
+        """
+        # LtiSysDyn ?
+        if self._ppp2sys is None:
+            return (0, self.pwa)
+        
+        subsystem_idx = self._ppp2sys[region_index]
+        subsystem = self.pwa.list_subsys[subsystem_idx]
+        return (subsystem_idx, subsystem)
+    
+    def ppp2orig(self, region_index):
+        """Return index and region of original partition.
+        
+        The original partition is w/o any dynamics,
+        not even the PWA domains, only the polytopic predicates.
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, orig_ppp.regions[i])}
+        """
+        j = self._ppp2orig[region_index]
+        orig_region = self.orig_ppp[j]
+        return (j, orig_region)
+    
     def _ppp2other_str(self, ppp2other):
+        if ppp2other is None:
+            return ''
+        
         s = ''
         for i, other in enumerate(ppp2other):
             s += '\t\t' + str(i) + ' -> ' + str(other) + '\n'
