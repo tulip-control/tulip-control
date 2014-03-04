@@ -459,10 +459,9 @@ def discretize(
     if conservative:
         orig_list = None
         orig = 0
-        ppp2orig = part2orig
     else:
         (part, new2old) = part2convex(part) # convexify
-        ppp2orig = [part2orig[i] for i in new2old]
+        part2orig = [part2orig[i] for i in new2old]
         
         # map new regions to pwa subsystems
         if ispwa:
@@ -808,6 +807,8 @@ def discretize(
     }
     
     assert(len(prop_list) == n)
+    
+    ppp2orig = [part2orig[x] for x in orig]
     
     return AbstractPwa(
         ppp=new_part,
