@@ -90,11 +90,14 @@ T_OFTS = 'OpenFiniteTransitionSystem'
 
 
 def _make_pretty(tree, indent=1):
-	"""Modifies the tail attribute of an XML tree so that the resulting file
-	isn't just one messy line of text.
+	"""
+	Modifies the tail attributes of nodes in an XML tree so that the resulting
+	printed XML file looks like an indented tree (and not one long line).
 
-	@type tree: L{xml.etree.ElementTree.Element}
-	@type indent: L{int}
+	@type tree: xml.etree.ElementTree.Element
+	@type indent: int
+
+	@return: None, just modifies tree by reference
 	@rtype: None
 	"""
 
@@ -110,10 +113,12 @@ def _make_pretty(tree, indent=1):
 	# Number of children in the tree
 	N = len(tree.getchildren())
 
-	# Put tabs after each child in a list (to indent the next one), 
-	# one less tab after the final child
+	# Recursively run function on children
 	for index, child in enumerate(tree):
 		_make_pretty(child, indent=indent+1)
+
+		# Print new line and tabs at the tail of each child, except the last
+		# child. Print new line and one fewer tab at the tail of the last child.
 		if index < N - 1:
 			child.tail = tab_string
 		else:
@@ -122,17 +127,20 @@ def _make_pretty(tree, indent=1):
 
 
 def exportXML(data, filename, tag=None):
-	"""Exports a Tulip data structure into an XML file.
+	"""
+	Exports a Tulip data structure into an XML file.
 
 	@param data: The Tulip data structure to export into an xml lfile
 	@type data: L{Polytope}, L{Region}, L{PropPreservingPartition},
-		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
+		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}, L{FiniteTransitionSystem},
+		L{OpenFiniteTransitionSystem}
 	@param filename: The name of the XML file to export to.
-	@type filename: L{string}
+	@type filename: string
 	@param tag: (Optional) What we want the first tag of the XML file to read.
-	@type tag: L{string}
+	@type tag: string
 
-	@rtype: L{None}
+	@return: No return, just writes text.
+	@rtype: None
 	"""
 
 	if tag is None:
@@ -149,14 +157,16 @@ def exportXML(data, filename, tag=None):
 
 
 def importXML(filename):
-	"""Takes a Tulip XML file and returns a Tulip data structure.
+	"""
+	Takes a Tulip XML file and returns a Tulip data structure.
 
 	@param filename: XML file containing exported data to import
-	@type filename: L{string}
+	@type filename: string
 
 	@return: the data structure exported into the file.
 	@rtype: L{Polytope}, L{Region}, L{PropPreservingPartition},
-		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
+		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}, L{FiniteTransitionSystem},
+		L{OpenFiniteTransitionSystem}
 	"""
 
 	# Load the file into an xml tree
@@ -168,16 +178,19 @@ def importXML(filename):
 
 
 def _import_xml(node):
-	"""Takes a XML tree and returns the Tulip data structure the tree was made
-	from.
+	"""
+	Returns the Tulip data structure contained in a parsed XML file.
 
-	@type tree: L{xml.ElementTree.etree.Element}
+	@type tree: xml.etree.ElementTree.Element
 
-	@rtype: stuff
+	@rtype: L{Polytope}, L{Region}, L{PropPreservingPartition}, L{HybridSysDyn},
+		L{PwaSysDyn}, L{LtiSysDyn}, L{FiniteTransitionSystem},
+		L{OpenFiniteTransitionSystem} 
 	"""
 
 	# Get the type of data this is
 	nodetype = node.attrib['type']
+
 
 	# Call the right import function
 
@@ -193,13 +206,15 @@ def _import_xml(node):
 	elif nodetype == T_MATRIX:
 		return eval('numpy.array(' + node.text + ')')
 	elif nodetype == T_TUPLE:
-		return _import_tuple(node)
+		return _import_list(node, type_str=T_TUPLE)
 	elif nodetype == T_DICT:
 		return _import_dictionary(node)
 	elif nodetype == T_LIST:
 		return _import_list(node)
 	elif nodetype == T_ADJ:
 		return _import_adj(node)
+	elif nodetype == T_SET:
+		return _import_list(node, type_STR=T_SET)
 
 	# Tulip data structures
 	elif nodetype == T_POLYTOPE:
@@ -270,18 +285,17 @@ def _import_ppp(node):
 
 
 
-def _import_tuple(node):
 
+def _import_list(node, type_str=T_LIST):
 	all_stuff = []
 	for child in node:
 		all_stuff.append(_import_xml(child))
-	return tuple(all_stuff)
 
+	if type_str==T_SET:
+		all_stuff = set(all_stuff)
+	elif type_str==T_TUPLE:
+		all_stuff = tuple(all_stuff)
 
-def _import_list(node):
-	all_stuff = []
-	for child in node:
-		all_stuff.append(_import_xml(child))
 	return all_stuff
 
 
@@ -390,17 +404,17 @@ def _export_xml(data, parent=None, tag=None, tag_list=[]):
 	function is called both internal
 
 	@param data: the data structure to be exported into an XML tree.
-	@type data: L{numpy.ndarray} or L{Polytope} or L{Region} or 
+	@type data: numpy.ndarray or L{Polytope} or L{Region} or 
 	    L{FiniteTransitionSystem} or L{PropPreservingPartition} or
-		L{AbstractSysDyn} or L{dict}
+		L{AbstractSysDyn} or dict
 	@param parent: 
-	@type parent: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
-	@type tag: L{None} or L{string}
+	@type parent: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
+	@type tag: None or string
 	
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}return: The data structure
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 
 	# Tulip types (parent might not exist)
@@ -573,8 +587,8 @@ def _export_fts(fts, parent, tag, type_str=T_OFTS):
 def _export_ppp(ppp, parent, tag):
 	"""
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 	if tag is None:
 		tag = "PropPreservingPartition"
@@ -603,8 +617,8 @@ def _export_ppp(ppp, parent, tag):
 def _export_ltisys(ltisys, parent, tag=None):
 	"""
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 	if tag is None:
 		tag = "LtiSysDyn"
@@ -635,8 +649,8 @@ def _export_ltisys(ltisys, parent, tag=None):
 def _export_pwasys(pwasys, parent, tag=None):
 	"""
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 	if tag is None:
 		tag = "PwaSysDyn"
@@ -659,8 +673,8 @@ def _export_pwasys(pwasys, parent, tag=None):
 def _export_hybridsys(hybridsys, parent, tag=None):
 	"""
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 	if tag is None:
 		tag = "HybridSysDyn"
@@ -696,8 +710,8 @@ def _export_polytope(poly, parent, tag=None):
 	@type poly: Polytope
 
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 
 	if tag is None:
@@ -754,8 +768,8 @@ def _export_polytope(poly, parent, tag=None):
 def _export_region(reg, parent, tag=None):
 	"""
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 	if tag is None:
 		tag = "region"
@@ -811,14 +825,14 @@ def _export_adj(matrix, parent, tag=None):
 	tree.
 
 	@param matrix: Sparce adjacency matrix.
-	@type matrix: L{scipy.sparse.lil.lil_matrix}
-	@type parent: L{None} or L{xml.etree.ElementTree.Element} or 
-		L{xml.etree.ElementTree.SubElement}
-	@type tag: L{string}
+	@type matrix: scipy.sparse.lil.lil_matrix
+	@type parent: None or xml.etree.ElementTree.Element or 
+		xml.etree.ElementTree.SubElement
+	@type tag: string
 
 	@return: None (if parent is None), or an xml tree
-	@rtype: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
+	@rtype: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
 	"""
 
 	if tag is None:
@@ -845,16 +859,19 @@ def _export_adj(matrix, parent, tag=None):
 
 
 def _export_dict(dictionary, parent, tag=None):
-	"""Converts a dictionary into an XML tree. The key and value can be any
-	supported type because the function calls _export_xml()
+	"""
+	Converts a dictionary into an XML tree. The key and value can be any
+	supported type because the function calls _export_xml() on the key and
+	value to form the document tree.
 
-	@type dictionary: L{dict}
-	@type parent: L{None} or L{xml.etree.ElementTree.Element} or
-		L{xml.etree.ElementTree.SubElement}
-	@type tag: L{string}
+	@type dictionary: dict
+	@type parent: None or xml.etree.ElementTree.Element or
+		xml.etree.ElementTree.SubElement
+	@type tag: string
 
-	@return: None, if parent is None. An XML tree if parent is a node
-	@rtype: L{xml.etree.ElementTree.Element} or L{None}
+	@return: An XML tree if parent is None. Otherwise, modifies the tree parent
+		is contained in without returning.
+	@rtype: xml.etree.ElementTree.Element or None
 	"""
 
 	if tag is None:
