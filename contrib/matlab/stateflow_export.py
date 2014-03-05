@@ -4,6 +4,7 @@
 import numpy
 import copy
 from tulip.transys import Mealy
+import pdb
 
 
 def to_stateflow(TS, filename):
@@ -32,9 +33,10 @@ def to_stateflow(TS, filename):
 	head_text = head_text + "ch.Name = 'TulipFSM';\n\n"
 
 	# Get list of nodes and add to Stateflow
-	num_nodes = len(TS.states.list)
+	state_list = TS.states.find()
+	num_nodes = len(state_list)
 	node_positions = get_positions(num_nodes)
-	(state_string, states_dict) = write_states(TS.states.list, node_positions)
+	(state_string, states_dict) = write_states(state_list, node_positions)
 
 	# Get list of transitions and add to Stateflow
 	transitions_list = TS.transitions.find()
@@ -44,8 +46,11 @@ def to_stateflow(TS, filename):
 		states_dict)
 
 	# Get default transition for initial state
-	initial_states = tuple(TS.states.initial)
-	initial_str = write_init_string(initial_states, states_dict)
+	initial_transitions = TS.transitions.find(from_states=('Sinit',))
+#	initial_states = []
+#	for initial_transition in initial_transitions:
+#		initial_states.append(initial_transition[1])
+	initial_str = write_init_string(initial_transitions, states_dict, inputs)
 
 	# Declare Inputs and outputs on model
 	input_string = write_data_string(inputs, "Input")
@@ -127,7 +132,7 @@ def write_data_string(name_list, opt):
 
 
 
-def write_init_string(initial_states, states_dict):
+def write_init_string(initial_transitions, states_dict, inputs):
 	"""Given a set of possible initial states, writes MATLAB code so that
 	Stateflow's initial state labels are added to each initial state.
 
@@ -145,10 +150,12 @@ def write_init_string(initial_states, states_dict):
 
 		-text: a string that contains MATLAB code
 	"""
-
-	num_inits = len(initial_states)
+	num_inits = len(initial_transitions)
 	text = "inits = cell(1," + str(num_inits) + ");\n"
-	for i, init_state in enumerate(initial_states):
+	for i, init_transition in enumerate(initial_transitions):
+
+		init_state = init_transition[1]
+		values_dict = init_transition[2]
 
 		# Name of variable that will contain handle to default transition obj
 		start_string = "inits{" + str(i+1) + "}"
@@ -167,6 +174,20 @@ def write_init_string(initial_states, states_dict):
 		text = text + start_string + ".MidPoint = [" + \
 			init_state_str + ".Position(1) - 15, " + \
 			init_state_str + ".Position(2) + 25];\n"
+
+		# Set string label from environment input
+		label_string = "'["
+		for env_var in inputs: # outputs
+			env_value = values_dict[env_var]
+			label_string = label_string + "(" + str(env_var) + "==" + \
+				str(env_value) + ")&&"
+		label_string = label_string[:-2] # Remove the last two & symbols
+		label_string = label_string + "]'"
+
+		text = text + start_string + ".LabelString = " + label_string + ";\n"
+		text = text + "\n"
+
+
 	text = text + "\n"
 	return text	
 
@@ -198,7 +219,9 @@ def write_states(state_list, node_positions):
 	states_dict = {}
 	text = "states = cell(1," + str(num_nodes) + ");\n"
 	
-	for i, state_name in enumerate(state_list):
+	for i, state_tuple in enumerate(state_list):
+		state_name = state_tuple[0]
+
 		# Name of MATLAB variable containing handle
 		line_start = "states{" + str(i+1) + "}"
 
