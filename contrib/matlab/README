@@ -1,5 +1,5 @@
 MATLAB Export
-Stephanie Tsuei, January 2013
+Stephanie Tsuei, 2014
 
 This folder contains the files required to export controllers to Simulink
 blocks and a couple examples for reference. Tulip, MATLAB, Simulink, and
@@ -13,10 +13,10 @@ USAGE
 
 1) Run the converter after synthesis:
 
-	import StateflowExport
+	from stateflow_export import to_stateflow
 	...
-	ctrl = synth.synthesize(...)                       # returns a Mealy Machine
-	stateflow_export.to_stateflow(ctrl, 'machine.m')   # writes machine.m
+	ctrl = synth.synthesize(...)               # returns a Mealy Machine
+	to_stateflow(ctrl, 'machine.m')            # writes machine.m
 
 2) In MATLAB, run machine.m. A new Simulink model containing the Mealy
    Machine should appear. Note that for the moment, exported Stateflow 
@@ -38,10 +38,6 @@ generated park signal.
 
 KNOWN ISSUES
 
-1) Graphs are unreadable. Once graphs are readable, then users should pick the
-   initial state themselves through Stateflow. Currently, the script makes
-   "Sinit" the initial state, which only works when the first environment input
-   can pick the correct transition out of Sinit, which is the cases in the
-   problem in discrete.py.
+1) Graphs are unreadable.
 
-2) Doesn't support continuous controllers.
+2) Doesn't support continuous controllers yet.

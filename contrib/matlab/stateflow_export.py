@@ -4,7 +4,6 @@
 import numpy
 import copy
 from tulip.transys import Mealy
-import pdb
 
 
 def to_stateflow(TS, filename):
