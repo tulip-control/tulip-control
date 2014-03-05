@@ -32,14 +32,21 @@ def to_stateflow(TS, filename):
 	head_text = head_text + "ch = m.find('-isa', 'Stateflow.Chart');\n"
 	head_text = head_text + "ch.Name = 'TulipFSM';\n\n"
 
-	# Get list of nodes and add to Stateflow
+	# Get list of nodes (remove Sinit from list) and add to Stateflow`
 	state_list = TS.states.find()
+	sinit = TS.states.find('Sinit')[0]
+	sinit_index = state_list.index(sinit)
+	state_list.pop(sinit_index)
 	num_nodes = len(state_list)
 	node_positions = get_positions(num_nodes)
 	(state_string, states_dict) = write_states(state_list, node_positions)
 
-	# Get list of transitions and add to Stateflow
+	# Get list of transitions (remove those from Sinit) and add to Stateflow
 	transitions_list = TS.transitions.find()
+	tsinit_list = TS.transitions.find(from_states=('Sinit',))
+	for transition in tsinit_list:
+		index = transitions_list.index(transition)
+		transitions_list.pop(index)
 	inputs = TS.inputs.keys()
 	outputs = TS.outputs.keys()
 	transitions_string = write_transitions(transitions_list, inputs, outputs,
@@ -47,9 +54,6 @@ def to_stateflow(TS, filename):
 
 	# Get default transition for initial state
 	initial_transitions = TS.transitions.find(from_states=('Sinit',))
-#	initial_states = []
-#	for initial_transition in initial_transitions:
-#		initial_states.append(initial_transition[1])
 	initial_str = write_init_string(initial_transitions, states_dict, inputs)
 
 	# Declare Inputs and outputs on model
