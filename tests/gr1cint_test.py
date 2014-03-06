@@ -104,6 +104,11 @@ class GR1CSession_test:
     def test_numgoals(self):
         assert self.gs.numgoals() == 3
 
+    def test_getvars(self):
+        vars_str = self.gs.getvars()
+        vars_list = [vi.strip() for vi in vars_str.split(",")]
+        assert vars_list == ["x (0)", "ze (1)", "y (2)", "zs (3)"]
+
     def test_getindex(self):
         assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
         assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 1
