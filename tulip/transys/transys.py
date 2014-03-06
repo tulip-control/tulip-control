@@ -44,7 +44,7 @@ from .mathset import PowerSet, MathSet
 from .executions import FTSSim
 from .export import graph2promela
 
-hl = 40 *'-'
+_hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 
@@ -230,8 +230,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
-        s = hl +'\nFinite Transition System (closed) : '
-        s += self.name +'\n' +hl +'\n'
+        s = _hl +'\nFinite Transition System (closed) : '
+        s += self.name +'\n' +_hl +'\n'
         s += 'Atomic Propositions:\n\t'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States and State Labels (\in 2^AP):\n'
@@ -241,7 +241,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s += 'Actions:\n\t' +str(self.actions) +2*'\n'
         s += 'Transitions & Labels:\n'
         s += pformat(self.transitions(labeled=True), indent=3)
-        s += '\n' +hl +'\n'
+        s += '\n' +_hl +'\n'
         
         return s
     
@@ -580,8 +580,8 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         self.default_export_fname = 'ofts'
         
     def __str__(self):
-        s = hl +'\nFinite Transition System (open) : '
-        s += self.name +'\n' +hl +'\n'
+        s = _hl +'\nFinite Transition System (open) : '
+        s += self.name +'\n' +_hl +'\n'
         s += 'Atomic Propositions:\n'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States & State Labels (\in 2^AP):\n'
@@ -594,7 +594,7 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         s += pformat(self.env_actions, indent=3) +2*'\n'
         s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
         s += pformat(self.transitions(labeled=True), indent=3)
-        s += '\n' +hl +'\n'
+        s += '\n' +_hl +'\n'
         
         return s
 
@@ -923,7 +923,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     accepting_states_preimage = MathSet()
     
-    logger.debug(hl +'\n' +' Product TS construction:\n' +hl +'\n')
+    logger.debug(_hl +'\n' +' Product TS construction:\n' +_hl +'\n')
     
     if not s0s:
         msg = 'Transition System has no initial states !\n'
