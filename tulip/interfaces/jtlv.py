@@ -39,11 +39,9 @@ import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
-#for checking form of spec
-import pyparsing as pp
-
 from tulip import transys
 from tulip.spec import ast
+from tulip.spec.parser import parse
 #from tulip.spec import GRSpec
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -312,13 +310,12 @@ def generate_JTLV_LTL(spec, verbose=0):
     It takes as input a GRSpec object.  N.B., assumes all variables
     are Boolean (i.e., atomic propositions).
     """
+    formula = spec.to_canon()
+    parse(formula)  # Raises exception if syntax error
+
     specLTL = spec.to_jtlv()
     assumption = specLTL[0]
     guarantee = specLTL[1]
-    
-    if not check_gr1(assumption, guarantee, spec.env_vars.keys(),
-                     spec.sys_vars.keys()):
-        raise Exception('Spec not in GR(1) format')
     
     assumption = re.sub(r'\b'+'True'+r'\b', 'TRUE', assumption)
     guarantee = re.sub(r'\b'+'True'+r'\b', 'TRUE', guarantee)
@@ -525,121 +522,6 @@ def remove_comments(spec):
         if not '--' in line:
             newspec+=line+'\n'
     return newspec
-
-
-def check_gr1(assumption, guarantee, env_vars, sys_vars):
-    """Check format of a GR(1) specification."""
-    assumption = remove_comments(assumption)
-    guarantee = remove_comments(guarantee)
-        
-    # Check that dictionaries are in the correct format
-    if not check_vars(env_vars):
-        return False
-    if not check_vars(sys_vars):
-        return False
-
-    # Check for parentheses mismatch
-    if not check_parentheses(assumption):
-        return False
-    if not check_parentheses(guarantee):
-        return False
-
-    # Check that all non-special-characters metioned are variable names
-    # or possible values
-    varnames = env_vars+sys_vars
-    if not check_spec(assumption,varnames):
-        return False
-    if not check_spec(guarantee, varnames):
-        return False
-
-    # Literals cannot start with G, F or X unless quoted
-    restricted_alphas = filter(lambda x: x not in "GFX", pp.alphas)
-    # Quirk: allow literals of the form (G|F|X)[0-9_][A-Za-z0-9._]*
-    # so we can have X0 etc.
-    bool_keyword = pp.CaselessKeyword("TRUE") | pp.CaselessKeyword("FALSE")
-    var = ~bool_keyword + (pp.Word(restricted_alphas, pp.alphanums + "._:") | \
-                           pp.Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | \
-                           pp.QuotedString('"')).setParseAction(ast.ASTVar)
-    atom = var | bool_keyword.setParseAction(ast.ASTBool)
-    number = var | pp.Word(pp.nums).setParseAction(ast.ASTNum)
-
-    # arithmetic expression
-    arith_expr = pp.operatorPrecedence(
-        number,
-        [(pp.oneOf("* /"), 2, pp.opAssoc.LEFT, ast.ASTArithmetic),
-         (pp.oneOf("+ -"), 2, pp.opAssoc.LEFT, ast.ASTArithmetic),
-         ("mod", 2, pp.opAssoc.LEFT, ast.ASTArithmetic)]
-    )
-
-    # integer comparison expression
-    comparison_expr = pp.Group(
-        arith_expr + pp.oneOf("< <= > >= != = ==") +
-        arith_expr
-    ).setParseAction(ast.ASTComparator)
-
-    proposition = comparison_expr | atom
-
-    # Check that the syntax is GR(1). This uses pyparsing
-    UnaryTemporalOps = ~bool_keyword + pp.oneOf("next") + ~pp.Word(pp.nums + "_")
-    next_ltl_expr = pp.operatorPrecedence(proposition,
-        [("'", 1, pp.opAssoc.LEFT, ast.ASTUnTempOp),
-        ("!", 1, pp.opAssoc.RIGHT, ast.ASTNot),
-        (UnaryTemporalOps, 1, pp.opAssoc.RIGHT, ast.ASTUnTempOp),
-        (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ast.ASTAnd),
-        (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ast.ASTOr),
-        (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ast.ASTXor),
-        ("->", 2, pp.opAssoc.RIGHT, ast.ASTImp),
-        ("<->", 2, pp.opAssoc.RIGHT, ast.ASTBiImp),
-        (pp.oneOf("= !="), 2, pp.opAssoc.RIGHT, ast.ASTComparator),
-        ])
-    always_expr = pp.Literal("[]") + next_ltl_expr
-    always_eventually_expr = pp.Literal("[]") + \
-      pp.Literal("<>") + next_ltl_expr
-    gr1_expr = next_ltl_expr | always_expr | always_eventually_expr
-
-    # Final Check
-    GR1_expression = pp.operatorPrecedence(gr1_expr,
-     [("&", 2, pp.opAssoc.RIGHT)])
-        
-    try:
-        GR1_expression.parseString(assumption)
-    except pp.ParseException:
-        print("Assumption is not in GR(1) format.")
-        return False
-        
-    try:
-        GR1_expression.parseString(guarantee)
-    except pp.ParseException:
-        print("Guarantee is not in GR(1) format")
-        return False
-    return True
-
-def check_parentheses(spec):
-    """Check whether all the parentheses in a spec are closed.
-
-    @return: False if there are errors and True when there are no
-        errors.
-    """
-    open_parens = 0
-
-    for index, char in enumerate(spec):
-        if char == "(":
-            open_parens += 1
-        elif char == ")":
-            open_parens -= 1
-
-    if open_parens != 0:
-        if open_parens > 0:
-            print("The spec is missing " + str(open_parens) + " close-" +
-              "parentheses or has " + str(open_parens) + " too many " +
-              "open-parentheses")
-        elif open_parens < 0:
-            print("The spec is missing " + str(-open_parens) + " open-" +
-              "parentheses or has " + str(open_parens) + " too many " +
-              "close-parentheses")
-        return False
-
-    return True
 
 def check_vars(varNames):
     """Complain if any variable name is a number or not a string.
