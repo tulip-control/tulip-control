@@ -104,6 +104,9 @@ class GR1CSession_test:
     def test_numgoals(self):
         assert self.gs.numgoals() == 3
 
+    def test_reset(self):
+        assert self.gs.reset()
+
     def test_getvars(self):
         vars_str = self.gs.getvars()
         vars_list = [vi.strip() for vi in vars_str.split(",")]
