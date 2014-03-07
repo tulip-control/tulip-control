@@ -17,6 +17,3 @@ continuous state space (discrete-time dynamics):
 
 In each of the examples, the task involves repeatedly visiting a cell,
 responding to a parking signal, and avoiding an environmental obstacle.
-
-RMM, 26 Jun 2013
-NO, 5 Sep 2013

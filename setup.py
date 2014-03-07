@@ -148,6 +148,16 @@ if check_deps:
 
 
 if perform_setup:
+    # Build PLY table, to be installed as tulip package data
+    try:
+        import os
+        import tulip.spec.plyparser
+        tulip.spec.plyparser.rebuild_parsetab()
+        os.rename("parsetab.py", "tulip/spec/parsetab.py")
+        plytable_build_failed = False
+    except:
+        plytable_build_failed = True
+
     from tulip import __version__ as tulip_version
     setup(
         name = 'tulip',
@@ -170,6 +180,12 @@ if perform_setup:
         package_dir = {'tulip' : 'tulip'},
         package_data={
             'tulip.interfaces': ['jtlv_grgame.jar'],
-            'tulip.transys.export' : ['d3.v3.min.js']
+            'tulip.transys.export' : ['d3.v3.min.js'],
+            'tulip.spec' : ['parsetab.py']
         },
     )
+
+    if plytable_build_failed:
+        print("!"*65)
+        print("    Failed to build PLY table.  Please run setup.py again.")
+        print("!"*65)
