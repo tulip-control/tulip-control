@@ -60,6 +60,59 @@ def mathset_test():
     assert(a._set == set() )
     assert(a._list == [{'a':1} ] )
 
+class MathSet_operations_test:
+    def setUp(self):
+        self.x = MathSet(['a', 1, [1, 2], {'a', 'b', '8'} ] )
+        self.y = MathSet(['b', -2, [3.5, 2.25], {'/', '_'} ] )
+        self.small2_listnum = MathSet([[1,2], 0.2])
+        self.small1_set = MathSet([{-1, 1}])
+
+    def tearDown(self):
+        self.x = None
+        self.y = None
+
+    def test_mul(self):
+        assert self.small2_listnum * self.small1_set == \
+            MathSet([([1,2], {-1, 1}), (0.2, {-1, 1})])
+        assert self.small2_listnum * self.small2_listnum == \
+            MathSet([([1,2], [1,2]), ([1,2], 0.2), (0.2, [1,2]), (0.2, 0.2)])
+
+    def test_sub(self):
+        assert self.small2_listnum - self.small2_listnum== MathSet()
+        assert self.small1_set - self.small2_listnum == self.small1_set
+        assert self.x - self.small2_listnum == \
+            MathSet(['a', 1, {'a', 'b', '8'} ] )
+
+    def test_isub(self):
+        q = MathSet(self.small2_listnum)
+        q -= self.small2_listnum
+        assert q == MathSet()
+
+        q = MathSet(self.small2_listnum)
+        q -= MathSet()
+        assert q == q
+
+    def test_add_unhashable(self):
+        self.small1_set.add([1,2])
+        assert self.small1_set == MathSet([{-1, 1}, [1, 2]])
+
+    def test_pop(self):
+        # These tests could be improved by seeding random number
+        # generation to ensure determinism.
+        assert self.small1_set.pop() == {-1, 1}
+        assert self.small1_set == MathSet()
+
+        original = MathSet(self.small2_listnum)
+        q = self.small2_listnum.pop()
+        assert len(self.small2_listnum) + 1 == len(original)
+        self.small2_listnum.add(q)
+        assert self.small2_listnum == original
+
+    def test_intersection(self):
+        assert self.x.intersection(self.small2_listnum) == MathSet([[1, 2]])
+        assert self.x.intersection(MathSet()) == MathSet()
+
+
 def subset_test():
     a = SubSet([1,2,3,4, {1:2} ] )
     print(a)
