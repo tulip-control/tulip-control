@@ -149,10 +149,14 @@ if check_deps:
 
 if perform_setup:
     # Build PLY table, to be installed as tulip package data
-    import os
-    import tulip.spec.plyparser
-    tulip.spec.plyparser.rebuild_parsetab()
-    os.rename("parsetab.py", "tulip/spec/parsetab.py")
+    try:
+        import os
+        import tulip.spec.plyparser
+        tulip.spec.plyparser.rebuild_parsetab()
+        os.rename("parsetab.py", "tulip/spec/parsetab.py")
+        plytable_build_failed = False
+    except:
+        plytable_build_failed = True
 
     from tulip import __version__ as tulip_version
     setup(
@@ -180,3 +184,8 @@ if perform_setup:
             'tulip.spec' : ['parsetab.py']
         },
     )
+
+    if plytable_build_failed:
+        print("!"*65)
+        print("    Failed to build PLY table.  Please run setup.py again.")
+        print("!"*65)
