@@ -111,7 +111,11 @@ class MathSet_operations_test:
     def test_intersection(self):
         assert self.x.intersection(self.small2_listnum) == MathSet([[1, 2]])
         assert self.x.intersection(MathSet()) == MathSet()
-
+    
+def test_tuple():
+    s = MathSet((1,2))
+    assert(s._set == {1,2})
+    assert(s._list == [])
 
 def subset_test():
     a = SubSet([1,2,3,4, {1:2} ] )
