@@ -7,7 +7,7 @@ Unit Tests for transys module.
 from collections import Iterable
 
 from tulip.transys.mathset import MathSet, SubSet, PowerSet
-from tulip.transys.mathset import compare_lists
+from tulip.transys.mathset import compare_lists, unique, contains_multiple
 from tulip import transys as trs
 
 def mathset_test():
@@ -111,6 +111,29 @@ class MathSet_operations_test:
     def test_intersection(self):
         assert self.x.intersection(self.small2_listnum) == MathSet([[1, 2]])
         assert self.x.intersection(MathSet()) == MathSet()
+
+    def test_intersects(self):
+        assert self.x.intersects(self.small2_listnum)
+        assert not self.small2_listnum.intersects(self.small1_set)
+
+
+def unique_check(iterable, expected):
+    print unique(iterable)
+    assert unique(iterable) == expected
+
+def unique_test():
+    for (iterable, expected) in [(range(3), set([0, 1, 2])),
+                                 ([], set([])),
+                                 ([1, 1, -1], set([1, -1])),
+                                 ([[1, 2], 3, 3], [[1, 2], 3]),
+                                 ("Dessert!!", set("Desert!"))]:
+        yield unique_check, iterable, expected
+
+def contains_multiple_test():
+    assert contains_multiple([1, 1])
+    assert not contains_multiple(("cc",))
+    assert contains_multiple("cc")
+
     
 def test_tuple():
     s = MathSet((1,2))
@@ -172,6 +195,35 @@ def powerset_test():
     assert(compare_lists(f.math_set._list, [[1, 2], {'a':1} ] ) )
     
     return s
+
+class PowerSet_operations_test:
+    def setUp(self):
+        self.p = PowerSet({1, 2, 3})
+        self.q_unhashable = PowerSet(MathSet([[1,2], ["a", "b"]]))
+        self.singleton = PowerSet(set([1]))
+        self.empty = PowerSet()
+
+    def tearDown(self):
+        self.p = None
+        self.q_unhashable = None
+        self.singleton = None
+
+    def test_len(self):
+        assert len(self.p) == 2**3
+        assert len(self.q_unhashable) == 2**2
+        assert len(self.singleton) == 2
+        assert len(self.empty) == 1
+
+    def test_call(self):
+        p = [set(x) for x in self.p()]
+        assert len(p) == 2**3
+        assert (set() in p)
+        assert (set([1]) in p) and (set([2]) in p) and (set([3]) in p)
+        assert (set([1,2]) in p) and (set([2,3]) in p) and (set([1,3]) in p)
+        assert set([1,2,3]) in p
+        assert self.singleton() == [(), (1,)]
+        assert self.empty() == [()]
+
 
 def rabin_test():
     dra = trs.DRA()
