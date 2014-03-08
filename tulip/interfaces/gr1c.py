@@ -276,7 +276,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         spec0 = spec
     
     # show port only when true (or non-zero for int-valued vars)
-    mask_func = lambda x: bool(x)
+    mask_func = bool
     
     mach = MealyMachine()
     inputs = _create_machine_ports(spec0.env_vars)
