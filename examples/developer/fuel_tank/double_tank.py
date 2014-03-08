@@ -180,7 +180,7 @@ ax = ppp.plot()
 ax.figure.savefig(imgpath + 'ppp.pdf')
 
 """Discretize to establish transitions"""
-start = time.time()
+start = time.clock()
 
 disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
@@ -190,7 +190,7 @@ sys_ts = abstract.multiproc_discretize_switched(
     ppp, switched_dynamics, disc_params, plot=False
 )
 
-elapsed = (time.time() - start)
+elapsed = (time.clock() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
 
 """Specs"""
@@ -219,13 +219,13 @@ print(specs.pretty())
 
 """Synthesis"""
 print("Starting synthesis")
-start = time.time()
+start = time.clock()
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
     action_vars=('u_in', 'act')
 )
-elapsed = (time.time() - start)
+elapsed = (time.clock() - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
 
 print(ctrl)
