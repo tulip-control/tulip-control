@@ -570,6 +570,8 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
                                                 'env_actions':'env',
                                                 'type?label':':',
                                                 'separator':'\\n'}
+        self._transition_dot_mask = dict()
+        
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
