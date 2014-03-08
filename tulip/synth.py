@@ -35,7 +35,7 @@ Interface to library of synthesis tools, e.g., JTLV, gr1c
 import logging
 logger = logging.getLogger(__name__)
 
-from warnings import warn
+import warnings
 
 from tulip import transys
 from tulip.spec import GRSpec
@@ -584,7 +584,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += '   so the spec becomes trivially False.\n'
         msg += ' - assumption if this is an environment TS,\n'
         msg += '   so the spec becomes trivially True.'
-        warn(msg)
+        warnings.warn(msg)
         
         init += ['False']
         return init
@@ -706,7 +706,7 @@ def env_trans_from_env_ts(
             msg += 'If sys can force env to dead-end,\n'
             msg += 'then GR(1) assumption becomes False,\n'
             msg += 'and spec trivially True.'
-            warn(msg)
+            warnings.warn(msg)
             
             continue
         
@@ -934,13 +934,13 @@ def _check_solver_options(option, bool_states, action_vars, bool_actions):
         action_vars = _default_action_vars()
     
     if bool_states is False and option is 'jtlv':
-        warn('Int state not yet available for jtlv solver.\n' +
-             'Using bool states.')
+        warnings.warn('Int state not yet available for jtlv solver.\n' +
+                      'Using bool states.')
         bool_states = True
     
     if bool_actions is False and option is 'jtlv':
-        warn('Int action modeling not yet available for jtlv solver.\n' +
-             'Using bool actions.')
+        warnings.warn('Int action modeling not yet available for jtlv solver.\n' +
+                      'Using bool actions.')
         bool_actions = True
     
     return (bool_states, action_vars, bool_actions)
