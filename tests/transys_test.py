@@ -138,6 +138,18 @@ def labeled_digraph_test():
         g.node[1]['month'] = 'abc'
     with assert_raises(ValueError):
         g[1][2][0]['day'] = 'abc'
+    
+def open_fts_multiple_env_actions_test():
+    env_modes = MathSet({'up', 'down'})
+    env_choice = MathSet({'left', 'right'})
+    
+    env_actions = [('env_modes', env_modes, True),
+                   ('env_choices', env_choice)]
+    ts = trs.OpenFTS(env_actions)
+    
+    assert(ts.env_modes is env_modes)
+    assert(not hasattr(ts, 'env_choices') )
+    assert(ts.sys_actions == MathSet() )
 
 def rabin_test():
     dra = trs.DRA()

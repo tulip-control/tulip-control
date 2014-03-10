@@ -2166,12 +2166,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     If you want co-domain C{D_i} to be extensible,
                     it must implement C{add}.
                 
-                - C{setter}: the co-domain C{D_i} becomes
-                    accessible via an attribute C{self.L_i}
-                    pointing to C{setter}.
+                - C{setter}: 3 cases:
                     
-                    If a 2-tuple C{(L_i, D_i)} is provided,
-                    then C{D_i} is used as C{setter}.
+                    - if 2-tuple C{(L_i, D_i)} provided,
+                      then no C{setter} attributes created
+                    
+                    - if C{setter} is C{True},
+                      then an attribute C{self.L_i} is created
+                      pointing at the given co-domain C{D_i}
+                    
+                    - Otherwise an attribute C{self.Li}
+                      is created pointing at the given C{setter}.
             
             Be careful to avoid name conflicts with existing
             networkx C{MultiDiGraph} attributes.
@@ -2238,13 +2243,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
             elif len(label_type) == 3:
                 type_name, codomain, setter = label_type
             else:
-                raise ValueError('label_type can be 2 or 3-tuple')
+                msg = 'label_type can be 2 or 3-tuple, '
+                msg += 'got instead:\n\t' + str(label_type)
+                raise ValueError(msg)
             
             labeling[type_name] = codomain
             
             if setter is None:
+                # don't create attribute unless told to do so
+                pass
+            elif setter is True:
+                # create attribute, point it directly to D_i
                 setattr(self, type_name, labeling[type_name])
             else:
+                # custom setter
                 setattr(self, type_name, setter)
     
     def add_node(self, n, attr_dict=None, **attr):
