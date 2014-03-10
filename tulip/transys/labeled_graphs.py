@@ -2329,25 +2329,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         self.default_export_path = './'
         self.default_export_fname = 'out'
         self.default_layout = 'dot'
-        
-    def _add_missing_extension(self, path, file_type):
-        filename, file_extension = os.path.splitext(path)
-        desired_extension = os.path.extsep +file_type
-        if file_extension != desired_extension:
-            path = filename +desired_extension
-        return path
-    
-    def _export_fname(self, path, file_type, addext):
-        if path == 'default':
-            if self.name == '':
-                path = self.default_export_path +self.default_export_fname
-            else:
-                path = self.default_export_path +self.name
-        
-        if addext:
-            path = self._add_missing_extension(path, file_type)
-        
-        return path
     
     def copy(self):
         return copy.deepcopy(self)
@@ -2617,6 +2598,25 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
         
         return True
+    
+    def _add_missing_extension(self, path, file_type):
+        filename, file_extension = os.path.splitext(path)
+        desired_extension = os.path.extsep +file_type
+        if file_extension != desired_extension:
+            path = filename +desired_extension
+        return path
+    
+    def _export_fname(self, path, file_type, addext):
+        if path == 'default':
+            if self.name == '':
+                path = self.default_export_path +self.default_export_fname
+            else:
+                path = self.default_export_path +self.name
+        
+        if addext:
+            path = self._add_missing_extension(path, file_type)
+        
+        return path
     
     def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
         """Plot image using dot.
