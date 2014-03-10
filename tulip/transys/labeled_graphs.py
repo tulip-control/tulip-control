@@ -2324,8 +2324,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_node(self, n, attr_dict=None, **attr):
         """Use a ConstrainedDict as attribute dict.
         
-        Raise exception if node already exists.
-        To change attributes use subscript notation instead.
+        Log warning if node already exists.
         
         A 'check' argument to turn off the exception
         is not available any more, to simplify things
@@ -2336,7 +2335,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # avoid multiple additions
         if n in self:
-            raise Exception('Graph alreay has node: ' + str(n))
+            logger.warn('Graph alreay has node: ' + str(n))
         
         if attr_dict is None:
             attr_dict=attr
@@ -2370,8 +2369,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """Use a ConstrainedDict as attribute dict.
         
         Raise exception if C{u} or C{v} are not already graph nodes.
-        Raise exception if edge already exists.
-        To change labeling use subscript notation instead.
+        Warn if edge with same attr_dict already exists.
+        Each label defines a different labeled edge.
+        So to "change" the label, either:
+        
+            - remove the edge with this label, then add a new one, or
+            - find the edge key, then use subscript notation:
+                
+                G[i][j][key]['attr_name'] = attr_value
         
         Argument C{key} has been removed, because edges defined
         by their labeling, i.e., multiple edges with same labeling
@@ -2379,9 +2384,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # check nodes exist
         if u not in self.succ:
-            raise Exception('Graph already has node: ' + str(u))
+            raise Exception('Graph does not have node: ' + str(u))
         if v not in self.succ:
-            raise Exception('Graph already has node: ' + str(v))
+            raise Exception('Graph does not have node: ' + str(v))
         
         if attr_dict is None:
             attr_dict=attr
@@ -2413,7 +2418,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             msg += '\t from_state = ' +str(u) +'\n'
             msg += '\t to_state = ' +str(v) +'\n'
             msg += '\t label = ' +str(typed_attr) +'\n'
-            raise Exception(msg)
+            warnings.warn(msg)
+            return
         
         #self._breaks_determinism(from_state, labels)
         
