@@ -2349,63 +2349,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         
         return path
     
-    def __eq__(self, other):
-        """Check finite-transition system equality.
-        
-        A == B
-        
-        4 sets should match:
-            1. nodes  IDs
-            2. node attributes (include labels)
-            3. transitions
-            4. transition attributes (include labels)
-        """
-        raise NotImplementedError
-    
-    def __ne__(self, other):
-        return not self.__eq__(other) 
-    
-    def __le__(self, other):
-        """Check sub-finite-transition-system relationship.
-        
-        A <= B
-        A is a sub-finite-transition-system of B
-        
-        A should have a subset of B's:
-            1. node IDs
-            2. node attributes (includes labels)
-            2. transitions (between same node IDs)
-            3. transition attributes (includes labels).
-        """
-        raise NotImplementedError
-    
-    def __lt__(self, other):
-        return self.__le__(other) and self.__ne__(other)
-        
-    def __ge__(self, other):
-        return other.__le__(self)
-        
-    def __gt__(self, other):
-        return other.__lt__(self)
-    
     def copy(self):
         return copy.deepcopy(self)
-
-	# unary operators
-    def reachable(self):
-        """Return reachable subautomaton."""
-        raise NotImplementedError
-        
-    def trim_dead(self):
-        raise NotImplementedError
-    
-    def trim_unreachable(self):
-        raise NotImplementedError
-    
-    def is_deterministic(self):
-        """Does there exist a transition for each state & each input letter ?
-        """
-        raise NotImplementedError
     
     def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         def prod_ids2states(prod_state_id, self, other):
@@ -2672,12 +2617,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
         
         return True
-    
-    def dump_dot_color(self):
-        raise NotImplementedError
-    
-    def write_dot_color_file(self):
-        raise NotImplementedError
     
     def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
         """Plot image using dot.
