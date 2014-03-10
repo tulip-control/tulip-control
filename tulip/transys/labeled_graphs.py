@@ -1322,39 +1322,6 @@ class LabeledStates(States):
         #except KeyError:
         #warnings.warn("State: " +str(state) +", doesn't have AP label.")
         #return None
-    
-    def delabel(self, states):
-        """Remove labels from states."""
-        
-        raise NotImplementedError
-    
-    def _check_sublabeling(self, state_sublabel_value):
-        """Verify consistency: all sublabels used are defined.
-        
-        To be used after or before removing a sublabel value from
-        its corresponding type definition.
-        Previously these checks where automatically performed,
-        using dedicated classes. But dedicating classes to
-        checks unnecessarily duplicates data types as
-        for example MathSet or PowerSet, which are otherwise
-        between systems and can be reused.
-        """
-        raise NotImplementedError
-        
-        node_ap = nx.get_node_attributes(self.graph, self.name)
-        
-        nodes_using_ap = set()
-        for (node, ap_subset) in node_ap.iteritems():
-            if state_sublabel_value in ap_subset:
-                nodes_using_ap.add(node)                
-        
-        if nodes_using_ap:
-            msg = 'AP (=' +str(state_sublabel_value) +') still used '
-            msg += 'in label of nodes: ' +str(nodes_using_ap)
-            raise Exception(msg)
-        
-        self.atomic_propositions = \
-            self.atomic_propositions.difference({state_sublabel_value} )
 
 class Transitions(object):
     """Building block for managing unlabeled transitions = edges.
@@ -1541,43 +1508,6 @@ class Transitions(object):
         for from_state in from_states:
             for to_state in to_states:
                 self.remove(from_state, to_state)
-    
-    def between(self, from_states, to_states):
-        """Return list of edges between given nodes.
-        
-        Filtering the edge set E is based on end-point states of edge,
-        because edges are not yet labeled.
-        To search over labeled edges = transitions,
-        see L{LabeledTransitions.find}
-        
-        Note
-        ====
-        filter around NetworkX.MultiDiGraph.edges()
-        
-        See Also
-        ========
-        L{LabeledTransitions.find}
-        
-        @param from_states: from where transition should start
-        @type from_states: valid states
-        
-        @param to_states: where transition should end
-        @type to_states: valid states
-        
-        @return: Edges between given subsets of states
-        @rtype: list of state pairs as tuples::
-                [(C{from_state}, C{to_state}), ...]
-            such that:
-              - C{from_state} \\in C{from_states} and
-              - C{to_state} \\in C{to_states}
-        """
-        edges = []
-        for (from_state, to_state) in self.graph.edges_iter(
-            from_states, data=False, keys=False
-        ):
-            if to_state in to_states:
-                edges.append((from_state, to_state) )
-        return edges
 
 class LabeledTransitions(Transitions):
     """Manage labeled transitions (!= edges).
