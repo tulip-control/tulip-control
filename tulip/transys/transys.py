@@ -943,7 +943,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         
         for q0 in q0s:
             enabled_ba_trans = ba.transitions.find(
-                [q0], desired_label=Sigma_dict
+                [q0], with_attr_dict=Sigma_dict
             )
             
             # q0 blocked ?
@@ -993,7 +993,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             logger.debug("Next state's label:\n\t" +str(Sigma_dict) )
             
             enabled_ba_trans = ba.transitions.find(
-                [q], desired_label=Sigma_dict
+                [q], with_attr_dict=Sigma_dict
             )
             logger.debug('Enabled BA transitions:\n\t' +
                           str(enabled_ba_trans) )
@@ -1021,7 +1021,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 # is fts transition labeled with an action ?
                 ts_enabled_trans = fts.transitions.find(
                     [s], to_states=[next_s],
-                    desired_label='any', as_dict=False
+                    with_attr_dict=None, as_dict=False
                 )
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
                     assert(from_s == s)

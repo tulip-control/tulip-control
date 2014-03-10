@@ -1161,11 +1161,11 @@ class LabeledStates(States):
         @return: states with C{desired_label}
         @rtype: list
         """
-        state_label_pairs = self.find(desired_label=desired_label)
+        state_label_pairs = self.find(with_attr_dict=desired_label)
         states = [state for (state, label) in state_label_pairs]
         return states
         
-    def label_of(self, state, as_dict=True):
+    def label_of(self, state):
         """Return label of given state.
         
         Convenience method for calling find.
@@ -1176,19 +1176,15 @@ class LabeledStates(States):
         
         @param state: single system state
         
-        @param as_dict: return label as dict
-        @type as_dict: bool
-        
         @return: label of C{state}
         @rtype: If C{as_dict is True}, then C{dict} of the form::
                 {sublabel_type : sublabel_value}
-            Otherwise list: C{(sublabel1_value, sublabel2_value, ...) }
         """
-        state_label_pairs = self.find([state], as_dict=as_dict)
+        state_label_pairs = self.find([state])
         (state_, label) = state_label_pairs[0]
         return label
     
-    def find(self, states='any', desired_label='any', as_dict=True):
+    def find(self, states='any', with_attr_dict=None, **with_attr):
         """Filter by desired states and by desired state labels.
         
         Examples
@@ -1220,7 +1216,7 @@ class LabeledStates(States):
           - To find all states with a specific label C{{'p'}}:
 
               >>> ts.states.label('s1', {'p'}, check=False)
-              >>> b = ts.states.find(desired_label={'ap':{'p'} } )
+              >>> b = ts.states.find(with_attr_dict={'ap':{'p'} } )
               >>> states = [state for (state, label_) in b]
               >>> print(set(states) )
               {'s0', 's1'}
@@ -1246,27 +1242,27 @@ class LabeledStates(States):
             | iterable of valid states
             | single valid state
         
-        @param desired_label: label with which to filter the states
-        @type desired_label: {sublabel_type : desired_sublabel_value, ...}
-            | 'any', to allow any state label (default)
+        @param with_attr_dict: label with which to filter the states
+        @type with_attr_dict: {sublabel_type : desired_sublabel_value, ...}
+            | leave empty, to allow any state label (default)
         
-        @param as_dict:
-            - If C{True}, then return sublabels as dict:
-                {sublabel_type : sublabel_value}
-            - Otherwise return sublabel values ordered in list,
-              the list order based on graph._transition_label_def
-        @type as_dict: bool
+        @param with_attr: label key-value pairs which take
+            precedence over C{with_attr_dict}.
         
         @rtype: list of labeled states
         @return: [(C{state}, C{label}),...]
             where:
                 - C{state} \\in C{states}
                 - C{label}: dict
-                    | tuple of edge annotation,
-                    determined by C{as_dict}.
-
         """
-        #TODO support tuples as desired_labels, using available conversion
+        if with_attr_dict is None:
+            with_attr_dict = with_attr
+        else:
+            try:
+                with_attr_dict.update(with_attr)
+            except AttributeError:
+                raise Exception('with_attr_dict must be a dict')
+        
         if states is 'any':
             state_ids = 'any'
         else:
@@ -1295,22 +1291,22 @@ class LabeledStates(States):
             
             msg = 'Checking state label:\n\t attr_dict = '
             msg += str(attr_dict)
-            msg += '\n vs:\n\t desired_label = ' + str(desired_label)
+            msg += '\n vs:\n\t desired_label = ' + str(with_attr_dict)
             logger.debug(msg)
             
-            if desired_label is 'any':
+            if not with_attr_dict:
                 logger.debug('Any label acceptable.')
                 ok = True
             else:
-                ok = self._label_check.label_is_desired(attr_dict, desired_label)
+                ok = self._label_check.label_is_desired(attr_dict, with_attr_dict)
             
             if ok:
                 logger.debug('Label Matched:\n\t' +str(attr_dict) +
-                              ' == ' +str(desired_label) )
+                              ' == ' +str(with_attr_dict) )
                 
                 state = self._int2mutant(state_id)
                 annotation = \
-                    self._label_check._attr_dict2sublabels(attr_dict, as_dict)
+                    self._label_check._attr_dict2sublabels(attr_dict, as_dict=True)
                 state_label_pair = (state, annotation)
                 
                 found_state_label_pairs.append(state_label_pair)
@@ -1675,7 +1671,7 @@ class LabeledTransitions(Transitions):
         if not from_state in self.graph.states:
             raise Exception('from_state \notin graph')
         
-        same_labeled = self.find([from_state], desired_label=sublabels)        
+        same_labeled = self.find([from_state], with_attr_dict=sublabels)        
         
         if same_labeled:
             msg = 'Candidate transition violates determinism.\n'
@@ -1947,8 +1943,8 @@ class LabeledTransitions(Transitions):
         
         # TODO add overwriting (=delete_labeled +add once more) capability
     
-    def find(self, from_states='any', to_states='any', desired_label='any',
-             as_dict=True):
+    def find(self, from_states='any', to_states='any',
+             with_attr_dict=None, **with_attr):
         """Find all edges from_state to_states, annotated with given label.
         
         Instead of having two separate methods to:
@@ -1996,16 +1992,12 @@ class LabeledTransitions(Transitions):
             | iterable of valid states
             | single valid state
         
-        @param desired_label: label with which to filter the transitions
-        @type desired_label: {sublabel_type : desired_sublabel_value, ...}
-            | 'any', to allow any label (default)
+        @param with_attr_dict: label with which to filter the transitions
+        @type with_attr_dict: {sublabel_type : desired_sublabel_value, ...}
+            | leave empty, to allow any label (default)
         
-        @param as_dict:
-            - If C{True}, then return sublabels as dict:
-                {sublabel_type : sublabel_value}
-            - Otherwise return sublabel values ordered in list,
-              the list order based on graph._transition_label_def
-        @type as_dict: bool
+        @param with_attr: label type-value pairs,
+            take precedence over C{desired_label}.
         
         @return: set of transitions = labeled edges::
                 (C{from_state}, C{to_state}, label)
@@ -2020,10 +2012,14 @@ class LabeledTransitions(Transitions):
                 - C{from_state} \\in C{from_states}
                 - C{to_state} \\in C{to_states}
                 - C{label}: dict
-                    | tuple of edge annotation,
-                    determined by C{as_dict}.
-
         """
+        if with_attr_dict is None:
+            with_attr_dict = with_attr 
+        try:
+            with_attr_dict.update(with_attr)
+        except:
+            raise TypeError('with_attr_dict must be a dict')
+        
         (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
                                                             to_states)
         
@@ -2039,7 +2035,7 @@ class LabeledTransitions(Transitions):
                 if to_state_id not in to_state_ids:
                     continue
             
-            if desired_label is 'any':
+            if not with_attr_dict:
                 logger.debug('Any label is allowed.')
                 ok = True
             elif not attr_dict:
@@ -2048,7 +2044,7 @@ class LabeledTransitions(Transitions):
             else:
                 logger.debug('Checking guard.')
                 ok = self._label_check.label_is_desired(
-                    attr_dict, desired_label
+                    attr_dict, with_attr_dict
                 )
             
             if ok:
@@ -2058,7 +2054,7 @@ class LabeledTransitions(Transitions):
                 to_state = self.graph.states._int2mutant(to_state_id)
                 
                 annotation = \
-                    self._label_check._attr_dict2sublabels(attr_dict, as_dict)
+                    self._label_check._attr_dict2sublabels(attr_dict, as_dict=True)
                 transition = (from_state, to_state, annotation)
                 
                 found_transitions.append(transition)
