@@ -2152,7 +2152,38 @@ class LabeledTransitions(Transitions):
         
         #self.actions.remove(action)
 
-
+class TypedDict(dict):
+    def __setitem__(self, i, y):
+        """Before setting, check if value y is allowed for key i.
+        """
+        valid_y = True
+        try:
+            if i in self.allowed_values:
+                if y not in self.allowed_values[i]:
+                    valid_y = False
+        except:
+            pass
+        
+        if not valid_y:
+            msg = 'key: ' + str(i) + ', cannot be'
+            msg += ' assigned value: ' + str(y) + '\n'
+            msg += 'Admissible values are:\n\t'
+            msg += str(self.allowed_values[i])
+            raise ValueError(msg)
+        
+        dict.__setitem__(self, i, y)
+    
+    def set_types(self, allowed_values):
+        """Restrict values the key can be paired with.
+        
+        @param allowed_values: dict of the form:
+            
+                {key : values}
+            
+            C{values} must implement C{__contains__}
+            to enable checking validity of values.
+        """
+        self.allowed_values = allowed_values
 
 class LabeledDiGraph(nx.MultiDiGraph):
     """Directed multi-graph with constrained labeling.
@@ -2176,6 +2207,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
        because it is unreliable, so user will be encouraged to use dicts,
        or key-value pairs. For figure saving purposes it will be
        possible to define an order independently, as an export filter.
+    
+    Credits
+    =======
+    Some code in overriden methods of networkx.MultiDiGraph
+    is adapted from networkx, which is distributed under the BSD license.
     """
     def __init__(
         self,
@@ -2233,6 +2269,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if edge_label_types is not None:
             self._init_labeling_function('transition', list(edge_label_types))
         
+        # temporary hack until rename
+        self._node_label_types = self._state_label_def
+        self._edge_label_types = self._transition_label_def
+        
         nx.MultiDiGraph.__init__(self, **kwargs)
         
         self.states = LabeledStates(self, mutable=False)
@@ -2280,6 +2320,121 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 setattr(self, type_name, labeling[type_name])
             else:
                 setattr(self, type_name, setter)
+    
+    def add_node(self, n, attr_dict=None, **attr):
+        """Use a ConstrainedDict as attribute dict.
+        
+        Raise exception if node already exists.
+        To change attributes use subscript notation instead.
+        
+        A 'check' argument to turn off the exception
+        is not available any more, to simplify things
+        and allow 'check' as a possible key in C{attr}.
+        Use a try clause instead.
+        
+        All other functionality remains the same.
+        """
+        # avoid multiple additions
+        if n in self:
+            raise Exception('Graph alreay has node: ' + str(n))
+        
+        if attr_dict is None:
+            attr_dict=attr
+        else:
+            try:
+                attr_dict.update(attr)
+            except AttributeError:
+                raise nx.NetworkXError(\
+                    "The attr_dict argument must be a dictionary.")
+        
+        typed_attr = TypedDict()
+        typed_attr.set_types(self._node_label_types)
+        typed_attr.update(attr_dict) # type checking happens here
+        
+        nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
+    
+    def add_nodes_from(self, nodes, **attr):
+        for n in nodes:
+            try:
+                n not in self.succ
+                node = n
+                attr_dict = attr
+            except TypeError:
+                node, ndict = n
+                attr_dict = attr.copy()
+                attr_dict.update(ndict)
+            
+            self.add_node(node, attr_dict=attr_dict)
+    
+    def add_edge(self, u, v, attr_dict=None, **attr):
+        """Use a ConstrainedDict as attribute dict.
+        
+        Raise exception if C{u} or C{v} are not already graph nodes.
+        Raise exception if edge already exists.
+        To change labeling use subscript notation instead.
+        
+        Argument C{key} has been removed, because edges defined
+        by their labeling, i.e., multiple edges with same labeling
+        are not allowed.
+        """
+        # check nodes exist
+        if u not in self.succ:
+            raise Exception('Graph already has node: ' + str(u))
+        if v not in self.succ:
+            raise Exception('Graph already has node: ' + str(v))
+        
+        if attr_dict is None:
+            attr_dict=attr
+        else:
+            try:
+                attr_dict.update(attr)
+            except AttributeError:
+                raise nx.NetworkXError(\
+                    "The attr_dict argument must be a dictionary.")
+        
+        typed_attr = TypedDict()
+        typed_attr.set_types(self._edge_label_types)
+        typed_attr.update(attr_dict) # type checking happens here
+        
+        existing_u_v = self.get_edge_data(u, v, default={})
+        
+        if dict() in existing_u_v.values():
+            msg = 'Unlabeled transition: '
+            msg += 'from_state-> to_state already exists,\n'
+            msg += 'where:\t from_state = ' +str(u) +'\n'
+            msg += 'and:\t to_state = ' +str(v) +'\n'
+            raise Exception(msg)
+        
+        # check if same labeled transition exists
+        if attr_dict in existing_u_v.values():
+            msg = 'Same labeled transition:\n'
+            msg += 'from_state---[label]---> to_state\n'
+            msg += 'already exists, where:\n'
+            msg += '\t from_state = ' +str(u) +'\n'
+            msg += '\t to_state = ' +str(v) +'\n'
+            msg += '\t label = ' +str(typed_attr) +'\n'
+            raise Exception(msg)
+        
+        #self._breaks_determinism(from_state, labels)
+        
+        # only change from nx in this clause is using TypedDict
+        if v in self.succ[u]:
+            keydict = self.adj[u][v]
+            # find a unique integer key
+            key = len(keydict)
+            while key in keydict:
+                key-=1
+            
+            datadict = keydict.get(key, typed_attr)
+            datadict.update(typed_attr)
+            
+            keydict[key] = datadict
+        else:
+            # selfloops work this way without special treatment
+            key = 0
+            keydict = {key:typed_attr}
+            self.succ[u][v] = keydict
+            self.pred[v][u] = keydict
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton.

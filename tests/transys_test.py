@@ -130,6 +130,14 @@ def labeled_digraph_test():
     
     assert_raises(Exception, g.transitions.add_labeled,
                   1, 2, {'month':'Jan', 'day':'abc'})
+    
+    g.node[1]['mont'] = 'Feb'
+    g[1][2][0]['day'] = 'Tue'
+    
+    with assert_raises(ValueError):
+        g.node[1]['month'] = 'abc'
+    with assert_raises(ValueError):
+        g[1][2][0]['day'] = 'abc'
 
 def rabin_test():
     dra = trs.DRA()
