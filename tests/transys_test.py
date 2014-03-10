@@ -3,8 +3,9 @@
 """
 Unit Tests for transys module.
 """
-
 from collections import Iterable
+
+from nose.tools import assert_raises
 
 from tulip.transys.mathset import MathSet, SubSet, PowerSet
 from tulip.transys.mathset import compare_lists
@@ -115,6 +116,20 @@ def powerset_test():
     assert(compare_lists(f.math_set._list, [[1, 2], {'a':1} ] ) )
     
     return s
+
+def labeled_digraph_test():
+    p = PowerSet({1, 2})
+    node_labeling = [('month', ['Jan', 'Feb']),
+                     ('day', ['Mon', 'Tue']),
+                     ('comb', p, p.math_set)]
+    edge_labeling = node_labeling
+    g = trs.labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
+    
+    g.states.add_from({1, 2})
+    g.transitions.add_labeled(1, 2, {'month':'Jan', 'day':'Mon'})
+    
+    assert_raises(Exception, g.transitions.add_labeled,
+                  1, 2, {'month':'Jan', 'day':'abc'})
 
 def rabin_test():
     dra = trs.DRA()

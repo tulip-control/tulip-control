@@ -2152,6 +2152,135 @@ class LabeledTransitions(Transitions):
         
         #self.actions.remove(action)
 
+
+
+class LabeledDiGraph(nx.MultiDiGraph):
+    """Directed multi-graph with constrained labeling.
+    
+    Provided facilities to define labeling functions on
+    vertices and edges, with given co-domains,
+    so that labels are type-checked, not arbitrary.
+    
+    Note
+    ====
+    1. Edge labeling implies the "multi",
+       so it is omitted from the class name.
+    
+    2. From its name, C{networkx} targets networks, so vertices
+       are called nodes. Here a general graph-theoretic
+       viewpoint is more appropriate, so vertices would be
+       preferred. But to maintain uniform terminology,
+       the term node is used (plus it is shorter to write).
+    
+    3. Label ordering will be disabled (i.e., internal use of OrderedDict),
+       because it is unreliable, so user will be encouraged to use dicts,
+       or key-value pairs. For figure saving purposes it will be
+       possible to define an order independently, as an export filter.
+    """
+    def __init__(
+        self,
+        node_label_types=None,
+        edge_label_types=None,
+        max_outdegree=None,
+        max_outdegree_per_label=None,
+        mutable=False,
+        **kwargs
+    ):
+        """Initialize the types of labelings on states and edges.
+        
+        @param state_label_types: defines the state labeling functions:
+            
+                L_i : V -> D_i
+            
+            each from vertices C{V} to some co-domain C{D_i}.
+            
+            Each labeling function is defined by
+            a tuple C{(L_i, D_i, setter)}:
+            
+                - C{L_i} is a C{str} naming the labeling function.
+                
+                - C{D_i} implements C{__contains__}
+                    to enable checking label validity.
+                    If you want co-domain C{D_i} to be extensible,
+                    it must implement C{add}.
+                
+                - C{setter}: the co-domain C{D_i} becomes
+                    accessible via an attribute C{self.L_i}
+                    pointing to C{setter}.
+                    
+                    If a 2-tuple C{(L_i, D_i)} is provided,
+                    then C{D_i} is used as C{setter}.
+            
+            Be careful to avoid name conflicts with existing
+            networkx C{MultiDiGraph} attributes.
+        @type state_label_types: C{[(L_i, D_i, setter), ...]}
+        
+        @param edge_label_types: labeling functions for edges,
+            defined similarly to C{state_label_types}.
+        
+        @param max_outdegree: upper bound on the outdegree of each node.
+            Labels are ignored while counting edges,
+            so edges with different labels count as two edges.
+        @type max_outdegree: int
+        
+        @param max_outdegree_per_label: like C{max_outdegree},
+            but outgoing edges are counted separately for each
+            labeling function.
+        @type max_outdegree_per_label: int
+        """
+        if node_label_types is not None:
+            self._init_labeling_function('state', list(node_label_types))
+        if edge_label_types is not None:
+            self._init_labeling_function('transition', list(edge_label_types))
+        
+        nx.MultiDiGraph.__init__(self, **kwargs)
+        
+        self.states = LabeledStates(self, mutable=False)
+        
+        #todo: handle accepting states separately
+        if max_outdegree == 1:
+            deterministic = True
+        else:
+            deterministic = False
+        self.transitions = LabeledTransitions(self, deterministic)
+        
+        # export properties
+        self.dot_node_shape = {'normal':'circle'}
+        self.default_export_path = './'
+        self.default_export_fname = 'out'
+        self.default_layout = 'dot'
+        
+    def _init_labeling_function(self, domain, label_types):
+        """
+        @type domain: 'state' | 'transition'
+        
+        @param label_types: see L{__init__}.
+        
+        Note
+        ====
+        'state' will be renamed to 'node' in the future
+        'transition' will be renamed to 'edge' in the future
+        """
+        labeling_attr = '_' + domain + '_label_def'
+        setattr(self, labeling_attr, dict())
+        labeling = getattr(self, labeling_attr)
+        
+        for label_type in label_types:
+            if len(label_type) == 2:
+                type_name, codomain = label_type
+                setter = None
+            elif len(label_type) == 3:
+                type_name, codomain, setter = label_type
+            else:
+                raise ValueError('label_type can be 2 or 3-tuple')
+            
+            labeling[type_name] = codomain
+            
+            if setter is None:
+                setattr(self, type_name, labeling[type_name])
+            else:
+                setattr(self, type_name, setter)
+
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton.
     
