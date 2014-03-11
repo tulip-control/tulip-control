@@ -250,7 +250,7 @@ def create_actions(
     @rtype: dict
     """
     if not actions:
-        return
+        return dict()
     
     logger.debug('create actions:' + str(actions) )
     
@@ -352,7 +352,7 @@ def sys_to_spec(
     if isinstance(sys, transys.FiniteTransitionSystem):
         (sys_vars, sys_init, sys_trans) = fts2spec(
             sys, ignore_initial, bool_states, 'loc',
-            action_vars[1], bool_actions
+            'sys_actions', bool_actions
         )
         return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                       sys_safety=sys_trans)
@@ -380,7 +380,7 @@ def env_to_spec(
     if isinstance(env, transys.FiniteTransitionSystem):
         (env_vars, env_init, env_trans) = fts2spec(
             env, ignore_initial, bool_states, 'eloc',
-            action_vars[0], bool_actions
+            'env_actions', bool_actions
         )
         return GRSpec(env_vars=env_vars, env_init=env_init,
                       env_safety=env_trans)
@@ -395,7 +395,7 @@ def env_to_spec(
 
 def fts2spec(
     fts, ignore_initial=False, bool_states=False,
-    statevar='loc', actionvar='act',
+    statevar='loc', actionvar=None,
     bool_actions=False
 ):
     """Convert closed FTS to GR(1) representation.
@@ -468,8 +468,6 @@ def sys_open_fts2spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
-    env_actions = ofts.env_actions
-    sys_actions = ofts.sys_actions
     
     sys_init = []
     sys_trans = []
@@ -479,15 +477,24 @@ def sys_open_fts2spec(
     sys_vars = {ap:'boolean' for ap in aps}
     env_vars = dict()
     
-    sys_action_ids = create_actions(
-        sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, ofts.sys_actions_must
-    )
+    actions = ofts.actions
     
-    env_action_ids = create_actions(
-        env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, ofts.env_actions_must
-    )
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        if 'sys' in action_type:
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, ofts.sys_actions_must
+            )
+            sys_action_ids.update(action_ids)
+        elif 'env' in action_type:
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, ofts.env_actions_must
+            )
+            env_action_ids.update(action_ids)
     
     statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
@@ -522,8 +529,6 @@ def env_open_fts2spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
-    env_actions = ofts.env_actions
-    sys_actions = ofts.sys_actions
     
     sys_init = []
     sys_trans = []
@@ -534,19 +539,29 @@ def env_open_fts2spec(
     env_vars = {ap:'boolean' for ap in aps}
     sys_vars = dict()
     
-    env_action_ids = create_actions(
-        env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, ofts.env_actions_must
-    )
+    actions = ofts.actions
+    
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        if 'sys' in action_type:
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, ofts.sys_actions_must
+            )
+            sys_action_ids.update(action_ids)
+        elif 'env' in action_type:
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, ofts.env_actions_must
+            )
+            env_action_ids.update(action_ids)
     
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
     # and whether that TS will contain all the system actions
     # defined in the environment TS
-    sys_action_ids = create_actions(
-        sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, ofts.sys_actions_must
-    )
     
     statevar = 'eloc'
     state_ids = create_states(states, env_vars, env_trans,

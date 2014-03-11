@@ -186,7 +186,7 @@ def test_sys_fts_no_actions():
         bool_actions=False
     )
     
-    assert('act' not in spec.sys_vars)
+    assert('actions' not in spec.sys_vars)
 
 def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested.
@@ -202,8 +202,8 @@ def test_env_fts_bool_actions():
         bool_actions=True,
     )
     
-    assert('act' not in spec.env_vars)
-    assert('eact' not in spec.env_vars)
+    assert('sys_actions' not in spec.env_vars)
+    assert('env_actions' not in spec.env_vars)
     
     assert('park' in spec.env_vars)
     assert(spec.env_vars['park'] == 'boolean')
@@ -230,10 +230,12 @@ def test_env_fts_int_actions():
     assert('go' not in spec.env_vars)
     assert('stop' not in spec.env_vars)
     
-    assert('act' not in spec.env_vars)
-    assert('eact' in spec.env_vars)    
+    assert('sys_actions' not in spec.env_vars)
+    assert('env_actions' in spec.env_vars)    
     
-    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'eactnone'})
+    print spec.env_vars['env_actions']
+    assert(set(spec.env_vars['env_actions']) ==
+           {'park', 'go', 'stop', 'env_actionsnone'})
 
 def test_env_ofts_bool_actions():
     """Env OpenFTS has 2 actions, bools requested.
@@ -286,8 +288,8 @@ def _check_ofts_bool_actions(spec):
     assert('down' in spec.sys_vars)
     assert(spec.sys_vars['down'] == 'boolean')
     
-    assert('eact' not in spec.env_vars)
-    assert('act' not in spec.sys_vars)
+    assert('env_actions' not in spec.env_vars)
+    assert('sys_actions' not in spec.sys_vars)
 
 def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1).
@@ -333,11 +335,11 @@ def _check_ofts_int_actions(spec):
     assert('down' not in spec.sys_vars)
     assert('hover' not in spec.sys_vars)
     
-    assert('eact' in spec.env_vars)
-    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop'})
+    assert('env_actions' in spec.env_vars)
+    assert(set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'})
     
-    assert('act' in spec.sys_vars)
-    assert(set(spec.sys_vars['act']) == {'up', 'down', 'hover'})
+    assert('sys_actions' in spec.sys_vars)
+    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover'})
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
