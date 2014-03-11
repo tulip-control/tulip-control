@@ -39,7 +39,7 @@ L{find_controller}
 """
 import logging
 logger = logging.getLogger(__name__)
-import pdb
+
 import warnings
 import pprint
 from copy import deepcopy
@@ -1409,7 +1409,7 @@ def merge_partition_pair(
 		includes the mode that was just merged.
     """
     logger.info('merging partitions')
-    pdb.set_trace()
+
     part2 = ab2.ppp
     
     modes = prev_modes + [cur_mode]
