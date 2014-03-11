@@ -39,7 +39,7 @@ L{find_controller}
 """
 import logging
 logger = logging.getLogger(__name__)
-
+import pdb
 import warnings
 import pprint
 from copy import deepcopy
@@ -1025,15 +1025,14 @@ def discretize_switched(
     @param hybrid_sys: dynamics of switching modes
     @type hybrid_sys: L{HybridSysDyn}
     
-    @param disc_params: discretization parameters
-        passed to L{discretize},
-        see that for details
-    @type disc_params: dict (keyed by mode) of dicts
+    @param disc_params: discretization parameters passed to L{discretize} for
+		each mode. See L{discretize} for details.
+    @type disc_params: dict (keyed by mode) of dicts.
     
     @param plot: save partition images
     @type plot: bool
     
-    @param show_ts, only_adjacent: see L{AbstractPwa.plot}.
+    @param show_ts, only_adjacent: options for L{AbstractPwa.plot}.
     
     @return: abstracted dynamics,
         some attributes are dict keyed by mode
@@ -1067,7 +1066,7 @@ def discretize_switched(
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
     logger.info('Merged partition has: ' + str(n) + ', states')
-    
+
     # find feasible transitions over merged partition
     trans = dict()
     for mode in modes:
@@ -1079,7 +1078,7 @@ def discretize_switched(
             merged_abstr, mode, cont_dyn,
             N=params['N'], trans_length=params['trans_length']
         )
-    
+
     # merge the abstractions, creating a common TS
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
@@ -1309,28 +1308,28 @@ def merge_partitions(abstractions):
     
     # initialize iteration data
     prev_modes = [init_mode]
-    
+   
+   	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
     parents = {init_mode:range(len(regions) )}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
-    
     for cur_mode in remaining_modes:
         ab2 = abstractions[cur_mode]
-        
         r = merge_partition_pair(
             regions, ab2, cur_mode, prev_modes,
             parents, ap_labeling
         )
         regions, parents, ap_labeling = r
-        
         prev_modes += [cur_mode]
-    
     new_list = regions
     
     # build adjacency based on spatial adjacencies of
     # component abstractions.
     # which justifies the assumed symmetry of part1.adj, part2.adj
+	# Basically, if two regions are either 1) part of the same region in one of
+	# the abstractions or 2) adjacent in one of the abstractions, then the two
+	# regions are adjacent in the switched dynamics.
     n_reg = len(new_list)
     
     adj = np.zeros([n_reg, n_reg], dtype=int)
@@ -1376,9 +1375,41 @@ def merge_partition_pair(
     old_parents, old_ap_labeling
 ):
     """Merge an Abstraction with the current partition iterate.
+
+	@param old_regions: A list of L{Region} that is from either:
+		1. The ppp of the first (initial) L{AbstractPwa} to be merged.
+		2. A list of already-merged regions
+	@type old_regions: list of L{Region}
+
+	@param ab2: Abstracted piecewise affine dynamics to be merged into the 
+	@type ab2: L{AbstractPwa}
+
+	@param cur_mode: mode to be merged
+	@type cur_mode: tuple
+
+	@param prev_mode: list of modes that have already been merged together
+	@type prev_mode: list of tuple
+
+	@param old_parents: dict of modes that have already been merged to dict of
+		indices of new regions to indices of regions
+	@type old_parents: dict of modes to list of region indices in list
+		C{old_regions} or dict of region indices to regions in original ppp for
+		that mode
+
+	@param old_ap_labeling: dict of states of already-merged modes to sets of
+		propositions for each state
+	@type old_ap_labeling: dict of tuples to sets
+
+
+	@return new_list: list of new regions
+	@return parents: same as input param C{old_parents}, except that it 
+		includes the mode that was just merged and for list of regions in 
+		return value new_list
+	@return ap_labeling: same as input param C{old_ap_labeling}, except that it
+		includes the mode that was just merged.
     """
     logger.info('merging partitions')
-    
+    pdb.set_trace()
     part2 = ab2.ppp
     
     modes = prev_modes + [cur_mode]
