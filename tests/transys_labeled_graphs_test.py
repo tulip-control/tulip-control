@@ -210,3 +210,37 @@ class LabeledStates_test:
         print result
         assert len(result) == 2 and \
             set([s for (s,l) in result]) == set(["state0", "state2"])
+
+def labeled_digraph_test():
+    p = PowerSet({1, 2})
+    node_labeling = [('month', ['Jan', 'Feb']),
+                     ('day', ['Mon', 'Tue']),
+                     ('comb', p, p.math_set)]
+    edge_labeling = node_labeling
+    g = trs.labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
+    
+    g.states.add_from({1, 2})
+    g.transitions.add_labeled(1, 2, {'month':'Jan', 'day':'Mon'})
+    
+    assert_raises(Exception, g.transitions.add_labeled,
+                  1, 2, {'month':'Jan', 'day':'abc'})
+    
+    g.node[1]['mont'] = 'Feb'
+    g[1][2][0]['day'] = 'Tue'
+    
+    with assert_raises(ValueError):
+        g.node[1]['month'] = 'abc'
+    with assert_raises(ValueError):
+        g[1][2][0]['day'] = 'abc'
+    
+def open_fts_multiple_env_actions_test():
+    env_modes = MathSet({'up', 'down'})
+    env_choice = MathSet({'left', 'right'})
+    
+    env_actions = [('env_modes', env_modes, True),
+                   ('env_choices', env_choice)]
+    ts = trs.OpenFTS(env_actions)
+    
+    assert(ts.env_modes is env_modes)
+    assert(not hasattr(ts, 'env_choices') )
+    assert(ts.sys_actions == MathSet() )
