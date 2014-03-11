@@ -201,10 +201,13 @@ class LabeledStates_test:
             ("state1", {"ap": set(['q'])}) in result and \
             ("state0", {"ap": set(['p'])}) in result
 
-        result = self.S_mutable_ap.find(desired_label={"ap": {'p'}})
+        result = self.S_mutable_ap.find(with_attr_dict={"ap": {'p'}})
         print result
         assert len(result) == 2 and \
             set([s for (s,l) in result]) == set(["state0", "state2"])
+        
+        same_result = self.S_mutable_ap.find(ap={'p'})
+        assert(same_result == result)
 
 def labeled_digraph_test():
     p = PowerSet({1, 2})
