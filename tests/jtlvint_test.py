@@ -4,7 +4,7 @@ Tests for the interface with JTLV.
 """
 
 from tulip.spec import GRSpec
-from tulip.interfaces.jtlv import check_gr1, check_realizable, synthesize
+from tulip.interfaces.jtlv import check_realizable, synthesize
 from tulip.transys import MealyMachine
 
 
@@ -22,13 +22,6 @@ class basic_test:
     def tearDown(self):
         self.f_un = None
         self.f = None
-
-    def test_dumpjtlv(self):
-        specLTL = self.f_un.to_jtlv()
-        assumption = specLTL[0]
-        guarantee = specLTL[1]
-        assert check_gr1(assumption, guarantee,
-                         self.f_un.env_vars.keys(), self.f_un.sys_vars.keys())
 
     def test_check_realizable(self):
         assert not check_realizable(self.f_un)
