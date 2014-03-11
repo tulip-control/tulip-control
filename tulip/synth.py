@@ -127,6 +127,30 @@ def exactly_one(iterable):
     ]) + ')']
 
 def _conj_action(label, action_type, nxt=False, ids=None):
+    """Return conjunct if C{action_type} in C{label}.
+    
+    @param label: C{dict} with pairs C{action_type_name : action_value}
+    @type label: dict
+    
+    @param action_type: key to look for in C{label}
+    @type action_type: hashable (here typically a str)
+    
+    @param nxt: prepend or not with the next operator
+    @type nxt: bool
+    
+    @param ids: map C{action_value} -> value used in solver input, e.g., for gr1c
+    @type ids: dict
+    
+    @return:
+        - conjunct (includes C{&&} operator) if:
+          
+            - C{action_type} in C{label}, and
+            - C{action_value} is not the empty string (modeling "no constrain")
+          
+          includes next operator (C{X}) if C{nxt = True}.
+        - empty string otherwise
+    @rtype: str
+    """
     if action_type not in label:
         return ''
     action = label[action_type]
