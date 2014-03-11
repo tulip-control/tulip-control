@@ -3,11 +3,11 @@
 Tests for transys.labeled_graphs (part of transys subpackage)
 """
 
-from nose.tools import raises
+from nose.tools import raises, assert_raises
 from networkx import MultiDiGraph
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
-
+from tulip.transys.transys import OpenFTS
 
 def str2singleton_test():
     assert labeled_graphs.str2singleton("p") == {"p"}
@@ -217,7 +217,7 @@ def labeled_digraph_test():
                      ('day', ['Mon', 'Tue']),
                      ('comb', p, p.math_set)]
     edge_labeling = node_labeling
-    g = trs.labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
+    g = labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
     
     g.states.add_from({1, 2})
     g.transitions.add_labeled(1, 2, {'month':'Jan', 'day':'Mon'})
@@ -239,7 +239,7 @@ def open_fts_multiple_env_actions_test():
     
     env_actions = [('env_modes', env_modes, True),
                    ('env_choices', env_choice)]
-    ts = trs.OpenFTS(env_actions)
+    ts = OpenFTS(env_actions)
     
     assert(ts.env_modes is env_modes)
     assert(not hasattr(ts, 'env_choices') )
