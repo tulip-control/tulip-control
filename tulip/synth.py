@@ -126,13 +126,13 @@ def exactly_one(iterable):
         for x in iterable
     ]) + ')']
 
-def _conj_action(label, action_type, nxt=False, ids=None):
-    """Return conjunct if C{action_type} in C{label}.
+def _conj_action(actions_dict, action_type, nxt=False, ids=None):
+    """Return conjunct if C{action_type} in C{actions_dict}.
     
-    @param label: C{dict} with pairs C{action_type_name : action_value}
-    @type label: dict
+    @param actions_dict: C{dict} with pairs C{action_type_name : action_value}
+    @type actions_dict: dict
     
-    @param action_type: key to look for in C{label}
+    @param action_type: key to look for in C{actions_dict}
     @type action_type: hashable (here typically a str)
     
     @param nxt: prepend or not with the next operator
@@ -144,16 +144,16 @@ def _conj_action(label, action_type, nxt=False, ids=None):
     @return:
         - conjunct (includes C{&&} operator) if:
           
-            - C{action_type} in C{label}, and
+            - C{action_type} in C{actions_dict}, and
             - C{action_value} is not the empty string (modeling "no constrain")
           
           includes next operator (C{X}) if C{nxt = True}.
         - empty string otherwise
     @rtype: str
     """
-    if action_type not in label:
+    if action_type not in actions_dict:
         return ''
-    action = label[action_type]
+    action = actions_dict[action_type]
     if ids is not None:
         action = ids[action]
     if action is '':
