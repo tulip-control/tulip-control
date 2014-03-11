@@ -136,11 +136,6 @@ class Transitions_test:
         self.T.remove_from((2,), (4, 3))
         assert set([t for t in self.T()]) == set([(5, 4)])
 
-    def test_between(self):
-        self.T.add_from([5, 2], [4, 3], check_states=False)
-        assert set(self.T.between([5, 2], [3,])) == set([(5, 3), (2, 3)])
-
-
 class LabeledStates_test:
     def setUp(self):
         G = labeled_graphs.LabeledStateDiGraph()
