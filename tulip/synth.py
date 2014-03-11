@@ -163,6 +163,25 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     else:
         return ' && ' + pstr(action)
 
+def _conj_actions(actions_dict, solver_expr=None, nxt=False):
+    """Conjunction of multiple action types.
+    
+    Includes solver expression substitution.
+    See also L{_conj_action}.
+    """
+    logger.debug(actions_dict)
+    if solver_expr is not None:
+        actions = [solver_expr[action_value]
+                   for type_name, action_value in actions_dict.iteritems()]
+    else:
+        actions = actions_dict
+    conjuncted_actions = _conj(actions)
+    
+    if nxt:
+        return ' && X' + pstr(conjuncted_actions)
+    else:
+        return ' && ' + pstr(conjuncted_actions)
+
 def create_states(states, variables, trans, statevar, bool_states):
     """Create bool or int state variables in GR(1).
     
@@ -424,7 +443,18 @@ def fts2spec(
 ):
     """Convert closed FTS to GR(1) representation.
     
+    Single player + Multiple action types
+    =====================================
     So fts on its own is not the complete problem spec.
+    Currently L{FTS} supports only a single set of actions.
+    
+    If you have only one player (either env or sys),
+    with multiple action types, then use an L{OpenFTS},
+    without any action types for its opponent.
+    
+    Make sure that, depending on the player,
+    C{'env'} or C{'sys'} are part of the action type names,
+    so that L{synth.synthesize} can recognize them.
     
     @param fts: L{transys.FiniteTransitionSystem}
     
@@ -647,6 +677,33 @@ def sys_trans_from_ts(
     @param trans: L{LabeledTransitions} as from the transitions
         attribute of L{FiniteTransitionSystem} or
         L{OpenFiniteTransitionSystem}.
+    
+    @param action_ids: same as C{sys-action_ids}
+        Caution: to be removed in a future release
+    
+    @param sys_action_ids: dict of dicts
+        outer dict keyed by action_type
+        each inner dict keyed by action_value
+        each inner dict value is the solver expression for that action value
+        
+        for example an action type with an
+        arbitrary finite discrete codomain can be modeled either:
+        
+          - as Boolean variables, so each possible action value
+            becomes a different Boolean variable with the same
+            name, thus C{sys_action_ids[action_type]} will be
+            the identity map on C{action_values} for that C{action_type}.
+          
+          - as integer variables, so each possible action value
+            becomes a different expression in the solver (e.g. gr1c)
+            input format. Then C{sys_action_ids[action_type]} maps
+            C{action_value} -> solver expression of the form:
+                
+                C{action_type = i}
+            
+            where C{i} corresponds to that particular  C{action_type}.
+    
+    @param env_action_ids: same as C{sys-action_ids}
     """
     sys_trans = []
     
@@ -668,9 +725,16 @@ def sys_trans_from_ts(
             
             postcond = pstr(to_state_id)
             
-            postcond += _conj_action(label, 'env_actions', ids=env_action_ids)
-            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
-            # system FTS given
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            postcond += _conj_actions(env_actions, env_action_ids)
+            
+            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
+            postcond += _conj_actions(sys_actions, sys_action_ids)
+            
+            # if system FTS given
+            # in case 'actions in label, then action_ids is a dict,
+            # not a dict of dicts, because certainly this came
+            # from an FTS, not an OpenFTS
             postcond += _conj_action(label, 'actions', ids=action_ids)
             
             cur_str += [postcond]
@@ -684,8 +748,14 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     This constrains the actions available next to the environment
     based on the system OpenFTS.
     
+    Purpose is to prevent env from blocking sys by purely
+    picking a combination of actions for which sys has no outgoing
+    transition from that state.
+    
     Might become optional in the future,
     depending on the desired way of defining env behavior.
+    
+    @param env_action_ids: dict of dicts, see L{sys_trans_from_ts}.
     """
     env_trans = []
     if not env_action_ids:
@@ -704,15 +774,16 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
             continue
         
         # collect possible next env actions
-        next_env_actions = set()
+        next_env_action_combs = set()
         for (from_state, to_state, label) in cur_trans:
-            if 'env_actions' not in label:
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            
+            if not env_actions:
                 continue
             
-            env_action = label['env_actions']
-            env_action_id = env_action_ids[env_action]
-            next_env_actions.add(env_action_id)
-        next_env_actions = _disj(next_env_actions)
+            env_action_comb = _conj_actions(env_actions, env_action_ids)
+            next_env_action_combs.add(env_action_comb)
+        next_env_actions = _disj(next_env_action_combs)
         
         env_trans += [precond + ' -> X(' +
                       next_env_actions + ')']

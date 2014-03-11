@@ -405,3 +405,28 @@ def test_only_mode_control():
     
     r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
     assert(not r)
+
+def multiple_env_actions_test():
+    """Two env players, 3 states controlled by sys.
+    
+    sys wins marginally, due to assumption on
+    next combination of actions by env players.
+    """
+    env_actions = [('alice', transys.MathSet() ),
+                   ('bob', transys.MathSet() )]
+    
+    sys = transys.OpenFTS(env_actions)
+    sys.states.add_from({1,2,3})
+    sys.states.initial.add_from({1})
+    
+    sys.add_edge(1, 2, alice='left', bob='right')
+    sys.add_edge(1, 3, alice='right', bob='left') # at state 3 sys loses
+    sys.add_edge(2, 1, alice='left', bob='right')
+    
+    env_safe = {'(loc = 1) -> X( (alice = left) && (bob = right) )'}
+    sys_prog = {'loc = 1', 'loc = 2'}
+    
+    specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
+    
+    r = synth.is_realizable('gr1c', specs, sys=sys)
+    assert(not r)
