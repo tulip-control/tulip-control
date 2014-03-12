@@ -138,14 +138,14 @@ class Transitions_test:
 
 class LabeledStates_test:
     def setUp(self):
-        G = labeled_graphs.LabeledStateDiGraph()
-        G._state_label_def = {"ap": PowerSet(MathSet(['p', 'q', 'r',
-                                                      'x', 'a', 'b']))}
+        node_label_def = [('ap', PowerSet({'p', 'q', 'r', 'x', 'a', 'b'}) )]
+        G = labeled_graphs.LabeledDiGraph(node_label_def)
+        
         self.S_immutable_ap = labeled_graphs.LabeledStates(G, mutable=False)
         G.states = self.S_immutable_ap
 
-        G = labeled_graphs.LabeledStateDiGraph()
-        G._state_label_def = {"ap": PowerSet(MathSet(['p', 'q', 'r']))}
+        node_label_def = [('ap', PowerSet(['p', 'q', 'r']) )]
+        G = labeled_graphs.LabeledDiGraph(node_label_def)
         self.S_mutable_ap = labeled_graphs.LabeledStates(G, mutable=True)
         G.states = self.S_mutable_ap
 

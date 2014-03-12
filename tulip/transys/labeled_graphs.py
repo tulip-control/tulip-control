@@ -2133,11 +2133,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
             labeling function.
         @type max_outdegree_per_label: int
         """
-        if node_label_types is not None:
-            self._init_labeling_function('state', list(node_label_types))
-        if edge_label_types is not None:
-            self._init_labeling_function('transition', list(edge_label_types))
-        
+        self._state_label_def = self._init_labeling(node_label_types)
+        self._transition_label_def = self._init_labeling(edge_label_types)
+            
         # temporary hack until rename
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
@@ -2159,7 +2157,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.default_export_fname = 'out'
         self.default_layout = 'dot'
         
-    def _init_labeling_function(self, domain, label_types):
+    def _init_labeling(self, label_types):
         """
         @type domain: 'state' | 'transition'
         
@@ -2170,9 +2168,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
         'state' will be renamed to 'node' in the future
         'transition' will be renamed to 'edge' in the future
         """
-        labeling_attr = '_' + domain + '_label_def'
-        setattr(self, labeling_attr, dict())
-        labeling = getattr(self, labeling_attr)
+        labeling = dict()
+        
+        if label_types is None:
+            logger.debug('no label types passed')
+            return labeling
+        
+        if not label_types:
+            logger.debug('label types absent (given: ' +
+                         str(label_types) + ')')
+            return labeling
+        
+        label_types = list(label_types)
         
         for label_type in label_types:
             if len(label_type) == 2:
@@ -2196,6 +2203,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             else:
                 # custom setter
                 setattr(self, type_name, setter)
+        return labeling
     
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         logger.debug('checking for untyped keys...')
