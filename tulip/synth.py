@@ -170,12 +170,19 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     See also L{_conj_action}.
     """
     logger.debug('conjunction of actions: ' + str(actions_dict))
+    
+    if not actions_dict:
+        logger.debug('actions_dict empty, returning empty string')
+        return ''
+    
     if solver_expr is not None:
         actions = [solver_expr[action_value]
                    for type_name, action_value in actions_dict.iteritems()]
     else:
         actions = actions_dict
+    
     conjuncted_actions = _conj(actions)
+    logger.debug('conjuncted actions: ' + str(conjuncted_actions))
     
     if nxt:
         return ' && X' + pstr(conjuncted_actions)
@@ -207,10 +214,14 @@ def create_states(states, variables, trans, statevar, bool_states):
         bool_states = True
     
     if bool_states:
+        logger.debug('states modeled as Boolean variables')
+        
         state_ids = {x:x for x in states}
         variables.update({s:'boolean' for s in states})
         trans += exactly_one(states)
     else:
+        logger.debug('states not modeled as Booleans')
+        
         state_ids, domain = states2ints(states, statevar)
         variables[statevar] = domain
     return state_ids
@@ -231,6 +242,12 @@ def states2ints(states, statevar):
     @rtype: {state : state_id}
     """
     # TODO: merge with actions2ints, don't strip letter
+    msg = 'mapping states: ' + str(states) +\
+          '\n\t to expressions understood by solver.'
+    logger.debug(msg)
+    
+    if not states:
+        raise Exception('No states given, got: ' + str(states))
     
     letter_int = True
     for state in states:
@@ -240,10 +257,17 @@ def states2ints(states, statevar):
             letter_int = False
             break
     
+    logger.debug('all states are strings')
     if letter_int:
+        logger.debug('all states are like "x1" where x some character')
+        
         # this allows the user to control numbering
         strip_letter = lambda x: statevar + ' = ' + x[1:]
         state_ids = {x:strip_letter(x) for x in states}
+        
+        logger.debug('after stripping the character: ' +\
+                     'state_ids = ' + str(state_ids))
+        
         n_states = len(states)
         domain = (0, n_states-1)
     else:
@@ -346,7 +370,7 @@ def create_actions(
         elif min_one:
             raise Exception('min_one requires mutex')
     else:
-        logger.debug('actions modeled as integer variables')
+        logger.debug('actions not modeled as Booleans')
         assert(use_mutex)
         action_ids, domain = actions2ints(actions, actionvar, min_one)
         variables[actionvar] = domain
@@ -374,7 +398,7 @@ def actions2ints(actions, actionvar, min_one=False):
             int_actions = False
             break
     if int_actions:
-        logger.debug('modeling actions as integers')
+        logger.debug('actions modeled as an integer variable')
         
         action_ids = {x:x for x in actions}
         n_actions = len(actions)
