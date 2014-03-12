@@ -934,25 +934,39 @@ def env_trans_from_env_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = 'X' + pstr(to_state_id)
+            postcond = ['X' + pstr(to_state_id)]
             
-            postcond += _conj_action(label, 'env_actions', nxt=True,
-                                     ids=env_action_ids)
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
             
-            # environment FTS given
-            postcond += _conj_action(label, 'actions', nxt=True, ids=action_ids)
-            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
+            # remember: this is an environment FTS, so no next for sys
+            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
+            postcond += [_conj_actions(sys_actions, sys_action_ids)]
             
-            if not _conj_action(label, 'sys_actions', ids=sys_action_ids):
+            postcond += [_conj_action(label, 'actions', nxt=True, ids=action_ids)]
+            
+            # todo: test this claus
+            if not sys_actions:
                 found_free = True
             
-            cur_list += [pstr(postcond) ]
+            cur_list += [_conj(postcond) ]
         
         # can sys kill env by setting all previous sys outputs to False ?
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
-            cur_list += [_conj_neg(sys_action_ids.values() )]
+            msg = 'no free env outgoing transition found\n' +\
+                  'instead will take disjunction with negated sys actions'
+            logger.debug(msg)
+            
+            for action_type, codomain in sys_action_ids.iteritems():
+                conj = _conj_neg(codomain.itervalues() )
+                cur_list += [conj]
+                
+                msg = 'for action_type: ' + str(action_type) +'\n' +\
+                      'with codomain: ' + str(codomain) +'\n' +\
+                      'the negated conjunction is: ' + str(conj)
+                logger.debug(msg)
         
         env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
