@@ -637,7 +637,7 @@ class States(object):
             states = state
         return states
     
-    def add(self, new_state):
+    def add(self, new_state, attr_dict=None, check=True, **attr):
         """Create single state.
         
         The new state must be hashable, unless mutable states are enabled.
@@ -662,7 +662,7 @@ class States(object):
         self._warn_if_state_exists(new_state)
         
         logger.debug('Adding new id: ' +str(new_state_id) )
-        self.graph.add_node(new_state_id)
+        self.graph.add_node(new_state_id, attr_dict, check, **attr)
         
         # mutant ?
         if self._is_mutable():
@@ -2226,17 +2226,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 # custom setter
                 setattr(self, type_name, setter)
     
-    def _check_for_untyped_keys(self, typed_attr, check):
-        untyped_keys = set(typed_attr).difference(self._edge_label_types)
+    def _check_for_untyped_keys(self, typed_attr, type_defs, check):
+        logger.debug('checking for untyped keys...')
+        
+        msg = 'attribute dict: ' + str(typed_attr)
+        msg += 'type definitions: ' + str(type_defs)
+        
+        untyped_keys = set(typed_attr).difference(type_defs)
         if untyped_keys:
-            msg = 'Given untyped edge attributes:\n\t' +\
+            msg += 'Given untyped edge attributes:\n\t' +\
                   str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
             if check:
-                msg = '\nTo allow untyped annotation, pass: check = True'
+                msg += '\nTo allow untyped annotation, pass: check = False'
                 raise AttributeError(msg)
             else:
                 msg += 'Allowed because you passed: check = True'
                 warnings.warn(msg)
+        else:
+            logger.debug('no untyped keys.')
     
     def add_node(self, n, attr_dict=None, check=True, **attr):
         """Use a ConstrainedDict as attribute dict.
@@ -2265,7 +2272,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.set_types(self._node_label_types)
         typed_attr.update(attr_dict) # type checking happens here
         
-        self._check_for_untyped_keys(typed_attr, check)
+        logger.debug('node typed_attr: ' + str(typed_attr))
+        
+        self._check_for_untyped_keys(typed_attr, self._node_label_types, check)
         
         nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
     
@@ -2353,7 +2362,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         #self._breaks_determinism(from_state, labels)
         
-        self._check_for_untyped_keys(typed_attr, check)
+        self._check_for_untyped_keys(typed_attr, self._edge_label_types, check)
         
         # the only change from nx in this clause is using TypedDict
         logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))

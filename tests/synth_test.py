@@ -17,8 +17,8 @@ def sys_fts_2_states():
     sys.transitions.add_from({'X1'}, {'X0', 'X1'})
     
     sys.atomic_propositions.add_from({'home', 'lot'})
-    sys.states.label('X0', 'home')
-    sys.states.label('X1', 'lot')
+    sys.states.add('X0', ap='home')
+    sys.states.add('X1', ap='lot')
     
     #sys.plot()
     return sys
