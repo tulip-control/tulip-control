@@ -2232,8 +2232,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             msg = 'Given untyped edge attributes:\n\t' +\
                   str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
             if check:
-                msg += 'To allow untyped annotation, pass: check = True'
-                raise KeyError(msg)
+                msg = '\nTo allow untyped annotation, pass: check = True'
+                raise AttributeError(msg)
             else:
                 msg += 'Allowed because you passed: check = True'
                 warnings.warn(msg)
@@ -2246,7 +2246,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         All other functionality remains the same.
         
         @param check: if True and untyped keys are passed,
-            then raise C{KeyError}.
+            then raise C{AttributeError}.
         """
         # avoid multiple additions
         if n in self:
@@ -2303,7 +2303,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param check: control how untyped attributes are handled:
             
             - if C{True} and C{attr_dict} has untyped keys,
-              then raise C{KeyError},
+              then raise C{AttributeError},
             
             - otherwise warn
         """

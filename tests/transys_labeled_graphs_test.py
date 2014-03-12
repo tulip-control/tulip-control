@@ -234,7 +234,7 @@ class LabeledDiGraph_test():
         
         self.G = G
     
-    @raises(KeyError)
+    @raises(AttributeError)
     def test_add_edge_only_typed(self):
         """check that untyped attribute keys are caught
         """
