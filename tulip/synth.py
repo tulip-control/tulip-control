@@ -174,7 +174,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     logger.debug('mapping to solver equivalents: ' + str(solver_expr))
     
     if not actions_dict:
-        logger.debug('actions_dict empty, returning empty string')
+        logger.debug('actions_dict empty, returning empty string\n')
         return ''
     
     if solver_expr is not None:
@@ -186,7 +186,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     logger.debug('after substitution: ' + str(actions))
     
     conjuncted_actions = _conj(actions)
-    logger.debug('conjuncted actions: ' + str(conjuncted_actions))
+    logger.debug('conjuncted actions: ' + str(conjuncted_actions) +'\n')
     
     if nxt:
         return ' X' + pstr(conjuncted_actions)
