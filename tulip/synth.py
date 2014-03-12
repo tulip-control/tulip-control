@@ -57,6 +57,7 @@ def _conj(set0):
     return " && ".join([
         "(" +str(x) +")"
         for x in set0
+        if x != ''
     ])
 
 def _conj_intersection(set0, set1, parenth=True):
@@ -159,9 +160,9 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     if action is '':
         return ''
     if nxt:
-        return ' && X' + pstr(action)
+        return ' X' + pstr(action)
     else:
-        return ' && ' + pstr(action)
+        return pstr(action)
 
 def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     """Conjunction of multiple action types.
@@ -170,24 +171,27 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     See also L{_conj_action}.
     """
     logger.debug('conjunction of actions: ' + str(actions_dict))
+    logger.debug('mapping to solver equivalents: ' + str(solver_expr))
     
     if not actions_dict:
         logger.debug('actions_dict empty, returning empty string')
         return ''
     
     if solver_expr is not None:
-        actions = [solver_expr[action_value]
+        actions = [solver_expr[type_name][action_value]
                    for type_name, action_value in actions_dict.iteritems()]
     else:
         actions = actions_dict
+    
+    logger.debug('after substitution: ' + str(actions))
     
     conjuncted_actions = _conj(actions)
     logger.debug('conjuncted actions: ' + str(conjuncted_actions))
     
     if nxt:
-        return ' && X' + pstr(conjuncted_actions)
+        return ' X' + pstr(conjuncted_actions)
     else:
-        return ' && ' + pstr(conjuncted_actions)
+        return pstr(conjuncted_actions)
 
 def create_states(states, variables, trans, statevar, bool_states):
     """Create bool or int state variables in GR(1).
@@ -618,7 +622,7 @@ def sys_open_fts2spec(
             )
             
             logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
-            sys_action_ids.update(action_ids)
+            sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             logger.debug('Found env action')
             
@@ -628,7 +632,7 @@ def sys_open_fts2spec(
             )
             
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
-            env_action_ids.update(action_ids)
+            env_action_ids[action_type] = action_ids
     
     statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
@@ -684,13 +688,13 @@ def env_open_fts2spec(
                 codomain, sys_vars, sys_trans, sys_init,
                 action_type, bool_actions, ofts.sys_actions_must
             )
-            sys_action_ids.update(action_ids)
+            sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             action_ids = create_actions(
                 codomain, env_vars, env_trans, env_init,
                 action_type, bool_actions, ofts.env_actions_must
             )
-            env_action_ids.update(action_ids)
+            env_action_ids[action_type] = action_ids
     
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
@@ -809,25 +813,26 @@ def sys_trans_from_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = pstr(to_state_id)
+            postcond = [pstr(to_state_id)]
             
             env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
-            postcond += _conj_actions(env_actions, env_action_ids)
+            postcond += [_conj_actions(env_actions, env_action_ids)]
             
             sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
-            postcond += _conj_actions(sys_actions, sys_action_ids)
+            postcond += [_conj_actions(sys_actions, sys_action_ids)]
             
             # if system FTS given
             # in case 'actions in label, then action_ids is a dict,
             # not a dict of dicts, because certainly this came
             # from an FTS, not an OpenFTS
-            postcond += _conj_action(label, 'actions', ids=action_ids)
+            postcond += [_conj_action(label, 'actions', ids=action_ids)]
             
-            cur_str += [postcond]
+            cur_str += [_conj(postcond)]
             
             msg = 'guard to state: ' + str(to_state) +\
                   ', with state_id: ' + str(to_state_id) +\
-                  'has post-conditions: ' + str(postcond)
+                  ', has post-conditions: ' + str(postcond)
+            logger.debug(msg)
             
         sys_trans += [precond + ' -> X(' + _disj(cur_str) + ')']
     return sys_trans
@@ -859,8 +864,9 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         
         # no successor states ?
         if not cur_trans:
-            env_trans += [precond + ' -> X(' +
-                _conj_neg(env_action_ids.values() ) + ')']
+            # nothing modeled for env, since sys has X(False) anyway
+            #for action_type, codomain_map in env_action_ids.iteritems():
+            #env_trans += [precond + ' -> X(' + s + ')']
             continue
         
         # collect possible next env actions
@@ -871,7 +877,13 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
             if not env_actions:
                 continue
             
+            logger.debug('env_actions: ' + str(env_actions))
+            logger.debug('env_action_ids: ' + str(env_action_ids))
+            
             env_action_comb = _conj_actions(env_actions, env_action_ids)
+            
+            logger.debug('env_action_comb: ' + str(env_action_comb))
+            
             next_env_action_combs.add(env_action_comb)
         next_env_actions = _disj(next_env_action_combs)
         
