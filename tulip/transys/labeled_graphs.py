@@ -2208,8 +2208,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         logger.debug('checking for untyped keys...')
         
-        msg = 'attribute dict: ' + str(typed_attr)
-        msg += 'type definitions: ' + str(type_defs)
+        msg = 'attribute dict: ' + str(typed_attr) + '\n'
+        msg += 'type definitions: ' + str(type_defs) + '\n'
         
         untyped_keys = set(typed_attr).difference(type_defs)
         if untyped_keys:

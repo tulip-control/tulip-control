@@ -25,8 +25,8 @@ def prepend_with_test():
 
 class States_test():
     def setUp(self):
-        self.S_mutable = labeled_graphs.States(MultiDiGraph(), mutable=True)
-        self.S_immutable = labeled_graphs.States(MultiDiGraph(), mutable=False)
+        self.S_mutable = labeled_graphs.States(labeled_graphs.LabeledDiGraph(), mutable=True)
+        self.S_immutable = labeled_graphs.States(labeled_graphs.LabeledDiGraph(), mutable=False)
 
     def tearDown(self):
         self.S_mutable = None
@@ -91,10 +91,10 @@ class States_test():
 
 class Transitions_test:
     def setUp(self):
-        G = labeled_graphs.LabeledStateDiGraph()
+        G = labeled_graphs.LabeledDiGraph()
         self.T = labeled_graphs.Transitions(G)
         G.transitions = self.T
-        self.T.graph.states.add_from([1, 2, 3])
+        self.T.graph.states.add_from([1, 2, 3, 4])
 
     def tearDown(self):
         self.T = None

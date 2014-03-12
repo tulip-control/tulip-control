@@ -809,7 +809,7 @@ class TypedDict(dict):
         super(TypedDict, self).__setitem__(i, y)
     
     def __str__(self):
-        return 'TypedDict(' + str(list(self)) + ')'
+        return 'TypedDict(' + dict.__str__(self) + ')'
     
     def update(self, *args, **kwargs):
         if args:
