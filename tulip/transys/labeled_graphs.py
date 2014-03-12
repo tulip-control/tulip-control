@@ -1359,39 +1359,10 @@ class Transitions(object):
         
         return (from_state_id, to_state_id)
     
-    def add(self, from_state, to_state, check_states=True):
-        """Add unlabeled transition, checking states \\in set of states.
-        
-        If either state not in set of states, raise exception.
-        
-        Argument check_states = False can override the check.
-        If check_states = False, and states not already in set of states,
-        then they are added.
+    def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
+        """Wrapper for L{LabeledDiGraph.add_edge}.
         """
-        if not isinstance(check_states, bool):
-            raise TypeError('check_states must be bool.\n'
-                            +'Maybe you intended to call add_labeled instead ?')
-        
-        if not check_states:
-            self.graph.states.add_from({from_state, to_state} )
-        
-        if from_state not in self.graph.states():
-            raise Exception('from_state:\n\t' +str(from_state) +
-                            '\\notin states:\n\t' +str(self.graph.states() ) )
-        
-        if to_state not in self.graph.states():
-            raise Exception('to_state:\n\t' +str(to_state) +
-                            '\\notin states:\n\t' +str(self.graph.states() ) )
-        
-        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        
-        logger.debug('Adding transition:\n\t' +
-                      str(from_state_id) +'--->' +str(to_state_id) )
-        
-        # if another un/labeled edge already exists between these nodes,
-        # then avoid duplication of edges
-        if not self.graph.has_edge(from_state_id, to_state_id):
-            self.graph.add_edge(from_state_id, to_state_id)
+        self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
     
     def add_from(self, from_states, to_states, check_states=True):
         """Add non-deterministic transition.
@@ -2316,11 +2287,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             - otherwise warn
         """
+        #TODO: (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
+        
         # check nodes exist
         if u not in self.succ:
-            raise Exception('Graph does not have node: ' + str(u))
+            raise ValueError('Graph does not have node u: ' + str(u))
         if v not in self.succ:
-            raise Exception('Graph does not have node: ' + str(v))
+            raise ValueError('Graph does not have node v: ' + str(v))
         
         if attr_dict is None:
             attr_dict=attr
