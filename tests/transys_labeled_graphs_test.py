@@ -209,27 +209,55 @@ class LabeledStates_test:
         same_result = self.S_mutable_ap.find(ap={'p'})
         assert(same_result == result)
 
-def labeled_digraph_test():
-    p = PowerSet({1, 2})
-    node_labeling = [('month', ['Jan', 'Feb']),
-                     ('day', ['Mon', 'Tue']),
-                     ('comb', p, p.math_set)]
-    edge_labeling = node_labeling
-    g = labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
+class LabeledDiGraph_test():
+    def setUp(self):
+        p = PowerSet({1, 2})
+        node_labeling = [('month', ['Jan', 'Feb']),
+                         ('day', ['Mon', 'Tue']),
+                         ('comb', p, p.math_set)]
+        edge_labeling = node_labeling
+        G = labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
+        
+        G.states.add_from({1, 2})
+        G.transitions.add_labeled(1, 2, {'month':'Jan', 'day':'Mon'})
+        
+        assert_raises(Exception, G.transitions.add_labeled,
+                      1, 2, {'month':'Jan', 'day':'abc'})
+        
+        # note how untyped keys can be set directly via assignment,
+        # whereas check=False is needed for G.add_node
+        G.node[1]['mont'] = 'Feb'
+        assert(G.node[1] == {'mont':'Feb'})
+        
+        G[1][2][0]['day'] = 'Tue'
+        assert(G[1][2][0] == {'month':'Jan', 'day':'Tue'})
+        
+        self.G = G
     
-    g.states.add_from({1, 2})
-    g.transitions.add_labeled(1, 2, {'month':'Jan', 'day':'Mon'})
+    @raises(KeyError)
+    def test_add_edge_only_typed(self):
+        """check that untyped attribute keys are caught
+        """
+        self.G.add_edge(1, 2, mo='Jan')
     
-    assert_raises(Exception, g.transitions.add_labeled,
-                  1, 2, {'month':'Jan', 'day':'abc'})
+    def test_add_edge_untyped(self):
+        """the untyped attribute key 'mo' should be allowed,
+        because check=False
+        """
+        self.G.add_edge(1, 2, mo='Jan', check=False)
+        assert(self.G[1][2][1] == {'mo':'Jan'})
     
-    g.node[1]['mont'] = 'Feb'
-    g[1][2][0]['day'] = 'Tue'
+    @raises(ValueError)
+    def test_add_edge_illegal_value(self):
+        self.G.add_edge(1, 2, month='haha')
     
-    with assert_raises(ValueError):
-        g.node[1]['month'] = 'abc'
-    with assert_raises(ValueError):
-        g[1][2][0]['day'] = 'abc'
+    @raises(ValueError)
+    def test_node_subscript_assign_illegal_value(self):
+        self.G.node[1]['month'] = 'abc'
+    
+    @raises(ValueError)
+    def test_edge_subscript_assign_illegal_value(self):
+        self.G[1][2][0]['day'] = 'abc'
     
 def open_fts_multiple_env_actions_test():
     env_modes = MathSet({'up', 'down'})
