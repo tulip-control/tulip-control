@@ -412,21 +412,23 @@ def multiple_env_actions_test():
     sys wins marginally, due to assumption on
     next combination of actions by env players.
     """
-    env_actions = [('alice', transys.MathSet() ),
-                   ('bob', transys.MathSet() )]
+    env_actions = [('env_alice', transys.MathSet({'left', 'right'}) ),
+                   ('env_bob', transys.MathSet({'left', 'right'}) )]
     
     sys = transys.OpenFTS(env_actions)
-    sys.states.add_from({1,2,3})
-    sys.states.initial.add_from({1})
+    sys.states.add_from({'s1', 's2', 's3'})
+    sys.states.initial.add_from({'s1'})
     
-    sys.add_edge(1, 2, alice='left', bob='right')
-    sys.add_edge(1, 3, alice='right', bob='left') # at state 3 sys loses
-    sys.add_edge(2, 1, alice='left', bob='right')
+    sys.add_edge('s1', 's2', env_alice='left', env_bob='right')
+    sys.add_edge('s1', 's3', env_alice='right', env_bob='left') # at state 3 sys loses
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='right')
     
-    env_safe = {'(loc = 1) -> X( (alice = left) && (bob = right) )'}
-    sys_prog = {'loc = 1', 'loc = 2'}
+    logging.debug(sys)
+    
+    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = right) )'}
+    sys_prog = {'loc = s1', 'loc = s2'}
     
     specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
     
     r = synth.is_realizable('gr1c', specs, sys=sys)
-    assert(not r)
+    assert(r)
