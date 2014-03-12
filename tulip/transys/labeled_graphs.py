@@ -43,7 +43,7 @@ import copy
 
 import networkx as nx
 
-from .mathset import MathSet, SubSet, PowerSet, \
+from .mathset import MathSet, SubSet, PowerSet, TypedDict, \
     is_subset, unique
 from .export import save_d3, graph2dot
 
@@ -2226,17 +2226,27 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 # custom setter
                 setattr(self, type_name, setter)
     
-    def add_node(self, n, attr_dict=None, **attr):
+    def _check_for_untyped_keys(self, typed_attr, check):
+        untyped_keys = set(typed_attr).difference(self._edge_label_types)
+        if untyped_keys:
+            msg = 'Given untyped edge attributes:\n\t' +\
+                  str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
+            if check:
+                msg += 'To allow untyped annotation, pass: check = True'
+                raise KeyError(msg)
+            else:
+                msg += 'Allowed because you passed: check = True'
+                warnings.warn(msg)
+    
+    def add_node(self, n, attr_dict=None, check=True, **attr):
         """Use a ConstrainedDict as attribute dict.
         
         Log warning if node already exists.
         
-        A 'check' argument to turn off the exception
-        is not available any more, to simplify things
-        and allow 'check' as a possible key in C{attr}.
-        Use a try clause instead.
-        
         All other functionality remains the same.
+        
+        @param check: if True and untyped keys are passed,
+            then raise C{KeyError}.
         """
         # avoid multiple additions
         if n in self:
@@ -2255,6 +2265,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.set_types(self._node_label_types)
         typed_attr.update(attr_dict) # type checking happens here
         
+        self._check_for_untyped_keys(typed_attr, check)
+        
         nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
     
     def add_nodes_from(self, nodes, **attr):
@@ -2270,7 +2282,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.add_node(node, attr_dict=attr_dict)
     
-    def add_edge(self, u, v, attr_dict=None, **attr):
+    def add_edge(self, u, v, attr_dict=None, check=True, **attr):
         """Use a ConstrainedDict as attribute dict.
         
         Raise exception if C{u} or C{v} are not already graph nodes.
@@ -2283,9 +2295,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 
                 G[i][j][key]['attr_name'] = attr_value
         
-        Argument C{key} has been removed, because edges defined
+        Argument C{key} has been removed compared to
+        L{networkx.MutliDigraph.add_edge}, because edges are defined
         by their labeling, i.e., multiple edges with same labeling
         are not allowed.
+        
+        @param check: control how untyped attributes are handled:
+            
+            - if C{True} and C{attr_dict} has untyped keys,
+              then raise C{KeyError},
+            
+            - otherwise warn
         """
         # check nodes exist
         if u not in self.succ:
@@ -2306,6 +2326,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.set_types(self._edge_label_types)
         typed_attr.update(attr_dict) # type checking happens here
         
+        logger.debug('Given: attr_dict = ' + str(attr_dict))
+        logger.debug('Stored in: typed_attr = ' + str(typed_attr))
+        
+        # may be possible to speedup using .succ
         existing_u_v = self.get_edge_data(u, v, default={})
         
         if dict() in existing_u_v.values():
@@ -2324,12 +2348,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
             msg += '\t to_state = ' +str(v) +'\n'
             msg += '\t label = ' +str(typed_attr) +'\n'
             warnings.warn(msg)
+            logger.warning(msg)
             return
         
         #self._breaks_determinism(from_state, labels)
         
-        # only change from nx in this clause is using TypedDict
+        self._check_for_untyped_keys(typed_attr, check)
+        
+        # the only change from nx in this clause is using TypedDict
+        logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
         if v in self.succ[u]:
+            msg = 'there already exist directed edges with ' +\
+                  'same end-points'
+            logger.debug(msg)
+            
             keydict = self.adj[u][v]
             # find a unique integer key
             key = len(keydict)
@@ -2341,6 +2373,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             keydict[key] = datadict
         else:
+            logger.debug('first directed edge between these nodes')
             # selfloops work this way without special treatment
             key = 0
             keydict = {key:typed_attr}
