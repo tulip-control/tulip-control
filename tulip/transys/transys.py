@@ -601,10 +601,20 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         s += pformat(self.states(data=True), indent=3) +2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'System Actions:\n'
-        s += pformat(self.sys_actions, indent=3) +2*'\n'
-        s += 'Environment Actions:\n'
-        s += pformat(self.env_actions, indent=3) +2*'\n'
+        for action_type, codomain in self.actions.iteritems():
+            if 'sys' in action_type:
+                s += 'System Action Type: ' + str(action_type) +\
+                     ', with possible values: ' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            elif 'env' in action_type:
+                s += 'Environment Action Type: ' + str(action_type) +\
+                     ', with possible values:\n\t' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            else:
+                s += 'Action type controlled by neither env nor sys\n' +\
+                     ' (will cause you errors later)' +\
+                     ', with possible values:\n\t'
+                s += pformat(codomain, indent=3) +2*'\n'
         s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
         s += pformat(self.transitions(labeled=True), indent=3)
         s += '\n' +_hl +'\n'
