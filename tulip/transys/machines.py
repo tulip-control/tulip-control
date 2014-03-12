@@ -36,7 +36,7 @@ from collections import OrderedDict
 from pprint import pformat
 from random import choice
 
-from .labeled_graphs import LabeledStateDiGraph
+from .labeled_graphs import LabeledDiGraph
 from . import executions
 from .export import machine2scxml
 
@@ -55,7 +55,7 @@ def is_valuation(ports, valuations):
         if not ok:
             raise TypeError('Not a valuation.')
 
-class FiniteStateMachine(LabeledStateDiGraph):
+class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
     Inputs
@@ -202,7 +202,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
         self.default_export_fname = 'fsm'
         
-        LabeledStateDiGraph.__init__(self, **args)
+        LabeledDiGraph.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
