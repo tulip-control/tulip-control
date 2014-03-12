@@ -32,6 +32,9 @@
 """ 
 Formulae constituting specifications
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import time
 import re, copy
 
@@ -464,6 +467,13 @@ class GRSpec(LTL):
         symfound = True
         while (symfound):
             for propSymbol, prop in props.iteritems():
+                logger.debug('propSymbol: ' + str(propSymbol))
+                logger.debug('prop: ' + str(prop))
+                
+                if not isinstance(propSymbol, str):
+                    raise TypeError('propSymbol: ' + str(propSymbol) +
+                                    'is not a string.')
+                
                 if propSymbol[-1] != "'":  # To handle gr1c primed variables
                     propSymbol += r"\b"
                 if (verbose > 2):
@@ -719,6 +729,21 @@ def _sub_var(spec, vars_dict):
     for variable, domain in vars_dict.items():
         if not isinstance(domain, list):
             continue
+        
+        if len(domain) == 0:
+            raise Exception('variable: ' + str(variable) +
+                            'has empty domain: ' + str(domain))
+        
+        logger.debug('mapping arbitrary finite domain to integers...')
+        
+        # integers cannot be an arbitrary finite domain,
+        # neither as integers (like 1), nor as strings (like '1')
+        # because they will be indistinguishable from
+        # from values of gr1c integer variables        
+        if any([not isinstance(x, str) for x in domain]):
+            msg = 'Found non-string elements in domain: ' + str(domain) + '\n'
+            msg += 'only string elements allowed in arbitrary finite domains.'
+            raise TypeError(msg)
         
         # the order provided will be the map to ints
         vars_dict[variable] = (0, len(domain)-1)
