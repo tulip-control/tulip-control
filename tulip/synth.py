@@ -859,6 +859,8 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     @param env_action_ids: dict of dicts, see L{sys_trans_from_ts}.
     """
     env_trans = []
+    
+    # this probably useless for multiple action types
     if not env_action_ids:
         return env_trans
     
@@ -892,6 +894,12 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
             
             next_env_action_combs.add(env_action_comb)
         next_env_actions = _disj(next_env_action_combs)
+        
+        logger.debug('next_env_actions: ' + str(next_env_actions))
+        
+        # no next env actions ?
+        if not next_env_actions:
+            continue
         
         env_trans += [precond + ' -> X(' +
                       next_env_actions + ')']
