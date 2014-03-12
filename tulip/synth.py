@@ -169,7 +169,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     Includes solver expression substitution.
     See also L{_conj_action}.
     """
-    logger.debug(actions_dict)
+    logger.debug('conjunction of actions: ' + str(actions_dict))
     if solver_expr is not None:
         actions = [solver_expr[action_value]
                    for type_name, action_value in actions_dict.iteritems()]
@@ -293,9 +293,10 @@ def create_actions(
     @rtype: dict
     """
     if not actions:
+        logger.debug('actions empty, empty dict for solver expr')
         return dict()
     
-    logger.debug('create actions:' + str(actions) )
+    logger.debug('creating actions from: ' + str(actions) )
     
     # options for modeling actions
     if actions_must is None:
@@ -311,16 +312,23 @@ def create_actions(
         raise Exception('Unknown value: actions_must = ' +
                         str(actions_must) )
     
+    yesno = lambda x: 'Yes' if x else 'No'
+    msg = 'options for modeling actions:\n\t' +\
+          'mutex: ' + yesno(use_mutex) +'\n\t' +\
+          'min_one: ' + yesno(min_one)
+    logger.debug(msg)
+    
     # too few values for gr1c ?
     #if len(actions) < 3:
     #    bool_actions = True
     
     # no mutex -> cannot use int variable
     if not use_mutex:
+        logger.debug('not using mutex: Booleans must model actions')
         bool_actions = True
     
     if bool_actions:
-        logger.debug('bool actions')
+        logger.debug('actions modeled as Boolean variables')
         
         action_ids = {x:x for x in actions}
         variables.update({a:'boolean' for a in actions})
@@ -338,18 +346,36 @@ def create_actions(
         elif min_one:
             raise Exception('min_one requires mutex')
     else:
+        logger.debug('actions modeled as integer variables')
         assert(use_mutex)
         action_ids, domain = actions2ints(actions, actionvar, min_one)
         variables[actionvar] = domain
+        
+        msg = 'created solver variable: ' + str(actionvar) + '\n\t' +\
+              'with domain: ' + str(domain)
+        logger.debug(msg)
+    
+    msg = 'for tulip variable: ' + str(actionvar) +\
+          ' (an action type)\n\t' +\
+          'the map from [tulip action values] ---> ' +\
+          '[solver expressions] is:\n' + 2*'\t' + str(action_ids)
+    logger.debug(msg)
     return action_ids
 
 def actions2ints(actions, actionvar, min_one=False):
+    msg = 'mapping domain of action_type: ' + str(actionvar) +\
+          '\n\t to expressions understood by solver.'
+    logger.debug(msg)
+    
     int_actions = True
     for action in actions:
         if not isinstance(action, int):
+            logger.debug('not all actions are integers')
             int_actions = False
             break
     if int_actions:
+        logger.debug('modeling actions as integers')
+        
         action_ids = {x:x for x in actions}
         n_actions = len(actions)
         
@@ -360,11 +386,17 @@ def actions2ints(actions, actionvar, min_one=False):
             n = n_actions
         domain = (0, n)
     else:
+        logger.debug('modeling actions as arbitrary finite domain')
+        
         setact = lambda s: actionvar + ' = ' + s
         action_ids = {s:setact(s) for s in actions}
         domain = list(actions)
         if not min_one:
             domain += [actionvar + 'none']
+            
+            msg = 'domain has been extended, because all actions\n\t' +\
+                  'could be False (constraint: min_one = False).'
+            logger.debug(msg)
         
     return (action_ids, domain)
 
@@ -537,17 +569,29 @@ def sys_open_fts2spec(
     env_action_ids = dict()
     
     for action_type, codomain in actions.iteritems():
+        msg = 'action_type:\n\t' + str(action_type) +'\n'
+        msg += 'with codomain:\n\t' + str(codomain)
+        logger.debug(msg)
+        
         if 'sys' in action_type:
+            logger.debug('Found sys action')
+            
             action_ids = create_actions(
                 codomain, sys_vars, sys_trans, sys_init,
                 action_type, bool_actions, ofts.sys_actions_must
             )
+            
+            logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
             sys_action_ids.update(action_ids)
         elif 'env' in action_type:
+            logger.debug('Found env action')
+            
             action_ids = create_actions(
                 codomain, env_vars, env_trans, env_init,
                 action_type, bool_actions, ofts.env_actions_must
             )
+            
+            logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids.update(action_ids)
     
     statevar = 'loc'
@@ -705,6 +749,7 @@ def sys_trans_from_ts(
     
     @param env_action_ids: same as C{sys-action_ids}
     """
+    logger.debug('modeling sys transitions in logic')
     sys_trans = []
     
     # Transitions
@@ -714,8 +759,13 @@ def sys_trans_from_ts(
         
         cur_trans = trans.find([from_state])
         
+        msg = 'from state: ' + str(from_state) +\
+              ', the available transitions are:\n\t' + str(cur_trans)
+        logger.debug(msg)
+        
         # no successor states ?
         if not cur_trans:
+            logger.debug('state: ' + str(from_state) + ' is deadend !')
             sys_trans += [precond + ' -> X(False)']
             continue
         
@@ -738,6 +788,10 @@ def sys_trans_from_ts(
             postcond += _conj_action(label, 'actions', ids=action_ids)
             
             cur_str += [postcond]
+            
+            msg = 'guard to state: ' + str(to_state) +\
+                  ', with state_id: ' + str(to_state_id) +\
+                  'has post-conditions: ' + str(postcond)
             
         sys_trans += [precond + ' -> X(' + _disj(cur_str) + ')']
     return sys_trans
@@ -1037,6 +1091,12 @@ def is_realizable(
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
+    
+    if r:
+        logger.debug('is realizable')
+    else:
+        logger.debug('is not realizable')
+    
     return r
 
 def _check_solver_options(option, bool_states, action_vars, bool_actions):
