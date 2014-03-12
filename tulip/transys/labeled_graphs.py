@@ -2297,6 +2297,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         #TODO: (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
         
+        # legacy
+        if 'check_states' in attr:
+            msg = 'saw keyword argument: check_states ' +\
+                  'which is no longer available, ' +\
+                  'firstly add the new nodes.'
+            logger.warning(msg)
+        
         # check nodes exist
         if u not in self.succ:
             raise ValueError('Graph does not have node u: ' + str(u))

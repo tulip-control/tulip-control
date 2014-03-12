@@ -115,16 +115,15 @@ class Transitions_test:
         self.T.add(10, 11, check_states=True)
 
     def test_add_from(self):
-        # This also tests Transitions.add(..., check_states=False)
-        self.T.add(1, 4, check_states=False)
+        self.T.add(1, 4)
         assert len(self.T) == 1 and set([t for t in self.T()]) == set([(1, 4)])
-        self.T.add(1, 4, check_states=True)
+        assert_raises(Exception, self.T.add, 1, 4)
         assert len(self.T) == 1  # Edge already exists, so not added
 
         self.T.add_from([5, 2], [4, 3], check_states=False)
         assert len(self.T) == 5
         assert set([t for t in self.T()]) == set([(5, 4), (5, 3), (1, 4),
-                                                  (2, 4), (2, 3)])
+                                                 (2, 4), (2, 3)])
 
     def test_remove(self):
         # This also tests remove_from
