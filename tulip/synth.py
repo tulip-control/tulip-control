@@ -255,7 +255,6 @@ def states2ints(states, statevar):
             int(state[1:])
         except:
             letter_int = False
-            break
     
     logger.debug('all states are strings')
     if letter_int:
@@ -264,14 +263,27 @@ def states2ints(states, statevar):
         # this allows the user to control numbering
         strip_letter = lambda x: statevar + ' = ' + x[1:]
         state_ids = {x:strip_letter(x) for x in states}
+        state_ints = {int(x[1:]) for x in states}
+        n_states = len(states)
+        domain = (0, n_states-1)
+        solver_range = set(range(0, n_states))
         
         logger.debug('after stripping the character: ' +\
                      'state_ids = ' + str(state_ids))
         
-        n_states = len(states)
-        domain = (0, n_states-1)
-    else:
-        setloc = lambda s: statevar + ' = ' + s
+        # any missing integers ?
+        if state_ints != solver_range:
+            msg = 'some integers within string states missing:' +\
+                  'compare given:\n\t' + str(state_ints) +\
+                  '\n to same length range:\n\t' + str(solver_range) +\
+                  '\n Will try to model them as arbitrary finite domain...'
+            logger.error(msg)
+            letter_int = False
+    
+    # try arbitrary finite domain
+    if not letter_int:
+        logger.debug('string states modeled as an arbitrary finite domain')
+        setloc = lambda s: statevar + ' = ' + str(s)
         state_ids = {s:setloc(s) for s in states}
         domain = list(states)
     
