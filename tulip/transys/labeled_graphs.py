@@ -2376,6 +2376,136 @@ class LabeledDiGraph(nx.MultiDiGraph):
             keydict = {key:typed_attr}
             self.succ[u][v] = keydict
             self.pred[v][u] = keydict
+    
+    def dot_str(self, wrap=10):
+        """Return dot string.
+        
+        Requires pydot.        
+        """
+        return graph2dot.graph2dot_str(self, wrap)
+    
+    def save(self, filename='default', fileformat=None,
+             add_missing_extension=True, rankdir='LR', prog=None,
+             wrap=10):
+        """Save image to file.
+        
+        Recommended: pdf, html, svg (can render LaTeX labels with inkscape export)
+        
+        Caution
+        =======
+        rankdir experimental argument
+        
+        Depends
+        =======
+        dot, pydot
+        
+        See Also
+        ========
+        L{plot}, pydot.Dot.write
+        
+        @param fileformat: type of image file
+        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
+            (for more, see pydot.write)
+            | 'scxml' | 'html' (using d3.js for animation)
+        
+        @param filename: path to image
+            (extension C{.fileformat} appened if missing and
+            C{add_missing_extension==True} )
+            Default:
+            
+              - If C{self.name} is not set and no C{path} given,
+                  then use C{self.default_export_fname} prepended with
+                  C{self.default_export_fname}.
+              - If C{self.name} is set, but no C{path} given,
+                  then use C{self.name} prepended with
+                  C{self.default_export_fname}.
+              - If C{path} is given, use that.
+        @type filename: str
+        
+        @param add_missing_extension: if extension C{.fileformat} missing,
+            it is appended
+        @type add_missing_extension: bool
+        
+        @param rankdir: direction for dot layout
+        @type rankdir: str = 'TB' | 'LR'
+            (i.e., Top->Bottom | Left->Right)
+        
+        @param prog: executable to call
+        @type prog: dot | circo | ... see pydot.Dot.write
+
+        @rtype: bool
+        @return: True if saving completed successfully, False otherwise.
+        """
+        if fileformat is None:
+            fname, fextension = os.path.splitext(filename)
+            if not fextension:
+                fextension = '.pdf'
+            fileformat = fextension[1:]
+        
+        path = self._export_fname(filename, fileformat,
+                                  addext=add_missing_extension)
+        
+        if fileformat is 'html':
+            return save_d3.labeled_digraph2d3(self, path)
+        
+        # subclass has extra export formats ?
+        if hasattr(self, '_save'):
+            if self._save(path, fileformat):
+                return True
+        
+        if prog is None:
+            prog = self.default_layout
+        
+        graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
+        
+        return True
+    
+    def _add_missing_extension(self, path, file_type):
+        filename, file_extension = os.path.splitext(path)
+        desired_extension = os.path.extsep +file_type
+        if file_extension != desired_extension:
+            path = filename +desired_extension
+        return path
+    
+    def _export_fname(self, path, file_type, addext):
+        if path == 'default':
+            if self.name == '':
+                path = self.default_export_path +self.default_export_fname
+            else:
+                path = self.default_export_path +self.name
+        
+        if addext:
+            path = self._add_missing_extension(path, file_type)
+        
+        return path
+    
+    def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
+        """Plot image using dot.
+        
+        No file I/O involved.
+        Requires GraphViz dot and either Matplotlib or IPython.
+        
+        NetworkX does not yet support plotting multiple edges between 2 nodes.
+        This method fixes that issue, so users don't need to look at files
+        in a separate viewer during development.
+        
+        See Also
+        ========
+        L{save}
+        
+        Depends
+        =======
+        dot and either of IPython or Matplotlib
+        """
+        # anything to plot ?
+        if not self.states:
+            print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
+            return
+        
+        if prog is None:
+            prog = self.default_layout
+        
+        return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
 class LabeledStateDiGraph(nx.MultiDiGraph):
     """Species: System & Automaton.
@@ -2611,136 +2741,6 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
             if self.states.is_terminal(state):
                 return True
         return False
-    
-    def dot_str(self, wrap=10):
-        """Return dot string.
-        
-        Requires pydot.        
-        """
-        return graph2dot.graph2dot_str(self, wrap)
-    
-    def save(self, filename='default', fileformat=None,
-             add_missing_extension=True, rankdir='LR', prog=None,
-             wrap=10):
-        """Save image to file.
-        
-        Recommended: pdf, html, svg (can render LaTeX labels with inkscape export)
-        
-        Caution
-        =======
-        rankdir experimental argument
-        
-        Depends
-        =======
-        dot, pydot
-        
-        See Also
-        ========
-        L{plot}, pydot.Dot.write
-        
-        @param fileformat: type of image file
-        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
-            (for more, see pydot.write)
-            | 'scxml' | 'html' (using d3.js for animation)
-        
-        @param filename: path to image
-            (extension C{.fileformat} appened if missing and
-            C{add_missing_extension==True} )
-            Default:
-            
-              - If C{self.name} is not set and no C{path} given,
-                  then use C{self.default_export_fname} prepended with
-                  C{self.default_export_fname}.
-              - If C{self.name} is set, but no C{path} given,
-                  then use C{self.name} prepended with
-                  C{self.default_export_fname}.
-              - If C{path} is given, use that.
-        @type filename: str
-        
-        @param add_missing_extension: if extension C{.fileformat} missing,
-            it is appended
-        @type add_missing_extension: bool
-        
-        @param rankdir: direction for dot layout
-        @type rankdir: str = 'TB' | 'LR'
-            (i.e., Top->Bottom | Left->Right)
-        
-        @param prog: executable to call
-        @type prog: dot | circo | ... see pydot.Dot.write
-
-        @rtype: bool
-        @return: True if saving completed successfully, False otherwise.
-        """
-        if fileformat is None:
-            fname, fextension = os.path.splitext(filename)
-            if not fextension:
-                fextension = '.pdf'
-            fileformat = fextension[1:]
-        
-        path = self._export_fname(filename, fileformat,
-                                  addext=add_missing_extension)
-        
-        if fileformat is 'html':
-            return save_d3.labeled_digraph2d3(self, path)
-        
-        # subclass has extra export formats ?
-        if hasattr(self, '_save'):
-            if self._save(path, fileformat):
-                return True
-        
-        if prog is None:
-            prog = self.default_layout
-        
-        graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
-        
-        return True
-    
-    def _add_missing_extension(self, path, file_type):
-        filename, file_extension = os.path.splitext(path)
-        desired_extension = os.path.extsep +file_type
-        if file_extension != desired_extension:
-            path = filename +desired_extension
-        return path
-    
-    def _export_fname(self, path, file_type, addext):
-        if path == 'default':
-            if self.name == '':
-                path = self.default_export_path +self.default_export_fname
-            else:
-                path = self.default_export_path +self.name
-        
-        if addext:
-            path = self._add_missing_extension(path, file_type)
-        
-        return path
-    
-    def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
-        """Plot image using dot.
-        
-        No file I/O involved.
-        Requires GraphViz dot and either Matplotlib or IPython.
-        
-        NetworkX does not yet support plotting multiple edges between 2 nodes.
-        This method fixes that issue, so users don't need to look at files
-        in a separate viewer during development.
-        
-        See Also
-        ========
-        L{save}
-        
-        Depends
-        =======
-        dot and either of IPython or Matplotlib
-        """
-        # anything to plot ?
-        if not self.states:
-            print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
-            return
-        
-        if prog is None:
-            prog = self.default_layout
-        
-        return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
 def str2singleton(ap_label):
         """If string, convert to set(string).
