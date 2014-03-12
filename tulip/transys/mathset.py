@@ -789,7 +789,7 @@ class TypedDict(dict):
         self.update(*args, **kwargs)
     
     def __setitem__(self, i, y):
-        """Before setting, check if value y is allowed for key i.
+        """Raise ValueError if value y not allowed for key i.
         """
         valid_y = True
         try:

@@ -2,10 +2,10 @@
 """
 Tests for transys.mathset (part of transys subpackage)
 """
-
+from nose.tools import raises
 from collections import Iterable
 
-from tulip.transys.mathset import MathSet, SubSet, PowerSet
+from tulip.transys.mathset import MathSet, SubSet, PowerSet, TypedDict
 from tulip.transys.mathset import compare_lists, unique, contains_multiple
 from tulip import transys as trs
 
@@ -222,3 +222,27 @@ class PowerSet_operations_test:
         assert set([1,2,3]) in p
         assert self.singleton() == [(), (1,)]
         assert self.empty() == [()]
+
+class TypedDict_test():
+    def setUp(self):
+        d = TypedDict()
+        d.set_types({'animal':{'dog', 'cat'} })
+        self.d = d
+    
+    def test_add_typed_key_value(self):
+        d = self.d
+        
+        d['animal'] = 'dog'
+        assert(d['animal'] == 'dog')
+    
+    @raises(ValueError)
+    def test_add_typed_key_illegal_value(self):
+        d = self.d
+        
+        d['animal'] = 'elephant'
+    
+    def test_add_untyped_key_value(self):
+        d = self.d
+        
+        d['human'] = 'Bob'
+        assert(d['human'] == 'Bob')
