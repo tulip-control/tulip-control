@@ -2079,6 +2079,17 @@ class LabeledTransitions(Transitions):
         #self.actions.remove(action)
 
 class TypedDict(dict):
+    """dict subclass where values can be constrained by key.
+    
+    For each key, a domain can optionally be defined,
+    which restricts the admissible values that can be
+    paired with that key.
+    """
+    # credits for debugging this go here:
+    #   http://stackoverflow.com/questions/2060972/
+    def __init__(self, *args, **kwargs):
+        self.update(*args, **kwargs)
+    
     def __setitem__(self, i, y):
         """Before setting, check if value y is allowed for key i.
         """
@@ -2097,7 +2108,26 @@ class TypedDict(dict):
             msg += str(self.allowed_values[i])
             raise ValueError(msg)
         
-        dict.__setitem__(self, i, y)
+        super(TypedDict, self).__setitem__(i, y)
+    
+    def __str__(self):
+        return 'TypedDict(' + str(list(self)) + ')'
+    
+    def update(self, *args, **kwargs):
+        if args:
+            if len(args) > 1:
+                raise TypeError("update expected at most 1 arguments, "
+                                "got %d" % len(args))
+            other = dict(args[0])
+            for key in other:
+                self[key] = other[key]
+        for key in kwargs:
+            self[key] = kwargs[key]
+
+    def setdefault(self, key, value=None):
+        if key not in self:
+            self[key] = value
+        return self[key]
     
     def set_types(self, allowed_values):
         """Restrict values the key can be paired with.
