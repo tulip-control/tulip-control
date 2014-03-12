@@ -255,6 +255,12 @@ def states2ints(states, statevar):
     
     letter_int = True
     for state in states:
+        if not isinstance(state, str):
+            msg = 'States must be strings, not anything else.\n' +\
+                  'Got instead: ' + str(state) +\
+                  ', of type: ' + str(type(state) )
+            raise TypeError(msg)
+        
         try:
             int(state[1:])
         except:
