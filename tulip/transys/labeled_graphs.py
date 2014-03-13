@@ -69,7 +69,7 @@ class LabelConsistency(object):
         """
         self.label_def = label_def
     
-    def _attr_dict2sublabels(self, attr_dict, as_dict):
+    def _attr_dict2sublabels(self, attr_dict, as_dict=True, typed_only=True):
         """Extract sublabels representation from edge attribute dict.
         
         If C{as_dict==True}, then return dict of::
@@ -83,21 +83,21 @@ class LabelConsistency(object):
         L{_attr_dict2sublabels_list}
         """
         if as_dict:
-            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
+            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict, typed_only)
             annotation = sublabels_dict
         else:
-            sublabel_values = self._attr_dict2sublabels_list(attr_dict)
+            sublabel_values = self._attr_dict2sublabels_list(attr_dict, typed_only)
             annotation = sublabel_values
         
         return annotation
     
-    def _attr_dict2sublabels_list(self, attr_dict):
+    def _attr_dict2sublabels_list(self, attr_dict, typed_only=False):
         """Convert attribute dict to tuple of sublabel values."""
-        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict)
-        sublabel_values = self._sublabels_dict2list(sublabels_dict)
+        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict, typed_only)
+        sublabel_values = self._sublabels_dict2list(sublabels_dict, typed_only)
         return sublabel_values
     
-    def _attr_dict2sublabels_dict(self, attr_dict):
+    def _attr_dict2sublabels_dict(self, attr_dict, typed_only=False):
         """Filter the edge attributes which are not labels.
         
         See Also
@@ -110,12 +110,15 @@ class LabelConsistency(object):
         #self._exist_labels()
         
         sublabel_ordict = self.label_def
-        sublabels_dict = {k:v for k,v in attr_dict.iteritems()
-                              if k in sublabel_ordict}
+        if typed_only:
+            sublabels_dict = {k:v for k,v in attr_dict.iteritems()
+                                  if k in sublabel_ordict}
+        else:
+            sublabels_dict = {k:v for k,v in attr_dict.iteritems()}
         
         return sublabels_dict
             
-    def _sublabels_dict2list(self, sublabels_dict):
+    def _sublabels_dict2list(self, sublabels_dict, typed_only=False):
         """Return ordered sulabel values.
         
         Sublabel values are ordered according to sublabel ordering
@@ -126,11 +129,14 @@ class LabelConsistency(object):
         L{_sublabels_list2dict}
         """
         #self._exist_labels()
-        
         sublabel_ordict = self.label_def
-        sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
-                                             if k in sublabels_dict]
         
+        if typed_only:
+            sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
+                                                 if k in sublabels_dict]
+        else:
+            sublabel_values = [sublabels_dict[k] for k in sublabel_ordict]
+            
         return sublabel_values
     
     def _sublabels_list2dict(self, sublabel_values, check_label=True):
@@ -1915,7 +1921,7 @@ class LabeledTransitions(Transitions):
         # TODO add overwriting (=delete_labeled +add once more) capability
     
     def find(self, from_states='any', to_states='any',
-             with_attr_dict=None, **with_attr):
+             with_attr_dict=None, typed_only=False, **with_attr):
         """Find all edges from_state to_states, annotated with given label.
         
         Instead of having two separate methods to:
@@ -2025,7 +2031,9 @@ class LabeledTransitions(Transitions):
                 to_state = self.graph.states._int2mutant(to_state_id)
                 
                 annotation = \
-                    self._label_check._attr_dict2sublabels(attr_dict, as_dict=True)
+                    self._label_check._attr_dict2sublabels(
+                        attr_dict, as_dict=True, typed_only=typed_only
+                    )
                 transition = (from_state, to_state, annotation)
                 
                 found_transitions.append(transition)
@@ -2206,21 +2214,23 @@ class LabeledDiGraph(nx.MultiDiGraph):
         return labeling
     
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
-        logger.debug('checking for untyped keys...')
-        
-        msg = 'attribute dict: ' + str(typed_attr) + '\n'
-        msg += 'type definitions: ' + str(type_defs) + '\n'
-        
         untyped_keys = set(typed_attr).difference(type_defs)
+        
+        msg = 'checking for untyped keys...\n'
+        msg += 'attribute dict: ' + str(typed_attr) + '\n'
+        msg += 'type definitions: ' + str(type_defs) + '\n'
+        msg += 'untyped_keys: ' + str(untyped_keys)
+        logger.debug(msg)
+        
         if untyped_keys:
-            msg += 'Given untyped edge attributes:\n\t' +\
+            msg = 'Given untyped edge attributes:\n\t' +\
                   str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
             if check:
                 msg += '\nTo allow untyped annotation, pass: check = False'
                 raise AttributeError(msg)
             else:
                 msg += 'Allowed because you passed: check = True'
-                warnings.warn(msg)
+                logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
     
