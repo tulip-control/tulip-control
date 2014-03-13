@@ -415,6 +415,9 @@ def multiple_env_actions_test():
     sys wins marginally, due to assumption on
     next combination of actions by env players.
     """
+    # 1 <---> 2
+    #    ---> 3
+    
     env_actions = [('env_alice', transys.MathSet({'left', 'right'}) ),
                    ('env_bob', transys.MathSet({'left', 'right'}) )]
     
@@ -435,3 +438,9 @@ def multiple_env_actions_test():
     
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(r)
+    
+    # slightly relax assumption
+    specs = spec.GRSpec(sys_prog=sys_prog)
+    
+    r = synth.is_realizable('gr1c', specs, sys=sys)
+    assert(not r)
