@@ -763,6 +763,20 @@ def sys_trans_from_ts(
         
         - sys states
         - env actions
+    
+    An edge attribute 'previous' can be optionally set to
+    an iterable of edge attribute keys.
+    The actions with those action_types those keys
+    will not be prepended by the next operator.
+    
+    This enables defining both current and next actions, e.g.,
+        
+        some_action && X(some_other_action)
+    
+    About label type checking: in principle everything should work the
+    same if the base class LabeledDigraph was replaced by MultiDiGraph,
+    so that users can play around with their own bare graphs,
+    when they don't need the label typing overhead.
 
     @param trans: L{LabeledTransitions} as from the transitions
         attribute of L{FiniteTransitionSystem} or
@@ -819,19 +833,43 @@ def sys_trans_from_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = [pstr(to_state_id)]
+            postcond = ['X' + pstr(to_state_id)]
+            
+            logger.debug('label = ' + str(label))
+            if 'previous' in label:
+                previous = label['previous']
+            else:
+                previous = set()
+            print('previous = ' + str(previous))
             
             env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
-            postcond += [_conj_actions(env_actions, env_action_ids)]
+            prev_env_act = {k:v for k,v in env_actions.iteritems()
+                            if k in previous}
+            next_env_act = {k:v for k,v in env_actions.iteritems()
+                            if k not in previous}
+            
+            postcond += [_conj_actions(prev_env_act, env_action_ids, nxt=False)]
+            postcond += [_conj_actions(next_env_act, env_action_ids, nxt=True)]
             
             sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
-            postcond += [_conj_actions(sys_actions, sys_action_ids)]
+            prev_sys_act = {k:v for k,v in sys_actions.iteritems()
+                            if k in previous}
+            next_sys_act = {k:v for k,v in sys_actions.iteritems()
+                            if k not in previous}
+            
+            postcond += [_conj_actions(prev_sys_act, sys_action_ids, nxt=False)]
+            postcond += [_conj_actions(next_sys_act, sys_action_ids, nxt=True)]
             
             # if system FTS given
             # in case 'actions in label, then action_ids is a dict,
             # not a dict of dicts, because certainly this came
             # from an FTS, not an OpenFTS
-            postcond += [_conj_action(label, 'actions', ids=action_ids)]
+            if 'actions' in previous:
+                postcond += [_conj_action(label, 'actions',
+                                          ids=action_ids, nxt=False)]
+            else:
+                postcond += [_conj_action(label, 'actions',
+                                          ids=action_ids, nxt=True)]
             
             cur_str += [_conj(postcond)]
             
@@ -840,7 +878,7 @@ def sys_trans_from_ts(
                   ', has post-conditions: ' + str(postcond)
             logger.debug(msg)
             
-        sys_trans += [precond + ' -> X(' + _disj(cur_str) + ')']
+        sys_trans += [precond + ' -> (' + _disj(cur_str) + ')']
     return sys_trans
 
 def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
