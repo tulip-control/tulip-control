@@ -204,8 +204,12 @@ def _form_edge_label(edge_data, label_def, label_format, label_mask):
                 continue
         
         # label formatting
-        type_name = label_format[label_type]
-        sep_type_value = label_format['type?label']
+        if label_type in label_format:
+            type_name = label_format[label_type]
+            sep_type_value = label_format['type?label']
+        else:
+            type_name = ':'
+            sep_type_value = ','
         
         if isinstance(label_value, str):
             # str is Iterable: avoid turning it to list
