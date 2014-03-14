@@ -27,7 +27,7 @@ def export(system, filename):
 		output['type'] = 'HybridSysDyn'
 	else:
 		raise TypeError(str(type(system)) + ' is not supported.')
-	scipy.io.savemat(filename, {'system': output}, oned_as='column')
+	scipy.io.savemat(filename, {'TulipSystem': output}, oned_as='column')
 
 
 def lti_export(ltisys):
