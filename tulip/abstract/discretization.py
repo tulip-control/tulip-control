@@ -458,7 +458,7 @@ def discretize(
     # Save original polytopes, require them to be convex 
     if conservative:
         orig_list = None
-        orig = 0
+        orig = [0]
     else:
         (part, new2old) = part2convex(part) # convexify
         part2orig = [part2orig[i] for i in new2old]
