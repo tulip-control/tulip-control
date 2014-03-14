@@ -9,19 +9,19 @@ function MPTsys = createMPTsys(matfile, timestep)
 
 
 % Load the file containing a variable called "TulipSystem"
-TulipSystem = load(matfile);
-TulipSystem = TulipSystem.TulipSystem;
+TulipObject = load(matfile);
+TulipObject = TulipObject.TulipObject;
 
 
-if strcmp(TulipSystem.type, 'LtiSysDyn')
-    MPTsys = createLTIsys(TulipSystem);
+if strcmp(TulipObject.type, 'LtiSysDyn')
+    MPTsys = createLTIsys(TulipObject);
     
-elseif strcmp(TulipSystem.type, 'PwaSysDyn')
+elseif strcmp(TulipObject.type, 'PwaSysDyn')
     
     % Import each Lti and add it to a list
-    n_lti = length(TulipSystem.subsystems);
+    n_lti = length(TulipObject.subsystems);
     lti_cell = cell(1, n_lti);
-    lti_list = TulipSystem.subsystems;
+    lti_list = TulipObject.subsystems;
     for ind = 1:n_lti
         lti_cell{ind} = createLTIsys(lti_list{ind});
     end
