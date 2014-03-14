@@ -6,7 +6,7 @@ from tulip import hybrid, polytope, abstract
 import scipy.io
 
 
-def export(system, filename):
+def export(system_dynamics, abstraction, filename):
 	"""Saves a Tulip dynamical system as a .mat file that can be imported into
 	the MPT toolbox.
 
@@ -16,25 +16,26 @@ def export(system, filename):
 	@rtype: None
 	"""
 
-	if isinstance(system, hybrid.LtiSysDyn):
-		output = lti_export(system)
-		output['type'] = 'LtiSysDyn'
-	elif isinstance(system, hybrid.PwaSysDyn):
-		output = pwa_export(system)
-		output['type'] = 'PwaSysDyn'
-	elif isinstance(system, hybrid.HybridSysDyn):
-		output = hybrid_export(system)
-		output['type'] = 'HybridSysDyn'
-	elif isinstance(system, polytope.Region):
-		output = reg_export(system)
-		output['type'] = 'Region'
-	elif (isinstance(system, abstract.discretization.AbstractSwitched) or \
-		isinstance(system, abstract.discretization.AbstractPwa)):
-		output = export_locations(system)
-		output['type'] = 'Abstraction'
+	# Export system dynamics
+	if isinstance(system_dynamics, hybrid.LtiSysDyn):
+		dynamics_output = lti_export(system_dynamics)
+		dynamics_output['type'] = 'LtiSysDyn'
+	elif isinstance(system_dynamics, hybrid.PwaSysDyn):
+		dynamics_output = pwa_export(system_dynamics)
+		dynamics_output['type'] = 'PwaSysDyn'
+	elif isinstance(system_dynamics, hybrid.HybridSysDyn):
+		dynamics_output = hybrid_export(system_dynamics)
+		dynamics_output['type'] = 'HybridSysDyn'	
 	else:
-		raise TypeError(str(type(system)) + ' is not supported.')
-	scipy.io.savemat(filename, {'TulipObject': output}, oned_as='column')
+		raise TypeError(str(type(system)) + 
+		    ' is not a supported type of system dynamics.')
+	
+	# Final output dict
+	output = {}
+	output['system_dynamics'] = dynamics_output
+	output['abstraction'] = export_locations(abstraction) #get abstraction
+	scipy.io.savemat(filename, output, oned_as='column')
+
 
 
 def lti_export(ltisys):
