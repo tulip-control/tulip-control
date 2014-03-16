@@ -31,7 +31,7 @@ tulip_logger.setLevel(logging.ERROR)
 log = logging.getLogger('multiprocessing')
 #log.setLevel(logging.ERROR)
 
-import time
+import os
 import pickle
 import numpy as np
 #from scipy import io as sio
@@ -181,7 +181,8 @@ ax = ppp.plot()
 ax.figure.savefig(imgpath + 'ppp.pdf')
 
 """Discretize to establish transitions"""
-start = time.clock()
+start = os.times()[2]
+logger.info('start time: ' + str(start))
 
 disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
@@ -191,14 +192,16 @@ sys_ts = abstract.multiproc_discretize_switched(
     ppp, switched_dynamics, disc_params, plot=False
 )
 
-elapsed = (time.clock() - start)
+end = os.times()[2]
+logger.info('end time: ' + str(end))
+elapsed = (end - start)
 logger.info('Discretization lasted: ' + str(elapsed))
 
 """Save abstraction to save debugging time"""
 fname = './abstract_switched.pickle'
 #pickle.dump(sys_ts, open(fname, 'wb') )
 
-sys_ts = pickle.load(open(fname, 'r') )
+#sys_ts = pickle.load(open(fname, 'r') )
 
 """Specs"""
 env_vars = set()
@@ -226,16 +229,17 @@ print(specs.pretty())
 
 """Synthesis"""
 print("Starting synthesis")
-start = time.clock()
+start = os.times()[2]
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
-    action_vars=('u_in', 'act')
+    #action_vars=('u_in', 'act')
 )
-elapsed = (time.clock() - start)
+end = os.times()[2]
+elapsed = (end - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
 
-print(ctrl)
+logger.info(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')
 
 ax = plot_strategy(sys_ts, ctrl)
