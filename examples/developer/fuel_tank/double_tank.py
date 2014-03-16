@@ -204,16 +204,16 @@ sys_ts = pickle.load(open(fname, 'r') )
 env_vars = set()
 sys_disc_vars = set()
 
-env_init = {'u_in = normal'}
+env_init = {'env_actions = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> X(u_in = normal)',
-            '(critical & (u_in = normal)) -> X(u_in = refuel)',
-            '(!critical & u_in = normal) -> X(u_in = normal)',
-            '(!no_refuel & u_in = refuel) -> X(u_in = refuel)'}
-env_prog = {'u_in = refuel'}
+env_safe = {'no_refuel -> X(env_actions = normal)',
+            '(critical & (env_actions = normal)) -> X(env_actions = refuel)',
+            '(!critical & env_actions = normal) -> X(env_actions = normal)',
+            '(!no_refuel & env_actions = refuel) -> X(env_actions = refuel)'}
+env_prog = {'env_actions = refuel'}
 
-# relate switching actions to u_in
+# relate switching actions to u_in (env_actions)
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
 sys_prog = {'True'} #{'vol_diff2'}
