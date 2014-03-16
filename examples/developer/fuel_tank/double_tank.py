@@ -32,6 +32,7 @@ log = logging.getLogger('multiprocessing')
 #log.setLevel(logging.ERROR)
 
 import time
+import pickle
 import numpy as np
 #from scipy import io as sio
 #import matplotlib
@@ -192,6 +193,12 @@ sys_ts = abstract.multiproc_discretize_switched(
 
 elapsed = (time.clock() - start)
 logger.info('Discretization lasted: ' + str(elapsed))
+
+"""Save abstraction to save debugging time"""
+fname = './abstract_switched.pickle'
+#pickle.dump(sys_ts, open(fname, 'wb') )
+
+sys_ts = pickle.load(open(fname, 'r') )
 
 """Specs"""
 env_vars = set()
