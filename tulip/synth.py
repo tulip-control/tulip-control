@@ -840,7 +840,7 @@ def sys_trans_from_ts(
                 previous = label['previous']
             else:
                 previous = set()
-            print('previous = ' + str(previous))
+            logger.debug('previous = ' + str(previous))
             
             env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
             prev_env_act = {k:v for k,v in env_actions.iteritems()
