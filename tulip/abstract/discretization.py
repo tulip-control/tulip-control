@@ -645,10 +645,14 @@ def discretize(
                 diff.props = si.props.copy()
         
             # replace si by intersection (single state)
-            sol[i] = isect
+            isect_list = pc.separate(isect)
+            sol[i] = isect_list.pop(0)
             
             # cut difference into connected pieces
             difflist = pc.separate(diff)
+            
+            difflist += isect_list
+            
             num_new = len(difflist)
             
             # add each piece, as a new state
