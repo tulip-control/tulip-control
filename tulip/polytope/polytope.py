@@ -377,6 +377,10 @@ class Polytope(object):
         r, xc = cheby_ball(self)
         return self._chebXc
     
+    @property
+    def cheby(self):
+        return cheby_ball(self)
+    
     def bounding_box(self):
         """Wrapper of L{polytope.bounding_box}.
         
@@ -625,6 +629,10 @@ class Region(object):
     def chebXc(self):
         r, xc = cheby_ball(self)
         return self._chebXc
+    
+    @property
+    def cheby(self):
+        return cheby_ball(self)
     
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
