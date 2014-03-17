@@ -466,6 +466,7 @@ class Region(object):
             for poly in list_poly:
                 if is_empty(poly):
                     self.list_poly.remove(poly)
+            
             self.props = set(props)
             self.bbox = None
             self.fulldim = None
@@ -1529,7 +1530,7 @@ def separate(reg1, abs_tol=ABS_TOL):
         ind_left = np.setdiff1d(ind_left, ind_del)
     
     return final
-        
+
 def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
     """Return True if the two polytopes or regions are adjacent.
     
@@ -1862,6 +1863,17 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
     
     @return: polytope or region containing non-overlapping polytopes
     """
+    if not isinstance(poly, Polytope):
+        raise Exception('poly not a Polytope, but: ' +
+                        str(type(poly) ) )
+    
+    if isinstance(reg, Polytope):
+        reg = Region([reg])
+    
+    if not isinstance(reg, Region):
+        raise Exception('reg not a Region, but: ' +
+                        str(type(reg) ) )
+    
     Pdummy = poly
     res = Polytope() # Initiate output
     
@@ -1878,27 +1890,21 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
     if is_empty(poly):
         return Polytope()
     
+    # Checking intersections to find Polytopes in Region
+    # that intersect the Polytope
     Rc = np.zeros(N)
-    
-    # Checking intersections to find intersecting regions
-    for ii in xrange(N):        
-        dummy = Polytope(
-            np.vstack([
-                poly.A,
-                reg.list_poly[ii].A
-            ]),
-            np.hstack([
-                poly.b,
-                reg.list_poly[ii].b
-            ])
-        )
-        Rc[ii], xc = cheby_ball(dummy)
+    for i, poly1 in enumerate(reg):
+        A_dummy = np.vstack([poly.A, poly1.A])
+        b_dummy = np.hstack([poly.b, poly1.b])
+        dummy = Polytope(A_dummy, b_dummy)
+        Rc[i], xc = cheby_ball(dummy)
 
-    N = np.sum(Rc>=intersect_tol)    
-    if N==0:
+    N = np.sum(Rc >= intersect_tol)    
+    if N == 0:
+        logger.debug('no Polytope in the Region intersects the given Polytope')
         return poly
     
-    # Sort radiuses
+    # Sort radii
     Rc = -Rc
     ind = np.argsort(Rc)
     val = Rc[ind]
