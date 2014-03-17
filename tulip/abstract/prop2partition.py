@@ -224,7 +224,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     parents = []
     for i, subsys in enumerate(pwa_sys.list_subsys):
         for j, region in enumerate(ppp.regions):
-            isect = subsys.domain.intersect(region)
+            isect = region.intersect(subsys.domain)
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
