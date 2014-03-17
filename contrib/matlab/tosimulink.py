@@ -4,7 +4,6 @@
 import numpy
 import copy
 from tulip.transys import Mealy
-import pdb
 
 def export(TS, is_continuous, control_horizon=None, R=None, r=None, Q=None, 
 	mid_weight=None):
@@ -72,7 +71,6 @@ def mealy_to_stateflow(TS, is_continuous):
 	if is_continuous:
 		for transition in initial_transitions:
 			transition[2]['current_loc'] = transition[2]['loc']
-	pdb.set_trace()
 	initial_str = write_init_string(initial_transitions, states_dict, inputs)
 
 	return head_text + state_string + transitions_string + initial_str + \

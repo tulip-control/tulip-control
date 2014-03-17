@@ -6,7 +6,6 @@ from tulip import hybrid, polytope, abstract
 import scipy.io
 import tosimulink
 import numpy
-import pdb
 
 
 def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
