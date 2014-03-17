@@ -8,18 +8,17 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 from tulip import abstract, hybrid
-from tulip.polytope import box2poly
 from tulip import polytope as pc
 
 input_bound = 0.4
 
 def subsys0():
-    dom = box2poly([[0., 3.], [0., 2.]])
+    dom = pc.box2poly([[0., 3.], [0., 2.]])
     
     A = np.eye(2)
     B = np.eye(2)
     
-    U = box2poly([[0., 1.],
+    U = pc.box2poly([[0., 1.],
                   [0., 1.]])
     U.scale(input_bound)
     
@@ -28,12 +27,12 @@ def subsys0():
     return sys_dyn
 
 def subsys1():
-    dom = box2poly([[0., 3.], [0., 2.]])
+    dom = pc.box2poly([[0., 3.], [0., 2.]])
     
     A = np.eye(2)
     B = np.eye(2)
     
-    U = box2poly([[0., 0.],
+    U = pc.box2poly([[0., 0.],
                   [-1., 0.]])
     U.scale(input_bound)
     
@@ -53,7 +52,7 @@ def transition_directions_test():
     modes.append(('refuel', 'fly'))
     env_modes, sys_modes = zip(*modes)
     
-    cont_state_space = box2poly([[0., 3.], [0., 2.]])
+    cont_state_space = pc.box2poly([[0., 3.], [0., 2.]])
     pwa_sys = dict()
     pwa_sys[('normal', 'fly')] = hybrid.PwaSysDyn(
         [subsys0()], cont_state_space
@@ -71,8 +70,8 @@ def transition_directions_test():
     )
     
     cont_props = {}
-    cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
-    cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
+    cont_props['home'] = pc.box2poly([[0., 1.], [0., 1.]])
+    cont_props['lot'] = pc.box2poly([[2., 3.], [1., 2.]])
     
     ppp = abstract.prop2part(cont_state_space, cont_props)
     ppp, new2old = abstract.part2convex(ppp)
