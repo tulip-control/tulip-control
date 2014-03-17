@@ -554,6 +554,24 @@ class PropPreservingPartition(object):
                 if region.intersect(preimage).volume > pc.polytope.ABS_TOL:
                     return False
         return True
+    
+    def is_partition(self):
+        """Return True if all Regions are disjoint.
+        """
+        logger.info('checking if PPP is a partition.')
+        
+        for i, region in enumerate(self.regions):
+            for j, other in enumerate(self.regions):
+                if i == j:
+                    continue
+                
+                if pc.is_fulldim(region.intersect(other) ):
+                    msg = 'PPP is not a partition, regions: '
+                    msg += str(i) + ' and: ' + str(j)
+                    msg += ' intersect each other.'
+                    logger.error(msg)
+                    return False
+        return True
 
     def __str__(self):
         s = '\n' + _hl + '\n'
