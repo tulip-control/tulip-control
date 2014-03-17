@@ -3,11 +3,13 @@ Tests for the abstraction from continuous dynamics to logic
 """
 import logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 import numpy as np
 
 from tulip import abstract, hybrid
 from tulip.polytope import box2poly
+from tulip import polytope as pc
 
 input_bound = 0.4
 
@@ -103,3 +105,54 @@ def transition_directions_test():
     for i, j in edges:
         assert(ts[i][j][0]['env_actions'] == 'normal')
         assert(ts[i][j][0]['sys_actions'] == 'fly')
+
+def test_transient_regions():
+    """drift is too strong, so no self-loop must exist
+    
+    This bug caused when running union is taken between Presets
+    during solve_feasible, as happened with old use_all_horizon,
+    cf:
+        - 5b1e9681918739b276a221fcc1fd6eebfd058ce3
+        - f5f4934ab9d21062f633eef3861ad935c3d3b54b
+    """
+    dom = pc.box2poly([[0.0, 4.0], [0.0, 3.0]])
+    
+    def cont_predicates():
+        p = dict()
+        p['safe'] = pc.box2poly([[0.5, 3.5], [0.5, 2.5]])
+        
+        ppp = abstract.prop2part(dom, p)
+        ppp, new2old_reg = abstract.part2convex(ppp)
+        ppp.plot()
+        return ppp
+    
+    def drifting_dynamics():
+        A = np.array([[1.0, 0.0],
+                      [0.0, 1.0]])
+        
+        B = np.array([[1.0],
+                      [0.0]])
+        
+        U = pc.box2poly([[0.0, 1.0]])
+        
+        K = np.array([[-100.0],
+                      [0.0]])
+        
+        sys = hybrid.LtiSysDyn(A, B, None, K, U, None, dom)
+        return sys
+    
+    ppp = cont_predicates()
+    sys = drifting_dynamics()
+    logger.info(sys)
+    
+    ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
+                             trans_length=1)
+    
+    logger.debug(ab.ts)
+    self_loops = {i for i,j in ab.ts.transitions() if i==j}
+    logger.debug('self loops at states: ' + str(self_loops))
+    
+    assert(not self_loops)
+    
+    #ax = ab.plot(show_ts=True)
+    #ax.figure.savefig('./very_simple.pdf')
