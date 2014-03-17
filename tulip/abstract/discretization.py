@@ -588,15 +588,43 @@ def discretize(
         
         logger.debug(msg)
         
-        # isect = si \cap S0
+        logger.debug('si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
-        # diff = si \setminus S0
+        logger.debug('si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
+        
+        if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
+            logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
+            diff = pc.mldivide(si, S0, save=True)
+            
+            ax = S0.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/s0.pdf')
+            
+            ax = si.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/si.pdf')
+            
+            ax = isect.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/isect.pdf')
+            
+            ax = diff.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff.pdf')
+            
+            ax = isect.intersect(diff).plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff_cap_isect.pdf')
+            
+            logger.error('Intersection \cap Difference != \emptyset')
+            
+            assert(False)
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -714,6 +742,15 @@ def discretize(
             msg += ',\n\t diff vol: ' + str(vol2)
             msg += ', intersect vol: ' + str(vol1)
             transitions[j,i] = 0
+        
+        # check to avoid overlapping Regions
+        #if logger.level <= logging.DEBUG:
+        #    tmp_part = PropPreservingPartition(
+        #        domain=part.domain,
+        #        regions=sol, adj=sp.lil_matrix(adj),
+        #        prop_regions=part.prop_regions
+        #    )
+        #    assert(tmp_part.is_partition() )
         
         logger.info(msg)
         

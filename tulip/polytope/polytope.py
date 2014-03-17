@@ -705,6 +705,8 @@ def is_fulldim(polyreg, abs_tol=ABS_TOL):
     @return: Boolean that is True if inner points found, False
         otherwise.
     """
+    #logger.debug('is_fulldim')
+    
     if polyreg.fulldim is not None:
         return polyreg.fulldim
         
@@ -903,6 +905,8 @@ def union(polyreg1,polyreg2,check_convex=False):
     
     @return: region of non-overlapping polytopes describing the union
     """
+    #logger.debug('union')
+    
     if is_empty(polyreg1):
         return polyreg2
     if is_empty(polyreg2):
@@ -990,6 +994,8 @@ def cheby_ball(poly1):
     
     @return: rc,xc: Chebyshev radius rc (float) and center xc (numpy array)
     """
+    #logger.debug('cheby ball')
+    
     if (poly1._chebXc is not None) and (poly1._chebR is not None):
         #In case chebyshev ball already calculated and stored
         return poly1._chebR,poly1._chebXc
@@ -1170,22 +1176,45 @@ def envelope(reg, abs_tol=ABS_TOL):
     else:
         return Polytope()
 
-def mldivide(poly1,poly2):
-    """Compute set difference poly1 \ poly2 between two regions or polytopes
+count = 0
+
+def mldivide(a, b, save=False):
+    """Return set difference a \ b.
     
-    @param poly1: Starting L{Polytope} or L{Region}
-    @param poly2: L{Polytope} to subtract
+    @param a: L{Polytope} or L{Region}
+    @param b: L{Polytope} to subtract
     
     @return: L{Region} describing the set difference
     """
-    P = Polytope()    
-
-    if isinstance(poly1, Region):
-        for ii in xrange(len(poly1.list_poly)):
-            Pdiff = region_diff(poly1.list_poly[ii],poly2)
-            P = union(P,Pdiff, False)        
+    if isinstance(b, Polytope):
+        b = Region([b])
+    
+    if isinstance(a, Region):
+        logger.debug('a is Region')
+        
+        P = Region()
+        for poly in a:
+            assert(not is_fulldim(P.intersect(poly) ) )
+            Pdiff = region_diff(poly, b, save=save)
+            P = union(P, Pdiff, check_convex=False)   
+                
+            if save:
+                global count
+                count = count + 1
+                
+                ax = Pdiff.plot()
+                ax.axis([0.0, 1.0, 0.0, 2.0])
+                ax.figure.savefig('./img/Pdiff' + str(count) + '.pdf')
+                
+                ax = P.plot()
+                ax.axis([0.0, 1.0, 0.0, 2.0])
+                ax.figure.savefig('./img/P' + str(count) + '.pdf')
+    elif isinstance(a, Polytope):
+        logger.debug('a is Polytope')
+        P = region_diff(a, b)
     else:
-        P = region_diff(poly1,poly2)
+        raise Exception('a neither Region nor Polytope')
+    
     return P
     
 def intersect(poly1,poly2,abs_tol=ABS_TOL):
@@ -1823,7 +1852,8 @@ def projection_esp(poly1,keep_dim,del_dim):
     G,g,E = esp(C,D,poly1.b)
     return Polytope(G,g)
 
-def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
+def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
+                save=False):
     """Subtract a region from a polytope
     
     @param poly: polytope from which to subtract a region
@@ -1880,7 +1910,7 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
     m = np.shape(A)[0]
     mi = np.zeros([N,1], dtype=int)
     
-    # Finding contraints that are not in original polytope
+    # Finding constraints that are not in original polytope
     HK = np.hstack([H,np.array([K]).T])
     for ii in xrange(N): 
         i = ind[ii]
@@ -1920,9 +1950,19 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
     INDICES = np.arange(m, dtype=int)
         
     level = 0
-    
-    while level!=-1:
+    res_count = 0
+    while level != -1:
+        if save:
+            if res:
+                ax = res.plot()
+                ax.axis([0.0, 1.0, 0.0, 2.0])
+                ax.figure.savefig('./img/res' + str(res_count) + '.pdf')
+                res_count += 1
+        
         if counter[level] == 0:
+            if save:
+                logger.debug('counter[level] is 0')
+            
             for j in xrange(level,N):
                 auxINDICES = np.hstack([
                     INDICES,
@@ -1954,8 +1994,12 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
                         counter[level] = 0
                         INDICES = INDICES[0:m+sum(counter)]
                         if level == -1:
+                            logger.debug('returning res from 1st point')
                             return res
         else:
+            if save:
+                logger.debug('counter[level] > 0')
+            
             # counter(level) > 0
             nzcount = np.nonzero(counter)[0]
             
@@ -1975,6 +2019,13 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
                     INDICES = INDICES[0:m+np.sum(counter)]
                     level = level - 1
                     if level == -1:
+                        if save:
+                            if save:
+                                if res:
+                                    ax = res.plot()
+                                    ax.axis([0.0, 1.0, 0.0, 2.0])
+                                    ax.figure.savefig('./img/res_returned' + str(res_count) + '.pdf')
+                            logger.debug('returning res from 2nd point')
                         return res
                     
         test_poly = Polytope(A[INDICES,:],B[INDICES])
@@ -1984,6 +2035,7 @@ def region_diff(poly,reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL):
                 res = union(res, reduce(test_poly), False)
             else:
                 level = level + 1
+    logger.debug('returning res from end')
     return res
     
 def num_bin(N, places=8):
