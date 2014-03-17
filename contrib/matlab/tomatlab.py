@@ -1,14 +1,21 @@
 """
-Saves LtiSysDyn, PwaSysDyn, and HybridSysDyn into a .mat file.
+Only supports closed-loop and non-conservative simulation.
 """
 
 from tulip import hybrid, polytope, abstract
 import scipy.io
+import tosimulink
+import numpy
+import pdb
 
 
-def export(system_dynamics, abstraction, filename):
-	"""Saves a Tulip dynamical system as a .mat file that can be imported into
-	the MPT toolbox.
+def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
+	control_horizon=None, R=None, r=None, Q=None, mid_weight=None):
+
+	"""Creates two matlab files. One is a script that generates a Simulink model
+	that contains a Stateflow Chart of the Mealy Machine, a block that contains
+	a get_input function, a block that maps continuous state to discrete state,
+	and a block that times simulation of get_input.
 
 	@param system: L{LtiSysDyn}, L{PwaSysDyn}, or L{HybridSysDyn} to be saved in
 		the .mat file.
@@ -16,25 +23,71 @@ def export(system_dynamics, abstraction, filename):
 	@rtype: None
 	"""
 
-	# Export system dynamics
-	if isinstance(system_dynamics, hybrid.LtiSysDyn):
-		dynamics_output = lti_export(system_dynamics)
-		dynamics_output['type'] = 'LtiSysDyn'
-	elif isinstance(system_dynamics, hybrid.PwaSysDyn):
-		dynamics_output = pwa_export(system_dynamics)
-		dynamics_output['type'] = 'PwaSysDyn'
-	elif isinstance(system_dynamics, hybrid.HybridSysDyn):
-		dynamics_output = hybrid_export(system_dynamics)
-		dynamics_output['type'] = 'HybridSysDyn'	
+	# Check whether we're discrete or continuous
+	if ((system_dynamics is None) and (abstraction is None)):
+		is_continuous = False
+	elif ((system_dynamics is not None) and (abstraction is not None)):
+		is_continuous = True
 	else:
-		raise TypeError(str(type(system)) + 
-		    ' is not a supported type of system dynamics.')
-	
-	# Final output dict
-	output = {}
-	output['system_dynamics'] = dynamics_output
-	output['abstraction'] = export_locations(abstraction) #get abstraction
-	scipy.io.savemat(filename, output, oned_as='column')
+		raise StandardError('Cannot tell whether system is continuous or ' + 
+			'discrete. Please specify dynamics and abstraciton or neither.')
+
+
+	# Skip all but last part if the system is discrete.
+	if is_continuous:
+
+		# Export system dynamics, get state and input dimension
+		if isinstance(system_dynamics, hybrid.LtiSysDyn):
+			dynamics_output = lti_export(system_dynamics)
+			dynamics_output['type'] = 'LtiSysDyn'
+			state_dimension = numpy.shape(system_dynamics.A)[0];
+			input_dimension = numpy.shape(system_dynamics.B)[0];
+		elif isinstance(system_dynamics, hybrid.PwaSysDyn):
+			dynamics_output = pwa_export(system_dynamics)
+			dynamics_output['type'] = 'PwaSysDyn'
+			state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[0];
+			input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[0];
+		elif isinstance(system_dynamics, hybrid.HybridSysDyn):
+			dynamics_output = hybrid_export(system_dynamics)
+			dynamics_output['type'] = 'HybridSysDyn'
+		else:
+			raise TypeError(str(type(system)) + 
+				' is not a supported type of system dynamics.')
+
+		# Set default values for matrix weights and other optional parameters
+		if control_horizon is None:
+			raise ValueError('Control horizon must be given for continuous ' +
+				'systems.')
+		if R is None:
+			R = numpy.zeros([state_dimension, state_dimension])
+		if r is None:
+			r = numpy.zeros([1, state_dimension])
+		if Q is None:
+			Q = numpy.eye(input_dimension)
+		if mid_weight is None:
+			mid_weight = 3
+
+
+		# Miscellaneous simulation parameters that aren't in the dynamics
+		sim_params = {}
+		sim_params['horizon'] = control_horizon
+		sim_params['state_weight'] = R
+		sim_params['input_weight'] = Q
+		sim_params['linear_weight'] = r
+		sim_params['mid_weight'] = mid_weight
+		
+		# Final data dictionary
+		output = {}
+		output['system_dynamics'] = dynamics_output
+		output['abstraction'] = export_locations(abstraction) #get abstraction
+		output['sim_params'] = sim_params
+		scipy.io.savemat(filename, output, oned_as='column')
+
+
+	# Export the simulink model
+	tosimulink.export(mealy_machine, is_continuous, control_horizon, R, r, Q, 
+		mid_weight)
+
 
 
 

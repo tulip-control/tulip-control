@@ -8,9 +8,9 @@ function discrete_state = continuousStatetoDiscrete(state, regions)
 discrete_state = -1;
 
 for i = 1:length(regions)
-    [isin, ~, ~] = regions{i}.region.contains(state, 1);
+    [isin, ~, ~] = regions(i).region.contains(state, 1);
     if isin
-        discrete_state = regions{i}.index;
+        discrete_state = regions(i).index;
         break
     end
 end

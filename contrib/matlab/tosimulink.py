@@ -4,9 +4,27 @@
 import numpy
 import copy
 from tulip.transys import Mealy
+import pdb
+
+def export(TS, is_continuous, control_horizon=None, R=None, r=None, Q=None, 
+	mid_weight=None):
+
+	# String at the top of the file that creates the Simulink diagram
+	head_text = "sfnew('-Mealy','Tulip Controller');\n"
+	head_text = head_text + "root = sfroot;\n"
+	head_text = head_text + "m = root.find('-isa', 'Simulink.BlockDiagram');\n" 
+
+	# String that writes the stateflow chart
+	stateflow_string = mealy_to_stateflow(TS, is_continuous)
+
+	# Open and write the file
+	filehandle = open('tulipsim.m', 'w')
+	filehandle.write(head_text)
+	filehandle.write(stateflow_string)
 
 
-def to_stateflow(TS, filename):
+
+def mealy_to_stateflow(TS, is_continuous):
 	"""Converts a Mealy Machine to a Stateflow diagram.
 	
 	Inputs:
@@ -19,16 +37,8 @@ def to_stateflow(TS, filename):
 	when run.
 	"""
 
-	# Check that the filename ends in ".m"
-	if filename[-2:] != ".m":
-		print "Filename must end in '.m'"
-		raise
-
-	# Get the intro text
-	head_text = "sfnew('-Mealy','Tulip Controller');\n"
-	head_text = head_text + "root = sfroot;\n"
-	head_text = head_text + "m = root.find('-isa', 'Simulink.BlockDiagram');\n"
-	head_text = head_text + "ch = m.find('-isa', 'Stateflow.Chart');\n"
+	# Text that declares the Mealy Machine
+	head_text = "ch = m.find('-isa', 'Stateflow.Chart');\n"
 	head_text = head_text + "ch.Name = 'TulipFSM';\n\n"
 
 	# Get list of nodes (remove Sinit from list) and add to Stateflow`
@@ -51,23 +61,22 @@ def to_stateflow(TS, filename):
 	transitions_string = write_transitions(transitions_list, inputs, outputs,
 		states_dict)
 
-	# Get default transition for initial state
-	initial_transitions = TS.transitions.find(from_states=('Sinit',))
-	initial_str = write_init_string(initial_transitions, states_dict, inputs)
-
 	# Declare Inputs and outputs on model
+	if is_continuous:
+		inputs.append("current_loc")
 	input_string = write_data_string(inputs, "Input")
 	output_string = write_data_string(outputs, "Output")
 
-	# Open file handle and write the 
-	filehandle = open(filename, 'w')
-	filehandle.write(head_text)
-	filehandle.write(state_string)
-	filehandle.write(transitions_string)
-	filehandle.write(initial_str)
-	filehandle.write(input_string)
-	filehandle.write(output_string)
-	filehandle.close()
+	# Get default transition for initial state
+	initial_transitions = TS.transitions.find(from_states=('Sinit',))
+	if is_continuous:
+		for transition in initial_transitions:
+			transition[2]['current_loc'] = transition[2]['loc']
+	pdb.set_trace()
+	initial_str = write_init_string(initial_transitions, states_dict, inputs)
+
+	return head_text + state_string + transitions_string + initial_str + \
+		input_string + output_string
 
 
 

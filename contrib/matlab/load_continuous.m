@@ -1,4 +1,5 @@
-function [regions, MPTsys] = load_continuous(matfile, timestep)
+function [regions, MPTsys, control_weights, horizon] = load_continuous(...
+    matfile, timestep)
 
 % Load .mat file
 TulipObject = load(matfile);
@@ -8,7 +9,14 @@ MPTsys = createMPTsys(TulipObject.system_dynamics, timestep);
 
 % Pull abstraction from .mat file
 regions = createAbstraction(TulipObject.abstraction.abstraction);
+regions = [regions{:}];
 
+% Get control weights and parameters
+horizon = double(TulipObject.sim_params.horizon);
+control_weights.state_weight = double(TulipObject.sim_params.state_weight);
+control_weights.input_weight = double(TulipObject.sim_params.input_weight);
+control_weights.linear_weight = double(TulipObject.sim_params.linear_weight);
+control_weights.mid_weight = double(TulipObject.sim_params.mid_weight);
 
 
 %------------------------------------------------------------------------------%
@@ -17,7 +25,7 @@ regions = createAbstraction(TulipObject.abstraction.abstraction);
 
 
 function region_list = createAbstraction(abstraction)
-% Returns a cell array of PolyUnion
+% Returns a list of Polyhedra.
 
 num_regions = length(abstraction);
 region_list = cell(1, num_regions);
@@ -25,16 +33,31 @@ region_list = cell(1, num_regions);
 for ind = 1:num_regions
     region_index = abstraction{ind}.index;
     polytope_list = abstraction{ind}.region.list_poly;
-    num_polytopes = length(polytope_list);
-    polyhedron_list = cell(1, num_polytopes);
     
-    for jnd = 1:num_polytopes
-        polytope = polytope_list{jnd};
-        polyhedron_list{jnd} = Polyhedron('A', polytope.A, 'b', polytope.b);
+    if length(polytope_list) > 1
+        little_poly_list = cell(1, length(polytope_list));
+        for jnd = 1:length(polytope_list)
+            little_poly = polytope_list{jnd};
+            little_poly_list{jnd} = Polyhedron('A', little_poly.A, 'b', ...
+                little_poly.b);
+        end
+        little_poly_list = PolyUnion([little_poly_list{:}]');
+        little_poly_list.merge;
+        polytope = little_poly_list.Set;
+    else
+        polytope = polytope_list{1};
     end
-    polyhedron_list = PolyUnion([polyhedron_list{:}]');
+    %num_polytopes = length(polytope_list);
+    %polyhedron_list = cell(1, num_polytopes);
+    
+    %for jnd = 1:num_polytopes
+    %    polytope = polytope_list{jnd};
+    %    polyhedron_list{jnd} = Polyhedron('A', polytope.A, 'b', polytope.b);
+    %end
+    %polyhedron_list = PolyUnion([polyhedron_list{:}]');
+    
     region_list{ind}.index = region_index;
-    region_list{ind}.region = polyhedron_list;
+    region_list{ind}.region = Polyhedron('A', polytope.A, 'b', polytope.b);
 end
 
 end
@@ -52,7 +75,17 @@ function MPTsys = createMPTsys(system, timestep)
 
 
 if strcmp(system.type, 'LtiSysDyn')
-    MPTsys = createLTIsys(system);
+    MPTsys = createLTIsys(system, timestep);
+    
+    % set the domain for the Ltisystem
+    domain = Polyhedron('A', system.domain.A, 'b', system.domain.b);
+    domain_vertices = domain.V;
+    MPTsys.x.min = min(domain_vertices);
+    MPTsys.x.max = max(domain_vertices);
+    Uset = Polyhedron('A', system.Uset.A, 'b', system.Uset.b);
+    Uset_vertices = Uset.V;
+    MPTsys.u.min = min(Uset_vertices);
+    MPTsys.u.max = max(Uset_vertices);
 
 elseif strcmp(system.type, 'PwaSysDyn')
 
@@ -66,6 +99,16 @@ elseif strcmp(system.type, 'PwaSysDyn')
 
     % Create PWASystem from list of ltis.
     MPTsys = PWASystem([lti_cell{:}]');
+    
+    % Set the domain
+    domain = Polyhedron('A', system.domain.A, 'b', system.domain.b);
+    domain_vertices = domain.V;
+    MPTsys.x.min = min(domain_vertices);
+    MPTsys.x.max = max(domain_vertices);
+    Uset = Polyhedron('A', system.Uset.A, 'b', system.Uset.b);
+    Uset_vertices = Uset.V;
+    MPTsys.u.min = min(Uset_vertices);
+    MPTsys.u.max = max(Uset_vertices);
 end
 
 
