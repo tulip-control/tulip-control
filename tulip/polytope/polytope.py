@@ -256,11 +256,29 @@ class Polytope(object):
     def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
-        @type other: L{Polytope} or L{Region}.
+        @type other: L{Polytope}.
         
         @rtype: L{Polytope} or L{Region}
         """
-        return intersect(self, other, abs_tol)
+        if isinstance(other, Region):
+            return other.intersect(self)
+        
+        if not isinstance(other, Polytope):
+            msg = 'Polytope intersection defined only'
+            msg += ' with other Polytope. Got instead: '
+            msg += str(type(other) )
+            raise Exception(msg)
+        
+        if (not is_fulldim(self)) or (not is_fulldim(other)):
+            return Polytope()
+        
+        if self.dim != other.dim:
+            raise Exception("polytopes have different dimension")
+        
+        iA = np.vstack([self.A, other.A])
+        ib = np.hstack([self.b, other.b])
+        
+        return reduce(Polytope(iA, ib), abs_tol=abs_tol)
     
     def copy(self):
         """Return copy of this Polytope.
@@ -560,11 +578,22 @@ class Region(object):
     def intersect(self, other, abs_tol=ABS_TOL):
         """Return intersection with Polytope or Region.
         
-        @type other: L{Polytope} or L{Region}.
+        @type other: iterable container of L{Polytope}.
         
-        @rtype: L{Polytope} or L{Region}
+        @rtype: L{Region}
         """
-        return intersect(self, other, abs_tol)
+        if isinstance(other, Polytope):
+            other = [other]
+        
+        P = Region()
+        for poly0 in self:
+            for poly1 in other:
+                isect = poly0.intersect(poly1, abs_tol)
+                rp, xp = isect.cheby
+            
+                if rp > abs_tol:
+                    P = union(P, isect, check_convex=True)
+        return P
     
     def __copy__(self):
         """Return copy of this Region."""
@@ -1159,35 +1188,20 @@ def intersect(poly1,poly2,abs_tol=ABS_TOL):
     
     @return: Intersection of poly1 and poly2 described by a polytope
     """
-    if (not is_fulldim(poly1)) or (not is_fulldim(poly2)):
-        return Polytope()
-        
-    if poly1.dim != poly2.dim:
-        raise Exception("polytopes have different dimension")
-    
+    #raise NotImplementedError('Being removed, use {Polytope, Region}.intersect instead')
     if isinstance(poly1, Region):
-        P = Polytope()
-        for poly in poly1.list_poly:
-            int_p = intersect(poly, poly2, abs_tol)
-            rp, xp = cheby_ball(int_p)
-            if rp > abs_tol:
-                P = union(P, int_p, check_convex=False)
-        return P
-        
+        return poly1.intersect(poly2)
+    
     if isinstance(poly2, Region):
-        P = Polytope()
-        for poly in poly2.list_poly:
-            int_p = intersect(poly1, poly, abs_tol)
-            rp, xp = cheby_ball(int_p)
-            if rp > abs_tol:
-                P = union(P, int_p, check_convex=False)
-        return P
+        return poly2.intersect(poly1)
     
-    iA = np.vstack([poly1.A, poly2.A])
-    ib = np.hstack([poly1.b, poly2.b])
+    if not isinstance(poly1, Polytope):
+        msg = 'poly1 not Region nor Polytope.'
+        msg += 'Got instead: ' + str(type(poly1) )
+        raise Exception(msg)
     
-    return reduce(Polytope(iA,ib), abs_tol=abs_tol)
-          
+    return poly1.intersect(poly2)
+    
 def volume(polyreg):
     """Approximately compute the volume of a Polytope or Region.
     
