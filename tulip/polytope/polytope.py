@@ -1196,8 +1196,10 @@ def mldivide(a, b, save=False):
         P = Region()
         for poly in a:
             assert(not is_fulldim(P.intersect(poly) ) )
-            Pdiff = region_diff(poly, b, save=save)
-            P = union(P, Pdiff, check_convex=False)   
+            Pdiff = poly
+            for poly1 in b:
+                Pdiff = mldivide(Pdiff, poly1, save=save)
+            P = union(P, Pdiff, check_convex=True)
                 
             if save:
                 global count
