@@ -8,7 +8,9 @@ please see examples/robot_planning/discrete.py
 from tulip import transys, spec, synth
 
 # import file that contains to_stateflow
-import stateflow_export
+import sys
+sys.path.append('../')
+import tomatlab
 
 # Create a finite transition system
 sys = transys.FTS()          
@@ -51,4 +53,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('gr1c', specs, sys=sys)
 
 # Generate a MATLAB script that generates a Mealy Machine
-stateflow_export.to_stateflow(ctrl, 'robot_discrete.m')
+tomatlab.export('robot_discrete.m', ctrl)
