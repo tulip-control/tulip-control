@@ -560,7 +560,7 @@ class PropPreservingPartition(object):
                     return False
         return True
     
-    def is_partition(self, check_all=False, fname=None):
+    def are_disjoint(self, check_all=False, fname=None):
         """Return True if all Regions are disjoint.
         
         Print:
