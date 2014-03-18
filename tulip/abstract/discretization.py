@@ -598,6 +598,7 @@ def discretize(
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
         
+        """
         if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
             logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
             diff = pc.mldivide(si, S0, save=True)
@@ -625,6 +626,12 @@ def discretize(
             logger.error('Intersection \cap Difference != \emptyset')
             
             assert(False)
+        """
+        if vol1 <= min_cell_volume:
+            logger.warning('too small: si \cap Pre(sj), so discard intersection')
+            logger.warning('discarded intersection: consider reducing min_cell_volume')
+        if vol2 <= min_cell_volume:
+            logger.warning('too small: si \ Pre(sj), so reached it')
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -737,14 +744,17 @@ def discretize(
                 msg += '\n\n Updated trans: \n' + str(transitions)
                 msg += '\n\n Updated IJ: \n' + str(IJ)
             
-            msg += 'Divided region: ' + str(i)
+            msg += 'Divided region: ' + str(i) + '\n'
         elif vol2 < abs_tol:
-            msg = 'Found: ' + str(i) + ' ---> ' + str(j)
+            msg = 'Found: ' + str(i) + ' ---> ' + str(j) + '\n'
             transitions[j,i] = 1
         else:
-            msg = 'Unreachable: ' + str(i) + ' --X--> ' + str(j)
-            msg += ',\n\t diff vol: ' + str(vol2)
-            msg += ', intersect vol: ' + str(vol1)
+            if logger.level <= logging.DEBUG:
+                msg = 'Unreachable: ' + str(i) + ' --X--> ' + str(j)
+                msg += ',\n\t diff vol: ' + str(vol2)
+                msg += ', intersect vol: ' + str(vol1) + '\n'
+            else:
+                msg += 'unreachable\n'
             transitions[j,i] = 0
         
         # check to avoid overlapping Regions
@@ -756,6 +766,7 @@ def discretize(
         #    )
         #    assert(tmp_part.is_partition() )
         
+        msg += 'max #polytopes: ' + str(len(sol) ) + '\n'
         logger.info(msg)
         
         iter_count += 1

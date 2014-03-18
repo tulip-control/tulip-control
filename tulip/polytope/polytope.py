@@ -1191,16 +1191,16 @@ def mldivide(a, b, save=False):
         b = Region([b])
     
     if isinstance(a, Region):
-        logger.debug('a is Region')
+        logger.debug('mldivide got Region as minuend')
         
         P = Region()
         for poly in a:
-            assert(not is_fulldim(P.intersect(poly) ) )
+            #assert(not is_fulldim(P.intersect(poly) ) )
             Pdiff = poly
             for poly1 in b:
                 Pdiff = mldivide(Pdiff, poly1, save=save)
             P = union(P, Pdiff, check_convex=True)
-                
+            
             if save:
                 global count
                 count = count + 1
@@ -1868,6 +1868,7 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
     if not isinstance(poly, Polytope):
         raise Exception('poly not a Polytope, but: ' +
                         str(type(poly) ) )
+    poly = poly.copy()
     
     if isinstance(reg, Polytope):
         reg = Region([reg])
@@ -1876,8 +1877,7 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
         raise Exception('reg not a Region, but: ' +
                         str(type(reg) ) )
     
-    Pdummy = poly
-    res = Polytope() # Initiate output
+    #Pdummy = poly
     
     N = len(reg)
     
@@ -1909,7 +1909,7 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
     # Sort radii
     Rc = -Rc
     ind = np.argsort(Rc)
-    val = Rc[ind]
+    #val = Rc[ind]
     
     A = poly.A.copy()
     B = poly.b.copy()
@@ -1959,6 +1959,7 @@ def region_diff(poly, reg, abs_tol=ABS_TOL, intersect_tol=ABS_TOL,
         
     level = 0
     res_count = 0
+    res = Polytope() # Initiate output
     while level != -1:
         if save:
             if res:
