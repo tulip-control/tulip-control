@@ -166,7 +166,7 @@ def solve_closed_loop(
     if not pc.is_fulldim(s0):
         return pc.Polytope()
     
-    pc.reduce(s0)
+    s0 = pc.reduce(s0)
     return s0
 
 def solve_open_loop(

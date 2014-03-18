@@ -536,6 +536,9 @@ class PropPreservingPartition(object):
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()
     
+    #TODO: iterator over pairs
+    #TODO: use nx graph to store partition
+    
     def is_preserving(self):
         """Return True if each Region <= Continuous Prop for its props
         """
@@ -557,23 +560,72 @@ class PropPreservingPartition(object):
                     return False
         return True
     
-    def is_partition(self):
+    def is_partition(self, check_all=False, fname=None):
         """Return True if all Regions are disjoint.
+        
+        Print:
+        
+            - the offending Regions and their
+            - their intersection (mean) volume ratio
+            - their difference (mean) volume ratio
+        
+        Optionally save numbered figures of:
+        
+            - offending Regions
+            - their intersection
+            - their difference
+        
+        @param check_all: don't return when first offending regions found,
+            continue and check all pairs
+        @type check_all: bool
+        
+        @param fname: path prefix where to save the debugging figures
+            By default no figures are saved.
+        @type fname: str
         """
         logger.info('checking if PPP is a partition.')
         
+        l,u = self.domain.bbox
+        ok = True
         for i, region in enumerate(self.regions):
-            for j, other in enumerate(self.regions):
-                if i == j:
-                    continue
-                
+            for j, other in enumerate(self.regions[0:i]):
                 if pc.is_fulldim(region.intersect(other) ):
                     msg = 'PPP is not a partition, regions: '
                     msg += str(i) + ' and: ' + str(j)
-                    msg += ' intersect each other.'
+                    msg += ' intersect each other.\n'
+                    msg += 'Offending regions are:\n' + 10*'-' + '\n'
+                    msg += str(region) + 10*'-' + '\n'
+                    msg += str(other) + 10*'-' + '\n'
+                    
+                    isect = region.intersect(other)
+                    diff = region.diff(other)
+                    
+                    mean_volume = (region.volume + other.volume) /2.0
+                    
+                    overlap = 100 * isect.volume / mean_volume
+                    non_overlap = 100 * diff.volume / mean_volume
+                    
+                    msg += '|cap| = ' + str(overlap) + ' %\n'
+                    msg += '|diff| = ' + str(non_overlap) + '\n'
+                    
                     logger.error(msg)
-                    return False
-        return True
+                    
+                    if fname:
+                        print('saving')
+                        fname1 = fname + 'region' + str(i) + '.pdf'
+                        fname2 = fname + 'region' + str(j) + '.pdf'
+                        fname3 = fname + 'isect_' + str(i) + '_' + str(j) + '.pdf'
+                        fname4 = fname + 'diff_' + str(i) + '_' + str(j) + '.pdf'
+                        
+                        _save_region_plot(region, fname1, l, u)
+                        _save_region_plot(other, fname2, l, u)
+                        _save_region_plot(isect, fname3, l, u)
+                        _save_region_plot(diff, fname4, l, u)
+                    
+                    ok = False
+                    if not check_all:
+                        break
+        return ok
 
     def __str__(self):
         s = '\n' + _hl + '\n'
@@ -642,3 +694,9 @@ class PPP(PropPreservingPartition):
     """
     def __init__(self, **args):
         PropPreservingPartition.__init__(self, **args)
+
+def _save_region_plot(region, fname, l, u):
+    ax = region.plot()
+    ax.set_xlim(l[0,0], u[0,0])
+    ax.set_ylim(l[1,0], u[1,0])
+    ax.figure.savefig(fname)
