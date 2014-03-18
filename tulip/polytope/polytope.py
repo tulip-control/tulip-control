@@ -399,16 +399,16 @@ class Polytope(object):
             logger.warn('newax not imported. No Polytope plotting.')
             return
         
+        if ax is None:
+            ax, fig = newax()
+        
         if not is_fulldim(self):
             logger.error("Cannot plot empty polytope")
-            return
+            return ax
         
         if self.dim != 2:
             logger.error("Cannot plot polytopes of dimension larger than 2")
-            return
-        
-        if ax is None:
-            ax, fig = newax()
+            return ax
         
         poly = _get_patch(
             self, facecolor=color, hatch=hatch,
