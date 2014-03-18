@@ -69,7 +69,7 @@ def is_feasible(
     return from_region <= S0
 
 def solve_feasible(
-    P1, P2, ssys, N, closed_loop=True,
+    P1, P2, ssys, N=1, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
     """Compute S0 \subseteq P1 from which P2 is N-reachable.
@@ -171,7 +171,7 @@ def solve_closed_loop(
         # we went past it -> don't continue
         if old_reached is True and reached is False:
             logger.info('stopped intersecting si')
-            break
+            #break
         
         if reached is True:
             break
