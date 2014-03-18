@@ -42,6 +42,7 @@ from scipy import sparse as sp
 import networkx as nx
 
 from tulip.polytope import cheby_ball, bounding_box
+import tulip.polytope as pc
 
 try:
     import matplotlib as mpl
@@ -159,6 +160,38 @@ def plot_partition(
     if show:
         mpl.pyplot.show()
     
+    return ax
+
+def plot_abstraction_scc(ab, ax=None):
+    """Plot Regions colored by strongly connected component.
+    
+    Handy to develop new examples or debug existing ones.
+    """
+    ppp = ab.ppp
+    ts = ab.ts
+    ppp2ts = ab.ppp2ts
+    
+    # each connected component of filtered graph is a symbol
+    components = nx.strongly_connected_components(ts)
+    
+    if ax is None:
+        ax = mpl.pyplot.subplot()
+    
+    l, u = pc.bounding_box(ab.ppp.domain)
+    ax.set_xlim(l[0,0], u[0,0])
+    ax.set_ylim(l[1,0], u[1,0])
+    
+    for component in components:
+        # map to random colors
+        red = np.random.rand()
+        green = np.random.rand()
+        blue = np.random.rand()
+        
+        color = (red, green, blue)
+        
+        for state in component:
+            i = ppp2ts.index(state)
+            ppp[i].plot(ax=ax, color=color)
     return ax
 
 def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
