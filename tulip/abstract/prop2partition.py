@@ -500,6 +500,8 @@ class PropPreservingPartition(object):
                 msg = "adj size doesn't agree with number of regions"
                 raise ValueError(msg)
         
+        self.regions = regions[:]
+        
         if check:
             for region in regions:
                 if not region <= domain:
@@ -507,21 +509,10 @@ class PropPreservingPartition(object):
                     msg += 'is not subset of given domain:\n\t'
                     msg += str(domain)
                     raise ValueError(msg)
-                
-                if self.prop_regions is None:
-                    warnings.warn('No continuous propositions defined.')
-                    continue
-                
-                if not region.props <= set(self.prop_regions):
-                    msg = 'Partitions: Region labeled with propositions:\n\t'
-                    msg += str(region.props) + '\n'
-                    msg += 'not all of which are in the '
-                    msg += 'continuous atomic propositions:\n\t'
-                    msg += str(set(self.prop_regions) )
-                    raise ValueError(msg)
+            
+            self.is_symbolic()
         
         self.domain = domain
-        self.regions = regions[:]
         self.adj = adj
     
     def __len__(self):
@@ -538,6 +529,27 @@ class PropPreservingPartition(object):
     
     #TODO: iterator over pairs
     #TODO: use nx graph to store partition
+    
+    def is_symbolic(self):
+        """Check that the set of preserved predicates
+        are bijectively mapped to the symbols.
+        
+        Symbols = Atomic Propositions
+        """
+        if self.prop_regions is None:
+            msg = 'No continuous propositions defined.'
+            logging.warn(msg)
+            warnings.warn(msg)
+            return
+        
+        for region in self.regions:
+            if not region.props <= set(self.prop_regions):
+                msg = 'Partitions: Region labeled with propositions:\n\t'
+                msg += str(region.props) + '\n'
+                msg += 'not all of which are in the '
+                msg += 'continuous atomic propositions:\n\t'
+                msg += str(set(self.prop_regions) )
+                raise ValueError(msg)
     
     def is_predicate_preserving(self):
         """Return True if each Region <= Predicates for the
