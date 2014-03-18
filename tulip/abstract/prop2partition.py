@@ -586,6 +586,24 @@ class PropPreservingPartition(object):
                     return False
         return True
     
+    def is_partition(self):
+        """Return True if Regions are pairwise disjoint and cover domain.
+        """
+        return self.covers_domain() and self.are_disjoint()
+    
+    def covers_domain(self):
+        """Return True if Regions cover domain
+        """
+        union = pc.Region()
+        for region in self.regions:
+            union += region
+        
+        if not self.domain <= union:
+            msg = 'partition does not cover domain.'
+            logger.Error(msg)
+            warnings.warn(msg)
+            return False
+    
     def are_disjoint(self, check_all=False, fname=None):
         """Return True if all Regions are disjoint.
         
