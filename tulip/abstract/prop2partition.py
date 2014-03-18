@@ -476,6 +476,8 @@ class PropPreservingPartition(nx.Graph):
         domain=None, regions=[],
         adj=None, prop_regions=None, check=True
     ):
+        #super(PropPreservingPartition, self).__init__(adj)
+        
         if prop_regions is None:
             self.prop_regions = None
         else:
