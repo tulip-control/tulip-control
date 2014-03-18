@@ -539,8 +539,22 @@ class PropPreservingPartition(object):
     #TODO: iterator over pairs
     #TODO: use nx graph to store partition
     
-    def is_preserving(self):
-        """Return True if each Region <= Continuous Prop for its props
+    def is_predicate_preserving(self):
+        """Return True if each Region <= Predicates for the
+        predicates in C{prop_regions.values},
+        where C{prop_regions} is a bijection to
+        "continuous" propositions of the specification's alphabet.
+        
+        Note
+        ====
+        1. C{prop_regions} in practice need not be injective.
+            It doesnt hurt - though creates unnecessary redundancy.
+        
+        2. The specification alphabet is fixed an user-defined.
+            It should be distinguished from the auxiliary alphabet
+            generated automatically during abstraction,
+            which defines another partition with
+            its own bijection to TS.
         """
         all_props = set(self.prop_regions)
         
