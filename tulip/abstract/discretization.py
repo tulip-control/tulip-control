@@ -40,6 +40,7 @@ L{find_controller}
 import logging
 logger = logging.getLogger(__name__)
 
+import os
 import warnings
 import pprint
 from copy import deepcopy
@@ -443,6 +444,8 @@ def discretize(
     
     @rtype: L{AbstractPwa}
     """
+    start_time = os.times()[0]
+    
     orig_ppp = part
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -861,6 +864,9 @@ def discretize(
     assert(len(prop_list) == n)
     
     ppp2orig = [part2orig[x] for x in orig]
+    
+    end_time = os.times()[0]
+    print('discretize computation time: ' + str(end_time - start_time))
     
     return AbstractPwa(
         ppp=new_part,
