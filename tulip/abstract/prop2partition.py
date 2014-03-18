@@ -37,10 +37,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 import warnings
+import copy
 
 import numpy as np
 from scipy import sparse as sp
-import copy
+import networkx as nx
 
 from tulip import polytope as pc
 from .plot import plot_partition
@@ -448,7 +449,7 @@ def find_adjacent_regions(partition):
     return adj
 ################################
 
-class PropPreservingPartition(object):
+class PropPreservingPartition(nx.Graph):
     """Partition class with following fields:
     
       - domain: the domain we want to partition
