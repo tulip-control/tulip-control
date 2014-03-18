@@ -631,10 +631,13 @@ def discretize(
             assert(False)
         """
         if vol1 <= min_cell_volume:
-            logger.warning('too small: si \cap Pre(sj), so discard intersection')
-            logger.warning('discarded intersection: consider reducing min_cell_volume')
+            logger.warning('too small: si \cap Pre(sj), ' +
+                           'so discard intersection')
+        if vol1 <= min_cell_volume and isect:
+            logger.warning('discarded non-empty intersection: ' +
+                           'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('too small: si \ Pre(sj), so reached it')
+            logger.warning('too small: si \ Pre(sj), so not reached it')
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -866,7 +869,10 @@ def discretize(
     ppp2orig = [part2orig[x] for x in orig]
     
     end_time = os.times()[0]
-    print('discretize computation time: ' + str(end_time - start_time))
+    msg = 'Total abstraction time: ' +\
+          str(end_time - start_time) + '[sec]'
+    print(msg)
+    logger.info(msg)
     
     return AbstractPwa(
         ppp=new_part,

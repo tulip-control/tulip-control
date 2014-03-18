@@ -25,8 +25,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-tulip_logger = logging.getLogger('tulip')
-tulip_logger.setLevel(logging.ERROR)
+logging.getLogger('tulip').setLevel(logging.ERROR)
+logging.getLogger('tulip.synth').setLevel(logging.ERROR)
 
 log = logging.getLogger('multiprocessing')
 #log.setLevel(logging.ERROR)

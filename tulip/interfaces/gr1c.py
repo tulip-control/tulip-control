@@ -459,6 +459,9 @@ def check_realizable(spec, verbose=0):
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
+    
+    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
+    
     if p.returncode == 0:
         return True
     else:
