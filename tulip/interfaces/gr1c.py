@@ -490,8 +490,12 @@ def synthesize(spec, verbose=0):
         (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
         return aut
     else:
-        if verbose > 0:
-            print(stdoutdata)
+        print(30*' ' + '\n gr1c return code:\n' + 30*' ')
+        print(p.returncode)
+        print(30*' ' + '\n gr1c stdout:\n' + 30*' ')
+        print(stderrdata)
+        print(30*' ' + '\n gr1c stdout:\n' + 30*' ')
+        print(stdoutdata)
         return None
 
 class GR1CSession:

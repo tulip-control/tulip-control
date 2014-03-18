@@ -743,7 +743,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += '   so the spec becomes trivially False.\n'
         msg += ' - assumption if this is an environment TS,\n'
         msg += '   so the spec becomes trivially True.'
-        warnings.warn(msg)
+        raise Exception(msg)
         
         init += ['False']
         return init
