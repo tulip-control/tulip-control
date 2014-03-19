@@ -207,8 +207,8 @@ class PwaSysDyn(object):
     ========
     L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
-    def __init__(self, list_subsys=[], domain=None, timestep=None,
-                 time_semantics=None):
+    def __init__(self, list_subsys=[], domain=None, time_semantics=None,
+                 timestep=None, overwrite_time=True):
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
         
@@ -241,7 +241,12 @@ class PwaSysDyn(object):
         self.list_subsys = list_subsys
         self.domain = domain
 
-        _check_time_consistency(list_subsys)
+        # Input time semantics
+        _check_time_data(time_semantics, timestep)
+        if overwrite_time:
+            _push_time_data(self.list_subsys, time_semantics, timestep)
+        else:
+            _check_time_consistency(list_subsys, time_semantics, timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
    
@@ -319,6 +324,8 @@ class HybridSysDyn(object):
        
            - env[t] and
            - s[t] (synchronously at time t).
+
+      - C{timestep}: A value describing the timestep.
        
     Note
     ====
@@ -331,8 +338,8 @@ class HybridSysDyn(object):
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,
-                 env_labels=None, disc_sys_labels=None, timestep=None,
-                 time_semantics=None):
+                 env_labels=None, disc_sys_labels=None, time_semantics=None,
+                 timestep=None, overwrite_time=True):
         # check that the continuous domain is specified
         if cts_ss is None:
             warn('continuous state space not given to HybridSysDyn')
@@ -380,7 +387,11 @@ class HybridSysDyn(object):
         self.dynamics = dynamics
         self.cts_ss = cts_ss
 
-        _check_time_consistency(dynamics.values())
+        _check_time_data(time_semantics, timestep)
+        if overwrite_time:
+            _push_time_data(self.dynamics.values(), time_semantics, timestep)
+        else:
+            _check_time_consistency(dynamics.values(), time_semantics, timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
 
@@ -471,6 +482,24 @@ class HybridSysDyn(object):
         return cls((1,1), {(0,0):pwa_sys}, domain)
 
 
+def _push_time_data(system_list, time_semantics, timestep):
+    """Overwrite the time data in system list. Throws warnings if overwriting
+    existing data."""
+
+    for system in system_list:
+        if (system.time_semantics != time_semantics) and (system.time_semantics
+            is not None):
+            warn('Overwriting existing time semantics data.')
+        if (system.timestep != timestep) and (system.timestep is not None):
+            warn('Overwriting existing timestep data.')
+        system.time_semantics = time_semantics
+        system.timestep = timestep
+
+        # Overwrite LTI in system if system is a PWA
+        if isinstance(system, PwaSysDyn):
+            _push_time_data(system.list_subsys, time_semantics, timestep)
+
+
 
 def _check_time_data(semantics, timestep):
     """Checks that time semantics and timestep are correctly specified. Raises
@@ -486,21 +515,15 @@ def _check_time_data(semantics, timestep):
         raise ValueError('Time semantics must be discrete or ' + 
             'continuous (sampled from continuous time system).')
 
-    if semantics is None:
-        warn('Time semantics are not set.')
-
     if timestep is not None:
         timestep = float(timestep) #make sure timestep is an actual number
         if timestep <= 0:
             raise ValueError('Timestep must be a positive real number or ' +
                 'unspecified.')
 
-    if timestep is None:
-        warn('Timestep is not set.')
 
 
-
-def _check_time_consistency(system_list):
+def _check_time_consistency(system_list, time_semantics, timestep):
     """Checks that all the dynamical systems in system_list have the same time
     semantics and timestep. Raises ValueError if not the case.
 
@@ -508,6 +531,7 @@ def _check_time_consistency(system_list):
     @rtype: None
     """
 
+    # Check that time semantics for all subsystems match
     for ind in range(len(system_list)-1):
 
         if system_list[ind].timestep != system_list[ind+1].timestep:
@@ -515,3 +539,14 @@ def _check_time_consistency(system_list):
 
         if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
             raise ValueError('Not all time semantics are the same.')
+
+
+    # Check that time semantics for all subsystems match specified system and
+    # timestep
+    if system_list[0].timestep != timestep:
+        raise ValueError('Timestep of subsystems do not match specified ' +
+                         'timestep.')
+
+    if system_list[0].time_semantics != time_semantics:
+        raise ValueError('Time semantics of subsystems do not match ' +
+                         'specified time semantics.')

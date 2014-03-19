@@ -3,10 +3,18 @@
 #
 """
 This example demonstrates how to add time semantics data to Tulip. Otherwise, it
-is a copy of examples/robot_planning/pwa.py
+is a copy of examples/robot_planning/pwa.py.
 
-To see the example fail when time semantics and timesteps do not match, change
-the values in lines 50, 51, 71, and 72.
+To see this example fail:
+
+    1. Call PwaSysDyn with overwrite_time=False and setting
+       the two LtiSysDyn's time semantics and timestep values separately to
+       something different.
+
+    2. Set the value of time_semantics and timestep when calling PwaSysDyn to
+       something invalid (not 'continuous' or 'discrete' for time_semantics and
+       a non-numeric scalar data type for timestep.)
+
 """
 import numpy as np
 
@@ -47,10 +55,7 @@ def subsys0():
     
     dom = box2poly([[0., 3.], [0.5, 2.]])
 
-    time_semantics = 'discrete'
-    timestep = .1
-    
-    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom, time_semantics, timestep)
+    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn
@@ -67,11 +72,8 @@ def subsys1():
     W.scale(uncertainty)
     
     dom = box2poly([[0., 3.], [0., 0.5]])
-
-    time_semantics = 'discrete'
-    timestep = .1
     
-    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom, time_semantics, timestep)
+    sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
     
     return sys_dyn
@@ -79,7 +81,8 @@ def subsys1():
 subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
-sys_dyn = PwaSysDyn(subsystems, cont_state_space)
+sys_dyn = PwaSysDyn(subsystems, cont_state_space, time_semantics='discrete',
+                    timestep=.1)
 
 # Continuous proposition
 cont_props = {}
