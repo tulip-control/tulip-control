@@ -733,6 +733,67 @@ class PropPreservingPartition(nx.Graph):
             isect_poly.plot(ax, color='none', hatch='/')
             isect_poly.text(prop, ax, color='yellow')
         return ax
+    
+    def compute_adj(self):
+        """Update the adjacency matrix by checking all region pairs.
+        
+        Uses L{polytope.is_adjacent}.
+        """
+        n = len(self.regions)
+        adj = sp.lil_matrix((n, n))
+        
+        logger.info('computing adjacency from scratch...')
+        for i, region0 in enumerate(self.regions):
+            for j, region1 in enumerate(self.regions):
+                if i == j:
+                    adj[i, j] = 1
+                    continue
+                
+                if pc.is_adjacent(region0, region1):
+                    adj[i, j] = 1
+                    adj[j, i] = 1
+                    
+                    logger.info('regions: ' + str(i) + ', ' +
+                                 str(j) + ', are adjacent.')
+        logger.info('...done computing adjacency.')
+        
+        # check previous one to unmask errors
+        if self.adj is not None:
+            logger.info('checking previous adjacency...')
+            
+            ok = True
+            row, col = adj.nonzero()
+            
+            for i, j in zip(row, col):
+                if adj[i, j] != self.adj[i, j]:
+                    ok = False
+                    
+                    msg = 'PPP adjacency matrix is incomplete, '
+                    msg += 'missing: (' + str(i) + str(j) + ')'
+                    logging.error(msg)
+            
+            row, col = adj.nonzero()
+            
+            for i, j in zip(row, col):
+                if adj[i, j] != self.adj[i, j]:
+                    ok = False
+                    
+                    msg = 'PPP adjacency matrix is incorrect, '
+                    msg += 'has 1 at: (' + str(i) + str(j) + ')'
+                    logging.error(msg)
+            
+            if not ok:
+                logging.error('PPP had incorrect adjacency matrix.')
+            
+            logger.info('done checking previous adjacency.')
+        else:
+            logger.info('no previous adjacency found: ' +
+                        'skip verification.')
+        
+        # update adjacency
+        self.adj = adj
+        
+        return self.adj
 
 class PPP(PropPreservingPartition):
     """Alias to L{PropPreservingPartition}.
