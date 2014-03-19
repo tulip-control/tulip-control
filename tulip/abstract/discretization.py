@@ -706,12 +706,13 @@ def discretize(
         
             # replace si by intersection (single state)
             isect_list = pc.separate(isect)
-            sol[i] = isect_list.pop(0)
+            sol[i] = isect_list[0]
             
             # cut difference into connected pieces
             difflist = pc.separate(diff)
             
-            difflist += isect_list
+            difflist += isect_list[1:]
+            n_isect = len(isect_list) -1
             
             num_new = len(difflist)
             
@@ -739,6 +740,10 @@ def discretize(
             # sol[j] is reachable from intersection of sol[i] and S0
             if i != j:
                 transitions[j, i] = 1
+                
+                # sol[j] is reachable from each piece os S0 \cap sol[i]
+                #for k in xrange(n_cells-n_isect-2, n_cells):
+                #    transitions[j, k] = 1
             
             """Update adjacency matrix"""
             old_adj = np.nonzero(adj[i, :])[0]
