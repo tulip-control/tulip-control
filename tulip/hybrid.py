@@ -71,6 +71,11 @@ class LtiSysDyn(object):
     
         - A, B, E, K, (matrices)
         - Uset, Wset and domain (each a L{polytope.Polytope})
+        - time_semantics: 'discrete' (if system is originally a discrete-time
+          system) or 'continuous' (if system is sampled from a continuous-time
+          system)
+
+        - timestep: A value describing the timestep.
     
     as defined above.
     
@@ -198,7 +203,13 @@ class PwaSysDyn(object):
 
       - C{domain}: domain over which piecewise affine system is defined,
           type: polytope.Polytope
-    
+
+      - C{time_semantics}: 'discrete' (if system is originally a discrete-time
+       system) or 'continuous' (if system is sampled from a continuous-time
+       system)
+
+      - C{timestep}: A value describing the timestep.
+
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
     domain.
@@ -310,22 +321,11 @@ class HybridSysDyn(object):
      - C{cts_ss}: continuous state space over which hybrid system is defined.
        type: L{polytope.Region}
     
-     - C{time_semantics}: TBD. Current default semantics are discrete-time.
-       
-           - State s[t] and
-           - discrete environment env[t]
-       
-       are observed and:
-       
-           - continuous input u[t] and
-           - discrete system variable m[t]
-       
-       are determined based on:
-       
-           - env[t] and
-           - s[t] (synchronously at time t).
+     - C{time_semantics}: 'discrete' (if system is originally a discrete-time
+       system) or 'continuous' (if system is sampled from a continuous-time
+       system)
 
-      - C{timestep}: A value describing the timestep.
+     - C{timestep}: A value describing the timestep.
        
     Note
     ====
