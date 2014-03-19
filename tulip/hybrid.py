@@ -85,7 +85,8 @@ class LtiSysDyn(object):
     L{PwaSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
-                 Uset=None,Wset=None, domain=None):
+                 Uset=None,Wset=None, domain=None, time_semantics=None,
+                 timestep=None):
         
         if Uset is None:
             warn("Uset not given to LtiSysDyn()")
@@ -155,6 +156,12 @@ class LtiSysDyn(object):
         self.Uset = Uset
         self.domain = domain
 
+        # Check that timestep and semantics are valid.
+        _check_time_data(time_semantics, timestep)
+        self.time_semantics = time_semantics
+        self.timestep = timestep
+
+
     def __str__(self):
         output = "A =\n"+str(self.A)
         output += "\nB =\n"+str(self.B)
@@ -200,7 +207,8 @@ class PwaSysDyn(object):
     ========
     L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
     """
-    def __init__(self, list_subsys=[], domain=None):
+    def __init__(self, list_subsys=[], domain=None, timestep=None,
+                 time_semantics=None):
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
         
@@ -232,7 +240,12 @@ class PwaSysDyn(object):
         
         self.list_subsys = list_subsys
         self.domain = domain
-    
+
+        _check_time_consistency(list_subsys)
+        self.timestep = timestep
+        self.time_semantics = time_semantics
+   
+
     def __str__(self):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
@@ -318,7 +331,8 @@ class HybridSysDyn(object):
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,
-                 env_labels=None, disc_sys_labels=None):
+                 env_labels=None, disc_sys_labels=None, timestep=None,
+                 time_semantics=None):
         # check that the continuous domain is specified
         if cts_ss is None:
             warn('continuous state space not given to HybridSysDyn')
@@ -365,7 +379,11 @@ class HybridSysDyn(object):
         
         self.dynamics = dynamics
         self.cts_ss = cts_ss
-    
+
+        _check_time_consistency(dynamics.values())
+        self.timestep = timestep
+        self.time_semantics = time_semantics
+
     def __str__(self):
         n_env, n_sys = self.disc_domain_size
         
@@ -451,3 +469,49 @@ class HybridSysDyn(object):
         pwa_sys = PwaSysDyn.from_lti(A, B, E, K,
                                      Uset, Wset, domain)
         return cls((1,1), {(0,0):pwa_sys}, domain)
+
+
+
+def _check_time_data(semantics, timestep):
+    """Checks that time semantics and timestep are correctly specified. Raises
+    ValueErrors if that's not the case.
+
+    @type semantics: string
+    @type timestep: float
+
+    @rtype: None
+    """
+
+    if semantics not in ['continuous', 'discrete', None]:
+        raise ValueError('Time semantics must be discrete or ' + 
+            'continuous (sampled from continuous time system).')
+
+    if semantics is None:
+        warn('Time semantics are not set.')
+
+    if timestep is not None:
+        timestep = float(timestep) #make sure timestep is an actual number
+        if timestep <= 0:
+            raise ValueError('Timestep must be a positive real number or ' +
+                'unspecified.')
+
+    if timestep is None:
+        warn('Timestep is not set.')
+
+
+
+def _check_time_consistency(system_list):
+    """Checks that all the dynamical systems in system_list have the same time
+    semantics and timestep. Raises ValueError if not the case.
+
+    @type system_list: list of L{LtiSysDyn} or L{PwaSysDyn}
+    @rtype: None
+    """
+
+    for ind in range(len(system_list)-1):
+
+        if system_list[ind].timestep != system_list[ind+1].timestep:
+            raise ValueError('Not all timesteps in child systems are the same.')
+
+        if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
+            raise ValueError('Not all time semantics are the same.')
