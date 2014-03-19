@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-""" 
+"""
 Algorithms related to discretization of continuous dynamics.
 
 See Also
@@ -291,12 +291,30 @@ class AbstractPwa(object):
         
         return s
     
+    def ts2ppp(self, state):
+        region_index = self.ppp2ts.index(state)
+        region = self.ppp[region_index]
+        return (region_index, region)
+    
+    def ppp2trans(self, region_index):
+        """Return the transition set constraint and active subsystem,
+        
+        for non-conservative planning.
+        """
+        reg_idx, pwa_region = self.ppp2pwa(region_index)
+        sys_idx, sys = self.ppp2sys(region_index)
+        return pwa_region, sys
+    
     def ppp2pwa(self, region_index):
-        """Return index and region of active PWA subsystem in indexed region.
+        """Return dynamics and predicate-preserving region
+        and its index for PWA subsystem active in given region.
+        
+        The returned region is the C{trans_set} used for
+        non-conservative planning.
         
         @param region_index: index in C{ppp.regions}.
         
-        @rtype: C{(i, pwa.regions[i])}
+        @rtype: C{(i, pwa.pwa_ppp[i])}
         """
         j = self._ppp2pwa[region_index]
         pwa_region = self.pwa_ppp[j]
@@ -370,6 +388,33 @@ class AbstractPwa(object):
         ax = _plot_abstraction(self, show_ts, only_adjacent,
                                color_seed)
         return ax
+    
+    def verify_transitions(self):
+        logger.info('verifying transitions...')
+        
+        for from_state, to_state in self.ts.transitions():
+            i, from_region = self.ts2ppp(from_state)
+            j, to_region = self.ts2ppp(to_state)
+            
+            trans_set, sys = self.ppp2trans(i)
+            
+            params = {'N', 'close_loop', 'use_all_horizon'}
+            disc_params = {k:v for k,v in self.disc_params.iteritems()
+                           if k in params}
+            
+            s0 = solve_feasible(from_region, to_region, sys,
+                                trans_set=trans_set, **disc_params)
+            
+            msg = str(i) + ' ---> ' + str(j)
+            
+            if not from_region <= s0:
+                logger.error('incorrect transition: ' + msg)
+                
+                isect = from_region.intersect(s0)
+                ratio = isect.volume /from_region.volume
+                logger.error('intersection volume: ' + str(ratio) + ' %')
+            else:
+                logger.info('correct transition: ' + msg)
 
 def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
     if ab.ppp is None or ab.ts is None:
