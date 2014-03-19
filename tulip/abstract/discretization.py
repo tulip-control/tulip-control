@@ -758,6 +758,16 @@ def discretize(
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
             
+            # adjacencies between pieces of isect and diff
+            for r in new_idx:
+                for k in new_idx:
+                    if r is k:
+                        continue
+                    
+                    if pc.is_adjacent(sol[r], sol[k]):
+                        adj[r, k] = 1
+                        adj[k, r] = 1
+            
             msg = ''
             if logger.getEffectiveLevel() <= logging.DEBUG:
                 msg += '\n Adding states ' + str(i) + ' and '
