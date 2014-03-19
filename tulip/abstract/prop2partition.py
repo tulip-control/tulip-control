@@ -606,6 +606,8 @@ class PropPreservingPartition(nx.Graph):
             logger.Error(msg)
             warnings.warn(msg)
             return False
+        else:
+            return True
     
     def are_disjoint(self, check_all=False, fname=None):
         """Return True if all Regions are disjoint.
