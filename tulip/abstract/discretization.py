@@ -56,6 +56,8 @@ from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
 from .plot import plot_ts_on_partition
 
+debug = True
+
 class AbstractSwitched(object):
     """Abstraction of HybridSysDyn, with mode-specific and common info.
     
@@ -809,13 +811,13 @@ def discretize(
             transitions[j,i] = 0
         
         # check to avoid overlapping Regions
-        #if logger.level <= logging.DEBUG:
-        #    tmp_part = PropPreservingPartition(
-        #        domain=part.domain,
-        #        regions=sol, adj=sp.lil_matrix(adj),
-        #        prop_regions=part.prop_regions
-        #    )
-        #    assert(tmp_part.is_partition() )
+        if debug and False:
+            tmp_part = PropPreservingPartition(
+                domain=part.domain,
+                regions=sol, adj=sp.lil_matrix(adj),
+                prop_regions=part.prop_regions
+            )
+            assert(tmp_part.is_partition() )
         
         msg += 'max #polytopes: ' + str(len(sol) ) + '\n'
         logger.info(msg)
@@ -874,6 +876,11 @@ def discretize(
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions
     )
+    
+    # check completeness of adjacency matrix
+    if debug:
+        tmp_part = deepcopy(new_part)
+        tmp_part.compute_adj()
     
     # Generate transition system and add transitions       
     ofts = trs.OpenFTS()
