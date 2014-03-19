@@ -1,8 +1,17 @@
-function u = get_input(continuous_state, MPTsys, end_loc, regions, ...
-    control_weights, horizon)
+% Computes the receding horizon controller given a continuous state, an
+% index of a target region, and a horizon.
+
+
+function u = get_input(continuous_state, end_loc, horizon)
+
+% Get variables from base workspace
+regions = evalin('base', 'regions');
+control_weights = evalin('base', 'control_weights');
+MPTsys = evalin('base', 'MPTsys');
+
 
 % Get Chebyshev center of end region
-end_region = regions(end_loc).region;
+end_region = regions{end_loc}.region;
 end_cheby = end_region.chebyCenter;
 end_cheby = double(end_cheby.x);
 offset = control_weights.mid_weight*norm(continuous_state - end_cheby);
@@ -19,5 +28,9 @@ MPTsys.x.terminalSet = end_region;
 % Evaluate Controller
 controller = MPCController(MPTsys, horizon);
 u = controller.evaluate(continuous_state);
+
+% Remove terminal set filter so that this function doesn't print a warning
+% (and slowing down the simulation) next time it's called
+MPTsys.x.without('terminalSet');
 
 end
