@@ -725,28 +725,30 @@ def discretize(
             n_cells = len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
             
-            # Update transition matrix
+            """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
             transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
-                
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
                 # except possibly the new part
                 transitions[i, r] = 0
                 transitions[j, r] = 0            
             
+            # sol[j] is reachable from intersection of sol[i] and S0
             if i != j:
-                # sol[j] is reachable from intersection of sol[i] and S0..
                 transitions[j, i] = 1
             
-            # Update adjacency matrix
+            """Update adjacency matrix"""
             old_adj = np.nonzero(adj[i, :])[0]
+            
+            # reset new adjacencies
             adj[i, :] = np.zeros([n_cells -num_new])
             adj[:, i] = np.zeros([n_cells -num_new])
+            adj[i, i] = 1
             
-            adj = np.pad(adj, (0,num_new), 'constant')
+            adj = np.pad(adj, (0, num_new), 'constant')
             
             for r in new_idx:
                 adj[i, r] = 1
@@ -755,7 +757,6 @@ def discretize(
                 
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-            adj[i, i] = 1
             
             msg = ''
             if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -784,7 +785,7 @@ def discretize(
                         transitions[r, k] = 0
                         transitions[k, r] = 0
             
-            # Update IJ matrix
+            """Update IJ matrix"""
             IJ = np.pad(IJ, (0,num_new), 'constant')
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
