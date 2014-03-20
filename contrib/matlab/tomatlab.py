@@ -250,8 +250,10 @@ def export_mealy(mealy_machine, is_continuous):
             continue
 
         transition_vals = transition_tuple[2]
-        transition_inputs = { var: transition_vals[var] for var in env_vars }
-        transition_outputs = { var: transition_vals[var] for var in sys_vars }
+        transition_inputs = { var: str(transition_vals[var])
+                              for var in env_vars }
+        transition_outputs = { var: str(transition_vals[var]) 
+                               for var in sys_vars }
         transition_dict = {}
         transition_dict['start_state'] = transition_tuple[0]
         transition_dict['end_state'] = transition_tuple[1]
