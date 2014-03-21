@@ -11,22 +11,28 @@ timestep = 1;
 
 
 %-------------------------------------------------------------------------------
-% % Do not edit below this line
+% Do not edit below this line
 %-------------------------------------------------------------------------------
-bdclose(modelname); 
-open_system(new_system(modelname))
-
-
-% Load apparatus for continuous systems if the system is continuous
 load(matfile, 'is_continuous', 'TS');
+
+
+% Load abstraction, mpt objects for continuous systems.
+%-------------------------------------------------------------------------------
 if is_continuous
-    [regions, MPTsys, control_weights, horizon] = ...
+    [regions, MPTsys, control_weights, simulation_parameters] = ...
         load_continuous(matfile, timestep);
 end
 
 
-% CREATE TULIP CONTROLLER
-add_block('sflib/Chart', [modelname '/TulipController']);
+
+% Make Simulink Model
+%-------------------------------------------------------------------------------
+
+bdclose(modelname); 
+open_system(new_system(modelname))
+
+% Create Tulip Controller
+tulip_controller = add_block('sflib/Chart', [modelname '/TulipController']);
 
 
 % Get handle on the chart
@@ -39,10 +45,10 @@ mealy_machine.StateMachineType = 'Mealy';
 
 
 % Set chart time semantics
+mealy_machine.ChartUpdate = 'DISCRETE';
 if is_continuous
     
 else
-    mealy_machine.ChartUpdate = 'DISCRETE';
     mealy_machine.SampleTime = num2str(timestep);
 end
 
@@ -65,11 +71,25 @@ for ind = 1:num_inputs
     input_handles{ind} = Stateflow.Data(mealy_machine);
     input_handles{ind}.Name = strtrim(TS.inputs(ind,:));
     input_handles{ind}.Scope = 'Input';
+    
+
 end
 for ind = 1:num_outputs
     output_handles{ind} = Stateflow.Data(mealy_machine);
     output_handles{ind}.Name = strtrim(TS.outputs(ind,:));
     output_handles{ind}.Scope = 'Output';
+    
+    if (is_continuous && strcmp(output_handles{ind}.Name,'loc'))
+        output_handles{ind}.Port = 1;
+    end
+end
+
+% Add current location to list of inputs if system is continuous
+if is_continuous
+    current_loc = Stateflow.Data(mealy_machine);
+    current_loc.Name = 'current_loc';
+    current_loc.Scope = 'Input';
+    current_loc.Port = 1;
 end
 
 % Add transitions
@@ -121,12 +141,81 @@ for ind = 1:num_init_transitions
         label_string = [label_string, '(', input_name '==' input_value ')', ...
             '&&'];
     end
-    label_string = [label_string(1:end-2) ']'];
+    
+    % Add current location to inputs if system is continuous
+    if is_continuous
+        current_loc = num2str(double(TS.states{init_state_index}.loc));
+        label_string = [label_string '(current_loc==' current_loc ')]'];
+    else
+        label_string = [label_string(1:end-2) ']'];
+    end
+    
     init_handles{ind}.LabelString = label_string;
 end
 
 
-% CREATE RHC BLOCKS
+
+% RHC blocks for continuous systems
 if is_continuous
     
+    % Horizon block
+    if simulation_parameters.closed_loop
+        horizon_block = add_block('sflib/Chart',[modelname '/Control Horizon']);
+        set_param(horizon_block, 'Orientation', 'left');
+        horizon_chart = simulink_model.find('-isa', 'Stateflow.Chart', ...
+            '-and', 'Name', 'Control Horizon');
+        
+        % Output variable
+        horizon_output = Stateflow.Data(horizon_chart);
+        horizon_output.Name = 'horizon';
+        horizon_output.Scope = 'Output';
+        
+        
+        % TODO: Iterate amongst states
+        % TODO: Sample Time
+    else
+        % TODO: Define constant block for oppen loop algorithm
+        horizon_block = add_block('built-in/Constant', ...
+                                  [modelname '/Control Horizon']);
+    end
+    
+    % Continuous state to discrete state
+    c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
+    set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
+    
+    % RHC block
+    rhc_block = add_block('built-in/MATLABFcn', [modelname '/RHC Input']);
+    set_param(rhc_block, 'Orientation', 'left');
+    set_param(rhc_block, 'MATLABFcn', ...
+              'get_input(u(1:end-2), u(end-1), u(end))');
+          
+    % Mux for RHC block
+    rhc_mux = add_block('built-in/Mux', [modelname '/RHC Mux']);
+    set_param(rhc_mux, 'Orientation', 'left');
+    set_param(rhc_mux, 'DisplayOption', 'Bar');
+    set_param(rhc_mux, 'Inputs', '3');
+    % TODO: sample time parameter
+    
+    % The Plant Subsystem
+    plant = add_block('built-in/Subsystem', [modelname '/Plant']);
+    control_input = add_block('built-in/Inport', [modelname '/Plant/u']);
+    cont_state = add_block('built-in/Outport', [modelname '/Plant/cont_state']);
+    % TODO: continuous sample time
+          
+    % Set block positions
+    set_param(c2d_block, 'Position', '[330 34 420 86]');
+    set_param(rhc_block, 'Position', '[120 320 215 370]');
+    set_param(rhc_mux, 'Position', '[415, 305, 420, 385]');
+    set_param(tulip_controller, 'Position', '[495 27 600 153]');
+    set_param(horizon_block, 'Position', '[525, 356, 565, 384]');
+    set_param(plant, 'Position', '[120, 197, 240, 263]');
+    
+    % Draw Transitions
+    add_line(modelname, 'RHC Mux/1', 'RHC Input/1', 'autorouting', 'on');
+    add_line(modelname, 'Control Horizon/1', 'RHC Mux/3', 'autorouting', 'on');
+    add_line(modelname, 'Abstraction/1','TulipController/1','autorouting','on');
+    add_line(modelname, 'RHC Input/1', 'Plant/1', 'autorouting', 'on');
+    add_line(modelname, 'Plant/1', 'Abstraction/1', 'autorouting', 'on');
+    add_line(modelname, 'Plant/1', 'RHC Mux/1', 'autorouting', 'on');
+    add_line(modelname, 'TulipController/1', 'RHC Mux/2', 'autorouting', 'on');
 end

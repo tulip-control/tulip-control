@@ -245,6 +245,7 @@ def export_mealy(mealy_machine, is_continuous):
     # make the MATLAB code easier to write
     transitions = []
     for transition_tuple in mealy_machine.transitions.find():
+
         # Ignore transitions from Sinit
         if transition_tuple[0] == 'Sinit':
             continue
@@ -262,13 +263,16 @@ def export_mealy(mealy_machine, is_continuous):
         transitions.append(transition_dict)
     output['transitions'] = transitions 
 
+
     # Initial states are the states that have transitions from Sinit. This block
     # similar to previous block
     initial_transitions = mealy_machine.transitions.find(from_states=['Sinit'])
     initial_states = [ trans[1] for trans in initial_transitions ]
     initial_trans = []
     for init_transition in initial_transitions:
+
         transition_vals = init_transition[2]
+
         trans_dict = {}
         trans_dict['state'] = init_transition[1]
         trans_dict['inputs'] = { var: transition_vals[var] for var in env_vars}

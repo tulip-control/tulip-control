@@ -1,5 +1,5 @@
-function [regions, MPTsys, control_weights, horizon] = load_continuous(...
-    matfile, timestep)
+function [regions, MPTsys, control_weights, simulation_parameters] = ...
+    load_continuous(matfile, timestep)
 
 % Load .mat file
 TulipObject = load(matfile);
@@ -14,14 +14,15 @@ regions = createAbstraction(TulipObject.abstraction.abstraction);
 
 
 % Control weights in receding horizon control
-control_weights.state_weight = double(TulipObject.sim_params.state_weight);
-control_weights.input_weight = double(TulipObject.sim_params.input_weight);
-control_weights.linear_weight = double(TulipObject.sim_params.linear_weight);
-control_weights.mid_weight = double(TulipObject.sim_params.mid_weight);
+control_weights.state_weight = double(TulipObject.control_weights.state_weight);
+control_weights.input_weight = double(TulipObject.control_weights.input_weight);
+control_weights.linear_weight = ...
+    double(TulipObject.control_weights.linear_weight);
+control_weights.mid_weight = double(TulipObject.control_weights.mid_weight);
 
 
 % Simulation parameters
-horizon = double(TulipObject.sim_params.horizon);
+simulation_parameters = TulipObject.simulation_parameters;
 
 
 
