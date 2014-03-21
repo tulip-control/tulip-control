@@ -4,7 +4,7 @@
 #          the upcoming release.
 #
 """
-Continuous example with MATLAB export. Mostly identical to 
+Continuous example with MATLAB export at the end. Mostly identical to 
 examples/robot_planning/continuous.py
 """
 #
@@ -63,11 +63,11 @@ plot_partition(cont_partition, show=visualize)
 
 # @discretize_section@
 # Given dynamics & proposition-preserving partition, find feasible transitions
-disc_dynamics = discretize(
-    cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, plotit=visualize, conservative=False,
-)
+disc_params = {'closed_loop':True, 'N':8, 'min_cell_volume':0.1, 
+               'plotit':visualize, 'conservative':False}
+disc_dynamics = discretize(cont_partition, sys_dyn, **disc_params)
 # @discretize_section_end@
+
 """Visualize transitions in continuous domain (optional)"""
 plot_partition(disc_dynamics.ppp, disc_dynamics.ts,
                disc_dynamics.ppp2ts, show=visualize)
@@ -98,6 +98,6 @@ ctrl = synth.synthesize('gr1c', specs,
 if ctrl is None:
     sys.exit()
 
-# Export matlab stuff
-disc_params = {'N': 8, 'closed_loop': False}
-tomatlab.export(ctrl, sys_dyn, disc_dynamics, disc_params)
+# Export Simulink Model
+tomatlab.export('robot_continuous.mat', ctrl, sys_dyn, disc_dynamics, 
+                disc_params)

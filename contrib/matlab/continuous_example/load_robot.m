@@ -1,7 +1,8 @@
 % Define parameters for the model
-matfile = 'tulip_output.mat';
+matfile = 'robot_continuous.mat';
 modelname = 'Robot_Continuous';
 timestep = .1;
+
 
 % Load the model
 load_tulip;
@@ -13,7 +14,7 @@ sysB = eye(2);
 sysC = eye(2);
 sysD = zeros(2,2);
 sysc = ss(sysA, sysB, sysC, sysD);
-x_init = [1; 1];
+x_init = [2.5; .5];
 
 lti_block = add_block('cstblocks/LTI System', [modelname '/Plant/robotdyn']);
 set_param(lti_block, 'sys', 'sysc');

@@ -153,7 +153,6 @@ if is_continuous
     % Horizon block
     if simulation_parameters.closed_loop
         horizon_block = add_block('sflib/Chart',[modelname '/Control Horizon']);
-        set_param(horizon_block, 'Orientation', 'left');
         horizon_chart = simulink_model.find('-isa', 'Stateflow.Chart', ...
             '-and', 'Name', 'Control Horizon');
         
@@ -192,6 +191,7 @@ if is_continuous
         set_param(horizon_block, 'Value', ...
                   num2str(simulation_parameters.horizon));
     end
+    set_param(horizon_block, 'Orientation', 'left');
     
     % Continuous state to discrete state
     c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
