@@ -74,8 +74,7 @@ class LtiSysDyn(object):
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'continuous' (if system is sampled from a continuous-time
           system)
-
-        - timestep: A value describing the timestep.
+        - timestep: A float containing the timestep.
     
     as defined above.
     
@@ -506,7 +505,8 @@ def _check_time_data(semantics, timestep):
     ValueErrors if that's not the case.
 
     @type semantics: string
-    @type timestep: float
+    @param timestep: any positive number
+    @type timestep: int or float or long
 
     @rtype: None
     """
@@ -516,10 +516,11 @@ def _check_time_data(semantics, timestep):
             'continuous (sampled from continuous time system).')
 
     if timestep is not None:
-        timestep = float(timestep) #make sure timestep is an actual number
+        error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:
-            raise ValueError('Timestep must be a positive real number or ' +
-                'unspecified.')
+            raise ValueError(error_string)
+        if not isinstance(timestep, (int, float, long)):
+            raise TypeError(error_string)
 
 
 
