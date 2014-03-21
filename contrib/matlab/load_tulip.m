@@ -1,38 +1,27 @@
-clear all; close all; clc;
+% Tulip file that 
+
+% TODO: Support use_all_horizon
 
 
-%-------------------------------------------------------------------------------
-% Edit input arguments here
-%-------------------------------------------------------------------------------
-matfile = 'tulip_output.mat';
-modelname = 'Tulip_Model';
-timestep = 1;
-
-
-
-%-------------------------------------------------------------------------------
-% Do not edit below this line
-%-------------------------------------------------------------------------------
 load(matfile, 'is_continuous', 'TS');
 
 
-% Load abstraction, mpt objects for continuous systems.
+% Load abstraction, mpt objects for continuous systems. Open blank model.
 %-------------------------------------------------------------------------------
 if is_continuous
     [regions, MPTsys, control_weights, simulation_parameters] = ...
         load_continuous(matfile, timestep);
 end
 
-
-
-% Make Simulink Model
-%-------------------------------------------------------------------------------
-
 bdclose(modelname); 
 open_system(new_system(modelname))
 
+
+
 % Create Tulip Controller
+%-------------------------------------------------------------------------------
 tulip_controller = add_block('sflib/Chart', [modelname '/TulipController']);
+
 
 
 % Get handle on the chart
@@ -47,7 +36,7 @@ mealy_machine.StateMachineType = 'Mealy';
 % Set chart time semantics
 mealy_machine.ChartUpdate = 'DISCRETE';
 if is_continuous
-    
+    mealy_machine.SampleTime = num2str(timestep*simulation_parameters.horizon);
 else
     mealy_machine.SampleTime = num2str(timestep);
 end
@@ -84,6 +73,7 @@ for ind = 1:num_outputs
     end
 end
 
+
 % Add current location to list of inputs if system is continuous
 if is_continuous
     current_loc = Stateflow.Data(mealy_machine);
@@ -91,6 +81,7 @@ if is_continuous
     current_loc.Scope = 'Input';
     current_loc.Port = 1;
 end
+
 
 % Add transitions
 num_transitions = length(TS.transitions);
@@ -156,6 +147,7 @@ end
 
 
 % RHC blocks for continuous systems
+%-------------------------------------------------------------------------------
 if is_continuous
     
     % Horizon block
@@ -170,13 +162,35 @@ if is_continuous
         horizon_output.Name = 'horizon';
         horizon_output.Scope = 'Output';
         
+        % TODO: make states and transitions
+        N = simulation_parameters.horizon;
+        horizon_states = cell(1,N);
+        for ind = 1:N
+            horizon_states{ind} = Stateflow.State(horizon_chart);
+            horizon_states{ind}.Name = ['s' num2str(ind)];
+            horizon_states{ind}.position = [ 100, 100+150*(ind-1), 50, 50];
+        end
+        horizon_transitions = cell(1,N+1);
+        for ind = 1:N
+            horizon_transitions{ind} = Stateflow.Transition(horizon_chart);
+            horizon_transitions{ind}.Source = horizon_states{ind};
+            horizon_transitions{ind}.Destination = horizon_states{mod(ind,N)+1};
+            horizon_transitions{ind}.LabelString = ...
+                ['{horizon=' num2str(N-ind+1) '}'];
+        end
+        horizon_init = Stateflow.Transition(horizon_chart);
+        horizon_init.Destination = horizon_states{1};
+        horizon_init.DestinationOClock = 9;
+
         
-        % TODO: Iterate amongst states
-        % TODO: Sample Time
+        % Sample Time
+        horizon_chart.ChartUpdate = 'DISCRETE';
+        horizon_chart.SampleTime = num2str(timestep);
     else
-        % TODO: Define constant block for oppen loop algorithm
         horizon_block = add_block('built-in/Constant', ...
                                   [modelname '/Control Horizon']);
+        set_param(horizon_block, 'Value', ...
+                  num2str(simulation_parameters.horizon));
     end
     
     % Continuous state to discrete state
@@ -188,19 +202,18 @@ if is_continuous
     set_param(rhc_block, 'Orientation', 'left');
     set_param(rhc_block, 'MATLABFcn', ...
               'get_input(u(1:end-2), u(end-1), u(end))');
+    set_param(rhc_block, 'SampleTime', num2str(timestep));
           
     % Mux for RHC block
     rhc_mux = add_block('built-in/Mux', [modelname '/RHC Mux']);
     set_param(rhc_mux, 'Orientation', 'left');
     set_param(rhc_mux, 'DisplayOption', 'Bar');
     set_param(rhc_mux, 'Inputs', '3');
-    % TODO: sample time parameter
     
     % The Plant Subsystem
     plant = add_block('built-in/Subsystem', [modelname '/Plant']);
     control_input = add_block('built-in/Inport', [modelname '/Plant/u']);
-    cont_state = add_block('built-in/Outport', [modelname '/Plant/cont_state']);
-    % TODO: continuous sample time
+    cont_state = add_block('built-in/Outport', [modelname '/Plant/contstate']);
           
     % Set block positions
     set_param(c2d_block, 'Position', '[330 34 420 86]');
