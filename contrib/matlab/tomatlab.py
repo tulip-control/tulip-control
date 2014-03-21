@@ -6,7 +6,7 @@ import scipy.io
 import numpy
 
 
-def export(mealy_machine, system_dynamics=None, abstraction=None,
+def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
     disc_params=None, R=None, r=None, Q=None, mid_weight=None):
 
     """Creates two matlab files. One is a script that generates a Simulink model
@@ -14,6 +14,7 @@ def export(mealy_machine, system_dynamics=None, abstraction=None,
     a get_input function, a block that maps continuous state to discrete state,
     and a block that times simulation of get_input.
 
+    @param filename: string ending in '.mat'
     @param system: L{LtiSysDyn}, L{PwaSysDyn}, or L{HybridSysDyn} to be saved in
         the .mat file.
     @param filename: String containing name of the .mat file to be created.
@@ -103,7 +104,7 @@ def export(mealy_machine, system_dynamics=None, abstraction=None,
     output['TS'] = export_mealy(mealy_machine, is_continuous)
 
     # Save file
-    scipy.io.savemat('tulip_output.mat', output, oned_as='column')
+    scipy.io.savemat(filename, output, oned_as='column')
 
 
 
