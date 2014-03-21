@@ -74,7 +74,7 @@ class LtiSysDyn(object):
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'continuous' (if system is sampled from a continuous-time
           system)
-        - timestep: A float containing the timestep.
+        - timestep: A positive real number containing the timestep.
     
     as defined above.
     
@@ -207,7 +207,7 @@ class PwaSysDyn(object):
        system) or 'continuous' (if system is sampled from a continuous-time
        system)
 
-      - C{timestep}: A value describing the timestep.
+      - C{timestep}: A positive real number containing the timestep.
 
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
@@ -334,7 +334,8 @@ class HybridSysDyn(object):
        system) or 'continuous' (if system is sampled from a continuous-time
        system)
 
-     - C{timestep}: A value describing the timestep.
+     - C{timestep}: A positive real number containing the timestep.
+
        
     Note
     ====
