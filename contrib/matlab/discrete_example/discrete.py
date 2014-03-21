@@ -53,4 +53,4 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 ctrl = synth.synthesize('gr1c', specs, sys=sys)
 
 # Generate a MATLAB script that generates a Mealy Machine
-tomatlab.export(ctrl)
+tomatlab.export('robot_discrete.mat', ctrl)
