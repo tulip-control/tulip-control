@@ -219,6 +219,16 @@ class PwaSysDyn(object):
     """
     def __init__(self, list_subsys=[], domain=None, time_semantics=None,
                  timestep=None, overwrite_time=True):
+        """
+        @type overwrite_time: bool
+        @param overwrite_time: If true, then overwrites any time data in the
+                               objects in C{list_subsys} with the data in 
+                               C{time_semantics} and C{timestep} variables. 
+                               Otherwise checks that the time data of the
+                               objects in C{list_subsys} are consistent with 
+                               C{time_semantics} and C{timestep}.
+        """
+
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
         
@@ -339,6 +349,16 @@ class HybridSysDyn(object):
                  dynamics=None, cts_ss=None,
                  env_labels=None, disc_sys_labels=None, time_semantics=None,
                  timestep=None, overwrite_time=True):
+        """
+        @type overwrite_time: bool
+        @param overwrite_time: If true, then overwrites any time data in the
+                               objects in C{list_subsys} with the data in 
+                               C{time_semantics} and C{timestep} variables. 
+                               Otherwise checks that the time data of the
+                               objects in C{list_subsys} are consistent with 
+                               C{time_semantics} and C{timestep}.
+        """
+
         # check that the continuous domain is specified
         if cts_ss is None:
             warn('continuous state space not given to HybridSysDyn')
