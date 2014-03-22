@@ -449,74 +449,29 @@ def find_adjacent_regions(partition):
     return adj
 ################################
 
-class PropPreservingPartition(nx.Graph):
-    """Partition class with following fields:
+class Partition(object):
+    """Partition of a set.
     
-      - domain: the domain we want to partition
-          type: L{Polytope}
-
-      - regions: Regions of proposition-preserving partition
-          type: list of L{Region}
-
-      - adj: a sparse matrix showing which regions are adjacent
-          order of L{Region}s same as in list C{regions}
-
-          type: scipy lil sparse
-
-      - prop_regions: map from atomic proposition symbols
-          to continuous subsets
-
-          type: dict of L{Polytope} or L{Region}
+    A C{Partition} is an iterable container of sets
+    over C{Partition.set} and these must implement the methods:
     
-    See Also
-    ========
-    L{prop2part}
+        - union
+        - difference
+        - intersection
+    
+    so the builtin class C{set} can be used for discrete sets,
+    or custom classes (e.g. polytopes) can be used for sets
+    equipped with more structure.
+    
+    To utilize additional structure, see L{MetricPartition}.
     """
-    def __init__(self,
-        domain=None, regions=[],
-        adj=None, prop_regions=None, check=True
-    ):
-        #super(PropPreservingPartition, self).__init__(adj)
+    def __init__(self, domain=None):
+        """Partition over C{domain}.
         
-        if prop_regions is None:
-            self.prop_regions = None
-        else:
-            try:
-                # don't call it
-                # use try because it should work
-                # vs hasattr, which would look like normal selection
-                prop_regions.keys
-            except:
-                msg = 'prop_regions must be dict.'
-                msg += 'Got instead: ' + str(type(prop_regions))
-                raise TypeError(msg)
-            
-            self.prop_regions = copy.deepcopy(prop_regions)
-        
-        n = len(regions)
-        
-        if hasattr(adj, 'shape'):
-            (m, k) = adj.shape
-            if m != k:
-                raise ValueError('adj must be square')
-            if m != n:
-                msg = "adj size doesn't agree with number of regions"
-                raise ValueError(msg)
-        
-        self.regions = regions[:]
-        
-        if check:
-            for region in regions:
-                if not region <= domain:
-                    msg = 'Partition: Region:\n\n' + str(region) + '\n'
-                    msg += 'is not subset of given domain:\n\t'
-                    msg += str(domain)
-                    raise ValueError(msg)
-            
-            self.is_symbolic()
-        
-        self.domain = domain
-        self.adj = adj
+        C{domain} is used to avoid conflicts with
+        the python builtin set function.
+        """
+        self.set = domain
     
     def __len__(self):
         return len(self.regions)
@@ -526,83 +481,6 @@ class PropPreservingPartition(nx.Graph):
     
     def __getitem__(self, key):
         return self.regions[key]
-    
-    def reg2props(self, region_index):
-        return self.regions[region_index].props.copy()
-    
-    #TODO: iterator over pairs
-    #TODO: use nx graph to store partition
-    
-    def is_symbolic(self):
-        """Check that the set of preserved predicates
-        are bijectively mapped to the symbols.
-        
-        Symbols = Atomic Propositions
-        """
-        if self.prop_regions is None:
-            msg = 'No continuous propositions defined.'
-            logging.warn(msg)
-            warnings.warn(msg)
-            return
-        
-        for region in self.regions:
-            if not region.props <= set(self.prop_regions):
-                msg = 'Partitions: Region labeled with propositions:\n\t'
-                msg += str(region.props) + '\n'
-                msg += 'not all of which are in the '
-                msg += 'continuous atomic propositions:\n\t'
-                msg += str(set(self.prop_regions) )
-                raise ValueError(msg)
-    
-    def refines(self, other):
-        """Return True if each element is a subset of other.
-        
-        @type other: PropPreservingPartition
-        """
-        for small in self:
-            found_superset = False
-            for big in other:
-                if small <= big:
-                    found_superset = True
-                    break
-            if not found_superset:
-                return False
-        return True
-    
-    def is_predicate_preserving(self):
-        """Return True if each Region <= Predicates for the
-        predicates in C{prop_regions.values},
-        where C{prop_regions} is a bijection to
-        "continuous" propositions of the specification's alphabet.
-        
-        Note
-        ====
-        1. C{prop_regions} in practice need not be injective.
-            It doesnt hurt - though creates unnecessary redundancy.
-        
-        2. The specification alphabet is fixed an user-defined.
-            It should be distinguished from the auxiliary alphabet
-            generated automatically during abstraction,
-            which defines another partition with
-            its own bijection to TS.
-        """
-        all_props = set(self.prop_regions)
-        
-        for region in self.regions:
-            # Propositions True in Region
-            for prop in region.props:
-                preimage = self.prop_regions[prop]
-                
-                if not region <= preimage:
-                    return False
-            
-            # Propositions False in Region
-            for prop in all_props.difference(region.props):
-                preimage = self.prop_regions[prop]
-                
-                if region.intersect(preimage).volume > pc.polytope.ABS_TOL:
-                    return False
-        return True
     
     def is_partition(self):
         """Return True if Regions are pairwise disjoint and cover domain.
@@ -690,67 +568,34 @@ class PropPreservingPartition(nx.Graph):
                     if not check_all:
                         break
         return ok
+    
+    def refines(self, other):
+        """Return True if each element is a subset of other.
+        
+        @type other: PropPreservingPartition
+        """
+        for small in self:
+            found_superset = False
+            for big in other:
+                if small <= big:
+                    found_superset = True
+                    break
+            if not found_superset:
+                return False
+        return True
 
-    def __str__(self):
-        s = '\n' + _hl + '\n'
-        s += 'Proposition Preserving Partition:\n'
-        s += _hl + 2*'\n'
-        
-        s += 'Domain: ' + str(self.domain) + '\n'
-        
-        for j, region in enumerate(self.regions):
-            s += 'Region: ' + str(j) +'\n'
-            
-            if self.prop_regions is not None:
-                s += '\t Propositions: '
-                
-                active_props = ' '.join(region.props)
-                
-                if active_props:
-                    s += active_props + '\n'
-                else:
-                    s += '{}\n'
-            
-            s += str(region)
-        
-        if hasattr(self.adj, 'todense'):
-            s += 'Adjacency matrix:\n'
-            s += str(self.adj.todense()) + '\n'
-        return s
+class MetricPartition(Partition, nx.Graph):
+    """Partition of a metric space.
     
-    def plot(
-        self, trans=None, ppp2trans=None, only_adjacent=False,
-        ax=None, plot_numbers=True, color_seed=None,
-        show=False
-    ):
-        """For details see plot.plot_partition.
-        """
-        return plot_partition(
-            self, trans, ppp2trans, only_adjacent,
-            ax, plot_numbers, color_seed, show
-        )
+    Includes adjacency information which abstracts
+    the topology induced by the metric.
     
-    def plot_props(self, ax=None):
-        """Plot labeled regions of continuous propositions.
-        """
-        if mpl is None:
-            warnings.warn('No matplotlib')
-            return
-        
-        if ax is None:
-            ax = mpl.pyplot.subplot()
-        
-        l, u = pc.bounding_box(self.domain)
-        ax.set_xlim(l[0,0], u[0,0])
-        ax.set_ylim(l[1,0], u[1,0])
-        
-        for (prop, poly) in self.prop_regions.iteritems():
-            isect_poly = poly.intersect(self.domain)
-            
-            isect_poly.plot(ax, color='none', hatch='/')
-            isect_poly.text(prop, ax, color='yellow')
-        return ax
+    Two subsets in the partition are called adjacent
+    if the intersection of their closure is non-empty.
     
+    If the space is also a measure space,
+    then volume information is used for diagnostic purposes.
+    """
     def compute_adj(self):
         """Update the adjacency matrix by checking all region pairs.
         
@@ -813,6 +658,197 @@ class PropPreservingPartition(nx.Graph):
         self.adj = adj
         
         return self.adj
+
+class PropPreservingPartition(MetricPartition):
+    """Partition class with following fields:
+    
+      - domain: the domain we want to partition
+          type: L{Polytope}
+
+      - regions: Regions of proposition-preserving partition
+          type: list of L{Region}
+
+      - adj: a sparse matrix showing which regions are adjacent
+          order of L{Region}s same as in list C{regions}
+
+          type: scipy lil sparse
+
+      - prop_regions: map from atomic proposition symbols
+          to continuous subsets
+
+          type: dict of L{Polytope} or L{Region}
+    
+    See Also
+    ========
+    L{prop2part}
+    """
+    def __init__(self,
+        domain=None, regions=[],
+        adj=None, prop_regions=None, check=True
+    ):
+        #super(PropPreservingPartition, self).__init__(adj)
+        
+        if prop_regions is None:
+            self.prop_regions = None
+        else:
+            try:
+                # don't call it
+                # use try because it should work
+                # vs hasattr, which would look like normal selection
+                prop_regions.keys
+            except:
+                msg = 'prop_regions must be dict.'
+                msg += 'Got instead: ' + str(type(prop_regions))
+                raise TypeError(msg)
+            
+            self.prop_regions = copy.deepcopy(prop_regions)
+        
+        n = len(regions)
+        
+        if hasattr(adj, 'shape'):
+            (m, k) = adj.shape
+            if m != k:
+                raise ValueError('adj must be square')
+            if m != n:
+                msg = "adj size doesn't agree with number of regions"
+                raise ValueError(msg)
+        
+        self.regions = regions[:]
+        
+        if check:
+            for region in regions:
+                if not region <= domain:
+                    msg = 'Partition: Region:\n\n' + str(region) + '\n'
+                    msg += 'is not subset of given domain:\n\t'
+                    msg += str(domain)
+                    raise ValueError(msg)
+            
+            self.is_symbolic()
+        
+        self.domain = domain
+        self.adj = adj
+    
+    def reg2props(self, region_index):
+        return self.regions[region_index].props.copy()
+    
+    #TODO: iterator over pairs
+    #TODO: use nx graph to store partition
+    
+    def is_symbolic(self):
+        """Check that the set of preserved predicates
+        are bijectively mapped to the symbols.
+        
+        Symbols = Atomic Propositions
+        """
+        if self.prop_regions is None:
+            msg = 'No continuous propositions defined.'
+            logging.warn(msg)
+            warnings.warn(msg)
+            return
+        
+        for region in self.regions:
+            if not region.props <= set(self.prop_regions):
+                msg = 'Partitions: Region labeled with propositions:\n\t'
+                msg += str(region.props) + '\n'
+                msg += 'not all of which are in the '
+                msg += 'continuous atomic propositions:\n\t'
+                msg += str(set(self.prop_regions) )
+                raise ValueError(msg)
+    
+    def is_predicate_preserving(self):
+        """Return True if each Region <= Predicates for the
+        predicates in C{prop_regions.values},
+        where C{prop_regions} is a bijection to
+        "continuous" propositions of the specification's alphabet.
+        
+        Note
+        ====
+        1. C{prop_regions} in practice need not be injective.
+            It doesnt hurt - though creates unnecessary redundancy.
+        
+        2. The specification alphabet is fixed an user-defined.
+            It should be distinguished from the auxiliary alphabet
+            generated automatically during abstraction,
+            which defines another partition with
+            its own bijection to TS.
+        """
+        all_props = set(self.prop_regions)
+        
+        for region in self.regions:
+            # Propositions True in Region
+            for prop in region.props:
+                preimage = self.prop_regions[prop]
+                
+                if not region <= preimage:
+                    return False
+            
+            # Propositions False in Region
+            for prop in all_props.difference(region.props):
+                preimage = self.prop_regions[prop]
+                
+                if region.intersect(preimage).volume > pc.polytope.ABS_TOL:
+                    return False
+        return True
+
+    def __str__(self):
+        s = '\n' + _hl + '\n'
+        s += 'Proposition Preserving Partition:\n'
+        s += _hl + 2*'\n'
+        
+        s += 'Domain: ' + str(self.domain) + '\n'
+        
+        for j, region in enumerate(self.regions):
+            s += 'Region: ' + str(j) +'\n'
+            
+            if self.prop_regions is not None:
+                s += '\t Propositions: '
+                
+                active_props = ' '.join(region.props)
+                
+                if active_props:
+                    s += active_props + '\n'
+                else:
+                    s += '{}\n'
+            
+            s += str(region)
+        
+        if hasattr(self.adj, 'todense'):
+            s += 'Adjacency matrix:\n'
+            s += str(self.adj.todense()) + '\n'
+        return s
+    
+    def plot(
+        self, trans=None, ppp2trans=None, only_adjacent=False,
+        ax=None, plot_numbers=True, color_seed=None,
+        show=False
+    ):
+        """For details see plot.plot_partition.
+        """
+        return plot_partition(
+            self, trans, ppp2trans, only_adjacent,
+            ax, plot_numbers, color_seed, show
+        )
+    
+    def plot_props(self, ax=None):
+        """Plot labeled regions of continuous propositions.
+        """
+        if mpl is None:
+            warnings.warn('No matplotlib')
+            return
+        
+        if ax is None:
+            ax = mpl.pyplot.subplot()
+        
+        l, u = pc.bounding_box(self.domain)
+        ax.set_xlim(l[0,0], u[0,0])
+        ax.set_ylim(l[1,0], u[1,0])
+        
+        for (prop, poly) in self.prop_regions.iteritems():
+            isect_poly = poly.intersect(self.domain)
+            
+            isect_poly.plot(ax, color='none', hatch='/')
+            isect_poly.text(prop, ax, color='yellow')
+        return ax
 
 class PPP(PropPreservingPartition):
     """Alias to L{PropPreservingPartition}.
