@@ -485,7 +485,7 @@ class Partition(object):
     def is_partition(self):
         """Return True if Regions are pairwise disjoint and cover domain.
         """
-        return self.covers_domain() and self.are_disjoint()
+        return self.is_cover() and self.are_disjoint()
     
     def is_cover(self):
         """Return True if Regions cover domain
