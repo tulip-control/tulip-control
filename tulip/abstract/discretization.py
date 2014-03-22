@@ -865,7 +865,7 @@ def discretize(
         
         # plot partition
         ax1.clear()
-        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        plot_partition(tmp_part, transitions.T, ax=ax1, color_seed=23)
         
         # plot dynamics
         ssys.plot(ax1, show_domain=False)
