@@ -4,6 +4,8 @@ Tests for the abstraction from continuous dynamics to logic
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logging.getLogger('tulip').setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 import numpy as np
 
@@ -91,15 +93,17 @@ def transition_directions_test():
     ts = swab.modes[('normal', 'fly')].ts
     edges = {('s0', 's0'), ('s1', 's1'), ('s2', 's2'), ('s3', 's3'),
              ('s4', 's4'), ('s5', 's5'),
-             ('s1', 's2'), ('s1', 's4'),
+             ('s1', 's2'), ('s1', 's4'), ('s1', 's5'),
              ('s2', 's3'), ('s2', 's5'), ('s2', 's0'),
              ('s3', 's0'),
              ('s4', 's5'),
              ('s5', 's0')}
+    
+    logger.debug(set(ts.edges() ).symmetric_difference(edges) )
     assert(set(ts.edges() ) == edges)
     
     ts = swab.ts
-    edges.remove(('s2', 's0'))
+    
     assert(set(ts.edges() ) == edges)
     for i, j in edges:
         assert(ts[i][j][0]['env_actions'] == 'normal')
