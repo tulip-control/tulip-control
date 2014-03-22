@@ -603,6 +603,9 @@ def discretize(
         si = sol[i]
         sj = sol[j]
         
+        si_tmp = deepcopy(si)
+        sj_tmp = deepcopy(sj)
+        
         #num_new_reg[i] += 1
         #print(num_new_reg)
         
@@ -856,9 +859,9 @@ def discretize(
         
         # plot pair under reachability check
         ax2.clear()
-        si.plot(ax=ax2, color='green')
-        sj.plot(ax2, color='red', hatch='o', alpha=0.5)
-        plot_transition_arrow(si, sj, ax2)
+        si_tmp.plot(ax=ax2, color='green')
+        sj_tmp.plot(ax2, color='red', hatch='o', alpha=0.5)
+        plot_transition_arrow(si_tmp, sj_tmp, ax2)
         
         S0.plot(ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
