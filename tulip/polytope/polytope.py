@@ -1534,33 +1534,32 @@ def separate(reg1, abs_tol=ABS_TOL):
     return final
 
 def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
-    """Return True if the two polytopes or regions are adjacent.
+    """Return True if two polytopes or regions are adjacent.
     
     Check by enlarging both slightly and checking for intersection.
     
-    @param poly1, poly2: L{Polytope}s or L{Region}s to check
-    @param abs_tol: absolute tolerance
-    @param overlap: used for overlapping polytopes, functions returns
-                 True if polytopes are neighbors OR overlap
+    @type poly1, poly2: L{Polytope}s or L{Region}s
     
-    @return: True if polytopes are adjacent, False otherwise
+    @param overlap: return True if polytopes are neighbors OR overlap
+    
+    @param abs_tol: absolute tolerance
+    
+    @return: True if polytopes are adjacent
     """
     if poly1.dim != poly2.dim:
         raise Exception("is_adjacent: "
             "polytopes do not have the same dimension")
     
     if isinstance(poly1, Region):
-        for i in xrange(len(poly1)):
-            adj = is_adjacent(poly1.list_poly[i], poly2, \
-                              overlap=overlap, abs_tol=abs_tol)
+        for p in poly1:
+            adj = is_adjacent(p, poly2, overlap=overlap, abs_tol=abs_tol)
             if adj:
                 return True
         return False
     
     if isinstance(poly2, Region):
-        for j in xrange(len(poly2)):
-            adj = is_adjacent(poly1, poly2.list_poly[j], \
-                              overlap=overlap, abs_tol=abs_tol)
+        for p in poly2:
+            adj = is_adjacent(poly1, p, overlap=overlap, abs_tol=abs_tol)
             if adj:
                 return True
         return False
@@ -1577,7 +1576,7 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
             np.concatenate((A1_arr, A2_arr)),
             np.concatenate((b1_arr, b2_arr))
         )
-        return is_fulldim(dummy, abs_tol=abs_tol/10)
+        return is_fulldim(dummy, abs_tol=abs_tol / 10)
         
     else:
         M1 = np.concatenate((poly1.A, np.array([poly1.b]).T), 1).T
