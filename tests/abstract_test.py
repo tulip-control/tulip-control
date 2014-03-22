@@ -4,7 +4,7 @@ Tests for the abstraction from continuous dynamics to logic
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logging.getLogger('tulip').setLevel(logging.ERROR)
+#logging.getLogger('tulip').setLevel(logging.ERROR)
 logger.setLevel(logging.DEBUG)
 
 import numpy as np
@@ -159,3 +159,55 @@ def test_transient_regions():
     
     #ax = ab.plot(show_ts=True)
     #ax.figure.savefig('./very_simple.pdf')
+
+def define_partition(dom):
+    p = dict()
+    p['a'] = pc.box2poly([[0.0, 10.0], [15.0, 18.0]])
+    p['b'] = pc.box2poly([[0.0, 1.0], [0.0, 20.0]])
+    
+    ppp = abstract.prop2part(dom, p)
+    ppp, new2old_reg = abstract.part2convex(ppp)
+    return ppp
+
+def define_dynamics(dom):
+    A = np.eye(2)
+    
+    B = np.array([[1.0, -1.0],
+                  [0.0, +1.0]])
+    
+    U = pc.box2poly([[0.0, 3.0],
+                     [-3.0, 3.0]])
+    
+    E = np.array([[0.0],
+                  [-1.0]])
+    
+    W = pc.box2poly([[-1.0, 1.0]])
+    W.scale(0.4)
+    
+    K = np.array([[0.0],
+                  [-0.4]])
+    
+    sys = hybrid.LtiSysDyn(A, B, E, K, U, W, dom)
+    return sys
+
+def test_abstract_the_dynamics():
+    dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
+    ppp = define_partition(dom)
+    sys = define_dynamics(dom)
+    logger.info(sys)
+    
+    disc_options = {'N':3, 'trans_length':2, 'min_cell_volume':1.5}
+    
+    ab = abstract.discretize(ppp, sys, plotit=False,
+                             save_img=False, **disc_options)
+    assert(ab.ppp.compute_adj() )
+    assert(ab.ppp.is_partition() )
+    #ax = ab.plot(show_ts=True, color_seed=0)
+    #sys.plot(ax, show_domain=False)
+    #print(ab.ts)
+
+    #self_loops = {i for i,j in ab.ts.transitions() if i==j}
+    #print('self loops at states: ' + str(self_loops))
+
+if __name__ == '__main__':
+    test_abstract_the_dynamics()

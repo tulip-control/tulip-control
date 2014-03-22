@@ -672,13 +672,14 @@ class MetricPartition(Partition, nx.Graph):
             
             logger.info('done checking previous adjacency.')
         else:
+            ok = True
             logger.info('no previous adjacency found: ' +
                         'skip verification.')
         
         # update adjacency
         self.adj = adj
         
-        return self.adj
+        return ok
 
 class PropPreservingPartition(MetricPartition):
     """Partition class with following fields:
