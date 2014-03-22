@@ -429,24 +429,23 @@ def product_interval(list1, list2):
 
 def find_adjacent_regions(partition):
     """Return region pairs that are spatially adjacent.
+    
+    @type partition: iterable container of L{Region}
+    
+    @rtype: lil_matrix
     """
-    num_reg = len(partition.regions)
+    n = len(partition)
+    adj = sp.lil_matrix((n, n), dtype=np.int8)
+    s = partition.regions
     
-    adj = sp.lil_matrix(
-        (num_reg, num_reg),
-        dtype=np.int8
-    )
-    
-    for i in xrange(num_reg):
-        adj[i,i] = 1
-        for j in xrange(i+1, num_reg):
-            adj[i, j] = pc.is_adjacent(
-                partition.regions[i],
-                partition.regions[j]
-            )
-            adj[j,i] = adj[i,j]
+    for i, a in enumerate(s):
+        adj[i, i] = 1
+        
+        for j, b in enumerate(s[0:i]):
+            adj[i, j] = adj[j, i] = pc.is_adjacent(a, b)
         
     return adj
+
 ################################
 
 class Partition(object):
