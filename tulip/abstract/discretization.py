@@ -835,7 +835,7 @@ def discretize(
             transitions[j,i] = 0
         
         # check to avoid overlapping Regions
-        if debug and False:
+        if debug:
             tmp_part = PropPreservingPartition(
                 domain=part.domain,
                 regions=sol, adj=sp.lil_matrix(adj),
