@@ -767,22 +767,24 @@ class PropPreservingPartition(nx.Graph):
             row, col = adj.nonzero()
             
             for i, j in zip(row, col):
+                assert(adj[i, j])
                 if adj[i, j] != self.adj[i, j]:
                     ok = False
                     
                     msg = 'PPP adjacency matrix is incomplete, '
-                    msg += 'missing: (' + str(i) + str(j) + ')'
-                    logging.error(msg)
+                    msg += 'missing: (' + str(i) + ', ' + str(j) + ')'
+                    logger.error(msg)
             
-            row, col = adj.nonzero()
+            row, col = self.adj.nonzero()
             
             for i, j in zip(row, col):
+                assert(self.adj[i, j])
                 if adj[i, j] != self.adj[i, j]:
                     ok = False
                     
                     msg = 'PPP adjacency matrix is incorrect, '
-                    msg += 'has 1 at: (' + str(i) + str(j) + ')'
-                    logging.error(msg)
+                    msg += 'has 1 at: (' + str(i) + ', ' + str(j) + ')'
+                    logger.error(msg)
             
             if not ok:
                 logging.error('PPP had incorrect adjacency matrix.')
