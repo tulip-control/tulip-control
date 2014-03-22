@@ -488,7 +488,7 @@ class Partition(object):
         """
         return self.covers_domain() and self.are_disjoint()
     
-    def covers_domain(self):
+    def is_cover(self):
         """Return True if Regions cover domain
         """
         union = pc.Region()
@@ -777,7 +777,7 @@ class PropPreservingPartition(MetricPartition):
                 msg += str(set(self.prop_regions) )
                 raise ValueError(msg)
     
-    def is_predicate_preserving(self):
+    def preserves_predicates(self):
         """Return True if each Region <= Predicates for the
         predicates in C{prop_regions.values},
         where C{prop_regions} is a bijection to
