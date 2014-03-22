@@ -455,9 +455,10 @@ class Partition(object):
     A C{Partition} is an iterable container of sets
     over C{Partition.set} and these must implement the methods:
     
-        - union
+        - union, __add__
         - difference
         - intersection
+        - __le__
     
     so the builtin class C{set} can be used for discrete sets,
     or custom classes (e.g. polytopes) can be used for sets
@@ -582,6 +583,27 @@ class Partition(object):
                     break
             if not found_superset:
                 return False
+        return True
+    
+    def preserves(self, other):
+        """Return True if it refines closure of C{other} under complement.
+        
+        Closure under complement is the union of C{other}
+        with the collection of complements of its elements.
+        
+        This method checks the annotation of elements in C{self}
+        with elements fro C{other}.
+        """
+        for item in self._elements:
+            # item subset of these sets
+            for superset in item.supersets:
+                if not item <= superset:
+                    return False
+            
+            # item subset of the complements of these sets
+            for other_set in set(other).difference(item.supersets):
+                if item.intersect(other_set):
+                    return False
         return True
 
 class MetricPartition(Partition, nx.Graph):
