@@ -1574,20 +1574,21 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
         b1_arr += abs_tol
         b2_arr += abs_tol 
         dummy = Polytope(
-            np.concatenate((A1_arr,A2_arr)),
-            np.concatenate((b1_arr,b2_arr))
+            np.concatenate((A1_arr, A2_arr)),
+            np.concatenate((b1_arr, b2_arr))
         )
         return is_fulldim(dummy, abs_tol=abs_tol/10)
         
-    else: 
-        M1 = np.concatenate((poly1.A,np.array([poly1.b]).T),1).T
-        M1row = 1/np.sqrt(np.sum(M1**2,0))
-        M1n = np.dot(M1,np.diag(M1row))
-        M2 = np.concatenate((poly2.A,np.array([poly2.b]).T),1).T
-        M2row = 1/np.sqrt(np.sum(M2**2,0))
-        M2n = np.dot(M2,np.diag(M2row))
+    else:
+        M1 = np.concatenate((poly1.A, np.array([poly1.b]).T), 1).T
+        M1row = 1 / np.sqrt(np.sum(M1**2, 0))
+        M1n = np.dot(M1, np.diag(M1row))
         
-        if not np.any(np.dot(M1n.T,M2n)<-0.99):
+        M2 = np.concatenate((poly2.A, np.array([poly2.b]).T), 1).T
+        M2row = 1 / np.sqrt(np.sum(M2**2, 0))
+        M2n = np.dot(M2, np.diag(M2row))
+        
+        if not np.any(np.dot(M1n.T,M2n) < -0.99):
             return False      
         
         dummy = np.dot(M1n.T, M2n)
@@ -1598,10 +1599,10 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
             b2_arr[j] += abs_tol
         
         dummy = Polytope(
-            np.concatenate((A1_arr,A2_arr)),
-            np.concatenate((b1_arr,b2_arr))
+            np.concatenate((A1_arr, A2_arr)),
+            np.concatenate((b1_arr, b2_arr))
         )
-        return is_fulldim(dummy, abs_tol=abs_tol/10)
+        return is_fulldim(dummy, abs_tol=abs_tol / 10)
 
 def is_interior(r0, r1, abs_tol=ABS_TOL):
     """Return True if r1 is strictly in the interior of r0.
