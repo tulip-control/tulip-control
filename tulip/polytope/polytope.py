@@ -1589,15 +1589,13 @@ def is_adjacent(poly1, poly2, overlap=False, abs_tol=ABS_TOL):
         
         if not np.any(np.dot(M1n.T,M2n)<-0.99):
             return False      
-        neq1 = M1n.shape[1]
-        neq2 = M2n.shape[1]
-        dummy = np.dot(M1n.T,M2n)
-        cand = np.nonzero(dummy==dummy.min())
-        i = cand[0][0]
-        j = cand[1][0]
         
-        b1_arr[i] += abs_tol
-        b2_arr[j] += abs_tol 
+        dummy = np.dot(M1n.T, M2n)
+        row, col = np.nonzero(np.isclose(dummy, dummy.min() ) )
+        
+        for i,j in zip(row, col):
+            b1_arr[i] += abs_tol
+            b2_arr[j] += abs_tol
         
         dummy = Polytope(
             np.concatenate((A1_arr,A2_arr)),
