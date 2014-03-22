@@ -541,7 +541,7 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
-    logger.info("\n Starting IJ: \n" + str(IJ) )
+    logger.debug("\n Starting IJ: \n" + str(IJ) )
     
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
@@ -628,25 +628,27 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        msg = '\n Working with states:\n\t'
-        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')\n\t'
+        msg = '\n Working with partition cells: ' + str(i) + ', ' + str(j)
+        logger.info(msg)
+        
+        msg = '\t' + str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n'
+        msg += '\t' + str(j) +' (#polytopes = ' +str(len(sj) ) +')\n'
         
         if ispwa:
-            msg += 'with active subsystem: '
-            msg += str(subsys_list[i]) + '\n\t'
+            msg += '\t with active subsystem: '
+            msg += str(subsys_list[i]) + '\n'
             
-        msg += 'Computed reachable set S0 with volume: '
+        msg += '\t Computed reachable set S0 with volume: '
         msg += str(S0.volume) + '\n'
         
         logger.debug(msg)
         
-        logger.debug('si \cap s0')
+        #logger.debug('si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
-        logger.debug('si \ s0')
+        #logger.debug('si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
@@ -681,13 +683,13 @@ def discretize(
             assert(False)
         """
         if vol1 <= min_cell_volume:
-            logger.warning('too small: si \cap Pre(sj), ' +
+            logger.warning('\t too small: si \cap Pre(sj), ' +
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning('discarded non-empty intersection: ' +
+            logger.warning('\t discarded non-empty intersection: ' +
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('too small: si \ Pre(sj), so not reached it')
+            logger.warning('\t too small: si \ Pre(sj), so not reached it')
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -778,10 +780,11 @@ def discretize(
             
             msg = ''
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg += '\n Adding states ' + str(i) + ' and '
+                msg += '\t\n Adding states ' + str(i) + ' and '
                 for r in new_idx:
                     msg += str(r) + ' and '
                 msg += '\n'
+                logger.debug(msg)
                         
             for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                 # Every "old" neighbor must be the neighbor
@@ -812,21 +815,23 @@ def discretize(
                 sym_adj_change(IJ, adj_k, transitions, r)
             
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg += '\n\n Updated adj: \n' + str(adj)
+                msg = '\n\n Updated adj: \n' + str(adj)
                 msg += '\n\n Updated trans: \n' + str(transitions)
                 msg += '\n\n Updated IJ: \n' + str(IJ)
+                logger.debug(msg)
             
-            msg += 'Divided region: ' + str(i) + '\n'
+            logger.info('Divided region: ' + str(i) + '\n')
         elif vol2 < abs_tol:
-            msg = 'Found: ' + str(i) + ' ---> ' + str(j) + '\n'
+            logger.info('Found: ' + str(i) + ' ---> ' + str(j) + '\n')
             transitions[j,i] = 1
         else:
             if logger.level <= logging.DEBUG:
-                msg = 'Unreachable: ' + str(i) + ' --X--> ' + str(j)
-                msg += ',\n\t diff vol: ' + str(vol2)
-                msg += ', intersect vol: ' + str(vol1) + '\n'
+                msg = '\t Unreachable: ' + str(i) + ' --X--> ' + str(j) + '\n'
+                msg += '\t\t diff vol: ' + str(vol2) + '\n'
+                msg += '\t\t intersect vol: ' + str(vol1) + '\n'
+                logger.debug(msg)
             else:
-                msg += 'unreachable\n'
+                logger.info('\t unreachable\n')
             transitions[j,i] = 0
         
         # check to avoid overlapping Regions
@@ -838,7 +843,9 @@ def discretize(
             )
             assert(tmp_part.is_partition() )
         
-        msg += 'max #polytopes: ' + str(len(sol) ) + '\n'
+        n_cells = len(sol)
+        msg = '\t total # polytopes: ' + str(n_cells) + '\n'
+        msg += '\t progress ratio: ' + str(1 - float(np.sum(IJ) ) /n_cells**2) + '\n'
         logger.info(msg)
         
         iter_count += 1
