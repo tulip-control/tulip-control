@@ -56,7 +56,13 @@ from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
 from .plot import plot_ts_on_partition
 
-debug = True
+try:
+    import matplotlib.pyplot as plt
+except Exception, e:
+    plt = None
+    logger.error(e)
+
+debug = False
 
 class AbstractSwitched(object):
     """Abstraction of HybridSysDyn, with mode-specific and common info.
@@ -574,16 +580,12 @@ def discretize(
             logger.error(e)
             plot_partition = None
         
-        try:
-            import matplotlib.pyplot as plt
+        if plt is not None:
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
             file_extension = 'png'
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
         
     iter_count = 0
     
@@ -592,6 +594,8 @@ def discretize(
     # and a list of original number of neighbors
     #num_new_reg = np.zeros(len(orig_list))
     #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    
+    progress = list()
     
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -844,8 +848,11 @@ def discretize(
             assert(tmp_part.is_partition() )
         
         n_cells = len(sol)
+        progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
+        progress += [progress_ratio]
+        
         msg = '\t total # polytopes: ' + str(n_cells) + '\n'
-        msg += '\t progress ratio: ' + str(1 - float(np.sum(IJ) ) /n_cells**2) + '\n'
+        msg += '\t progress ratio: ' + str(progress_ratio) + '\n'
         logger.info(msg)
         
         iter_count += 1
@@ -951,6 +958,13 @@ def discretize(
           str(end_time - start_time) + '[sec]'
     print(msg)
     logger.info(msg)
+    
+    if plt is not None and save_img:
+        fig, ax = plt.subplots(1, 1)
+        plt.plot(progress)
+        ax.set_xlabel('iteration')
+        ax.set_ylabel('progress ratio')
+        ax.figure.savefig('progress.pdf')
     
     return AbstractPwa(
         ppp=new_part,
