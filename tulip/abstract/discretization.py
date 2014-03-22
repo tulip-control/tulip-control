@@ -887,7 +887,7 @@ def discretize(
         
         # scale view based on domain,
         # not only the current polytopes si, sj
-        l,u = pc.bounding_box(part.domain)
+        l,u = part.domain.bounding_box
         ax2.set_xlim(l[0,0], u[0,0])
         ax2.set_ylim(l[1,0], u[1,0])
         

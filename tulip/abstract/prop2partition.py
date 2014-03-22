@@ -302,7 +302,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                          grid points parameters must be given.")
  
     dim=len(ppp.domain.A[0])
-    domain_bb = pc.bounding_box(ppp.domain)
+    domain_bb = ppp.domain.bounding_box
     size_list=list()
     if grid_size!=None:
         if isinstance( grid_size, list ):
@@ -527,7 +527,7 @@ class Partition(object):
         """
         logger.info('checking if PPP is a partition.')
         
-        l,u = self.domain.bbox
+        l,u = self.set.bounding_box
         ok = True
         for i, region in enumerate(self.regions):
             for j, other in enumerate(self.regions[0:i]):
@@ -860,7 +860,7 @@ class PropPreservingPartition(MetricPartition):
         if ax is None:
             ax = mpl.pyplot.subplot()
         
-        l, u = pc.bounding_box(self.domain)
+        l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
         ax.set_ylim(l[1,0], u[1,0])
         

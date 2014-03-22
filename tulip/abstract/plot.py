@@ -41,7 +41,7 @@ import numpy as np
 from scipy import sparse as sp
 import networkx as nx
 
-from tulip.polytope import cheby_ball, bounding_box
+from tulip.polytope import cheby_ball
 import tulip.polytope as pc
 
 try:
@@ -105,7 +105,7 @@ def plot_partition(
         trans = nx.to_numpy_matrix(trans, nodelist=ppp2trans)
         trans = np.array(trans)
     
-    l,u = bounding_box(ppp.domain)
+    l,u = ppp.domain.bounding_box
     arr_size = (u[0,0]-l[0,0])/50.0
     
     # new figure ?
@@ -177,7 +177,7 @@ def plot_abstraction_scc(ab, ax=None):
     if ax is None:
         ax = mpl.pyplot.subplot()
     
-    l, u = pc.bounding_box(ab.ppp.domain)
+    l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0,0], u[0,0])
     ax.set_ylim(l[1,0], u[1,0])
     
@@ -203,7 +203,7 @@ def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
     @param edge_label: desired label
     @type edge_label: dict
     """
-    l,u = bounding_box(ppp.domain)
+    l,u = ppp.domain.bounding_box
     arr_size = (u[0,0]-l[0,0])/50.0
     
     ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
@@ -274,7 +274,7 @@ def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
         return None
     
     if arr_size is None:
-        l,u = polyreg1.bounding_box()
+        l,u = polyreg1.bounding_box
         arr_size = (u[0,0]-l[0,0])/25.0
     
     #TODO: 3d

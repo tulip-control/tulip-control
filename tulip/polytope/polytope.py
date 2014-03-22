@@ -381,6 +381,7 @@ class Polytope(object):
     def cheby(self):
         return cheby_ball(self)
     
+    @property
     def bounding_box(self):
         """Wrapper of L{polytope.bounding_box}.
         
@@ -635,6 +636,7 @@ class Region(object):
     def cheby(self):
         return cheby_ball(self)
     
+    @property
     def bounding_box(self):
         """Wrapper of polytope.bounding_box.
         
@@ -747,8 +749,8 @@ def is_convex(reg, abs_tol=ABS_TOL):
         # Probably because input polytopes were so small and ugly..
         return False,None
 
-    Pl,Pu = bounding_box(reg)
-    Ol,Ou = bounding_box(outer)
+    Pl,Pu = reg.bounding_box
+    Ol,Ou = outer.bounding_box
     
     bboxP = np.hstack([Pl,Pu])
     bboxO = np.hstack([Ol,Ou])
@@ -859,7 +861,7 @@ def reduce(poly,nonEmptyBounded=1, abs_tol=ABS_TOL):
     
     # Now eliminate hyperplanes outside the bounding box
     if neq>3*nx:
-        lb, ub = bounding_box(Polytope(A_arr,b_arr))
+        lb, ub = Polytope(A_arr,b_arr).bounding_box
         #cand = -(np.dot((A_arr>0)*A_arr,ub-lb)
         #-(b_arr-np.dot(A_arr,lb).T).T<-1e-4)
         cand = -(
@@ -1078,7 +1080,7 @@ def bounding_box(polyreg):
         allupper = np.zeros([lenP,dimP])
         
         for ii in xrange(0,lenP):
-            bbox = bounding_box(polyreg.list_poly[ii])            
+            bbox = polyreg.list_poly[ii].bounding_box     
             ll,uu = bbox
             alllower[ii,:]=ll.T
             allupper[ii,:]=uu.T
@@ -1276,7 +1278,7 @@ def volume(polyreg):
     else:
         N = 10000
     
-    l_b, u_b = bounding_box(polyreg)
+    l_b, u_b = polyreg.bounding_box
     x = np.tile(l_b,(1,N)) +\
         np.random.rand(n,N) *\
         np.tile(u_b-l_b,(1,N) )
@@ -2107,7 +2109,7 @@ def grid_region(polyreg, res=None):
     
     @param res: resolution of grid
     """
-    bbox = polyreg.bounding_box()
+    bbox = polyreg.bounding_box
     bbox = np.hstack(bbox)
     dom = bbox.flatten()
     
