@@ -748,6 +748,7 @@ class PropPreservingPartition(MetricPartition):
             self.is_symbolic()
         
         self.domain = domain
+        super(PropPreservingPartition, self).__init__(domain)
         self.adj = adj
     
     def reg2props(self, region_index):
