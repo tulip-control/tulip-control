@@ -554,6 +554,21 @@ class PropPreservingPartition(nx.Graph):
                 msg += str(set(self.prop_regions) )
                 raise ValueError(msg)
     
+    def refines(self, other):
+        """Return True if each element is a subset of other.
+        
+        @type other: PropPreservingPartition
+        """
+        for small in self:
+            found_superset = False
+            for big in other:
+                if small <= big:
+                    found_superset = True
+                    break
+            if not found_superset:
+                return False
+        return True
+    
     def is_predicate_preserving(self):
         """Return True if each Region <= Predicates for the
         predicates in C{prop_regions.values},
