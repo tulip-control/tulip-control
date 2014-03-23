@@ -312,6 +312,9 @@ class States(object):
     def __get__(self):
         return self.__call__()
     
+    def __getitem__(self, state):
+        return self.graph.node[state]
+    
     def __call__(self, *args, **kwargs):
         """Return list of states.
         
@@ -644,31 +647,21 @@ class States(object):
         #return None
 
 class Transitions(object):
-    """Building block for managing unlabeled transitions = edges.
+    """Methods for handling labeled transitions.
     
     Note that a directed edge is an ordered set of nodes.
     Unlike an edge, a transition is a labeled edge.
-    However, labelings may vary, so they are defined separately and methods for
-    working with labeled transitions are defined in the respective classes.
     """
-    def __init__(self, graph):
+    def __init__(self, graph, deterministic=False):
         self.graph = graph
+        self._deterministic = deterministic
     
-    def __call__(self):
+    def __call__(self, **kwargs):
         """Return list of transitions.
         
-        The transitions are yet unlabeled, so they are graph edges,
-        i.e., ordered pairs of states: (s1, s2).
-        The edge direction is from s1 to s2, i.e., s1-> s2.
-        
-        LabeledTransitions overload this to return transitions,
-        i.e., labeled edges = triples: (s1, s2, label).
-        
-        See Also
-        ========
-        L{LabeledTransitions.__call__}
+        Wraps L{LabeledDiGraph.edges}.
         """
-        return self.graph.edges(data=False)
+        return self.graph.edges(**kwargs)
     
     def __str__(self):
         return 'Transitions:\n' +pformat(self() )
@@ -677,15 +670,27 @@ class Transitions(object):
         """Count transitions."""
         return self.graph.number_of_edges()
     
-    def _mutant2int(self, from_state, to_state):
-        from_state_id = self.graph.states._mutant2int(from_state)
-        to_state_id = self.graph.states._mutant2int(to_state)
+    def _breaks_determinism(self, from_state, sublabels):
+        """Return True if adding transition conserves determinism.
+        """
+        if not self._deterministic:
+            return
         
-        return (from_state_id, to_state_id)
+        if not from_state in self.graph.states:
+            raise Exception('from_state \notin graph')
+        
+        same_labeled = self.find([from_state], with_attr_dict=sublabels)        
+        
+        if same_labeled:
+            msg = 'Candidate transition violates determinism.\n'
+            msg += 'Existing transitions with same label:\n'
+            msg += str(same_labeled)
+            raise Exception(msg)
     
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
         """Wrapper for L{LabeledDiGraph.add_edge}.
         """
+        #self._breaks_determinism(from_state, labels)
         self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
     
     def add_from(self, from_states, to_states, check_states=True):
