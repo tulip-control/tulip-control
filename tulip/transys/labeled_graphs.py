@@ -1122,14 +1122,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         nx.MultiDiGraph.__init__(self, **kwargs)
         
-        self.states = LabeledStates(self, mutable=False)
+        self.states = States(self)
         
         #todo: handle accepting states separately
         if max_outdegree == 1:
             deterministic = True
         else:
             deterministic = False
-        self.transitions = LabeledTransitions(self, deterministic)
+        self.transitions = Transitions(self, deterministic)
         
         # export properties
         self.dot_node_shape = {'normal':'circle'}
