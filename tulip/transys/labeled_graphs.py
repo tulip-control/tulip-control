@@ -1263,7 +1263,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 attr_dict = attr.copy()
                 attr_dict.update(ndict)
             
-            self.add_node(node, attr_dict=attr_dict)
+            self.add_node(node, attr_dict=attr_dict, check=check)
     
     def add_edge(self, u, v, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
