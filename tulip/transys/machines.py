@@ -178,6 +178,10 @@ class FiniteStateMachine(LabeledDiGraph):
     so it does not "care" about word length.
     It continues as long as its input is fed with letters.
     
+    For Machines, each state label consists of (possibly multiple) sublabels,
+    each of which is either a variable, or, only for Moore machines,
+    may be an output.
+    
     See Also
     ========
     FSM, MealyMachine, MooreMachine
