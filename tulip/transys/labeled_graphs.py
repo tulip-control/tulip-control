@@ -304,153 +304,28 @@ class LabelConsistency(object):
 
 class States(object):
     """Methods to manage states, initial states, current state.
-        
-    add, remove, count, test membership
-    
-    Mutable States
-    ==============
-    During language parsing, LTL->BA converion or partition refinement
-    it is convenient to keep revisiting states and replacing them by others
-    which refine them.
-    
-    For this it useful to store the objects that will be further processed
-    directly as states. For example, suppose we want to store ['a', '||', 'b']
-    as a state, then visit it, recognize the operator '||' and replace
-    ['a', '||', 'b'] by two new states: 'a' and: 'b'.
-    
-    However, we cannot store ['a', '||', 'b'] as a NetworkX state, because
-    a list is not hashable. There are two solutions:
-    
-      - recursively freeze everything
-      - store actual states as labels of int states
-      - maintain a bijection between states and ints,
-        using the later as NetworkX states
-    
-    The first alternative is painful and requires that each user write their
-    custom freezing code, depending on the particular data structure stored.
-    The second alternative is even worse.
-    
-    The second approach is implemented if C{mutable==True}.
-    From the user's viewpoint, everything remains the same.
-    
-    Using this flag can slow down comparisons, so it is appropriate for the
-    special case of refinement. In many cases the resulting states after the
-    refinement are hashable without special arrangements (e.g. strings).
-    So the final result would then be storable in an ordinary NetworkX graph.
-    
-    See Also
-    ========
-    L{LabeledStateDiGraph}, L{LabeledTransitions}, L{Transitions}
-    
-    @param mutable: enable storage of unhashable states
-    @type mutable: bool (default: False)
     """
-    def __init__(self, graph, mutable=False,
-                 accepting_states_type=None):
+    def __init__(self, graph):
         self.graph = graph
-        self.list = None # None when list disabled
-        
-        # biject mutable states <-> ints ?
-        if mutable:
-            self.mutants = dict()
-            self.min_free_id = 0
-        else:
-            self.mutants = None
-            self.min_free_id = None
-        
-        self.initial = SubSet(self)
-        
-        self._accepting_type = accepting_states_type
-        if accepting_states_type:
-            self.accepting = accepting_states_type(self)
-        
-        self.select_current([], warn=False)
+        self.initial = []
+        self.current = []
     
     def __get__(self):
         return self.__call__()
     
-    def __call__(self, data=False, listed=False):
-        """Return set of states.
+    def __call__(self, *args, **kwargs):
+        """Return list of states.
         
-        Default: state annotation not returned.
-        To obtain that use argumet data=True.
-        
-        @param data: include annotation dict of each state
-        @type data: bool
-        
-        @param listed:
-            Return ordered states (instead of random list).
-            Available only if order maintained.
-            List is always returned anyway, to avoid issues with mutable states.
-        
-        @return:
-            - If C{data==True},
-              then return [(state, attr_dict),...]
-            - If C{data==False} and C{listed==True} and state order maintained,
-              then return [state_i,...]
-            - If C{data==False} and C{listed==True} but no order maintained,
-              then return [state_i,...] (RANDOM ORDER)
+        For more details see L{LabeledDiGraph.nodes}
         """
-        if (data != True) and (data != False):
-            raise Exception('Functionality of States() changed.')
-        
-        if data == True:
-            state_id_data_pairs = self.graph.nodes(data=True)
-            
-            # no replacement needed ?
-            if not self._is_mutable():
-                state_data_pairs = state_id_data_pairs
-                return state_data_pairs
-            
-            # replace state_id-> state
-            state_data_pairs = []
-            for (state_id, attr_dict) in state_id_data_pairs:
-                state = self._int2mutant(state_id)
-                
-                state_data_pairs += [(state, attr_dict) ]
-                
-            return state_data_pairs
-        elif data == False:
-            if listed:
-                if self.list is None:
-                    raise Exception('State ordering not maintained.')
-                state_ids = self.list
-            else:
-                state_ids = self.graph.nodes(data=False)
-            
-            # return list, so avoid hashing issues when states are mutable
-            # selection here avoids infinite recursion
-            if self._is_mutable():
-                return self._ints2mutants(state_ids)
-            else:
-                states = state_ids
-                return states
-        else:
-            raise Exception("data must be bool\n")
+        return self.graph.nodes(*args, **kwargs)
     
     def __str__(self):
-        return 'States:\n' +pformat(self(data=False) )    
-    
-    def __eq__(self, other):
-        return self.graph.nodes(data=False) == other
-        
-    def __ne__(self, other):
-        return self.graph.nodes(data=False) != other
-    
-    def __lt__(self, other):
-        return self.graph.nodes(data=False) < other
-    
-    def __gt__(self, other):
-        return self.graph.nodes(data=False) > other
-    
-    def __le__(self, other):
-        return self.graph.nodes(data=False) <= other
-    
-    def __ge__(self, other):
-        return self.graph.nodes(data=False) >= other
+        return 'States:\n' +pformat(self(data=False) )
     
     def __len__(self):
-        """Total number of states."""
+        """Total number of states.
+        """
         return self.graph.number_of_nodes()
     
     def __iter__(self):
@@ -462,167 +337,39 @@ class States(object):
         return self
     
     def __contains__(self, state):
-        """Check if single state \\in set_of_states.
-        
-        @param state: Check if C{state} already in states.
-        @type state: if mutable states enabled, then any type,
-            otherwise must be hashable
-        
-        @return: C{True} if C{state} is in states.
-        @rtype: bool
+        """Return True if state in states.
         """
-        state_id = self._mutant2int(state)
-        return self.graph.has_node(state_id)
+        return state in self.graph
     
-    def __setattr__(self, name, value):
-        ok = True
-        if name is 'initial':
-            if not isinstance(value, SubSet):
-                ok = False
-            if ok:
-                ok = value.has_superset(self)
-        
-        if name is 'accepting':
-            if not isinstance(value, self._accepting_type):
-                ok = False
-            if ok:
-                ok = value.has_superset(self)
-        
-        if not ok:
-            msg = 'States.initial must be of class StateSubset.'
-            msg += 'Got instead:\n\t' +str(value) +'\nof class:\n\t'
-            msg += str(type(value) )
-            raise Exception(msg)
-        
-        object.__setattr__(self, name, value)
-    
-    def _is_mutable(self):
-        if self.mutants is None:
-            return False
-        else:
-            return True
-    
-    def _mutant2int(self, state):
-        """Convert mutant to its integer ID.
-        
-        If C{state} \\in states, then return its int ID.
-        Otherwise return the smallest available int ID, if mutable,
-        or the given state, if immutable.
-        
-        Note
-        ====
-        If not mutable, no check that given state is valid,
-        because this direction (also) inputs to the data structure new states.
-        
-        See Also
-        ========
-        L{_int2mutant}
-        
-        @param state: state to check for
-        
-        @return:
-            - If states not mutable,
-              then return given C{state}.
-            - If C{state} does not exist and states mutable,
-              then return min free int ID.
-            - If C{state} does exist and states mutable,
-              then return its int ID.
+    @property
+    def initial(self):
+        """ Return SubSet of initial states.
         """
-        
-        # classic NetworkX ?
-        if not self._is_mutable():
-            #logger.debug('Immutable states (must be hashable): classic NetworkX.\n')
-            return state
-        logger.debug('Mutable states.')
-        
-        mutants = self.mutants
-        state_id = [x for x in mutants if mutants[x] == state]
-        
-        logger.debug('Converted: state = ' +str(state) +' ---> ' +str(state_id) )
-        
-        # found state ?
-        if not state_id:
-            logger.debug('No states matching. State is new.\n')
-        elif len(state_id) == 1:
-            return state_id[0]
-        else:
-            msg = 'Found multiple state_ids with the same state !\n'
-            msg += 'This violates injectivity from IDs to states.\n'
-            msg += 'In particular, state:\n\t' +str(state) +'\n'
-            msg += 'is a common value for the keys:\n\t' +str(state_id)
-            raise Exception(msg)
-        
-        # new, get next free id
-        return self.min_free_id
+        return self._initial
     
-    def _int2mutant(self, state_id):
-        """Convert integer ID to its mutant.
+    @initial.setter
+    def initial(self, states):
+        s = SubSet(self)
+        s |= states
+        self._initial = s
+    
+    @property
+    def current(self):
+        """Return SubSet of current states.
         
-        If C{state_id} \\in used IDs, then return corresponding state.
-        Otherwise return None, or the given state, if not mutable.
-        
-        Note
-        ====
-        If not mutable, given int checked to be valid state,
-        because this direction outputs to the world.
-        
-        See Also
-        ========
-        L{_mutant2int}
-        
-        @param state_id: ID number to check for
-        @type state_id:
-            int, if mutable
-            valid state, if immutable
-        
-        @return:
-            - If states not mutable,
-              then return given argument, because it is the actual state.
-            - If states are mutable and C{state_id} is used,
-              then return corresponding C{state}.
-            - If states are mutable but C{state_id} is free,
-              then return None.
+        Non-deterministic automata can have multiple current states.
         """
-        
-        # classic NetworkX ?
-        if not self._is_mutable():
-            state = state_id
-            
-            if state not in self():
-                msg = 'States are immutable.\n.'
-                msg = 'Given integer ID is not a state.\n'
-                raise Exception(msg)
-            return state
-        
-        mutants = self.mutants
-        
-        # found ID ?
-        if state_id in mutants:
-            state = mutants[state_id]
-            logger.debug('For ID:\n\t' +str(state_id) +'\n'
-                   +'Found state:\n\t' +str(state) )
-            return state
-        
-        # mutable, but ID unused
-        logger.debug('Mutable states, but this ID is currently unused.')
-        return None
+        return self._current
     
-    def _mutants2ints(self, states):
-        return map(self._mutant2int, states)
-    
-    def _ints2mutants(self, ints):
-        return map(self._int2mutant, ints)
-    
-    def _exist_accepting_states(self, warn=True):
-        """Check if system has accepting states."""
-        if not hasattr(self, 'accepting'):
-            if warn:
-                msg = 'System of type: ' +str(type(self.graph) )
-                msg += 'does not have accepting states.'
-                warnings.warn(msg)
-            return False
-        else:
-            return True
+    @current.setter
+    def current(self, states):
+        """Set current states.
+        
+        If state not in states, exception raised.
+        """
+        s = SubSet(self)
+        s |= states
+        self._current = s
     
     def _warn_if_state_exists(self, state):
         if state in self():
@@ -644,177 +391,40 @@ class States(object):
         return states
     
     def add(self, new_state, attr_dict=None, check=True, **attr):
-        """Create single state.
+        """Create or label single state.
         
-        The new state must be hashable, unless mutable states are enabled.
-        For details about mutable states see the docstring of transys.States.
-        
-        For annotating a state with a subset of atomic propositions,
-        or other (custom) annotation, use the functions provided by
-        AtomicPropositions, or directly the NetworkX.MultiDiGraph.add_node method.
-        
-        See Also
-        ========
-        networkx.MultiDiGraph.add_node
-        
-        @param new_state:
-            Single new state to add.
-        @type new_state:
-            - If states immutable, then C{state} must be a hashable object.
-              Any hashable allowed, except for None (see nx add_node below).
-            - If states mutable, then C{state} can be unhashable.
+        For details see L{LabeledDiGraph.add_node}.
         """
         new_state_id = self._mutant2int(new_state)
         self._warn_if_state_exists(new_state)
         
         logger.debug('Adding new id: ' +str(new_state_id) )
         self.graph.add_node(new_state_id, attr_dict, check, **attr)
-        
-        # mutant ?
-        if self._is_mutable():
-            self.mutants[new_state_id] = new_state
-            
-            # find min free id
-            found = False
-            while not found:
-                self.min_free_id = self.min_free_id +1
-                
-                if not self.mutants.has_key(self.min_free_id):
-                    found = True
-        
-        # list maintained ?
-        if self.list is not None:
-            self.list.append(new_state)
     
     def add_from(self, new_states, destroy_order=False):
-        """Add multiple states from iterable container.
+        """Create or label multiple states from iterable container.
         
-        See Also
-        ========
-        networkx.MultiDiGraph.add_nodes_from.
+        For details see L{LabeledDiGraph.add_nodes_from}.
         """
-        def check_order(new_states):
-            # ordered ?
-            if isinstance(new_states, list):
-                return
-            
-            # interable at least ?
-            if not isinstance(new_states, Iterable):
-                raise Exception('New set of states must be iterable container.')
-            
-            # no order currently maintained ?
-            if self.list is None:
-                return
-            
-            # no states stored yet ?
-            if not self.list:
-                print(
-                    'Adding non-list to empty system with ordering.\n'+
-                    "Won't remember state order from now on."
-                )
-                self.list = None
-                return
-            
-            # cancel ordering of already stored states ?
-            if destroy_order:
-                warnings.warn('Added non-list of new states.'+
-                              'Existing state order forgotten.')
-                self.list = None
-                return
-            
-            raise Exception('Ordered states maintained.'+
-                            'Please add list of states instead.')
-        
-        check_order(new_states)
-        
         # iteration used for comprehensible error message
         for new_state in new_states:
             self._warn_if_state_exists(new_state)
         
-        # mutable ?
-        if self._is_mutable():
-            for new_state in new_states:
-                self.add(new_state)
-        else:
-            self.graph.add_nodes_from(new_states)
-        
-            # list maintained ?
-            if self.list is not None:
-                self.list = self.list +list(new_states)
+        self.graph.add_nodes_from(new_states)
     
-    def remove(self, rm_state):
-        """Remove single state."""
-        
-        # not a state ?
-        if rm_state not in self():
-            warnings.warn('Attempting to remove inexistent state.')
-            return
-        
-        state_id = self._mutant2int(rm_state)
-        self.graph.remove_node(state_id)
-        
-        # are mutants ?
-        if self._is_mutable():
-            self.mutants.pop(state_id)
-            self.min_free_id = min(self.min_free_id, state_id)
-        
-        # ordering maintained ?
-        if self.list is not None:
-            self.list.remove(rm_state)
-        
-        # rm if init
-        if rm_state in self.initial:
-            self.initial.remove(rm_state)
-        
-        # chain to parent (for accepting states etc)
-        if self._exist_accepting_states(warn=False):
-            if rm_state in self.accepting:
-                self.accepting.remove(rm_state)
-    
-    def remove_from(self, rm_states):
-        """Remove a list of states."""
-        for rm_state in rm_states:
-            self.remove(rm_state)
-    
-    def select_current(self, states, warn=True):
-        """Select current state.
-        
-        State membership is checked.
-        If state \\notin states, exception raised.
-        
-        None is possible.
+    def remove(self, state):
+        """Remove single state.
         """
-        self._current = MathSet()
+        if state in self.initial:
+            self.initial.remove(state)
         
-        if not states:
-            msg = 'System has no states, current set to None.\n'
-            msg += 'You can add states using sys.states.add()'
-            if warn:
-                warnings.warn(msg)
-            return
-        
-        # single state given instead of singleton ?
-        if not isinstance(states, Iterable) and states in self:
-            msg = 'Single state provided, setting current states to it.\n'
-            msg += 'A subset of states expected as argument.'
-            warnings.warn(msg)
-            states = [states]
-        
-        if not is_subset(states, self() ):
-            msg = 'Current state given is not in set of states.\n'
-            msg += 'Cannot set current state to given state.'
-            raise Exception(msg)
-        
-        self._current.add_from(states)
+        self.graph.remove_node(state)
     
-    @property
-    def current(self):
-        """Return list of current states.
-        
-        Multiple current states are meaningful in the context
-        of non-deterministic automata.
+    def remove_from(self, states):
+        """Remove a list of states.
         """
-        return list(self._current)
+        for state in states:
+            self.remove(state)
     
     def is_terminal(self, state):
         """Check if state has no outgoing transitions.
@@ -855,18 +465,9 @@ class States(object):
         """
         states = self._single_state2singleton(states)
         
-        try:
-            state_ids = self._mutants2ints(states)
-        except:
-            raise Exception('Not all states given are in the set of states.\n')
-        
-        successor_ids = list()
-        for state_id in state_ids:
-            successor_ids += self.graph.successors(state_id)
-        
-        successor_ids = unique(successor_ids)
-        successors = self._ints2mutants(successor_ids)
-        
+        successors = list()
+        for state in state:
+            successors += self.graph.successors(state)
         return successors
     
     def pre(self, states):
@@ -880,17 +481,9 @@ class States(object):
         """
         states = self._single_state2singleton(states)
         
-        try:
-            state_ids = self._mutants2ints(states)
-        except:
-            raise Exception('Some given items are not states.')
-        
-        predecessor_ids = list()
-        for state_id in state_ids:
-            predecessor_ids += self.graph.predecessors(state_id)
-        
-        predecessor_ids = unique(predecessor_ids)
-        predecessors = self._ints2mutants(predecessor_ids)
+        predecessors = list()
+        for state in states:
+            predecessors += self.graph.predecessors(state)
         
         return predecessors
     
@@ -899,51 +492,14 @@ class States(object):
         
         Iterated post(), a wrapper of networkx.descendants.
         """
-        state_id = self._mutant2int(state)
-        descendant_ids = nx.descendants(self, state_id)
-        descendants = self._ints2mutants(descendant_ids)
+        descendants = nx.descendants(self, state)
         return descendants
     
     def backward_reachable(self, state):
         """Return states from which the given state can be reached.
         """
-        state_id = self._mutant2int(state)
-        descendant_ids = nx.ancestors(self, state_id)
-        ancestors = self._ints2mutants(descendant_ids)
+        ancestors = nx.ancestors(self, state)
         return ancestors
-    
-    def rename(self, new_states_dict):
-        """Map states in place, based on dict.
-
-        See Also
-        ========
-        networkx.relabel_nodes
-        
-        @param new_states_dict: {old_state : new_state}
-            (partial allowed, i.e., projection)
-        """
-        return nx.relabel_nodes(self.graph, new_states_dict, copy=False)
-    
-    def check(self):
-        """Check sanity of various state sets.
-        
-        Checks if:
-            - Initial states \\subseteq states
-            - Current state is set
-            - Current state \\subseteq states
-        """
-        if not is_subset(self.initial, self() ):
-            warnings.warn('Initial states \\not\\subseteq states.')
-        
-        if self.current is None:
-            warnings.warn('Current state unset.')
-            return
-        
-        if self.current not in self():
-            warnings.warn('Current state \\notin states.')
-        
-        print('States and Initial States are ok.\n'
-              +'For accepting states, refer to my parent.')
     
     def paint(self, state, color):
         """Color the given state.
@@ -956,9 +512,8 @@ class States(object):
         @param color: with which to paint C{state}
         @type color: str of valid dot color
         """
-        state_id = self._mutant2int(state)
-        self.graph.node[state_id]['style'] = 'filled'
-        self.graph.node[state_id]['fillcolor'] = color
+        self.graph.node[state]['style'] = 'filled'
+        self.graph.node[state]['fillcolor'] = color
     
     def find(self, states='any', with_attr_dict=None, **with_attr):
         """Filter by desired states and by desired state labels.
@@ -1039,9 +594,7 @@ class States(object):
             except AttributeError:
                 raise Exception('with_attr_dict must be a dict')
         
-        if states is 'any':
-            state_ids = 'any'
-        else:
+        if states is not 'any':
             # singleton check
             if states in self:
                 state = states
@@ -1051,18 +604,15 @@ class States(object):
                 msg += 'Replaced given states = ' +str(state)
                 msg += ' with states = ' +str(states)
                 logger.debug(msg)
-                
-            state_ids = self._mutants2ints(states)
-            logger.debug(state_ids)
         
         found_state_label_pairs = []
-        for state_id, attr_dict in self.graph.nodes_iter(data=True):
-            logger.debug('Checking state_id = ' +str(state_id) +
+        for state, attr_dict in self.graph.nodes_iter(data=True):
+            logger.debug('Checking state_id = ' +str(state) +
                           ', with attr_dict = ' +str(attr_dict) )
             
-            if state_ids is not 'any':
-                if state_id not in state_ids:
-                    logger.debug('state_id = ' +str(state_id) +', not desired.')
+            if states is not 'any':
+                if state not in states:
+                    logger.debug('state_id = ' +str(state) +', not desired.')
                     continue
             
             msg = 'Checking state label:\n\t attr_dict = '
@@ -1080,7 +630,6 @@ class States(object):
                 logger.debug('Label Matched:\n\t' +str(attr_dict) +
                               ' == ' +str(with_attr_dict) )
                 
-                state = self._int2mutant(state_id)
                 annotation = \
                     self._label_check._attr_dict2sublabels(attr_dict, as_dict=True)
                 state_label_pair = (state, annotation)
