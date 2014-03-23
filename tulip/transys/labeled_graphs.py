@@ -43,8 +43,7 @@ import copy
 
 import networkx as nx
 
-from .mathset import MathSet, SubSet, PowerSet, TypedDict, \
-    is_subset, unique
+from .mathset import SubSet, PowerSet, TypedDict, is_subset
 from .export import save_d3, graph2dot
 
 class LabelConsistency(object):
@@ -800,376 +799,6 @@ class Transitions(object):
         for from_state in from_states:
             for to_state in to_states:
                 self.remove(from_state, to_state)
-
-class LabeledTransitions(Transitions):
-    """Manage labeled transitions (!= edges).
-    
-    Each transition is a graph edge (s1, s2) paired with a label.
-    The label can consist of one or more pieces, called sub-labels.
-    Each sub-label is an element from some pre-defined set.
-    This set might e.g. be various actions, as {work, sleep}.
-    
-    This class is for defining and managing transitions, together with
-    the set of elements from which sub-label are picked.
-    Note that in case an edge label comprises of a single sub-label,
-    then the notions of label and sub-label are identical.
-    
-    But for systems with more sub-labels, e.g.,::
-        {system_actions, environment_actions}
-    a label consists of two sub-labels, each of which can be selected
-    from the set of available system actions and environment actions.
-    Each of these sets is defined using this class.
-    
-    The purpose is to support labels with any number of sub-labels,
-    without the need to re-write keyword-value management of
-    NetworkX edge dictionaries every time this is needed.
-    
-    Caution
-    =======
-    Before removal of a sublabel value from the sublabel type V,
-    remember to check using L{_check_sublabeling} that the value is
-    not currently used by any edges.
-    
-    Example
-    =======
-    The action taken when traversing an edge.
-    Each edge is annotated by a single action.
-    If an edge (s1, s2) can be taken on two transitions,
-    then 2 copies of that same edge are stored.
-    Each copy is annotated using a different action,
-    the actions must belong to the same action set.
-    That action set is defined as a ser instance.
-    This description is a (closed) L{FTS}.
-    
-    The system and environment actions associated with an edge
-    of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same (open) L{FTS}.
-    
-    In more detail, the following classes encapsulate this one:
-      - L{FiniteTransitionSystem} (closed)
-      - L{OpenFiniteTransitionSystem}
-      - L{FiniteStateAutomaton}
-      - L{FiniteStateMachine}
-    
-    See Also
-    ========
-    L{Transitions}
-    """
-    def __init__(self, graph, deterministic=False):
-        Transitions.__init__(self, graph)
-        
-        # labeling defined ?
-        if hasattr(self.graph, '_transition_label_def'):
-            self._label_check = \
-                LabelConsistency(self.graph._transition_label_def)
-        else:
-            self._label_check = None
-        
-        self._deterministic = deterministic
-    
-    def __call__(self, labeled=False, as_dict=True):
-        """Return all edges, optionally paired with labels.
-        
-        Note
-        ====
-        __call__(labeled=True, as_dict=True) is equivalent to find(),
-        i.e., L{find} without any restrictions on the desired
-        from_state, to_state, nor sublabels.
-        
-        See Also
-        ========
-        L{find}
-        
-        @param labeled: If C{True}, then return labeled edges
-        @type labeled: bool
-        
-        @param as_dict:
-            - If C{True}, then return sublabel values keyed by sublabel type:
-                {sublabel_type : sublabel_value, ...}
-            - Otherwise return list of sublabel values ordered by
-                _transition_label_def
-        @type as_dict: bool
-        
-        @return: labeled or unlabeled edges, depending on args.
-        @rtype: list of edges = unlabeled transitions = [(s1, s2), ...]
-            | list of labeled edges = transitions = [(s1, s2, L), ...]
-            where the label L = dict | list, depending on args.
-        """
-        if not labeled:
-            return self.graph.edges(data=False)
-        
-        edges = [] # if labeled, should better be called "transitions"
-        for (from_node, to_node, attr_dict) in self.graph.edges_iter(data=True):
-            annotation = self._label_check._attr_dict2sublabels(attr_dict, as_dict)
-            edge = (from_node, to_node, annotation)
-            edges.append(edge)
-        
-        return edges
-    
-    def _exist_labels(self):
-        if self._label_check is None:
-            raise Exception('Transition labeling not defined for:\n\t.' +
-                            str(self.graph) )
-    
-    def _check_states(self, from_state, to_state, check=True):
-        """Are from_state, to_state \\in states.
-        
-        If check == False, then add them.
-        """
-        if not check:
-            # attempt adding only if not already in set of states
-            # to avoid ordering-related exceptions
-            if from_state not in self.graph.states:
-                self.graph.states.add(from_state)
-            if to_state not in self.graph.states:
-                self.graph.states.add(to_state)
-        
-        if from_state not in self.graph.states:
-            msg = 'from_state:\n\t' +str(from_state)
-            msg += '\n\\notin States:' +str(self.graph.states() )
-            raise Exception(msg)
-        
-        if to_state not in self.graph.states:
-            msg = str(to_state) +' = to_state \\notin state'
-            raise Exception(msg)
-    
-    def _mutable2ints(self, from_states, to_states):
-        """Convert possibly unhashable states to internal ones.
-        
-        If states are hashable, the internal ones are the same.
-        Otherwise the internal ones are ints maintained in bijection
-        with the mutable states.
-        """
-        if from_states == 'any':
-            from_state_ids = 'any'
-        else:
-            if from_states in self.graph.states:
-                raise TypeError('from_states is a single state,\n'
-                                'should be iterable of states.')
-            from_state_ids = self.graph.states._mutants2ints(from_states)
-        
-        if to_states == 'any':
-            to_state_ids = 'any'
-        else:
-            if to_states in self.graph.states:
-                raise TypeError('to_states is a single state,\n'
-                                    'should be iterable of states.')
-            to_state_ids = self.graph.states._mutants2ints(to_states)
-        
-        return (from_state_ids, to_state_ids)
-    
-    def _breaks_determinism(self, from_state, sublabels):
-        """Return True if adding transition conserves determinism.
-        """
-        if not self._deterministic:
-            return
-        
-        if not from_state in self.graph.states:
-            raise Exception('from_state \notin graph')
-        
-        same_labeled = self.find([from_state], with_attr_dict=sublabels)        
-        
-        if same_labeled:
-            msg = 'Candidate transition violates determinism.\n'
-            msg += 'Existing transitions with same label:\n'
-            msg += str(same_labeled)
-            raise Exception(msg)
-    
-    def remove_labeled(self, from_state, to_state, label):
-        self._exist_labels()
-        self._check_states(from_state, to_state, check=True)
-        edge_label = \
-            self._label_check._sublabels_list2dict(label, check_label=True)
-        
-        # get all transitions with given label
-        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        edge_set = copy.copy(self.graph.get_edge_data(from_state_id, to_state_id,
-                                                      default={} ) )
-        
-        found_one = 0
-        for (edge_key, label) in edge_set.iteritems():
-            logger.debug('Checking edge with:\n\t key = ' +
-                          str(edge_key) + '\n')
-            logger.debug('\n\t label = ' +str(label) +'\n')
-            logger.debug('\n against: ' +str(edge_label) )
-            
-            if label == edge_label:
-                logger.debug('Matched. Removing...')
-                self.graph.remove_edge(from_state_id, to_state_id, key=edge_key)
-                found_one = 1
-        
-        if not found_one:
-            msg = 'No transition with specified labels found, none removed.'
-            raise Exception(msg)
-            
-    def label(self, from_state, to_state, labels, check_label=True):
-        """Add label to existing unlabeled transition.
-        
-        If unlabeled transition between the given nodes already exists, label it.
-        Otherwise raise error.
-        
-        States checked anyway, because method assumes transition already exists.        
-        
-        Requires that action set or alphabet be defined.
-        """
-        self._exist_labels()
-        self._check_states(from_state, to_state, check=True)
-        
-        # chek if same unlabeled transition exists
-        from_state_id = self.graph.states._mutant2int(from_state)
-        to_state_id  = self.graph.states._mutant2int(to_state)
-        
-        trans_from_to = self.graph.get_edge_data(
-            from_state_id, to_state_id, default={} )
-        
-        if {} not in trans_from_to.values():
-            msg = 'Unlabeled transition from_state-> to_state '
-            msg += "doesn't exist,\n where:\t"
-            msg += 'from_state = ' +str(from_state) +'\n'
-            msg += 'and:\t to_state = ' +str(to_state) +'\n'
-            msg += 'So it cannot be labeled.\n'
-            msg += 'Either add it first using: transitions.add() '
-            msg += 'and then label it,\n'
-            msg += 'or use transitions.add_labeled(), '
-            msg += 'same with a single call.\n'
-            raise Exception(msg)
-        
-        # label it
-        self.remove(from_state, to_state)
-        self.add_labeled(from_state, to_state, labels, check=check_label)
-    
-    def relabel(self, from_state, to_state, old_labels, new_labels, check=True):
-        """Change the label of an existing labeled transition.
-        
-        TODO partial relabeling available
-        
-        Need to identify existing transition by providing old label.
-        
-        A labeled transition is (uniquely) identified by the list::
-            [from_state, to_state, old_label]
-        However disagrees will have to work directly using int IDs for edges,
-        or any other type desired as edge key.
-        
-        The other option is to switch to DiGraph and then "manually" handle
-        multiple edges with different labels by storing them as attribute info
-        in a single graph edge, not very friendly.
-        """
-        self._exist_labels()
-        self._check_states(from_state, to_state, check=True)
-        
-        self.remove_labeled(from_state, to_state, old_labels)
-        self.add_labeled(from_state, to_state, new_labels, check=check)
-        
-    def add_labeled(self, from_state, to_state, labels, check=True):
-        """Add new labeled transition, error if same exists.
-        
-        If edge between same nodes, either unlabeled or with same label
-        already exists, then:
-            - if check, then raise error
-            - otherwise produce warning
-        
-        Checks states are already in set of states.
-        Checks action is already in set of actions.
-        If not, raises exception or warning.
-        
-        To override, use check = False.
-        Then given states are added to set of states,
-        given action is added to set of actions,
-        and if same edge with identical label already exists,
-        a warning is issued.
-        
-        See Also
-        ========
-        L{add}, L{label}, L{relabel}, L{add_labeled_adj}
-        
-        @param from_state: start state of the transition
-        @type from_state: valid system state
-        
-        @param to_state: end state of the transition
-        @type to_state: valid system state
-        
-        @param labels: annotate this edge with these labels
-        @type labels:
-            - if single action set /alphabet defined,
-                then single label
-            - if multiple action sets /alphabets,
-                then either:
-                    - list of labels in proper oder
-                    - dict of action_set_name : label pairs
-        
-        @param check: if same edge with identical annotation
-            (=sublabels) already exists, then:
-                - if C{False}, then raise exception
-                - otherwise produce warning
-        @type check: bool
-        """
-        self._exist_labels()
-        self._check_states(from_state, to_state, check=check)
-        
-        # chek if same unlabeled transition exists
-        (from_state_id, to_state_id) = self._mutant2int(
-            from_state, to_state
-        )
-        trans_from_to = self.graph.get_edge_data(
-            from_state_id, to_state_id, default={}
-        )
-        
-        if {} in trans_from_to.values():
-            msg = 'Unlabeled transition: '
-            msg += 'from_state-> to_state already exists,\n'
-            msg += 'where:\t from_state = ' +str(from_state) +'\n'
-            msg += 'and:\t to_state = ' +str(to_state) +'\n'
-            raise Exception(msg)
-        
-        # note that first we add states, labels, if check =False,
-        # then we check to see if same transition already exists
-        #
-        # if states were not previously in set of states,
-        # then transition is certainly new,
-        # so we won't abort due to finding an existing transition,
-        # in the middle, having added states, but not the transition,
-        # because that is impossible.
-        #
-        # if labels were not previously in label set,
-        # then a similar issue can arise only
-        # if an unlabeled transition already exists.
-        #
-        # Avoided by first checking for an unlabeled transition.        
-        edge_label = self._label_check._sublabels_list2dict(
-            labels, check_label=check
-        )
-        
-        msg = 'Same labeled transition:\n'
-        msg += 'from_state---[label]---> to_state\n'
-        msg += 'already exists, where:\n'
-        msg += '\t from_state = ' +str(from_state) +'\n'
-        msg += '\t to_state = ' +str(to_state) +'\n'
-        msg += '\t label = ' +str(edge_label) +'\n'
-        
-        # check if same labeled transition exists
-        if edge_label in trans_from_to.values():
-            if check:
-                raise Exception(msg)
-            else:
-                warnings.warn(msg)
-        
-        self._breaks_determinism(from_state, labels)
-        
-        # states, labels checked, no same unlabeled nor labeled,
-        # so add it
-        self.graph.add_edge(from_state_id, to_state_id, **edge_label)
-    
-    def add_labeled_from(self, from_states, to_states, labels, check=True):
-        """Add multiple labeled transitions.
-        
-        Adds transitions between all states in set from_states,
-        to all states in set to_states, annotating them with the same labels.
-        For more details, see L{add_labeled}.
-        """
-        for from_state in from_states:
-            for to_state in to_states:
-                self.add_labeled(from_state, to_state, labels, check=check)
-    
     def add_labeled_adj(
             self, adj, adj2states,
             labels, check_labels=True
@@ -1256,8 +885,6 @@ class LabeledTransitions(Transitions):
         intersected with given subset of edges::
             L^{-1}(desired_label) \\cap (from_states x to_states)
         
-        TODO support partial labels
-        
         Note
         ====
           -  L{__call__}
@@ -1316,19 +943,16 @@ class LabeledTransitions(Transitions):
         except:
             raise TypeError('with_attr_dict must be a dict')
         
-        (from_state_ids, to_state_ids) = self._mutable2ints(from_states,
-                                                            to_states)
-        
         found_transitions = []
         
-        if from_state_ids is 'any':
-            from_state_ids = self.graph.nodes()
+        if from_states is 'any':
+            from_states = self.graph.nodes()
         
-        for from_state_id, to_state_id, attr_dict in self.graph.edges_iter(
-            from_state_ids, data=True, keys=False
+        for from_state, to_state, attr_dict in self.graph.edges_iter(
+            from_states, data=True, keys=False
         ):
             if to_states is not 'any':
-                if to_state_id not in to_state_ids:
+                if to_state not in to_states:
                     continue
             
             if not with_attr_dict:
@@ -1346,9 +970,6 @@ class LabeledTransitions(Transitions):
             if ok:
                 logger.debug('Transition label matched desired label.')
                 
-                from_state = self.graph.states._int2mutant(from_state_id)
-                to_state = self.graph.states._int2mutant(to_state_id)
-                
                 annotation = \
                     self._label_check._attr_dict2sublabels(
                         attr_dict, as_dict=True, typed_only=typed_only
@@ -1358,23 +979,6 @@ class LabeledTransitions(Transitions):
                 found_transitions.append(transition)
             
         return found_transitions
-    
-    def _check_sublabeling(self, sublabel_name, sublabel_value):
-        """Check which sublabels are still being used."""
-        raise NotImplementedError
-        edge_sublabels = nx.get_edge_attributes(self.graph, sublabel_name)
-        
-        edges_using_sublabel_value = set()
-        for (edge, cur_sublabel_value) in edge_sublabels.iteritems():
-            if cur_sublabel_value == sublabel_value:
-                edges_using_sublabel_value.add(edge)                
-        
-        if edges_using_sublabel_value:
-            msg = 'AP (=' +str(sublabel_name) +') still used '
-            msg += 'in label of nodes: ' +str(edges_using_sublabel_value)
-            raise Exception(msg)
-        
-        #self.actions.remove(action)
 
 class LabeledDiGraph(nx.MultiDiGraph):
     """Directed multi-graph with constrained labeling.
