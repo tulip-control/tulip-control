@@ -428,24 +428,6 @@ class States(object):
         for state in states:
             self.remove(state)
     
-    def is_terminal(self, state):
-        """Check if state has no outgoing transitions.
-        
-        See Also
-        ========
-        Def. 2.4, p.23 U{[BK08]
-        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
-        """
-        successors = self.post(state)
-        if successors:
-            return False
-        else:
-            return True
-    
-    def is_blocking(self, state):
-        """Check if state has outgoing transitions for each label.
-        """
-    
     def post(self, states):
         """Direct successor set (1-hop) for given states.
         
@@ -645,6 +627,25 @@ class States(object):
         #except KeyError:
         #warnings.warn("State: " +str(state) +", doesn't have AP label.")
         #return None
+    
+    def is_terminal(self, state):
+        """Check if state has no outgoing transitions.
+        
+        See Also
+        ========
+        Def. 2.4, p.23 U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        """
+        successors = self.post(state)
+        if successors:
+            return False
+        else:
+            return True
+    
+    def is_blocking(self, state):
+        """Check if state has outgoing transitions for each label.
+        """
+        raise NotImplementedError
 
 class Transitions(object):
     """Methods for handling labeled transitions.
@@ -719,6 +720,29 @@ class Transitions(object):
             for to_state in to_states:
                 self.graph.add_edge(from_state, to_state)
     
+    def remove(self, from_state, to_state, attr_dict=None, **attr):
+        """Remove single transition.
+        
+        If only the states are passed,
+        then all transitions between them are removed.
+        
+        If C{attr_dict}, C{attr} are also passed,
+        then only transitions annotated with those labels are removed.
+        
+        Wraps L{LabeledDiGraph.remove_labeled_edge}.
+        """
+        self.graph.remove_labeled_edge(from_state, to_state, attr_dict, **attr)
+    
+    def remove_from(self, transitions):
+        """Remove list of transitions.
+        
+        Each transition is either a:
+        
+          - 2-tuple: (u, v), or a
+          - 3-tuple: (u, v, data)
+        """
+        self.graph.remove_labeled_edges(transitions)
+    
     def add_adj(self, adj, adj2states):
         """Add multiple transitions from adjacency matrix.
         
@@ -777,29 +801,6 @@ class Transitions(object):
             to_state = adj2states[to_idx]
             
             self.add(from_state, to_state)
-    
-    def remove(self, from_state, to_state, attr_dict=None, **attr):
-        """Remove single transition.
-        
-        If only the states are passed,
-        then all transitions between them are removed.
-        
-        If C{attr_dict}, C{attr} are also passed,
-        then only transitions annotated with those labels are removed.
-        
-        Wraps L{LabeledDiGraph.remove_labeled_edge}.
-        """
-        self.graph.remove_labeled_edge(from_state, to_state, attr_dict, **attr)
-    
-    def remove_from(self, transitions):
-        """Remove list of transitions.
-        
-        Each transition is either a:
-        
-          - 2-tuple: (u, v), or a
-          - 3-tuple: (u, v, data)
-        """
-        self.graph.remove_labeled_edges(transitions)
     
     def add_labeled_adj(
             self, adj, adj2states,
