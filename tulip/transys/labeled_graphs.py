@@ -1060,8 +1060,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         node_label_types=None,
         edge_label_types=None,
         max_outdegree=None,
-        max_outdegree_per_label=None,
-        mutable=False,
         **kwargs
     ):
         """Initialize the types of labelings on states and edges.
