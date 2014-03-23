@@ -52,7 +52,7 @@ except Exception, e:
     quiver = None
 
 class LtiSysDyn(object):
-    """Represent discrete-time continuous dynamics::
+    """Represent discrete-time continuous-state dynamics::
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
     
@@ -72,9 +72,10 @@ class LtiSysDyn(object):
         - A, B, E, K, (matrices)
         - Uset, Wset and domain (each a L{polytope.Polytope})
         - time_semantics: 'discrete' (if system is originally a discrete-time
-          system) or 'continuous' (if system is sampled from a continuous-time
+          system) or 'sampled' (if system is sampled from a continuous-time
           system)
-        - timestep: A positive real number containing the timestep.
+        - timestep: A positive real number containing the timestep (for sampled
+          system)
     
     as defined above.
     
@@ -204,10 +205,11 @@ class PwaSysDyn(object):
           type: polytope.Polytope
 
       - C{time_semantics}: 'discrete' (if system is originally a discrete-time
-       system) or 'continuous' (if system is sampled from a continuous-time
+       system) or 'sampled' (if system is sampled from a continuous-time
        system)
 
-      - C{timestep}: A positive real number containing the timestep.
+      - C{timestep}: A positive real number containing the timestep (for sampled
+        systems)
 
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
@@ -331,10 +333,11 @@ class HybridSysDyn(object):
        type: L{polytope.Region}
     
      - C{time_semantics}: 'discrete' (if system is originally a discrete-time
-       system) or 'continuous' (if system is sampled from a continuous-time
+       system) or 'sampled' (if system is sampled from a continuous-time
        system)
 
-     - C{timestep}: A positive real number containing the timestep.
+     - C{timestep}: A positive real number containing the timestep (for sampled
+       systems)
 
        
     Note
@@ -532,11 +535,14 @@ def _check_time_data(semantics, timestep):
     @rtype: None
     """
 
-    if semantics not in ['continuous', 'discrete', None]:
+    if semantics not in ['sampled', 'discrete', None]:
         raise ValueError('Time semantics must be discrete or ' + 
-            'continuous (sampled from continuous time system).')
+            'sampled (sampled from continuous time system).')
 
-    if timestep is not None:
+    elif ((timestep == 'discrete') && (timestep is not None)):
+        raise ValueError('Discrete semantics must not have a timestep')
+
+    elif timestep is not None:
         error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:
             raise ValueError(error_string)
