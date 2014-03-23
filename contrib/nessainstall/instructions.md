@@ -85,21 +85,21 @@ on Windows.
 
 		pip uninstall pyparsing
 		pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
-		easy_install pydot (don't use pip)
+		easy_install pydot (do not use pip)
 		pip install networkx
 
    See [this page](http://stackoverflow.com/questions/15951748/pydot-and-graphviz-error-couldnt-import-dot-parser-loading-of-dot-files-will) for more details.
 
 8. Install the precompiled binaries of `gr1c`:
 
-	a. Download `gr1c-0.6.6-95ec9c6.tar.gz` from 
+	a. Download `gr1c-0.7.3.tar.gz` from 
 	   `http://vehicles.caltech.edu/private/snapshots/nessa/gr1c/`
 	   (Requires Caltech IP Address)
 
 	b. Un`tar` the package and copy all binaries to your `bin` folder:
 
-			tar xzf gr1c-0.6.6-95ec9c6.tar.gz
-			cd gr1c-0.6.6-95ec9c6
+			tar xzf gr1c-0.7.3.tar.gz
+			cd gr1c-0.7.3
 			cp gr1c rg grpatch /path/to/libraries/bin
 
 9. Install `cvxopt`:
@@ -137,7 +137,7 @@ on Windows.
 
 11. Use [`sshfs`](https://en.wikipedia.org/wiki/SSHFS) on `Mac OS X`:
 	- install [`FUSE for OS X`](http://osxfuse.github.io/)
-	- install `sshfs` with `MacPorts`, or if that's broken, by downloading the `pkg` from [`github`](https://github.com/osxfuse/osxfuse/wiki/SSHFS).
+	- install `sshfs` with `MacPorts`, or if that is broken, by downloading the `pkg` from [`github`](https://github.com/osxfuse/osxfuse/wiki/SSHFS).
 	- if in your remote `~/.tcsh` you start `bash`, then remove that
 	- Then `sshfs -p 22 user@nessa.cds.caltech.edu:/home/user/path/to/tulip-control/ /Users/user/path/to/local/nessa/ -oauto_cache,reconnect,defer_permissions,negative_vncache,volname=nessa`
 	

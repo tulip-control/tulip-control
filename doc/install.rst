@@ -1,7 +1,8 @@
 Installation
 ------------
 
-The latest release of TuLiP can be downloaded from `SourceForge <http://sourceforge.net/projects/tulip-control/files/>`_.
+The latest release of TuLiP can be downloaded from `SourceForge
+<http://sourceforge.net/projects/tulip-control/files/>`_.
 
 TuLiP is designed to work with Python version 2.7, though it should also support
 Python version 3.2+.  The following additional Python packages are required to
@@ -33,8 +34,12 @@ Besides ``gr1c`` and ``GLPK`` mentioned above, the following are optional Python
 packages, listed with a summary of dependent features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
-* `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz dot <http://www.graphviz.org/>`_ export routines
-* `Graphviz <http://www.graphviz.org/>`_  -- generation of images (e.g., PNG files) from dot code
+
+* `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz
+  dot <http://www.graphviz.org/>`_ export routines
+
+* `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
+  files) from dot code
 
 Once all of the above preparations are completed, you can install TuLiP.  As
 with most `Distutils <http://docs.python.org/install/index.html>`_-based
@@ -53,10 +58,10 @@ New to Python?
 ~~~~~~~~~~~~~~
 
 If you don't already use Python for scientific computing, consider using
-`Enthought Python Distribution (EPD) <http://enthought.com>`_ (now called
-`Enthought Canopy <https://www.enthought.com/products/canopy/>`_). This may make
-the installation process easier.  The EPD Free (now called Canopy Express)
-distribution comes with Python and includes NumPy, SciPy, matplotlib. EPD Free
+`Enthought Python Distribution (EPD) <http://enthought.com>`_ or `Enthought
+Canopy <https://www.enthought.com/products/canopy/>`_. This may make the
+installation process easier.  The EPD Free and Canopy Express distributions come
+with Python and includes NumPy, SciPy, matplotlib. EPD Free or Canopy Express
 together with networkx, cvxopt, and ply is sufficient to run TuLiP.
 
 Alternatives to Enthought are listed on the `SciPy installation webpage
@@ -149,7 +154,8 @@ have to uninstall and reinstall those packages as well.
 Microsoft Windows
 `````````````````
 
-For Windows users, type the above commands without "$" in the terminal. For example, check the version of your Python by typing::
+For Windows users, type the above commands without "$" in the terminal. For
+example, check the version of your Python by typing::
 
   python -V
 
@@ -160,9 +166,14 @@ To check whether the packages has been installed, open a new terminal and try::
   import scipy
   import cvxopt
 
-If an error message occurs, the package might not be visible on the current path or may not be installed at all. When you cannot find a suitable package of NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying `Unofficial Windows Binaries for Python Extension Packages <http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ by Christoph Gohlke. 
+If an error message occurs, the package might not be visible on the current path
+or may not be installed at all. When you cannot find a suitable package of
+NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying
+`Unofficial Windows Binaries for Python Extension Packages
+<http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ by Christoph Gohlke.
 
-The package of gr1c for Windows still cannot be found. But without this package, you can also run most TuLiP functions.
+The package of gr1c for Windows still cannot be found. But without this package,
+you can also run most TuLiP functions.
 
 Installing other Python dependencies
 ````````````````````````````````````
@@ -202,4 +213,6 @@ it, try looking at the polytope subpackage by entering::
 remote server installation
 ``````````````````````````
 
-Instructions for installing ``tulip`` and its dependencies from scratch on a Unix server can be found `here <https://github.com/tulip-control/tulip-control/blob/master/contrib/nessainstall/instructions.md>`_.
+Instructions for installing ``tulip`` and its dependencies from scratch on a
+Unix server can be found `here
+<https://github.com/tulip-control/tulip-control/blob/master/contrib/nessainstall/instructions.md>`_.

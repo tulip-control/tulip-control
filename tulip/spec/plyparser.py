@@ -38,6 +38,7 @@ import logging
 logger = logging.getLogger(__name__)
 from warnings import warn
 
+
 from ast import ASTVar, ASTNum, ASTBool, ASTArithmetic, \
     ASTComparator, ASTUnTempOp, ASTBiTempOp, \
     ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp
@@ -213,7 +214,12 @@ def p_error(t):
     warn("Syntax error at '%s'" % t.value)
 
 import ply.yacc as yacc
-yacc.yacc()
+yacc.yacc(tabmodule="tulip.spec.parsetab",
+          write_tables=0, debug=0)
+
+def rebuild_parsetab():
+    yacc.yacc(tabmodule="parsetab",
+              write_tables=1, debug=1)
 
 def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).

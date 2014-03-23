@@ -253,13 +253,16 @@ class BuchiAutomaton(OmegaAutomaton):
                 project on accepting states of both BA and BA2.
         
                 This definition of accepting set extends
-                Def.4.8, p.156 [Baier] to NBA.
+                Def.4.8, p.156 U{[BK08]
+                <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+                to NBA.
         
         Caution
         =======
-        This method includes semantics for true\in\Sigma (p.916, [Baier]),
-        so there is a slight overlap with logic grammar.
-        In other words, not completely isolated from logics.
+        This method includes semantics for true\in\Sigma (p.916, U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}),
+        so there is a slight overlap with logic grammar.  In other
+        words, not completely isolated from logics.
         
         See Also
         ========
@@ -451,8 +454,9 @@ class RabinPairs(object):
     Caution
     =======
     Here and in ltl2dstar documentation L denotes a "good" set.
-    [Baier 2008] denote the a "bad" set with L.
-    To avoid ambiguity, attributes: .good, .bad were used here.
+    U{[BK08] <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    denote the a "bad" set with L.  To avoid ambiguity, attributes:
+    .good, .bad were used here.
     
     Example
     =======
@@ -468,7 +472,8 @@ class RabinPairs(object):
     See Also
     ========
       - L{RabinAutomaton}
-      - Def. 10.53, p.801, [Baier 2008]
+      - Def. 10.53, p.801, U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
       - U{ltl2dstar<http://ltl2dstar.de/>} documentation
     """
     def __init__(self, automaton_states):

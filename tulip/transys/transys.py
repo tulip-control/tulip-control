@@ -51,7 +51,8 @@ logger = logging.getLogger(__name__)
 class FiniteTransitionSystem(LabeledStateDiGraph):
     """Finite Transition System modeling a closed system.
     
-    Implements Def. 2.1, p.20 [Baier]:
+    Implements Def. 2.1, p.20 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
         - states = S
         - states.initial = S_0 \subseteq S
         - atomic_propositions = AP
@@ -355,8 +356,10 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         See Also
         ========
         __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
-        Def. 2.42, pp. 75--76 [Baier 2008]
-        Def. 4.62, p.200 [Baier 2008]
+        Def. 2.42, pp. 75--76 U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        Def. 4.62, p.200 U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         
         @param ts_or_ba: system with which to take synchronous product
         @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
@@ -404,7 +407,8 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         See Also
         ========
         __or__, sync_prod, cartesian_product
-        Def. 2.18, p.38 [Baier 2008]
+        Def. 2.18, p.38 U{[BK08]
+        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
         if not isinstance(ts, FiniteTransitionSystem):
             raise TypeError('ts must be a FiniteTransitionSystem.')
@@ -837,7 +841,8 @@ def add_initial_states(ts, ap_labels):
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
     
-    Def. 4.62, p.200 [Baier]
+    Def. 4.62, p.200 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
     
     Erratum
     =======

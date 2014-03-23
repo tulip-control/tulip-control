@@ -133,11 +133,11 @@ pip install cvxopt-1.1.6.tar.gz
 # install gr1c
 
 # download requires Caltech IP Address (change this to building it)
-curl -O http://vehicles.caltech.edu/private/snapshots/nessa/gr1c/gr1c-0.6.6-95ec9c6.tar.gz
+curl -O http://vehicles.caltech.edu/private/snapshots/nessa/gr1c/gr1c-0.7.3.tar.gz
 
 # untar and copy all binaries to your bin folder
-tar xzf gr1c-0.6.6-95ec9c6.tar.gz
-cd gr1c-0.6.6-95ec9c6
+tar xzf gr1c-0.7.3.tar.gz
+cd gr1c-0.7.3
 cp gr1c rg grpatch $TMPLIB/bin 
 
 #------------------------------------------------------------

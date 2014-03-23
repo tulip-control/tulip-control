@@ -271,7 +271,7 @@ class MathSet(object):
         return filter(lambda x: isinstance(x, Hashable), iterable)
     
     def _filter_unhashables(self, iterable):
-        return filter(lambda x: not isinstance(x, Hashable), iterable)
+        return list(filter(lambda x: not isinstance(x, Hashable), iterable))
     
     def _delete_all(self):
         self._set = set()
@@ -345,11 +345,12 @@ class MathSet(object):
         # filter to optimize storage
         try:
             self._set |= set(self._filter_hashables(iterable) )
-            self._list = list(unique(self._list +
-                          self._filter_unhashables(iterable) ) )
+            self._list = list(unique(
+                self._list + self._filter_unhashables(iterable)
+            ))
             return
         except:
-            # ...if contents are mutable
+            # ...if contents of elements in iterable are mutable
             self._list = list(unique(self._list +list(iterable) ) )
     
     def remove(self, item):
