@@ -539,10 +539,10 @@ def _check_time_data(semantics, timestep):
         raise ValueError('Time semantics must be discrete or ' + 
             'sampled (sampled from continuous time system).')
 
-    elif ((timestep == 'discrete') and (timestep is not None)):
+    if ((semantics == 'discrete') and (timestep is not None)):
         raise ValueError('Discrete semantics must not have a timestep')
 
-    elif timestep is not None:
+    if timestep is not None:
         error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:
             raise ValueError(error_string)
