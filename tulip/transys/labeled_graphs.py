@@ -984,6 +984,56 @@ class LabeledDiGraph(nx.MultiDiGraph):
     vertices and edges, with given co-domains,
     so that labels are type-checked, not arbitrary.
     
+    Each state (or edge) is annotated with labels.
+    Before removing a value from a label type,
+    first make sure no state (or edge) is labeled with it.
+    
+    Multiple edges with the same C{attr_dict} are not possible.
+    So the difference from C{networkx.MultiDigraph} is that
+    the C{dict} of edges between u,v is a bijection.
+    
+    Between two nodes either:
+    
+      - a single unlabeled edge exists (no labeling constraints), or
+      - labeled edges exist
+      
+    but mixing labeled with unlabeled edges for the same
+    edge is not allowed, to simplifiy and avoid confusion.
+    
+    Example
+    =======
+    The action taken when traversing an edge.
+    Each edge is annotated by a single action.
+    If an edge (s1, s2) can be taken on two transitions,
+    then 2 copies of that same edge are stored.
+    Each copy is annotated using a different action,
+    the actions must belong to the same action set.
+    That action set is defined as a ser instance.
+    This description is a (closed) L{FTS}.
+    
+    The system and environment actions associated with an edge
+    of a reactive system. To store these, 2 sub-labels are used
+    and their sets are encapsulated within the same (open) L{FTS}.
+    
+    Example
+    =======
+    Initialize and define one label type called C{'fruits'}.
+    This also creates a field C{g.fruits}.
+    
+    >>> from tulip.transys import LabeledDiGraph
+    >>> node_label_types = [('fruits', set(), True)]
+    >>> g = LabeledDiGraph(node_label_types=node_label_types)
+    
+    Add some value to the codomain of type C{'fruits'}.
+    
+    >>> g.fruits |= ['apple', 'lemon']
+    
+    The label key 'day' will be untyped,
+    so the class accepts 'Jan', though incorrect.
+    
+    >>> g.add_nodes_from([(1, {'fruit':'apple'}), \
+                          (2, {'fruit':'lemon', 'day':'Jan'})])
+    
     Note
     ====
     1. Edge labeling implies the "multi",
@@ -1016,7 +1066,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     ):
         """Initialize the types of labelings on states and edges.
         
-        @param state_label_types: defines the state labeling functions:
+        @param node_label_types: defines the state labeling functions:
             
                 L_i : V -> D_i
             
@@ -1055,7 +1105,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
             Labels are ignored while counting edges,
             so edges with different labels count as two edges.
         @type max_outdegree: int
-        
+        """
+        #todo
+        """
         @param max_outdegree_per_label: like C{max_outdegree},
             but outgoing edges are counted separately for each
             labeling function.
@@ -1087,14 +1139,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
     def _init_labeling(self, label_types):
         """
-        @type domain: 'state' | 'transition'
-        
-        @param label_types: see L{__init__}.
-        
         Note
         ====
         'state' will be renamed to 'node' in the future
         'transition' will be renamed to 'edge' in the future
+        
+        @type domain: 'state' | 'transition'
+        
+        @param label_types: see L{__init__}.
         """
         labeling = dict()
         
@@ -1164,8 +1216,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 msg = 'The attr_dict argument must be a dictionary.'
                 raise nx.NetworkXError(msg)
         return attr_dict
+    
     def add_node(self, n, attr_dict=None, check=True, **attr):
-        """Use a ConstrainedDict as attribute dict.
+        """Use a L{TypedDict} as attribute dict.
         
         Log warning if node already exists.
         
@@ -1190,7 +1243,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
     
-    def add_nodes_from(self, nodes, **attr):
+    def add_nodes_from(self, nodes, check=True, **attr):
+        """Create or label multiple nodes.
+        
+        For details see L{add_node} and
+        C{networkx.MultiDiGraph.add_nodes_from}
+        """
         for n in nodes:
             try:
                 n not in self.succ
@@ -1204,29 +1262,34 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self.add_node(node, attr_dict=attr_dict)
     
     def add_edge(self, u, v, attr_dict=None, check=True, **attr):
-        """Use a ConstrainedDict as attribute dict.
+        """Use a L{TypedDict} as attribute dict.
         
-        Raise exception if C{u} or C{v} are not already graph nodes.
-        Warn if edge with same attr_dict already exists.
+          - Raise ValueError if C{u} or C{v} are not already nodes.
+          - Raise Exception if edge (u, v, {}).
+          - Log warning if edge (u, v, attr_dict) exists.
+          - Raise ValueError if C{attr_dict} contains typed key with invalid value.
+          - Raise AttributeError if C{attr_dict} contains untyped keys,
+            unless C{check=True}.
+        
         Each label defines a different labeled edge.
         So to "change" the label, either:
         
             - remove the edge with this label, then add a new one, or
             - find the edge key, then use subscript notation:
                 
-                G[i][j][key]['attr_name'] = attr_value
+                C{G[i][j][key]['attr_name'] = attr_value}
         
-        Argument C{key} has been removed compared to
-        L{networkx.MutliDigraph.add_edge}, because edges are defined
-        by their labeling, i.e., multiple edges with same labeling
-        are not allowed.
+        For more details see L{networkx.MultiDiGraph.add_edge}.
         
-        @param check: control how untyped attributes are handled:
-            
-            - if C{True} and C{attr_dict} has untyped keys,
-              then raise C{AttributeError},
-            
-            - otherwise warn
+        Notes
+        =====
+        1. Argument C{key} has been removed compared to
+           L{networkx.MutliDigraph.add_edge}, because edges are defined
+           by their labeling, i.e., multiple edges with same labeling
+           are not allowed.
+        
+        @param check: raise C{AttributeError} if C{attr_dict}
+            has untyped attribute keys, otherwise warn
         """
         #TODO: (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
         
@@ -1276,7 +1339,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         #self._breaks_determinism(from_state, labels)
         
-        self._check_for_untyped_keys(typed_attr, self._edge_label_types, check)
+        self._check_for_untyped_keys(typed_attr,
+                                     self._edge_label_types,
+                                     check)
         
         # the only change from nx in this clause is using TypedDict
         logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
