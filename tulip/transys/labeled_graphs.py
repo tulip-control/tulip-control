@@ -773,32 +773,29 @@ class Transitions(object):
             
             self.add(from_state, to_state)
     
-    def remove(self, from_state, to_state):
-        """Delete all unlabeled transitions between two given states.
+    def remove(self, from_state, to_state, attr_dict=None, **attr):
+        """Remove single transition.
         
-        MultiDigraph identifies different edges between same nodes
-        by an additional id. When created here, no such id is passed,
-        because edge labeling is not yet used.
+        If only the states are passed,
+        then all transitions between them are removed.
         
-        Use instead the appropriate transition labeling function
-        provided by the alphabet or action classes.
-        Those identify transitions by their action or input letter labels.
+        If C{attr_dict}, C{attr} are also passed,
+        then only transitions annotated with those labels are removed.
+        
+        Wraps L{LabeledDiGraph.remove_labeled_edge}.
         """
-        (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        
-        edge_set = copy.copy(self.graph.get_edge_data(from_state_id, to_state_id) )
-        for (edge_key, label) in edge_set.iteritems():
-            if label == {}:
-                self.graph.remove_edge(from_state_id, to_state_id, key=edge_key)
+        self.graph.remove_labeled_edge(from_state, to_state, attr_dict, **attr)
     
-    def remove_from(self, from_states, to_states):
-        """Delete all unlabeled transitions between multiple state pairs.
+    def remove_from(self, transitions):
+        """Remove list of transitions.
         
-        See also L{remove}.
+        Each transition is either a:
+        
+          - 2-tuple: (u, v), or a
+          - 3-tuple: (u, v, data)
         """
-        for from_state in from_states:
-            for to_state in to_states:
-                self.remove(from_state, to_state)
+        self.graph.remove_labeled_edges(transitions)
+    
     def add_labeled_adj(
             self, adj, adj2states,
             labels, check_labels=True
