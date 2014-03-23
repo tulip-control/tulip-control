@@ -1310,6 +1310,40 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self.succ[u][v] = keydict
             self.pred[v][u] = keydict
     
+    def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
+        """Remove single labeled edge.
+        
+        @param: attr_dict 
+        """
+        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        
+        rm_keys = {key for key, data in self[u][v]
+                   if data == attr_dict}
+        for key in rm_keys:
+            self.remove_edge(u, v, key=key)
+    
+    def remove_labeled_edges_from(self, labeled_ebunch):
+        """Remove labeled edges.
+        
+        Example
+        =======
+        >>> g = LabeledDiGraph()
+        >>> g.add_edge(1, 2, day='Mon')
+        >>> g.add_edge(1, 2, day='Tue')
+        >>> edges = [(1, 2, {'day':'Mon'}), \
+                     (1, 2, {'day':'Tue'})]
+        >>> g.remove_edges_from(edges)
+        
+        @param labeled_ebunch: iterable container of edge tuples
+            Each edge tuple can be:
+            
+              - 2-tuple: (u, v) All edges between u and v are removed.
+              - 3-tuple: (u, v, attr_dict) all edges between u and v
+                  annotated with that C{attr_dict} are removed.
+        """
+        for u, v, attr_dict in labeled_ebunch:
+            self.remove_edge(u, v, **attr_dict)
+    
     def dot_str(self, wrap=10):
         """Return dot string.
         
