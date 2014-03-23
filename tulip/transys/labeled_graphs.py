@@ -1509,11 +1509,8 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
         """
         nx.MultiDiGraph.__init__(self, name=name)
         
-        self.states = LabeledStates(
-            self, mutable=mutable,
-            accepting_states_type=accepting_states_type
-        )
-        self.transitions = LabeledTransitions(self, deterministic)
+        self.states = States(self)
+        self.transitions = Transitions(self, deterministic)
 
         self.dot_node_shape = {'normal':'circle'}
         self.default_export_path = './'
