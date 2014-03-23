@@ -466,15 +466,21 @@ class SubSet(MathSet):
     ========
     MathSet, PowerSet
     """
-    def __init__(self, iterable_superset):
-        """Define the superset with respect to maintain consistency.
+    def __init__(self, superset, iterable=None):
+        """Define the superset of this set.
         
-        @param iterable_superset: This SubSet checked vs C{superset}
-        @type iterable_superset: Iterable
+        @param superset: This SubSet checked vs C{superset}
+        @type superset: Iterable
+        
+        @param iterable: elements to add to subset
+        @type iterable: Iterable
         """
-        self._superset = []
         super(SubSet, self).__init__([])
-        self.superset = iterable_superset
+        
+        if not isinstance(superset, Container):
+            raise TypeError('superset must be Iterable,\n' +
+                            'Got instead:\n\t' +str(superset) )
+        self._superset = superset
     
     def __repr__(self):
         return 'SubSet(' +pformat(list(self._set) +self._list) +')'
@@ -483,23 +489,9 @@ class SubSet(MathSet):
         set_str = ', '.join([repr(i) for i in self._set] )
         return 'SubSet({' +set_str +'} +' +str(self._list) +')'
     
-    def _get_superset(self):
+    @property
+    def superset(self):
         return self._superset
-    
-    def _set_superset(self, iterable_superset):
-        if not isinstance(iterable_superset, Container):
-            raise TypeError('superset must be Iterable,\n' +
-                            'Got instead:\n\t' +str(iterable_superset) )
-        
-        # consistent with existing values ?
-        if not is_subset(self(), iterable_superset):
-            msg = 'Not all elements currently in SubSet:\n\t' +str(self)
-            msg += 'are in given superset:\n\t' +str(iterable_superset)
-            raise Exception(msg)
-        
-        self._superset = iterable_superset
-    
-    superset = property(_get_superset, _set_superset)
     
     def add(self, new_element):
         """Add state to subset.
@@ -516,12 +508,12 @@ class SubSet(MathSet):
         ========
         MathSet.add
         """
-        if not new_element in self.superset:
+        if not new_element in self._superset:
             raise Exception(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
                 'FYI: new element:\n\t' +str(new_element) +'\n'
-                'and superset:\n\t' +str(self.superset)
+                'and superset:\n\t' +str(self._superset)
             )
         
         super(SubSet, self).add(new_element)
@@ -546,13 +538,8 @@ class SubSet(MathSet):
         if not is_subset(new_elements, self._superset):
             raise Exception('All new_elements:\n\t' +str(new_elements) +
                             '\nshould already be \\in ' +
-                            'self.superset = ' +str(self.superset) )
+                            'self.superset = ' +str(self._superset) )
         super(SubSet, self).add_from(new_elements)
-    
-    def has_superset(self, superset):
-        """Check if given set if the superset.
-        """
-        return superset is self._superset
 
 class CartesianProduct(object):
     """List of MathSets, with Cartesian semantics.
