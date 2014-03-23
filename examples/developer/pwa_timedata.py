@@ -81,8 +81,7 @@ def subsys1():
 subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
-sys_dyn = PwaSysDyn(subsystems, cont_state_space, time_semantics='discrete',
-                    timestep=.1)
+sys_dyn = PwaSysDyn(subsystems, cont_state_space, time_semantics='discrete')
 
 # Continuous proposition
 cont_props = {}
