@@ -1154,6 +1154,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
         else:
             logger.debug('no untyped keys.')
     
+    def _update_attr_dict_with_attr(attr_dict, attr):
+        if attr_dict is None:
+            attr_dict = attr
+        else:
+            try:
+                attr_dict.update(attr)
+            except AttributeError:
+                msg = 'The attr_dict argument must be a dictionary.'
+                raise nx.NetworkXError(msg)
+        return attr_dict
     def add_node(self, n, attr_dict=None, check=True, **attr):
         """Use a ConstrainedDict as attribute dict.
         
@@ -1168,14 +1178,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if n in self:
             logger.warn('Graph alreay has node: ' + str(n))
         
-        if attr_dict is None:
-            attr_dict=attr
-        else:
-            try:
-                attr_dict.update(attr)
-            except AttributeError:
-                raise nx.NetworkXError(\
-                    "The attr_dict argument must be a dictionary.")
+        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
@@ -1240,14 +1243,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if v not in self.succ:
             raise ValueError('Graph does not have node v: ' + str(v))
         
-        if attr_dict is None:
-            attr_dict=attr
-        else:
-            try:
-                attr_dict.update(attr)
-            except AttributeError:
-                raise nx.NetworkXError(\
-                    "The attr_dict argument must be a dictionary.")
+        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
