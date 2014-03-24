@@ -237,7 +237,7 @@ def _pydot_missing():
 def _graph2pydot(graph, wrap=10):
     """Convert (possibly labeled) state graph to dot str.
     
-    @type graph: LabeledStateDiGraph 
+    @type graph: L{LabeledDiGraph}
     
     @rtype: str
     """
@@ -259,7 +259,7 @@ def graph2dot_str(graph, wrap=10):
     
     Requires pydot.
     
-    @type graph: LabeledStateDiGraph
+    @type graph: L{LabeledDiGraph}
     
     @rtype: str
     """
@@ -270,7 +270,7 @@ def graph2dot_str(graph, wrap=10):
 def save_dot(graph, path, fileformat, rankdir, prog, wrap):
     """Save state graph to dot file.
     
-    @type graph: LabeledStateDiGraph
+    @type graph: L{LabeledDiGraph}
     
     @return: True upon success
     @rtype: bool

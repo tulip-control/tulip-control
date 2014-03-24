@@ -794,20 +794,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
     but mixing labeled with unlabeled edges for the same
     edge is not allowed, to simplifiy and avoid confusion.
     
-    Example
-    =======
-    The action taken when traversing an edge.
-    Each edge is annotated by a single action.
-    If an edge (s1, s2) can be taken on two transitions,
-    then 2 copies of that same edge are stored.
-    Each copy is annotated using a different action,
-    the actions must belong to the same action set.
-    That action set is defined as a ser instance.
-    This description is a (closed) L{FTS}.
+    For dot export subclasses must define:
+        
+        - _state_label_def
+        - _state_dot_label_format
+        
+        - _transition_label_def
+        - _transition_dot_label_format
+        - _transition_dot_mask
     
-    The system and environment actions associated with an edge
-    of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same (open) L{FTS}.
+    Note: this interface will be improved in the future.
     
     Example
     =======
@@ -1324,55 +1320,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
-class LabeledStateDiGraph(nx.MultiDiGraph):
-    """Species: System & Automaton.
-    
-    For dot export subclasses must define:
-        
-        - _state_label_def
-        - _state_dot_label_format
-        
-        - _transition_label_def
-        - _transition_dot_label_format
-        - _transition_dot_mask
-    
-    Note: this interface will be improved in the future.
-    """
-    def __init__(
-            self, name='', mutable=False,
-            deterministic=False,
-            accepting_states_type=None,
-        ):
-        """Initialize labeled digraph.
-        
-        @param name: system name, default for save and __str__
-        @type name: str
-        
-        @param mutable: if C{True}, then mutable C{states} allowed
-        @type mutable: bool
-        
-        @param deterministic: if C{True}, then each transition
-            added is checked to maintain edge-label-determinism
-        @type deterministic: bool
-        
-        @param accepting_states_type:
-            accepting states use this class,
-            f C{None}, then no accepting states initialized
-        @type accepting_states_type: class definition
-        """
-        nx.MultiDiGraph.__init__(self, name=name)
-        
-        self.states = States(self)
-        self.transitions = Transitions(self, deterministic)
-
-        self.dot_node_shape = {'normal':'circle'}
-        self.default_export_path = './'
-        self.default_export_fname = 'out'
-        self.default_layout = 'dot'
-    
-    def copy(self):
-        return copy.deepcopy(self)
-    
+class _LabeledStateDiGraph(nx.MultiDiGraph):
     def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         def prod_ids2states(prod_state_id, self, other):
             (idx1, idx2) = prod_state_id
@@ -1469,7 +1417,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                 mutable = True
             else:
                 mutable = False
-            prod_sys = LabeledStateDiGraph(mutable=mutable)
+            prod_sys = LabeledDiGraph(mutable=mutable)
         
         prod_sys = self._multiply_mutable_states(
             other, prod_graph, prod_sys
@@ -1518,7 +1466,7 @@ class LabeledStateDiGraph(nx.MultiDiGraph):
                 mutable = True
             else:
                 mutable = False
-            prod_sys = LabeledStateDiGraph(mutable=mutable)
+            prod_sys = LabeledDiGraph(mutable=mutable)
         
         prod_sys = self._multiply_mutable_states(
             other, prod_graph, prod_sys

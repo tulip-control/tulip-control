@@ -74,7 +74,7 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
     FSM, BA, Mealy
     
     @param graph: labeled graph to export
-    @type graph: LabeledStateDiGraph
+    @type graph: L{LabeledDiGraph}
     """
     file_path = inspect.getfile(inspect.currentframe())
     dir_path = os.path.dirname(os.path.abspath(file_path) )
