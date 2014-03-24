@@ -173,31 +173,6 @@ class LabelConsistency(object):
                 msg += 'because it gets converted to [value] anyway.'
                 raise Exception(msg)
             
-            if isinstance(possible_labels, PowerSet):
-                possible_labels.math_set |= sublabel
-                continue
-            
-            try:
-                possible_labels.add(sublabel)
-                continue
-            except:
-                logger.debug('no add method')
-            
-            try:
-                possible_labels.append(sublabel)
-                continue
-            except:
-                logger.debug('no append method')
-            
-            # iterable sublabel description ? (i.e., discrete ?)
-            if isinstance(possible_labels, Iterable):
-                msg = 'Possible labels described by Iterable of type:\n'
-                msg += str(type(possible_labels) ) +'\n'
-                msg += 'but it is not a PowerSet, nor does it have'
-                msg += 'an .add or .append method.\n'
-                msg += 'Failed to add new label_value.'
-                raise TypeError(msg)
-            
             # not iterable, check using convention:
             
             # sublabel type not defined ?
