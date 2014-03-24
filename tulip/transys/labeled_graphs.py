@@ -524,104 +524,27 @@ class Transitions(object):
         """
         self.graph.remove_labeled_edges(transitions)
     
-    def add_adj(self, adj, adj2states):
-        """Add multiple transitions from adjacency matrix.
-        
-        These transitions are not labeled.
-        To label then, use either L{LabeledTransitions.relabel},
-        or L{remove} and then L{LabeledTransitions.add_labeled_adj}.
-
-        See Also
-        ========
-        L{States.add}, L{States.add_from},
-        L{LabeledTransitions.add_labeled_adj}
-        
-        @param adj: new transitions, represented by the
-            non-zero elements of an adjacency matrix.
-            Note that adjacency here is in the sense of nodes
-            and not spatial.
-        @type adj: scipy.sparse.lil (list of lists)
-        
-        @param adj2states: correspondence between adjacency matrix
-            nodes and existing states.
-            
-            For example the 1st state in adj2states corresponds to
-            the first node in C{adj}.
-            
-            States must have been added using:
-            
-                - sys.states.add, or
-                - sys.states.add_from
-                
-            If adj2states includes a state not in sys.states,
-            no transition is added and an exception raised.
-        @type adj2states: list of valid states
-        """
-        # square ?
-        if adj.shape[0] != adj.shape[1]:
-            raise Exception('Adjacency matrix must be square.')
-        
-        # check states exist, before adding any transitions
-        for state in adj2states:
-            if state not in self.graph.states:
-                raise Exception(
-                    'State: ' +str(state) +' not found.'
-                    ' Consider adding it with sys.states.add'
-                )
-        
-        # convert to format friendly for edge iteration
-        nx_adj = nx.from_scipy_sparse_matrix(
-            adj, create_using=nx.DiGraph()
-        )
-        
-        # add each edge using existing checks
-        for edge in nx_adj.edges_iter():
-            (from_idx, to_idx) = edge
-            
-            from_state = adj2states[from_idx]
-            to_state = adj2states[to_idx]
-            
-            self.add(from_state, to_state)
-    
-    def add_labeled_adj(
-            self, adj, adj2states,
-            labels, check_labels=True
+    def add_adj(
+            self, adj, adj2states, attr_dict=None,
+            check=True, **attr
         ):
-        """Add multiple transitions from adjacency matrix.
+        """Add multiple labeled transitions from adjacency matrix.
         
-        These transitions are enabled when the given guard is active.
-
-        See Also
-        ========
-        L{add_labeled}, L{Transitions.add_adj}
+        The label can be empty.
+        For more details see L{add}.
         
         @param adj: new transitions represented by adjacency matrix.
         @type adj: scipy.sparse.lil (list of lists)
         
-        @param adj2states: correspondence between adjacency matrix
-            nodes and existing states.
+        @param adj2states: map from adjacency matrix indices to states.
+            If value not a state, raise Exception.
+            Use L{States.add}, L{States.add_from} to add states first.
             
             For example the 1st state in adj2states corresponds to
             the first node in C{adj}.
             
             States must have been added using:
-            
-                - sys.states.add, or
-                - sys.states.add_from
-                
-            If adj2states includes a state not in sys.states,
-            no transition is added and an exception raised.
-        @type adj2states: list of valid states
-        
-        @param labels: combination of labels with which to annotate each of
-            the new transitions created from matrix adj.
-            Each label value must be already in one of the
-            transition labeling sets.
-        @type labels: tuple of valid transition labels
-        
-        @param check_labels: check validity of labels,
-            or just add them as new
-        @type check_labels: bool
+        @type adj2states: list of existing states
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -629,7 +552,7 @@ class Transitions(object):
         
         # check states exist, before adding any transitions
         for state in adj2states:
-            if state not in self.graph.states:
+            if state not in self.graph:
                 raise Exception(
                     'State: ' +str(state) +' not found.'
                     ' Consider adding it with sys.states.add'
@@ -641,15 +564,11 @@ class Transitions(object):
         )
         
         # add each edge using existing checks
-        for edge in nx_adj.edges_iter():
-            (from_idx, to_idx) = edge
+        for i, j in nx_adj.edges_iter():
+            si = adj2states[i]
+            sj = adj2states[j]
             
-            from_state = adj2states[from_idx]
-            to_state = adj2states[to_idx]
-            
-            self.add_labeled(from_state, to_state, labels,
-                             check=check_labels)
-        
+            self.add(si, sj, attr_dict, check, **attr)
     
     def find(self, from_states='any', to_states='any',
              with_attr_dict=None, typed_only=False, **with_attr):
