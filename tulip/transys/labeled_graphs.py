@@ -78,13 +78,6 @@ class LabelConsistency(object):
                msg += 'Did you mix sets & lists when setting AP labels ?'
                raise Exception(msg)
         
-        def match_singleton_guard(cur_val, desired_val):
-            logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
-            logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
-            
-            if cur_val == desired_val:
-                return True
-        
         label_def = self.label_def
         for (type_name, desired_val) in desired_label.iteritems():
             cur_val = attr_dict[type_name]
@@ -106,7 +99,10 @@ class LabelConsistency(object):
             # then by convention:
             #   guard is singleton {cur_val},
             # so test for equality
-            guard_value = match_singleton_guard(cur_val, desired_val)
+            logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
+            logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
+            guard_value = (cur_val == desired_val)
+            
             if not guard_value:
                 test_common_bug(cur_val, desired_val)
                 return False
