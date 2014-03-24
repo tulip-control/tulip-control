@@ -94,8 +94,8 @@ class FiniteStateMachine(LabeledDiGraph):
         - C{check}:
           is a class with methods:
             
-                - C{.is_valid(x) }:
-                  check if value given to input port 'p1' is
+                - C{__contains__(x) }:
+                  check if guard value given to input port 'p1' is
                   in the set of possible values Vp.
                 
                 - C{.contains(guard_set, input_port_value) }:

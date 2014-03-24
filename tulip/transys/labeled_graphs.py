@@ -180,17 +180,6 @@ class LabelConsistency(object):
                 print('Undefined sublabel type')
                 continue
             
-            # check given ?
-            #TODO change to is_valid_sublabel
-            if not hasattr(possible_labels, 'is_valid_guard'):
-                raise TypeError('SubLabel type V does not have method is_valid.')
-            
-            # check sublabel type
-            if not possible_labels.is_valid_guard(sublabel):
-                raise TypeError('Sublabel:\n\t' +str(sublabel) +'\n' +
-                                'not valid for sublabel type:\n\t' +
-                                str(possible_labels) )
-            
         return edge_label
     
     def label_is_desired(self, attr_dict, desired_label):

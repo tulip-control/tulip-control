@@ -50,7 +50,7 @@ def mealy_machine_example():
             if x <= 0.7 or x > 256:
                 raise TypeError('This f-# is outside allowable range.')
         
-        def is_valid_guard(self, guard):
+        def __contains__(self, guard):
             # when properly implemented, do appropriate syntactic check
             if isinstance(guard, float):
                 return True
@@ -76,7 +76,7 @@ def mealy_machine_example():
             if x.shape != (3,):
                 raise Exception('Not a 3d vector!')
         
-        def is_valid_guard(self, guard):
+        def __contains__(self, guard):
             # when properly implemented, do appropriate syntactic check
             if isinstance(guard, np.ndarray) and guard.shape == (3,):
                 return True
@@ -194,7 +194,7 @@ def thermostat_with_hysteresis():
             if not isinstance(x, [float, int]):
                 raise TypeError('Input temperature must be float.')
         
-        def is_valid_guard(self, guard):
+        def __contains__(self, guard):
             # when properly implemented, do appropriate syntactic check
             if isinstance(guard, float):
                 return True
