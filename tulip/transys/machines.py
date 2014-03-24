@@ -666,7 +666,7 @@ class MealyMachine(FiniteStateMachine):
             if state_selected is None:
                 return None
         elif cur_states:
-            state_selected = choice(cur_states)
+            state_selected = choice(list(cur_states) )
         else:
             raise Exception('Bug: "if not" above must have caught this.')
             

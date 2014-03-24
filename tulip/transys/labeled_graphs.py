@@ -310,8 +310,6 @@ class States(object):
               >>> print(set(states) )
               {'s0', 's1'}
 
-              Calling C{labeled_with} is a shortcut for the above.
-
           - To find all states in subset C{M} labeled with C{{'p'}}:
 
               >>> ts.states.add('s2', ap={'p'})
@@ -1275,7 +1273,7 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
             prod_state = prod_ids2states(prod_state_id, self, other)
             
             prod_sys.states.add(prod_state)
-            prod_sys.states.label(prod_state, prod_attr_dict)
+            prod_sys.states.add(prod_state, **prod_attr_dict)
         print(prod_sys.states)
         
         # prod of initial states

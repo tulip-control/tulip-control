@@ -155,8 +155,7 @@ class States_labeling_test:
     def test_add_untyped_keys(self):
         self.S_immutable_ap.add(1, foo=MathSet(['p']), check=True)
 
-    def test_label(self):
-        # This also tests label_of and labeled_with
+    def test_add(self):
         self.S_immutable_ap.add(1, ap={'p'} )
         assert len(self.S_immutable_ap) == 1
         self.S_immutable_ap.add(2, ap={'p'} )

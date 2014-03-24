@@ -65,26 +65,15 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 - sys.transitions.add
                 - sys.transitions.add_from
                 - sys.transitions.add_adj
-          Labeled edges (=transitions) are defined using:
-                - sys.transitions.add_labeled
-                - sys.transitions.add_labeled_from
-                - sys.transitions.add_labeled_adj
           and accessed using:
                 - sys.transitions.find
-                - sys.transitions.between
-          To convert an unlabeled edge to a labeled edge use:
-                - sys.transitions.label
-          and to change the label of an existing labeled edge:
-                - sys.transitions.relabel
         - the state labeling function::
                 L: S-> 2^AP
           can be defined using:
-                - sys.states.label
-                - sys.states.labels
+                - sys.states.add
+                - sys.states.add_from
           and accessed using methods:
                 - sys.states(data=True)
-                - sys.states.label_of
-                - sys.states.labeled_with
                 - sys.states.find
     
     The state labels are subsets of atomic_propositions, so \in 2^AP.
@@ -134,14 +123,14 @@ class FiniteTransitionSystem(LabeledDiGraph):
     here 'p':
     
     >>> ts.atomic_propositions |= ['p', None]
-    >>> ts.states.label('s0', {'p'} )
-    >>> ts.states.labels(['s1', 's3'], [{'p'}, {None} ] )
-    >>> ts.states.labels([('end', {'p'} ), (5, {None} ) ] )
+    >>> ts.states.add('s0', ap={'p'})
+    >>> ts.states.add_from([('s1', {'ap':{'p'} }), \
+                            ('s3', {'ap':{} } )])
     
     For singleton subsets of AP passing the atomic proposition
     itself, instead of the singleton, will also work:
     
-    >>> ts.states.label('s0', 'p')
+    >>> ts.states['s0']['ap'] = {'p'}
     
     Having added states, we can also add some labeled transitions:
     
@@ -157,9 +146,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     unintended duplication, after adding an unlabeled transition,
     any attempt to add a labeled transition between the same states
     will raise an exception, unless the unlabeled transition is
-    either removed before adding the labeled transition,
-    or method C{sys.transitions.label} is used instead,
-    to convert the unlabeled into a labeled transition.
+    removed before adding the labeled transition.
     
     Using L{tuple2fts} offers a more convenient constructor
     for transition systems.
@@ -291,7 +278,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         >>> 
         >>> L = n*['p']
         >>> ts2 = cycle_labeled_with(L)
-        >>> ts2.states.label('s3', '!p')
+        >>> ts2.states.add('s3', ap={'!p'})
         >>> ts2.plot()
         >>> 
         >>> ts3 = ts1 +ts2
@@ -326,7 +313,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 self.states.add(state)
             
             if label:
-                self.states.label(state, label['ap'] )
+                self.states[state]['ap'] = label['ap']
         
         self.states.initial |= other.states.initial()
         
@@ -762,7 +749,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             
             logger.debug('Labeling state:\n\t' +str(state) +'\n' +
                   'with label:\n\t' +str(ap_label) +'\n')
-            ts.states.label(state, ap_label)
+            ts.states[state]['ap'] = ap_label
     
     # any transition labeling ?
     if actions is None:
@@ -874,7 +861,7 @@ def add_initial_states(ts, ap_labels):
         ts.atomic_propositions
     """
     for label in ap_labels:
-        new_init_states = ts.states.labeled_with({'ap':label})
+        new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
 
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
@@ -991,10 +978,10 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             # which q next ?     (note: curq0 = q0)
             logger.debug('enabled_ba_trans = ' +str(enabled_ba_trans) )
             for (curq0, q, sublabels) in enabled_ba_trans:
-                new_sq0 = (s0, q)                
+                new_sq0 = (s0, q)
                 prodts.states.add(new_sq0)
                 prodts.states.initial.add(new_sq0)
-                prodts.states.label(new_sq0, {q} )
+                prodts.states[new_sq0]['ap'] = {q}
                 
                 # accepting state ?
                 if q in ba.states.accepting:
@@ -1050,7 +1037,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                     logger.debug(str(new_sq) +
                                   ' contains an accepting state.')
                 
-                prodts.states.label(new_sq, {next_q} )
+                prodts.states[new_sq]['ap'] = {next_q}
                 
                 logger.debug('Adding transitions:\n\t' +
                               str(sq) + '--->' + str(new_sq) )

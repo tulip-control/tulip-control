@@ -1299,7 +1299,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
         props =  merged_abstr.ppp[i].props
-        sys_ts.states.label(state, props)
+        sys_ts.states[state]['ap'] = props
     
     # create mode actions
     sys_actions = [str(s) for e,s in modes]
@@ -1331,10 +1331,10 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
         
-        sys_ts.transitions.add_labeled_adj(
+        sys_ts.transitions.add_adj(
             adj = adj,
             adj2states = states,
-            labels = env_sys_actions
+            **env_sys_actions
         )
     
     merged_abstr.ts = sys_ts
@@ -1597,7 +1597,7 @@ def merge_partition_pair(
             
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
-            ap_label_2 = ab2.ts.states.label_of('s'+str(j))['ap']
+            ap_label_2 = ab2.ts.states['s'+str(j)]['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
