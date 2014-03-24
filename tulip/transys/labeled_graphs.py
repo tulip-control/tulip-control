@@ -190,26 +190,17 @@ class States(object):
         return states
     
     def add(self, new_state, attr_dict=None, check=True, **attr):
-        """Create or label single state.
-        
-        For details see L{LabeledDiGraph.add_node}.
+        """Wraps L{LabeledDiGraph.add_node}.
         """
-        new_state_id = self._mutant2int(new_state)
         self._warn_if_state_exists(new_state)
         
-        logger.debug('Adding new id: ' +str(new_state_id) )
-        self.graph.add_node(new_state_id, attr_dict, check, **attr)
+        logger.debug('Adding new id: ' +str(new_state) )
+        self.graph.add_node(new_state, attr_dict, check, **attr)
     
-    def add_from(self, new_states, destroy_order=False):
-        """Create or label multiple states from iterable container.
-        
-        For details see L{LabeledDiGraph.add_nodes_from}.
+    def add_from(self, new_states, check=True, **attr):
+        """Wraps L{LabeledDiGraph.add_nodes_from}.
         """
-        # iteration used for comprehensible error message
-        for new_state in new_states:
-            self._warn_if_state_exists(new_state)
-        
-        self.graph.add_nodes_from(new_states)
+        self.graph.add_nodes_from(new_states, check, **attr)
     
     def remove(self, state):
         """Remove single state.
@@ -376,7 +367,7 @@ class States(object):
             logger.debug('Checking state_id = ' +str(state) +
                           ', with attr_dict = ' +str(attr_dict) )
             
-            if states is not 'any':
+            if states is not None:
                 if state not in states:
                     logger.debug('state_id = ' +str(state) +', not desired.')
                     continue
@@ -496,7 +487,7 @@ class Transitions(object):
           - 2-tuple: (u, v), or a
           - 3-tuple: (u, v, data)
         """
-        self.graph.remove_labeled_edges(transitions)
+        self.graph.remove_labeled_edges_from(transitions)
     
     def add_adj(
             self, adj, adj2states, attr_dict=None,
@@ -855,7 +846,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         else:
             logger.debug('no untyped keys.')
     
-    def _update_attr_dict_with_attr(attr_dict, attr):
+    def _update_attr_dict_with_attr(self, attr_dict, attr):
         if attr_dict is None:
             attr_dict = attr
         else:
@@ -1036,33 +1027,38 @@ class LabeledDiGraph(nx.MultiDiGraph):
        
         # process ebunch
         for e in labeled_ebunch:
-            ne=len(e)
+            datadict = dict(attr_dict)
+            
+            ne = len(e)
             if ne == 3:
                 u, v, dd = e
+                datadict.update(dd)
             elif ne == 2:
                 u, v = e
             else:
                 raise ValueError(\
                     "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
             
-            datadict = dict(attr_dict)
-            datadict.update(dd)
-            self.add_edge(u, v, attr_dict=datadict,
-                          check=check, **attr)
+            self.add_edge(u, v, attr_dict=datadict, check=check)
     
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
         
         @param: attr_dict 
         """
+        if u not in self:
+            return
+        if v not in self[u]:
+            return
+        
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         
-        rm_keys = {key for key, data in self[u][v]
+        rm_keys = {key for key, data in self[u][v].iteritems()
                    if data == attr_dict}
         for key in rm_keys:
             self.remove_edge(u, v, key=key)
     
-    def remove_labeled_edges_from(self, labeled_ebunch):
+    def remove_labeled_edges_from(self, labeled_ebunch, attr_dict=None, **attr):
         """Remove labeled edges.
         
         Example
@@ -1081,8 +1077,22 @@ class LabeledDiGraph(nx.MultiDiGraph):
               - 3-tuple: (u, v, attr_dict) all edges between u and v
                   annotated with that C{attr_dict} are removed.
         """
-        for u, v, attr_dict in labeled_ebunch:
-            self.remove_edge(u, v, **attr_dict)
+        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        
+        for e in labeled_ebunch:
+            datadict = dict(attr_dict)
+            
+            ne = len(e)
+            if ne == 3:
+                u, v, dd = e
+                datadict.update(dd)
+            elif ne == 2:
+                u, v = e
+            else:
+                raise ValueError(\
+                    "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
+            
+            self.remove_labeled_edge(u, v, attr_dict=datadict)
     
     def dot_str(self, wrap=10):
         """Return dot string.
