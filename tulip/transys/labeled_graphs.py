@@ -559,56 +559,43 @@ class Transitions(object):
             
             self.add(si, sj, attr_dict, check, **attr)
     
-    def find(self, from_states='any', to_states='any',
+    def find(self, from_states=None, to_states=None,
              with_attr_dict=None, typed_only=False, **with_attr):
-        """Find all edges from_state to_states, annotated with given label.
+        """Find all edges between given states with given labels.
         
         Instead of having two separate methods to:
-            - find all labels of edges between given states (s1, s2)
-            - find all transitions (s1, s2, L) with given label L,
+          
+          - find all labels of edges between given states (s1, s2)
+          
+          - find all transitions (s1, s2, L) with given label L,
                 possibly from some given state s1,
                 i.e., the edges leading to the successor states
                 Post(s1, a) = Post(s1) restricted by action a
-        this method provides both functionalities,
-        attempting to reduce duplication of effort by the user.
+        
+        this method provides both functionalities.
         
         Preimage under edge labeling function L of given label,
         intersected with given subset of edges::
             L^{-1}(desired_label) \\cap (from_states x to_states)
         
-        Note
-        ====
-          -  L{__call__}
-
-          - If called with C{from_states} = all states,
-            then the labels annotating returned edges are those which
-            appear at least once as edge annotations.
-            This may not be the set of all possible
-            labels, in case there valid but yet unused edge labels.
-
-          - find could have been named ".from...", but it would
-            elongate its name w/o adding information. Since you search
-            for transitions, there are underlying states and this
-            function naturally provides the option to restrict those
-            states to a subset of the possible ones.
-        
         See Also
         ========
-        L{label}, L{relabel}, L{add_labeled}, L{add_labeled_adj}, L{__call__}
+        L{add}, L{add_adj}
         
-        @param from_states: subset of states from which transition must start
-        @type from_states: 'any' (default)
-            | iterable of valid states
-            | single valid state
+        @param from_states: edges must start from this subset of states
+        @type from_states:
+            - iterable of existing states, or
+            - None (no constraint, default)
         
-        @param to_states: set of states to which the transitions must lead
-        @type to_states: 'any' (default)
-            | iterable of valid states
-            | single valid state
+        @param to_states: edges must end in this subset of states
+        @type to_states:
+            - iterable of existing states, or
+            - None (no constraint, default)
         
-        @param with_attr_dict: label with which to filter the transitions
-        @type with_attr_dict: {sublabel_type : desired_sublabel_value, ...}
-            | leave empty, to allow any label (default)
+        @param with_attr_dict: edges must be annotated with these labels
+        @type with_attr_dict:
+            - {label_type : desired_label_value, ...}, or
+            - None (no constraint, default)
         
         @param with_attr: label type-value pairs,
             take precedence over C{desired_label}.
@@ -617,14 +604,14 @@ class Transitions(object):
                 (C{from_state}, C{to_state}, label)
             such that::
                 (C{from_state}, C{to_state} )
-                \\in C{from_states} x C{to_states}
+                in C{from_states} x C{to_states}
                 
         @rtype: list of transitions::
                 = list of labeled edges
                 = [(C{from_state}, C{to_state}, C{label}),...]
             where:
-                - C{from_state} \\in C{from_states}
-                - C{to_state} \\in C{to_states}
+                - C{from_state} in C{from_states}
+                - C{to_state} in C{to_states}
                 - C{label}: dict
         """
         if with_attr_dict is None:
@@ -636,29 +623,25 @@ class Transitions(object):
         
         found_transitions = []
         
-        if from_states is 'any':
-            from_states = self.graph.nodes()
+        u_v_edges = self.graph.edges_iter(nbunch=from_states, data=True)
         
-        for from_state, to_state, attr_dict in self.graph.edges_iter(
-            from_states, data=True, keys=False
-        ):
-            if to_states is not 'any':
-                if to_state not in to_states:
-                    continue
-            
+        if to_states is not None:
+            candidate_edges = [(u,v,d) for u,v,d in u_v_edges
+                                       if v in to_states]
+        
+        for u, v, attr_dict in candidate_edges:
+            ok = True
             if not with_attr_dict:
                 logger.debug('Any label is allowed.')
-                ok = True
             elif not attr_dict:
-                logger.debug('No guard defined.')
-                ok = True
+                logger.debug('No labels defined.')
             else:
                 logger.debug('Checking guard.')
                 ok = label_is_desired(attr_dict, with_attr_dict)
             
             if ok:
                 logger.debug('Transition label matched desired label.')
-                transition = (from_state, to_state, dict(attr_dict))
+                transition = (u, v, dict(attr_dict))
                 
                 found_transitions.append(transition)
             
