@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-""" 
+"""
 Algorithms related to discretization of continuous dynamics.
 
 See Also
@@ -40,6 +40,7 @@ L{find_controller}
 import logging
 logger = logging.getLogger(__name__)
 
+import os
 import warnings
 import pprint
 from copy import deepcopy
@@ -54,6 +55,14 @@ from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
 from .plot import plot_ts_on_partition
+
+try:
+    import matplotlib.pyplot as plt
+except Exception, e:
+    plt = None
+    logger.error(e)
+
+debug = False
 
 class AbstractSwitched(object):
     """Abstraction of HybridSysDyn, with mode-specific and common info.
@@ -290,12 +299,30 @@ class AbstractPwa(object):
         
         return s
     
+    def ts2ppp(self, state):
+        region_index = self.ppp2ts.index(state)
+        region = self.ppp[region_index]
+        return (region_index, region)
+    
+    def ppp2trans(self, region_index):
+        """Return the transition set constraint and active subsystem,
+        
+        for non-conservative planning.
+        """
+        reg_idx, pwa_region = self.ppp2pwa(region_index)
+        sys_idx, sys = self.ppp2sys(region_index)
+        return pwa_region, sys
+    
     def ppp2pwa(self, region_index):
-        """Return index and region of active PWA subsystem in indexed region.
+        """Return dynamics and predicate-preserving region
+        and its index for PWA subsystem active in given region.
+        
+        The returned region is the C{trans_set} used for
+        non-conservative planning.
         
         @param region_index: index in C{ppp.regions}.
         
-        @rtype: C{(i, pwa.regions[i])}
+        @rtype: C{(i, pwa.pwa_ppp[i])}
         """
         j = self._ppp2pwa[region_index]
         pwa_region = self.pwa_ppp[j]
@@ -369,6 +396,33 @@ class AbstractPwa(object):
         ax = _plot_abstraction(self, show_ts, only_adjacent,
                                color_seed)
         return ax
+    
+    def verify_transitions(self):
+        logger.info('verifying transitions...')
+        
+        for from_state, to_state in self.ts.transitions():
+            i, from_region = self.ts2ppp(from_state)
+            j, to_region = self.ts2ppp(to_state)
+            
+            trans_set, sys = self.ppp2trans(i)
+            
+            params = {'N', 'close_loop', 'use_all_horizon'}
+            disc_params = {k:v for k,v in self.disc_params.iteritems()
+                           if k in params}
+            
+            s0 = solve_feasible(from_region, to_region, sys,
+                                trans_set=trans_set, **disc_params)
+            
+            msg = str(i) + ' ---> ' + str(j)
+            
+            if not from_region <= s0:
+                logger.error('incorrect transition: ' + msg)
+                
+                isect = from_region.intersect(s0)
+                ratio = isect.volume /from_region.volume
+                logger.error('intersection volume: ' + str(ratio) + ' %')
+            else:
+                logger.info('correct transition: ' + msg)
 
 def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
     if ab.ppp is None or ab.ts is None:
@@ -443,6 +497,8 @@ def discretize(
     
     @rtype: L{AbstractPwa}
     """
+    start_time = os.times()[0]
+    
     orig_ppp = part
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
@@ -491,7 +547,7 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
-    logger.info("\n Starting IJ: \n" + str(IJ) )
+    logger.debug("\n Starting IJ: \n" + str(IJ) )
     
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
@@ -524,16 +580,12 @@ def discretize(
             logger.error(e)
             plot_partition = None
         
-        try:
-            import matplotlib.pyplot as plt
+        if plt is not None:
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
             file_extension = 'png'
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
         
     iter_count = 0
     
@@ -542,6 +594,8 @@ def discretize(
     # and a list of original number of neighbors
     #num_new_reg = np.zeros(len(orig_list))
     #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    
+    progress = list()
     
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -552,6 +606,9 @@ def discretize(
         IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
+        
+        si_tmp = deepcopy(si)
+        sj_tmp = deepcopy(sj)
         
         #num_new_reg[i] += 1
         #print(num_new_reg)
@@ -575,28 +632,68 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        msg = '\n Working with states:\n\t'
-        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')\n\t'
+        msg = '\n Working with partition cells: ' + str(i) + ', ' + str(j)
+        logger.info(msg)
+        
+        msg = '\t' + str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n'
+        msg += '\t' + str(j) +' (#polytopes = ' +str(len(sj) ) +')\n'
         
         if ispwa:
-            msg += 'with active subsystem: '
-            msg += str(subsys_list[i]) + '\n\t'
+            msg += '\t with active subsystem: '
+            msg += str(subsys_list[i]) + '\n'
             
-        msg += 'Computed reachable set S0 with volume: '
+        msg += '\t Computed reachable set S0 with volume: '
         msg += str(S0.volume) + '\n'
         
         logger.debug(msg)
         
-        # isect = si \cap S0
+        #logger.debug('si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
-        # diff = si \setminus S0
+        #logger.debug('si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
+        
+        """
+        if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
+            logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
+            diff = pc.mldivide(si, S0, save=True)
+            
+            ax = S0.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/s0.pdf')
+            
+            ax = si.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/si.pdf')
+            
+            ax = isect.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/isect.pdf')
+            
+            ax = diff.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff.pdf')
+            
+            ax = isect.intersect(diff).plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff_cap_isect.pdf')
+            
+            logger.error('Intersection \cap Difference != \emptyset')
+            
+            assert(False)
+        """
+        if vol1 <= min_cell_volume:
+            logger.warning('\t too small: si \cap Pre(sj), ' +
+                           'so discard intersection')
+        if vol1 <= min_cell_volume and isect:
+            logger.warning('\t discarded non-empty intersection: ' +
+                           'consider reducing min_cell_volume')
+        if vol2 <= min_cell_volume:
+            logger.warning('\t too small: si \ Pre(sj), so not reached it')
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -617,10 +714,15 @@ def discretize(
                 diff.props = si.props.copy()
         
             # replace si by intersection (single state)
-            sol[i] = isect
+            isect_list = pc.separate(isect)
+            sol[i] = isect_list[0]
             
             # cut difference into connected pieces
             difflist = pc.separate(diff)
+            
+            difflist += isect_list[1:]
+            n_isect = len(isect_list) -1
+            
             num_new = len(difflist)
             
             # add each piece, as a new state
@@ -633,28 +735,34 @@ def discretize(
             n_cells = len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
             
-            # Update transition matrix
+            """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
             transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
-                
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
                 # except possibly the new part
                 transitions[i, r] = 0
                 transitions[j, r] = 0            
             
+            # sol[j] is reachable from intersection of sol[i] and S0
             if i != j:
-                # sol[j] is reachable from intersection of sol[i] and S0..
                 transitions[j, i] = 1
+                
+                # sol[j] is reachable from each piece os S0 \cap sol[i]
+                #for k in xrange(n_cells-n_isect-2, n_cells):
+                #    transitions[j, k] = 1
             
-            # Update adjacency matrix
+            """Update adjacency matrix"""
             old_adj = np.nonzero(adj[i, :])[0]
+            
+            # reset new adjacencies
             adj[i, :] = np.zeros([n_cells -num_new])
             adj[:, i] = np.zeros([n_cells -num_new])
+            adj[i, i] = 1
             
-            adj = np.pad(adj, (0,num_new), 'constant')
+            adj = np.pad(adj, (0, num_new), 'constant')
             
             for r in new_idx:
                 adj[i, r] = 1
@@ -663,14 +771,24 @@ def discretize(
                 
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-            adj[i, i] = 1
+            
+            # adjacencies between pieces of isect and diff
+            for r in new_idx:
+                for k in new_idx:
+                    if r is k:
+                        continue
+                    
+                    if pc.is_adjacent(sol[r], sol[k]):
+                        adj[r, k] = 1
+                        adj[k, r] = 1
             
             msg = ''
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg += '\n Adding states ' + str(i) + ' and '
+                msg += '\t\n Adding states ' + str(i) + ' and '
                 for r in new_idx:
                     msg += str(r) + ' and '
                 msg += '\n'
+                logger.debug(msg)
                         
             for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                 # Every "old" neighbor must be the neighbor
@@ -692,7 +810,7 @@ def discretize(
                         transitions[r, k] = 0
                         transitions[k, r] = 0
             
-            # Update IJ matrix
+            """Update IJ matrix"""
             IJ = np.pad(IJ, (0,num_new), 'constant')
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
@@ -701,20 +819,40 @@ def discretize(
                 sym_adj_change(IJ, adj_k, transitions, r)
             
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg += '\n\n Updated adj: \n' + str(adj)
+                msg = '\n\n Updated adj: \n' + str(adj)
                 msg += '\n\n Updated trans: \n' + str(transitions)
                 msg += '\n\n Updated IJ: \n' + str(IJ)
+                logger.debug(msg)
             
-            msg += 'Divided region: ' + str(i)
+            logger.info('Divided region: ' + str(i) + '\n')
         elif vol2 < abs_tol:
-            msg = 'Found: ' + str(i) + ' ---> ' + str(j)
+            logger.info('Found: ' + str(i) + ' ---> ' + str(j) + '\n')
             transitions[j,i] = 1
         else:
-            msg = 'Unreachable: ' + str(i) + ' --X--> ' + str(j)
-            msg += ',\n\t diff vol: ' + str(vol2)
-            msg += ', intersect vol: ' + str(vol1)
+            if logger.level <= logging.DEBUG:
+                msg = '\t Unreachable: ' + str(i) + ' --X--> ' + str(j) + '\n'
+                msg += '\t\t diff vol: ' + str(vol2) + '\n'
+                msg += '\t\t intersect vol: ' + str(vol1) + '\n'
+                logger.debug(msg)
+            else:
+                logger.info('\t unreachable\n')
             transitions[j,i] = 0
         
+        # check to avoid overlapping Regions
+        if debug:
+            tmp_part = PropPreservingPartition(
+                domain=part.domain,
+                regions=sol, adj=sp.lil_matrix(adj),
+                prop_regions=part.prop_regions
+            )
+            assert(tmp_part.is_partition() )
+        
+        n_cells = len(sol)
+        progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
+        progress += [progress_ratio]
+        
+        msg = '\t total # polytopes: ' + str(n_cells) + '\n'
+        msg += '\t progress ratio: ' + str(progress_ratio) + '\n'
         logger.info(msg)
         
         iter_count += 1
@@ -735,16 +873,16 @@ def discretize(
         
         # plot pair under reachability check
         ax2.clear()
-        si.plot(ax=ax2, color='green')
-        sj.plot(ax2, color='red', hatch='o', alpha=0.5)
-        plot_transition_arrow(si, sj, ax2)
+        si_tmp.plot(ax=ax2, color='green')
+        sj_tmp.plot(ax2, color='red', hatch='o', alpha=0.5)
+        plot_transition_arrow(si_tmp, sj_tmp, ax2)
         
         S0.plot(ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         
         # plot partition
         ax1.clear()
-        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        plot_partition(tmp_part, transitions.T, ax=ax1, color_seed=23)
         
         # plot dynamics
         ssys.plot(ax1, show_domain=False)
@@ -756,7 +894,7 @@ def discretize(
         
         # scale view based on domain,
         # not only the current polytopes si, sj
-        l,u = pc.bounding_box(part.domain)
+        l,u = part.domain.bounding_box
         ax2.set_xlim(l[0,0], u[0,0])
         ax2.set_ylim(l[1,0], u[1,0])
         
@@ -771,6 +909,11 @@ def discretize(
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions
     )
+    
+    # check completeness of adjacency matrix
+    if debug:
+        tmp_part = deepcopy(new_part)
+        tmp_part.compute_adj()
     
     # Generate transition system and add transitions       
     ofts = trs.OpenFTS()
@@ -788,13 +931,9 @@ def discretize(
     # Decorate TS with state labels
     atomic_propositions = set(part.prop_regions)
     ofts.atomic_propositions.add_from(atomic_propositions)
-    prop_list = []
-    for region in sol:
+    for state, region in zip(ofts_states, sol):
         state_prop = region.props.copy()
-        
-        prop_list.append(state_prop)
-    
-    ofts.states.labels(ofts_states, prop_list)
+        ofts.states.add(state, ap=state_prop)
     
     param = {
         'N':N,
@@ -806,9 +945,20 @@ def discretize(
         'max_num_poly':max_num_poly
     }
     
-    assert(len(prop_list) == n)
-    
     ppp2orig = [part2orig[x] for x in orig]
+    
+    end_time = os.times()[0]
+    msg = 'Total abstraction time: ' +\
+          str(end_time - start_time) + '[sec]'
+    print(msg)
+    logger.info(msg)
+    
+    if plt is not None and save_img:
+        fig, ax = plt.subplots(1, 1)
+        plt.plot(progress)
+        ax.set_xlabel('iteration')
+        ax.set_ylabel('progress ratio')
+        ax.figure.savefig('progress.pdf')
     
     return AbstractPwa(
         ppp=new_part,
@@ -1149,7 +1299,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
         props =  merged_abstr.ppp[i].props
-        sys_ts.states.label(state, props)
+        sys_ts.states[state]['ap'] = props
     
     # create mode actions
     sys_actions = [str(s) for e,s in modes]
@@ -1181,10 +1331,10 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
         
-        sys_ts.transitions.add_labeled_adj(
+        sys_ts.transitions.add_adj(
             adj = adj,
             adj2states = states,
-            labels = env_sys_actions
+            **env_sys_actions
         )
     
     merged_abstr.ts = sys_ts
@@ -1447,7 +1597,7 @@ def merge_partition_pair(
             
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
-            ap_label_2 = ab2.ts.states.label_of('s'+str(j))['ap']
+            ap_label_2 = ab2.ts.states['s'+str(j)]['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))

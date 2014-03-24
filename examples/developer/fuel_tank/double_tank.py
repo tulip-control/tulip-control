@@ -25,13 +25,14 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-tulip_logger = logging.getLogger('tulip')
-tulip_logger.setLevel(logging.ERROR)
+logging.getLogger('tulip').setLevel(logging.ERROR)
+logging.getLogger('tulip.synth').setLevel(logging.ERROR)
 
 log = logging.getLogger('multiprocessing')
 #log.setLevel(logging.ERROR)
 
-import time
+import os
+import pickle
 import numpy as np
 #from scipy import io as sio
 #import matplotlib
@@ -180,7 +181,8 @@ ax = ppp.plot()
 ax.figure.savefig(imgpath + 'ppp.pdf')
 
 """Discretize to establish transitions"""
-start = time.clock()
+start = os.times()[2]
+logger.info('start time: ' + str(start))
 
 disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
@@ -190,23 +192,31 @@ sys_ts = abstract.multiproc_discretize_switched(
     ppp, switched_dynamics, disc_params, plot=False
 )
 
-elapsed = (time.clock() - start)
+end = os.times()[2]
+logger.info('end time: ' + str(end))
+elapsed = (end - start)
 logger.info('Discretization lasted: ' + str(elapsed))
+
+"""Save abstraction to save debugging time"""
+fname = './abstract_switched.pickle'
+#pickle.dump(sys_ts, open(fname, 'wb') )
+
+#sys_ts = pickle.load(open(fname, 'r') )
 
 """Specs"""
 env_vars = set()
 sys_disc_vars = set()
 
-env_init = {'u_in = normal'}
+env_init = {'env_actions = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> X(u_in = normal)',
-            '(critical & (u_in = normal)) -> X(u_in = refuel)',
-            '(!critical & u_in = normal) -> X(u_in = normal)',
-            '(!no_refuel & u_in = refuel) -> X(u_in = refuel)'}
-env_prog = {'u_in = refuel'}
+env_safe = {'no_refuel -> X(env_actions = normal)',
+            '(critical & (env_actions = normal)) -> X(env_actions = refuel)',
+            '(!critical & env_actions = normal) -> X(env_actions = normal)',
+            '(!no_refuel & env_actions = refuel) -> X(env_actions = refuel)'}
+env_prog = {'env_actions = refuel'}
 
-# relate switching actions to u_in
+# relate switching actions to u_in (env_actions)
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
 sys_prog = {'True'} #{'vol_diff2'}
@@ -219,16 +229,17 @@ print(specs.pretty())
 
 """Synthesis"""
 print("Starting synthesis")
-start = time.clock()
+start = os.times()[2]
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
-    action_vars=('u_in', 'act')
+    #action_vars=('u_in', 'act')
 )
-elapsed = (time.clock() - start)
+end = os.times()[2]
+elapsed = (end - start)
 logger.info('Synthesis lasted: ' + str(elapsed))
 
-print(ctrl)
+logger.info(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')
 
 ax = plot_strategy(sys_ts, ctrl)

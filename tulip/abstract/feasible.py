@@ -69,7 +69,7 @@ def is_feasible(
     return from_region <= S0
 
 def solve_feasible(
-    P1, P2, ssys, N, closed_loop=True,
+    P1, P2, ssys, N=1, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
     """Compute S0 \subseteq P1 from which P2 is N-reachable.
@@ -146,26 +146,41 @@ def solve_closed_loop(
         Pinit = p1
     
     # backwards in time
+    s0 = pc.Region()
+    reached = False
     for i in xrange(N, 0, -1):
         # first step from P1
         if i == 1:
             Pinit = p1
         
-        s0 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
-        p2 = union_or_chain(s0, p2, use_all_horizon)
+        p2 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
+        s0 = s0.union(p2, check_convex=True)
+        s0 = pc.reduce(s0)
         
         # empty target polytope ?
         if not pc.is_fulldim(p2):
-            return pc.Polytope()
+            break
+        
+        old_reached = reached
+        
+        # overlaps initial set ?
+        if p1.intersect(p2):
+            s0 = s0.union(p2, check_convex=True)
+            s0 = pc.reduce(s0)
+        
+        # we went past it -> don't continue
+        if old_reached is True and reached is False:
+            logger.info('stopped intersecting si')
+            #break
+        
+        if reached is True:
+            break
     
-    return p2
-
-def union_or_chain(s0, p2, use_all_horizon):
-    if use_all_horizon:
-        p2 = s0.union(p2, check_convex=True)
-    else:
-        p2 = s0
-    return p2
+    if not pc.is_fulldim(s0):
+        return pc.Polytope()
+    
+    s0 = pc.reduce(s0)
+    return s0
 
 def solve_open_loop(
     P1, P2, ssys, N,

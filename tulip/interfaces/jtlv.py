@@ -449,9 +449,7 @@ def load_file(aut_file, spec, verbose=0):
         for to_state in transitions:
             guard = stateDict[to_state][0]
             try:
-                m.transitions.add_labeled(
-                    from_state, to_state, guard, check=False
-                )
+                m.transitions.add(from_state, to_state, **guard)
             except Exception, e:
                 raise Exception('Failed to add transition:\n' +str(e) )
     
@@ -470,7 +468,7 @@ def load_file(aut_file, spec, verbose=0):
         t = spec.evaluate(bool_values)
         
         if t['env_init'] and t['sys_init']:
-            m.transitions.add_labeled(initial_state, v, var_values)
+            m.transitions.add(initial_state, v, **var_values)
     """
     # label states with variable valuations
     # TODO: consider adding typed states to Mealy machines
@@ -485,7 +483,7 @@ def load_file(aut_file, spec, verbose=0):
             (from_, to_, trans_label) = trans[0]
 
             state_label = {k:trans_label[k] for k in m.state_vars}
-            m.states.label(to_state, state_label)
+            m.states.add(to_state, **state_label)
     """
     return m
             

@@ -53,8 +53,8 @@ def prop2part_test():
     assert pc.is_empty(dum.diff(mypartition.regions[2]) )
     assert pc.is_empty(mypartition.regions[2].diff(dum) )
     
-    assert(mypartition.is_preserving())
+    assert(mypartition.preserves_predicates())
     
     # invalidate it
     mypartition.regions += [pc.Region([pc.Polytope(A[0], b[0])], {})]
-    assert(not mypartition.is_preserving())
+    assert(not mypartition.preserves_predicates())

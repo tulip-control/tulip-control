@@ -2,7 +2,10 @@
 Tests for the tulip.synth module.
 """
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
+
+logging.getLogger('tulip.transys').setLevel(logging.ERROR)
+logging.getLogger('tulip.spec').setLevel(logging.DEBUG)
 
 from tulip import spec, synth, transys
 import numpy as np
@@ -13,12 +16,13 @@ def sys_fts_2_states():
     sys.states.add_from(['X0', 'X1'])
     sys.states.initial.add_from(['X0', 'X1'])
     
-    sys.transitions.add_from({'X0'}, {'X1'})
-    sys.transitions.add_from({'X1'}, {'X0', 'X1'})
+    sys.transitions.add('X0', 'X1')
+    sys.transitions.add('X1', 'X0')
+    sys.transitions.add('X1', 'X1')
     
     sys.atomic_propositions.add_from({'home', 'lot'})
-    sys.states.label('X0', 'home')
-    sys.states.label('X1', 'lot')
+    sys.states.add('X0', ap='home')
+    sys.states.add('X1', ap='lot')
     
     #sys.plot()
     return sys
@@ -31,8 +35,8 @@ def env_fts_2_states():
     # Park as an env action
     env.actions.add_from({'park', 'go'})
     
-    env.transitions.add_labeled('e0', 'e0', 'park')
-    env.transitions.add_labeled('e0', 'e0', 'go')
+    env.transitions.add('e0', 'e0', actions='park')
+    env.transitions.add('e0', 'e0', actions='go')
     
     #env.plot()
     return env
@@ -45,10 +49,10 @@ def env_ofts_bool_actions():
     env.env_actions.add_from({'park', 'go'})
     env.sys_actions.add_from({'up', 'down'})
     
-    env.transitions.add_labeled('e0', 'e1',
-                                {'env_actions':'park', 'sys_actions':'up'})
-    env.transitions.add_labeled('e1', 'e2',
-                                {'env_actions':'go', 'sys_actions':'down'})
+    env.transitions.add('e0', 'e1', env_actions='park',
+                                    sys_actions='up')
+    env.transitions.add('e1', 'e2', env_actions='go',
+                                    sys_actions='down')
     
     #env.plot()
     return env
@@ -173,7 +177,7 @@ def test_env_fts_int_states():
     assert(spec.env_vars['eloc'] == (0, 2))
 
 def test_sys_fts_no_actions():
-    """sys FTS has no actions.
+    """Sys FTS has no actions.
     """
     sys = sys_fts_2_states()
     sys.actions_must='mutex'
@@ -186,7 +190,7 @@ def test_sys_fts_no_actions():
         bool_actions=False
     )
     
-    assert('act' not in spec.sys_vars)
+    assert('actions' not in spec.sys_vars)
 
 def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested.
@@ -202,8 +206,8 @@ def test_env_fts_bool_actions():
         bool_actions=True,
     )
     
-    assert('act' not in spec.env_vars)
-    assert('eact' not in spec.env_vars)
+    assert('sys_actions' not in spec.env_vars)
+    assert('env_actions' not in spec.env_vars)
     
     assert('park' in spec.env_vars)
     assert(spec.env_vars['park'] == 'boolean')
@@ -230,10 +234,12 @@ def test_env_fts_int_actions():
     assert('go' not in spec.env_vars)
     assert('stop' not in spec.env_vars)
     
-    assert('act' not in spec.env_vars)
-    assert('eact' in spec.env_vars)    
+    assert('sys_actions' not in spec.env_vars)
+    assert('env_actions' in spec.env_vars)    
     
-    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop', 'eactnone'})
+    print spec.env_vars['env_actions']
+    assert(set(spec.env_vars['env_actions']) ==
+           {'park', 'go', 'stop', 'env_actionsnone'})
 
 def test_env_ofts_bool_actions():
     """Env OpenFTS has 2 actions, bools requested.
@@ -286,8 +292,8 @@ def _check_ofts_bool_actions(spec):
     assert('down' in spec.sys_vars)
     assert(spec.sys_vars['down'] == 'boolean')
     
-    assert('eact' not in spec.env_vars)
-    assert('act' not in spec.sys_vars)
+    assert('env_actions' not in spec.env_vars)
+    assert('sys_actions' not in spec.sys_vars)
 
 def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1).
@@ -333,11 +339,11 @@ def _check_ofts_int_actions(spec):
     assert('down' not in spec.sys_vars)
     assert('hover' not in spec.sys_vars)
     
-    assert('eact' in spec.env_vars)
-    assert(set(spec.env_vars['eact']) == {'park', 'go', 'stop'})
+    assert('env_actions' in spec.env_vars)
+    assert(set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'})
     
-    assert('act' in spec.sys_vars)
-    assert(set(spec.sys_vars['act']) == {'up', 'down', 'hover'})
+    assert('sys_actions' in spec.sys_vars)
+    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover'})
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
@@ -361,14 +367,22 @@ def test_only_mode_control():
     # str states
     n = 4
     states = transys.prepend_with(range(n), 's')
-    env_sws.states.add_from(set(states) )
+    
+    env_sws.atomic_propositions.add_from(['home','lot'])
+    
+    # label TS with APs
+    ap_labels = [set(),set(),{'home'},{'lot'}]
+    for i, label in enumerate(ap_labels):
+        state = 's' + str(i)
+        env_sws.states.add(state, ap=label)
+    
     
     # mode1 transitions
     transmat1 = np.array([[0,1,0,1],
                           [0,1,0,0],
                           [0,1,0,1],
                           [0,0,0,1]])
-    env_sws.transitions.add_labeled_adj(
+    env_sws.transitions.add_adj(
         sp.lil_matrix(transmat1), states, {'sys_actions':'right'}
     )
                           
@@ -377,14 +391,8 @@ def test_only_mode_control():
                           [1,0,1,0],
                           [0,0,1,0],
                           [1,0,1,0]])
-    env_sws.transitions.add_labeled_adj(
+    env_sws.transitions.add_adj(
         sp.lil_matrix(transmat2), states, {'sys_actions':'left'}
-    )
-    
-    # label TS with APs
-    env_sws.atomic_propositions.add_from(['home','lot'])
-    env_sws.states.labels(
-        states, [set(),set(),{'home'},{'lot'}]
     )
     
     env_vars = {'park'}
@@ -402,4 +410,40 @@ def test_only_mode_control():
                         env_safe, sys_safe, env_prog, sys_prog)
     
     r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
+    assert(not r)
+
+def multiple_env_actions_test():
+    """Two env players, 3 states controlled by sys.
+    
+    sys wins marginally, due to assumption on
+    next combination of actions by env players.
+    """
+    # 1 <---> 2
+    #    ---> 3
+    
+    env_actions = [('env_alice', transys.MathSet({'left', 'right'}) ),
+                   ('env_bob', transys.MathSet({'left', 'right'}) )]
+    
+    sys = transys.OpenFTS(env_actions)
+    sys.states.add_from({'s1', 's2', 's3'})
+    sys.states.initial.add_from({'s1'})
+    
+    sys.add_edge('s1', 's2', env_alice='left', env_bob='right')
+    sys.add_edge('s1', 's3', env_alice='right', env_bob='left') # at state 3 sys loses
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='right')
+    
+    logging.debug(sys)
+    
+    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = right) )'}
+    sys_prog = {'loc = s1', 'loc = s2'}
+    
+    specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
+    
+    r = synth.is_realizable('gr1c', specs, sys=sys)
+    assert(r)
+    
+    # slightly relax assumption
+    specs = spec.GRSpec(sys_prog=sys_prog)
+    
+    r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(not r)

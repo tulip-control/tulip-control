@@ -57,6 +57,7 @@ def _conj(set0):
     return " && ".join([
         "(" +str(x) +")"
         for x in set0
+        if x != ''
     ])
 
 def _conj_intersection(set0, set1, parenth=True):
@@ -126,18 +127,71 @@ def exactly_one(iterable):
         for x in iterable
     ]) + ')']
 
-def _conj_action(label, action_type, nxt=False, ids=None):
-    if action_type not in label:
+def _conj_action(actions_dict, action_type, nxt=False, ids=None):
+    """Return conjunct if C{action_type} in C{actions_dict}.
+    
+    @param actions_dict: C{dict} with pairs C{action_type_name : action_value}
+    @type actions_dict: dict
+    
+    @param action_type: key to look for in C{actions_dict}
+    @type action_type: hashable (here typically a str)
+    
+    @param nxt: prepend or not with the next operator
+    @type nxt: bool
+    
+    @param ids: map C{action_value} -> value used in solver input, e.g., for gr1c
+    @type ids: dict
+    
+    @return:
+        - conjunct (includes C{&&} operator) if:
+          
+            - C{action_type} in C{actions_dict}, and
+            - C{action_value} is not the empty string (modeling "no constrain")
+          
+          includes next operator (C{X}) if C{nxt = True}.
+        - empty string otherwise
+    @rtype: str
+    """
+    if action_type not in actions_dict:
         return ''
-    action = label[action_type]
+    action = actions_dict[action_type]
     if ids is not None:
         action = ids[action]
     if action is '':
         return ''
     if nxt:
-        return ' && X' + pstr(action)
+        return ' X' + pstr(action)
     else:
-        return ' && ' + pstr(action)
+        return pstr(action)
+
+def _conj_actions(actions_dict, solver_expr=None, nxt=False):
+    """Conjunction of multiple action types.
+    
+    Includes solver expression substitution.
+    See also L{_conj_action}.
+    """
+    logger.debug('conjunction of actions: ' + str(actions_dict))
+    logger.debug('mapping to solver equivalents: ' + str(solver_expr))
+    
+    if not actions_dict:
+        logger.debug('actions_dict empty, returning empty string\n')
+        return ''
+    
+    if solver_expr is not None:
+        actions = [solver_expr[type_name][action_value]
+                   for type_name, action_value in actions_dict.iteritems()]
+    else:
+        actions = actions_dict
+    
+    logger.debug('after substitution: ' + str(actions))
+    
+    conjuncted_actions = _conj(actions)
+    logger.debug('conjuncted actions: ' + str(conjuncted_actions) +'\n')
+    
+    if nxt:
+        return ' X' + pstr(conjuncted_actions)
+    else:
+        return pstr(conjuncted_actions)
 
 def create_states(states, variables, trans, statevar, bool_states):
     """Create bool or int state variables in GR(1).
@@ -164,10 +218,14 @@ def create_states(states, variables, trans, statevar, bool_states):
         bool_states = True
     
     if bool_states:
+        logger.debug('states modeled as Boolean variables')
+        
         state_ids = {x:x for x in states}
         variables.update({s:'boolean' for s in states})
         trans += exactly_one(states)
     else:
+        logger.debug('states not modeled as Booleans')
+        
         state_ids, domain = states2ints(states, statevar)
         variables[statevar] = domain
     return state_ids
@@ -188,23 +246,54 @@ def states2ints(states, statevar):
     @rtype: {state : state_id}
     """
     # TODO: merge with actions2ints, don't strip letter
+    msg = 'mapping states: ' + str(states) +\
+          '\n\t to expressions understood by solver.'
+    logger.debug(msg)
+    
+    if not states:
+        raise Exception('No states given, got: ' + str(states))
     
     letter_int = True
     for state in states:
+        if not isinstance(state, str):
+            msg = 'States must be strings, not anything else.\n' +\
+                  'Got instead: ' + str(state) +\
+                  ', of type: ' + str(type(state) )
+            raise TypeError(msg)
+        
         try:
             int(state[1:])
         except:
             letter_int = False
-            break
     
+    logger.debug('all states are strings')
     if letter_int:
+        logger.debug('all states are like "x1" where x some character')
+        
         # this allows the user to control numbering
         strip_letter = lambda x: statevar + ' = ' + x[1:]
         state_ids = {x:strip_letter(x) for x in states}
+        state_ints = {int(x[1:]) for x in states}
         n_states = len(states)
         domain = (0, n_states-1)
-    else:
-        setloc = lambda s: statevar + ' = ' + s
+        solver_range = set(range(0, n_states))
+        
+        logger.debug('after stripping the character: ' +\
+                     'state_ids = ' + str(state_ids))
+        
+        # any missing integers ?
+        if state_ints != solver_range:
+            msg = 'some integers within string states missing:' +\
+                  'compare given:\n\t' + str(state_ints) +\
+                  '\n to same length range:\n\t' + str(solver_range) +\
+                  '\n Will try to model them as arbitrary finite domain...'
+            logger.error(msg)
+            letter_int = False
+    
+    # try arbitrary finite domain
+    if not letter_int:
+        logger.debug('string states modeled as an arbitrary finite domain')
+        setloc = lambda s: statevar + ' = ' + str(s)
         state_ids = {s:setloc(s) for s in states}
         domain = list(states)
     
@@ -250,9 +339,10 @@ def create_actions(
     @rtype: dict
     """
     if not actions:
-        return
+        logger.debug('actions empty, empty dict for solver expr')
+        return dict()
     
-    logger.debug('create actions:' + str(actions) )
+    logger.debug('creating actions from: ' + str(actions) )
     
     # options for modeling actions
     if actions_must is None:
@@ -268,16 +358,23 @@ def create_actions(
         raise Exception('Unknown value: actions_must = ' +
                         str(actions_must) )
     
+    yesno = lambda x: 'Yes' if x else 'No'
+    msg = 'options for modeling actions:\n\t' +\
+          'mutex: ' + yesno(use_mutex) +'\n\t' +\
+          'min_one: ' + yesno(min_one)
+    logger.debug(msg)
+    
     # too few values for gr1c ?
     #if len(actions) < 3:
     #    bool_actions = True
     
     # no mutex -> cannot use int variable
     if not use_mutex:
+        logger.debug('not using mutex: Booleans must model actions')
         bool_actions = True
     
     if bool_actions:
-        logger.debug('bool actions')
+        logger.debug('actions modeled as Boolean variables')
         
         action_ids = {x:x for x in actions}
         variables.update({a:'boolean' for a in actions})
@@ -295,18 +392,36 @@ def create_actions(
         elif min_one:
             raise Exception('min_one requires mutex')
     else:
+        logger.debug('actions not modeled as Booleans')
         assert(use_mutex)
         action_ids, domain = actions2ints(actions, actionvar, min_one)
         variables[actionvar] = domain
+        
+        msg = 'created solver variable: ' + str(actionvar) + '\n\t' +\
+              'with domain: ' + str(domain)
+        logger.debug(msg)
+    
+    msg = 'for tulip variable: ' + str(actionvar) +\
+          ' (an action type)\n\t' +\
+          'the map from [tulip action values] ---> ' +\
+          '[solver expressions] is:\n' + 2*'\t' + str(action_ids)
+    logger.debug(msg)
     return action_ids
 
 def actions2ints(actions, actionvar, min_one=False):
+    msg = 'mapping domain of action_type: ' + str(actionvar) +\
+          '\n\t to expressions understood by solver.'
+    logger.debug(msg)
+    
     int_actions = True
     for action in actions:
         if not isinstance(action, int):
+            logger.debug('not all actions are integers')
             int_actions = False
             break
     if int_actions:
+        logger.debug('actions modeled as an integer variable')
+        
         action_ids = {x:x for x in actions}
         n_actions = len(actions)
         
@@ -317,11 +432,17 @@ def actions2ints(actions, actionvar, min_one=False):
             n = n_actions
         domain = (0, n)
     else:
+        logger.debug('modeling actions as arbitrary finite domain')
+        
         setact = lambda s: actionvar + ' = ' + s
         action_ids = {s:setact(s) for s in actions}
         domain = list(actions)
         if not min_one:
             domain += [actionvar + 'none']
+            
+            msg = 'domain has been extended, because all actions\n\t' +\
+                  'could be False (constraint: min_one = False).'
+            logger.debug(msg)
         
     return (action_ids, domain)
 
@@ -352,7 +473,7 @@ def sys_to_spec(
     if isinstance(sys, transys.FiniteTransitionSystem):
         (sys_vars, sys_init, sys_trans) = fts2spec(
             sys, ignore_initial, bool_states, 'loc',
-            action_vars[1], bool_actions
+            'sys_actions', bool_actions
         )
         return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                       sys_safety=sys_trans)
@@ -380,7 +501,7 @@ def env_to_spec(
     if isinstance(env, transys.FiniteTransitionSystem):
         (env_vars, env_init, env_trans) = fts2spec(
             env, ignore_initial, bool_states, 'eloc',
-            action_vars[0], bool_actions
+            'env_actions', bool_actions
         )
         return GRSpec(env_vars=env_vars, env_init=env_init,
                       env_safety=env_trans)
@@ -395,12 +516,23 @@ def env_to_spec(
 
 def fts2spec(
     fts, ignore_initial=False, bool_states=False,
-    statevar='loc', actionvar='act',
+    statevar='loc', actionvar=None,
     bool_actions=False
 ):
     """Convert closed FTS to GR(1) representation.
     
+    Single player + Multiple action types
+    =====================================
     So fts on its own is not the complete problem spec.
+    Currently L{FTS} supports only a single set of actions.
+    
+    If you have only one player (either env or sys),
+    with multiple action types, then use an L{OpenFTS},
+    without any action types for its opponent.
+    
+    Make sure that, depending on the player,
+    C{'env'} or C{'sys'} are part of the action type names,
+    so that L{synth.synthesize} can recognize them.
     
     @param fts: L{transys.FiniteTransitionSystem}
     
@@ -468,8 +600,6 @@ def sys_open_fts2spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
-    env_actions = ofts.env_actions
-    sys_actions = ofts.sys_actions
     
     sys_init = []
     sys_trans = []
@@ -479,15 +609,36 @@ def sys_open_fts2spec(
     sys_vars = {ap:'boolean' for ap in aps}
     env_vars = dict()
     
-    sys_action_ids = create_actions(
-        sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, ofts.sys_actions_must
-    )
+    actions = ofts.actions
     
-    env_action_ids = create_actions(
-        env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, ofts.env_actions_must
-    )
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        msg = 'action_type:\n\t' + str(action_type) +'\n'
+        msg += 'with codomain:\n\t' + str(codomain)
+        logger.debug(msg)
+        
+        if 'sys' in action_type:
+            logger.debug('Found sys action')
+            
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, ofts.sys_actions_must
+            )
+            
+            logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
+            sys_action_ids[action_type] = action_ids
+        elif 'env' in action_type:
+            logger.debug('Found env action')
+            
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, ofts.env_actions_must
+            )
+            
+            logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
+            env_action_ids[action_type] = action_ids
     
     statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
@@ -522,8 +673,6 @@ def env_open_fts2spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
-    env_actions = ofts.env_actions
-    sys_actions = ofts.sys_actions
     
     sys_init = []
     sys_trans = []
@@ -534,19 +683,29 @@ def env_open_fts2spec(
     env_vars = {ap:'boolean' for ap in aps}
     sys_vars = dict()
     
-    env_action_ids = create_actions(
-        env_actions, env_vars, env_trans, env_init,
-        action_vars[0], bool_actions, ofts.env_actions_must
-    )
+    actions = ofts.actions
+    
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        if 'sys' in action_type:
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, ofts.sys_actions_must
+            )
+            sys_action_ids[action_type] = action_ids
+        elif 'env' in action_type:
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, ofts.env_actions_must
+            )
+            env_action_ids[action_type] = action_ids
     
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
     # and whether that TS will contain all the system actions
     # defined in the environment TS
-    sys_action_ids = create_actions(
-        sys_actions, sys_vars, sys_trans, sys_init,
-        action_vars[1], bool_actions, ofts.sys_actions_must
-    )
     
     statevar = 'eloc'
     state_ids = create_states(states, env_vars, env_trans,
@@ -584,7 +743,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         msg += '   so the spec becomes trivially False.\n'
         msg += ' - assumption if this is an environment TS,\n'
         msg += '   so the spec becomes trivially True.'
-        warnings.warn(msg)
+        raise Exception(msg)
         
         init += ['False']
         return init
@@ -604,11 +763,53 @@ def sys_trans_from_ts(
         
         - sys states
         - env actions
+    
+    An edge attribute 'previous' can be optionally set to
+    an iterable of edge attribute keys.
+    The actions with those action_types those keys
+    will not be prepended by the next operator.
+    
+    This enables defining both current and next actions, e.g.,
+        
+        some_action && X(some_other_action)
+    
+    About label type checking: in principle everything should work the
+    same if the base class LabeledDigraph was replaced by MultiDiGraph,
+    so that users can play around with their own bare graphs,
+    when they don't need the label typing overhead.
 
     @param trans: L{LabeledTransitions} as from the transitions
         attribute of L{FiniteTransitionSystem} or
         L{OpenFiniteTransitionSystem}.
+    
+    @param action_ids: same as C{sys-action_ids}
+        Caution: to be removed in a future release
+    
+    @param sys_action_ids: dict of dicts
+        outer dict keyed by action_type
+        each inner dict keyed by action_value
+        each inner dict value is the solver expression for that action value
+        
+        for example an action type with an
+        arbitrary finite discrete codomain can be modeled either:
+        
+          - as Boolean variables, so each possible action value
+            becomes a different Boolean variable with the same
+            name, thus C{sys_action_ids[action_type]} will be
+            the identity map on C{action_values} for that C{action_type}.
+          
+          - as integer variables, so each possible action value
+            becomes a different expression in the solver (e.g. gr1c)
+            input format. Then C{sys_action_ids[action_type]} maps
+            C{action_value} -> solver expression of the form:
+                
+                C{action_type = i}
+            
+            where C{i} corresponds to that particular  C{action_type}.
+    
+    @param env_action_ids: same as C{sys-action_ids}
     """
+    logger.debug('modeling sys transitions in logic')
     sys_trans = []
     
     # Transitions
@@ -618,8 +819,13 @@ def sys_trans_from_ts(
         
         cur_trans = trans.find([from_state])
         
+        msg = 'from state: ' + str(from_state) +\
+              ', the available transitions are:\n\t' + str(cur_trans)
+        logger.debug(msg)
+        
         # no successor states ?
         if not cur_trans:
+            logger.debug('state: ' + str(from_state) + ' is deadend !')
             sys_trans += [precond + ' -> X(False)']
             continue
         
@@ -627,16 +833,52 @@ def sys_trans_from_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = pstr(to_state_id)
+            postcond = ['X' + pstr(to_state_id)]
             
-            postcond += _conj_action(label, 'env_actions', ids=env_action_ids)
-            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
-            # system FTS given
-            postcond += _conj_action(label, 'actions', ids=action_ids)
+            logger.debug('label = ' + str(label))
+            if 'previous' in label:
+                previous = label['previous']
+            else:
+                previous = set()
+            logger.debug('previous = ' + str(previous))
             
-            cur_str += [postcond]
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            prev_env_act = {k:v for k,v in env_actions.iteritems()
+                            if k in previous}
+            next_env_act = {k:v for k,v in env_actions.iteritems()
+                            if k not in previous}
             
-        sys_trans += [precond + ' -> X(' + _disj(cur_str) + ')']
+            postcond += [_conj_actions(prev_env_act, env_action_ids, nxt=False)]
+            postcond += [_conj_actions(next_env_act, env_action_ids, nxt=True)]
+            
+            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
+            prev_sys_act = {k:v for k,v in sys_actions.iteritems()
+                            if k in previous}
+            next_sys_act = {k:v for k,v in sys_actions.iteritems()
+                            if k not in previous}
+            
+            postcond += [_conj_actions(prev_sys_act, sys_action_ids, nxt=False)]
+            postcond += [_conj_actions(next_sys_act, sys_action_ids, nxt=True)]
+            
+            # if system FTS given
+            # in case 'actions in label, then action_ids is a dict,
+            # not a dict of dicts, because certainly this came
+            # from an FTS, not an OpenFTS
+            if 'actions' in previous:
+                postcond += [_conj_action(label, 'actions',
+                                          ids=action_ids, nxt=False)]
+            else:
+                postcond += [_conj_action(label, 'actions',
+                                          ids=action_ids, nxt=True)]
+            
+            cur_str += [_conj(postcond)]
+            
+            msg = 'guard to state: ' + str(to_state) +\
+                  ', with state_id: ' + str(to_state_id) +\
+                  ', has post-conditions: ' + str(postcond)
+            logger.debug(msg)
+            
+        sys_trans += [precond + ' -> (' + _disj(cur_str) + ')']
     return sys_trans
 
 def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
@@ -645,10 +887,18 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     This constrains the actions available next to the environment
     based on the system OpenFTS.
     
+    Purpose is to prevent env from blocking sys by purely
+    picking a combination of actions for which sys has no outgoing
+    transition from that state.
+    
     Might become optional in the future,
     depending on the desired way of defining env behavior.
+    
+    @param env_action_ids: dict of dicts, see L{sys_trans_from_ts}.
     """
     env_trans = []
+    
+    # this probably useless for multiple action types
     if not env_action_ids:
         return env_trans
     
@@ -660,20 +910,34 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         
         # no successor states ?
         if not cur_trans:
-            env_trans += [precond + ' -> X(' +
-                _conj_neg(env_action_ids.values() ) + ')']
+            # nothing modeled for env, since sys has X(False) anyway
+            #for action_type, codomain_map in env_action_ids.iteritems():
+            #env_trans += [precond + ' -> X(' + s + ')']
             continue
         
         # collect possible next env actions
-        next_env_actions = set()
+        next_env_action_combs = set()
         for (from_state, to_state, label) in cur_trans:
-            if 'env_actions' not in label:
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            
+            if not env_actions:
                 continue
             
-            env_action = label['env_actions']
-            env_action_id = env_action_ids[env_action]
-            next_env_actions.add(env_action_id)
-        next_env_actions = _disj(next_env_actions)
+            logger.debug('env_actions: ' + str(env_actions))
+            logger.debug('env_action_ids: ' + str(env_action_ids))
+            
+            env_action_comb = _conj_actions(env_actions, env_action_ids)
+            
+            logger.debug('env_action_comb: ' + str(env_action_comb))
+            
+            next_env_action_combs.add(env_action_comb)
+        next_env_actions = _disj(next_env_action_combs)
+        
+        logger.debug('next_env_actions: ' + str(next_env_actions))
+        
+        # no next env actions ?
+        if not next_env_actions:
+            continue
         
         env_trans += [precond + ' -> X(' +
                       next_env_actions + ')']
@@ -716,25 +980,39 @@ def env_trans_from_env_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = 'X' + pstr(to_state_id)
+            postcond = ['X' + pstr(to_state_id)]
             
-            postcond += _conj_action(label, 'env_actions', nxt=True,
-                                     ids=env_action_ids)
+            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
             
-            # environment FTS given
-            postcond += _conj_action(label, 'actions', nxt=True, ids=action_ids)
-            postcond += _conj_action(label, 'sys_actions', ids=sys_action_ids)
+            # remember: this is an environment FTS, so no next for sys
+            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
+            postcond += [_conj_actions(sys_actions, sys_action_ids)]
             
-            if not _conj_action(label, 'sys_actions', ids=sys_action_ids):
+            postcond += [_conj_action(label, 'actions', nxt=True, ids=action_ids)]
+            
+            # todo: test this claus
+            if not sys_actions:
                 found_free = True
             
-            cur_list += [pstr(postcond) ]
+            cur_list += [_conj(postcond) ]
         
         # can sys kill env by setting all previous sys outputs to False ?
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
-            cur_list += [_conj_neg(sys_action_ids.values() )]
+            msg = 'no free env outgoing transition found\n' +\
+                  'instead will take disjunction with negated sys actions'
+            logger.debug(msg)
+            
+            for action_type, codomain in sys_action_ids.iteritems():
+                conj = _conj_neg(codomain.itervalues() )
+                cur_list += [conj]
+                
+                msg = 'for action_type: ' + str(action_type) +'\n' +\
+                      'with codomain: ' + str(codomain) +'\n' +\
+                      'the negated conjunction is: ' + str(conj)
+                logger.debug(msg)
         
         env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
@@ -752,7 +1030,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     # initial labeling
     for state in states:
         state_id = state_ids[state]
-        label = states.label_of(state)
+        label = states[state]
         ap_str = sprint_aps(label, aps)
         if not ap_str:
             continue
@@ -760,7 +1038,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     
     # transitions of labels
     for state in states:
-        label = states.label_of(state)
+        label = states[state]
         state_id = state_ids[state]
         
         tmp = sprint_aps(label, aps)
@@ -927,6 +1205,12 @@ def is_realizable(
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
+    
+    if r:
+        logger.debug('is realizable')
+    else:
+        logger.debug('is not realizable')
+    
     return r
 
 def _check_solver_options(option, bool_states, action_vars, bool_actions):

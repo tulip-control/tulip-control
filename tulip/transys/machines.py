@@ -36,8 +36,8 @@ from collections import OrderedDict
 from pprint import pformat
 from random import choice
 
-from .labeled_graphs import LabeledStateDiGraph
-from . import executions
+from .labeled_graphs import LabeledDiGraph
+import executions
 from .export import machine2scxml
 
 _hl = 40 *'-'
@@ -55,7 +55,7 @@ def is_valuation(ports, valuations):
         if not ok:
             raise TypeError('Not a valuation.')
 
-class FiniteStateMachine(LabeledStateDiGraph):
+class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
     Inputs
@@ -94,13 +94,13 @@ class FiniteStateMachine(LabeledStateDiGraph):
         - C{check}:
           is a class with methods:
             
-                - C{.is_valid(x) }:
-                  check if value given to input port 'p1' is
+                - C{__contains__(x) }:
+                  check if guard value given to input port 'p1' is
                   in the set of possible values Vp.
                 
-                - C{.contains(guard_set, input_port_value) }:
+                - C{__call__(guard_set, input_port_value) }:
                   check if C{input_port_value} \\in C{guard_set}
-                  This allows flexible type definitions.
+                  This allows symbolic type definitions.
                     
                   For example, C{input_port_value} might be assigned
                   int values, but the C{guard_set} be defined by
@@ -178,6 +178,10 @@ class FiniteStateMachine(LabeledStateDiGraph):
     so it does not "care" about word length.
     It continues as long as its input is fed with letters.
     
+    For Machines, each state label consists of (possibly multiple) sublabels,
+    each of which is either a variable, or, only for Moore machines,
+    may be an output.
+    
     See Also
     ========
     FSM, MealyMachine, MooreMachine
@@ -202,7 +206,7 @@ class FiniteStateMachine(LabeledStateDiGraph):
         
         self.default_export_fname = 'fsm'
         
-        LabeledStateDiGraph.__init__(self, **args)
+        LabeledDiGraph.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
@@ -662,7 +666,7 @@ class MealyMachine(FiniteStateMachine):
             if state_selected is None:
                 return None
         elif cur_states:
-            state_selected = choice(cur_states)
+            state_selected = choice(list(cur_states) )
         else:
             raise Exception('Bug: "if not" above must have caught this.')
             

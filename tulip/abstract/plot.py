@@ -41,7 +41,8 @@ import numpy as np
 from scipy import sparse as sp
 import networkx as nx
 
-from tulip.polytope import cheby_ball, bounding_box
+from tulip.polytope import cheby_ball
+import tulip.polytope as pc
 
 try:
     import matplotlib as mpl
@@ -104,7 +105,7 @@ def plot_partition(
         trans = nx.to_numpy_matrix(trans, nodelist=ppp2trans)
         trans = np.array(trans)
     
-    l,u = bounding_box(ppp.domain)
+    l,u = ppp.domain.bounding_box
     arr_size = (u[0,0]-l[0,0])/50.0
     
     # new figure ?
@@ -161,6 +162,38 @@ def plot_partition(
     
     return ax
 
+def plot_abstraction_scc(ab, ax=None):
+    """Plot Regions colored by strongly connected component.
+    
+    Handy to develop new examples or debug existing ones.
+    """
+    ppp = ab.ppp
+    ts = ab.ts
+    ppp2ts = ab.ppp2ts
+    
+    # each connected component of filtered graph is a symbol
+    components = nx.strongly_connected_components(ts)
+    
+    if ax is None:
+        ax = mpl.pyplot.subplot()
+    
+    l, u = ab.ppp.domain.bounding_box
+    ax.set_xlim(l[0,0], u[0,0])
+    ax.set_ylim(l[1,0], u[1,0])
+    
+    for component in components:
+        # map to random colors
+        red = np.random.rand()
+        green = np.random.rand()
+        blue = np.random.rand()
+        
+        color = (red, green, blue)
+        
+        for state in component:
+            i = ppp2ts.index(state)
+            ppp[i].plot(ax=ax, color=color)
+    return ax
+
 def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
     """Plot partition and arrows from labeled digraph.
     
@@ -170,11 +203,11 @@ def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
     @param edge_label: desired label
     @type edge_label: dict
     """
-    l,u = bounding_box(ppp.domain)
+    l,u = ppp.domain.bounding_box
     arr_size = (u[0,0]-l[0,0])/50.0
     
     ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
-    for from_state, to_state, label in ts.transitions.find(desired_label=edge_label):
+    for from_state, to_state, label in ts.transitions.find(with_attr_dict=edge_label):
         i = ts2ppp[from_state]
         j = ts2ppp[to_state]
         
@@ -195,8 +228,8 @@ def project_strategy_on_partition(ppp, mealy):
     proj_adj = sp.lil_matrix((n, n))
     
     for (from_state, to_state, label) in mealy.transitions.find():
-        from_label = mealy.states.label_of(from_state)
-        to_label = mealy.states.label_of(to_state)
+        from_label = mealy.states[from_state]
+        to_label = mealy.states[to_state]
         
         if 'loc' not in from_label or 'loc' not in to_label:
             continue
@@ -241,7 +274,7 @@ def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
         return None
     
     if arr_size is None:
-        l,u = polyreg1.bounding_box()
+        l,u = polyreg1.bounding_box
         arr_size = (u[0,0]-l[0,0])/25.0
     
     #TODO: 3d

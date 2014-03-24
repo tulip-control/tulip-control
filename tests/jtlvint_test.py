@@ -56,6 +56,6 @@ class basic_test:
                            (4, 0) : (1,1),
                            (4, 3) : (0,0),
                            ("Sinit", 0) : (1,1)}
-        for (from_state, to_state, slabel) in mach.transitions(labeled=True):
+        for (from_state, to_state, slabel) in mach.transitions(data=True):
             assert label_reference[(from_state, to_state)] == (slabel["x"],
                                                                slabel["y"])

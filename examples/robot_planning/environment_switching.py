@@ -38,7 +38,13 @@ sys_swe.env_actions.add_from({'slippery','normal'})
 
 n = 6
 states = ['s'+str(i) for i in xrange(n) ]
-sys_swe.states.add_from(states)
+
+sys_swe.atomic_propositions.add_from(['home','lot'])
+state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
+
+# Add states and decorate TS with state labels (aka atomic propositions)
+for state, label in zip(states, state_labels):
+    sys_swe.states.add(state, ap=label)
 
 # Within each mode the transitions can be deterministically chosen, environment
 # chooses the mode (the surface can be slippery or normal).
@@ -51,7 +57,7 @@ transmat1 = sp.lil_matrix(np.array(
                  [0,0,1,0,1,1]]
             ))
                      
-sys_swe.transitions.add_labeled_adj(transmat1, states, {'env_actions':'normal'})
+sys_swe.transitions.add_adj(transmat1, states, env_actions='normal')
 
 # In slippery mode, the robot can't stay still and makes larger jumps.
 transmat2 = sp.lil_matrix(np.array(
@@ -63,11 +69,7 @@ transmat2 = sp.lil_matrix(np.array(
                  [0,0,1,1,0,0]]
             ))
 
-sys_swe.transitions.add_labeled_adj(transmat2, states, {'env_actions':'slippery'})
-
-# Decorate TS with state labels (aka atomic propositions)
-sys_swe.atomic_propositions.add_from(['home','lot'])
-sys_swe.states.labels(states, [{'home'}, set(), set(), set(), set(), {'lot'}] )
+sys_swe.transitions.add_adj(transmat2, states, env_actions='slippery')
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print(sys_swe)

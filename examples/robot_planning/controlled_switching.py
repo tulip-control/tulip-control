@@ -41,6 +41,13 @@ states = transys.prepend_with(range(n), 's')
 sys_sws.states.add_from(set(states) )
 sys_sws.states.initial.add_from({'s0', 's3'})
 
+sys_sws.atomic_propositions.add_from(['home','lot'])
+state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
+
+# Add states and decorate TS with state labels (aka atomic propositions)
+for state, label in zip(states, state_labels):
+    sys_sws.states.add(state, ap=label)
+
 # mode1 transitions
 transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
@@ -48,8 +55,8 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat1), states, 'right'
+sys_sws.transitions.add_adj(
+    sp.lil_matrix(transmat1), states, actions='right'
 )
                       
 # mode2 transitions
@@ -59,8 +66,8 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat2), states, 'up'
+sys_sws.transitions.add_adj(
+    sp.lil_matrix(transmat2), states, actions='up'
 )
                       
 # mode3 transitions
@@ -70,8 +77,8 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [0,0,0,1,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat3), states, 'left'
+sys_sws.transitions.add_adj(
+    sp.lil_matrix(transmat3), states, actions='left'
 )
                       
 # mode4 transitions
@@ -81,15 +88,8 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
-sys_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat4), states, 'down'
-)
-
-
-# Decorate TS with state labels (aka atomic propositions)
-sys_sws.atomic_propositions.add_from(['home','lot'])
-sys_sws.states.labels(
-    states, [{'home'},set(),set(),set(),set(),{'lot'}]
+sys_sws.transitions.add_adj(
+    sp.lil_matrix(transmat4), states, actions='down'
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
@@ -132,7 +132,7 @@ env_safe = set()                # empty set
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach', 'act = right'}
+sys_init = {'X0reach', 'sys_actions = right'}
 sys_prog = {'home'}               # []<>home
 sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
