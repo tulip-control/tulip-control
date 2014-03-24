@@ -39,7 +39,6 @@ import os
 from pprint import pformat
 from collections import Iterable
 import warnings
-import copy
 
 import networkx as nx
 
@@ -418,10 +417,6 @@ class States(object):
                 logger.debug('No match for label---> state discarded.')
         
         return found_state_label_pairs
-        
-        #except KeyError:
-        #warnings.warn("State: " +str(state) +", doesn't have AP label.")
-        #return None
     
     def is_terminal(self, state):
         """Check if state has no outgoing transitions.
@@ -490,16 +485,7 @@ class Transitions(object):
         self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
     
     def add_from(self, from_states, to_states, check_states=True):
-        """Add non-deterministic transition.
-        
-        No labeling at this level of structuring.
-                
-        L{LabeledTransitions.label}, L{LabeledTransitions.relabel},
-        L{LabeledTransitions.add_labeled} manipulate labeled
-        transitions.
-        
-        They become available only if set of actions, or an alphabet
-        are defined, so can be used only in FTS, open FTS, automaton, etc.
+        """Add transition.
         """
         if not check_states:
             self.graph.states.add_from(from_states)
@@ -664,7 +650,6 @@ class Transitions(object):
             self.add_labeled(from_state, to_state, labels,
                              check=check_labels)
         
-        # TODO add overwriting (=delete_labeled +add once more) capability
     
     def find(self, from_states='any', to_states='any',
              with_attr_dict=None, typed_only=False, **with_attr):
@@ -1079,8 +1064,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param check: raise C{AttributeError} if C{attr_dict}
             has untyped attribute keys, otherwise warn
         """
-        #TODO: (from_state_id, to_state_id) = self._mutant2int(from_state, to_state)
-        
         # legacy
         if 'check_states' in attr:
             msg = 'saw keyword argument: check_states ' +\
