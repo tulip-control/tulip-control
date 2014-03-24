@@ -99,6 +99,19 @@ class FiniteTransitionSystem(LabeledDiGraph):
     The xor constraint can prevent the environment from
     blocking the system by setting all its actions to False.
     
+    The action are taken when traversing an edge.
+    Each edge is annotated by a single action.
+    If an edge (s1, s2) can be taken on two transitions,
+    then 2 copies of that same edge are stored.
+    Each copy is annotated using a different action,
+    the actions must belong to the same action set.
+    That action set is defined as a ser instance.
+    This description is a (closed) L{FTS}.
+    
+    The system and environment actions associated with an edge
+    of a reactive system. To store these, 2 sub-labels are used
+    and their sets are encapsulated within the same (open) L{FTS}.
+    
     Example
     =======
     In the following C{None} represents the empty set, subset of AP.
@@ -197,13 +210,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
         @param actions: actions used to label transitions
         @type actions: iterable of str
         
-        For other arguments, see L{LabeledStateDiGraph}
+        For other arguments, see L{LabeledDiGraph}
         """
         ap_labels = PowerSet()
         node_label_types = [('ap', ap_labels, ap_labels.math_set)]
         edge_label_types = [('actions', MathSet(), True)]
         
-        LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
+        super(FiniteTransitionSystem, self).__init__(
+            node_label_types, edge_label_types,
+            *args, **kwargs
+        )
         
         self.atomic_propositions = self.ap
         self.aps = self.atomic_propositions # shortcut

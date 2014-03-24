@@ -595,7 +595,9 @@ class RabinAutomaton(OmegaAutomaton):
                  atomic_proposition_based=False, **kwargs):
         super(RabinAutomaton, self).__init__(
             deterministic=deterministic,
-            RabinPairs, atomic_proposition_based, **kwargs
+            accepting_states_type=RabinPairs,
+            atomic_proposition_based=atomic_proposition_based,
+            **kwargs
         )
         self.automaton_type = 'Rabin Automaton'
     

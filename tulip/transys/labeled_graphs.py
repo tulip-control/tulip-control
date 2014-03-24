@@ -42,7 +42,7 @@ import warnings
 
 import networkx as nx
 
-from .mathset import SubSet, TypedDict, is_subset
+from .mathset import SubSet, TypedDict
 from .export import save_d3, graph2dot
 
 def label_is_desired(attr_dict, desired_dict):
