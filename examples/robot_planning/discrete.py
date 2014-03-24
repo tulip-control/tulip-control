@@ -48,19 +48,19 @@ sys.states.initial.add('X0')    # start in state X0
 #! TODO (IF): can arguments be a singleton instead of a list?
 #! TODO (IF): can we use lists instead of sets?
 #!   * use optional flag to allow list as label
-sys.transitions.add_from({'X0'}, {'X1', 'X3'})
-sys.transitions.add_from({'X1'}, {'X0', 'X4', 'X2'})
-sys.transitions.add_from({'X2'}, {'X1', 'X5'})
-sys.transitions.add_from({'X3'}, {'X0', 'X4'})
-sys.transitions.add_from({'X4'}, {'X3', 'X1', 'X5'})
-sys.transitions.add_from({'X5'}, {'X4', 'X2'})
+sys.transitions.add_comb({'X0'}, {'X1', 'X3'})
+sys.transitions.add_comb({'X1'}, {'X0', 'X4', 'X2'})
+sys.transitions.add_comb({'X2'}, {'X1', 'X5'})
+sys.transitions.add_comb({'X3'}, {'X0', 'X4'})
+sys.transitions.add_comb({'X4'}, {'X3', 'X1', 'X5'})
+sys.transitions.add_comb({'X5'}, {'X4', 'X2'})
 # @system_dynamics_section_end@
 
 # @system_labels_section@
 # Add atomic propositions to the states
 sys.atomic_propositions.add_from({'home', 'lot'})
-sys.states.label('X0', 'home')
-sys.states.label('X5', 'lot')
+sys.states.add('X0', ap={'home'})
+sys.states.add('X5', ap={'lot'})
 # @system_labels_section_end@
 
 # if IPython and Matplotlib available

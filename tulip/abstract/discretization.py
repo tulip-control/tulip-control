@@ -931,13 +931,9 @@ def discretize(
     # Decorate TS with state labels
     atomic_propositions = set(part.prop_regions)
     ofts.atomic_propositions.add_from(atomic_propositions)
-    prop_list = []
-    for region in sol:
+    for state, region in zip(ofts_states, sol):
         state_prop = region.props.copy()
-        
-        prop_list.append(state_prop)
-    
-    ofts.states.labels(ofts_states, prop_list)
+        ofts.states.add(state, ap=state_prop)
     
     param = {
         'N':N,
@@ -948,8 +944,6 @@ def discretize(
         'min_cell_volume':min_cell_volume,
         'max_num_poly':max_num_poly
     }
-    
-    assert(len(prop_list) == n)
     
     ppp2orig = [part2orig[x] for x in orig]
     

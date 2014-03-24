@@ -67,20 +67,18 @@ def _states2dot_str(states, to_pydot_graph, wrap=10):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
     # get labeling def
-    if states._exist_labels():
+    if hasattr(states, '_state_label_def'):
         label_def = states.graph._state_label_def
         label_format = states.graph._state_dot_label_format
     
-    for (state_id, state_data) in states.graph.nodes_iter(data=True):
-        state = states._int2mutant(state_id)
-        
+    for (state, state_data) in states.graph.nodes_iter(data=True):
         if state in states.initial:
-            _add_incoming_edge(to_pydot_graph, state_id)
+            _add_incoming_edge(to_pydot_graph, state)
         
         node_shape = _decide_node_shape(states.graph, state)
         
         # state annotation
-        if states._exist_labels():
+        if hasattr(states, '_form_node_label'):
             node_dot_label = _form_node_label(
                 state, state_data, label_def, label_format, wrap
             )
@@ -106,7 +104,7 @@ def _states2dot_str(states, to_pydot_graph, wrap=10):
         # TODO option to replace with int to reduce size,
         # TODO generate separate LaTeX legend table (PNG option ?)
         to_pydot_graph.add_node(
-            state_id,
+            state,
             label=node_dot_label,
             shape=node_shape,
             style=node_style,
@@ -158,7 +156,7 @@ def _decide_node_shape(graph, state):
     node_shape = graph.dot_node_shape['normal']
     
     # check if accepting states defined
-    if not graph.states._exist_accepting_states(warn=False):
+    if not hasattr(graph.states, 'accepting'):
         return node_shape
     
     # check for accepting states
@@ -172,7 +170,12 @@ def _transitions2dot_str(trans, to_pydot_graph):
     
     @rtype: str
     """
-    trans._exist_labels()
+    if not hasattr(trans.graph, '_transition_label_def'):
+        return
+    if not hasattr(trans.graph, '_transition_dot_label_format'):
+        return
+    if not hasattr(trans.graph, '_transition_dot_mask'):
+        return
     
     # get labeling def
     label_def = trans.graph._transition_label_def

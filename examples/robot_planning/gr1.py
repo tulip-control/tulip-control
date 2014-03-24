@@ -121,7 +121,7 @@ if not ctrl.save('gr1.png'):
     print(ctrl)
 
 # either select current state before simulation
-ctrl.states.select_current([0] )
+ctrl.states.current = [0]
 ctrl.simulate(inputs_sequence='random', iterations=10)
     
 # or pass it to simulate

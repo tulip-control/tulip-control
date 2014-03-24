@@ -44,6 +44,13 @@ states = transys.prepend_with(range(n), 's')
 env_sws.states.add_from(set(states) )
 env_sws.states.initial.add('s0')
 
+env_sws.atomic_propositions.add_from(['home','lot'])
+state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
+
+# Add states and decorate TS with state labels (aka atomic propositions)
+for state, label in zip(states, state_labels):
+    env_sws.states.add(state, ap=label)
+
 # mode1 transitions
 transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
@@ -51,8 +58,8 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
-env_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat1), states, {'sys_actions':'right'}
+env_sws.transitions.add_adj(
+    sp.lil_matrix(transmat1), states, sys_actions='right'
 )
                       
 # mode2 transitions
@@ -62,8 +69,8 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
-env_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat2), states, {'sys_actions':'up'}
+env_sws.transitions.add_adj(
+    sp.lil_matrix(transmat2), states, sys_actions='up'
 )
                       
 # mode3 transitions
@@ -73,8 +80,8 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [0,0,0,1,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
-env_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat3), states, {'sys_actions':'left'}
+env_sws.transitions.add_adj(
+    sp.lil_matrix(transmat3), states, sys_actions='left'
 )
                       
 # mode4 transitions
@@ -84,15 +91,8 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
-env_sws.transitions.add_labeled_adj(
-    sp.lil_matrix(transmat4), states, {'sys_actions':'down'}
-)
-
-
-# Decorate TS with state labels (aka atomic propositions)
-env_sws.atomic_propositions.add_from(['home','lot'])
-env_sws.states.labels(
-    states, [{'home'},set(),set(),set(),set(),{'lot'}]
+env_sws.transitions.add_adj(
+    sp.lil_matrix(transmat4), states, sys_actions='down'
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
