@@ -3,6 +3,7 @@ Tests for tulip.hybrid module
 """
 import numpy as np
 
+from nose.tools import raises
 from tulip import hybrid
 from tulip import polytope as pc
 
@@ -54,196 +55,243 @@ def switched_system_test():
     assert(hyb.cts_ss == domain)
 
 
+class time_semantics_test:
+    """Test out time semantics for hybrid systems module."""
+    def setUp(self):
+        self.A1 = np.eye(2)
+        self.A2 = np.array([[0, 1], [0, 0]])
+        self.B1 = np.array([[0] ,[1]])
+        self.B2 = np.array([[1], [0]])
+        self.poly1 = pc.Polytope.from_box([[0, 1], [0, 1]])
+        self.poly2 = pc.Polytope.from_box([[1, 2], [0, 1]])
+        self.total_box = pc.Region(list_poly=[self.poly1, self.poly2])
+        self.Uset = pc.Polytope.from_box([[0, 1], [0, 1]])
 
-def time_semantics_test():
-    """Tests out time semantics for hybrid systems module."""
+    def tearDown(self):
+        self.A1 = None
+        self.A2 = None
+        self.B1 = None
+        self.B2 = None
+        self.poly1 = None
+        self.poly2 = None
+        self.total_box = None
+        self.Uset = None
 
-    # Specify four LTI systems:
-    A1 = np.eye(2)
-    A2 = np.array([[0, 1], [0, 0]])
-    B1 = np.array([[0] ,[1]])
-    B2 = np.array([[1], [0]])
-    poly1 = pc.Polytope.from_box([[0, 1], [0, 1]])
-    poly2 = pc.Polytope.from_box([[1, 2], [0, 1]])
-    total_box = pc.Region(list_poly=[poly1, poly2])
-    Uset = pc.Polytope.from_box([[0, 1], [0, 1]])
+    def test_correct_lti_construction(self):
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
+                                time_semantics='discrete', timestep=None)
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='sampled', timestep=.1)
+        LTI3 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly1)
+        LTI4 = hybrid.LtiSysDyn(A=self.A1, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2)
+        assert(LTI1.time_semantics == 'discrete')
+        assert(LTI2.time_semantics == 'sampled')
+        assert(LTI1.timestep is None)
+        assert(LTI2.timestep == .1)
+        assert(LTI3.time_semantics is None)
+        assert(LTI3.timestep is None)
+        assert(LTI4.time_semantics is None)
+        assert(LTI4.timestep is None)
 
-    # Test correct time semantics for LTIs, should produce no errors
-    LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                            time_semantics='discrete', timestep=None)
-    LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-                            time_semantics='sampled', timestep=.1)
-    LTI3 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly1)
-    LTI4 = hybrid.LtiSysDyn(A=A1, B=B2, Uset=Uset, domain=poly2)
-    assert(LTI1.time_semantics == 'discrete')
-    assert(LTI2.time_semantics == 'sampled')
-    assert(LTI1.timestep is None)
-    assert(LTI2.timestep == .1)
-    assert(LTI3.time_semantics is None)
-    assert(LTI3.timestep is None)
-    assert(LTI4.time_semantics is None)
-    assert(LTI4.timestep is None)
+    def test_correct_pwa_construction(self):
+        # Putting pwa together successfully, without time overwrite
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
+                                time_semantics='sampled', timestep=.1)
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='sampled', timestep=.1)
+        LTI3 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly1)
+        LTI4 = hybrid.LtiSysDyn(A=self.A1, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2)
+        PWA1 = hybrid.PwaSysDyn(list_subsys=[LTI3, LTI4], domain=self.total_box,
+                                overwrite_time=False)
 
-    # Test incorrect time semantics, should produce errors
+        # Putting pwa together successfully, with time overwrite
+        PWA2 = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
+                                time_semantics='sampled', timestep=.1,
+                                overwrite_time=True)
 
-    # Discrete time semantics, existing timestep
-    try:
-        LTI = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                               time_semantics='discrete', timestep=.1)
-        raise AssertionError('time semantic test failed')
-    except ValueError:
-        pass
-
-    # invalid semantics
-    try:
-        LTI = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                               time_semantics='hello', timestep=.1)
-        raise AssertionError
-    except ValueError:
-        pass
-
-    # nonpositive timestep
-    try:
-        LTI = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                               time_semantics='sampled', timestep=0)
-        raise AssertionError
-    except ValueError:
-        pass
-
-    # timestep is wrong type
-    try:
-        LTI = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                               time_semantics='sampled', timestep='.1')
-        raise AssertionError
-    except TypeError:
-        pass
-
-
-    # Putting pwa together successfully, without time overwrite
-    LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                            time_semantics='sampled', timestep=.1)
-    LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-                            time_semantics='sampled', timestep=.1)
-    PWA1 = hybrid.PwaSysDyn(list_subsys=[LTI3, LTI4], domain=total_box,
-                            overwrite_time=False)
-
-    # Putting pwa together successfully, with time overwrite
-    PWA2 = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
-                            time_semantics='sampled', timestep=.1,
-                            overwrite_time=True)
-
-
-    # Putting pwa togther unsuccessfully
-
-    # different time semantics among subsystems
-    try:
-        LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                            time_semantics='sampled', timestep=.1)
-        LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-                            time_semantics='discrete')
-        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
+    @raises(ValueError)
+    def test_pwa_difftseman_among_subsys(self):
+        """Different time semantics among LtiSysDyn subsystems of PwaSysDyn"""
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
+                                time_semantics='sampled', timestep=.1)
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='discrete')
+        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='sampled', timestep=.1,
                                overwrite_time=False)
-        raise AssertionError
-    except ValueError:
-        pass
 
-    # different timesteps among subsystems
-    try:
-        LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-                            time_semantics='sampled', timestep=.1)
-        LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-                            time_semantics='sampled', timestep=.2)
-        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
+    @raises(ValueError)
+    def test_pwa_difftstep_among_subsys(self):
+        """Different timesteps among LtiSysDyn subsystems of PwaSysDyn"""
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
+                                time_semantics='sampled', timestep=.1)
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='sampled', timestep=.2)
+        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='sampled', timestep=.1,
                                overwrite_time=False)
-        raise AssertionError
-    except ValueError:
-        pass
 
-    # time semantics don't match what is specified for pwa system
-    try:
-        LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
+    @raises(ValueError)
+    def test_pwa_difftseman_from_subsys(self):
+        """LtiSysDyn subsystems time semantics do not match that of PwaSysDyn"""
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
                                 time_semantics='sampled', timestep=.1)
-        LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
                                 time_semantics='sampled', timestep=.1)
-        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
+        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='discrete', overwrite_time=False)
-        raise AssertionError
-    except ValueError:
-        pass
 
-    # timesteps don't match what is specified for pwa system
-    try:
-        LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
+    @raises(ValueError)
+    def test_pwa_difftstep_from_subsys(self):
+        """LtiSysDyn subsystems timesteps do not match that of PwaSysDyn"""
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
                                 time_semantics='sampled', timestep=.1)
-        LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-                                time_semantics='sampled', timestep=.1) 
-        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='sampled', timestep=.1)
+        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='sampled', timestep=.2,
                                overwrite_time=False)
-        raise AssertionError
-    except ValueError:
-        pass
 
-
-    # PWA fails _check_time_data
-    try:
-        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
+    @raises(ValueError)
+    def test_pwa_invalid_semantics(self):
+        LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                Uset=self.Uset, domain=self.poly1,
+                                time_semantics='sampled', timestep=.1)
+        LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                Uset=self.Uset, domain=self.poly2,
+                                time_semantics='sampled', timestep=.1)
+        PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='hello')
-        raise AssertionError 
-    except ValueError:
-        pass
+
+    @raises(ValueError)
+    def test_disctime_errtstep(self):
+        """Discrete time semantics yet given timestep"""
+        LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                               Uset=self.Uset, domain=self.poly1,
+                               time_semantics='discrete', timestep=.1)
 
 
-    # Correct switched system constructions
-    env_labels = ('hi', 'hello')
-    sys_labels = ('mode1',)
-    disc_domain_size = (2, 1)
-    LTI1 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly1,
-        time_semantics='sampled', timestep=.1)
-    LTI2 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly2,
-        time_semantics='sampled', timestep=.1)
-    LTI3 = hybrid.LtiSysDyn(A=A1, B=B1, Uset=Uset, domain=poly2,
-        time_semantics='sampled', timestep=.1)
-    LTI4 = hybrid.LtiSysDyn(A=A2, B=B2, Uset=Uset, domain=poly1,
-        time_semantics='sampled', timestep=.1)
-    PWA1 = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=total_box,
-        time_semantics='sampled', timestep=.1)
-    PWA2 = hybrid.PwaSysDyn(list_subsys=[LTI3, LTI4], domain=total_box,
-        time_semantics='sampled', timestep=.1)
-    dynamics1 = { (env_labels[0], sys_labels[0]) : PWA1,
-                  (env_labels[1], sys_labels[0]) : PWA2 }
-    dynamics2 = { (env_labels[0], sys_labels[0]) : PWA2,
-                  (env_labels[1], sys_labels[0]) : PWA1 }
-    switched1 = hybrid.HybridSysDyn(disc_domain_size=disc_domain_size, 
-        dynamics=dynamics1, env_labels=env_labels, disc_sys_labels=sys_labels,
-        time_semantics='sampled', timestep=.1, overwrite_time=True)
-    switched2 = hybrid.HybridSysDyn(disc_domain_size=disc_domain_size, 
-        dynamics=dynamics1, env_labels=env_labels, disc_sys_labels=sys_labels,
-        time_semantics='sampled', timestep=.1, overwrite_time=False)
-    assert(switched1.time_semantics == 'sampled')
-    assert(switched2.time_semantics == 'sampled')
-    assert(switched1.timestep == .1)
-    assert(switched2.timestep == .1)
-    
+    @raises(ValueError)
+    def test_lti_invalid_semantics(self):
+        LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                               Uset=self.Uset, domain=self.poly1,
+                               time_semantics='hello', timestep=.1)
 
-    # Hybrid system can fail _check_time_data
-    try:
-        switched1 = hybrid.HybridSysDyn(disc_domain_size=disc_domain_size, 
-            dynamics=dynamics1, env_labels=env_labels, 
-            disc_sys_labels=sys_labels, time_semantics='hello', 
-            timestep=.1, overwrite_time=True)
-        raise AssertionError
-    except ValueError:
-        pass
+    @raises(ValueError)
+    def test_nonpositive_timestep(self):
+        LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                               Uset=self.Uset, domain=self.poly1,
+                               time_semantics='sampled', timestep=0)
 
-    # Hybrid system fails _check_time_consistency
-    try:
-        switched1 = hybrid.HybridSysDyn(disc_domain_size=disc_domain_size, 
-            dynamics=dynamics1, env_labels=env_labels, 
-            disc_sys_labels=sys_labels, time_semantics='sampled', 
-            timestep=.2, overwrite_time=False)
-        raise AssertionError
-    except ValueError:
-        pass
+    @raises(TypeError)
+    def test_timestep_wrong_type(self):
+        LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                               Uset=self.Uset, domain=self.poly1,
+                               time_semantics='sampled', timestep='.1')
+
+
+class HybridSysDyn_test:
+    def setUp(self):
+        self.A1 = np.eye(2)
+        self.A2 = np.array([[0, 1], [0, 0]])
+        self.B1 = np.array([[0] ,[1]])
+        self.B2 = np.array([[1], [0]])
+        self.poly1 = pc.Polytope.from_box([[0, 1], [0, 1]])
+        self.poly2 = pc.Polytope.from_box([[1, 2], [0, 1]])
+        self.total_box = pc.Region(list_poly=[self.poly1, self.poly2])
+        self.Uset = pc.Polytope.from_box([[0, 1], [0, 1]])
+        self.env_labels = ('hi', 'hello')
+        self.sys_labels = ('mode1',)
+        self.disc_domain_size = (2, 1)
+        self.LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                     Uset=self.Uset, domain=self.poly1,
+                                     time_semantics='sampled', timestep=.1)
+        self.LTI2 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                     Uset=self.Uset, domain=self.poly2,
+                                     time_semantics='sampled', timestep=.1)
+        self.LTI3 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
+                                     Uset=self.Uset, domain=self.poly2,
+                                     time_semantics='sampled', timestep=.1)
+        self.LTI4 = hybrid.LtiSysDyn(A=self.A2, B=self.B2,
+                                     Uset=self.Uset, domain=self.poly1,
+                                     time_semantics='sampled', timestep=.1)
+        self.PWA1 = hybrid.PwaSysDyn(list_subsys=[self.LTI1, self.LTI2],
+                                     domain=self.total_box,
+                                     time_semantics='sampled', timestep=.1)
+        self.PWA2 = hybrid.PwaSysDyn(list_subsys=[self.LTI3, self.LTI4],
+                                     domain=self.total_box,
+                                     time_semantics='sampled', timestep=.1)
+        self.dynamics1 = {(self.env_labels[0], self.sys_labels[0]): self.PWA1,
+                          (self.env_labels[1], self.sys_labels[0]): self.PWA2}
+
+    def tearDown(self):
+        self.A1 = None
+        self.A2 = None
+        self.B1 = None
+        self.B2 = None
+        self.poly1 = None
+        self.poly2 = None
+        self.total_box = None
+        self.Uset = None
+        self.env_labels = None
+        self.sys_labels = None
+        self.disc_domain_size = None
+        self.LTI1 = None
+        self.LTI2 = None
+        self.LTI3 = None
+        self.LTI4 = None
+        self.PWA1 = None
+        self.PWA2 = None
+        self.dynamics1 = None
+
+    @raises(ValueError)
+    def test_hybrid_difftstep_from_subsys(self):
+        """LtiSysDyn subsystems timesteps do not match that of HybridSysDyn"""
+        hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            disc_sys_labels=self.sys_labels,
+                            time_semantics='hello', timestep=.1,
+                            overwrite_time=True)
+
+    @raises(ValueError)
+    def test_hybrid_fail_check_time_consistency(self):
+        # fail _check_time_consistency
+        hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            disc_sys_labels=self.sys_labels,
+                            time_semantics='sampled', timestep=.2,
+                            overwrite_time=False)
+
+    def test_correct_switched_construction(self):
+        switched1 = hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+                                        dynamics=self.dynamics1,
+                                        env_labels=self.env_labels,
+                                        disc_sys_labels=self.sys_labels,
+                                        time_semantics='sampled', timestep=.1,
+                                        overwrite_time=True)
+        switched2 = hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+                                        dynamics=self.dynamics1,
+                                        env_labels=self.env_labels,
+                                        disc_sys_labels=self.sys_labels,
+                                        time_semantics='sampled', timestep=.1,
+                                        overwrite_time=False)
+        assert(switched1.time_semantics == 'sampled')
+        assert(switched2.time_semantics == 'sampled')
+        assert(switched1.timestep == .1)
+        assert(switched2.timestep == .1)
