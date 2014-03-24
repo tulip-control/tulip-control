@@ -138,49 +138,6 @@ class LabelConsistency(object):
             
         return sublabel_values
     
-    def _sublabels_list2dict(self, sublabel_values, check_label=True):
-        """Return sublabel values dict from tuple.
-        
-        See Also
-        ========
-        L{_sublabels_dict2list}
-        
-        @param sublabel_values: ordered sublabel values
-        @type sublabel_values: tuple
-        
-        @param check_label: verify existence of label
-        @type check_label: bool
-        """
-        label_def = self.label_def
-        
-        
-        # check if dict is consistent with label defs
-        for (typename, sublabel) in edge_label.iteritems():
-            possible_labels = label_def[typename]
-            
-            
-            # discrete sublabel type ?
-            if check_label and isinstance(possible_labels, Iterable):
-                if sublabel in possible_labels:
-                    continue
-                
-                msg = 'Given SubLabel:\n\t' +str(sublabel) +'\n'
-                msg += 'not in possible SubLabels:\n\t'
-                msg += str(possible_labels) +'\n'
-                msg += 'Usual cause: when label comprised of\n'
-                msg += 'single SubLabel, pass the value itself,\n'
-                msg += 'instead of an Iterable like [value],\n'
-                msg += 'because it gets converted to [value] anyway.'
-                raise Exception(msg)
-            
-            # not iterable, check using convention:
-            
-            # sublabel type not defined ?
-            if possible_labels is None:
-                print('Undefined sublabel type')
-                continue
-            
-        return edge_label
     
     def label_is_desired(self, attr_dict, desired_label):
         def test_common_bug(cur_val, desired_val):
