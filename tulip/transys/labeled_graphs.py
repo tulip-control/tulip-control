@@ -78,14 +78,6 @@ class LabelConsistency(object):
                msg += 'Did you mix sets & lists when setting AP labels ?'
                raise Exception(msg)
         
-        def evaluate_guard(eval_guard, guard, input_port_value):
-            logger.debug('Found guard semantics:\n\t')
-            logger.debug(eval_guard)
-            
-            guard_value = eval_guard(guard, input_port_value)
-            
-            return guard_value
-        
         def match_singleton_guard(cur_val, desired_val):
             logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
             logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
@@ -101,10 +93,10 @@ class LabelConsistency(object):
             logger.debug('Checking SubLabel type:\n\t' +str(type_name) )
             
             # guard semantics ?
-            if hasattr(type_def, 'eval_guard'):
-                guard_value = evaluate_guard(
-                    type_def.eval_guard, cur_val, desired_label
-                )
+            if hasattr(type_def, '__call__'):
+                logger.debug('Found label semantics:\n\t' + str(type_def))
+                guard = cur_val
+                guard_value = type_def(guard, desired_label)
                 if not guard_value:
                     return False
                 else:

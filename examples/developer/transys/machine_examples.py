@@ -57,7 +57,7 @@ def mealy_machine_example():
             
             return False
         
-        def eval_guard(self, guard_set, input_port_value):
+        def __call__(self, guard_set, input_port_value):
             """This method "knows" that we are using x to denote the input
             within guards."""
             self.is_valid_value(input_port_value)
@@ -83,7 +83,7 @@ def mealy_machine_example():
             
             return False
         
-        def eval_guard(self, guard_set, input_port_value):
+        def __call__(self, guard_set, input_port_value):
             self.is_valid_value(input_port_value)
             
             v1 = guard_set # guard_halfspace_normal_vector

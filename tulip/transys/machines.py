@@ -98,9 +98,9 @@ class FiniteStateMachine(LabeledDiGraph):
                   check if guard value given to input port 'p1' is
                   in the set of possible values Vp.
                 
-                - C{.contains(guard_set, input_port_value) }:
+                - C{__call__(guard_set, input_port_value) }:
                   check if C{input_port_value} \\in C{guard_set}
-                  This allows flexible type definitions.
+                  This allows symbolic type definitions.
                     
                   For example, C{input_port_value} might be assigned
                   int values, but the C{guard_set} be defined by
