@@ -479,27 +479,16 @@ class Transitions(object):
             raise Exception(msg)
     
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
-        """Wrapper for L{LabeledDiGraph.add_edge}.
+        """Wrapper of L{LabeledDiGraph.add_edge}.
         """
         #self._breaks_determinism(from_state, labels)
         self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
     
-    def add_from(self, from_states, to_states, check_states=True):
-        """Add transition.
+    def add_from(self, transitions, attr_dict=None, check=True, **attr):
+        """Wrapper of L{LabeledDiGraph.add_edges_from}.
         """
-        if not check_states:
-            self.graph.states.add_from(from_states)
-            self.graph.states.add_from(to_states)
-        
-        if not is_subset(from_states, self.graph.states() ):
-            raise Exception('from_states \\not\\subseteq states.')
-        
-        if not is_subset(to_states, self.graph.states() ):
-            raise Exception('to_states \\not\\subseteq states.')
-        
-        for from_state in from_states:
-            for to_state in to_states:
-                self.graph.add_edge(from_state, to_state)
+        self.graph.add_edges_from(transitions, attr_dict=attr_dict,
+                                  check=check, **attr)
     
     def remove(self, from_state, to_state, attr_dict=None, **attr):
         """Remove single transition.
@@ -931,7 +920,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         logger.debug('node typed_attr: ' + str(typed_attr))
         
-        self._check_for_untyped_keys(typed_attr, self._node_label_types, check)
+        self._check_for_untyped_keys(typed_attr,
+                                     self._node_label_types,
+                                     check)
         
         nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
     
