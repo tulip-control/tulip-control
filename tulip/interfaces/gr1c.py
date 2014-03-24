@@ -312,7 +312,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         
         label = {k:v for k,v in label.iteritems()
                  if k in {'loc', 'eloc'}}
-        mach.states.label(state, label)
+        mach.states.add(state, **label)
     
     # transitions labeled with I/O
     for u in A.nodes_iter():
@@ -322,7 +322,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
             
             label = _map_int2dom(A.node[v]["state"],
                                  arbitrary_domains)
-            mach.transitions.add_labeled(u, v, label)
+            mach.transitions.add(u, v, **label)
     
     # special initial state, for first input
     initial_state = 'Sinit'
@@ -362,7 +362,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         
         if t['env_init'] and t['sys_init']:
             label = _map_int2dom(var_values, arbitrary_domains)
-            mach.transitions.add_labeled(initial_state, node, label)
+            mach.transitions.add(initial_state, node, **label)
     
     return (spec, mach)
 
