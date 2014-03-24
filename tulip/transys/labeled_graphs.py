@@ -46,7 +46,7 @@ import networkx as nx
 from .mathset import SubSet, TypedDict, is_subset
 from .export import save_d3, graph2dot
 
-def label_is_desired(self, attr_dict, desired_label):
+def label_is_desired(attr_dict, desired_label):
     """Return True if all labels match.
     
     Supports symbolic evaluation, if label type is callable.
@@ -57,36 +57,38 @@ def label_is_desired(self, attr_dict, desired_label):
     
     label_def = attr_dict.allowed_values
     
+    for type_name, desired_value in desired_label.iteritems():
+        value = attr_dict[type_name]
         type_def = label_def[type_name]
         
-        logger.debug('Checking SubLabel type:\n\t' +str(type_name) )
+        logger.debug('Checking label type:\n\t' +str(type_name) )
         
         # guard semantics ?
         if hasattr(type_def, '__call__'):
             logger.debug('Found label semantics:\n\t' + str(type_def))
-            guard = cur_val
-            guard_value = type_def(guard, desired_label)
-            if not guard_value:
+            
+            # value = guard
+            if not type_def(value, desired_value):
                 return False
             else:
                 continue
         
         # no guard semantics given,
         # then by convention: guard is singleton {cur_val},
-        logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
-        logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
-        
-        if not cur_val == desired_val:
-            test_common_bug(cur_val, desired_val)
+        if not value == desired_value:
+            test_common_bug(value, desired_value)
             return False
     return True
 
-def test_common_bug(cur_val, desired_val):
-    if isinstance(cur_val, (set, list) ) and \
-    isinstance(desired_val, (set, list) ) and \
-    cur_val.__class__ != desired_val.__class__:
-       msg = 'Set SubLabel:\n\t' +str(cur_val)
-       msg += 'compared to list SubLabel:\n\t' +str(desired_val)
+def test_common_bug(value, desired_value):
+    logger.debug('Label value:\n\t' +str(value) )
+    logger.debug('Desired value:\n\t' +str(desired_value) )
+    
+    if isinstance(value, (set, list) ) and \
+    isinstance(desired_value, (set, list) ) and \
+    value.__class__ != desired_value.__class__:
+       msg = 'Set SubLabel:\n\t' +str(value)
+       msg += 'compared to list SubLabel:\n\t' +str(desired_value)
        msg += 'Did you mix sets & lists when setting AP labels ?'
        raise Exception(msg)
 
