@@ -171,12 +171,8 @@ class States(object):
         self._current = s
     
     def _warn_if_state_exists(self, state):
-        if state in self():
-            if self.list is not None:
-                raise Exception('State exists and ordering enabled: ambiguous.')
-            else:
-                logger.debug('State already exists.')
-                return
+        if state in self:
+            logger.debug('State already exists.')
     
     def _single_state2singleton(self, state):
         """Convert to a singleton list, if argument is a single state.
@@ -466,6 +462,17 @@ class Transitions(object):
         self.graph.add_edges_from(transitions, attr_dict=attr_dict,
                                   check=check, **attr)
     
+    def add_comb(self, from_states, to_states, attr_dict=None,
+                 check=True, **attr):
+        """Add an edge for each combination C{(u, v)},
+        
+        for C{u} in C{from_states} for C{v} in C{to_states}.
+        """
+        for u in from_states:
+            for v in to_states:
+                self.graph.add_edge(u, v, attr_dict=attr_dict,
+                                    check=check, **attr)
+    
     def remove(self, from_state, to_state, attr_dict=None, **attr):
         """Remove single transition.
         
@@ -602,10 +609,10 @@ class Transitions(object):
         u_v_edges = self.graph.edges_iter(nbunch=from_states, data=True)
         
         if to_states is not None:
-            candidate_edges = [(u,v,d) for u,v,d in u_v_edges
-                                       if v in to_states]
+            u_v_edges = [(u,v,d) for u,v,d in u_v_edges
+                                 if v in to_states]
         
-        for u, v, attr_dict in candidate_edges:
+        for u, v, attr_dict in u_v_edges:
             ok = True
             if not with_attr_dict:
                 logger.debug('Any label is allowed.')

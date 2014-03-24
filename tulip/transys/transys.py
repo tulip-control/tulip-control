@@ -251,7 +251,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Actions:\n\t' +str(self.actions) +2*'\n'
         s += 'Transitions & Labels:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s
@@ -632,7 +632,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
                      ', with possible values:\n\t'
                 s += pformat(codomain, indent=3) +2*'\n'
         s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s

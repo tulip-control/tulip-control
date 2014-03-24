@@ -1030,7 +1030,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     # initial labeling
     for state in states:
         state_id = state_ids[state]
-        label = states.label_of(state)
+        label = states[state]
         ap_str = sprint_aps(label, aps)
         if not ap_str:
             continue
@@ -1038,7 +1038,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     
     # transitions of labels
     for state in states:
-        label = states.label_of(state)
+        label = states[state]
         state_id = state_ids[state]
         
         tmp = sprint_aps(label, aps)
