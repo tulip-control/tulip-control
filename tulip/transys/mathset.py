@@ -130,16 +130,6 @@ class MathSet(object):
         set_str = ', '.join([repr(i) for i in self._set] )
         return 'MathSet({' +set_str +'} +' +str(self._list) +')'
     
-    def __call__(self):
-        return list(self._set) +self._list
-    
-    #def __get__(self, instance, iterable):
-    #    return self()
-    
-    #def __set__(self, instance, iterable):
-    #    self._delete_all()
-    #    self.add_from(iterable)
-    
     def __or__(self, other):
         """Union with another mathematical set.
         
@@ -261,7 +251,7 @@ class MathSet(object):
         return item in self._list
     
     def __iter__(self):
-        return iter(self() )
+        return iter(self._list + list(self._set))
     
     def __len__(self):
         """Number of elements in set."""
@@ -728,12 +718,8 @@ class PowerSet(object):
         
         return is_subset(item, self.math_set)
     
-    def __call__(self):
-        """Return the powerset as list of subsets, each subset as tuple."""
-        return list(powerset(self.math_set) )
-    
     def __iter__(self):
-        return iter(self() )
+        return powerset(self.math_set)
     
     def __len__(self):
         return 2**len(self.math_set)
