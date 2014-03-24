@@ -92,11 +92,6 @@ class LabelConsistency(object):
             
             if cur_val == desired_val:
                 return True
-            else:
-                try:
-                    return True in cur_val
-                except:
-                    return False
         
         label_def = self.label_def
         for (type_name, desired_val) in desired_label.iteritems():
