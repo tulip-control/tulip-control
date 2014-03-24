@@ -296,7 +296,7 @@ class States(object):
         self.graph.node[state]['style'] = 'filled'
         self.graph.node[state]['fillcolor'] = color
     
-    def find(self, states='any', with_attr_dict=None, **with_attr):
+    def find(self, states=None, with_attr_dict=None, **with_attr):
         """Filter by desired states and by desired state labels.
         
         Examples
@@ -306,8 +306,7 @@ class States(object):
         >>> import transys as trs
         >>> ts = trs.FTS()
         >>> ts.atomic_propositions.add('p')
-        >>> ts.states.add('s0')
-        >>> ts.states.label('s0', {'p'} )
+        >>> ts.states.add('s0', ap={'p'})
         
           - To find the label of a single state C{'s0'}:
 
@@ -315,19 +314,10 @@ class States(object):
               >>> (s0_, label) = a[0]
               >>> print(label)
               {'ap': set(['p'])}
-
-              equivalently, but asking for a list instead of a dict:
-
-              >>> a = ts.states.find(['s0'], as_dict=False)
-              >>> (s0_, label) = a[0]
-              >>> print(label)
-              [set(['p'])]
-
-              Calling C{label_of} is a shortcut for the above.
-
+              
           - To find all states with a specific label C{{'p'}}:
 
-              >>> ts.states.label('s1', {'p'}, check=False)
+              >>> ts.states.add('s1', ap={'p'})
               >>> b = ts.states.find(with_attr_dict={'ap':{'p'} } )
               >>> states = [state for (state, label_) in b]
               >>> print(set(states) )
@@ -337,17 +327,12 @@ class States(object):
 
           - To find all states in subset C{M} labeled with C{{'p'}}:
 
-              >>> ts.states.label('s2', {'p'}, check=False)
+              >>> ts.states.add('s2', ap={'p'})
               >>> M = {'s0', 's2'}
               >>> b = ts.states.find(M, {'ap': {'p'} } )
               >>> states = [state for (state, label_) in b]
               >>> print(set(states) )
               {'s0', 's2'}
-        
-        See Also
-        ========
-        L{label_of}, L{labeled_with}, L{label}, L{labels},
-        L{LabeledTransitions.find}
         
         @param states: subset of states over which to search
         @type states: 'any' (default)
@@ -375,7 +360,7 @@ class States(object):
             except AttributeError:
                 raise Exception('with_attr_dict must be a dict')
         
-        if states is not 'any':
+        if states is not None:
             # singleton check
             if states in self:
                 state = states
