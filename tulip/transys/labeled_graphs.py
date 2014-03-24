@@ -68,77 +68,6 @@ class LabelConsistency(object):
         """
         self.label_def = label_def
     
-    def _attr_dict2sublabels(self, attr_dict, as_dict=True, typed_only=True):
-        """Extract sublabels representation from edge attribute dict.
-        
-        If C{as_dict==True}, then return dict of::
-            {sublabel_type : sublabel_value, ...}
-        Otherwise return list of sublabel values::
-            [sublabel_value, ...]
-        ordered by L{_attr_dict2sublabels_list}.
-        
-        See Also
-        ========
-        L{_attr_dict2sublabels_list}
-        """
-        if as_dict:
-            sublabels_dict = self._attr_dict2sublabels_dict(attr_dict, typed_only)
-            annotation = sublabels_dict
-        else:
-            sublabel_values = self._attr_dict2sublabels_list(attr_dict, typed_only)
-            annotation = sublabel_values
-        
-        return annotation
-    
-    def _attr_dict2sublabels_list(self, attr_dict, typed_only=False):
-        """Convert attribute dict to tuple of sublabel values."""
-        sublabels_dict = self._attr_dict2sublabels_dict(attr_dict, typed_only)
-        sublabel_values = self._sublabels_dict2list(sublabels_dict, typed_only)
-        return sublabel_values
-    
-    def _attr_dict2sublabels_dict(self, attr_dict, typed_only=False):
-        """Filter the edge attributes which are not labels.
-        
-        See Also
-        ========
-        L{_attr_dict2sublabels_list}
-        
-        @return: sublabel types with their values
-        @rtype: {C{sublabel_type} : C{sublabel_value},...}
-        """
-        #self._exist_labels()
-        
-        sublabel_ordict = self.label_def
-        if typed_only:
-            sublabels_dict = {k:v for k,v in attr_dict.iteritems()
-                                  if k in sublabel_ordict}
-        else:
-            sublabels_dict = {k:v for k,v in attr_dict.iteritems()}
-        
-        return sublabels_dict
-            
-    def _sublabels_dict2list(self, sublabels_dict, typed_only=False):
-        """Return ordered sulabel values.
-        
-        Sublabel values are ordered according to sublabel ordering
-        defined in graph._transition_label_def, which is an OrderedDict.
-        
-        See Also
-        ========
-        L{_sublabels_list2dict}
-        """
-        #self._exist_labels()
-        sublabel_ordict = self.label_def
-        
-        if typed_only:
-            sublabel_values = [sublabels_dict[k] for k in sublabel_ordict
-                                                 if k in sublabels_dict]
-        else:
-            sublabel_values = [sublabels_dict[k] for k in sublabel_ordict]
-            
-        return sublabel_values
-    
-    
     def label_is_desired(self, attr_dict, desired_label):
         def test_common_bug(cur_val, desired_val):
             if isinstance(cur_val, (set, list) ) and \
@@ -508,10 +437,7 @@ class States(object):
             if ok:
                 logger.debug('Label Matched:\n\t' +str(attr_dict) +
                               ' == ' +str(with_attr_dict) )
-                
-                annotation = \
-                    self._label_check._attr_dict2sublabels(attr_dict, as_dict=True)
-                state_label_pair = (state, annotation)
+                state_label_pair = (state, dict(attr_dict))
                 
                 found_state_label_pairs.append(state_label_pair)
             else:
@@ -867,12 +793,7 @@ class Transitions(object):
             
             if ok:
                 logger.debug('Transition label matched desired label.')
-                
-                annotation = \
-                    self._label_check._attr_dict2sublabels(
-                        attr_dict, as_dict=True, typed_only=typed_only
-                    )
-                transition = (from_state, to_state, annotation)
+                transition = (from_state, to_state, dict(attr_dict))
                 
                 found_transitions.append(transition)
             
