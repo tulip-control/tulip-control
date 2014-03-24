@@ -56,18 +56,6 @@ class LabelConsistency(object):
     For example, if the 'actions' sublabel set has type: {'yes', 'no'},
     an attempt to label an L{FTS} transition with 'not sure' will fail.
     """
-    def __init__(self, label_def):
-        """Link to the label definition from within the systems.
-        
-        @param label_def: dict defining labels:
-                - for states: _state_label_def
-                - for transitions: _transition_label_def
-            from within each system (FTS, FSA, FSM etc)
-        @type label_def: dict of the form {sublabel_name : sublabel_type}.
-            For example: {'actions' : {'start', 'stop', 'turn'}, ...}
-        """
-        self.label_def = label_def
-    
     def label_is_desired(self, attr_dict, desired_label):
         def test_common_bug(cur_val, desired_val):
             if isinstance(cur_val, (set, list) ) and \
