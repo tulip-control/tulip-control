@@ -51,9 +51,12 @@ def label_is_desired(self, attr_dict, desired_label):
     
     Supports symbolic evaluation, if label type is callable.
     """
-    label_def = self.label_def
-    for (type_name, desired_val) in desired_label.iteritems():
-        cur_val = attr_dict[type_name]
+    if not isinstance(attr_dict, TypedDict):
+        raise Exception('attr_dict must be TypedDict' +
+                        ', instead: ' + str(type(attr_dict) ) )
+    
+    label_def = attr_dict.allowed_values
+    
         type_def = label_def[type_name]
         
         logger.debug('Checking SubLabel type:\n\t' +str(type_name) )
