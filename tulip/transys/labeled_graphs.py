@@ -1058,6 +1058,39 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self.succ[u][v] = keydict
             self.pred[v][u] = keydict
     
+    def add_edges_from(self, labeled_ebunch, attr_dict=None,
+                       check=True, **attr):
+        """Add multiple labeled edges.
+        
+        For details see C{networkx.MultiDigraph.add_edges_from}.
+        Only difference is that only 2 and 3-tuple edges allowed.
+        Keys cannot be specified, because a bijection is maintained.
+        
+        @param labeled_ebunch: iterable container of:
+        
+            - 2-tuples: (u, v), or
+            - 3-tuples: (u, v, label)
+          
+          See also L{remove_labeled_edges_from}.
+        """
+        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+       
+        # process ebunch
+        for e in labeled_ebunch:
+            ne=len(e)
+            if ne == 3:
+                u, v, dd = e
+            elif ne == 2:
+                u, v = e
+            else:
+                raise ValueError(\
+                    "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
+            
+            datadict = dict(attr_dict)
+            datadict.update(dd)
+            self.add_edge(u, v, attr_dict=datadict,
+                          check=check, **attr)
+    
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
         
