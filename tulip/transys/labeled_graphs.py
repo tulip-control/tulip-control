@@ -153,26 +153,6 @@ class LabelConsistency(object):
         """
         label_def = self.label_def
         
-        # already a dict ?
-        if not isinstance(sublabel_values, dict):
-            # single label ?
-            if len(label_def) == 1:
-                # hack strings for now, until deciding
-                if label_def.has_key('ap'):
-                    sublabel_values = str2singleton(sublabel_values)
-                
-                logger.debug('Replaced sublabel value:\n\t' +
-                       str(sublabel_values) )
-                sublabel_values = [sublabel_values]
-                logger.debug('with the singleton:\n\t' +str(sublabel_values) )
-            
-            # constuct label dict
-            try:
-                edge_label = dict(zip(label_def, sublabel_values) )
-            except:
-                raise Exception('Bug')
-        else:
-            edge_label = sublabel_values
         
         # check if dict is consistent with label defs
         for (typename, sublabel) in edge_label.iteritems():
