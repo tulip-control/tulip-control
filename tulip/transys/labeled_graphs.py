@@ -43,7 +43,7 @@ import copy
 
 import networkx as nx
 
-from .mathset import SubSet, PowerSet, TypedDict, is_subset
+from .mathset import SubSet, TypedDict, is_subset
 from .export import save_d3, graph2dot
 
 class LabelConsistency(object):
@@ -57,15 +57,6 @@ class LabelConsistency(object):
     an attempt to label an L{FTS} transition with 'not sure' will fail.
     """
     def label_is_desired(self, attr_dict, desired_label):
-        def test_common_bug(cur_val, desired_val):
-            if isinstance(cur_val, (set, list) ) and \
-            isinstance(desired_val, (set, list) ) and \
-            cur_val.__class__ != desired_val.__class__:
-               msg = 'Set SubLabel:\n\t' +str(cur_val)
-               msg += 'compared to list SubLabel:\n\t' +str(desired_val)
-               msg += 'Did you mix sets & lists when setting AP labels ?'
-               raise Exception(msg)
-        
         label_def = self.label_def
         for (type_name, desired_val) in desired_label.iteritems():
             cur_val = attr_dict[type_name]
@@ -84,17 +75,23 @@ class LabelConsistency(object):
                     continue
             
             # no guard semantics given,
-            # then by convention:
-            #   guard is singleton {cur_val},
-            # so test for equality
+            # then by convention: guard is singleton {cur_val},
             logger.debug('Actual SubLabel value:\n\t' +str(cur_val) )
             logger.debug('Desired SubLabel value:\n\t' +str(desired_val) )
-            guard_value = (cur_val == desired_val)
             
-            if not guard_value:
+            if not cur_val == desired_val:
                 test_common_bug(cur_val, desired_val)
                 return False
         return True
+
+def test_common_bug(cur_val, desired_val):
+    if isinstance(cur_val, (set, list) ) and \
+    isinstance(desired_val, (set, list) ) and \
+    cur_val.__class__ != desired_val.__class__:
+       msg = 'Set SubLabel:\n\t' +str(cur_val)
+       msg += 'compared to list SubLabel:\n\t' +str(desired_val)
+       msg += 'Did you mix sets & lists when setting AP labels ?'
+       raise Exception(msg)
 
 class States(object):
     """Methods to manage states, initial states, current state.
