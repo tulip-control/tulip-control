@@ -46,24 +46,31 @@ import networkx as nx
 from .mathset import SubSet, TypedDict, is_subset
 from .export import save_d3, graph2dot
 
-def label_is_desired(attr_dict, desired_label):
+def label_is_desired(attr_dict, desired_dict):
     """Return True if all labels match.
     
     Supports symbolic evaluation, if label type is callable.
     """
     if not isinstance(attr_dict, TypedDict):
         raise Exception('attr_dict must be TypedDict' +
-                        ', instead: ' + str(type(attr_dict) ) )
+                        ', instead: ' + str(type(attr_dict) ))
     
+    if attr_dict == desired_dict:
+        return True
+    
+    # different keys ?
+    mismatched_keys = set(attr_dict).symmetric_difference(desired_dict)
+    if mismatched_keys:
+        return False
+    
+    # any labels have symbolic semantics ?
     label_def = attr_dict.allowed_values
-    
-    for type_name, desired_value in desired_label.iteritems():
-        value = attr_dict[type_name]
+    for type_name, value in attr_dict.iteritems():
+        logger.debug('Checking label type:\n\t' +str(type_name))
+        
         type_def = label_def[type_name]
+        desired_value = desired_dict[type_name]
         
-        logger.debug('Checking label type:\n\t' +str(type_name) )
-        
-        # guard semantics ?
         if hasattr(type_def, '__call__'):
             logger.debug('Found label semantics:\n\t' + str(type_def))
             
