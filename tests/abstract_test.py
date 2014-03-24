@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)
 import numpy as np
 
 from tulip import abstract, hybrid
-from tulip import polytope as pc
+import polytope as pc
 
 input_bound = 0.4
 

@@ -25,7 +25,7 @@ import sys
 import numpy as np
 
 from tulip import spec, synth, hybrid
-from tulip.polytope import box2poly
+from polytope import box2poly
 from tulip.abstract import prop2part, discretize
 # @import_section_end@
 

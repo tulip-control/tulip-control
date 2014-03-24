@@ -40,7 +40,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 
 from tulip import hybrid, abstract, spec, synth
-from tulip import polytope as pc
+import polytope as pc
 from tulip.abstract.plot import plot_strategy
 #from tulip.graphics import newax
 

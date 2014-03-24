@@ -49,7 +49,7 @@ import multiprocessing as mp
 import numpy as np
 from scipy import sparse as sp
 
-from tulip import polytope as pc
+import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex

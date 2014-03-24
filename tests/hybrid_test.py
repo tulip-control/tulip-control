@@ -4,7 +4,7 @@ Tests for tulip.hybrid module
 import numpy as np
 
 from tulip import hybrid
-from tulip import polytope as pc
+import polytope as pc
 
 def switched_system_test():
     subsystems = []

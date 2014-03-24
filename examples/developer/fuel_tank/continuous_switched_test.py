@@ -9,7 +9,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 
 from tulip import abstract, hybrid
-from tulip.polytope import box2poly
+from polytope import box2poly
 
 input_bound = 0.4
 uncertainty = 0.05

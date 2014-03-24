@@ -16,7 +16,7 @@ import numpy as np
 
 from tulip import spec, synth
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from tulip.polytope import box2poly
+from polytope import box2poly
 from tulip.abstract import prop2part, discretize
 from tulip.abstract.plot import plot_strategy
 

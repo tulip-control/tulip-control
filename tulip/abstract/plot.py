@@ -41,8 +41,7 @@ import numpy as np
 from scipy import sparse as sp
 import networkx as nx
 
-from tulip.polytope import cheby_ball
-import tulip.polytope as pc
+from polytope import cheby_ball
 
 try:
     import matplotlib as mpl

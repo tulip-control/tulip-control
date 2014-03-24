@@ -39,7 +39,7 @@ import numpy
 import scipy.sparse
 import xml.etree.ElementTree as ET
 
-from tulip import polytope
+import polytope
 from tulip import transys
 from tulip import hybrid
 from tulip import abstract

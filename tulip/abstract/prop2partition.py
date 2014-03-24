@@ -43,7 +43,7 @@ import numpy as np
 from scipy import sparse as sp
 import networkx as nx
 
-from tulip import polytope as pc
+import polytope as pc
 from .plot import plot_partition
 
 try:

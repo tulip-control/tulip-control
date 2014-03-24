@@ -49,7 +49,7 @@ from collections import Iterable
 
 import numpy as np
 
-from tulip import polytope as pc
+import polytope as pc
 
 def is_feasible(
     from_region, to_region, sys, N,
