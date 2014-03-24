@@ -465,12 +465,13 @@ class SubSet(MathSet):
         @param iterable: elements to add to subset
         @type iterable: Iterable
         """
+        self._superset = superset
+        
         super(SubSet, self).__init__([])
         
         if not isinstance(superset, Container):
             raise TypeError('superset must be Iterable,\n' +
                             'Got instead:\n\t' +str(superset) )
-        self._superset = superset
     
     def __repr__(self):
         return 'SubSet(' +pformat(list(self._set) +self._list) +')'

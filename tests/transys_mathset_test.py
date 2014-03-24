@@ -152,8 +152,6 @@ def subset_test():
     a |= [{1:2} ]
     assert(a._list == [{1:2} ] )
     
-    a.superset = [1,2,3,4, {1:2}, '6']
-    
     b = SubSet([1,'2'] )
     b.add('2')
     assert(b._set == {'2'} )
@@ -214,14 +212,14 @@ class PowerSet_operations_test:
         assert len(self.empty) == 1
 
     def test_call(self):
-        p = [set(x) for x in self.p()]
+        p = [set(x) for x in self.p]
         assert len(p) == 2**3
         assert (set() in p)
         assert (set([1]) in p) and (set([2]) in p) and (set([3]) in p)
         assert (set([1,2]) in p) and (set([2,3]) in p) and (set([1,3]) in p)
         assert set([1,2,3]) in p
-        assert self.singleton() == [(), (1,)]
-        assert self.empty() == [()]
+        assert set(self.singleton) == set([(), (1,)])
+        assert set(self.empty) == set([()])
 
 class TypedDict_test():
     def setUp(self):
