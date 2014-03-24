@@ -178,12 +178,6 @@ class LabelConsistency(object):
         for (typename, sublabel) in edge_label.iteritems():
             possible_labels = label_def[typename]
             
-            if isinstance(possible_labels, PowerSet):
-                # label with empty set
-                if sublabel is None:
-                    logger.debug('None given: label with empty set')
-                    edge_label[typename] = set()
-                    continue
             
             # discrete sublabel type ?
             if check_label and isinstance(possible_labels, Iterable):
