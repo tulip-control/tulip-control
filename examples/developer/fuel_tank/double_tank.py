@@ -162,7 +162,7 @@ dynamics_dict = {
     ('refuel', 'fly') : pwa_refuel
 }
 
-switched_dynamics = hybrid.HybridSysDyn(
+switched_dynamics = hybrid.SwitchedSysDyn(
     cts_ss=cont_ss,
     disc_domain_size=(len(env_modes), len(sys_modes)),
     dynamics=dynamics_dict,

@@ -65,7 +65,7 @@ except Exception, e:
 debug = False
 
 class AbstractSwitched(object):
-    """Abstraction of HybridSysDyn, with mode-specific and common info.
+    """Abstraction of SwitchedSysDyn, with mode-specific and common info.
     
     Attributes:
     
@@ -1173,7 +1173,7 @@ def discretize_switched(
     @type ppp: L{PropPreservingPartition}
     
     @param hybrid_sys: dynamics of switching modes
-    @type hybrid_sys: L{HybridSysDyn}
+    @type hybrid_sys: L{SwitchedSysDyn}
     
     @param disc_params: discretization parameters passed to L{discretize} for
 		each mode. See L{discretize} for details.

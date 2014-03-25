@@ -76,7 +76,7 @@ msg = 'Found:\n'
 msg += '\t Environment modes: ' + str(env_modes)
 msg += '\t System modes: ' + str(sys_modes)
 
-switched_dynamics = hybrid.HybridSysDyn(
+switched_dynamics = hybrid.SwitchedSysDyn(
     disc_domain_size=(len(env_modes), len(sys_modes)),
     dynamics=sys_dyn,
     env_labels=env_modes,

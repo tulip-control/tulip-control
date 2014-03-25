@@ -37,7 +37,7 @@ def switched_system_test():
     env_labels = ['a', 'b']
     sys_labels = ['c', 'd']
     
-    hyb = hybrid.HybridSysDyn(
+    hyb = hybrid.SwitchedSysDyn(
         disc_domain_size=dom,
         dynamics=dyn,
         cts_ss=domain,

@@ -86,7 +86,7 @@ class LtiSysDyn(object):
     
     See Also
     ========
-    L{PwaSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
+    L{PwaSysDyn}, L{SwitchedSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None):
@@ -212,7 +212,7 @@ class PwaSysDyn(object):
     
     See Also
     ========
-    L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
+    L{LtiSysDyn}, L{SwitchedSysDyn}, L{polytope.Polytope}
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain is None:
@@ -274,16 +274,16 @@ class PwaSysDyn(object):
                            show_domain=show_domain)
         return ax
 
-class HybridSysDyn(object):
+class SwitchedSysDyn(object):
     """Represent hybrid systems switching between dynamic modes.
     
-    A HybridSysDyn represents a system with switching modes
+    A C{SwitchedSysDyn} represents a system with switching modes
     that depend on both discrete:
     
         - n_env environment variables (uncontrolled)
         - n_sys system variables (controlled)
     
-    A HybridSysDyn object contains the fields:
+    A C{SwitchedSysDyn} object contains the fields:
     
      - C{disc_domain_size}: 2-tuple of numbers of modes
        type: (n_env, n_sys)
@@ -336,10 +336,10 @@ class HybridSysDyn(object):
                  env_labels=None, disc_sys_labels=None):
         # check that the continuous domain is specified
         if cts_ss is None:
-            warn('continuous state space not given to HybridSysDyn')
+            warn('continuous state space not given to SwitchedSysDyn')
         else:
             if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
-                raise Exception('HybridSysDyn: ' +
+                raise Exception('SwitchedSysDyn: ' +
                    '`cts_ss` must be a Polytope or Region')
         
         self.disc_domain_size = disc_domain_size
@@ -359,7 +359,7 @@ class HybridSysDyn(object):
             undefined_modes = set(dynamics.keys()).difference(modes)
             
             if undefined_modes:
-                msg = 'HybridSysDyn: `dynamics` keys inconsistent'
+                msg = 'SwitchedSysDyn: `dynamics` keys inconsistent'
                 msg += ' with discrete mode labels.\n'
                 msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)

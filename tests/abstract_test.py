@@ -63,7 +63,7 @@ def transition_directions_test():
         [subsys1()], cont_state_space
     )
     
-    switched_dynamics = hybrid.HybridSysDyn(
+    switched_dynamics = hybrid.SwitchedSysDyn(
         disc_domain_size=(len(env_modes), len(sys_modes)),
         dynamics=pwa_sys,
         env_labels=env_modes,
