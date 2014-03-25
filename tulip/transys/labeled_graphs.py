@@ -713,35 +713,35 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         @param node_label_types: defines the state labeling functions:
             
-                L_i : V -> D_i
+          L_i : V -> D_i
             
-            each from vertices C{V} to some co-domain C{D_i}.
+          each from vertices C{V} to some co-domain C{D_i}.
             
-            Each labeling function is defined by
-            a tuple C{(L_i, D_i, setter)}:
+          Each labeling function is defined by
+          a tuple C{(L_i, D_i, setter)}:
             
-                - C{L_i} is a C{str} naming the labeling function.
+            - C{L_i} is a C{str} naming the labeling function.
+            
+            - C{D_i} implements C{__contains__}
+                to enable checking label validity.
+                If you want co-domain C{D_i} to be extensible,
+                it must implement C{add}.
+            
+            - C{setter}: 3 cases:
                 
-                - C{D_i} implements C{__contains__}
-                    to enable checking label validity.
-                    If you want co-domain C{D_i} to be extensible,
-                    it must implement C{add}.
+              - if 2-tuple C{(L_i, D_i)} provided,
+                then no C{setter} attributes created
                 
-                - C{setter}: 3 cases:
-                    
-                    - if 2-tuple C{(L_i, D_i)} provided,
-                      then no C{setter} attributes created
-                    
-                    - if C{setter} is C{True},
-                      then an attribute C{self.L_i} is created
-                      pointing at the given co-domain C{D_i}
-                    
-                    - Otherwise an attribute C{self.Li}
-                      is created pointing at the given C{setter}.
+              - if C{setter} is C{True},
+                then an attribute C{self.L_i} is created
+                pointing at the given co-domain C{D_i}
+                
+              - Otherwise an attribute C{self.Li}
+                is created pointing at the given C{setter}.
             
-            Be careful to avoid name conflicts with existing
-            networkx C{MultiDiGraph} attributes.
-        @type state_label_types: C{[(L_i, D_i, setter), ...]}
+          Be careful to avoid name conflicts with existing
+          networkx C{MultiDiGraph} attributes.
+        @type node_label_types: C{[(L_i, D_i, setter), ...]}
         
         @param edge_label_types: labeling functions for edges,
             defined similarly to C{state_label_types}.
@@ -788,8 +788,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         ====
         'state' will be renamed to 'node' in the future
         'transition' will be renamed to 'edge' in the future
-        
-        @type domain: 'state' | 'transition'
         
         @param label_types: see L{__init__}.
         """
@@ -926,12 +924,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 
                 C{G[i][j][key]['attr_name'] = attr_value}
         
-        For more details see L{networkx.MultiDiGraph.add_edge}.
+        For more details see C{networkx.MultiDiGraph.add_edge}.
         
         Notes
         =====
         1. Argument C{key} has been removed compared to
-           L{networkx.MutliDigraph.add_edge}, because edges are defined
+           C{networkx.MutliDigraph.add_edge}, because edges are defined
            by their labeling, i.e., multiple edges with same labeling
            are not allowed.
         
@@ -1049,7 +1047,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
         
-        @param: attr_dict 
+        @param attr_dict: attributes with which to identify the edge.
+        @type attr_dict: dict
+        
+        @param attr: keyword arguments with which to update C{attr_dict}.
         """
         if u not in self:
             return

@@ -79,20 +79,20 @@ class AbstractSwitched(object):
       - modes: dict of {mode: AbstractPwa}
       
       - ppp2modes: map from C{ppp.regions} to C{modes[mode].ppp.regions}
-          of the form:
+        of the form:
           
-              {mode: list}
+        {mode: list}
           
-          where C{list} has same indices as C{ppp.regions} and
-          elements in each C{list} are indices of regions in
-          each C{modes[mode].ppp.regions}.
+        where C{list} has same indices as C{ppp.regions} and
+        elements in each C{list} are indices of regions in
+        each C{modes[mode].ppp.regions}.
           
-          type: dict
+        type: dict
     
     Each partition corresponds to some mode.
     (for switched systems)
     
-    In each mode a L{PwaSubSys} is active.
+    In each mode a L{PwaSysDyn} is active.
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
@@ -240,14 +240,16 @@ class AbstractPwa(object):
     If any of the above is not given,
     then it is initialized to None.
             
-    Note1: There could be some redundancy in ppp and ofts,
-        in that they are both decorated with propositions.
-        This might be useful to keep each of 
-        them as functional units on their own
-        (possible to change later).
+    Notes
+    =====
+      1. There could be some redundancy in ppp and ofts,
+         in that they are both decorated with propositions.
+         This might be useful to keep each of 
+         them as functional units on their own
+         (possible to change later).
     
-    Note2: The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
-        as a special case.
+      2. The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
+         as a special case.
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
@@ -332,7 +334,7 @@ class AbstractPwa(object):
         """Return index and PWA subsystem active in indexed region.
         
         Semantics: j-th sub-system is active in i-th Region,
-            where C{j = ppp2pwa[i]}
+        where C{j = ppp2pwa[i]}
         
         @param region_index: index in C{ppp.regions}.
         

@@ -191,11 +191,10 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     =========
     Modified from Petter Nilsson's code
     implementing merge algorithm in:
-        Nilsson et al.
-            `Temporal Logic Control of
-            Switched Affine Systems with an
-            Application in Fuel Balancing`,
-        ACC 2012.
+    
+    Nilsson et al.
+    `Temporal Logic Control of Switched Affine Systems with an
+    Application in Fuel Balancing`, ACC 2012.
 
     See Also
     ========

@@ -115,7 +115,7 @@ def project_strategy_on_partition(ppp, mealy):
     
     @type ppp: L{PropPreservingPartition}
     
-    @type: mealy: L{transys.MealyMachine}
+    @type mealy: L{transys.MealyMachine}
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))

@@ -771,14 +771,14 @@ def sys_trans_from_ts(
     
     This enables defining both current and next actions, e.g.,
         
-        some_action && X(some_other_action)
+    some_action && X(some_other_action)
     
     About label type checking: in principle everything should work the
     same if the base class LabeledDigraph was replaced by MultiDiGraph,
     so that users can play around with their own bare graphs,
     when they don't need the label typing overhead.
 
-    @param trans: L{LabeledTransitions} as from the transitions
+    @param trans: L{Transitions} as from the transitions
         attribute of L{FiniteTransitionSystem} or
         L{OpenFiniteTransitionSystem}.
     
@@ -803,7 +803,7 @@ def sys_trans_from_ts(
             input format. Then C{sys_action_ids[action_type]} maps
             C{action_value} -> solver expression of the form:
                 
-                C{action_type = i}
+            C{action_type = i}
             
             where C{i} corresponds to that particular  C{action_type}.
     

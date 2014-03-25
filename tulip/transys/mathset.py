@@ -695,7 +695,7 @@ class PowerSet(object):
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
     """    
-    def __init__(self, iterable=[]):
+    def __init__(self, iterable=None):
         """Create new PowerSet over elements contained in S = C{iterable}.
         
         This powerset is 2^S.
@@ -703,6 +703,8 @@ class PowerSet(object):
         @param iterable: contains elements of set S underlying the PowerSet.
         @type iterable: iterable of elements which can be hashable or not.
         """
+        if iterable is None:
+            iterable = []
         self.math_set = MathSet(iterable)
     
     def __get__(self, instance, value):
@@ -808,7 +810,7 @@ class TypedDict(dict):
             
                 {key : values}
             
-            C{values} must implement C{__contains__}
-            to enable checking validity of values.
+                C{values} must implement C{__contains__}
+                to enable checking validity of values.
         """
         self.allowed_values = allowed_values

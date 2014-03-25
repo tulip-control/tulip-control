@@ -190,14 +190,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     def __init__(self, *args, **kwargs):
         """Initialize Finite Transition System.
         
-        @param atomic_propositions: state are labeled with
-            subsets of atomic propositions (\in 2^AP)
-        @type atomic_propositions: iterable of str
-        
-        @param actions: actions used to label transitions
-        @type actions: iterable of str
-        
-        For other arguments, see L{LabeledDiGraph}
+        For arguments, see L{LabeledDiGraph}
         """
         ap_labels = PowerSet()
         node_label_types = [('ap', ap_labels, ap_labels.math_set)]
