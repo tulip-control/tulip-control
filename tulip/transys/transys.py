@@ -930,8 +930,8 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     prodts.actions.add_from(fts.actions)
 
     # construct initial states of product automaton
-    s0s = fts.states.initial()
-    q0s = ba.states.initial()
+    s0s = set(fts.states.initial)
+    q0s = set(ba.states.initial)
     
     accepting_states_preimage = MathSet()
     
@@ -977,7 +977,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
-    queue = MathSet(prodts.states.initial() )
+    queue = MathSet(prodts.states.initial)
     visited = MathSet()
     while queue:
         sq = queue.pop()
