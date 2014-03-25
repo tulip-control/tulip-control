@@ -107,23 +107,25 @@ class FiniteStateAutomaton(LabeledDiGraph):
             self.atomic_proposition_based = False
             alphabet = set()
         
-        # accepting states
-        if accepting_states_type is None:
-            self.accepting = SubSet(self)
-            self._accepting_type = SubSet
-        else:
-            self.accepting = accepting_states_type(self)
-            self._accepting_type = accepting_states_type
-        
-        edge_label_types = [('alphabet', alphabet, True)]
+        edge_label_types = [('letter', alphabet, True)]
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types, **kwargs
         )
+        self.alphabet = alphabet
+        
+        # accepting states
+        if accepting_states_type is None:
+            self._accepting = SubSet(self.states)
+            self._accepting_type = SubSet
+        else:
+            self._accepting = accepting_states_type(self)
+            self._accepting_type = accepting_states_type
+        self.states.accepting = self._accepting
         
         # used before label value
-        self._transition_dot_label_format = {'in_alphabet':'',
-                                                'type?label':'',
-                                                'separator':'\\n'}
+        self._transition_dot_label_format = {'letter':'',
+                                             'type?label':'',
+                                             'separator':'\\n'}
         self._transition_dot_mask = dict()
         
         self.dot_node_shape = {'normal':'circle',
@@ -359,8 +361,10 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
                                               prepend_str)
         # convention
         if atomic_proposition_based:
+            if guard is None:
+                guard = set()
             guard = str2singleton(guard)
-        ba.transitions.add_labeled(from_state, to_state, guard)
+        ba.transitions.add(from_state, to_state, letter=guard)
     
     return ba
 
@@ -421,8 +425,8 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         state_label_pairs = transition_system.states.find(ts_to_state)
         (ts_to_state_, transition_label_dict) = state_label_pairs[0]
         transition_label_value = transition_label_dict['ap']
-        prod_ba.transitions.add_labeled(
-            from_state, to_state, transition_label_value
+        prod_ba.transitions.add(
+            from_state, to_state, letter=transition_label_value
         )
     
     return prod_ba

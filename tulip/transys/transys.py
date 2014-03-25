@@ -882,7 +882,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             on accepting states of the Buchi Automaton BA.
     """
     def convert_ts2ba_label(state_label_dict):
-        """Replace 'ap' key with 'in_alphabet'.
+        """Replace 'ap' key with 'letter'.
         
         @param state_label_dict: FTS state label, its value \\in 2^AP
         @type state_label_dict: dict {'ap' : state_label_value}
@@ -895,7 +895,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         logger.debug('Ls0:\t' +str(state_label_dict) )
         
         (s0_, label_dict) = state_label_dict[0]
-        Sigma_dict = {'in_alphabet': label_dict['ap'] }
+        Sigma_dict = {'letter': label_dict['ap'] }
         
         logger.debug('State label of: ' +str(s0) +
                       ', is: ' +str(Sigma_dict) )
