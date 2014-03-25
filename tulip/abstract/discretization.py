@@ -1527,38 +1527,38 @@ def merge_partition_pair(
     old_parents, old_ap_labeling
 ):
     """Merge an Abstraction with the current partition iterate.
-
-	@param old_regions: A list of C{Region} that is from either:
-		1. The ppp of the first (initial) L{AbstractPwa} to be merged.
-		2. A list of already-merged regions
-	@type old_regions: list of C{Region}
-
-	@param ab2: Abstracted piecewise affine dynamics to be merged into the 
-	@type ab2: L{AbstractPwa}
-
-	@param cur_mode: mode to be merged
-	@type cur_mode: tuple
-
-	@param prev_mode: list of modes that have already been merged together
-	@type prev_mode: list of tuple
-
-	@param old_parents: dict of modes that have already been merged to dict of
-		indices of new regions to indices of regions
-	@type old_parents: dict of modes to list of region indices in list
-		C{old_regions} or dict of region indices to regions in original ppp for
-		that mode
-
-	@param old_ap_labeling: dict of states of already-merged modes to sets of
-		propositions for each state
-	@type old_ap_labeling: dict of tuples to sets
-
-
-	@return new_list: list of new regions
-	@return parents: same as input param C{old_parents}, except that it 
-		includes the mode that was just merged and for list of regions in 
-		return value new_list
-	@return ap_labeling: same as input param C{old_ap_labeling}, except that it
-		includes the mode that was just merged.
+    
+    @param old_regions: A list of C{Region} that is from either:
+        1. The ppp of the first (initial) L{AbstractPwa} to be merged.
+        2. A list of already-merged regions
+    @type old_regions: list of C{Region}
+    
+    @param ab2: Abstracted piecewise affine dynamics to be merged into the 
+    @type ab2: L{AbstractPwa}
+    
+    @param cur_mode: mode to be merged
+    @type cur_mode: tuple
+    
+    @param prev_modes: list of modes that have already been merged together
+    @type prev_modes: list of tuple
+    
+    @param old_parents: dict of modes that have already been merged to dict of
+        indices of new regions to indices of regions
+    @type old_parents: dict of modes to list of region indices in list
+        C{old_regions} or dict of region indices to regions in original ppp for
+        that mode
+    
+    @param old_ap_labeling: dict of states of already-merged modes to sets of
+        propositions for each state
+    @type old_ap_labeling: dict of tuples to sets
+    
+    @return: the following:
+        - C{new_list}, list of new regions
+        - C{parents}, same as input param C{old_parents}, except that it
+          includes the mode that was just merged and for list of regions in 
+          return value C{new_list}
+        - C{ap_labeling}, same as input param C{old_ap_labeling}, except that it
+          includes the mode that was just merged.
     """
     logger.info('merging partitions')
 
