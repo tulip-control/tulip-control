@@ -923,15 +923,8 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     prodts_name = fts.name +'*' +ba.name
     
-    if fts.states.mutants or ba.states.mutants:
-        mutable = True
-    else:
-        mutable = False
-    
     # using set() destroys order
-    prodts = FiniteTransitionSystem(
-        name=prodts_name, mutable=mutable
-    )
+    prodts = FiniteTransitionSystem(name=prodts_name)
     prodts.states.add_from(set() )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)

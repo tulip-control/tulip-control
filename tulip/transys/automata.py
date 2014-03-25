@@ -383,12 +383,7 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
     
-    if prod_ts.states.mutants:
-        mutable = True
-    else:
-        mutable = False
-    
-    prod_ba = BuchiAutomaton(name=prod_name, mutable=mutable)
+    prod_ba = BuchiAutomaton(name=prod_name)
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
@@ -411,12 +406,8 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
             """
         raise Exception(msg)
     
-    for (from_state_id, to_state_id) in prod_ts.transitions():
+    for (from_state, to_state) in prod_ts.transitions():
         # prject prod_TS state to TS state
-        
-        from_state = prod_ts.states._int2mutant(from_state_id)
-        to_state = prod_ts.states._int2mutant(to_state_id)
-        
         ts_to_state = to_state[0]
         msg = 'prod_TS: to_state =\n\t' +str(to_state) +'\n'
         msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
