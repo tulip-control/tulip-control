@@ -74,7 +74,7 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a L{polytope.Polytope})
+        - Uset, Wset and domain (each a C{polytope.Polytope})
     
     as defined above.
     
@@ -86,7 +86,7 @@ class LtiSysDyn(object):
     
     See Also
     ========
-    L{PwaSysDyn}, L{SwitchedSysDyn}, L{polytope.Polytope}
+    L{PwaSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None):
@@ -212,7 +212,7 @@ class PwaSysDyn(object):
     
     See Also
     ========
-    L{LtiSysDyn}, L{SwitchedSysDyn}, L{polytope.Polytope}
+    L{LtiSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
     def __init__(self, list_subsys=[], domain=None):
         if domain is None:
@@ -305,7 +305,7 @@ class SwitchedSysDyn(object):
        then default to int indices (i,j) L{PwaSysDyn}.
     
      - C{cts_ss}: continuous state space over which hybrid system is defined.
-       type: L{polytope.Region}
+       type: C{polytope.Region}
     
      - C{time_semantics}: TBD. Current default semantics are discrete-time.
        
@@ -329,7 +329,7 @@ class SwitchedSysDyn(object):
     
     See Also
     ========
-    L{LtiSysDyn}, L{PwaSysDyn}, L{polytope.Region}
+    L{LtiSysDyn}, L{PwaSysDyn}, C{polytope.Region}
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,

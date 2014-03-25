@@ -79,8 +79,8 @@ def solve_feasible(
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
     
-    @type P1: L{Polytope} or L{Region}
-    @type P2: L{Polytope} or L{Region}
+    @type P1: C{Polytope} or C{Region}
+    @type P2: C{Polytope} or C{Region}
     @type ssys: L{LtiSysDyn}
     @param N: The horizon length
     @param closed_loop: If true, take 1 step at a time.
@@ -97,7 +97,7 @@ def solve_feasible(
         Otherwise, P1 is used.
     
     @return: the subset S0 of P1 from which P2 is reachable
-    @rtype: L{Polytope} or L{Region}
+    @rtype: C{Polytope} or C{Region}
     """
     if closed_loop:
         return solve_closed_loop(
@@ -118,8 +118,8 @@ def solve_closed_loop(
 ):
     """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
     
-    @type P1: L{Polytope} or L{Region}
-    @type P2: L{Polytope} or L{Region}
+    @type P1: C{Polytope} or C{Region}
+    @type P2: C{Polytope} or C{Region}
     
     @param ssys: system dynamics
     
@@ -260,7 +260,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
       - x(t+1) = A x(t) + B u(t) + E d(t)
       - [u(k); x(k)] \in ssys.Uset for all k
     
-    If list_P is a L{Polytope}:
+    If list_P is a C{Polytope}:
 
       - x(0) \in list_P if list_P
       - x(k) \in Pk for k= 1,2, .. N-1
@@ -278,9 +278,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     
     @param N: horizon length
     
-    @type list_P: list of Polytopes or L{Polytope}
-    @type Pk: L{Polytope}
-    @type PN: L{Polytope}
+    @type list_P: list of Polytopes or C{Polytope}
+    @type Pk: C{Polytope}
+    @type PN: C{Polytope}
     
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.

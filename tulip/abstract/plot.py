@@ -154,13 +154,13 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
 
     See Also
     ========
-    L{plot_partition}, plot
+    C{plot_partition}, plot
 
     @type ppp: L{PropPreservingPartition}
     @param x0: initial state
     @param u_seq: matrix where each row contains an input
     @param ssys: system dynamics
-    @param color_seed: see L{plot_partition}
+    @param color_seed: see C{plot_partition}
     @return: axis object
     """
     if ax is None:

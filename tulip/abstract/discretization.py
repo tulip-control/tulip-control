@@ -119,7 +119,7 @@ class AbstractSwitched(object):
         return s
     
     def ppp2pwa(self, mode, i):
-        """Return original L{Region} containing C{Region} C{i} in C{mode}.
+        """Return original C{Region} containing C{Region} C{i} in C{mode}.
         
         @param mode: key of C{modes}
         
@@ -127,8 +127,8 @@ class AbstractSwitched(object):
         
         @return: tuple C{(j, region)} of:
             
-                - index C{j} of L{Region} and
-                - L{Region} object
+                - index C{j} of C{Region} and
+                - C{Region} object
             
             in C{modes[mode].ppp.regions}
         """
@@ -493,7 +493,7 @@ def discretize(
         default = False
     
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of L{Polytope}
+    @type cont_props: list of C{Polytope}
     
     @rtype: L{AbstractPwa}
     """
@@ -1526,10 +1526,10 @@ def merge_partition_pair(
 ):
     """Merge an Abstraction with the current partition iterate.
 
-	@param old_regions: A list of L{Region} that is from either:
+	@param old_regions: A list of C{Region} that is from either:
 		1. The ppp of the first (initial) L{AbstractPwa} to be merged.
 		2. A list of already-merged regions
-	@type old_regions: list of L{Region}
+	@type old_regions: list of C{Region}
 
 	@param ab2: Abstracted piecewise affine dynamics to be merged into the 
 	@type ab2: L{AbstractPwa}

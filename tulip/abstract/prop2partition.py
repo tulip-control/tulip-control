@@ -61,13 +61,13 @@ def prop2part(state_space, cont_props_dict):
     See Also
     ========
     L{PropPreservingPartition},
-    L{polytope.Polytope}
+    C{polytope.Polytope}
     
     @param state_space: problem domain
-    @type state_space: L{polytope.Polytope}
+    @type state_space: C{polytope.Polytope}
     
     @param cont_props_dict: propositions
-    @type cont_props_dict: dict of L{polytope.Polytope}
+    @type cont_props_dict: dict of C{polytope.Polytope}
     
     @return: state space quotient partition induced by propositions
     @rtype: L{PropPreservingPartition}
@@ -432,20 +432,20 @@ class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:
     
       - domain: the domain we want to partition
-          type: L{Polytope}
+          type: C{Polytope}
 
       - regions: Regions of proposition-preserving partition
-          type: list of L{Region}
+          type: list of C{Region}
 
       - adj: a sparse matrix showing which regions are adjacent
-          order of L{Region}s same as in list C{regions}
+          order of C{Region}s same as in list C{regions}
 
           type: scipy lil sparse
 
       - prop_regions: map from atomic proposition symbols
           to continuous subsets
 
-          type: dict of L{Polytope} or L{Region}
+          type: dict of C{Polytope} or C{Region}
     
     See Also
     ========

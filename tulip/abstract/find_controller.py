@@ -404,7 +404,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     @param ssys: dynamics
     @type ssys: L{LtiSysDyn}
     
-    @param P0: L{Polytope} where we want x(k) to remain for k = 1, ... N-1
+    @param P0: C{Polytope} where we want x(k) to remain for k = 1, ... N-1
     
     @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
         C{False} otherwise  
