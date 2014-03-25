@@ -234,7 +234,7 @@ class States(object):
         states = self._single_state2singleton(states)
         
         successors = list()
-        for state in state:
+        for state in states:
             successors += self.graph.successors(state)
         return successors
     
