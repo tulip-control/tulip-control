@@ -153,7 +153,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
             s += 'Input Alphabet Letters:\n\t'
         s += str(self.alphabet) +2*'\n'
         s += 'Transitions & labeling w/ Input Letters:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s

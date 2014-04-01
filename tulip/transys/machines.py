@@ -340,7 +340,7 @@ class MooreMachine(FiniteStateMachine):
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Input ports:\n\t' +pformat(self.inputs) +'\n'
         s += 'Transitions & labeling w/ Input Port guards:\n\t'
-        s += str(self.transitions(labeled=True) ) +'\n' +_hl +'\n'
+        s += str(self.transitions(data=True) ) +'\n' +_hl +'\n'
         
         return s
     
@@ -466,7 +466,7 @@ class MealyMachine(FiniteStateMachine):
         
         s += 'Transitions & Labels: (from --> to : label)\n'
         for (from_state, to_state, label_dict) in \
-        self.transitions(labeled=True):
+        self.transitions(data=True):
             s += '\t' +str(from_state) +' ---> '
             s += str(to_state) +' :\n'
             s += print_label(label_dict)
