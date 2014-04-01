@@ -741,7 +741,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                 ap_label = set()
             
             ap_label = str2singleton(ap_label)
-            (state,) = prepend_with([state], prepend_str)
+            state = prepend_str + str(state)
             
             logger.debug('Labeling state:\n\t' +str(state) +'\n' +
                   'with label:\n\t' +str(ap_label) +'\n')
