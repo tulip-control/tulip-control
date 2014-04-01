@@ -737,6 +737,9 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # state labeling assigned ?
     if state_labeling is not None:
         for (state, ap_label) in state_labeling:
+            if ap_label is None:
+                ap_label = set()
+            
             ap_label = str2singleton(ap_label)
             (state,) = prepend_with([state], prepend_str)
             
