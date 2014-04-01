@@ -181,8 +181,11 @@ ax = ppp.plot()
 ax.figure.savefig(imgpath + 'ppp.pdf')
 
 """Discretize to establish transitions"""
-start = os.times()[2]
-logger.info('start time: ' + str(start))
+if os.name == "posix":
+    start = os.times()[2]
+    logger.info('start time: ' + str(start))
+else:
+    logger.info('Timing currently only available for POSIX platforms (not Windows)')
 
 disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
@@ -192,10 +195,11 @@ sys_ts = abstract.multiproc_discretize_switched(
     ppp, switched_dynamics, disc_params, plot=False
 )
 
-end = os.times()[2]
-logger.info('end time: ' + str(end))
-elapsed = (end - start)
-logger.info('Discretization lasted: ' + str(elapsed))
+if os.name == "posix":
+    end = os.times()[2]
+    logger.info('end time: ' + str(end))
+    elapsed = (end - start)
+    logger.info('Discretization lasted: ' + str(elapsed))
 
 """Save abstraction to save debugging time"""
 fname = './abstract_switched.pickle'
@@ -229,15 +233,17 @@ print(specs.pretty())
 
 """Synthesis"""
 print("Starting synthesis")
-start = os.times()[2]
+if os.name == "posix":
+    start = os.times()[2]
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
     #action_vars=('u_in', 'act')
 )
-end = os.times()[2]
-elapsed = (end - start)
-logger.info('Synthesis lasted: ' + str(elapsed))
+if os.name == "posix":
+    end = os.times()[2]
+    elapsed = (end - start)
+    logger.info('Synthesis lasted: ' + str(elapsed))
 
 logger.info(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')
