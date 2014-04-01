@@ -80,13 +80,12 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10):
         node_shape = _decide_node_shape(states.graph, state)
         
         # state annotation
-        if hasattr(states, '_form_node_label'):
-            node_dot_label = _form_node_label(
-                state, state_data, label_def, label_format, wrap
-            )
-        else:
-            node_dot_label = fill(str(state), width=wrap)
-            node_dot_label.replace('\n', '\\n')
+        node_dot_label = _form_node_label(
+            state, state_data, label_def, label_format, wrap
+        )
+    
+        #node_dot_label = fill(str(state), width=wrap)
+        #node_dot_label.replace('\n', '\\n')
         
         # state boundary color
         if state_data.has_key('color'):
