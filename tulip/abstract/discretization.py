@@ -1618,21 +1618,3 @@ def merge_partition_pair(
             ap_labeling[idx] = ap_label_1
     
     return new_list, parents, ap_labeling
-
-def _all_dict(r, names='?'):
-    """Return True if all elements in r are dict.
-    
-    False if all elements are not dict.
-    Otherwise raise Exception mentioning C{names}.
-    """
-    f = lambda x: isinstance(x, dict)
-    
-    n_dict = len(filter(f, r))
-    
-    if n_dict == 0:
-        return False
-    elif n_dict == len(r):
-        return True
-    else:
-        msg = 'Mixed dicts with non-dicts among: ' + str(names)
-        raise Exception(msg)
