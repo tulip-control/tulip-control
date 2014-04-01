@@ -74,7 +74,7 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a L{polytope.Polytope})
+        - Uset, Wset and domain (each a C{polytope.Polytope})
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'sampled' (if system is sampled from a continuous-time
           system)
