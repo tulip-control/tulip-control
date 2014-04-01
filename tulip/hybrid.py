@@ -56,7 +56,7 @@ def indent(s, n):
     return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
-    """Represent discrete-time continuous dynamics::
+    """Represent discrete-time continuous-state dynamics::
     
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
     
@@ -75,6 +75,11 @@ class LtiSysDyn(object):
     
         - A, B, E, K, (matrices)
         - Uset, Wset and domain (each a C{polytope.Polytope})
+        - time_semantics: 'discrete' (if system is originally a discrete-time
+          system) or 'sampled' (if system is sampled from a continuous-time
+          system)
+        - timestep: A positive real number containing the timestep (for sampled
+          system)
     
     as defined above.
     
@@ -89,7 +94,8 @@ class LtiSysDyn(object):
     L{PwaSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
-                 Uset=None,Wset=None, domain=None):
+                 Uset=None,Wset=None, domain=None, time_semantics=None,
+                 timestep=None):
         
         if Uset is None:
             warn('Uset not given to LtiSysDyn()')
@@ -168,6 +174,12 @@ class LtiSysDyn(object):
         self.Uset = Uset
         self.domain = domain
 
+        # Check that timestep and semantics are valid.
+        _check_time_data(time_semantics, timestep)
+        self.time_semantics = time_semantics
+        self.timestep = timestep
+
+
     def __str__(self):
         n = 3
         output = 'A =\n' + indent(str(self.A), n)
@@ -205,7 +217,14 @@ class PwaSysDyn(object):
 
       - C{domain}: domain over which piecewise affine system is defined,
           type: polytope.Polytope
-    
+
+      - C{time_semantics}: 'discrete' (if system is originally a discrete-time
+       system) or 'sampled' (if system is sampled from a continuous-time
+       system)
+
+      - C{timestep}: A positive real number containing the timestep (for sampled
+        systems)
+
     For the system to be well-defined the domains of its subsystems should be
     mutually exclusive (modulo intersections with empty interior) and cover the
     domain.
@@ -214,7 +233,18 @@ class PwaSysDyn(object):
     ========
     L{LtiSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
-    def __init__(self, list_subsys=[], domain=None):
+    def __init__(self, list_subsys=[], domain=None, time_semantics=None,
+                 timestep=None, overwrite_time=True):
+        """
+        @type overwrite_time: bool
+        @param overwrite_time: If true, then overwrites any time data in the
+                               objects in C{list_subsys} with the data in 
+                               C{time_semantics} and C{timestep} variables. 
+                               Otherwise checks that the time data of the
+                               objects in C{list_subsys} are consistent with 
+                               C{time_semantics} and C{timestep}.
+        """
+
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
         
@@ -246,7 +276,17 @@ class PwaSysDyn(object):
         
         self.list_subsys = list_subsys
         self.domain = domain
-    
+
+        # Input time semantics
+        _check_time_data(time_semantics, timestep)
+        if overwrite_time:
+            _push_time_data(self.list_subsys, time_semantics, timestep)
+        else:
+            _check_time_consistency(list_subsys, time_semantics, timestep)
+        self.timestep = timestep
+        self.time_semantics = time_semantics
+   
+
     def __str__(self):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
@@ -307,20 +347,13 @@ class SwitchedSysDyn(object):
      - C{cts_ss}: continuous state space over which hybrid system is defined.
        type: C{polytope.Region}
     
-     - C{time_semantics}: TBD. Current default semantics are discrete-time.
-       
-           - State s[t] and
-           - discrete environment env[t]
-       
-       are observed and:
-       
-           - continuous input u[t] and
-           - discrete system variable m[t]
-       
-       are determined based on:
-       
-           - env[t] and
-           - s[t] (synchronously at time t).
+     - C{time_semantics}: 'discrete' (if system is originally a discrete-time
+       system) or 'sampled' (if system is sampled from a continuous-time
+       system)
+
+     - C{timestep}: A positive real number containing the timestep (for sampled
+       systems)
+
        
     Note
     ====
@@ -333,7 +366,18 @@ class SwitchedSysDyn(object):
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,
-                 env_labels=None, disc_sys_labels=None):
+                 env_labels=None, disc_sys_labels=None, time_semantics=None,
+                 timestep=None, overwrite_time=True):
+        """
+        @type overwrite_time: bool
+        @param overwrite_time: If true, then overwrites any time data in the
+                               objects in C{list_subsys} with the data in 
+                               C{time_semantics} and C{timestep} variables. 
+                               Otherwise checks that the time data of the
+                               objects in C{list_subsys} are consistent with 
+                               C{time_semantics} and C{timestep}.
+        """
+
         # check that the continuous domain is specified
         if cts_ss is None:
             warn('continuous state space not given to SwitchedSysDyn')
@@ -380,7 +424,15 @@ class SwitchedSysDyn(object):
         
         self.dynamics = dynamics
         self.cts_ss = cts_ss
-    
+
+        _check_time_data(time_semantics, timestep)
+        if overwrite_time:
+            _push_time_data(self.dynamics.values(), time_semantics, timestep)
+        else:
+            _check_time_consistency(dynamics.values(), time_semantics, timestep)
+        self.timestep = timestep
+        self.time_semantics = time_semantics
+
     def __str__(self):
         n_env, n_sys = self.disc_domain_size
         
@@ -466,3 +518,78 @@ class SwitchedSysDyn(object):
         pwa_sys = PwaSysDyn.from_lti(A, B, E, K,
                                      Uset, Wset, domain)
         return cls((1,1), {(0,0):pwa_sys}, domain)
+
+
+def _push_time_data(system_list, time_semantics, timestep):
+    """Overwrite the time data in system list. Throws warnings if overwriting
+    existing data."""
+
+    for system in system_list:
+        if (system.time_semantics != time_semantics) and (system.time_semantics
+            is not None):
+            warn('Overwriting existing time semantics data.')
+        if (system.timestep != timestep) and (system.timestep is not None):
+            warn('Overwriting existing timestep data.')
+        system.time_semantics = time_semantics
+        system.timestep = timestep
+
+        # Overwrite LTI in system if system is a PWA
+        if isinstance(system, PwaSysDyn):
+            _push_time_data(system.list_subsys, time_semantics, timestep)
+
+
+
+def _check_time_data(semantics, timestep):
+    """Checks that time semantics and timestep are correctly specified. Raises
+    ValueErrors if that's not the case.
+
+    @type semantics: string
+    @param timestep: any positive number
+    @type timestep: int or float or long
+
+    @rtype: None
+    """
+
+    if semantics not in ['sampled', 'discrete', None]:
+        raise ValueError('Time semantics must be discrete or ' + 
+            'sampled (sampled from continuous time system).')
+
+    if ((semantics == 'discrete') and (timestep is not None)):
+        raise ValueError('Discrete semantics must not have a timestep')
+
+    if timestep is not None:
+        error_string = 'Timestep must be a positive real number or unspecified.'
+        if timestep <= 0:
+            raise ValueError(error_string)
+        if not isinstance(timestep, (int, float, long)):
+            raise TypeError(error_string)
+
+
+
+def _check_time_consistency(system_list, time_semantics, timestep):
+    """Checks that all the dynamical systems in system_list have the same time
+    semantics and timestep. Raises ValueError if not the case.
+
+    @type system_list: list of L{LtiSysDyn} or L{PwaSysDyn}
+    @rtype: None
+    """
+
+    # Check that time semantics for all subsystems match
+    for ind in range(len(system_list)-1):
+
+        if system_list[ind].timestep != system_list[ind+1].timestep:
+            raise ValueError('Not all timesteps in child systems are the same.')
+
+        if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
+            raise ValueError('Not all time semantics are the same.')
+
+
+    # Check that time semantics for all subsystems match specified system and
+    # timestep
+    if system_list[0].timestep != timestep:
+        raise ValueError('Timestep of subsystems do not match specified ' +
+                         'timestep.')
+
+    if system_list[0].time_semantics != time_semantics:
+        raise ValueError('Time semantics of subsystems do not match ' +
+                         'specified time semantics.')
