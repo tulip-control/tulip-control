@@ -63,11 +63,13 @@ except ImportError:
     logger.error('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
-def _states2dot_str(states, to_pydot_graph, wrap=10):
+def _states2dot_str(graph, to_pydot_graph, wrap=10):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
+    states = graph.states
+    
     # get labeling def
-    if hasattr(states, '_state_label_def'):
+    if hasattr(graph, '_state_label_def'):
         label_def = states.graph._state_label_def
         label_format = states.graph._state_dot_label_format
     
@@ -249,7 +251,7 @@ def _graph2pydot(graph, wrap=10):
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    _states2dot_str(graph.states, dummy_nx_graph, wrap)
+    _states2dot_str(graph, dummy_nx_graph, wrap)
     _transitions2dot_str(graph.transitions, dummy_nx_graph)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
