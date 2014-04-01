@@ -142,7 +142,8 @@ def _form_node_label(state, state_data, label_def,
         if isinstance(label_value, str):
             label_str = fill(label_value, width=width)
         elif isinstance(label_value, Iterable): # and not str
-            label_str = fill(str(list(label_value) ), width=width)
+            s = ', '.join([str(x) for x in label_value])
+            label_str = '{' + fill(s, width=width) + '}'
         else:
             label_str = fill(str(label_value), width=width)
         label_str.replace('\n', '\\n')
