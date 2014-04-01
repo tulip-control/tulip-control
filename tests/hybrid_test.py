@@ -65,7 +65,7 @@ class time_semantics_test:
         self.poly1 = pc.Polytope.from_box([[0, 1], [0, 1]])
         self.poly2 = pc.Polytope.from_box([[1, 2], [0, 1]])
         self.total_box = pc.Region(list_poly=[self.poly1, self.poly2])
-        self.Uset = pc.Polytope.from_box([[0, 1], [0, 1]])
+        self.Uset = pc.Polytope.from_box([[0, 1]])
 
     def tearDown(self):
         self.A1 = None
@@ -215,7 +215,7 @@ class SwitchedSysDyn_test:
         self.poly1 = pc.Polytope.from_box([[0, 1], [0, 1]])
         self.poly2 = pc.Polytope.from_box([[1, 2], [0, 1]])
         self.total_box = pc.Region(list_poly=[self.poly1, self.poly2])
-        self.Uset = pc.Polytope.from_box([[0, 1], [0, 1]])
+        self.Uset = pc.Polytope.from_box([[0, 1]])
         self.env_labels = ('hi', 'hello')
         self.sys_labels = ('mode1',)
         self.disc_domain_size = (2, 1)
