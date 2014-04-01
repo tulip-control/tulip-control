@@ -206,7 +206,7 @@ class time_semantics_test:
                                time_semantics='sampled', timestep='.1')
 
 
-class HybridSysDyn_test:
+class SwitchedSysDyn_test:
     def setUp(self):
         self.A1 = np.eye(2)
         self.A2 = np.array([[0, 1], [0, 0]])
@@ -262,8 +262,8 @@ class HybridSysDyn_test:
 
     @raises(ValueError)
     def test_hybrid_difftstep_from_subsys(self):
-        """LtiSysDyn subsystems timesteps do not match that of HybridSysDyn"""
-        hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+        """LtiSysDyn subsystems timesteps do not match that of SwitchedSysDyn"""
+        hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                             dynamics=self.dynamics1, env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='hello', timestep=.1,
@@ -272,20 +272,20 @@ class HybridSysDyn_test:
     @raises(ValueError)
     def test_hybrid_fail_check_time_consistency(self):
         # fail _check_time_consistency
-        hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+        hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                             dynamics=self.dynamics1, env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='sampled', timestep=.2,
                             overwrite_time=False)
 
     def test_correct_switched_construction(self):
-        switched1 = hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+        switched1 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
                                         time_semantics='sampled', timestep=.1,
                                         overwrite_time=True)
-        switched2 = hybrid.HybridSysDyn(disc_domain_size=self.disc_domain_size,
+        switched2 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
