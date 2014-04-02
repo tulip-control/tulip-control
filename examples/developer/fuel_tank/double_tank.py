@@ -59,7 +59,7 @@ init_lower = 6          # Lower bound for possible initial volumes
 init_upper = 8          # Upper bound for possible initial volumes
 fast = True             # Use smaller domain to increase speed
 
-imgpath = './img/'
+imgpath = './'
 fontsize = 18
 
 """State space and propositions"""
