@@ -606,7 +606,7 @@ class PropPreservingPartition(pc.MetricPartition):
             return
         
         if ax is None:
-            ax = mpl.pyplot.subplot()
+            ax = mpl.pyplot.subplot(111)
         
         l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
