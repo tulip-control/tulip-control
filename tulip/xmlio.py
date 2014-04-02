@@ -39,7 +39,7 @@ import numpy
 import scipy.sparse
 import xml.etree.ElementTree as ET
 
-from tulip import polytope
+import polytope
 from tulip import transys
 from tulip import hybrid
 from tulip import abstract
@@ -83,7 +83,7 @@ T_TUPLE = 'tuple'
 T_LIST = 'list'
 T_LTISYS = 'LtiSysDyn'
 T_PWASYS = 'PwaSysDyn'
-T_HYBRIDSYS = 'HybridSysDyn'
+T_HYBRIDSYS = 'SwitchedSysDyn'
 
 
 def _make_pretty(tree, indent=1):
@@ -123,7 +123,7 @@ def exportXML(data, filename, tag=None):
 
 	@param data: The Tulip data structure to export into an xml lfile
 	@type data: L{Polytope}, L{Region}, L{PropPreservingPartition},
-		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
+		L{SwitchedSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
 	@param filename: The name of the XML file to export to.
 	@type filename: L{string}
 	@param tag: (Optional) What we want the first tag of the XML file to read.
@@ -153,7 +153,7 @@ def importXML(filename):
 
 	@return: the data structure exported into the file.
 	@rtype: L{Polytope}, L{Region}, L{PropPreservingPartition},
-		L{HybridSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
+		L{SwitchedSysDyn}, L{PwaSysDyn}, L{LtiSysDyn}
 	"""
 
 	# Load the file into an xml tree
@@ -376,7 +376,7 @@ def _import_hybridsys(node):
 	else:
 		env_lables = None
 
-	return hybrid.HybridSysDyn(disc_domain_size=disc_domain_size,
+	return hybrid.SwitchedSysDyn(disc_domain_size=disc_domain_size,
 		dynamics=dynamics, cts_ss=cts_ss, env_labels=env_labels,
 		disc_sys_labels=sys_labels)
 
@@ -430,7 +430,7 @@ def _export_xml(data, parent=None, tag=None):
 		else:
 			_export_pwasys(data, parent, tag)
 	
-	elif isinstance(data, hybrid.HybridSysDyn):
+	elif isinstance(data, hybrid.SwitchedSysDyn):
 		if parent is None:
 			return _export_hybridsys(data, parent, tag)
 		else:
@@ -582,7 +582,7 @@ def _export_hybridsys(hybridsys, parent, tag=None):
 		L{xml.etree.ElementTree.SubElement}
 	"""
 	if tag is None:
-		tag = "HybridSysDyn"
+		tag = "SwitchedSysDyn"
 	if parent is None:
 		tree = ET.Element(tag, type=T_HYBRIDSYS)
 	else:

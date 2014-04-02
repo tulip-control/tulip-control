@@ -25,24 +25,24 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-polylogger = logging.getLogger('tulip.polytope')
-polylogger.setLevel(logging.WARNING)
+logging.getLogger('tulip').setLevel(logging.ERROR)
+logging.getLogger('tulip.synth').setLevel(logging.ERROR)
 
-abs_logger = logging.getLogger('tulip.abstract')
-abs_logger.setLevel(logging.WARNING)
+log = logging.getLogger('multiprocessing')
+#log.setLevel(logging.ERROR)
 
-logging.getLogger('tulip.gr1cint').setLevel(logging.DEBUG)
-
+import os
+import pickle
 import numpy as np
-import time
-
+#from scipy import io as sio
 #import matplotlib
-#import matplotlib.pyplot as plt
-#from tulip.graphics import newax
+import matplotlib as mpl
+mpl.use('Agg')
 
 from tulip import hybrid, abstract, spec, synth
-from tulip import polytope as pc
-from tulip.abstract.plot import plot_partition
+import polytope as pc
+from tulip.abstract.plot import plot_strategy
+#from tulip.graphics import newax
 
 """Problem variables"""
 tank_capacity = 10      # Maximum tank capacity
@@ -57,68 +57,67 @@ N = 1                   # Horizon length
 disturbance = 0.0       # Absolute uncertainty in fuel consumption
 init_lower = 6          # Lower bound for possible initial volumes
 init_upper = 8          # Upper bound for possible initial volumes
-fast = False             # Use smaller domain to increase speed
+fast = True             # Use smaller domain to increase speed
 
+imgpath = './'
 fontsize = 18
 
 """State space and propositions"""
 if fast:
     cont_ss = pc.Polytope(
-        np.array([
-            [1,0], [-1,0], [0,1],
-            [0,-1], [1,-1], [-1,1]
-        ]),
-        np.array([
-            tank_capacity, 1, tank_capacity,
-            1, 2*max_vol_diff, 2*max_vol_diff
-        ])
+        np.array([[1,0],
+                  [-1,0],
+                  [0,1],
+                  [0,-1],
+                  [1,-1],
+                  [-1,1]]),
+        np.array([tank_capacity, 1, tank_capacity,
+                  1, 2*max_vol_diff, 2*max_vol_diff])
     )
 else:
     cont_ss = pc.Polytope(
-        np.array([
-            [1,0], [-1,0], [0,1], [0,-1]
-        ]),
-        np.array([
-            tank_capacity, 0, tank_capacity, 0
-        ])
+        np.array([[1,0],
+                  [-1,0],
+                  [0,1],
+                  [0,-1]]),
+        np.array([tank_capacity, 0, tank_capacity, 0])
     )
 
 cont_props = {}
 cont_props['no_refuel'] = pc.Polytope(
-    np.array([
-        [1,0], [-1,0], [0,1], [0,-1]
-    ]),
-    np.array([
-        tank_capacity, 0, tank_capacity, -max_refuel_level
-    ])
+    np.array([[1,0],
+              [-1,0],
+              [0,1],
+              [0,-1]]),
+    np.array([tank_capacity, 0, tank_capacity, -max_refuel_level])
 )
 cont_props['vol_diff'] = pc.Polytope(
-    np.array([[-1,0],[0,-1],[-1,1],[1,-1]]),
+    np.array([[-1,0],
+              [0,-1],
+              [-1,1],
+              [1,-1]]),
     np.array([0,0,max_vol_diff,max_vol_diff])
 )
 cont_props['vol_diff2'] = pc.Polytope(
-    np.array([
-        [-1,0], [0,-1], [-1,1], [1,-1]
-    ]),
-    np.array([
-        0,0,fin_vol_diff,fin_vol_diff
-    ])
+    np.array([[-1,0],
+              [0,-1],
+              [-1,1],
+              [1,-1]]),
+    np.array([0,0,fin_vol_diff,fin_vol_diff])
 )
 cont_props['initial'] = pc.Polytope(
-    np.array([
-        [1,0], [-1,0], [0,1], [0,-1]
-    ]),
-    np.array([
-        init_upper, -init_lower, init_upper, -init_lower
-    ])
+    np.array([[1,0],
+             [-1,0],
+             [0, 1],
+             [0,-1]]),
+    np.array([init_upper, -init_lower, init_upper, -init_lower])
 )
 cont_props['critical'] = pc.Polytope(
-    np.array([
-        [-1,0], [0,-1], [1,1]
-    ]),
-    np.array([
-        0, 0, 2*fuel_consumption
-    ]))
+    np.array([[-1,0],
+              [0,-1],
+              [1,1]]),
+    np.array([0, 0, 2*fuel_consumption])
+)
 
 """Dynamics"""
 A = np.eye(2)
@@ -163,7 +162,7 @@ dynamics_dict = {
     ('refuel', 'fly') : pwa_refuel
 }
 
-switched_dynamics = hybrid.HybridSysDyn(
+switched_dynamics = hybrid.SwitchedSysDyn(
     cts_ss=cont_ss,
     disc_domain_size=(len(env_modes), len(sys_modes)),
     dynamics=dynamics_dict,
@@ -175,33 +174,53 @@ switched_dynamics = hybrid.HybridSysDyn(
 ppp = abstract.prop2part(cont_ss, cont_props)
 ppp, new2old = abstract.part2convex(ppp)
 
+ax = ppp.plot_props()
+ax.figure.savefig(imgpath + 'cprops.pdf')
+
+ax = ppp.plot()
+ax.figure.savefig(imgpath + 'ppp.pdf')
+
 """Discretize to establish transitions"""
-start = time.time()
+if os.name == "posix":
+    start = os.times()[2]
+    logger.info('start time: ' + str(start))
+else:
+    logger.info('Timing currently only available for POSIX platforms (not Windows)')
 
 disc_params = {}
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
 disc_params[('refuel', 'fly')] = {'N':N, 'trans_length':3}
 
-sys_ts = abstract.discretize_switched(ppp, switched_dynamics,
-                                      disc_params, plot=True)
+sys_ts = abstract.multiproc_discretize_switched(
+    ppp, switched_dynamics, disc_params, plot=False
+)
 
-elapsed = (time.time() - start)
-logger.info('Discretization lasted: ' + str(elapsed))
+if os.name == "posix":
+    end = os.times()[2]
+    logger.info('end time: ' + str(end))
+    elapsed = (end - start)
+    logger.info('Discretization lasted: ' + str(elapsed))
+
+"""Save abstraction to save debugging time"""
+fname = './abstract_switched.pickle'
+#pickle.dump(sys_ts, open(fname, 'wb') )
+
+#sys_ts = pickle.load(open(fname, 'r') )
 
 """Specs"""
 env_vars = set()
 sys_disc_vars = set()
 
-env_init = {'u_in = normal'}
+env_init = {'env_actions = normal'}
 #env_init |= {'initial'}
 
-env_safe = {'no_refuel -> X(u_in = normal)',
-            '(critical & (u_in = normal)) -> X(u_in = refuel)',
-            '(!critical & u_in = normal) -> X(u_in = normal)',
-            '(!no_refuel & u_in = refuel) -> X(u_in = refuel)'}
-env_prog = {'u_in = refuel'}
+env_safe = {'no_refuel -> X(env_actions = normal)',
+            '(critical & (env_actions = normal)) -> X(env_actions = refuel)',
+            '(!critical & env_actions = normal) -> X(env_actions = normal)',
+            '(!no_refuel & env_actions = refuel) -> X(env_actions = refuel)'}
+env_prog = {'env_actions = refuel'}
 
-# relate switching actions to u_in
+# relate switching actions to u_in (env_actions)
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
 sys_prog = {'True'} #{'vol_diff2'}
@@ -214,20 +233,25 @@ print(specs.pretty())
 
 """Synthesis"""
 print("Starting synthesis")
-start = time.time()
+if os.name == "posix":
+    start = os.times()[2]
 
 ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
-    action_vars=('u_in', 'act')
+    #action_vars=('u_in', 'act')
 )
-print(ctrl)
+if os.name == "posix":
+    end = os.times()[2]
+    elapsed = (end - start)
+    logger.info('Synthesis lasted: ' + str(elapsed))
 
-elapsed = (time.time() - start)
-logger.info('Synthesis lasted: ' + str(elapsed))
+logger.info(ctrl)
+ctrl.save(imgpath + 'double_tank.pdf')
 
-exit
+ax = plot_strategy(sys_ts, ctrl)
+ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 
-"""Simulate"""
+"""Simulate""
 num_it = 25
 init_state = {}
 init_state['u_in'] = 0
@@ -276,7 +300,7 @@ data = {}
 data['x'] = x_arr
 data['u'] = u_arr[range(1,u_arr.shape[0]), :]
 data['u_in'] = uin_arr
-from scipy import io as sio
+
 sio.savemat("matlabdata", data)
 
 ax = plot_partition(new_part, plot_numbers=False, show=False)
@@ -303,4 +327,5 @@ for i in range(1,x_arr.shape[0]):
 ax.plot(x_arr[0,0], x_arr[0,1], 'og')
 ax.plot(x_arr[-1,0], x_arr[-1,1], 'or')
 
-plt.savefig('simulation.eps')
+plt.savefig(imgpath + 'simulation.pdf')
+"""

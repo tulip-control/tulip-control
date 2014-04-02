@@ -16,8 +16,11 @@ import numpy as np
 
 from tulip import spec, synth
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from tulip.polytope import box2poly
+from polytope import box2poly
 from tulip.abstract import prop2part, discretize
+from tulip.abstract.plot import plot_strategy
+
+plotting = False
 
 # Problem parameters
 input_bound = 0.4
@@ -89,7 +92,7 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 cont_partition = prop2part(cont_state_space, cont_props)
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, plotit=False,
+    N=8, min_cell_volume=0.1, plotit=plotting,
     cont_props=cont_props
 )
 
@@ -119,6 +122,9 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Synthesize
 ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
+if plotting:
+    ax = plot_strategy(disc_dynamics, ctrl)
+    ax.figure.savefig('pwa_proj_mealy.pdf')
 
 # Save graphical representation of controller for viewing
 if not ctrl.save('pwa.png'):

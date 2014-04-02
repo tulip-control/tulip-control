@@ -5,7 +5,7 @@ This folder contains the files required to export controllers to Simulink
 blocks and a couple examples for reference. Tulip, MATLAB, Simulink, and
 Stateflow must all be installed. Provided files below:
 
-	- stateflow_export.py - Converts Mealy Machines to Stateflow charts
+	- tomatlab.py
 
 
 
@@ -13,31 +13,35 @@ USAGE
 
 1) Run the converter after synthesis:
 
-	from stateflow_export import to_stateflow
+	import tomatlab
 	...
 	ctrl = synth.synthesize(...)               # returns a Mealy Machine
-	to_stateflow(ctrl, 'machine.m')            # writes machine.m
+	tomatlab.export(ctrl)                      # exports tulip_output.mat
 
-2) In MATLAB, run machine.m. A new Simulink model containing the Mealy
-   Machine should appear. Note that for the moment, exported Stateflow 
-   charts are not very readable.
+2) In MATLAB, make sure that these files are in the MATLAB path:
+    - tulip_output.mat
+    - load_tulip.m
 
+3) In MATLAB, run load_tulip.m. A new Simulink model containing the Mealy
+   Machine should appear.
 
 
 EXAMPLES
 
-discrete.py is a modified version of /examples/robot_planning/discrete.py that
-contains a line at the end for generating a Stateflow chart from the Mealy
-Machine "ctrl".
+1) Discrete Example:
 
-discrete.slx is a Simulink Model (Probably requires MATLAB/Simulink R2012b or
-higher) that shows the working Mealy Machine interacting with a randomly
-generated park signal.
+	discrete.py is a modified version of /examples/robot_planning/discrete.py
+	that contains a line at the end for generating a Stateflow chart from the
+	Mealy Machine "ctrl".
+
+	discrete.slx is a Simulink Model (Might require MATLAB/Simulink R2012b
+	or higher) that shows the working Mealy Machine interacting with a randomly
+	generated park signal.
 
 
 
 KNOWN ISSUES
 
-1) Graphs are unreadable.
+1) Stateflow charts are unreadable.
 
-2) Doesn't support continuous controllers yet.
+2) Support for continuous controllers is half-implemented.

@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-""" 
+"""
 Algorithms related to discretization of continuous dynamics.
 
 See Also
@@ -40,23 +40,157 @@ L{find_controller}
 import logging
 logger = logging.getLogger(__name__)
 
+import os
 import warnings
 import pprint
 from copy import deepcopy
+import multiprocessing as mp
 
 import numpy as np
 from scipy import sparse as sp
 
-from tulip import polytope as pc
+import polytope as pc
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
-from .feasible import solve_feasible
+from .feasible import is_feasible, solve_feasible
+from .plot import plot_ts_on_partition
 
-class AbstractSysDyn(object):
-    """Class for discrete abstractions of continuous dynamics.
+try:
+    import matplotlib.pyplot as plt
+except Exception, e:
+    plt = None
+    logger.error(e)
+
+debug = False
+
+class AbstractSwitched(object):
+    """Abstraction of SwitchedSysDyn, with mode-specific and common info.
     
-    An AbstractSysDyn object contains the fields:
+    Attributes:
+    
+      - ppp: merged partition, if any
+          Preserves both propositions and dynamics
+    
+      - ts: common TS, if any
+      
+      - ppp2ts: map from C{ppp.regions} to C{ts.states}
+      
+      - modes: dict of {mode: AbstractPwa}
+      
+      - ppp2modes: map from C{ppp.regions} to C{modes[mode].ppp.regions}
+        of the form:
+          
+        {mode: list}
+          
+        where C{list} has same indices as C{ppp.regions} and
+        elements in each C{list} are indices of regions in
+        each C{modes[mode].ppp.regions}.
+          
+        type: dict
+    
+    Each partition corresponds to some mode.
+    (for switched systems)
+    
+    In each mode a L{PwaSysDyn} is active.
+    """
+    def __init__(
+        self, ppp=None, ts=None, ppp2ts=None,
+        modes=None, ppp2modes=None
+    ):
+        if modes is None:
+            modes = dict()
+        
+        self.ppp = ppp
+        self.ts = ts
+        self.ppp2ts = ppp2ts
+        self.modes = modes
+        self.ppp2modes = ppp2modes
+    
+    def __str__(self):
+        s = 'Abstraction of switched system\n'
+        s += str('common PPP:\n') + str(self.ppp)
+        s += str('common ts:\n') + str(self.ts)
+        
+        for mode, ab in self.modes.iteritems():
+            s += 'mode: ' + str(mode)
+            s += ', with abstraction:\n' + str(ab)
+        
+        return s
+    
+    def ppp2pwa(self, mode, i):
+        """Return original C{Region} containing C{Region} C{i} in C{mode}.
+        
+        @param mode: key of C{modes}
+        
+        @param i: Region index in common partition C{ppp.regions}.
+        
+        @return: tuple C{(j, region)} of:
+            
+                - index C{j} of C{Region} and
+                - C{Region} object
+            
+            in C{modes[mode].ppp.regions}
+        """
+        region_idx = self.ppp2modes[mode][i]
+        ab = self.modes[mode]
+        return ab.ppp2pwa(region_idx)
+        
+    def ppp2sys(self, mode, i):
+        """Return index of active PWA subsystem in C{mode},
+        
+        @param mode: key of C{modes}
+        
+        @param i: Region index in common partition C{ppp.regions}.
+        
+        @return: tuple C{(j, subsystem)} of:
+                
+                - index C{j} of PWA C{subsystem}
+                - L{LtiSysDyn} object C{subsystem}
+        """
+        region_idx = self.ppp2modes[mode][i]
+        ab = self.modes[mode]
+        return ab.ppp2sys(region_idx)
+    
+    def plot(self, show_ts=False, only_adjacent=False):
+        """Plot mode partitions and merged partition, if one exists.
+        
+        For details see L{AbstractPwa.plot}.
+        """
+        axs = []
+        color_seed = 0
+        
+        # merged partition exists ?
+        if self.ppp is not None:
+            for mode in self.modes:
+                env_mode, sys_mode = mode
+                edge_label = {'env_actions':env_mode,
+                              'sys_actions':sys_mode}
+                
+                ax = _plot_abstraction(
+                    self, show_ts=False, only_adjacent=False,
+                    color_seed=color_seed
+                )
+                plot_ts_on_partition(
+                    self.ppp, self.ts, self.ppp2ts,
+                    edge_label, only_adjacent, ax
+                )
+                axs += [ax]
+        
+        # plot mode partitions
+        for mode, ab in self.modes.iteritems():
+            ax = ab.plot(show_ts, only_adjacent, color_seed)
+            ax.set_title('Abstraction for mode: ' + str(mode))
+            axs += [ax]
+        
+        #if isinstance(self.ts, dict):
+        #    for ts in self.ts:
+        #        ax = ts.plot()
+        #        axs += [ax]
+        return axs
+
+class AbstractPwa(object):
+    """Discrete abstraction of PWA dynamics, with attributes:
     
       - ppp: Partition into Regions.
           Each Region corresponds to
@@ -65,45 +199,37 @@ class AbstractSysDyn(object):
           type: L{PropPreservingPartition}
 
       - ts: Finite transition system abstracting the continuous system.
-          Each state corresponds to a Region in ppp.
+          Each state corresponds to a Region in C{ppp.regions}.
           It can be fed into discrete synthesis algorithms.
 
           type: L{transys.OpenFTS}
 
-      - ppp2ts: map Regions to states of the transition system
-          Each index denotes the Region with same index in ppp.
-
-          type: list of states
+      - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
+          Has common indices with C{ppp.regions}.
+          Elements are states in C{ts.states}.
           (usually each state is a str)
 
-      - original_regions: Regions of original
-          proposition preserving partition
+          type: list of states
+      
+      - pwa: system dynamics
+          
+          type: L{PwaSysDyn}
+
+      - pwa_ppp: partition preserving both:
+            
+            - propositions and
+            - domains of PWA subsystems
+          
           Used for non-conservative planning.
-
-          type: list of Region
-
-      - ppp2orig: map of new Regions to original Regions:
-
-              - i-th new Region in C{ppp}
-              - ppp2orig[i]-th original Region in C{original_regions}
-
-          type: list of indices
-
-      - ppp2pwa: map Regions to PwaSubSys.list_subsys
-          Each partition corresponds to some mode.
-          (for switched systems)
-
-          In each mode a PwaSubSys is active.
-          This PwaSubSys comprises of subsystems,
-          which are listed in PwaSubSys.list_subsys.
-
-          The list C{ppp2pwa} means:
-
-              - i-th Region in C{regions}
-              - ppp2pwa[i]-th system in PwaSubSys.list_subsys
-                  is active in the i-th Region
-
-          type: list
+          If just L{LtiSysDyn}, then the only difference
+          of C{pwa_ppp} from C{orig_ppp} is convexification.
+          
+          type: L{PropPreservingPartition}
+      
+      - orig_ppp: partition preserving only propositions
+          i.e., agnostic of dynamics
+          
+          type: L{PropPreservingPartition}
 
       - disc_params: parameters used in discretization that 
           should be passed to the controller refinement
@@ -114,38 +240,42 @@ class AbstractSysDyn(object):
     If any of the above is not given,
     then it is initialized to None.
             
-    Note1: There could be some redundancy in ppp and ofts in that they are
-    both decorated with propositions. This might be useful to keep each of 
-    them as functional units on their own (possible to change later).
-
+    Notes
+    =====
+      1. There could be some redundancy in ppp and ofts,
+         in that they are both decorated with propositions.
+         This might be useful to keep each of 
+         them as functional units on their own
+         (possible to change later).
+    
+      2. The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
+         as a special case.
     """
-    def __init__(self, ppp=None, ts=None, ppp2ts=None,
-                 original_regions=None, ppp2orig=None,
-                 ppp2pwa=None, disc_params=None):
+    def __init__(
+        self, ppp=None, ts=None, ppp2ts=None,
+        pwa=None, pwa_ppp=None, ppp2pwa=None, ppp2sys=None,
+        orig_ppp=None, ppp2orig=None,
+        disc_params=None
+    ):
         if disc_params is None:
             disc_params = dict()
         
-        # check consistency
-        group0 = [ppp, ts, ppp2ts]
-        names0 = 'ppp, ts, ppp2ts'
-        all_dict0 = _all_dict(group0, names0)
-        
-        # disc_aprams excluded, because it is always a dict
-        group1 = [original_regions, ppp2orig, ppp2pwa]
-        names1 = 'original_regions, ppp2orig, ppp2pwa'
-        all_dict1 = _all_dict(group1, names1)
-        
-        # prohibited combination
-        if all_dict0 and not all_dict1:
-            msg = 'if ' + names0 + ' are dict,\n'
-            msg += 'so must ' + names1 + ' be.'
-            raise Exception(msg)
-        
         self.ppp = ppp
         self.ts = ts
-        self.original_regions = original_regions
-        self.ppp2orig = ppp2orig
-        self.ppp2pwa = ppp2pwa
+        self.ppp2ts = ppp2ts
+        
+        self.pwa = pwa
+        self.pwa_ppp = pwa_ppp
+        self._ppp2pwa = ppp2pwa
+        self._ppp2sys = ppp2sys
+        
+        self.orig_ppp = orig_ppp
+        self._ppp2orig = ppp2orig
+        
+        # original_regions -> pwa_ppp
+        # ppp2orig -> ppp2pwa_ppp
+        # ppp2pwa -> ppp2pwa_sys
+        
         self.disc_params = disc_params
     
     def __str__(self):
@@ -153,58 +283,168 @@ class AbstractSysDyn(object):
         s += str(self.ts)
         
         s += 30 * '-' + '\n'
-        if isinstance(self.original_regions, dict):
-            s += 'Original Regions:\n\n'
-            for mode, orig_reg in self.original_regions.iteritems():
-                s += 'mode: ' + str(mode)
-                s += ', has: ' + str(len(orig_reg)) + ' Regions\n'
-        else:
-            s += 'Original Regions: ' + str(len(self.original_regions))
         
-        s += 'Map of New to Original Regions:\n'
-        if isinstance(self.ppp2orig, dict):
-            for mode, ppp2orig in self.ppp2orig.iteritems():
-                s += '\t mode: ' + str(mode) + '\n'
-                s += self._ppp2orig_str(ppp2orig) + '\n'
-        else:
-            s += self._ppp2orig_str(self.ppp2orig) + '\n'
+        s += 'Map PPP Regions ---> TS states:\n'
+        s += self._ppp2other_str(self.ppp2ts) + '\n'
+        
+        s += 'Map PPP Regions ---> PWA PPP Regions:\n'
+        s += self._ppp2other_str(self._ppp2pwa) + '\n'
+        
+        s += 'Map PPP Regions ---> PWA Subsystems:\n'
+        s += self._ppp2other_str(self._ppp2sys) + '\n'
+        
+        s += 'Map PPP Regions ---> Original PPP Regions:\n'
+        s += self._ppp2other_str(self._ppp2orig) + '\n'
         
         s += 'Discretization Options:\n\t'
         s += pprint.pformat(self.disc_params) +'\n'
         
         return s
     
-    def _ppp2orig_str(self, ppp2orig):
+    def ts2ppp(self, state):
+        region_index = self.ppp2ts.index(state)
+        region = self.ppp[region_index]
+        return (region_index, region)
+    
+    def ppp2trans(self, region_index):
+        """Return the transition set constraint and active subsystem,
+        
+        for non-conservative planning.
+        """
+        reg_idx, pwa_region = self.ppp2pwa(region_index)
+        sys_idx, sys = self.ppp2sys(region_index)
+        return pwa_region, sys
+    
+    def ppp2pwa(self, region_index):
+        """Return dynamics and predicate-preserving region
+        and its index for PWA subsystem active in given region.
+        
+        The returned region is the C{trans_set} used for
+        non-conservative planning.
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, pwa.pwa_ppp[i])}
+        """
+        j = self._ppp2pwa[region_index]
+        pwa_region = self.pwa_ppp[j]
+        return (j, pwa_region)
+    
+    def ppp2sys(self, region_index):
+        """Return index and PWA subsystem active in indexed region.
+        
+        Semantics: j-th sub-system is active in i-th Region,
+        where C{j = ppp2pwa[i]}
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, pwa.list_subsys[i])}
+        """
+        # LtiSysDyn ?
+        if self._ppp2sys is None:
+            return (0, self.pwa)
+        
+        subsystem_idx = self._ppp2sys[region_index]
+        subsystem = self.pwa.list_subsys[subsystem_idx]
+        return (subsystem_idx, subsystem)
+    
+    def ppp2orig(self, region_index):
+        """Return index and region of original partition.
+        
+        The original partition is w/o any dynamics,
+        not even the PWA domains, only the polytopic predicates.
+        
+        @param region_index: index in C{ppp.regions}.
+        
+        @rtype: C{(i, orig_ppp.regions[i])}
+        """
+        j = self._ppp2orig[region_index]
+        orig_region = self.orig_ppp[j]
+        return (j, orig_region)
+    
+    def _ppp2other_str(self, ppp2other):
+        if ppp2other is None:
+            return ''
+        
         s = ''
-        for i, original_region in enumerate(ppp2orig):
-            s += '\t\t' + str(i) + ' -> ' + str(original_region) + '\n'
+        for i, other in enumerate(ppp2other):
+            s += '\t\t' + str(i) + ' -> ' + str(other) + '\n'
         return s
     
     def _debug_str_(self):
         s = str(self.ppp)
         s += str(self.ts)
         
-        s += 'Original Regions List:\n\n'
-        for i, region in enumerate(self.original_regions):
-            s += 'Region: ' + str(i) + '\n'
-            s += str(region) + '\n'
+        s += '(PWA + Prop)-Preserving Partition'
+        s += str(self.pwa_ppp)
+        
+        s += 'Original Prop-Preserving Partition'
+        s += str(self.orig_ppp)
+        return s
     
-    def plot(self):
-        if self.ppp is None or self.ts is None:
-            return
+    def plot(self, show_ts=False, only_adjacent=False,
+             color_seed=None):
+        """Plot partition and optionally feasible transitions.
         
-        if isinstance(self.ppp, dict):
-            for mode, ppp in self.ppp.iteritems():
-                ax = ppp.plot()
-                ax.set_title('Partition for mode: ' + str(mode))
-        else:
-            self.ppp.plot(trans=self.ts)
+        @param show_ts: plot feasible transitions on partition
+        @type show_ts: bool
         
-        if isinstance(self.ts, dict):
-            for ts in self.ts:
-                ts.plot()
-        else:
-            self.ts.plot()
+        @param only_adjacent: plot feasible transitions only
+            between adjacent regions. This reduces clutter,
+            but if horizon > 1 and not all horizon used,
+            then some transitions could be hidden.
+        @param only_adjacent: bool
+        """
+        ax = _plot_abstraction(self, show_ts, only_adjacent,
+                               color_seed)
+        return ax
+    
+    def verify_transitions(self):
+        logger.info('verifying transitions...')
+        
+        for from_state, to_state in self.ts.transitions():
+            i, from_region = self.ts2ppp(from_state)
+            j, to_region = self.ts2ppp(to_state)
+            
+            trans_set, sys = self.ppp2trans(i)
+            
+            params = {'N', 'close_loop', 'use_all_horizon'}
+            disc_params = {k:v for k,v in self.disc_params.iteritems()
+                           if k in params}
+            
+            s0 = solve_feasible(from_region, to_region, sys,
+                                trans_set=trans_set, **disc_params)
+            
+            msg = str(i) + ' ---> ' + str(j)
+            
+            if not from_region <= s0:
+                logger.error('incorrect transition: ' + msg)
+                
+                isect = from_region.intersect(s0)
+                ratio = isect.volume /from_region.volume
+                logger.error('intersection volume: ' + str(ratio) + ' %')
+            else:
+                logger.info('correct transition: ' + msg)
+
+def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
+    if ab.ppp is None or ab.ts is None:
+        warnings.warn('Either ppp or ts is None.')
+        return
+    
+    if show_ts:
+        ts = ab.ts
+        ppp2ts = ab.ppp2ts
+    else:
+        ts = None
+        ppp2ts = None
+    
+    ax = ab.ppp.plot(
+        ts, ppp2ts, only_adjacent=only_adjacent,
+        color_seed=color_seed
+    )
+    #ax = self.ts.plot()
+    
+    return ax
 
 def discretize(
     part, ssys, N=10, min_cell_volume=0.1,
@@ -255,10 +495,13 @@ def discretize(
         default = False
     
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of L{Polytope}
+    @type cont_props: list of C{Polytope}
     
-    @rtype: L{AbstractSysDyn}
+    @rtype: L{AbstractPwa}
     """
+    start_time = os.times()[0]
+    
+    orig_ppp = part
     min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
         *np.finfo(np.double).eps)
     
@@ -266,14 +509,17 @@ def discretize(
     islti = isinstance(ssys, LtiSysDyn)
     
     if ispwa:
-        (part, ppp2pwa) = pwa_partition(ssys, part)
+        (part, ppp2pwa, part2orig) = pwa_partition(ssys, part)
+    else:
+        part2orig = range(len(part))
     
     # Save original polytopes, require them to be convex 
     if conservative:
         orig_list = None
-        orig = 0
+        orig = [0]
     else:
         (part, new2old) = part2convex(part) # convexify
+        part2orig = [part2orig[i] for i in new2old]
         
         # map new regions to pwa subsystems
         if ispwa:
@@ -303,7 +549,7 @@ def discretize(
     IJ = part.adj.copy()
     IJ = IJ.todense()
     IJ = np.array(IJ)
-    logger.info("\n Starting IJ: \n" + str(IJ) )
+    logger.debug("\n Starting IJ: \n" + str(IJ) )
     
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
@@ -336,16 +582,12 @@ def discretize(
             logger.error(e)
             plot_partition = None
         
-        try:
-            import matplotlib.pyplot as plt
+        if plt is not None:
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
             file_extension = 'png'
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
         
     iter_count = 0
     
@@ -354,6 +596,8 @@ def discretize(
     # and a list of original number of neighbors
     #num_new_reg = np.zeros(len(orig_list))
     #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    
+    progress = list()
     
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -364,6 +608,9 @@ def discretize(
         IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
+        
+        si_tmp = deepcopy(si)
+        sj_tmp = deepcopy(sj)
         
         #num_new_reg[i] += 1
         #print(num_new_reg)
@@ -387,28 +634,68 @@ def discretize(
             use_all_horizon, trans_set, max_num_poly
         )
         
-        msg = '\n Working with states:\n\t'
-        msg += str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n\t'
-        msg += str(j) +' (#polytopes = ' +str(len(sj) ) +')'
-            
-        if ispwa:
-            msg += 'with active subsystem:\n\t'
-            msg += str(subsys_list[i])
-            
-        msg += 'Computed reachable set S0 with volume: '
-        msg += str(S0.volume) + '\n'
-        
+        msg = '\n Working with partition cells: ' + str(i) + ', ' + str(j)
         logger.info(msg)
         
-        # isect = si \cap S0
+        msg = '\t' + str(i) +' (#polytopes = ' +str(len(si) ) +'), and:\n'
+        msg += '\t' + str(j) +' (#polytopes = ' +str(len(sj) ) +')\n'
+        
+        if ispwa:
+            msg += '\t with active subsystem: '
+            msg += str(subsys_list[i]) + '\n'
+            
+        msg += '\t Computed reachable set S0 with volume: '
+        msg += str(S0.volume) + '\n'
+        
+        logger.debug(msg)
+        
+        #logger.debug('si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
         
-        # diff = si \setminus S0
+        #logger.debug('si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
+        
+        """
+        if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
+            logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
+            diff = pc.mldivide(si, S0, save=True)
+            
+            ax = S0.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/s0.pdf')
+            
+            ax = si.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/si.pdf')
+            
+            ax = isect.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/isect.pdf')
+            
+            ax = diff.plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff.pdf')
+            
+            ax = isect.intersect(diff).plot()
+            ax.axis([0.0, 1.0, 0.0, 2.0])
+            ax.figure.savefig('./img/diff_cap_isect.pdf')
+            
+            logger.error('Intersection \cap Difference != \emptyset')
+            
+            assert(False)
+        """
+        if vol1 <= min_cell_volume:
+            logger.warning('\t too small: si \cap Pre(sj), ' +
+                           'so discard intersection')
+        if vol1 <= min_cell_volume and isect:
+            logger.warning('\t discarded non-empty intersection: ' +
+                           'consider reducing min_cell_volume')
+        if vol2 <= min_cell_volume:
+            logger.warning('\t too small: si \ Pre(sj), so not reached it')
         
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
@@ -429,10 +716,15 @@ def discretize(
                 diff.props = si.props.copy()
         
             # replace si by intersection (single state)
-            sol[i] = isect
+            isect_list = pc.separate(isect)
+            sol[i] = isect_list[0]
             
             # cut difference into connected pieces
             difflist = pc.separate(diff)
+            
+            difflist += isect_list[1:]
+            n_isect = len(isect_list) -1
+            
             num_new = len(difflist)
             
             # add each piece, as a new state
@@ -445,28 +737,34 @@ def discretize(
             n_cells = len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
             
-            # Update transition matrix
+            """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
             transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
-                
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
                 # except possibly the new part
                 transitions[i, r] = 0
                 transitions[j, r] = 0            
             
+            # sol[j] is reachable from intersection of sol[i] and S0
             if i != j:
-                # sol[j] is reachable from intersection of sol[i] and S0..
                 transitions[j, i] = 1
+                
+                # sol[j] is reachable from each piece os S0 \cap sol[i]
+                #for k in xrange(n_cells-n_isect-2, n_cells):
+                #    transitions[j, k] = 1
             
-            # Update adjacency matrix
+            """Update adjacency matrix"""
             old_adj = np.nonzero(adj[i, :])[0]
+            
+            # reset new adjacencies
             adj[i, :] = np.zeros([n_cells -num_new])
             adj[:, i] = np.zeros([n_cells -num_new])
+            adj[i, i] = 1
             
-            adj = np.pad(adj, (0,num_new), 'constant')
+            adj = np.pad(adj, (0, num_new), 'constant')
             
             for r in new_idx:
                 adj[i, r] = 1
@@ -475,13 +773,24 @@ def discretize(
                 
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-            adj[i, i] = 1
-                        
-            if logger.getEffectiveLevel() >= logging.INFO:
-                msg = '\n Adding states ' + str(i) + ' and '
+            
+            # adjacencies between pieces of isect and diff
+            for r in new_idx:
+                for k in new_idx:
+                    if r is k:
+                        continue
+                    
+                    if pc.is_adjacent(sol[r], sol[k]):
+                        adj[r, k] = 1
+                        adj[k, r] = 1
+            
+            msg = ''
+            if logger.getEffectiveLevel() <= logging.DEBUG:
+                msg += '\t\n Adding states ' + str(i) + ' and '
                 for r in new_idx:
                     msg += str(r) + ' and '
                 msg += '\n'
+                logger.debug(msg)
                         
             for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                 # Every "old" neighbor must be the neighbor
@@ -503,7 +812,7 @@ def discretize(
                         transitions[r, k] = 0
                         transitions[k, r] = 0
             
-            # Update IJ matrix
+            """Update IJ matrix"""
             IJ = np.pad(IJ, (0,num_new), 'constant')
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
@@ -511,17 +820,41 @@ def discretize(
             for r in new_idx:
                 sym_adj_change(IJ, adj_k, transitions, r)
             
-            msg += '\n\n Updated adj: \n' + str(adj)
-            msg += '\n\n Updated trans: \n' + str(transitions)
-            msg += '\n\n Updated IJ: \n' + str(IJ)
+            if logger.getEffectiveLevel() <= logging.DEBUG:
+                msg = '\n\n Updated adj: \n' + str(adj)
+                msg += '\n\n Updated trans: \n' + str(transitions)
+                msg += '\n\n Updated IJ: \n' + str(IJ)
+                logger.debug(msg)
+            
+            logger.info('Divided region: ' + str(i) + '\n')
         elif vol2 < abs_tol:
-            msg += 'Transition found'
+            logger.info('Found: ' + str(i) + ' ---> ' + str(j) + '\n')
             transitions[j,i] = 1
         else:
-            msg += 'No transition found, diff vol: ' + str(vol2)
-            msg += ', intersect vol: ' + str(vol1)
+            if logger.level <= logging.DEBUG:
+                msg = '\t Unreachable: ' + str(i) + ' --X--> ' + str(j) + '\n'
+                msg += '\t\t diff vol: ' + str(vol2) + '\n'
+                msg += '\t\t intersect vol: ' + str(vol1) + '\n'
+                logger.debug(msg)
+            else:
+                logger.info('\t unreachable\n')
             transitions[j,i] = 0
         
+        # check to avoid overlapping Regions
+        if debug:
+            tmp_part = PropPreservingPartition(
+                domain=part.domain,
+                regions=sol, adj=sp.lil_matrix(adj),
+                prop_regions=part.prop_regions
+            )
+            assert(tmp_part.is_partition() )
+        
+        n_cells = len(sol)
+        progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
+        progress += [progress_ratio]
+        
+        msg = '\t total # polytopes: ' + str(n_cells) + '\n'
+        msg += '\t progress ratio: ' + str(progress_ratio) + '\n'
         logger.info(msg)
         
         iter_count += 1
@@ -542,31 +875,28 @@ def discretize(
         
         # plot pair under reachability check
         ax2.clear()
-        si.plot(ax=ax2, color='green')
-        sj.plot(ax2, color='red', hatch='o', alpha=0.5)
-        plot_transition_arrow(si, sj, ax2)
+        si_tmp.plot(ax=ax2, color='green')
+        sj_tmp.plot(ax2, color='red', hatch='o', alpha=0.5)
+        plot_transition_arrow(si_tmp, sj_tmp, ax2)
         
         S0.plot(ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         
         # plot partition
         ax1.clear()
-        plot_partition(tmp_part, transitions, ax=ax1, color_seed=23)
+        plot_partition(tmp_part, transitions.T, ax=ax1, color_seed=23)
         
         # plot dynamics
         ssys.plot(ax1, show_domain=False)
         
         # plot hatched continuous propositions
-        if cont_props is not None:
-	        for (prop, poly) in cont_props.iteritems():
-	            poly.plot(ax1, color='none', hatch='/')
-	            poly.text(prop, ax1, color='yellow')
+        part.plot_props(ax1)
         
         fig.canvas.draw()
         
         # scale view based on domain,
         # not only the current polytopes si, sj
-        l,u = pc.bounding_box(part.domain)
+        l,u = part.domain.bounding_box
         ax2.set_xlim(l[0,0], u[0,0])
         ax2.set_ylim(l[1,0], u[1,0])
         
@@ -582,10 +912,15 @@ def discretize(
         prop_regions=part.prop_regions
     )
     
+    # check completeness of adjacency matrix
+    if debug:
+        tmp_part = deepcopy(new_part)
+        tmp_part.compute_adj()
+    
     # Generate transition system and add transitions       
     ofts = trs.OpenFTS()
     
-    adj = sp.lil_matrix(transitions)
+    adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
@@ -598,13 +933,9 @@ def discretize(
     # Decorate TS with state labels
     atomic_propositions = set(part.prop_regions)
     ofts.atomic_propositions.add_from(atomic_propositions)
-    prop_list = []
-    for region in sol:
+    for state, region in zip(ofts_states, sol):
         state_prop = region.props.copy()
-        
-        prop_list.append(state_prop)
-    
-    ofts.states.labels(ofts_states, prop_list)
+        ofts.states.add(state, ap=state_prop)
     
     param = {
         'N':N,
@@ -616,15 +947,31 @@ def discretize(
         'max_num_poly':max_num_poly
     }
     
-    assert(len(prop_list) == n)
+    ppp2orig = [part2orig[x] for x in orig]
     
-    return AbstractSysDyn(
+    end_time = os.times()[0]
+    msg = 'Total abstraction time: ' +\
+          str(end_time - start_time) + '[sec]'
+    print(msg)
+    logger.info(msg)
+    
+    if plt is not None and save_img:
+        fig, ax = plt.subplots(1, 1)
+        plt.plot(progress)
+        ax.set_xlabel('iteration')
+        ax.set_ylabel('progress ratio')
+        ax.figure.savefig('progress.pdf')
+    
+    return AbstractPwa(
         ppp=new_part,
         ts=ofts,
         ppp2ts=ofts_states,
-        original_regions=orig_list,
-        ppp2orig=orig,
-        ppp2pwa=subsys_list,
+        pwa=ssys,
+        pwa_ppp=part,
+        ppp2pwa=orig,
+        ppp2sys=subsys_list,
+        orig_ppp=orig_ppp,
+        ppp2orig=ppp2orig,
         disc_params=param
     )
 
@@ -726,25 +1073,122 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)                           
 #     return new_part
 
-def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
+def multiproc_discretize(q, mode, ppp, cont_dyn, disc_params):
+    global logger
+    logger = mp.log_to_stderr()
+    
+    name = mp.current_process().name
+    print('Abstracting mode: ' + str(mode) + ', on: ' + str(name))
+    
+    absys = discretize(ppp, cont_dyn, **disc_params)
+    
+    q.put((mode, absys))
+    print('Worker: ' + str(name) + 'finished.')
+
+def multiproc_get_transitions(
+    q, absys, mode, ssys, params
+):
+    global logger
+    logger = mp.log_to_stderr()
+    
+    name = mp.current_process().name
+    print('Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
+    
+    trans = get_transitions(absys, mode, ssys, **params)
+    
+    q.put((mode, trans))
+    print('Worker: ' + str(name) + 'finished.')
+
+def multiproc_discretize_switched(
+    ppp, hybrid_sys, disc_params=None,
+    plot=False, show_ts=False, only_adjacent=True
+):
+    """Parallel implementation of discretize_switched.
+    
+    Uses the multiprocessing package.
+    """
+    logger.info('parallel discretize_switched started')
+    
+    modes = hybrid_sys.modes
+    mode_nums = hybrid_sys.disc_domain_size
+    
+    q = mp.Queue()
+    
+    mode_args = dict()
+    for mode in modes:
+        cont_dyn = hybrid_sys.dynamics[mode]
+        mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
+    
+    jobs = [mp.Process(target=multiproc_discretize, args=args)
+            for args in mode_args.itervalues()]
+    for job in jobs:
+        job.start()
+    
+    # flush before join:
+    #   http://stackoverflow.com/questions/19071529/
+    abstractions = dict()
+    for job in jobs:
+        mode, absys = q.get()
+        abstractions[mode] = absys
+    
+    for job in jobs:
+        job.join()
+    
+    # merge their domains
+    (merged_abstr, ap_labeling) = merge_partitions(abstractions)
+    n = len(merged_abstr.ppp)
+    logger.info('Merged partition has: ' + str(n) + ', states')
+    
+    # find feasible transitions over merged partition
+    for mode in modes:
+        cont_dyn = hybrid_sys.dynamics[mode]
+        params = disc_params[mode]
+        
+        mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
+    
+    jobs = [mp.Process(target=multiproc_get_transitions, args=args)
+            for args in mode_args.itervalues()]
+    
+    for job in jobs:
+        job.start()
+    
+    trans = dict()
+    for job in jobs:
+        mode, t = q.get()
+        trans[mode] = t
+    
+    # merge the abstractions, creating a common TS
+    merge_abstractions(merged_abstr, trans,
+                       abstractions, modes, mode_nums)
+    
+    if plot:
+        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
+    
+    return merged_abstr
+
+def discretize_switched(
+    ppp, hybrid_sys, disc_params=None,
+    plot=False, show_ts=False, only_adjacent=True
+):
     """Abstract switched dynamics over given partition.
     
     @type ppp: L{PropPreservingPartition}
     
     @param hybrid_sys: dynamics of switching modes
-    @type hybrid_sys: L{HybridSysDyn}
+    @type hybrid_sys: L{SwitchedSysDyn}
     
-    @param disc_params: discretization parameters
-        passed to L{discretize},
-        see that for details
-    @type disc_params: dict (keyed by mode) of dicts
+    @param disc_params: discretization parameters passed to L{discretize} for
+		each mode. See L{discretize} for details.
+    @type disc_params: dict (keyed by mode) of dicts.
     
     @param plot: save partition images
     @type plot: bool
     
+    @param show_ts, only_adjacent: options for L{AbstractPwa.plot}.
+    
     @return: abstracted dynamics,
         some attributes are dict keyed by mode
-    @rtype: L{AbstractSysDyn}
+    @rtype: L{AbstractSwitched}
     """
     if disc_params is None:
         disc_params = {'N':1, 'trans_length':1}
@@ -754,6 +1198,7 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
     modes = hybrid_sys.modes
     mode_nums = hybrid_sys.disc_domain_size
     
+    # discretize each abstraction separately
     abstractions = dict()
     for mode in modes:
         logger.debug(30*'-'+'\n')
@@ -769,10 +1214,12 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
         
         abstractions[mode] = absys
     
+    # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
     logger.info('Merged partition has: ' + str(n) + ', states')
-    
+
+    # find feasible transitions over merged partition
     trans = dict()
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
@@ -783,37 +1230,42 @@ def discretize_switched(ppp, hybrid_sys, disc_params=None, plot=False):
             merged_abstr, mode, cont_dyn,
             N=params['N'], trans_length=params['trans_length']
         )
-    
+
+    # merge the abstractions, creating a common TS
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
-    merged_abstr.disc_params = disc_params
     
     if plot:
-        plot_mode_partitions(abstractions, merged_abstr)
+        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
     
     return merged_abstr
 
-def plot_mode_partitions(abstractions, merged_abs):
+def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
     try:
-        from tulip.graphics import newax
+        import matplotlib
     except:
-        warnings.warn('could not import newax, no partitions plotted.')
+        warnings.warn('could not import matplotlib, no partitions plotted.')
         return
     
-    ax, fig = newax()
+    axs = swab.plot(show_ts, only_adjacent)
+    n = len(swab.modes)
+    assert(len(axs) == 2*n)
     
-    for mode, ab in abstractions.iteritems():
-        ab.ppp.plot(plot_numbers=False, ax=ax, trans=ab.ppp.adj)
+    # annotate
+    for ax in axs:
         plot_annot(ax)
-        fname = 'part_' + str(mode) + '.pdf'
-        fig.savefig(fname)
     
-    merged_abs.ppp.plot(plot_numbers=False, ax=ax, trans=merged_abs.ppp.adj)
-    plot_annot
-    fname = 'part_merged' + '.pdf'
-    fig.savefig(fname)
+    # save mode partitions
+    for ax, mode in zip(axs[:n], swab.modes):
+        fname = 'merged_' + str(mode) + '.pdf'
+        ax.figure.savefig(fname)
+    
+    # save merged partition
+    for ax, mode in zip(axs[n:], swab.modes):
+        fname = 'part_' + str(mode) + '.pdf'
+        ax.figure.savefig(fname)
 
 def plot_annot(ax):
     fontsize = 5
@@ -828,8 +1280,8 @@ def plot_annot(ax):
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
     
-    @type merged_abstr: L{AbstractSysDyn}
-    @type abstr: list of L{AbstractSysDyn}
+    @type merged_abstr: L{AbstractSwitched}
+    @type abstr: dict of L{AbstractPwa}
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
@@ -849,7 +1301,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
         props =  merged_abstr.ppp[i].props
-        sys_ts.states.label(state, props)
+        sys_ts.states[state]['ap'] = props
     
     # create mode actions
     sys_actions = [str(s) for e,s in modes]
@@ -881,17 +1333,20 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
         
-        sys_ts.transitions.add_labeled_adj(
+        sys_ts.transitions.add_adj(
             adj = adj,
             adj2states = states,
-            labels = env_sys_actions
+            **env_sys_actions
         )
     
     merged_abstr.ts = sys_ts
     merged_abstr.ppp2ts = ppp2ts
 
-def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
-                    trans_length=1, abs_tol=1e-7):
+def get_transitions(
+    abstract_sys, mode, ssys, N=10,
+    closed_loop=True,
+    trans_length=1
+):
     """Find which transitions are feasible in given mode.
     
     Used for the candidate transitions of the merged partition.
@@ -930,27 +1385,22 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
         si = part[i]
         sj = part[j]
         
-        orig_region_idx = abstract_sys.ppp2orig[mode][i]
-        
-        subsys_idx = abstract_sys.ppp2pwa[mode][i]
-        active_subsystem = ssys.list_subsys[subsys_idx]
-        
         # Use original cell as trans_set
-        S0 = solve_feasible(
+        trans_set = abstract_sys.ppp2pwa(mode, i)[1]
+        active_subsystem = abstract_sys.ppp2sys(mode, i)[1]
+        
+        trans_feasible = is_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
-            trans_set = abstract_sys.original_regions[mode][orig_region_idx]
+            trans_set = trans_set
         )
-        
-        diff = pc.mldivide(si, S0)
-        vol2 = pc.volume(diff)
                     
-        if vol2 < abs_tol:
-            transitions[j,i] = 1 
+        if trans_feasible:
+            transitions[i, j] = 1 
             msg = '\t Feasible transition.'
             n_found += 1
         else:
-            transitions[j,i] = 0
+            transitions[i, j] = 0
             msg = '\t Not feasible transition.'
         logger.debug(msg)
     logger.info('Checked: ' + str(n_checked))
@@ -958,16 +1408,23 @@ def get_transitions(abstract_sys, mode, ssys, N=10, closed_loop=True,
     logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
             
     return transitions
+
+def multiproc_merge_partitions(abstractions):
+    """LOGTIME in #processors parallel merging.
     
+    Assuming sufficient number of processors.
+    """
+    raise NotImplementedError
+
 def merge_partitions(abstractions):
     """Merge multiple abstractions.
     
     @param abstractions: keyed by mode
-    @type abstractions: dict of L{AbstractSysDyn}
+    @type abstractions: dict of L{AbstractPwa}
     
     @return: (merged_abstraction, ap_labeling)
         where:
-            - merged_abstraction: L{AbstractSysDyn}
+            - merged_abstraction: L{AbstractSwitched}
             - ap_labeling: dict
     """
     if len(abstractions) == 0:
@@ -989,8 +1446,8 @@ def merge_partitions(abstractions):
             not (p1.domain.b == p2.domain.b).all():
                 raise Exception('merge: partitions have different domains')
             
-            # check equality of original partitions
-            if ab1.original_regions == ab2.original_regions:
+            # check equality of original PPP partitions
+            if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info('original partitions happen to be equal')
     
     init_mode = abstractions.keys()[0]
@@ -1003,31 +1460,28 @@ def merge_partitions(abstractions):
     
     # initialize iteration data
     prev_modes = [init_mode]
-    
+   
+   	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
     parents = {init_mode:range(len(regions) )}
-    ppp2orig = {init_mode:ab0.ppp2orig}
-    ppp2pwa = {init_mode:ab0.ppp2pwa}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
-    
     for cur_mode in remaining_modes:
         ab2 = abstractions[cur_mode]
-        
         r = merge_partition_pair(
             regions, ab2, cur_mode, prev_modes,
-            parents, ap_labeling,
-            ppp2orig, ppp2pwa
+            parents, ap_labeling
         )
-        regions, parents, ap_labeling, ppp2orig, ppp2pwa = r
-        
+        regions, parents, ap_labeling = r
         prev_modes += [cur_mode]
-    
     new_list = regions
     
     # build adjacency based on spatial adjacencies of
     # component abstractions.
     # which justifies the assumed symmetry of part1.adj, part2.adj
+	# Basically, if two regions are either 1) part of the same region in one of
+	# the abstractions or 2) adjacent in one of the abstractions, then the two
+	# regions are adjacent in the switched dynamics.
     n_reg = len(new_list)
     
     adj = np.zeros([n_reg, n_reg], dtype=int)
@@ -1059,15 +1513,10 @@ def merge_partitions(abstractions):
         adj=adj
     )
     
-    switched_original_regions = {
-        mode:abstractions[mode].original_regions for mode in abstractions
-    }
-    
-    abstraction = AbstractSysDyn(
-        ppp = ppp,
-        original_regions = switched_original_regions,
-        ppp2orig = ppp2orig,
-        ppp2pwa=ppp2pwa
+    abstraction = AbstractSwitched(
+        ppp=ppp,
+        modes=abstractions,
+        ppp2modes=parents,
     )
     
     return (abstraction, ap_labeling)
@@ -1075,20 +1524,49 @@ def merge_partitions(abstractions):
 def merge_partition_pair(
     old_regions, ab2,
     cur_mode, prev_modes,
-    old_parents, old_ap_labeling,
-    old_ppp2orig, old_ppp2pwa
+    old_parents, old_ap_labeling
 ):
     """Merge an Abstraction with the current partition iterate.
+    
+    @param old_regions: A list of C{Region} that is from either:
+        1. The ppp of the first (initial) L{AbstractPwa} to be merged.
+        2. A list of already-merged regions
+    @type old_regions: list of C{Region}
+    
+    @param ab2: Abstracted piecewise affine dynamics to be merged into the 
+    @type ab2: L{AbstractPwa}
+    
+    @param cur_mode: mode to be merged
+    @type cur_mode: tuple
+    
+    @param prev_modes: list of modes that have already been merged together
+    @type prev_modes: list of tuple
+    
+    @param old_parents: dict of modes that have already been merged to dict of
+        indices of new regions to indices of regions
+    @type old_parents: dict of modes to list of region indices in list
+        C{old_regions} or dict of region indices to regions in original ppp for
+        that mode
+    
+    @param old_ap_labeling: dict of states of already-merged modes to sets of
+        propositions for each state
+    @type old_ap_labeling: dict of tuples to sets
+    
+    @return: the following:
+        - C{new_list}, list of new regions
+        - C{parents}, same as input param C{old_parents}, except that it
+          includes the mode that was just merged and for list of regions in 
+          return value C{new_list}
+        - C{ap_labeling}, same as input param C{old_ap_labeling}, except that it
+          includes the mode that was just merged.
     """
     logger.info('merging partitions')
-    
+
     part2 = ab2.ppp
     
     modes = prev_modes + [cur_mode]
     
     new_list = []
-    ppp2orig = {mode:[] for mode in modes}
-    ppp2pwa = {mode:[] for mode in modes}
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
     
@@ -1101,7 +1579,8 @@ def merge_partition_pair(
             # no intersection ?
             if rc < 1e-5:
                 continue
-            logger.info('merging region: A' + str(i) + ', with: B' + str(j))
+            logger.info('merging region: A' + str(i) +
+                        ', with: B' + str(j))
             
             # if Polytope, make it Region
             if len(isect) == 0:
@@ -1118,19 +1597,9 @@ def merge_partition_pair(
                 parents[mode][idx] = old_parents[mode][i]
             parents[cur_mode][idx] = j
             
-            # keep track of original regions
-            for mode in old_ppp2orig:
-                ppp2orig[mode] += [old_ppp2orig[mode][i] ]
-            ppp2orig[cur_mode] += [ab2.ppp2orig[j] ]
-            
-            # keep track of subsystems
-            for mode in old_ppp2pwa:
-                ppp2pwa[mode] += [old_ppp2pwa[mode][i] ]
-            ppp2pwa[cur_mode] += [ab2.ppp2pwa[j] ]
-            
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
-            ap_label_2 = ab2.ts.states.label_of('s'+str(j))['ap']
+            ap_label_2 = ab2.ts.states['s'+str(j)]['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
@@ -1148,22 +1617,4 @@ def merge_partition_pair(
             
             ap_labeling[idx] = ap_label_1
     
-    return new_list, parents, ap_labeling, ppp2orig, ppp2pwa
-
-def _all_dict(r, names='?'):
-    """Return True if all elements in r are dict.
-    
-    False if all elements are not dict.
-    Otherwise raise Exception mentioning C{names}.
-    """
-    f = lambda x: isinstance(x, dict)
-    
-    n_dict = len(filter(f, r))
-    
-    if n_dict == 0:
-        return False
-    elif n_dict == len(r):
-        return True
-    else:
-        msg = 'Mixed dicts with non-dicts among: ' + str(names)
-        raise Exception(msg)
+    return new_list, parents, ap_labeling

@@ -2,10 +2,10 @@
 """
 Tests for transys.mathset (part of transys subpackage)
 """
-
+from nose.tools import raises
 from collections import Iterable
 
-from tulip.transys.mathset import MathSet, SubSet, PowerSet
+from tulip.transys.mathset import MathSet, SubSet, PowerSet, TypedDict
 from tulip.transys.mathset import compare_lists, unique, contains_multiple
 from tulip import transys as trs
 
@@ -152,8 +152,6 @@ def subset_test():
     a |= [{1:2} ]
     assert(a._list == [{1:2} ] )
     
-    a.superset = [1,2,3,4, {1:2}, '6']
-    
     b = SubSet([1,'2'] )
     b.add('2')
     assert(b._set == {'2'} )
@@ -214,11 +212,35 @@ class PowerSet_operations_test:
         assert len(self.empty) == 1
 
     def test_call(self):
-        p = [set(x) for x in self.p()]
+        p = [set(x) for x in self.p]
         assert len(p) == 2**3
         assert (set() in p)
         assert (set([1]) in p) and (set([2]) in p) and (set([3]) in p)
         assert (set([1,2]) in p) and (set([2,3]) in p) and (set([1,3]) in p)
         assert set([1,2,3]) in p
-        assert self.singleton() == [(), (1,)]
-        assert self.empty() == [()]
+        assert set(self.singleton) == set([(), (1,)])
+        assert set(self.empty) == set([()])
+
+class TypedDict_test():
+    def setUp(self):
+        d = TypedDict()
+        d.set_types({'animal':{'dog', 'cat'} })
+        self.d = d
+    
+    def test_add_typed_key_value(self):
+        d = self.d
+        
+        d['animal'] = 'dog'
+        assert(d['animal'] == 'dog')
+    
+    @raises(ValueError)
+    def test_add_typed_key_illegal_value(self):
+        d = self.d
+        
+        d['animal'] = 'elephant'
+    
+    def test_add_untyped_key_value(self):
+        d = self.d
+        
+        d['human'] = 'Bob'
+        assert(d['human'] == 'Bob')

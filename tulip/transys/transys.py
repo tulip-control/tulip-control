@@ -33,13 +33,13 @@
 Transition System Module
 """
 import logging
-from collections import Iterable, OrderedDict
+from collections import Iterable
 from pprint import pformat
 import copy
 import warnings
 
-from .labeled_graphs import LabeledStateDiGraph, str2singleton
-from .labeled_graphs import prepend_with, vprint
+from .labeled_graphs import LabeledDiGraph, str2singleton
+from .labeled_graphs import prepend_with
 from .mathset import PowerSet, MathSet
 from .executions import FTSSim
 from .export import graph2promela
@@ -48,7 +48,7 @@ _hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 
-class FiniteTransitionSystem(LabeledStateDiGraph):
+class FiniteTransitionSystem(LabeledDiGraph):
     """Finite Transition System modeling a closed system.
     
     Implements Def. 2.1, p.20 U{[BK08]
@@ -65,26 +65,15 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                 - sys.transitions.add
                 - sys.transitions.add_from
                 - sys.transitions.add_adj
-          Labeled edges (=transitions) are defined using:
-                - sys.transitions.add_labeled
-                - sys.transitions.add_labeled_from
-                - sys.transitions.add_labeled_adj
           and accessed using:
                 - sys.transitions.find
-                - sys.transitions.between
-          To convert an unlabeled edge to a labeled edge use:
-                - sys.transitions.label
-          and to change the label of an existing labeled edge:
-                - sys.transitions.relabel
         - the state labeling function::
                 L: S-> 2^AP
           can be defined using:
-                - sys.states.label
-                - sys.states.labels
+                - sys.states.add
+                - sys.states.add_from
           and accessed using methods:
                 - sys.states(data=True)
-                - sys.states.label_of
-                - sys.states.labeled_with
                 - sys.states.find
     
     The state labels are subsets of atomic_propositions, so \in 2^AP.
@@ -98,6 +87,19 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     
     The xor constraint can prevent the environment from
     blocking the system by setting all its actions to False.
+    
+    The action are taken when traversing an edge.
+    Each edge is annotated by a single action.
+    If an edge (s1, s2) can be taken on two transitions,
+    then 2 copies of that same edge are stored.
+    Each copy is annotated using a different action,
+    the actions must belong to the same action set.
+    That action set is defined as a ser instance.
+    This description is a (closed) L{FTS}.
+    
+    The system and environment actions associated with an edge
+    of a reactive system. To store these, 2 sub-labels are used
+    and their sets are encapsulated within the same (open) L{FTS}.
     
     Example
     =======
@@ -121,14 +123,14 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     here 'p':
     
     >>> ts.atomic_propositions |= ['p', None]
-    >>> ts.states.label('s0', {'p'} )
-    >>> ts.states.labels(['s1', 's3'], [{'p'}, {None} ] )
-    >>> ts.states.labels([('end', {'p'} ), (5, {None} ) ] )
+    >>> ts.states.add('s0', ap={'p'})
+    >>> ts.states.add_from([('s1', {'ap':{'p'} }), \
+                            ('s3', {'ap':{} } )])
     
     For singleton subsets of AP passing the atomic proposition
     itself, instead of the singleton, will also work:
     
-    >>> ts.states.label('s0', 'p')
+    >>> ts.states['s0']['ap'] = {'p'}
     
     Having added states, we can also add some labeled transitions:
     
@@ -144,9 +146,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     unintended duplication, after adding an unlabeled transition,
     any attempt to add a labeled transition between the same states
     will raise an exception, unless the unlabeled transition is
-    either removed before adding the labeled transition,
-    or method C{sys.transitions.label} is used instead,
-    to convert the unlabeled into a labeled transition.
+    removed before adding the labeled transition.
     
     Using L{tuple2fts} offers a more convenient constructor
     for transition systems.
@@ -190,42 +190,33 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
     def __init__(self, *args, **kwargs):
         """Initialize Finite Transition System.
         
-        @param atomic_propositions: state are labeled with
-            subsets of atomic propositions (\in 2^AP)
-        @type atomic_propositions: iterable of str
-        
-        @param actions: actions used to label transitions
-        @type actions: iterable of str
-        
-        For other arguments, see L{LabeledStateDiGraph}
+        For arguments, see L{LabeledDiGraph}
         """
-        atomic_propositions = []
-        actions = []
+        ap_labels = PowerSet()
+        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
+        edge_label_types = [('actions', MathSet(), True)]
         
-        # state labels
-        self._state_label_def = OrderedDict(
-            [['ap', PowerSet(atomic_propositions) ]]
+        super(FiniteTransitionSystem, self).__init__(
+            node_label_types, edge_label_types,
+            *args, **kwargs
         )
-        self.atomic_propositions = self._state_label_def['ap'].math_set
+        
+        self.atomic_propositions = self.ap
         self.aps = self.atomic_propositions # shortcut
-        self._state_dot_label_format = {'ap':'',
-                                           'type?label':'',
-                                           'separator':'\\n'}
-        
-        # edge labels comprised of sublabels (here single sublabel)
-        self._transition_label_def = OrderedDict(
-            [['actions', MathSet(actions)]]
-        )
-        self.actions = self._transition_label_def['actions']
-        self._transition_dot_label_format = {'actions':'',
-                                                'type?label':'',
-                                                'separator':'\\n'}
-        self._transition_dot_mask = dict()
-        
         self.actions_must = 'xor'
         
-        LabeledStateDiGraph.__init__(self, *args, **kwargs)
-        
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\\n'
+        }
+        self._transition_dot_label_format = {
+            'actions':'',
+            'type?label':'',
+            'separator':'\\n'
+        }
+        self._transition_dot_mask = dict()
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'fts'
 
@@ -240,7 +231,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Actions:\n\t' +str(self.actions) +2*'\n'
         s += 'Transitions & Labels:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s
@@ -280,7 +271,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
         >>> 
         >>> L = n*['p']
         >>> ts2 = cycle_labeled_with(L)
-        >>> ts2.states.label('s3', '!p')
+        >>> ts2.states.add('s3', ap={'!p'})
         >>> ts2.plot()
         >>> 
         >>> ts3 = ts1 +ts2
@@ -315,7 +306,7 @@ class FiniteTransitionSystem(LabeledStateDiGraph):
                 self.states.add(state)
             
             if label:
-                self.states.label(state, label['ap'] )
+                self.states[state]['ap'] = label['ap']
         
         self.states.initial |= other.states.initial()
         
@@ -517,7 +508,7 @@ class FTS(FiniteTransitionSystem):
     def __init__(self, *args, **kwargs):
         FiniteTransitionSystem.__init__(self, *args, **kwargs)
 
-class OpenFiniteTransitionSystem(LabeledStateDiGraph):
+class OpenFiniteTransitionSystem(LabeledDiGraph):
     """Open Finite Transitin System modeling an open system.
     
     Analogous to L{FTS}, but for open systems comprised of
@@ -547,38 +538,56 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
     ========
     L{FiniteTransitionSystem}
     """
-    def __init__(self, atomic_propositions=[], sys_actions=[],
-                 env_actions=[], **args):
-        # state labeling
-        self._state_label_def = OrderedDict(
-            [['ap', PowerSet(atomic_propositions) ]]
-        )
-        self.atomic_propositions = self._state_label_def['ap'].math_set
-        self.aps = self.atomic_propositions
-        self._state_dot_label_format = {'ap':'',
-                                           'type?label':'',
-                                           'separator':'\\n'}
+    def __init__(self, env_actions=None, sys_actions=None, **args):
+        if env_actions is None:
+            env_actions = [('env_actions', MathSet(), True)]
+        if sys_actions is None:
+            sys_actions = [('sys_actions', MathSet(), True)]
+                
+        ap_labels = PowerSet()
+        action_types = env_actions + sys_actions
         
-        # edge labeling (here 2 sublabels)
-        self._transition_label_def = OrderedDict([
-            ['sys_actions', MathSet(sys_actions) ],
-            ['env_actions', MathSet(env_actions) ]
-        ])
-        self.sys_actions = self._transition_label_def['sys_actions']
-        self.env_actions = self._transition_label_def['env_actions']
-        self._transition_dot_label_format = {'sys_actions':'sys',
-                                                'env_actions':'env',
-                                                'type?label':':',
-                                                'separator':'\\n'}
+        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
+        edge_label_types = action_types
+        
+        LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
+        
+        # make them available also via an "actions" dicts
+        # name, codomain, *rest = x
+        actions = {x[0]:x[1] for x in edge_label_types}
+        
+        if 'actions' in actions:
+            msg = '"actions" cannot be used as an action type name,\n'
+            msg += 'because if an attribute for this action type'
+            msg += 'is requested,\n then it will conflict with '
+            msg += 'the dict storing all action types.'
+            raise ValueError(msg)
+                
+        self.actions = actions
+        self.atomic_propositions = self.ap
+        self.aps = self.atomic_propositions
+        
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
         
-        LabeledStateDiGraph.__init__(self, **args)
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\\n'
+        }
+        self._transition_dot_label_format = {
+            'sys_actions':'sys',
+            'env_actions':'env',
+            'type?label':':',
+            'separator':'\\n'
+        }
         
+        self._transition_dot_mask = dict()
         self.dot_node_shape = {'normal':'box'}
         self.default_export_fname = 'ofts'
-        
+    
     def __str__(self):
         s = _hl +'\nFinite Transition System (open) : '
         s += self.name +'\n' +_hl +'\n'
@@ -588,12 +597,22 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
         s += pformat(self.states(data=True), indent=3) +2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'System Actions:\n'
-        s += pformat(self.sys_actions, indent=3) +2*'\n'
-        s += 'Environment Actions:\n'
-        s += pformat(self.env_actions, indent=3) +2*'\n'
+        for action_type, codomain in self.actions.iteritems():
+            if 'sys' in action_type:
+                s += 'System Action Type: ' + str(action_type) +\
+                     ', with possible values: ' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            elif 'env' in action_type:
+                s += 'Environment Action Type: ' + str(action_type) +\
+                     ', with possible values:\n\t' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            else:
+                s += 'Action type controlled by neither env nor sys\n' +\
+                     ' (will cause you errors later)' +\
+                     ', with possible values:\n\t'
+                s += pformat(codomain, indent=3) +2*'\n'
         s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s
@@ -601,8 +620,8 @@ class OpenFiniteTransitionSystem(LabeledStateDiGraph):
 class OpenFTS(OpenFiniteTransitionSystem):
     """Alias to L{transys.OpenFiniteTransitionSystem}.
     """
-    def __init__(self, **args):
-        OpenFiniteTransitionSystem.__init__(self, **args)
+    def __init__(self, *args, **kwargs):
+        OpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None, verbose=False):
@@ -677,8 +696,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         if state_label_pairs:
             return state_labeling
         
-        vprint('State labeling L not tuples (state, ap_label),\n'
-                   'zipping with states S...\n', verbose)
+        logger.debug('State labeling L not tuples (state, ap_label),\n'
+                   'zipping with states S...\n')
         state_labeling = zip(states, state_labeling)
         return state_labeling
     
@@ -700,8 +719,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     
     # prepending states with given str
     if prepend_str:
-        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.', verbose)
+        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
+               'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     
@@ -718,29 +737,32 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # state labeling assigned ?
     if state_labeling is not None:
         for (state, ap_label) in state_labeling:
-            ap_label = str2singleton(ap_label, verbose=verbose)
-            (state,) = prepend_with([state], prepend_str)
+            if ap_label is None:
+                ap_label = set()
             
-            vprint('Labeling state:\n\t' +str(state) +'\n' +
-                  'with label:\n\t' +str(ap_label) +'\n', verbose)
-            ts.states.label(state, ap_label)
+            ap_label = str2singleton(ap_label)
+            state = prepend_str + str(state)
+            
+            logger.debug('Labeling state:\n\t' +str(state) +'\n' +
+                  'with label:\n\t' +str(ap_label) +'\n')
+            ts.states[state]['ap'] = ap_label
     
     # any transition labeling ?
     if actions is None:
         for (from_state, to_state) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            vprint('Added unlabeled edge:\n\t' +str(from_state) +
-                   '--->' +str(to_state) +'\n', verbose)
+            logger.debug('Added unlabeled edge:\n\t' +str(from_state) +
+                   '--->' +str(to_state) +'\n')
             ts.transitions.add(from_state, to_state)
     else:
         ts.actions |= actions
         for (from_state, to_state, act) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            vprint('Added labeled edge (=transition):\n\t' +
+            logger.debug('Added labeled edge (=transition):\n\t' +
                    str(from_state) +'---[' +str(act) +']--->' +
-                   str(to_state) +'\n', verbose)
+                   str(to_state) +'\n')
             ts.transitions.add_labeled(from_state, to_state, act)
     
     return ts
@@ -821,11 +843,11 @@ def cycle_labeled_with(L):
 def add_initial_states(ts, ap_labels):
     """Make initial any state of ts labeled with any label in ap_labels.
     
-    For example if isinstance(disc_dynamics, L{AbstractSysDyn}):
+    For example if isinstance(ofts, OpenFTS):
     
     >>> from tulip.transys.transys import add_initial_states
     >>> initial_labels = [{'home'}]
-    >>> add_initial_states(disc_dynamics.ofts, initial_labels)
+    >>> add_initial_states(ofts, initial_labels)
     
     @type ts: L{transys.FiniteTransitionSystem},
         L{transys.OpenFiniteTransitionSystem}
@@ -835,7 +857,7 @@ def add_initial_states(ts, ap_labels):
         ts.atomic_propositions
     """
     for label in ap_labels:
-        new_init_states = ts.states.labeled_with({'ap':label})
+        new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
 
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
@@ -863,7 +885,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             on accepting states of the Buchi Automaton BA.
     """
     def convert_ts2ba_label(state_label_dict):
-        """Replace 'ap' key with 'in_alphabet'.
+        """Replace 'ap' key with 'letter'.
         
         @param state_label_dict: FTS state label, its value \\in 2^AP
         @type state_label_dict: dict {'ap' : state_label_value}
@@ -876,7 +898,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         logger.debug('Ls0:\t' +str(state_label_dict) )
         
         (s0_, label_dict) = state_label_dict[0]
-        Sigma_dict = {'in_alphabet': label_dict['ap'] }
+        Sigma_dict = {'letter': label_dict['ap'] }
         
         logger.debug('State label of: ' +str(s0) +
                       ', is: ' +str(Sigma_dict) )
@@ -904,22 +926,15 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     prodts_name = fts.name +'*' +ba.name
     
-    if fts.states.mutants or ba.states.mutants:
-        mutable = True
-    else:
-        mutable = False
-    
     # using set() destroys order
-    prodts = FiniteTransitionSystem(
-        name=prodts_name, mutable=mutable
-    )
+    prodts = FiniteTransitionSystem(name=prodts_name)
     prodts.states.add_from(set() )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
 
     # construct initial states of product automaton
-    s0s = fts.states.initial()
-    q0s = ba.states.initial()
+    s0s = set(fts.states.initial)
+    q0s = set(ba.states.initial)
     
     accepting_states_preimage = MathSet()
     
@@ -941,7 +956,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
         
         for q0 in q0s:
             enabled_ba_trans = ba.transitions.find(
-                [q0], desired_label=Sigma_dict
+                [q0], with_attr_dict=Sigma_dict
             )
             
             # q0 blocked ?
@@ -952,10 +967,10 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             # which q next ?     (note: curq0 = q0)
             logger.debug('enabled_ba_trans = ' +str(enabled_ba_trans) )
             for (curq0, q, sublabels) in enabled_ba_trans:
-                new_sq0 = (s0, q)                
+                new_sq0 = (s0, q)
                 prodts.states.add(new_sq0)
                 prodts.states.initial.add(new_sq0)
-                prodts.states.label(new_sq0, {q} )
+                prodts.states[new_sq0]['ap'] = {q}
                 
                 # accepting state ?
                 if q in ba.states.accepting:
@@ -965,7 +980,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
-    queue = MathSet(prodts.states.initial() )
+    queue = MathSet(prodts.states.initial)
     visited = MathSet()
     while queue:
         sq = queue.pop()
@@ -991,7 +1006,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             logger.debug("Next state's label:\n\t" +str(Sigma_dict) )
             
             enabled_ba_trans = ba.transitions.find(
-                [q], desired_label=Sigma_dict
+                [q], with_attr_dict=Sigma_dict
             )
             logger.debug('Enabled BA transitions:\n\t' +
                           str(enabled_ba_trans) )
@@ -1011,7 +1026,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                     logger.debug(str(new_sq) +
                                   ' contains an accepting state.')
                 
-                prodts.states.label(new_sq, {next_q} )
+                prodts.states[new_sq]['ap'] = {next_q}
                 
                 logger.debug('Adding transitions:\n\t' +
                               str(sq) + '--->' + str(new_sq) )
@@ -1019,7 +1034,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 # is fts transition labeled with an action ?
                 ts_enabled_trans = fts.transitions.find(
                     [s], to_states=[next_s],
-                    desired_label='any', as_dict=False
+                    with_attr_dict=None, as_dict=False
                 )
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
                     assert(from_s == s)

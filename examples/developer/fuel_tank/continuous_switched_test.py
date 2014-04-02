@@ -5,8 +5,11 @@ logging.basicConfig(level=logging.INFO)
 import time
 import numpy as np
 
+import matplotlib as mpl
+mpl.use('Agg')
+
 from tulip import abstract, hybrid
-from tulip.polytope import box2poly
+from polytope import box2poly
 
 input_bound = 0.4
 uncertainty = 0.05
@@ -40,8 +43,7 @@ def subsys0(h):
     
     dom = box2poly([[0., 3.], [h, 2.]])
     
-    sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
-    #sys_dyn.plot()
+    sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, dom)
     
     return sys_dyn
 
@@ -58,8 +60,7 @@ def subsys1(h):
     
     dom = box2poly([[0., 3.], [0., h]])
     
-    sys_dyn = hybrid.LtiSysDyn(A, B, E, [], U, W, dom)
-    #sys_dyn.plot()
+    sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, dom)
     
     return sys_dyn
 
@@ -75,7 +76,7 @@ msg = 'Found:\n'
 msg += '\t Environment modes: ' + str(env_modes)
 msg += '\t System modes: ' + str(sys_modes)
 
-switched_dynamics = hybrid.HybridSysDyn(
+switched_dynamics = hybrid.SwitchedSysDyn(
     disc_domain_size=(len(env_modes), len(sys_modes)),
     dynamics=sys_dyn,
     env_labels=env_modes,
@@ -98,12 +99,13 @@ disc_params = {}
 for mode in modes:
     disc_params[mode] = {'N':N, 'trans_length':trans_len}
 
-sys_ts = abstract.discretize_switched(
-    ppp, switched_dynamics, disc_params)
+swab = abstract.multiproc_discretize_switched(
+    ppp, switched_dynamics, disc_params,
+    plot=True, show_ts=True
+)
+print(swab)
 
-print(sys_ts)
-sys_ts.ppp.plot()
-sys_ts.ts.plot()
+#ax = sys_ts.ts.plot()
 
 elapsed = (time.time() - start)
 print('Discretization lasted: ' + str(elapsed))

@@ -37,7 +37,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from warnings import warn
-
 import itertools
 from pprint import pformat
 
@@ -50,6 +49,11 @@ try:
 except Exception, e:
     logger.error(e)
     quiver = None
+
+def indent(s, n):
+    s = s.split('\n')
+    w = n*' '
+    return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
     """Represent discrete-time continuous-state dynamics::
@@ -70,7 +74,7 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a L{polytope.Polytope})
+        - Uset, Wset and domain (each a C{polytope.Polytope})
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'sampled' (if system is sampled from a continuous-time
           system)
@@ -87,23 +91,21 @@ class LtiSysDyn(object):
     
     See Also
     ========
-    L{PwaSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
+    L{PwaSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None, time_semantics=None,
                  timestep=None):
         
         if Uset is None:
-            warn("Uset not given to LtiSysDyn()")
-        
-        if (Uset is not None) and (not isinstance(Uset, pc.Polytope)):
-            raise Exception("LtiSysDyn: `Uset` has to be a Polytope")
+            warn('Uset not given to LtiSysDyn()')
+        elif not isinstance(Uset, pc.Polytope):
+            raise Exception('`Uset` has to be a Polytope')
            
         if domain is None:
-            warn("Domain is not given in LtiSysDyn()")
-        
-        if (domain is not None) and (not isinstance(domain, pc.Polytope)):
-            raise Exception("LtiSysDyn: `domain` has to be a Polytope")
+            warn('Domain is not given in LtiSysDyn()')
+        elif not isinstance(domain, pc.Polytope):
+            raise Exception('`domain` has to be a Polytope')
         
         # check dimensions agree
         try:
@@ -112,6 +114,9 @@ class LtiSysDyn(object):
             raise TypeError('A matrix must be 2d array')
         if nA != mA:
             raise ValueError('A must be square')
+        if domain is not None:
+            if domain.dim != mA:
+                raise Exception('domain.dim != A.size[1]')
         
         if B is not None:
             try:
@@ -120,6 +125,11 @@ class LtiSysDyn(object):
                 raise TypeError('B matrix must be 2d array')
             if nA != nB:
                 raise ValueError('A and B must have same number of rows')
+            if Uset is not None:
+                if (Uset.dim != mB) and (Uset.dim != mB + nA):
+                    msg = 'Uset.dim != B.size[1]'
+                    msg += ' and != B.size[1] + A.size[1]'
+                    raise Exception(msg)
         
         if E is not None:
             try:
@@ -128,6 +138,9 @@ class LtiSysDyn(object):
                 raise TypeError('E matrix must be 2d array')
             if nA != nE:
                 raise ValueError('A and E must have same number of rows')
+            if Wset is not None:
+                if Wset.dim != mE:
+                    raise Exception('Wset.dim != E.size[1]')
         
         if K is not None:
             try:
@@ -168,12 +181,13 @@ class LtiSysDyn(object):
 
 
     def __str__(self):
-        output = "A =\n"+str(self.A)
-        output += "\nB =\n"+str(self.B)
-        output += "\nE =\n"+str(self.E)
-        output += "\nK =\n"+str(self.K)
-        output += "\nUset =\n"+str(self.Uset)
-        output += "\nWset =\n"+str(self.Wset)
+        n = 3
+        output = 'A =\n' + indent(str(self.A), n)
+        output += '\nB =\n' + indent(str(self.B), n)
+        output += '\nE =\n' + indent(str(self.E), n)
+        output += '\nK =\n' + indent(str(self.K), n)
+        output += '\nUset =\n' + indent(str(self.Uset), n)
+        output += '\nWset =\n' + indent(str(self.Wset), n)
         return output
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
@@ -217,7 +231,7 @@ class PwaSysDyn(object):
     
     See Also
     ========
-    L{LtiSysDyn}, L{HybridSysDyn}, L{polytope.Polytope}
+    L{LtiSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
     """
     def __init__(self, list_subsys=[], domain=None, time_semantics=None,
                  timestep=None, overwrite_time=True):
@@ -277,12 +291,12 @@ class PwaSysDyn(object):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
         
-        s += 'Domain:\n\n'
-        s += pformat(self.domain) + '\n'
+        s += 3*' ' + 'Domain:\n\n'
+        s += indent(str(self.domain), n=6) + '\n'
     
         for i, sys in enumerate(self.list_subsys):
-            s += 'Subsystem: ' + str(i) +'\n'
-            s += str(sys) +2*'\n'
+            s += 3*' ' + 'Subsystem: ' + str(i) +'\n'
+            s += indent(str(sys), n=6)
         return s
     
     @classmethod
@@ -298,17 +312,18 @@ class PwaSysDyn(object):
         for subsystem in self.list_subsys:
             subsystem.plot(ax, color=np.random.rand(3),
                            show_domain=show_domain)
+        return ax
 
-class HybridSysDyn(object):
+class SwitchedSysDyn(object):
     """Represent hybrid systems switching between dynamic modes.
     
-    A HybridSysDyn represents a system with switching modes
+    A C{SwitchedSysDyn} represents a system with switching modes
     that depend on both discrete:
     
         - n_env environment variables (uncontrolled)
         - n_sys system variables (controlled)
     
-    A HybridSysDyn object contains the fields:
+    A C{SwitchedSysDyn} object contains the fields:
     
      - C{disc_domain_size}: 2-tuple of numbers of modes
        type: (n_env, n_sys)
@@ -330,7 +345,7 @@ class HybridSysDyn(object):
        then default to int indices (i,j) L{PwaSysDyn}.
     
      - C{cts_ss}: continuous state space over which hybrid system is defined.
-       type: L{polytope.Region}
+       type: C{polytope.Region}
     
      - C{time_semantics}: 'discrete' (if system is originally a discrete-time
        system) or 'sampled' (if system is sampled from a continuous-time
@@ -347,7 +362,7 @@ class HybridSysDyn(object):
     
     See Also
     ========
-    L{LtiSysDyn}, L{PwaSysDyn}, L{polytope.Region}
+    L{LtiSysDyn}, L{PwaSysDyn}, C{polytope.Region}
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,
@@ -365,10 +380,10 @@ class HybridSysDyn(object):
 
         # check that the continuous domain is specified
         if cts_ss is None:
-            warn('continuous state space not given to HybridSysDyn')
+            warn('continuous state space not given to SwitchedSysDyn')
         else:
             if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
-                raise Exception('HybridSysDyn: ' +
+                raise Exception('SwitchedSysDyn: ' +
                    '`cts_ss` must be a Polytope or Region')
         
         self.disc_domain_size = disc_domain_size
@@ -388,7 +403,7 @@ class HybridSysDyn(object):
             undefined_modes = set(dynamics.keys()).difference(modes)
             
             if undefined_modes:
-                msg = 'HybridSysDyn: `dynamics` keys inconsistent'
+                msg = 'SwitchedSysDyn: `dynamics` keys inconsistent'
                 msg += ' with discrete mode labels.\n'
                 msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)
@@ -431,12 +446,12 @@ class HybridSysDyn(object):
         s += 6*' ' + pformat(self.disc_sys_labels, indent=3) + 2*'\n'
         
         s += 'Continuous State Space:\n\n'
-        s += pformat(self.cts_ss) + '\n'
+        s += indent(str(self.cts_ss), 4) + '\n'
         
         s += 'Dynamics:\n'
         for mode, pwa in self.dynamics.iteritems():
-            s += ' mode: ' + str(mode) + '\n'
-            s += ' dynamics: ' + pformat(pwa, indent=3) +'\n\n'
+            s += 4*' ' + 'mode: ' + str(mode) + '\n'
+            s += 4*' ' + 'dynamics:\n' + indent(str(pwa), 8) +'\n\n'
         return s
     
     def _check_labels(self, n, labels):

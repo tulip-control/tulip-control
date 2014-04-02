@@ -47,7 +47,7 @@ L{discretize}
 import numpy as np
 from cvxopt import matrix, solvers
 
-from tulip import polytope as pc
+import polytope as pc
 from .feasible import solve_feasible, createLM, _block_diag2
 
 def get_input(
@@ -107,7 +107,7 @@ def get_input(
     @type ssys: L{LtiSysDyn}
     
     @param abstraction: state space partition
-    @type abstraction: L{AbstractSysDyn}
+    @type abstraction: L{AbstractPwa}
     
     @param start: index of the initial state in C{abstraction.ts}
     @type start: int >= 0
@@ -163,7 +163,7 @@ def get_input(
     
     ofts = abstraction.ts
     original_regions = abstraction.original_regions
-    orig = abstraction.ppp2orig
+    orig = abstraction._ppp2orig
     
     params = abstraction.disc_params
     N = params['N']
@@ -404,7 +404,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     @param ssys: dynamics
     @type ssys: L{LtiSysDyn}
     
-    @param P0: L{Polytope} where we want x(k) to remain for k = 1, ... N-1
+    @param P0: C{Polytope} where we want x(k) to remain for k = 1, ... N-1
     
     @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
         C{False} otherwise  

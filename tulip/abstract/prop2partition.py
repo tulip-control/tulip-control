@@ -33,14 +33,23 @@
 """ 
 Proposition preserving partition module.
 """
-from warnings import warn
+import logging
+logger = logging.getLogger(__name__)
+
+import warnings
+import copy
 
 import numpy as np
 from scipy import sparse as sp
-import copy
 
-from tulip import polytope as pc
+import polytope as pc
 from .plot import plot_partition
+
+try:
+    import matplotlib as mpl
+except Exception, e:
+    logger.error(e)
+    mpl = None
 
 _hl = 40 * '-'
 
@@ -52,13 +61,13 @@ def prop2part(state_space, cont_props_dict):
     See Also
     ========
     L{PropPreservingPartition},
-    L{polytope.Polytope}
+    C{polytope.Polytope}
     
     @param state_space: problem domain
-    @type state_space: L{polytope.Polytope}
+    @type state_space: C{polytope.Polytope}
     
     @param cont_props_dict: propositions
-    @type cont_props_dict: dict of L{polytope.Polytope}
+    @type cont_props_dict: dict of C{polytope.Polytope}
     
     @return: state space quotient partition induced by propositions
     @rtype: L{PropPreservingPartition}
@@ -131,7 +140,7 @@ def prop2part(state_space, cont_props_dict):
         prop_regions = copy.deepcopy(cont_props_dict)
     )
     
-    mypartition.adj = find_adjacent_regions(mypartition).copy()
+    mypartition.adj = pc.find_adjacent_regions(mypartition).copy()
     
     return mypartition
 
@@ -152,7 +161,9 @@ def part2convex(ppp):
     )
     new2old = []
     for i in xrange(len(ppp.regions)):
-        simplified_reg = ppp.regions[i] + ppp.regions[i]
+        simplified_reg = pc.union(ppp.regions[i],
+                                  ppp.regions[i],
+                                  check_convex=True)
         
         for j in xrange(len(simplified_reg)):
             region_now = pc.Region(
@@ -162,18 +173,27 @@ def part2convex(ppp):
             cvxpart.regions.append(region_now)
             new2old += [i]
     
-    cvxpart.adj = find_adjacent_regions(cvxpart).copy()
+    cvxpart.adj = pc.find_adjacent_regions(cvxpart).copy()
     
     return (cvxpart, new2old)
     
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
-    """This function takes a piecewise affine system pwa_sys and a proposition 
-    preserving partition ppp whose domain is a subset of the domain of pwa_sys
-    and returns a refined proposition preserving partition where in each
-    region a unique subsystem of pwa_sys is active.
+    """This function takes:
     
-    Modified from Petter Nilsson's code implementing merge algorithm in 
-    Nilsson et al. `Temporal Logic Control of Switched Affine Systems with an
+      - a piecewise affine system C{pwa_sys} and
+      - a proposition-preserving partition C{ppp}
+          whose domain is a subset of the domain of C{pwa_sys}
+    
+    and returns a *refined* proposition preserving partition
+    where in each region a unique subsystem of pwa_sys is active.
+    
+    Reference
+    =========
+    Modified from Petter Nilsson's code
+    implementing merge algorithm in:
+    
+    Nilsson et al.
+    `Temporal Logic Control of Switched Affine Systems with an
     Application in Fuel Balancing`, ACC 2012.
 
     See Also
@@ -183,54 +203,73 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     @type pwa_sys: L{hybrid.PwaSysDyn}
     @type ppp: L{PropPreservingPartition}
     
-    @return: partition and assignmend of its regions to PWA subsystems
-    @rtype: (L{PropPreservingPartition}, list)
-        where the list contains indices referring to subsystems
-        by their order in C{pwa_sys}
+    @return: new partition and associated maps:
+        
+        - new partition C{new_ppp}
+        - map of C{new_ppp.regions} to C{pwa_sys.list_subsys}
+        - map of C{new_ppp.regions} to C{ppp.regions}
+    
+    @rtype: C{(L{PropPreservingPartition}, list, list)}
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
-        raise Exception("pwaPartition: "
-            "pwa system is not defined everywhere in state space")
-
+        raise Exception('pwa system is not defined everywhere ' +
+                        'in state space')
+    
+    # for each subsystem's domain, cut it into pieces
+    # each piece is the intersection with
+    # a unique Region in ppp.regions
     new_list = []
     subsys_list = []
-    parent = []
-    for i in xrange(len(pwa_sys.list_subsys)):
-        for j in xrange(len(ppp.regions)):
-            isect = pwa_sys.list_subsys[i].domain.intersect(
-                ppp.regions[j]
-            )
+    parents = []
+    for i, subsys in enumerate(pwa_sys.list_subsys):
+        for j, region in enumerate(ppp.regions):
+            isect = region.intersect(subsys.domain)
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
+                
                 if rc < abs_tol:
-                    print("Warning: One of the regions in the refined PPP is "
-                          "too small, this may cause numerical problems")
+                    msg = 'One of the regions in the refined PPP is '
+                    msg += 'too small, this may cause numerical problems'
+                    warnings.warn(msg)
+                
+                # not Region yet, but Polytope ?
                 if len(isect) == 0:
                     isect = pc.Region([isect])
                 
-                isect.props = ppp.regions[j].props.copy()
-                subsys_list.append(i)
+                # label with AP
+                isect.props = region.props.copy()
+                
+                # store new Region
                 new_list.append(isect)
-                parent.append(j)
+                
+                # keep track of original Region in ppp.regions
+                parents.append(j)
+                
+                # index of subsystem active within isect
+                subsys_list.append(i)
     
-    adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
-    for i in xrange(len(new_list)):
-        for j in xrange(i+1, len(new_list)):
-            if (ppp.adj[parent[i], parent[j]] == 1) or \
-                    (parent[i] == parent[j]):
-                if pc.is_adjacent(new_list[i], new_list[j]):
-                    adj[i,j] = 1
-                    adj[j,i] = 1
-        adj[i,i] = 1
+    # compute spatial adjacency matrix
+    n = len(new_list)
+    adj = sp.lil_matrix((n, n), dtype=np.int8)
+    for i, ri in enumerate(new_list):
+        pi = parents[i]
+        for j, rj in enumerate(new_list[0:i]):
+            pj = parents[j]
             
-    ppp = PropPreservingPartition(
+            if (ppp.adj[pi, pj] == 1) or (pi == pj):
+                if pc.is_adjacent(ri, rj):
+                    adj[i, j] = 1
+                    adj[j, i] = 1
+        adj[i, i] = 1
+            
+    new_ppp = PropPreservingPartition(
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
         prop_regions = ppp.prop_regions
     )
-    return (ppp, subsys_list)
+    return (new_ppp, subsys_list, parents)
                 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     """ This function takes a proposition preserving partition ppp and the size 
@@ -261,7 +300,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                          grid points parameters must be given.")
  
     dim=len(ppp.domain.A[0])
-    domain_bb = pc.bounding_box(ppp.domain)
+    domain_bb = ppp.domain.bounding_box
     size_list=list()
     if grid_size!=None:
         if isinstance( grid_size, list ):
@@ -386,46 +425,26 @@ def product_interval(list1, list2):
             new_list.append(list1[m]+list2[n])
     return new_list
 
-def find_adjacent_regions(partition):
-    """Return region pairs that are spatially adjacent.
-    """
-    num_reg = len(partition.regions)
-    
-    adj = sp.lil_matrix(
-        (num_reg, num_reg),
-        dtype=np.int8
-    )
-    
-    for i in xrange(num_reg):
-        adj[i,i] = 1
-        for j in xrange(i+1, num_reg):
-            adj[i, j] = pc.is_adjacent(
-                partition.regions[i],
-                partition.regions[j]
-            )
-            adj[j,i] = adj[i,j]
-        
-    return adj
 ################################
 
-class PropPreservingPartition(object):
+class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:
     
       - domain: the domain we want to partition
-          type: L{Polytope}
+          type: C{Polytope}
 
       - regions: Regions of proposition-preserving partition
-          type: list of L{Region}
+          type: list of C{Region}
 
       - adj: a sparse matrix showing which regions are adjacent
-          order of L{Region}s same as in list C{regions}
+          order of C{Region}s same as in list C{regions}
 
           type: scipy lil sparse
 
       - prop_regions: map from atomic proposition symbols
           to continuous subsets
 
-          type: dict of L{Polytope} or L{Region}
+          type: dict of C{Polytope} or C{Region}
     
     See Also
     ========
@@ -435,6 +454,8 @@ class PropPreservingPartition(object):
         domain=None, regions=[],
         adj=None, prop_regions=None, check=True
     ):
+        #super(PropPreservingPartition, self).__init__(adj)
+        
         if prop_regions is None:
             self.prop_regions = None
         else:
@@ -460,6 +481,8 @@ class PropPreservingPartition(object):
                 msg = "adj size doesn't agree with number of regions"
                 raise ValueError(msg)
         
+        self.regions = regions[:]
+        
         if check:
             for region in regions:
                 if not region <= domain:
@@ -467,40 +490,56 @@ class PropPreservingPartition(object):
                     msg += 'is not subset of given domain:\n\t'
                     msg += str(domain)
                     raise ValueError(msg)
-                
-                if self.prop_regions is None:
-                    warn('No continuous propositions defined.')
-                    continue
-                
-                if self.prop_regions is None:
-                    continue
-                
-                if not region.props <= set(self.prop_regions):
-                    msg = 'Partitions: Region labeled with propositions:\n\t'
-                    msg += str(region.props) + '\n'
-                    msg += 'not all of which are in the '
-                    msg += 'continuous atomic propositions:\n\t'
-                    msg += str(set(self.prop_regions) )
-                    raise ValueError(msg)
+            
+            self.is_symbolic()
         
         self.domain = domain
-        self.regions = regions[:]
+        super(PropPreservingPartition, self).__init__(domain)
         self.adj = adj
-    
-    def __len__(self):
-        return len(self.regions)
-    
-    def __iter__(self):
-        return iter(self.regions)
-    
-    def __getitem__(self, key):
-        return self.regions[key]
     
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()
     
-    def is_preserving(self):
-        """Return True if each Region <= Continuous Prop for its props
+    #TODO: iterator over pairs
+    #TODO: use nx graph to store partition
+    
+    def is_symbolic(self):
+        """Check that the set of preserved predicates
+        are bijectively mapped to the symbols.
+        
+        Symbols = Atomic Propositions
+        """
+        if self.prop_regions is None:
+            msg = 'No continuous propositions defined.'
+            logging.warn(msg)
+            warnings.warn(msg)
+            return
+        
+        for region in self.regions:
+            if not region.props <= set(self.prop_regions):
+                msg = 'Partitions: Region labeled with propositions:\n\t'
+                msg += str(region.props) + '\n'
+                msg += 'not all of which are in the '
+                msg += 'continuous atomic propositions:\n\t'
+                msg += str(set(self.prop_regions) )
+                raise ValueError(msg)
+    
+    def preserves_predicates(self):
+        """Return True if each Region <= Predicates for the
+        predicates in C{prop_regions.values},
+        where C{prop_regions} is a bijection to
+        "continuous" propositions of the specification's alphabet.
+        
+        Note
+        ====
+        1. C{prop_regions} in practice need not be injective.
+            It doesnt hurt - though creates unnecessary redundancy.
+        
+        2. The specification alphabet is fixed an user-defined.
+            It should be distinguished from the auxiliary alphabet
+            generated automatically during abstraction,
+            which defines another partition with
+            its own bijection to TS.
         """
         all_props = set(self.prop_regions)
         
@@ -547,10 +586,38 @@ class PropPreservingPartition(object):
             s += str(self.adj.todense()) + '\n'
         return s
     
-    def plot(self, **kwargs):
+    def plot(
+        self, trans=None, ppp2trans=None, only_adjacent=False,
+        ax=None, plot_numbers=True, color_seed=None,
+        show=False
+    ):
         """For details see plot.plot_partition.
         """
-        return plot_partition(self, **kwargs)
+        return plot_partition(
+            self, trans, ppp2trans, only_adjacent,
+            ax, plot_numbers, color_seed, show
+        )
+    
+    def plot_props(self, ax=None):
+        """Plot labeled regions of continuous propositions.
+        """
+        if mpl is None:
+            warnings.warn('No matplotlib')
+            return
+        
+        if ax is None:
+            ax = mpl.pyplot.subplot(111)
+        
+        l, u = self.domain.bounding_box
+        ax.set_xlim(l[0,0], u[0,0])
+        ax.set_ylim(l[1,0], u[1,0])
+        
+        for (prop, poly) in self.prop_regions.iteritems():
+            isect_poly = poly.intersect(self.domain)
+            
+            isect_poly.plot(ax, color='none', hatch='/')
+            isect_poly.text(prop, ax, color='yellow')
+        return ax
 
 class PPP(PropPreservingPartition):
     """Alias to L{PropPreservingPartition}.

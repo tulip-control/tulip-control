@@ -36,8 +36,8 @@ import logging
 from collections import Iterable, OrderedDict
 from pprint import pformat
 
-from .labeled_graphs import LabeledStateDiGraph
-from .labeled_graphs import vprint, prepend_with, str2singleton
+from .labeled_graphs import LabeledDiGraph
+from .labeled_graphs import prepend_with, str2singleton
 from .mathset import SubSet, PowerSet
 from .transys import _ts_ba_sync_prod
 
@@ -46,7 +46,7 @@ _hl = 40 *'-'
 logger = logging.getLogger(__name__)
 
 # future: may become an abc
-class FiniteStateAutomaton(LabeledStateDiGraph):
+class FiniteStateAutomaton(LabeledDiGraph):
     """Generic automaton.
     
     It has:
@@ -63,6 +63,8 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     
     If C{atomic_proposition_based=True},
     the the alphabet is represented by a powerset 2^AP.
+    
+    subclasses implement C{is_accepted}, C{simulate}
     
     Note
     ====
@@ -91,38 +93,49 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
     L{MullerAutomaton}, L{ParityAutomaton}
     """
     def __init__(
-            self, name='', mutable=False, deterministic=False,
-            accepting_states_type=SubSet,
+            self, deterministic=False,
+            accepting_states_type=None,
             atomic_proposition_based=True,
+            **kwargs
         ):
         # edge labeling
         if atomic_proposition_based:
             self.atomic_proposition_based = True
             alphabet = PowerSet([])
+            self.atomic_propositions = alphabet
         else:
             self.atomic_proposition_based = False
             alphabet = set()
         
-        self._transition_label_def = OrderedDict([
-            ['in_alphabet', alphabet]
-        ])
-        self.alphabet = self._transition_label_def['in_alphabet']
-        
-        LabeledStateDiGraph.__init__(
-            self, mutable=mutable,
-            accepting_states_type=accepting_states_type
+        edge_label_types = [('letter', alphabet, True)]
+        super(FiniteStateAutomaton, self).__init__(
+            edge_label_types=edge_label_types, **kwargs
         )
+        self.alphabet = alphabet
+        
+        # accepting states
+        if accepting_states_type is None:
+            self._accepting = SubSet(self.states)
+            self._accepting_type = SubSet
+        else:
+            self._accepting = accepting_states_type(self)
+            self._accepting_type = accepting_states_type
+        self.states.accepting = self._accepting
         
         # used before label value
-        self._transition_dot_label_format = {'in_alphabet':'',
-                                                'type?label':'',
-                                                'separator':'\\n'}
+        self._transition_dot_label_format = {'letter':'',
+                                             'type?label':'',
+                                             'separator':'\\n'}
         self._transition_dot_mask = dict()
         
         self.dot_node_shape = {'normal':'circle',
                                'accepting':'doublecircle'}
         self.default_export_fname = 'fsa'
         self.automaton_type = 'Finite State Automaton'
+    
+    @property
+    def accepting(self):
+        return self._accepting
     
     def __str__(self):
         s = _hl +'\n' +self.automaton_type +': '
@@ -140,20 +153,15 @@ class FiniteStateAutomaton(LabeledStateDiGraph):
             s += 'Input Alphabet Letters:\n\t'
         s += str(self.alphabet) +2*'\n'
         s += 'Transitions & labeling w/ Input Letters:\n'
-        s += pformat(self.transitions(labeled=True), indent=3)
+        s += pformat(self.transitions(data=True), indent=3)
         s += '\n' +_hl +'\n'
         
         return s
     
-    def is_accepted(self, word):
-        """Check if automaton accepts input word.
-        """
-        print('Implemented by subclasses')
-    
-    def simulate(self, initial_state, word):
-        """Return an Automaton Simulation.
-        """
-        print('Implemented by subclasses')
+    def remove_node(self, node):
+        # intercept to remove also from accepting states
+        self.accepting.remove(node)
+        super(FiniteStateAutomaton, self).remove_node(node)
 
 class NFA(FiniteStateAutomaton):
     """Finite-word finite-state automaton.
@@ -161,11 +169,9 @@ class NFA(FiniteStateAutomaton):
     Determinism can be enforced by optional argument
     when creating transitions.
     """
-    def __init__(self, name='', mutable=False,
-                 atomic_proposition_based=True,
-                 deterministic=False):
-        FiniteStateAutomaton.__init__(
-            self, name, mutable, deterministic,
+    def __init__(self, atomic_proposition_based=True, **kwargs):
+        super(NFA, self).__init__(
+            deterministic=False,
             atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Non-Deterministic Finite Automaton'
@@ -181,10 +187,9 @@ class DFA(NFA):
     Determinism can be enforced by optional argument
     when creating transitions.
     """
-    def __init__(self, name='', mutable=False,
-                 atomic_proposition_based=True):
-        NFA.__init__(
-            self, name, mutable, deterministic=True,
+    def __init__(self, atomic_proposition_based=True):
+        super(DFA, self).__init__(
+            deterministic=True,
             atomic_proposition_based=atomic_proposition_based,
         )
         self.automaton_type = 'Deterministic Finite Automaton'
@@ -204,17 +209,17 @@ def dfa2nfa(dfa):
 
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, *args, **kwargs):
-        FiniteStateAutomaton.__init__(self, *args, **kwargs)
+        super(OmegaAutomaton, self).__init__(*args, **kwargs)
 
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(
-            self, name='', mutable=False,
-            deterministic=False,
-            atomic_proposition_based=True
+            self, deterministic=False,
+            atomic_proposition_based=True, **kwargs
         ):
-        OmegaAutomaton.__init__(
-            self, name, mutable, deterministic,
-            atomic_proposition_based=atomic_proposition_based
+        super(BuchiAutomaton, self).__init__(
+            deterministic=deterministic,
+            atomic_proposition_based=atomic_proposition_based,
+            **kwargs
         )
         self.automaton_type = 'Buchi Automaton'
     
@@ -288,10 +293,10 @@ class BA(BuchiAutomaton):
     """Alias to L{BuchiAutomaton}.
     """
     def __init__(self, **args):
-        BuchiAutomaton.__init__(self, **args)
+        super(BA, self).__init__(**args)
 
 def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
-             atomic_proposition_based=True, verbose=False):
+             atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by a tuple (S, S0, Sa, \\Sigma, trans)
@@ -333,8 +338,8 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     
     # prepending states with given str
     if prepend_str:
-        vprint('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.', verbose)
+        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
+               'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     accepting_states = prepend_with(accepting_states, prepend_str)
@@ -356,8 +361,10 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
                                               prepend_str)
         # convention
         if atomic_proposition_based:
+            if guard is None:
+                guard = set()
             guard = str2singleton(guard)
-        ba.transitions.add_labeled(from_state, to_state, guard)
+        ba.transitions.add(from_state, to_state, letter=guard)
     
     return ba
 
@@ -376,16 +383,11 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
     
-    if prod_ts.states.mutants:
-        mutable = True
-    else:
-        mutable = False
-    
-    prod_ba = BuchiAutomaton(name=prod_name, mutable=mutable)
+    prod_ba = BuchiAutomaton(name=prod_name)
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
-    prod_ba.states.initial |= prod_ts.states.initial()
+    prod_ba.states.initial |= set(prod_ts.states.initial)
     print('initial:\n\t' +str(prod_ts.states.initial) )
     # accepting states = persistent set
     prod_ba.states.accepting |= persistent
@@ -404,12 +406,8 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
             """
         raise Exception(msg)
     
-    for (from_state_id, to_state_id) in prod_ts.transitions():
+    for (from_state, to_state) in prod_ts.transitions():
         # prject prod_TS state to TS state
-        
-        from_state = prod_ts.states._int2mutant(from_state_id)
-        to_state = prod_ts.states._int2mutant(to_state_id)
-        
         ts_to_state = to_state[0]
         msg = 'prod_TS: to_state =\n\t' +str(to_state) +'\n'
         msg += 'TS: ts_to_state =\n\t' +str(ts_to_state)
@@ -418,8 +416,8 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
         state_label_pairs = transition_system.states.find(ts_to_state)
         (ts_to_state_, transition_label_dict) = state_label_pairs[0]
         transition_label_value = transition_label_dict['ap']
-        prod_ba.transitions.add_labeled(
-            from_state, to_state, transition_label_value
+        prod_ba.transitions.add(
+            from_state, to_state, letter=transition_label_value
         )
     
     return prod_ba
@@ -588,11 +586,13 @@ class RabinAutomaton(OmegaAutomaton):
     ========
     L{DRA}, L{BuchiAutomaton}
     """    
-    def __init__(self, name='', mutable=False, deterministic=False,
-                 atomic_proposition_based=False):
-        OmegaAutomaton.__init__(
-            self,  name, mutable, deterministic,
-            RabinPairs, atomic_proposition_based
+    def __init__(self, deterministic=False,
+                 atomic_proposition_based=False, **kwargs):
+        super(RabinAutomaton, self).__init__(
+            deterministic=deterministic,
+            accepting_states_type=RabinPairs,
+            atomic_proposition_based=atomic_proposition_based,
+            **kwargs
         )
         self.automaton_type = 'Rabin Automaton'
     
@@ -606,11 +606,11 @@ class DRA(RabinAutomaton):
     ========
     L{RabinAutomaton}
     """
-    def __init__(self, name='', mutable=False,
-                 atomic_proposition_based=True):
-        RabinAutomaton.__init__(
-            self, name, mutable, deterministic=True,
-            atomic_proposition_based=atomic_proposition_based
+    def __init__(self, atomic_proposition_based=True, **kwargs):
+        super(DRA, self).__init__(
+            deterministic=True,
+            atomic_proposition_based=atomic_proposition_based,
+            **kwargs
         )
         self.automaton_type = 'Deterministic Rabin Automaton'
 

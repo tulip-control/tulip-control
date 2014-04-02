@@ -4,29 +4,22 @@
 #          the upcoming release.
 #
 """
-This example is an extension of robot_discrete.py by including continuous
-dynamics with disturbances.
-
-Petter Nilsson (pettni@kth.se)
-August 14, 2011
-
-NO, system and cont. prop definitions based on TuLiP 1.x
-2 Jul, 2013
-NO, TuLiP 1.x discretization
-17 Jul, 2013
+Continuous example with MATLAB export at the end. Mostly identical to 
+examples/robot_planning/continuous.py
 """
 #
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
-
+#
 # @import_section@
 import sys
+sys.path.append('../')
 import numpy as np
-
+import tomatlab
 from tulip import spec, synth, hybrid
-from polytope import box2poly
-from tulip.abstract import prop2part, discretize
+from tulip.polytope import box2poly
+from tulip.abstract import prop2part, discretize, find_controller
 # @import_section_end@
 
 visualize = False
@@ -70,10 +63,9 @@ plot_partition(cont_partition, show=visualize)
 
 # @discretize_section@
 # Given dynamics & proposition-preserving partition, find feasible transitions
-disc_dynamics = discretize(
-    cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, plotit=visualize
-)
+disc_params = {'closed_loop':True, 'N':8, 'min_cell_volume':0.1, 
+               'plotit':visualize, 'conservative':False}
+disc_dynamics = discretize(cont_partition, sys_dyn, **disc_params)
 # @discretize_section_end@
 
 """Visualize transitions in continuous domain (optional)"""
@@ -102,14 +94,10 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 """Synthesize"""
 ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
-
 # Unrealizable spec ?
 if ctrl is None:
     sys.exit()
 
-# Generate a graphical representation of the controller for viewing
-if not ctrl.save('continuous.png'):
-    print(ctrl)
-# @synthesize_section_end@
-
-# Simulation
+# Export Simulink Model
+tomatlab.export('robot_continuous.mat', ctrl, sys_dyn, disc_dynamics, 
+                disc_params)

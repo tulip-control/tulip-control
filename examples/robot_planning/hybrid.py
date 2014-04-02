@@ -41,7 +41,13 @@ sys_hyb.env_actions.add_from({'slippery','normal'})
 # str states
 n = 6
 states = ['s'+str(i) for i in xrange(n) ]
-sys_hyb.states.add_from(states)
+
+sys_hyb.atomic_propositions.add_from(['home','lot'])
+state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
+
+# Add states and decorate TS with state labels (aka atomic propositions)
+for state, label in zip(states, state_labels):
+    sys_hyb.states.add(state, ap=label)
 
 # First environment chooses a mode, than the system chooses a mode and within
 # each mode there exists a low level controller to take any available transition
@@ -51,11 +57,13 @@ sys_hyb.states.add_from(states)
 # We take the transitions to be identity.
 trans1 = np.eye(6)
 
-sys_hyb.transitions.add_labeled_adj(
-    sp.lil_matrix(trans1), states, ('gear0','normal')
+sys_hyb.transitions.add_adj(
+    sp.lil_matrix(trans1), states,
+    sys_actions='gear0', env_actions='normal'
 )
-sys_hyb.transitions.add_labeled_adj(
-    sp.lil_matrix(trans1), states, ('gear0','slippery')
+sys_hyb.transitions.add_adj(
+    sp.lil_matrix(trans1), states,
+    sys_actions='gear0', env_actions='slippery'
 )
 
 # gear1 dynamics are similar to the environment switching example.
@@ -68,7 +76,9 @@ transmat1 = sp.lil_matrix(np.array(
                  [0,0,1,0,1,1]]
             ))
 
-sys_hyb.transitions.add_labeled_adj(transmat1, states, ('gear1','normal'))
+sys_hyb.transitions.add_adj(
+    transmat1, states, sys_actions='gear1', env_actions='normal'
+)
 
 transmat2 = sp.lil_matrix(np.array(
                 [[0,0,1,1,0,0],
@@ -79,11 +89,9 @@ transmat2 = sp.lil_matrix(np.array(
                  [0,0,1,1,0,0]]
             ))
 
-sys_hyb.transitions.add_labeled_adj(transmat2, states, ('gear1','slippery'))
-
-# Decorate TS with state labels (aka atomic propositions)
-sys_hyb.atomic_propositions |= ['home','lot']
-sys_hyb.states.labels(states, [{'home'}, set(), set(), set(), set(), {'lot'}] )
+sys_hyb.transitions.add_adj(
+    transmat2, states, sys_actions='gear1', env_actions='slippery'
+)
 
 # This is what is visible to the outside world (and will go into synthesis method)
 print(sys_hyb)

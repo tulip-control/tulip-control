@@ -49,7 +49,7 @@ from collections import Iterable
 
 import numpy as np
 
-from tulip import polytope as pc
+import polytope as pc
 
 def is_feasible(
     from_region, to_region, sys, N,
@@ -57,6 +57,10 @@ def is_feasible(
     use_all_horizon=False,
     trans_set=None
 ):
+    """Return True if to_region is reachable from_region.
+    
+    For details see solve_feasible.
+    """
     S0 = solve_feasible(
         from_region, to_region, sys, N,
         closed_loop, use_all_horizon,
@@ -65,7 +69,7 @@ def is_feasible(
     return from_region <= S0
 
 def solve_feasible(
-    P1, P2, ssys, N, closed_loop=True,
+    P1, P2, ssys, N=1, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
     """Compute S0 \subseteq P1 from which P2 is N-reachable.
@@ -75,8 +79,8 @@ def solve_feasible(
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
     
-    @type P1: L{Polytope} or L{Region}
-    @type P2: L{Polytope} or L{Region}
+    @type P1: C{Polytope} or C{Region}
+    @type P2: C{Polytope} or C{Region}
     @type ssys: L{LtiSysDyn}
     @param N: The horizon length
     @param closed_loop: If true, take 1 step at a time.
@@ -93,7 +97,7 @@ def solve_feasible(
         Otherwise, P1 is used.
     
     @return: the subset S0 of P1 from which P2 is reachable
-    @rtype: L{Polytope} or L{Region}
+    @rtype: C{Polytope} or C{Region}
     """
     if closed_loop:
         return solve_closed_loop(
@@ -114,8 +118,8 @@ def solve_closed_loop(
 ):
     """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
     
-    @type P1: L{Polytope} or L{Region}
-    @type P2: L{Polytope} or L{Region}
+    @type P1: C{Polytope} or C{Region}
+    @type P2: C{Polytope} or C{Region}
     
     @param ssys: system dynamics
     
@@ -142,26 +146,41 @@ def solve_closed_loop(
         Pinit = p1
     
     # backwards in time
+    s0 = pc.Region()
+    reached = False
     for i in xrange(N, 0, -1):
         # first step from P1
         if i == 1:
             Pinit = p1
         
-        s0 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
-        p2 = union_or_chain(s0, p2, use_all_horizon)
+        p2 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
+        s0 = s0.union(p2, check_convex=True)
+        s0 = pc.reduce(s0)
         
         # empty target polytope ?
         if not pc.is_fulldim(p2):
-            return pc.Polytope()
+            break
+        
+        old_reached = reached
+        
+        # overlaps initial set ?
+        if p1.intersect(p2):
+            s0 = s0.union(p2, check_convex=True)
+            s0 = pc.reduce(s0)
+        
+        # we went past it -> don't continue
+        if old_reached is True and reached is False:
+            logger.info('stopped intersecting si')
+            #break
+        
+        if reached is True:
+            break
     
-    return p2
-
-def union_or_chain(s0, p2, use_all_horizon):
-    if use_all_horizon:
-        p2 = s0.union(p2, check_convex=True)
-    else:
-        p2 = s0
-    return p2
+    if not pc.is_fulldim(s0):
+        return pc.Polytope()
+    
+    s0 = pc.reduce(s0)
+    return s0
 
 def solve_open_loop(
     P1, P2, ssys, N,
@@ -241,7 +260,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
       - x(t+1) = A x(t) + B u(t) + E d(t)
       - [u(k); x(k)] \in ssys.Uset for all k
     
-    If list_P is a L{Polytope}:
+    If list_P is a C{Polytope}:
 
       - x(0) \in list_P if list_P
       - x(k) \in Pk for k= 1,2, .. N-1
@@ -259,9 +278,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     
     @param N: horizon length
     
-    @type list_P: list of Polytopes or L{Polytope}
-    @type Pk: L{Polytope}
-    @type PN: L{Polytope}
+    @type list_P: list of Polytopes or C{Polytope}
+    @type Pk: C{Polytope}
+    @type PN: C{Polytope}
     
     @param disturbance_ind: list indicating which k's
         that disturbance should be taken into account.

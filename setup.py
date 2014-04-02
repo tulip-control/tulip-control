@@ -167,14 +167,14 @@ if perform_setup:
         author_email = 'murray@cds.caltech.edu',
         url = 'http://www.cds.caltech.edu/tulip',
         license = 'BSD',
-        requires = ['numpy', 'scipy', 'ply', 'networkx', 'cvxopt'],
+        requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx', 'cvxopt'],
         install_requires = [
             'numpy >= 1.7', 'ply >= 3.4',
             'networkx >= 1.6', 'cvxopt'
         ],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',
-            'tulip.abstract', 'tulip.polytope', 'tulip.spec',
+            'tulip.abstract', 'tulip.spec',
             'tulip.interfaces'
         ],
         package_dir = {'tulip' : 'tulip'},

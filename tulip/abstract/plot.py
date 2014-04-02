@@ -38,155 +38,114 @@ logger = logging.getLogger(__name__)
 from warnings import warn
 
 import numpy as np
+from scipy import sparse as sp
 import networkx as nx
 
-from tulip.polytope import cheby_ball, bounding_box
+from polytope import plot_partition, plot_transition_arrow
 
 try:
-    import matplotlib
+    import matplotlib as mpl
 except Exception, e:
     logger.error(e)
-    matplotlib = None
+    mpl = None
 
 try:
     from tulip.graphics import newax
 except Exception, e:
     logger.error(e)
-    matplotlib = None
+    mpl = None
 
-def plot_partition(ppp, trans=None, plot_numbers=True,
-                   ax=None, color_seed=None, nodelist=None,
-                   show=False):
-    """Plots 2D PropPreservingPartition using matplotlib
-
-    See Also
-    ========
-    L{abstract.prop2partition.PropPreservingPartition}, L{plot_trajectory}
-
-    @type ppp: L{PropPreservingPartition}
+def plot_abstraction_scc(ab, ax=None):
+    """Plot Regions colored by strongly connected component.
     
-    @param trans: Transition matrix. If used,
-        then transitions in C{ppp} are shown with arrows.
-        Otherwise C{ppp.adj} is plotted.
-        
-        To show C{ppp.adj}, pass: trans = True
-    
-    @param plot_numbers: If True,
-        then annotate each Region center with its number.
-    
-    @param show: If True, then show the plot.
-        Otherwise return axis object.
-        Axis object is good for creating custom plots.
-    
-    @param ax: axes where to plot
-    
-    @param color_seed: seed for reproducible random coloring
-    
-    @param nodelist: order mapping ppp indices to trans states
-    @type nodelist: list of trans states
-    
-    @param show: call mpl.pyplot.show before returning
+    Handy to develop new examples or debug existing ones.
     """
-    if matplotlib is None:
-        warn('matplotlib not found')
-        return
+    ppp = ab.ppp
+    ts = ab.ts
+    ppp2ts = ab.ppp2ts
     
-    if isinstance(trans, nx.MultiDiGraph):
-        if nodelist is None:
-            n = len(trans.states)
-            nodelist = ['s' +str(x) for x in xrange(n)]
-        trans = np.array(nx.to_numpy_matrix(trans,
-                         nodelist=nodelist) )
+    # each connected component of filtered graph is a symbol
+    components = nx.strongly_connected_components(ts)
     
-    l,u = bounding_box(ppp.domain)
-    arr_size = (u[0,0]-l[0,0])/50.0
-    reg_list = ppp.regions
-    
-    # new figure ?
     if ax is None:
-        ax, fig = newax()
+        ax = mpl.pyplot.subplot()
     
-    # no trans given: use partition's
-    if trans is True and ppp.adj is not None:
-        ax.set_title('Adjacency from Partition')
-        trans = ppp.adj
-    elif trans is None:
-        trans = 'none'
-    else:
-        ax.set_title('Adjacency from given Transitions')
+    l, u = ab.ppp.domain.bounding_box
+    ax.set_xlim(l[0,0], u[0,0])
+    ax.set_ylim(l[1,0], u[1,0])
     
-    ax.set_xlim(l[0,0],u[0,0])
-    ax.set_ylim(l[1,0],u[1,0])
-    
-    # repeatable coloring ?
-    if color_seed is not None:
-        prng = np.random.RandomState(color_seed)
-    else:
-        prng = np.random.RandomState()
-    
-    # plot polytope patches
-    for i in xrange(len(reg_list)):
-        reg = reg_list[i]
+    for component in components:
+        # map to random colors
+        red = np.random.rand()
+        green = np.random.rand()
+        blue = np.random.rand()
         
-        # select random color,
-        # same color for all polytopes in each region
-        col = prng.rand(3)
+        color = (red, green, blue)
         
-        # single polytope or region ?
-        reg.plot(color=col, ax=ax)
-    
-    # plot transition arrows between patches
-    for (i, reg) in enumerate(reg_list):
-        if plot_numbers:
-            reg.text(str(i), ax, color='red')
-        
-        if trans is 'none':
-            continue
-        
-        for j in np.nonzero(trans[:,i] )[0]:
-            reg1 = reg_list[j]
-            plot_transition_arrow(reg, reg1, ax, arr_size)
-    
-    if show:
-        matplotlib.pyplot.show()
-    
+        for state in component:
+            i = ppp2ts.index(state)
+            ppp[i].plot(ax=ax, color=color)
     return ax
 
-def plot_transition_arrow(polyreg0, polyreg1, ax, arr_size=None):
-    """Plot arrow starting from polyreg0 and ending at polyreg1.
+def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
+    """Plot partition and arrows from labeled digraph.
     
-    @type polyreg0: L{Polytope} or L{Region}
-    @type polyreg1: L{Polytope} or L{Region}
-    @param ax: axes where to plot
+    Edges can be filtered by selecting an edge_label.
+    So it can plot transitions of a single mode for a switched system.
     
-    @return: arrow object
+    @param edge_label: desired label
+    @type edge_label: dict
     """
-    # brevity
-    p0 = polyreg0
-    p1 = polyreg1
+    l,u = ppp.domain.bounding_box
+    arr_size = (u[0,0]-l[0,0])/50.0
     
-    rc0, xc0 = cheby_ball(p0)
-    rc1, xc1 = cheby_ball(p1)
+    ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
+    for from_state, to_state, label in ts.transitions.find(with_attr_dict=edge_label):
+        i = ts2ppp[from_state]
+        j = ts2ppp[to_state]
+        
+        if only_adjacent:
+            if ppp.adj[i, j] == 0:
+                continue
+        
+        plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)
+
+def project_strategy_on_partition(ppp, mealy):
+    """Return an FTS with the PPP (spatial) transitions used by Mealy strategy.
     
-    if np.sum(np.abs(xc1-xc0)) < 1e-7:
-        return None
+    @type ppp: L{PropPreservingPartition}
     
-    if arr_size is None:
-        l,u = polyreg1.bounding_box()
-        arr_size = (u[0,0]-l[0,0])/25.0
+    @type mealy: L{transys.MealyMachine}
+    """
+    n = len(ppp)
+    proj_adj = sp.lil_matrix((n, n))
     
-    #TODO: 3d
-    x = xc0[0]
-    y = xc0[1]
-    dx = xc1[0] - xc0[0]
-    dy = xc1[1] - xc0[1]
-    arrow = matplotlib.patches.Arrow(
-        float(x), float(y), float(dx), float(dy),
-        width=arr_size, color='black'
-    )
-    ax.add_patch(arrow)
+    for (from_state, to_state, label) in mealy.transitions.find():
+        from_label = mealy.states[from_state]
+        to_label = mealy.states[to_state]
+        
+        if 'loc' not in from_label or 'loc' not in to_label:
+            continue
+        
+        from_loc = from_label['loc']
+        to_loc = to_label['loc']
+        
+        proj_adj[from_loc, to_loc] = 1
     
-    return arrow
+    return proj_adj
+
+def plot_strategy(ab, mealy):
+    """Plot strategic transitions on PPP.
+    
+    Assumes that mealy is feasible for ab.
+    
+    @type ab: L{AbstractPwa} or L{AbstractSwitched}
+    
+    @type mealy: L{transys.MealyMachine}
+    """
+    proj_mealy = project_strategy_on_partition(ab.ppp, mealy)
+    ax = plot_partition(ab.ppp, proj_mealy, color_seed=0)
+    return ax
 
 def plot_trajectory(ppp, x0, u_seq, ssys,
                     ax=None, color_seed=None):
@@ -195,13 +154,13 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
 
     See Also
     ========
-    L{plot_partition}, plot
+    C{plot_partition}, plot
 
     @type ppp: L{PropPreservingPartition}
     @param x0: initial state
     @param u_seq: matrix where each row contains an input
     @param ssys: system dynamics
-    @param color_seed: see L{plot_partition}
+    @param color_seed: see C{plot_partition}
     @return: axis object
     """
     if ax is None:

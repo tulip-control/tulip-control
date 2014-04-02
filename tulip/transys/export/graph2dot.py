@@ -63,30 +63,29 @@ except ImportError:
     logger.error('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
-def _states2dot_str(states, to_pydot_graph, wrap=10):
+def _states2dot_str(graph, to_pydot_graph, wrap=10):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
+    states = graph.states
+    
     # get labeling def
-    if states._exist_labels():
+    if hasattr(graph, '_state_label_def'):
         label_def = states.graph._state_label_def
         label_format = states.graph._state_dot_label_format
     
-    for (state_id, state_data) in states.graph.nodes_iter(data=True):
-        state = states._int2mutant(state_id)
-        
+    for (state, state_data) in states.graph.nodes_iter(data=True):
         if state in states.initial:
-            _add_incoming_edge(to_pydot_graph, state_id)
+            _add_incoming_edge(to_pydot_graph, state)
         
         node_shape = _decide_node_shape(states.graph, state)
         
         # state annotation
-        if states._exist_labels():
-            node_dot_label = _form_node_label(
-                state, state_data, label_def, label_format, wrap
-            )
-        else:
-            node_dot_label = fill(str(state), width=wrap)
-            node_dot_label.replace('\n', '\\n')
+        node_dot_label = _form_node_label(
+            state, state_data, label_def, label_format, wrap
+        )
+    
+        #node_dot_label = fill(str(state), width=wrap)
+        #node_dot_label.replace('\n', '\\n')
         
         # state boundary color
         if state_data.has_key('color'):
@@ -106,7 +105,7 @@ def _states2dot_str(states, to_pydot_graph, wrap=10):
         # TODO option to replace with int to reduce size,
         # TODO generate separate LaTeX legend table (PNG option ?)
         to_pydot_graph.add_node(
-            state_id,
+            state,
             label=node_dot_label,
             shape=node_shape,
             style=node_style,
@@ -143,7 +142,8 @@ def _form_node_label(state, state_data, label_def,
         if isinstance(label_value, str):
             label_str = fill(label_value, width=width)
         elif isinstance(label_value, Iterable): # and not str
-            label_str = fill(str(list(label_value) ), width=width)
+            s = ', '.join([str(x) for x in label_value])
+            label_str = '{' + fill(s, width=width) + '}'
         else:
             label_str = fill(str(label_value), width=width)
         label_str.replace('\n', '\\n')
@@ -158,7 +158,7 @@ def _decide_node_shape(graph, state):
     node_shape = graph.dot_node_shape['normal']
     
     # check if accepting states defined
-    if not graph.states._exist_accepting_states(warn=False):
+    if not hasattr(graph.states, 'accepting'):
         return node_shape
     
     # check for accepting states
@@ -172,7 +172,12 @@ def _transitions2dot_str(trans, to_pydot_graph):
     
     @rtype: str
     """
-    trans._exist_labels()
+    if not hasattr(trans.graph, '_transition_label_def'):
+        return
+    if not hasattr(trans.graph, '_transition_dot_label_format'):
+        return
+    if not hasattr(trans.graph, '_transition_dot_mask'):
+        return
     
     # get labeling def
     label_def = trans.graph._transition_label_def
@@ -204,8 +209,12 @@ def _form_edge_label(edge_data, label_def, label_format, label_mask):
                 continue
         
         # label formatting
-        type_name = label_format[label_type]
-        sep_type_value = label_format['type?label']
+        if label_type in label_format:
+            type_name = label_format[label_type]
+            sep_type_value = label_format['type?label']
+        else:
+            type_name = ':'
+            sep_type_value = ','
         
         if isinstance(label_value, str):
             # str is Iterable: avoid turning it to list
@@ -233,7 +242,7 @@ def _pydot_missing():
 def _graph2pydot(graph, wrap=10):
     """Convert (possibly labeled) state graph to dot str.
     
-    @type graph: LabeledStateDiGraph 
+    @type graph: L{LabeledDiGraph}
     
     @rtype: str
     """
@@ -242,11 +251,11 @@ def _graph2pydot(graph, wrap=10):
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    _states2dot_str(graph.states, dummy_nx_graph, wrap)
+    _states2dot_str(graph, dummy_nx_graph, wrap)
     _transitions2dot_str(graph.transitions, dummy_nx_graph)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
-    pydot_graph.set_overlap(False)
+    pydot_graph.set_overlap('false')
     
     return pydot_graph
 
@@ -255,7 +264,7 @@ def graph2dot_str(graph, wrap=10):
     
     Requires pydot.
     
-    @type graph: LabeledStateDiGraph
+    @type graph: L{LabeledDiGraph}
     
     @rtype: str
     """
@@ -266,7 +275,7 @@ def graph2dot_str(graph, wrap=10):
 def save_dot(graph, path, fileformat, rankdir, prog, wrap):
     """Save state graph to dot file.
     
-    @type graph: LabeledStateDiGraph
+    @type graph: L{LabeledDiGraph}
     
     @return: True upon success
     @rtype: bool
@@ -280,7 +289,7 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap):
     pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 
-def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
+def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     """Plot a networkx or pydot graph using dot.
     
     No files written or deleted from the disk.
@@ -301,6 +310,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     
     @param rankdir: direction to layout nodes
     @type rankdir: 'LR' | 'TB'
+    
+    @param ax: axes
     """
     if pydot is None:
         msg = 'Using plot_pydot requires that pydot be installed.'
@@ -349,13 +360,18 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10):
     if matplotlib:
         logger.debug('Matplotlib installed.')
         
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        
         sio = StringIO()
         sio.write(png_str)
         sio.seek(0)
         img = mpimg.imread(sio)
-        imgplot = plt.imshow(img, aspect='equal')
+        ax.imshow(img, aspect='equal')
         plt.show(block=False)
-        return imgplot
+        
+        return ax
     else:
         logger.debug('Matplotlib not installed.')
     

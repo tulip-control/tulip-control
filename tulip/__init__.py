@@ -36,6 +36,6 @@ The Temporal Logic Planning (TuLiP) Toolbox provides functions
 for verifying and constructing control protocols.
 """
 
-__all__ = ["abstract", "polytope", "hybrid", "transys"]
+__all__ = ["abstract", "hybrid", "transys"]
 
 __version__ = "1.0b"

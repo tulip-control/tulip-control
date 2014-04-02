@@ -4,7 +4,7 @@ abstract.get_input usage example
 to be run after robot_continuous.py, in same session
 """
 from tulip.abstract import get_input, find_discrete_state
-from tulip.polytope import is_inside
+from polytope import is_inside
 import numpy as np
 
 def integrate(sys_dyn, x0, u_seq):

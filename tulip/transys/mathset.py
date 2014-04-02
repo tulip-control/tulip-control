@@ -130,16 +130,6 @@ class MathSet(object):
         set_str = ', '.join([repr(i) for i in self._set] )
         return 'MathSet({' +set_str +'} +' +str(self._list) +')'
     
-    def __call__(self):
-        return list(self._set) +self._list
-    
-    #def __get__(self, instance, iterable):
-    #    return self()
-    
-    #def __set__(self, instance, iterable):
-    #    self._delete_all()
-    #    self.add_from(iterable)
-    
     def __or__(self, other):
         """Union with another mathematical set.
         
@@ -261,7 +251,7 @@ class MathSet(object):
         return item in self._list
     
     def __iter__(self):
-        return iter(self() )
+        return iter(self._list + list(self._set))
     
     def __len__(self):
         """Number of elements in set."""
@@ -466,15 +456,22 @@ class SubSet(MathSet):
     ========
     MathSet, PowerSet
     """
-    def __init__(self, iterable_superset):
-        """Define the superset with respect to maintain consistency.
+    def __init__(self, superset, iterable=None):
+        """Define the superset of this set.
         
-        @param iterable_superset: This SubSet checked vs C{superset}
-        @type iterable_superset: Iterable
+        @param superset: This SubSet checked vs C{superset}
+        @type superset: Iterable
+        
+        @param iterable: elements to add to subset
+        @type iterable: Iterable
         """
-        self._superset = []
+        self._superset = superset
+        
         super(SubSet, self).__init__([])
-        self.superset = iterable_superset
+        
+        if not isinstance(superset, Container):
+            raise TypeError('superset must be Iterable,\n' +
+                            'Got instead:\n\t' +str(superset) )
     
     def __repr__(self):
         return 'SubSet(' +pformat(list(self._set) +self._list) +')'
@@ -483,23 +480,9 @@ class SubSet(MathSet):
         set_str = ', '.join([repr(i) for i in self._set] )
         return 'SubSet({' +set_str +'} +' +str(self._list) +')'
     
-    def _get_superset(self):
+    @property
+    def superset(self):
         return self._superset
-    
-    def _set_superset(self, iterable_superset):
-        if not isinstance(iterable_superset, Container):
-            raise TypeError('superset must be Iterable,\n' +
-                            'Got instead:\n\t' +str(iterable_superset) )
-        
-        # consistent with existing values ?
-        if not is_subset(self(), iterable_superset):
-            msg = 'Not all elements currently in SubSet:\n\t' +str(self)
-            msg += 'are in given superset:\n\t' +str(iterable_superset)
-            raise Exception(msg)
-        
-        self._superset = iterable_superset
-    
-    superset = property(_get_superset, _set_superset)
     
     def add(self, new_element):
         """Add state to subset.
@@ -516,12 +499,12 @@ class SubSet(MathSet):
         ========
         MathSet.add
         """
-        if not new_element in self.superset:
+        if not new_element in self._superset:
             raise Exception(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
                 'FYI: new element:\n\t' +str(new_element) +'\n'
-                'and superset:\n\t' +str(self.superset)
+                'and superset:\n\t' +str(self._superset)
             )
         
         super(SubSet, self).add(new_element)
@@ -546,13 +529,8 @@ class SubSet(MathSet):
         if not is_subset(new_elements, self._superset):
             raise Exception('All new_elements:\n\t' +str(new_elements) +
                             '\nshould already be \\in ' +
-                            'self.superset = ' +str(self.superset) )
+                            'self.superset = ' +str(self._superset) )
         super(SubSet, self).add_from(new_elements)
-    
-    def has_superset(self, superset):
-        """Check if given set if the superset.
-        """
-        return superset is self._superset
 
 class CartesianProduct(object):
     """List of MathSets, with Cartesian semantics.
@@ -717,7 +695,7 @@ class PowerSet(object):
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
     """    
-    def __init__(self, iterable=[]):
+    def __init__(self, iterable=None):
         """Create new PowerSet over elements contained in S = C{iterable}.
         
         This powerset is 2^S.
@@ -725,6 +703,8 @@ class PowerSet(object):
         @param iterable: contains elements of set S underlying the PowerSet.
         @type iterable: iterable of elements which can be hashable or not.
         """
+        if iterable is None:
+            iterable = []
         self.math_set = MathSet(iterable)
     
     def __get__(self, instance, value):
@@ -741,12 +721,8 @@ class PowerSet(object):
         
         return is_subset(item, self.math_set)
     
-    def __call__(self):
-        """Return the powerset as list of subsets, each subset as tuple."""
-        return list(powerset(self.math_set) )
-    
     def __iter__(self):
-        return iter(self() )
+        return powerset(self.math_set)
     
     def __len__(self):
         return 2**len(self.math_set)
@@ -775,3 +751,66 @@ class PowerSet(object):
             raise Exception(msg)
         
         object.__setattr__(self, name, value)
+
+class TypedDict(dict):
+    """dict subclass where values can be constrained by key.
+    
+    For each key, a domain can optionally be defined,
+    which restricts the admissible values that can be
+    paired with that key.
+    """
+    # credits for debugging this go here:
+    #   http://stackoverflow.com/questions/2060972/
+    def __init__(self, *args, **kwargs):
+        self.update(*args, **kwargs)
+    
+    def __setitem__(self, i, y):
+        """Raise ValueError if value y not allowed for key i.
+        """
+        valid_y = True
+        try:
+            if i in self.allowed_values:
+                if y not in self.allowed_values[i]:
+                    valid_y = False
+        except:
+            pass
+        
+        if not valid_y:
+            msg = 'key: ' + str(i) + ', cannot be'
+            msg += ' assigned value: ' + str(y) + '\n'
+            msg += 'Admissible values are:\n\t'
+            msg += str(self.allowed_values[i])
+            raise ValueError(msg)
+        
+        super(TypedDict, self).__setitem__(i, y)
+    
+    def __str__(self):
+        return 'TypedDict(' + dict.__str__(self) + ')'
+    
+    def update(self, *args, **kwargs):
+        if args:
+            if len(args) > 1:
+                raise TypeError("update expected at most 1 arguments, "
+                                "got %d" % len(args))
+            other = dict(args[0])
+            for key in other:
+                self[key] = other[key]
+        for key in kwargs:
+            self[key] = kwargs[key]
+
+    def setdefault(self, key, value=None):
+        if key not in self:
+            self[key] = value
+        return self[key]
+    
+    def set_types(self, allowed_values):
+        """Restrict values the key can be paired with.
+        
+        @param allowed_values: dict of the form:
+            
+                {key : values}
+            
+                C{values} must implement C{__contains__}
+                to enable checking validity of values.
+        """
+        self.allowed_values = allowed_values
