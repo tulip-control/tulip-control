@@ -18,7 +18,7 @@ sys.path.append('../')
 import numpy as np
 import tomatlab
 from tulip import spec, synth, hybrid
-from tulip.polytope import box2poly
+from polytope import box2poly
 from tulip.abstract import prop2part, discretize, find_controller
 # @import_section_end@
 
