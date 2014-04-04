@@ -71,7 +71,10 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10):
     # get labeling def
     if hasattr(graph, '_state_label_def'):
         label_def = states.graph._state_label_def
+    if hasattr(graph, '_state_dot_label_format'):
         label_format = states.graph._state_dot_label_format
+    else:
+        label_format = {'type?label':'', 'separator':'\\n'}
     
     for (state, state_data) in states.graph.nodes_iter(data=True):
         if state in states.initial:
