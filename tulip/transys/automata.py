@@ -388,7 +388,7 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
     prod_ba.states.initial |= set(prod_ts.states.initial)
-    print('initial:\n\t' +str(prod_ts.states.initial) )
+    
     # accepting states = persistent set
     prod_ba.states.accepting |= persistent
     
