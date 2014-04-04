@@ -135,8 +135,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     Having added states, we can also add some labeled transitions:
     
     >>> ts.actions |= ['think', 'write']
-    >>> ts.transitions.add_labeled('s0', 's1', 'think')
-    >>> ts.transitions.add_labeled('s1', 5, 'write')
+    >>> ts.transitions.add('s0', 's1', actions='think')
+    >>> ts.transitions.add('s1', 5, actions='write')
     
     Note that an unlabeled transition:
     
@@ -318,8 +318,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 self.transitions.add(from_state, to_state)
             else:
                 sublabel_value = label_dict['actions']
-                self.transitions.add_labeled(
-                    from_state, to_state, sublabel_value
+                self.transitions.add(
+                    from_state, to_state, actions=sublabel_value
                 )
         
         return copy.copy(self)
@@ -763,7 +763,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             logger.debug('Added labeled edge (=transition):\n\t' +
                    str(from_state) +'---[' +str(act) +']--->' +
                    str(to_state) +'\n')
-            ts.transitions.add_labeled(from_state, to_state, act)
+            ts.transitions.add(from_state, to_state, actions=act)
     
     return ts
 
@@ -1012,6 +1012,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                           str(enabled_ba_trans) )
             
             if not enabled_ba_trans:
+                logger.debug('No enabled transitions')
                 continue
             
             for (q, next_q, sublabels) in enabled_ba_trans:
@@ -1034,7 +1035,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 # is fts transition labeled with an action ?
                 ts_enabled_trans = fts.transitions.find(
                     [s], to_states=[next_s],
-                    with_attr_dict=None, as_dict=False
+                    with_attr_dict=None
                 )
                 for (from_s, to_s, sublabel_values) in ts_enabled_trans:
                     assert(from_s == s)
@@ -1047,8 +1048,8 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                         prodts.transitions.add(sq, new_sq)
                     else:
                         #TODO open FTS
-                        prodts.transitions.add_labeled(
-                            sq, new_sq, sublabel_values[0]
+                        prodts.transitions.add(
+                            sq, new_sq, actions=sublabel_values['actions']
                         )
         
         # discard visited & push them to queue

@@ -378,31 +378,21 @@ class MealyMachine(FiniteStateMachine):
     >>> p = 'present'
     >>> a = 'absent'
     
-    The transitions can now be defined using tuples
-    for the values of the inputs and outputs.
-    The inputs and outputs annotate transitions of a Mealy machine.
-    The order is inputs, outputs and the order within each
-    is defined by the list passed to .add_inputs and .add_outputs above.
-    
-    >>> m.transitions.add_labeled('red', 'green', (p, p, a) )
-    >>> m.transitions.add_labeled('green', 'yellow', (p, a, p) )
-    >>> m.transitions.add_labeled('yellow', 'red', (p, a, p) )
-    
     The transitions can equivalently be defined with dict().
-    So instead of the previous m.transitions.add_labeled, we can use:
+    So instead of the previous C{m.transitions.add}, we can use:
     
     >>> label = {'tick':p, 'go':p, 'stop':a}
-    >>> m.transitions.add_labeled('red', 'green', label)
+    >>> m.transitions.add('red', 'green', **label)
     >>> label = {'tick':p, 'go':a, 'stop':p}
-    >>> m.transitions.add_labeled('green', 'yellow', label)
+    >>> m.transitions.add('green', 'yellow', **label)
     >>> label = {'tick':p, 'go':a, 'stop':p}
-    >>> m.transitions.add_labeled('yellow', 'red', label)
+    >>> m.transitions.add('yellow', 'red', **label)
     
     This avoids any ordering issues, i.e., changing the
     order of the sublabels does not matter:
     
     >>> label = {'go':p, 'tick':p, 'stop':a}
-    >>> m.transitions.add_labeled('red', 'green', label)
+    >>> m.transitions.add('red', 'green', **label)
     
     Theory
     ======

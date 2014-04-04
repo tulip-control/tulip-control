@@ -1305,8 +1305,8 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
             from_state = prod_ids2states(from_state_id, self, other)
             to_state = prod_ids2states(to_state_id, self, other)
             
-            prod_sys.transitions.add_labeled(
-                from_state, to_state, edge_dict
+            prod_sys.transitions.add(
+                from_state, to_state, **edge_dict
             )
         return prod_sys
     
