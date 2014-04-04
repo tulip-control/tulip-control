@@ -778,8 +778,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         # export properties
         self.dot_node_shape = {'normal':'circle'}
-        self.default_export_path = './'
-        self.default_export_fname = 'out'
         self.default_layout = 'dot'
         
     def _init_labeling(self, label_types):
@@ -1193,12 +1191,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def _export_fname(self, path, file_type, addext):
         if path == 'default':
             if self.name == '':
-                path = self.default_export_path +self.default_export_fname
             else:
-                path = self.default_export_path +self.name
         
         if addext:
-            path = self._add_missing_extension(path, file_type)
         
         return path
     
