@@ -1105,47 +1105,47 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         return graph2dot.graph2dot_str(self, wrap)
     
-    def save(self, filename='default', fileformat=None,
-             add_missing_extension=True, rankdir='LR', prog=None,
-             wrap=10):
+    def save(self, filename=None, fileformat=None,
+             rankdir='LR', prog=None,
+             wrap=10, latex=False):
         """Save image to file.
         
-        Recommended: pdf, html, svg (can render LaTeX labels with inkscape export)
+        Recommended file formats:
         
-        Caution
-        =======
-        rankdir experimental argument
+            - pdf, eps
+            - png, gif
+            - svg (can render LaTeX labels with inkscape export)
+            - dot
         
-        Depends
-        =======
+        Any other format supported by C{pydot.write} is available.
+        
+        Experimental:
+        
+            - html (uses d3.js)
+            - 'scxml'
+        
+        Requires
+        ========
         dot, pydot
         
         See Also
         ========
-        L{plot}, pydot.Dot.write
+        L{plot}, C{pydot.Dot.write}
         
-        @param fileformat: type of image file
-        @type fileformat: str = 'dot' | 'pdf'| 'png'| 'svg' | 'gif' | 'eps' 
-            (for more, see pydot.write)
-            | 'scxml' | 'html' (using d3.js for animation)
-        
-        @param filename: path to image
-            (extension C{.fileformat} appened if missing and
-            C{add_missing_extension==True} )
-            Default:
+        @param filename: file path to save image to
+            Default is C{self.name}, unless C{name} is empty,
+            then use 'out.pdf'.
             
-              - If C{self.name} is not set and no C{path} given,
-                  then use C{self.default_export_fname} prepended with
-                  C{self.default_export_fname}.
-              - If C{self.name} is set, but no C{path} given,
-                  then use C{self.name} prepended with
-                  C{self.default_export_fname}.
-              - If C{path} is given, use that.
+            If extension is missing '.pdf' is used.
         @type filename: str
         
-        @param add_missing_extension: if extension C{.fileformat} missing,
-            it is appended
-        @type add_missing_extension: bool
+        @param fileformat: replace the extension of C{filename}
+            with this. For example:
+                
+                filename = 'fig.pdf'
+                fileformat = 'svg'
+            
+                result in saving 'fig.svg'
         
         @param rankdir: direction for dot layout
         @type rankdir: str = 'TB' | 'LR'
@@ -1153,49 +1153,52 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         @param prog: executable to call
         @type prog: dot | circo | ... see pydot.Dot.write
-
+        
+        @param wrap: max width of node strings
+        @type wrap: int
+        
+        @param latex: when printing states,
+            prepend underscores to numbers that follow letters,
+            enclose the string is $ to create a math environment.
+        
         @rtype: bool
         @return: True if saving completed successfully, False otherwise.
         """
-        if fileformat is None:
-            fname, fextension = os.path.splitext(filename)
-            if not fextension:
-                fextension = '.pdf'
-            fileformat = fextension[1:]
+        if filename is None:
+            if not self.name:
+                filename = 'out'
+            else:
+                filename = self.name
         
-        path = self._export_fname(filename, fileformat,
-                                  addext=add_missing_extension)
+        fname, fextension = os.path.splitext(filename)
+        
+        # default extension
+        if not fextension or fextension is '.':
+            fextension = '.pdf'
+        
+        if fileformat:
+            fextension = '.' + fileformat
+        
+        filename = fname + fextension
+        
+        # drop '.'
+        fileformat = fextension[1:]    
         
         if fileformat is 'html':
-            return save_d3.labeled_digraph2d3(self, path)
+            return save_d3.labeled_digraph2d3(self, filename)
         
         # subclass has extra export formats ?
         if hasattr(self, '_save'):
-            if self._save(path, fileformat):
+            if self._save(filename, fileformat):
                 return True
         
         if prog is None:
             prog = self.default_layout
         
-        graph2dot.save_dot(self, path, fileformat, rankdir, prog, wrap)
+        graph2dot.save_dot(self, filename, fileformat, rankdir,
+                           prog, wrap, latex)
         
         return True
-    
-    def _add_missing_extension(self, path, file_type):
-        filename, file_extension = os.path.splitext(path)
-        desired_extension = os.path.extsep +file_type
-        if file_extension != desired_extension:
-            path = filename +desired_extension
-        return path
-    
-    def _export_fname(self, path, file_type, addext):
-        if path == 'default':
-            if self.name == '':
-            else:
-        
-        if addext:
-        
-        return path
     
     def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
         """Plot image using dot.
