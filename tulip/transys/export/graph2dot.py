@@ -125,8 +125,10 @@ def _add_incoming_edge(g, state):
 def _form_node_label(state, state_data, label_def,
                             label_format, width=10):
     # node itself
-    state_str = fill(str(state), width=width)
-    state_str.replace('\n', '\\n')
+    state_str = str(state)
+    state_str = state_str.replace("'", "")
+    state_str = fill(state_str, width=width)
+    #state_str = state_str.replace('\n', '\\n')
     node_dot_label = '"' +state_str +'\\n'
     
     # add node annotations from action, AP sets etc
@@ -223,7 +225,8 @@ def _form_edge_label(edge_data, label_def, label_format, label_mask):
             # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
-            label_str = str(list(label_value) )
+            s = ', '.join([str(x) for x in label_value])
+            label_str = '{' + fill(s) + '}'
         else:
             label_str = str(label_value)
         
