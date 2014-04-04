@@ -109,6 +109,8 @@ def transition_directions_test():
         assert(ts[i][j][0]['env_actions'] == 'normal')
         assert(ts[i][j][0]['sys_actions'] == 'fly')
 
+transition_directions_test.slow = True
+
 def test_transient_regions():
     """drift is too strong, so no self-loop must exist
     
@@ -208,6 +210,9 @@ def test_abstract_the_dynamics():
 
     #self_loops = {i for i,j in ab.ts.transitions() if i==j}
     #print('self loops at states: ' + str(self_loops))
+
+test_abstract_the_dynamics.slow = True
+
 
 if __name__ == '__main__':
     test_abstract_the_dynamics()
