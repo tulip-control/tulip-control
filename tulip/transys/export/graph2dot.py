@@ -292,7 +292,7 @@ def graph2dot_str(graph, wrap=10, latex=False):
     
     @type graph: L{LabeledDiGraph}
     
-    @param: wrap
+    @param wrap: textwrap width
     
     @rtype: str
     """

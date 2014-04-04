@@ -265,6 +265,8 @@ class States(object):
     
     def backward_reachable(self, state):
         """Return states from which the given state can be reached.
+
+        A wrapper of networkx.ancestors.
         """
         ancestors = nx.ancestors(self, state)
         return ancestors
@@ -678,7 +680,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     The label key 'day' will be untyped,
     so the class accepts 'Jan', though incorrect.
     
-    >>> g.add_nodes_from([(1, {'fruit':'apple'}), \
+    >>> g.add_nodes_from([(1, {'fruit':'apple'}),
                           (2, {'fruit':'lemon', 'day':'Jan'})])
     
     Note
@@ -699,7 +701,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     
     Credits
     =======
-    Some code in overriden methods of networkx.MultiDiGraph
+    Some code in overridden methods of networkx.MultiDiGraph
     is adapted from networkx, which is distributed under the BSD license.
     """
     def __init__(
@@ -1140,12 +1142,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @type filename: str
         
         @param fileformat: replace the extension of C{filename}
-            with this. For example:
+            with this. For example::
                 
                 filename = 'fig.pdf'
                 fileformat = 'svg'
             
-                result in saving 'fig.svg'
+            result in saving 'fig.svg'
         
         @param rankdir: direction for dot layout
         @type rankdir: str = 'TB' | 'LR'
