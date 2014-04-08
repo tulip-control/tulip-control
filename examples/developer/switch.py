@@ -60,7 +60,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     
 # Controller synthesis
 ctrl = synth.synthesize('gr1c', specs, sys=sys_swe,
-                        ignore_sys_init=True, bool_actions=True, verbose=1)
+                        ignore_sys_init=True, bool_actions=True)
 
 if not ctrl.save('switch.pdf'):
     print(ctrl)

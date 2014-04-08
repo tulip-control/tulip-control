@@ -450,7 +450,7 @@ class GRSpec(LTL):
         else:
             return "True"
     
-    def sym_to_prop(self, props, verbose=0):
+    def sym_to_prop(self, props):
         """Replace the symbols of propositions with the actual propositions.
 
         @type props: dict
@@ -475,8 +475,7 @@ class GRSpec(LTL):
                 
                 if propSymbol[-1] != "'":  # To handle gr1c primed variables
                     propSymbol += r"\b"
-                if (verbose > 2):
-                    print('\t' + propSymbol + ' -> ' + prop)
+                logger.debug('\t' + propSymbol + ' -> ' + prop)
                 
                 symfound  = _sub_all(self.env_init, propSymbol, prop)
                 symfound |= _sub_all(self.env_safety, propSymbol, prop)
