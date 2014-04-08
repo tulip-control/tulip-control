@@ -32,8 +32,6 @@
 """
 Classes for executions, traces, words, input port valuations, etc.
 """
-from collections import OrderedDict
-
 class FiniteSequence(object):
     """Used to construct finite words."""
     def __init__(self, sequence):
@@ -310,7 +308,7 @@ class MachineInputSequence(object):
                 'machine has no inputs field\n.' +
                 'Got type:\n\t' +str(type(machine) ) )
         
-        self.inputs = OrderedDict(machine.inputs)
+        self.inputs = machine.inputs
         self._input_valuations = dict()
     
     def __str__(self):
