@@ -38,6 +38,8 @@ import logging
 logger = logging.getLogger(__name__)
 from warnings import warn
 
+import ply.lex as lex
+import ply.yacc as yacc
 
 from ast import ASTVar, ASTNum, ASTBool, ASTArithmetic, \
     ASTComparator, ASTUnTempOp, ASTBiTempOp, \
@@ -104,8 +106,7 @@ def t_error(t):
     t.lexer.skip(1)
     
 # Build the lexer
-import ply.lex as lex
-lex.lex()
+lexer = lex.lex()
 
 # lowest to highest
 precedence = (
@@ -213,9 +214,8 @@ def p_bool(t):
 def p_error(t):
     warn("Syntax error at '%s'" % t.value)
 
-import ply.yacc as yacc
-yacc.yacc(tabmodule="tulip.spec.parsetab",
-          write_tables=0, debug=0)
+parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
+                   write_tables=0, debug=0)
 
 def rebuild_parsetab():
     yacc.yacc(tabmodule="parsetab",
@@ -224,10 +224,10 @@ def rebuild_parsetab():
 def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
-    return yacc.parse(formula)
+    return parser.parse(formula)
     
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
-    p = yacc.parse(s)
+    p = parser.parse(s)
     
     print('Parsing result: ' + str(p.to_gr1c()))
