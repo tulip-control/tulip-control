@@ -35,6 +35,9 @@ Interface to the JTLV implementation of GR(1) synthesis
 Relevant links:
   - U{JTLV<http://jtlv.ysaar.net/>}
 """
+import logging
+logger = logging.getLogger(__name__)
+
 import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
@@ -299,7 +302,8 @@ def generate_JTLV_SMV(spec, verbose=0):
         smv+= '\t\t'
         smv+= var
         smv+= ' : boolean;\n'
-        
+    
+    logger.debug(smv)
     return smv
 
 def generate_JTLV_LTL(spec, verbose=0):
@@ -312,6 +316,8 @@ def generate_JTLV_LTL(spec, verbose=0):
     parse(formula)  # Raises exception if syntax error
 
     specLTL = spec.to_jtlv()
+    logger.debug(''.join([str(x) for x in specLTL]) )
+    
     assumption = specLTL[0]
     guarantee = specLTL[1]
     
