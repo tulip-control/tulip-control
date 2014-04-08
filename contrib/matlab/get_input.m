@@ -2,7 +2,11 @@
 % index of a target region, and a horizon.
 
 
-function u = get_input(continuous_state, end_loc, horizon)
+function u = get_input(input)
+
+horizon = input(end);
+end_loc = input(end-1);
+continuous_state = input(1:end-2);
 
 % Get variables from base workspace
 regions = evalin('base', 'regions');
