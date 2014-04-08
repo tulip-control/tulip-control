@@ -125,6 +125,6 @@ def fts2promela(graph, procname=None):
     s += '}\n'
     return s
 
-def mealy2promela():
-    """Convert Mealy machine to Promela str.
-    """
+#def mealy2promela():
+#    """Convert Mealy machine to Promela str.
+#    """
