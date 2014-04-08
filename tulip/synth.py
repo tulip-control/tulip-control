@@ -39,8 +39,8 @@ import warnings
 
 from tulip import transys
 from tulip.spec import GRSpec
-from tulip.interfaces import jtlvint
-from tulip.interfaces import gr1cint
+from tulip.interfaces import jtlv
+from tulip.interfaces import gr1c
 
 _hl = '\n' +60*'-'
 
@@ -1157,9 +1157,9 @@ def synthesize(
                           bool_actions)
     
     if option == 'gr1c':
-        ctrl = gr1cint.synthesize(specs, verbose=verbose)
+        ctrl = gr1c.synthesize(specs, verbose=verbose)
     elif option == 'jtlv':
-        ctrl = jtlvint.synthesize(specs, verbose=verbose)
+        ctrl = jtlv.synthesize(specs, verbose=verbose)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
@@ -1199,9 +1199,9 @@ def is_realizable(
     )
     
     if option == 'gr1c':
-        r = gr1cint.check_realizable(specs, verbose=verbose)
+        r = gr1c.check_realizable(specs, verbose=verbose)
     elif option == 'jtlv':
-        r = jtlvint.check_realizable(specs, verbose=verbose)
+        r = jtlv.check_realizable(specs, verbose=verbose)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
