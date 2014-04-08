@@ -15,7 +15,7 @@ MPTsys = evalin('base', 'MPTsys');
 
 
 % Get Chebyshev center of end region
-end_region = regions{end_loc}.region;
+end_region = regions{end_loc+1}.region;
 end_cheby = end_region.chebyCenter;
 end_cheby = double(end_cheby.x);
 offset = control_weights.mid_weight*norm(continuous_state - end_cheby);
