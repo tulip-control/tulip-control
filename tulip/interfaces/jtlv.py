@@ -49,7 +49,7 @@ JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
 def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
-                     init_option=1, verbose=0):
+                     init_option=1):
     """Decide realizability of specification defined by given GRSpec object.
 
     ...for standalone use
@@ -58,7 +58,7 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
     """
     fSMV, fLTL, fAUT = create_files(spec)
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
-                            priority_kind, init_option, verbose)
+                            priority_kind, init_option)
     os.unlink(fSMV)
     os.unlink(fLTL)
     os.unlink(fAUT)
@@ -66,7 +66,7 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
 
 def solve_game(
     spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m',
-    priority_kind=3, init_option=1, verbose=0
+    priority_kind=3, init_option=1
 ):
     """Decide realizability of specification.
 
@@ -116,8 +116,6 @@ def solve_game(
                 For each initial environment state, the resulting
                 automaton contain all the possible initial system states,
                 starting from which the system can satisfy the specification.
-
-    @param verbose: an integer that specifies the level of verbosity.
     """
     priority_kind = get_priority(priority_kind)
     
@@ -131,7 +129,7 @@ def solve_game(
         init_option = 1
 
     
-    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose)
+    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
     
     realizable = False
     
@@ -153,7 +151,7 @@ def solve_game(
 
 def synthesize(
     spec, heap_size='-Xmx128m', priority_kind = 3,
-    init_option = 1, verbose=0
+    init_option = 1
 ):
     """Synthesize a strategy satisfying the spec.
 
@@ -165,17 +163,17 @@ def synthesize(
     fSMV, fLTL, fAUT = create_files(spec)
 
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
-                            priority_kind, init_option, verbose)
+                            priority_kind, init_option)
 
     # Build Automaton
     if (not realizable):
-        counter_examples = get_counterexamples(fAUT, verbose=verbose)
+        counter_examples = get_counterexamples(fAUT)
         os.unlink(fSMV)
         os.unlink(fLTL)
         os.unlink(fAUT)
         return counter_examples
     else: 
-        aut = load_file(fAUT, spec, verbose=verbose)
+        aut = load_file(fAUT, spec)
         os.unlink(fSMV)
         os.unlink(fLTL)
         os.unlink(fAUT)
@@ -229,31 +227,41 @@ def get_priority(priority_kind):
         priority_kind = 3
     return priority_kind
 
-def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
-    """Subprocess calls to JTLV."""
-    if (verbose > 0):
-        print('Calling jtlv with the following arguments:')
-        print('  heap size: ' + heap_size)
-        print('  jtlv path: ' + JTLV_PATH)
-        print('  priority_kind: ' + str(priority_kind) + '\n')
+def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
+    """Subprocess calls to JTLV.
+    """
+    logger.info('Calling jtlv with the following arguments:')
+    logger.info('  heap size: ' + heap_size)
+    logger.info('  jtlv path: ' + JTLV_PATH)
+    logger.info('  priority_kind: ' + str(priority_kind) + '\n')
 
     if (len(JTLV_EXE) > 0):
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-        print jtlv_grgame
-        if (verbose > 1):
-            print('  java ' +str(heap_size) +' -jar ' +str(jtlv_grgame) +' ' +
-                str(fSMV) +' ' +str(fLTL) +' ' +str(fAUT) +' ' +
-                str(priority_kind) +' ' +str(init_option) )
+        logger.debug(jtlv_grgame)
+        logger.debug(
+            '  java ' + str(heap_size) +
+            ' -jar ' + str(jtlv_grgame) +
+            ' ' + str(fSMV) +
+            ' ' + str(fLTL) +
+            ' ' + str(fAUT) +
+            ' ' + str(priority_kind) +
+            ' ' + str(init_option)
+        )
         cmd = subprocess.call( \
             ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
                  str(priority_kind), str(init_option)])
     else: # For debugging purpose
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
-        if (verbose > 1):
-            print('  java ' +str(heap_size) +' -cp ' +str(classpath) +
-                ' GRMain ' +str(fSMV) +' ' +str(fLTL) +' ' +
-                str(fAUT) +' ' +str(priority_kind) +' ' +str(init_option) )
+        logger.debug(
+            '  java ' + str(heap_size) +
+            ' -cp ' + str(classpath) +
+            ' GRMain ' + str(fSMV) +
+            ' ' + str(fLTL) +
+            ' ' + str(fAUT) +
+            ' ' + str(priority_kind) +
+            ' ' + str(init_option)
+        )
         cmd = subprocess.call([
             "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
             fAUT, str(priority_kind), str(init_option)
@@ -263,7 +271,7 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option, verbose):
 #                aut_file, str(priority_kind), str(init_option)], \
 #               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
-def generate_JTLV_SMV(spec, verbose=0):
+def generate_JTLV_SMV(spec):
     """Return the SMV module definitions needed by JTLV.
 
     N.B., assumes all variables are Boolean (i.e., atomic
@@ -306,7 +314,7 @@ def generate_JTLV_SMV(spec, verbose=0):
     logger.debug(smv)
     return smv
 
-def generate_JTLV_LTL(spec, verbose=0):
+def generate_JTLV_LTL(spec):
     """Return the LTLSPEC for JTLV.
 
     It takes as input a GRSpec object.  N.B., assumes all variables
@@ -362,7 +370,7 @@ def generate_JTLV_LTL(spec, verbose=0):
 
     return ltl
 
-def load_file(aut_file, spec, verbose=0):
+def load_file(aut_file, spec):
     """Construct a Mealy Machine from an aut_file.
 
     N.B., assumes all variables are Boolean (i.e., atomic
@@ -423,12 +431,12 @@ def load_file(aut_file, spec, verbose=0):
                     state[var] = val
                 if (len(varnames) > 0):
                     if not var in varnames:
-                        print('Unknown variable ' + var)
+                        logger.error('Unknown variable ' + var)
 
 
             for var in varnames:
                 if not var in state.keys():
-                    print('Variable ' + var + ' not assigned')
+                    logger.error('Variable ' + var + ' not assigned')
 
         # parse transitions
         if (line.find('successors') >= 0):
@@ -491,7 +499,7 @@ def load_file(aut_file, spec, verbose=0):
     """
     return m
             
-def get_counterexamples(aut_file, verbose=0):
+def get_counterexamples(aut_file):
     """Return a list of dictionaries, each representing a counter example.
 
     @param aut_file: a string containing the name of the file
@@ -511,8 +519,7 @@ def get_counterexamples(aut_file, verbose=0):
             for var, val in counter_ex.iteritems():
                 counter_ex[var] = int(val)
             counter_examples.append(counter_ex)
-            if (verbose > 0):
-                print(counter_ex)
+            logger.info(counter_ex)
     return counter_examples
 
 
@@ -531,14 +538,14 @@ def check_vars(varNames):
     for item in varNames:
         # Check that the vars are strings
         if type(item) != str:
-            print("Prop " + str(item) + " is invalid")
+            logger.error("Prop " + str(item) + " is invalid")
             return False
 
         # Check that the keys are not numbers
         try:
             int(item)
             float(item)
-            print("Prop " + str(item) + " is invalid")
+            logger.errror("Prop " + str(item) + " is invalid")
             return False
         except ValueError:
             continue
