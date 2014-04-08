@@ -129,15 +129,15 @@ precedence = (
 # dictionary of names
 #names = {'var':'replacement'}
 
-def p_arithmetic(t):
+def p_arithmetic(p):
     """expression : expression TIMES expression
                   | expression DIV expression
                   | expression PLUS expression
                   | expression MINUS expression
     """
-    t[0] = ASTArithmetic(None, None, t[1:4])
+    p[0] = ASTArithmetic(None, None, p[1:4])
 
-def p_comparator(t):
+def p_comparator(p):
     """expression : expression EQUALS expression
                   | expression NEQUALS expression
                   | expression LT expression
@@ -145,74 +145,74 @@ def p_comparator(t):
                   | expression GT expression
                   | expression GE expression
     """
-    t[0] = ASTComparator(None, None, t[1:4])
+    p[0] = ASTComparator(None, None, p[1:4])
 
-def p_and(t):
+def p_and(p):
     """expression : expression AND expression
     """
-    t[0] = ASTAnd(None, None, t[1:4])
+    p[0] = ASTAnd(None, None, p[1:4])
 
-def p_or(t):
+def p_or(p):
     """expression : expression OR expression
     """
-    t[0] = ASTOr(None, None, t[1:4])
+    p[0] = ASTOr(None, None, p[1:4])
 
-def p_xor(t):
+def p_xor(p):
     """expression : expression XOR expression
     """
-    t[0] = ASTXor(None, None, t[1:4])
+    p[0] = ASTXor(None, None, p[1:4])
 
-def p_imp(t):
+def p_imp(p):
     """expression : expression IMP expression
     """
-    t[0] = ASTImp(None, None, t[1:4])
+    p[0] = ASTImp(None, None, p[1:4])
 
-def p_bimp(t):
+def p_bimp(p):
     """expression : expression BIMP expression
     """
-    t[0] = ASTBiImp(None, None, t[1:4])
+    p[0] = ASTBiImp(None, None, p[1:4])
 
-def p_unary_temp_op(t):
+def p_unary_temp_op(p):
     """expression : NEXT expression
                   | ALWAYS expression
                   | EVENTUALLY expression
     """
-    t[0] = ASTUnTempOp(None, None, t[1:3])
+    p[0] = ASTUnTempOp(None, None, p[1:3])
 
-def p_bin_temp_op(t):
+def p_bin_temp_op(p):
     """expression : expression UNTIL expression
                   | expression RELEASE expression
     """
-    t[0] = ASTBiTempOp(None, None, t[1:4])
+    p[0] = ASTBiTempOp(None, None, p[1:4])
 
-def p_not(t):
+def p_not(p):
     """expression : NOT expression
     """
-    t[0] = ASTNot(None, None, t[1:3])
+    p[0] = ASTNot(None, None, p[1:3])
 
-def p_group(t):
+def p_group(p):
     """expression : LPAREN expression RPAREN
     """
-    t[0] = t[2]
+    p[0] = p[2]
 
-def p_number(t):
+def p_number(p):
     """expression : NUMBER
     """
-    t[0] = ASTNum(None, None, [t[1]])
+    p[0] = ASTNum(None, None, [p[1]])
 
-def p_expression_name(t):
+def p_expression_name(p):
     """expression : NAME
     """
-    t[0] = ASTVar(None, None, [t[1]])
+    p[0] = ASTVar(None, None, [p[1]])
 
-def p_bool(t):
+def p_bool(p):
     """expression : TRUE
                   | FALSE
     """
-    t[0] = ASTBool(None, None, [t[1]])
+    p[0] = ASTBool(None, None, [p[1]])
 
-def p_error(t):
-    warn("Syntax error at '%s'" % t.value)
+def p_error(p):
+    warn("Syntax error at '%s'" % p.value)
 
 parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
                    write_tables=0, debug=0)
@@ -224,10 +224,10 @@ def rebuild_parsetab():
 def parse(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
-    return parser.parse(formula)
+    return parser.parse(formula, lexer=lexer, debug=logger)
     
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
-    p = parser.parse(s)
+    parsed_formula = parser.parse(s)
     
-    print('Parsing result: ' + str(p.to_gr1c()))
+    print('Parsing result: ' + str(parsed_formula.to_gr1c()))
