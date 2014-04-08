@@ -41,11 +41,15 @@ from .mathset import MathSet, SubSet, PowerSet
 
 from .labeled_graphs import prepend_with
 
-from .transys import FiniteTransitionSystem, FTS
-from .transys import OpenFiniteTransitionSystem, OpenFTS
-from .transys import tuple2fts, line_labeled_with, cycle_labeled_with
+from .transys import (
+    FiniteTransitionSystem, FTS,
+    OpenFiniteTransitionSystem, OpenFTS,
+    tuple2fts, line_labeled_with, cycle_labeled_with
+)
 
-from .automata import BuchiAutomaton, BA, tuple2ba
-from .automata import RabinAutomaton, DRA
+from .automata import (
+    BuchiAutomaton, BA, tuple2ba,
+    RabinAutomaton, DRA
+)
 
 from .machines import MooreMachine, MealyMachine, Mealy

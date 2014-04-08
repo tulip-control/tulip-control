@@ -41,9 +41,9 @@ from warnings import warn
 import ply.lex as lex
 import ply.yacc as yacc
 
-from ast import ASTVar, ASTNum, ASTBool, ASTArithmetic, \
-    ASTComparator, ASTUnTempOp, ASTBiTempOp, \
-    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp
+from .ast import (ASTVar, ASTNum, ASTBool, ASTArithmetic,
+    ASTComparator, ASTUnTempOp, ASTBiTempOp,
+    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp)
 
 tokens = (
     'TRUE', 'FALSE',

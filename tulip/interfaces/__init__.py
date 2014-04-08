@@ -32,5 +32,5 @@
 """
 Interfaces subpackage
 """
-import gr1c as gr1cint
-import jtlv as jtlvint
+from . import gr1c as gr1cint
+from . import jtlv as jtlvint

@@ -40,9 +40,7 @@ import warnings
 from collections import OrderedDict
 
 from tulip import transys
-from tulip.spec import ast
 from tulip.spec.parser import parse
-#from tulip.spec import GRSpec
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'

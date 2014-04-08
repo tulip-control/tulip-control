@@ -33,13 +33,17 @@
 """TuLiP Toolbox Abstract subpackage
 """
 # avoid shadowing modules
-from .discretization import discretize, discretize_switched, \
+from .discretization import (
+    discretize, discretize_switched,
     multiproc_discretize_switched
+)
 from .feasible import is_feasible, solve_feasible
 
-from .prop2partition import prop2part
-from .prop2partition import part2convex, pwa_partition, add_grid
-from .prop2partition import PropPreservingPartition
+from .prop2partition import (
+    prop2part, part2convex,
+    pwa_partition, add_grid,
+    PropPreservingPartition, PPP
+)
 
 from .find_controller import get_input, find_discrete_state
     

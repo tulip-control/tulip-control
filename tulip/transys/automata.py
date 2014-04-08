@@ -33,7 +33,9 @@
 Automata Module
 """
 import logging
-from collections import Iterable, OrderedDict
+logger = logging.getLogger(__name__)
+
+from collections import Iterable
 from pprint import pformat
 
 from .labeled_graphs import LabeledDiGraph
@@ -42,8 +44,6 @@ from .mathset import SubSet, PowerSet
 from .transys import _ts_ba_sync_prod
 
 _hl = 40 *'-'
-
-logger = logging.getLogger(__name__)
 
 # future: may become an abc
 class FiniteStateAutomaton(LabeledDiGraph):

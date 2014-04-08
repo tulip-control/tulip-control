@@ -39,9 +39,9 @@ Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 import pyparsing as pp
 import sys
 
-from .ast import ASTVar, ASTNum, ASTBool, ASTArithmetic, \
-    ASTComparator, ASTUnTempOp, ASTBiTempOp, \
-    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp
+from .ast import (ASTVar, ASTNum, ASTBool, ASTArithmetic,
+    ASTComparator, ASTUnTempOp, ASTBiTempOp,
+    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp)
 
 # Packrat parsing - it's much faster
 pp.ParserElement.enablePackrat()

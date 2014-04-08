@@ -35,8 +35,7 @@ Formulae constituting specifications
 import logging
 logger = logging.getLogger(__name__)
 
-import time
-import re, copy
+import time, re, copy
 
 from tulip.spec import parser
 

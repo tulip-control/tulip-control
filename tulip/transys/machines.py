@@ -37,7 +37,7 @@ from pprint import pformat
 from random import choice
 
 from .labeled_graphs import LabeledDiGraph
-import executions
+from . import executions
 from .export import machine2scxml
 
 _hl = 40 *'-'
