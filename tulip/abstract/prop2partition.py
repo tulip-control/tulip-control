@@ -41,8 +41,8 @@ import copy
 
 import numpy as np
 from scipy import sparse as sp
-
 import polytope as pc
+
 from .plot import plot_partition
 
 try:

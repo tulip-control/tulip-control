@@ -35,12 +35,10 @@ Functions for plotting Partitions.
 """
 import logging
 logger = logging.getLogger(__name__)
-from warnings import warn
 
 import numpy as np
 from scipy import sparse as sp
 import networkx as nx
-
 from polytope import plot_partition, plot_transition_arrow
 
 try:

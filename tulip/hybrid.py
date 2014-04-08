@@ -41,7 +41,6 @@ import itertools
 from pprint import pformat
 
 import numpy as np
-
 import polytope as pc
 
 try:

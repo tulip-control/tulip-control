@@ -48,7 +48,6 @@ logger = logging.getLogger(__name__)
 from collections import Iterable
 
 import numpy as np
-
 import polytope as pc
 
 def is_feasible(

@@ -46,8 +46,8 @@ L{discretize}
 """
 import numpy as np
 from cvxopt import matrix, solvers
-
 import polytope as pc
+
 from .feasible import solve_feasible, createLM, _block_diag2
 
 def get_input(
