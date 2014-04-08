@@ -200,9 +200,10 @@ if is_continuous
     % RHC block
     rhc_block = add_block('built-in/MATLABFcn', [modelname '/RHC Input']);
     set_param(rhc_block, 'Orientation', 'left');
-    set_param(rhc_block, 'MATLABFcn', ...
-              'get_input(u(1:end-2), u(end-1), u(end))');
+    set_param(rhc_block, 'MATLABFcn', 'get_input');
     set_param(rhc_block, 'SampleTime', num2str(timestep));
+    input_dim = length(MPTsys.u.max);
+    set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
           
     % Mux for RHC block
     rhc_mux = add_block('built-in/Mux', [modelname '/RHC Mux']);

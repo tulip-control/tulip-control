@@ -2,7 +2,11 @@
 % index of a target region, and a horizon.
 
 
-function u = get_input(continuous_state, end_loc, horizon)
+function u = get_input(input)
+
+horizon = input(end);
+end_loc = input(end-1);
+continuous_state = input(1:end-2);
 
 % Get variables from base workspace
 regions = evalin('base', 'regions');
@@ -11,7 +15,7 @@ MPTsys = evalin('base', 'MPTsys');
 
 
 % Get Chebyshev center of end region
-end_region = regions{end_loc}.region;
+end_region = regions{end_loc+1}.region;
 end_cheby = end_region.chebyCenter;
 end_cheby = double(end_cheby.x);
 offset = control_weights.mid_weight*norm(continuous_state - end_cheby);
