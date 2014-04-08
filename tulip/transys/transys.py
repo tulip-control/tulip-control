@@ -958,6 +958,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             enabled_ba_trans = ba.transitions.find(
                 [q0], with_attr_dict=Sigma_dict
             )
+            enabled_ba_trans += ba.transitions.find(
+                [q0], letter={True}
+            )
             
             # q0 blocked ?
             if not enabled_ba_trans:
@@ -1007,6 +1010,9 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
             
             enabled_ba_trans = ba.transitions.find(
                 [q], with_attr_dict=Sigma_dict
+            )
+            enabled_ba_trans += ba.transitions.find(
+                [q], letter={True}
             )
             logger.debug('Enabled BA transitions:\n\t' +
                           str(enabled_ba_trans) )
