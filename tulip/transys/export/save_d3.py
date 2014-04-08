@@ -41,7 +41,7 @@ import inspect
 
 from networkx.readwrite import json_graph
 
-def format_label(label_def, label_dot_format):
+def _format_label(label_def, label_dot_format):
     """Format state/edge labels, which pop-up on mouse hover.
     """
     s = '"\\n\\n" +'
@@ -180,7 +180,7 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
     hasattr(graph, '_transition_dot_label_format'):
         transition_label_def = graph._transition_label_def
         transition_label_format = graph._transition_dot_label_format
-        s += format_label(transition_label_def, transition_label_format)
+        s += _format_label(transition_label_def, transition_label_format)
     else:
         s += '" ";'
     
@@ -211,7 +211,7 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
     hasattr(graph, '_state_dot_label_format'):
         state_label_def = graph._state_label_def
         state_label_format = graph._state_dot_label_format
-        s += format_label(state_label_def, state_label_format)
+        s += _format_label(state_label_def, state_label_format)
     else:
         s += '" ";'
       
