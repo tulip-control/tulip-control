@@ -2,6 +2,8 @@
 """
 Tests for the interface with gr1c.
 """
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import os
 
@@ -63,12 +65,12 @@ class basic_test:
         self.dcounter = None
 
     def test_check_syntax(self):
-        assert gr1cint.check_syntax(REFERENCE_SPECFILE, verbose=1)
-        assert not gr1cint.check_syntax("foo", verbose=1)
+        assert gr1cint.check_syntax(REFERENCE_SPECFILE)
+        assert not gr1cint.check_syntax("foo")
 
     def test_to_gr1c(self):
-        assert gr1cint.check_syntax(self.f_un.to_gr1c(), verbose=1)
-        assert gr1cint.check_syntax(self.dcounter.to_gr1c(), verbose=1)
+        assert gr1cint.check_syntax(self.f_un.to_gr1c() )
+        assert gr1cint.check_syntax(self.dcounter.to_gr1c() )
 
     def test_check_realizable(self):
         assert not gr1cint.check_realizable(self.f_un)

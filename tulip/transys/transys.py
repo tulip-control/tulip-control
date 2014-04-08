@@ -624,7 +624,7 @@ class OpenFTS(OpenFiniteTransitionSystem):
         OpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
-              prepend_str=None, verbose=False):
+              prepend_str=None):
     """Create a Finite Transition System from a tuple of fields.
 
     Hint

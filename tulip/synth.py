@@ -39,8 +39,8 @@ import warnings
 
 from tulip import transys
 from tulip.spec import GRSpec
-from tulip.interfaces import jtlvint
-from tulip.interfaces import gr1cint
+from tulip.interfaces import jtlv
+from tulip.interfaces import gr1c
 
 _hl = '\n' +60*'-'
 
@@ -1070,7 +1070,7 @@ def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
-    bool_actions=False, verbose=0
+    bool_actions=False
 ):
     """Function to call the appropriate synthesis tool on the spec.
 
@@ -1140,8 +1140,6 @@ def synthesize(
     @param bool_actions: model actions using bool variables
     @type bool_actions: bool
     
-    @type verbose: bool
-    
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return None.
@@ -1157,9 +1155,9 @@ def synthesize(
                           bool_actions)
     
     if option == 'gr1c':
-        ctrl = gr1cint.synthesize(specs, verbose=verbose)
+        ctrl = gr1c.synthesize(specs)
     elif option == 'jtlv':
-        ctrl = jtlvint.synthesize(specs, verbose=verbose)
+        ctrl = jtlv.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
@@ -1182,7 +1180,7 @@ def is_realizable(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
-    bool_actions=False, verbose=0
+    bool_actions=False
 ):
     """Check realizability.
     
@@ -1199,9 +1197,9 @@ def is_realizable(
     )
     
     if option == 'gr1c':
-        r = gr1cint.check_realizable(specs, verbose=verbose)
+        r = gr1c.check_realizable(specs)
     elif option == 'jtlv':
-        r = jtlvint.check_realizable(specs, verbose=verbose)
+        r = jtlv.check_realizable(specs)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')

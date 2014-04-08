@@ -39,9 +39,7 @@ In general, functions defined here will raise CalledProcessError (from
 the subprocess module) or OSError if an exception occurs while
 interacting with the gr1c executable.
 
-Most functions have a "verbose" argument.
-0 means silent (the default setting),
-positive means provide some status updates.
+Use the logging module to throttle verbosity.
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -426,7 +424,7 @@ def _parse_vars(variables, vardict):
     ])
     return variables
 
-def check_syntax(spec_str, verbose=0):
+def check_syntax(spec_str):
     """Check whether given string has correct gr1c specification syntax.
 
     Return True if syntax check passed, False on error.
@@ -434,18 +432,22 @@ def check_syntax(spec_str, verbose=0):
     f = tempfile.TemporaryFile()
     f.write(spec_str)
     f.seek(0)
+    
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
+    
+    logger.debug('gr1c returncode: ' + str(p.returncode) )
+    logger.debug('gr1c stdout: ' + p.stdout.read() )
+    
     if p.returncode == 0:
         return True
     else:
-        if verbose > 0:
-            print(p.stdout.read() )
+        logger.info(p.stdout.read() )
         return False
 
-def check_realizable(spec, verbose=0):
+def check_realizable(spec):
     """Decide realizability of specification.
 
     @type spec: L{GRSpec}
@@ -465,11 +467,10 @@ def check_realizable(spec, verbose=0):
     if p.returncode == 0:
         return True
     else:
-        if verbose > 0:
-            print(p.stdout.read() )
+        logger.info(p.stdout.read() )
         return False
 
-def synthesize(spec, verbose=0):
+def synthesize(spec):
     """Synthesize strategy.
 
     @type spec: L{GRSpec}
