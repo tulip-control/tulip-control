@@ -2,10 +2,18 @@ MATLAB Export
 Stephanie Tsuei, 2014
 
 This folder contains the files required to export controllers to Simulink
-blocks and a couple examples for reference. Tulip, MATLAB, Simulink, and
-Stateflow must all be installed. Provided files below:
+blocks and a couple examples for reference. 
 
-	- tomatlab.py
+Required software (in addition to Tulip):
+    - Matlab
+    - Simulink
+    - Stateflow
+    - MPT Toolbox 3.0 (http://people.ee.ethz.ch/~mpt/3/)
+
+Provided files below:
+
+	- Python files: tomatlab.py
+    - Matlab files: get_input.m, load_tulip.m, load_continuous.m, cont_to_disc.m
 
 
 
@@ -19,8 +27,10 @@ USAGE
 	tomatlab.export(ctrl)                      # exports tulip_output.mat
 
 2) In MATLAB, make sure that these files are in the MATLAB path:
-    - tulip_output.mat
+    - get_input.m
     - load_tulip.m
+    - load_continuous.m
+    - cont_to_disc.m
 
 3) In MATLAB, run load_tulip.m. A new Simulink model containing the Mealy
    Machine should appear.
@@ -32,16 +42,29 @@ EXAMPLES
 
 	discrete.py is a modified version of /examples/robot_planning/discrete.py
 	that contains a line at the end for generating a Stateflow chart from the
-	Mealy Machine "ctrl".
+	Mealy Machine "ctrl". After running discrete.py, running the file
+    "load_discrete.m" opens up a Simulink model that contains the Tulip Mealy
+    Machine, a random park signal generator, and output scopes.
 
-	discrete.slx is a Simulink Model (Might require MATLAB/Simulink R2012b
-	or higher) that shows the working Mealy Machine interacting with a randomly
-	generated park signal.
+	
+2) Continuous Example:
 
+    continuous.py is a modified version of
+    /examples/robot_planning/continuous.py. Run load_robot.m after continuous.py
+    in order to see a completed Simulink setup.
 
 
 KNOWN ISSUES
 
-1) Stateflow charts are unreadable.
+1) Stateflow charts are nearly unreadable.
 
-2) Support for continuous controllers is half-implemented.
+2) Support for continuous-state controllers is limited. The current
+   implementation only supports continuous controllers discretized with the
+   following settings:
+
+       use_all_horizon = False
+       conservative = False
+
+   In the future, use_all_horizon = True will be supported. Until the MPT
+   toolbox supports setting non-Polytopic target sets, we will not support
+   conservative discretization.
