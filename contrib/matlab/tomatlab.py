@@ -277,8 +277,10 @@ def export_mealy(mealy_machine, is_continuous):
 
         trans_dict = {}
         trans_dict['state'] = init_transition[1]
-        trans_dict['inputs'] = { var: transition_vals[var] for var in env_vars}
-        trans_dict['outputs'] = { var: transition_vals[var] for var in sys_vars}
+        trans_dict['inputs'] = { var: str(transition_vals[var]) 
+                                 for var in env_vars }
+        trans_dict['outputs'] = { var: str(transition_vals[var])
+                                  for var in sys_vars }
         initial_trans.append(trans_dict)
     output['init_trans'] = initial_trans
 

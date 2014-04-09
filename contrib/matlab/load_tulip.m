@@ -127,10 +127,12 @@ for ind = 1:num_init_transitions
     init_handles{ind}.MidPoint = ...
         [state_handles{init_state_index}.Position(1) - 15, ...
          state_handles{init_state_index}.Position(2) + 25];
+     
+    % Label string on initial transitions
     label_string = '[';
     for jnd = 1:num_inputs
         input_name = input_handles{jnd}.Name;
-        input_value = eval(['TS.transitions{ind}.inputs.' input_name]);
+        input_value = eval(['TS.init_trans{ind}.inputs.' input_name]);
         label_string = [label_string, '(', input_name '==' input_value ')', ...
             '&&'];
     end
@@ -138,10 +140,18 @@ for ind = 1:num_init_transitions
     % Add current location to inputs if system is continuous
     if is_continuous
         current_loc = num2str(double(TS.states{init_state_index}.loc));
-        label_string = [label_string '(current_loc==' current_loc ')]'];
+        label_string = [label_string '(current_loc==' current_loc ')]{'];
     else
-        label_string = [label_string(1:end-2) ']'];
+        label_string = [label_string(1:end-2) ']{'];
     end
+    
+    % Initial outputs
+    for jnd = 1:num_outputs
+        output_name = output_handles{jnd}.Name;
+        output_value = eval(['TS.init_trans{ind}.outputs.' output_name]);
+        label_string = [label_string output_name '=' output_value ';'];
+    end
+    label_string = [label_string '}'];
     
     init_handles{ind}.LabelString = label_string;
 end
