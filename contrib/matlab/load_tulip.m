@@ -36,7 +36,8 @@ mealy_machine.StateMachineType = 'Mealy';
 % Set chart time semantics
 mealy_machine.ChartUpdate = 'DISCRETE';
 if is_continuous
-    mealy_machine.SampleTime = num2str(timestep*simulation_parameters.horizon);
+    machine_timestep = timestep*simulation_parameters.horizon;
+    mealy_machine.SampleTime = num2str(machine_timestep);
 else
     mealy_machine.SampleTime = num2str(timestep);
 end

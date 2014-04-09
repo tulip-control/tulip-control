@@ -23,6 +23,7 @@ control_weights.mid_weight = double(TulipObject.control_weights.mid_weight);
 
 % Simulation parameters
 simulation_parameters = TulipObject.simulation_parameters;
+simulation_parameters.horizon = double(simulation_parameters.horizon);
 
 
 
