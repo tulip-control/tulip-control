@@ -18,6 +18,7 @@ park_out = add_block('built-in/Outport', [modelname '/Park Signal/park']);
 set_param(random_number, 'Position', '[60 32 95 68]');
 set_param(random_number, 'Minimum', '0');
 set_param(random_number, 'Maximum', '1');
+set_param(random_number, 'SampleTime', num2str(timestep));
 set_param(rounder, 'Position', '[180 32 215 68]');
 set_param(rounder, 'Operator', 'round');
 set_param(park_out, 'Position', '[305 42 335 58]');
