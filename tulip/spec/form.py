@@ -421,9 +421,9 @@ class GRSpec(LTL):
     def to_canon(self):
         """Output formula in TuLiP LTL syntax.
 
-        Beware!  The canonical TuLiP LTL syntax is under active
-        development and may change without notice.  Consult
-        U{https://sourceforge.net/p/tulip-control/wiki/TL_formula_syntax/}
+        The format is described in the U{Specifications section
+        <http://tulip-control.sourceforge.net/doc/specifications.html>}
+        of the TuLiP User's Guide.
         """
         conj_cstr = lambda s: " && " if len(s) > 0 else ""
         assumption = ""
