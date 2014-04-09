@@ -1082,8 +1082,8 @@ def synthesize(
     @param option: Magic string that declares what tool to invoke,
         what method to use, etc.  Currently recognized forms:
 
-          - C{"gr1c"}: use gr1c for GR(1) synthesis via L{gr1cint}.
-          - C{"jtlv"}: use JTLV for GR(1) synthesis via L{jtlvint}.
+          - C{"gr1c"}: use gr1c for GR(1) synthesis via L{interfaces.gr1c}.
+          - C{"jtlv"}: use JTLV for GR(1) synthesis via L{interfaces.jtlv}.
     @type specs: L{spec.GRSpec}
     
     @param env: A transition system describing the environment:

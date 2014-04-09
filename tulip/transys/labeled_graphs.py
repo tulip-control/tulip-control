@@ -585,7 +585,7 @@ class Transitions(object):
         
         @return: set of transitions = labeled edges::
                 (C{from_state}, C{to_state}, label)
-            such that::
+        such that::
                 (C{from_state}, C{to_state} )
                 in C{from_states} x C{to_states}
                 
