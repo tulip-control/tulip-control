@@ -1,4 +1,5 @@
-% Tulip file that 
+% File that generates a Simulink model containing a receding horizon input
+% and a Stateflow chart representing the Tulip automaton.
 
 % TODO: Support use_all_horizon
 
