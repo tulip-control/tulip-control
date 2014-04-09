@@ -17,6 +17,10 @@ end
 bdclose(modelname); 
 open_system(new_system(modelname))
 
+if ~is_continuous
+    set_param(modelname, 'Solver', 'VariableStepDiscrete');
+    set_param(modelname, 'MaxStep', num2str(timestep));
+end
 
 
 % Create Tulip Controller
