@@ -364,7 +364,8 @@ class MealyMachine(FiniteStateMachine):
     
     Examples
     ========
-    Traffic Light: Fig. 3.14, p.72 [Lee-Seshia]
+    Traffic Light: Fig. 3.14, p.72 U{[LS11]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
     
     >>> m = MealyMachine()
     >>> pure_signal = {'present', 'absent'}

@@ -31,6 +31,11 @@
 # SUCH DAMAGE.
 """
 Finite State Machine examples
+
+Bibliography:
+
+[LS11] E.A. Lee and S.A. Seshia. *Introduction to Embedded Systems - A Cyber-
+Physical Systems Approach*. `LeeSeshia.org <http://LeeSeshia.org>`_, 2011.
 """
 import networkx as nx
 from collections import OrderedDict
@@ -142,7 +147,7 @@ def mealy_machine_example():
     return m
 
 def garage_counter(ploting=True):
-    """Example 3.4, p.49 [Lee-Seshia], for M=2
+    """Example 3.4, p.49 [LS11], for M=2
     
     no state variables in this Finite-State Machine
     """
@@ -172,7 +177,7 @@ def garage_counter(ploting=True):
     return m
 
 def garage_counter_with_state_vars():
-    """Example 3.8, p.57 [Lee-Seshia], for M=2
+    """Example 3.8, p.57 [LS11], for M=2
     unfolded with respect to state variable c
     """
     m = garage_counter(ploting=False)
@@ -187,7 +192,7 @@ def garage_counter_with_state_vars():
     return m
 
 def thermostat_with_hysteresis():
-    """Example 3.5, p.50 [Lee-Seshia]
+    """Example 3.5, p.50 [LS11]
     """
     class temperature_type():
         def is_valid_value(x):
@@ -249,7 +254,7 @@ def traffic_light_2():
     return m
 
 def pedestrians():
-    """Example 2.14, p.63 [Lee-Seshia]
+    """Example 2.14, p.63 [LS11]
     """
     m = trs.Mealy()
     
