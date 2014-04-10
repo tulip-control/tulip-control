@@ -79,14 +79,6 @@ function MPTsys = createMPTsys(system, timestep)
     if strcmp(system.type, 'LtiSysDyn')
         MPTsys = createLTIsys(system, timestep);
         
-        % Set the domain of the system
-        domain = Polyhedron('A', system.domain.A, 'b', system.domain.b);
-        MPTsys.x.min = min(domain.V);
-        MPTsys.x.max = max(domain.V);
-        Uset = Polyhedron('A', system.Uset.A, 'b', system.Uset.b);
-        MPTsys.u.min = min(Uset.V);
-        MPTsys.u.max = max(Uset.V);
-        
     elseif strcmp(system.type, 'PwaSysDyn')
 
         % Import each LTI system and add it to a list
@@ -135,6 +127,14 @@ function LtiSys = createLTIsys(lti_struct, timestep)
 
     % Set the domain
     LtiSys.setDomain('xu', state_input_region);
+    
+    % Set the domain of the system
+    domain = Polyhedron('A', lti_struct.domain.A, 'b', lti_struct.domain.b);
+    LtiSys.x.min = min(domain.V);
+    LtiSys.x.max = max(domain.V);
+    Uset = Polyhedron('A', lti_struct.Uset.A, 'b', lti_struct.Uset.b);
+    LtiSys.u.min = min(Uset.V);
+    LtiSys.u.max = max(Uset.V);
 end
 
 
