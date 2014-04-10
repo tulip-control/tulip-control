@@ -25,7 +25,7 @@ set_param([modelname '/Plant/contstate'], 'Position', '[295, 45, 315, 65]');
 set_param(lti_block, 'Position', '[120 37 215 73]');
 
 add_line([modelname '/Plant'], 'u/1', 'robotdyn/1', 'autorouting', 'on');
-add_line([modelname '/Plant'], 'robotdyn/1', 'contstate/1', 'autorouting', 'on');
+add_line([modelname '/Plant'], 'robotdyn/1', 'contstate/1', 'autorouting','on');
 
 
 % Add park signal generator
