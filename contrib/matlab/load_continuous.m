@@ -1,13 +1,12 @@
-function [regions, MPTsys, control_weights, simulation_parameters] = ...
+function [regions, MPTsys, control_weights, simulation_parameters, systype] =...
     load_continuous(matfile, timestep)
 
 % Load .mat file
 TulipObject = load(matfile);
 
-
 % Get the system
 MPTsys = createMPTsys(TulipObject.system_dynamics, timestep);
-
+systype = TulipObject.system_dynamics.type;
 
 % List of regions in each abstraction and polytopes in each abstraction
 regions = createAbstraction(TulipObject.abstraction.abstraction);

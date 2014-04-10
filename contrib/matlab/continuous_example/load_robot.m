@@ -70,4 +70,4 @@ add_line(modelname, 'TulipController/3', 'Lot/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/4', 'X0reach/1', 'autorouting', 'on');
 add_line(modelname, 'Plant/1', 'Continuous State/1', 'autorouting', 'on');
 add_line(modelname, 'Park Signal/1', 'Park Output/1', 'autorouting', 'on');
-add_line(modelname, 'RHC Input/1', 'u/1', 'autorouting', 'on');
+add_line(modelname, 'RHC/1', 'u/1', 'autorouting', 'on');

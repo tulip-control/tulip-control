@@ -10,8 +10,13 @@ load(matfile, 'is_continuous', 'TS');
 % Load abstraction, mpt objects for continuous systems. Open blank model.
 %-------------------------------------------------------------------------------
 if is_continuous
-    [regions, MPTsys, control_weights, simulation_parameters] = ...
+    [regions, MPTsys, control_weights, simulation_parameters, systype] = ...
         load_continuous(matfile, timestep);
+end
+if strcmp(systype, 'SwitchedSysDyn')
+    is_switched = true;
+else
+    is_switched = false;
 end
 
 bdclose(modelname); 
@@ -77,6 +82,8 @@ for ind = 1:num_outputs
     if (is_continuous && strcmp(output_handles{ind}.Name,'loc'))
         output_handles{ind}.Port = 1;
     end
+    
+    % TODO: Add handling for env_action and sys_action
 end
 
 
@@ -166,9 +173,37 @@ end
 %-------------------------------------------------------------------------------
 if is_continuous
     
-    % Horizon block
+    % Move this to a good position
+    set_param(tulip_controller, 'Position', '[495 27 600 153]');
+    
+    % Continuous state to discrete state
+    c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
+    set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
+    set_param(c2d_block, 'Position', '[330 34 420 86]');
+        
+    % RHC Subsystem Container
+    rhc_subsys = add_block('built-in/Subsystem', [modelname '/RHC']);
+    set_param(rhc_subsys, 'Orientation', 'left');
+    rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']);
+    rhc_cont_input = add_block('built-in/Inport', ...
+                               [modelname '/RHC/Continuous Input']);
+    rhc_loc_input = add_block('built-in/Inport', ...
+                              [modelname '/RHC/Location']);
+    if is_switched
+        rhc_env_input = add_block('built-in/Inport', ...
+                                  [modelname '/RHC/Env Action']);
+        rhc_sys_input = add_block('built-in/Inport', ...
+                                  [modelname '/RHC/Sys Action']);
+    end
+    set_param(rhc_output, 'Position', '[820 50 840 70]');
+    set_param(rhc_cont_input, 'Position', '[40 50 60 70]');
+    set_param(rhc_loc_input, 'Position', '[40 110 60 130]');
+    set_param(rhc_subsys, 'Position', '[295 364 420 466]');
+                           
+    % Horizon block (in RHC Subsystem)
     if simulation_parameters.closed_loop
-        horizon_block = add_block('sflib/Chart',[modelname '/Control Horizon']);
+        horizon_block = add_block('sflib/Chart', ...
+                                  [modelname '/RHC/Control Horizon']);
         horizon_chart = simulink_model.find('-isa', 'Stateflow.Chart', ...
             '-and', 'Name', 'Control Horizon');
         
@@ -197,8 +232,7 @@ if is_continuous
         horizon_init.Destination = horizon_states{1};
         horizon_init.DestinationOClock = 9;
         horizon_init.LabelString = ['{horizon=' num2str(N) '}'];
-
-        
+ 
         % Sample Time
         horizon_chart.ChartUpdate = 'DISCRETE';
         horizon_chart.SampleTime = num2str(timestep);
@@ -208,45 +242,46 @@ if is_continuous
         set_param(horizon_block, 'Value', ...
                   num2str(simulation_parameters.horizon));
     end
-    set_param(horizon_block, 'Orientation', 'left');
+    set_param(horizon_block, 'Position', '[40 309 100 361]');
     
-    % Continuous state to discrete state
-    c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
-    set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
-    
-    % RHC block
-    rhc_block = add_block('built-in/MATLABFcn', [modelname '/RHC Input']);
-    set_param(rhc_block, 'Orientation', 'left');
-    set_param(rhc_block, 'MATLABFcn', 'get_input');
-    set_param(rhc_block, 'SampleTime', num2str(timestep));
-    input_dim = length(MPTsys.u.max);
-    set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
-          
-    % Mux for RHC block
-    rhc_mux = add_block('built-in/Mux', [modelname '/RHC Mux']);
-    set_param(rhc_mux, 'Orientation', 'left');
-    set_param(rhc_mux, 'DisplayOption', 'Bar');
-    set_param(rhc_mux, 'Inputs', '3');
+    if ~is_switched
+        % RHC block (in RHC Subsystem)
+        rhc_block = add_block('built-in/MATLABFcn', ...
+                              [modelname '/RHC/RHC Input']);
+        set_param(rhc_block, 'MATLABFcn', 'get_input');
+        set_param(rhc_block, 'SampleTime', num2str(timestep));
+        input_dim = length(MPTsys.u.max);
+        set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
+        set_param(rhc_block, 'Position', '[460 27 545 93]');
+
+        % Mux for RHC block (in RHC Subsystem)
+        rhc_mux = add_block('built-in/Mux', [modelname '/RHC/RHC Mux']);
+        set_param(rhc_mux, 'DisplayOption', 'Bar');
+        set_param(rhc_mux, 'Inputs', '3');
+        set_param(rhc_mux, 'Position', '[370 19 375 101]');
+    end
     
     % The Plant Subsystem
     plant = add_block('built-in/Subsystem', [modelname '/Plant']);
     control_input = add_block('built-in/Inport', [modelname '/Plant/u']);
     cont_state = add_block('built-in/Outport', [modelname '/Plant/contstate']);
-          
-    % Set block positions
-    set_param(c2d_block, 'Position', '[330 34 420 86]');
-    set_param(rhc_block, 'Position', '[120 320 215 370]');
-    set_param(rhc_mux, 'Position', '[415, 305, 420, 385]');
-    set_param(tulip_controller, 'Position', '[495 27 600 153]');
-    set_param(horizon_block, 'Position', '[525, 356, 565, 384]');
     set_param(plant, 'Position', '[120, 197, 240, 263]');
     
     % Draw Transitions
-    add_line(modelname, 'RHC Mux/1', 'RHC Input/1', 'autorouting', 'on');
-    add_line(modelname, 'Control Horizon/1', 'RHC Mux/3', 'autorouting', 'on');
     add_line(modelname, 'Abstraction/1','TulipController/1','autorouting','on');
-    add_line(modelname, 'RHC Input/1', 'Plant/1', 'autorouting', 'on');
+    add_line(modelname, 'RHC/1', 'Plant/1', 'autorouting', 'on');
     add_line(modelname, 'Plant/1', 'Abstraction/1', 'autorouting', 'on');
-    add_line(modelname, 'Plant/1', 'RHC Mux/1', 'autorouting', 'on');
-    add_line(modelname, 'TulipController/1', 'RHC Mux/2', 'autorouting', 'on');
+    add_line(modelname, 'Plant/1', 'RHC/1', 'autorouting', 'on');
+    add_line(modelname, 'TulipController/1', 'RHC/2', 'autorouting', 'on');
+    if ~is_switched
+        add_line([modelname '/RHC'], 'RHC Mux/1', 'RHC Input/1', ...
+            'autorouting', 'on');
+        add_line([modelname '/RHC'], 'Control Horizon/1', 'RHC Mux/3', ...
+            'autorouting', 'on');
+        add_line([modelname '/RHC'], 'Continuous Input/1', 'RHC Mux/1', ...
+            'autorouting', 'on');
+        add_line([modelname '/RHC'], 'Location/1', 'RHC Mux/2', 'autorouting',...
+            'on');
+        add_line([modelname '/RHC'], 'RHC Input/1', 'u/1', 'autorouting', 'on');
+    end
 end
