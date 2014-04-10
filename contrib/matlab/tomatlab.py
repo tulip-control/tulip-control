@@ -52,9 +52,9 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             dynamics_output['type'] = 'PwaSysDyn'
             state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[0];
             input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[0];
-        elif isinstance(system_dynamics, hybrid.HybridSysDyn):
+        elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
             dynamics_output = hybrid_export(system_dynamics)
-            dynamics_output['type'] = 'HybridSysDyn'
+            dynamics_output['type'] = 'SwitchedSysDyn'
         else:
             raise TypeError(str(type(system)) + 
                 ' is not a supported type of system dynamics.')
