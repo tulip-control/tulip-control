@@ -24,7 +24,7 @@ USAGE
 	import tomatlab
 	...
 	ctrl = synth.synthesize(...)               # returns a Mealy Machine
-	tomatlab.export(ctrl)                      # exports tulip_output.mat
+	tomatlab.export(ctrl, 'system.mat')        # exports .mat file
 
 2) In MATLAB, make sure that these files are in the MATLAB path:
     - get_input.m
@@ -32,8 +32,8 @@ USAGE
     - load_continuous.m
     - cont_to_disc.m
 
-3) In MATLAB, run load_tulip.m. A new Simulink model containing the Mealy
-   Machine should appear.
+3) In MATLAB, define the variables 'matfile' and 'timestep'. Run load_tulip.m. A
+   new Simulink model containing the Mealy Machine should appear.
 
 
 EXAMPLES
@@ -68,3 +68,5 @@ KNOWN ISSUES
    In the future, use_all_horizon = True will be supported. Until the MPT
    toolbox supports setting non-Polytopic target sets, we will not support
    conservative discretization.
+
+3) No support for SwitchedSysDyn (yet).
