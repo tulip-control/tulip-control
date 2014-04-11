@@ -105,7 +105,9 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     
     accepting_states_preimage = set()
     
-    logger.debug(_hl +'\n' +' Product TS construction:\n' +_hl +'\n')
+    logger.debug('\n' + _hl + '\n' +
+                 ' Product TS construction:' +
+                 '\n' + _hl + '\n')
     
     if not s0s:
         msg = 'Transition System has no initial states !\n'
@@ -114,18 +116,16 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         warnings.warn(msg)
     
     for s0 in s0s:
-        logger.debug('Checking initial state:\t' +str(s0) )
+        logger.debug('initial state:\t' +str(s0) )
         
         for q0 in q0s:
             enabled_ba_trans = find_ba_succ(q0, s0, fts, ba)
             
             # q0 blocked ?
             if not enabled_ba_trans:
-                logger.debug('blocked q0 = ' +str(q0) )
                 continue
             
             # which q next ?     (note: curq0 = q0)
-            logger.debug('enabled_ba_trans = ' +str(enabled_ba_trans) )
             for (curq0, q, sublabels) in enabled_ba_trans:
                 new_sq0 = (s0, q)
                 prodts.states.add(new_sq0)
@@ -136,8 +136,6 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
                 if q in ba.states.accepting:
                     accepting_states_preimage.add(new_sq0)
     
-    logger.debug(prodts)
-    
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
     queue = set(prodts.states.initial)
@@ -147,7 +145,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         visited.add(sq)
         (s, q) = sq
         
-        logger.debug('Current product state:\n\t' +str(sq) )
+        logger.debug('Current product state:\t' +str(sq) )
         
         # get next states
         next_ss = fts.states.post(s)
@@ -156,7 +154,6 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
             enabled_ba_trans = find_ba_succ(q, next_s, fts, ba)
             
             if not enabled_ba_trans:
-                logger.debug('No enabled transitions')
                 continue
             
             (next_sqs, new_accepting) = find_prod_succ(
@@ -167,6 +164,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
             next_sqs.update(next_sqs)
             accepting_states_preimage.update(new_accepting)
         
+        logger.debug('next product states: ' + str(next_sqs))
         # discard visited & push them to queue
         new_sqs = {x for x in next_sqs if x not in visited}
         logger.debug('new unvisited product states: ' + str(new_sqs) )
@@ -261,6 +259,10 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
 
     @return: C{prod_ba}, the product L{BuchiAutomaton}.
     """
+    logger.debug('\n' + _hl + '\n'
+                 'Product: BA * TS' +
+                 '\n' + _hl + '\n')
+    
     (prod_ts, persistent) = ts_ba_sync_prod(
         transition_system, buchi_automaton
     )
