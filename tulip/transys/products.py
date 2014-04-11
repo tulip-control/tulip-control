@@ -41,7 +41,7 @@ from pprint import pformat
 
 from .labeled_graphs import LabeledDiGraph
 from .labeled_graphs import prepend_with, str2singleton
-from .mathset import MathSet, SubSet, PowerSet
+from .mathset import SubSet, PowerSet
 
 from . import transys
 from . import automata
@@ -103,7 +103,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     s0s = set(fts.states.initial)
     q0s = set(ba.states.initial)
     
-    accepting_states_preimage = MathSet()
+    accepting_states_preimage = set()
     
     logger.debug(_hl +'\n' +' Product TS construction:\n' +_hl +'\n')
     
@@ -140,8 +140,8 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)    
-    queue = MathSet(prodts.states.initial)
-    visited = MathSet()
+    queue = set(prodts.states.initial)
+    visited = set()
     while queue:
         sq = queue.pop()
         visited.add(sq)
@@ -151,7 +151,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         
         # get next states
         next_ss = fts.states.post(s)
-        next_sqs = MathSet()
+        next_sqs = set()
         for next_s in next_ss:
             enabled_ba_trans = find_ba_succ(q, next_s, fts, ba)
             
