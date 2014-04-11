@@ -45,13 +45,13 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
         if isinstance(system_dynamics, hybrid.LtiSysDyn):
             dynamics_output = lti_export(system_dynamics)
             dynamics_output['type'] = 'LtiSysDyn'
-            state_dimension = numpy.shape(system_dynamics.A)[1];
-            input_dimension = numpy.shape(system_dynamics.B)[1];
+            state_dimension = numpy.shape(system_dynamics.A)[1]
+            input_dimension = numpy.shape(system_dynamics.B)[1]
         elif isinstance(system_dynamics, hybrid.PwaSysDyn):
             dynamics_output = pwa_export(system_dynamics)
             dynamics_output['type'] = 'PwaSysDyn'
-            state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[1];
-            input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[1];
+            state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[1]
+            input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[1]
         elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
             dynamics_output = hybrid_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
