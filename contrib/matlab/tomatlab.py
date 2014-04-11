@@ -53,7 +53,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[1]
             input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[1]
         elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
-            dynamics_output = hybrid_export(system_dynamics)
+            dynamics_output = switched_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
 
             # getting state and input dimension by looking at size of the A and
@@ -143,14 +143,14 @@ def pwa_export(pwasys):
     return output
 
 
-def hybrid_export(hybridsys):
+def switched_export(switchedsys):
 
     output = {}
-    output['disc_domain_size'] = list(hybridsys.disc_domain_size)
-    output['cts_ss'] = poly_export(hybridsys.cts_ss)
+    output['disc_domain_size'] = list(switchedsys.disc_domain_size)
+    output['cts_ss'] = poly_export(switchedsys.cts_ss)
 
     dynamics = []
-    for label, system in hybridsys.dynamics.iteritems():
+    for label, system in switchedsys.dynamics.iteritems():
         system_dict = {}
         system_dict['env_act'] = label[0]
         system_dict['sys_act'] = label[1]
