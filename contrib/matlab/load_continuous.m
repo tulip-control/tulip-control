@@ -56,7 +56,8 @@ function region_list = createAbstraction(abstraction)
             polytopes_in_region.merge;
             polytope = polytopes_in_region.Set;
         else
-            polytope = Polyhedron('A', polytope_list{1}.A, 'b', polytope_list{1}.b);
+            polytope = Polyhedron('A', polytope_list{1}.A, 'b', ...
+                polytope_list{1}.b);
         end
 
         region_list{ind}.index = double(region_index);
@@ -79,38 +80,50 @@ function MPTsys = createMPTsys(system, timestep)
         MPTsys = createLTIsys(system, timestep);
         
     elseif strcmp(system.type, 'PwaSysDyn')
-
-        % Import each LTI system and add it to a list
-        num_lti = length(system.subsystems);
-        lti_list = cell(1, num_lti);
-        for ind = 1:num_lti
-            lti_list{ind} = createLTIsys(system.subsystems{ind}, timestep);
+        MPTsys = createPWAsys(system, timestep);
+    elseif strcmp(system.type, 'SwitchedSysDyn')
+        num_modes = length(system.dynamics);
+        MPTsys(num_modes).system = [];
+        for ind = 1:num_modes
+            MPTsys(ind).system = createPWAsys(system.dynamics{ind}.pwasys, ...
+                timestep);
+            MPTsys(ind).env_act = system.dynamics{ind}.env_act;
+            MPTsys(ind).sys_act = system.dynamics{ind}.sys_act;
         end
-
-        % Create PWASystem from list of LTI systems.
-        MPTsys = PWASystem([lti_list{:}]');
-        
-        % Set domain of system
-        domain = Polyhedron('A', system.domain.A, 'b', system.domain.b);
-        MPTsys.x.min = min(domain.V);
-        MPTsys.x.max = max(domain.V);
-        
-        % Set input domain of system (need it iterate through all
-        % subsystems
-        for ind = 1:num_lti
-            UsetA = system.subsystems{ind}.Uset.A;
-            Usetb = system.subsystems{ind}.Uset.b;
-            Uset = Polyhedron('A', UsetA, 'b', Usetb);
-            MPTsys.u.min = min([MPTsys.u.min'; Uset.V]);
-            MPTsys.u.max = max([MPTsys.u.max'; Uset.V]);
-        end
-        
+    else
+        error(['System type "' num2str(system.type) '" not recognized.']);
     end
 
 
 end
 
 
+function MPTsys = createPWAsys(system, timestep)
+    % Import each LTI system and add it to a list
+    num_lti = length(system.subsystems);
+    lti_list = cell(1, num_lti);
+    for ind = 1:num_lti
+        lti_list{ind} = createLTIsys(system.subsystems{ind}, timestep);
+    end
+
+    % Create PWASystem from list of LTI systems.
+    MPTsys = PWASystem([lti_list{:}]');
+
+    % Set domain of system
+    domain = Polyhedron('A', system.domain.A, 'b', system.domain.b);
+    MPTsys.x.min = min(domain.V);
+    MPTsys.x.max = max(domain.V);
+
+    % Set input domain of system (need it iterate through all
+    % subsystems
+    for ind = 1:num_lti
+        UsetA = system.subsystems{ind}.Uset.A;
+        Usetb = system.subsystems{ind}.Uset.b;
+        Uset = Polyhedron('A', UsetA, 'b', Usetb);
+        MPTsys.u.min = min([MPTsys.u.min'; Uset.V]);
+        MPTsys.u.max = max([MPTsys.u.max'; Uset.V]);
+    end
+end
 
 % Nested function for importing LTIs. 
 function LtiSys = createLTIsys(lti_struct, timestep)
