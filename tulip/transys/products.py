@@ -116,17 +116,8 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     for s0 in s0s:
         logger.debug('Checking initial state:\t' +str(s0) )
         
-        # desired input letter for BA
-        ap = fts.node[s0]['ap']
-        Sigma_dict = {'letter':ap}
-        
         for q0 in q0s:
-            enabled_ba_trans = ba.transitions.find(
-                [q0], with_attr_dict=Sigma_dict
-            )
-            enabled_ba_trans += ba.transitions.find(
-                [q0], letter={True}
-            )
+            enabled_ba_trans = find_ba_succ(q0, s0, fts, ba)
             
             # q0 blocked ?
             if not enabled_ba_trans:
@@ -162,68 +153,19 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         next_ss = fts.states.post(s)
         next_sqs = MathSet()
         for next_s in next_ss:
-            logger.debug('Next state:\n\t' +str(next_s) )
-            
-            try:
-                ap = fts.node[next_s]['ap']
-            except:
-                raise Exception(
-                    'No AP label for FTS state: ' +str(next_s) +
-                     '\n Did you forget labeing it ?'
-                )
-            
-            Sigma_dict = {'letter':ap}
-            logger.debug("Next state's label:\n\t" +str(Sigma_dict) )
-            
-            enabled_ba_trans = ba.transitions.find(
-                [q], with_attr_dict=Sigma_dict
-            )
-            enabled_ba_trans += ba.transitions.find(
-                [q], letter={True}
-            )
-            logger.debug('Enabled BA transitions:\n\t' +
-                          str(enabled_ba_trans) )
+            enabled_ba_trans = find_ba_succ(q, next_s, fts, ba)
             
             if not enabled_ba_trans:
                 logger.debug('No enabled transitions')
                 continue
             
-            for (q, next_q, sublabels) in enabled_ba_trans:
-                new_sq = (next_s, next_q)
-                next_sqs.add(new_sq)
-                logger.debug('Adding state:\n\t' + str(new_sq) )
-                
-                prodts.states.add(new_sq)
-                
-                if next_q in ba.states.accepting:
-                    accepting_states_preimage.add(new_sq)
-                    logger.debug(str(new_sq) +
-                                  ' contains an accepting state.')
-                
-                prodts.states[new_sq]['ap'] = {next_q}
-                
-                logger.debug('Adding transitions:\n\t' +
-                              str(sq) + '--->' + str(new_sq) )
-                
-                # is fts transition labeled with an action ?
-                ts_enabled_trans = fts.transitions.find(
-                    [s], to_states=[next_s],
-                    with_attr_dict=None
-                )
-                for (from_s, to_s, sublabel_values) in ts_enabled_trans:
-                    assert(from_s == s)
-                    assert(to_s == next_s)
-                    logger.debug('Sublabel value:\n\t' +
-                                  str(sublabel_values) )
-                    
-                    # labeled transition ?
-                    if not sublabel_values:
-                        prodts.transitions.add(sq, new_sq)
-                    else:
-                        #TODO open FTS
-                        prodts.transitions.add(
-                            sq, new_sq, actions=sublabel_values['actions']
-                        )
+            (next_sqs, new_accepting) = find_prod_succ(
+                sq, next_s, enabled_ba_trans,
+                prodts, ba, fts
+            )
+            
+            next_sqs.update(next_sqs)
+            accepting_states_preimage.update(new_accepting)
         
         # discard visited & push them to queue
         new_sqs = {x for x in next_sqs if x not in visited}
@@ -231,6 +173,84 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         queue.update(new_sqs)
     
     return (prodts, accepting_states_preimage)
+
+def find_ba_succ(prev_q, next_s, fts, ba):
+    q = prev_q
+    
+    logger.debug('Next state:\t' +str(next_s) )
+    try:
+        ap = fts.node[next_s]['ap']
+    except:
+        raise Exception(
+            'No AP label for FTS state: ' +str(next_s) +
+             '\n Did you forget labeing it ?'
+        )
+    
+    Sigma_dict = {'letter':ap}
+    logger.debug("Next state's label:\t" +str(Sigma_dict) )
+    
+    enabled_ba_trans = ba.transitions.find(
+        [q], with_attr_dict=Sigma_dict
+    )
+    enabled_ba_trans += ba.transitions.find(
+        [q], letter={True}
+    )
+    logger.debug('Enabled BA transitions:\n\t' +
+                  str(enabled_ba_trans) )
+    
+    if not enabled_ba_trans:
+        logger.debug('No enabled BA transitions at: ' + str(q))
+    
+    logger.debug('---\n')
+    
+    return enabled_ba_trans
+
+def find_prod_succ(prev_sq, next_s, enabled_ba_trans, prodts, ba, fts):
+    (s, q) = prev_sq
+    
+    new_accepting = set()
+    next_sqs = set()
+    for (curq, next_q, sublabels) in enabled_ba_trans:
+        assert(curq == q)
+        
+        new_sq = (next_s, next_q)
+        next_sqs.add(new_sq)
+        logger.debug('Adding state:\t' + str(new_sq) )
+        
+        prodts.states.add(new_sq)
+        prodts.states[new_sq]['ap'] = {next_q}
+        
+        # accepting state ?
+        if next_q in ba.states.accepting:
+            new_accepting.add(new_sq)
+            logger.debug(str(new_sq) +
+                          ' contains an accepting state.')
+        
+        logger.debug('Adding transitions:\t' +
+                      str(prev_sq) + '--->' + str(new_sq) )
+        
+        # is fts transition labeled with an action ?
+        ts_enabled_trans = fts.transitions.find(
+            [s], to_states=[next_s],
+            with_attr_dict=None
+        )
+        for (from_s, to_s, sublabel_values) in ts_enabled_trans:
+            assert(from_s == s)
+            assert(to_s == next_s)
+            logger.debug('Sublabel value:\n\t' +
+                          str(sublabel_values) )
+            
+            # labeled transition ?
+            if not sublabel_values:
+                prodts.transitions.add(prev_sq, new_sq)
+            else:
+                #TODO open FTS
+                prodts.transitions.add(
+                    prev_sq, new_sq, actions=sublabel_values['actions']
+                )
+    
+    return (next_sqs, new_accepting)
+    
 
 def ba_ts_sync_prod(buchi_automaton, transition_system):
     """Construct Buchi Automaton equal to synchronous product TS x NBA.
