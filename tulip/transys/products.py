@@ -226,11 +226,9 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
                         )
         
         # discard visited & push them to queue
-        new_sqs = MathSet()
-        for next_sq in next_sqs:
-            if next_sq not in visited:
-                new_sqs.add(next_sq)
-                queue.add(next_sq)
+        new_sqs = {x for x in next_sqs if x not in visited}
+        logger.debug('new unvisited product states: ' + str(new_sqs) )
+        queue.update(new_sqs)
     
     return (prodts, accepting_states_preimage)
 
