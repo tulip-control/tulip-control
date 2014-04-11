@@ -35,17 +35,20 @@ Products between automata and transition systems
 import logging
 logger = logging.getLogger(__name__)
 
+import warnings
 from collections import Iterable
 from pprint import pformat
 
 from .labeled_graphs import LabeledDiGraph
 from .labeled_graphs import prepend_with, str2singleton
-from .mathset import SubSet, PowerSet
-from .transys import _ts_ba_sync_prod
+from .mathset import MathSet, SubSet, PowerSet
+
+from . import transys
+from . import automata
 
 _hl = 40 *'-'
 
-def _ts_ba_sync_prod(transition_system, buchi_automaton):
+def ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
     
     Def. 4.62, p.200 U{[BK08]
@@ -58,14 +61,14 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     See Also
     ========
-    L{automata._ba_ts_sync_prod}, L{FiniteTransitionSystem.sync_prod}
+    L{automata._ba_ts_sync_prod}, L{transys.FiniteTransitionSystem.sync_prod}
     
     @return: C{(product_ts, persistent_states)}, where:
         - C{product_ts} is the synchronous product TS * BA
         - C{persistent_states} are those in TS * BA which
             project on accepting states of BA.
     @rtype:
-        - C{product_TS} is a L{FiniteTransitionSystem}
+        - C{product_TS} is a L{transys.FiniteTransitionSystem}
         - C{persistent_states} is the set of states which project
             on accepting states of the Buchi Automaton BA.
     """
@@ -112,7 +115,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     prodts_name = fts.name +'*' +ba.name
     
     # using set() destroys order
-    prodts = FiniteTransitionSystem(name=prodts_name)
+    prodts = transys.FiniteTransitionSystem(name=prodts_name)
     prodts.states.add_from(set() )
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
@@ -252,7 +255,7 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
     
     return (prodts, accepting_states_preimage)
 
-def _ba_ts_sync_prod(buchi_automaton, transition_system):
+def ba_ts_sync_prod(buchi_automaton, transition_system):
     """Construct Buchi Automaton equal to synchronous product TS x NBA.
     
     See Also
@@ -261,13 +264,13 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
 
     @return: C{prod_ba}, the product L{BuchiAutomaton}.
     """
-    (prod_ts, persistent) = _ts_ba_sync_prod(
+    (prod_ts, persistent) = ts_ba_sync_prod(
         transition_system, buchi_automaton
     )
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
     
-    prod_ba = BuchiAutomaton(name=prod_name)
+    prod_ba = automata.BuchiAutomaton(name=prod_name)
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )
