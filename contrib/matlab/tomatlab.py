@@ -56,7 +56,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             dynamics_output = hybrid_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
         else:
-            raise TypeError(str(type(system)) + 
+            raise TypeError(str(type(system_dynamics)) + 
                 ' is not a supported type of system dynamics.')
         output['system_dynamics'] = dynamics_output
 
