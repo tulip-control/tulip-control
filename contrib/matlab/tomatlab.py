@@ -55,6 +55,13 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
         elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
             dynamics_output = hybrid_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
+
+            # getting state and input dimension by looking at size of the A and
+            # B matrices of one of the PWA subsystems
+            pwa_systems = system_dynamics.dynamics.values()
+            pwa_system = pwa_systems[0]
+            state_dimension = numpy.shape(pwa_system.list_subsys[0].A)[1]
+            input_dimension = numpy.shape(pwa_system.list_subsys[0].B)[1]
         else:
             raise TypeError(str(type(system_dynamics)) + 
                 ' is not a supported type of system dynamics.')
@@ -140,14 +147,13 @@ def hybrid_export(hybridsys):
 
     output = {}
     output['disc_domain_size'] = list(hybridsys.disc_domain_size)
-    output['env_labels'] = list(hybridsys.env_labels)
-    output['sys_labels'] = list(hybridsys.disc_sys_labels)
     output['cts_ss'] = poly_export(hybridsys.cts_ss)
 
     dynamics = []
     for label, system in hybridsys.dynamics.iteritems():
         system_dict = {}
-        system_dict['label'] = label
+        system_dict['env_act'] = label[0]
+        system_dict['sys_act'] = label[1]
         system_dict['pwasys'] = pwa_export(system)
         dynamics.append(system_dict)
     
