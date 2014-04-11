@@ -72,27 +72,6 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         - C{persistent_states} is the set of states which project
             on accepting states of the Buchi Automaton BA.
     """
-    def convert_ts2ba_label(state_label_dict):
-        """Replace 'ap' key with 'letter'.
-        
-        @param state_label_dict: FTS state label, its value \\in 2^AP
-        @type state_label_dict: dict {'ap' : state_label_value}
-        
-        @return: BA edge label, its value \\in 2^AP
-            (same value with state_label_dict)
-        @rtype: dict {'in_alphabet' : edge_label_value}
-            Note: edge_label_value is the BA edge "guard"
-        """
-        logger.debug('Ls0:\t' +str(state_label_dict) )
-        
-        (s0_, label_dict) = state_label_dict[0]
-        Sigma_dict = {'letter': label_dict['ap'] }
-        
-        logger.debug('State label of: ' +str(s0) +
-                      ', is: ' +str(Sigma_dict) )
-        
-        return Sigma_dict
-    
     if not isinstance(transition_system, FiniteTransitionSystem):
         msg = 'transition_system not transys.FiniteTransitionSystem.\n'
         msg += 'Actual type passed: ' +str(type(transition_system) )
@@ -137,10 +116,9 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     for s0 in s0s:
         logger.debug('Checking initial state:\t' +str(s0) )
         
-        Ls0 = fts.states.find(s0)
-        
         # desired input letter for BA
-        Sigma_dict = convert_ts2ba_label(Ls0)
+        ap = fts.node[s0]['ap']
+        Sigma_dict = {'letter':ap}
         
         for q0 in q0s:
             enabled_ba_trans = ba.transitions.find(
@@ -186,14 +164,15 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         for next_s in next_ss:
             logger.debug('Next state:\n\t' +str(next_s) )
             
-            Ls = fts.states.find(next_s)
-            if not Ls:
+            try:
+                ap = fts.node[next_s]['ap']
+            except:
                 raise Exception(
                     'No AP label for FTS state: ' +str(next_s) +
                      '\n Did you forget labeing it ?'
                 )
             
-            Sigma_dict = convert_ts2ba_label(Ls)
+            Sigma_dict = {'letter':ap}
             logger.debug("Next state's label:\n\t" +str(Sigma_dict) )
             
             enabled_ba_trans = ba.transitions.find(
