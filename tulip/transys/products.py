@@ -36,12 +36,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import warnings
-from collections import Iterable
-from pprint import pformat
-
-from .labeled_graphs import LabeledDiGraph
-from .labeled_graphs import prepend_with, str2singleton
-from .mathset import SubSet, PowerSet
 
 from . import transys
 from . import automata
@@ -206,10 +200,8 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     ba = buchi_automaton
     
     prodts_name = fts.name +'*' +ba.name
-    
-    # using set() destroys order
     prodts = transys.FiniteTransitionSystem(name=prodts_name)
-    prodts.states.add_from(set() )
+    
     prodts.atomic_propositions.add_from(ba.states() )
     prodts.actions.add_from(fts.actions)
 
@@ -299,7 +291,7 @@ def find_ba_succ(prev_q, next_s, fts, ba):
         )
     
     Sigma_dict = {'letter':ap}
-    logger.debug("Next state's label:\t" +str(Sigma_dict) )
+    logger.debug("Next state's label:\t" +str(ap) )
     
     enabled_ba_trans = ba.transitions.find(
         [q], with_attr_dict=Sigma_dict
@@ -346,15 +338,16 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
                       str(prev_sq) + '--->' + str(new_sq) )
         
         # is fts transition labeled with an action ?
-        ts_enabled_trans = fts.transitions.find(
+        enabled_ts_trans = fts.transitions.find(
             [s], to_states=[next_s],
             with_attr_dict=None
         )
-        for (from_s, to_s, sublabel_values) in ts_enabled_trans:
+        for (from_s, to_s, sublabel_values) in enabled_ts_trans:
             assert(from_s == s)
             assert(to_s == next_s)
+            
             logger.debug('Sublabel value:\n\t' +
-                          str(sublabel_values) )
+                         str(sublabel_values) )
             
             # labeled transition ?
             if hasattr(product, 'alphabet'):
