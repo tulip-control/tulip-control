@@ -56,9 +56,11 @@ EXAMPLES
 
 KNOWN ISSUES
 
-1) Stateflow charts are nearly unreadable.
+Issues that may be fixed in the future are starred.
 
-2) Support for continuous-state controllers is limited. The current
+1*) Stateflow charts are nearly unreadable.
+
+2*) Support for continuous-state controllers is limited. The current
    implementation only supports continuous controllers discretized with the
    following settings:
 
@@ -69,4 +71,12 @@ KNOWN ISSUES
    toolbox supports setting non-Polytopic target sets, we will not support
    conservative discretization.
 
-3) No support for SwitchedSysDyn (yet).
+3*) No support for SwitchedSysDyn (yet).
+
+4) domain must not be None in LtiSysDyn.
+
+5) If there are any env_actions or sys_actions, both must be there.
+
+6*) Variables must not be named as strings. (Support coming later.)
+
+7*) No custom env_action and sys_action names passed into synthesize function.
