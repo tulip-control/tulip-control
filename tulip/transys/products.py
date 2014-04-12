@@ -270,12 +270,12 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
             if not enabled_ba_trans:
                 continue
             
-            (next_sqs, new_accepting) = find_prod_succ(
+            (new_sqs, new_accepting) = find_prod_succ(
                 sq, next_s, enabled_ba_trans,
                 prodts, ba, fts
             )
             
-            next_sqs.update(next_sqs)
+            next_sqs.update(new_sqs)
             accepting_states_preimage.update(new_accepting)
         
         logger.debug('next product states: ' + str(next_sqs))
