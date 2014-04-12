@@ -53,4 +53,7 @@ from .automata import (
     ParityGame
 )
 
+
 from .machines import MooreMachine, MealyMachine
+
+from .products import OnTheFlyProductAutomaton

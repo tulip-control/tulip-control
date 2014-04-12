@@ -48,6 +48,120 @@ from . import automata
 
 _hl = 40 *'-'
 
+class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
+    """Dynamically extends itself by adding successors.
+    
+    Note that performs on-the-fly BA * TS.
+    The given TS can be explicit or on-the-fly,
+    depending on what you pass to C{__init__}.
+    
+    The state space serves as the set of "visited" states.
+    
+    Note that this is equivalent to adding successors
+    to both the queue and the set of visited states
+    at the end of each iteration during a search,
+    instead of adding each successor to the visited states
+    when it is poped from the queue.
+    """
+    def __init__(self, ba, ts):
+        self.ba = ba
+        self.ts = ts
+        super(OnTheFlyProductAutomaton, self).__init__()
+        self.atomic_propositions |= ts.atomic_propositions
+        self._add_initial()
+    
+    def _add_initial(self):
+        ts = self.ts
+        ba = self.ba
+        s0s = set(ts.states.initial)
+        q0s = set(ba.states.initial)
+        
+        logger.debug('\n' + _hl + '\n' +
+                     ' Product BA construction:' +
+                     '\n' + _hl + '\n')
+        
+        if not s0s:
+            msg = 'Transition System has no initial states !\n'
+            msg += '=> Empty product system.\n'
+            msg += 'Did you forget to define initial states ?'
+            warnings.warn(msg)
+        
+        for s0 in s0s:
+            logger.debug('initial state:\t' + str(s0) )
+            
+            for q0 in q0s:
+                enabled_ba_trans = find_ba_succ(q0, s0, ts, ba)
+                
+                # q0 blocked ?
+                if not enabled_ba_trans:
+                    continue
+                
+                # which q next ?     (note: curq0 = q0)
+                for (curq0, q, sublabels) in enabled_ba_trans:
+                    new_sq0 = (s0, q)
+                    
+                    self.states.add(new_sq0)
+                    self.states.initial.add(new_sq0)
+                    
+                    # accepting state ?
+                    if q in ba.states.accepting:
+                        self.states.accepting.add(new_sq0)
+    
+    def add_successors(self, s, q):
+        """Add the successors of (s, q) to the state space.
+        
+        @param s: TS state
+        
+        @param q: BA state
+        
+        @return: those successors that are new states
+        """
+        sq = (s, q)
+        ts = self.ts
+        ba = self.ba
+        
+        logger.debug('Creating successors from' +
+                     ' product state:\t' + str(sq) )
+        
+        # get next states
+        next_ss = ts.states.post(s)
+        next_sqs = set()
+        for next_s in next_ss:
+            enabled_ba_trans = find_ba_succ(q, next_s, ts, ba)
+            
+            if not enabled_ba_trans:
+                continue
+            
+            (new_sqs, new_accepting) = find_prod_succ(
+                sq, next_s, enabled_ba_trans,
+                self, ba, ts
+            )
+            
+            next_sqs.update(new_sqs)
+            self.states.accepting |= new_accepting
+        
+        #new_sqs = {x for x in next_sqs if x not in self}
+        
+        logger.debug('next product states: ' + str(next_sqs))
+        logger.debug('new unvisited product states: ' + str(new_sqs) )
+        
+        return new_sqs
+    
+    def add_all_states(self):
+        """Iterate L{add_successors} until all states are added.
+        
+        In other words until the state space
+        reaches a fixed point.
+        """
+        Q = set(self.states)
+        while Q:
+            Qnew = set()
+            for sq in Q:
+                (s, q) = sq
+                new = self.add_successors(s, q)
+                Qnew.update(new)
+            Q = Qnew
+
 def ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
     
@@ -203,7 +317,7 @@ def find_ba_succ(prev_q, next_s, fts, ba):
     
     return enabled_ba_trans
 
-def find_prod_succ(prev_sq, next_s, enabled_ba_trans, prodts, ba, fts):
+def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
     (s, q) = prev_sq
     
     new_accepting = set()
@@ -212,11 +326,15 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, prodts, ba, fts):
         assert(curq == q)
         
         new_sq = (next_s, next_q)
-        next_sqs.add(new_sq)
-        logger.debug('Adding state:\t' + str(new_sq) )
         
-        prodts.states.add(new_sq)
-        prodts.states[new_sq]['ap'] = {next_q}
+        if new_sq not in product:
+            next_sqs.add(new_sq)
+            product.states.add(new_sq)
+            
+            logger.debug('Adding state:\t' + str(new_sq) )
+        
+        if hasattr(product, 'actions'):
+            product.states[new_sq]['ap'] = {next_q}
         
         # accepting state ?
         if next_q in ba.states.accepting:
@@ -239,16 +357,21 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, prodts, ba, fts):
                           str(sublabel_values) )
             
             # labeled transition ?
-            if not sublabel_values:
-                prodts.transitions.add(prev_sq, new_sq)
-            else:
-                #TODO open FTS
-                prodts.transitions.add(
-                    prev_sq, new_sq, actions=sublabel_values['actions']
+            if hasattr(product, 'alphabet'):
+                product.transitions.add(
+                    prev_sq, new_sq,
+                    letter=fts.states[to_s]['ap']
                 )
+            elif hasattr(product, 'actions'):
+                if not sublabel_values:
+                    product.transitions.add(prev_sq, new_sq)
+                else:
+                    product.transitions.add(
+                        prev_sq, new_sq,
+                        actions=sublabel_values['actions']
+                    )
     
     return (next_sqs, new_accepting)
-    
 
 def ba_ts_sync_prod(buchi_automaton, transition_system):
     """Construct Buchi Automaton equal to synchronous product TS x NBA.

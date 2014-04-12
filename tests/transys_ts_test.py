@@ -68,7 +68,7 @@ def ba_test():
     ba.transitions.add('q0', 'q0', letter=set() )
     
     logger.debug(ba)
-    #ba.save('ba.pdf')
+    ba.save('ba.pdf')
     return ba
 
 def ba_ts_prod_test():
@@ -76,8 +76,23 @@ def ba_ts_prod_test():
     ba = ba_test()
     
     ba_ts = ba * ts
+    check_prodba(ba_ts)
+    
+    (ts_ba, persistent) = ts * ba
+    
     states = {('s0', 'q1'), ('s1', 'q0'),
               ('s2', 'q0'), ('s3', 'q0')}
+    
+    assert(set(ts_ba.states) == states)
+    assert(persistent == {('s0', 'q1')} )
+    
+    ba_ts.save('prod.pdf')
+    return ba_ts
+
+def check_prodba(ba_ts):
+    states = {('s0', 'q1'), ('s1', 'q0'),
+              ('s2', 'q0'), ('s3', 'q0')}
+    
     assert(set(ba_ts.states) == states)
     
     assert(set(ba_ts.states.initial) == {('s0', 'q1'), ('s1', 'q0')})
@@ -100,10 +115,15 @@ def ba_ts_prod_test():
             [('s3', 'q0')], [('s0', 'q1')]
         )[0][2]['letter'] == {'p'}
     )
+
+def on_the_fly_test():
+    ba = ba_test()
+    ts = ts_test()
+    prodba = trs.OnTheFlyProductAutomaton(ba, ts)
+    assert(set(prodba.states) == {('s0', 'q1'), ('s1', 'q0')})
     
-    (ts_ba, persistent) = ts * ba
-    
-    assert(set(ts_ba.states) == states)
-    assert(persistent == {('s0', 'q1')} )
-    
-    return ba_ts
+    prodba.save('prodba_initialized.pdf')
+    prodba.add_all_states()
+    check_prodba(prodba)
+    prodba.save('prodba_full.pdf')
+
