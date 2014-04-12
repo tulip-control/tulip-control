@@ -180,10 +180,10 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         - C{persistent_states} is the set of states which project
             on accepting states of the Buchi Automaton BA.
     """
-    if not isinstance(transition_system, FiniteTransitionSystem):
-        msg = 'transition_system not transys.FiniteTransitionSystem.\n'
-        msg += 'Actual type passed: ' +str(type(transition_system) )
-        raise TypeError(msg)
+    #if not hasattr(transition_system, FiniteTransitionSystem):
+    #    msg = 'transition_system not transys.FiniteTransitionSystem.\n'
+    #    msg += 'Actual type passed: ' +str(type(transition_system) )
+    #    raise TypeError(msg)
     
     if not hasattr(buchi_automaton, 'alphabet'):
         msg = 'transition_system not transys.BuchiAutomaton.\n'
