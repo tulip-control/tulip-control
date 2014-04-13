@@ -11,7 +11,7 @@ TULIP_REL     = ../tulip
 # Epydoc options
 EPYDOC        = epydoc
 EPYBUILDDIR   = api_doc
-EPYOPTS       = --graph=classtree --no-sourcecode
+EPYOPTS       = -v --graph=classtree --no-sourcecode --no-private
 
 # Sphinx options
 SPHINXOPTS    =
@@ -37,4 +37,4 @@ html:
 
 api:
 	mkdir -p $(BUILDDIR)/$(EPYBUILDDIR)
-	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,transys,spec,interfaces,synth.py,abstract,hybrid.py} --no-private
+	$(EPYDOC) $(EPYOPTS) --html --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,transys,spec,interfaces,synth.py,abstract,hybrid.py}
