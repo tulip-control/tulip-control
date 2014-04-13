@@ -296,6 +296,7 @@ class BuchiAutomaton(OmegaAutomaton):
     def is_accepted(self, prefix, suffix):
         """Check if given infinite word over alphabet \Sigma is accepted.
         """
+        raise NotImplementedError
 
 class BA(BuchiAutomaton):
     """Alias to L{BuchiAutomaton}.
