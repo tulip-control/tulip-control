@@ -15,6 +15,7 @@ if is_continuous
 end
 if strcmp(systype, 'SwitchedSysDyn')
     is_switched = true;
+    num_modes = length(MPTsys);
 else
     is_switched = false;
 end
@@ -79,11 +80,16 @@ for ind = 1:num_outputs
     output_handles{ind}.Name = strtrim(TS.outputs(ind,:));
     output_handles{ind}.Scope = 'Output';
     
+    % Move location to first output port for consistency
     if (is_continuous && strcmp(output_handles{ind}.Name,'loc'))
         output_handles{ind}.Port = 1;
     end
     
-    % TODO: Add handling for env_action and sys_action
+    % Move system action to second output port for consistency
+    if (is_continuous && strcmp(output_handles{ind}.Name, 'sys_actions') && ...
+            is_switched)
+        output_handles{ind}.Port = 2;
+    end
 end
 
 
@@ -194,6 +200,8 @@ if is_continuous
                                   [modelname '/RHC/Env Action']);
         rhc_sys_input = add_block('built-in/Inport', ...
                                   [modelname '/RHC/Sys Action']);
+        set_param(rhc_env_input, 'Position', '[40 180 60 200]');
+        set_param(rhc_sys_input, 'Position', '[40 250 60 270]');
     end
     set_param(rhc_output, 'Position', '[820 50 840 70]');
     set_param(rhc_cont_input, 'Position', '[40 50 60 70]');
@@ -247,7 +255,7 @@ if is_continuous
     if ~is_switched
         % RHC block (in RHC Subsystem)
         rhc_block = add_block('built-in/MATLABFcn', ...
-                              [modelname '/RHC/RHC Input']);
+            [modelname '/RHC/RHC Input']);
         set_param(rhc_block, 'MATLABFcn', 'get_input');
         set_param(rhc_block, 'SampleTime', num2str(timestep));
         input_dim = length(MPTsys.u.max);
@@ -259,6 +267,41 @@ if is_continuous
         set_param(rhc_mux, 'DisplayOption', 'Bar');
         set_param(rhc_mux, 'Inputs', '3');
         set_param(rhc_mux, 'Position', '[370 19 375 101]');
+    else
+        % If-else block
+        if_block = add_block('built-in/If', [modelname, '/RHC/Switch']);
+        set_param(if_block, 'NumInputs', '2');
+        add_line([modelname '/RHC'], 'Env Action/1', 'Switch/1', ...
+            'autorouting', 'on');
+        add_line([modelname '/RHC'], 'Sys Action/1', 'Switch/2', ...
+            'autorouting', 'on');
+        
+        % Write the different if conditions
+        elifstring = [];
+        for ind = 1:num_modes
+            env_action = MPTsys(ind).env_act;
+            sys_action = MPTsys(ind).sys_act;
+            if ind == 1
+                ifstring = ['u1==' num2str(env_action) ', u2==' ...
+                    num2str(sys_action)];
+            else
+                elifstring = [elifstring, 'u1==' num2str(env_action) ...
+                    ', u2==' num2str(sys_action) ','];
+            end
+        end
+        set_param(if_block, 'IfExpression', ifstring);
+        elifstring = elifstring(1:end-1);
+        set_param(if_block, 'ElseIfExpressions', elifstring);
+        
+        % Set up output blocks
+        
+        % Error block
+        stop_block = add_block('built-in/Stop', [modelname, '/RHC/Error']);
+        
+        % Merge block
+        merge_block = add_block('built-in/Merge', [modelname '/RHC/Merge']);
+        set_param(merge_block, 'Position', '[675 30 750 270]');
+        set_param(merge_block, 'Inputs', num2str(num_modes));
     end
     
     % The Plant Subsystem
@@ -283,5 +326,8 @@ if is_continuous
         add_line([modelname '/RHC'], 'Location/1', 'RHC Mux/2','autorouting',...
             'on');
         add_line([modelname '/RHC'], 'RHC Input/1', 'u/1', 'autorouting', 'on');
+    else
+        add_line([modelname '/RHC'], 'Merge/1', 'u/1', 'autorouting', 'on');
+        add_line(modelname, 'TulipController/2', 'RHC/4', 'autorouting', 'on');
     end
 end
