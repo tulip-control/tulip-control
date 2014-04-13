@@ -37,4 +37,4 @@ html:
 
 api:
 	mkdir -p $(BUILDDIR)/$(EPYBUILDDIR)
-	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,transys,spec,interfaces,synth.py,abstract,hybrid.py}
+	$(EPYDOC) $(EPYOPTS) --html -v --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL)/{__init__.py,transys,spec,interfaces,synth.py,abstract,hybrid.py} --no-private
