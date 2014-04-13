@@ -29,6 +29,9 @@ if ~is_continuous
 end
 
 
+% Check 
+
+
 % Create Tulip Controller
 %-------------------------------------------------------------------------------
 tulip_controller = add_block('sflib/Chart', [modelname '/TulipController']);
@@ -192,9 +195,9 @@ if is_continuous
     set_param(rhc_subsys, 'Orientation', 'left');
     rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']);
     rhc_cont_input = add_block('built-in/Inport', ...
-                               [modelname '/RHC/Continuous Input']);
+        [modelname '/RHC/Continuous Input']);
     rhc_loc_input = add_block('built-in/Inport', ...
-                              [modelname '/RHC/Location']);
+        [modelname '/RHC/Location']);
     if is_switched
         rhc_env_input = add_block('built-in/Inport', ...
                                   [modelname '/RHC/Env Action']);
@@ -293,7 +296,54 @@ if is_continuous
         elifstring = elifstring(1:end-1);
         set_param(if_block, 'ElseIfExpressions', elifstring);
         
-        % Set up output blocks
+        % Set up subsystem blocks
+        if_subsystems = cell(1,num_modes);
+        for ind = 1:num_modes
+            subsystem_name = ['subsys' num2str(ind)];
+            if_subsystems{ind} = add_block('built-in/Subsystem', ...
+                [modelname '/RHC/' subsystem_name]);
+            
+            action_port = add_block('built-in/ActionPort', ...
+                [modelname '/RHC/' subsystem_name '/If Action']);
+            set_param(action_port, 'Position', '[15 15 35 35]');
+            
+            input_cont = add_block('built-in/Inport', ...
+                [modelname '/RHC/' subsystem_name '/Continuous State']);
+            set_param(input_cont, 'Position', '[60 95 80 115]');
+            input_loc = add_block('built-in/Inport', ...
+                [modelname '/RHC/' subsystem_name '/Discrete Location']);
+            set_param(input_loc, 'Position', '[60 155 80 175]');
+            input_horizon = add_block('built-in/Inport', ...
+                [modelname '/RHC/' subsystem_name '/Control Horizon']);
+            set_param(input_horizon, 'Position', '[60 215 80 235]');           
+            output_ctrl = add_block('built-in/Outport', ...
+                [modelname '/RHC/' subsystem_name '/Continuous Output']);
+            set_param(output_ctrl, 'Position', '[615 155 635 175]');
+            
+            % Mux inputs to funciton together
+            input_mux = add_block('built-in/Mux', ...
+                [modelname '/RHC/' subsystem_name '/RHC Mux']);
+            set_param(input_mux, 'Inputs', '3');
+            set_param(input_mux, 'DisplayOption', 'bar');
+            set_param(input_mux, 'Position', '[250 76 255 254]');
+            
+            % RHC function
+            rhc_function = add_block('built-in/MATLABFcn', ...
+                [modelname '/RHC/' subsystem_name '/RHC Input']);
+            set_param(rhc_function, 'Position', '[400 140 495 190]');
+            
+            % Draw lines connecting ports in each subsystems
+            add_line([modelname '/RHC/' subsystem_name], 'RHC Input/1', ...
+                'Continuous Output/1');
+            add_line([modelname '/RHC/' subsystem_name], 'RHC Mux/1', ...
+                'RHC Input/1');
+            add_line([modelname '/RHC/' subsystem_name], ...
+                'Continuous State/1', 'RHC Mux/1');
+            add_line([modelname '/RHC/' subsystem_name], ...
+                'Discrete Location/1', 'RHC Mux/2');
+            add_line([modelname '/RHC/' subsystem_name], ...
+                'Control Horizon/1', 'RHC Mux/3');
+        end
         
         % Error block
         stop_block = add_block('built-in/Stop', [modelname, '/RHC/Error']);
