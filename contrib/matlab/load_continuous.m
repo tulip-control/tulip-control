@@ -117,11 +117,9 @@ function MPTsys = createPWAsys(system, timestep)
     % Set input domain of system (need it iterate through all
     % subsystems
     for ind = 1:num_lti
-        UsetA = system.subsystems{ind}.Uset.A;
-        Usetb = system.subsystems{ind}.Uset.b;
-        Uset = Polyhedron('A', UsetA, 'b', Usetb);
-        MPTsys.u.min = min([MPTsys.u.min'; Uset.V]);
-        MPTsys.u.max = max([MPTsys.u.max'; Uset.V]);
+        ltisys = MPTsys.toLTI(ind);
+        MPTsys.u.min = min([MPTsys.u.min'; ltisys.u.min']);
+        MPTsys.u.max = max([MPTsys.u.max'; ltisys.u.max']);
     end
 end
 
@@ -131,22 +129,31 @@ function LtiSys = createLTIsys(lti_struct, timestep)
     % Create LTI System object
     LtiSys = LTISystem('A', lti_struct.A, 'B', lti_struct.B, 'f', ...
         lti_struct.K, 'Ts', timestep);
+    
+    state_dim = size(lti_struct.A, 2);
+    input_dim = size(lti_struct.B, 2);
 
-    % Create the polytope constraining the domain of the state
-    polyA = blkdiag(lti_struct.domain.A, lti_struct.Uset.A);
-    polyB = [lti_struct.domain.b; lti_struct.Uset.b];
-    state_input_region = Polyhedron('A', polyA, 'b', polyB);
+    % Create the polytope constraining the domain of the state. How it's
+    % done depends on whether it uses state and input constraints
+    % separately or state-input constraints.
+    if size(lti_struct.Uset.A,2) == input_dim
+        polyA = blkdiag(lti_struct.domain.A, lti_struct.Uset.A);
+        polyB = [lti_struct.domain.b; lti_struct.Uset.b];
+        state_input_region = Polyhedron('A', polyA, 'b', polyB);
+    else
+        state_input_region = Polyhedron('A', lti_struct.Uset.A, 'b', ...
+            lti_struct.Uset.b);
+    end
 
     % Set the domain
     LtiSys.setDomain('xu', state_input_region);
     
-    % Set the domain of the system
-    domain = Polyhedron('A', lti_struct.domain.A, 'b', lti_struct.domain.b);
-    LtiSys.x.min = min(domain.V);
-    LtiSys.x.max = max(domain.V);
-    Uset = Polyhedron('A', lti_struct.Uset.A, 'b', lti_struct.Uset.b);
-    LtiSys.u.min = min(Uset.V);
-    LtiSys.u.max = max(Uset.V);
+    % Set the domain of the system for big-M relaxation
+    poly_state = Polyhedron('A', lti_struct.domain.A, 'b', lti_struct.domain.b);
+    LtiSys.x.min = min(poly_state.V);
+    LtiSys.x.max = max(poly_state.V);
+    LtiSys.u.min = min(state_input_region.V(:,state_dim+1:end));
+    LtiSys.u.max = max(state_input_region.V(:,state_dim+1:end));
 end
 
 
