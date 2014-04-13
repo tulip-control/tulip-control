@@ -57,13 +57,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
           (possibly based on atomic propositions (AP),
           meaning it is the powerset of some AP set)
         - is_accepted, for testing input words
-    
-    If C{atomic_proposition_based=False},
-    then the alphabet is represented by a set.
-    
-    If C{atomic_proposition_based=True},
-    the the alphabet is represented by a powerset 2^AP.
-    
+
     subclasses implement C{is_accepted}, C{simulate}
     
     Note
@@ -98,6 +92,14 @@ class FiniteStateAutomaton(LabeledDiGraph):
             atomic_proposition_based=True,
             **kwargs
         ):
+        """Initialize FiniteStateAutomaton.
+
+        Additional keyword arguments are passed to L{LabeledDiGraph.__init__}.
+
+        @param atomic_proposition_based: If False, then the alphabet
+            is represented by a set.  If True, then the alphabet is
+            represented by a powerset 2^AP.
+        """
         # edge labeling
         if atomic_proposition_based:
             self.atomic_proposition_based = True
@@ -138,6 +140,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         return self._accepting
     
     def __str__(self):
+        """Get informal string representation."""
         s = _hl +'\n' +self.automaton_type +': '
         s += self.name +'\n' +_hl +'\n'
         s += 'States:\n'
@@ -159,12 +162,17 @@ class FiniteStateAutomaton(LabeledDiGraph):
         return s
     
     def remove_node(self, node):
+        """Remove state (also referred to as "node").
+
+        More than a wrapper since the state is also removed from the
+        accepting set if present.
+        """
         # intercept to remove also from accepting states
         self.accepting.remove(node)
         super(FiniteStateAutomaton, self).remove_node(node)
 
 class NFA(FiniteStateAutomaton):
-    """Finite-word finite-state automaton.
+    """Nondeterministic finite-word finite-state automaton.
     
     Determinism can be enforced by optional argument
     when creating transitions.
@@ -182,8 +190,8 @@ class NFA(FiniteStateAutomaton):
         raise NotImplementedError
 
 class DFA(NFA):
-    """Finite-word finite-state automaton.
-    
+    """Deterministic finite-word finite-state automaton.
+
     Determinism can be enforced by optional argument
     when creating transitions.
     """
@@ -312,7 +320,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     @param Sigma_or_AP: Sigma = alphabet
     @param trans: transition relation, represented by list of triples::
             [(from_state, to_state, guard), ...]
-        where guard \\in \\Sigma.
+    where guard \\in \\Sigma.
 
     @param name: used for file export
     @type name: str
