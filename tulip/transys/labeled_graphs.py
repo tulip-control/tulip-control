@@ -590,18 +590,18 @@ class Transitions(object):
             take precedence over C{desired_label}.
         
         @return: set of transitions = labeled edges::
-                (C{from_state}, C{to_state}, label)
+                (from_state, to_state, label)
         such that::
-                (C{from_state}, C{to_state} )
-                in C{from_states} x C{to_states}
+                (from_state, to_state )
+                in from_states x to_states
                 
         @rtype: list of transitions::
                 = list of labeled edges
-                = [(C{from_state}, C{to_state}, C{label}),...]
-            where:
-                - C{from_state} in C{from_states}
-                - C{to_state} in C{to_states}
-                - C{label}: dict
+                = [(from_state, to_state, label),...]
+        where:
+          - C{from_state} in C{from_states}
+          - C{to_state} in C{to_states}
+          - C{label}: dict
         """
         if with_attr_dict is None:
             with_attr_dict = with_attr 
@@ -719,36 +719,36 @@ class LabeledDiGraph(nx.MultiDiGraph):
     ):
         """Initialize the types of labelings on states and edges.
         
-        @param node_label_types: defines the state labeling functions:
+        @param node_label_types: defines the state labeling functions::
             
-          L_i : V -> D_i
+            L_i : V -> D_i
             
-          each from vertices C{V} to some co-domain C{D_i}.
-            
-          Each labeling function is defined by
-          a tuple C{(L_i, D_i, setter)}:
-            
-            - C{L_i} is a C{str} naming the labeling function.
-            
-            - C{D_i} implements C{__contains__}
-                to enable checking label validity.
-                If you want co-domain C{D_i} to be extensible,
-                it must implement C{add}.
-            
-            - C{setter}: 3 cases:
-                
-              - if 2-tuple C{(L_i, D_i)} provided,
-                then no C{setter} attributes created
-                
-              - if C{setter} is C{True},
-                then an attribute C{self.L_i} is created
-                pointing at the given co-domain C{D_i}
-                
-              - Otherwise an attribute C{self.Li}
-                is created pointing at the given C{setter}.
-            
-          Be careful to avoid name conflicts with existing
-          networkx C{MultiDiGraph} attributes.
+        each from vertices C{V} to some co-domain C{D_i}.
+
+        Each labeling function is defined by
+        a tuple C{(L_i, D_i, setter)}:
+
+          - C{L_i} is a C{str} naming the labeling function.
+
+          - C{D_i} implements C{__contains__}
+              to enable checking label validity.
+              If you want co-domain C{D_i} to be extensible,
+              it must implement C{add}.
+
+          - C{setter}: 3 cases:
+
+            - if 2-tuple C{(L_i, D_i)} provided,
+              then no C{setter} attributes created
+
+            - if C{setter} is C{True},
+              then an attribute C{self.L_i} is created
+              pointing at the given co-domain C{D_i}
+
+            - Otherwise an attribute C{self.Li}
+              is created pointing at the given C{setter}.
+
+        Be careful to avoid name conflicts with existing
+        networkx C{MultiDiGraph} attributes.
         @type node_label_types: C{[(L_i, D_i, setter), ...]}
         
         @param edge_label_types: labeling functions for edges,
