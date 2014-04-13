@@ -142,7 +142,7 @@ class States(object):
     
     @property
     def initial(self):
-        """ Return SubSet of initial states.
+        """ Return L{SubSet} of initial states.
         """
         return self._initial
     
@@ -154,7 +154,7 @@ class States(object):
     
     @property
     def current(self):
-        """Return SubSet of current states.
+        """Return L{SubSet} of current states.
         
         Non-deterministic automata can have multiple current states.
         """
@@ -516,6 +516,12 @@ class Transitions(object):
             the first node in C{adj}.
             
             States must have been added using:
+
+               - sys.states.add, or
+               - sys.states.add_from
+
+            If C{adj2states} includes a state not in sys.states,
+            no transition is added and an exception raised.
         @type adj2states: list of existing states
         """
         # square ?
@@ -1431,10 +1437,10 @@ def prepend_with(states, prepend_str):
     
     Example
     =======
-    states = [0, 1]
-    prepend_str = 's'
-    states = prepend_with(states, prepend_str)
-    assert(states == ['s0', 's1'] )
+    >>> states = [0, 1]
+    >>> prepend_str = 's'
+    >>> states = prepend_with(states, prepend_str)
+    >>> assert(states == ['s0', 's1'] )
     
     See Also
     ========
