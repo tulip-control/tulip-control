@@ -373,12 +373,12 @@ if is_continuous
             horizon_transitions{ind}.Source = horizon_states{ind};
             horizon_transitions{ind}.Destination = horizon_states{mod(ind,N)+1};
             horizon_transitions{ind}.LabelString = ...
-                ['{horizon=' num2str(N-mod(ind,N)) '}'];
+                ['{horizon=' num2str(N-mod(ind,N)) ';}'];
         end
         horizon_init = Stateflow.Transition(horizon_chart);
         horizon_init.Destination = horizon_states{1};
         horizon_init.DestinationOClock = 9;
-        horizon_init.LabelString = ['{horizon=' num2str(N) '}'];
+        horizon_init.LabelString = ['{horizon=' num2str(N) ';}'];
  
         % Sample Time
         horizon_chart.ChartUpdate = 'DISCRETE';
