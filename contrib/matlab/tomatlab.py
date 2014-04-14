@@ -6,7 +6,6 @@ import polytope
 import scipy.io
 import numpy
 
-
 def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
     disc_params=None, R=None, r=None, Q=None, mid_weight=None):
 
@@ -211,6 +210,20 @@ def export_locations(abstraction):
     return output
 
 
+def export_mealy_io(variables, values):
+    """
+    @rtype: list of dict
+    """
+
+    var_list = []
+    for ind, variable in enumerate(variables):
+        var_dict = {}
+        var_dict['name'] = variable
+        var_dict['values'] = list(values[ind])
+        var_list.append(var_dict)
+    return var_list
+
+
 def export_mealy(mealy_machine, is_continuous):
     """Exports a Mealy Machine to data that can be put into a .mat file. Turns
     the Mealy Machine states into a list of dictionaries. Turns the Mealy
@@ -244,9 +257,13 @@ def export_mealy(mealy_machine, is_continuous):
 
     # Get list of environment and system variables
     env_vars = mealy_machine.inputs.keys()
+    env_values = mealy_machine.inputs.values()
     sys_vars = mealy_machine.outputs.keys()
-    output['inputs'] = env_vars
-    output['outputs'] = sys_vars
+    sys_values = mealy_machine.outputs.values()
+    #output['inputs'] = env_vars
+    #output['outputs'] = sys_vars
+    output['inputs'] = export_mealy_io(env_vars, env_values)
+    output['outputs'] = export_mealy_io(sys_vars, sys_values)
 
     # Transitions will be exported as a 2D list of dictionaries. The only
     # purpose of this block here is to separate the inputs from the outputs to

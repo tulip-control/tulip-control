@@ -7,6 +7,7 @@
 load(matfile, 'is_continuous', 'TS');
 
 
+
 % Load abstraction, mpt objects for continuous systems. Open blank model.
 %-------------------------------------------------------------------------------
 if is_continuous
@@ -29,7 +30,141 @@ if ~is_continuous
 end
 
 
-% Check 
+
+% Make sure that the input and output values of transition system aren't
+% strings
+%-------------------------------------------------------------------------------
+
+num_inputs = length(TS.inputs);
+num_outputs = length(TS.outputs);
+num_transitions = length(TS.transitions);
+num_init_transitions = length(TS.init_trans);
+
+% Change input and output values to cell arrays
+for i = 1:num_inputs
+    if ischar(TS.inputs{i}.values)
+        TS.inputs{i}.values = cellstr(TS.inputs{i}.values);
+    else
+        TS.inputs{i}.values = num2cell(TS.inputs{i}.values);
+    end
+end
+for i = 1:num_outputs
+    if ischar(TS.outputs{i}.values)
+        TS.outputs{i}.values = cellstr(TS.outputs{i}.values);
+    else
+        TS.outputs{i}.values = num2cell(TS.outputs{i}.values);
+    end
+end
+
+% If inputs are strings, change their values everywhere, otherwise skip
+% this process
+for i = 1:num_inputs
+    input_name = TS.inputs{i}.name;
+    
+    % Skip if not dealing with strings
+    if ~ischar(TS.inputs{i}.values{1}), continue; end
+    
+    num_values = size(TS.inputs{i}.values, 1);
+    value_map = containers.Map();
+    
+    % Fill in hash table
+    for j = 1:num_values
+        input_value = TS.inputs{i}.values{j};
+        value_map(input_value) = input_value;
+    end
+    
+    % Replace string values with numbers in hash
+    new_values = -1*ones(1, num_values);
+    for j = 1:num_values
+        input_value = TS.inputs{i}.values{j};
+        value_found = 0;
+        while ~value_found
+            new_value = randi([0 1000]);
+            if ~ismember(new_value, new_values)
+                value_found = 1;
+                new_values(j) = new_value;
+                value_map(input_value) = new_value;
+                TS.inputs{i}.values{j} = new_value;
+            end
+        end
+    end
+    
+    % Replace value in all transitions and initial transitions
+    for j = 1:num_transitions
+        env_input = eval(['TS.transitions{' num2str(j) '}.inputs.' ...
+            input_name]);
+        eval_str = ['TS.transitions{' num2str(j) '}.inputs.' input_name ...
+            '=' num2str(value_map(env_input)) ';'];
+        eval(eval_str);
+    end
+    for j = 1:num_init_transitions
+        env_input = eval(['TS.init_trans{' num2str(j) '}.inputs.' ...
+            input_name]);
+        eval_str = ['TS.init_trans{' num2str(j) '}.inputs.' input_name ...
+            '=' num2str(value_map(env_input)) ';'];
+        eval(eval_str);
+    end
+    
+    % Replace value in MPTsys object
+    num_modes = length(MPTsys);
+    for j = 1:num_modes
+        MPTsys(j).env_act = value_map(MPTsys(j).env_act);
+    end
+end
+
+for i = 1:num_outputs
+    output_name = TS.outputs{i}.name;
+    
+    % Skip if not strings
+    if ~ischar(TS.outputs{i}.values{1}), continue; end
+    
+    num_values = size(TS.outputs{i}.values, 1);
+    value_map = containers.Map();
+    
+    % Fill in hash table
+    for j = 1:num_values
+        output_value = TS.outputs{i}.values{j};
+        value_map(output_value) = output_value;
+    end
+    
+    % Replace string values with numbers in hash
+    new_values = -1*ones(1, num_values);
+    for j = 1:num_values
+        output_value = TS.outputs{i}.values{j};
+        value_found = 0;
+        while ~value_found
+            new_value = randi([0 1000]);
+            if ~ismember(new_value, new_values)
+                value_found = 1;
+                new_values(j) = new_value;
+                value_map(output_value) = new_value;
+                TS.outputs{i}.values{j} = new_value;
+            end
+        end
+    end
+    
+    % Replace value in all transitions and initial transitions
+    for j = 1:num_transitions
+        sys_output = eval(['TS.transitions{' num2str(j) '}.outputs.' ...
+            output_name]);
+        eval_str = ['TS.transitions{' num2str(j) '}.outputs.' output_name ...
+            '=' num2str(value_map(sys_output)) ';'];
+        eval(eval_str);
+    end
+    for j = 1:num_init_transitions
+        sys_output = eval(['TS.init_trans{' num2str(j) '}.outputs.' ...
+            output_name]);
+        eval_str = ['TS.init_trans{' num2str(j) '}.inputs.' output_name ...
+            '=' num2str(value_map(sys_output)) ';'];
+        eval(eval_str);
+    end
+    
+    % Replace value in MPTsys object
+    num_modes = length(MPTsys);
+    for j = 1:num_modes
+        MPTsys(j).sys_act = value_map(MPTsys(j).sys_act);
+    end
+end
 
 
 % Create Tulip Controller
@@ -73,14 +208,12 @@ input_handles = cell(1, num_inputs);
 output_handles = cell(1, num_outputs);
 for ind = 1:num_inputs
     input_handles{ind} = Stateflow.Data(mealy_machine);
-    input_handles{ind}.Name = strtrim(TS.inputs(ind,:));
+    input_handles{ind}.Name = strtrim(TS.inputs{ind}.name);
     input_handles{ind}.Scope = 'Input';
-    
-
 end
 for ind = 1:num_outputs
     output_handles{ind} = Stateflow.Data(mealy_machine);
-    output_handles{ind}.Name = strtrim(TS.outputs(ind,:));
+    output_handles{ind}.Name = strtrim(TS.outputs{ind}.name);
     output_handles{ind}.Scope = 'Output';
     
     % Move location to first output port for consistency
@@ -120,14 +253,14 @@ for ind = 1:num_transitions
     for jnd = 1:num_inputs
         input_name = input_handles{jnd}.Name;
         input_value = eval(['TS.transitions{ind}.inputs.' input_name]);
-        label_string = [label_string, '(', input_name '==' input_value ')', ...
-            '&&'];
+        label_string = [label_string, '(', input_name '==' ...
+            num2str(input_value) ')', '&&'];
     end
     label_string = [label_string(1:end-2), ']{'];
     for jnd = 1:num_outputs
         output_name = output_handles{jnd}.Name;
         output_value = eval(['TS.transitions{ind}.outputs.' output_name]);
-        label_string = [label_string output_name '=' output_value ';'];
+        label_string = [label_string output_name '=' num2str(output_value) ';'];
     end
     label_string = [label_string '}'];
     transition_handles{ind}.LabelString = label_string;
