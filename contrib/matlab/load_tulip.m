@@ -327,24 +327,24 @@ if is_continuous
     rhc_subsys = add_block('built-in/Subsystem', [modelname '/RHC']);
     set_param(rhc_subsys, 'Position', '[295 364 420 466]');
     set_param(rhc_subsys, 'Orientation', 'left');
-    rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']);
-    set_param(rhc_output, 'Position', '[820 50 840 70]');
+    rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']); 
     rhc_cont_input = add_block('built-in/Inport', ...
         [modelname '/RHC/Continuous Input']);
-    rhc_loc_input = add_block('built-in/Inport', ...
-        [modelname '/RHC/Location']);
+    rhc_loc_input = add_block('built-in/Inport', [modelname '/RHC/Location']);
     if is_switched
         rhc_env_input = add_block('built-in/Inport', ...
                                   [modelname '/RHC/Env Action']);
         rhc_sys_input = add_block('built-in/Inport', ...
                                   [modelname '/RHC/Sys Action']);
-        set_param(rhc_env_input, 'Position', '[40 30 60 50]');
-        set_param(rhc_sys_input, 'Position', '[40 95 60 115]');
-        set_param(rhc_cont_input, 'Position', '[40 195 60 215]');
-        set_param(rhc_loc_input, 'Position', '[40 255 60 275]');
+        set_param(rhc_env_input, 'Position', '[40 195 60 215]');
+        set_param(rhc_sys_input, 'Position', '[40 270 60 290]');
+        set_param(rhc_cont_input, 'Position', '[40 45 60 65]');
+        set_param(rhc_loc_input, 'Position', '[40 120 60 140]');
+        set_param(rhc_output, 'Position', '[570 195 590 215]');
     else
         set_param(rhc_cont_input, 'Position', '[40 50 60 70]');
         set_param(rhc_loc_input, 'Position', '[40 110 60 130]');
+        set_param(rhc_output, 'Position', '[820 50 840 70]');
     end
                            
     % Horizon block (in RHC Subsystem)
@@ -390,125 +390,30 @@ if is_continuous
                   num2str(simulation_parameters.horizon));
     end
     if is_switched
-        set_param(horizon_block, 'Position', '[20 319 80 371]');
+        set_param(horizon_block, 'Position', '[20 329 80 381]');
     else
         set_param(horizon_block, 'Position', '[40 309 100 361]');
     end
     
+    % RHC Input
+    rhc_block = add_block('built-in/MATLABFcn', [modelname '/RHC/RHC Input']);
+    set_param(rhc_block, 'SampleTime', num2str(timestep));
+    rhc_mux = add_block('built-in/Mux', [modelname '/RHC/RHC Mux']);
+    set_param(rhc_mux, 'DisplayOption', 'Bar');
     if ~is_switched
-        % RHC block (in RHC Subsystem)
-        rhc_block = add_block('built-in/MATLABFcn', ...
-            [modelname '/RHC/RHC Input']);
-        set_param(rhc_block, 'MATLABFcn', 'get_input');
-        set_param(rhc_block, 'SampleTime', num2str(timestep));
+        set_param(rhc_block, 'MATLABFcn', 'get_input');  
         input_dim = length(MPTsys.u.max);
-        set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
         set_param(rhc_block, 'Position', '[460 27 545 93]');
-
-        % Mux for RHC block (in RHC Subsystem)
-        rhc_mux = add_block('built-in/Mux', [modelname '/RHC/RHC Mux']);
-        set_param(rhc_mux, 'DisplayOption', 'Bar');
         set_param(rhc_mux, 'Inputs', '3');
         set_param(rhc_mux, 'Position', '[370 19 375 101]');
     else
-        % If-else block
-        if_block = add_block('built-in/If', [modelname, '/RHC/Switch']);
-        set_param(if_block, 'NumInputs', '2');
-        set_param(if_block, 'ShowElse', 0);
-        set_param(if_block, 'Position', '[250 9 355 136]');
-        add_line([modelname '/RHC'], 'Env Action/1', 'Switch/1', ...
-            'autorouting', 'on');
-        add_line([modelname '/RHC'], 'Sys Action/1', 'Switch/2', ...
-            'autorouting', 'on');
-        
-        % Write the different if conditions
-        elifstring = [];
-        for ind = 1:num_modes
-            env_action = MPTsys(ind).env_act;
-            sys_action = MPTsys(ind).sys_act;
-            if ind == 1
-                ifstring = ['u1==' num2str(env_action) ' & u2==' ...
-                    num2str(sys_action)];
-            else
-                elifstring = [elifstring, 'u1==' num2str(env_action) ...
-                    ' & u2==' num2str(sys_action) ','];
-            end
-        end
-        set_param(if_block, 'IfExpression', ifstring);
-        elifstring = elifstring(1:end-1);
-        set_param(if_block, 'ElseIfExpressions', elifstring);
-        
-        % Set up subsystem blocks
-        if_subsystems = cell(1,num_modes);
-        for ind = 1:num_modes
-            subsystem_name = ['subsys' num2str(ind)];
-            if_subsystems{ind} = add_block('built-in/Subsystem', ...
-                [modelname '/RHC/' subsystem_name]);
-            subsystem_pos = [430 39+166*(ind-1) 605 141+164*(ind-1)];
-            subsystem_pos = ['[' num2str(subsystem_pos) ']'];
-            set_param(if_subsystems{ind}, 'Position', num2str(subsystem_pos));
-            
-            action_port = add_block('built-in/ActionPort', ...
-                [modelname '/RHC/' subsystem_name '/If Action']);
-            set_param(action_port, 'Position', '[15 15 35 35]');
-            
-            input_cont = add_block('built-in/Inport', ...
-                [modelname '/RHC/' subsystem_name '/Continuous State']);
-            set_param(input_cont, 'Position', '[60 95 80 115]');
-            input_loc = add_block('built-in/Inport', ...
-                [modelname '/RHC/' subsystem_name '/Discrete Location']);
-            set_param(input_loc, 'Position', '[60 155 80 175]');
-            input_horizon = add_block('built-in/Inport', ...
-                [modelname '/RHC/' subsystem_name '/Control Horizon']);
-            set_param(input_horizon, 'Position', '[60 215 80 235]');           
-            output_ctrl = add_block('built-in/Outport', ...
-                [modelname '/RHC/' subsystem_name '/Continuous Output']);
-            set_param(output_ctrl, 'Position', '[615 155 635 175]');
-            
-            % Mux inputs to funciton together
-            input_mux = add_block('built-in/Mux', ...
-                [modelname '/RHC/' subsystem_name '/RHC Mux']);
-            set_param(input_mux, 'Inputs', '3');
-            set_param(input_mux, 'DisplayOption', 'bar');
-            set_param(input_mux, 'Position', '[250 76 255 254]');
-            
-            % RHC function
-            rhc_function = add_block('built-in/MATLABFcn', ...
-                [modelname '/RHC/' subsystem_name '/RHC Input']);
-            set_param(rhc_function, 'Position', '[400 140 495 190]');
-            
-            % Draw lines connecting ports in each subsystems
-            add_line([modelname '/RHC/' subsystem_name], 'RHC Input/1', ...
-                'Continuous Output/1');
-            add_line([modelname '/RHC/' subsystem_name], 'RHC Mux/1', ...
-                'RHC Input/1');
-            add_line([modelname '/RHC/' subsystem_name], ...
-                'Continuous State/1', 'RHC Mux/1');
-            add_line([modelname '/RHC/' subsystem_name], ...
-                'Discrete Location/1', 'RHC Mux/2');
-            add_line([modelname '/RHC/' subsystem_name], ...
-                'Control Horizon/1', 'RHC Mux/3');
-        end
-        
-        % Merge block
-        merge_block = add_block('built-in/Merge', [modelname '/RHC/Merge']);
-        set_param(merge_block, 'Position', '[675 30 750 270]');
-        set_param(merge_block, 'Inputs', num2str(num_modes));
-        
-        % Draw all the lines!
-        for ind = 1:num_modes
-            add_line([modelname '/RHC'], 'Continuous Input/1', ...
-                ['subsys' num2str(ind) '/1'], 'autorouting', 'on');
-            add_line([modelname '/RHC'], 'Location/1', ...
-                ['subsys' num2str(ind) '/2'], 'autorouting', 'on');
-            add_line([modelname '/RHC'], 'Control Horizon/1', ...
-                ['subsys' num2str(ind) '/3'], 'autorouting', 'on');
-            add_line([modelname '/RHC'], ['subsys' num2str(ind) '/1'], ...
-                ['Merge/' num2str(ind)], 'autorouting', 'on');
-            add_line([modelname '/RHC'], ['Switch/' num2str(ind)], ...
-                ['subsys' num2str(ind) '/Ifaction'], 'autorouting', 'on');
-        end
+        input_dim = length(MPTsys(1).system.u.max);
+        set_param(rhc_mux, 'Inputs', '5');
+        set_param(rhc_mux, 'Position', '[200 13 205 397]');
+        set_param(rhc_block, 'Position', '[335 172 455 238]');
+        set_param(rhc_block, 'MATLABFcn', 'get_input_switched');
     end
+    set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
     
     % The Plant Subsystem
     plant = add_block('built-in/Subsystem', [modelname '/Plant']);
@@ -516,24 +421,25 @@ if is_continuous
     cont_state = add_block('built-in/Outport', [modelname '/Plant/contstate']);
     set_param(plant, 'Position', '[120, 197, 240, 263]');
     
-    % Draw Transitions
+    % Draw all Transitions
     add_line(modelname, 'Abstraction/1','TulipController/1','autorouting','on');
     add_line(modelname, 'RHC/1', 'Plant/1', 'autorouting', 'on');
     add_line(modelname, 'Plant/1', 'Abstraction/1', 'autorouting', 'on');
     add_line(modelname, 'Plant/1', 'RHC/1', 'autorouting', 'on');
     add_line(modelname, 'TulipController/1', 'RHC/2', 'autorouting', 'on');
-    if ~is_switched
-        add_line([modelname '/RHC'], 'RHC Mux/1', 'RHC Input/1', ...
+    add_line([modelname '/RHC'], 'RHC Mux/1', 'RHC Input/1','autorouting','on');
+    add_line([modelname '/RHC'], 'Continuous Input/1', 'RHC Mux/1', ...
             'autorouting', 'on');
+    add_line([modelname '/RHC'], 'Location/1', 'RHC Mux/2','autorouting',...
+            'on');
+    add_line([modelname '/RHC'], 'RHC Input/1', 'u/1', 'autorouting', 'on');
+    if ~is_switched     
         add_line([modelname '/RHC'], 'Control Horizon/1', 'RHC Mux/3', ...
             'autorouting', 'on');
-        add_line([modelname '/RHC'], 'Continuous Input/1', 'RHC Mux/1', ...
-            'autorouting', 'on');
-        add_line([modelname '/RHC'], 'Location/1', 'RHC Mux/2','autorouting',...
-            'on');
-        add_line([modelname '/RHC'], 'RHC Input/1', 'u/1', 'autorouting', 'on');
     else
-        add_line([modelname '/RHC'], 'Merge/1', 'u/1', 'autorouting', 'on');
+        add_line([modelname '/RHC'], 'Env Action/1', 'RHC Mux/3');
+        add_line([modelname '/RHC'], 'Sys Action/1', 'RHC Mux/4');
+        add_line([modelname '/RHC'], 'Control Horizon/1', 'RHC Mux/5');
         add_line(modelname, 'TulipController/2', 'RHC/4', 'autorouting', 'on');
     end
 end
