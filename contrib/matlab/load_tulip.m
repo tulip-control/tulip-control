@@ -325,8 +325,10 @@ if is_continuous
         
     % RHC Subsystem Container
     rhc_subsys = add_block('built-in/Subsystem', [modelname '/RHC']);
+    set_param(rhc_subsys, 'Position', '[295 364 420 466]');
     set_param(rhc_subsys, 'Orientation', 'left');
     rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']);
+    set_param(rhc_output, 'Position', '[820 50 840 70]');
     rhc_cont_input = add_block('built-in/Inport', ...
         [modelname '/RHC/Continuous Input']);
     rhc_loc_input = add_block('built-in/Inport', ...
@@ -336,13 +338,14 @@ if is_continuous
                                   [modelname '/RHC/Env Action']);
         rhc_sys_input = add_block('built-in/Inport', ...
                                   [modelname '/RHC/Sys Action']);
-        set_param(rhc_env_input, 'Position', '[40 180 60 200]');
-        set_param(rhc_sys_input, 'Position', '[40 250 60 270]');
+        set_param(rhc_env_input, 'Position', '[40 30 60 50]');
+        set_param(rhc_sys_input, 'Position', '[40 95 60 115]');
+        set_param(rhc_cont_input, 'Position', '[40 195 60 215]');
+        set_param(rhc_loc_input, 'Position', '[40 255 60 275]');
+    else
+        set_param(rhc_cont_input, 'Position', '[40 50 60 70]');
+        set_param(rhc_loc_input, 'Position', '[40 110 60 130]');
     end
-    set_param(rhc_output, 'Position', '[820 50 840 70]');
-    set_param(rhc_cont_input, 'Position', '[40 50 60 70]');
-    set_param(rhc_loc_input, 'Position', '[40 110 60 130]');
-    set_param(rhc_subsys, 'Position', '[295 364 420 466]');
                            
     % Horizon block (in RHC Subsystem)
     if simulation_parameters.closed_loop
@@ -386,7 +389,11 @@ if is_continuous
         set_param(horizon_block, 'Value', ...
                   num2str(simulation_parameters.horizon));
     end
-    set_param(horizon_block, 'Position', '[40 309 100 361]');
+    if is_switched
+        set_param(horizon_block, 'Position', '[20 319 80 371]');
+    else
+        set_param(horizon_block, 'Position', '[40 309 100 361]');
+    end
     
     if ~is_switched
         % RHC block (in RHC Subsystem)
@@ -407,6 +414,8 @@ if is_continuous
         % If-else block
         if_block = add_block('built-in/If', [modelname, '/RHC/Switch']);
         set_param(if_block, 'NumInputs', '2');
+        set_param(if_block, 'ShowElse', 0);
+        set_param(if_block, 'Position', '[250 9 355 136]');
         add_line([modelname '/RHC'], 'Env Action/1', 'Switch/1', ...
             'autorouting', 'on');
         add_line([modelname '/RHC'], 'Sys Action/1', 'Switch/2', ...
@@ -418,11 +427,11 @@ if is_continuous
             env_action = MPTsys(ind).env_act;
             sys_action = MPTsys(ind).sys_act;
             if ind == 1
-                ifstring = ['u1==' num2str(env_action) ', u2==' ...
+                ifstring = ['u1==' num2str(env_action) ' & u2==' ...
                     num2str(sys_action)];
             else
                 elifstring = [elifstring, 'u1==' num2str(env_action) ...
-                    ', u2==' num2str(sys_action) ','];
+                    ' & u2==' num2str(sys_action) ','];
             end
         end
         set_param(if_block, 'IfExpression', ifstring);
@@ -435,6 +444,9 @@ if is_continuous
             subsystem_name = ['subsys' num2str(ind)];
             if_subsystems{ind} = add_block('built-in/Subsystem', ...
                 [modelname '/RHC/' subsystem_name]);
+            subsystem_pos = [430 39+166*(ind-1) 605 141+164*(ind-1)];
+            subsystem_pos = ['[' num2str(subsystem_pos) ']'];
+            set_param(if_subsystems{ind}, 'Position', num2str(subsystem_pos));
             
             action_port = add_block('built-in/ActionPort', ...
                 [modelname '/RHC/' subsystem_name '/If Action']);
@@ -478,13 +490,24 @@ if is_continuous
                 'Control Horizon/1', 'RHC Mux/3');
         end
         
-        % Error block
-        stop_block = add_block('built-in/Stop', [modelname, '/RHC/Error']);
-        
         % Merge block
         merge_block = add_block('built-in/Merge', [modelname '/RHC/Merge']);
         set_param(merge_block, 'Position', '[675 30 750 270]');
         set_param(merge_block, 'Inputs', num2str(num_modes));
+        
+        % Draw all the lines!
+        for ind = 1:num_modes
+            add_line([modelname '/RHC'], 'Continuous Input/1', ...
+                ['subsys' num2str(ind) '/1'], 'autorouting', 'on');
+            add_line([modelname '/RHC'], 'Location/1', ...
+                ['subsys' num2str(ind) '/2'], 'autorouting', 'on');
+            add_line([modelname '/RHC'], 'Control Horizon/1', ...
+                ['subsys' num2str(ind) '/3'], 'autorouting', 'on');
+            add_line([modelname '/RHC'], ['subsys' num2str(ind) '/1'], ...
+                ['Merge/' num2str(ind)], 'autorouting', 'on');
+            add_line([modelname '/RHC'], ['Switch/' num2str(ind)], ...
+                ['subsys' num2str(ind) '/Ifaction'], 'autorouting', 'on');
+        end
     end
     
     % The Plant Subsystem
