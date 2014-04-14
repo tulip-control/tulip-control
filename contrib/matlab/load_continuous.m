@@ -77,8 +77,8 @@ end
 function MPTsys = createMPTsys(system, timestep)
 
     if strcmp(system.type, 'LtiSysDyn')
-        MPTsys = createLTIsys(system, timestep);
-        
+        [MPTsys, xu] = createLTIsys(system, timestep);
+        MPTsys = set_lti_bounds(MPTsys, xu, system);
     elseif strcmp(system.type, 'PwaSysDyn')
         MPTsys = createPWAsys(system, timestep);
     elseif strcmp(system.type, 'SwitchedSysDyn')
@@ -102,8 +102,12 @@ function MPTsys = createPWAsys(system, timestep)
     % Import each LTI system and add it to a list
     num_lti = length(system.subsystems);
     lti_list = cell(1, num_lti);
+    xu_list = cell(1, num_lti);
     for ind = 1:num_lti
-        lti_list{ind} = createLTIsys(system.subsystems{ind}, timestep);
+        [lti_list{ind}, xu_list{ind}] = createLTIsys(system.subsystems{ind}, ...
+            timestep);
+        lti_list{ind} = set_lti_bounds(lti_list{ind}, xu_list{ind}, ...
+            system.subsystems{ind});
     end
 
     % Create PWASystem from list of LTI systems.
@@ -116,26 +120,27 @@ function MPTsys = createPWAsys(system, timestep)
 
     % Set input domain of system (need it iterate through all
     % subsystems
+    MPTsys.u.min = lti_list{1}.u.min';
+    MPTsys.u.max = lti_list{1}.u.max';
     for ind = 1:num_lti
-        ltisys = MPTsys.toLTI(ind);
+        ltisys = lti_list{ind};
         MPTsys.u.min = min([MPTsys.u.min'; ltisys.u.min']);
         MPTsys.u.max = max([MPTsys.u.max'; ltisys.u.max']);
     end
 end
 
+
 % Nested function for importing LTIs. 
-function LtiSys = createLTIsys(lti_struct, timestep)
+function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
 
     % Create LTI System object
     LtiSys = LTISystem('A', lti_struct.A, 'B', lti_struct.B, 'f', ...
         lti_struct.K, 'Ts', timestep);
-    
-    state_dim = size(lti_struct.A, 2);
-    input_dim = size(lti_struct.B, 2);
 
     % Create the polytope constraining the domain of the state. How it's
     % done depends on whether it uses state and input constraints
     % separately or state-input constraints.
+    input_dim = size(lti_struct.B, 2);
     if size(lti_struct.Uset.A,2) == input_dim
         polyA = blkdiag(lti_struct.domain.A, lti_struct.Uset.A);
         polyB = [lti_struct.domain.b; lti_struct.Uset.b];
@@ -147,15 +152,22 @@ function LtiSys = createLTIsys(lti_struct, timestep)
 
     % Set the domain
     LtiSys.setDomain('xu', state_input_region);
+end
+
+
+% Function that sets the state and input bounds of lti systems
+function ltisys = set_lti_bounds(ltisys, state_input_region, lti_struct)
     
     % Set the domain of the system for big-M relaxation
     poly_state = Polyhedron('A', lti_struct.domain.A, 'b', lti_struct.domain.b);
-    LtiSys.x.min = min(poly_state.V);
-    LtiSys.x.max = max(poly_state.V);
-    LtiSys.u.min = min(state_input_region.V(:,state_dim+1:end));
-    LtiSys.u.max = max(state_input_region.V(:,state_dim+1:end));
+    ltisys.x.min = min(poly_state.V);
+    ltisys.x.max = max(poly_state.V);
+    
+    % Domain of inputs
+    input_dim = size(lti_struct.B, 2);
+    ltisys.u.min = min(state_input_region.V(:,1:input_dim));
+    ltisys.u.max = max(state_input_region.V(:,1:input_dim));
 end
-
 
 
 end
