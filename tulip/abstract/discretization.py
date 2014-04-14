@@ -999,6 +999,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 # DEFUNCT until further notice
 def discretize_overlap(closed_loop=False, conservative=False):
     """default False."""
+    raise NotImplementedError
 #         
 #         if rdiff < abs_tol:
 #             logger.info("Transition found")

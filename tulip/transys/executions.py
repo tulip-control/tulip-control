@@ -252,6 +252,7 @@ class FiniteStateAutomatonSimulation(object):
         
         We need to decide a format.
         """
+        raise NotImplementedError
         
 class FSASim(FiniteStateAutomatonSimulation):
     """Alias."""
