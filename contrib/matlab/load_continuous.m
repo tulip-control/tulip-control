@@ -164,9 +164,9 @@ function ltisys = set_lti_bounds(ltisys, state_input_region, lti_struct)
     ltisys.x.max = max(poly_state.V);
     
     % Domain of inputs
-    input_dim = size(lti_struct.B, 2);
-    ltisys.u.min = min(state_input_region.V(:,1:input_dim));
-    ltisys.u.max = max(state_input_region.V(:,1:input_dim));
+    state_dim = size(lti_struct.A, 2);
+    ltisys.u.min = min(state_input_region.V(:,state_dim+1:end));
+    ltisys.u.max = max(state_input_region.V(:,state_dim+1:end));
 end
 
 
