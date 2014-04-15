@@ -28,6 +28,7 @@ USAGE
 
 2) In MATLAB, make sure that these files are in the MATLAB path:
     - get_input.m
+    - get_input_switched.m
     - load_tulip.m
     - load_continuous.m
     - cont_to_disc.m
@@ -60,23 +61,13 @@ Issues that may be fixed in the future are starred.
 
 1*) Stateflow charts are nearly unreadable.
 
-2*) Support for continuous-state controllers is limited. The current
-   implementation only supports continuous controllers discretized with the
-   following settings:
+2*) Must discretize with use_all_horizon = False
 
-       use_all_horizon = False
-       conservative = False
-
-   In the future, use_all_horizon = True will be supported. Until the MPT
-   toolbox supports setting non-Polytopic target sets, we will not support
-   conservative discretization.
-
-3*) No support for SwitchedSysDyn (yet).
+3) Must discretize with conservative = True. This will not be supported because
+   the MPT toolbox does not support non-convex regions.
 
 4) domain must not be None in LtiSysDyn.
 
-5) If there are any env_actions or sys_actions, both must be there.
+5*) If there are any env_actions or sys_actions, both must be there.
 
-6*) Variables must not be named as strings. (Support coming later.)
-
-7*) No custom env_action and sys_action names passed into synthesize function.
+6*) No custom env_action and sys_action names passed into synthesize function.
