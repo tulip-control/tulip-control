@@ -248,7 +248,7 @@ class FiniteStateAutomatonSimulation(object):
         return msg
     
     def save(self):
-        """Dump to file.close
+        """Dump to file.
         
         We need to decide a format.
         """

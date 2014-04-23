@@ -69,8 +69,8 @@ class FiniteStateAutomaton(LabeledDiGraph):
     
     The represented language is not readily accessible,
     because its generation requires solving a search problem.
-    This is search problem is the usual model checking,
-    assuming a transition system with a complete digraph.
+    This search problem is the usual model checking, assuming
+    a transition system with a complete digraph.
     
     For constructively representing a language,
     use a L{FiniteTransitionSystem}.
@@ -85,6 +85,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
     ========
     L{NFA}, L{DFA}, L{BA}, L{RabinAutomaton}, L{DRA}, L{StreettAutomaton},
     L{MullerAutomaton}, L{ParityAutomaton}
+
     """
     def __init__(
             self, deterministic=False,

@@ -510,7 +510,7 @@ class FTS(FiniteTransitionSystem):
         FiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 class OpenFiniteTransitionSystem(LabeledDiGraph):
-    """Open Finite Transitin System modeling an open system.
+    """Open Finite Transition System modeling an open system.
     
     Analogous to L{FTS}, but for open systems comprised of
     the system and its environment.
@@ -526,7 +526,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         - The first sublabel is a system action,
         - the second an environment action.
     
-    Constrains on actions can be defined
+    Constraints on actions can be defined
     similarly to L{FTS} actions by setting the fields:
     
         - ofts.env_actions_must
@@ -639,7 +639,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 
     Hint
     ====
-    To rememeber the arg order:
+    To remember the arg order:
 
     1) it starts with states (S0 requires S before it is defined)
 

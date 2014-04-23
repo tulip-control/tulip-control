@@ -657,7 +657,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
       - labeled edges exist
       
     but mixing labeled with unlabeled edges for the same
-    edge is not allowed, to simplifiy and avoid confusion.
+    edge is not allowed, to simplify and avoid confusion.
     
     For dot export subclasses must define:
         
