@@ -330,6 +330,7 @@ class MooreMachine(FiniteStateMachine):
         raise NotImplementedError
     
     def __str__(self):
+        """Get informal string representation."""
         #TODO: improve port formatting
         s = _hl +'\nMoore Machine: ' +self.name +'\n' +_hl +'\n'
         s += 'State Variables:\n\t' +pformat(self.state_vars) +'\n'
@@ -422,6 +423,7 @@ class MealyMachine(FiniteStateMachine):
         self.default_export_fname = 'mealy'
     
     def __str__(self):
+        """Get informal string representation."""
         def print_ports(port_dict):
             s = ''
             for (port_name, port_type) in port_dict.iteritems():

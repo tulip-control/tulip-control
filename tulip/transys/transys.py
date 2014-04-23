@@ -221,6 +221,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
+        """Get informal string representation."""
         s = _hl +'\nFinite Transition System (closed) : '
         s += self.name +'\n' +_hl +'\n'
         s += 'Atomic Propositions:\n\t'
@@ -539,6 +540,14 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
     L{FiniteTransitionSystem}
     """
     def __init__(self, env_actions=None, sys_actions=None, **args):
+        """Initialize Open Finite Transition System.
+
+        @param env_actions: environment (uncontrolled) actions,
+            defined as C{edge_label_types} in L{LabeledDiGraph.__init__}
+
+        @param sys_actions: system (controlled) actions, defined as
+            C{edge_label_types} in L{LabeledDiGraph.__init__}
+        """
         if env_actions is None:
             env_actions = [('env_actions', MathSet(), True)]
         if sys_actions is None:
@@ -589,6 +598,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'ofts'
     
     def __str__(self):
+        """Get informal string representation."""
         s = _hl +'\nFinite Transition System (open) : '
         s += self.name +'\n' +_hl +'\n'
         s += 'Atomic Propositions:\n'
