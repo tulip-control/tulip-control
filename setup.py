@@ -154,6 +154,7 @@ if perform_setup:
         requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx'],
         install_requires = [
             'numpy >= 1.7', 'ply >= 3.4',
+            'polytope >= 0.1.0',
             'networkx >= 1.6'
         ],
         packages = [
