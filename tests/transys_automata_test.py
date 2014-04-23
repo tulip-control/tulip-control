@@ -3,8 +3,6 @@
 Tests for transys.automata (part of transys subpackage)
 """
 
-from collections import Iterable
-
 from tulip import transys as trs
 
 
