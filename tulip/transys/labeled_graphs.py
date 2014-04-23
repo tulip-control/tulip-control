@@ -1293,16 +1293,14 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
             prod_init.append(new_init)
         prod_sys.states.initial |= prod_init
         
-        """
-        # multiply mutable states (only the reachable added)
-        if self.states.mutants or other.states.mutants:
-            for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
-                prod_state = prod_ids2states(prod_state_id, self, other)
-                prod_sys.states.mutants[idx] = prod_state
-            
-            prod_sys.states.min_free_id = idx +1
-        # no else needed: otherwise self already not mutant
-        """
+        # # multiply mutable states (only the reachable added)
+        # if self.states.mutants or other.states.mutants:
+        #     for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
+        #         prod_state = prod_ids2states(prod_state_id, self, other)
+        #         prod_sys.states.mutants[idx] = prod_state
+        #
+        #     prod_sys.states.min_free_id = idx +1
+        # # no else needed: otherwise self already not mutant
         
         # action labeling is taken care by nx,
         # since transition taken at a time
