@@ -41,7 +41,6 @@ from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 
-hl = 40 *'-'
 
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.
