@@ -108,7 +108,7 @@ if check_deps:
         try:
             import ply
         except:
-            print('ERROR: ply not found.')
+            print('ERROR: PLY not found.')
             raise
         try:
             import networkx
@@ -153,8 +153,9 @@ if perform_setup:
         license = 'BSD',
         requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx'],
         install_requires = [
-            'numpy >= 1.7', 'ply >= 3.4',
+            'numpy >= 1.7',
             'polytope >= 0.1.0',
+            'ply >= 3.4',
             'networkx >= 1.6'
         ],
         packages = [
