@@ -791,8 +791,8 @@ def line_labeled_with(L, m=0):
     @param L: state labeling
     @type L: iterable of state labels, e.g.,::
             [{'p', '!p', 'q',...]
-        Single strings are identified with singleton Atomic Propositions,
-        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+    Single strings are identified with singleton Atomic Propositions,
+    so [..., 'p',...] and [...,{'p'},...] are equivalent.
     
     @param m: starting index
     @type m: int

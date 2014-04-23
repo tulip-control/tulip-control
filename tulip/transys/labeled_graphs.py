@@ -752,7 +752,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @type node_label_types: C{[(L_i, D_i, setter), ...]}
         
         @param edge_label_types: labeling functions for edges,
-            defined similarly to C{state_label_types}.
+            defined similarly to C{node_label_types}.
         
         @param max_outdegree: upper bound on the outdegree of each node.
             Labels are ignored while counting edges,

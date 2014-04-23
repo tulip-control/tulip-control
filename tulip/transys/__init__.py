@@ -31,7 +31,7 @@
 # SUCH DAMAGE.
 # 
 
-"""TuLiP Toolbox Transition System module
+"""TuLiP Toolbox Transition System subpackage
 
 Suggested abbreviation:
 
