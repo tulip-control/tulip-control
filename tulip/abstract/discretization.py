@@ -659,35 +659,34 @@ def discretize(
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
         
-        """
-        if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
-            logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
-            diff = pc.mldivide(si, S0, save=True)
-            
-            ax = S0.plot()
-            ax.axis([0.0, 1.0, 0.0, 2.0])
-            ax.figure.savefig('./img/s0.pdf')
-            
-            ax = si.plot()
-            ax.axis([0.0, 1.0, 0.0, 2.0])
-            ax.figure.savefig('./img/si.pdf')
-            
-            ax = isect.plot()
-            ax.axis([0.0, 1.0, 0.0, 2.0])
-            ax.figure.savefig('./img/isect.pdf')
-            
-            ax = diff.plot()
-            ax.axis([0.0, 1.0, 0.0, 2.0])
-            ax.figure.savefig('./img/diff.pdf')
-            
-            ax = isect.intersect(diff).plot()
-            ax.axis([0.0, 1.0, 0.0, 2.0])
-            ax.figure.savefig('./img/diff_cap_isect.pdf')
-            
-            logger.error('Intersection \cap Difference != \emptyset')
-            
-            assert(False)
-        """
+        # if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
+        #     logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
+        #     diff = pc.mldivide(si, S0, save=True)
+        #
+        #     ax = S0.plot()
+        #     ax.axis([0.0, 1.0, 0.0, 2.0])
+        #     ax.figure.savefig('./img/s0.pdf')
+        #
+        #     ax = si.plot()
+        #     ax.axis([0.0, 1.0, 0.0, 2.0])
+        #     ax.figure.savefig('./img/si.pdf')
+        #
+        #     ax = isect.plot()
+        #     ax.axis([0.0, 1.0, 0.0, 2.0])
+        #     ax.figure.savefig('./img/isect.pdf')
+        #
+        #     ax = diff.plot()
+        #     ax.axis([0.0, 1.0, 0.0, 2.0])
+        #     ax.figure.savefig('./img/diff.pdf')
+        #
+        #     ax = isect.intersect(diff).plot()
+        #     ax.axis([0.0, 1.0, 0.0, 2.0])
+        #     ax.figure.savefig('./img/diff_cap_isect.pdf')
+        #
+        #     logger.error('Intersection \cap Difference != \emptyset')
+        #
+        #     assert(False)
+
         if vol1 <= min_cell_volume:
             logger.warning('\t too small: si \cap Pre(sj), ' +
                            'so discard intersection')
