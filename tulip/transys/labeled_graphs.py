@@ -234,13 +234,13 @@ class States(object):
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
 
-        @rtype: list
+        @rtype: set
         """
         states = self._single_state2singleton(states)
         
-        successors = list()
+        successors = set()
         for state in states:
-            successors += self.graph.successors(state)
+            successors |= set(self.graph.successors(state))
         return successors
     
     def pre(self, states):
@@ -252,13 +252,13 @@ class States(object):
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
 
-        @rtype: list
+        @rtype: set
         """
         states = self._single_state2singleton(states)
         
-        predecessors = list()
+        predecessors = set()
         for state in states:
-            predecessors += self.graph.predecessors(state)
+            predecessors |= set(self.graph.predecessors(state))
         
         return predecessors
     

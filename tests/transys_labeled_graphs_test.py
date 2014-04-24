@@ -37,6 +37,16 @@ class States_test():
         assert (2 in self.S) and (1 in self.S)
         assert 3 not in self.S
 
+    def test_ior(self):
+        self.S.add(1)
+        other_S = labeled_graphs.States(labeled_graphs.LabeledDiGraph())
+        other_S.add(0)
+        assert len(self.S) == 1
+        assert set([s for s in self.S]) == {1}
+        self.S |= other_S
+        assert len(self.S) == 2
+        assert set([s for s in self.S]) == {1, 0}
+
     def test_add(self):
         self.S.add(1)
         assert set([s for s in self.S]) == set([1])
@@ -66,6 +76,14 @@ class States_test():
         S_imm_dat = self.S(data=True)
         assert (len(S_imm_dat) == 2) and ((-1, dict()) in S_imm_dat) and \
             (("Cal", dict()) in S_imm_dat)
+
+    def test_postpre(self):
+        self.S.add_from(range(5))
+        self.S.graph.add_edges_from([(0, 1), (0, 2), (1, 3), (3, 4)])
+        assert self.S.post(0) == {1, 2}
+        assert self.S.post([0, 1]) == {1, 2, 3}
+        assert self.S.pre(4) == {3}
+        assert self.S.pre([1, 2, 4]) == {0, 3}
 
 
 class Transitions_test:
