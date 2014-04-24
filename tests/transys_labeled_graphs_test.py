@@ -4,7 +4,6 @@ Tests for transys.labeled_graphs (part of transys subpackage)
 """
 
 from nose.tools import raises, assert_raises
-#from networkx import MultiDiGraph
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
 from tulip.transys.transys import OpenFTS
@@ -25,69 +24,49 @@ def prepend_with_test():
 
 class States_test():
     def setUp(self):
-        #self.S_mutable = labeled_graphs.States(labeled_graphs.LabeledDiGraph() )
-        self.S_immutable = labeled_graphs.States(labeled_graphs.LabeledDiGraph() )
+        self.S = labeled_graphs.States(labeled_graphs.LabeledDiGraph() )
 
     def tearDown(self):
-        self.S_mutable = None
-        self.S_immutable = None
+        self.S = None
 
     def test_contains(self):
         # This also serves as a test for len
-        self.S_immutable.add(1)
-        self.S_immutable.add(2)
-        assert len(self.S_immutable) == 2
-        assert (2 in self.S_immutable) and (1 in self.S_immutable)
-        assert 3 not in self.S_immutable
-
-        #self.S_mutable.add([-1,0,1])
-        #assert len(self.S_mutable) == 1
-        #assert [-1,0,1] in self.S_mutable
-        #assert None not in self.S_mutable
+        self.S.add(1)
+        self.S.add(2)
+        assert len(self.S) == 2
+        assert (2 in self.S) and (1 in self.S)
+        assert 3 not in self.S
 
     def test_add(self):
-        self.S_immutable.add(1)
-        assert set([s for s in self.S_immutable]) == set([1])
-        self.S_immutable.add(2)
-        assert set([s for s in self.S_immutable]) == set([1, 2])
-
-        #self.S_mutable.add([1, 2])
-        #self.S_mutable.add("Cal")
-        #S_mutable_list = [s for s in self.S_mutable]
-        #assert (len(S_mutable_list) == 2) and ("Cal" in S_mutable_list) and \
-        #    ([1,2] in S_mutable_list)
+        self.S.add(1)
+        assert set([s for s in self.S]) == set([1])
+        self.S.add(2)
+        assert set([s for s in self.S]) == set([1, 2])
+        self.S.add("Cal")
+        assert set([s for s in self.S]) == set([1, 2, "Cal"])
 
     def test_add_from(self):
-        self.S_immutable.add_from(range(3))
-        assert len(self.S_immutable) == 3
-        assert set([s for s in self.S_immutable]) == set(range(3))
+        self.S.add_from(range(3))
+        assert len(self.S) == 3
+        assert set([s for s in self.S]) == set(range(3))
+        self.S.add_from(["Cal", "tech"])
+        assert len(self.S) == 5
+        assert set([s for s in self.S]) == set(range(3)+["Cal", "tech"])
         
-        #self.S_mutable.add_from([[1.0, "Cal"], -1])
-        #assert (len(self.S_mutable) == 2) and \
-        #    ([1.0, "Cal"] in self.S_mutable) and (-1 in self.S_mutable)
-
     def test_remove(self):
         # This also tests remove_from
-        self.S_immutable.add_from(range(4))
-        self.S_immutable.remove(1)
-        assert set([s for s in self.S_immutable]) == set([0, 2, 3])
-        self.S_immutable.remove_from([0, 3])
-        assert len(self.S_immutable) == 1 and 2 in self.S_immutable
-
-        #self.S_mutable.add_from([[1, 2], -1])
-        #self.S_mutable.remove([1, 2])
-        #assert set([s for s in self.S_mutable]) == set([-1])
+        self.S.add_from(range(4))
+        self.S.remove(1)
+        assert set([s for s in self.S]) == set([0, 2, 3])
+        self.S.remove_from([0, 3])
+        assert len(self.S) == 1 and 2 in self.S
 
     def test_call(self):
-        self.S_immutable.add_from([-1, "Cal"])
-        S_imm_dat = self.S_immutable(data=True)
+        self.S.add_from([-1, "Cal"])
+        S_imm_dat = self.S(data=True)
         assert (len(S_imm_dat) == 2) and ((-1, dict()) in S_imm_dat) and \
             (("Cal", dict()) in S_imm_dat)
 
-        #self.S_mutable.add_from([[1,2], 3])
-        #S_mut_dat = self.S_mutable(data=True)
-        #assert (len(S_mut_dat) == 2) and (([1, 2], dict()) in S_mut_dat) and \
-        #    ((3, dict()) in S_mut_dat)
 
 class Transitions_test:
     def setUp(self):
@@ -138,82 +117,72 @@ class States_labeling_test:
     def setUp(self):
         node_label_def = [('ap', PowerSet({'p', 'q', 'r', 'x', 'a', 'b'}) )]
         G = labeled_graphs.LabeledDiGraph(node_label_def)
-        
-        self.S_immutable_ap = labeled_graphs.States(G)
-        G.states = self.S_immutable_ap
-
-        node_label_def = [('ap', PowerSet(['p', 'q', 'r']) )]
-        G = labeled_graphs.LabeledDiGraph(node_label_def)
-        #self.S_mutable_ap = labeled_graphs.LabeledStates(G, mutable=True)
-        #G.states = self.S_mutable_ap
+        self.S_ap = labeled_graphs.States(G)
+        G.states = self.S_ap
 
     def tearDown(self):
-        self.S_immutable_ap = None
-        #self.S_mutable_ap = None
+        self.S_ap = None
 
     @raises(Exception)
     def test_add_untyped_keys(self):
-        self.S_immutable_ap.add(1, foo=MathSet(['p']), check=True)
+        self.S_ap.add(1, foo=MathSet(['p']), check=True)
 
     def test_add(self):
-        self.S_immutable_ap.add(1, ap={'p'} )
-        assert len(self.S_immutable_ap) == 1
-        self.S_immutable_ap.add(2, ap={'p'} )
-        assert len(self.S_immutable_ap) == 2
-        self.S_immutable_ap.add(3, ap={'q', 'r'} )
-        assert len(self.S_immutable_ap) == 3
+        self.S_ap.add(1, ap={'p'} )
+        assert len(self.S_ap) == 1
+        self.S_ap.add(2, ap={'p'} )
+        assert len(self.S_ap) == 2
+        self.S_ap.add(3, ap={'q', 'r'} )
+        assert len(self.S_ap) == 3
 
-        assert self.S_immutable_ap[1] == {'ap': {'p'} }
-        assert self.S_immutable_ap[3] == {'ap': {'q', 'r'} }
+        assert self.S_ap[1] == {'ap': {'p'} }
+        assert self.S_ap[3] == {'ap': {'q', 'r'} }
         
-        nodes = {u for u,l in self.S_immutable_ap.find(
+        nodes = {u for u,l in self.S_ap.find(
             with_attr_dict={'ap': {'p'} }
         )}
         assert nodes == set([1, 2])
 
     def test_add_from(self):
-        self.S_immutable_ap.add_from([(0, {'ap':{'p'}}), (1, {'ap':{'q'} })])
-        assert len(self.S_immutable_ap) == 2
-        current_labels = [l["ap"] for (s,l) in self.S_immutable_ap(data=True)]
+        self.S_ap.add_from([(0, {'ap':{'p'}}), (1, {'ap':{'q'} })])
+        assert len(self.S_ap) == 2
+        current_labels = [l["ap"] for (s,l) in self.S_ap(data=True)]
         
         assert len(current_labels) == 2 and \
             MathSet(current_labels) == MathSet([{'p'}, {'q'}])
 
-        self.S_immutable_ap.add_from([(10, {'ap':{'r'} }),
+        self.S_ap.add_from([(10, {'ap':{'r'} }),
                                       (11, {'ap':{'x'} })],
                                       check=False)
-        assert len(self.S_immutable_ap) == 4
-        self.S_immutable_ap.add_from([(10, {'ap':{'a'} }),
+        assert len(self.S_ap) == 4
+        self.S_ap.add_from([(10, {'ap':{'a'} }),
                                       (11, {'ap':{'b'} })])
-        assert len(self.S_immutable_ap) == 4
-        current_labels = [l["ap"] for (s,l) in self.S_immutable_ap(data=True)]
+        assert len(self.S_ap) == 4
+        current_labels = [l["ap"] for (s,l) in self.S_ap(data=True)]
         assert len(current_labels) == 4 and \
             MathSet(current_labels)== MathSet([{'p'}, {'q'}, {'a'}, {'b'}])
-
-        #self.S_mutable_ap.labels(range(4), [{'p'}, {'q'}, {'a'}, {'b'}], check=False)
-        #assert len(self.S_mutable_ap) == 4
-        assert MathSet([l["ap"] for (s,l) in self.S_immutable_ap(data=True)]) == MathSet(current_labels)
+        assert MathSet([l["ap"] for (s,l) in self.S_ap(data=True)]) == MathSet(current_labels)
 
     def test_find(self):
-        pass
-        #state_list = ["state"+str(i) for i in range(4)]
-        #self.S_mutable_ap.labels(state_list, [{'p'}, {'q'}, {'p'}, {'q'}],
-        #                         check=False)
-        #result = self.S_mutable_ap.find("state1")
-        #assert len(result) == 1 and result[0] == ("state1", {"ap": set(['q'])})
+        state_list = ["state"+str(i) for i in range(4)]
+        state_list = zip(state_list,
+                         [{"ap": L} for L in [{'p'}, {'q'}, {'p'}, {'q'}]])
+        self.S_ap.add_from(state_list, check=False)
+        result = self.S_ap.find("state1")
+        assert len(result) == 1 and result[0] == ("state1", {"ap": set(['q'])})
 
-        #result = self.S_mutable_ap.find(["state1", "state0"])
-        #assert len(result) == 2 and \
-        #    ("state1", {"ap": set(['q'])}) in result and \
-        #    ("state0", {"ap": set(['p'])}) in result
+        result = self.S_ap.find(["state1", "state0"])
+        assert len(result) == 2 and \
+           ("state1", {"ap": set(['q'])}) in result and \
+           ("state0", {"ap": set(['p'])}) in result
 
-        #result = self.S_mutable_ap.find(with_attr_dict={"ap": {'p'}})
-        #print result
-        #assert len(result) == 2 and \
-        #    set([s for (s,l) in result]) == set(["state0", "state2"])
+        result = self.S_ap.find(with_attr_dict={"ap": {'p'}})
+        print result
+        assert len(result) == 2 and \
+           set([s for (s,l) in result]) == set(["state0", "state2"])
         
-        #same_result = self.S_mutable_ap.find(ap={'p'})
-        #assert(same_result == result)
+        same_result = self.S_ap.find(ap={'p'})
+        assert(same_result == result)
 
 class LabeledDiGraph_test():
     def setUp(self):
