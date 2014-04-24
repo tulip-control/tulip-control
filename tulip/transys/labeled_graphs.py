@@ -102,6 +102,10 @@ class States(object):
     """Methods to manage states, initial states, current state.
     """
     def __init__(self, graph):
+        """
+
+        @type graph: L{LabeledDiGraph}
+        """
         self.graph = graph
         self.initial = []
         self.current = []
@@ -215,14 +219,13 @@ class States(object):
     def post(self, states):
         """Direct successor set (1-hop) for given states.
         
-        Over all actions or letters, i.e., edge labeling ignored
-        by states.pre, because it may be undefined. Only classes
-        which have an action set, alphabet, or other transition
-        labeling set provide a pre(state, label) method, as for
-        example pre(state, action) in the case of closed transition
-        systems.
+        Over all actions or letters, i.e., edge labeling is ignored,
+        because it may be undefined. Only classes which have an action
+        set, alphabet, or other transition labeling set provide a
+        pre(state, label) method, as for example pre(state, action) in
+        the case of closed transition systems.
         
-        If multiple stats provided,
+        If multiple states provided,
         then union Post(s) for s in states provided.
         
         See Also
@@ -230,6 +233,8 @@ class States(object):
           - L{pre}
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+
+        @rtype: list
         """
         states = self._single_state2singleton(states)
         
@@ -246,6 +251,8 @@ class States(object):
           - L{post}
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+
+        @rtype: list
         """
         states = self._single_state2singleton(states)
         
@@ -416,6 +423,10 @@ class Transitions(object):
     Unlike an edge, a transition is a labeled edge.
     """
     def __init__(self, graph, deterministic=False):
+        """
+
+        @type graph: L{LabeledDiGraph}
+        """
         self.graph = graph
         self._deterministic = deterministic
     
