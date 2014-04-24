@@ -124,7 +124,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     >>> ts.atomic_propositions |= ['p', None]
     >>> ts.states.add('s0', ap={'p'})
-    >>> ts.states.add_from([('s1', {'ap':{'p'} }), \
+    >>> ts.states.add_from([('s1', {'ap':{'p'} }),
                             ('s3', {'ap':{} } )])
     
     For singleton subsets of AP passing the atomic proposition
