@@ -489,9 +489,9 @@ class MealyMachine(FiniteStateMachine):
         @param new_outputs: ordered pairs of port_name : port_type
         @type new_outputs: OrderedDict | list, of::
                 (port_name, port_type)
-            where:
-                - port_name: str
-                - port_type: Iterable | check class
+        where:
+            - port_name: str
+            - port_type: Iterable | check class
         
         @param masks: custom mask functions, for each sublabel
             based on its current value

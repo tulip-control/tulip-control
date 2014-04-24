@@ -560,6 +560,7 @@ class PropPreservingPartition(pc.MetricPartition):
         return True
 
     def __str__(self):
+        """Get informal string representation."""
         s = '\n' + _hl + '\n'
         s += 'Proposition Preserving Partition:\n'
         s += _hl + 2*'\n'

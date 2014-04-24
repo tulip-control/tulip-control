@@ -1078,7 +1078,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         >>> g = LabeledDiGraph()
         >>> g.add_edge(1, 2, day='Mon')
         >>> g.add_edge(1, 2, day='Tue')
-        >>> edges = [(1, 2, {'day':'Mon'}), \
+        >>> edges = [(1, 2, {'day':'Mon'}),
                      (1, 2, {'day':'Tue'})]
         >>> g.remove_edges_from(edges)
         

@@ -49,7 +49,7 @@ def compare_lists(list1, list2):
     
     See Also
     ========
-    MathSet
+    L{MathSet}
     
     @type list1: list
     @type list2: list
@@ -106,7 +106,7 @@ class MathSet(object):
     
     See Also
     ========
-    SubSet, PowerSet, set
+    L{SubSet}, L{PowerSet}, set
     """    
     def __init__(self, iterable=[]):
         """Initialize by adding elements from iterable.
@@ -134,7 +134,7 @@ class MathSet(object):
         
         See Also
         ========
-        __ior__
+        L{__ior__}
         
         @param other: any other mathematical set.
         @type other: iterable, elements not restricted to hashable
@@ -155,7 +155,7 @@ class MathSet(object):
         
         See Also
         ========
-        CartesianProduct, __mul__
+        L{CartesianProduct}, L{__mul__}
         """
         raise NotImplementedError
     
@@ -177,7 +177,7 @@ class MathSet(object):
         
         See Also
         ========
-        cartesian
+        L{cartesian}
         
         @param other: set with which to take Cartesian product
         @type other: MathSet
@@ -201,7 +201,7 @@ class MathSet(object):
         
         See Also
         ========
-        __or__
+        L{__or__}
         
         @param iterable: any mathematical set.
         @type iterable: iterable, elements not restricted to hashable
@@ -277,7 +277,7 @@ class MathSet(object):
         
         See Also
         ========
-        add_from, __ior__, remove
+        L{add_from}, L{__ior__}, L{remove}
         
         @param item: the new set element
         @type item: anything, if hashable it is stored in a Python set,
@@ -312,7 +312,7 @@ class MathSet(object):
         
         See Also
         ========
-        add, __ior__, remove
+        L{add}, L{__ior__}, L{remove}
         
         @param iterable: new MathSet elements
         @type iterable: iterable containing (possibly not hashable) elements
@@ -354,7 +354,7 @@ class MathSet(object):
         
         See Also
         ========
-        add, add_from, __or__
+        L{add}, L{add_from}, L{__or__}
         
         @param item: An item already in the set.
             For adding items, see add.
@@ -453,7 +453,7 @@ class SubSet(MathSet):
     
     See Also
     ========
-    MathSet, PowerSet
+    L{MathSet}, L{PowerSet}
     """
     def __init__(self, superset, iterable=None):
         """Define the superset of this set.
@@ -496,7 +496,7 @@ class SubSet(MathSet):
         
         See Also
         ========
-        MathSet.add
+        L{MathSet.add}
         """
         if not new_element in self._superset:
             raise Exception(
@@ -523,7 +523,7 @@ class SubSet(MathSet):
         
         See Also
         ========
-        add, __ior__
+        L{add}, L{__ior__}
         """
         if not is_subset(new_elements, self._superset):
             raise Exception('All new_elements:\n\t' +str(new_elements) +
@@ -671,6 +671,7 @@ class PowerSet(object):
     Example
     =======
     Specify the mathematical set S underlying the PowerSet.
+
     >>> S = [[1, 2], '3', {'a':1}, 1]
     >>> p = PowerSet(S)
     
@@ -678,18 +679,21 @@ class PowerSet(object):
     >>> q.math_set = S
     
     Add new element to underlying set S.
+
     >>> p.math_set.add({3: 'a'} )
     
     Add multiple new elements to underlying set S.
+
     >>> p.math_set.add_from({3, 'a'} )
     >>> p.math_set |= [1,2]
     
     Remove existing element from set S.
+
     >>> p.remove(1)
     
     See Also
     ========
-    MathSet, SubSet, is_subset
+    L{MathSet}, L{SubSet}, L{is_subset}
     
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
