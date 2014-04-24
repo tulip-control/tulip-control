@@ -1458,14 +1458,15 @@ def prepend_with(states, prepend_str):
     @param states: items prepended with string C{prepend_str}
     @type states: iterable
     
-    @param prepend_str: text prepended to C{states}
-    @type prepend_str: str
+    @param prepend_str: text prepended to C{states}.  If None, then
+        C{states} is returned without modification
+    @type prepend_str: str or None
     """
     if not isinstance(states, Iterable):
         raise TypeError('states must be Iterable. Got:\n\t' +
                         str(states) +'\ninstead.')
     if not isinstance(prepend_str, str) and prepend_str is not None:
-        raise TypeError('prepend_str must be Iterable. Got:\n\t' +
+        raise TypeError('prepend_str must be of type str. Got:\n\t' +
                         str(prepend_str) +'\ninstead.')
     
     if prepend_str is None:
