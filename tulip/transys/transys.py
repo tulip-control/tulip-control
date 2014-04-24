@@ -53,28 +53,28 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     Implements Def. 2.1, p.20 U{[BK08]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
-        - states = S
+        - states (instance of L{States}) = S
         - states.initial = S_0 \subseteq S
         - atomic_propositions = AP
         - actions = Act
-        - transitions::
+        - transitions (instance of L{Transitions})::
               the transition relation ->
                 = edge set + edge labeling function
                 (labels \in actions)
-          Unlabeled edges are defined using:
-                - sys.transitions.add
-                - sys.transitions.add_from
-                - sys.transitions.add_adj
-          and accessed using:
-                - sys.transitions.find
+        Unlabeled edges are defined using:
+            - sys.transitions.add
+            - sys.transitions.add_from
+            - sys.transitions.add_adj
+        and accessed using:
+            - sys.transitions.find
         - the state labeling function::
                 L: S-> 2^AP
-          can be defined using:
-                - sys.states.add
-                - sys.states.add_from
-          and accessed using methods:
-                - sys.states(data=True)
-                - sys.states.find
+        can be defined using:
+            - sys.states.add
+            - sys.states.add_from
+        and accessed using methods:
+            - sys.states(data=True)
+            - sys.states.find
     
     The state labels are subsets of atomic_propositions, so \in 2^AP.
     The transition labels are actions.
@@ -111,7 +111,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     >>> ts.states.add('s0')
     >>> ts.states.add_from(['s1', 's3', 'end', 5] )
     
-    Set an initial state, must already be in states:
+    Set an initial state, which must already be in states:
     
     >>> ts.states.initial.add('s0')
     
@@ -127,8 +127,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     >>> ts.states.add_from([('s1', {'ap':{'p'} }),
                             ('s3', {'ap':{} } )])
     
-    For singleton subsets of AP passing the atomic proposition
-    itself, instead of the singleton, will also work:
+    If a state has already been added, its label of atomic
+    propositions can be defined directly:
     
     >>> ts.states['s0']['ap'] = {'p'}
     
