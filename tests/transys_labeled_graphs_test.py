@@ -19,7 +19,8 @@ def prepend_with_check(states, prepend_str, expected):
 def prepend_with_test():
     for (states, prepend_str, expected) in [([0,1], "s", ['s0', 's1']),
                                             ([], "s", []),
-                                            ([0], "Cal", ["Cal0"])]:
+                                            ([0], "Cal", ["Cal0"]),
+                                            ([0, 1], None, [0, 1])]:
         yield prepend_with_check, states, prepend_str, expected
 
 
@@ -130,7 +131,7 @@ class Transitions_test:
 
     def test_add_comb(self):
         self.T.add_comb([1, 2], [3, 4])
-        assert len(self.T) == 2 and set([t for t in self.T()]) == set([(1, 3),
+        assert len(self.T) == 4 and set([t for t in self.T()]) == set([(1, 3),
                                                                        (2, 3),
                                                                        (1, 4),
                                                                        (2, 4)])
