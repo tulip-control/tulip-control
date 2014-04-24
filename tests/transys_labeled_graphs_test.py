@@ -86,6 +86,12 @@ class States_test():
         assert self.S.pre(4) == {3}
         assert self.S.pre([1, 2, 4]) == {0, 3}
 
+    def test_is_terminal(self):
+        self.S.add_from([0, 1])
+        self.S.graph.add_edge(0, 1)
+        assert not self.S.is_terminal(0)
+        assert self.S.is_terminal(1)
+
 
 class Transitions_test:
     def setUp(self):
@@ -121,6 +127,13 @@ class Transitions_test:
         self.T.add_from([(5, 2), (4, 3)])
         assert len(self.T) == 3
         assert set([t for t in self.T()]) == set([(1, 4), (5, 2), (4, 3)])
+
+    def test_add_comb(self):
+        self.T.add_comb([1, 2], [3, 4])
+        assert len(self.T) == 2 and set([t for t in self.T()]) == set([(1, 3),
+                                                                       (2, 3),
+                                                                       (1, 4),
+                                                                       (2, 4)])
 
     def test_remove(self):
         # This also tests remove_from
