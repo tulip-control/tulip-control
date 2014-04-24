@@ -8,6 +8,7 @@ from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
 from tulip.transys.transys import OpenFTS
 
+
 def str2singleton_test():
     assert labeled_graphs.str2singleton("p") == {"p"}
     assert labeled_graphs.str2singleton({"Cal"}) == {"Cal"}
@@ -131,6 +132,7 @@ class Transitions_test:
         self.T.remove_from([(1, 2), (4, 3), (3, 2)])
         assert set([t for t in self.T()]) == set([(1, 3)])
 
+
 class States_labeling_test:
     def setUp(self):
         node_label_def = [('ap', PowerSet({'p', 'q', 'r', 'x', 'a', 'b'}) )]
@@ -202,6 +204,7 @@ class States_labeling_test:
         same_result = self.S_ap.find(ap={'p'})
         assert(same_result == result)
 
+
 class LabeledDiGraph_test():
     def setUp(self):
         p = PowerSet({1, 2})
@@ -251,6 +254,7 @@ class LabeledDiGraph_test():
     @raises(ValueError)
     def test_edge_subscript_assign_illegal_value(self):
         self.G[1][2][0]['day'] = 'abc'
+
     
 def open_fts_multiple_env_actions_test():
     env_modes = MathSet({'up', 'down'})
