@@ -11,3 +11,13 @@ readdstar.py, spin2dstar.py
 
 AES
   specification generation for an electric power system.  Consult AES/README.
+
+matlab
+  files required to export controllers to Simulink blocks and a couple examples
+  for reference.  Consult matlab/README.
+
+nessainstall
+  instructions for installing TuLiP on a big computer at Caltech but likely
+  useful for similar settings, in particular in which there are old versions of
+  system software, where only SSH access is available, and on a non-superuser
+  account.  Consult nessainstall/README.md.
