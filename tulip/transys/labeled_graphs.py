@@ -110,9 +110,6 @@ class States(object):
         self.initial = []
         self.current = []
     
-    def __get__(self):
-        return self.__call__()
-    
     def __getitem__(self, state):
         return self.graph.node[state]
     
