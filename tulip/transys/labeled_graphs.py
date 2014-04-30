@@ -656,7 +656,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     first make sure no state (or edge) is labeled with it.
     
     Multiple edges with the same C{attr_dict} are not possible.
-    So the difference from C{networkx.MultiDigraph} is that
+    So the difference from C{networkx.MultiDiGraph} is that
     the C{dict} of edges between u,v is a bijection.
     
     Between two nodes either:
@@ -943,7 +943,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Notes
         =====
         1. Argument C{key} has been removed compared to
-           C{networkx.MutliDigraph.add_edge}, because edges are defined
+           C{networkx.MultiDiGraph.add_edge}, because edges are defined
            by their labeling, i.e., multiple edges with same labeling
            are not allowed.
         
@@ -1029,7 +1029,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
         
-        For details see C{networkx.MultiDigraph.add_edges_from}.
+        For details see C{networkx.MultiDiGraph.add_edges_from}.
         Only difference is that only 2 and 3-tuple edges allowed.
         Keys cannot be specified, because a bijection is maintained.
         

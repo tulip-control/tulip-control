@@ -99,7 +99,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     The system and environment actions associated with an edge
     of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same (open) L{FTS}.
+    and their sets are encapsulated within the same L{(open) FTS
+    <OpenFiniteTransitionSystem>}.
     
     Example
     =======
