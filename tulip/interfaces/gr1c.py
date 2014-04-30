@@ -487,8 +487,7 @@ def synthesize(spec):
     (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
     
     logger.debug('gr1c returned:\n' + str(p.returncode) )
-    logger.debug('gr1c stdout:\n' + str(stdoutdata) +_hl)
-    logger.debug('gr1c stderr:\n' + str(stderrdata) +_hl)
+    logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
     
     if p.returncode == 0:
         (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
