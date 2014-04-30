@@ -496,9 +496,7 @@ def synthesize(spec):
     else:
         print(30*' ' + '\n gr1c return code:\n' + 30*' ')
         print(p.returncode)
-        print(30*' ' + '\n gr1c stdout:\n' + 30*' ')
-        print(stderrdata)
-        print(30*' ' + '\n gr1c stdout:\n' + 30*' ')
+        print(30*' ' + '\n gr1c stdout, stderr:\n' + 30*' ')
         print(stdoutdata)
         return None
 
