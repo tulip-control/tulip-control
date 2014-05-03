@@ -3,7 +3,7 @@ Tutorial and Examples
 
 TuLiP is developed for synthesis of discrete controllers for hybrid control
 systems, including supervisory controllers, switching controllers and
-receding horizon temporal logic planners.
+receding horizon temporal logic planners (not supported in this version).
 
 Synthesis of Reactive Controllers
 ---------------------------------
@@ -167,6 +167,8 @@ The resulting output is a finite state machine (Mealy machine):
 Syntax for Writing Specifications 
 `````````````````````````````````
 
+OUTDATED!
+
 The specification :eq:`spec` may contain various LTL operators, arithmetic operators for integer variables and parentheses 
 for precedence or to increase readability. Here is a quick list of names of the operators followed by the corresponding symbols that 
 are compatible with rhtlp: 
@@ -193,7 +195,7 @@ Also note that the domains of the variables can be either boolean or a list of i
 
 Example 1: Discrete State Robot Motion Planning
 ```````````````````````````````````````````````
-This example is provided in examples/robot_planning/robot_discrete.py.
+This example is provided in examples/robot_planning/discrete.py.
 It illustrates the use of the gr1c module in synthesizing a planner
 for a robot that only needs to make discrete decision.
 
@@ -220,7 +222,7 @@ necessary modules:
 
 .. highlight:: python
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @import_section@
    :end-before: @import_section_end@
 
@@ -230,13 +232,13 @@ Transitions between adjacent cells are allowed, which we model as a
 transition system in this example (it would also be possible to do this via
 a formula):
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @system_dynamics_section@
    :end-before: @system_dynamics_section_end@
 
 To create the specification, we label some of the states with names:
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @system_labels_section@
    :end-before: @system_labels_section_end@
 
@@ -248,7 +250,7 @@ by moving to the lower left corner of the grid.  We assume that
 the park signal is turned off infinitely often.  We describe this using the
 following code:
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @environ_section@
    :end-before: @environ_section_end@
 
@@ -277,7 +279,7 @@ variable X0reach that is initialized to True and the specification
 
 The python code to implement this logic is given by:
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @specs_setup_section@
    :end-before: @specs_setup_section_end@
 
@@ -292,21 +294,21 @@ Finally, we construct the full specification for the system and environment
 by creating a GR(1) specification consisting of the various pieces we have
 constructed:
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @specs_create_section@
    :end-before: @specs_create_section_end@
 
 To synthesize the controller, we call the :literal:`synth.synthesize()`
 function. 
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @synthesize@
    :end-before: @synthesize_end@
 
 The controller can now be saved in graphical form, or printed if pydot package
 is not available:
 
-.. literalinclude:: ../examples/robot_planning/robot_discrete.py
+.. literalinclude:: ../examples/robot_planning/discrete.py
    :start-after: @plot_print@
    :end-before: @plot_print_end@
 
@@ -314,7 +316,7 @@ is not available:
 
 Example 2: Continuous State Robot Motion Planning
 `````````````````````````````````````````````````
-This example is provided in examples/robot_planning/robot_continuous.py.
+This example is provided in examples/robot_planning/continuous.py.
 It is an extension of the previous example by including continuous dynamics.
 
 First, we import the necessary modules, 
@@ -322,7 +324,7 @@ specify the smv file, spc file and aut file,
 and specify the environment and the discrete system variables
 as in the previous example.
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+.. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @import_section@
    :end-before: @import_section_end@
 
@@ -331,18 +333,18 @@ continuous state space, propositions on continuous variables, and the
 dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y}
 = u_y.`
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+.. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @dynamics_section@
    :end-before: @dynamics_section_end@
 
 Now, we can construct the proposition preserving partition of the continuous
 state space and discretize the continuous state space based on the dynamics.
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+.. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @partition_section@
    :end-before: @partition_section_end@
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+.. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @discretize_section@
    :end-before: @discretize_section_end@
 
@@ -351,7 +353,7 @@ environment, create a GR(1) system specification, and synthesize a
 controller.  Here we use the JTLV synthesis tool, which returns a counter
 example if no controller can be found:
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous.py
+.. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @synthesize_section@
    :end-before: @synthesize_section_end@
 
@@ -393,7 +395,7 @@ is represented by PwaSysDyn class.
 Example 4: Robot Motion Planning with Piecewise Affine Dynamics
 ```````````````````````````````````````````````````````````````
 
-This example is provided in examples/robot_planning/robot_continuous_pwa.py.
+This example is provided in examples/robot_planning/pwa.py.
 It is an extension of the previous examples including a robot model
 with piecewise affine dynamics.
 
@@ -404,173 +406,32 @@ dynamics in different parts of the surface can be modeled as a piecewise
 affine system. When :math:`s[t] \in[0, 3]\times[0.5, 2]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
+.. literalinclude:: ../examples/robot_planning/pwa.py
    :start-after: @subsystem0@
    :end-before: @subsystem0_end@
 
 When :math:`s[t] \in[0, 3]\times[0, 0.5]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
+.. literalinclude:: ../examples/robot_planning/pwa.py
    :start-after: @subsystem1@
    :end-before: @subsystem1_end@
 
 Piecewise affine system can be formed from the dynamics of its subsystems.
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
+.. literalinclude:: ../examples/robot_planning/pwa.py
    :start-after: @pwasystem@
    :end-before: @pwasystem_end@
 
 Discretization and synthesis follow exactly as before.
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
+.. literalinclude:: ../examples/robot_planning/pwa.py
    :start-after: @synth@
    :end-before: @synth_end@
 
 Finally, we can simulate the continuous and discrete parts and plot the resulting trajectories.
 
-.. literalinclude:: ../examples/robot_planning/robot_continuous_pwa.py
+.. literalinclude:: ../examples/robot_planning/pwa.py
    :start-after: @sim@
    :end-before: @sim_end@
 
-Receding Horizon Temporal Logic Planning
-----------------------------------------
-
-For systems with a certain structure, the computational complexity of the
-planner synthesis can be alleviated by solving the planning problems in a
-receding horizon fashion, i.e., compute the plan or strategy over a
-"shorter" horizon, starting from the current state, implement the initial
-portion of the plan, move the horizon one step ahead, and recompute.  This
-approach essentially reduces the planner synthesis problem into a set of
-smaller problems.  To ensure that this "receding horizon" framework
-preserves the desired system-level temporal properties, certain sufficient
-conditions need to be satisfied.
-
-We consider a specification of the form
-
-.. math::
-   \varphi = \big(\psi_{init} \wedge \square \psi_e^e \wedge 
-   \bigwedge_{i \in I_f} \square\diamond \psi_{f,i}\big) \implies
-   \big(\square \psi_s \wedge \bigwedge_{i \in I_g} \psi_{g,i}\big).
-   :label: GR1Spec
-
-Given a specification of this form, we first construct a finite state
-abstraction of the physical system.  Then, for each :math:`i \in I_g`, we
-organize the system states into a partially ordered set :math:`\mathcal{P}^i
-= (\{\mathcal{W}_j^i\}, \preceq_{\psi_{g,i}})` where :math:`\mathcal{W}_0^i`
-are the set of states satisfying :math:`\psi_{g,i}.` For each :math:`j`, we
-define a short-horizon specification :math:`\Psi_j^i` associated with
-:math:`\mathcal{W}_j^i` as
-
-.. math::
-   \Psi_j^i = \big((\nu \in \mathcal{W}_j^i) \wedge \Phi \wedge \square \psi_e^e \wedge 
-   \bigwedge_{k \in I_f} \square\diamond \psi_{f,k}\big) \implies
-   \big(\square \psi_s \wedge \square\diamond(\nu \in \mathcal{F}^i(\mathcal{W}_j^i)) \big).
-
-Here, :math:`\Phi` describes receding horizon invariants.  :math:`\Phi`
-needs to be defined such that :math:`\psi_{init} \implies \Phi` is a
-tautology.  :math:`\mathcal{F}^i : \{\mathcal{W}_j^i\} \to
-\{\mathcal{W}_j^i\}` is a mapping such that
-:math:`\mathcal{F}^i(\mathcal{W}_j^i) \prec_{\psi_{g,i}} \mathcal{W}_j^i,
-\forall j \not= 0.` :math:`\mathcal{F}^i(\mathcal{W}_j^i)` essentially
-defines intermediate goal for starting in :math:`\mathcal{W}^i_j.`
-
-.. image:: rhtlp_strategy.*
-
-The above figure provides a graphical description of the receding horizon
-strategy for a special case where for each :math:`i \in I_g, \mathcal{W}^i_j
-\prec_{\psi_{g,i}} \mathcal{W}^i_k, \forall j < k`,
-:math:`\mathcal{F}^i(\mathcal{W}^i_j) = \mathcal{W}^i_{j-1}, \forall j > 0`
-and :math:`F^i(\mathcal{W}^i_0) = \mathcal{W}^i_0.` Please refer to our
-`paper <http://www.cds.caltech.edu/~nok/doc/tac10.pdf>`_ for more details.
-
-Short-Horizon Problem
-`````````````````````
-
-A short-horizon problem can be defined using the ShortHorizonProb class.
-
-     .. autoclass:: rhtlp.ShortHorizonProb
-	:noindex:
-
-Receding Horizon Temporal Logic Planning Problem
-````````````````````````````````````````````````
-
-A receding horizon temporal logic planning problem contains a collection of
-short-horizon problems. It can be defined using the RHTLPProb class, which
-contains many functions such as ``computePhi()`` and ``validate()``.   
-
-     .. autoclass:: rhtlp.RHTLPProb
-	:members: computePhi, validate
-	:noindex:
-
-
-
-Example 5: Autonomous Vehicle
-`````````````````````````````
-This example is provided in examples/autonomous_car_road.py.
-It is a simplified version of the problem presented in our
-`CDC paper <http://www.cds.caltech.edu/~nok/doc/cdc09.pdf>`_
-
-We first import the necessary modules.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @import_section@
-   :end-before: @import_section_end@
-
-Specify the road configuration and the problem setup.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @roadsetup@
-   :end-before: @roadsetup_end@
-
-Continuous dynamics.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @contdyn@
-   :end-before: @contdyn_end@
-
-Variables and propositions.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @varprop@
-   :end-before: @varprop_end@
-
-Specification.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @spec@
-   :end-before: @spec_end@
-
-Now, we construct the RHTLPProb object.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @prob@
-   :end-before: @prob_end@
-
-Add ShortHorizonProb objects to the RHTLPProb object.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @shorthoriz@
-   :end-before: @shorthoriz_end@
-
-For each :math:`\mathcal{W}_j`, set :math:`\mathcal{F}(\mathcal{W}_j).`
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @setF@
-   :end-before: @setF_end@
-
-Now, we can validate whether the RHTLPProb object satisfies all the sufficient conditions.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @valid@
-   :end-before: @valid_end@
-
-The result of the above ``validate()`` call is that the state in which
-:math:`X_i = 0, \forall i \in \{0, \ldots, 29\}` is not in any :math:`\mathcal{W}_j,` 
-i.e., the sufficient condition that the union of all :math:`\mathcal{W}_j`
-covers the entire state space is not satisfied.
-Since we know that we don't have to deal with the above state, we will exclude it.
-
-.. literalinclude:: ../examples/autonomous_car_road.py
-   :start-after: @exclude@
-   :end-before: @exclude_end@
