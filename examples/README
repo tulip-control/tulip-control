@@ -1,0 +1,6 @@
+This directory contains some examples of the use of the TuLiP toolbox.  The
+following examples are included here:
+
+* robot_planning/ - simple motion planning examples
+* developer/ - various examples used during development, unstable directory
+* developer/transys/ - examples focusing on the tulip.transys subpackage

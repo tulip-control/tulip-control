@@ -1,7 +1,0 @@
-.. Emacs, this is -*-rst-*-
-
-Simulation
-==========
-
-.. automodule:: grsim
-   :members:

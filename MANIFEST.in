@@ -1,8 +1,7 @@
-include tulip/jtlv_grgame.jar
-include tulip/matlab/*.m
-recursive-include examples *.py
+recursive-include examples *.py README
+include run_tests.py
+include tests/*.py
+include README.rst
 include doc/*
-include doc/_templates/*.*
-include doc/formats/*.*
 exclude doc/*.sh
 recursive-include contrib *

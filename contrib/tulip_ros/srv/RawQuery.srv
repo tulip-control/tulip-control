@@ -1,4 +1,0 @@
-# Get attributes of the current automaton node.
-
----
-uint16[] state

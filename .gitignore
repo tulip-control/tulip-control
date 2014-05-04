@@ -1,3 +1,16 @@
-*.*~
+*~
+*.log
+*.out
+parsetab.py
+*.gr1
+*.m
 *.pyc
+*.egg-info
+.DS_Store
+._.DS_Store
+*.png
+*.PNG
+*.pdf
+*.PDF
 /build/
+/dist/

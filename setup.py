@@ -1,24 +1,11 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
-
+from setuptools import setup
 
 ###########################################
 # Dependency or optional-checking functions
 ###########################################
 # (see notes below.)
-
-def check_graphlibs():
-    """Check for presence of graph packages: python-graph."""
-    try:
-        import pygraph
-        print "python-graph found."
-    except ImportError:
-        print 'python-graph not found. If you\'re interested, see http://code.google.com/p/python-graph/'
-        print 'Some methods for the Automaton class will not be available.'
-
-    # Dud return value to conform to typical behavior of check_... functions.
-    return True
 
 def check_gr1c():
     import subprocess
@@ -28,78 +15,28 @@ def check_gr1c():
         return False
     return True
 
-def check_yaml():
+def check_mpl():
     try:
-        import yaml
+        import matplotlib
     except ImportError:
         return False
     return True
 
-def check_mpt():
-    import subprocess
-
-    # Check for Matlab;
-    # N.B., the user might have Matlab installed despite it not being
-    # visible on the system path!  If set to use MPT, this would cause
-    # TuLiP, to enter an interactive processing mode, wherein the user
-    # must manually invoke runDiscretizeMatlab.m
-    cmd = subprocess.Popen(['which', 'matlab'],
-                           stdout=subprocess.PIPE, close_fds=True)
-    matlab_visible = False
-    for line in cmd.stdout:
-        if 'matlab' in line:
-            matlab_visible = True
-            break
-    if not matlab_visible:
-        print 'WARNING: Matlab not found, thus we cannot check for MPT.'
-        return False
-
-    cmd = subprocess.Popen(['matlab',
-                            '-nodesktop',
-                            '-nosplash',
-                            '-nojvm',
-                            '-r',
-                            'if (exist(\'mpt_init\', \'file\')==2) && (exist(\'polytope\', \'file\')==2), disp \'MPT FOUND; GO TIME\'; else, disp \'NO MPT; PANIC\'; end; pause(1); exit'],
-                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    for line in cmd.stdout:
-        if 'MPT FOUND; GO TIME' in line:
-            return True
-    
-    return False
-
-def check_yices():
-    import subprocess
-    cmd = subprocess.Popen(['which', 'yices'],
-                           stdout=subprocess.PIPE, close_fds=True)
-    for line in cmd.stdout:
-        if 'yices' in line:
-            return True
-    return False
-
-def check_glpk():
+def check_pydot():
     try:
-        import cvxopt.glpk
+        import pydot
+        from distutils.version import StrictVersion
+        if StrictVersion(pydot.__version__) < StrictVersion('1.0.28'):
+            print('Pydot version >= 1.0.28 required.' +
+                'found: ' +pydot.__version__)
     except ImportError:
         return False
     return True
 
-def check_gephi():
-    import subprocess
-    cmd = subprocess.Popen(['which', 'gephi'], stdout=subprocess.PIPE)
-    for line in cmd.stdout:
-        if 'gephi' in line:
-            return True
-    return False
-
-
-# Handle "check" argument to check for dependencies;
-# occurs by default if "install" is given,
-# unless both "install" and "nocheck" are given (but typical
-# users do not need "nocheck").
-#
-# The behavior is such that if "check" is given as a command-line
-# argument, but "install" is not, then setup (as provided by
-# Distutils) is not invoked.
+# Handle "dry-check" argument to check for dependencies without
+# installing the tulip package; checking occurs by default if
+# "install" is given, unless both "install" and "nocheck" are given
+# (but typical users do not need "nocheck").
 
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
@@ -109,7 +46,18 @@ def check_gephi():
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {'yices' : [check_yices, 'ERROR: Yices not found.']}
+other_depends = {}
+
+gr1c_msg = 'gr1c not found.\n' +\
+    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
+    'see http://scottman.net/2012/gr1c'
+mpl_msg = 'matplotlib not found.\n' +\
+    'For many graphics drawing features in TuLiP, you must install\n' +\
+    'matplotlib (http://matplotlib.org/).'
+pydot_msg = 'pydot not found.\n' +\
+    'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
+    'export routines will be unavailable unless you install\n' +\
+    'pydot (http://code.google.com/p/pydot/).'
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -118,26 +66,23 @@ other_depends = {'yices' : [check_yices, 'ERROR: Yices not found.']}
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', 'GLPK seems to be missing\nand thus apparently not used by your installation of CVXOPT.\nIf you\'re interested, see http://www.gnu.org/s/glpk/'],
-             'gephi' : [check_gephi, 'Gephi found.', 'Gephi seems to be missing. If you\'re interested in graph visualization, see http://gephi.org/'],
-             'graphlibs' : [check_graphlibs, '', ''],
-             'MPT' : [check_mpt, 'MPT found.', 'MPT not found (and not required). If you\'re curious, see http://control.ee.ethz.ch/~mpt/'],
-             'gr1c' : [check_gr1c, 'gr1c found.', 'gr1c not found.\nIf you\'re interested in a GR(1) synthesis tool besides JTLV, see https://github.com/slivingston/gr1c'],
-             'PyYAML' : [check_yaml, 'PyYAML found.', 'PyYAML not found.\nTo read/write YAML, you will need to install PyYAML; see http://pyyaml.org/']}
+optionals = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
+             'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
+             'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 import sys
 perform_setup = True
 check_deps = False
 if 'install' in sys.argv[1:] and 'nocheck' not in sys.argv[1:]:
     check_deps = True
-elif 'check' in sys.argv[1:]:
+elif 'dry-check' in sys.argv[1:]:
     perform_setup = False
     check_deps = True
 
-# Pull "check" and "nocheck" from argument list, if present, to play
+# Pull "dry-check" and "nocheck" from argument list, if present, to play
 # nicely with Distutils setup.
 try:
-    sys.argv.remove('check')
+    sys.argv.remove('dry-check')
 except ValueError:
     pass
 try:
@@ -146,57 +91,87 @@ except ValueError:
     pass
 
 if check_deps:
-    print "Checking for dependencies..."
+    if not perform_setup:
+        print('Checking for required dependencies...')
 
-    # Python package dependencies
-    try:
-        import numpy
-    except:
-        print 'ERROR: NumPy not found.'
-        raise
-    try:
-        import scipy
-    except:
-        print 'ERROR: SciPy not found.'
-        raise
-    try:
-        import cvxopt
-    except:
-        print 'ERROR: CVXOPT not found.'
-        raise
-    try:
-        import matplotlib
-    except:
-        print 'ERROR: matplotlib not found.'
-        raise
+        # Python package dependencies
+        try:
+            import numpy
+        except:
+            print('ERROR: NumPy not found.')
+            raise
+        try:
+            import scipy
+        except:
+            print('ERROR: SciPy not found.')
+            raise
+        try:
+            import ply
+        except:
+            print('ERROR: PLY not found.')
+            raise
+        try:
+            import networkx
+        except:
+            print('ERROR: NetworkX not found.')
+            raise
 
-    # Other dependencies
-    for (dep_key, dep_val) in other_depends.items():
-        if not dep_val[0]():
-            print dep_val[1]
-            raise Exception('Failed dependency: '+dep_key)
+        # Other dependencies
+        for (dep_key, dep_val) in other_depends.items():
+            if not dep_val[0]():
+                print(dep_val[1] )
+                raise Exception('Failed dependency: '+dep_key)
 
     # Optional stuff
     for (opt_key, opt_val) in optionals.items():
-        print 'Probing for optional '+opt_key+'...'
+        print('Probing for optional '+opt_key+'...')
         if opt_val[0]():
-            print opt_val[1]
+            print("\t"+opt_val[1] )
         else:
-            print opt_val[2]
+            print("\t"+opt_val[2] )
 
 
 if perform_setup:
+    # Build PLY table, to be installed as tulip package data
+    try:
+        import os
+        import tulip.spec.plyparser
+        tulip.spec.plyparser.rebuild_parsetab()
+        os.rename("parsetab.py", "tulip/spec/parsetab.py")
+        plytable_build_failed = False
+    except:
+        plytable_build_failed = True
+
     from tulip import __version__ as tulip_version
-    setup(name = 'tulip',
-          version = tulip_version,
-          description = 'Temporal Logic Planning (TuLiP) Toolbox',
-          author = 'Caltech Control and Dynamical Systems',
-          author_email = 'murray@cds.caltech.edu',
-          url = 'http://tulip-control.sourceforge.net',
-          license = 'BSD',
-          requires = ['numpy', 'scipy', 'cvxopt', 'matplotlib'],
-          packages = ['tulip'],
-          package_dir = {'tulip' : 'tulip'},
-          package_data={'tulip': ['matlab/*.m', 'jtlv_grgame.jar', 'polytope/*.py']},
-          scripts = ['tools/aut2dot','tools/aut2gexf','tools/trim_aut']
-          )
+    setup(
+        name = 'tulip',
+        version = tulip_version,
+        description = 'Temporal Logic Planning (TuLiP) Toolbox',
+        author = 'Caltech Control and Dynamical Systems',
+        author_email = 'tulip@tulip-control.org',
+        url = 'http://tulip-control.org',
+        license = 'BSD',
+        requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx'],
+        install_requires = [
+            'numpy >= 1.7',
+            'polytope >= 0.1.0',
+            'ply >= 3.4',
+            'networkx >= 1.6'
+        ],
+        packages = [
+            'tulip', 'tulip.transys', 'tulip.transys.export',
+            'tulip.abstract', 'tulip.spec',
+            'tulip.interfaces'
+        ],
+        package_dir = {'tulip' : 'tulip'},
+        package_data={
+            'tulip.interfaces': ['jtlv_grgame.jar'],
+            'tulip.transys.export' : ['d3.v3.min.js'],
+            'tulip.spec' : ['parsetab.py']
+        },
+    )
+
+    if plytable_build_failed:
+        print("!"*65)
+        print("    Failed to build PLY table.  Please run setup.py again.")
+        print("!"*65)

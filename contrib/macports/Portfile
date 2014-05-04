@@ -1,0 +1,82 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:et:sw=4:ts=4:sts=4
+# $Id: Portfile 105864 2013-05-08 17:20:42Z johndoe@macports.org $
+
+# for howto:
+#   http://guide.macports.org/index.html#development.introduction
+
+# for github portgroup:
+#   cat /opt/local/var/macports/sources/rsync.macports.org/release/tarballs/ports/_resources/port1.0/group/github-1.0.tcl
+
+PortSystem              1.0
+PortGroup               python 1.0
+PortGroup               github 1.0
+
+github.setup            tulip-control tulip-control 0.4a tulip-
+fetch.type              git
+
+name                    py-tulip
+
+categories-append       math science
+license                 BSD
+platforms               darwin
+maintainers             openmaintainer
+description             Temporal Logic Planning (TuLiP) Toolbox
+
+long_description \
+    The Temporal Logic Planning (TuLiP) Toolbox is \
+    a collection of Python-based code for automatic \
+    synthesis of correct-by-construction embedded \
+    control software.
+
+supported_archs         noarch
+                       
+homepage                tulip-control.org
+
+checksums               rmd160  8bfab3e26055095475a02f3cf0e24103bf1597e7 \
+                        sha256  752b03fb8be900f6c53cac257c2751675c1bbda0a04011efd9c1831fba514b29
+
+python.versions         27
+
+depends_lib-append      port:python27 \
+                        port:py27-setuptools \
+                        port:py27-numpy \
+                        port:py27-scipy \
+                        port:py27-networkx \
+                        port:py27-parsing \
+                        port:gr1c
+                        #port:py27-cvxopt -dsdp +atlas \
+                        #port:yices: http://yices.csl.sri.com/
+
+configure.args          --complete
+
+default_variants        +complete
+
+variant complete description {install also optional dependencies} {
+	depends_lib-append port:py27-matplotlib \
+	                   port:py27-pydot \
+                       port:graphviz \
+                       port:py27-ipython \
+	                   port:glpk
+}
+
+# "recommended dependencies" might be added to MacPorts in the future:
+#	https://trac.macports.org/ticket/39897
+
+if {![file exists ${prefix}/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/cvxopt/solvers.py]} {
+    depends_lib-delete port:boost
+    pre-configure {
+        ui_error "
+****
+**** ${name} requires port cvxopt installed with variants -dsdp +atlas,
+**** after patching using the .diff from https://trac.macports.org/ticket/38887
+**** Please do the following then try installing ${name} again:
+****
+****     cd /opt/local/var/macports/sources/rsync.macports.org/release/tarballs/ports/python/py-cvxopt/
+****     patch < py-cvxopt_Portfile.2.diff
+****     sudo port install py27-cvxopt -dsdp +atlas
+****
+
+"
+        return -code error "missing cvxopt port with variants"
+    }
+}

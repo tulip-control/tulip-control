@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """
-Test the interface with gr1c.
-
-SCL; 14 Mar 2012.
+Tests for the interface with gr1c.
 """
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import os
 
-from tulip.conxml import loadXML
 from tulip.spec import GRSpec
-from tulip.gr1cint import *
+from tulip.interfaces import gr1cint
 
 
 REFERENCE_SPECFILE = """
@@ -29,32 +28,22 @@ SYSGOAL: []<>y&x & []<>!y & []<> !ze;
 """
 
 REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
-<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/0" version="0">
+<tulipcon xmlns="http://tulip-control.sourceforge.net/ns/1" version="1">
+  <env_vars><item key="x" value="boolean" /></env_vars>
+  <sys_vars><item key="y" value="boolean" /></sys_vars>
   <spec><env_init></env_init><env_safety></env_safety><env_prog></env_prog><sys_init></sys_init><sys_safety></sys_safety><sys_prog></sys_prog></spec>
-  <aut>
+  <aut type="basic">
     <node>
-      <id>0</id><name></name>
-      <child_list> 1 2</child_list>
-      <state>
-        <item key="x" value="1" />
-        <item key="y" value="0" />
-      </state>
+      <id>0</id><anno></anno><child_list> 1 2</child_list>
+      <state><item key="x" value="1" /><item key="y" value="0" /></state>
     </node>
     <node>
-      <id>1</id><name></name>
-      <child_list> 1 2</child_list>
-      <state>
-        <item key="x" value="0" />
-        <item key="y" value="0" />
-      </state>
+      <id>1</id><anno></anno><child_list> 1 2</child_list>
+      <state><item key="x" value="0" /><item key="y" value="0" /></state>
     </node>
     <node>
-      <id>2</id><name></name>
-      <child_list> 1 0</child_list>
-      <state>
-        <item key="x" value="1" />
-        <item key="y" value="1" />
-      </state>
+      <id>2</id><anno></anno><child_list> 1 0</child_list>
+      <state><item key="x" value="1" /><item key="y" value="1" /></state>
     </node>
   </aut>
   <extra></extra>
@@ -62,42 +51,45 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class gr1cint_test:
+class basic_test:
     def setUp(self):
-        pass
+        self.f_un = GRSpec(env_vars="x", sys_vars="y",
+                           env_init="x", env_prog="x",
+                           sys_init="y",sys_safety=["y -> X(!y)","!y -> X(y)"],
+                           sys_prog="y && x")
+        self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
+                               sys_prog=["y=0", "y=5"])
 
     def tearDown(self):
-        pass
+        self.f_un = None
+        self.dcounter = None
 
     def test_check_syntax(self):
-        assert check_syntax(REFERENCE_SPECFILE, verbose=1)
-        assert not check_syntax("foo", verbose=1)
+        assert gr1cint.check_syntax(REFERENCE_SPECFILE)
+        assert not gr1cint.check_syntax("foo")
 
-    def test_dumpgr1c(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
-                      sys_prog="y & x")
-        assert check_syntax(spec.dumpgr1c(), verbose=1)
+    def test_to_gr1c(self):
+        assert gr1cint.check_syntax(self.f_un.to_gr1c() )
+        assert gr1cint.check_syntax(self.dcounter.to_gr1c() )
 
     def test_check_realizable(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y", sys_safety=["y -> !y'", "!y -> y'"],
-                      sys_prog="y & x")
-        assert not check_realizable(spec)
-        spec.sys_safety = []
-        assert check_realizable(spec)
+        assert not gr1cint.check_realizable(self.f_un)
+        self.f_un.sys_safety = []
+        assert gr1cint.check_realizable(self.f_un)
+        assert gr1cint.check_realizable(self.dcounter)
         
     def test_synthesize(self):
-        spec = GRSpec(env_vars="x", sys_vars="y",
-                      env_init="x", env_prog="x",
-                      sys_init="y",
-                      sys_prog=["y & x", "!y"])
-        aut = synthesize(spec)
-        assert aut is not None
-        (prob, sys_dyn, aut_ref) = loadXML(REFERENCE_AUTXML)
-        assert aut == aut_ref
+        self.f_un.sys_safety = []  # Make it realizable
+        mach = gr1cint.synthesize(self.f_un)
+        assert mach is not None
+        assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
+        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+
+        mach = gr1cint.synthesize(self.dcounter)
+        assert mach is not None
+        assert len(mach.inputs) == 0
+        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+        assert len(mach.states) == 3
 
 
 class GR1CSession_test:
@@ -105,7 +97,7 @@ class GR1CSession_test:
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
             f.write(REFERENCE_SPECFILE)
-        self.gs = GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
+        self.gs = gr1cint.GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
 
     def tearDown(self):
         self.gs.close()
@@ -114,9 +106,17 @@ class GR1CSession_test:
     def test_numgoals(self):
         assert self.gs.numgoals() == 3
 
+    def test_reset(self):
+        assert self.gs.reset()
+
+    def test_getvars(self):
+        vars_str = self.gs.getvars()
+        vars_list = [vi.strip() for vi in vars_str.split(",")]
+        assert vars_list == ["x (0)", "ze (1)", "y (2)", "zs (3)"]
+
     def test_getindex(self):
         assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 0
+        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 1
 
     def test_iswinning(self):
         assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
@@ -131,3 +131,12 @@ class GR1CSession_test:
 
     def test_sys_nextfeas(self):
         assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
+
+
+def test_load_autxml():
+    (spec, mach) = gr1cint.load_aut_xml(REFERENCE_AUTXML)
+    assert spec.env_vars == {"x": "boolean"}
+    assert spec.sys_vars == {"y": "boolean"}
+    assert len(mach.states) == 4
+    assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
+    assert len(mach.outputs) == 1 and mach.outputs.has_key("y")

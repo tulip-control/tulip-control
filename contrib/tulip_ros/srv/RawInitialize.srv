@@ -1,8 +1,0 @@
-# Initialize strategy automaton.
-
-# Note that it does not matter at which node we begin; it suffices to
-# address the requested state.  Later versions may add the option to
-# prefer a particular goal made.
-uint16[] state
----
-bool result
