@@ -133,8 +133,8 @@ class GR1CSession_test:
         assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
 
 
-def test_load_autxml():
-    (spec, mach) = gr1cint.load_aut_xml(REFERENCE_AUTXML)
+def test_aut_xml2mealy():
+    (spec, mach) = gr1cint.aut_xml2mealy(REFERENCE_AUTXML)
     assert spec.env_vars == {"x": "boolean"}
     assert spec.sys_vars == {"y": "boolean"}
     assert len(mach.states) == 4

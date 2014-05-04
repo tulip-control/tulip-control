@@ -158,7 +158,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
+def aut_xml2mealy(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
     @param x: a string or an instance of
@@ -490,7 +490,7 @@ def synthesize(spec):
     logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
     
     if p.returncode == 0:
-        (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
+        (spec, aut) = aut_xml2mealy(stdoutdata, spec0=spec)
         return aut
     else:
         print(30*' ' + '\n gr1c return code:\n' + 30*' ')
