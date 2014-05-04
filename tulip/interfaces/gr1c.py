@@ -499,6 +499,20 @@ def synthesize(spec):
         print(stdoutdata)
         return None
 
+def load_mealy(filename):
+    """Load gr1c stratgy from C{xml} file to a MealyMachine.
+    
+    @param filename: xml file name
+    @type filename: C{str}
+    
+    @return: loaded strategy as a Mealy machine
+    @rtype: L{MealyMachine}
+    """
+    s = open(filename, 'r').read()
+    spec, aut = aut_xml2mealy(s)
+    logger.info('Loaded spec: \n' + spec.pretty() )
+    return aut
+
 class GR1CSession:
     """Manage interactive session with gr1c.
 
