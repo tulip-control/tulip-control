@@ -142,7 +142,9 @@ if perform_setup:
     except:
         plytable_build_failed = True
 
-    from tulip import __version__ as tulip_version
+    exec(open('tulip/version.py').read())
+    tulip_version = version
+    
     setup(
         name = 'tulip',
         version = tulip_version,

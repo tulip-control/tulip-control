@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,9 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-TuLiP toolbox
-
-The Temporal Logic Planning (TuLiP) Toolbox provides functions
-for verifying and constructing control protocols.
+tulip package version
 """
+version_info = (1, 0, 'b')
 
-__all__ = ["abstract", "hybrid", "transys"]
-
-from .version import version as __version__
+version = '.'.join([str(x) for x in version_info[:2] ])
+version += version_info[2]
