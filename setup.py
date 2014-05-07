@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import logging
+logger = logging.getLogger(__name__)
 
 from setuptools import setup
+import subprocess
+import sys
 
 ###########################################
 # Dependency or optional-checking functions
@@ -8,7 +12,6 @@ from setuptools import setup
 # (see notes below.)
 
 def check_gr1c():
-    import subprocess
     try:
         subprocess.call(["gr1c", "-V"], stdout=subprocess.PIPE)
     except OSError:
@@ -70,7 +73,39 @@ optionals = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
-import sys
+def retrieve_git_info():
+    """Return commit hash of HEAD,
+    
+    if git is available and HEAD not tagged,
+    otherwise return None.
+    """
+    try:
+        subprocess.call(['git', '--version'],
+                        stdout=subprocess.PIPE)
+    except OSError:
+        return None
+    
+    p = subprocess.Popen(
+        ['git', 'log', '-1', '--format="%H"'],
+        stdout=subprocess.PIPE
+    )
+    sha1 = p.stdout.read()
+    logger.debug('SHA1: ' + sha1)
+    
+    p = subprocess.Popen(
+        ['git', 'describe', '--contains', 'HEAD'],
+        stdout=subprocess.PIPE
+    )
+    tags = p.stdout.read()
+    logger.debug('Tags: ' + tags)
+    
+    if tags:
+        print('tagged version')
+        return None
+    else:
+        print('development version')
+        return sha1
+
 perform_setup = True
 check_deps = False
 if 'install' in sys.argv[1:] and 'nocheck' not in sys.argv[1:]:
@@ -141,7 +176,12 @@ if perform_setup:
         plytable_build_failed = False
     except:
         plytable_build_failed = True
-
+    
+    sha1 = retrieve_git_info()
+    # todo: dynamically add a file containing the SHA1
+    # if tulip/version.py finds that file,
+    # then it loads the SHA1 from it and appends it
+    
     exec(open('tulip/version.py').read())
     tulip_version = version
     
