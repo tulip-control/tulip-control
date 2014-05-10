@@ -36,3 +36,13 @@ version_info = (1, 1, 'a')
 
 version = '.'.join([str(x) for x in version_info[:2] ])
 version += version_info[2]
+
+import os.path
+
+path_to_hashfile = os.path.join(os.path.dirname(__file__), "commit_hash.txt")
+if os.path.exists(path_to_hashfile):
+    commit_hash = open(path_to_hashfile, "r").read().strip()
+    if len(commit_hash) > 0:
+        version += "-dev-" + commit_hash
+else:
+    version += "-dev-Unknown"

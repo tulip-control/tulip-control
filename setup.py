@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 from setuptools import setup
 import subprocess
 import sys
+import os.path
 
 ###########################################
 # Dependency or optional-checking functions
@@ -74,37 +75,54 @@ optionals = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 def retrieve_git_info():
-    """Return commit hash of HEAD,
+    """Return commit hash of HEAD, or None if failure or release.
     
-    if git is available and HEAD not tagged,
-    otherwise return None.
+    If git is not found, return None.
+
+    If HEAD has tag with prefix "tulip-" or "vM" where M is an
+    integer, then return None.  Tags with such names are regarded as
+    version or release tags.
+
+    Otherwise, return the commit hash as str.
     """
+    # Is there a git repo directory, and is Git installed?
+    if not os.path.exists('.git'):
+        return None
     try:
         subprocess.call(['git', '--version'],
                         stdout=subprocess.PIPE)
     except OSError:
         return None
-    
+
+    # Decide whether this is a release
     p = subprocess.Popen(
-        ['git', 'log', '-1', '--format="%H"'],
+        ['git', 'describe', '--tags', '--candidates=0', 'HEAD'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    )
+    p.wait()
+    if p.returncode == 0:
+        tag = p.stdout.read()
+        logger.debug('Most recent tag: ' + tag)
+        if tag.startswith('tulip-'):
+            return None
+        if len(tag) >= 2 and tag.startswith('v'):
+            try:
+                int(tag[1])
+                return None
+            except ValueError:
+                pass
+
+    # Otherwise, return commit hash
+    p = subprocess.Popen(
+        ['git', 'log', '-1', '--format=%H'],
         stdout=subprocess.PIPE
     )
+    p.wait()
     sha1 = p.stdout.read()
     logger.debug('SHA1: ' + sha1)
-    
-    p = subprocess.Popen(
-        ['git', 'describe', '--contains', 'HEAD'],
-        stdout=subprocess.PIPE
-    )
-    tags = p.stdout.read()
-    logger.debug('Tags: ' + tags)
-    
-    if tags:
-        print('tagged version')
-        return None
-    else:
-        print('development version')
-        return sha1
+    return sha1
+
 
 perform_setup = True
 check_deps = False
@@ -177,14 +195,18 @@ if perform_setup:
     except:
         plytable_build_failed = True
     
+    # Provide commit hash or empty file to indicate release
     sha1 = retrieve_git_info()
-    # todo: dynamically add a file containing the SHA1
-    # if tulip/version.py finds that file,
-    # then it loads the SHA1 from it and appends it
-    
-    exec(open('tulip/version.py').read())
-    tulip_version = version
-    
+    if sha1 is None:
+        sha1 = ""
+    open("tulip/commit_hash.txt", "w").write(sha1)
+
+    # Import tulip/version.py without importing tulip
+    import imp
+    version = imp.load_module("version",
+                              *imp.find_module("version", ["tulip"]))
+    tulip_version = version.version
+
     setup(
         name = 'tulip',
         version = tulip_version,
@@ -207,6 +229,7 @@ if perform_setup:
         ],
         package_dir = {'tulip' : 'tulip'},
         package_data={
+            'tulip': ['commit_hash.txt'],
             'tulip.interfaces': ['jtlv_grgame.jar'],
             'tulip.transys.export' : ['d3.v3.min.js'],
             'tulip.spec' : ['parsetab.py']
