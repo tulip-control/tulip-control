@@ -14,3 +14,4 @@ parsetab.py
 *.PDF
 /build/
 /dist/
+/tulip/commit_hash.txt
