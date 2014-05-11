@@ -77,12 +77,13 @@ optionals = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
 def retrieve_git_info():
     """Return commit hash of HEAD, or None if failure or release.
     
-    If git is not found, return None.
+    If the git command or a git repository are not found,
+    then return None.
 
     If HEAD has tag with prefix "tulip-" or "vM" where M is an
-    integer, then return None.  Tags with such names are regarded as
-    version or release tags.
-
+    integer, then return 'release'.
+    Tags with such names are regarded as version or release tags.
+    
     Otherwise, return the commit hash as str.
     """
     # Is there a git repo directory, and is Git installed?
@@ -105,11 +106,11 @@ def retrieve_git_info():
         tag = p.stdout.read()
         logger.debug('Most recent tag: ' + tag)
         if tag.startswith('tulip-'):
-            return None
+            return 'release'
         if len(tag) >= 2 and tag.startswith('v'):
             try:
                 int(tag[1])
-                return None
+                return 'release'
             except ValueError:
                 pass
 
@@ -198,7 +199,11 @@ if perform_setup:
     # Provide commit hash or empty file to indicate release
     sha1 = retrieve_git_info()
     if sha1 is None:
-        sha1 = ""
+        sha1 = 'unknown-commit'
+    elif sha1 is 'release':
+        sha1 = ''
+    else:
+        logger.debug('dev sha1: ' + str(sha1) )
     open("tulip/commit_hash.txt", "w").write(sha1)
 
     # Import tulip/version.py without importing tulip

@@ -45,4 +45,4 @@ if os.path.exists(path_to_hashfile):
     if len(commit_hash) > 0:
         version += "-dev-" + commit_hash
 else:
-    version += "-dev-Unknown"
+    version += "-dev-unknown-commit"
