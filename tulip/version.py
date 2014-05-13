@@ -41,7 +41,14 @@ import os.path
 
 path_to_hashfile = os.path.join(os.path.dirname(__file__), "commit_hash.txt")
 if os.path.exists(path_to_hashfile):
-    commit_hash = open(path_to_hashfile, "r").read().strip()
+    commit_hash = ""
+    with open(path_to_hashfile, "r") as f:
+        for line in f:
+            line = line.strip()
+            if len(line) == 0 or line[0] == '#':
+                continue
+            commit_hash = line
+            break
     if len(commit_hash) > 0:
         version += "-dev-" + commit_hash
 else:
