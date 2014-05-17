@@ -568,7 +568,7 @@ class MealyMachine(FiniteStateMachine):
                 msg += 'before calling .simulate.'
                 print(msg)
             else:
-                self.states.select_current(self.states.initial)
+                self.states.current = set(self.states.initial)
         
         if isinstance(inputs_sequence, executions.MachineInputSequence):
             self._guided_simulation(inputs_sequence)
