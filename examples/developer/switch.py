@@ -43,18 +43,20 @@ sys_swe.states.add(states[1], ap={'lot'})
 
 print(sys_swe)
 
+sys_swe.save('sys_swe.pdf')
+
 # (park & sun) & []<>!park && []<>sum
 env_vars = {'park'}
 env_init = {'park', 'sun'}
 env_prog = {'!park','sun'}
 env_safe = set()
 
-# (s0 & X0reach) & []<> home & [](park -> <>lot)
-sys_vars = {'X0reach'}
-sys_init = {'X0reach', 's0'}          
+# (s0 & mem) & []<> home & [](park -> <>lot)
+sys_vars = {'mem'}
+sys_init = {'mem', 's0'}          
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
-sys_prog |= {'X0reach'}
+sys_safe = {'next(mem) <-> lot || (mem && !park)'}
+sys_prog |= {'mem'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,

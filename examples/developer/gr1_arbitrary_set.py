@@ -25,10 +25,10 @@ sys_safe = {
     'loc=foo -> next(loc=e || loc=c)',
 }
 
-sys_vars['X0reach'] = 'boolean'
-sys_init |= {'X0reach'}
-sys_safe |= {'next(X0reach) <-> (loc=a) || (X0reach && !park)'}
-sys_prog = {'X0reach'}
+sys_vars['mem'] = 'boolean'
+sys_init |= {'mem'}
+sys_safe |= {'next(mem) <-> (loc=a) || (mem && !park)'}
+sys_prog = {'mem'}
 
 specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     sys_init=sys_init, sys_safety=sys_safe,
@@ -58,8 +58,8 @@ sys.transitions.add_from(
 sys.atomic_propositions |= {'cave'}
 sys.states.add('a', ap={'cave'})
 
-sys_vars = {'X0reach':'boolean'}
-sys_init = {'X0reach'}
+sys_vars = {'mem':'boolean'}
+sys_init = {'mem'}
 
 # if we don't want to use an extra AP to label a,
 # then we need to either know that tulip internally names
@@ -68,7 +68,7 @@ sys_init = {'X0reach'}
 # The latter approach can help a user avoid name
 # conflicts, in case, e.g., she wants to reserve
 # 'loc' for different use
-sys_safe = {'next(X0reach) <-> (cave) || (X0reach && !park)'}
+sys_safe = {'next(mem) <-> (cave) || (mem && !park)'}
 
 specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     sys_init=sys_init, sys_safety=sys_safe,

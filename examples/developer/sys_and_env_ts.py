@@ -52,15 +52,15 @@ logger.info(env0)
 # barely realizable: assumption necessary
 env_prog = '!park'
 
-sys_vars = {'X0reach'}
-sys_init = {'X0reach'}
+sys_vars = {'mem'}
+sys_init = {'mem'}
 sys_prog = {'home'}
 
 # one additional requirement: if in lot,
 # then stay there until park signal is turned off
-sys_safe = {'(X(X0reach) <-> lot) || (X0reach && !park)',
+sys_safe = {'(X(mem) <-> lot) || (mem && !park)',
             '((lot && park) -> X(lot))'}
-sys_prog |= {'X0reach'}
+sys_prog |= {'mem'}
 
 specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     sys_safety=sys_safe,
@@ -88,4 +88,5 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
 
 ctrl = synth.synthesize('gr1c', specs, sys=sys, env=env1, bool_actions=True)
 ctrl.save('sys_and_env_ts1.pdf')
+env1.save('env1.pdf')
 logger.info(ctrl)
