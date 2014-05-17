@@ -46,8 +46,8 @@ def fts_minimal_example():
     fts.states.initial.add('s0')
     
     fts.atomic_propositions.add_from({'green', 'not_green'})
-    fts.states.label('s0', {'not_green'})
-    fts.states.label('s1', {'green'})
+    fts.states.add('s0', ap={'not_green'})
+    fts.states.add('s1', ap={'green'})
     
     fts.transitions.add('s0', 's1')
     fts.transitions.add('s1', 's0')
@@ -68,9 +68,9 @@ def ofts_minimal_example():
     ofts.states.initial.add('s1')
     
     ofts.atomic_propositions |= ['p']
-    ofts.states.label('s1', 'p')
-    ofts.states.label('s2', set() )
-    ofts.states.label('s3', 'p')
+    ofts.states.add('s1', ap={'p'})
+    ofts.states.add('s2', ap=set() )
+    ofts.states.add('s3', ap={'p'})
     
     ofts.transitions.add('s1', 's2') # unlabeled
     
@@ -81,9 +81,21 @@ def ofts_minimal_example():
     print(ofts.sys_actions)
     print(ofts.env_actions)
     
-    ofts.transitions.label('s1', 's2', ['try', 'block'] )
-    ofts.transitions.add_labeled('s2', 's3', ['start', 'wait'] )
-    ofts.transitions.add_labeled('s3', 's2', ['stop', 'block'] )
+    # remove unlabeled edge s1->s2
+    ofts.transitions.remove('s1', 's2')
+    
+    ofts.transitions.add(
+        's1', 's2',
+        sys_actions='try', env_actions='block'
+    )
+    ofts.transitions.add(
+        's2', 's3',
+        sys_actions='start', env_actions='wait'
+    )
+    ofts.transitions.add(
+        's3', 's2',
+        sys_actions='stop', env_actions='block'
+    )
     
     print('The Open TS now looks like:')
     print(ofts.transitions() )
@@ -125,11 +137,11 @@ def ba_minimal_example():
     
     ba.alphabet.math_set |= [True, 'green', 'not_green']
     
-    ba.transitions.add_labeled('q0', 'q0', {True})
-    ba.transitions.add_labeled('q0', 'q1', {'not_green'})
-    ba.transitions.add_labeled('q1', 'q1', {'not_green'})
-    ba.transitions.add_labeled('q1', 'q2', {'green'})
-    ba.transitions.add_labeled('q2', 'q2', {True})
+    ba.transitions.add('q0', 'q0', letter={True})
+    ba.transitions.add('q0', 'q1', letter={'not_green'})
+    ba.transitions.add('q1', 'q1', letter={'not_green'})
+    ba.transitions.add('q1', 'q2', letter={'green'})
+    ba.transitions.add('q2', 'q2', letter={True})
     
     if not ba.plot() and save_fig:
         ba.save('small_ba.png')
@@ -143,19 +155,25 @@ def merge_example():
     L = n*['p']
     ts1 = trs.line_labeled_with(L, n-1)
     
+    ts1.transitions.remove('s3', 's4')
+    ts1.transitions.remove('s5', 's6')
+    
     ts1.actions |= ['step', 'jump']
-    ts1.transitions.label('s3', 's4', 'step')
-    ts1.transitions.label('s5', 's6', 'jump')
+    ts1.transitions.add('s3', 's4', actions='step')
+    ts1.transitions.add('s5', 's6', actions='jump')
     
     ts1.plot()
     
     L = n*['p']
     ts2 = trs.cycle_labeled_with(L)
-    ts2.states.label('s3', None)
+    ts2.states.add('s3', ap=None)
+    
+    ts2.transitions.remove('s0', 's1')
+    ts2.transitions.remove('s1', 's2')
     
     ts2.actions |= ['up', 'down']
-    ts2.transitions.label('s0', 's1', 'up')
-    ts2.transitions.label('s1', 's2', 'down')
+    ts2.transitions.add('s0', 's1', actions='up')
+    ts2.transitions.add('s1', 's2', actions='down')
     
     ts2.plot()
     

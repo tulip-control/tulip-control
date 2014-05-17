@@ -13,7 +13,6 @@ import numpy as np
 from scipy import sparse as sp
 
 sys_swe = transys.OpenFTS()
-sys_swe.sys_actions.add('')
 sys_swe.env_actions.add_from({'sun','rain'})
 
 # Environment actions are mutually exclusive.
@@ -27,18 +26,21 @@ transmat1 = sp.lil_matrix(np.array(
                 [[0,1],
                  [1,0]]
             ))
-sys_swe.transitions.add_labeled_adj(transmat1, states, ('','sun') )
+sys_swe.transitions.add_adj(transmat1, states, env_actions='sun')
 
 # avoid being killed by environment
 transmat2 = sp.lil_matrix(np.array(
                 [[1,0],
                  [0,1]]
             ))
-sys_swe.transitions.add_labeled_adj(transmat2, states, ('','rain') )
+sys_swe.transitions.add_adj(transmat2, states, env_actions='rain')
 
 # atomic props
 sys_swe.atomic_propositions.add_from(['home','lot'])
-sys_swe.states.labels(states, [{'home'}, {'lot'}] )
+
+sys_swe.states.add(states[0], ap={'home'})
+sys_swe.states.add(states[1], ap={'lot'})
+
 print(sys_swe)
 
 # (park & sun) & []<>!park && []<>sum

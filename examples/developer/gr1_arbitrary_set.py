@@ -46,15 +46,17 @@ states = {'a', 'b', 'c', 'd', 'e', 'foo'}
 sys.states.add_from(states)
 sys.states.initial.add('a')
 
-sys.transitions.add_from({'a'}, {'b', 'd'})
-sys.transitions.add_from({'b'}, {'a', 'e', 'c'})
-sys.transitions.add_from({'c'}, {'b', 'foo'})
-sys.transitions.add_from({'d'}, {'a', 'e'})
-sys.transitions.add_from({'e'}, {'d', 'b', 'foo'})
-sys.transitions.add_from({'foo'}, {'e', 'c'})
+sys.transitions.add_from(
+    [('a', x) for x in {'b', 'd'}] +
+    [('b', x) for x in {'a', 'e', 'c'}] +
+    [('c', x) for x in {'b', 'foo'}] +
+    [('d', x) for x in {'a', 'e'}] +
+    [('e', x) for x in {'d', 'b', 'foo'}] +
+    [('foo', x) for x in {'e', 'c'}]
+)
 
 sys.atomic_propositions |= {'cave'}
-sys.states.label('a', 'cave')
+sys.states.add('a', ap={'cave'})
 
 sys_vars = {'X0reach':'boolean'}
 sys_init = {'X0reach'}
