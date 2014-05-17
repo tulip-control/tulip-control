@@ -43,7 +43,7 @@ def mutex(varnames):
     """Create mutual exclusion formulae from iterable of variables.
 
     E.g., given a set of variable names {"a", "b", "c"}, return a set
-    of formulae {"a -> ! (c || b)", "b -> ! (a || c)", ...}.
+    of formulae {"a -> ! (c || b)", "c -> ! (b)"}.
     """
     mutex = set()
     numVars = len(varnames)
@@ -349,6 +349,7 @@ class GRSpec(LTL):
         raise NotImplementedError
 
     def pretty(self):
+        """Return pretty printing string."""
         output = "ENVIRONMENT VARIABLES:\n"
         if len(self.env_vars) > 0:
             for (k,v) in self.env_vars.items():
