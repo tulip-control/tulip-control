@@ -310,7 +310,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             if label:
                 self.states[state]['ap'] = label['ap']
         
-        self.states.initial |= other.states.initial()
+        self.states.initial |= set(other.states.initial)
         
         # copy extra transitions (be careful w/ labeling)
         for (from_state, to_state, label_dict) in \
