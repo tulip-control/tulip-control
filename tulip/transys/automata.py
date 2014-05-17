@@ -105,7 +105,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         if atomic_proposition_based:
             self.atomic_proposition_based = True
             alphabet = PowerSet([])
-            self.atomic_propositions = alphabet
+            self.atomic_propositions = alphabet.math_set
         else:
             self.atomic_proposition_based = False
             alphabet = set()
