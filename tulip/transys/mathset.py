@@ -156,6 +156,9 @@ class MathSet(object):
         See Also
         ========
         L{CartesianProduct}, L{__mul__}
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     

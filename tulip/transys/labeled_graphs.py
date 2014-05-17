@@ -410,6 +410,9 @@ class States(object):
     
     def is_blocking(self, state):
         """Check if state has outgoing transitions for each label.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -1407,6 +1410,9 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
         =========
           - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
           - networkx.algorithms.operators.product.strong_product
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         # An issue here is that transitions are possible both

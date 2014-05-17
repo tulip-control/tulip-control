@@ -144,6 +144,9 @@ class LTL(object):
         """Verify formula syntax and type-check variable domains.
 
         Return True iff OK.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -342,10 +345,20 @@ class GRSpec(LTL):
 
     @staticmethod
     def loads(s):
+        """Create GRSpec object from TuLiP LTL file string.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
     @staticmethod
     def load(f):
+        """Wrap L{loads} for reading from files.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
     def pretty(self):

@@ -997,7 +997,11 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 
 # DEFUNCT until further notice
 def discretize_overlap(closed_loop=False, conservative=False):
-    """default False."""
+    """default False.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
+    """
     raise NotImplementedError
 #         
 #         if rdiff < abs_tol:
@@ -1413,6 +1417,9 @@ def multiproc_merge_partitions(abstractions):
     """LOGTIME in #processors parallel merging.
     
     Assuming sufficient number of processors.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
 

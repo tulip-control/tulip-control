@@ -428,16 +428,25 @@ class FiniteTransitionSystem(LabeledDiGraph):
     # operations between transition systems    
     def intersection(self):
         """Conjunction with another FTS.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         
     def difference(self):
         """Remove a sub-FTS.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
     def composition(self):
         """Compositions of FTS, with state replaced by another FTS.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -449,6 +458,9 @@ class FiniteTransitionSystem(LabeledDiGraph):
             - If C{int}, then project on the designated element of
                 the tuple comprising each state
         @type factor: None or int
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -461,6 +473,9 @@ class FiniteTransitionSystem(LabeledDiGraph):
         
         @type state_sequence: inputs="random"
             | given array
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -478,10 +493,18 @@ class FiniteTransitionSystem(LabeledDiGraph):
         See Also
         ========
         L{simulate}
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
     def loadSPINAut():
+        """
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
     
     def _save(self, path, fileformat):
