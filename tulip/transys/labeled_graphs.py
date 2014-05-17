@@ -852,13 +852,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
         logger.debug(msg)
         
         if untyped_keys:
-            msg = 'Given untyped edge attributes:\n\t' +\
-                  str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
+            msg = 'The following edge attributes:\n' +\
+                  str({k:typed_attr[k] for k in untyped_keys}) +'\n' +\
+                  'are not allowed.\n' +\
+                  'Currently the allowed attributes are:' +\
+                  ', '.join([str(x) for x in type_defs])
             if check:
-                msg += '\nTo allow untyped annotation, pass: check = False'
+                msg += '\nTo set attributes not included '+\
+                       'in the existing types, pass: check = False'
                 raise AttributeError(msg)
             else:
-                msg += 'Allowed because you passed: check = True'
+                msg += '\nAllowed because you passed: check = True'
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
