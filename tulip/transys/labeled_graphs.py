@@ -928,11 +928,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """Use a L{TypedDict} as attribute dict.
         
           - Raise ValueError if C{u} or C{v} are not already nodes.
-          - Raise Exception if edge (u, v, {}).
+          - Raise Exception if edge (u, v, {}) exists.
           - Log warning if edge (u, v, attr_dict) exists.
           - Raise ValueError if C{attr_dict} contains typed key with invalid value.
           - Raise AttributeError if C{attr_dict} contains untyped keys,
-            unless C{check=True}.
+            unless C{check=False}.
         
         Each label defines a different labeled edge.
         So to "change" the label, either:
