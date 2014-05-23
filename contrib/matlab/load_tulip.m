@@ -65,12 +65,12 @@ for i = 1:num_inputs
     if ~ischar(TS.inputs{i}.values{1}), continue; end
     
     num_values = size(TS.inputs{i}.values, 1);
-    value_map = containers.Map();
+    input_value_map = containers.Map();
     
     % Fill in hash table
     for j = 1:num_values
         input_value = TS.inputs{i}.values{j};
-        value_map(input_value) = input_value;
+        input_value_map(input_value) = input_value;
     end
     
     % Replace string values with numbers in hash
@@ -83,7 +83,7 @@ for i = 1:num_inputs
             if ~ismember(new_value, new_values)
                 value_found = 1;
                 new_values(j) = new_value;
-                value_map(input_value) = new_value;
+                input_value_map(input_value) = new_value;
                 TS.inputs{i}.values{j} = new_value;
             end
         end
@@ -94,21 +94,21 @@ for i = 1:num_inputs
         env_input = eval(['TS.transitions{' num2str(j) '}.inputs.' ...
             input_name]);
         eval_str = ['TS.transitions{' num2str(j) '}.inputs.' input_name ...
-            '=' num2str(value_map(env_input)) ';'];
+            '=' num2str(input_value_map(env_input)) ';'];
         eval(eval_str);
     end
     for j = 1:num_init_transitions
         env_input = eval(['TS.init_trans{' num2str(j) '}.inputs.' ...
             input_name]);
         eval_str = ['TS.init_trans{' num2str(j) '}.inputs.' input_name ...
-            '=' num2str(value_map(env_input)) ';'];
+            '=' num2str(input_value_map(env_input)) ';'];
         eval(eval_str);
     end
     
     % Replace value in MPTsys object
     num_modes = length(MPTsys);
     for j = 1:num_modes
-        MPTsys(j).env_act = value_map(MPTsys(j).env_act);
+        MPTsys(j).env_act = input_value_map(MPTsys(j).env_act);
     end
 end
 
@@ -119,12 +119,12 @@ for i = 1:num_outputs
     if ~ischar(TS.outputs{i}.values{1}), continue; end
     
     num_values = size(TS.outputs{i}.values, 1);
-    value_map = containers.Map();
+    output_value_map = containers.Map();
     
     % Fill in hash table
     for j = 1:num_values
         output_value = TS.outputs{i}.values{j};
-        value_map(output_value) = output_value;
+        output_value_map(output_value) = output_value;
     end
     
     % Replace string values with numbers in hash
@@ -137,7 +137,7 @@ for i = 1:num_outputs
             if ~ismember(new_value, new_values)
                 value_found = 1;
                 new_values(j) = new_value;
-                value_map(output_value) = new_value;
+                output_value_map(output_value) = new_value;
                 TS.outputs{i}.values{j} = new_value;
             end
         end
@@ -148,21 +148,21 @@ for i = 1:num_outputs
         sys_output = eval(['TS.transitions{' num2str(j) '}.outputs.' ...
             output_name]);
         eval_str = ['TS.transitions{' num2str(j) '}.outputs.' output_name ...
-            '=' num2str(value_map(sys_output)) ';'];
+            '=' num2str(output_value_map(sys_output)) ';'];
         eval(eval_str);
     end
     for j = 1:num_init_transitions
         sys_output = eval(['TS.init_trans{' num2str(j) '}.outputs.' ...
             output_name]);
-        eval_str = ['TS.init_trans{' num2str(j) '}.inputs.' output_name ...
-            '=' num2str(value_map(sys_output)) ';'];
+        eval_str = ['TS.init_trans{' num2str(j) '}.outputs.' output_name ...
+            '=' num2str(output_value_map(sys_output)) ';'];
         eval(eval_str);
     end
     
     % Replace value in MPTsys object
     num_modes = length(MPTsys);
     for j = 1:num_modes
-        MPTsys(j).sys_act = value_map(MPTsys(j).sys_act);
+        MPTsys(j).sys_act = output_value_map(MPTsys(j).sys_act);
     end
 end
 
@@ -286,8 +286,8 @@ for ind = 1:num_init_transitions
     for jnd = 1:num_inputs
         input_name = input_handles{jnd}.Name;
         input_value = eval(['TS.init_trans{ind}.inputs.' input_name]);
-        label_string = [label_string, '(', input_name '==' input_value ')', ...
-            '&&'];
+        label_string = [label_string, '(', input_name '==' ...
+                        num2str(input_value) ')', '&&'];
     end
     
     % Add current location to inputs if system is continuous
@@ -302,7 +302,7 @@ for ind = 1:num_init_transitions
     for jnd = 1:num_outputs
         output_name = output_handles{jnd}.Name;
         output_value = eval(['TS.init_trans{ind}.outputs.' output_name]);
-        label_string = [label_string output_name '=' output_value ';'];
+        label_string = [label_string output_name '=' num2str(output_value) ';'];
     end
     label_string = [label_string '}'];
     
