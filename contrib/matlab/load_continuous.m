@@ -149,15 +149,12 @@ function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
         state_input_region = Polyhedron('A', polyA, 'b', polyB);
     else
         rows_A1 = size(lti_struct.domain.A,1);
-        %state_dim = size(lti_struct.domain.A,2);
         UA = lti_struct.Uset.A;
         UA = [UA(:,input_dim+1:end), UA(:,1:input_dim)];
         polyA = [lti_struct.domain.A, zeros(rows_A1,input_dim); ...
                  UA];
         polyB = [lti_struct.domain.b; lti_struct.Uset.b];
         state_input_region = Polyhedron('A', polyA, 'b', polyB);
-        %state_input_region = Polyhedron('A', lti_struct.Uset.A, 'b', ...
-        %    lti_struct.Uset.b);
     end
 
     % Set the domain
