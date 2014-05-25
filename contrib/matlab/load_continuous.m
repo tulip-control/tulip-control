@@ -148,8 +148,16 @@ function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
         polyB = [lti_struct.domain.b; lti_struct.Uset.b];
         state_input_region = Polyhedron('A', polyA, 'b', polyB);
     else
-        state_input_region = Polyhedron('A', lti_struct.Uset.A, 'b', ...
-            lti_struct.Uset.b);
+        rows_A1 = size(lti_struct.domain.A,1);
+        %state_dim = size(lti_struct.domain.A,2);
+        UA = lti_struct.Uset.A;
+        UA = [UA(:,input_dim+1:end), UA(:,1:input_dim)];
+        polyA = [lti_struct.domain.A, zeros(rows_A1,input_dim); ...
+                 UA];
+        polyB = [lti_struct.domain.b; lti_struct.Uset.b];
+        state_input_region = Polyhedron('A', polyA, 'b', polyB);
+        %state_input_region = Polyhedron('A', lti_struct.Uset.A, 'b', ...
+        %    lti_struct.Uset.b);
     end
 
     % Set the domain
@@ -166,9 +174,9 @@ function ltisys = set_lti_bounds(ltisys, state_input_region, lti_struct)
     ltisys.x.max = max(poly_state.V);
     
     % Domain of inputs
-    state_dim = size(lti_struct.A, 2);
-    ltisys.u.min = min(state_input_region.V(:,state_dim+1:end));
-    ltisys.u.max = max(state_input_region.V(:,state_dim+1:end));
+    input_dim = size(lti_struct.B, 2);
+    ltisys.u.min = min(state_input_region.V(:,1:input_dim));
+    ltisys.u.max = max(state_input_region.V(:,1:input_dim));
 end
 
 
