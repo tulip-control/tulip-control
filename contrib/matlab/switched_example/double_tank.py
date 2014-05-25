@@ -205,4 +205,5 @@ ctrl = synth.synthesize(
     'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
 )
 
+disc_params = disc_params[('normal', 'fly')]
 tomatlab.export('fuel_tank.mat', ctrl, switched_dynamics, sys_ts, disc_params)

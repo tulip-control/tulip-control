@@ -71,3 +71,7 @@ Issues that may be fixed in the future are starred.
 5*) If there are any env_actions or sys_actions, both must be there.
 
 6*) No custom env_action and sys_action names passed into synthesize function.
+
+7*) Can't handle having different discretization parameters for each mode. When
+    exporting a .mat file for a switched system, make sure that `disc_params` is
+    the same for all modes and pass one of those modes into tomatlab.export()
