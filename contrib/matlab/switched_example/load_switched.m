@@ -1,7 +1,7 @@
 clear; close all; clc;
 
 matfile = 'fuel_tank';
-timestep = .1;
+timestep = 1;
 modelname = 'Fuel_Tank';
 
 % Load Tulip Framework
