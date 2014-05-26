@@ -229,8 +229,9 @@ for ind = 1:num_outputs
 end
 
 
-% Add current location to list of inputs if system is continuous
-if is_continuous
+% Add current location to list of inputs if system is continuous and we are
+% using the entire horizon
+if is_continuous && simulation_parameters.use_all_horizon
     current_loc = Stateflow.Data(mealy_machine);
     current_loc.Name = 'current_loc';
     current_loc.Scope = 'Input';
@@ -319,9 +320,11 @@ if is_continuous
     set_param(tulip_controller, 'Position', '[495 27 600 153]');
     
     % Continuous state to discrete state
-    c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
-    set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
-    set_param(c2d_block, 'Position', '[330 34 420 86]');
+    if simulation_parameters.use_all_horizon
+        c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
+        set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
+        set_param(c2d_block, 'Position', '[330 34 420 86]');
+    end
         
     % RHC Subsystem Container
     rhc_subsys = add_block('built-in/Subsystem', [modelname '/RHC']);
@@ -422,9 +425,13 @@ if is_continuous
     set_param(plant, 'Position', '[120, 197, 240, 263]');
     
     % Draw all Transitions
-    add_line(modelname, 'Abstraction/1','TulipController/1','autorouting','on');
+    if simulation_parameters.use_all_horizon
+        add_line(modelname, 'Abstraction/1','TulipController/1', ...
+            'autorouting','on');
+        add_line(modelname, 'Plant/1', 'Abstraction/1', 'autorouting', 'on');
+    end
     add_line(modelname, 'RHC/1', 'Plant/1', 'autorouting', 'on');
-    add_line(modelname, 'Plant/1', 'Abstraction/1', 'autorouting', 'on');
+
     add_line(modelname, 'Plant/1', 'RHC/1', 'autorouting', 'on');
     add_line(modelname, 'TulipController/1', 'RHC/2', 'autorouting', 'on');
     add_line([modelname '/RHC'], 'RHC Mux/1', 'RHC Input/1','autorouting','on');
