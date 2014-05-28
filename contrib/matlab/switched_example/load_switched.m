@@ -177,31 +177,28 @@ add_line([modelname '/Refuel Signal'], 'Time/1', 'If/1');
 add_line([modelname '/Refuel Signal'], 'Merge/1', 'out/1');
 
 % Model outputs
-no_refuel = add_block('built-in/Outport', [modelname '/no_refuel']);
+no_refuel = add_block('built-in/Scope', [modelname '/no_refuel']);
 set_param(no_refuel, 'Position', '[705 20 725 40]');
-vol_diff = add_block('built-in/Outport', [modelname '/vol_diff']);
+vol_diff = add_block('built-in/Scope', [modelname '/vol_diff']);
 set_param(vol_diff, 'Position', '[705 60 725 80]');
-critical = add_block('built-in/Outport', [modelname '/critical']);
+critical = add_block('built-in/Scope', [modelname '/critical']);
 set_param(critical, 'Position', '[705 100 725 120]');
-%vol_diff2 = add_block('built-in/Outport', [modelname '/vol_diff2']);
-%set_param(vol_diff2, 'Position', '[705 140 725 160]');
-init_bool = add_block('built-in/Outport', [modelname '/initial']);
+init_bool = add_block('built-in/Scope', [modelname '/initial']);
 set_param(init_bool, 'Position', '[705 140 725 160]');
 
-location = add_block('built-in/Outport', [modelname '/loc']);
-set_param(location, 'Position', '[705 220 725 240]');
-env_out = add_block('built-in/Outport', [modelname '/env_action']);
+location = add_block('built-in/Scope', [modelname '/loc']);
+set_param(location, 'Position', '[705 180 725 200]');
+env_out = add_block('built-in/Scope', [modelname '/env_action']);
 set_param(env_out, 'Position', '[495 200 515 220]');
-u_out = add_block('built-in/Outport', [modelname '/u']);
+u_out = add_block('built-in/Scope', [modelname '/u']);
 set_param(u_out, 'Position', '[235 375 255 395]');
-x_out = add_block('built-in/Outport', [modelname '/x']);
+x_out = add_block('built-in/Scope', [modelname '/x']);
 set_param(x_out, 'Position', '[345 255 365 275]');
 
 add_line(modelname, 'TulipController/3', 'no_refuel/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/4', 'vol_diff/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/5', 'critical/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/6', 'initial/1', 'autorouting', 'on');
-%add_line(modelname, 'TulipController/7', 'initial/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/1', 'loc/1', 'autorouting', 'on');
 add_line(modelname, 'Refuel Signal/1', 'env_action/1', 'autorouting', 'on');
 add_line(modelname, 'Plant/1', 'x/1', 'autorouting', 'on');
