@@ -18,14 +18,15 @@ K1d = [0; -fuel_consumption];
 K2d = [refill_rate; -fuel_consumption];
 
 % Convert to continuous time
-A = Ad / timestep - eye(2);
-B = Bd / timestep;
+linearization_timestep = 1;
+A = zeros(2,2);
+B = Bd;
 x0 = zeros(2,1);
-x0dot1 = K1d / timestep + A*x0;
-x0dot2 = K2d / timestep + A*x0;
+x0dot1 = K1d;
+x0dot2 = K2d;
 
 % Initial state
-x_init = [7.8; 6.5];
+x_init = [7.5; 7.8];
 
 % Fill in (ideal) plant of Simulink Model
 set_param(cont_state, 'Position', '[665 100 685 120]');
@@ -39,7 +40,9 @@ set_param(integrator, 'Position', '[575 95 605 125]');
 set_param(integrator, 'InitialCondition', 'x_init');
 
 mode_if = add_block('built-in/If', [modelname '/Plant/If']);
+normal_mode_key = num2str(input_value_map('normal'));
 set_param(mode_if, 'Position', '[90 171 190 209]');
+set_param(mode_if, 'IfExpression', ['u1 == ' normal_mode_key]);
 
 mode_merge = add_block('built-in/Merge', [modelname '/Plant/Merge']);
 set_param(mode_merge, 'Position', '[405 150 445 190]');
@@ -117,7 +120,13 @@ set_param(refueling, 'Position', '[330 125 420 185]');
 refuel_signal = add_block('built-in/Outport', [modelname '/Refuel Signal/out']);
 set_param(refuel_signal, 'Position', '[605 35 625 55]');
 
-add_line(modelname, 'Refuel Signal/1', 'TulipController/2','autorouting', 'on');
+if simulation_parameters.use_all_horizon
+    add_line(modelname, 'Refuel Signal/1', 'TulipController/2', ...
+        'autorouting', 'on');
+else
+    add_line(modelname, 'Refuel Signal/1', 'TulipController/1', ...
+        'autorouting', 'on');
+end
 add_line(modelname, 'Refuel Signal/1', 'Plant/2', 'autorouting', 'on');
 add_line(modelname, 'Refuel Signal/1', 'RHC/3', 'autorouting', 'on');
 
@@ -126,7 +135,7 @@ set_param(time_block, 'Position', '[30 35 50 55]');
 
 iftime = add_block('built-in/If', [modelname '/Refuel Signal/If']);
 set_param(iftime, 'Position', '[110 17 220 68]');
-set_param(iftime, 'IfExpression', 'u1 > 3');
+set_param(iftime, 'IfExpression', 'u1 >= 14');
 
 zero_subsys = add_block('built-in/Subsystem', ...
     [modelname '/Refuel Signal/Normal Mode']);
@@ -179,10 +188,10 @@ vol_diff = add_block('built-in/Outport', [modelname '/vol_diff']);
 set_param(vol_diff, 'Position', '[705 60 725 80]');
 critical = add_block('built-in/Outport', [modelname '/critical']);
 set_param(critical, 'Position', '[705 100 725 120]');
-vol_diff2 = add_block('built-in/Outport', [modelname '/vol_diff2']);
-set_param(vol_diff2, 'Position', '[705 140 725 160]');
+%vol_diff2 = add_block('built-in/Outport', [modelname '/vol_diff2']);
+%set_param(vol_diff2, 'Position', '[705 140 725 160]');
 init_bool = add_block('built-in/Outport', [modelname '/initial']);
-set_param(init_bool, 'Position', '[705 180 725 200]');
+set_param(init_bool, 'Position', '[705 140 725 160]');
 
 location = add_block('built-in/Outport', [modelname '/loc']);
 set_param(location, 'Position', '[705 220 725 240]');
@@ -196,8 +205,8 @@ set_param(x_out, 'Position', '[345 255 365 275]');
 add_line(modelname, 'TulipController/3', 'no_refuel/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/4', 'vol_diff/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/5', 'critical/1', 'autorouting', 'on');
-add_line(modelname, 'TulipController/6', 'vol_diff2/1', 'autorouting', 'on');
-add_line(modelname, 'TulipController/7', 'initial/1', 'autorouting', 'on');
+add_line(modelname, 'TulipController/6', 'initial/1', 'autorouting', 'on');
+%add_line(modelname, 'TulipController/7', 'initial/1', 'autorouting', 'on');
 add_line(modelname, 'TulipController/1', 'loc/1', 'autorouting', 'on');
 add_line(modelname, 'Refuel Signal/1', 'env_action/1', 'autorouting', 'on');
 add_line(modelname, 'Plant/1', 'x/1', 'autorouting', 'on');

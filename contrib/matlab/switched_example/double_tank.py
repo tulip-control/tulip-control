@@ -47,29 +47,16 @@ N = 1                   # Horizon length
 disturbance = 0.0       # Absolute uncertainty in fuel consumption
 init_lower = 6          # Lower bound for possible initial volumes
 init_upper = 8          # Upper bound for possible initial volumes
-fast = True             # Use smaller domain to increase speed
 
 
 """State space and propositions"""
-if fast:
-    cont_ss = pc.Polytope(
-        np.array([[1,0],
-                  [-1,0],
-                  [0,1],
-                  [0,-1],
-                  [1,-1],
-                  [-1,1]]),
-        np.array([tank_capacity, 1, tank_capacity,
-                  1, 2*max_vol_diff, 2*max_vol_diff])
-    )
-else:
-    cont_ss = pc.Polytope(
-        np.array([[1,0],
-                  [-1,0],
-                  [0,1],
-                  [0,-1]]),
-        np.array([tank_capacity, 0, tank_capacity, 0])
-    )
+cont_ss = pc.Polytope(
+    np.array([[1,0],
+              [-1,0],
+              [0,1],
+              [0,-1]]),
+    np.array([tank_capacity, 0, tank_capacity, 0])
+)
 
 cont_props = {}
 cont_props['no_refuel'] = pc.Polytope(
@@ -85,13 +72,6 @@ cont_props['vol_diff'] = pc.Polytope(
               [-1,1],
               [1,-1]]),
     np.array([0,0,max_vol_diff,max_vol_diff])
-)
-cont_props['vol_diff2'] = pc.Polytope(
-    np.array([[-1,0],
-              [0,-1],
-              [-1,1],
-              [1,-1]]),
-    np.array([0,0,fin_vol_diff,fin_vol_diff])
 )
 cont_props['initial'] = pc.Polytope(
     np.array([[1,0],
@@ -173,8 +153,6 @@ sys_ts = abstract.discretize_switched(
     ppp, switched_dynamics, disc_params, plot=False
 )
 
-
-
 """Specs"""
 env_vars = set()
 sys_disc_vars = set()
@@ -190,7 +168,7 @@ env_prog = {'env_actions = refuel'}
 # relate switching actions to u_in (env_actions)
 sys_init = {'initial'}
 sys_safe = {'vol_diff'}
-sys_prog = {'True'} #{'vol_diff2'}
+sys_prog = {'True'}
 
 specs = spec.GRSpec(env_vars, sys_disc_vars,
                     env_init, sys_init,
