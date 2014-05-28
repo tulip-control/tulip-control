@@ -120,13 +120,8 @@ set_param(refueling, 'Position', '[330 125 420 185]');
 refuel_signal = add_block('built-in/Outport', [modelname '/Refuel Signal/out']);
 set_param(refuel_signal, 'Position', '[605 35 625 55]');
 
-if simulation_parameters.use_all_horizon
-    add_line(modelname, 'Refuel Signal/1', 'TulipController/2', ...
-        'autorouting', 'on');
-else
-    add_line(modelname, 'Refuel Signal/1', 'TulipController/1', ...
-        'autorouting', 'on');
-end
+add_line(modelname, 'Refuel Signal/1', 'TulipController/2', ...
+    'autorouting', 'on');
 add_line(modelname, 'Refuel Signal/1', 'Plant/2', 'autorouting', 'on');
 add_line(modelname, 'Refuel Signal/1', 'RHC/3', 'autorouting', 'on');
 
