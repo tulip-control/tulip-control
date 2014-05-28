@@ -292,7 +292,7 @@ for ind = 1:num_init_transitions
     end
     
     % Add current location to inputs if system is continuous
-    if is_continuous
+    if is_continuous && simulation_parameters.use_all_horizon
         current_loc = num2str(double(TS.states{init_state_index}.loc));
         label_string = [label_string '(current_loc==' current_loc ')]{'];
     else
