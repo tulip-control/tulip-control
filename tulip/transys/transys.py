@@ -471,11 +471,11 @@ class FiniteTransitionSystem(LabeledDiGraph):
         ========
         L{is_simulation}
         
-        @type state_sequence: inputs="random"
-            | given array
-
         UNDER DEVELOPMENT; function signature may change without
         notice.  Calling will result in NotImplementedError.
+
+        @type state_sequence: inputs="random"
+            | given array
         """
         raise NotImplementedError
     
