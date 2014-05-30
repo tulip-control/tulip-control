@@ -774,7 +774,7 @@ def sys_trans_from_ts(
     some_action && X(some_other_action)
     
     About label type checking: in principle everything should work the
-    same if the base class LabeledDigraph was replaced by MultiDiGraph,
+    same if the base class LabeledDiGraph was replaced by MultiDiGraph,
     so that users can play around with their own bare graphs,
     when they don't need the label typing overhead.
 

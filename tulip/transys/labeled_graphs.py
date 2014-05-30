@@ -410,6 +410,9 @@ class States(object):
     
     def is_blocking(self, state):
         """Check if state has outgoing transitions for each label.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -656,7 +659,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     first make sure no state (or edge) is labeled with it.
     
     Multiple edges with the same C{attr_dict} are not possible.
-    So the difference from C{networkx.MultiDigraph} is that
+    So the difference from C{networkx.MultiDiGraph} is that
     the C{dict} of edges between u,v is a bijection.
     
     Between two nodes either:
@@ -852,13 +855,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
         logger.debug(msg)
         
         if untyped_keys:
-            msg = 'Given untyped edge attributes:\n\t' +\
-                  str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
+            msg = 'The following edge attributes:\n' +\
+                  str({k:typed_attr[k] for k in untyped_keys}) +'\n' +\
+                  'are not allowed.\n' +\
+                  'Currently the allowed attributes are:' +\
+                  ', '.join([str(x) for x in type_defs])
             if check:
-                msg += '\nTo allow untyped annotation, pass: check = False'
+                msg += '\nTo set attributes not included '+\
+                       'in the existing types, pass: check = False'
                 raise AttributeError(msg)
             else:
-                msg += 'Allowed because you passed: check = True'
+                msg += '\nAllowed because you passed: check = True'
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
@@ -924,11 +931,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """Use a L{TypedDict} as attribute dict.
         
           - Raise ValueError if C{u} or C{v} are not already nodes.
-          - Raise Exception if edge (u, v, {}).
+          - Raise Exception if edge (u, v, {}) exists.
           - Log warning if edge (u, v, attr_dict) exists.
           - Raise ValueError if C{attr_dict} contains typed key with invalid value.
           - Raise AttributeError if C{attr_dict} contains untyped keys,
-            unless C{check=True}.
+            unless C{check=False}.
         
         Each label defines a different labeled edge.
         So to "change" the label, either:
@@ -943,7 +950,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Notes
         =====
         1. Argument C{key} has been removed compared to
-           C{networkx.MutliDigraph.add_edge}, because edges are defined
+           C{networkx.MultiDiGraph.add_edge}, because edges are defined
            by their labeling, i.e., multiple edges with same labeling
            are not allowed.
         
@@ -1029,7 +1036,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
         
-        For details see C{networkx.MultiDigraph.add_edges_from}.
+        For details see C{networkx.MultiDiGraph.add_edges_from}.
         Only difference is that only 2 and 3-tuple edges allowed.
         Keys cannot be specified, because a bijection is maintained.
         
@@ -1077,7 +1084,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                    if data == attr_dict}
         for key in rm_keys:
             self.remove_edge(u, v, key=key)
-
+    
     def remove_labeled_edges_from(self, labeled_ebunch, attr_dict=None, **attr):
         """Remove labeled edges.
         
@@ -1130,7 +1137,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 if self.neighbors(node) == []:
                     changed = True
                     self.remove_node(node) 
-
+                    
     def dot_str(self, wrap=10):
         """Return dot string.
         
@@ -1420,6 +1427,9 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
         =========
           - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
           - networkx.algorithms.operators.product.strong_product
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         # An issue here is that transitions are possible both
