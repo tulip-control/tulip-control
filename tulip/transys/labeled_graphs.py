@@ -1120,7 +1120,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
-    
+
+    def trim_dead_states(self):
+        """Recursively delete states with no outgoing transitions.
+
+        Merge and update transition listings as needed.  N.B., this
+        method might change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
+        """
+        changed = True  
+        # Becomes False when no deletions have been made.
+
+        while changed:
+            changed = False
+            for node in self.nodes():
+                if self.neighbors(node) == []:
+                    changed = True
+                    self.states.remove(node)
+                    
     def dot_str(self, wrap=10):
         """Return dot string.
         
