@@ -1070,7 +1070,7 @@ def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
-    bool_actions=False
+    bool_actions=False, bool_trim=True
 ):
     """Function to call the appropriate synthesis tool on the spec.
 
@@ -1139,6 +1139,10 @@ def synthesize(
     
     @param bool_actions: model actions using bool variables
     @type bool_actions: bool
+
+    @param bool_trim: if True, 
+        then remove all states without outgoing transitions
+    @type bool_trim: bool
     
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
@@ -1173,7 +1177,10 @@ def synthesize(
     # can be done by calling a dedicated other function, not this
     if not isinstance(ctrl, transys.MealyMachine):
         return None
-    
+
+    if bool_trim:
+        ctrl.trim_dead_states()
+
     return ctrl
 
 def is_realizable(
