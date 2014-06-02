@@ -1136,7 +1136,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
             for node in self.nodes():
                 if self.neighbors(node) == []:
                     changed = True
+<<<<<<< HEAD
                     self.states.remove(node)
+=======
+                    self.remove_node(node) 
+>>>>>>> 724bf8cacec0a3cf0318847d49d0e39fb29ec9f3
                     
     def dot_str(self, wrap=10):
         """Return dot string.
