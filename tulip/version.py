@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,20 +30,36 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-TuLiP toolbox
-
-The Temporal Logic Planning (TuLiP) Toolbox provides functions
-for verifying and constructing control protocols.
-
-Notes
-=====
-Citations are used throughout the documentation.  References
-corresponding to these citations are defined in doc/bibliography.rst
-of the TuLiP source distribution.  E.g., [BK08] used in various
-docstrings is listed in doc/bibliography.rst as the book "Principles
-of Model Checking" by Baier and Katoen (2008).
+tulip package version
 """
+version_info = (1, 1, 'a')
 
-__all__ = ["abstract", "hybrid", "transys"]
+version = '.'.join([str(x) for x in version_info[:2] ])
+version += version_info[2]
 
-from .version import version as __version__
+
+# Append annotation to version string to indicate development versions.
+#
+# An empty (modulo comments and blank lines) commit_hash.txt is used
+# to indicate a release, in which case nothing is appended to version
+# string as defined above.
+import os.path
+path_to_hashfile = os.path.join(os.path.dirname(__file__), "commit_hash.txt")
+if os.path.exists(path_to_hashfile):
+    commit_hash = ""
+    with open(path_to_hashfile, "r") as f:
+        for line in f:
+            line = line.strip()
+            if len(line) == 0 or line[0] == '#':
+                # Ignore blank lines and comments, the latter being
+                # any line that begins with #.
+                continue
+
+            # First non-blank line is assumed to be the commit hash
+            commit_hash = line
+            break
+
+    if len(commit_hash) > 0:
+        version += "-dev-" + commit_hash
+else:
+    version += "-dev-unknown-commit"

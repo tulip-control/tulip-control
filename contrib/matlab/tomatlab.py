@@ -289,10 +289,13 @@ def export_mealy(mealy_machine, is_continuous):
     output['transitions'] = transitions 
 
 
-    # Initial states are the states that have transitions from Sinit. This block
-    # similar to previous block
-    initial_transitions = mealy_machine.transitions.find(from_states=['Sinit'])
-    initial_states = [ trans[1] for trans in initial_transitions ]
+    # Initial states are the states that have transitions from Sinit. Initial
+    # transitions (for the purposes of execution in Stateflow), are the
+    # transitions coming from the states that transition from Sinit.
+    Sinit_transitions = mealy_machine.transitions.find(from_states=['Sinit'])
+    initial_states = [ trans[1] for trans in Sinit_transitions ]
+    initial_transitions = mealy_machine.transitions.find(
+        from_states=initial_states)
     initial_trans = []
     for init_transition in initial_transitions:
 
@@ -304,6 +307,9 @@ def export_mealy(mealy_machine, is_continuous):
                                  for var in env_vars }
         trans_dict['outputs'] = { var: str(transition_vals[var])
                                   for var in sys_vars }
+
+        orig_state = init_transition[0]
+        trans_dict['start_loc'] =  mealy_machine.states[orig_state]['loc']
         initial_trans.append(trans_dict)
     output['init_trans'] = initial_trans
 

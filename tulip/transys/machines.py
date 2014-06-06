@@ -273,6 +273,9 @@ class FiniteStateMachine(LabeledDiGraph):
         
         @param state: state to be checked as blocking
         @type state: single state to be checked
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -290,9 +293,19 @@ class FiniteStateMachine(LabeledDiGraph):
 
     # operations between state machines
     def sync_product(self):
+        """
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
         
     def async_product(self):
+        """
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
 class FSM(FiniteStateMachine):
@@ -322,6 +335,11 @@ class MooreMachine(FiniteStateMachine):
     valuation: assignment of values to each port
     """
     def __init__(self, **args):
+        """
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         FiniteStateMachine.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
@@ -568,7 +586,7 @@ class MealyMachine(FiniteStateMachine):
                 msg += 'before calling .simulate.'
                 print(msg)
             else:
-                self.states.select_current(self.states.initial)
+                self.states.current = set(self.states.initial)
         
         if isinstance(inputs_sequence, executions.MachineInputSequence):
             self._guided_simulation(inputs_sequence)
@@ -703,7 +721,11 @@ class Mealy(MealyMachine):
 pure = {'present', 'absent'}
 
 def moore2mealy(moore_machine, mealy_machine):
-    """Convert Moore machine to equivalent Mealy machine"""
+    """Convert Moore machine to equivalent Mealy machine
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
+    """
     raise NotImplementedError
 
 ####
