@@ -8,7 +8,7 @@ Required software (in addition to Tulip):
     - Matlab
     - Simulink
     - Stateflow
-    - MPT Toolbox 3.0 (http://people.ee.ethz.ch/~mpt/3/)
+    - MPT Toolbox 3.0.x (http://people.ee.ethz.ch/~mpt/3/)
 
 Provided files below:
 
