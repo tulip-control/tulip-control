@@ -149,7 +149,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('gr1c', specs, env=env_sws)
+ctrl = synth.synthesize('jtlv', specs, env=env_sws)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('only_mode_controlled.png'):
