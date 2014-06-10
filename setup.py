@@ -12,10 +12,25 @@ import os.path
 ###########################################
 # (see notes below.)
 
+GR1C_MIN_VERSION = (0,7,4)
 def check_gr1c():
     try:
-        subprocess.call(["gr1c", "-V"], stdout=subprocess.PIPE)
+        v_str = subprocess.check_output(["gr1c", "-V"])
     except OSError:
+        return False
+    try:
+        v_str = v_str.split()[1]
+        major, minor, micro = v_str.split(".")
+        major = int(major)
+        minor = int(minor)
+        micro = int(micro)
+        if not (major > GR1C_MIN_VERSION[0]
+                or (major == GR1C_MIN_VERSION[0]
+                    and (minor > GR1C_MIN_VERSION[1]
+                         or (minor == GR1C_MIN_VERSION[1]
+                             and micro >= GR1C_MIN_VERSION[2])))):
+            return False
+    except:
         return False
     return True
 
@@ -62,7 +77,9 @@ other_depends = {}
 glpk_msg = 'GLPK seems to be missing\n' +\
     'and thus apparently not used by your installation of CVXOPT.\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
-gr1c_msg = 'gr1c not found.\n' +\
+gr1c_msg = 'gr1c not found or of version prior to ' +\
+    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
+    '.\n' +\
     'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
     'see http://scottman.net/2012/gr1c'
 mpl_msg = 'matplotlib not found.\n' +\
