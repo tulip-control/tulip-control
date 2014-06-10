@@ -20,7 +20,8 @@ Newcomers to scientific computing with Python should read
 The default synthesis tool for GR[1] specifications is implemented by Yaniv
 Sa'ar [BJPPS12]_ and distributed with TuLiP.  To use it, you must have Java
 version 1.6 (or later) installed. An alternative GR[1] synthesis tool used by
-TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_.
+TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_; if you use gr1c, please install
+at least version 0.7.4.
 
 For computing discrete abstractions from hybrid system descriptions, it is
 highly recommended---but not required---that you install `GLPK
