@@ -16,3 +16,5 @@ parsetab.py
 /dist/
 /tulip/commit_hash.txt
 /MANIFEST
+/.coverage
+/tests/cover/
