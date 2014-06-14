@@ -218,7 +218,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'separator':'\n'
         }
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal':'box'}
+        self.dot_node_shape = {'normal':'rectangle'}
         self.default_export_fname = 'fts'
 
     def __str__(self):

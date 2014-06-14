@@ -1136,10 +1136,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Recommended file formats:
         
             - pdf, eps
+            - tikz for use with dot2tex and/or dot2texi
             - png, gif
             - svg (can render LaTeX labels with inkscape export)
             - dot
-            - pgf/tikz
         
         Any other format supported by C{pydot.write} is available.
         
@@ -1150,7 +1150,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         Requires
         ========
-        dot, pydot
+          - graphviz dot: http://www.graphviz.org/
+          - pydot: https://pypi.python.org/pypi/pydot
+          
+        and for tikz:
+          
+          - dot2tex: https://pypi.python.org/pypi/dot2tex
+          - dot2texi: http://www.ctan.org/pkg/dot2texi
+            (to automate inclusion)
         
         See Also
         ========

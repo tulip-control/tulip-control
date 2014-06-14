@@ -95,28 +95,85 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
         #node_dot_label = fill(str(state), width=wrap)
     
         # state boundary color
+        rim_color = 'black'
         if state_data.has_key('color'):
-            node_color = state_data['color']
-        else:
-            node_color = '"black"'
+            rim_color = state_data['color']
         
         # state interior color
-        node_style = '"rounded'
+        fill_color = None
         if state_data.has_key('fillcolor'):
-            node_style += ',filled"'
             fill_color = state_data['fillcolor']
-        else:
-            node_style += '"'
-            fill_color = "none"
         
-        to_pydot_graph.add_node(
-            state,
-            label=node_dot_label,
-            shape=node_shape,
-            style=node_style,
-            color=node_color,
-            fillcolor=fill_color
-        )
+        if tikz:
+            _state2tikz(graph, to_pydot_graph, state,
+                        is_initial, is_accepting,
+                        rim_color, fill_color, node_dot_label)
+        else:
+            _state2dot(graph, to_pydot_graph, state,
+                       is_initial, is_accepting,
+                       rim_color, fill_color, node_dot_label)
+
+def _state2dot(graph, to_pydot_graph, state,
+               is_initial, is_accepting,
+               rim_color, fill_color, node_dot_label):
+    if is_initial:
+        _add_incoming_edge(to_pydot_graph, state)
+    
+    shape = graph.dot_node_shape['normal']
+    if is_accepting:
+        shape = graph.dot_node_shape['accepting']
+    
+    corners = ''
+    if shape is 'rectangle':
+        corners = 'rounded'
+    
+    rim_color = '"' + rim_color + '"'
+    
+    filled = ''
+    if fill_color is not None:
+        filled = ',filled'
+    
+    if fill_color is None:
+        fill_color = 'none'
+    
+    node_style = '"' + corners + filled + '"'
+    
+    to_pydot_graph.add_node(
+        state,
+        label=node_dot_label,
+        shape=shape,
+        style=node_style,
+        color=rim_color,
+        fillcolor=fill_color
+    )
+
+def _state2tikz(graph, to_pydot_graph, state,
+                is_initial, is_accepting,
+                rim_color, fill_color, node_dot_label):
+    style = 'state'
+    
+    if is_initial:
+        style += ', initial by arrow, initial text='
+    if is_accepting:
+        style += ', accepting'
+    
+    if graph.dot_node_shape['normal'] is 'rectangle':
+        style += ', shape = rectangle, rounded corners'
+    
+    style += ', draw = ' + rim_color
+    
+    if fill_color is not None:
+        s = {'top color', 'bottom color', 'left color', 'right color'}
+        if any(x in fill_color for x in s):
+            style += ', ' + fill_color
+        else:
+            style += ', fill = ' + fill_color
+    
+    to_pydot_graph.add_node(
+        state,
+        texlbl=node_dot_label,
+        style=style
+    )
 
 def _add_incoming_edge(g, state):
     phantom_node = 'phantominit' +str(state)
@@ -130,18 +187,23 @@ def _form_node_label(state, state_data, label_def,
     state_str = str(state)
     state_str = state_str.replace("'", "")
     
+    # rm parentheses to reduce size of states in fig
+    if tikz:
+        state_str = state_str.replace('(', '')
+        state_str = state_str.replace(')', '')
+    
     # make indices subscripts
     if latex or tikz:
         pattern = '([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
         state_str = re.sub(pattern, make_subscript, state_str)
     
-    # only for latex via svg, instead use math mode for dot2tex
+    # SVG requires breaking the math environment into
+    # one math env per line. Just make 1st line math env
     if latex:
         state_str = '$' + state_str + '$'
-    
-    state_str = fill(state_str, width=width)
-    node_dot_label = '"' + state_str + '\n'
+        state_str = fill(state_str, width=width) + '\n'
+    node_dot_label = state_str
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
@@ -166,11 +228,20 @@ def _form_node_label(state, state_data, label_def,
         
         node_dot_label += type_name +sep_type_value
         node_dot_label += label_str +sep_label_sets
-    node_dot_label += '"'
     
     if latex:
         node_dot_label = node_dot_label.replace(r'{', r'\\{')
         node_dot_label = node_dot_label.replace(r'}', r'\\}')
+    
+    if tikz:
+        node_dot_label = node_dot_label.replace(r'{', r'\{')
+        node_dot_label = node_dot_label.replace(r'}', r'\}')
+        
+        # replace LF by latex newline
+        node_dot_label = node_dot_label.replace('\n', '\\\\ ')
+        
+        # dot2tex math mode doesn't handle newlines properly
+        node_dot_label = '$\\begin{matrix} ' + node_dot_label + '\\end{matrix}$'
     
     return node_dot_label
 
@@ -252,6 +323,10 @@ def _form_edge_label(edge_data, label_def,
     if latex:
         edge_dot_label = edge_dot_label.replace(r'{', r'\\{')
         edge_dot_label = edge_dot_label.replace(r'}', r'\\}')
+    
+    if tikz:
+        edge_dot_label = edge_dot_label.replace(r'{', r'\{')
+        edge_dot_label = edge_dot_label.replace(r'}', r'\}')
     
     return edge_dot_label
 
