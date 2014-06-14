@@ -196,12 +196,12 @@ class FiniteStateMachine(LabeledDiGraph):
         # state labeling
         self._state_label_def = OrderedDict()
         self._state_dot_label_format = {'type?label':':',
-                                        'separator':'\\n'}
+                                        'separator':'\n'}
         
         # edge labeling
         self._transition_label_def = OrderedDict()
         self._transition_dot_label_format = {'type?label':':',
-                                             'separator':'\\n'}
+                                             'separator':'\n'}
         self._transition_dot_mask = dict()
         
         self.default_export_fname = 'fsm'

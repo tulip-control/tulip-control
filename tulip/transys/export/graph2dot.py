@@ -75,7 +75,7 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10, latex=False):
     if hasattr(graph, '_state_dot_label_format'):
         label_format = states.graph._state_dot_label_format
     else:
-        label_format = {'type?label':'', 'separator':'\\n'}
+        label_format = {'type?label':'', 'separator':'\n'}
     
     for (state, state_data) in states.graph.nodes_iter(data=True):
         if state in states.initial:
@@ -89,8 +89,7 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10, latex=False):
         )
     
         #node_dot_label = fill(str(state), width=wrap)
-        #node_dot_label.replace('\n', '\\n')
-        
+    
         # state boundary color
         if state_data.has_key('color'):
             node_color = state_data['color']
@@ -139,8 +138,7 @@ def _form_node_label(state, state_data, label_def,
         state_str = s
     
     state_str = fill(state_str, width=width)
-    #state_str = state_str.replace('\n', '\\n')
-    node_dot_label = '"' +state_str +'\\n'
+    node_dot_label = '"' + state_str + '\n'
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
@@ -162,7 +160,6 @@ def _form_node_label(state, state_data, label_def,
             label_str = '{' + fill(s, width=width) + '}'
         else:
             label_str = fill(str(label_value), width=width)
-        label_str = label_str.replace('\n', '\\n')
         
         node_dot_label += type_name +sep_type_value
         node_dot_label += label_str +sep_label_sets

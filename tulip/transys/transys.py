@@ -210,12 +210,12 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap':'',
            'type?label':'',
-           'separator':'\\n'
+           'separator':'\n'
         }
         self._transition_dot_label_format = {
             'actions':'',
             'type?label':'',
-            'separator':'\\n'
+            'separator':'\n'
         }
         self._transition_dot_mask = dict()
         self.dot_node_shape = {'normal':'box'}
@@ -608,13 +608,13 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap':'',
            'type?label':'',
-           'separator':'\\n'
+           'separator':'\n'
         }
         self._transition_dot_label_format = {
             'sys_actions':'sys',
             'env_actions':'env',
             'type?label':':',
-            'separator':'\\n'
+            'separator':'\n'
         }
         
         self._transition_dot_mask = dict()
