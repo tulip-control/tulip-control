@@ -130,14 +130,15 @@ def _form_node_label(state, state_data, label_def,
     state_str = str(state)
     state_str = state_str.replace("'", "")
     
-    if latex:
-        s = state_str
-        
+    # make indices subscripts
+    if latex or tikz:
         pattern = '([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
-        s = '$' + re.sub(pattern, make_subscript, s) + '$'
-        
-        state_str = s
+        state_str = re.sub(pattern, make_subscript, state_str)
+    
+    # only for latex via svg, instead use math mode for dot2tex
+    if latex:
+        state_str = '$' + state_str + '$'
     
     state_str = fill(state_str, width=width)
     node_dot_label = '"' + state_str + '\n'
