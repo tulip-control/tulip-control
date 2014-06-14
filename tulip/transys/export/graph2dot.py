@@ -68,13 +68,16 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
                     latex=False, tikz=False):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
+    # TODO option to replace with int to reduce size,
+    # TODO generate separate LaTeX legend table (PNG option ?)
+    
     states = graph.states
     
     # get labeling def
     if hasattr(graph, '_state_label_def'):
-        label_def = states.graph._state_label_def
+        label_def = graph._state_label_def
     if hasattr(graph, '_state_dot_label_format'):
-        label_format = states.graph._state_dot_label_format
+        label_format = graph._state_dot_label_format
     else:
         label_format = {'type?label':'', 'separator':'\n'}
     
@@ -107,8 +110,6 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
             node_style += '"'
             fill_color = "none"
         
-        # TODO option to replace with int to reduce size,
-        # TODO generate separate LaTeX legend table (PNG option ?)
         to_pydot_graph.add_node(
             state,
             label=node_dot_label,
