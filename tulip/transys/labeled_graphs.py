@@ -1121,16 +1121,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
     
-    def dot_str(self, wrap=10):
+    def dot_str(self, wrap=10, **kwargs):
         """Return dot string.
         
         Requires pydot.        
         """
-        return graph2dot.graph2dot_str(self, wrap)
+        return graph2dot.graph2dot_str(self, wrap, **kwargs)
     
     def save(self, filename=None, fileformat=None,
              rankdir='LR', prog=None,
-             wrap=10, latex=False):
+             wrap=10, latex=False, tikz=False):
         """Save image to file.
         
         Recommended file formats:
@@ -1139,6 +1139,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - png, gif
             - svg (can render LaTeX labels with inkscape export)
             - dot
+            - pgf/tikz
         
         Any other format supported by C{pydot.write} is available.
         
@@ -1219,7 +1220,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             prog = self.default_layout
         
         graph2dot.save_dot(self, filename, fileformat, rankdir,
-                           prog, wrap, latex)
+                           prog, wrap, latex=latex, tikz=tikz)
         
         return True
     

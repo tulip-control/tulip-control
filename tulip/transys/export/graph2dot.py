@@ -64,7 +64,8 @@ except ImportError:
     logger.error('IPython not found.\nSo loaded dot images not inline.')
     IPython = None
 
-def _states2dot_str(graph, to_pydot_graph, wrap=10, latex=False):
+def _states2dot_str(graph, to_pydot_graph, wrap=10,
+                    latex=False, tikz=False):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
     states = graph.states
@@ -85,7 +86,8 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10, latex=False):
         
         # state annotation
         node_dot_label = _form_node_label(
-            state, state_data, label_def, label_format, wrap, latex
+            state, state_data, label_def,
+            label_format, wrap, latex, tikz=tikz
         )
     
         #node_dot_label = fill(str(state), width=wrap)
@@ -123,7 +125,7 @@ def _add_incoming_edge(g, state):
     g.add_edge(phantom_node, state)
 
 def _form_node_label(state, state_data, label_def,
-                     label_format, width=10, latex=False):
+                     label_format, width=10, latex=False, tikz=False):
     # node itself
     state_str = str(state)
     state_str = state_str.replace("'", "")
@@ -184,7 +186,7 @@ def _decide_node_shape(graph, state):
         
     return node_shape
 
-def _transitions2dot_str(trans, to_pydot_graph, latex):
+def _transitions2dot_str(trans, to_pydot_graph, latex, tikz=False):
     """Convert transitions to dot str.
     
     @rtype: str
@@ -205,13 +207,13 @@ def _transitions2dot_str(trans, to_pydot_graph, latex):
     trans.graph.edges_iter(data=True, keys=True):
         edge_dot_label = _form_edge_label(
             edge_data, label_def,
-            label_format, label_mask, latex
+            label_format, label_mask, latex, tikz
         )
         to_pydot_graph.add_edge(u, v, key=key,
                                 label=edge_dot_label)
 
 def _form_edge_label(edge_data, label_def,
-                     label_format, label_mask, latex):
+                     label_format, label_mask, latex, tikz):
     edge_dot_label = '"'
     sep_label_sets = label_format['separator']
     
@@ -262,7 +264,7 @@ def _pydot_missing():
     
     return False
     
-def _graph2pydot(graph, wrap=10, latex=False):
+def _graph2pydot(graph, wrap=10, latex=False, tikz=False):
     """Convert (possibly labeled) state graph to dot str.
     
     @type graph: L{LabeledDiGraph}
@@ -274,15 +276,15 @@ def _graph2pydot(graph, wrap=10, latex=False):
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, latex=latex)
-    _transitions2dot_str(graph.transitions, dummy_nx_graph, latex)
+    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, latex=latex, tikz=tikz)
+    _transitions2dot_str(graph.transitions, dummy_nx_graph, latex, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
     pydot_graph.set_overlap('false')
     
     return pydot_graph
 
-def graph2dot_str(graph, wrap=10, latex=False):
+def graph2dot_str(graph, wrap=10, latex=False, tikz=False):
     """Convert graph to dot string.
     
     Requires pydot.
@@ -293,11 +295,12 @@ def graph2dot_str(graph, wrap=10, latex=False):
     
     @rtype: str
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, latex=latex)
+    pydot_graph = _graph2pydot(graph, wrap=wrap,
+                               latex=latex, tikz=tikz)
     
     return pydot_graph.to_string()
 
-def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex):
+def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex, tikz=False):
     """Save state graph to dot file.
     
     @type graph: L{LabeledDiGraph}
@@ -305,7 +308,8 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex):
     @return: True upon success
     @rtype: bool
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, latex=latex)
+    pydot_graph = _graph2pydot(graph, wrap=wrap,
+                               latex=latex, tikz=tikz)
     if pydot_graph is None:
         # graph2dot must have printed warning already
         return False
