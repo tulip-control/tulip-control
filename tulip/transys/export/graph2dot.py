@@ -81,11 +81,10 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
     else:
         label_format = {'type?label':'', 'separator':'\n'}
     
-    for (state, state_data) in states.graph.nodes_iter(data=True):
-        if state in states.initial:
-            _add_incoming_edge(to_pydot_graph, state)
-        
-        node_shape = _decide_node_shape(states.graph, state)
+    for (state, state_data) in graph.nodes_iter(data=True):
+        # initial state ?
+        is_initial = state in states.initial
+        is_accepting = _is_accepting(graph, state)
         
         # state annotation
         node_dot_label = _form_node_label(
@@ -175,18 +174,17 @@ def _form_node_label(state, state_data, label_def,
     
     return node_dot_label
 
-def _decide_node_shape(graph, state):
-    node_shape = graph.dot_node_shape['normal']
-    
+def _is_accepting(graph, state):
+    """accepting state ?
+    """
     # check if accepting states defined
     if not hasattr(graph.states, 'accepting'):
-        return node_shape
+        return False
     
-    # check for accepting states
+    # check state is accepting
     if state in graph.states.accepting:
-        node_shape = graph.dot_node_shape['accepting']
-        
-    return node_shape
+        return True
+    return False
 
 def _transitions2dot_str(trans, to_pydot_graph, latex, tikz=False):
     """Convert transitions to dot str.
