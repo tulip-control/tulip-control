@@ -142,7 +142,7 @@ sys_prog |= {'X0reach'}
 # It is unsafe to "break" (switch to gear0) when road is slippery
 sys_safe |= {'(gear1 && slippery) -> X (gear1)'}
 
-# to use int actions with gr1c:
+# to use int actions:
 # sys_safe |= {'((act = gear1) && (eact = slippery)) -> X (act = gear1)'}
 
 # Create the specification
