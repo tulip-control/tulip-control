@@ -1072,7 +1072,7 @@ def synthesize(
     bool_states=False, action_vars=None,
     bool_actions=False, trim_aut=True
 ):
-    """Function to call the appropriate synthesis tool on the spec.
+    """Function to call the appropriate synthesis tool on the specification.
 
     Beware!  This function provides a generic interface to a variety
     of routines.  Being under active development, the types of
