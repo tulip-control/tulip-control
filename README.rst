@@ -54,5 +54,4 @@ run::
   ./run_tests.py
 
 to run all available tests.  Use the flag "-h" to see driver script options.  To
-change default options, edit the "nosetests" section in setup.cfg.  To disable
-output capture, add the flag "-s" when invoking nose.
+disable output capture, add the flag "-s" when invoking nose.
