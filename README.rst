@@ -31,11 +31,7 @@ documentation is under ``doc/`` and is built with `Sphinx
 
   make html
 
-Note that a Windows build file, make.bat, was auto-generated at the time of
-first initialising the docs configuration files (ca. 2011 May
-8) but is not actively maintained.  It is included for convenience; please
-consider ``doc/Makefile`` to be the ground truth.  A built copy for the most
-recent release of TuLiP is available online at
+A built copy for the most recent release of TuLiP is available online at
 
   http://tulip-control.sourceforge.net/doc/
 
