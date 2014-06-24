@@ -31,14 +31,15 @@ documentation is under ``doc/`` and is built with `Sphinx
 
   make html
 
-A built copy for the most recent release of TuLiP is available online at
-
-  http://tulip-control.sourceforge.net/doc/
-
 API documentation is generated using `Epydoc <http://epydoc.sourceforge.net/>`_
 and can also be built from the ``doc`` directory, now by ::
 
   make api
+
+Built copies for the most recent release of TuLiP are available online at:
+
+* http://tulip-control.sourceforge.net/doc/
+* http://tulip-control.sourceforge.net/api-doc/
 
 Command summaries are provided by ``make help``.
 
