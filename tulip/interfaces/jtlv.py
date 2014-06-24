@@ -153,7 +153,7 @@ def synthesize(
     spec, heap_size='-Xmx128m', priority_kind = 3,
     init_option = 1
 ):
-    """Synthesize a strategy satisfying the spec.
+    """Synthesize a strategy satisfying the specification.
 
     Arguments are described in documentation for L{solve_game}.
     
