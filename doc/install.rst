@@ -205,9 +205,9 @@ appropriate alias is similar to::
 
 To set this alias for every new terminal session, add the line to your shell
 startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc`` for zsh.  To test
-it, try looking at the polytope subpackage by entering::
+it, try looking at the transys subpackage by entering::
 
-  $ pydoc tulip.polytope
+  $ pydoc tulip.transys
 
 .. rubric:: Footnotes
 
