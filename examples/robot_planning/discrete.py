@@ -94,7 +94,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) <-> lot || (X0reach && !park))
+#     [](X (X0reach) <-> lot || (X0reach && !park))
 #
 
 # @specs_setup_section@
