@@ -191,11 +191,15 @@ virtualenv and pydoc
 
 If you have installed TuLiP into a `virtualenv
 <http://www.virtualenv.org/>`_-built environment, then the documentation may not
-be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  There
-are more sophisticated ways to fix this, but an easy solution is to augment the
-path used by pydoc with an alias.  E.g., suppose your username is "frodo", you
-are running Python v2.6, and your virtual environment is called "PY_scratch"
-under your home directory.  Then the appropriate alias is similar to::
+be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  We
+describe two solutions here, the first being more general. ::
+
+  $ alias pydoc='python -m pydoc'
+
+If that fails, try to explicitly augment the path used by pydoc with an alias.
+E.g., suppose your username is "frodo", you are running Python v2.6, and your
+virtual environment is called "PY_scratch" under your home directory.  Then the
+appropriate alias is similar to::
 
   $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
 
