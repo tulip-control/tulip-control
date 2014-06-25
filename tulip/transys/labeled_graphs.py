@@ -763,6 +763,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                   if C{C is True}
                 
                 - C{C}, otherwise.
+          
+          - C{default : d} is a value in C{B}
+            to be returned for node and edge labels
+            not yet explicitly specified by the user.
+        
         Be careful to avoid name conflicts with existing
         networkx C{MultiDiGraph} attributes.
         @type node_label_types: C{[(L_i, D_i, setter), ...]}
@@ -782,9 +787,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
             labeling function.
         @type max_outdegree_per_label: int
         """
-        self._state_label_def = self._init_labeling(node_label_types)
-        self._transition_label_def = self._init_labeling(edge_label_types)
-            
+        node_labeling, node_defaults = self._init_labeling(node_label_types)
+        edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
+        
+        self._state_label_def = node_labeling
+        self._node_label_defaults = node_defaults
+        
+        self._transition_label_def = edge_labeling
+        self._edge_label_defaults = edge_defaults
+        
         # temporary hack until rename
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
@@ -814,28 +825,25 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param label_types: see L{__init__}.
         """
         labeling = dict()
+        defaults = dict()
         
         if label_types is None:
             logger.debug('no label types passed')
-            return labeling
+            return labeling, defaults
         
         if not label_types:
             logger.debug('label types absent (given: ' +
                          str(label_types) + ')')
-            return labeling
+            return labeling, defaults
         
         label_types = list(label_types)
         
         for label_type in label_types:
             type_name = label_type['name']
             codomain = label_type['values']
-            
-            if label_type.has_key('setter'):
-                setter = label_type['setter']
-            else:
-                setter = None
-            
             labeling[type_name] = codomain
+            
+            setter = label_type.get('setter')
             
             if setter is None:
                 # don't create attribute unless told to do so
@@ -846,7 +854,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             else:
                 # custom setter
                 setattr(self, type_name, setter)
-        return labeling
+            
+            default_value = label_type.get('default')
+            
+            if default_value is not None:
+                defaults[type_name] = default_value
+                
+        return labeling, defaults
     
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         untyped_keys = set(typed_attr).difference(type_defs)
@@ -902,6 +916,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
+        typed_attr.update(self._node_label_defaults)
+        
         typed_attr.update(attr_dict) # type checking happens here
         
         logger.debug('node typed_attr: ' + str(typed_attr))
@@ -977,6 +993,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
+        typed_attr.update(self._edge_label_defaults)
+        
         typed_attr.update(attr_dict) # type checking happens here
         
         logger.debug('Given: attr_dict = ' + str(attr_dict))
