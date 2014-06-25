@@ -450,7 +450,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         """
         raise NotImplementedError
     
-    def project(self, factor=None):
+    def projection(self, factor=None):
         """Project onto subgraph or factor graph.
         
         @param factor: on what to project:
