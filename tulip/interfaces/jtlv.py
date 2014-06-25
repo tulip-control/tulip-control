@@ -278,6 +278,9 @@ def generate_JTLV_SMV(spec):
     propositions).
 
     @type spec: L{GRSpec}
+
+    @rtype: str
+    @return: string conforming to the SMV file format that JTLV expects.
     """
     smv = ""
 
