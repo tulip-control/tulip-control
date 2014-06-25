@@ -18,15 +18,19 @@ class basic_test:
                         env_init="x", env_prog="x",
                         sys_init="y",
                         sys_prog=["y & x", "!y"])
+        self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
+                               sys_prog=["y=0", "y=5"])
 
     def tearDown(self):
         self.f_un = None
         self.f = None
+        self.dcounter = None
 
     def test_check_realizable(self):
         assert not check_realizable(self.f_un)
         self.f_un.sys_safety = []
         assert check_realizable(self.f_un)
+        assert check_realizable(self.dcounter)
 
     def test_synthesize(self):
         mach = synthesize(self.f_un)

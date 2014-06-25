@@ -42,6 +42,7 @@ import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
+from tulip.transys.machines import create_machine_ports
 from tulip import transys
 from tulip.spec.parser import parse
 
@@ -174,9 +175,9 @@ def synthesize(
         return counter_examples
     else: 
         aut = load_file(fAUT, spec)
-        os.unlink(fSMV)
-        os.unlink(fLTL)
-        os.unlink(fAUT)
+        # os.unlink(fSMV)
+        # os.unlink(fLTL)
+        # os.unlink(fAUT)
         return aut
 
 def create_files(spec):
@@ -271,11 +272,29 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
 #                aut_file, str(priority_kind), str(init_option)], \
 #               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
+
+def canon_to_jtlv_domain(dom):
+    """Convert an LTL or GRSpec variable domain to JTLV style.
+
+    @param dom: a variable domain, as would be provided by the values
+    in the output_variables attribute of L{spec.form.LTL} or sys_vars
+    of L{spec.form.GRSpec}.
+
+    @rtype: str
+    @return: variable domain string, ready for use in an SMV file, as
+        expected by the JTLV solver.
+    """
+    if dom == "boolean":
+        return dom
+    elif isinstance(dom, tuple) and len(dom) == 2:
+        return "{"+", ".join([str(i) for i in range(dom[0], dom[1]+1)])+"}"
+    else:
+        raise ValueError("Unrecognized domain type: "+str(domain))
+
 def generate_JTLV_SMV(spec):
     """Return the SMV module definitions needed by JTLV.
 
-    N.B., assumes all variables are Boolean (i.e., atomic
-    propositions).
+    Raises exception if malformed GRSpec object is detected.
 
     @type spec: L{GRSpec}
 
@@ -298,10 +317,10 @@ def generate_JTLV_SMV(spec):
     MODULE env -- inputs
         VAR
     """))
-    for var in spec.env_vars.keys():
+    for var, dom in spec.env_vars.items():
         smv+= '\t\t'
         smv+= var
-        smv+= ' : boolean;\n'
+        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
 
     
     # Define sys vars
@@ -309,10 +328,10 @@ def generate_JTLV_SMV(spec):
     MODULE sys -- outputs
         VAR
     """))
-    for var in spec.sys_vars.keys():
+    for var, dom in spec.sys_vars.items():
         smv+= '\t\t'
         smv+= var
-        smv+= ' : boolean;\n'
+        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
     
     logger.debug(smv)
     return smv
@@ -320,8 +339,7 @@ def generate_JTLV_SMV(spec):
 def generate_JTLV_LTL(spec):
     """Return the LTLSPEC for JTLV.
 
-    It takes as input a GRSpec object.  N.B., assumes all variables
-    are Boolean (i.e., atomic propositions).
+    It takes as input a GRSpec object.
     """
     formula = spec.to_canon()
     parse(formula)  # Raises exception if syntax error
@@ -376,18 +394,12 @@ def generate_JTLV_LTL(spec):
 def load_file(aut_file, spec):
     """Construct a Mealy Machine from an aut_file.
 
-    N.B., assumes all variables are Boolean (i.e., atomic
-    propositions).
-
     @param aut_file: the name of the text file containing the
         automaton, or an (open) file-like object.
     @type spec: L{GRSpec}
 
     @rtype: L{MealyMachine}
     """
-    env_vars = spec.env_vars.keys()  # Enforce Boolean var assumption
-    sys_vars = spec.sys_vars.keys()
-
     if isinstance(aut_file, str):
         f = open(aut_file, 'r')
         closable = True
@@ -402,21 +414,19 @@ def load_file(aut_file, spec):
     mask_func = lambda x: bool(x)
     
     # input defs
-    inputs = OrderedDict([list(a) for a in \
-                          zip(env_vars, itertools.repeat({0, 1}))])
+    inputs = create_machine_ports(spec.env_vars)
     m.add_inputs(inputs)
 
     # outputs def
-    outputs = OrderedDict([list(a) for a in \
-                           zip(sys_vars, itertools.repeat({0, 1}))])
-    masks = {k:mask_func for k in sys_vars}
+    outputs = create_machine_ports(spec.sys_vars)
+    masks = {k:mask_func for k in spec.sys_vars.keys()}
     m.add_outputs(outputs, masks)
 
     # state variables def
     state_vars = outputs
     m.add_state_vars(state_vars)
 
-    varnames = sys_vars+env_vars
+    varnames = spec.sys_vars.keys()+spec.env_vars.keys()
 
     stateDict = {}
     for line in f:
