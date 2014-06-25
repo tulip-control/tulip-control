@@ -764,6 +764,17 @@ class TypedDict(dict):
     For each key, a domain can optionally be defined,
     which restricts the admissible values that can be
     paired with that key.
+    
+    Example
+    =======
+    
+    >>> d = TypedDict()
+    >>> allowed_values = {'name': {'Maria', 'John'},
+                          'age': range(122)}
+    >>> default_values = {'name': 'Maria',
+                          'age': 30}
+    >>> d.set_types(allowed_types)
+    >>> d.update(default_values)
     """
     # credits for debugging this go here:
     #   http://stackoverflow.com/questions/2060972/
@@ -816,7 +827,7 @@ class TypedDict(dict):
             
                 {key : values}
             
-                C{values} must implement C{__contains__}
-                to enable checking validity of values.
+            C{values} must implement C{__contains__}
+            to enable checking validity of values.
         """
         self.allowed_values = allowed_values
