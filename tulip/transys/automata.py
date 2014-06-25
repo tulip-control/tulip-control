@@ -110,7 +110,11 @@ class FiniteStateAutomaton(LabeledDiGraph):
             self.atomic_proposition_based = False
             alphabet = set()
         
-        edge_label_types = [('letter', alphabet, True)]
+        edge_label_types = [
+            {'name':'letter',
+             'values':alphabet,
+             'setter':True}
+        ]
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types, **kwargs
         )

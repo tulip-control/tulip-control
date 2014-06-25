@@ -194,8 +194,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
         For arguments, see L{LabeledDiGraph}
         """
         ap_labels = PowerSet()
-        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
-        edge_label_types = [('actions', MathSet(), True)]
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+        ]
+        edge_label_types = [
+            {'name':'actions',
+             'values':MathSet(),
+             'setter':True}
+        ]
         
         super(FiniteTransitionSystem, self).__init__(
             node_label_types, edge_label_types,
@@ -565,14 +573,27 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
             C{edge_label_types} in L{LabeledDiGraph.__init__}
         """
         if env_actions is None:
-            env_actions = [('env_actions', MathSet(), True)]
+            env_actions = [
+                {'name':'env_actions',
+                 'values':MathSet(),
+                 'setter':True}
+            ]
+        
         if sys_actions is None:
-            sys_actions = [('sys_actions', MathSet(), True)]
-                
+            sys_actions = [
+                {'name':'sys_actions',
+                 'values':MathSet(),
+                 'setter':True}
+            ]
+        
         ap_labels = PowerSet()
         action_types = env_actions + sys_actions
         
-        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+        ]
         edge_label_types = action_types
         
         LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
