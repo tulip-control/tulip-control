@@ -198,6 +198,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             {'name':'ap',
              'values':ap_labels,
              'setter':ap_labels.math_set,
+             'default':set()}
         ]
         edge_label_types = [
             {'name':'actions',
@@ -593,6 +594,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
             {'name':'ap',
              'values':ap_labels,
              'setter':ap_labels.math_set,
+             'default':set()}
         ]
         edge_label_types = action_types
         
