@@ -175,9 +175,9 @@ def synthesize(
         return counter_examples
     else: 
         aut = load_file(fAUT, spec)
-        # os.unlink(fSMV)
-        # os.unlink(fLTL)
-        # os.unlink(fAUT)
+        os.unlink(fSMV)
+        os.unlink(fLTL)
+        os.unlink(fAUT)
         return aut
 
 def create_files(spec):
