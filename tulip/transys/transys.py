@@ -1101,3 +1101,54 @@ def load_spin2fts():
     """
     raise NotImplementedError
 
+class GameGraph(LabeledDiGraph):
+    """Store a deterministic game graph.
+    
+    When adding states, you have to say
+    which player controls the outgoing transitions.
+    Use C{networkx} state labels for that:
+    
+    >>> g = GameGraph()
+    >>> g.states.add('s0', player=0)
+    
+    reference
+    =========
+    Chatterjee K.; Henzinger T.A.; Jobstmann B.
+        Environment Assumptions for Synthesis
+        CONCUR'08, LNCS 5201, pp. 147-161, 2008
+    """
+    def __init__(self):
+        node_label_types = [
+            {
+                'name':'player',
+                'values':{0, 1},
+                'default':0
+            }
+        ]
+        
+        LabeledDiGraph.__init__(self, node_label_types)
+        
+    def player_states(self, n):
+        """Return states controlled by player C{n}.
+        
+        'controlled' means that player C{n}
+        gets to decide the successor state.
+        
+        @param n: player index (id number)
+        @type n: 0 or 1
+        
+        @return: set of states
+        @rtype: C{set}
+        """
+        f = lambda state: self.node[state]['player'] == n
+        return filter(f, self)
+    
+    def edge_controlled_by(self, e):
+        """Return the index of the player controlling edge C{e}.
+        
+        @type e: 2-tuple of nodes C{(n1, n2)}
+        
+        @rtype: integer 0 or 1
+        """
+        from_state = e[0]
+        return self.node[from_state]['player']
