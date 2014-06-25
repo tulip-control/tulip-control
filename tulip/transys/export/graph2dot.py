@@ -153,14 +153,18 @@ def _state2tikz(graph, to_pydot_graph, state,
     style = 'state'
     
     if is_initial:
-        style += ', initial by arrow, initial text='
+        style += ', initial by arrow, initial right, initial text='
     if is_accepting:
         style += ', accepting'
     
     if graph.dot_node_shape['normal'] is 'rectangle':
         style += ', shape = rectangle, rounded corners'
     
-    style += ', draw = ' + rim_color
+    if 'black' not in rim_color:
+        tmp_rim_color = rim_color + '!black!30'
+    else:
+        tmp_rim_color = rim_color
+    style += ', draw = ' + tmp_rim_color
     
     if fill_color is not None:
         s = {'top color', 'bottom color', 'left color', 'right color'}
