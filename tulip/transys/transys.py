@@ -499,14 +499,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         """
         raise NotImplementedError
     
-    def loadSPINAut():
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-    
     def _save(self, path, fileformat):
         """Export options available only for FTS systems.
         
@@ -1100,3 +1092,12 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 queue.add(next_sq)
     
     return (prodts, accepting_states_preimage)
+
+def load_spin2fts():
+    """
+
+    UNDER DEVELOPMENT; function signature may change without
+    notice.  Calling will result in NotImplementedError.
+    """
+    raise NotImplementedError
+
