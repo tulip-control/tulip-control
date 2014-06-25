@@ -735,29 +735,34 @@ class LabeledDiGraph(nx.MultiDiGraph):
             L_i : V -> D_i
             
         each from vertices C{V} to some co-domain C{D_i}.
-
-        Each labeling function is defined by
-        a tuple C{(L_i, D_i, setter)}:
-
-          - C{L_i} is a C{str} naming the labeling function.
-
-          - C{D_i} implements C{__contains__}
-              to enable checking label validity.
-              If you want co-domain C{D_i} to be extensible,
-              it must implement C{add}.
-
-          - C{setter}: 3 cases:
-
-            - if 2-tuple C{(L_i, D_i)} provided,
-              then no C{setter} attributes created
-
-            - if C{setter} is C{True},
-              then an attribute C{self.L_i} is created
-              pointing at the given co-domain C{D_i}
-
-            - Otherwise an attribute C{self.Li}
-              is created pointing at the given C{setter}.
-
+        
+        Each labeling function is defined by a C{dict}
+        with the required key-value pairs:
+        
+          - C{name : A} is a C{str}
+            naming the labeling function.
+            
+          - C{values : B} implements C{__contains__}
+            used to check label validity.
+            
+            If you want the codomain C{B} to be
+            extensible even after initialization,
+            it must implement method C{add}.
+          
+        and the optional key-value pairs:
+          
+          - C{setter : C} with 3 possibilities:
+            
+            - if absent,
+              then no C{setter} attribute is created
+            
+            - otherwise an attribute C{self.A}
+              is created, pointing at:
+              
+                - the given co-domain C{B}
+                  if C{C is True}
+                
+                - C{C}, otherwise.
         Be careful to avoid name conflicts with existing
         networkx C{MultiDiGraph} attributes.
         @type node_label_types: C{[(L_i, D_i, setter), ...]}
@@ -822,15 +827,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
         label_types = list(label_types)
         
         for label_type in label_types:
-            if len(label_type) == 2:
-                type_name, codomain = label_type
-                setter = None
-            elif len(label_type) == 3:
-                type_name, codomain, setter = label_type
+            type_name = label_type['name']
+            codomain = label_type['values']
+            
+            if label_type.has_key('setter'):
+                setter = label_type['setter']
             else:
-                msg = 'label_type can be 2 or 3-tuple, '
-                msg += 'got instead:\n\t' + str(label_type)
-                raise ValueError(msg)
+                setter = None
             
             labeling[type_name] = codomain
             
