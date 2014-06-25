@@ -36,6 +36,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
+import copy
 from pprint import pformat
 from collections import Iterable
 import warnings
@@ -916,7 +917,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
-        typed_attr.update(self._node_label_defaults)
+        typed_attr.update(copy.deepcopy(self._node_label_defaults) )
         
         typed_attr.update(attr_dict) # type checking happens here
         
@@ -993,7 +994,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
-        typed_attr.update(self._edge_label_defaults)
+        typed_attr.update(copy.deepcopy(self._edge_label_defaults) )
         
         typed_attr.update(attr_dict) # type checking happens here
         
