@@ -52,7 +52,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
     It has:
         - states
         - states.initial
-        - states.aceepting (type depends on automaton flavor)
+        - states.accepting (type depends on automaton flavor)
         - alphabet = set of input letters (labeling edges)
           (possibly based on atomic propositions (AP),
           meaning it is the powerset of some AP set)
