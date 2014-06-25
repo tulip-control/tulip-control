@@ -206,8 +206,12 @@ def _form_node_label(state, state_data, label_def,
     # one math env per line. Just make 1st line math env
     if latex:
         state_str = '$' + state_str + '$'
-        state_str = fill(state_str, width=width) + '\n'
+        state_str = fill(state_str, width=width)
     node_dot_label = state_str
+    
+    # newline between state name and label, only if state is labeled
+    if state_data:
+        node_dot_label += '\n'
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
