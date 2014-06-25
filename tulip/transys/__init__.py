@@ -37,7 +37,7 @@ Suggested abbreviation:
 
     >>> from tulip import transys as trs
 """
-from .mathset import MathSet, SubSet, PowerSet
+from .mathset import MathSet, SubSet, PowerSet, TypedDict
 
 from .labeled_graphs import prepend_with
 
