@@ -364,6 +364,10 @@ def _graph2pydot(graph, wrap=10, latex=False, tikz=False):
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
     pydot_graph.set_overlap('false')
+    #pydot_graph.set_size('"0.25,1"')
+    #pydot_graph.set_ratio('"compress"')
+    #pydot_graph.set_nodesep(0.1)
+    #pydot_graph.set_ranksep(0.1)
     
     return pydot_graph
 
