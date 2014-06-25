@@ -51,6 +51,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 import networkx as nx
 
+from tulip.transys.machines import create_machine_ports
 from tulip.spec import GRSpec
 from tulip.transys import MealyMachine
 
@@ -277,10 +278,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     mask_func = bool
     
     mach = MealyMachine()
-    inputs = _create_machine_ports(spec0.env_vars)
+    inputs = create_machine_ports(spec0.env_vars)
     mach.add_inputs(inputs)
     
-    outputs = _create_machine_ports(spec0.sys_vars)
+    outputs = create_machine_ports(spec0.sys_vars)
     masks = {k:mask_func for k in sys_vars}
     mach.add_outputs(outputs, masks)
     
@@ -363,29 +364,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
             mach.transitions.add(initial_state, node, **label)
     
     return (spec, mach)
-
-def _create_machine_ports(spec0_vars):
-    """Create proper port domains of valuations, given port types.
-    
-    @param spec0_vars: port names and types inside tulip.
-        For arbitrary finite types the type can be a list of strings,
-        instead of a range of integers.
-        These are as originally defined by the user or synth.
-    """
-    ports = OrderedDict()
-    for env_var, var_type in spec0_vars.items():
-        if var_type == 'boolean':
-            domain = {0,1}
-        elif isinstance(var_type, tuple):
-            # integer domain
-            start, end = var_type
-            domain = set(range(start, end+1))
-        elif isinstance(var_type, list):
-            # arbitrary finite domain defined by list var_type
-            domain = set(var_type)
-        
-        ports[env_var] = domain
-    return ports
 
 def _map_int2dom(label, arbitrary_domains):
     """For custom finite domains map int values to domain elements.
