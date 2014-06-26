@@ -237,7 +237,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         s += 'Atomic Propositions:\n\t'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States and State Labels (\in 2^AP):\n'
-        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += _dumps_states(self) + 2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Actions:\n\t' +str(self.actions) +2*'\n'
@@ -643,7 +643,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         s += 'Atomic Propositions:\n'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States & State Labels (\in 2^AP):\n'
-        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += _dumps_states(self) + 2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
         for action_type, codomain in self.actions.iteritems():
@@ -908,6 +908,27 @@ def add_initial_states(ts, ap_labels):
     for label in ap_labels:
         new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
+
+def _dumps_states(g):
+    """Dump string of transition system states.
+    
+    @type g: L{FTS} or L{OpenFTS}
+    """
+    s = ''
+    for state in g:
+        s += '\t State: ' + str(state)
+        s += ', AP: ' + str(g.states[state]['ap']) + '\n'
+        
+        # more labels than only AP ?
+        if len(g.states[state]) == 1:
+            continue
+        
+        s += ', '.join([
+            str(k) + ': ' + str(v)
+            for k,v in g.states[state]
+            if k is not 'ap'
+        ])
+    return s
 
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
