@@ -888,6 +888,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
         else:
             logger.debug('no untyped keys.')
     
+    def is_consistent(self):
+        """Check if labels are consistent with their type definitions.
+        
+        Use case: removing values from a label type
+            can invalidate existing labels that use them.
+        
+        @rtype: bool
+        """
+        for node, attr_dict in self.nodes_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        for node_i, node_j, attr_dict in self.edges_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        return True
+    
     def _update_attr_dict_with_attr(self, attr_dict, attr):
         if attr_dict is None:
             attr_dict = attr

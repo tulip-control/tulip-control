@@ -831,3 +831,17 @@ class TypedDict(dict):
             to enable checking validity of values.
         """
         self.allowed_values = allowed_values
+    
+    def is_consistent(self):
+        """Check if typed keys have consistent values.
+        
+        Use case: changing the object that allowed_values
+        points to can invalidate the assigned values.
+        
+        @rtype: bool
+        """
+        for k, v in self:
+            if self.allowed_values.has_key(k):
+                if v in self.allowed_values[k]:
+                    return False
+        return True
