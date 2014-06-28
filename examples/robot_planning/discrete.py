@@ -94,7 +94,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) <-> lot || (X0reach && !park))
+#     [](X (X0reach) <-> lot || (X0reach && !park))
 #
 
 # @specs_setup_section@
@@ -120,7 +120,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.  Here we make use of JTLV.
 #
 # @synthesize@
-ctrl = synth.synthesize('gr1c', specs, sys=sys)
+ctrl = synth.synthesize('jtlv', specs, sys=sys)
 # @synthesize_end@
 
 #

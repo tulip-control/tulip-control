@@ -124,7 +124,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) <-> lot || (X0reach && !park))
+#     [](X (X0reach) <-> lot || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
@@ -137,7 +137,7 @@ env_safe = set()                # empty set
 sys_vars = {'X0reach'}
 sys_init = {'X0reach','sys_actions = right'}          
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
+sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create the specification
@@ -149,7 +149,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.  Here we make use of JTLV.
 #
-ctrl = synth.synthesize('gr1c', specs, env=env_sws)
+ctrl = synth.synthesize('jtlv', specs, env=env_sws)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('only_mode_controlled.png'):

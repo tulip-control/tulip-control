@@ -20,7 +20,8 @@ Newcomers to scientific computing with Python should read
 The default synthesis tool for GR[1] specifications is implemented by Yaniv
 Sa'ar [BJPPS12]_ and distributed with TuLiP.  To use it, you must have Java
 version 1.6 (or later) installed. An alternative GR[1] synthesis tool used by
-TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_.
+TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_; if you use gr1c, please install
+at least version 0.7.4.
 
 For computing discrete abstractions from hybrid system descriptions, it is
 highly recommended---but not required---that you install `GLPK
@@ -190,19 +191,23 @@ virtualenv and pydoc
 
 If you have installed TuLiP into a `virtualenv
 <http://www.virtualenv.org/>`_-built environment, then the documentation may not
-be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  There
-are more sophisticated ways to fix this, but an easy solution is to augment the
-path used by pydoc with an alias.  E.g., suppose your username is "frodo", you
-are running Python v2.6, and your virtual environment is called "PY_scratch"
-under your home directory.  Then the appropriate alias is similar to::
+be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  We
+describe two solutions here, the first being more general. ::
+
+  $ alias pydoc='python -m pydoc'
+
+If that fails, try to explicitly augment the path used by pydoc with an alias.
+E.g., suppose your username is "frodo", you are running Python v2.6, and your
+virtual environment is called "PY_scratch" under your home directory.  Then the
+appropriate alias is similar to::
 
   $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
 
 To set this alias for every new terminal session, add the line to your shell
 startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc`` for zsh.  To test
-it, try looking at the polytope subpackage by entering::
+it, try looking at the transys subpackage by entering::
 
-  $ pydoc tulip.polytope
+  $ pydoc tulip.transys
 
 .. rubric:: Footnotes
 

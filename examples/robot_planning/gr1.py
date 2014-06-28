@@ -110,11 +110,6 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 ctrl = synth.synthesize('jtlv', specs)
 
-
-# if the spec is unrealizable, ctrl is a list of counterexamples
-if ctrl is None:
-    sys.exit()
-
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
 if not ctrl.save('gr1.png'):
