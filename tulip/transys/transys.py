@@ -602,7 +602,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
-        actions = {x[0]:x[1] for x in edge_label_types}
+        actions = {x['name']:x['values'] for x in edge_label_types}
         
         if 'actions' in actions:
             msg = '"actions" cannot be used as an action type name,\n'
