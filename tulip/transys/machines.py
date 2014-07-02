@@ -78,7 +78,6 @@ def create_machine_ports(spc_vars):
         ports[env_var] = domain
     return ports
 
-
 class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
@@ -91,7 +90,7 @@ class FiniteStateMachine(LabeledDiGraph):
     
     We call "inputs" the set of pairs::
     
-        {(p_i, Vp_i),...}
+      {(p_i, Vp_i),...}
     
     of input ports p_i and their corresponding types Vp_i.
     
@@ -99,64 +98,60 @@ class FiniteStateMachine(LabeledDiGraph):
     A guard is defined by a set and evaluated using set membership.
     So given an input port value p=x, then if::
     
-        x \in guard_set
+      x \in guard_set
     
     then the guard is True, otherwise it is False.
     
     The "inputs" are defined by an OrderedDict::
     
-        {'p1':explicit, 'p2':check, 'p3':None, ...}
+      {'p1':explicit, 'p2':check, 'p3':None, ...}
     
     where:
-        - C{explicit}:
-          is an iterable representation of Vp,
-          possible only for discrete Vp.
-          If 'p1' is explicitly typed, then guards are evaluated directly::
-            
-                input_port_value == guard_value ?
+      - C{explicit}:
+        is an iterable representation of Vp,
+        possible only for discrete Vp.
+        If 'p1' is explicitly typed, then guards are evaluated directly::
         
-        - C{check}:
-          is a class with methods:
-            
-                - C{__contains__(x) }:
-                  check if guard value given to input port 'p1' is
-                  in the set of possible values Vp.
-                
-                - C{__call__(guard_set, input_port_value) }:
-                  check if C{input_port_value} \\in C{guard_set}
-                  This allows symbolic type definitions.
-                    
-                  For example, C{input_port_value} might be assigned
-                  int values, but the C{guard_set} be defined by
-                  a symbolic expression as the str: 'x<=5'.
-                    
-                  Then the user is responsible for providing
-                  the appropriate method to the Mealy Machine,
-                  using the custom C{check} class described here.
-                    
-                  Note that we could provide a rudimentary library
-                  for the basic types of checks, e.g., for
-                  the above simple symbolic case, where using
-                  function eval() is sufficient.
-            
-        - C{None}:
-          signifies that no type is currently defined for
-          this input port, so input type checking and guard
-          evaluation are disabled.
-            
-          This can be used to skip type definitions when
-          they are not needed by the user.
-            
-          However, since Machines are in general the output
-          of synthesis, it follows that they are constructed
-          by code, so the benefits of typedefs will be
-          considerable compared to the required coding effort.
+          input_port_value == guard_value ?
     
-    An OrderedDict is used to allow setting guards using tuples
-    (so order of inputs) or dicts, to avoid writing dicts for each
-    guard definition (which would be quite cumbersome).
+      - C{check}:
+        is a class with methods:
+        
+          - C{__contains__(x) }:
+            check if guard value given to input port 'p1' is
+            in the set of possible values Vp.
+            
+          - C{__call__(guard_set, input_port_value) }:
+            check if C{input_port_value} \\in C{guard_set}
+            This allows symbolic type definitions.
+              
+            For example, C{input_port_value} might be assigned
+            int values, but the C{guard_set} be defined by
+            a symbolic expression as the str: 'x<=5'.
+              
+            Then the user is responsible for providing
+            the appropriate method to the Mealy Machine,
+            using the custom C{check} class described here.
+              
+            Note that we could provide a rudimentary library
+            for the basic types of checks, e.g., for
+            the above simple symbolic case, where using
+            function eval() is sufficient.
     
-    Guards annotate transitions::
+      - C{None}:
+        signifies that no type is currently defined for
+        this input port, so input type checking and guard
+        evaluation are disabled.
+        
+        This can be used to skip type definitions when
+        they are not needed by the user.
+        
+        However, since Machines are in general the output
+        of synthesis, it follows that they are constructed
+        by code, so the benefits of typedefs will be
+        considerable compared to the required coding effort.
+      
+      Guards annotate transitions::
         
         Guards: States x States ---> Input_Predicates
     
@@ -164,36 +159,36 @@ class FiniteStateMachine(LabeledDiGraph):
     =======
     Similarly defined to inputs, but:
     
-        - for Mealy Machines they annotate transitions
-        - for Moore Machines they annotate states
+      - for Mealy Machines they annotate transitions
+      - for Moore Machines they annotate states
     
     State Variables
     ===============
     Similarly defined to inputs, they annotate states,
     for both Mealy and Moore machines::
     
-        States ---> State_Variables
+      States ---> State_Variables
     
     Update Function
     ===============
     The transition relation:
     
-        - for Mealy Machines::
+      - for Mealy Machines::
         
-                States x Input_Valuations ---> Output_Valuations x States
-                
-          Note that in the range Output_Valuations are ordered before States
-          to emphasize that an output_valuation is produced
-          during the transition, NOT at the next state.
-            
-          The data structure representation of the update function is
-          by storage of the Guards function and definition of Guard
-          evaluation for each input port via the OrderedDict discussed above.
+        States x Input_Valuations ---> Output_Valuations x States
+              
+        Note that in the range Output_Valuations are ordered before States
+        to emphasize that an output_valuation is produced
+        during the transition, NOT at the next state.
+          
+        The data structure representation of the update function is
+        by storage of the Guards function and definition of Guard
+        evaluation for each input port via the OrderedDict discussed above.
         
-        - for Moore Machines::
+      - for Moore Machines::
         
-            States x Input_Valuations ---> States
-            States ---> Output_valuations
+        States x Input_Valuations ---> States
+        States ---> Output_valuations
     
     Note
     ====
