@@ -42,6 +42,9 @@ from .export import machine2scxml
 
 _hl = 40 *'-'
 
+# port type
+pure = {'present', 'absent'}
+
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
         curvaluation = valuations[name]     
@@ -740,8 +743,6 @@ class MealyMachine(FiniteStateMachine):
         self.states._current.add(to_state)
         
         return count
-
-pure = {'present', 'absent'}
 
 def moore2mealy(moore):
     """Convert Moore machine to equivalent Mealy machine.
