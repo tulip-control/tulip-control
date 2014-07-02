@@ -235,7 +235,7 @@ class FiniteStateMachine(LabeledDiGraph):
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
     
-    def add_inputs(self, new_inputs, masks={}):
+    def add_inputs(self, new_inputs, masks=None):
         """Create new inputs.
         
         @param new_inputs: C{dict} of pairs {port_name : port_type}
@@ -261,6 +261,9 @@ class FiniteStateMachine(LabeledDiGraph):
             
             # printing format
             self._transition_dot_label_format[port_name] = str(port_name)
+            
+            if masks is None:
+                continue
             
             if port_name in masks:
                 mask_func = masks[port_name]
@@ -288,12 +291,15 @@ class FiniteStateMachine(LabeledDiGraph):
         """
         raise NotImplementedError
     
-    def is_receptive(self, states='all'):
+    def is_receptive(self, states=None):
         """For each state, for each input valuation, there exists a transition.
         
         @param states: states to be checked whether blocking
         @type states: iterable container of states
         """
+        if states is None:
+            states = self
+        
         for state in states:
             if self.is_blocking(state):
                 return False
@@ -507,7 +513,7 @@ class MealyMachine(FiniteStateMachine):
         f.close()
         return True
     
-    def add_outputs(self, new_outputs, masks={}):
+    def add_outputs(self, new_outputs, masks=None):
         """Add new outputs.
         
         @param new_outputs: dict of pairs {port_name : port_type}
@@ -536,6 +542,9 @@ class MealyMachine(FiniteStateMachine):
             # printing format
             self._transition_dot_label_format[port_name] = \
                 '/out:' +str(port_name)
+            
+            if masks is None:
+                continue
             
             if port_name in masks:
                 mask_func = masks[port_name]
