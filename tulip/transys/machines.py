@@ -760,6 +760,9 @@ def moore2mealy(moore):
     
     @rtype: L{MealyMachine}
     """
+    if not isinstance(moore, MooreMachine):
+        raise TypeError('moore must be a MooreMachine')
+    
     mealy = MealyMachine()
     
     # cp inputs
@@ -801,6 +804,90 @@ def moore2mealy(moore):
     
     return mealy
 
+def mealy2moore(mealy):
+    """Convert Mealy machine to almost equivalent Moore machine.
+    
+    A Mealy machine cannot be transformed to an equivalent Moore machine.
+    It can be converted to a Moore machine with an arbitrary initial output,
+    which outputs the Mealy output at its next reaction.
+    
+    Reference
+    =========
+    U{[LS11]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    
+    @type mealy: L{MealyMachine}
+    
+    @rtype: L{MooreMachine}
+    """
+    # TODO: check for when Mealy is exactly convertible to Moore
+    
+    if not isinstance(mealy, MealyMachine):
+        raise TypeError('moore must be a MealyMachine')
+    
+    moore = MooreMachine()
+    
+    # cp inputs
+    for port_name, port_type in mealy.inputs.iteritems():
+        mask_func = mealy._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name:mask_func}
+        
+        moore.add_inputs({port_name:port_type}, masks=masks)
+    
+    # cp outputs
+    for port_name, port_type in mealy.outputs.iteritems():
+        mask_func = mealy._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name:mask_func}
+        
+        moore.add_outputs({port_name:port_type}, masks=masks)
+    
+    # initial state with arbitrary label
+    out = {k:list(v)[0] for k, v in mealy.outputs.iteritems()}
+    s0 = list(mealy.states.initial)[0]
+    
+    moore2mealy_states = dict() # {qj : si} (function)
+    mealy2moore_states = dict() # {si : {qj, qk, ...} } (relation)
+    
+    new_s0 = _create_state_str(
+        s0, out, moore, moore2mealy_states,
+        mealy2moore_states
+    )
+    
+    moore.states.add(new_s0, out)
+    moore.states.initial.add(new_s0)
+    
+    # cp transitions and create appropriate states
+    Q = set()
+    S = set()
+    
+    Q.add(new_s0)
+    S.add(new_s0)
+    while Q:
+        new_si = Q.pop()
+        si = moore2mealy_states[new_si]
+        
+        for si_, sj, attr_dict in mealy.transitions.find(si):
+            in_values, out_values = _split_io(attr_dict, mealy)
+            
+            new_sj = _create_state_str(
+                sj, out_values, moore, moore2mealy_states,
+                mealy2moore_states
+            )
+            
+            moore.transitions.add(new_si, new_sj, in_values)
+            
+            if new_sj not in S:
+                Q.add(new_sj)
+                S.add(new_sj)
+    
+    return moore
+
 def _print_ports(port_dict):
     s = ''
     for (port_name, port_type) in port_dict.iteritems():
@@ -815,6 +902,36 @@ def _print_label(label_dict):
         s += '\t\t' +str(name) +' : ' +str(value) +'\n'
     s += '\n'
     return s
+
+def _create_state_str(mealy_state, output, moore,
+                      moore2mealy_states,
+                      mealy2moore_states):
+    """Used to create Moore states when converting Mealy -> Moore.
+    """
+    for s in mealy2moore_states.setdefault(mealy_state, set() ):
+        # check output values
+        if moore.states[s] == output:
+            return s
+    
+    # create new
+    n = len(moore)
+    s = 's' + str(n)
+    
+    moore.states.add(s, output)
+    
+    moore2mealy_states[s] = mealy_state
+    mealy2moore_states[mealy_state].add(s)
+    
+    return s
+
+def _split_io(attr_dict, machine):
+    """Split into inputs and outputs.
+    """
+    input_values = {k:v for k, v in attr_dict.iteritems()
+                    if k in machine.inputs}
+    output_values = {k:v for k,v in attr_dict.iteritems()
+                     if k in machine.outputs}
+    return input_values, output_values
 
 ####
 # Program Graph (memo)
