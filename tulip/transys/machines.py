@@ -785,8 +785,11 @@ def moore2mealy(moore):
         
         mealy.add_outputs({port_name:port_type}, masks=masks)
     
+    # cp states
     mealy.states.add_from(moore.states() )
+    mealy.states.initial.add_from(moore.states.initial)
     
+    # cp transitions
     for si in moore:
         output_values = {
             k:v for k, v in moore.states[si].iteritems()
