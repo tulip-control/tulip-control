@@ -32,6 +32,7 @@
 """
 Finite State Machines Module
 """
+import copy
 from pprint import pformat
 from random import choice
 
@@ -747,13 +748,59 @@ class MealyMachine(FiniteStateMachine):
 
 pure = {'present', 'absent'}
 
-def moore2mealy(moore_machine, mealy_machine):
-    """Convert Moore machine to equivalent Mealy machine
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
+def moore2mealy(moore):
+    """Convert Moore machine to equivalent Mealy machine.
+    
+    Reference
+    =========
+    U{[LS11]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    
+    @type moore: L{MooreMachine}
+    
+    @rtype: L{MealyMachine}
     """
-    raise NotImplementedError
+    mealy = MealyMachine()
+    
+    # cp inputs
+    for port_name, port_type in moore.inputs.iteritems():
+        mask_func = moore._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name:mask_func}
+        
+        mealy.add_inputs({port_name:port_type}, masks=masks)
+    
+    # cp outputs
+    for port_name, port_type in moore.outputs.iteritems():
+        mask_func = moore._state_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name:mask_func}
+        
+        mealy.add_outputs({port_name:port_type}, masks=masks)
+    
+    mealy.states.add_from(moore.states() )
+    
+    for si in moore:
+        output_values = {
+            k:v for k, v in moore.states[si].iteritems()
+            if k in moore.outputs
+        }
+        output_values = copy.deepcopy(output_values)
+        
+        for si_, sj, attr_dict in moore.transitions.find(si):
+            # note that we don't filter only input ports,
+            # so other edge annotation is preserved
+            attr_dict = copy.deepcopy(attr_dict)
+            attr_dict.update(output_values)
+            
+            mealy.transitions.add(si, sj, attr_dict)
+    
+    return mealy
+
 def _print_ports(port_dict):
     s = ''
     for (port_name, port_type) in port_dict.iteritems():
