@@ -252,19 +252,19 @@ class FiniteStateMachine(LabeledDiGraph):
         @type masks: C{dict} of functions C{{port_name : mask_function}}
             each C{mask_function} returns bool
         """
-        for (in_port_name, in_port_type) in new_inputs.iteritems():
+        for (port_name, port_type) in new_inputs.iteritems():
             # append
-            self._transition_label_def[in_port_name] = in_port_type
+            self._transition_label_def[port_name] = port_type
             
             # inform inputs
-            self.inputs[in_port_name] = self._transition_label_def[in_port_name]
+            self.inputs[port_name] = port_type
             
             # printing format
-            self._transition_dot_label_format[in_port_name] = str(in_port_name)
+            self._transition_dot_label_format[port_name] = str(port_name)
             
-            if in_port_name in masks:
-                mask_func = masks[in_port_name]
-                self._transition_dot_mask[in_port_name] = mask_func
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._transition_dot_mask[port_name] = mask_func
     
     def add_state_vars(self, new_state_vars):
         for (var_name, var_type) in new_state_vars.iteritems():
@@ -373,17 +373,16 @@ class MooreMachine(FiniteStateMachine):
         return s
     
     def add_outputs(self, new_outputs):
-        for (out_port_name, out_port_type) in new_outputs.iteritems():
+        for (port_name, port_type) in new_outputs.iteritems():
             # append
-            self._state_label_def[out_port_name] = out_port_type
+            self._state_label_def[port_name] = port_type
             
             # inform state vars
-            self.outputs[out_port_name] = \
-                self._state_label_def[out_port_name]
+            self.outputs[port_name] = port_type
             
             # printing format
-            self._state_dot_label_format[out_port_name] = \
-                '/out:' +str(out_port_name)
+            self._state_dot_label_format[port_name] = \
+                '/out:' +str(port_name)
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine.
@@ -526,21 +525,21 @@ class MealyMachine(FiniteStateMachine):
             keys are port_names (see arg: new_outputs)
             each function returns bool
         """
-        for (out_port_name, out_port_type) in new_outputs.iteritems():
+        for (port_name, port_type) in new_outputs.iteritems():
             # append
-            self._transition_label_def[out_port_name] = out_port_type
+            self._transition_label_def[port_name] = port_type
             
             # inform state vars
-            self.outputs[out_port_name] = \
-                self._transition_label_def[out_port_name]
+            self.outputs[port_name] = \
+                self._transition_label_def[port_name]
             
             # printing format
-            self._transition_dot_label_format[out_port_name] = \
-                '/out:' +str(out_port_name)
+            self._transition_dot_label_format[port_name] = \
+                '/out:' +str(port_name)
             
-            if out_port_name in masks:
-                mask_func = masks[out_port_name]
-                self._transition_dot_mask[out_port_name] = mask_func
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._transition_dot_mask[port_name] = mask_func
     
     def simulate(
             self, inputs_sequence='manual', iterations=100,
