@@ -378,7 +378,7 @@ class MooreMachine(FiniteStateMachine):
         
         return s
     
-    def add_outputs(self, new_outputs):
+    def add_outputs(self, new_outputs, masks=None):
         for (port_name, port_type) in new_outputs.iteritems():
             # append
             self._state_label_def[port_name] = port_type
@@ -389,6 +389,13 @@ class MooreMachine(FiniteStateMachine):
             # printing format
             self._state_dot_label_format[port_name] = \
                 '/out:' +str(port_name)
+            
+            if masks is None:
+                continue
+            
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._state_dot_mask[port_name] = mask_func
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine.
