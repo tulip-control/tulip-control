@@ -348,19 +348,19 @@ class MooreMachine(FiniteStateMachine):
     Note
     ====
     valuation: assignment of values to each port
+    
+    Reference
+    =========
+    U{[M56]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#m56>}
     """
     def __init__(self, **args):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
+        """Instantiate a Moore state machine.
         """
         FiniteStateMachine.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'moore'
-        
-        raise NotImplementedError
     
     def __str__(self):
         """Get informal string representation."""
@@ -451,6 +451,11 @@ class MealyMachine(FiniteStateMachine):
     Note
     ====
     valuation: assignment of values to each port
+    
+    Reference
+    =========
+    U{[M55]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#m55>}
     """
     def __init__(self, **args):
         FiniteStateMachine.__init__(self, **args)
@@ -532,8 +537,8 @@ class MealyMachine(FiniteStateMachine):
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
-                - True, if the sublabel should be shown
-                - False, otherwise (to hide it)
+              - True, if the sublabel should be shown
+              - False, otherwise (to hide it)
         @type masks: dict of functions
             keys are port_names (see arg: new_outputs)
             each function returns bool
