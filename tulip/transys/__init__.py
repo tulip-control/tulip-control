@@ -52,4 +52,4 @@ from .automata import (
     RabinAutomaton, DRA
 )
 
-from .machines import MooreMachine, MealyMachine, Mealy
+from .machines import MooreMachine, MealyMachine

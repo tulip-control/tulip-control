@@ -736,12 +736,6 @@ class MealyMachine(FiniteStateMachine):
         
         return count
 
-class Mealy(MealyMachine):
-    """Alias to Mealy machine.
-    """
-    def __init__(self, *args, **kwargs):
-        MealyMachine.__init__(self, *args, **kwargs)
-
 pure = {'present', 'absent'}
 
 def moore2mealy(moore_machine, mealy_machine):
