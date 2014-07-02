@@ -465,46 +465,32 @@ class MealyMachine(FiniteStateMachine):
         self.default_export_fname = 'mealy'
     
     def __str__(self):
-        """Get informal string representation."""
-        def print_ports(port_dict):
-            s = ''
-            for (port_name, port_type) in port_dict.iteritems():
-                s += '\t' +str(port_name) +' : '
-                s += pformat(port_type) +'\n'
-            s += '\n'
-            return s
-        
-        def print_label(label_dict):
-            s = ''
-            for (name, value) in label_dict.iteritems():
-                s += '\t\t' +str(name) +' : ' +str(value) +'\n'
-            s += '\n'
-            return s
-        
+        """Get informal string representation.
+        """
         s = _hl +'\nMealy Machine: ' +self.name +'\n' +_hl +'\n'
         s += 'State Variables:\n\t(name : type)\n'
-        s += print_ports(self.state_vars)
+        s += _print_ports(self.state_vars)
         
         s += 'States & State Var Values:\n'
         for (state, label_dict) in self.states(data=True):
             s += '\t' +str(state) +' :\n'
-            s += print_label(label_dict)
+            s += _print_label(label_dict)
         
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
         
         s += 'Input Ports:\n\t(name : type)\n'
-        s += print_ports(self.inputs)
+        s += _print_ports(self.inputs)
         
         s += 'Output Ports:\n\t(name : type)\n'
-        s += print_ports(self.outputs)
+        s += _print_ports(self.outputs)
         
         s += 'Transitions & Labels: (from --> to : label)\n'
         for (from_state, to_state, label_dict) in \
         self.transitions(data=True):
             s += '\t' +str(from_state) +' ---> '
             s += str(to_state) +' :\n'
-            s += print_label(label_dict)
+            s += _print_label(label_dict)
         s += _hl +'\n'
         
         return s
@@ -745,6 +731,20 @@ def moore2mealy(moore_machine, mealy_machine):
     Calling will result in NotImplementedError.
     """
     raise NotImplementedError
+def _print_ports(port_dict):
+    s = ''
+    for (port_name, port_type) in port_dict.iteritems():
+        s += '\t' +str(port_name) +' : '
+        s += pformat(port_type) +'\n'
+    s += '\n'
+    return s
+
+def _print_label(label_dict):
+    s = ''
+    for (name, value) in label_dict.iteritems():
+        s += '\t\t' +str(name) +' : ' +str(value) +'\n'
+    s += '\n'
+    return s
 
 ####
 # Program Graph (memo)
