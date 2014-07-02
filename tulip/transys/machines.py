@@ -32,7 +32,6 @@
 """
 Finite State Machines Module
 """
-from collections import OrderedDict
 from pprint import pformat
 from random import choice
 
@@ -63,7 +62,7 @@ def create_machine_ports(spc_vars):
         instead of a range of integers.
         These are as originally defined by the user or synth.
     """
-    ports = OrderedDict()
+    ports = dict()
     for env_var, var_type in spc_vars.items():
         if var_type == 'boolean':
             domain = {0,1}
@@ -212,21 +211,22 @@ class FiniteStateMachine(LabeledDiGraph):
     """
     def __init__(self, **args):
         # values will point to values of _*_label_def below
-        self.state_vars = OrderedDict()
-        self.inputs = OrderedDict()
-        self.outputs = OrderedDict()
+        self.state_vars = dict()
+        self.inputs = dict()
+        self.outputs = dict()
         #self.set_actions = {}
         
         # state labeling
-        self._state_label_def = OrderedDict()
+        self._state_label_def = dict()
         self._state_dot_label_format = {'type?label':':',
                                         'separator':'\n'}
         
         # edge labeling
-        self._transition_label_def = OrderedDict()
+        self._transition_label_def = dict()
         self._transition_dot_label_format = {'type?label':':',
                                              'separator':'\n'}
         self._transition_dot_mask = dict()
+        self._state_dot_mask = dict()
         
         self.default_export_fname = 'fsm'
         
@@ -235,36 +235,23 @@ class FiniteStateMachine(LabeledDiGraph):
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
     
-    def _to_ordered_dict(self, x):
-        if not isinstance(x, OrderedDict):
-            try:
-                x = OrderedDict(x)
-            except:
-                raise TypeError('Argument must be an OrderedDict, ' +
-                                'or be directly convertible to an OrderedDict.')
-        return x
-    
     def add_inputs(self, new_inputs, masks={}):
         """Create new inputs.
         
-        @param new_inputs: ordered pairs of port_name : port_type
-        @type new_inputs: OrderedDict | list, of::
-                (port_name, port_type)
+        @param new_inputs: C{dict} of pairs {port_name : port_type}
             where:
                 - port_name: str
                 - port_type: Iterable | check class
+        @type new_inputs: dict
         
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
                 - True, if the sublabel should be shown
                 - False, otherwise (to hide it)
-        @type masks: dict of functions
-            keys are port_names (see arg: new_outputs)
-            each function returns bool
+        @type masks: C{dict} of functions C{{port_name : mask_function}}
+            each C{mask_function} returns bool
         """
-        new_inputs = self._to_ordered_dict(new_inputs)
-        
         for (in_port_name, in_port_type) in new_inputs.iteritems():
             # append
             self._transition_label_def[in_port_name] = in_port_type
@@ -280,8 +267,6 @@ class FiniteStateMachine(LabeledDiGraph):
                 self._transition_dot_mask[in_port_name] = mask_func
     
     def add_state_vars(self, new_state_vars):
-        new_state_vars = self._to_ordered_dict(new_state_vars)
-        
         for (var_name, var_type) in new_state_vars.iteritems():
             # append
             self._state_label_def[var_name] = var_type
@@ -388,8 +373,6 @@ class MooreMachine(FiniteStateMachine):
         return s
     
     def add_outputs(self, new_outputs):
-        new_outputs = self._to_ordered_dict(new_outputs)
-        
         for (out_port_name, out_port_type) in new_outputs.iteritems():
             # append
             self._state_label_def[out_port_name] = out_port_type
@@ -528,12 +511,11 @@ class MealyMachine(FiniteStateMachine):
     def add_outputs(self, new_outputs, masks={}):
         """Add new outputs.
         
-        @param new_outputs: ordered pairs of port_name : port_type
-        @type new_outputs: OrderedDict | list, of::
-                (port_name, port_type)
-        where:
+        @param new_outputs: dict of pairs {port_name : port_type}
+          where:
             - port_name: str
             - port_type: Iterable | check class
+        @type new_outputs: dict
         
         @param masks: custom mask functions, for each sublabel
             based on its current value
@@ -544,8 +526,6 @@ class MealyMachine(FiniteStateMachine):
             keys are port_names (see arg: new_outputs)
             each function returns bool
         """
-        new_outputs = self._to_ordered_dict(new_outputs)
-        
         for (out_port_name, out_port_type) in new_outputs.iteritems():
             # append
             self._transition_label_def[out_port_name] = out_port_type
