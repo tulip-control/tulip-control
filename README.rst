@@ -13,6 +13,10 @@ To avoid checking for optional dependencies, add the option "nocheck"::
 
   python setup.py install nocheck
 
+TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
+
+  pip install tulip
+
 Detailed instructions, including notes about dependencies and troubleshooting,
 are available at
 
