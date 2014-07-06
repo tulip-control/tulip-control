@@ -570,84 +570,84 @@ class MealyMachine(FiniteStateMachine):
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
     
-    def simulate(
-            self, inputs_sequence='manual', iterations=100,
-            current_state=None
-        ):
-        """Manual, random or guided machine run.
+    def simulate(self, inputs=None, from_state=None):
+        """Guided simulation run (programmatic or interactive).
         
-        If the argument current_state is passed,
-        then simulation starts from there.
+        Simulation starts from (with decreasing precedence):
         
-        Otherwise if MealyMachine.states.current is non-empty,
-        then simulation starts from there.
+          - C{from_state}
+          - C{self.current_states} (deterministic, so unique)
+          - C{self.states.initial}
         
-        If current states are empty,
-        then if MealyMachine.states.initial is non-empty,
-        then simulation starts from there.
+        @param inputs: sequence of input port valuations
+            If absent, then start an interactive simulation.
+        @type inputs: dict of lists
+            {'in_port_name':values_history}
+            The lists must be of equal length.
         
-        Otherwise an exception is raised.
-        
-        @param inputs_sequence: inputs for guided simulation
-        @type inputs_sequence: 'manual' | list of input valuations
-        
-        @param iterations: number of steps for manual or random simulation
-        @type iterations: int
-        
-        @param current_state: state from where to start the simulation
-        @type current_state: element in MealyMachine.states
-            Note that this allows simulating from any desired state,
-            irrespective of whether it is reachable from the subset of
-            initial states.
+        @type from_state: in C{self.states}
         """
-        max_count = iterations
-        if inputs_sequence not in ['manual', 'random'] and \
-        not isinstance(inputs_sequence, executions.MachineInputSequence):
-            raise Exception(
-                'Available simulation modes:\n' +
-                'manual, random, or guided by given MachineInputSequence.'
-            )
-        
-        if current_state:
-            self.states.select_current([current_state] )
+        if from_state:
+            self.states.select_current([from_state] )
         elif not self.states.current:
             print('Current state unset.')
             if not self.states.initial:
                 msg = 'Initial state(s) unset.\n'
                 msg += 'Set either states.current, or states.initial\n'
-                msg += 'before calling .simulate.'
+                msg += 'before calling simulate().'
                 print(msg)
             else:
                 self.states.current = set(self.states.initial)
         
-        if isinstance(inputs_sequence, executions.MachineInputSequence):
-            self._guided_simulation(inputs_sequence)
+        if inputs is not None:
+            self._guided_simulation(inputs)
             return
         
-        count = 1
-        stop = False
-        mode = inputs_sequence
-        while not stop:
-            print(60 *'-' +'\n Current States:\t' +
-                  str(self.states.current) +2*'\n')
+        while True:
+            print(60 *'-' + '\n Current State:\t' +
+                  str(self.states.current) + 2*'\n')
             
-            count = self._step_simulation(mode, count)
-            
-            if mode == 'manual':
-                stop = count is None
-            elif mode == 'random':
-                stop = count is None or count > max_count
-            else:
-                raise Exception('Bug: mode has unkown value.')
+            if self._interactive_simulation() is None:
+                break
     
-    def _guided_simulation(self, inputs_sequence):
-        raise NotImplementedError
-    
-    def _step_simulation(self, mode, count):
-        def select_state(cur_states, mode):
-            if mode == 'random':
-                return choice(cur_states)
+    def _guided_simulation(self, inputs):
+        missing_ports = set(self.inputs).difference(inputs)
+        if missing_ports:
+            raise ValueError('missing input port(s): ' + missing_ports)
+        
+        # uniform lengths (if lists) ?
+        try:
+            len_lists = set(len(x) for x in inputs.itervalues() )
+            if len(len_lists) > 1:
+                raise ValueError('all input ports should have same length lists')
+        except:
+            pass
+        
+        # dict given (1 time step) ?
+        for k, v in inputs.iteritems():
+            if not isinstance(v, list):
+                inputs[k] = list(v)
+        
+        # now it is dict of lists
+        n = len(inputs.itervalues()[0])
+        for i in range(n):
+            input_values = {k:v[i] for k, v in inputs}
             
+            (current_state,) = self.states.current
+            trans = self.transitions.find(current_state, attr_dict=input_values)
+            
+            # must be deterministic
+            assert(len(trans) <= 1)
+            
+            _, next_state, _ = trans[0]
+            
+            self.states.current.remove(current_state)
+            self.states.current.add(next_state)
+    
+    def _interactive_simulation(self):
+        """Single transition of interactive simulation.
+        """
+        def select_state(cur_states):
             cur_states = list(cur_states) # order them
             while True:
                 msg = 'Found more than 1 current state.\n'
@@ -671,10 +671,7 @@ class MealyMachine(FiniteStateMachine):
                     print('Could not convert your input to integer.\n' +
                           'Please try again.\n')
         
-        def select_transition(transitions, mode):
-            if mode == 'random':
-                return choice(transitions)
-            
+        def select_transition(transitions):
             while True:
                 msg = 'Found more than 1 outgoing transitions:' +2*'\n'
                 for (num, transition) in enumerate(transitions):
@@ -697,23 +694,22 @@ class MealyMachine(FiniteStateMachine):
                     print('Could not convert your input to integer.\n' +
                           'Please try again.\n')
         
-        count += 1
-        cur_states = self.states.current
+        cur_state = self.states.current
         
-        if not cur_states:
-            print('No current states: Stopping simulation.')
+        if not cur_state:
+            print('No current state: Stopping simulation.')
             return None
         
-        if len(cur_states) > 1:
-            state_selected = select_state(cur_states, mode)
+        if len(cur_state) > 1:
+            state_selected = select_state(cur_state)
             if state_selected is None:
                 return None
-        elif cur_states:
-            state_selected = choice(list(cur_states) )
+        elif cur_state:
+            state_selected = choice(list(cur_state) )
         else:
             raise Exception('Bug: "if not" above must have caught this.')
             
-        print('State to step from:\t' +str(state_selected) )
+        print(':\t' +str(state_selected) )
         from_state = state_selected
         
         transitions = self.transitions.find([from_state] )
@@ -724,7 +720,7 @@ class MealyMachine(FiniteStateMachine):
             return None
         
         if len(transitions) > 1:
-            transition_selected = select_transition(transitions, mode)
+            transition_selected = select_transition(transitions)
             if transition_selected is None:
                 return None
         elif transitions:
@@ -742,7 +738,7 @@ class MealyMachine(FiniteStateMachine):
         self.states._current.remove(from_state)
         self.states._current.add(to_state)
         
-        return count
+        return True
 
 def moore2mealy(moore):
     """Convert Moore machine to equivalent Mealy machine.
