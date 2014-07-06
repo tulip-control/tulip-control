@@ -323,8 +323,8 @@ class FiniteStateMachine(LabeledDiGraph):
         raise NotImplementedError
 
 class FSM(FiniteStateMachine):
-    """Alias for Finite-state Machine."""
-    
+    """Alias for Finite-state Machine.
+    """
     def __init__(self, **args):
         FiniteStateMachine.__init__(self, **args)
 
