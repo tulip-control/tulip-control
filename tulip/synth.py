@@ -732,8 +732,8 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """
     init = []
     
-    # skip ?
     if ignore_initial:
+        init += exactly_one([state_ids[s] for s in states()])
         return init
     
     if not states.initial:
@@ -748,7 +748,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         init += ['False']
         return init
         
-    init += [_disj([state_ids[s] for s in states.initial])]
+    init += exactly_one([state_ids[s] for s in states.initial])
     return init
 
 def sys_trans_from_ts(
