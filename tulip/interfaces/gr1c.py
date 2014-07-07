@@ -425,17 +425,23 @@ def check_syntax(spec_str):
         logger.info(p.stdout.read() )
         return False
 
-def check_realizable(spec):
+def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     """Decide realizability of specification.
 
-    @type spec: L{GRSpec}
+    Consult the documentation of L{synthesize} about parameters.
+
     @return: True if realizable, False if not, or an error occurs.
     """
+    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
+                           "ALL_INIT", "ONE_SIDE_INIT"):
+        raise ValueError("Unrecognized initial condition" +
+                         "interpretation (init_option)")
+
     f = tempfile.TemporaryFile()
     f.write(spec.to_gr1c())
     f.seek(0)
     logger.info('starting realizability check')
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-r"],
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
@@ -448,19 +454,53 @@ def check_realizable(spec):
         logger.info(p.stdout.read() )
         return False
 
-def synthesize(spec):
+def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     """Synthesize strategy realizing the given specification.
 
     @type spec: L{GRSpec}
     @param spec: specification, which is incomplete without an
-        interpretation of initial conditions.  It cannot currently be
-        set from this TuLiP interface to gr1c, so the default in gr1c
-        (ALL_ENV_EXIST_SYS_INIT) must be used.
+        interpretation of initial conditions (init_option).
+
+    @type init_option: str
+    @param init_option: string declaration of the initial condition
+        interpretation to use.  This parameter corresponds to that of
+        the -n command-line flag of gr1c.  It is one of:
+
+            - "ALL_ENV_EXIST_SYS_INIT" (default) - For each initial
+              valuation of environment variables that satisfies
+              spec.env_init, the strategy must provide some valuation
+              of system variables that satisfies spec.sys_init.  Only
+              environment variables (spec.env_vars) may appear in
+              spec.env_init, and only system variables (spec.sys_vars)
+              may appear in spec.sys_init.
+
+            - "ALL_INIT" - Any state that satisfies the conjunction of
+              spec.env_init an spec.sys_init can occur initially.
+
+            - "ONE_SIDE_INIT" - At most one of spec.env_init and
+              spec.sys_init is nonempty, and the nonempty one can
+              include both environment and system variables
+              (spec.env_vars and spec.sys_vars, respectively).  Both
+              being empty is equivalent to spec.env_init=["True"].  If
+              spec.env_init is nonempty, then any state satisfying it
+              is possible initially.  If spec.sys_init is nonempty,
+              then the strategy need only choose one initial state
+              satisfying it.
+
+        Consult the U{documentation of gr1c
+        <http://slivingston.github.io/gr1c/md_spc_format.html#initconditions>}
+        for detailed descriptions.
 
     @return: strategy as L{MealyMachine},
         or None if unrealizable or error occurs.
     """
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
+    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
+                           "ALL_INIT", "ONE_SIDE_INIT"):
+        raise ValueError("Unrecognized initial condition" +
+                         "interpretation (init_option)")
+
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
+                          "-n", init_option, "-t", "tulip"],
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
