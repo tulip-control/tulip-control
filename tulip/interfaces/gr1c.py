@@ -449,9 +449,13 @@ def check_realizable(spec):
         return False
 
 def synthesize(spec):
-    """Synthesize strategy.
+    """Synthesize strategy realizing the given specification.
 
     @type spec: L{GRSpec}
+    @param spec: specification, which is incomplete without an
+        interpretation of initial conditions.  It cannot currently be
+        set from this TuLiP interface to gr1c, so the default in gr1c
+        (ALL_ENV_EXIST_SYS_INIT) must be used.
 
     @return: strategy as L{MealyMachine},
         or None if unrealizable or error occurs.
