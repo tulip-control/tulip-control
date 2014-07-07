@@ -97,7 +97,7 @@ def solve_game(
         to advance with a finite path to somewhere, and Z means that
         the controller tries to satisfy one of his guarantees.
 
-    @param init_option: an integer in that specifies how to handle the
+    @param init_option: an integer that specifies how to handle the
         initial state of the system. Possible values of C{init_option}
         are:
 
