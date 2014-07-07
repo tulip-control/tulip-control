@@ -196,7 +196,17 @@ def create_files(spec):
     return fSMV.name, fLTL.name, fAUT.name
 
 def get_priority(priority_kind):
-    """Convert the priority_kind to the corresponding integer."""
+    """Validate and convert priority_kind to the corresponding integer.
+
+    @type priority_kind: str or int
+    @param priority_kind: a string of length 3 or integer as may be
+        used when invoking L{solve_game}.  Check documentation there
+        for possible values.
+
+    @rtype: int
+    @return: if given priority_kind is permissible, then return
+        integer representation of it.  Else, return default ("ZYX").
+    """
     if (isinstance(priority_kind, str)):
         if (priority_kind == 'ZYX'):
             priority_kind = 3
