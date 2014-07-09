@@ -37,6 +37,9 @@ supporting JTLV, SPIN, SMV, and gr1c syntax
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
+import logging
+logger = logging.getLogger(__name__)
+
 TEMPORAL_OP_MAP = \
         { "G" : "G", "F" : "F", "X" : "X",
         "[]" : "G", "<>" : "F", "next" : "X",
@@ -401,3 +404,20 @@ class ASTComparator(ASTBinary):
 class ASTArithmetic(ASTBinary):
     def op(self):
         return self.operator
+
+def get_vars(ast):
+    var = set()
+    Q = {ast}
+    #tree S = {ast}
+    while Q:
+        x = Q.pop()
+        logger.debug('visiting: ' + str(type(x) ) )
+        
+        if isinstance(x, ASTUnary):
+            Q.add(x.operand)
+        elif isinstance(x, ASTBinary):
+            Q.add(x.op_l)
+            Q.add(x.op_r)
+        elif isinstance(x, ASTVar):
+            var.add(x)
+    return var
