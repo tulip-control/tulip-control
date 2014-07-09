@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 import time, re, copy
 
 from tulip.spec import parser
+from . import ast
 
 def mutex(varnames):
     """Create mutual exclusion formulae from iterable of variables.
@@ -772,3 +773,132 @@ def _sub_var(spec, vars_dict):
         
         # replace symbols by ints
         spec.sym_to_prop(values2ints)
+
+def stability_to_gr1(p, aux='aux'):
+    """Convert <>[] p to GR(1).
+    
+    GR(1) form:
+    
+        !(aux) &&
+        [](aux -> X aux) &&
+        []<>(aux) &&
+        
+        [](aux -> p)
+    
+    @param p: operand of <>[]
+    @type p: str
+    
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+    
+    @rtype: L{GRSpec}
+    """
+    a = aux
+    
+    p0, a0 = p, a
+    
+    p = _paren(p)
+    a = _paren(a)
+    
+    v = _check_var_name_conflict(p, a0)
+    
+    sys_vars = v | {a0}
+    sys_init = {'!' + a}
+    sys_safe = {a + ' -> ' + p,
+                a + ' -> X ' + a}
+    sys_prog = {a}
+    
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+def response_to_gr1(p, q, aux='aux'):
+    """Convert [](p -> <> q) to GR(1).
+    
+    GR(1) form:
+        
+        []<>(aux) &&
+        
+        []( (p && !q) -> X ! aux) &&
+        []( (! aux && !q) -> X ! aux)
+    
+    @type p, q: str
+    
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+    
+    @rtype: L{GRSpec}
+    """
+    a = aux
+    
+    p0, q0, a0 = p, q, a
+    
+    p = _paren(p)
+    q = _paren(q)
+    a = _paren(a)
+    
+    s = p + ' -> <> ' + q
+    v = _check_var_name_conflict(s, a0)
+    
+    sys_vars = v | {a0}
+    #sys_init = {a}
+    sys_safe = {
+        '(' + p + ' && !' + q + ') -> X !' + a,
+        '(!' + a + ' && !' + q + ') -> X !' + a
+    }
+    sys_prog = {a}
+    
+    return GRSpec(sys_vars=sys_vars, #sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+def eventually_to_gr1(p, aux='aux'):
+    """Convert <> p to GRSpec.
+    
+    GR(1) form:
+    
+        !(aux) &&
+        [](aux -> X aux) &&
+        []<>(aux) &&
+        
+        []( (!p && !aux) -> X!(aux) )
+    
+    @type p: str
+    
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+    
+    @rtype: GRSpec
+    """
+    a = aux
+    
+    p0, a0 = p, a
+    
+    p = _paren(p)
+    a = _paren(a)
+    
+    v = _check_var_name_conflict(p, a0)
+    
+    sys_vars = v | {a0}
+    sys_init = {'!(' + a + ')'}
+    sys_safe = {
+        '(!' + p + ' && !' + a + ') -> X !' + a,
+        a + ' -> X ' + a
+    }
+    sys_prog = {a}
+    
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+    
+def _check_var_name_conflict(f, varname):
+    t = parser.parse(f)
+    v = {x.val for x in ast.get_vars(t)}
+    
+    if varname in v:
+        raise ValueError('var name "' + varname + '" already used')
+    return v
+
+def _paren(x):
+    """Enclose in parentheses.
+    
+    @type x: str
+    """
+    return '(' + x + ')'
