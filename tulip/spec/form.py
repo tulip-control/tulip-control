@@ -414,22 +414,31 @@ class GRSpec(LTL):
                       sys_prog=copy.copy(self.sys_prog))
 
     def __or__(self, other):
-        """Create union of two specifications."""
+        """Create union of two specifications.
+        """
         result = self.copy()
-        for varname in other.env_vars.keys():
-            if result.env_vars.has_key(varname) and \
-                other.env_vars[varname] != result.env_vars[varname]:
-                raise ValueError("Mismatched variable domains")
-        for varname in other.sys_vars.keys():
-            if result.sys_vars.has_key(varname) and \
-                other.sys_vars[varname] != result.sys_vars[varname]:
-                raise ValueError("Mismatched variable domains")
+        
+        if not isinstance(other, GRSpec):
+            raise TypeError('type(other) must be GRSpec')
+        
+        # common vars have same types ?
+        for varname in set(other.env_vars) & set(result.env_vars):
+            if other.env_vars[varname] != result.env_vars[varname]:
+                raise ValueError('Mismatched variable domains')
+        
+        for varname in set(other.sys_vars) & set(result.sys_vars):
+            if other.sys_vars[varname] != result.sys_vars[varname]:
+                raise ValueError('Mismatched variable domains')
+        
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
-        for formula_component in ["env_init", "env_safety", "env_prog",
-                                  "sys_init", "sys_safety", "sys_prog"]:
-            getattr(result, formula_component).extend(
-                getattr(other, formula_component))
+        
+        s = {x + y for x in {'env_', 'sys_'}
+                   for y in {'init', 'safety', 'prog'} }
+        
+        for x in s:
+            getattr(result, x).extend(getattr(other, x) )
+        
         return result
 
     def to_canon(self):
