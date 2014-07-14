@@ -214,14 +214,10 @@ class States(object):
         for state in states:
             self.remove(state)
     
-    def post(self, states):
+    def post(self, states=None):
         """Direct successor set (1-hop) for given states.
         
-        Over all actions or letters, i.e., edge labeling is ignored,
-        because it may be undefined. Only classes which have an action
-        set, alphabet, or other transition labeling set provide a
-        pre(state, label) method, as for example pre(state, action) in
-        the case of closed transition systems.
+        Edge labels are ignored.
         
         If multiple states provided,
         then union Post(s) for s in states provided.
@@ -231,9 +227,17 @@ class States(object):
           - L{pre}
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        
+        @param states:
+          - None, so initial states returned
+          - single state or
+          - set of states or
 
         @rtype: set
         """
+        if states is None:
+            return set(self.initial)
+        
         states = self._single_state2singleton(states)
         
         successors = set()
