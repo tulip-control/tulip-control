@@ -269,7 +269,6 @@ class LabeledDiGraph_test():
     def test_edge_subscript_assign_illegal_value(self):
         self.G[1][2][0]['day'] = 'abc'
 
-    
 def open_fts_multiple_env_actions_test():
     env_modes = MathSet({'up', 'down'})
     env_choice = MathSet({'left', 'right'})
@@ -281,3 +280,31 @@ def open_fts_multiple_env_actions_test():
     assert(ts.env_modes is env_modes)
     assert(not hasattr(ts, 'env_choices') )
     assert(ts.sys_actions == MathSet() )
+
+def test_remove_deadends():
+    g = labeled_graphs.LabeledDiGraph()
+    
+    # cycle
+    n = 5
+    g.add_nodes_from(range(n))
+    for i in range(n):
+        j = (i + 1) % n
+        g.add_edge(i, j)
+    
+    g.remove_deadends()
+    assert(len(g) == n)
+    
+    # line + cycle
+    g.add_nodes_from(range(n, 2*n))
+    for i in range(n, 2*n-1):
+        g.add_edge(i, i+1)
+    assert(len(g) == 2*n)
+    
+    g.remove_deadends()
+    assert(len(g) == n)
+    
+    # line
+    g.remove_edge(4, 0)
+    
+    g.remove_deadends()
+    assert(len(g) == 0)
