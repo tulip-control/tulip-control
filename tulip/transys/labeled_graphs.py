@@ -1123,10 +1123,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     def trim_dead_states(self):
         """Recursively delete states with no outgoing transitions.
-
-        Merge and update transition listings as needed.  N.B., this
-        method might change IDs after trimming to ensure indexing still
-        works (since self.states attribute is a list).
         """
         changed = True  
         # Becomes False when no deletions have been made.
