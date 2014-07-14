@@ -1121,8 +1121,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
 
-    def trim_dead_states(self):
-        """Recursively delete states with no outgoing transitions.
+    def remove_deadends(self):
+        """Recursively delete nodes with no outgoing transitions.
         """
         changed = True  
         # Becomes False when no deletions have been made.
