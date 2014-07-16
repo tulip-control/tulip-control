@@ -4,9 +4,6 @@ Tests for the tulip.synth module.
 import logging
 logging.basicConfig(level=logging.WARNING)
 
-logging.getLogger('tulip.transys').setLevel(logging.ERROR)
-logging.getLogger('tulip.spec').setLevel(logging.DEBUG)
-
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
