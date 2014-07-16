@@ -1178,7 +1178,7 @@ def synthesize(
     if not isinstance(ctrl, transys.MealyMachine):
         return None
 
-    if trim_aut:
+    if rm_deadends:
         ctrl.remove_deadends()
 
     return ctrl
