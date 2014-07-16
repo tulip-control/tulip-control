@@ -444,3 +444,15 @@ def multiple_env_actions_test():
     
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(not r)
+
+
+class synthesize_test:
+    def setUp(self):
+        self.f_triv = spec.GRSpec(sys_vars="y")
+
+    def tearDown(self):
+        self.f_triv = None
+
+    def test_gr1c_basic(self):
+        assert isinstance(synth.synthesize("gr1c", self.f_triv),
+                          transys.MealyMachine)
