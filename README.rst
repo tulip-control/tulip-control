@@ -15,16 +15,14 @@ To avoid checking for optional dependencies, add the option "nocheck"::
   python setup.py install nocheck
 
 Detailed instructions, including notes about dependencies and troubleshooting,
-are available at
+are available at http://tulip-control.sourceforge.net/doc/install.html
 
-  http://tulip-control.sourceforge.net/doc/install.html
-
-The documentation sources (see below) can be found under ``doc/``.  A test suite
-(see below) is provided under tests/.
+The next section describes how to build documentation.  A test suite is provided
+under ``tests/``.  Consult the section "Testing" below.
 
 
-Sphinx and Epydoc generated documentation
------------------------------------------
+Documentation
+-------------
 
 There are two main sources of documentation outside the code.  The "user"
 documentation is under ``doc/`` and is built with `Sphinx
@@ -42,7 +40,10 @@ Built copies for the most recent release of TuLiP are available online at:
 * http://tulip-control.sourceforge.net/doc/
 * http://tulip-control.sourceforge.net/api-doc/
 
-Command summaries are provided by ``make help``.
+Command summaries are provided by ``make help``.  Besides the above sources, you
+may also read API documentation using the standard pydoc tool.  E.g., ::
+
+  pydoc tulip
 
 
 Testing
