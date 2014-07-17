@@ -1,6 +1,7 @@
 TuLiP
 =====
 This is the source repository for TuLiP, the temporal logic planning toolbox.
+The project website is http://tulip-control.org
 
 Installation
 ------------
