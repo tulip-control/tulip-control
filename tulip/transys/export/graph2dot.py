@@ -42,6 +42,7 @@ from textwrap import fill
 from cStringIO import StringIO
 
 import networkx as nx
+from networkx.utils import make_str
 
 try:
     import pydot
@@ -179,6 +180,16 @@ def _state2tikz(graph, to_pydot_graph, state,
         style=style
     )
 
+def _place_initial_states(trs_graph, pd_graph):
+    init_subg = pydot.Subgraph('initial')
+    init_subg.set_rank('source')
+    
+    for node in trs_graph.states.initial:
+        pd_node = pydot.Node(make_str(node) )
+        init_subg.add_node(pd_node)
+    
+    pd_graph.add_subgraph(init_subg)
+
 def _add_incoming_edge(g, state):
     phantom_node = 'phantominit' +str(state)
     
@@ -249,7 +260,7 @@ def _form_node_label(state, state_data, label_def,
         node_dot_label = node_dot_label.replace('\n', '\\\\ ')
         
         # dot2tex math mode doesn't handle newlines properly
-        node_dot_label = '$\\begin{matrix} ' + node_dot_label + '\\end{matrix}$'
+        node_dot_label = '$\\\\begin{matrix} ' + node_dot_label + '\\end{matrix}$'
     
     return node_dot_label
 
@@ -363,6 +374,8 @@ def _graph2pydot(graph, wrap=10, latex=False, tikz=False):
     _transitions2dot_str(graph.transitions, dummy_nx_graph, latex, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
+    _place_initial_states(graph, pydot_graph)
+    
     pydot_graph.set_overlap('false')
     #pydot_graph.set_size('"0.25,1"')
     #pydot_graph.set_ratio('"compress"')
