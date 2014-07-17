@@ -5,6 +5,7 @@ Tests for the interface with gr1c.
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+from nose.tools import raises
 import os
 
 from tulip.spec import GRSpec
@@ -73,23 +74,45 @@ class basic_test:
         assert gr1cint.check_syntax(self.dcounter.to_gr1c() )
 
     def test_check_realizable(self):
-        assert not gr1cint.check_realizable(self.f_un)
+        assert not gr1cint.check_realizable(self.f_un,
+                                            init_option="ALL_ENV_EXIST_SYS_INIT")
         self.f_un.sys_safety = []
-        assert gr1cint.check_realizable(self.f_un)
-        assert gr1cint.check_realizable(self.dcounter)
-        
+        assert gr1cint.check_realizable(self.f_un,
+                                        init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert gr1cint.check_realizable(self.f_un,
+                                        init_option="ALL_INIT")
+
+        assert gr1cint.check_realizable(self.dcounter,
+                                        init_option="ALL_ENV_EXIST_SYS_INIT")
+        self.dcounter.sys_init = []
+        assert gr1cint.check_realizable(self.dcounter,
+                                        init_option="ALL_INIT")
+
     def test_synthesize(self):
         self.f_un.sys_safety = []  # Make it realizable
-        mach = gr1cint.synthesize(self.f_un)
+        mach = gr1cint.synthesize(self.f_un,
+                                  init_option="ALL_ENV_EXIST_SYS_INIT")
         assert mach is not None
         assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
         assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
 
-        mach = gr1cint.synthesize(self.dcounter)
+        mach = gr1cint.synthesize(self.dcounter,
+                                  init_option="ALL_ENV_EXIST_SYS_INIT")
         assert mach is not None
         assert len(mach.inputs) == 0
         assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
         assert len(mach.states) == 3
+
+        # In the notation of gr1c SYSINIT: True;, so the strategy must
+        # account for every initial state, i.e., for y=0, y=1, y=2, ...
+        self.dcounter.sys_init = []
+        mach = gr1cint.synthesize(self.dcounter,
+                                  init_option="ALL_INIT")
+        assert mach is not None
+        print mach
+        assert len(mach.inputs) == 0
+        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+        assert len(mach.states) == 7
 
 
 class GR1CSession_test:
@@ -140,3 +163,21 @@ def test_aut_xml2mealy():
     assert len(mach.states) == 4
     assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
     assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+
+@raises(ValueError)
+def synth_init_illegal_check(init_option):
+    spc = GRSpec()
+    gr1cint.synthesize(spc, init_option=init_option)
+
+def synth_init_illegal_test():
+    for init_option in ["Caltech", 1]:
+        yield synth_init_illegal_check, init_option
+
+@raises(ValueError)
+def realiz_init_illegal_check(init_option):
+    spc = GRSpec()
+    gr1cint.check_realizable(spc, init_option=init_option)
+
+def realiz_init_illegal_test():
+    for init_option in ["Caltech", 1]:
+        yield realiz_init_illegal_check, init_option
