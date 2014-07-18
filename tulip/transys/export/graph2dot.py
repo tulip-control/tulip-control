@@ -221,12 +221,12 @@ def _form_node_label(state, state_data, label_def,
     node_dot_label = state_str
     
     # newline between state name and label, only if state is labeled
-    if state_data:
+    if len(state_data) != 0:
         node_dot_label += '\n'
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
-    sep_label_sets = label_format['separator']
+    pieces = list()
     for (label_type, label_value) in state_data.iteritems():
         if label_type not in label_def:
             continue
@@ -245,8 +245,10 @@ def _form_node_label(state, state_data, label_def,
         else:
             label_str = fill(str(label_value), width=width)
         
-        node_dot_label += type_name +sep_type_value
-        node_dot_label += label_str +sep_label_sets
+        pieces.append(type_name + sep_type_value + label_str)
+    
+    sep_label_sets = label_format['separator']
+    node_dot_label += sep_label_sets.join(pieces)
     
     if latex:
         node_dot_label = node_dot_label.replace(r'{', r'\\{')
