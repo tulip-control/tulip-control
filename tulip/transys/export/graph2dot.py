@@ -259,7 +259,7 @@ def _form_node_label(state, state_data, label_def,
         node_dot_label = node_dot_label.replace(r'}', r'\}')
         
         # replace LF by latex newline
-        node_dot_label = node_dot_label.replace('\n', '\\\\ ')
+        node_dot_label = node_dot_label.replace('\n', '\\\\\\\\ ')
         
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = '$\\\\begin{matrix} ' + node_dot_label + '\\end{matrix}$'
