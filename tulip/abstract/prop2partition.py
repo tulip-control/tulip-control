@@ -43,6 +43,7 @@ import numpy as np
 from scipy import sparse as sp
 import polytope as pc
 
+from tulip import transys as trs
 from .plot import plot_partition
 
 try:
@@ -627,3 +628,38 @@ class PPP(PropPreservingPartition):
     """
     def __init__(self, **args):
         PropPreservingPartition.__init__(self, **args)
+
+def ppp2ts(part):
+    """Derive transition system from proposition preserving partition.
+    
+    @param part: labeled polytopic partition from
+        which to derive the transition system
+    @type part: L{PropPreservingPartition}
+    
+    @return: C{(ts, state_map)}
+        finite transition system labeled with propositions
+        from the given partition, and map of
+        polytope indices to transition system states.
+        
+    @rtype: (L{transys.FTS}, \C{dict})
+    """
+    # generate transition system and add transitions       
+    ofts = trs.OpenFTS()
+    
+    adj = part.adj #sp.lil_matrix
+    n = adj.shape[0]
+    ofts_states = range(n)
+    ofts_states = trs.prepend_with(ofts_states, 's')
+    
+    ofts.states.add_from(ofts_states)
+    
+    ofts.transitions.add_adj(adj, ofts_states)
+    
+    # decorate TS with state labels
+    atomic_propositions = set(part.prop_regions)
+    ofts.atomic_propositions.add_from(atomic_propositions)
+    for state, region in zip(ofts_states, part.regions):
+        state_prop = region.props.copy()
+        ofts.states.add(state, ap=state_prop)
+    
+    return (ofts, ofts_states)
