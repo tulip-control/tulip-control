@@ -538,7 +538,10 @@ class Transitions(object):
 
             If C{adj2states} includes a state not in sys.states,
             no transition is added and an exception raised.
-        @type adj2states: list of existing states
+        @type adj2states: either of:
+            - C{dict} from adjacency matrix indices to
+              existing, or
+            - C{list} of existing states
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
