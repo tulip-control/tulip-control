@@ -924,8 +924,7 @@ def discretize(
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
     
-    # add set to destroy ordering
-    ofts.states.add_from(set(ofts_states) )
+    ofts.states.add_from(ofts_states)
     
     ofts.transitions.add_adj(adj, ofts_states)
     
