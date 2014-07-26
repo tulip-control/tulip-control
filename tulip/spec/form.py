@@ -777,6 +777,10 @@ def _sub_var(spec, vars_dict):
 def stability_to_gr1(p, aux='aux'):
     """Convert <>[] p to GR(1).
     
+    Warning: This conversion is sound, but not complete.
+    See p.2, U{[E10]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#e10>}
+    
     GR(1) form:
     
         !(aux) &&
@@ -793,6 +797,11 @@ def stability_to_gr1(p, aux='aux'):
     
     @rtype: L{GRSpec}
     """
+    logging.warning(
+        'Conversion of stability (<>[]p) to GR(1)' +
+        'is sound, but NOT complete.'
+    )
+    
     a = aux
     
     p0, a0 = p, a
