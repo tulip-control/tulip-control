@@ -896,6 +896,50 @@ def eventually_to_gr1(p, aux='aux'):
     
     return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
+
+def until_to_gr1(p, q, aux='aux'):
+    """Convert p U q to GRSpec.
+    
+    GR(1) form:
+    
+        (!q -> !aux) &&
+        [](q -> aux)
+        [](aux -> X aux) &&
+        []<>(aux) &&
+        
+        []( (!aux && X(!q) ) -> X!(aux) ) &&
+        [](!aux -> p)
+    
+    @type p: str
+    
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+    
+    @rtype: GRSpec
+    """
+    a = aux
+    
+    p0, q0, a0 = p, q, a
+    
+    p = _paren(p)
+    q = _paren(q)
+    a = _paren(a)
+    
+    s = p + ' && ' + q
+    v = _check_var_name_conflict(s, a0)
+    
+    sys_vars = v | {a0}
+    sys_init = {'!' + q + ' -> !' + a}
+    sys_safe = {
+        q + ' -> ' + a,
+        '( (X !' + q + ') && !' + a + ') -> X !' + a,
+        a + ' -> X ' + a,
+        '(!' + a + ') -> ' + p
+    }
+    sys_prog = {a}
+    
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
     
 def _check_var_name_conflict(f, varname):
     t = parser.parse(f)

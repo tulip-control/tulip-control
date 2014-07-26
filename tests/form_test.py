@@ -129,5 +129,35 @@ def test_eventually():
     #mealy = synth.synthesize('gr1c', s4)
     #mealy.save()
 
+def test_until():
+    s = spec.form.until_to_gr1('p', 'q', aux='c')
+    
+    assert(isinstance(s, spec.GRSpec) )
+    assert('aux' not in str(s) )
+    assert('c' in s.sys_vars)
+    assert('p' in s.sys_vars)
+    assert('q' in s.sys_vars)
+    
+    # []!q
+    s0 = spec.GRSpec(
+        sys_vars={'q'}, sys_safety={'!q'}
+    )
+    assert(not synth.is_realizable('gr1c', s | s0) )
+    
+    # !q && <>q
+    s1 = spec.GRSpec(
+        sys_vars={'q'}, sys_init={'!q'},
+        sys_prog={'q'}
+    )
+    assert(synth.is_realizable('gr1c', s | s1) )
+    
+    # !q && []!p && <>q
+    s1 = spec.GRSpec(
+        sys_vars={'q'}, sys_init={'!q'},
+        sys_safety={'!p'},
+        sys_prog={'q'}
+    )
+    assert(not synth.is_realizable('gr1c', s | s1) )
+
 if __name__ == '__main__':
     test_response()
