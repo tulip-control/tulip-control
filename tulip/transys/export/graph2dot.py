@@ -269,14 +269,11 @@ def _form_node_label(state, state_data, label_def,
 def _is_accepting(graph, state):
     """accepting state ?
     """
-    # check if accepting states defined
+    # no accepting states defined ?
     if not hasattr(graph.states, 'accepting'):
         return False
     
-    # check state is accepting
-    if state in graph.states.accepting:
-        return True
-    return False
+    return state in graph.states.accepting
 
 def _transitions2dot_str(trans, to_pydot_graph, latex, tikz=False):
     """Convert transitions to dot str.
