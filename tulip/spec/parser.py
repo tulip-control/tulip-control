@@ -35,8 +35,10 @@ LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 """
 import sys
 
-from .ast import LTLException, ASTVar, ASTUnTempOp, \
+from tulip.spec.ast import (
+    LTLException, ASTVar, ASTUnTempOp,
     ASTBiTempOp, ASTUnary, ASTBinary
+)
 
 def extract_vars(tree):
     v = []
