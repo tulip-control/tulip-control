@@ -2,7 +2,8 @@
 #          upcoming release.
 #
 #!/usr/bin/env python
-# robot_gr1.py - example of direct GR(1) specification
+# gr1_set.py - example of direct GR(1) specification,
+#              using an integer-valued variable to model location.
 #
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 """
