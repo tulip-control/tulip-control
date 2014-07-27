@@ -34,4 +34,4 @@
 from .graph2dot import graph2dot_str, save_dot, plot_pydot
 from .graph2promela import fts2promela
 from .machine2scxml import mealy2scxml
-from .save_d3 import labeled_digraph2d3
+#from .save_d3 import labeled_digraph2d3

@@ -42,7 +42,6 @@ from .labeled_graphs import LabeledDiGraph, str2singleton
 from .labeled_graphs import prepend_with
 from .mathset import PowerSet, MathSet
 from .executions import FTSSim
-from .export import graph2promela
 
 _hl = 40 *'-'
 
@@ -519,6 +518,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         if fileformat not in {'promela', 'Promela', 'pml'}:
             return False
         
+        from .export import graph2promela
         s = graph2promela.fts2promela(self, self.name)
         
         # dump to file

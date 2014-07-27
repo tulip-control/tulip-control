@@ -43,7 +43,6 @@ import warnings
 import networkx as nx
 
 from .mathset import SubSet, TypedDict
-from .export import save_d3, graph2dot
 
 def label_is_desired(attr_dict, desired_dict):
     """Return True if all labels match.
@@ -1126,6 +1125,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         Requires pydot.        
         """
+        from .export import graph2dot
+        
         return graph2dot.graph2dot_str(self, wrap)
     
     def save(self, filename=None, fileformat=None,
@@ -1208,6 +1209,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         fileformat = fextension[1:]    
         
         if fileformat is 'html':
+            from .export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         
         # subclass has extra export formats ?
@@ -1218,6 +1220,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
+        from .export import graph2dot
         graph2dot.save_dot(self, filename, fileformat, rankdir,
                            prog, wrap, latex)
         

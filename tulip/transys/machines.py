@@ -38,7 +38,6 @@ from random import choice
 
 from .labeled_graphs import LabeledDiGraph
 from . import executions
-from .export import machine2scxml
 
 _hl = 40 *'-'
 
@@ -517,6 +516,7 @@ class MealyMachine(FiniteStateMachine):
         if fileformat != 'scxml':
             return False
         
+        from .export import machine2scxml
         s = machine2scxml.mealy2scxml(self)
         
         # dump to file
