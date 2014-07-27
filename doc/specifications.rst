@@ -122,7 +122,7 @@ BNF grammar, the formula syntax is descibed in the following.
 5. Notice that the alternative operators **/\\** and **\\/** for **&&** and
    **||**, respectively, are not included; cf. the `Spin LTL formula syntax
    <http://spinroot.com/spin/Man/ltl.html>`_.  Furthermore, **W** (weak until)
-   is not included.
+   is not included, except for the parser of the GR(1) fragment.
 6. Space is required wherever its absence would cause parsing ambiguity.  E.g.,
    ``Xp`` is always an identifier, whereas ``X p`` is a formula in which the next
    operator is applied to the identifier ``p``.
