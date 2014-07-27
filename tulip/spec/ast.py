@@ -215,12 +215,12 @@ class ASTUnary(ASTNode):
                 # handle left-associative chains, e.g. Y''
                 t = self.__class__(None, None, tok[:-1])
                 tok = [t, tok[-1]]
-            self.operand = tok[0]
+            
             self.operator = 'X'
+            self.operand = tok[0]
         else:
+            self.operator = tok[0]
             self.operand = tok[1]
-            if isinstance(self, ASTUnTempOp):
-                self.operator = TEMPORAL_OP_MAP[tok[0]]
     
     def __repr__(self):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
@@ -253,6 +253,10 @@ class ASTNot(ASTUnary):
         return '!'
 
 class ASTUnTempOp(ASTUnary):
+    def init(self, tok):
+        super(ASTUnTempOp, self).init(tok)
+        self.operator = TEMPORAL_OP_MAP[self.operator]
+    
     def op(self):
         return self.operator
     
@@ -301,16 +305,11 @@ class ASTBinary(ASTNode):
         if len(tok) > 3:
             t = self.__class__(None, None, tok[:-2])
             tok = [t, tok[-2], tok[-1]]
+        
+        self.operator = tok[1]
         self.op_l = tok[0]
         self.op_r = tok[2]
-        # generalise temporal operator
-        if isinstance(self, ASTBiTempOp):
-            self.operator = TEMPORAL_OP_MAP[tok[1]]
-        elif isinstance(self, ASTComparator) or isinstance(self, ASTArithmetic):
-            if tok[1] == '==':
-                self.operator = '='
-            else:
-                self.operator = tok[1]
+        
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
     
@@ -375,6 +374,12 @@ class ASTBiImp(ASTBinary):
         return '<->'
 
 class ASTBiTempOp(ASTBinary):
+    def init(self, tok):
+        # generalise temporal operator
+        super(ASTBiTempOp, self).init(tok)
+        
+        self.operator = TEMPORAL_OP_MAP[self.operator]
+    
     def op(self):
         return self.operator
     
@@ -409,6 +414,12 @@ class ASTBiTempOp(ASTBinary):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
     
 class ASTComparator(ASTBinary):
+    def init(self, tok):
+        super(ASTComparator, self).init(tok)
+        
+        if self.operator is '==':
+            self.operator = '='
+    
     def op(self):
         return self.operator
     
