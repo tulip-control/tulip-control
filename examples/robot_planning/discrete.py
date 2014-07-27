@@ -22,7 +22,7 @@ from tulip import transys, spec, synth
 # System dynamics
 #
 # The system is modeled as a discrete transition system in which the
-# robot can be located anyplace no a 2x3 grid of cells.  Transitions
+# robot can be located anyplace on a 2x3 grid of cells.  Transitions
 # between adjacent cells are allowed, which we model as a transition
 # system in this example (it would also be possible to do this via a
 # formula)
@@ -69,7 +69,7 @@ sys.states.add('X5', ap={'lot'})
 #
 # Environment variables and specification
 #
-# The environment can issue a park signal that the robot just respond
+# The environment can issue a park signal that the robot must respond
 # to by moving to the lower left corner of the grid.  We assume that
 # the park signal is turned off infinitely often.
 #
