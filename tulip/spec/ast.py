@@ -35,29 +35,33 @@ Abstract Syntax Tree classes for LTL,
 
 supporting JTLV, SPIN, SMV, and gr1c syntax
 
-Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
+Syntax taken originally roughly from:
+    http://spot.lip6.fr/wiki/LtlSyntax
 """
 import logging
 logger = logging.getLogger(__name__)
 
-TEMPORAL_OP_MAP = \
-        { "G" : "G", "F" : "F", "X" : "X",
-        "[]" : "G", "<>" : "F", "next" : "X",
-        "U" : "U", "V" : "R", "R" : "R", 
-          "'" : "X", "FALSE" : "False", "TRUE" : "True"}
+TEMPORAL_OP_MAP = {
+    'G':'G', 'F':'F', 'X':'X',
+    '[]':'G', '<>':'F', 'next':'X',
+    'U':'U', 'V':'R', 'R':'R', 
+    "'":'X', 'FALSE':'False', 'TRUE':'True'
+}
 
-JTLV_MAP = { "G" : "[]", "F" : "<>", "X" : "next",
-             "U" : "U", "||" : "||", "&&" : "&&",
-             "False" : "FALSE", "True" : "TRUE" }
+JTLV_MAP = {
+    'G':'[]', 'F':'<>', 'X':'next',
+    'U':'U', '||':'||', '&&':'&&',
+    'False':'FALSE', 'True':'TRUE'
+}
 
-GR1C_MAP = {"G" : "[]", "F" : "<>", "X" : "'", "||" : "|", "&&" : "&",
-            "False" : "False", "True" : "True"}
+GR1C_MAP = {
+    'G':'[]', 'F':'<>', 'X':"'", '||':'|', '&&':'&',
+    'False':'False', 'True':'True'
+}
 
-SMV_MAP = { "G" : "G", "F" : "F", "X" : "X",
-        "U" : "U", "R" : "V" }
+SMV_MAP = {'G':'G', 'F':'F', 'X':'X', 'U':'U', 'R':'V'}
 
-SPIN_MAP = { "G" : "[]", "F" : "<>", "U" : "U",
-        "R" : "V" }
+SPIN_MAP = {'G':'[]', 'F':'<>', 'U':'U', 'R':'V'}
 
 class LTLException(Exception):
     pass
@@ -149,7 +153,7 @@ class ASTVar(ASTNode):
             return str(self)
         
     def to_jtlv(self):
-        return "(" + str(self) + ")"
+        return '(' + str(self) + ')'
         
     def to_smv(self):
         return str(self)
@@ -162,16 +166,16 @@ class ASTVar(ASTNode):
         
 class ASTBool(ASTNode):
     def init(self, t):
-        if t[0].upper() == "TRUE":
+        if t[0].upper() == 'TRUE':
             self.val = True
         else:
             self.val = False
     
     def __repr__(self):
         if self.val:
-            return "True"
+            return 'True'
         else:
-            return "False"
+            return 'False'
     
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
@@ -181,8 +185,8 @@ class ASTBool(ASTNode):
             return GR1C_MAP[str(self)]
         except KeyError:
             raise LTLException(
-                "Reserved word \"" + self.op() +
-                "\" not supported in gr1c syntax map"
+                'Reserved word "' + self.op() +
+                '" not supported in gr1c syntax map'
             )
     
     def to_jtlv(self):
@@ -190,8 +194,8 @@ class ASTBool(ASTNode):
             return JTLV_MAP[str(self)]
         except KeyError:
             raise LTLException(
-                "Reserved word \"" + self.op() +
-                "\" not supported in JTLV syntax map"
+                'Reserved word "' + self.op() +
+                '" not supported in JTLV syntax map'
             )
     
     def dump_dot(self):
@@ -212,7 +216,7 @@ class ASTUnary(ASTNode):
                 t = self.__class__(None, None, tok[:-1])
                 tok = [t, tok[-1]]
             self.operand = tok[0]
-            self.operator = "X"
+            self.operator = 'X'
         else:
             self.operand = tok[1]
             if isinstance(self, ASTUnTempOp):
@@ -246,7 +250,7 @@ class ASTUnary(ASTNode):
 
 class ASTNot(ASTUnary):
     def op(self):
-        return "!"
+        return '!'
 
 class ASTUnTempOp(ASTUnary):
     def op(self):
@@ -257,13 +261,13 @@ class ASTUnTempOp(ASTUnary):
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException(
-                "Operator " + self.op() +
-                " not supported in Promela syntax map"
+                'Operator ' + self.op() +
+                ' not supported in Promela syntax map'
             )
     
     def to_gr1c(self, primed=False):
-        if self.op() == "X":
-            return self.flatten(_flatten_gr1c, "", primed=True)
+        if self.op() == 'X':
+            return self.flatten(_flatten_gr1c, '', primed=True)
         else:
             try:
                 return self.flatten(
@@ -271,8 +275,8 @@ class ASTUnTempOp(ASTUnary):
                 )
             except KeyError:
                 raise LTLException(
-                    "Operator " + self.op() +
-                    " not supported in gr1c syntax map"
+                    'Operator ' + self.op() +
+                    ' not supported in gr1c syntax map'
                 )
     
     def to_jtlv(self):
@@ -280,8 +284,8 @@ class ASTUnTempOp(ASTUnary):
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException(
-                "Operator " + self.op() +
-                " not supported in JTLV syntax map"
+                'Operator ' + self.op() +
+                ' not supported in JTLV syntax map'
             )
     
     def to_smv(self):
@@ -303,8 +307,8 @@ class ASTBinary(ASTNode):
         if isinstance(self, ASTBiTempOp):
             self.operator = TEMPORAL_OP_MAP[tok[1]]
         elif isinstance(self, ASTComparator) or isinstance(self, ASTArithmetic):
-            if tok[1] == "==":
-                self.operator = "="
+            if tok[1] == '==':
+                self.operator = '='
             else:
                 self.operator = tok[1]
     def __repr__(self):
@@ -340,35 +344,35 @@ class ASTBinary(ASTNode):
 
 class ASTAnd(ASTBinary):
     def op(self):
-        return "&"
+        return '&'
     
     def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, "&&")
+        return self.flatten(_flatten_JTLV, '&&')
     
     def to_promela(self):
-        return self.flatten(_flatten_Promela, "&&")
+        return self.flatten(_flatten_Promela, '&&')
 
 class ASTOr(ASTBinary):
     def op(self):
-        return "|"
+        return '|'
     
     def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, "||")
+        return self.flatten(_flatten_JTLV, '||')
     
     def to_promela(self):
-        return self.flatten(_flatten_Promela, "||")
+        return self.flatten(_flatten_Promela, '||')
 
 class ASTXor(ASTBinary):
     def op(self):
-        return "xor"
+        return 'xor'
     
 class ASTImp(ASTBinary):
     def op(self):
-        return "->"
+        return '->'
 
 class ASTBiImp(ASTBinary):
     def op(self):
-        return "<->"
+        return '<->'
 
 class ASTBiTempOp(ASTBinary):
     def op(self):
@@ -379,8 +383,8 @@ class ASTBiTempOp(ASTBinary):
             return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
         except KeyError:
             raise LTLException(
-                "Operator " + self.op() +
-                " not supported in Promela syntax map"
+                'Operator ' + self.op() +
+                ' not supported in Promela syntax map'
             )
     
     def to_gr1c(self, primed=False):
@@ -388,8 +392,8 @@ class ASTBiTempOp(ASTBinary):
             return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()])
         except KeyError:
             raise LTLException(
-                "Operator " + self.op() +
-                " not supported in gr1c syntax map"
+                'Operator ' + self.op() +
+                ' not supported in gr1c syntax map'
             )
     
     def to_jtlv(self):
@@ -397,8 +401,8 @@ class ASTBiTempOp(ASTBinary):
             return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
         except KeyError:
             raise LTLException(
-                "Operator " + self.op() +
-                " not supported in JTLV syntax map"
+                'Operator ' + self.op() +
+                ' not supported in JTLV syntax map'
             )
     
     def to_smv(self):
@@ -409,8 +413,8 @@ class ASTComparator(ASTBinary):
         return self.operator
     
     def to_promela(self):
-        if self.operator == "=":
-            return self.flatten(_flatten_Promela, "==")
+        if self.operator == '=':
+            return self.flatten(_flatten_Promela, '==')
         else:
             return self.flatten(_flatten_Promela)
     
