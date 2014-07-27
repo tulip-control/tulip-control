@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# robot_discrete.py - example using transition system dynamics
+# discrete.py - example using transition system dynamics
 #
 # RMM, 20 Jul 2013
 """
