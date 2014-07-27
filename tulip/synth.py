@@ -536,7 +536,9 @@ def fts2spec(
     
     @param fts: L{transys.FiniteTransitionSystem}
     
-    @rtype: L{GRSpec}
+    @rtype: (dict, list, list)
+    @return: (sys_vars, sys_init, sys_trans), where each element
+        corresponds to the similarly-named attribute of L{GRSpec}.
     """
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
