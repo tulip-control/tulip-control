@@ -118,7 +118,7 @@ BNF grammar, the formula syntax is descibed in the following.
 3. Boolean operators are **!** (negation), **&&** (conjunction), **||**
    (disjunction), **->** (implication), and **<->** (equivalence).
 4. Temporal operators are **[]** (always), **<>** (eventually), **X** (next),
-   **U** (until), **V** (release).
+   **U** (until), **V** or **R** (release).
 5. Notice that the alternative operators **/\\** and **\\/** for **&&** and
    **||**, respectively, are not included; cf. the `Spin LTL formula syntax
    <http://spinroot.com/spin/Man/ltl.html>`_.  Furthermore, **W** (weak until)
