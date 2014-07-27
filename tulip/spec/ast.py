@@ -68,7 +68,7 @@ def dump_dot(ast):
     @param ast: L{ASTNode}, etc., that has a dump_dot() method; for
         example, the return value of a successful call to L{parser}.
     """
-    return "digraph AST {\n"+ast.dump_dot()+"}\n"
+    return 'digraph AST {\n' + ast.dump_dot() + '}\n'
 
 # Flattener helpers
 def _flatten_gr1c(node, **args):
@@ -95,6 +95,7 @@ class ASTNode(object):
                 # not a ParseResult
                 tok = t
         self.init(tok)
+    
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
     
@@ -125,8 +126,10 @@ class ASTNum(ASTNode):
         return str(self)
     
     def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
+        return (
+            str(id(self)) + '\n' +
+            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
+        )
 
 class ASTVar(ASTNode):
     def init(self, t):
@@ -152,8 +155,10 @@ class ASTVar(ASTNode):
         return str(self)
         
     def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
+        return (
+            str(id(self)) + '\n' +
+            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
+        )
         
 class ASTBool(ASTNode):
     def init(self, t):
@@ -190,8 +195,10 @@ class ASTBool(ASTNode):
             )
     
     def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
+        return (
+            str(id(self)) + '\n' +
+            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
+        )
 
 class ASTUnary(ASTNode):
     @classmethod
@@ -210,6 +217,7 @@ class ASTUnary(ASTNode):
             self.operand = tok[1]
             if isinstance(self, ASTUnTempOp):
                 self.operator = TEMPORAL_OP_MAP[tok[0]]
+    
     def __repr__(self):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
     
@@ -223,9 +231,11 @@ class ASTUnary(ASTNode):
         return ' '.join(['(', op, o, ')'])
     
     def dump_dot(self):
-        return (str(id(self))+"\n"
-                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
-                + str(id(self))+" -> "+self.operand.dump_dot())
+        return (
+            str(id(self)) + '\n' +
+            str(id(self)) + ' [label="' + str(self.op()) + '"]\n' +
+            str(id(self)) + ' -> ' + self.operand.dump_dot()
+        )
     
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op())
@@ -301,7 +311,9 @@ class ASTBinary(ASTNode):
         return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
     
     def flatten(self, flattener=str, op=None, **args):
-        if not op: op = self.op()
+        if not op:
+            op = self.op()
+        
         try:
             l = flattener(self.op_l, **args)
         except AttributeError:
@@ -313,10 +325,11 @@ class ASTBinary(ASTNode):
         return ' '.join (['(', l, op, r, ')'])
     
     def dump_dot(self):
-        return (str(id(self))+"\n"
-                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
-                + str(id(self))+" -> "+self.op_l.dump_dot()
-                + str(id(self))+" -> "+self.op_r.dump_dot())
+        return (
+            str(id(self)) + '\n' +
+            str(id(self)) + ' [label="' + str(self.op()) + '"]\n' +
+            str(id(self)) + ' -> ' + self.op_l.dump_dot() +
+            str(id(self)) + ' -> ' + self.op_r.dump_dot())
     
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op())
