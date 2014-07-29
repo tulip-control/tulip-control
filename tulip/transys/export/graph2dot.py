@@ -50,21 +50,6 @@ except ImportError:
     logger.error('pydot package not found.\nHence dot export not unavailable.')
     pydot = None
 
-try:
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-    matplotlib = True
-except ImportError:
-    logger.error('matplotlib package not found.\nSo no loading of dot plots.')
-    matplotlib = None
-
-try:
-    from IPython.display import display, Image
-    IPython = True
-except ImportError:
-    logger.error('IPython not found.\nSo loaded dot images not inline.')
-    IPython = None
-
 def _states2dot_str(graph, to_pydot_graph, wrap=10,
                     latex=False, tikz=False):
     """Copy nodes to given Pydot graph, with attributes for dot export.
@@ -461,7 +446,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     png_str = pydot_graph.create_png(prog=prog)
     
     # installed ?
-    if IPython:
+    try:
+        from IPython.display import display, Image
         logger.debug('IPython installed.')
         
         # called by IPython ?
@@ -479,29 +465,31 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
                 return True
         except:
             print('IPython installed, but not called from it.')
-    else:
-        logger.debug('IPython not installed.')
+    except ImportError:
+        logger.warn('IPython not found.\nSo loaded dot images not inline.')
     
     # not called from IPython QtConsole, try Matplotlib...
     
     # installed ?
-    if matplotlib:
-        logger.debug('Matplotlib installed.')
-        
-        if ax is None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        
-        sio = StringIO()
-        sio.write(png_str)
-        sio.seek(0)
-        img = mpimg.imread(sio)
-        ax.imshow(img, aspect='equal')
-        plt.show(block=False)
-        
-        return ax
-    else:
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.image as mpimg
+    except:
         logger.debug('Matplotlib not installed.')
+        logger.warn('Neither IPython QtConsole nor Matplotlib available.')
+        return None
     
-    logger.warn('Neither IPython QtConsole nor Matplotlib available.')
-    return None
+    logger.debug('Matplotlib installed.')
+    
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    
+    sio = StringIO()
+    sio.write(png_str)
+    sio.seek(0)
+    img = mpimg.imread(sio)
+    ax.imshow(img, aspect='equal')
+    plt.show(block=False)
+    
+    return ax
