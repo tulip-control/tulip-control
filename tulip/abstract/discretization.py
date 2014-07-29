@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -924,8 +924,7 @@ def discretize(
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
     
-    # add set to destroy ordering
-    ofts.states.add_from(set(ofts_states) )
+    ofts.states.add_from(ofts_states)
     
     ofts.transitions.add_adj(adj, ofts_states)
     

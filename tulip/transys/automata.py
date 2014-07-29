@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
     It has:
         - states
         - states.initial
-        - states.aceepting (type depends on automaton flavor)
+        - states.accepting (type depends on automaton flavor)
         - alphabet = set of input letters (labeling edges)
           (possibly based on atomic propositions (AP),
           meaning it is the powerset of some AP set)
@@ -110,7 +110,11 @@ class FiniteStateAutomaton(LabeledDiGraph):
             self.atomic_proposition_based = False
             alphabet = set()
         
-        edge_label_types = [('letter', alphabet, True)]
+        edge_label_types = [
+            {'name':'letter',
+             'values':alphabet,
+             'setter':True}
+        ]
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types, **kwargs
         )
@@ -128,7 +132,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         # used before label value
         self._transition_dot_label_format = {'letter':'',
                                              'type?label':'',
-                                             'separator':'\\n'}
+                                             'separator':'\n'}
         self._transition_dot_mask = dict()
         
         self.dot_node_shape = {'normal':'circle',

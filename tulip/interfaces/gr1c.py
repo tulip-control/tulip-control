@@ -159,7 +159,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
+def aut_xml2mealy(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
     @param x: a string or an instance of
@@ -512,7 +512,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
     
     if p.returncode == 0:
-        (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
+        (spec, aut) = aut_xml2mealy(stdoutdata, spec0=spec)
         return aut
     else:
         print(30*' ' + '\n gr1c return code:\n' + 30*' ')
@@ -520,6 +520,20 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         print(30*' ' + '\n gr1c stdout, stderr:\n' + 30*' ')
         print(stdoutdata)
         return None
+
+def load_mealy(filename):
+    """Load gr1c stratgy from C{xml} file to a MealyMachine.
+    
+    @param filename: xml file name
+    @type filename: C{str}
+    
+    @return: loaded strategy as a Mealy machine
+    @rtype: L{MealyMachine}
+    """
+    s = open(filename, 'r').read()
+    spec, aut = aut_xml2mealy(s)
+    logger.info('Loaded spec: \n' + spec.pretty() )
+    return aut
 
 class GR1CSession:
     """Manage interactive session with gr1c.

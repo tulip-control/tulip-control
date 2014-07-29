@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -764,6 +764,17 @@ class TypedDict(dict):
     For each key, a domain can optionally be defined,
     which restricts the admissible values that can be
     paired with that key.
+    
+    Example
+    =======
+    
+    >>> d = TypedDict()
+    >>> allowed_values = {'name': {'Maria', 'John'},
+                          'age': range(122)}
+    >>> default_values = {'name': 'Maria',
+                          'age': 30}
+    >>> d.set_types(allowed_types)
+    >>> d.update(default_values)
     """
     # credits for debugging this go here:
     #   http://stackoverflow.com/questions/2060972/
@@ -816,7 +827,21 @@ class TypedDict(dict):
             
                 {key : values}
             
-                C{values} must implement C{__contains__}
-                to enable checking validity of values.
+            C{values} must implement C{__contains__}
+            to enable checking validity of values.
         """
         self.allowed_values = allowed_values
+    
+    def is_consistent(self):
+        """Check if typed keys have consistent values.
+        
+        Use case: changing the object that allowed_values
+        points to can invalidate the assigned values.
+        
+        @rtype: bool
+        """
+        for k, v in self:
+            if self.allowed_values.has_key(k):
+                if v in self.allowed_values[k]:
+                    return False
+        return True

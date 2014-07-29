@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -193,8 +193,17 @@ class FiniteTransitionSystem(LabeledDiGraph):
         For arguments, see L{LabeledDiGraph}
         """
         ap_labels = PowerSet()
-        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
-        edge_label_types = [('actions', MathSet(), True)]
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+             'default':set()}
+        ]
+        edge_label_types = [
+            {'name':'actions',
+             'values':MathSet(),
+             'setter':True}
+        ]
         
         super(FiniteTransitionSystem, self).__init__(
             node_label_types, edge_label_types,
@@ -209,15 +218,15 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap':'',
            'type?label':'',
-           'separator':'\\n'
+           'separator':'\n'
         }
         self._transition_dot_label_format = {
             'actions':'',
             'type?label':'',
-            'separator':'\\n'
+            'separator':'\n'
         }
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal':'box'}
+        self.dot_node_shape = {'normal':'rectangle'}
         self.default_export_fname = 'fts'
 
     def __str__(self):
@@ -227,7 +236,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         s += 'Atomic Propositions:\n\t'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States and State Labels (\in 2^AP):\n'
-        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += _dumps_states(self) + 2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
         s += 'Actions:\n\t' +str(self.actions) +2*'\n'
@@ -449,7 +458,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         """
         raise NotImplementedError
     
-    def project(self, factor=None):
+    def projection(self, factor=None):
         """Project onto subgraph or factor graph.
         
         @param factor: on what to project:
@@ -492,14 +501,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         See Also
         ========
         L{simulate}
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-    
-    def loadSPINAut():
-        """
 
         UNDER DEVELOPMENT; function signature may change without
         notice.  Calling will result in NotImplementedError.
@@ -573,21 +574,35 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
             C{edge_label_types} in L{LabeledDiGraph.__init__}
         """
         if env_actions is None:
-            env_actions = [('env_actions', MathSet(), True)]
+            env_actions = [
+                {'name':'env_actions',
+                 'values':MathSet(),
+                 'setter':True}
+            ]
+        
         if sys_actions is None:
-            sys_actions = [('sys_actions', MathSet(), True)]
-                
+            sys_actions = [
+                {'name':'sys_actions',
+                 'values':MathSet(),
+                 'setter':True}
+            ]
+        
         ap_labels = PowerSet()
         action_types = env_actions + sys_actions
         
-        node_label_types = [('ap', ap_labels, ap_labels.math_set)]
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+             'default':set()}
+        ]
         edge_label_types = action_types
         
         LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
         
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
-        actions = {x[0]:x[1] for x in edge_label_types}
+        actions = {x['name']:x['values'] for x in edge_label_types}
         
         if 'actions' in actions:
             msg = '"actions" cannot be used as an action type name,\n'
@@ -608,13 +623,13 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap':'',
            'type?label':'',
-           'separator':'\\n'
+           'separator':'\n'
         }
         self._transition_dot_label_format = {
             'sys_actions':'sys',
             'env_actions':'env',
             'type?label':':',
-            'separator':'\\n'
+            'separator':'\n'
         }
         
         self._transition_dot_mask = dict()
@@ -628,7 +643,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         s += 'Atomic Propositions:\n'
         s += pformat(self.atomic_propositions, indent=3) +2*'\n'
         s += 'States & State Labels (\in 2^AP):\n'
-        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += _dumps_states(self) + 2*'\n'
         s += 'Initial States:\n'
         s += pformat(self.states.initial, indent=3) +2*'\n'
         for action_type, codomain in self.actions.iteritems():
@@ -894,6 +909,27 @@ def add_initial_states(ts, ap_labels):
         new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
 
+def _dumps_states(g):
+    """Dump string of transition system states.
+    
+    @type g: L{FTS} or L{OpenFTS}
+    """
+    s = ''
+    for state in g:
+        s += '\t State: ' + str(state)
+        s += ', AP: ' + str(g.states[state]['ap']) + '\n'
+        
+        # more labels than only AP ?
+        if len(g.states[state]) == 1:
+            continue
+        
+        s += ', '.join([
+            str(k) + ': ' + str(v)
+            for k,v in g.states[state]
+            if k is not 'ap'
+        ])
+    return s
+
 def _ts_ba_sync_prod(transition_system, buchi_automaton):
     """Construct transition system for the synchronous product TS * BA.
     
@@ -1100,3 +1136,63 @@ def _ts_ba_sync_prod(transition_system, buchi_automaton):
                 queue.add(next_sq)
     
     return (prodts, accepting_states_preimage)
+
+def load_spin2fts():
+    """
+
+    UNDER DEVELOPMENT; function signature may change without
+    notice.  Calling will result in NotImplementedError.
+    """
+    raise NotImplementedError
+
+class GameGraph(LabeledDiGraph):
+    """Store a deterministic game graph.
+    
+    When adding states, you have to say
+    which player controls the outgoing transitions.
+    Use C{networkx} state labels for that:
+    
+    >>> g = GameGraph()
+    >>> g.states.add('s0', player=0)
+    
+    reference
+    =========
+    Chatterjee K.; Henzinger T.A.; Jobstmann B.
+        Environment Assumptions for Synthesis
+        CONCUR'08, LNCS 5201, pp. 147-161, 2008
+    """
+    def __init__(self):
+        node_label_types = [
+            {
+                'name':'player',
+                'values':{0, 1},
+                'default':0
+            }
+        ]
+        
+        LabeledDiGraph.__init__(self, node_label_types)
+        
+    def player_states(self, n):
+        """Return states controlled by player C{n}.
+        
+        'controlled' means that player C{n}
+        gets to decide the successor state.
+        
+        @param n: player index (id number)
+        @type n: 0 or 1
+        
+        @return: set of states
+        @rtype: C{set}
+        """
+        f = lambda state: self.node[state]['player'] == n
+        return filter(f, self)
+    
+    def edge_controlled_by(self, e):
+        """Return the index of the player controlling edge C{e}.
+        
+        @type e: 2-tuple of nodes C{(n1, n2)}
+        
+        @rtype: integer 0 or 1
+        """
+        from_state = e[0]
+        return self.node[from_state]['player']

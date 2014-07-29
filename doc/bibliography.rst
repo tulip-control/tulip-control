@@ -16,3 +16,7 @@ Bibliography
 .. [WTM12] T. Wongpiromsarn, U. Topcu, and R. Murray (2012). `Receding horizon temporal logic planning <http://dx.doi.org/10.1109/TAC.2012.2195811>`_. *IEEE Transactions on Automatic Control*, 57(11):2817--2830.
 
 .. [WTOXM11] T. Wongpiromsarn, U. Topcu, N. Ozay, H. Xu, and R. Murray (2011). `TuLiP: a software toolbox for receding horizon temporal logic planning <http://dx.doi.org/10.1145/1967701.1967747>`_. In *Proc. of Hybrid Systems: Computation and Control (HSCC)*.
+
+.. [M55] G. H. Mealy. `A Method for Synthesizing Sequential Circuits <http://dx.doi.org/10.1002/j.1538-7305.1955.tb03788.x>`_. *Bell System Technical Journal (BSTJ)*, Vol.34, No.5, pp. 1045 -- 1079, September, 1955.
+
+.. [M56] E. F. Moore. `Gedanken-experiments on Sequential Machines <http://people.mokk.bme.hu/~kornai/termeszetes/moore_1956.pdf>`. *Annals of Mathematical Studies*, No. 34 (Automata Studies), pp 129 – 153, Princeton University Press, Princeton, N. J., 1956.

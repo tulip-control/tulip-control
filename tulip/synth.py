@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2013 by California Institute of Technology
+# Copyright (c) 2012-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -1070,7 +1070,7 @@ def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
-    bool_actions=False
+    bool_actions=False, rm_deadends=True
 ):
     """Function to call the appropriate synthesis tool on the specification.
 
@@ -1139,6 +1139,10 @@ def synthesize(
     
     @param bool_actions: model actions using bool variables
     @type bool_actions: bool
+
+    @param rm_deadends: if True,
+        then the returned strategy contains no terminal states.
+    @type rm_deadends: bool
     
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
@@ -1173,7 +1177,10 @@ def synthesize(
     # can be done by calling a dedicated other function, not this
     if not isinstance(ctrl, transys.MealyMachine):
         return None
-    
+
+    if rm_deadends:
+        ctrl.remove_deadends()
+
     return ctrl
 
 def is_realizable(

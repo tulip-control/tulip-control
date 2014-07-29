@@ -1,4 +1,5 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,10 +13,9 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
-#    products derived from this software without specific prior
-#    written permission.
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -36,6 +36,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
+import copy
 from pprint import pformat
 from collections import Iterable
 import warnings
@@ -212,14 +213,10 @@ class States(object):
         for state in states:
             self.remove(state)
     
-    def post(self, states):
+    def post(self, states=None):
         """Direct successor set (1-hop) for given states.
         
-        Over all actions or letters, i.e., edge labeling is ignored,
-        because it may be undefined. Only classes which have an action
-        set, alphabet, or other transition labeling set provide a
-        pre(state, label) method, as for example pre(state, action) in
-        the case of closed transition systems.
+        Edge labels are ignored.
         
         If multiple states provided,
         then union Post(s) for s in states provided.
@@ -229,9 +226,17 @@ class States(object):
           - L{pre}
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        
+        @param states:
+          - None, so initial states returned
+          - single state or
+          - set of states or
 
         @rtype: set
         """
+        if states is None:
+            return set(self.initial)
+        
         states = self._single_state2singleton(states)
         
         successors = set()
@@ -532,7 +537,10 @@ class Transitions(object):
 
             If C{adj2states} includes a state not in sys.states,
             no transition is added and an exception raised.
-        @type adj2states: list of existing states
+        @type adj2states: either of:
+            - C{dict} from adjacency matrix indices to
+              existing, or
+            - C{list} of existing states
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -734,29 +742,39 @@ class LabeledDiGraph(nx.MultiDiGraph):
             L_i : V -> D_i
             
         each from vertices C{V} to some co-domain C{D_i}.
-
-        Each labeling function is defined by
-        a tuple C{(L_i, D_i, setter)}:
-
-          - C{L_i} is a C{str} naming the labeling function.
-
-          - C{D_i} implements C{__contains__}
-              to enable checking label validity.
-              If you want co-domain C{D_i} to be extensible,
-              it must implement C{add}.
-
-          - C{setter}: 3 cases:
-
-            - if 2-tuple C{(L_i, D_i)} provided,
-              then no C{setter} attributes created
-
-            - if C{setter} is C{True},
-              then an attribute C{self.L_i} is created
-              pointing at the given co-domain C{D_i}
-
-            - Otherwise an attribute C{self.Li}
-              is created pointing at the given C{setter}.
-
+        
+        Each labeling function is defined by a C{dict}
+        with the required key-value pairs:
+        
+          - C{name : A} is a C{str}
+            naming the labeling function.
+            
+          - C{values : B} implements C{__contains__}
+            used to check label validity.
+            
+            If you want the codomain C{B} to be
+            extensible even after initialization,
+            it must implement method C{add}.
+          
+        and the optional key-value pairs:
+          
+          - C{setter : C} with 3 possibilities:
+            
+            - if absent,
+              then no C{setter} attribute is created
+            
+            - otherwise an attribute C{self.A}
+              is created, pointing at:
+              
+                - the given co-domain C{B}
+                  if C{C is True}
+                
+                - C{C}, otherwise.
+          
+          - C{default : d} is a value in C{B}
+            to be returned for node and edge labels
+            not yet explicitly specified by the user.
+        
         Be careful to avoid name conflicts with existing
         networkx C{MultiDiGraph} attributes.
         @type node_label_types: C{[(L_i, D_i, setter), ...]}
@@ -776,9 +794,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
             labeling function.
         @type max_outdegree_per_label: int
         """
-        self._state_label_def = self._init_labeling(node_label_types)
-        self._transition_label_def = self._init_labeling(edge_label_types)
-            
+        node_labeling, node_defaults = self._init_labeling(node_label_types)
+        edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
+        
+        self._state_label_def = node_labeling
+        self._node_label_defaults = node_defaults
+        
+        self._transition_label_def = edge_labeling
+        self._edge_label_defaults = edge_defaults
+        
         # temporary hack until rename
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
@@ -808,30 +832,25 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param label_types: see L{__init__}.
         """
         labeling = dict()
+        defaults = dict()
         
         if label_types is None:
             logger.debug('no label types passed')
-            return labeling
+            return labeling, defaults
         
         if not label_types:
             logger.debug('label types absent (given: ' +
                          str(label_types) + ')')
-            return labeling
+            return labeling, defaults
         
         label_types = list(label_types)
         
         for label_type in label_types:
-            if len(label_type) == 2:
-                type_name, codomain = label_type
-                setter = None
-            elif len(label_type) == 3:
-                type_name, codomain, setter = label_type
-            else:
-                msg = 'label_type can be 2 or 3-tuple, '
-                msg += 'got instead:\n\t' + str(label_type)
-                raise ValueError(msg)
-            
+            type_name = label_type['name']
+            codomain = label_type['values']
             labeling[type_name] = codomain
+            
+            setter = label_type.get('setter')
             
             if setter is None:
                 # don't create attribute unless told to do so
@@ -842,7 +861,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             else:
                 # custom setter
                 setattr(self, type_name, setter)
-        return labeling
+            
+            default_value = label_type.get('default')
+            
+            if default_value is not None:
+                defaults[type_name] = default_value
+                
+        return labeling, defaults
     
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         untyped_keys = set(typed_attr).difference(type_defs)
@@ -868,6 +893,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
+    
+    def is_consistent(self):
+        """Check if labels are consistent with their type definitions.
+        
+        Use case: removing values from a label type
+            can invalidate existing labels that use them.
+        
+        @rtype: bool
+        """
+        for node, attr_dict in self.nodes_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        for node_i, node_j, attr_dict in self.edges_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        return True
     
     def _update_attr_dict_with_attr(self, attr_dict, attr):
         if attr_dict is None:
@@ -898,6 +941,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
+        typed_attr.update(copy.deepcopy(self._node_label_defaults) )
+        
         typed_attr.update(attr_dict) # type checking happens here
         
         logger.debug('node typed_attr: ' + str(typed_attr))
@@ -973,6 +1018,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
+        typed_attr.update(copy.deepcopy(self._edge_label_defaults) )
+        
         typed_attr.update(attr_dict) # type checking happens here
         
         logger.debug('Given: attr_dict = ' + str(attr_dict))
@@ -1119,24 +1166,32 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
+
+    def remove_deadends(self):
+        """Recursively delete nodes with no outgoing transitions.
+        """
+        s = {1}
+        while s:
+            s = {n for n in self if not self.succ[n]}
+            self.states.remove_from(s)
     
-    def dot_str(self, wrap=10):
+    def dot_str(self, wrap=10, **kwargs):
         """Return dot string.
         
         Requires pydot.        
         """
         from .export import graph2dot
-        
-        return graph2dot.graph2dot_str(self, wrap)
+        return graph2dot.graph2dot_str(self, wrap, **kwargs)
     
     def save(self, filename=None, fileformat=None,
              rankdir='LR', prog=None,
-             wrap=10, latex=False):
+             wrap=10, latex=False, tikz=False):
         """Save image to file.
         
         Recommended file formats:
         
             - pdf, eps
+            - tikz for use with dot2tex and/or dot2texi
             - png, gif
             - svg (can render LaTeX labels with inkscape export)
             - dot
@@ -1150,7 +1205,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         Requires
         ========
-        dot, pydot
+          - graphviz dot: http://www.graphviz.org/
+          - pydot: https://pypi.python.org/pypi/pydot
+          
+        and for tikz:
+          
+          - dot2tex: https://pypi.python.org/pypi/dot2tex
+          - dot2texi: http://www.ctan.org/pkg/dot2texi
+            (to automate inclusion)
         
         See Also
         ========
@@ -1222,7 +1284,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         from .export import graph2dot
         graph2dot.save_dot(self, filename, fileformat, rankdir,
-                           prog, wrap, latex)
+                           prog, wrap, latex=latex, tikz=tikz)
         
         return True
     
