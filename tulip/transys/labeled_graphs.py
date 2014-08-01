@@ -1,5 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
-# and 2014 The Regents of the University of Michigan
+# Copyright (c) 2013 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -13,9 +12,10 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the copyright holder(s) nor the names of its 
-#    contributors may be used to endorse or promote products derived 
-#    from this software without specific prior written permission.
+# 3. Neither the name of the California Institute of Technology nor
+#    the names of its contributors may be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -410,9 +410,6 @@ class States(object):
     
     def is_blocking(self, state):
         """Check if state has outgoing transitions for each label.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -659,7 +656,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     first make sure no state (or edge) is labeled with it.
     
     Multiple edges with the same C{attr_dict} are not possible.
-    So the difference from C{networkx.MultiDiGraph} is that
+    So the difference from C{networkx.MultiDigraph} is that
     the C{dict} of edges between u,v is a bijection.
     
     Between two nodes either:
@@ -855,17 +852,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
         logger.debug(msg)
         
         if untyped_keys:
-            msg = 'The following edge attributes:\n' +\
-                  str({k:typed_attr[k] for k in untyped_keys}) +'\n' +\
-                  'are not allowed.\n' +\
-                  'Currently the allowed attributes are:' +\
-                  ', '.join([str(x) for x in type_defs])
+            msg = 'Given untyped edge attributes:\n\t' +\
+                  str({k:typed_attr[k] for k in untyped_keys}) +'\n\t'
             if check:
-                msg += '\nTo set attributes not included '+\
-                       'in the existing types, pass: check = False'
+                msg += '\nTo allow untyped annotation, pass: check = False'
                 raise AttributeError(msg)
             else:
-                msg += '\nAllowed because you passed: check = True'
+                msg += 'Allowed because you passed: check = True'
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
@@ -931,11 +924,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """Use a L{TypedDict} as attribute dict.
         
           - Raise ValueError if C{u} or C{v} are not already nodes.
-          - Raise Exception if edge (u, v, {}) exists.
+          - Raise Exception if edge (u, v, {}).
           - Log warning if edge (u, v, attr_dict) exists.
           - Raise ValueError if C{attr_dict} contains typed key with invalid value.
           - Raise AttributeError if C{attr_dict} contains untyped keys,
-            unless C{check=False}.
+            unless C{check=True}.
         
         Each label defines a different labeled edge.
         So to "change" the label, either:
@@ -950,7 +943,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Notes
         =====
         1. Argument C{key} has been removed compared to
-           C{networkx.MultiDiGraph.add_edge}, because edges are defined
+           C{networkx.MutliDigraph.add_edge}, because edges are defined
            by their labeling, i.e., multiple edges with same labeling
            are not allowed.
         
@@ -1036,7 +1029,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
         
-        For details see C{networkx.MultiDiGraph.add_edges_from}.
+        For details see C{networkx.MultiDigraph.add_edges_from}.
         Only difference is that only 2 and 3-tuple edges allowed.
         Keys cannot be specified, because a bijection is maintained.
         
@@ -1084,7 +1077,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                    if data == attr_dict}
         for key in rm_keys:
             self.remove_edge(u, v, key=key)
-    
+
     def remove_labeled_edges_from(self, labeled_ebunch, attr_dict=None, **attr):
         """Remove labeled edges.
         
@@ -1121,14 +1114,23 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
 
-    def remove_deadends(self):
-        """Recursively delete nodes with no outgoing transitions.
+    def trim_dead_states(self):
+        """Recursively delete states with no outgoing transitions.
+
+        Merge and update transition listings as needed.  N.B., this
+        method might change IDs after trimming to ensure indexing still
+        works (since self.states attribute is a list).
         """
-        s = {1}
-        while s:
-            s = {n for n in self if not self.succ[n]}
-            self.states.remove_from(s)
-                    
+        changed = True  
+        # Becomes False when no deletions have been made.
+
+        while changed:
+            changed = False
+            for node in self.nodes():
+                if self.neighbors(node) == []:
+                    changed = True
+                    self.states.remove(node) 
+
     def dot_str(self, wrap=10):
         """Return dot string.
         
@@ -1418,9 +1420,6 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
         =========
           - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
           - networkx.algorithms.operators.product.strong_product
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         # An issue here is that transitions are possible both
@@ -1488,3 +1487,4 @@ def prepend_with(states, prepend_str):
         return states
     
     return [prepend_str +str(s) for s in states]
+    

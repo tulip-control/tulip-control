@@ -49,7 +49,7 @@ except Exception, e:
     logger.error(e)
     quiver = None
 
-def _indent(s, n):
+def indent(s, n):
     s = s.split('\n')
     w = n*' '
     return w + ('\n'+w).join(s)
@@ -181,12 +181,12 @@ class LtiSysDyn(object):
 
     def __str__(self):
         n = 3
-        output = 'A =\n' + _indent(str(self.A), n)
-        output += '\nB =\n' + _indent(str(self.B), n)
-        output += '\nE =\n' + _indent(str(self.E), n)
-        output += '\nK =\n' + _indent(str(self.K), n)
-        output += '\nUset =\n' + _indent(str(self.Uset), n)
-        output += '\nWset =\n' + _indent(str(self.Wset), n)
+        output = 'A =\n' + indent(str(self.A), n)
+        output += '\nB =\n' + indent(str(self.B), n)
+        output += '\nE =\n' + indent(str(self.E), n)
+        output += '\nK =\n' + indent(str(self.K), n)
+        output += '\nUset =\n' + indent(str(self.Uset), n)
+        output += '\nWset =\n' + indent(str(self.Wset), n)
         return output
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
@@ -291,11 +291,11 @@ class PwaSysDyn(object):
         s += 30 * '-' + 2*'\n'
         
         s += 3*' ' + 'Domain:\n\n'
-        s += _indent(str(self.domain), n=6) + '\n'
+        s += indent(str(self.domain), n=6) + '\n'
     
         for i, sys in enumerate(self.list_subsys):
             s += 3*' ' + 'Subsystem: ' + str(i) +'\n'
-            s += _indent(str(sys), n=6)
+            s += indent(str(sys), n=6)
         return s
     
     @classmethod
@@ -445,12 +445,12 @@ class SwitchedSysDyn(object):
         s += 6*' ' + pformat(self.disc_sys_labels, indent=3) + 2*'\n'
         
         s += 'Continuous State Space:\n\n'
-        s += _indent(str(self.cts_ss), 4) + '\n'
+        s += indent(str(self.cts_ss), 4) + '\n'
         
         s += 'Dynamics:\n'
         for mode, pwa in self.dynamics.iteritems():
             s += 4*' ' + 'mode: ' + str(mode) + '\n'
-            s += 4*' ' + 'dynamics:\n' + _indent(str(pwa), 8) +'\n\n'
+            s += 4*' ' + 'dynamics:\n' + indent(str(pwa), 8) +'\n\n'
         return s
     
     def _check_labels(self, n, labels):

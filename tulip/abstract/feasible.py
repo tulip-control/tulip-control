@@ -181,6 +181,7 @@ def solve_closed_loop(
     s0 = pc.reduce(s0)
     return s0
 
+
 def solve_open_loop(
     P1, P2, ssys, N,
     trans_set=None, max_num_poly=5
@@ -210,6 +211,7 @@ def solve_open_loop(
             s0 = s0.union(cur_s0, check_convex=True)
     
     return s0
+
 
 def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     """Compute s0 for open-loop polytope to polytope N-reachability.

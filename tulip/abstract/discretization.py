@@ -52,9 +52,10 @@ import polytope as pc
 
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
-from .feasible import is_feasible, solve_feasible
-from .plot import plot_ts_on_partition
+from tulip.abstract.prop2partition import PropPreservingPartition, pwa_partition, part2convex
+from tulip.abstract.feasible import is_feasible, solve_feasible
+from tulip.abstract.plot import plot_ts_on_partition
+from tulip.abstract import prop2partition as p2p
 
 try:
     import matplotlib.pyplot as plt
@@ -426,6 +427,77 @@ class AbstractPwa(object):
             else:
                 logger.info('correct transition: ' + msg)
 
+class AbstractModeSwitched(object):
+    """Abstraction of SwitchedSysDyn, with mode-specific and common info.
+    
+    Attributes:
+    
+      - ppp: merged partition, if any
+          Preserves both propositions and dynamics
+    
+      - ts: common TS, if any
+      
+      - ppp2ts: map from C{ppp.regions} to C{ts.states}
+      
+      - modes: list of modes
+      
+    """
+    def __init__(
+        self, ppp=None, ts=None, ppp2ts=None,
+        modes=None
+        ):
+        if modes is None:
+            modes = dict()
+        
+        self.ppp = ppp
+        self.ts = ts
+        self.ppp2ts = ppp2ts
+        self.modes = modes
+    
+    def __str__(self):
+        s = 'Abstraction of switched system\n'
+        s += str('common PPP:\n') + str(self.ppp)
+        s += str('common ts:\n') + str(self.ts)
+        
+        for mode in self.modes:
+            s += 'mode: ' + str(mode)
+        
+        return s
+
+    def plot(self, show_ts=False, only_adjacent=False):
+        
+        axs = []
+        color_seed = 0
+        
+        # merged partition exists ?
+        if self.ppp is not None:
+            for mode in self.modes:
+                env_mode, sys_mode = mode
+                edge_label = {'env_actions':env_mode,
+                              'sys_actions':sys_mode}
+                
+                ax = _plot_abstraction(
+                    self, show_ts=False, only_adjacent=False,
+                    color_seed=color_seed
+                )
+                plot_ts_on_partition(
+                    self.ppp, self.ts, self.ppp2ts,
+                    edge_label, only_adjacent, ax
+                )
+                axs += [ax]
+        
+        # plot mode partitions
+        # for mode, ab in self.modes.iteritems():
+        #     ax = ab.plot(show_ts, only_adjacent, color_seed)
+        #     ax.set_title('Abstraction for mode: ' + str(mode))
+        #     axs += [ax]
+        
+        #if isinstance(self.ts, dict):
+        #    for ts in self.ts:
+        #        ax = ts.plot()
+        #        axs += [ax]
+        return axs
+
 def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
     if ab.ppp is None or ab.ts is None:
         warnings.warn('Either ppp or ts is None.')
@@ -658,7 +730,7 @@ def discretize(
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
-        
+        #logger.warning('\nVol2: %2f '%vol2)
         # if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
         #     logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
         #     diff = pc.mldivide(si, S0, save=True)
@@ -733,13 +805,16 @@ def discretize(
                 # keep track of PWA subsystems map to new states
                 if ispwa:
                     subsys_list.append(subsys_list[i])
-            n_cells = len(sol)
+            #n_cvol2ells = len(sol)
+            n_cells=len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
+
+            #logger.warning('\n n_cells %1f:'%n_cells)
             
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
-            transitions[i, :] = np.zeros(n_cells)
+            transitions[i, :] = np.zeros(n_cells) 
             for r in new_idx:
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
@@ -849,6 +924,8 @@ def discretize(
             assert(tmp_part.is_partition() )
         
         n_cells = len(sol)
+        
+
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
         progress += [progress_ratio]
         
@@ -997,11 +1074,7 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 
 # DEFUNCT until further notice
 def discretize_overlap(closed_loop=False, conservative=False):
-    """default False.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
+    """default False."""
     raise NotImplementedError
 #         
 #         if rdiff < abs_tol:
@@ -1243,7 +1316,7 @@ def discretize_switched(
         plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
     
     return merged_abstr
-
+        
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
@@ -1255,7 +1328,7 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     
     axs = swab.plot(show_ts, only_adjacent)
     n = len(swab.modes)
-    assert(len(axs) == 2*n)
+    #assert(len(axs) == 2*n)
     
     # annotate
     for ax in axs:
@@ -1263,7 +1336,7 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     
     # save mode partitions
     for ax, mode in zip(axs[:n], swab.modes):
-        fname = 'merged_' + str(mode) + '.pdf'
+        fname = 'merged_' +str(mode) + '.pdf'
         ax.figure.savefig(fname)
     
     # save merged partition
@@ -1417,9 +1490,6 @@ def multiproc_merge_partitions(abstractions):
     """LOGTIME in #processors parallel merging.
     
     Assuming sufficient number of processors.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
 

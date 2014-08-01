@@ -18,7 +18,7 @@
 #    written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLxUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH
 # OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -400,6 +400,86 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         adj = adj,
         prop_regions = ppp.prop_regions
     )
+
+def post_area(ppp, sys_dyn, N=1, abs_tol=1e-7):
+
+    list_post_area={}
+    list_extp_d=pc.extreme(sys_dyn.Wset)
+
+    if list_extp_d==None:
+        for i in range(0,len(ppp.regions)):
+            list_post_area[i]=[]
+            p_current=ppp.regions[i]
+            for m in range(len(ppp.regions[i].list_poly)):
+                extp=pc.extreme(p_current.list_poly[m])
+                j=1
+                post_extp_N=extp
+                while j <=N:
+                     post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T
+                     #post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+np.vstack([sys_dyn.K.T,sys_dyn.K.T,sys_dyn.K.T,sys_dyn.K.T])
+                     j+=1
+                post_area_hull=pc.qhull(post_extp_N)
+                list_post_area[i].append(post_area_hull)
+           
+    else:
+        for i in range(0,len(ppp.regions)):
+            list_post_area[i]=[]
+            list_post_extp_d =[]
+            p_current=ppp.regions[i]
+            extp=pc.extreme(p_current.list_poly[0])
+            #post_extp_n=np.zeros([len(list_extp_d),len(list_extp_d)])
+            #post_extp_n=[]
+            for m in range(0, len(list_extp_d)):
+                post_extp_N=extp
+                j=1
+                while j<= N:
+                     post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+np.dot(list_extp_d[m], sys_dyn.E.T)
+                     j+=1
+                list_post_extp_d.append(post_extp_N)
+                if m==0:
+                    post_extp_n = list_post_extp_d[m]
+                else:
+                    post_extp_n=np.vstack([post_extp_n, list_post_extp_d[m]])
+                #post_extp_n=post_extp_N.copy()
+                #post_extp_n=np.vstack([post_extp_n, list_post_extp_d[m]])
+            #post_extp_n=np.vstack([list_post_extp_d[0],list_post_extp_d[1],list_post_extp_d[2],list_post_extp_d[3]])
+            post_area_hull=pc.qhull(post_extp_n)
+            list_post_area[i].append(post_area_hull)
+    
+    return list_post_area
+
+def get_transitions(ppp, post_area):
+
+    transitions = np.zeros([len(ppp.regions),(len(ppp.regions)+1)], dtype = int)
+
+    list_intersect_region=[]
+    for i in range(0,len(ppp.regions)):
+        for j in range(0,len(ppp.regions)):
+            for m in range(len(ppp.regions[i].list_poly)):
+                inters_region=pc.intersect(ppp.regions[j],post_area[i][m])
+                if pc.is_empty(inters_region)== False:
+                    trans=1
+                    break
+                else:
+                    trans=0
+            if trans==1:
+                transitions[i,j]=1
+            else:
+                transitions[i,j]=0
+                
+    for j in range(0,len(ppp.regions)):
+        for m in range(len(ppp.regions[j].list_poly)):
+            inters_region=pc.mldivide(post_area[j][m],ppp.domain)
+            if pc.is_empty(inters_region)== False:
+                trans=1
+                break
+            else:
+                trans=0
+        if trans==1:
+            transitions[j,len(ppp.regions)]=1
+        else:
+            transitions[j,len(ppp.regions)]=0
+    return transitions
 
 #### Helper functions ####
 def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):

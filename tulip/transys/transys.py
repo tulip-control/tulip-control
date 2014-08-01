@@ -99,8 +99,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     The system and environment actions associated with an edge
     of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same L{(open) FTS
-    <OpenFiniteTransitionSystem>}.
+    and their sets are encapsulated within the same (open) L{FTS}.
     
     Example
     =======
@@ -310,7 +309,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             if label:
                 self.states[state]['ap'] = label['ap']
         
-        self.states.initial |= set(other.states.initial)
+        self.states.initial |= other.states.initial()
         
         # copy extra transitions (be careful w/ labeling)
         for (from_state, to_state, label_dict) in \
@@ -428,25 +427,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
     # operations between transition systems    
     def intersection(self):
         """Conjunction with another FTS.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         
     def difference(self):
         """Remove a sub-FTS.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
     def composition(self):
         """Compositions of FTS, with state replaced by another FTS.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -458,9 +448,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
             - If C{int}, then project on the designated element of
                 the tuple comprising each state
         @type factor: None or int
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -471,9 +458,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         ========
         L{is_simulation}
         
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-
         @type state_sequence: inputs="random"
             | given array
         """
@@ -493,18 +477,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
         See Also
         ========
         L{simulate}
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
     def loadSPINAut():
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
         raise NotImplementedError
     
     def _save(self, path, fileformat):
@@ -656,6 +632,137 @@ class OpenFTS(OpenFiniteTransitionSystem):
     """
     def __init__(self, *args, **kwargs):
         OpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
+
+class AugmentedOpenFiniteTransitionSystem(LabeledDiGraph):
+    """Augmented Open Finite Transition System modeling an Augmented system.
+    
+    Analogous to L{FTS}, but for open systems comprised of
+    the system and its environment.
+    
+    Please refer to L{FiniteTransitionSystem} for usage details.
+    
+    The only significant difference is in transition labeling.
+    For closed systems, each transition is labeled with a system action.
+    So each transition label comprises of a single sublabel,
+    the system action.
+    
+    For open systems, each transition is labeled with 2 sublabels:
+        - The first sublabel is a system action,
+        - the second an environment action.
+    
+    Constraints on actions can be defined
+    similarly to L{FTS} actions by setting the fields:
+    
+        - ofts.env_actions_must
+        - ofts.sys_actions_must
+    
+    The default constraint is 'xor'.
+    For more details see L{FTS}.
+   
+    Requires Progress map to have the mode name in it. 
+    See Also
+    ========
+    L{FiniteTransitionSystem}, L{OpenFiniteTransitionSystem}
+    """
+    def __init__(self, env_actions=None, sys_actions=None, **args):
+        """Initialize Open Finite Transition System.
+
+        @param env_actions: environment (uncontrolled) actions,
+            defined as C{edge_label_types} in L{LabeledDiGraph.__init__}
+
+        @param sys_actions: system (controlled) actions, defined as
+            C{edge_label_types} in L{LabeledDiGraph.__init__}
+        """
+        if env_actions is None:
+            env_actions = [('env_actions', MathSet(), True)]
+        if sys_actions is None:
+            sys_actions = [('sys_actions', MathSet(), True)]
+                
+        ap_labels = PowerSet()
+        pm_labels = PowerSet()
+        action_types = env_actions + sys_actions
+        
+        node_label_types = [('ap', ap_labels, ap_labels.math_set),('pm',pm_labels,pm_labels.math_set)]
+        edge_label_types = action_types
+        
+        LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
+        
+        # make them available also via an "actions" dicts
+        # name, codomain, *rest = x
+        actions = {x[0]:x[1] for x in edge_label_types}
+        
+        if 'actions' in actions:
+            msg = '"actions" cannot be used as an action type name,\n'
+            msg += 'because if an attribute for this action type'
+            msg += 'is requested,\n then it will conflict with '
+            msg += 'the dict storing all action types.'
+            raise ValueError(msg)
+                
+        self.actions = actions
+        self.atomic_propositions = self.ap
+        self.aps = self.atomic_propositions
+        self.progress_map=self.pm
+        self.pms=self.progress_map
+        
+        # action constraint used in synth.synthesize
+        self.env_actions_must = 'xor'
+        self.sys_actions_must = 'xor'
+        
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+            'pm':'',
+           'type?label':'',
+           'separator':'\\n'
+        }
+        self._transition_dot_label_format = {
+            'sys_actions':'sys',
+            'env_actions':'env',
+            'type?label':':',
+            'separator':'\\n'
+        }
+        
+        self._transition_dot_mask = dict()
+        self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'ofts'
+    
+    def __str__(self):
+        """Get informal string representation."""
+        s = _hl +'\nFinite Transition System (open) : '
+        s += self.name +'\n' +_hl +'\n'
+        s += 'Atomic Propositions:\n'
+        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
+        s += 'Progress Map:\n'
+        s += pformat(self.progress_map, indent=3) +2*'\n'
+        s += 'States & State Labels w/ Progress Map (\in 2^AP):\n'
+        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        for action_type, codomain in self.actions.iteritems():
+            if 'sys' in action_type:
+                s += 'System Action Type: ' + str(action_type) +\
+                     ', with possible values: ' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            elif 'env' in action_type:
+                s += 'Environment Action Type: ' + str(action_type) +\
+                     ', with possible values:\n\t' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            else:
+                s += 'Action type controlled by neither env nor sys\n' +\
+                     ' (will cause you errors later)' +\
+                     ', with possible values:\n\t'
+                s += pformat(codomain, indent=3) +2*'\n'
+        s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
+        s += pformat(self.transitions(data=True), indent=3)
+        s += '\n' +_hl +'\n'
+        
+        return s
+
+class AOFTS(AugmentedOpenFiniteTransitionSystem):
+    """Alias to L{transys.OpenFiniteTransitionSystem}.
+    """
+    def __init__(self, *args, **kwargs):
+        AugmentedOpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None):

@@ -42,6 +42,7 @@ from .feasible import is_feasible, solve_feasible
 from .prop2partition import (
     prop2part, part2convex,
     pwa_partition, add_grid,
+    post_area, get_transitions,
     PropPreservingPartition, PPP
 )
 

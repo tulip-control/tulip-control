@@ -55,30 +55,6 @@ def is_valuation(ports, valuations):
         if not ok:
             raise TypeError('Not a valuation.')
 
-def create_machine_ports(spc_vars):
-    """Create proper port domains of valuations, given port types.
-
-    @param spc_vars: port names and types inside tulip.
-        For arbitrary finite types the type can be a list of strings,
-        instead of a range of integers.
-        These are as originally defined by the user or synth.
-    """
-    ports = OrderedDict()
-    for env_var, var_type in spc_vars.items():
-        if var_type == 'boolean':
-            domain = {0,1}
-        elif isinstance(var_type, tuple):
-            # integer domain
-            start, end = var_type
-            domain = set(range(start, end+1))
-        elif isinstance(var_type, list):
-            # arbitrary finite domain defined by list var_type
-            domain = set(var_type)
-
-        ports[env_var] = domain
-    return ports
-
-
 class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     
@@ -297,9 +273,6 @@ class FiniteStateMachine(LabeledDiGraph):
         
         @param state: state to be checked as blocking
         @type state: single state to be checked
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -317,20 +290,10 @@ class FiniteStateMachine(LabeledDiGraph):
 
     # operations between state machines
     def sync_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
         raise NotImplementedError
         
     def async_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
+        raise NotImplementedError      
 
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine."""
@@ -359,11 +322,6 @@ class MooreMachine(FiniteStateMachine):
     valuation: assignment of values to each port
     """
     def __init__(self, **args):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
         FiniteStateMachine.__init__(self, **args)
         
         self.dot_node_shape = {'normal':'ellipse'}
@@ -561,7 +519,7 @@ class MealyMachine(FiniteStateMachine):
             if out_port_name in masks:
                 mask_func = masks[out_port_name]
                 self._transition_dot_mask[out_port_name] = mask_func
-    
+
     def simulate(
             self, inputs_sequence='manual', iterations=100,
             current_state=None
@@ -610,7 +568,7 @@ class MealyMachine(FiniteStateMachine):
                 msg += 'before calling .simulate.'
                 print(msg)
             else:
-                self.states.current = set(self.states.initial)
+                self.states.select_current(self.states.initial)
         
         if isinstance(inputs_sequence, executions.MachineInputSequence):
             self._guided_simulation(inputs_sequence)
@@ -745,11 +703,7 @@ class Mealy(MealyMachine):
 pure = {'present', 'absent'}
 
 def moore2mealy(moore_machine, mealy_machine):
-    """Convert Moore machine to equivalent Mealy machine
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
+    """Convert Moore machine to equivalent Mealy machine"""
     raise NotImplementedError
 
 ####

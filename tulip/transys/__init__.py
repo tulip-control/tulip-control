@@ -43,7 +43,8 @@ from .labeled_graphs import prepend_with
 
 from .transys import (
     FiniteTransitionSystem, FTS,
-    OpenFiniteTransitionSystem, OpenFTS,
+    OpenFiniteTransitionSystem, OpenFTS, 
+    AugmentedOpenFiniteTransitionSystem, AOFTS,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
 
