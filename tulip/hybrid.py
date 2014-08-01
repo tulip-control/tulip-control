@@ -189,7 +189,8 @@ class LtiSysDyn(object):
         output += '\nWset =\n' + _indent(str(self.Wset), n)
         return output
     
-    def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
+    def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
+             **kwargs):
         if quiver is None:
             warn('pyvectorized not found. No plotting.')
             return
@@ -204,7 +205,8 @@ class LtiSysDyn(object):
         
         if show_domain:
             self.domain.plot(ax, color)
-        quiver(x, v, ax)
+        
+        quiver(x, v, ax, **kwargs)
         
         return ax
 
@@ -304,13 +306,13 @@ class PwaSysDyn(object):
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
     
-    def plot(self, ax=None, show_domain=True):
+    def plot(self, ax=None, show_domain=True, **kwargs):
         if ax is None:
             ax, fig = newax()
         
         for subsystem in self.list_subsys:
             subsystem.plot(ax, color=np.random.rand(3),
-                           show_domain=show_domain)
+                           show_domain=show_domain, **kwargs)
         return ax
 
 class SwitchedSysDyn(object):
