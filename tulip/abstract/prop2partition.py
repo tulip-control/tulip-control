@@ -46,6 +46,8 @@ import polytope as pc
 from tulip import transys as trs
 from .plot import plot_partition
 
+from tulip.graphics import newax
+
 try:
     import matplotlib as mpl
 except Exception, e:
@@ -608,7 +610,7 @@ class PropPreservingPartition(pc.MetricPartition):
             return
         
         if ax is None:
-            ax = mpl.pyplot.subplot(111)
+            ax, fig = newax()
         
         l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
