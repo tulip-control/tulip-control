@@ -190,12 +190,12 @@ class LtiSysDyn(object):
         return output
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
-             **kwargs):
+             res=(5, 5), **kwargs):
         if quiver is None:
             warn('pyvectorized not found. No plotting.')
             return
         
-        (x, res) = pc.grid_region(self.domain)
+        (x, res) = pc.grid_region(self.domain, res=res)
         n = self.A.shape[0]
         DA = self.A - np.eye(n)
         v = DA.dot(x) + self.K
