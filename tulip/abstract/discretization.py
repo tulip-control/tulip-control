@@ -587,7 +587,7 @@ def discretize(
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
-            file_extension = 'png'
+            file_extension = 'pdf'
         
     iter_count = 0
     
