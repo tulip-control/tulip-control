@@ -602,7 +602,7 @@ class PropPreservingPartition(pc.MetricPartition):
             ax, plot_numbers, color_seed, show
         )
     
-    def plot_props(self, ax=None):
+    def plot_props(self, ax=None, text_color='yellow'):
         """Plot labeled regions of continuous propositions.
         """
         if mpl is None:
@@ -620,7 +620,7 @@ class PropPreservingPartition(pc.MetricPartition):
             isect_poly = poly.intersect(self.domain)
             
             isect_poly.plot(ax, color='none', hatch='/')
-            isect_poly.text(prop, ax, color='yellow')
+            isect_poly.text(prop, ax, color=text_color)
         return ax
 
 class PPP(PropPreservingPartition):
