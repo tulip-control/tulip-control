@@ -569,6 +569,46 @@ class MealyMachine(FiniteStateMachine):
             if port_name in masks:
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
+    
+    def reaction(self, from_state, inputs):
+        """Return next state and output, when reacting to given inputs.
+        
+        The machine must be deterministic.
+        (for each state and input at most a single transition enabled,
+         this notion does not coincide with output-determinism)
+        
+        Not exactly a wrapper of L{LabeledDiGraph.transitions.find},
+        because it matches only that part of an edge label
+        that corresponds to the inputs.
+        
+        @param from_state: transition starts from this state.
+        @type from_state: element of C{self.states}
+        
+        @param inputs: C{dict} assigning a valid value to each input port.
+        @type inputs: {'port_name':port_value, ...}
+        
+        @return: output values and next state.
+        @rtype: (outputs, next_state)
+          where C{outputs}: C{{'port_name':port_value, ...}}
+        """
+        trans = self.transitions.find([from_state])
+        
+        enabled_trans = set()
+        for i, j, attr_dict in trans:
+            # match only inputs (explicit valuations, not symbolic)
+            trans_inputs = project_dict(attr_dict, self.inputs)
+            
+            if trans_inputs == inputs:
+                enabled_trans.add((i, j, attr_dict))
+        
+        # must be deterministic
+        assert(len(enabled_trans) <= 1)
+        
+        _, next_state, attr_dict  = enabled_trans[0]
+        
+        outputs = project_dict(attr_dict, self.outputs)
+        
+        return (next_state, outputs)
 
 def moore2mealy(moore):
     """Convert Moore machine to equivalent Mealy machine.
