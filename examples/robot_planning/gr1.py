@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# robot_gr1.py - example of direct GR(1) specification
+# gr1.py - example of direct GR(1) specification,
+#          using only boolean variables.
 #
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 """
@@ -109,11 +110,6 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Here we make use of jtlv.
 #
 ctrl = synth.synthesize('jtlv', specs)
-
-
-# if the spec is unrealizable, ctrl is a list of counterexamples
-if ctrl is None:
-    sys.exit()
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.

@@ -12,10 +12,32 @@ import os.path
 ###########################################
 # (see notes below.)
 
+GR1C_MIN_VERSION = (0,7,4)
 def check_gr1c():
     try:
-        subprocess.call(["gr1c", "-V"], stdout=subprocess.PIPE)
+        v_str = subprocess.check_output(["gr1c", "-V"])
     except OSError:
+        return False
+    try:
+        v_str = v_str.split()[1]
+        major, minor, micro = v_str.split(".")
+        major = int(major)
+        minor = int(minor)
+        micro = int(micro)
+        if not (major > GR1C_MIN_VERSION[0]
+                or (major == GR1C_MIN_VERSION[0]
+                    and (minor > GR1C_MIN_VERSION[1]
+                         or (minor == GR1C_MIN_VERSION[1]
+                             and micro >= GR1C_MIN_VERSION[2])))):
+            return False
+    except:
+        return False
+    return True
+
+def check_glpk():
+    try:
+        import cvxopt.glpk
+    except ImportError:
         return False
     return True
 
@@ -52,7 +74,12 @@ def check_pydot():
 #           True to be success, and False failure.
 other_depends = {}
 
-gr1c_msg = 'gr1c not found.\n' +\
+glpk_msg = 'GLPK seems to be missing\n' +\
+    'and thus apparently not used by your installation of CVXOPT.\n' +\
+    'If you\'re interested, see http://www.gnu.org/s/glpk/'
+gr1c_msg = 'gr1c not found or of version prior to ' +\
+    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
+    '.\n' +\
     'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
     'see http://scottman.net/2012/gr1c'
 mpl_msg = 'matplotlib not found.\n' +\
@@ -70,7 +97,8 @@ pydot_msg = 'pydot not found.\n' +\
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
+optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+             'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
@@ -166,6 +194,11 @@ if check_deps:
         except:
             print('ERROR: NetworkX not found.')
             raise
+        try:
+            import cvxopt
+        except:
+            print('ERROR: CVXOPT not found.')
+            raise
 
         # Other dependencies
         for (dep_key, dep_val) in other_depends.items():
@@ -228,7 +261,8 @@ if perform_setup:
             'numpy >= 1.7',
             'polytope >= 0.1.0',
             'ply >= 3.4',
-            'networkx >= 1.6'
+            'networkx >= 1.6',
+            'cvxopt'
         ],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',

@@ -12,7 +12,11 @@ parsetab.py
 *.PNG
 *.pdf
 *.PDF
+*.dot
+*.swp
 /build/
 /dist/
 /tulip/commit_hash.txt
 /MANIFEST
+/.coverage
+/tests/cover/

@@ -55,6 +55,30 @@ def is_valuation(ports, valuations):
         if not ok:
             raise TypeError('Not a valuation.')
 
+def create_machine_ports(spc_vars):
+    """Create proper port domains of valuations, given port types.
+
+    @param spc_vars: port names and types inside tulip.
+        For arbitrary finite types the type can be a list of strings,
+        instead of a range of integers.
+        These are as originally defined by the user or synth.
+    """
+    ports = OrderedDict()
+    for env_var, var_type in spc_vars.items():
+        if var_type == 'boolean':
+            domain = {0,1}
+        elif isinstance(var_type, tuple):
+            # integer domain
+            start, end = var_type
+            domain = set(range(start, end+1))
+        elif isinstance(var_type, list):
+            # arbitrary finite domain defined by list var_type
+            domain = set(var_type)
+
+        ports[env_var] = domain
+    return ports
+
+
 class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
     

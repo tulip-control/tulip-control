@@ -1,4 +1,5 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,10 +13,9 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
-#    products derived from this software without specific prior
-#    written permission.
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
+#    from this software without specific prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -1121,22 +1121,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
 
-    def trim_dead_states(self):
-        """Recursively delete states with no outgoing transitions.
-
-        Merge and update transition listings as needed.  N.B., this
-        method might change IDs after trimming to ensure indexing still
-        works (since self.states attribute is a list).
+    def remove_deadends(self):
+        """Recursively delete nodes with no outgoing transitions.
         """
-        changed = True  
-        # Becomes False when no deletions have been made.
-
-        while changed:
-            changed = False
-            for node in self.nodes():
-                if self.neighbors(node) == []:
-                    changed = True
-                    self.states.remove(node)
+        s = {1}
+        while s:
+            s = {n for n in self if not self.succ[n]}
+            self.states.remove_from(s)
                     
     def dot_str(self, wrap=10):
         """Return dot string.

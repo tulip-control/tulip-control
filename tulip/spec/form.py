@@ -418,11 +418,11 @@ class GRSpec(LTL):
         result = self.copy()
         for varname in other.env_vars.keys():
             if result.env_vars.has_key(varname) and \
-                other[varname] != result.env_vars[varname]:
+                other.env_vars[varname] != result.env_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         for varname in other.sys_vars.keys():
             if result.sys_vars.has_key(varname) and \
-                other[varname] != result.sys_vars[varname]:
+                other.sys_vars[varname] != result.sys_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
