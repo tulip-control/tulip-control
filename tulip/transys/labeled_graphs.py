@@ -99,7 +99,7 @@ def test_common_bug(value, desired_value):
        raise Exception(msg)
 
 class States(object):
-    """Methods to manage states, initial states, current state.
+    """Methods to manage states and initial states.
     """
     def __init__(self, graph):
         """
@@ -108,7 +108,6 @@ class States(object):
         """
         self.graph = graph
         self.initial = []
-        self.current = []
     
     def __getitem__(self, state):
         return self.graph.node[state]
@@ -152,24 +151,6 @@ class States(object):
         s = SubSet(self)
         s |= states
         self._initial = s
-    
-    @property
-    def current(self):
-        """Return L{SubSet} of current states.
-        
-        Non-deterministic automata can have multiple current states.
-        """
-        return self._current
-    
-    @current.setter
-    def current(self, states):
-        """Set current states.
-        
-        If state not in states, exception raised.
-        """
-        s = SubSet(self)
-        s |= states
-        self._current = s
     
     def _warn_if_state_exists(self, state):
         if state in self:
