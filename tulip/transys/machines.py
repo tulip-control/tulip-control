@@ -609,6 +609,18 @@ class MealyMachine(FiniteStateMachine):
         outputs = project_dict(attr_dict, self.outputs)
         
         return (next_state, outputs)
+    
+    def run(self, from_state=None, input_sequences=None):
+        """Guided or interactive run.
+        
+        @param input_sequences: if C{None}, then call L{interactive_run},
+            otherwise call L{guided_run}.
+        """
+        if input_sequences is None:
+            interactive_run(self, from_state=from_state)
+        else:
+            guided_run(self, from_state=from_state,
+                       input_sequences=input_sequences)
 
 # note on non-determinism and simulation:
 # =====
