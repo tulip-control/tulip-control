@@ -417,7 +417,7 @@ def multiple_env_actions_test():
         },
         {
             'name':'env_bob',
-            'values':transys.MathSet({'left', 'right'})
+            'values':transys.MathSet({'bleft', 'bright'})
         }
     ]
     
@@ -425,13 +425,13 @@ def multiple_env_actions_test():
     sys.states.add_from({'s1', 's2', 's3'})
     sys.states.initial.add_from({'s1'})
     
-    sys.add_edge('s1', 's2', env_alice='left', env_bob='right')
-    sys.add_edge('s1', 's3', env_alice='right', env_bob='left') # at state 3 sys loses
-    sys.add_edge('s2', 's1', env_alice='left', env_bob='right')
+    sys.add_edge('s1', 's2', env_alice='left', env_bob='bright')
+    sys.add_edge('s1', 's3', env_alice='right', env_bob='bleft') # at state 3 sys loses
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
     
     logging.debug(sys)
     
-    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = right) )'}
+    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = bright) )'}
     sys_prog = {'loc = s1', 'loc = s2'}
     
     specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
