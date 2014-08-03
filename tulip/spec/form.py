@@ -97,11 +97,12 @@ class LTL(object):
         attribute by reference.
         """
         if formula is None:
-            formula = ""
+            formula = ''
         if input_variables is None:
             input_variables = dict()
         if output_variables is None:
             output_variables = dict()
+        
         self.formula = formula
         self.input_variables = input_variables
         self.output_variables = output_variables

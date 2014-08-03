@@ -1176,7 +1176,7 @@ def synthesize(
     elif option == 'jtlv':
         ctrl = jtlv.synthesize(specs)
     else:
-        raise Exception('Undefined synthesis option. '+\
+        raise Exception('Undefined synthesis option. ' +
                         'Current options are "jtlv" and "gr1c"')
     
     try:
@@ -1221,7 +1221,7 @@ def is_realizable(
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
     else:
-        raise Exception('Undefined synthesis option. '+\
+        raise Exception('Undefined synthesis option. ' +
                         'Current options are "jtlv" and "gr1c"')
     
     if r:
@@ -1260,6 +1260,7 @@ def spec_plus_sys(
                                   action_vars, bool_actions)
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
+    
     if env is not None:
         env_formula = env_to_spec(env, ignore_env_init, bool_states,
                                   action_vars, bool_actions)
