@@ -94,7 +94,6 @@ def test_sys_fts_bool_states():
         sys,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -117,7 +116,6 @@ def test_env_fts_bool_states():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -141,7 +139,6 @@ def test_sys_fts_int_states():
         sys,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -164,7 +161,6 @@ def test_env_fts_int_states():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -186,7 +182,6 @@ def test_sys_fts_no_actions():
         sys,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -202,7 +197,6 @@ def test_env_fts_bool_actions():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=True,
     )
     
@@ -226,7 +220,6 @@ def test_env_fts_int_actions():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -253,7 +246,6 @@ def test_env_ofts_bool_actions():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=True
     )
     
@@ -271,7 +263,6 @@ def test_sys_ofts_bool_actions():
         sys,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=True
     )
     
@@ -305,7 +296,6 @@ def test_env_ofts_int_actions():
         env,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     
@@ -321,7 +311,6 @@ def test_sys_ofts_int_actions():
         sys,
         ignore_initial=False,
         bool_states=False,
-        action_vars=('eact', 'act'),
         bool_actions=False
     )
     

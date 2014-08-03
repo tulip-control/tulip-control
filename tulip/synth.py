@@ -457,10 +457,7 @@ def actions2ints(actions, actionvar, min_one=False):
         
     return (action_ids, domain)
 
-def sys_to_spec(
-    sys, ignore_initial, bool_states,
-    action_vars, bool_actions
-):
+def sys_to_spec(sys, ignore_initial, bool_states, bool_actions):
     """Convert system's transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
@@ -490,17 +487,13 @@ def sys_to_spec(
                       sys_safety=sys_trans)
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
         return sys_open_fts2spec(
-            sys, ignore_initial, bool_states,
-            action_vars, bool_actions
+            sys, ignore_initial, bool_states, bool_actions
         )
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def env_to_spec(
-    env, ignore_initial, bool_states,
-    action_vars, bool_actions
-):
+def env_to_spec(env, ignore_initial, bool_states, bool_actions):
     """Convert environment transition system to GR(1) representation.
     
     For details see also L{sys_to_spec}.
@@ -518,8 +511,7 @@ def env_to_spec(
                       env_safety=env_trans)
     elif isinstance(env, transys.OpenFiniteTransitionSystem):
         return env_open_fts2spec(
-            env, ignore_initial, bool_states,
-            action_vars, bool_actions
+            env, ignore_initial, bool_states, bool_actions
         )
     else:
         raise TypeError('synth.env_to_spec does not support ' +
@@ -583,8 +575,7 @@ def fts2spec(
     return (sys_vars, sys_init, sys_trans)
 
 def sys_open_fts2spec(
-    ofts, ignore_initial=False, bool_states=False,
-    action_vars=None, bool_actions=False
+    ofts, ignore_initial=False, bool_states=False, bool_actions=False
 ):
     """Convert OpenFTS to GR(1) representation.
     
@@ -678,8 +669,7 @@ def sys_open_fts2spec(
     )
 
 def env_open_fts2spec(
-    ofts, ignore_initial=False, bool_states=False,
-    action_vars=None, bool_actions=False
+    ofts, ignore_initial=False, bool_states=False, bool_actions=False
 ):
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
@@ -1082,7 +1072,7 @@ def sprint_aps(label, aps):
 def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False, action_vars=None,
+    bool_states=False,
     bool_actions=False, rm_deadends=True
 ):
     """Function to call the appropriate synthesis tool on the specification.
@@ -1139,17 +1129,6 @@ def synthesize(
         Currently int state implemented only for gr1c.
     @type bool_states: bool
     
-    @param action_vars: for the integer variables modeling
-        environment and system actions in GR(1).
-        Effective only when >2 actions for each player.
-    @type action_vars: 2-tuple of str:
-        
-        (env_action_var_name, sys_action_var_name)
-        
-        Default: ('eact', 'act')
-        
-        (must be valid variable name)
-    
     @param bool_actions: model actions using bool variables
     @type bool_actions: bool
 
@@ -1162,13 +1141,13 @@ def synthesize(
         Otherwise return None.
     @rtype: L{transys.MealyMachine} or None
     """
-    bool_states, action_vars, bool_actions = _check_solver_options(
-        option, bool_states, action_vars, bool_actions
+    bool_states, bool_actions = _check_solver_options(
+        option, bool_states, bool_actions
     )
     
     specs = spec_plus_sys(specs, env, sys,
                           ignore_env_init, ignore_sys_init,
-                          bool_states, action_vars,
+                          bool_states,
                           bool_actions)
     
     if option == 'gr1c':
@@ -1199,21 +1178,21 @@ def synthesize(
 def is_realizable(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False, action_vars=None,
+    bool_states=False,
     bool_actions=False
 ):
     """Check realizability.
     
     For details see L{synthesize}.
     """
-    bool_states, action_vars, bool_actions = _check_solver_options(
-        option, bool_states, action_vars, bool_actions
+    bool_states, bool_actions = _check_solver_options(
+        option, bool_states, bool_actions
     )
     
     specs = spec_plus_sys(
         specs, env, sys,
         ignore_env_init, ignore_sys_init,
-        bool_states, action_vars, bool_actions
+        bool_states, bool_actions
     )
     
     if option == 'gr1c':
@@ -1231,10 +1210,7 @@ def is_realizable(
     
     return r
 
-def _check_solver_options(option, bool_states, action_vars, bool_actions):
-    if action_vars is None:
-        action_vars = _default_action_vars()
-    
+def _check_solver_options(option, bool_states, bool_actions):
     if bool_states is False and option is 'jtlv':
         warnings.warn('Int state not yet available for jtlv solver.\n' +
                       'Using bool states.')
@@ -1245,25 +1221,20 @@ def _check_solver_options(option, bool_states, action_vars, bool_actions):
                       'Using bool actions.')
         bool_actions = True
     
-    return (bool_states, action_vars, bool_actions)
-
-def _default_action_vars():
-    return ('eact', 'act')
+    return (bool_states, bool_actions)
 
 def spec_plus_sys(
     specs, env, sys,
     ignore_env_init, ignore_sys_init,
-    bool_states, action_vars, bool_actions
+    bool_states, bool_actions
 ):
     if sys is not None:
-        sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states,
-                                  action_vars, bool_actions)
+        sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states, bool_actions)
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
     
     if env is not None:
-        env_formula = env_to_spec(env, ignore_env_init, bool_states,
-                                  action_vars, bool_actions)
+        env_formula = env_to_spec(env, ignore_env_init, bool_states, bool_actions)
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty() ) + _hl)
         
