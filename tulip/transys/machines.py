@@ -615,12 +615,14 @@ class MealyMachine(FiniteStateMachine):
         
         @param input_sequences: if C{None}, then call L{interactive_run},
             otherwise call L{guided_run}.
+        
+        @return: output of L{guided_run}, otherwise C{None}.
         """
         if input_sequences is None:
             interactive_run(self, from_state=from_state)
         else:
-            guided_run(self, from_state=from_state,
-                       input_sequences=input_sequences)
+            return guided_run(self, from_state=from_state,
+                              input_sequences=input_sequences)
 
 # note on non-determinism and simulation:
 # =====
