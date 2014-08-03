@@ -4,9 +4,12 @@ Tests for the tulip.synth module.
 import logging
 logging.basicConfig(level=logging.WARNING)
 
-from tulip import spec, synth, transys
+from nose.tools import assert_raises
+
 import numpy as np
 from scipy import sparse as sp
+
+from tulip import spec, synth, transys
 
 def sys_fts_2_states():
     sys = transys.FTS()
@@ -453,6 +456,163 @@ def multiple_env_actions_test():
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(not r)
 
+def test_var_name_conflicts():
+    """Check redefinitions between states, actions, atomic props.
+    """
+    conversion_raises = lambda x, y: \
+        assert_raises(
+        Exception, spec=x, sys=y,
+        ignore_initial=True, bool_states=False,
+        bool_actions=False
+    )
+    
+    # FTS to spec
+    
+    # states vs APs
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # states vs sys_actions
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('sys_actions')
+    sys.actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # states vs env_actions
+    env = transys.FTS()
+    env.states.add('out')
+    env.actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    env = transys.FTS()
+    env.states.add('env_actions')
+    env.actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    # APs vs sys_actions
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.atomic_propositions.add('out')
+    sys.actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.atomic_propositions.add('sys_actions')
+    sys.actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # APs vs env_actions
+    env = transys.FTS()
+    env.states.add('s0')
+    env.atomic_propositions.add('out')
+    env.actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    env = transys.FTS()
+    env.states.add('s0')
+    env.atomic_propositions.add('env_actions')
+    env.actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    # OpenFTS to spec
+    
+    # states vs APs
+    sys = transys.OpenFTS()
+    sys.states.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # states vs sys_actions
+    sys = transys.OpenFTS()
+    sys.states.add('out')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.OpenFTS()
+    sys.states.add('sys_actions')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # states vs env_actions
+    sys = transys.OpenFTS()
+    sys.states.add('out')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.OpenFTS()
+    sys.states.add('env_actions')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # sys_actions vs APs
+    sys = transys.OpenFTS()
+    sys.states.add('s0')
+    sys.sys_actions.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.OpenFTS()
+    sys.states.add('s0')
+    sys.sys_actions.add('out')
+    sys.atomic_propositions.add('sys_actions')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # env_actions vs APs
+    sys = transys.OpenFTS()
+    sys.states.add('s0')
+    sys.env_actions.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.OpenFTS()
+    sys.states.add('s0')
+    sys.env_actions.add('out')
+    sys.atomic_propositions.add('env_actions')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
 
 class synthesize_test:
     def setUp(self):

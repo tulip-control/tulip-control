@@ -39,6 +39,7 @@ import warnings
 
 from tulip import transys
 from tulip.spec import GRSpec
+from tulip.spec.form import check_var_conflicts
 from tulip.interfaces import jtlv
 from tulip.interfaces import gr1c
 
@@ -213,6 +214,8 @@ def create_states(states, variables, trans, statevar, bool_states):
         The latter is overridden in case < 3 states exist,
         to avoid issues with gr1c.
     """
+    check_var_conflicts(states, variables)
+    
     # too few states for a gr1c int variable ?
     if len(states) < 3:
         bool_states = True
@@ -227,6 +230,9 @@ def create_states(states, variables, trans, statevar, bool_states):
         logger.debug('states not modeled as Booleans')
         
         state_ids, domain = states2ints(states, statevar)
+        
+        check_var_conflicts({statevar}, variables)
+        
         variables[statevar] = domain
     return state_ids
 
@@ -368,6 +374,8 @@ def create_actions(
     #if len(actions) < 3:
     #    bool_actions = True
     
+    check_var_conflicts(actions, variables)
+    
     # no mutex -> cannot use int variable
     if not use_mutex:
         logger.debug('not using mutex: Booleans must model actions')
@@ -395,6 +403,9 @@ def create_actions(
         logger.debug('actions not modeled as Booleans')
         assert(use_mutex)
         action_ids, domain = actions2ints(actions, actionvar, min_one)
+        
+        check_var_conflicts({actionvar}, variables)
+        
         variables[actionvar] = domain
         
         msg = 'created solver variable: ' + str(actionvar) + '\n\t' +\
