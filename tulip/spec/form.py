@@ -105,6 +105,8 @@ class LTL(object):
         self.formula = formula
         self.input_variables = input_variables
         self.output_variables = output_variables
+        
+        self.check_vars()
 
     def __str__(self):
         return str(self.formula)
@@ -140,6 +142,31 @@ class LTL(object):
             for (k,v) in self.output_variables.items():
                 output += str(k) + " : " + self._domain_str(v) + ";\n"
         return output + "\n%%\n"+self.formula
+    
+    def check_vars(self):
+        """Raise Exception if variabe definitions are invalid.
+        
+        Checks:
+        
+          - env and sys have common vars
+          - some var is also a possible value of some var (including itself)
+            (of arbitrary finite data type)
+        """
+        common_vars = {x for x in self.input_variables
+                         if x in self.output_variables}
+        if common_vars:
+            raise Exception('Env and sys have variables in common: ' +
+                            str(common_vars))
+        
+        # having just checked there are no duplicate keys
+        all_vars = dict(self.input_variables)
+        all_vars.update(self.output_variables)
+        
+        for var in all_vars:
+            other_vars = dict(all_vars)
+            other_vars.pop(var)
+            
+            check_var_conflicts({var}, other_vars)
 
     def check_form(self, check_undeclared_identifiers=False):
         """Verify formula syntax and type-check variable domains.
@@ -955,3 +982,31 @@ def _paren(x):
     @type x: str
     """
     return '(' + x + ')'
+
+def check_var_conflicts(s, variables):
+    """Raise exception if set intersects existing variable name, or values.
+    
+    Values refers to arbitrary finite data types.
+    
+    @param s: set
+    
+    @param variables: definitions of variable types
+    @type variables: C{dict}
+    """
+    # check conflicts with variable names
+    vars_redefined = {x for x in s if x in variables}
+    
+    if vars_redefined:
+        raise Exception('Variables redefined: ' + str(vars_redefined))
+    
+    # check conflicts with values of arbitrary finite data types
+    for var, domain in variables.iteritems():
+        # not arbitrary finite type ?
+        if not isinstance(domain, list):
+            continue
+        
+        # var has arbitrary finite type
+        conflicting_values = {x for x in s if x in domain}
+        
+        if conflicting_values:
+            raise Exception('Values redefined: ' + str(conflicting_values))
