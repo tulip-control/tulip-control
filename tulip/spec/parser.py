@@ -34,11 +34,22 @@
 LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 """
 import sys
+import re
 
 from tulip.spec.ast import (
     LTLException, ASTVar, ASTUnTempOp,
-    ASTBiTempOp, ASTUnary, ASTBinary
+    ASTBiTempOp, ASTUnary, ASTBinary, FULL_OPERATOR_NAMES
 )
+
+def _replace_full_name_operators(formula):
+    """Replace full names with symbols for temporal and Boolean operators.
+    
+    Each operator must be a word (as defined by \b in regexp).
+    Substitution is case insensitive.
+    """
+    for name, symbol in FULL_OPERATOR_NAMES.iteritems():
+        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
+    return formula
 
 def extract_vars(tree):
     v = []
@@ -63,7 +74,7 @@ def issafety(tree):
         return True
     return tree.map(f)
 
-def parse(formula, parser='ply'):
+def parse(formula, parser='ply', full_operators=False):
     """Parse formula string and create abstract syntax tree (AST).
     
     Both PyParsing and PLY are available for the parsing.
@@ -71,7 +82,15 @@ def parse(formula, parser='ply'):
     
     @param parser: python package to use for generating lexer and parser
     @type parser: 'pyparsing' | 'ply'
+    
+    @param full_operators: replace full names of operators
+        with their symbols (case insensitive,
+        each operator must be a separate word).
+    @type full_operators: C{bool}
     """
+    if full_operators:
+        formula = _replace_full_name_operators(formula)
+    
     if parser == 'pyparsing':
         from .pyparser import parse as pyparse
         spec = pyparse(formula)

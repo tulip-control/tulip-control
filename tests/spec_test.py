@@ -127,3 +127,15 @@ def form_mutex_test():
                                       (set(), set()),
                                       ({"cat"}, set())]:
         yield form_mutex_check, varnames, expected_form
+
+def full_name_operators_test():
+    formulas = {
+        'always eventually p':'( G ( F p ) )',
+        'ALwaYs EvenTUAlly(p)':'( G ( F p ) )',
+        '(p and q) UNtIl (q or ((p -> w) and not (z implies b))) and always next g':
+        '( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )'
+    }
+    
+    for f, correct in formulas.iteritems():
+        ast = parse(f, full_operators=True)
+        assert(str(ast) == correct)

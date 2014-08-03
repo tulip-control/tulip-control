@@ -63,6 +63,24 @@ SMV_MAP = {'G':'G', 'F':'F', 'X':'X', 'U':'U', 'R':'V'}
 
 SPIN_MAP = {'G':'[]', 'F':'<>', 'U':'U', 'R':'V'}
 
+# this mapping is based on SPIN documentation:
+#   http://spinroot.com/spin/Man/ltl.html
+FULL_OPERATOR_NAMES = {
+    'next':'X',
+    'always':'[]',
+    'eventually':'<>',
+    'until':'U',
+    'stronguntil':'U',
+    'weakuntil':'W',
+    'unless':'W', # see Baier - Katoen
+    'release':'V',
+    'implies':'->',
+    'equivalent':'<->',
+    'not':'!',
+    'and':'&&',
+    'or':'||',
+}
+
 class LTLException(Exception):
     pass
 
