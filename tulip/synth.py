@@ -457,7 +457,8 @@ def actions2ints(actions, actionvar, min_one=False):
         
     return (action_ids, domain)
 
-def sys_to_spec(sys, ignore_initial, bool_states, bool_actions):
+def sys_to_spec(sys, ignore_initial=False, statevar='loc',
+                bool_states=False, bool_actions=False):
     """Convert system's transition system to GR(1) representation.
     
     The term GR(1) representation is preferred to GR(1) spec,
@@ -479,21 +480,30 @@ def sys_to_spec(sys, ignore_initial, bool_states, bool_actions):
     @rtype: L{GRSpec}
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        (sys_vars, sys_init, sys_trans) = fts2spec(
-            sys, ignore_initial, bool_states, 'loc',
-            'sys_actions', bool_actions
+        sys_vars, sys_init, sys_trans = fts2spec(
+            sys,
+            ignore_initial=ignore_initial,
+            statevar=statevar,
+            actionvar='sys_actions',
+            bool_states=bool_states,
+            bool_actions=bool_actions
         )
-        return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
-                      sys_safety=sys_trans)
+        return GRSpec(
+            sys_vars=sys_vars,
+            sys_init=sys_init,
+            sys_safety=sys_trans
+        )
     elif isinstance(sys, transys.OpenFiniteTransitionSystem):
         return sys_open_fts2spec(
-            sys, ignore_initial, bool_states, bool_actions
+            sys, ignore_initial, statevar,
+            bool_states, bool_actions
         )
     else:
         raise TypeError('synth.sys_to_spec does not support ' +
             str(type(sys)) +'. Use FTS or OpenFTS.')
 
-def env_to_spec(env, ignore_initial, bool_states, bool_actions):
+def env_to_spec(env, ignore_initial=False, statevar='eloc',
+                bool_states=False, bool_actions=False):
     """Convert environment transition system to GR(1) representation.
     
     For details see also L{sys_to_spec}.
@@ -504,23 +514,31 @@ def env_to_spec(env, ignore_initial, bool_states, bool_actions):
     """
     if isinstance(env, transys.FiniteTransitionSystem):
         (env_vars, env_init, env_trans) = fts2spec(
-            env, ignore_initial, bool_states, 'eloc',
-            'env_actions', bool_actions
+            env,
+            ignore_initial=ignore_initial,
+            statevar=statevar,
+            actionvar='env_actions',
+            bool_states=bool_states,
+            bool_actions=bool_actions
         )
-        return GRSpec(env_vars=env_vars, env_init=env_init,
-                      env_safety=env_trans)
+        return GRSpec(
+            env_vars=env_vars,
+            env_init=env_init,
+            env_safety=env_trans
+        )
     elif isinstance(env, transys.OpenFiniteTransitionSystem):
         return env_open_fts2spec(
-            env, ignore_initial, bool_states, bool_actions
+            env, ignore_initial, statevar,
+            bool_states, bool_actions
         )
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
 
 def fts2spec(
-    fts, ignore_initial=False, bool_states=False,
+    fts, ignore_initial=False,
     statevar='loc', actionvar=None,
-    bool_actions=False
+    bool_states=False, bool_actions=False
 ):
     """Convert closed FTS to GR(1) representation.
     
@@ -575,7 +593,8 @@ def fts2spec(
     return (sys_vars, sys_init, sys_trans)
 
 def sys_open_fts2spec(
-    ofts, ignore_initial=False, bool_states=False, bool_actions=False
+    ofts, ignore_initial=False, statevar='loc',
+    bool_states=False, bool_actions=False
 ):
     """Convert OpenFTS to GR(1) representation.
     
@@ -644,7 +663,6 @@ def sys_open_fts2spec(
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids[action_type] = action_ids
     
-    statevar = 'loc'
     state_ids = create_states(states, sys_vars, sys_trans,
                               statevar, bool_states)
     
@@ -669,7 +687,8 @@ def sys_open_fts2spec(
     )
 
 def env_open_fts2spec(
-    ofts, ignore_initial=False, bool_states=False, bool_actions=False
+    ofts, ignore_initial=False, statevar='eloc',
+    bool_states=False, bool_actions=False
 ):
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
@@ -710,7 +729,6 @@ def env_open_fts2spec(
     # and whether that TS will contain all the system actions
     # defined in the environment TS
     
-    statevar = 'eloc'
     state_ids = create_states(states, env_vars, env_trans,
                               statevar, bool_states)
     
@@ -1229,12 +1247,20 @@ def spec_plus_sys(
     bool_states, bool_actions
 ):
     if sys is not None:
-        sys_formula = sys_to_spec(sys, ignore_sys_init, bool_states, bool_actions)
+        sys_formula = sys_to_spec(
+            sys, ignore_sys_init,
+            bool_states=bool_states,
+            bool_actions=bool_actions
+        )
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
     
     if env is not None:
-        env_formula = env_to_spec(env, ignore_env_init, bool_states, bool_actions)
+        env_formula = env_to_spec(
+            env, ignore_env_init,
+            bool_states=bool_states,
+            bool_actions=bool_actions
+        )
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty() ) + _hl)
         
