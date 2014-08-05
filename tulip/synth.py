@@ -465,6 +465,10 @@ def sys_to_spec(sys, ignore_initial=False, statevar='loc',
     because an FTS can represent sys_init, sys_safety, but
     not other spec forms.
     
+    See also
+    ========
+    L{env_to_spec}, L{sys_open_fts2spec}, L{fts2spec}
+    
     @type sys: L{transys.FTS} or L{transys.OpenFTS}
     
     @param ignore_initial: Do not include initial state info from TS.
@@ -555,6 +559,10 @@ def fts2spec(
     C{'env'} or C{'sys'} are part of the action type names,
     so that L{synth.synthesize} can recognize them.
     
+    See also
+    ========
+    L{sys_open_fts2spec}
+    
     @param fts: L{transys.FiniteTransitionSystem}
     
     @rtype: (dict, list, list)
@@ -598,25 +606,63 @@ def sys_open_fts2spec(
 ):
     """Convert OpenFTS to GR(1) representation.
     
+    The following are represented by system variables:
+    
+      - the current state
+      - the atomic propositions annotating states
+      - the system actions annotating edges
+    
+    The following are represented by environment variables:
+    
+      - the environment actions annotating edges
+    
+    Multiple types of environment and system actions can be defined.
+    
+    Current limitations
+    ===================
     Note that not any GR(1) can be represented by an OpenFTS,
-    as the OpenFTS is currently defined.
-    A GameStructure would be needed instead.
+    the way that L{OpenFTS} is currently defined.
+    For that purpose, a GameStructure would be needed instead.
     
-    Use the spec to add more information,
-    for example to specify env_init, sys_init that
-    involve both sys_vars and env_vars.
+    Besides, there are aspects of L{OpenFTS} that
+    need to be separately specified in a logic formula.
     
-    For example, an OpenFTS cannot represent how the
-    initial valuation of env_vars affects the allowable
-    initial valuation of sys_vars, which is represented
-    by the state of OpenFTS.
+    An example is initial conditions constraining the values
+    of environment or system actions.
     
-    Either OpenFTS can be extended in the future,
-    or a game structure added.
+    See also
+    ========
+    L{sys_trans_from_ts}, L{env_open_fts2spec}, L{fts2spec},
+    L{create_actions}, L{create_states}
     
-    @param ofts: L{transys.OpenFiniteTransitionSystem}
+    @param ofts: L{transys.OpenFTS}
     
-    @rtype: L{GRSpec}
+    @param ignore_initial: if C{True}, then do not represent in logic
+        the set of initial states of C{ofts}.
+    @type ignore_initial: bool
+    
+    @param statevar: name of integer variable used in GR(1)
+        to store the current state.
+    @type statevar: str
+    
+    @param bool_states: if C{True}, then use one Boolean variable
+        to represent each state in GR(1).
+        Otherwise use a single integer variable,
+        different values of which correspond to states of C{ofts}.
+    @type bool_states: bool
+    
+    @param bool_actions: Similar to C{bool_states}.
+        For each type of system actions,
+        and each type of environment actions:
+        
+          - if C{True}, then for each possible value of that action type,
+            use a different Boolean variable to represent it.
+            
+          - Otherwise use a single integer variable,
+            that ranges over the possible action values.
+    
+    @return: logic formula in GR(1) form representing C{ofts}.
+    @rtype: L{spec.GRSpec}
     """
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
@@ -690,6 +736,24 @@ def env_open_fts2spec(
     ofts, ignore_initial=False, statevar='eloc',
     bool_states=False, bool_actions=False
 ):
+    """Convert OpenFTS to GR(1) representation.
+    
+    The following are represented by environment variables:
+    
+      - the current state
+      - the atomic propositions annotating states
+      - the environment actions annotating edges
+    
+    The following are represented by system variables:
+    
+      - the system actions annotating edges
+    
+    Multiple types of environment and system actions can be defined.
+    
+    See also
+    ========
+    L{sys_open_fts2spec}
+    """
     assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
     
     aps = ofts.aps
