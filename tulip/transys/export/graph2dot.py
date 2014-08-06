@@ -399,6 +399,11 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex, tikz=False):
         return False
     pydot_graph.set_rankdir(rankdir)
     pydot_graph.set_splines('true')
+    
+    # turn off graphviz warnings caused by tikz labels
+    if tikz:
+        prog = [prog, '-q 1']
+    
     pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 
