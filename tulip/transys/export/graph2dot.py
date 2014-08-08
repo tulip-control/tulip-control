@@ -251,9 +251,6 @@ def _form_node_label(state, state_data, label_def,
         node_dot_label = node_dot_label.replace(r'}', r'\\}')
     
     if tikz:
-        node_dot_label = node_dot_label.replace(r'{', r'\{')
-        node_dot_label = node_dot_label.replace(r'}', r'\}')
-        
         # replace LF by latex newline
         node_dot_label = node_dot_label.replace('\n', '\\\\\\\\ ')
         
@@ -343,8 +340,6 @@ def _form_edge_label(edge_data, label_def,
         edge_dot_label = edge_dot_label.replace(r'}', r'\\}')
     
     if tikz:
-        edge_dot_label = edge_dot_label.replace(r'{', r'\{')
-        edge_dot_label = edge_dot_label.replace(r'}', r'\}')
     
     return edge_dot_label
 
