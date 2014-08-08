@@ -300,7 +300,7 @@ def _transitions2dot_str(trans, to_pydot_graph, latex, tikz=False):
 
 def _form_edge_label(edge_data, label_def,
                      label_format, label_mask, latex, tikz):
-    edge_dot_label = '"'
+    label = '' # dot label for edge
     sep_label_sets = label_format['separator']
     
     for label_type, label_value in edge_data.iteritems():
@@ -333,17 +333,23 @@ def _form_edge_label(edge_data, label_def,
         else:
             label_str = str(label_value)
         
-        edge_dot_label += type_name +sep_type_value
-        edge_dot_label += label_str +sep_label_sets
-    edge_dot_label += '"'
-    
-    if latex:
-        edge_dot_label = edge_dot_label.replace(r'{', r'\\{')
-        edge_dot_label = edge_dot_label.replace(r'}', r'\\}')
+        if tikz:
+            type_name = r'\mathrm' + '{' + type_name + '}'
+        
+        label += (type_name + sep_type_value +
+                  label_str + sep_label_sets)
     
     if tikz:
+        label = r'$\\begin{matrix}' + label + r'\\end{matrix}$'
     
-    return edge_dot_label
+    label = '"' + label + '"'
+    
+    
+    if latex:
+        label = label.replace(r'{', r'\\{')
+        label = label.replace(r'}', r'\\}')
+    
+    return label
 
 def _pydot_missing():
     if pydot is None:
