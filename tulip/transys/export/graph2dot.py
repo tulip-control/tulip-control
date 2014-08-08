@@ -294,8 +294,12 @@ def _transitions2dot_str(trans, to_pydot_graph, latex, tikz=False):
             edge_data, label_def,
             label_format, label_mask, latex, tikz
         )
+        
+        edge_color = edge_data.get('color', 'black')
+        
         to_pydot_graph.add_edge(u, v, key=key,
-                                label=edge_dot_label)
+                                label=edge_dot_label,
+                                color=edge_color)
 
 def _form_edge_label(edge_data, label_def,
                      label_format, label_mask, latex, tikz):
