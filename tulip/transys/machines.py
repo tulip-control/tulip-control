@@ -409,7 +409,7 @@ class MooreMachine(FiniteStateMachine):
             
             # printing format
             self._state_dot_label_format[port_name] = \
-                '/out:' +str(port_name)
+                '/' + str(port_name)
             
             if masks is None:
                 continue
@@ -561,7 +561,7 @@ class MealyMachine(FiniteStateMachine):
             
             # printing format
             self._transition_dot_label_format[port_name] = \
-                '/out:' +str(port_name)
+                '/' +str(port_name)
             
             if masks is None:
                 continue
