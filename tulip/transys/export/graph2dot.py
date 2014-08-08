@@ -218,7 +218,7 @@ def _form_node_label(state, state_data, label_def,
     
     # newline between state name and label, only if state is labeled
     if len(state_data) != 0:
-        node_dot_label += '\n'
+        node_dot_label += r'\n'
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
@@ -252,10 +252,10 @@ def _form_node_label(state, state_data, label_def,
     
     if tikz:
         # replace LF by latex newline
-        node_dot_label = node_dot_label.replace('\n', '\\\\\\\\ ')
+        node_dot_label = node_dot_label.replace('\n', r'\\\\ ')
         
         # dot2tex math mode doesn't handle newlines properly
-        node_dot_label = '$\\\\begin{matrix} ' + node_dot_label + '\\end{matrix}$'
+        node_dot_label = r'$\\begin{matrix} ' + node_dot_label + r'\\end{matrix}$'
     
     return node_dot_label
 
@@ -303,7 +303,7 @@ def _form_edge_label(edge_data, label_def,
     edge_dot_label = '"'
     sep_label_sets = label_format['separator']
     
-    for (label_type, label_value) in edge_data.iteritems():
+    for label_type, label_value in edge_data.iteritems():
         if label_type not in label_def:
             continue
         
@@ -320,9 +320,11 @@ def _form_edge_label(edge_data, label_def,
             sep_type_value = label_format['type?label']
         else:
             type_name = ':'
-            sep_type_value = ','
+            sep_type_value = r',\n'
         
-        if isinstance(label_value, str):
+        # format iterable containers using
+        # mathematical set notation: {...}
+        if isinstance(label_value, basestring):
             # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
