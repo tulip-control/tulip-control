@@ -51,7 +51,7 @@ except ImportError:
     pydot = None
 
 def _states2dot_str(graph, to_pydot_graph, wrap=10,
-                    latex=False, tikz=False):
+                    latex=False, tikz=False, rankdir='TB'):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
     # TODO option to replace with int to reduce size,
@@ -92,7 +92,7 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
         
         if tikz:
             _state2tikz(graph, to_pydot_graph, state,
-                        is_initial, is_accepting,
+                        is_initial, is_accepting, rankdir,
                         rim_color, fill_color, node_dot_label)
         else:
             _state2dot(graph, to_pydot_graph, state,
@@ -134,12 +134,23 @@ def _state2dot(graph, to_pydot_graph, state,
     )
 
 def _state2tikz(graph, to_pydot_graph, state,
-                is_initial, is_accepting,
+                is_initial, is_accepting, rankdir,
                 rim_color, fill_color, node_dot_label):
     style = 'state'
     
+    if rankdir is 'LR':
+        init_dir = 'initial left'
+    elif rankdir is 'RL':
+        init_dir = 'initial right'
+    elif rankdir is 'TB':
+        init_dir = 'initial above'
+    elif rankdir is 'BT':
+        init_dir = 'initial below'
+    else:
+        raise ValueError('Unknown rankdir')
+    
     if is_initial:
-        style += ', initial by arrow, initial right, initial text='
+        style += ', initial by arrow, ' + init_dir + ', initial text='
     if is_accepting:
         style += ', accepting'
     
@@ -342,7 +353,8 @@ def _pydot_missing():
     
     return False
     
-def _graph2pydot(graph, wrap=10, latex=False, tikz=False):
+def _graph2pydot(graph, wrap=10, latex=False, tikz=False,
+                 rankdir='TB'):
     """Convert (possibly labeled) state graph to dot str.
     
     @type graph: L{LabeledDiGraph}
@@ -354,7 +366,8 @@ def _graph2pydot(graph, wrap=10, latex=False, tikz=False):
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, latex=latex, tikz=tikz)
+    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, latex=latex, tikz=tikz,
+                    rankdir=rankdir)
     _transitions2dot_str(graph.transitions, dummy_nx_graph, latex, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
@@ -393,7 +406,8 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex, tikz=False):
     @rtype: bool
     """
     pydot_graph = _graph2pydot(graph, wrap=wrap,
-                               latex=latex, tikz=tikz)
+                               latex=latex, tikz=tikz,
+                               rankdir=rankdir)
     if pydot_graph is None:
         # graph2dot must have printed warning already
         return False
