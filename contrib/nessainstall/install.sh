@@ -19,6 +19,7 @@ export CFG_FILE=~/.bash_profile
 # will contain python, ATLAS, LAPACK, glpk, gr1c
 INSTALL_LOC=~
 
+install_glpk=1
 install_atlas=0
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
@@ -138,17 +139,22 @@ pip install ipython
 # downgrade pyparsing
 #------------------------------------------------------------
 # install glpk
-if [ -f "$TMPLIB/bin/glpsol" ]; then
-	echo "glpk installed: skipping installing it"
-else
-	# cvxopt is incompatible with newer versions
-	curl -O http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
-	tar xzf glpk-4.48.tar.gz
-	cd glpk-4.48
-	./configure --prefix=$TMPLIB
-	make
-	make check # should return no errors
-	make install
+if [ -o install_glpk ]; then
+	if [ -f "$TMPBIN/glpsol" ]; then
+		echo "glpk installed: skipping installing it"
+	else
+		# cvxopt is incompatible with newer versions
+		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
+		tar xzf glpk-4.48.tar.gz
+		cd glpk-4.48
+		./configure --prefix=$TMPLIB
+		make
+		make check # should return no errors
+		make install
+		
+		# make sure this glpsol is used by bash later
+		hash glpsol
+	fi
 fi
 #------------------------------------------------------------
 # install cvxopt
