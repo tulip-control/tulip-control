@@ -284,3 +284,4 @@ if [ "$tulip_develop" = "true" ]; then
 else
 	python setup.py install
 fi
+python run_tests.py --fast
