@@ -916,7 +916,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # avoid multiple additions
         if n in self:
-            logger.warn('Graph alreay has node: ' + str(n))
+            logger.debug('Graph already has node: ' + str(n))
         
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         
