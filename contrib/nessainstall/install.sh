@@ -215,7 +215,7 @@ else
 	make install # doesn't include: grpatch, grjit
 	
 	hash gr1c
-end
+fi
 
 #------------------------------------------------------------
 # install tulip
