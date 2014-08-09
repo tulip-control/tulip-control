@@ -87,13 +87,16 @@ else
 	./configure --prefix=$TMPLIB --enable-shared
 	make
 	make install
+	
+	hash python
+fi
 fi
 
 #------------------------------------------------------------
 # install pip
 curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 python get-pip.py
-source $CFG_FILE
+hash pip
 
 #------------------------------------------------------------
 # install python packages
