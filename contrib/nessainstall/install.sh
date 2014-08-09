@@ -1,14 +1,21 @@
 # install script for unix-like systems
-# appends to your $CFG_FILE (defined below)
-# assumes git is installed on you machine
-
-# edit these to your preference
+#
+# dependencies:
+#	git
+#
+# configure:
+#   - $CFG_FILE: your shell sources this at startup
+#   - $INSTALL_LOC: installation will be there
+#
+# on ubuntu you must install dependencies required by python 2.7.8
+# with apt-get as outlined here:
+#	http://askubuntu.com/questions/101591/how-do-i-install-python-2-7-2-on-ubuntu
 
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
 export CFG_FILE=~/.bash_profile
 
-# where the `libraries` directory will go,
+# location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
 INSTALL_LOC=~
 
@@ -21,12 +28,13 @@ TMPBIN=$TMPLIB/bin
 # create libraries to install things
 mkdir $TMPLIB
 
-# in bash use export,
-# in csh use setenv
-sed -i '$ a export PATH='"$TMPLIB"'/bin:$PATH' $CFG_FILE
-sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 
+# "export" works in bash
+# "setenv" works in csh
+sed -i '$ a export PATH='"$TMPBIN"':$PATH' $CFG_FILE
+sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 source $CFG_FILE
+
 cd $INSTALL_LOC
 
 #------------------------------------------------------------
@@ -50,6 +58,7 @@ if [ -o install_atlas ]; then
 else
 	echo "Skipping ATLAS installation, set install_atlas to enable this."
 fi
+
 #------------------------------------------------------------
 # install python
 if [ -f "$TMPBIN/python" ]; then
@@ -62,6 +71,7 @@ else
 	make
 	make install
 fi
+
 #------------------------------------------------------------
 # install pip
 curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
@@ -75,6 +85,7 @@ pip install scipy
 pip install matplotlib
 pip install ply
 
+# pyparsing needed as pydot dependency
 # downgrade pyparsing
 /usr/bin/yes | pip uninstall pyparsing
 pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
@@ -132,6 +143,8 @@ pip install cvxopt-1.1.6.tar.gz
 
 #------------------------------------------------------------
 # install gr1c
+#
+# http://slivingston.github.io/gr1c/md_installation.html
 
 # download requires Caltech IP Address (change this to building it)
 curl -O http://vehicles.caltech.edu/private/snapshots/nessa/gr1c/gr1c-0.7.3.tar.gz
