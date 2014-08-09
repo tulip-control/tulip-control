@@ -158,26 +158,33 @@ if [ -o install_glpk ]; then
 fi
 #------------------------------------------------------------
 # install cvxopt
-curl -O http://abel.ee.ucla.edu/src/cvxopt-1.1.6.tar.gz
-tar xzf cvxopt-1.1.6.tar.gz
 
-# rename archive
-mv cvxopt-1.1.6.tar.gz cvxopt-orig.tar.gz
-cd cvxopt-1.1.6
+# env vars for building cvxopt
+if [ -o install_atlas ]; then
+	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
+	export CVXOPT_BLAS_LIB="['satlas', 'tatlas', 'atlas']"
+	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
+	export CVXOPT_BLAS_EXTRA_LINK_ARGS="['-nostdlib']"
+	export CVXOPT_LAPACK_LIB="[]"
+else
+	if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+		export CVXOPT_BLAS_LIB="['f77blas','cblas','atlas','gfortran']"
+		export CVXOPT_BLAS_LIB_DIR="'/usr/lib'"
+		export CVXOPT_BLAS_EXTRA_LINK_ARGS="[]"
+		export CVXOPT_LAPACK_LIB="['lapack']"
+	fi
+fi
 
-# hack: edit setup.py
-sed -i "5 c BLAS_LIB_DIR = '"$TMPLIB"/lib'" setup.py
-sed -i "8 c BLAS_LIB = ['satlas', 'tatlas', 'atlas']" setup.py
-sed -i "9 c LAPACK_LIB = []" setup.py
-sed -i "10 c BLAS_EXTRA_LINK_ARGS = ['-nostdlib']" setup.py
-sed -i "36 c BUILD_GLPK = 1" setup.py
-sed -i "39 c GLPK_LIB_DIR = '"$TMPLIB"/lib'" setup.py
-sed -i "42 c GLPK_INC_DIR = '"$TMPLIB"/include'" setup.py
+if [ -o install_glpk ]; then
+	export CVXOPT_BUILD_GLPK=1
+	export CVXOPT_GLPK_LIB_DIR=$TMPLIB/lib
+	export CVXOPT_GLPK_INC_DIR=$TMPLIB/include
+fi
 
 # tar the edited package and install
-cd ..
-tar czf cvxopt-1.1.6.tar.gz cvxopt-1.1.6/
-pip install cvxopt-1.1.6.tar.gz
+git clone https://github.com/cvxopt/cvxopt.git
+cd cvxopt
+python setup.py install
 
 #------------------------------------------------------------
 # install gr1c
