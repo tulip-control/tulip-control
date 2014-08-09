@@ -137,7 +137,10 @@ pip install ply
 
 # pyparsing needed as pydot dependency
 # downgrade pyparsing
-if [ $(python -c "import pydot; print(pydot.__version__)") != "1.0.28" ]; then
+if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
+	echo "correct pydot version installed locally: skip"
+else
+	echo "pydot to be installed locally"
 	cd $DOWNLOAD_LOC
 	
 	/usr/bin/yes | pip uninstall pyparsing
