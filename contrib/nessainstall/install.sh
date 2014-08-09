@@ -21,6 +21,8 @@ INSTALL_LOC=~
 
 install_glpk=1
 install_atlas=0
+tulip_develop=1 # if 1, then tulip installed in develop mode
+
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
 TMPLIB=$INSTALL_LOC/libraries
@@ -217,9 +219,11 @@ end
 
 #------------------------------------------------------------
 # install tulip
-git clone https://github.com/tulip-control/tulip-control.git 
+git clone https://github.com/tulip-control/tulip-control.git
 cd tulip-control
-python setup.py install
 
-# use this instead if you want to edit code in the git repository
-#python setup.py develop
+if [ -o tulip_develop ]; then
+	python setup.py develop
+else
+	python setup.py install
+fi
