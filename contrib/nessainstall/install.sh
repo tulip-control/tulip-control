@@ -264,6 +264,9 @@ fi
 #------------------------------------------------------------
 # install polytope
 if $(python -c "import polytope" &> /dev/null); then
+	echo "polytope already installed locally: skip"
+else
+	echo "polytope not found locally: install"
 	cd $DOWNLOAD_LOC
 	git clone https://github.com/tulip-control/polytope.git
 	cd polytope
