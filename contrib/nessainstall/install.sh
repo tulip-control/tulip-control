@@ -191,13 +191,29 @@ python setup.py install
 #
 # http://slivingston.github.io/gr1c/md_installation.html
 
-# download requires Caltech IP Address (change this to building it)
-curl -O http://vehicles.caltech.edu/private/snapshots/nessa/gr1c/gr1c-0.7.3.tar.gz
-
-# untar and copy all binaries to your bin folder
-tar xzf gr1c-0.7.3.tar.gz
-cd gr1c-0.7.3
-cp gr1c rg grpatch $TMPLIB/bin 
+if hash "gr1c" >/dev/null 2>&1; then
+	echo "gr1c installed: skipping installing it"
+else
+	git clone https://github.com/slivingston/gr1c.git
+	cd gr1c
+	
+	# install CUDD
+	mkdir extern
+	cd extern
+	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
+	tar -xzf cudd-2.5.0.tar.gz
+	cd cudd-2.5.0
+	make
+	
+	# build and install gr1c
+	cd ../..
+	export GR1C_PREFIX=$TMPBIN
+	make all
+	make check
+	make install # doesn't include: grpatch, grjit
+	
+	hash gr1c
+end
 
 #------------------------------------------------------------
 # install tulip
