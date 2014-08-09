@@ -16,6 +16,7 @@ install_atlas=0
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
 TMPLIB=$INSTALL_LOC/libraries
+TMPBIN=$TMPLIB/bin
 
 # create libraries to install things
 mkdir $TMPLIB
@@ -51,7 +52,7 @@ else
 fi
 #------------------------------------------------------------
 # install python
-if [ -f "$TMPLIB/bin/python" ]; then
+if [ -f "$TMPBIN/python" ]; then
 	echo "Python already installed, skipping"
 else
 	curl -O http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz
