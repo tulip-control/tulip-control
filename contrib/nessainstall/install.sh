@@ -135,11 +135,15 @@ pip install ply
 
 # pyparsing needed as pydot dependency
 # downgrade pyparsing
-/usr/bin/yes | pip uninstall pyparsing
-pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
+if [ $(python -c "import pydot; print(pydot.__version__)") != "1.0.28" ]; then
+	cd $DOWNLOAD_LOC
+	
+	/usr/bin/yes | pip uninstall pyparsing
+	pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
 
-# install latest pydot version
-pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
+	# install latest pydot version
+	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
+fi
 
 pip install networkx
 #------------------------------------------------------------
