@@ -261,6 +261,15 @@ else
 fi
 
 #------------------------------------------------------------
+# install polytope
+if $(python -c "import polytope" &> /dev/null); then
+	cd $DOWNLOAD_LOC
+	git clone https://github.com/tulip-control/polytope.git
+	cd polytope
+	python setup.py install
+fi
+
+#------------------------------------------------------------
 # install tulip
 cd $DOWNLOAD_LOC
 git clone https://github.com/tulip-control/tulip-control.git
