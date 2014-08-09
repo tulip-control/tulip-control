@@ -185,16 +185,16 @@ fi
 # env vars for building cvxopt
 if [ "$install_atlas" = "true" ]; then
 	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
-	export CVXOPT_BLAS_LIB="['satlas', 'tatlas', 'atlas']"
+	export CVXOPT_BLAS_LIB="satlas,tatlas,atlas"
 	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
-	export CVXOPT_BLAS_EXTRA_LINK_ARGS="['-nostdlib']"
+	export CVXOPT_BLAS_EXTRA_LINK_ARGS="-nostdlib"
 	export CVXOPT_LAPACK_LIB="[]"
 else
 	if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-		export CVXOPT_BLAS_LIB="['f77blas','cblas','atlas','gfortran']"
-		export CVXOPT_BLAS_LIB_DIR="'/usr/lib'"
+		export CVXOPT_BLAS_LIB="f77blas,cblas,atlas,gfortran"
+		export CVXOPT_BLAS_LIB_DIR="/usr/lib"
 		export CVXOPT_BLAS_EXTRA_LINK_ARGS="[]"
-		export CVXOPT_LAPACK_LIB="['lapack']"
+		export CVXOPT_LAPACK_LIB="lapack"
 	fi
 fi
 
