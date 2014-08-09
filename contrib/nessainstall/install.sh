@@ -99,7 +99,7 @@ fi
 
 #------------------------------------------------------------
 # install pip
-curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+curl -LO https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 hash pip
 
