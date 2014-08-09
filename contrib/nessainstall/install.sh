@@ -57,6 +57,14 @@ fi
 
 # "export" works in bash
 # "setenv" works in csh
+if [ -f "$CFG_FILE" ]; then
+	echo "$CFG_FILE already exists"
+else
+	# sed cannot edit files w/o any lines
+	echo "creating a new $CFG_FILE"
+	echo "# auto-created by tulip installation script" >> $CFG_FILE
+fi
+
 sed -i '$ a export PATH='"$TMPBIN"':$PATH' $CFG_FILE
 sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 source $CFG_FILE
