@@ -10,6 +10,10 @@
 # on ubuntu you must install dependencies required by python 2.7.8
 # with apt-get as outlined here:
 #	http://askubuntu.com/questions/101591/how-do-i-install-python-2-7-2-on-ubuntu
+#
+# caution: may need to apply
+#	chmod g-wx,o-wx ~/.python-eggs
+# due to cvxopt behavior
 
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
@@ -25,11 +29,13 @@ tulip_develop=1 # if 1, then tulip installed in develop mode
 
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
-TMPLIB=$INSTALL_LOC/libraries
-TMPBIN=$TMPLIB/bin
+export DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
+export TMPLIB=$INSTALL_LOC/libraries
+export TMPBIN=$TMPLIB/bin
 
 # create libraries to install things
 mkdir $TMPLIB
+mkdir $DOWNLOAD_LOC
 
 # check required commands exist
 #
@@ -55,13 +61,13 @@ sed -i '$ a export PATH='"$TMPBIN"':$PATH' $CFG_FILE
 sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 source $CFG_FILE
 
-cd $INSTALL_LOC
-
 #------------------------------------------------------------
 # install ATLAS with LAPACK
 if [ -o install_atlas ]; then
-	curl -O http://sourceforge.net/projects/math-atlas/files/Stable/3.10.1/atlas3.10.1.tar.bz2
-	curl -O http://www.netlib.org/lapack/lapack-3.5.0.tgz
+	cd $DOWNLOAD_LOC
+	
+	curl -LO http://sourceforge.net/projects/math-atlas/files/Stable/3.10.1/atlas3.10.1.tar.bz2
+	curl -LO http://www.netlib.org/lapack/lapack-3.5.0.tgz
 	
 	tar xjf atlas3.10.1.tar.bz2 # unpack only ATLAS
 	cd ATLAS
@@ -84,9 +90,11 @@ fi
 if [ -f "$TMPBIN/python" ]; then
 	echo "Python already installed, skipping"
 else
-	curl -O http://www.python.org/ftp/python/2.7.6/Python-2.7.6.tgz
-	tar xzf Python-2.7.6.tgz
-	cd Python-2.7.6
+	cd $DOWNLOAD_LOC
+	
+	curl -LO http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
+	tar xzf Python-2.7.8.tgz
+	cd Python-2.7.8
 	./configure --prefix=$TMPLIB --enable-shared
 	make
 	make install
@@ -96,7 +104,7 @@ fi
 
 # verify python is correct
 if [ $(command -v python) != "$TMPBIN/python" ]; then
-	echo
+	echo "local python not found"
 	exit 1
 fi
 
@@ -108,7 +116,7 @@ hash pip
 
 # verify python is correct
 if [ $(command -v pip) != "$TMPBIN/pip" ]; then
-	echo
+	echo "local pip not found"
 	exit 1
 fi
 
@@ -145,6 +153,8 @@ if [ -o install_glpk ]; then
 	if [ -f "$TMPBIN/glpsol" ]; then
 		echo "glpk installed: skipping installing it"
 	else
+		cd $DOWNLOAD_LOC
+		
 		# cvxopt is incompatible with newer versions
 		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
 		tar xzf glpk-4.48.tar.gz
@@ -196,6 +206,8 @@ python setup.py install
 if hash "gr1c" >/dev/null 2>&1; then
 	echo "gr1c installed: skipping installing it"
 else
+	cd $DOWNLOAD_LOC
+	
 	git clone https://github.com/slivingston/gr1c.git
 	cd gr1c
 	
@@ -219,6 +231,7 @@ fi
 
 #------------------------------------------------------------
 # install tulip
+cd $DOWNLOAD_LOC
 git clone https://github.com/tulip-control/tulip-control.git
 cd tulip-control
 
