@@ -205,10 +205,14 @@ if [ "$install_glpk" = "true" ]; then
 fi
 
 # tar the edited package and install
-git clone https://github.com/cvxopt/cvxopt.git
-cd cvxopt
-python setup.py install
-
+if $(python -c "import cvxopt.glpk" &> /dev/null); then
+	cd $DOWNLOAD_LOC
+	
+	git clone https://github.com/cvxopt/cvxopt.git
+	cd cvxopt
+	
+	python setup.py install
+fi
 #------------------------------------------------------------
 # install gr1c
 #
