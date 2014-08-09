@@ -1,5 +1,9 @@
 """
 Tests for the abstraction from continuous dynamics to logic
+
+if you want to use plotting over ssh, then use:
+
+    ssh -X whatever
 """
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -87,7 +91,7 @@ def transition_directions_test():
     
     swab = abstract.discretize_switched(
         ppp, switched_dynamics, disc_params,
-        plot=True, show_ts=True, only_adjacent=False
+        plot=False, show_ts=True, only_adjacent=False
     )
     
     ts = swab.modes[('normal', 'fly')].ts
@@ -128,7 +132,7 @@ def test_transient_regions():
         
         ppp = abstract.prop2part(dom, p)
         ppp, new2old_reg = abstract.part2convex(ppp)
-        ppp.plot()
+        #ppp.plot()
         return ppp
     
     def drifting_dynamics():
