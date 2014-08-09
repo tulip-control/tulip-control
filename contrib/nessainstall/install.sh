@@ -129,10 +129,11 @@ pip install networkx
 # optional python installs
 pip install ipython
 
-pip install virtualenvwrapper
-sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPLIB"'/bin/virtualenv-2.7' $CFG_FILE
-sed -i '$ a source '"$TMPLIB"'/bin/virtualenvwrapper.sh' $CFG_FILE
-source $CFG_FILE
+# skip virtualenvwrapper: fragile to install
+#pip install virtualenvwrapper
+#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
+#sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
+#source $CFG_FILE
 
 # downgrade pyparsing
 #------------------------------------------------------------
