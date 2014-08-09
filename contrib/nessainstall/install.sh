@@ -90,6 +90,11 @@ else
 	
 	hash python
 fi
+
+# verify python is correct
+if [ $(command -v python) != "$TMPBIN/python" ]; then
+	echo
+	exit 1
 fi
 
 #------------------------------------------------------------
@@ -97,6 +102,12 @@ fi
 curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 python get-pip.py
 hash pip
+
+# verify python is correct
+if [ $(command -v pip) != "$TMPBIN/pip" ]; then
+	echo
+	exit 1
+fi
 
 #------------------------------------------------------------
 # install python packages
