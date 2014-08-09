@@ -233,9 +233,10 @@ fi
 #
 # http://slivingston.github.io/gr1c/md_installation.html
 
-if hash "gr1c" >/dev/null 2>&1; then
-	echo "gr1c installed: skipping installing it"
+if [ -f "$TMPBIN/gr1c" ]; then
+	echo "GR1C already installed locally: skip"
 else
+	echo "GR1C not found locally: install"
 	cd $DOWNLOAD_LOC
 	
 	git clone https://github.com/slivingston/gr1c.git
