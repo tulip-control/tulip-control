@@ -88,8 +88,9 @@ fi
 #------------------------------------------------------------
 # install python
 if [ -f "$TMPBIN/python" ]; then
-	echo "Python already installed, skipping"
+	echo "Python already installed locally: skip"
 else
+	echo "Python not found locally: install"
 	cd $DOWNLOAD_LOC
 	
 	curl -LO http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
@@ -111,8 +112,9 @@ fi
 #------------------------------------------------------------
 # install pip
 if [ -f "$TMPBIN/pip" ]; then
-	echo "Pip already locally installed, skipping"
+	echo "Pip already installed locally: skip"
 else
+	echo "Pip not found locally: install"
 	cd $DOWNLOAD_LOC
 	
 	curl -LO https://bootstrap.pypa.io/get-pip.py
@@ -162,8 +164,9 @@ pip install ipython
 # install glpk
 if [ "$install_glpk" = "true" ]; then
 	if [ -f "$TMPBIN/glpsol" ]; then
-		echo "glpk installed: skipping installing it"
+		echo "GLPK already installed locally: skip"
 	else
+		echo "GLPK not found locally: install"
 		cd $DOWNLOAD_LOC
 		
 		# cvxopt is incompatible with newer versions
@@ -184,6 +187,8 @@ fi
 
 # env vars for building cvxopt
 if [ "$install_atlas" = "true" ]; then
+	echo "config CVXOPT for local ATLAS in Mac"
+	
 	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
 	export CVXOPT_BLAS_LIB="satlas,tatlas,atlas"
 	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
@@ -191,6 +196,8 @@ if [ "$install_atlas" = "true" ]; then
 	export CVXOPT_LAPACK_LIB="[]"
 else
 	if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+		echo "config CVXOPT for global ATLAS in Linux"
+		
 		export CVXOPT_BLAS_LIB="f77blas,cblas,atlas,gfortran"
 		export CVXOPT_BLAS_LIB_DIR="/usr/lib"
 		export CVXOPT_BLAS_EXTRA_LINK_ARGS="[]"
@@ -199,6 +206,8 @@ else
 fi
 
 if [ "$install_glpk" = "true" ]; then
+	echo "config CVXOPT to build GLPK extension"
+	
 	export CVXOPT_BUILD_GLPK=1
 	export CVXOPT_GLPK_LIB_DIR=$TMPLIB/lib
 	export CVXOPT_GLPK_INC_DIR=$TMPLIB/include
@@ -206,6 +215,9 @@ fi
 
 # tar the edited package and install
 if $(python -c "import cvxopt.glpk" &> /dev/null); then
+	echo "CVXOPT already installed with GLPK locally: skip"
+else
+	echo "CVXOPT not found locally: install"
 	cd $DOWNLOAD_LOC
 	
 	git clone https://github.com/cvxopt/cvxopt.git
