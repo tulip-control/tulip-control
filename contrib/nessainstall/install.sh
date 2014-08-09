@@ -23,9 +23,9 @@ export CFG_FILE=~/.bash_profile
 # will contain python, ATLAS, LAPACK, glpk, gr1c
 INSTALL_LOC=~
 
-install_glpk=1
-install_atlas=0
-tulip_develop=1 # if 1, then tulip installed in develop mode
+install_glpk=true
+install_atlas=false
+tulip_develop=true # if 1, then tulip installed in develop mode
 
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
@@ -63,7 +63,7 @@ source $CFG_FILE
 
 #------------------------------------------------------------
 # install ATLAS with LAPACK
-if [ -o install_atlas ]; then
+if [ "$install_atlas" = "true" ]; then
 	cd $DOWNLOAD_LOC
 	
 	curl -LO http://sourceforge.net/projects/math-atlas/files/Stable/3.10.1/atlas3.10.1.tar.bz2
@@ -149,7 +149,7 @@ pip install ipython
 # downgrade pyparsing
 #------------------------------------------------------------
 # install glpk
-if [ -o install_glpk ]; then
+if [ "$install_glpk" = "true" ]; then
 	if [ -f "$TMPBIN/glpsol" ]; then
 		echo "glpk installed: skipping installing it"
 	else
@@ -172,7 +172,7 @@ fi
 # install cvxopt
 
 # env vars for building cvxopt
-if [ -o install_atlas ]; then
+if [ "$install_atlas" = "true" ]; then
 	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
 	export CVXOPT_BLAS_LIB="['satlas', 'tatlas', 'atlas']"
 	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
@@ -187,7 +187,7 @@ else
 	fi
 fi
 
-if [ -o install_glpk ]; then
+if [ "$install_glpk" = "true" ]; then
 	export CVXOPT_BUILD_GLPK=1
 	export CVXOPT_GLPK_LIB_DIR=$TMPLIB/lib
 	export CVXOPT_GLPK_INC_DIR=$TMPLIB/include
@@ -235,7 +235,7 @@ cd $DOWNLOAD_LOC
 git clone https://github.com/tulip-control/tulip-control.git
 cd tulip-control
 
-if [ -o tulip_develop ]; then
+if [ "$tulip_develop" = "true" ]; then
 	python setup.py develop
 else
 	python setup.py install
