@@ -116,7 +116,6 @@ fi
 # install python packages
 pip install numpy
 pip install scipy
-pip install matplotlib
 pip install ply
 
 # pyparsing needed as pydot dependency
@@ -130,6 +129,7 @@ pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 pip install networkx
 #------------------------------------------------------------
 # optional python installs
+pip install matplotlib
 pip install ipython
 
 # skip virtualenvwrapper: fragile to install
