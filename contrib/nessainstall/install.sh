@@ -110,9 +110,16 @@ fi
 
 #------------------------------------------------------------
 # install pip
-curl -LO https://bootstrap.pypa.io/get-pip.py
-python get-pip.py
-hash pip
+if [ -f "$TMPBIN/pip" ]; then
+	echo "Pip already locally installed, skipping"
+else
+	cd $DOWNLOAD_LOC
+	
+	curl -LO https://bootstrap.pypa.io/get-pip.py
+	python get-pip.py
+
+	hash pip
+fi
 
 # verify python is correct
 if [ $(command -v pip) != "$TMPBIN/pip" ]; then
