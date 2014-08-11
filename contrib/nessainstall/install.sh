@@ -33,9 +33,22 @@ export DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
 export TMPLIB=$INSTALL_LOC/libraries
 export TMPBIN=$TMPLIB/bin
 
+# exit at first error
+set -e
+
 # create libraries to install things
-mkdir $TMPLIB
-mkdir $DOWNLOAD_LOC
+if [ -d "$TMPLIB" ]; then
+	echo "$TMPLIB already exists"
+else
+	echo "$TMPLIB does not exist: mkdir"
+	mkdir $TMPLIB
+fi
+if [ -d "$DOWNLOAD_LOC" ]; then
+	echo "$DOWNLOAD_LOC already exists"
+else
+	echo "$DOWNLOAD_LOC does not exist: mkdir"
+	mkdir $DOWNLOAD_LOC
+fi
 
 # check required commands exist
 #
@@ -79,7 +92,11 @@ if [ "$install_atlas" = "true" ]; then
 	
 	tar xjf atlas3.10.1.tar.bz2 # unpack only ATLAS
 	cd ATLAS
-	mkdir LinuxBuild
+	if [ -d "LinuxBuild" ]; then
+		echo "LinuxBuild dir already exists"
+	else
+		mkdir LinuxBuild
+	fi
 	cd LinuxBuild
 	../configure -b 64 --prefix=$TMPLIB --shared \
 		--with-netlib-lapack-tarfile=../lapack-3.5.0.tgz
@@ -232,7 +249,12 @@ else
 	echo "CVXOPT not found locally: install"
 	cd $DOWNLOAD_LOC
 	
-	git clone https://github.com/cvxopt/cvxopt.git
+	if [ -d "cvxopt" ]; then
+		echo "cvxopt already cloned"
+	else
+		echo "cloning cvxopt"
+		git clone https://github.com/cvxopt/cvxopt.git
+	fi
 	cd cvxopt
 	
 	python setup.py install
@@ -248,11 +270,20 @@ else
 	echo "GR1C not found locally: install"
 	cd $DOWNLOAD_LOC
 	
-	git clone https://github.com/slivingston/gr1c.git
+	if [ -d "gr1c" ]; then
+		echo "gr1c already cloned"
+	else
+		echo "cloning gr1c"
+		git clone https://github.com/slivingston/gr1c.git
+	fi
 	cd gr1c
 	
 	# install CUDD
-	mkdir extern
+	if [ -d "extern" ]; then
+		echo "directory 'extern' already exists"
+	else
+		mkdir extern
+	fi
 	cd extern
 	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
 	tar -xzf cudd-2.5.0.tar.gz
@@ -276,7 +307,12 @@ if $(python -c "import polytope" &> /dev/null); then
 else
 	echo "polytope not found locally: install"
 	cd $DOWNLOAD_LOC
-	git clone https://github.com/tulip-control/polytope.git
+	if [ -d "polytope" ]; then
+		echo "polytope already cloned"
+	else
+		echo "cloning polytope"
+		git clone https://github.com/tulip-control/polytope.git
+	fi
 	cd polytope
 	python setup.py install
 fi
@@ -284,7 +320,12 @@ fi
 #------------------------------------------------------------
 # install tulip
 cd $DOWNLOAD_LOC
-git clone https://github.com/tulip-control/tulip-control.git
+if [ -d "tulip-control" ]; then
+	echo "tulip already cloned"
+else
+	echo "clonign tulip"
+	git clone https://github.com/tulip-control/tulip-control.git
+fi
 cd tulip-control
 
 if [ "$tulip_develop" = "true" ]; then
