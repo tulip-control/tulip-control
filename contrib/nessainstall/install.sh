@@ -15,6 +15,13 @@
 #	chmod g-wx,o-wx ~/.python-eggs
 # due to cvxopt behavior
 
+# debian/ubuntu dependencies:
+#
+# sudo apt-get install \
+#   build-essential libreadline-gplv2-dev libncursesw5-dev \
+#   libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev \
+#   libbz2-dev libatlas-base-dev libatlas-dev gfortran libpng-dev
+
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
 export CFG_FILE=~/.bash_profile
@@ -54,7 +61,7 @@ fi
 #
 # snippet from:
 #    http://wiki.bash-hackers.org/scripting/style
-my_needed_commands="sed curl tar"
+my_needed_commands="sed curl tar gcc gfortran bison flex"
 missing_counter=0
 for needed_command in $my_needed_commands; do
   if ! hash "$needed_command" >/dev/null 2>&1; then
