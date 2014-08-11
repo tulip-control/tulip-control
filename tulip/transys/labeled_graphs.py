@@ -380,18 +380,14 @@ class States(object):
         return found_state_label_pairs
     
     def is_terminal(self, state):
-        """Check if state has no outgoing transitions.
+        """Return True if state has no outgoing transitions.
         
         See Also
         ========
         Def. 2.4, p.23 U{[BK08]
         <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
-        successors = self.post(state)
-        if successors:
-            return False
-        else:
-            return True
+        return not bool(self.graph.successors(state))
     
     def is_blocking(self, state):
         """Check if state has outgoing transitions for each label.
@@ -1147,7 +1143,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
-
+    
+    def has_deadends(self):
+        """Return False if all nodes have outgoing edges.
+        
+        Edge labels are not taken into account.
+        """
+        for n in self:
+            if not self.succ[n]:
+                return True
+        return False
+    
     def remove_deadends(self):
         """Recursively delete nodes with no outgoing transitions.
         """
@@ -1466,22 +1472,6 @@ class _LabeledStateDiGraph(nx.MultiDiGraph):
         # in sequence and simultaneously. So the actions set
         # is the product of the factor ones and an empty action
         # should also be introduced
-        
-    def is_blocking(self):
-        """Does each state have at least one outgoing transition ?
-        
-        Note that edge labels are NOT checked, i.e.,
-        it is not checked whether for each state and each possible symbol/letter
-        in the input alphabet, there exists at least one transition.
-        
-        The reason is that edge labels do not have any semantics at this level,
-        so they are not yet regarded as guards.
-        For more semantics, use a L{FiniteStateMachine}.
-        """
-        for state in self.states():
-            if self.states.is_terminal(state):
-                return True
-        return False
 
 def str2singleton(ap_label):
         """If string, convert to set(string).
