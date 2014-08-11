@@ -41,7 +41,7 @@ from pprint import pformat
 from .labeled_graphs import LabeledDiGraph
 from .labeled_graphs import prepend_with, str2singleton
 from .mathset import SubSet, PowerSet
-from .transys import _ts_ba_sync_prod
+from .transys import _ts_ba_sync_prod, GameGraph
 
 _hl = 40 *'-'
 
@@ -683,3 +683,50 @@ class ParityAutomaton(OmegaAutomaton):
         notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
+
+class ParityGame(GameGraph):
+    """GameGraph equipped with coloring.
+    
+    Define as C{k} the highest color that
+    occurs infinitely many times.
+    
+    If C{k} is even, then Player 0 wins.
+    Otherwise Player 1 wins (C{k} is odd).
+    
+    To define the number of colors C{c}:
+    
+    >>> p = ParityGame(c=4)
+    
+    See also
+    ========
+    L{transys.GameGraph}
+    """
+    def __init__(self, c=2):
+        node_label_types = [
+            {
+                'name':'color',
+                'values':range(c),
+                'default':0
+            }
+        ]
+        
+        super(ParityGame, self).__init__(node_label_types, [])
+    
+    def __str__(self):
+        s = (
+            'Parity Game\n'
+            '-----------\n'
+            'n: node, p: player, c: color\n\n'
+        )
+        for node, attr in self.states(data=True):
+            s += (
+                'n = ' + str(node) +
+                ', p = ' + str(attr['player']) +
+                ', c = ' + str(attr['color']) + '\n'
+            )
+        s += '\n' + str(self.transitions)
+        return s
+    
+    @property
+    def max_color(self):
+        return max(self._node_label_types['color'])

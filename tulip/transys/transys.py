@@ -1146,7 +1146,7 @@ def load_spin2fts():
     raise NotImplementedError
 
 class GameGraph(LabeledDiGraph):
-    """Store a deterministic game graph.
+    """Store a game graph.
     
     When adding states, you have to say
     which player controls the outgoing transitions.
@@ -1155,14 +1155,18 @@ class GameGraph(LabeledDiGraph):
     >>> g = GameGraph()
     >>> g.states.add('s0', player=0)
     
-    reference
+    See also
+    ========
+    L{automata.ParityGame}
+    
+    Reference
     =========
     Chatterjee K.; Henzinger T.A.; Jobstmann B.
         Environment Assumptions for Synthesis
         CONCUR'08, LNCS 5201, pp. 147-161, 2008
     """
-    def __init__(self):
-        node_label_types = [
+    def __init__(self, node_label_types, edge_label_types):
+        node_label_types += [
             {
                 'name':'player',
                 'values':{0, 1},
@@ -1170,7 +1174,8 @@ class GameGraph(LabeledDiGraph):
             }
         ]
         
-        LabeledDiGraph.__init__(self, node_label_types)
+        super(GameGraph, self).__init__(node_label_types,
+                                        edge_label_types)
         
     def player_states(self, n):
         """Return states controlled by player C{n}.
@@ -1184,8 +1189,7 @@ class GameGraph(LabeledDiGraph):
         @return: set of states
         @rtype: C{set}
         """
-        f = lambda state: self.node[state]['player'] == n
-        return filter(f, self)
+        return {x for x in self if self.node[x]['player'] == n}
     
     def edge_controlled_by(self, e):
         """Return the index of the player controlling edge C{e}.
