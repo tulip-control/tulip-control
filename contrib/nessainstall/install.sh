@@ -41,7 +41,7 @@ mkdir $DOWNLOAD_LOC
 #
 # snippet from:
 #    http://wiki.bash-hackers.org/scripting/style
-my_needed_commands="sed curl tar"
+my_needed_commands="sed curl tar gcc gfortran bison flex"
 missing_counter=0
 for needed_command in $my_needed_commands; do
   if ! hash "$needed_command" >/dev/null 2>&1; then
