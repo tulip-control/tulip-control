@@ -692,10 +692,13 @@ class ParityGame(GameGraph):
     
     If C{k} is even, then Player 0 wins.
     Otherwise Player 1 wins (C{k} is odd).
+    So the winner is Player (k mod 2).
     
     To define the number of colors C{c}:
     
     >>> p = ParityGame(c=4)
+    
+    Note that the colors are: 0, 1, ..., c-1
     
     See also
     ========
@@ -729,4 +732,10 @@ class ParityGame(GameGraph):
     
     @property
     def max_color(self):
-        return max(self._node_label_types['color'])
+        max_c = -1
+        #node = None
+        for x in self:
+            if self.node[x]['color'] > max_c:
+                max_c = self.node[x]['color']
+                #node = x
+        return max_c
