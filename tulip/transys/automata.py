@@ -337,6 +337,79 @@ def ba2ltl():
     """
     raise NotImplementedError
 
+def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
+             atomic_proposition_based=True):
+    """Create a Buchi Automaton from a tuple of fields.
+
+    defines Buchi Automaton by a tuple (S, S0, Sa, \\Sigma, trans)
+    (maybe replacing \\Sigma by AP since it is an AP-based BA ?)
+    
+    See Also
+    ========
+    L{tuple2fts}
+
+    @param S: set of states
+    @param S0: set of initial states, must be \\subset S
+    @param Sa: set of accepting states
+    @param Sigma_or_AP: Sigma = alphabet
+    @param trans: transition relation, represented by list of triples::
+            [(from_state, to_state, guard), ...]
+    where guard \\in \\Sigma.
+
+    @param name: used for file export
+    @type name: str
+
+    @rtype: L{BuchiAutomaton}
+    """
+    # args
+    if not isinstance(S, Iterable):
+        raise TypeError('States S must be iterable, even for single state.')
+    
+    if not isinstance(S0, Iterable) or isinstance(S0, str):
+        S0 = [S0]
+    
+    if not isinstance(Sa, Iterable) or isinstance(Sa, str):
+        Sa = [Sa]
+    
+    # comprehensive names
+    states = S
+    initial_states = S0
+    accepting_states = Sa
+    alphabet_or_ap = Sigma_or_AP
+    transitions = trans
+    
+    # prepending states with given str
+    if prepend_str:
+        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
+               'will be prepended to all states.')
+    states = prepend_with(states, prepend_str)
+    initial_states = prepend_with(initial_states, prepend_str)
+    accepting_states = prepend_with(accepting_states, prepend_str)
+    
+    ba = BuchiAutomaton(name=name, atomic_proposition_based=atomic_proposition_based)
+    
+    ba.states.add_from(states)
+    ba.states.initial |= initial_states
+    ba.states.accepting |= accepting_states
+    
+    if atomic_proposition_based:
+        ba.alphabet.math_set |= alphabet_or_ap
+    else:
+        ba.alphabet.add(alphabet_or_ap)
+    
+    for transition in transitions:
+        (from_state, to_state, guard) = transition
+        [from_state, to_state] = prepend_with([from_state, to_state],
+                                              prepend_str)
+        # convention
+        if atomic_proposition_based:
+            if guard is None:
+                guard = set()
+            guard = str2singleton(guard)
+        ba.transitions.add(from_state, to_state, letter=guard)
+    
+    return ba
+
 class RabinPairs(object):
     """Acceptance pairs for Rabin automaton.
     
