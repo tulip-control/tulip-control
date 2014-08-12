@@ -276,50 +276,6 @@ class FiniteStateMachine(LabeledDiGraph):
             
             # printing format
             self._state_dot_label_format[var_name] = str(var_name)
-    
-    def is_blocking(self, state):
-        """From this state, for each input valuation, there exists a transition.
-        
-        @param state: state to be checked as blocking
-        @type state: single state to be checked
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-    
-    def is_receptive(self, states=None):
-        """For each state, for each input valuation, there exists a transition.
-        
-        @param states: states to be checked whether blocking
-        @type states: iterable container of states
-        """
-        if states is None:
-            states = self
-        
-        for state in states:
-            if self.is_blocking(state):
-                return False
-                
-        return True
-
-    # operations between state machines
-    def sync_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-        
-    def async_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-
 
 class MooreMachine(FiniteStateMachine):
     """Moore machine.
