@@ -450,12 +450,6 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         
         return s
 
-class OpenFTS(OpenFiniteTransitionSystem):
-    """Alias to L{transys.OpenFiniteTransitionSystem}.
-    """
-    def __init__(self, *args, **kwargs):
-        OpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
-
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None):
     """Create a Finite Transition System from a tuple of fields.
