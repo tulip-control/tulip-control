@@ -769,3 +769,39 @@ class GameGraph(LabeledDiGraph):
         """
         from_state = e[0]
         return self.node[from_state]['player']
+
+def LabeledGameGraph(GameGraph):
+    """Game graph with labeled states.
+    
+    Its contraction is a Kripke structure.
+    Given a Kripke structure and a partition of propositions,
+    then the corresponding labeled game graph
+    can be obtained by graph expansion.
+    
+    Reference
+    =========
+    Chatterjee K.; Henzinger T.A.; Piterman N.
+        Strategy Logic
+        UCB/EECS-2007-78
+    """
+    def __init__(self):
+        ap_labels = PowerSet()
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+             'default':set()}
+        ]
+        
+        super(LabeledGameGraph, self).__init__(node_label_types)
+        
+        self.atomic_propositions = self.ap
+        
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\n'
+        }
+        
+        self.dot_node_shape = {'normal':'rectangle'}
