@@ -42,14 +42,15 @@ from .mathset import MathSet, SubSet, PowerSet, TypedDict
 from .labeled_graphs import prepend_with
 
 from .transys import (
-    FiniteTransitionSystem, FTS,
-    OpenFiniteTransitionSystem, OpenFTS,
+    KripkeStructure, FiniteTransitionSystem, FTS,
+    LabeledGameGraph,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
 
 from .automata import (
     BuchiAutomaton, BA, tuple2ba,
-    RabinAutomaton, DRA
+    RabinAutomaton, DRA,
+    ParityGame
 )
 
 from .machines import MooreMachine, MealyMachine

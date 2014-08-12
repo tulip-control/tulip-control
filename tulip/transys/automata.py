@@ -38,10 +38,9 @@ logger = logging.getLogger(__name__)
 from collections import Iterable
 from pprint import pformat
 
-from .labeled_graphs import LabeledDiGraph
-from .labeled_graphs import prepend_with, str2singleton
+from .labeled_graphs import LabeledDiGraph, str2singleton, prepend_with
 from .mathset import SubSet, PowerSet
-from .transys import _ts_ba_sync_prod, GameGraph
+from .transys import GameGraph
 
 _hl = 40 *'-'
 

@@ -35,8 +35,6 @@ Transition System Module
 import logging
 from collections import Iterable
 from pprint import pformat
-import copy
-import warnings
 
 from .labeled_graphs import LabeledDiGraph, str2singleton
 from .labeled_graphs import prepend_with
