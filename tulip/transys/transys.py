@@ -1,4 +1,5 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013, 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,8 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
 #    products derived from this software without specific prior
 #    written permission.
 # 
@@ -656,6 +657,137 @@ class OpenFTS(OpenFiniteTransitionSystem):
     """
     def __init__(self, *args, **kwargs):
         OpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
+
+class AugmentedOpenFiniteTransitionSystem(LabeledDiGraph):
+    """Augmented Open Finite Transition System modeling an augmented system.
+    
+    Analogous to L{OFTS}, but for augmented systems comprised of
+    the system and its environment.
+    
+    Please refer to L{FiniteTransitionSystem} and 
+    L{OpenFiniteTransitionSystem} for usage details.
+    
+    The only significant difference is the addition of the progress map
+    group. This shows the states for each mode when the system is not 
+    going to be in equilibrium. 
+   
+    Warning: If states are removed from the system, after generation
+    and assignment of progress group map, update the progress group 
+    map and reassign it.
+
+    See Also
+    ========
+    L{FiniteTransitionSystem}, L{OpenFiniteTransitionSystem}
+    """
+    def __init__(self, env_actions=None, sys_actions=None, **args):
+        """Initialize Augmented Open Finite Transition System.
+
+        @param env_actions: environment (uncontrolled) actions,
+            defined as C{edge_label_types} in L{LabeledDiGraph.__init__}
+
+        @param sys_actions: system (controlled) actions, defined as
+            C{edge_label_types} in L{LabeledDiGraph.__init__}
+        """
+        if env_actions is None:
+            env_actions = [('env_actions', MathSet(), True)]
+        if sys_actions is None:
+            sys_actions = [('sys_actions', MathSet(), True)]
+                
+        ap_labels = PowerSet()
+        eq_labels = PowerSet()
+        prog_map = dict()
+        action_types = env_actions + sys_actions
+        
+        node_label_types = [('ap', ap_labels, ap_labels.math_set),('eq',eq_labels,eq_labels.math_set)]
+        edge_label_types = action_types
+        
+        LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
+        
+        # make them available also via an "actions" dicts
+        # name, codomain, *rest = x
+        actions = {x[0]:x[1] for x in edge_label_types}
+        
+        if 'actions' in actions:
+            msg = '"actions" cannot be used as an action type name,\n'
+            msg += 'because if an attribute for this action type'
+            msg += 'is requested,\n then it will conflict with '
+            msg += 'the dict storing all action types.'
+            raise ValueError(msg)
+                
+        self.actions = actions
+        self.atomic_propositions = self.ap
+        self.aps = self.atomic_propositions
+        self.equilibrium_propositions = self.eq
+        self.eqs = self.equilibrium_propositions
+        self.progress_map=prog_map
+        # action constraint used in synth.synthesize
+        self.env_actions_must = 'xor'
+        self.sys_actions_must = 'xor'
+        
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\\n'
+        }
+        self._transition_dot_label_format = {
+            'sys_actions':'sys',
+            'env_actions':'env',
+            'type?label':':',
+            'separator':'\\n'
+        }
+        
+        self._transition_dot_mask = dict()
+        self.dot_node_shape = {'normal':'box'}
+        self.default_export_fname = 'aofts'
+    
+    def __str__(self):
+        """Get informal string representation."""
+        s = _hl +'\nAugmented Finite Transition System (open) : '
+        s += self.name +'\n' +_hl +'\n'
+        s += 'Atomic Propositions:\n'
+        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
+        s += 'Equilibrium Propositions:\n'
+        s += pformat(self.equilibrium_propositions, indent=3) +2*'\n'
+        s += 'States & State Labels (\in 2^AP):\n'
+        s += pformat(self.states(data=True), indent=3) +2*'\n'
+        s += 'Progress Map (\in 2^(2^Q)):\n'
+        s += "\n".join([(3*" "+str(x)+": "+str(self.progress_map[x]))
+                for x in self.progress_map]) +2*"\n"
+        s += 'Initial States:\n'
+        s += pformat(self.states.initial, indent=3) +2*'\n'
+        for action_type, codomain in self.actions.iteritems():
+            if 'sys' in action_type:
+                s += 'System Action Type: ' + str(action_type) +\
+                     ', with possible values: ' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            elif 'env' in action_type:
+                s += 'Environment Action Type: ' + str(action_type) +\
+                     ', with possible values:\n\t' + str(codomain) + '\n'
+                s += pformat(codomain, indent=3) +2*'\n'
+            else:
+                s += 'Action type controlled by neither env nor sys\n' +\
+                     ' (will cause you errors later)' +\
+                     ', with possible values:\n\t'
+                s += pformat(codomain, indent=3) +2*'\n'
+        s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
+        s += pformat(self.transitions(data=True), indent=3)
+        s += '\n' +_hl +'\n'
+        
+        return s
+
+    def set_progress_map(self,prog_map=dict()):
+        """Assign Progress map to the AOFTS object
+        """
+        assert(isinstance(prog_map,dict))
+        
+        self.progress_map=copy.deepcopy(prog_map)
+
+class AOFTS(AugmentedOpenFiniteTransitionSystem):
+    """Alias to L{transys.AugmentedOpenFiniteTransitionSystem}
+    """
+    def __init__(self, *args, **kwargs):
+        AugmentedOpenFiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None):
