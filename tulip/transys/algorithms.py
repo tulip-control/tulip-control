@@ -33,34 +33,109 @@
 Algorithms on Kripke structures and Automata
 """
 import logging
-from collections import Iterable
-from pprint import pformat
 import copy
 import warnings
 
-from .labeled_graphs import LabeledDiGraph, str2singleton
-from .labeled_graphs import prepend_with
-from .mathset import PowerSet, MathSet
+from .transys import FiniteTransitionSystem
+from .automata import BuchiAutomaton
+from .mathset import MathSet
 
 _hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 
-def __mul__(self, ts_or_ba):
-    """Synchronous product TS * BA or TS * TS2.
-    
-    TS is this transition system, TS2 another one and
-    BA a Buchi Automaton.
+#TODO BA x BA sync prod algorithm
 
+def ts_sync_prod(ts1, ts2):
+    """Synchronous (tensor) product with other FTS.
+    
+    @type ts1, ts2: L{FiniteTransitionSystem}
+    """
+    
+    prod_ts = FiniteTransitionSystem()
+    
+    # union of AP sets
+    prod_ts.atomic_propositions |= \
+        ts1.atomic_propositions | ts2.atomic_propositions
+    
+    # use more label sets, instead of this explicit approach
+    #
+    # for synchronous product: Cartesian product of action sets
+    #prod_ts.actions |= ts1.actions * ts2.actions
+    
+    prod_ts = super(FiniteTransitionSystem, self).tensor_product(
+        ts, prod_sys=prod_ts
+    )
+    
+    return prod_ts
+
+def sync_prod(ts, ba):
+    """Synchronous product between (BA, TS), or (BA1, BA2).
+    
+    The result is always a L{BuchiAutomaton}:
+    
+        - If C{ts_or_ba} is a L{FiniteTransitionSystem} TS,
+            then return the synchronous product BA * TS.
+            
+            The accepting states of BA * TS are those which
+            project on accepting states of BA.
+        
+        - If C{ts_or_ba} is a L{BuchiAutomaton} BA2,
+            then return the synchronous product BA * BA2.
+    
+            The accepting states of BA * BA2 are those which
+            project on accepting states of both BA and BA2.
+    
+            This definition of accepting set extends
+            Def.4.8, p.156 U{[BK08]
+            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+            to NBA.
+    
+    Synchronous product TS * BA or TS1 * TS2.
+    
+    Returns a Finite Transition System, because TS is
+    the first term in the product.
+    
+    Changing term order, i.e., BA * TS, returns the
+    synchronous product as a BA.
+    
+    Caution
+    =======
+    This method includes semantics for true\in\Sigma (p.916, U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}),
+    so there is a slight overlap with logic grammar.  In other
+    words, not completely isolated from logics.
+    
     See Also
     ========
-    L{self.sync_prod}
+    L{transys._ts_ba_sync_prod}
     
+    @param ts_or_ba: other with which to take synchronous product
+    @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
+    
+    @return: self * ts_or_ba
+    @rtype: L{BuchiAutomaton}
+    
+    See Also
+    ========
+    __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
+    Def. 2.42, pp. 75--76 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    Def. 4.62, p.200 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    
+    @param ts_or_ba: system with which to take synchronous product
+    @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
+    
+    @return: synchronous product C{self} x C{ts_or_ba}
     @rtype: L{FiniteTransitionSystem}
     """
-    return self.sync_prod(ts_or_ba)
+    if not isinstance(ba, BuchiAutomaton):
+        raise Exception
+    if not isinstance(ts, FiniteTransitionSystem):
+        raise Exception
 
-def __add__(self, other):
+def add(self, other):
     """Merge two Finite Transition Systems.
     
     States, Initial States, Actions, Atomic Propositions and
@@ -133,74 +208,6 @@ def __add__(self, other):
             )
     
     return copy.copy(self)
-
-def __or__(self, ts):
-    """Asynchronous product self * ts.
-    
-    See Also
-    ========
-    async_prod
-    
-    @type ts: L{FiniteTransitionSystem}
-    """
-    return self.async_prod(ts)
-
-def sync_prod(self, ts_or_ba):
-    """Synchronous product TS * BA or TS1 * TS2.
-    
-    Returns a Finite Transition System, because TS is
-    the first term in the product.
-    
-    Changing term order, i.e., BA * TS, returns the
-    synchronous product as a BA.
-    
-    See Also
-    ========
-    __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
-    Def. 2.42, pp. 75--76 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
-    Def. 4.62, p.200 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
-    
-    @param ts_or_ba: system with which to take synchronous product
-    @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
-    
-    @return: synchronous product C{self} x C{ts_or_ba}
-    @rtype: L{FiniteTransitionSystem}
-    """
-    if isinstance(ts_or_ba, FiniteTransitionSystem):
-        ts = ts_or_ba
-        return self._sync_prod(ts)
-    else:
-        ba = ts_or_ba
-        return _ts_ba_sync_prod(self, ba)
-
-def _sync_prod(self, ts):
-    """Synchronous (tensor) product with other FTS.
-    
-    @param ts: other FTS with which to take synchronous product
-    @type ts: L{FiniteTransitionSystem}
-    """
-    # type check done by caller: sync_prod
-    if self.states.mutants or ts.states.mutants:
-        mutable = True
-    else:
-        mutable = False
-    
-    prod_ts = FiniteTransitionSystem(mutable=mutable)
-    
-    # union of AP sets
-    prod_ts.atomic_propositions |= \
-        self.atomic_propositions | ts.atomic_propositions
-    
-    # for synchronous product: Cartesian product of action sets
-    prod_ts.actions |= self.actions * ts.actions
-    
-    prod_ts = super(FiniteTransitionSystem, self).tensor_product(
-        ts, prod_sys=prod_ts
-    )
-    
-    return prod_ts
 
 def async_prod(self, ts):
     """Asynchronous product TS1 x TS2 between FT Systems.
