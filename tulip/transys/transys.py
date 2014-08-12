@@ -307,12 +307,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         f.close()
         return True
 
-class FTS(FiniteTransitionSystem):
-    """Alias to L{FiniteTransitionSystem}.
-    """    
-    def __init__(self, *args, **kwargs):
-        FiniteTransitionSystem.__init__(self, *args, **kwargs)
-
 class OpenFiniteTransitionSystem(LabeledDiGraph):
     """Open Finite Transition System modeling an open system.
     
@@ -449,6 +443,12 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         )
         
         return s
+    
+class FTS(FiniteTransitionSystem):
+    """Alias to L{FiniteTransitionSystem}.
+    """
+    def __init__(self, *args, **kwargs):
+        FiniteTransitionSystem.__init__(self, *args, **kwargs)
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
               prepend_str=None):
