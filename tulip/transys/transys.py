@@ -757,7 +757,7 @@ class GameGraph(LabeledDiGraph):
         from_state = e[0]
         return self.node[from_state]['player']
 
-def LabeledGameGraph(GameGraph):
+class LabeledGameGraph(GameGraph):
     """Game graph with labeled states.
     
     Its contraction is a Kripke structure.
