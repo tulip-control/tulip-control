@@ -108,8 +108,15 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     so the environment picks the next state.
     
+    State labeling
+    ==============
+    The state labels are sets of atomic propositions,
+    similar to a L{LripkeStructure}.
+    
     Edge labeling
     =============
+    Edge labels are called "actions".
+    
     The edge labeling is syntactic sugar for
     labels that are shifted to the target states of
     those edges. So edge labeling is not an essential
@@ -162,35 +169,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     The default constraint is 'xor'.
     
-    
-    Implements Def. 2.1, p.20 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
-        - states (instance of L{States}) = S
-        - states.initial = S_0 \subseteq S
-        - atomic_propositions = AP
-        - actions = Act
-        - transitions (instance of L{Transitions})::
-              the transition relation ->
-                = edge set + edge labeling function
-                (labels \in actions)
-        Unlabeled edges are defined using:
-            - sys.transitions.add
-            - sys.transitions.add_from
-            - sys.transitions.add_adj
-        and accessed using:
-            - sys.transitions.find
-        - the state labeling function::
-                L: S-> 2^AP
-        can be defined using:
-            - sys.states.add
-            - sys.states.add_from
-        and accessed using methods:
-            - sys.states(data=True)
-            - sys.states.find
-    
-    The state labels are subsets of atomic_propositions, so \in 2^AP.
-    The transition labels are actions.
-    
     sys.actions_must: select constraint on actions. Options:
         
         - 'mutex': at most 1 action True each time
@@ -206,10 +184,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
     then 2 copies of that same edge are stored.
     Each copy is annotated using a different action,
     the actions must belong to the same action set.
-    That action set is defined as a ser instance.
+    That action set is defined as a set instance.
     This description is a (closed) L{FTS}.
     
-    The system and environment actions associated with an edge
+    The system and environment actions are associated with an edge
     of a reactive system. To store these, 2 sub-labels are used
     and their sets are encapsulated within the same L{(open) FTS
     <OpenFiniteTransitionSystem>}.
@@ -261,9 +239,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
     will raise an exception, unless the unlabeled transition is
     removed before adding the labeled transition.
     
-    Using L{tuple2fts} offers a more convenient constructor
-    for transition systems.
-    
     The user can still invoke NetworkX functions to set custom node
     and edge labels, in addition to the above ones.
     For example:
@@ -275,15 +250,43 @@ class FiniteTransitionSystem(LabeledDiGraph):
     are checked to make sure they are elements of the system's
     AP and Action sets.
     
-    It is not advisable to use NetworkX C{add_node} and C{add_edge}
-    directly, because that can result in an inconsistent system,
-    since it skips all checks performed by transys.
+    It is not advisable to use C{MultiDiGraph.add_node} and
+    C{MultiDiGraph.add_edge} directly,
+    because that can result in an inconsistent system,
+    since it skips all checks performed by L{transys}.
     
     Note
     ====
     The attributes atomic_propositions and aps are equal.
     When you want to produce readable code, use atomic_propositions.
     Otherwise, aps offers shorthand access to the APs.
+    
+    Reference
+    =========
+    For closed systems this corresponds to Def. 2.1, p.20 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
+        - states (instance of L{States}) = S
+        - states.initial = S_0 \subseteq S
+        - atomic_propositions = AP
+        - actions = Act
+        - transitions (instance of L{Transitions})::
+              the transition relation ->
+                = edge set + edge labeling function
+                (labels \in actions)
+        Unlabeled edges are defined using:
+            - sys.transitions.add
+            - sys.transitions.add_from
+            - sys.transitions.add_adj
+        and accessed using:
+            - sys.transitions.find
+        - the state labeling function::
+                L: S-> 2^AP
+        can be defined using:
+            - sys.states.add
+            - sys.states.add_from
+        and accessed using methods:
+            - sys.states(data=True)
+            - sys.states.find
     
     See Also
     ========
