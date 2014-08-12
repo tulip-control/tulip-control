@@ -715,7 +715,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self,
         node_label_types=None,
         edge_label_types=None,
-        max_outdegree=None,
+        deterministic=False
     ):
         """Initialize the types of labelings on states and edges.
         
@@ -764,17 +764,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param edge_label_types: labeling functions for edges,
             defined similarly to C{node_label_types}.
         
-        @param max_outdegree: upper bound on the outdegree of each node.
-            Labels are ignored while counting edges,
-            so edges with different labels count as two edges.
-        @type max_outdegree: int
-        """
-        #todo
-        """
-        @param max_outdegree_per_label: like C{max_outdegree},
-            but outgoing edges are counted separately for each
-            labeling function.
-        @type max_outdegree_per_label: int
+        @param deterministic: if True, then edge-label-deterministic
         """
         node_labeling, node_defaults = self._init_labeling(node_label_types)
         edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
@@ -794,10 +784,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.states = States(self)
         
         #todo: handle accepting states separately
-        if max_outdegree == 1:
-            deterministic = True
-        else:
-            deterministic = False
         self.transitions = Transitions(self, deterministic)
         
         # export properties
