@@ -1,4 +1,5 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011, 2012, 2013, 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,8 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
 #    products derived from this software without specific prior
 #    written permission.
 # 
@@ -52,9 +53,10 @@ import polytope as pc
 
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
-from .feasible import is_feasible, solve_feasible
-from .plot import plot_ts_on_partition
+from tulip.abstract.prop2partition import PropPreservingPartition, pwa_partition, part2convex
+from tulip.abstract.feasible import is_feasible, solve_feasible
+from tulip.abstract.plot import plot_ts_on_partition
+from tulip.abstract import prop2partition as p2p
 
 try:
     import matplotlib.pyplot as plt
@@ -426,6 +428,84 @@ class AbstractPwa(object):
             else:
                 logger.info('correct transition: ' + msg)
 
+class AbstractModeSwitched(AbstractSwitched):
+    """Abstraction of SwitchedSysDyn, with mode-specific and common info.
+    
+    The key difference between AbstractSwitched and AbstractModeSwitched
+    is that the plot function is different. AbstractModeSwitched, creates
+    a plot from a partition where transitions sometimes go outside the 
+    domain. This allows for that and shows these transitions. 
+
+    Attributes:
+    
+      - ppp: merged partition, if any
+          Preserves both propositions and dynamics
+    
+      - ts: common TS, if any
+      
+      - ppp2ts: map from C{ppp.regions} to C{ts.states}
+      
+      - modes: list of modes
+      
+    """
+    def __init__(
+        self, ppp=None, ts=None, ppp2ts=None,
+        modes=None
+        ):
+        if modes is None:
+            modes = dict()
+        
+        self.ppp = ppp
+        self.ts = ts
+        self.ppp2ts = ppp2ts
+        self.modes = modes
+    
+    def __str__(self):
+        s = 'Abstraction of switched system\n'
+        s += str('common PPP:\n') + str(self.ppp)
+        s += str('common ts:\n') + str(self.ts)
+        
+        for mode in self.modes:
+            s += 'mode: ' + str(mode)
+        
+        return s
+
+    def plot(self, show_ts=False, only_adjacent=False):
+        """Plots a transition map for the given object.
+
+        Allows transitions that go beyond the domain to be plotted.
+        No need to merge the transition plots as the system cannot be 
+        in multiple modes at a given time. 
+
+        For more details see L{AbstractPwa.plot}
+        """
+        bounds=self.ppp.domain.b
+        xlim=bounds[0]
+        ylim=bounds[1]
+        out=[box2poly([[xlim,xlim+1],[ylim,ylim+1]])]
+        self.ppp.regions.append(pc.Region(out))
+
+        axs = []
+        color_seed = 0
+        
+        if self.ppp is not None:
+            for mode in self.modes:
+                env_mode, sys_mode = mode
+                edge_label = {'env_actions':env_mode,
+                              'sys_actions':sys_mode}
+                
+                ax = _plot_abstraction(
+                    self, show_ts=False, only_adjacent=False,
+                    color_seed=color_seed
+                )
+                plot_ts_on_partition(
+                    self.ppp, self.ts, self.ppp2ts,
+                    edge_label, only_adjacent, ax
+                )
+                axs += [ax]
+
+        return axs
+
 def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
     if ab.ppp is None or ab.ts is None:
         warnings.warn('Either ppp or ts is None.')
@@ -658,7 +738,7 @@ def discretize(
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
-        
+        #logger.warning('\nVol2: %2f '%vol2)
         # if pc.is_fulldim(pc.Region([isect]).intersect(diff)):
         #     logging.getLogger('tulip.polytope').setLevel(logging.DEBUG)
         #     diff = pc.mldivide(si, S0, save=True)
@@ -733,13 +813,17 @@ def discretize(
                 # keep track of PWA subsystems map to new states
                 if ispwa:
                     subsys_list.append(subsys_list[i])
-            n_cells = len(sol)
+            #n_cvol2ells = len(sol)
+            n_cells=len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
+
+            #n_cells=len(sol) #MS changed here
+            #logger.warning('\n n_cells %1f:'%n_cells)
             
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
-            transitions[i, :] = np.zeros(n_cells)
+            transitions[i, :] = np.zeros(n_cells) #MS Change
             for r in new_idx:
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
@@ -849,6 +933,8 @@ def discretize(
             assert(tmp_part.is_partition() )
         
         n_cells = len(sol)
+        
+
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
         progress += [progress_ratio]
         
@@ -1243,7 +1329,7 @@ def discretize_switched(
         plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
     
     return merged_abstr
-
+        
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
@@ -1255,7 +1341,7 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     
     axs = swab.plot(show_ts, only_adjacent)
     n = len(swab.modes)
-    assert(len(axs) == 2*n)
+    #assert(len(axs) == 2*n)
     
     # annotate
     for ax in axs:
@@ -1263,7 +1349,7 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     
     # save mode partitions
     for ax, mode in zip(axs[:n], swab.modes):
-        fname = 'merged_' + str(mode) + '.pdf'
+        fname = 'merged_' +str(mode) + '.pdf'
         ax.figure.savefig(fname)
     
     # save merged partition
