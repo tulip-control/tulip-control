@@ -716,7 +716,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         node_label_types=None,
         edge_label_types=None,
         max_outdegree=None,
-        **kwargs
     ):
         """Initialize the types of labelings on states and edges.
         
@@ -790,7 +789,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
         
-        nx.MultiDiGraph.__init__(self, **kwargs)
+        nx.MultiDiGraph.__init__(self)
         
         self.states = States(self)
         

@@ -90,8 +90,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
     def __init__(
             self, deterministic=False,
             accepting_states_type=None,
-            atomic_proposition_based=True,
-            **kwargs
+            atomic_proposition_based=True
         ):
         """Initialize FiniteStateAutomaton.
 
@@ -116,7 +115,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
              'setter':True}
         ]
         super(FiniteStateAutomaton, self).__init__(
-            edge_label_types=edge_label_types, **kwargs
+            edge_label_types=edge_label_types
         )
         self.alphabet = alphabet
         
@@ -185,7 +184,7 @@ class NFA(FiniteStateAutomaton):
     Determinism can be enforced by optional argument
     when creating transitions.
     """
-    def __init__(self, atomic_proposition_based=True, **kwargs):
+    def __init__(self, atomic_proposition_based=True):
         super(NFA, self).__init__(
             deterministic=False,
             atomic_proposition_based=atomic_proposition_based
@@ -209,7 +208,7 @@ class DFA(NFA):
     def __init__(self, atomic_proposition_based=True):
         super(DFA, self).__init__(
             deterministic=True,
-            atomic_proposition_based=atomic_proposition_based,
+            atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Deterministic Finite Automaton'
 
@@ -236,12 +235,11 @@ class OmegaAutomaton(FiniteStateAutomaton):
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(
             self, deterministic=False,
-            atomic_proposition_based=True, **kwargs
+            atomic_proposition_based=True
         ):
         super(BuchiAutomaton, self).__init__(
             deterministic=deterministic,
-            atomic_proposition_based=atomic_proposition_based,
-            **kwargs
+            atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Buchi Automaton'
     
@@ -624,12 +622,11 @@ class RabinAutomaton(OmegaAutomaton):
     L{DRA}, L{BuchiAutomaton}
     """    
     def __init__(self, deterministic=False,
-                 atomic_proposition_based=False, **kwargs):
+                 atomic_proposition_based=False):
         super(RabinAutomaton, self).__init__(
             deterministic=deterministic,
             accepting_states_type=RabinPairs,
-            atomic_proposition_based=atomic_proposition_based,
-            **kwargs
+            atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Rabin Automaton'
     
@@ -648,11 +645,10 @@ class DRA(RabinAutomaton):
     ========
     L{RabinAutomaton}
     """
-    def __init__(self, atomic_proposition_based=True, **kwargs):
+    def __init__(self, atomic_proposition_based=True):
         super(DRA, self).__init__(
             deterministic=True,
-            atomic_proposition_based=atomic_proposition_based,
-            **kwargs
+            atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Deterministic Rabin Automaton'
 

@@ -244,7 +244,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     ========
     L{OpenFTS}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """Initialize Finite Transition System.
         
         For arguments, see L{LabeledDiGraph}
@@ -263,8 +263,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         ]
         
         super(FiniteTransitionSystem, self).__init__(
-            node_label_types, edge_label_types,
-            *args, **kwargs
+            node_label_types, edge_label_types
         )
         
         self.atomic_propositions = self.ap
@@ -621,7 +620,7 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
     ========
     L{FiniteTransitionSystem}
     """
-    def __init__(self, env_actions=None, sys_actions=None, **args):
+    def __init__(self, env_actions=None, sys_actions=None):
         """Initialize Open Finite Transition System.
 
         @param env_actions: environment (uncontrolled) actions,

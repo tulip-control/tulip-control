@@ -206,7 +206,7 @@ class FiniteStateMachine(LabeledDiGraph):
     ========
     FSM, MealyMachine, MooreMachine
     """
-    def __init__(self, **args):
+    def __init__(self):
         # values will point to values of _*_label_def below
         self.state_vars = dict()
         self.inputs = dict()
@@ -227,7 +227,7 @@ class FiniteStateMachine(LabeledDiGraph):
         
         self.default_export_fname = 'fsm'
         
-        LabeledDiGraph.__init__(self, **args)
+        LabeledDiGraph.__init__(self)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'fsm'
@@ -323,8 +323,8 @@ class FiniteStateMachine(LabeledDiGraph):
 class FSM(FiniteStateMachine):
     """Alias for Finite-state Machine.
     """
-    def __init__(self, **args):
-        FiniteStateMachine.__init__(self, **args)
+    def __init__(self):
+        FiniteStateMachine.__init__(self)
 
 class MooreMachine(FiniteStateMachine):
     """Moore machine.
@@ -351,10 +351,10 @@ class MooreMachine(FiniteStateMachine):
     U{[M56]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#m56>}
     """
-    def __init__(self, **args):
+    def __init__(self):
         """Instantiate a Moore state machine.
         """
-        FiniteStateMachine.__init__(self, **args)
+        FiniteStateMachine.__init__(self)
         
         self.dot_node_shape = {'normal':'ellipse'}
         self.default_export_fname = 'moore'
@@ -484,8 +484,8 @@ class MealyMachine(FiniteStateMachine):
     U{[M55]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#m55>}
     """
-    def __init__(self, **args):
-        FiniteStateMachine.__init__(self, **args)
+    def __init__(self):
+        FiniteStateMachine.__init__(self)
         
         # will point to selected values of self._transition_label_def
         self.dot_node_shape = {'normal':'ellipse'}
