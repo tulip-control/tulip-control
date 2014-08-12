@@ -89,7 +89,79 @@ class KripkeStructure(LabeledDiGraph):
         return s
 
 class FiniteTransitionSystem(LabeledDiGraph):
-    """Finite Transition System modeling a closed system.
+    """Kripke structure with labeled states and edges.
+    
+    Who controls the state
+    ======================
+    To define who "moves the token" between vertices in
+    the graph, set the attribute:
+    
+    >>> g = FiniteTransitionSystem()
+    >>> g.owner = 'sys'
+    
+    This means that when there are more than one transition
+    enabled, then the system picks the next state.
+    
+    The other option is:
+    
+    >>> g.owner = 'env'
+    
+    so the environment picks the next state.
+    
+    Edge labeling
+    =============
+    The edge labeling is syntactic sugar for
+    labels that are shifted to the target states of
+    those edges. So edge labeling is not an essential
+    difference from Kripke structures.
+    
+    Not to be confused with the term:
+    "Labeled Transition System"
+    found in the literature.
+    
+    Also, it differs from the definition in Baier-Katoen
+    in that actions are not mere reading aid,
+    but are interpreted as propositions as explained above.
+    
+    Besides, edge labeling usually allows for
+    graphs with fewer vertices than the corresponding
+    Kripke structure.
+    
+    Open vs Closed
+    ==============
+    The essential difference from Kripke structures
+    is the partition of atomic propositions into
+    input/output sets.
+    
+    If the set of inputs is empty, then the system is closed.
+    Otherwise it is an open system.
+    Open systems have an environment, closed don't.
+    
+    Alternatively, FTS can be thought of as a shorthand
+    for defining a vertex-labeled game graph,
+    or equivalently a game structure.
+    
+    System and environment actions
+    ==============================
+    The only significant difference is in transition labeling.
+    For closed systems, each transition is labeled with a system action.
+    So each transition label comprises of a single sublabel,
+    the system action.
+    
+    For open systems, each transition is labeled with 2 sublabels:
+        - The first sublabel is a system action,
+        - the second an environment action.
+    
+    Mutual exclusion of actions
+    ===========================
+    Constraints on actions can be defined
+    similarly to L{FTS} actions by setting the fields:
+    
+        - ofts.env_actions_must
+        - ofts.sys_actions_must
+    
+    The default constraint is 'xor'.
+    
     
     Implements Def. 2.1, p.20 U{[BK08]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
@@ -207,17 +279,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
     directly, because that can result in an inconsistent system,
     since it skips all checks performed by transys.
     
-    dot Export
-    ==========
-    Format transition labels using _transition_dot_label_format
-    which is a dict with values:
-        - 'actions' (=name of transitions attribute):
-            type before separator
-        - 'type?label': separator between label type and value
-        - 'separator': between labels for different sets of actions
-            (e.g. sys, env). Not used for closed FTS,
-            because it has single set of actions.
-    
     Note
     ====
     The attributes atomic_propositions and aps are equal.
@@ -226,119 +287,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     See Also
     ========
-    L{OpenFTS}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
-    """
-    def __init__(self):
-        """Initialize Finite Transition System.
-        
-        For arguments, see L{LabeledDiGraph}
-        """
-        ap_labels = PowerSet()
-        node_label_types = [
-            {'name':'ap',
-             'values':ap_labels,
-             'setter':ap_labels.math_set,
-             'default':set()}
-        ]
-        edge_label_types = [
-            {'name':'actions',
-             'values':MathSet(),
-             'setter':True}
-        ]
-        
-        super(FiniteTransitionSystem, self).__init__(
-            node_label_types, edge_label_types
-        )
-        
-        self.atomic_propositions = self.ap
-        self.aps = self.atomic_propositions # shortcut
-        self.actions_must = 'xor'
-        
-        # dot formatting
-        self._state_dot_label_format = {
-            'ap':'',
-           'type?label':'',
-           'separator':'\n'
-        }
-        self._transition_dot_label_format = {
-            'actions':'',
-            'type?label':'',
-            'separator':'\n'
-        }
-        self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal':'rectangle'}
-        self.default_export_fname = 'fts'
-
-    def __str__(self):
-        s = (
-            _hl + '\nFinite Transition System (closed) : ' +
-            self.name + '\n' + _hl + '\n' +
-            'Atomic Propositions:\n\t' +
-            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
-            'States and State Labels (\in 2^AP):\n' +
-            _dumps_states(self) + 2*'\n' +
-            'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2*'\n' +
-            'Actions:\n\t' +str(self.actions) + 2*'\n' +
-            'Transitions & Labels:\n' +
-            pformat(self.transitions(data=True), indent=3) +
-            '\n' + _hl + '\n'
-        )
-        return s
-    
-    def _save(self, path, fileformat):
-        """Export options available only for FTS systems.
-        
-        Provides: pml (Promela)
-        
-        See Also
-        ========
-        L{save}, L{plot}
-        """
-        if fileformat not in {'promela', 'Promela', 'pml'}:
-            return False
-        
-        from .export import graph2promela
-        s = graph2promela.fts2promela(self, self.name)
-        
-        # dump to file
-        f = open(path, 'w')
-        f.write(s)
-        f.close()
-        return True
-
-class OpenFiniteTransitionSystem(LabeledDiGraph):
-    """Open Finite Transition System modeling an open system.
-    
-    Analogous to L{FTS}, but for open systems comprised of
-    the system and its environment.
-    
-    Please refer to L{FiniteTransitionSystem} for usage details.
-    
-    The only significant difference is in transition labeling.
-    For closed systems, each transition is labeled with a system action.
-    So each transition label comprises of a single sublabel,
-    the system action.
-    
-    For open systems, each transition is labeled with 2 sublabels:
-        - The first sublabel is a system action,
-        - the second an environment action.
-    
-    Constraints on actions can be defined
-    similarly to L{FTS} actions by setting the fields:
-    
-        - ofts.env_actions_must
-        - ofts.sys_actions_must
-    
-    The default constraint is 'xor'.
-    For more details see L{FTS}.
-    
-    See Also
-    ========
-    L{FiniteTransitionSystem}
+    L{KripkeStucture}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
     """
     def __init__(self, env_actions=None, sys_actions=None):
-        """Initialize Open Finite Transition System.
+        """Instantiate finite transition system.
 
         @param env_actions: environment (uncontrolled) actions,
             defined as C{edge_label_types} in L{LabeledDiGraph.__init__}
@@ -359,6 +311,8 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
                  'values':MathSet(),
                  'setter':True}
             ]
+        # note: "sys_actions" used to be "actions"
+        # in closed systems (old FTS)
         
         ap_labels = PowerSet()
         action_types = env_actions + sys_actions
@@ -371,7 +325,9 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         ]
         edge_label_types = action_types
         
-        LabeledDiGraph.__init__(self, node_label_types, edge_label_types)
+        super(FiniteTransitionSystem, self).__init__(
+            node_label_types, edge_label_types
+        )
         
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
@@ -386,11 +342,12 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
                 
         self.actions = actions
         self.atomic_propositions = self.ap
-        self.aps = self.atomic_propositions
+        self.aps = self.atomic_propositions # shortcut
         
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
+        # self.actions_must = 'xor'
         
         # dot formatting
         self._state_dot_label_format = {
@@ -399,27 +356,37 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
            'separator':'\n'
         }
         self._transition_dot_label_format = {
-            'sys_actions':'sys',
+            'sys_actions':'sys', # todo: '' if no env
             'env_actions':'env',
-            'type?label':':',
+            'type?label':':', # todo: '' if no env
             'separator':'\n'
         }
         
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal':'box'}
-        self.default_export_fname = 'ofts'
+        self.dot_node_shape = {'normal':'box'} # todo: rectangle if no env
+        self.default_export_fname = 'fts'
     
     def __str__(self):
+        if self.env_vars:
+            t = 'open'
+        else:
+            t = 'closed'
+        
         s = (
-            _hl +'\nFinite Transition System (open) : ' +
+            _hl +'\nFinite Transition System (' + t + ': ' +
             self.name + '\n' + _hl + '\n' +
-            'Atomic Propositions:\n' +
+            
+            'Atomic Propositions (APs):\n' +
             pformat(self.atomic_propositions, indent=3) + 2*'\n' +
-            'States & State Labels (\in 2^AP):\n' +
+            
+            'States labeled with sets of APs:\n' +
             _dumps_states(self) + 2*'\n' +
+            
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2*'\n'
         )
+        
+        #'Actions:\n\t' +str(self.actions) + 2*'\n' +
         
         for action_type, codomain in self.actions.iteritems():
             if 'sys' in action_type:
@@ -437,12 +404,37 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
                 s += pformat(codomain, indent=3) +2*'\n'
         
         s += (
-            'Transitions & Labeling w/ Sys, Env Actions:\n' +
+            'Transitions labeled with sys and env actions:\n' +
             pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n'
         )
         
         return s
+    
+    def _save(self, path, fileformat):
+        """Export options available only for closed systems.
+        
+        Provides: pml (Promela)
+        
+        See Also
+        ========
+        L{save}, L{plot}
+        """
+        if fileformat not in {'promela', 'Promela', 'pml'}:
+            return False
+        
+        # closed ?
+        if self.env_vars:
+            return False
+        
+        from .export import graph2promela
+        s = graph2promela.fts2promela(self, self.name)
+        
+        # dump to file
+        f = open(path, 'w')
+        f.write(s)
+        f.close()
+        return True
     
 class FTS(FiniteTransitionSystem):
     """Alias to L{FiniteTransitionSystem}.
