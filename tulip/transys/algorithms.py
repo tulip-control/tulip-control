@@ -46,6 +46,193 @@ _hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
 
+def __mul__(self, ts_or_ba):
+    """Synchronous product TS * BA or TS * TS2.
+    
+    TS is this transition system, TS2 another one and
+    BA a Buchi Automaton.
+
+    See Also
+    ========
+    L{self.sync_prod}
+    
+    @rtype: L{FiniteTransitionSystem}
+    """
+    return self.sync_prod(ts_or_ba)
+
+def __add__(self, other):
+    """Merge two Finite Transition Systems.
+    
+    States, Initial States, Actions, Atomic Propositions and
+    State labels and Transitions of the second Transition System
+    are merged into the first and take precedence, overwriting
+    existing labeling.
+    
+    Example
+    =======
+    This can be useful to construct systems quickly by creating
+    standard "pieces" using the functions: line_labeled_with,
+    cycle_labeled_with
+    
+    >>> n = 4
+    >>> L = n*['p'] # state labeling
+    >>> ts1 = line_labeled_with(L, n-1)
+    >>> ts1.plot()
+    >>> 
+    >>> L = n*['p']
+    >>> ts2 = cycle_labeled_with(L)
+    >>> ts2.states.add('s3', ap={'!p'})
+    >>> ts2.plot()
+    >>> 
+    >>> ts3 = ts1 +ts2
+    >>> ts3.transitions.add('s'+str(n-1), 's'+str(n) )
+    >>> ts3.default_layout = 'circo'
+    >>> ts3.plot()
+    
+    See Also
+    ========
+    L{line_labeled_with}, L{cycle_labeled_with}
+    
+    @param other: system to merge with
+    @type other: C{FiniteTransitionSystem}
+    
+    @return: merge of C{self} with C{other}, union of states,
+        initial states, atomic propositions, actions, edges and
+        labelings, those of C{other} taking precedence over C{self}.
+    @rtype: L{FiniteTransitionSystem}
+    """
+    if not isinstance(other, FiniteTransitionSystem):
+        msg = 'other class must be FiniteTransitionSystem.\n'
+        msg += 'Got instead:\n\t' +str(other)
+        msg += '\nof type:\n\t' +str(type(other) )
+        raise TypeError(msg)
+    
+    self.atomic_propositions |= other.atomic_propositions
+    self.actions |= other.actions
+    
+    # add extra states & their labels
+    for state, label in other.states.find():
+        if state not in self.states:
+            self.states.add(state)
+        
+        if label:
+            self.states[state]['ap'] = label['ap']
+    
+    self.states.initial |= set(other.states.initial)
+    
+    # copy extra transitions (be careful w/ labeling)
+    for (from_state, to_state, label_dict) in \
+        other.transitions.find():
+        # labeled edge ?
+        if not label_dict:
+            self.transitions.add(from_state, to_state)
+        else:
+            sublabel_value = label_dict['actions']
+            self.transitions.add(
+                from_state, to_state, actions=sublabel_value
+            )
+    
+    return copy.copy(self)
+
+def __or__(self, ts):
+    """Asynchronous product self * ts.
+    
+    See Also
+    ========
+    async_prod
+    
+    @type ts: L{FiniteTransitionSystem}
+    """
+    return self.async_prod(ts)
+
+def sync_prod(self, ts_or_ba):
+    """Synchronous product TS * BA or TS1 * TS2.
+    
+    Returns a Finite Transition System, because TS is
+    the first term in the product.
+    
+    Changing term order, i.e., BA * TS, returns the
+    synchronous product as a BA.
+    
+    See Also
+    ========
+    __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
+    Def. 2.42, pp. 75--76 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    Def. 4.62, p.200 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    
+    @param ts_or_ba: system with which to take synchronous product
+    @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
+    
+    @return: synchronous product C{self} x C{ts_or_ba}
+    @rtype: L{FiniteTransitionSystem}
+    """
+    if isinstance(ts_or_ba, FiniteTransitionSystem):
+        ts = ts_or_ba
+        return self._sync_prod(ts)
+    else:
+        ba = ts_or_ba
+        return _ts_ba_sync_prod(self, ba)
+
+def _sync_prod(self, ts):
+    """Synchronous (tensor) product with other FTS.
+    
+    @param ts: other FTS with which to take synchronous product
+    @type ts: L{FiniteTransitionSystem}
+    """
+    # type check done by caller: sync_prod
+    if self.states.mutants or ts.states.mutants:
+        mutable = True
+    else:
+        mutable = False
+    
+    prod_ts = FiniteTransitionSystem(mutable=mutable)
+    
+    # union of AP sets
+    prod_ts.atomic_propositions |= \
+        self.atomic_propositions | ts.atomic_propositions
+    
+    # for synchronous product: Cartesian product of action sets
+    prod_ts.actions |= self.actions * ts.actions
+    
+    prod_ts = super(FiniteTransitionSystem, self).tensor_product(
+        ts, prod_sys=prod_ts
+    )
+    
+    return prod_ts
+
+def async_prod(self, ts):
+    """Asynchronous product TS1 x TS2 between FT Systems.
+    
+    See Also
+    ========
+    __or__, sync_prod, cartesian_product
+    Def. 2.18, p.38 U{[BK08]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    """
+    if not isinstance(ts, FiniteTransitionSystem):
+        raise TypeError('ts must be a FiniteTransitionSystem.')
+    
+    if self.states.mutants or ts.states.mutants:
+        mutable = True
+    else:
+        mutable = False
+    
+    # union of AP sets
+    prod_ts = FiniteTransitionSystem(mutable=mutable)
+    prod_ts.atomic_propositions |= \
+        self.atomic_propositions | ts.atomic_propositions
+    
+    # for parallel product: union of action sets
+    prod_ts.actions |= self.actions | ts.actions
+    
+    prod_ts = super(FiniteTransitionSystem, self).cartesian_product(
+        ts, prod_sys=prod_ts
+    )
+    
+    return prod_ts
+
 def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
              atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
