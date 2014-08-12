@@ -363,17 +363,20 @@ class MooreMachine(FiniteStateMachine):
     def __str__(self):
         """Get informal string representation.
         """
-        s = _hl + '\nMoore Machine: ' + self.name + '\n' +_hl + '\n'
-        s += 'State Variables:\n\t(name : type)\n'
-        s += _print_ports(self.state_vars)
+        s = (
+            _hl + '\nMoore Machine: ' + self.name + '\n' +_hl + '\n' +
+            'State Variables:\n\t(name : type)\n' +
+            _print_ports(self.state_vars) +
+            
+            'Input Ports:\n\t(name : type)\n' +
+            _print_ports(self.inputs) +
         
-        s += 'Input Ports:\n\t(name : type)\n'
-        s += _print_ports(self.inputs)
+            'Output Ports:\n\t(name : type)\n' +
+            _print_ports(self.outputs) +
         
-        s += 'Output Ports:\n\t(name : type)\n'
-        s += _print_ports(self.outputs)
+            'States & State Var Values: (state : outputs : vars)\n'
+        )
         
-        s += 'States & State Var Values: (state : outputs : vars)\n'
         for (state, label_dict) in self.states(data=True):
             s += '\t' +str(state) +' :\n'
             
@@ -383,18 +386,22 @@ class MooreMachine(FiniteStateMachine):
             output_values = {k:v for k, v in label_dict.iteritems()
                              if k in self.outputs}
             
-            s += _print_label(var_values) + ' : '
-            s += _print_label(output_values)
+            s += (_print_label(var_values) + ' : ' +
+                  _print_label(output_values))
         
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += (
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n'
+        )
         
         s += 'Transitions & Labels: (from --> to : label)\n'
         for (from_state, to_state, label_dict) in \
         self.transitions(data=True):
-            s += '\t' +str(from_state) +' ---> '
-            s += str(to_state) +' :\n'
-            s += _print_label(label_dict)
+            s += (
+                '\t' + str(from_state) + ' ---> ' +
+                str(to_state) + ' :\n' +
+                _print_label(label_dict)
+            )
         s += _hl +'\n'
         
         return s
@@ -488,30 +495,36 @@ class MealyMachine(FiniteStateMachine):
     def __str__(self):
         """Get informal string representation.
         """
-        s = _hl +'\nMealy Machine: ' +self.name +'\n' +_hl +'\n'
-        s += 'State Variables:\n\t(name : type)\n'
-        s += _print_ports(self.state_vars)
+        s = (
+            _hl +'\nMealy Machine: ' + self.name + '\n' + _hl + '\n' +
+            'State Variables:\n\t(name : type)\n' +
+            _print_ports(self.state_vars)
+        )
         
         s += 'States & State Var Values:\n'
         for (state, label_dict) in self.states(data=True):
-            s += '\t' +str(state) +' :\n'
-            s += _print_label(label_dict)
+            s += ('\t' + str(state) + ' :\n' +
+                  _print_label(label_dict))
         
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += (
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n' +
         
-        s += 'Input Ports:\n\t(name : type)\n'
-        s += _print_ports(self.inputs)
+            'Input Ports:\n\t(name : type)\n' +
+            _print_ports(self.inputs) +
         
-        s += 'Output Ports:\n\t(name : type)\n'
-        s += _print_ports(self.outputs)
+            'Output Ports:\n\t(name : type)\n' +
+            _print_ports(self.outputs) +
         
-        s += 'Transitions & Labels: (from --> to : label)\n'
+            'Transitions & Labels: (from --> to : label)\n'
+        )
         for (from_state, to_state, label_dict) in \
         self.transitions(data=True):
-            s += '\t' +str(from_state) +' ---> '
-            s += str(to_state) +' :\n'
-            s += _print_label(label_dict)
+            s += (
+                '\t' + str(from_state) + ' ---> ' +
+                str(to_state) + ' :\n' +
+                _print_label(label_dict)
+            )
         s += _hl +'\n'
         
         return s

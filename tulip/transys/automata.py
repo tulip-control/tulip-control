@@ -145,24 +145,27 @@ class FiniteStateAutomaton(LabeledDiGraph):
         return self._accepting
     
     def __str__(self):
-        """Get informal string representation."""
-        s = _hl +'\n' +self.automaton_type +': '
-        s += self.name +'\n' +_hl +'\n'
-        s += 'States:\n'
-        s += pformat(self.states(data=False), indent=3) +2*'\n'
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Accepting States:\n'
-        s += pformat(self.states.accepting, indent=3) +2*'\n'
+        s = (
+            _hl + '\n' + self.automaton_type + ': ' +
+            self.name + '\n' + _hl + '\n' +
+            'States:\n' +
+            pformat(self.states(data=False), indent=3) + 2*'\n' +
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n' +
+            'Accepting States:\n' +
+            pformat(self.states.accepting, indent=3) +2*'\n'
+        )
         
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\in 2^AP):\n\t'
         else:
             s += 'Input Alphabet Letters:\n\t'
-        s += str(self.alphabet) +2*'\n'
-        s += 'Transitions & labeling w/ Input Letters:\n'
-        s += pformat(self.transitions(data=True), indent=3)
-        s += '\n' +_hl +'\n'
+        s += (
+            str(self.alphabet) + 2*'\n' +
+            'Transitions & labeling w/ Input Letters:\n' +
+            pformat(self.transitions(data=True), indent=3) +
+            '\n' + _hl + '\n'
+        )
         
         return s
     
@@ -513,8 +516,10 @@ class RabinPairs(object):
     def __str__(self):
         s = 'L = Good states, U = Bad states\n' +30*'-' +'\n'
         for index, (good, bad) in enumerate(self._pairs):
-            s += 'Pair: ' +str(index) +', L = ' +str(good)
-            s += ', U = ' +str(bad) +'\n'
+            s += (
+                'Pair: ' + str(index) + ', L = ' + str(good) +
+                ', U = ' + str(bad) + '\n'
+            )
         return s
     
     def __getitem__(self, index):

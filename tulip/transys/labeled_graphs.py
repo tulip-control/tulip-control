@@ -93,9 +93,11 @@ def test_common_bug(value, desired_value):
     if isinstance(value, (set, list) ) and \
     isinstance(desired_value, (set, list) ) and \
     value.__class__ != desired_value.__class__:
-       msg = 'Set SubLabel:\n\t' +str(value)
-       msg += 'compared to list SubLabel:\n\t' +str(desired_value)
-       msg += 'Did you mix sets & lists when setting AP labels ?'
+       msg = (
+           'Set SubLabel:\n\t' + str(value) +
+           'compared to list SubLabel:\n\t' + str(desired_value) +
+           'Did you mix sets & lists when setting AP labels ?'
+          )
        raise Exception(msg)
 
 class States(object):
@@ -357,9 +359,11 @@ class States(object):
                     logger.debug('state_id = ' +str(state) +', not desired.')
                     continue
             
-            msg = 'Checking state label:\n\t attr_dict = '
-            msg += str(attr_dict)
-            msg += '\n vs:\n\t desired_label = ' + str(with_attr_dict)
+            msg = (
+                'Checking state label:\n\t attr_dict = ' +
+                str(attr_dict) +
+                '\n vs:\n\t desired_label = ' + str(with_attr_dict)
+            )
             logger.debug(msg)
             
             if not with_attr_dict:
@@ -437,9 +441,11 @@ class Transitions(object):
         same_labeled = self.find([from_state], with_attr_dict=sublabels)        
         
         if same_labeled:
-            msg = 'Candidate transition violates determinism.\n'
-            msg += 'Existing transitions with same label:\n'
-            msg += str(same_labeled)
+            msg = (
+                'Candidate transition violates determinism.\n'
+                'Existing transitions with same label:\n' +
+                str(same_labeled)
+            )
             raise Exception(msg)
     
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
@@ -849,21 +855,25 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         untyped_keys = set(typed_attr).difference(type_defs)
         
-        msg = 'checking for untyped keys...\n'
-        msg += 'attribute dict: ' + str(typed_attr) + '\n'
-        msg += 'type definitions: ' + str(type_defs) + '\n'
-        msg += 'untyped_keys: ' + str(untyped_keys)
+        msg = (
+            'checking for untyped keys...\n' +
+            'attribute dict: ' + str(typed_attr) + '\n' +
+            'type definitions: ' + str(type_defs) + '\n' +
+            'untyped_keys: ' + str(untyped_keys)
+        )
         logger.debug(msg)
         
         if untyped_keys:
-            msg = 'The following edge attributes:\n' +\
-                  str({k:typed_attr[k] for k in untyped_keys}) +'\n' +\
-                  'are not allowed.\n' +\
-                  'Currently the allowed attributes are:' +\
-                  ', '.join([str(x) for x in type_defs])
+            msg = (
+                'The following edge attributes:\n' +
+                 str({k:typed_attr[k] for k in untyped_keys}) +'\n' +
+                 'are not allowed.\n' +
+                 'Currently the allowed attributes are:' +
+                 ', '.join([str(x) for x in type_defs])
+            )
             if check:
-                msg += '\nTo set attributes not included '+\
-                       'in the existing types, pass: check = False'
+                msg += ('\nTo set attributes not included '+
+                        'in the existing types, pass: check = False')
                 raise AttributeError(msg)
             else:
                 msg += '\nAllowed because you passed: check = True'
@@ -1006,20 +1016,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
         existing_u_v = self.get_edge_data(u, v, default={})
         
         if dict() in existing_u_v.values():
-            msg = 'Unlabeled transition: '
-            msg += 'from_state-> to_state already exists,\n'
-            msg += 'where:\t from_state = ' +str(u) +'\n'
-            msg += 'and:\t to_state = ' +str(v) +'\n'
+            msg = (
+                'Unlabeled transition: '
+                'from_state-> to_state already exists,\n'
+                'where:\t from_state = ' + str(u) + '\n'
+                'and:\t to_state = ' + str(v) + '\n'
+            )
             raise Exception(msg)
         
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
-            msg = 'Same labeled transition:\n'
-            msg += 'from_state---[label]---> to_state\n'
-            msg += 'already exists, where:\n'
-            msg += '\t from_state = ' +str(u) +'\n'
-            msg += '\t to_state = ' +str(v) +'\n'
-            msg += '\t label = ' +str(typed_attr) +'\n'
+            msg = (
+                'Same labeled transition:\n'
+                'from_state---[label]---> to_state\n'
+                'already exists, where:\n'
+                '\t from_state = ' + str(u) + '\n'
+                '\t to_state = ' + str(v) + '\n'
+                '\t label = ' + str(typed_attr) + '\n'
+            )
             warnings.warn(msg)
             logger.warning(msg)
             return

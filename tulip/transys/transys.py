@@ -230,20 +230,20 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
-        """Get informal string representation."""
-        s = _hl +'\nFinite Transition System (closed) : '
-        s += self.name +'\n' +_hl +'\n'
-        s += 'Atomic Propositions:\n\t'
-        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
-        s += 'States and State Labels (\in 2^AP):\n'
-        s += _dumps_states(self) + 2*'\n'
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Actions:\n\t' +str(self.actions) +2*'\n'
-        s += 'Transitions & Labels:\n'
-        s += pformat(self.transitions(data=True), indent=3)
-        s += '\n' +_hl +'\n'
-        
+        s = (
+            _hl + '\nFinite Transition System (closed) : ' +
+            self.name + '\n' + _hl + '\n' +
+            'Atomic Propositions:\n\t' +
+            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
+            'States and State Labels (\in 2^AP):\n' +
+            _dumps_states(self) + 2*'\n' +
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n' +
+            'Actions:\n\t' +str(self.actions) + 2*'\n' +
+            'Transitions & Labels:\n' +
+            pformat(self.transitions(data=True), indent=3) +
+            '\n' + _hl + '\n'
+        )
         return s
     
     def __mul__(self, ts_or_ba):
@@ -637,15 +637,17 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'ofts'
     
     def __str__(self):
-        """Get informal string representation."""
-        s = _hl +'\nFinite Transition System (open) : '
-        s += self.name +'\n' +_hl +'\n'
-        s += 'Atomic Propositions:\n'
-        s += pformat(self.atomic_propositions, indent=3) +2*'\n'
-        s += 'States & State Labels (\in 2^AP):\n'
-        s += _dumps_states(self) + 2*'\n'
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s = (
+            _hl +'\nFinite Transition System (open) : ' +
+            self.name + '\n' + _hl + '\n' +
+            'Atomic Propositions:\n' +
+            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
+            'States & State Labels (\in 2^AP):\n' +
+            _dumps_states(self) + 2*'\n' +
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n'
+        )
+        
         for action_type, codomain in self.actions.iteritems():
             if 'sys' in action_type:
                 s += 'System Action Type: ' + str(action_type) +\
@@ -660,9 +662,12 @@ class OpenFiniteTransitionSystem(LabeledDiGraph):
                      ' (will cause you errors later)' +\
                      ', with possible values:\n\t'
                 s += pformat(codomain, indent=3) +2*'\n'
-        s += 'Transitions & Labeling w/ Sys, Env Actions:\n'
-        s += pformat(self.transitions(data=True), indent=3)
-        s += '\n' +_hl +'\n'
+        
+        s += (
+            'Transitions & Labeling w/ Sys, Env Actions:\n' +
+            pformat(self.transitions(data=True), indent=3) +
+            '\n' + _hl + '\n'
+        )
         
         return s
 
