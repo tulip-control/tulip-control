@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 class KripkeStructure(LabeledDiGraph):
     """Directed graph with vertex labeling and initial vertices.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         ap_labels = PowerSet()
         node_label_types = [
             {'name':'ap',
@@ -57,20 +57,10 @@ class KripkeStructure(LabeledDiGraph):
              'setter':ap_labels.math_set,
              'default':set()}
         ]
-        edge_label_types = [
-            {'name':'actions',
-             'values':MathSet(),
-             'setter':True}
-        ]
         
-        super(KripkeStructure, self).__init__(
-            node_label_types, edge_label_types,
-            *args, **kwargs
-        )
+        super(KripkeStructure, self).__init__(node_label_types)
         
         self.atomic_propositions = self.ap
-        self.aps = self.atomic_propositions # shortcut
-        self.actions_must = 'xor'
         
         # dot formatting
         self._state_dot_label_format = {
@@ -78,14 +68,8 @@ class KripkeStructure(LabeledDiGraph):
            'type?label':'',
            'separator':'\n'
         }
-        self._transition_dot_label_format = {
-            'actions':'',
-            'type?label':'',
-            'separator':'\n'
-        }
-        self._transition_dot_mask = dict()
+        
         self.dot_node_shape = {'normal':'rectangle'}
-        self.default_export_fname = 'fts'
 
     def __str__(self):
         s = (
