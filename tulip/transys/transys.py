@@ -41,11 +41,68 @@ import warnings
 from .labeled_graphs import LabeledDiGraph, str2singleton
 from .labeled_graphs import prepend_with
 from .mathset import PowerSet, MathSet
-from .executions import FTSSim
 
 _hl = 40 *'-'
 
 logger = logging.getLogger(__name__)
+
+class KripkeStructure(LabeledDiGraph):
+    """Directed graph with vertex labeling and initial vertices.
+    """
+    def __init__(self, *args, **kwargs):
+        ap_labels = PowerSet()
+        node_label_types = [
+            {'name':'ap',
+             'values':ap_labels,
+             'setter':ap_labels.math_set,
+             'default':set()}
+        ]
+        edge_label_types = [
+            {'name':'actions',
+             'values':MathSet(),
+             'setter':True}
+        ]
+        
+        super(KripkeStructure, self).__init__(
+            node_label_types, edge_label_types,
+            *args, **kwargs
+        )
+        
+        self.atomic_propositions = self.ap
+        self.aps = self.atomic_propositions # shortcut
+        self.actions_must = 'xor'
+        
+        # dot formatting
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\n'
+        }
+        self._transition_dot_label_format = {
+            'actions':'',
+            'type?label':'',
+            'separator':'\n'
+        }
+        self._transition_dot_mask = dict()
+        self.dot_node_shape = {'normal':'rectangle'}
+        self.default_export_fname = 'fts'
+
+    def __str__(self):
+        s = (
+            'Kripke Structure: ' + self.name + '\n' +
+            _hl + '\n' +
+            'Atomic Propositions (APs):\n\t' +
+            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
+            'States labeled with sets of APs:\n' +
+            _dumps_states(self) + 2*'\n' +
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2*'\n' +
+            'Actions:\n\t' + str(self.actions) + 2*'\n' +
+            'Transitions:\n' +
+            pformat(self.transitions(), indent=3) +
+            '\n' + _hl + '\n'
+        )
+        return s
 
 class FiniteTransitionSystem(LabeledDiGraph):
     """Finite Transition System modeling a closed system.

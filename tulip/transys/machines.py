@@ -37,7 +37,6 @@ from pprint import pformat
 from random import choice
 
 from .labeled_graphs import LabeledDiGraph
-from . import executions
 
 _hl = 40 *'-'
 
