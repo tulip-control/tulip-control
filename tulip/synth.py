@@ -1,4 +1,5 @@
-# Copyright (c) 2012, 2013 by California Institute of Technology
+# Copyright (c) 2012 - 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,8 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
 #    products derived from this software without specific prior
 #    written permission.
 # 
@@ -510,6 +511,11 @@ def env_to_spec(
             env, ignore_initial, bool_states,
             action_vars, bool_actions
         )
+    elif isinstance(env, transys.AugmentedOpenFiniteTransitionSystem):
+        return env_augmented_open_fts2spec(
+            env,ignore_initial,bool_states,
+            action_vars, bool_actions
+        )
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
@@ -722,11 +728,96 @@ def env_open_fts2spec(
     tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
     env_init += tmp_init
     env_trans += tmp_trans
-    
+
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
         env_init=env_init, sys_init=sys_init,
         env_safety=env_trans, sys_safety=sys_trans
+    )
+
+def env_augmented_open_fts2spec(
+    aofts, ignore_initial=False, bool_states=False,
+    action_vars=None, bool_actions=False
+):
+    assert(isinstance(aofts, transys.AugmentedOpenFiniteTransitionSystem))
+    
+    aps = aofts.aps
+    eqs = aofts.equilibrium_propositions
+    prog_map=aofts.progress_map
+    states = aofts.states
+    trans = aofts.transitions
+    
+    sys_init = []
+    sys_trans = []
+    env_init = []
+    env_trans = []
+    
+    # since APs are tied to env states, let them be env variables
+    env_vars = {ap:'boolean' for ap in aps}
+    env_vars.update({eq:'boolean' for eq in eqs})
+    sys_vars = dict()
+    
+    actions = aofts.actions
+    
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        if 'sys' in action_type:
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, aofts.sys_actions_must
+            )
+            sys_action_ids[action_type] = action_ids
+        elif 'env' in action_type:
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, aofts.env_actions_must
+            )
+            env_action_ids[action_type] = action_ids
+    
+    # some duplication here, because we don't know
+    # whether the user will provide a system TS as well
+    # and whether that TS will contain all the system actions
+    # defined in the environment TS
+    
+    statevar = 'eloc'
+    state_ids = create_states(states, env_vars, env_trans,
+                              statevar, bool_states)
+    
+    env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    
+    env_trans += env_trans_from_env_ts(
+        states, state_ids, trans,
+        env_action_ids=env_action_ids, sys_action_ids=sys_action_ids
+    )
+    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    env_init += tmp_init
+    env_trans += tmp_trans
+    sys_trans +=['!OUTSIDE']
+    env_prog=set()
+    if not bool_states:
+        # then solver used is gr1c
+        for eq in eqs:
+            temp=eq+' || !(sys_actions = '
+            for act in aofts.sys_actions:
+                if (act in eq):
+                    temp=temp+act+')'
+            env_prog|={temp}
+    else:
+        #then solver used is jtlv 
+        for eq in eqs:
+            temp=eq+' || !'
+            for act in aofts.sys_actions:
+                if (act in eq):
+                    temp=temp+act
+            env_prog|={temp}
+            
+    return GRSpec(
+        sys_vars=sys_vars, env_vars=env_vars,
+        env_init=env_init, sys_init=sys_init,
+        env_safety=env_trans, sys_safety=sys_trans,
+        env_prog=env_prog
     )
 
 def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
