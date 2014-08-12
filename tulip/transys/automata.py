@@ -45,7 +45,6 @@ from .transys import _ts_ba_sync_prod, GameGraph
 
 _hl = 40 *'-'
 
-# future: may become an abc
 class FiniteStateAutomaton(LabeledDiGraph):
     """Generic automaton.
     
