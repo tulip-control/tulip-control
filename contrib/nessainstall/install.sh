@@ -299,10 +299,9 @@ else
 	
 	# build and install gr1c
 	cd ../..
-	export GR1C_PREFIX=$TMPBIN
 	make all
 	make check
-	make install # doesn't include: grpatch, grjit
+	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
 	
 	hash gr1c
 fi
