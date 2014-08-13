@@ -1711,3 +1711,146 @@ def merge_partition_pair(
             ap_labeling[idx] = ap_label_1
     
     return new_list, parents, ap_labeling
+
+def create_prog_map(modes, ppp):
+    """ Creates a progress group map for a proposition preserving partition
+
+    A progress group map for a mode is a set of tuples that contains the 
+    states where it is not in equilibrium. As it contains information for
+    multiple modes, it is a dict.
+
+    @param modes: The different modes that the system operates in.
+    @type modes: list 
+
+    @param prog_map: The states in which the system doesn't reach 
+    equilibrium for a given state
+    @type prog_map: dict of set of tuples. 
+    """
+    prog_map=dict()
+    for mode in modes:
+        for reg in ppp.prop_regions:
+            if mode[1] in reg:
+                mode_prog=set()
+                for i in range(len(ppp.regions)):
+                    r_current=ppp.regions[i]
+                    for j in range(len(r_current.list_poly)):
+                        if not ppp.prop_regions[reg].intersect(r_current.list_poly[j]):
+                            mode_prog|={'s'+str(i)}
+                if mode_prog:
+                    prog_map[mode]=set()
+                    prog_map[mode].add(tuple(mode_prog))
+
+    return prog_map
+
+def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):
+    """Find the possible transitions between states in a system
+
+    @param ppp: Partitioned State Space 
+    @type ppp: L{PropPreservingPartition}
+
+    @param sys_dyn: Continuous dynamics for a given mode
+    @type sys_dyn: L{LtiSysDyn}
+
+    @param N: Horizon length
+    @type N: integer
+
+    Warning: Runs only when sys_dyn.Wset is none. The other condition 
+    has not been added in yet.
+
+    Warning: Running this in parrallel with glpk as a solver is unstable. 
+    Please use MOSEK in this case for accuracy
+    """
+    list_post_area={}
+    list_extp_d=pc.extreme(sys_dyn.Wset)
+    transitions = np.zeros([len(ppp.regions),(len(ppp.regions)+1)], dtype = int)
+    if list_extp_d==None:
+        for i in range(0,len(ppp.regions)):
+            list_post_area[i]=[]
+            p_current=ppp.regions[i]
+            for m in range(len(ppp.regions[i].list_poly)):
+                extp=pc.extreme(p_current.list_poly[m])
+                j=1
+                post_extp_N=extp
+                while j <=N:
+                     post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T
+                     j+=1
+                post_area_hull=pc.qhull(post_extp_N)
+                list_post_area[i].append(post_area_hull)
+
+                for k in range(0,len(ppp.regions)):
+                    inters_region=pc.intersect(list_post_area[i][m],ppp.regions[k])
+                    if (pc.is_empty(inters_region)== False and i!=k):
+                        trans=1
+                    else:
+                        trans=0
+                    transitions[i,k]=trans
+
+                inters=pc.mldivide(post_area_hull,ppp.domain)
+                if pc.is_empty(inters)== False:
+                    transend=1
+                else:
+                    transend=0
+                transitions[i,len(ppp.regions)]=transend
+
+    return transitions
+
+def multiproc_posttrans(q,mode,i,ref_grid,cont_dyn,N=1,abs_tol=1e-7):
+    """Accessorry function 2 to enable parallelization of posttrans
+    
+    Warning: Running in parrallel with glpk as a solver is unstable. 
+    Please use MOSEK in this case for accuracy
+    """
+    global logger
+    logger = mp.log_to_stderr()
+    
+    name = mp.current_process().name
+    print('Discretization mode: ' + str(mode) + ', on: ' + str(name))
+    
+    trans = get_postarea_transitions(ref_grid, cont_dyn, N,abs_tol)
+    
+    q.put((mode,i, trans))
+    print('Worker: ' + str(name) + ' finished.')
+
+def multiproc_postarea_transitions(modes,ref_grid,cont_dyn,N=1,abs_tol=1e-7):
+    """Accessorry function 1 to enable parallelization of posttrans
+
+    Warning: Running in parrallel with glpk as a solver is unstable. 
+    Please use MOSEK in this case for accuracy
+
+    In development: If you have 8 processors and only 4 modes, try 
+    execution such that each mode is split between 2 processors
+    """
+    global logger
+    logger.info('parallel discretize started')
+    q=mp.Queue()
+    mode_args = dict()
+    p=mp.cpu_count()
+    m=len(modes)
+    div=math.floor(p/m)
+    l=len(ref_grid.regions)
+    if div == 0:
+        div = 1
+    for mode in modes:
+        for i in range(0,int(div)):
+            lo=int(math.floor(i*l/div))
+            hi=int(math.floor((i+1)*l/div))
+            split_poly=[ref_grid.regions[x] for x in range(lo,hi)]
+            new_ppp=p2p.PPP(domain=ref_grid.domain, regions=split_poly)
+            mode_args[mode]=(q,mode,i,new_ppp,cont_dyn[mode])
+
+    jobs=[mp.Process(target=multiproc_posttrans, args=args)
+            for args in mode_args.itervalues()]
+    for job in jobs:
+        job.start()
+
+    transitions = dict()
+    temp_trans = dict()
+    for job in jobs:
+        mode, i, trans = q.get()
+        temp_trans[(mode,str(i))] = trans
+    for mode in modes:
+        trans[mode]=np.vstack(temp_trans[(mode,str(i))] for i in range(0,int(div)))
+    for job in jobs:
+        job.join()
+    
+    return transitions
