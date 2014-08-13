@@ -278,17 +278,15 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
     
     # copy edges, translating transitions,
     # i.e., changing transition labels
-    if buchi_automaton.atomic_proposition_based:
-        # direct access, not the inefficient
-        #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
-        # which would generate a combinatorially large alphabet
-        prod_ba.alphabet.math_set |= buchi_automaton.alphabet.math_set
-    else:
-        msg ="""
-            Buchi Automaton must be Atomic Proposition-based,
-            otherwise the synchronous product is not well-defined.
-            """
+    if not buchi_automaton.atomic_proposition_based:
+        msg ='Buchi Automaton must be Atomic Proposition-based,' +\
+             ' otherwise the synchronous product is not well-defined.'
         raise Exception(msg)
+    
+    # direct access, not the inefficient
+    #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
+    # which would generate a combinatorially large alphabet
+    prod_ba.alphabet.math_set |= buchi_automaton.alphabet.math_set
     
     for (from_state, to_state) in prod_ts.transitions():
         # prject prod_TS state to TS state
