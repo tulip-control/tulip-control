@@ -20,6 +20,9 @@ NO, TuLiP 1.x discretization
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 # @import_section@
 import sys
 import numpy as np
