@@ -27,10 +27,10 @@ import numpy as np
 from tulip import spec, synth, hybrid
 from polytope import box2poly
 from tulip.abstract import prop2part, discretize
+from tulip.abstract.plot import plot_partition
 # @import_section_end@
 
 visualize = False
-from tulip.abstract.plot import plot_partition
 
 # @dynamics_section@
 # Problem parameters
