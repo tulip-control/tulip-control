@@ -147,7 +147,7 @@ continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
 \text{ s.t. } c_j \models X_i} v = c_j}`.
 
 Putting everything together, we now obtain a specification of the form in
-:eq:`spec` (see also :ref:`ssec:spectips`).  We can then use the GR(1) game
+:eq:`spec` (see also :doc:`specifications`).  We can then use the GR(1) game
 implementation in `JTLV <http://jtlv.ysaar.net/>`_ or `gr1c
 <http://scottman.net/2012/gr1c>`_ to automatically synthesize a planner that
 ensures the satisfaction of the specification, taking into account all the
@@ -161,35 +161,6 @@ The resulting output is a finite state machine (Mealy machine):
 
     .. autofunction:: transys.FiniteStateMachine
 	:noindex:
-
-.. _ssec:spectips:
-
-Syntax for Writing Specifications 
-`````````````````````````````````
-
-OUTDATED!
-
-The specification :eq:`spec` may contain various LTL operators, arithmetic operators for integer variables and parentheses 
-for precedence or to increase readability. Here is a quick list of names of the operators followed by the corresponding symbols that 
-are compatible with rhtlp: 
-
-============================  =====================
-     Operator                      Symbol
-----------------------------  ---------------------
-and                                   &
-or                                    \|
-not                                   ! 
-next                                next
-always                               []
-eventually                           <>
-implies                              -> 
-boolean constants               TRUE, FALSE 
-order for integer variables    =, <, >, >=, <= 
-arithmetic operations                +, - 
-parentheses                          (, )
-============================  =====================
-
-Also note that the domains of the variables can be either boolean or a list of integers.
 
 .. _ssec:ex1:
 
@@ -392,7 +363,7 @@ is represented by PwaSysDyn class.
 	:noindex:
 
 
-Example 4: Robot Motion Planning with Piecewise Affine Dynamics
+Example 3: Robot Motion Planning with Piecewise Affine Dynamics
 ```````````````````````````````````````````````````````````````
 
 This example is provided in examples/robot_planning/pwa.py.
@@ -425,13 +396,5 @@ Piecewise affine system can be formed from the dynamics of its subsystems.
 
 Discretization and synthesis follow exactly as before.
 
-.. literalinclude:: ../examples/robot_planning/pwa.py
-   :start-after: @synth@
-   :end-before: @synth_end@
 
-Finally, we can simulate the continuous and discrete parts and plot the resulting trajectories.
-
-.. literalinclude:: ../examples/robot_planning/pwa.py
-   :start-after: @sim@
-   :end-before: @sim_end@
 

@@ -32,9 +32,9 @@
 """
 Transition System module developer examples
 """
-
+from scipy.sparse import lil_matrix
+from numpy.random import rand
 import networkx as nx
-from collections import OrderedDict
 import tulip.transys as trs
 import warnings
 
@@ -42,7 +42,8 @@ hl = 60*'='
 save_fig = False
 
 def sims_demo():
-    """Storing simulations."""
+    """Storing simulations.
+    """
     #=============
     # Sequences
     #=============
@@ -97,7 +98,8 @@ def sims_demo():
     print(aut_sim)
 
 def fts_maximal_example():
-    """Finite-Transition System demo."""
+    """Finite-Transition System demo.
+    """
     
     print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
     fts = trs.FiniteTransitionSystem(name='Beverage vending machine')
@@ -110,7 +112,7 @@ def fts_maximal_example():
     fts.states.remove_from({'pay', 'soda'} )
     fts.states.add_from({'pay', 'soda'} )
     
-    fts.states.select_current(['pay'])
+    fts.states.current = ['pay']
     
     fts.states.initial.add('pay') # should already be a state
     fts.states.initial |= {'soda', 'select'}
@@ -119,8 +121,6 @@ def fts_maximal_example():
     fts.states.add('water')
     fts.states.initial.add('water')
     fts.states.initial -= {'water', 'select'}
-    
-    fts.states.check() # sanity
     
     # no transitions yet...
     pre = fts.states.pre({'pay'} )
@@ -149,8 +149,12 @@ def fts_maximal_example():
     
     # add transition info (unlabeled)
     fts.transitions.add('pay', 'select') # notice: no labels
-    fts.transitions.add_from({'select'}, {'soda', 'beer'} )
-    fts.transitions.add_from({'soda', 'beer'}, {'pay'} )
+    fts.transitions.add_from(
+        [('select', x) for x in {'soda', 'beer'}]
+    )
+    fts.transitions.add_from(
+        [('soda', x) for x in {'beer', 'pay'}]
+    )
     fts.transitions.add('pay', 'soda')
     fts.transitions.remove('pay', 'soda')
     
@@ -189,23 +193,12 @@ def fts_maximal_example():
     try:
         fts.transitions.add('pay', 'not yet a state')
     except:
-        print('First add  from_, to_ states, then you can add transition.\n')
-    fts.transitions.add('pay', 'not yet a state', check_states=False)
-    fts.states.remove('not yet a state') # undo
+        print('First add from_, to_ states, then you can add transition.\n')
     
     try:
         fts.transitions.add_from({'not a state', 'also not a state'}, {'pay'} )
     except:
         print('Same state check as above.\n')
-    fts.transitions.add_from({'not a state', 'also not a state'}, {'pay'},
-                             check_states=False)
-    fts.states.remove_from({'not a state', 'also not a state'} )
-    
-    #avoid adding characters 'p', 'a', 'y' at states
-    fts.transitions.add_from({'pay'}, {'select'}, check_states=False)
-    print("States now include 'p', 'a', 'y':\n\t" +str(fts.states() ) )
-    fts.states.remove_from({'p', 'a', 'y'} )
-    print("Fixed:\n\t" +str(fts.states() ) +'\n')
     
     # get transition info (unlabeled)
     print('Transitions:\n\t' +str(fts.transitions() ) )
@@ -237,9 +230,9 @@ def fts_maximal_example():
     # first remove unlabeled, then add new labeled
     fts.transitions.remove('pay', 'select')
     fts.plot()
-    fts.transitions.add_labeled('pay', 'select', 'insert_coin')
+    fts.transitions.add('pay', 'select', actions='insert_coin')
     fts.plot()
-    fts.transitions.remove_labeled('pay', 'select', 'insert_coin')
+    fts.transitions.remove('pay', 'select', actions='insert_coin')
     
     try:
         fts.transitions.add_labeled('pay', 'new state', 'insert_coin')
@@ -253,29 +246,26 @@ def fts_maximal_example():
     
     # to override and add new state and/or new labels
     fts.plot()
-    fts.transitions.add_labeled('pay', 'new state', 'new action', check=False)
+    fts.states.add_from({'pay', 'new_state'})
+    fts.actions.add('new_action')
+    
+    fts.transitions.add('pay', 'new_state', actions='new_action')
     fts.plot()
-    fts.states.remove('new state')
-    fts.actions.remove('new action')
+    fts.states.remove('new_state')
+    fts.actions.remove('new_action')
     fts.plot()
     
-    fts.transitions.add_labeled('pay', 'select', 'insert_coin')
-    fts.transitions.remove_from({'select'}, {'soda', 'beer'} )
-    fts.transitions.add_labeled_from({'select'}, {'soda', 'beer'}, '')
-    fts.transitions.label('soda', 'pay', 'get_soda')
-    fts.transitions.label('beer', 'pay', 'get_be oops mistake', check_label=False)
-    fts.transitions.relabel('beer', 'pay', 'get_be oops mistake', 'get_beer')
-    fts.plot()
+    fts.transitions.add('pay', 'select', actions='insert_coin')
+    fts.transitions.remove_from(
+        [('select', x) for x in {'soda', 'beer'}]
+    )
+    fts.transitions.add_from(
+        [('select', x) for x in {'soda', 'beer'}]
+    )
+    fts.transitions.remove('soda', 'pay')
+    fts.transitions.add('soda', 'pay', actions='get_soda')
     
-    fts.actions.remove('get_be oops mistake') # checks that it is not used by edges
     fts.plot()
-    
-    try:
-        fts.transitions.add_labeled('c12', 'c13', 'insert_coin')
-    except:
-        print('First add states, then you can add labeled transition between them.')
-    fts.transitions.add_labeled('c12', 'c13', 'insert_coin', check=False)
-    fts.states.remove_from({'c12', 'c13'} ) # undo
     
     print('Types of actions: ' +str(fts._transition_label_def.keys() ) )
     print('Number of actions: ' +str(len(fts.actions) ) )
@@ -290,18 +280,14 @@ def fts_maximal_example():
     fts.atomic_propositions.add('paid')
     fts.atomic_propositions.add_from({'', 'drink'} )
     
-    fts.states.label('pay', {''})
-    fts.states.labels({'soda', 'beer'}, {'paid', 'drink'} )
-    fts.states.label('select', {'paid'} )
+    fts.states.add('pay')
     
-    # no checking of state
-    fts.states.label('new state', {'paid'}, check=False)
-    fts.states.remove('new state')
+    nodes = {'soda', 'beer'}
+    labels = {'paid', 'drink'}
+    for node, label in zip(nodes, labels):
+        fts.add_node(node, ap=label)
+    fts.states.add('select', ap={'paid'})
     
-    # same thing, now 'hihi' also added
-    fts.states.label('new state', {'hihi'}, check=False)
-    fts.states.remove('new state')
-    fts.atomic_propositions.remove('hihi')
     fts.plot()
     
     # export
@@ -315,33 +301,34 @@ def fts_maximal_example():
         #fts.save(dot_fname, 'dot')
         
 def ba_maximal_example():
-    """Buchi Automaton demo."""
-    
+    """Buchi Automaton demo.
+    """
     print(hl +'\nBuchi Automaton\n' +hl)
     ba = trs.BuchiAutomaton(atomic_proposition_based=True)
     
     ba.states.add('q0')
-    ba.states.add_from({'q1', 'q2', 'q3'}, destroy_order=True)
+    ba.states.add_from({'q1', 'q2', 'q3'})
     
     ba.states.initial.add('q0')
     ba.plot()
     
+    # alternatives to add props
     ba.alphabet.math_set.add(['paid'] )
-    ba.alphabet.math_set |= ['drink', 'paid', '']
+    ba.atomic_propositions |= {'drink', 'paid'}
     
     print('Number of letters: ' +str(len(ba.alphabet) ) +'\n')
-    print('Alphabet: ' +str(ba.alphabet() ) +'\n')
+    print('Alphabet: ' +str(ba.alphabet) +'\n')
     
     try:
         ba.transitions.add_labeled('q1', 'q10', {'paid'} )
     except:
         print('q10 not a state.')
     
-    ba.transitions.add_labeled('q0', 'q1', frozenset([''] ) )
-    ba.transitions.add_labeled('q0', 'q1', frozenset(['paid'] ) )
-    ba.transitions.add_labeled('q1', 'q2', frozenset(['paid', 'drink'] ) )
-    ba.transitions.add_labeled('q3', 'q0', frozenset([''] ) )
-    ba.transitions.add_labeled('q1', 'q3', frozenset(['drink'] ) )
+    ba.transitions.add('q0', 'q1', letter=None)
+    ba.transitions.add('q0', 'q1', letter={'paid'})
+    ba.transitions.add('q1', 'q2', letter={'paid', 'drink'})
+    ba.transitions.add('q3', 'q0', letter=None)
+    ba.transitions.add('q1', 'q3', letter={'drink'})
     ba.plot()
     
     # accepting states
@@ -366,9 +353,6 @@ def ba_maximal_example():
     return ba
     
 def scipy_sparse_labeled_adj():
-    from scipy.sparse import lil_matrix
-    from numpy.random import rand
-    
     n = 10
     
     A = lil_matrix((n, n) )
@@ -380,16 +364,15 @@ def scipy_sparse_labeled_adj():
     ofts = trs.OpenFTS()
     ofts.states.add_from(set(range(10) ) )
     
-    # note: to avoid first defining actions, pass arg check_labels=False
     ofts.sys_actions.add('move')
     ofts.env_actions.add('rain')
-    labels = ('move', 'rain')
-    ofts.transitions.add_labeled_adj(A, adj2states, labels)
-    #ofts.transitions.add_labeled_adj(A, labels, check_labels=False)
     
-    print(30*'-' +'\n'+
-          'Successfully added adjacency matrix transitions on guard: '
-          +str(labels) +', to open FTS.\n' +30*'-' +'result:\n')
+    ofts.transitions.add_adj(
+        A, adj2states,
+        sys_actions='move',
+        env_actions='rain'
+    )
+    
     ofts.plot()
     
     """same thing as above, using A as a submatrix instead
@@ -403,38 +386,26 @@ def scipy_sparse_labeled_adj():
     ofts = trs.OpenFTS()
     ofts.states.add_from(set(range(10) ) )
     
-    # note: to avoid first defining actions, pass arg check_labels=False
     ofts.sys_actions.add('move')
     ofts.env_actions.add('rain')
-    labels = ('move', 'rain')
-    ofts.transitions.add_labeled_adj(A, adj2states, labels)
+    
+    ofts.transitions.add_adj(
+        A, adj2states,
+        sys_actions='move',
+        env_actions='rain'
+    )
     ofts.plot()
     
     return ofts
 
 def label_per_state():
-    """Add states with (possibly) different AP labels each."""
-    
+    """Add states with (possibly) different AP labels each.
+    """
     fts = trs.FTS()
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add('p')
-    fts.states.labels(['s0', 's1'], [{'p'}, None] )
-    fts.plot()
-    
-    fts = trs.FTS()
-    fts.states.labels(['s0', 's1'], [{'p'}, None], check=False)
-    fts.plot()
-    
-    fts = trs.FTS()
-    fts.states.labels([1, 2], [{'p'}, None], check=False)
-    fts.plot()
-    
-    fts = trs.FTS()
-    fts.states.labels(range(2), [{'p'}, None], check=False)
-    fts.plot()
-    
-    fts = trs.FTS()
-    fts.states.labels('create', [{'p'}, None] )
+    fts.states.add('s0', ap={'p'})
+    fts.states.add('s1', ap=None)
     fts.plot()
 
 if __name__ == '__main__':

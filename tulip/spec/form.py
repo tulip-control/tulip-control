@@ -43,7 +43,7 @@ def mutex(varnames):
     """Create mutual exclusion formulae from iterable of variables.
 
     E.g., given a set of variable names {"a", "b", "c"}, return a set
-    of formulae {"a -> ! (c || b)", "b -> ! (a || c)", ...}.
+    of formulae {"a -> ! (c || b)", "c -> ! (b)"}.
     """
     mutex = set()
     numVars = len(varnames)
@@ -144,6 +144,9 @@ class LTL(object):
         """Verify formula syntax and type-check variable domains.
 
         Return True iff OK.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -342,13 +345,24 @@ class GRSpec(LTL):
 
     @staticmethod
     def loads(s):
+        """Create GRSpec object from TuLiP LTL file string.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
     @staticmethod
     def load(f):
+        """Wrap L{loads} for reading from files.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
     def pretty(self):
+        """Return pretty printing string."""
         output = "ENVIRONMENT VARIABLES:\n"
         if len(self.env_vars) > 0:
             for (k,v) in self.env_vars.items():
@@ -404,11 +418,11 @@ class GRSpec(LTL):
         result = self.copy()
         for varname in other.env_vars.keys():
             if result.env_vars.has_key(varname) and \
-                other[varname] != result.env_vars[varname]:
+                other.env_vars[varname] != result.env_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         for varname in other.sys_vars.keys():
             if result.sys_vars.has_key(varname) and \
-                other[varname] != result.sys_vars[varname]:
+                other.sys_vars[varname] != result.sys_vars[varname]:
                 raise ValueError("Mismatched variable domains")
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)

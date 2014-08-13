@@ -4,9 +4,6 @@ Tests for the tulip.synth module.
 import logging
 logging.basicConfig(level=logging.WARNING)
 
-logging.getLogger('tulip.transys').setLevel(logging.ERROR)
-logging.getLogger('tulip.spec').setLevel(logging.DEBUG)
-
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
@@ -447,3 +444,15 @@ def multiple_env_actions_test():
     
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(not r)
+
+
+class synthesize_test:
+    def setUp(self):
+        self.f_triv = spec.GRSpec(sys_vars="y")
+
+    def tearDown(self):
+        self.f_triv = None
+
+    def test_gr1c_basic(self):
+        assert isinstance(synth.synthesize("gr1c", self.f_triv),
+                          transys.MealyMachine)

@@ -179,6 +179,9 @@ class FiniteTransitionSystemSimulation(object):
         """Dump to file.
         
         We need to decide a format.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -251,6 +254,9 @@ class FiniteStateAutomatonSimulation(object):
         """Dump to file.
         
         We need to decide a format.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         
@@ -279,11 +285,18 @@ class FiniteStateMachineSimulation(object):
         """Output trace to terminal.
         
         For GUI output, use either wxpython or matlab.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
         
     def save():
-        """Dump to file."""
+        """Dump to file.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
 class MachineInputSequence(object):

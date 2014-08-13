@@ -122,7 +122,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) <-> lot || (X0reach && !park))
+#     [](X (X0reach) <-> lot || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
@@ -135,15 +135,15 @@ env_safe = set()                # empty set
 sys_vars = {'X0reach'}
 sys_init = {'X0reach'}          
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
+sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Possible additional specs
 # It is unsafe to "break" (switch to gear0) when road is slippery
-sys_safe |= {'(gear1 && slippery) -> next(gear1)'}
+sys_safe |= {'(gear1 && slippery) -> X (gear1)'}
 
-# to use int actions with gr1c:
-# sys_safe |= {'((act = gear1) && (eact = slippery)) -> next(act = gear1)'}
+# to use int actions:
+# sys_safe |= {'((act = gear1) && (eact = slippery)) -> X (act = gear1)'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,

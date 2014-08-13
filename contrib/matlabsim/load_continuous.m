@@ -134,8 +134,10 @@ end
 function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
 
     % Create LTI System object
-    LtiSys = LTISystem('A', lti_struct.A, 'B', lti_struct.B, 'f', ...
-        lti_struct.K, 'Ts', timestep);
+    LtiSys = LTISystem('A', double(lti_struct.A), ...
+        'B', double(lti_struct.B), ...
+        'f', double(lti_struct.K), ...
+        'Ts', double(timestep));
 
     % Create the polytope constraining the domain of the state. How it's
     % done depends on whether it uses state and input constraints
@@ -146,8 +148,13 @@ function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
         polyB = [lti_struct.domain.b; lti_struct.Uset.b];
         state_input_region = Polyhedron('A', polyA, 'b', polyB);
     else
-        state_input_region = Polyhedron('A', lti_struct.Uset.A, 'b', ...
-            lti_struct.Uset.b);
+        rows_A1 = size(lti_struct.domain.A,1);
+        UA = lti_struct.Uset.A;
+        UA = [UA(:,input_dim+1:end), UA(:,1:input_dim)];
+        polyA = [lti_struct.domain.A, zeros(rows_A1,input_dim); ...
+                 UA];
+        polyB = [lti_struct.domain.b; lti_struct.Uset.b];
+        state_input_region = Polyhedron('A', polyA, 'b', polyB);
     end
 
     % Set the domain

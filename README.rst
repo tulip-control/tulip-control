@@ -1,6 +1,7 @@
 TuLiP
 =====
 This is the source repository for TuLiP, the temporal logic planning toolbox.
+The project website is http://tulip-control.org
 
 Installation
 ------------
@@ -14,16 +15,14 @@ To avoid checking for optional dependencies, add the option "nocheck"::
   python setup.py install nocheck
 
 Detailed instructions, including notes about dependencies and troubleshooting,
-are available at
+are available at http://tulip-control.sourceforge.net/doc/install.html
 
-  http://tulip-control.sourceforge.net/doc/install.html
-
-The documentation sources (see below) can be found under ``doc/``.  A test suite
-(see below) is provided under tests/.
+The next section describes how to build documentation.  A test suite is provided
+under ``tests/``.  Consult the section "Testing" below.
 
 
-Sphinx and Epydoc generated documentation
------------------------------------------
+Documentation
+-------------
 
 There are two main sources of documentation outside the code.  The "user"
 documentation is under ``doc/`` and is built with `Sphinx
@@ -31,20 +30,20 @@ documentation is under ``doc/`` and is built with `Sphinx
 
   make html
 
-Note that a Windows build file, make.bat, was auto-generated at the time of
-first initialising the docs configuration files (ca. 2011 May
-8) but is not actively maintained.  It is included for convenience; please
-consider ``doc/Makefile`` to be the ground truth.  A built copy for the most
-recent release of TuLiP is available online at
-
-  http://tulip-control.sourceforge.net/doc/
-
 API documentation is generated using `Epydoc <http://epydoc.sourceforge.net/>`_
 and can also be built from the ``doc`` directory, now by ::
 
   make api
 
-Command summaries are provided by ``make help``.
+Built copies for the most recent release of TuLiP are available online at:
+
+* http://tulip-control.sourceforge.net/doc/
+* http://tulip-control.sourceforge.net/api-doc/
+
+Command summaries are provided by ``make help``.  Besides the above sources, you
+may also read API documentation using the standard pydoc tool.  E.g., ::
+
+  pydoc tulip
 
 
 Testing
@@ -57,5 +56,4 @@ run::
   ./run_tests.py
 
 to run all available tests.  Use the flag "-h" to see driver script options.  To
-change default options, edit the "nosetests" section in setup.cfg.  To disable
-output capture, add the flag "-s" when invoking nose.
+disable output capture, add the flag "-s" when invoking nose.

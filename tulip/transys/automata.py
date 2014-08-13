@@ -105,7 +105,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         if atomic_proposition_based:
             self.atomic_proposition_based = True
             alphabet = PowerSet([])
-            self.atomic_propositions = alphabet
+            self.atomic_propositions = alphabet.math_set
         else:
             self.atomic_proposition_based = False
             alphabet = set()
@@ -187,6 +187,9 @@ class NFA(FiniteStateAutomaton):
     
     def is_accepted(self, word):
         """Check if automaton accepts finite input word.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -205,6 +208,9 @@ class DFA(NFA):
 
 def nfa2dfa():
     """Determinize NFA.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
     
@@ -234,6 +240,9 @@ class BuchiAutomaton(OmegaAutomaton):
     
     def __add__(self, other):
         """Union of two automata, with equal states identified.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
     
@@ -296,6 +305,9 @@ class BuchiAutomaton(OmegaAutomaton):
     
     def is_accepted(self, prefix, suffix):
         """Check if given infinite word over alphabet \Sigma is accepted.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
         """
         raise NotImplementedError
 
@@ -434,11 +446,17 @@ def _ba_ts_sync_prod(buchi_automaton, transition_system):
 
 def ba2dra():
     """Buchi to Deterministic Rabin Automaton converter.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
 
 def ba2ltl():
     """Buchi Automaton to Linear Temporal Logic formula converter.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
 
@@ -607,6 +625,11 @@ class RabinAutomaton(OmegaAutomaton):
         self.automaton_type = 'Rabin Automaton'
     
     def is_accepted(self, word):
+        """Check if given infinite word over alphabet \Sigma is accepted.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
 class DRA(RabinAutomaton):
@@ -628,16 +651,31 @@ class StreettAutomaton(OmegaAutomaton):
     """Omega-automaton with Streett acceptance condition.
     """
     def is_accepted(self, word):
+        """Check if given infinite word over alphabet \Sigma is accepted.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
 class MullerAutomaton(OmegaAutomaton):
     """Omega-automaton with Muller acceptance condition.
     """
     def is_accepted(self, word):
+        """Check if given infinite word over alphabet \Sigma is accepted.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError
 
 class ParityAutomaton(OmegaAutomaton):
     """Omega-automaton with Parity acceptance condition.
     """
     def is_accepted(self, word):
+        """Check if given infinite word over alphabet \Sigma is accepted.
+
+        UNDER DEVELOPMENT; function signature may change without
+        notice.  Calling will result in NotImplementedError.
+        """
         raise NotImplementedError

@@ -41,6 +41,7 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 #
 # Togetger they comprise a Piecewise Affine System:
 
+# @subsystem0@
 def subsys0():
     A = np.array([[1.1052, 0.], [ 0., 1.1052]])
     B = np.array([[1.1052, 0.], [ 0., 1.1052]])
@@ -58,7 +59,9 @@ def subsys0():
     #sys_dyn.plot()
     
     return sys_dyn
+# @subsystem0_end@
 
+# @subsystem1@
 def subsys1():
     A = np.array([[0.9948, 0.], [0., 1.1052]])
     B = np.array([[-1.1052, 0.], [0., 1.1052]])
@@ -76,11 +79,14 @@ def subsys1():
     #sys_dyn.plot()
     
     return sys_dyn
+# @subsystem1_end@
 
+# @pwasystem@
 subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
 sys_dyn = PwaSysDyn(subsystems, cont_state_space)
+# @pwasystem_end@
 
 # Continuous proposition
 cont_props = {}
@@ -120,7 +126,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
 # Synthesize
-ctrl = synth.synthesize('gr1c', specs,
+ctrl = synth.synthesize('jtlv', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 if plotting:
     ax = plot_strategy(disc_dynamics, ctrl)

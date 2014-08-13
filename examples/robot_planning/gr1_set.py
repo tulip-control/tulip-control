@@ -2,7 +2,8 @@
 #          upcoming release.
 #
 #!/usr/bin/env python
-# robot_gr1.py - example of direct GR(1) specification
+# gr1_set.py - example of direct GR(1) specification,
+#              using an integer-valued variable to model location.
 #
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 """
@@ -65,12 +66,12 @@ sys_vars['loc'] = (0, 5)
 
 sys_init = {'loc=0'}
 sys_safe = {
-    'loc=0 -> next(loc=1 || loc=3)',
-    'loc=1 -> next(loc=0 || loc=4 || loc=2)',
-    'loc=2 -> next(loc=1 || loc=5)',
-    'loc=3 -> next(loc=0 || loc=4)',
-    'loc=4 -> next(loc=3 || loc=1 || loc=5)',
-    'loc=5 -> next(loc=4 || loc=2)',
+    'loc=0 -> X (loc=1 || loc=3)',
+    'loc=1 -> X (loc=0 || loc=4 || loc=2)',
+    'loc=2 -> X (loc=1 || loc=5)',
+    'loc=3 -> X (loc=0 || loc=4)',
+    'loc=4 -> X (loc=3 || loc=1 || loc=5)',
+    'loc=5 -> X (loc=4 || loc=2)',
 }
 sys_prog = set()                # empty set
 
@@ -88,14 +89,14 @@ sys_prog = set()                # empty set
 # environment variable X0reach that is initialized to True and the
 # specification [](park -> <>(loc=0)) becomes
 #
-#     [](next(X0reach) <-> (loc=0) || (X0reach && !park))
+#     [](X (X0reach) <-> (loc=0) || (X0reach && !park))
 #
 
 # Augment the system description to make it GR(1)
 sys_vars['X0reach'] = 'boolean'
 sys_init |= {'X0reach'}
-sys_safe |= {'next(X0reach) <-> (loc=0) || (X0reach && !park)'}
-sys_prog |= {'X0reach'}
+sys_safe |= {'(X (X0reach) <-> (loc=0)) || (X0reach && !park)'}
+sys_prog |= {'X0reach', 'loc=5'}
 
 # Create a GR(1) specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
@@ -105,10 +106,10 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.  Here we make use of JTLV.
 #
 
-ctrl = synth.synthesize('gr1c', specs)
+ctrl = synth.synthesize('jtlv', specs)
 
 
 # Generate a graphical representation of the controller for viewing

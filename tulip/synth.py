@@ -1,4 +1,5 @@
-# Copyright (c) 2012, 2013 by California Institute of Technology
+# Copyright (c) 2012 - 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,8 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
 #    products derived from this software without specific prior
 #    written permission.
 # 
@@ -44,7 +45,7 @@ from tulip.interfaces import gr1c
 
 _hl = '\n' +60*'-'
 
-def pstr(s):
+def _pstr(s):
     return '(' +str(s) +')'
 
 def _disj(set0):
@@ -120,7 +121,7 @@ def exactly_one(iterable):
     Contrast with pure mutual exclusion.
     """
     if len(iterable) <= 1:
-        return [pstr(x) for x in iterable]
+        return [_pstr(x) for x in iterable]
     
     return ['(' + _disj([
         '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
@@ -160,9 +161,9 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     if action is '':
         return ''
     if nxt:
-        return ' X' + pstr(action)
+        return ' X' + _pstr(action)
     else:
-        return pstr(action)
+        return _pstr(action)
 
 def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     """Conjunction of multiple action types.
@@ -189,9 +190,9 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     logger.debug('conjuncted actions: ' + str(conjuncted_actions) +'\n')
     
     if nxt:
-        return ' X' + pstr(conjuncted_actions)
+        return ' X' + _pstr(conjuncted_actions)
     else:
-        return pstr(conjuncted_actions)
+        return _pstr(conjuncted_actions)
 
 def create_states(states, variables, trans, statevar, bool_states):
     """Create bool or int state variables in GR(1).
@@ -510,6 +511,11 @@ def env_to_spec(
             env, ignore_initial, bool_states,
             action_vars, bool_actions
         )
+    elif isinstance(env, transys.AugmentedOpenFiniteTransitionSystem):
+        return env_augmented_open_fts2spec(
+            env,ignore_initial,bool_states,
+            action_vars, bool_actions
+        )
     else:
         raise TypeError('synth.env_to_spec does not support ' +
             str(type(env)) +'. Use FTS or OpenFTS.')
@@ -536,7 +542,9 @@ def fts2spec(
     
     @param fts: L{transys.FiniteTransitionSystem}
     
-    @rtype: L{GRSpec}
+    @rtype: (dict, list, list)
+    @return: (sys_vars, sys_init, sys_trans), where each element
+        corresponds to the similarly-named attribute of L{GRSpec}.
     """
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
@@ -720,11 +728,96 @@ def env_open_fts2spec(
     tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
     env_init += tmp_init
     env_trans += tmp_trans
-    
+
     return GRSpec(
         sys_vars=sys_vars, env_vars=env_vars,
         env_init=env_init, sys_init=sys_init,
         env_safety=env_trans, sys_safety=sys_trans
+    )
+
+def env_augmented_open_fts2spec(
+    aofts, ignore_initial=False, bool_states=False,
+    action_vars=None, bool_actions=False
+):
+    assert(isinstance(aofts, transys.AugmentedOpenFiniteTransitionSystem))
+    
+    aps = aofts.aps
+    eqs = aofts.equilibrium_propositions
+    prog_map=aofts.progress_map
+    states = aofts.states
+    trans = aofts.transitions
+    
+    sys_init = []
+    sys_trans = []
+    env_init = []
+    env_trans = []
+    
+    # since APs are tied to env states, let them be env variables
+    env_vars = {ap:'boolean' for ap in aps}
+    env_vars.update({eq:'boolean' for eq in eqs})
+    sys_vars = dict()
+    
+    actions = aofts.actions
+    
+    sys_action_ids = dict()
+    env_action_ids = dict()
+    
+    for action_type, codomain in actions.iteritems():
+        if 'sys' in action_type:
+            action_ids = create_actions(
+                codomain, sys_vars, sys_trans, sys_init,
+                action_type, bool_actions, aofts.sys_actions_must
+            )
+            sys_action_ids[action_type] = action_ids
+        elif 'env' in action_type:
+            action_ids = create_actions(
+                codomain, env_vars, env_trans, env_init,
+                action_type, bool_actions, aofts.env_actions_must
+            )
+            env_action_ids[action_type] = action_ids
+    
+    # some duplication here, because we don't know
+    # whether the user will provide a system TS as well
+    # and whether that TS will contain all the system actions
+    # defined in the environment TS
+    
+    statevar = 'eloc'
+    state_ids = create_states(states, env_vars, env_trans,
+                              statevar, bool_states)
+    
+    env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    
+    env_trans += env_trans_from_env_ts(
+        states, state_ids, trans,
+        env_action_ids=env_action_ids, sys_action_ids=sys_action_ids
+    )
+    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    env_init += tmp_init
+    env_trans += tmp_trans
+    sys_trans +=['!OUTSIDE']
+    env_prog=set()
+    if not bool_states:
+        # then solver used is gr1c
+        for eq in eqs:
+            temp=eq+' || !(sys_actions = '
+            for act in aofts.sys_actions:
+                if (act in eq):
+                    temp=temp+act+')'
+            env_prog|={temp}
+    else:
+        #then solver used is jtlv 
+        for eq in eqs:
+            temp=eq+' || !'
+            for act in aofts.sys_actions:
+                if (act in eq):
+                    temp=temp+act
+            env_prog|={temp}
+            
+    return GRSpec(
+        sys_vars=sys_vars, env_vars=env_vars,
+        env_init=env_init, sys_init=sys_init,
+        env_safety=env_trans, sys_safety=sys_trans,
+        env_prog=env_prog
     )
 
 def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
@@ -815,7 +908,7 @@ def sys_trans_from_ts(
     # Transitions
     for from_state in states:
         from_state_id = state_ids[from_state]
-        precond = pstr(from_state_id)
+        precond = _pstr(from_state_id)
         
         cur_trans = trans.find([from_state])
         
@@ -833,7 +926,7 @@ def sys_trans_from_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = ['X' + pstr(to_state_id)]
+            postcond = ['X' + _pstr(to_state_id)]
             
             logger.debug('label = ' + str(label))
             if 'previous' in label:
@@ -904,7 +997,7 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     
     for from_state in states:
         from_state_id = state_ids[from_state]
-        precond = pstr(from_state_id)
+        precond = _pstr(from_state_id)
         
         cur_trans = trans.find([from_state])
         
@@ -958,7 +1051,7 @@ def env_trans_from_env_ts(
     
     for from_state in states:
         from_state_id = state_ids[from_state]
-        precond = pstr(from_state_id)
+        precond = _pstr(from_state_id)
         
         cur_trans = trans.find([from_state])
         
@@ -980,7 +1073,7 @@ def env_trans_from_env_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
-            postcond = ['X' + pstr(to_state_id)]
+            postcond = ['X' + _pstr(to_state_id)]
             
             env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
             postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
@@ -1014,7 +1107,7 @@ def env_trans_from_env_ts(
                       'the negated conjunction is: ' + str(conj)
                 logger.debug(msg)
         
-        env_trans += [pstr(precond) + ' -> (' + _disj(cur_list) +')']
+        env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
 
 def ap_trans_from_ts(states, state_ids, aps):
@@ -1034,7 +1127,7 @@ def ap_trans_from_ts(states, state_ids, aps):
         ap_str = sprint_aps(label, aps)
         if not ap_str:
             continue
-        init += ['!(' + pstr(state_id) + ') || (' + ap_str +')']
+        init += ['!(' + _pstr(state_id) + ') || (' + ap_str +')']
     
     # transitions of labels
     for state in states:
@@ -1070,9 +1163,9 @@ def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
     bool_states=False, action_vars=None,
-    bool_actions=False
+    bool_actions=False, rm_deadends=True
 ):
-    """Function to call the appropriate synthesis tool on the spec.
+    """Function to call the appropriate synthesis tool on the specification.
 
     Beware!  This function provides a generic interface to a variety
     of routines.  Being under active development, the types of
@@ -1139,6 +1232,10 @@ def synthesize(
     
     @param bool_actions: model actions using bool variables
     @type bool_actions: bool
+
+    @param rm_deadends: if True,
+        then the returned strategy contains no terminal states.
+    @type rm_deadends: bool
     
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
@@ -1173,7 +1270,10 @@ def synthesize(
     # can be done by calling a dedicated other function, not this
     if not isinstance(ctrl, transys.MealyMachine):
         return None
-    
+
+    if rm_deadends:
+        ctrl.remove_deadends()
+
     return ctrl
 
 def is_realizable(

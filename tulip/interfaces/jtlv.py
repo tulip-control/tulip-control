@@ -42,6 +42,7 @@ import itertools, os, re, subprocess, tempfile, textwrap
 import warnings
 from collections import OrderedDict
 
+from tulip.transys.machines import create_machine_ports
 from tulip import transys
 from tulip.spec.parser import parse
 
@@ -96,7 +97,7 @@ def solve_game(
         to advance with a finite path to somewhere, and Z means that
         the controller tries to satisfy one of his guarantees.
 
-    @param init_option: an integer in that specifies how to handle the
+    @param init_option: an integer that specifies how to handle the
         initial state of the system. Possible values of C{init_option}
         are:
 
@@ -153,7 +154,7 @@ def synthesize(
     spec, heap_size='-Xmx128m', priority_kind = 3,
     init_option = 1
 ):
-    """Synthesize a strategy satisfying the spec.
+    """Synthesize a strategy satisfying the specification.
 
     Arguments are described in documentation for L{solve_game}.
     
@@ -195,7 +196,17 @@ def create_files(spec):
     return fSMV.name, fLTL.name, fAUT.name
 
 def get_priority(priority_kind):
-    """Convert the priority_kind to the corresponding integer."""
+    """Validate and convert priority_kind to the corresponding integer.
+
+    @type priority_kind: str or int
+    @param priority_kind: a string of length 3 or integer as may be
+        used when invoking L{solve_game}.  Check documentation there
+        for possible values.
+
+    @rtype: int
+    @return: if given priority_kind is permissible, then return
+        integer representation of it.  Else, return default ("ZYX").
+    """
     if (isinstance(priority_kind, str)):
         if (priority_kind == 'ZYX'):
             priority_kind = 3
@@ -271,13 +282,34 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
 #                aut_file, str(priority_kind), str(init_option)], \
 #               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
+
+def canon_to_jtlv_domain(dom):
+    """Convert an LTL or GRSpec variable domain to JTLV style.
+
+    @param dom: a variable domain, as would be provided by the values
+    in the output_variables attribute of L{spec.form.LTL} or sys_vars
+    of L{spec.form.GRSpec}.
+
+    @rtype: str
+    @return: variable domain string, ready for use in an SMV file, as
+        expected by the JTLV solver.
+    """
+    if dom == "boolean":
+        return dom
+    elif isinstance(dom, tuple) and len(dom) == 2:
+        return "{"+", ".join([str(i) for i in range(dom[0], dom[1]+1)])+"}"
+    else:
+        raise ValueError("Unrecognized domain type: "+str(domain))
+
 def generate_JTLV_SMV(spec):
     """Return the SMV module definitions needed by JTLV.
 
-    N.B., assumes all variables are Boolean (i.e., atomic
-    propositions).
+    Raises exception if malformed GRSpec object is detected.
 
     @type spec: L{GRSpec}
+
+    @rtype: str
+    @return: string conforming to the SMV file format that JTLV expects.
     """
     smv = ""
 
@@ -295,10 +327,10 @@ def generate_JTLV_SMV(spec):
     MODULE env -- inputs
         VAR
     """))
-    for var in spec.env_vars.keys():
+    for var, dom in spec.env_vars.items():
         smv+= '\t\t'
         smv+= var
-        smv+= ' : boolean;\n'
+        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
 
     
     # Define sys vars
@@ -306,10 +338,10 @@ def generate_JTLV_SMV(spec):
     MODULE sys -- outputs
         VAR
     """))
-    for var in spec.sys_vars.keys():
+    for var, dom in spec.sys_vars.items():
         smv+= '\t\t'
         smv+= var
-        smv+= ' : boolean;\n'
+        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
     
     logger.debug(smv)
     return smv
@@ -317,8 +349,7 @@ def generate_JTLV_SMV(spec):
 def generate_JTLV_LTL(spec):
     """Return the LTLSPEC for JTLV.
 
-    It takes as input a GRSpec object.  N.B., assumes all variables
-    are Boolean (i.e., atomic propositions).
+    It takes as input a GRSpec object.
     """
     formula = spec.to_canon()
     parse(formula)  # Raises exception if syntax error
@@ -373,18 +404,12 @@ def generate_JTLV_LTL(spec):
 def load_file(aut_file, spec):
     """Construct a Mealy Machine from an aut_file.
 
-    N.B., assumes all variables are Boolean (i.e., atomic
-    propositions).
-
     @param aut_file: the name of the text file containing the
         automaton, or an (open) file-like object.
     @type spec: L{GRSpec}
 
     @rtype: L{MealyMachine}
     """
-    env_vars = spec.env_vars.keys()  # Enforce Boolean var assumption
-    sys_vars = spec.sys_vars.keys()
-
     if isinstance(aut_file, str):
         f = open(aut_file, 'r')
         closable = True
@@ -399,21 +424,19 @@ def load_file(aut_file, spec):
     mask_func = lambda x: bool(x)
     
     # input defs
-    inputs = OrderedDict([list(a) for a in \
-                          zip(env_vars, itertools.repeat({0, 1}))])
+    inputs = create_machine_ports(spec.env_vars)
     m.add_inputs(inputs)
 
     # outputs def
-    outputs = OrderedDict([list(a) for a in \
-                           zip(sys_vars, itertools.repeat({0, 1}))])
-    masks = {k:mask_func for k in sys_vars}
+    outputs = create_machine_ports(spec.sys_vars)
+    masks = {k:mask_func for k in spec.sys_vars.keys()}
     m.add_outputs(outputs, masks)
 
     # state variables def
     state_vars = outputs
     m.add_state_vars(state_vars)
 
-    varnames = sys_vars+env_vars
+    varnames = spec.sys_vars.keys()+spec.env_vars.keys()
 
     stateDict = {}
     for line in f:
