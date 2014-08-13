@@ -196,25 +196,6 @@ def ru_disconnect(G,rulist,buslist):
                         f.write('guarantees += '"'"'&\\n\\t[]((ru'+str(i)+'=0) -> (c'+str(j)+str(i)+'=0))'"'")
                     f.write('\n')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def has_path(G, source, target):
-    """Return True if G has a path from source to target, False otherwise.
-    
-    Parameters
-    ----------
-    G : NetworkX graph
-
-    source : node
-       Starting node for path
-
-    target : node
-       Ending node for path
-    """
-    try:
-        sp = nx.shortest_path(G,source, target)
-    except nx.NetworkXNoPath:
-        return False
-    return True
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def all_pairs(gens):
     """Returns list of all generator pairs (potential parallels).
     
@@ -244,7 +225,7 @@ def all_gens(list,G):
     """
     pgens = []
     for i in range(len(list)):
-        if has_path(G,list[i][0], list[i][1]) is True:
+        if nx.has_path(G,list[i][0], list[i][1]) is True:
             pgens.append(list[i])
     return pgens
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -389,7 +370,7 @@ def buspathnodes(G,busno,source):
 
     """
     buspaths = []
-    if has_path(G,busno,source):
+    if nx.has_path(G,busno,source):
             buspaths.append((busno,source))
     return buspaths
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -529,85 +510,6 @@ def write_dcbusalways(buslist):
     """
     for i in buslist:
         f.write('guarantees += '"'"'&\\n\\t[](b'+str(i)+' = 1)'"'"+'\n')
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def all_simple_paths_graph(G, source, target, cutoff=None):
-    if cutoff is None:
-        cutoff = len(G)-1
-        if cutoff < 1:
-            yield []
-        else:
-            visited = [source]
-            stack = [iter(G[source])]
-            while stack:
-                children = stack[-1]
-                child = next(children, None)
-                if child is None:
-                    stack.pop()
-                    visited.pop()
-                elif len(visited) < cutoff:
-                    if child == target:
-                        yield visited + [target]
-                    elif child not in visited:
-                        visited.append(child)
-                        stack.append(iter(G[child]))
-	            else: #len(visited) == cutoff:
-	                if child == target or target in children:
-	                    yield visited + [target]
-                            stack.pop()
-                            visited.pop()
-                            
-def all_simple_paths_multigraph(G, source, target, cutoff=None):
-    if cutoff is None:
-        cutoff = len(G)-1
-        if cutoff < 1:
-            yield []
-        else:
-            visited = [source]
-            stack = [(v for u,v in G.edges(source))]
-            while stack:
-                children = stack[-1]
-                child = next(children, None)
-                if child is None:
-                    stack.pop()
-                    visited.pop()
-                elif len(visited) < cutoff:
-                    if child == target:
-                        yield visited + [target]
-                    elif child not in visited:
-                        visited.append(child)
-                        stack.append((v for u,v in G.edges(child)))
-	            else: #len(visited) == cutoff:
-	                count = ([child]+list(children)).count(target)
-	                for i in range(count):
-	                    yield visited + [target]
-                            stack.pop()
-                            visited.pop()	
-	
-def all_simple_paths(G, source, target, cutoff=None):
-    """Generate all simple paths in the graph G from source to target.
-    
-    Parameters
-    ----------
-    G : NetworkX graph
-    
-    source : node
-    Starting node for path.
-    
-    target : node
-    Ending node for path.
-    
-    cutoff : integer, optional
-    Depth to stop the search. Only paths of length <= cutoff are returned.
-    
-    Returns
-    -------
-    path_generator: generator
-    A generator that produces lists of simple paths.
-    """
-    if G.is_multigraph():
-        return all_simple_paths_multigraph(G, source, target, cutoff=cutoff)
-    else:
-        return all_simple_paths_graph(G, source, target, cutoff=cutoff)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def dcbusprop(G,source,target):
     """Creates discrete properties for power status of dc buses
