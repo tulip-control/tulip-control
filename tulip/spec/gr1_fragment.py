@@ -37,13 +37,13 @@ is convertible to deterministic Buchi Automata
 
 reference
 =========
-Andreas Morgenstern and Klaus Schneider,
-    A LTL Fragment for GR(1)-Synthesis,
-    in Proceedings First International Workshop on
-    Interactions, Games and Protocols (iWIGP),
-    Electronic Proceedings in Theoretical Computer Science (EPTCS),
-    50, pp. 33--45, 2011,
-    http://doi.org/10.4204/EPTCS.50.3
+1. Andreas Morgenstern and Klaus Schneider,
+   A LTL Fragment for GR(1)-Synthesis,
+   in Proceedings First International Workshop on
+   Interactions, Games and Protocols (iWIGP),
+   Electronic Proceedings in Theoretical Computer Science (EPTCS),
+   50, pp. 33--45, 2011,
+   http://doi.org/10.4204/EPTCS.50.3
 """
 import logging
 logger = logging.getLogger(__name__)

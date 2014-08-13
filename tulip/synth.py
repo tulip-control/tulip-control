@@ -469,7 +469,7 @@ def sys_to_spec(sys, ignore_initial=False, statevar='loc',
     ========
     L{env_to_spec}, L{sys_open_fts2spec}, L{fts2spec}
     
-    @type sys: L{transys.FTS} or L{transys.OpenFTS}
+    @type sys: L{FTS} or L{OpenFTS}
     
     @param ignore_initial: Do not include initial state info from TS.
         Enable this to mask absence of OpenFTS initial states.
@@ -512,7 +512,7 @@ def env_to_spec(env, ignore_initial=False, statevar='eloc',
     
     For details see also L{sys_to_spec}.
     
-    @type env: L{transys.FTS} or L{transys.OpenFTS}
+    @type env: L{FTS} or L{OpenFTS}
     
     @type bool_states: bool
     """
@@ -635,7 +635,7 @@ def sys_open_fts2spec(
     L{sys_trans_from_ts}, L{env_open_fts2spec}, L{fts2spec},
     L{create_actions}, L{create_states}
     
-    @param ofts: L{transys.OpenFTS}
+    @param ofts: L{OpenFTS}
     
     @param ignore_initial: if C{True}, then do not represent in logic
         the set of initial states of C{ofts}.
@@ -864,8 +864,7 @@ def sys_trans_from_ts(
     when they don't need the label typing overhead.
 
     @param trans: L{Transitions} as from the transitions
-        attribute of L{FiniteTransitionSystem} or
-        L{OpenFiniteTransitionSystem}.
+        attribute of L{FTS} or L{OpenFTS}.
     
     @param action_ids: same as C{sys-action_ids}
         Caution: to be removed in a future release
@@ -1183,7 +1182,7 @@ def synthesize(
         
         Note that an L{OpenFTS} with only sys_actions is
         equivalent to an L{FTS} for the environment.
-    @type env: L{transys.FTS} or L{transys.OpenFTS}
+    @type env: L{FTS} or L{OpenFTS}
     
     @param sys: A transition system describing the system:
         
@@ -1194,7 +1193,7 @@ def synthesize(
         
         Note that an OpenFTS with only sys_actions is
         equivalent to an FTS for the system.
-    @type sys: L{transys.FTS} L{transys.OpenFTS}
+    @type sys: L{FTS} L{OpenFTS}
     
     @param ignore_sys_init: Ignore any initial state information
         contained in env.

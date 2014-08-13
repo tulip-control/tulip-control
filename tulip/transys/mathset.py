@@ -823,7 +823,7 @@ class TypedDict(dict):
     def set_types(self, allowed_values):
         """Restrict values the key can be paired with.
         
-        @param allowed_values: dict of the form:
+        @param allowed_values: dict of the form::
             
                 {key : values}
             

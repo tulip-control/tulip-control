@@ -276,7 +276,7 @@ def sync_prod(ts, ba):
     
     See Also
     ========
-    L{transys._ts_ba_sync_prod}
+    L{_ts_ba_sync_prod}
     
     @param ts_or_ba: other with which to take synchronous product
     @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}

@@ -156,9 +156,9 @@ class FiniteStateMachine(LabeledDiGraph):
         by code, so the benefits of typedefs will be
         considerable compared to the required coding effort.
       
-      Guards annotate transitions::
+    Guards annotate transitions::
         
-        Guards: States x States ---> Input_Predicates
+      Guards: States x States ---> Input_Predicates
     
     Outputs
     =======
@@ -542,9 +542,9 @@ class MealyMachine(FiniteStateMachine):
         
         The machine must be deterministic.
         (for each state and input at most a single transition enabled,
-         this notion does not coincide with output-determinism)
+        this notion does not coincide with output-determinism)
         
-        Not exactly a wrapper of L{LabeledDiGraph.transitions.find},
+        Not exactly a wrapper of L{Transitions.find},
         because it matches only that part of an edge label
         that corresponds to the inputs.
         

@@ -169,7 +169,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     
     See Also
     ========
-    L{automata._ba_ts_sync_prod}, L{transys.FiniteTransitionSystem.sync_prod}
+    L{ba_ts_sync_prod}, L{sync_prod}
     
     @return: C{(product_ts, persistent_states)}, where:
         - C{product_ts} is the synchronous product TS * BA
@@ -371,7 +371,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     
     See Also
     ========
-    L{transys._ts_ba_sync_prod}, L{BuchiAutomaton.sync_prod}
+    L{ts_ba_sync_prod}, L{sync_prod}
 
     @return: C{prod_ba}, the product L{BuchiAutomaton}.
     """

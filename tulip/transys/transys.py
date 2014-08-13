@@ -113,7 +113,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     State labeling
     ==============
     The state labels are sets of atomic propositions,
-    similar to a L{LripkeStructure}.
+    similar to a L{KripkeStructure}.
     
     Edge labeling
     =============
@@ -190,9 +190,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     This description is a (closed) L{FTS}.
     
     The system and environment actions are associated with an edge
-    of a reactive system. To store these, 2 sub-labels are used
-    and their sets are encapsulated within the same L{(open) FTS
-    <OpenFiniteTransitionSystem>}.
+    of a reactive system. To store these, mutliple labels are used
+    and their sets are encapsulated within the same C{FTS}.
     
     Example
     =======
@@ -292,7 +291,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     See Also
     ========
-    L{KripkeStucture}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
+    L{KripkeStructure}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
     """
     def __init__(self, env_actions=None, sys_actions=None):
         """Instantiate finite transition system.
@@ -669,12 +668,11 @@ def add_initial_states(ts, ap_labels):
     
     For example if isinstance(ofts, OpenFTS):
     
-    >>> from tulip.transys.transys import add_initial_states
-    >>> initial_labels = [{'home'}]
-    >>> add_initial_states(ofts, initial_labels)
+      >>> from tulip.transys.transys import add_initial_states
+      >>> initial_labels = [{'home'}]
+      >>> add_initial_states(ofts, initial_labels)
     
-    @type ts: L{transys.FiniteTransitionSystem},
-        L{transys.OpenFiniteTransitionSystem}
+    @type ts: L{FiniteTransitionSystem}
     
     @param ap_labels: labels, each comprised of atomic propositions
     @type ap_labels: iterable of sets of elements from
@@ -712,8 +710,8 @@ class GameGraph(LabeledDiGraph):
     which player controls the outgoing transitions.
     Use C{networkx} state labels for that:
     
-    >>> g = GameGraph()
-    >>> g.states.add('s0', player=0)
+      >>> g = GameGraph()
+      >>> g.states.add('s0', player=0)
     
     See also
     ========
@@ -721,9 +719,9 @@ class GameGraph(LabeledDiGraph):
     
     Reference
     =========
-    Chatterjee K.; Henzinger T.A.; Jobstmann B.
-        Environment Assumptions for Synthesis
-        CONCUR'08, LNCS 5201, pp. 147-161, 2008
+    1. Chatterjee K.; Henzinger T.A.; Jobstmann B.
+       Environment Assumptions for Synthesis
+       CONCUR'08, LNCS 5201, pp. 147-161, 2008
     """
     def __init__(self, node_label_types, edge_label_types):
         node_label_types += [
@@ -771,9 +769,9 @@ class LabeledGameGraph(GameGraph):
     
     Reference
     =========
-    Chatterjee K.; Henzinger T.A.; Piterman N.
-        Strategy Logic
-        UCB/EECS-2007-78
+    1. Chatterjee K.; Henzinger T.A.; Piterman N.
+       Strategy Logic
+       UCB/EECS-2007-78
     """
     def __init__(self):
         ap_labels = PowerSet()

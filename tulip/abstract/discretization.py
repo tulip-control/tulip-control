@@ -202,7 +202,7 @@ class AbstractPwa(object):
           Each state corresponds to a Region in C{ppp.regions}.
           It can be fed into discrete synthesis algorithms.
 
-          type: L{transys.OpenFTS}
+          type: L{FTS}
 
       - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
           Has common indices with C{ppp.regions}.

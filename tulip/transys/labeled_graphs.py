@@ -876,7 +876,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """Check if labels are consistent with their type definitions.
         
         Use case: removing values from a label type
-            can invalidate existing labels that use them.
+        can invalidate existing labels that use them.
         
         @rtype: bool
         """

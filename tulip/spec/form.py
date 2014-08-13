@@ -803,13 +803,13 @@ def _sub_var(spec, vars_dict):
         spec.sym_to_prop(values2ints)
 
 def stability_to_gr1(p, aux='aux'):
-    """Convert <>[] p to GR(1).
+    """Convert C{<>[] p} to GR(1).
     
     Warning: This conversion is sound, but not complete.
     See p.2, U{[E10]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#e10>}
     
-    GR(1) form:
+    GR(1) form::
     
         !(aux) &&
         [](aux -> X aux) &&
@@ -817,7 +817,6 @@ def stability_to_gr1(p, aux='aux'):
         
         [](aux -> p)
     
-    @param p: operand of <>[]
     @type p: str
     
     @param aux: name to use for auxiliary variable
@@ -849,16 +848,18 @@ def stability_to_gr1(p, aux='aux'):
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def response_to_gr1(p, q, aux='aux'):
-    """Convert [](p -> <> q) to GR(1).
+    """Convert C{[](p -> <> q)} to GR(1).
     
-    GR(1) form:
+    GR(1) form::
         
         []<>(aux) &&
         
         []( (p && !q) -> X ! aux) &&
         []( (! aux && !q) -> X ! aux)
     
-    @type p, q: str
+    @type p: str
+    
+    @type q: str
     
     @param aux: name to use for auxiliary variable
     @type aux: str
@@ -888,9 +889,9 @@ def response_to_gr1(p, q, aux='aux'):
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def eventually_to_gr1(p, aux='aux'):
-    """Convert <> p to GRSpec.
+    """Convert C{<> p} to GR(1).
     
-    GR(1) form:
+    GR(1) form::
     
         !(aux) &&
         [](aux -> X aux) &&
@@ -903,7 +904,7 @@ def eventually_to_gr1(p, aux='aux'):
     @param aux: name to use for auxiliary variable
     @type aux: str
     
-    @rtype: GRSpec
+    @rtype: L{GRSpec}
     """
     a = aux
     
@@ -926,9 +927,9 @@ def eventually_to_gr1(p, aux='aux'):
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def until_to_gr1(p, q, aux='aux'):
-    """Convert p U q to GRSpec.
+    """Convert C{p U q} to GR(1).
     
-    GR(1) form:
+    GR(1) form::
     
         (!q -> !aux) &&
         [](q -> aux)
@@ -943,7 +944,7 @@ def until_to_gr1(p, q, aux='aux'):
     @param aux: name to use for auxiliary variable
     @type aux: str
     
-    @rtype: GRSpec
+    @rtype: L{GRSpec}
     """
     a = aux
     

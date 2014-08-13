@@ -36,7 +36,7 @@ Abstract Syntax Tree classes for LTL,
 supporting JTLV, SPIN, SMV, and gr1c syntax
 
 Syntax taken originally roughly from:
-    http://spot.lip6.fr/wiki/LtlSyntax
+http://spot.lip6.fr/wiki/LtlSyntax
 """
 import logging
 logger = logging.getLogger(__name__)
