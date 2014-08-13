@@ -38,6 +38,10 @@ from random import choice
 
 from .labeled_graphs import LabeledDiGraph
 
+# inline imports:
+#
+# from .export import machine2scxml
+
 _hl = 40 *'-'
 
 # port type

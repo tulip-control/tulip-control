@@ -44,15 +44,11 @@ from scipy import sparse as sp
 import polytope as pc
 
 from tulip import transys as trs
-from .plot import plot_partition
+from polytope.plot import plot_partition
 
-from tulip.graphics import newax
-
-try:
-    import matplotlib as mpl
-except Exception, e:
-    logger.error(e)
-    mpl = None
+# inline imports:
+#
+# from tulip.graphics import newax
 
 _hl = 40 * '-'
 
@@ -605,8 +601,10 @@ class PropPreservingPartition(pc.MetricPartition):
     def plot_props(self, ax=None, text_color='yellow'):
         """Plot labeled regions of continuous propositions.
         """
-        if mpl is None:
-            warnings.warn('No matplotlib')
+        try:
+            from tulip.graphics import newax
+        except:
+            logger.error('failed to import graphics')
             return
         
         if ax is None:

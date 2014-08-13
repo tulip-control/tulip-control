@@ -54,13 +54,13 @@ from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
 from .feasible import is_feasible, solve_feasible
+
+from polytope.plot import plot_partition, plot_transition_arrow
 from .plot import plot_ts_on_partition
 
-try:
-    import matplotlib.pyplot as plt
-except Exception, e:
-    plt = None
-    logger.error(e)
+# inline imports:
+#
+# inline: import matplotlib.pyplot as plt
 
 debug = False
 
@@ -575,19 +575,17 @@ def discretize(
     
     # init graphics
     if plotit:
-        # here to avoid loading matplotlib unless requested
         try:
-            from plot import plot_partition, plot_transition_arrow
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
-        
-        if plt is not None:
+            import matplotlib.pyplot as plt
+            
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
             file_extension = 'pdf'
+        except:
+            logger.error('failed to import matplotlib')
+            plt = None
         
     iter_count = 0
     
@@ -861,7 +859,7 @@ def discretize(
         # no plotting ?
         if not plotit:
             continue
-        if plot_partition is None:
+        if plt is None or plot_partition is None:
             continue
         if iter_count % plot_every != 0:
             continue
@@ -953,7 +951,7 @@ def discretize(
     print(msg)
     logger.info(msg)
     
-    if plt is not None and save_img:
+    if save_img and plt is not None:
         fig, ax = plt.subplots(1, 1)
         plt.plot(progress)
         ax.set_xlabel('iteration')
@@ -1246,13 +1244,12 @@ def discretize_switched(
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
-    try:
-        import matplotlib
-    except:
-        warnings.warn('could not import matplotlib, no partitions plotted.')
+    axs = swab.plot(show_ts, only_adjacent)
+    
+    if not axs:
+        logger.error('failed to plot the partitions.')
         return
     
-    axs = swab.plot(show_ts, only_adjacent)
     n = len(swab.modes)
     assert(len(axs) == 2*n)
     

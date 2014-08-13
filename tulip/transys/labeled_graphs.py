@@ -45,6 +45,12 @@ import networkx as nx
 
 from .mathset import SubSet, TypedDict
 
+# inline imports:
+#
+# from .export import graph2dot
+# from .export import save_d3
+# from .export import graph2dot
+
 def label_is_desired(attr_dict, desired_dict):
     """Return True if all labels match.
     

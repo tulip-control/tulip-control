@@ -43,11 +43,9 @@ from pprint import pformat
 import numpy as np
 import polytope as pc
 
-try:
-    from tulip.graphics import newax, quiver
-except Exception, e:
-    logger.error(e)
-    quiver = None
+# inline imports:
+#
+# from tulip.graphics import newax, quiver
 
 def _indent(s, n):
     s = s.split('\n')
@@ -191,7 +189,10 @@ class LtiSysDyn(object):
     
     def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
              res=(5, 5), **kwargs):
-        if quiver is None:
+        try:
+            from tulip.graphics import newax, quiver
+        except:
+            logger.error('failed to import graphics')
             warn('pyvectorized not found. No plotting.')
             return
         
@@ -307,6 +308,12 @@ class PwaSysDyn(object):
         return cls([lti_sys], domain)
     
     def plot(self, ax=None, show_domain=True, **kwargs):
+        try:
+            from tulip.graphics import newax
+        except:
+            logger.error('failed to import graphics')
+            return
+        
         if ax is None:
             ax, fig = newax()
         

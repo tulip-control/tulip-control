@@ -40,6 +40,10 @@ from .labeled_graphs import LabeledDiGraph, str2singleton
 from .labeled_graphs import prepend_with
 from .mathset import PowerSet, MathSet
 
+# inline imports
+#
+# from .export import graph2promela
+
 _hl = 40 *'-'
 
 logger = logging.getLogger(__name__)

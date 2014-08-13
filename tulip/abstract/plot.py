@@ -39,25 +39,24 @@ logger = logging.getLogger(__name__)
 import numpy as np
 from scipy import sparse as sp
 import networkx as nx
-from polytope import plot_partition, plot_transition_arrow
+from polytope.plot import plot_partition, plot_transition_arrow
 
-try:
-    import matplotlib as mpl
-except Exception, e:
-    logger.error(e)
-    mpl = None
-
-try:
-    from tulip.graphics import newax
-except Exception, e:
-    logger.error(e)
-    mpl = None
+# inline imports:
+#
+# import matplotlib as mpl
+# from tulip.graphics import newax
 
 def plot_abstraction_scc(ab, ax=None):
     """Plot Regions colored by strongly connected component.
     
     Handy to develop new examples or debug existing ones.
     """
+    try:
+        import matplotlib as mpl
+    except:
+        logger.error('failed to load matplotlib')
+        return
+    
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
@@ -161,6 +160,12 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     @param color_seed: see C{plot_partition}
     @return: axis object
     """
+    try:
+        from tulip.graphics import newax
+    except:
+        logger.error('failed to import graphics.newax')
+        return
+    
     if ax is None:
         ax, fig = newax()
     
