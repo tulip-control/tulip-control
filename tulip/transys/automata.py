@@ -176,39 +176,21 @@ class FiniteStateAutomaton(LabeledDiGraph):
         self.accepting.remove(node)
         super(FiniteStateAutomaton, self).remove_node(node)
 
-class NFA(FiniteStateAutomaton):
-    """Nondeterministic finite-word finite-state automaton.
+class FiniteWordAutomaton(FiniteStateAutomaton):
+    """Finite-word finite-state automaton.
     
-    Determinism can be enforced by optional argument
-    when creating transitions.
+    By default non-deterministic (NFA).
+    To enforce determinism (DFA):
+    
+    >>> a = FiniteWordAutomaton(deterministic=True)
     """
-    def __init__(self, atomic_proposition_based=True):
-        super(NFA, self).__init__(
-            deterministic=False,
+    def __init__(self, deterministic=False,
+                 atomic_proposition_based=True):
+        super(FiniteWordAutomaton, self).__init__(
+            deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based
         )
-        self.automaton_type = 'Non-Deterministic Finite Automaton'
-    
-    def is_accepted(self, word):
-        """Check if automaton accepts finite input word.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-
-class DFA(NFA):
-    """Deterministic finite-word finite-state automaton.
-
-    Determinism can be enforced by optional argument
-    when creating transitions.
-    """
-    def __init__(self, atomic_proposition_based=True):
-        super(DFA, self).__init__(
-            deterministic=True,
-            atomic_proposition_based=atomic_proposition_based
-        )
-        self.automaton_type = 'Deterministic Finite Automaton'
+        self.automaton_type = 'Finite-Word Automaton'
 
 def nfa2dfa():
     """Determinize NFA.
