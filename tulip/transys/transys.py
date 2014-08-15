@@ -578,7 +578,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     
-    ts = FTS(name=name)
+    ts = FTS()
+    ts.name=name
     
     ts.states.add_from(states)
     ts.states.initial |= initial_states

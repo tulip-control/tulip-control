@@ -200,10 +200,11 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     ba = buchi_automaton
     
     prodts_name = fts.name +'*' +ba.name
-    prodts = transys.FiniteTransitionSystem(name=prodts_name)
+    prodts = transys.FiniteTransitionSystem()
+    prodts.name = prodts_name
     
     prodts.atomic_propositions.add_from(ba.states() )
-    prodts.actions.add_from(fts.actions)
+    prodts.sys_actions.add_from(fts.actions)
 
     # construct initial states of product automaton
     s0s = set(fts.states.initial)
@@ -385,7 +386,8 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     
     prod_name = buchi_automaton.name +'*' +transition_system.name
     
-    prod_ba = automata.BuchiAutomaton(name=prod_name)
+    prod_ba = automata.BuchiAutomaton()
+    prod_ba.name = prod_name
     
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states() )

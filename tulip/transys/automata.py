@@ -35,6 +35,7 @@ Automata Module
 import logging
 logger = logging.getLogger(__name__)
 
+import copy
 from collections import Iterable
 from pprint import pformat
 
@@ -193,8 +194,8 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 def nfa2dfa():
-    """Determinize NFA.
-
+    """Determinize NFA using Rabin-Scott subset construction.
+    
     UNDER DEVELOPMENT; function signature may change without notice.
     Calling will result in NotImplementedError.
     """
@@ -203,7 +204,7 @@ def nfa2dfa():
 def dfa2nfa(dfa):
     """Copy DFA to an NFA, so remove determinism restriction.
     """
-    nfa = dfa.copy()
+    nfa = copy.deepcopy(dfa)
     nfa.transitions._deterministic = False
     nfa.automaton_type = 'Non-Deterministic Finite Automaton'
     return nfa
@@ -222,14 +223,6 @@ class BuchiAutomaton(OmegaAutomaton):
             atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Buchi Automaton'
-    
-    def is_accepted(self, prefix, suffix):
-        """Check if given infinite word over alphabet \Sigma is accepted.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
 
 class BA(BuchiAutomaton):
     """Alias to L{BuchiAutomaton}.
@@ -302,7 +295,8 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     initial_states = prepend_with(initial_states, prepend_str)
     accepting_states = prepend_with(accepting_states, prepend_str)
     
-    ba = BuchiAutomaton(name=name, atomic_proposition_based=atomic_proposition_based)
+    ba = BuchiAutomaton(atomic_proposition_based=atomic_proposition_based)
+    ba.name = name
     
     ba.states.add_from(states)
     ba.states.initial |= initial_states
@@ -490,14 +484,6 @@ class RabinAutomaton(OmegaAutomaton):
             atomic_proposition_based=atomic_proposition_based
         )
         self.automaton_type = 'Rabin Automaton'
-    
-    def is_accepted(self, word):
-        """Check if given infinite word over alphabet \Sigma is accepted.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
 
 class DRA(RabinAutomaton):
     """Deterministic Rabin Automaton.
@@ -516,35 +502,17 @@ class DRA(RabinAutomaton):
 class StreettAutomaton(OmegaAutomaton):
     """Omega-automaton with Streett acceptance condition.
     """
-    def is_accepted(self, word):
-        """Check if given infinite word over alphabet \Sigma is accepted.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
+    pass
 
 class MullerAutomaton(OmegaAutomaton):
     """Omega-automaton with Muller acceptance condition.
     """
-    def is_accepted(self, word):
-        """Check if given infinite word over alphabet \Sigma is accepted.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
+    pass
 
 class ParityAutomaton(OmegaAutomaton):
     """Omega-automaton with Parity acceptance condition.
     """
-    def is_accepted(self, word):
-        """Check if given infinite word over alphabet \Sigma is accepted.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
+    pass
 
 class ParityGame(GameGraph):
     """GameGraph equipped with coloring.
