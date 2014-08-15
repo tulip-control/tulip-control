@@ -1134,6 +1134,60 @@ def sprint_aps(label, aps):
         tmp = tmp0 + tmp1
     return tmp
 
+def synthesize_many(specs, ts=None, ignore_init=None,
+                    bool_actions=None, solver='gr1c'):
+    """Synthesize from logic specs and multiple transition systems.
+    
+    @type specs: L{GRSpec}
+    
+    @type ts: C{dict} of L{FiniteTransitionSystem}
+    
+    @type ignore_init: C{set} of keys from C{ts}
+    
+    @type bool_actions: C{set} of keys from C{ts}
+    
+    @param solver: 'gr1c' or 'jtlv'
+    @type solver: str
+    """
+    assert(isinstance(ts, dict))
+    
+    for name, t in ts.iteritems():
+        assert(isinstance(t, transys.FiniteTransitionSystem))
+        
+        ignore = name in ignore_init
+        bool_act = name in bool_actions
+        statevar = name + '_state'
+        
+        if t.owner == 'sys':
+            specs |= sys_to_spec(t, ignore, statevar,
+                                 bool_actions=bool_act)
+        elif t.owner == 'env':
+            specs |= env_to_spec(t, ignore, statevar,
+                                 bool_actions=bool_act)
+    
+    if solver == 'gr1c':
+        ctrl = gr1c.synthesize(specs)
+    elif solver == 'jtlv':
+        ctrl = jtlv.synthesize(specs)
+    else:
+        raise Exception('Unknown solver: ' + str(solver) + '. '
+                        'Available solvers: "jtlv" and "gr1c"')
+    
+    try:
+        logger.debug('Mealy machine has: n = ' +
+                     str(len(ctrl.states) ) +' states.')
+    except:
+        logger.debug('No Mealy machine returned.')
+    
+    # no controller found ?
+    # counterstrategy not constructed by synthesize
+    if not isinstance(ctrl, transys.MealyMachine):
+        return None
+    
+    ctrl.remove_deadends()
+
+    return ctrl
+
 def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
