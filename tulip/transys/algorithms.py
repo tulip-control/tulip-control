@@ -34,11 +34,9 @@ Algorithms on Kripke structures and Automata
 """
 import logging
 import copy
-import warnings
 
 from .transys import FiniteTransitionSystem
 from .automata import BuchiAutomaton
-from .mathset import MathSet
 
 _hl = 40 *'-'
 

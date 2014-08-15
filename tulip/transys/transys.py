@@ -178,16 +178,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
     Constraints on actions can be defined
     similarly to L{FTS} actions by setting the fields:
     
-        - ofts.env_actions_must
-        - ofts.sys_actions_must
+        - C{ofts.env_actions_must}
+        - C{ofts.sys_actions_must}
     
     The default constraint is 'xor'.
     
     sys.actions_must: select constraint on actions. Options:
         
-        - 'mutex': at most 1 action True each time
-        - 'xor': exactly 1 action True each time
-        - 'none': no constraint on action values
+        - C{'mutex'}: at most 1 action True each time
+        - C{'xor'}: exactly 1 action True each time
+        - C{'none'}: no constraint on action values
     
     The xor constraint can prevent the environment from
     blocking the system by setting all its actions to False.
@@ -224,7 +224,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     >>> ts.states.initial.add_from(['s0', 's3'] )
     
     To label the states, we need at least one atomic proposition,
-    here 'p':
+    here C{'p'}:
     
     >>> ts.atomic_propositions |= ['p', None]
     >>> ts.states.add('s0', ap={'p'})
@@ -303,7 +303,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     See Also
     ========
-    L{KripkeStructure}, L{tuple2fts}, L{line_labeled_with}, L{cycle_labeled_with}
+    L{KripkeStructure}, L{tuple2fts},
+    L{line_labeled_with}, L{cycle_labeled_with}
     """
     def __init__(self, env_actions=None, sys_actions=None):
         """Instantiate finite transition system.
@@ -332,8 +333,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
         # note: "sys_actions" used to be "actions"
         # in closed systems (old FTS)
         
-        ap_labels = PowerSet()
         action_types = env_actions + sys_actions
+        edge_label_types = action_types
+        
+        ap_labels = PowerSet()
         
         node_label_types = [
             {'name':'ap',
@@ -341,7 +344,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
              'setter':ap_labels.math_set,
              'default':set()}
         ]
-        edge_label_types = action_types
         
         super(FiniteTransitionSystem, self).__init__(
             node_label_types, edge_label_types

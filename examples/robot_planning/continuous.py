@@ -24,7 +24,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 # @import_section@
-import sys
 import numpy as np
 
 from tulip import spec, synth, hybrid

@@ -52,7 +52,8 @@ import polytope as pc
 
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
+from .prop2partition import (PropPreservingPartition,
+                             pwa_partition, part2convex)
 from .feasible import is_feasible, solve_feasible
 
 from polytope.plot import plot_partition, plot_transition_arrow
@@ -442,6 +443,7 @@ def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
     )
+    
     #ax = self.ts.plot()
     
     return ax
