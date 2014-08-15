@@ -299,7 +299,7 @@ def canon_to_jtlv_domain(dom):
     elif isinstance(dom, tuple) and len(dom) == 2:
         return "{"+", ".join([str(i) for i in range(dom[0], dom[1]+1)])+"}"
     else:
-        raise ValueError("Unrecognized domain type: "+str(domain))
+        raise ValueError("Unrecognized domain type: "+str(dom))
 
 def generate_JTLV_SMV(spec):
     """Return the SMV module definitions needed by JTLV.
