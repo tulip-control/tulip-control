@@ -387,13 +387,18 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
     
     def __str__(self):
-        if self.owner == 'sys' and self.env_actions:
+        isopen = (
+            ('sys' and self.env_actions) or
+            ('env' and self.sys_actions)
+        )
+        
+        if isopen:
             t = 'open'
-        elif self.owner == 'env' and self.sys_actions:
+        else:
             t = 'closed'
         
         s = (
-            _hl +'\nFinite Transition System (' + t + ': ' +
+            _hl +'\nFinite Transition System (' + t + '): ' +
             self.name + '\n' + _hl + '\n' +
             
             'Atomic Propositions (APs):\n' +
@@ -439,7 +444,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     def owner(self, x):
         if x not in {'env', 'sys'}:
             raise ValueError("The owner can be either 'sys' or 'env'.")
-        self._owner = 'sys'
+        self._owner = x
     
     def _save(self, path, fileformat):
         """Export options available only for closed systems.
