@@ -469,77 +469,57 @@ def sys_to_spec(sys, ignore_initial=False, statevar='loc',
     ========
     L{env_to_spec}, L{sys_open_fts2spec}, L{fts2spec}
     
-    @type sys: L{FTS} or L{OpenFTS}
+    @type sys: L{FTS}
     
     @param ignore_initial: Do not include initial state info from TS.
         Enable this to mask absence of OpenFTS initial states.
         Useful when initial states are specified in another way,
         e.g., directly augmenting the spec part.
+    @type ignore_initial: bool
+    
+    @param state_var: name of int variable used to represent
+        the current state
+    @type state_var: str
     
     @param bool_states: if True,
         then use one bool variable for each state,
         otherwise use an int variable called loc.
     @type bool_states: bool
     
+    @param bool_actions: if True,
+        then use one bool variable for each state,
+        otherwise use an int variable with same name as the action type.
+    @type bool_actions: bool
+    
     @rtype: L{GRSpec}
     """
     if isinstance(sys, transys.FiniteTransitionSystem):
-        sys_vars, sys_init, sys_trans = fts2spec(
-            sys,
-            ignore_initial=ignore_initial,
-            statevar=statevar,
-            actionvar='sys_actions',
-            bool_states=bool_states,
-            bool_actions=bool_actions
-        )
-        return GRSpec(
-            sys_vars=sys_vars,
-            sys_init=sys_init,
-            sys_safety=sys_trans
-        )
-    elif isinstance(sys, transys.OpenFiniteTransitionSystem):
         return sys_open_fts2spec(
             sys, ignore_initial, statevar,
             bool_states, bool_actions
         )
     else:
-        raise TypeError('synth.sys_to_spec does not support ' +
-            str(type(sys)) +'. Use FTS or OpenFTS.')
+        raise TypeError('synth.sys_to_spec must be FTS, got ' +
+                        str(type(sys)) + ' instead.')
 
 def env_to_spec(env, ignore_initial=False, statevar='eloc',
                 bool_states=False, bool_actions=False):
     """Convert environment transition system to GR(1) representation.
     
-    For details see also L{sys_to_spec}.
+    For details see L{sys_to_spec}.
     
-    @type env: L{FTS} or L{OpenFTS}
-    
-    @type bool_states: bool
+    @type env: L{FTS}
     """
     if isinstance(env, transys.FiniteTransitionSystem):
-        (env_vars, env_init, env_trans) = fts2spec(
-            env,
-            ignore_initial=ignore_initial,
-            statevar=statevar,
-            actionvar='env_actions',
-            bool_states=bool_states,
-            bool_actions=bool_actions
-        )
-        return GRSpec(
-            env_vars=env_vars,
-            env_init=env_init,
-            env_safety=env_trans
-        )
-    elif isinstance(env, transys.OpenFiniteTransitionSystem):
         return env_open_fts2spec(
             env, ignore_initial, statevar,
             bool_states, bool_actions
         )
     else:
-        raise TypeError('synth.env_to_spec does not support ' +
-            str(type(env)) +'. Use FTS or OpenFTS.')
+        raise TypeError('synth.env_to_spec must be FTS, got ' +
+                        str(type(env)) + ' instead.')
 
-def fts2spec(
+def _fts2spec(
     fts, ignore_initial=False,
     statevar='loc', actionvar=None,
     bool_states=False, bool_actions=False
@@ -569,6 +549,8 @@ def fts2spec(
     @return: (sys_vars, sys_init, sys_trans), where each element
         corresponds to the similarly-named attribute of L{GRSpec}.
     """
+    raise Exception('deprecated')
+    
     assert(isinstance(fts, transys.FiniteTransitionSystem))
     
     aps = fts.aps
@@ -632,7 +614,7 @@ def sys_open_fts2spec(
     
     See also
     ========
-    L{sys_trans_from_ts}, L{env_open_fts2spec}, L{fts2spec},
+    L{sys_trans_from_ts}, L{env_open_fts2spec},
     L{create_actions}, L{create_states}
     
     @param ofts: L{OpenFTS}
@@ -664,7 +646,8 @@ def sys_open_fts2spec(
     @return: logic formula in GR(1) form representing C{ofts}.
     @rtype: L{spec.GRSpec}
     """
-    assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
+    assert(isinstance(ofts, transys.FiniteTransitionSystem))
+    assert(ofts.owner == 'sys')
     
     aps = ofts.aps
     states = ofts.states
@@ -754,7 +737,8 @@ def env_open_fts2spec(
     ========
     L{sys_open_fts2spec}
     """
-    assert(isinstance(ofts, transys.OpenFiniteTransitionSystem))
+    assert(isinstance(ofts, transys.FiniteTransitionSystem))
+    assert(ofts.owner == 'env')
     
     aps = ofts.aps
     states = ofts.states
