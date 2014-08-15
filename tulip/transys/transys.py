@@ -115,6 +115,18 @@ class FiniteTransitionSystem(LabeledDiGraph):
     The state labels are sets of atomic propositions,
     similar to a L{KripkeStructure}.
     
+    In principle some of the propositions that label states
+    could be controlled by either of the players,
+    but this would lead to less straightforward semantics.
+    
+    You can achieve the same effect by using actions of
+    the opponent.
+    
+    It is a matter of future experimentation whether
+    this capability will be introduced, by partitioning
+    the props into C{env_props} and C{sys_props}
+    (similar to C{env_vars}, C{sys_vars} in L{GRSpec}).
+    
     Edge labeling
     =============
     Edge labels are called "actions".
@@ -302,6 +314,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
         @param sys_actions: system (controlled) actions, defined as
             C{edge_label_types} in L{LabeledDiGraph.__init__}
         """
+        self._owner = 'sys'
+        
         if env_actions is None:
             env_actions = [
                 {'name':'env_actions',
@@ -371,9 +385,9 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
     
     def __str__(self):
-        if self.env_vars:
+        if self.owner == 'sys' and self.env_actions:
             t = 'open'
-        else:
+        elif self.owner == 'env' and self.sys_actions:
             t = 'closed'
         
         s = (
@@ -414,6 +428,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
         )
         
         return s
+    
+    @property
+    def owner(self):
+        return self._owner
+    
+    @owner.setter
+    def owner(self, x):
+        if x not in {'env', 'sys'}:
+            raise ValueError("The owner can be either 'sys' or 'env'.")
+        self._owner = 'sys'
     
     def _save(self, path, fileformat):
         """Export options available only for closed systems.
