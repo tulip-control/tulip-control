@@ -248,7 +248,7 @@ def _form_node_label(state, state_data, label_def,
     
     if tikz:
         # replace LF by latex newline
-        node_dot_label = node_dot_label.replace('\n', r'\\\\ ')
+        node_dot_label = node_dot_label.replace(r'\n', r'\\\\ ')
         
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = (
