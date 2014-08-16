@@ -34,7 +34,8 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-env_sws = transys.OpenFTS()
+env_sws = transys.FTS()
+env_sws.owner = 'env'
 
 env_sws.sys_actions.add_from({'right','up','left','down'})
 

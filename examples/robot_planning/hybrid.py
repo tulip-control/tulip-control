@@ -29,7 +29,7 @@ from scipy import sparse as sp
 # Hybrid system with 2 env, 2 system modes:
 ###########################################
 
-sys_hyb = transys.OpenFTS()
+sys_hyb = transys.FTS()
 
 # We assume robots ability to transition between cells depends both on
 # discrete controlled modes (e.g., gears) and environment modes (e.g., surface

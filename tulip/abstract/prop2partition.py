@@ -644,7 +644,7 @@ def ppp2ts(part):
     @rtype: (L{transys.FTS}, \C{dict})
     """
     # generate transition system and add transitions       
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     
     adj = part.adj #sp.lil_matrix
     n = adj.shape[0]

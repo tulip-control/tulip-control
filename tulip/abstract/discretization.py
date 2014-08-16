@@ -917,7 +917,7 @@ def discretize(
         tmp_part.compute_adj()
     
     # Generate transition system and add transitions       
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
@@ -1290,7 +1290,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     logger.info('APs: ' + str(aps))
     
-    sys_ts = trs.OpenFTS()
+    sys_ts = trs.FTS()
     
     # create stats
     n = len(merged_abstr.ppp)

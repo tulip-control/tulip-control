@@ -472,7 +472,7 @@ def sys_to_spec(sys, ignore_initial=False, statevar='loc',
     @type sys: L{FTS}
     
     @param ignore_initial: Do not include initial state info from TS.
-        Enable this to mask absence of OpenFTS initial states.
+        Enable this to mask absence of FTS initial states.
         Useful when initial states are specified in another way,
         e.g., directly augmenting the spec part.
     @type ignore_initial: bool
@@ -525,29 +525,6 @@ def _fts2spec(
     bool_states=False, bool_actions=False
 ):
     """Convert closed FTS to GR(1) representation.
-    
-    Single player + Multiple action types
-    =====================================
-    So fts on its own is not the complete problem spec.
-    Currently L{FTS} supports only a single set of actions.
-    
-    If you have only one player (either env or sys),
-    with multiple action types, then use an L{OpenFTS},
-    without any action types for its opponent.
-    
-    Make sure that, depending on the player,
-    C{'env'} or C{'sys'} are part of the action type names,
-    so that L{synth.synthesize} can recognize them.
-    
-    See also
-    ========
-    L{sys_open_fts2spec}
-    
-    @param fts: L{transys.FiniteTransitionSystem}
-    
-    @rtype: (dict, list, list)
-    @return: (sys_vars, sys_init, sys_trans), where each element
-        corresponds to the similarly-named attribute of L{GRSpec}.
     """
     raise Exception('deprecated')
     
@@ -586,7 +563,7 @@ def sys_open_fts2spec(
     ofts, ignore_initial=False, statevar='loc',
     bool_states=False, bool_actions=False
 ):
-    """Convert OpenFTS to GR(1) representation.
+    """Convert transition system to GR(1) representation.
     
     The following are represented by system variables:
     
@@ -599,14 +576,17 @@ def sys_open_fts2spec(
       - the environment actions annotating edges
     
     Multiple types of environment and system actions can be defined.
+    Make sure that, depending on the player,
+    C{'env'} or C{'sys'} are part of the action type names,
+    so that L{synth.synthesize} can recognize them.
     
     Current limitations
     ===================
-    Note that not any GR(1) can be represented by an OpenFTS,
-    the way that L{OpenFTS} is currently defined.
+    Note that not any GR(1) can be represented by an FTS,
+    the way that L{FTS} is currently defined.
     For that purpose, a GameStructure would be needed instead.
     
-    Besides, there are aspects of L{OpenFTS} that
+    Besides, there are aspects of L{FTS} that
     need to be separately specified in a logic formula.
     
     An example is initial conditions constraining the values
@@ -617,7 +597,7 @@ def sys_open_fts2spec(
     L{sys_trans_from_ts}, L{env_open_fts2spec},
     L{create_actions}, L{create_states}
     
-    @param ofts: L{OpenFTS}
+    @param ofts: L{FTS}
     
     @param ignore_initial: if C{True}, then do not represent in logic
         the set of initial states of C{ofts}.
@@ -719,7 +699,7 @@ def env_open_fts2spec(
     ofts, ignore_initial=False, statevar='eloc',
     bool_states=False, bool_actions=False
 ):
-    """Convert OpenFTS to GR(1) representation.
+    """Convert env transition system to GR(1) representation.
     
     The following are represented by environment variables:
     
@@ -848,7 +828,7 @@ def sys_trans_from_ts(
     when they don't need the label typing overhead.
 
     @param trans: L{Transitions} as from the transitions
-        attribute of L{FTS} or L{OpenFTS}.
+        attribute of L{FTS}.
     
     @param action_ids: same as C{sys-action_ids}
         Caution: to be removed in a future release
@@ -953,7 +933,7 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     """Convert environment actions to GR(1) env_safety.
     
     This constrains the actions available next to the environment
-    based on the system OpenFTS.
+    based on the system FTS.
     
     Purpose is to prevent env from blocking sys by purely
     picking a combination of actions for which sys has no outgoing
@@ -1217,10 +1197,7 @@ def synthesize(
         
         This constrains the transitions available to
         the environment, given the outputs from the system.
-        
-        Note that an L{OpenFTS} with only sys_actions is
-        equivalent to an L{FTS} for the environment.
-    @type env: L{FTS} or L{OpenFTS}
+    @type env: L{FTS}
     
     @param sys: A transition system describing the system:
         
@@ -1228,10 +1205,8 @@ def synthesize(
             - input: env_actions
             - output: sys_actions
             - initial states constrain the system
-        
-        Note that an OpenFTS with only sys_actions is
-        equivalent to an FTS for the system.
-    @type sys: L{FTS} L{OpenFTS}
+    
+    @type sys: L{FTS}
     
     @param ignore_sys_init: Ignore any initial state information
         contained in env.

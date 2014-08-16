@@ -76,10 +76,10 @@ env1 = transys.FTS()
 env1.states.add('e0')
 env1.states.initial.add('e0')
 
-env1.actions.add_from({'park', ''})
+env1.env_actions.add_from({'park', ''})
 
-env1.transitions.add('e0', 'e0', actions='park')
-env1.transitions.add('e0', 'e0', actions='')
+env1.transitions.add('e0', 'e0', env_actions='park')
+env1.transitions.add('e0', 'e0', env_actions='')
 logger.info(env1)
 
 specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
