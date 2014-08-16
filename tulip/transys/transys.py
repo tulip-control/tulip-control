@@ -183,7 +183,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     The default constraint is 'xor'.
     
-    sys.actions_must: select constraint on actions. Options:
+    sys.sys_actions_must: select constraint on actions. Options:
         
         - C{'mutex'}: at most 1 action True each time
         - C{'xor'}: exactly 1 action True each time
@@ -359,7 +359,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             msg += 'is requested,\n then it will conflict with '
             msg += 'the dict storing all action types.'
             raise ValueError(msg)
-                
+        
         self.actions = actions
         self.atomic_propositions = self.ap
         self.aps = self.atomic_propositions # shortcut
@@ -367,7 +367,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
-        # self.actions_must = 'xor'
         
         # dot formatting
         self._state_dot_label_format = {
@@ -388,8 +387,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     
     def __str__(self):
         isopen = (
-            ('sys' and self.env_actions) or
-            ('env' and self.sys_actions)
+            ('sys' and any({'env' in x for x in self.actions}) ) or
+            ('env' and any({'sys' in x for x in self.actions}) )
         )
         
         if isopen:
