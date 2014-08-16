@@ -1177,16 +1177,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
     
     def save(self, filename=None, fileformat=None,
              rankdir='LR', prog=None,
-             wrap=10, latex=False, tikz=False):
+             wrap=10, tikz=False):
         """Save image to file.
         
         Recommended file formats:
-        
-            - pdf, eps
-            - tikz for use with dot2tex and/or dot2texi
-            - png, gif
-            - svg (can render LaTeX labels with inkscape export)
+            
+            - tikz (via dot2tex)
+            - pdf
+            - svg
             - dot
+            - png
         
         Any other format supported by C{pydot.write} is available.
         
@@ -1235,9 +1235,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param wrap: max width of node strings
         @type wrap: int
         
-        @param latex: when printing states,
-            prepend underscores to numbers that follow letters,
-            enclose the string is $ to create a math environment.
+        @param tikz: use tikz automata library in dot
         
         @rtype: bool
         @return: True if saving completed successfully, False otherwise.
@@ -1276,7 +1274,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         from .export import graph2dot
         graph2dot.save_dot(self, filename, fileformat, rankdir,
-                           prog, wrap, latex=latex, tikz=tikz)
+                           prog, wrap, tikz=tikz)
         
         return True
     
