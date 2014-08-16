@@ -6,7 +6,7 @@ Tests for transys.labeled_graphs (part of transys subpackage)
 from nose.tools import raises, assert_raises
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
-from tulip.transys.transys import OpenFTS
+from tulip.transys.transys import FTS
 
 
 def str2singleton_test():
@@ -299,7 +299,7 @@ def open_fts_multiple_env_actions_test():
             'values':env_choice
         }
     ]
-    ts = OpenFTS(env_actions)
+    ts = FTS(env_actions)
     
     assert(ts.env_modes is env_modes)
     assert(not hasattr(ts, 'env_choices') )

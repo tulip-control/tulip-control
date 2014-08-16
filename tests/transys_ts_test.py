@@ -75,10 +75,10 @@ def ba_ts_prod_test():
     ts = ts_test()
     ba = ba_test()
     
-    ba_ts = ba * ts
+    ba_ts = trs.products.ba_ts_sync_prod(ba, ts)
     check_prodba(ba_ts)
     
-    (ts_ba, persistent) = ts * ba
+    (ts_ba, persistent) = trs.products.ts_ba_sync_prod(ts, ba)
     
     states = {('s0', 'q1'), ('s1', 'q0'),
               ('s2', 'q0'), ('s3', 'q0')}

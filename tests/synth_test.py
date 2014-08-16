@@ -29,20 +29,24 @@ def sys_fts_2_states():
 
 def env_fts_2_states():
     env = transys.FTS()
+    env.owner = 'env'
+    
     env.states.add_from({'e0', 'e1'})
     env.states.initial.add('e0')
     
     # Park as an env action
-    env.actions.add_from({'park', 'go'})
+    env.env_actions.add_from({'park', 'go'})
     
-    env.transitions.add('e0', 'e0', actions='park')
-    env.transitions.add('e0', 'e0', actions='go')
+    env.transitions.add('e0', 'e0', env_actions='park')
+    env.transitions.add('e0', 'e0', env_actions='go')
     
     #env.plot()
     return env
 
 def env_ofts_bool_actions():
-    env = transys.OpenFTS()
+    env = transys.FTS()
+    env.owner = 'env'
+    
     env.states.add_from({'e0', 'e1', 'e2'})
     env.states.initial.add('e0')
     
@@ -88,12 +92,11 @@ def test_sys_fts_bool_states():
     """Sys FTS has 2 states, must become 2 bool vars in GR(1)
     """
     sys = sys_fts_2_states()
-    sys.actions_must = 'mutex'
+    sys.sys_actions_must = 'mutex'
 
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -110,12 +113,11 @@ def test_env_fts_bool_states():
     """Env FTS has 2 states, must become 2 bool vars in GR(1).
     """
     env = env_fts_2_states()
-    env.actions_must = 'mutex'
+    env.env_actions_must = 'mutex'
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -132,13 +134,12 @@ def test_sys_fts_int_states():
     """Sys FTS has 3 states, must become 1 int var in GR(1).
     """
     sys = sys_fts_2_states()
-    sys.actions_must='mutex'
+    sys.sys_actions_must='mutex'
     sys.states.add('X2')
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -154,13 +155,12 @@ def test_env_fts_int_states():
     """Env FTS has 3 states, must become 1 int var in GR(1).
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     env.states.add('e2')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -176,12 +176,11 @@ def test_sys_fts_no_actions():
     """Sys FTS has no actions.
     """
     sys = sys_fts_2_states()
-    sys.actions_must='mutex'
+    sys.sys_actions_must='mutex'
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -191,12 +190,11 @@ def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested.
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=True,
     )
     
@@ -213,13 +211,12 @@ def test_env_fts_int_actions():
     """Env FTS actions must become 1 int var in GR(1).
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
-    env.actions.add('stop')
+    env.env_actions_must = 'mutex'
+    env.env_actions.add('stop')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -238,14 +235,13 @@ def test_env_ofts_bool_actions():
     """Env OpenFTS has 2 actions, bools requested.
     """
     env = env_ofts_int_actions()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     env.env_actions.remove('stop')
     env.sys_actions.remove('hover')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=True
     )
     
@@ -255,14 +251,14 @@ def test_sys_ofts_bool_actions():
     """Sys OpenFTS has 2 actions, bools requested.
     """
     sys = env_ofts_int_actions()
-    sys.actions_must='mutex'
+    sys.owner = 'sys'
+    sys.sys_actions_must='mutex'
     sys.env_actions.remove('stop')
     sys.sys_actions.remove('hover')
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=True
     )
     
@@ -290,12 +286,11 @@ def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1).
     """
     env = env_ofts_int_actions()
-    env.actions_must='mutex'
+    env.sys_actions_must='mutex'
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -305,12 +300,12 @@ def test_sys_ofts_int_actions():
     """Sys OpenFTS actions must become 1 int var in GR(1).
     """
     sys = env_ofts_int_actions()
-    sys.actions_must='mutex'
+    sys.owner = 'sys'
+    sys.sys_actions_must='mutex'
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
         bool_actions=False
     )
     
@@ -320,6 +315,7 @@ def _check_ofts_int_actions(spec):
     """Common assertion checking for 2 function above.
     """
     print(spec.env_vars)
+    print(spec.sys_vars)
     assert('park' not in spec.env_vars)
     assert('go' not in spec.env_vars)
     assert('stop' not in spec.env_vars)
@@ -332,7 +328,8 @@ def _check_ofts_int_actions(spec):
     assert(set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'})
     
     assert('sys_actions' in spec.sys_vars)
-    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover'})
+    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover',
+           'sys_actionsnone'})
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
@@ -349,7 +346,8 @@ def test_only_mode_control():
     bad low-level feedback controllers.
     """
     # Create a finite transition system
-    env_sws = transys.OpenFTS()
+    env_sws = transys.FTS()
+    env_sws.owner = 'env'
     
     env_sws.sys_actions.add_from({'right','left'})
     
@@ -421,7 +419,7 @@ def multiple_env_actions_test():
         }
     ]
     
-    sys = transys.OpenFTS(env_actions)
+    sys = transys.FTS(env_actions)
     sys.states.add_from({'s1', 's2', 's3'})
     sys.states.initial.add_from({'s1'})
     
@@ -451,7 +449,7 @@ def test_var_name_conflicts():
     conversion_raises = lambda x, y: \
         assert_raises(
         Exception, spec=x, sys=y,
-        ignore_initial=True, bool_states=False,
+        ignore_initial=True,
         bool_actions=False
     )
     
@@ -467,26 +465,26 @@ def test_var_name_conflicts():
     # states vs sys_actions
     sys = transys.FTS()
     sys.states.add('out')
-    sys.actions.add('out')
+    sys.sys_actions.add('out')
     
     conversion_raises(synth.sys_to_spec, sys)
     
     sys = transys.FTS()
     sys.states.add('sys_actions')
-    sys.actions.add('out')
+    sys.sys_actions.add('out')
     
     conversion_raises(synth.sys_to_spec, sys)
     
     # states vs env_actions
     env = transys.FTS()
     env.states.add('out')
-    env.actions.add('out')
+    env.env_actions.add('out')
     
     conversion_raises(synth.env_to_spec, env)
     
     env = transys.FTS()
     env.states.add('env_actions')
-    env.actions.add('out')
+    env.env_actions.add('out')
     
     conversion_raises(synth.env_to_spec, env)
     
@@ -494,14 +492,14 @@ def test_var_name_conflicts():
     sys = transys.FTS()
     sys.states.add('s0')
     sys.atomic_propositions.add('out')
-    sys.actions.add('out')
+    sys.env_actions.add('out')
     
     conversion_raises(synth.sys_to_spec, sys)
     
     sys = transys.FTS()
     sys.states.add('s0')
     sys.atomic_propositions.add('sys_actions')
-    sys.actions.add('out')
+    sys.env_actions.add('out')
     
     conversion_raises(synth.sys_to_spec, sys)
     
@@ -509,21 +507,21 @@ def test_var_name_conflicts():
     env = transys.FTS()
     env.states.add('s0')
     env.atomic_propositions.add('out')
-    env.actions.add('out')
+    env.env_actions.add('out')
     
     conversion_raises(synth.env_to_spec, env)
     
     env = transys.FTS()
     env.states.add('s0')
     env.atomic_propositions.add('env_actions')
-    env.actions.add('out')
+    env.env_actions.add('out')
     
     conversion_raises(synth.env_to_spec, env)
     
     # OpenFTS to spec
     
     # states vs APs
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('out')
     sys.atomic_propositions.add('out')
     
@@ -532,7 +530,7 @@ def test_var_name_conflicts():
     conversion_raises(synth.env_to_spec, sys)
     
     # states vs sys_actions
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('out')
     sys.sys_actions.add('out')
     
@@ -540,7 +538,7 @@ def test_var_name_conflicts():
     
     conversion_raises(synth.env_to_spec, sys)
     
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('sys_actions')
     sys.sys_actions.add('out')
     
@@ -549,7 +547,7 @@ def test_var_name_conflicts():
     conversion_raises(synth.env_to_spec, sys)
     
     # states vs env_actions
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('out')
     sys.env_actions.add('out')
     
@@ -557,7 +555,7 @@ def test_var_name_conflicts():
     
     conversion_raises(synth.env_to_spec, sys)
     
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('env_actions')
     sys.env_actions.add('out')
     
@@ -566,7 +564,7 @@ def test_var_name_conflicts():
     conversion_raises(synth.env_to_spec, sys)
     
     # sys_actions vs APs
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('s0')
     sys.sys_actions.add('out')
     sys.atomic_propositions.add('out')
@@ -575,7 +573,7 @@ def test_var_name_conflicts():
     
     conversion_raises(synth.env_to_spec, sys)
     
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('s0')
     sys.sys_actions.add('out')
     sys.atomic_propositions.add('sys_actions')
@@ -585,7 +583,7 @@ def test_var_name_conflicts():
     conversion_raises(synth.env_to_spec, sys)
     
     # env_actions vs APs
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('s0')
     sys.env_actions.add('out')
     sys.atomic_propositions.add('out')
@@ -594,7 +592,7 @@ def test_var_name_conflicts():
     
     conversion_raises(synth.env_to_spec, sys)
     
-    sys = transys.OpenFTS()
+    sys = transys.FTS()
     sys.states.add('s0')
     sys.env_actions.add('out')
     sys.atomic_propositions.add('env_actions')
