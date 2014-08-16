@@ -237,7 +237,7 @@ def _form_node_label(state, state_data, label_def,
             label_str = fill(label_value, width=width)
         elif isinstance(label_value, Iterable): # and not str
             s = ', '.join([str(x) for x in label_value])
-            label_str = '{' + fill(s, width=width) + '}'
+            label_str = r'\\{' + fill(s, width=width) + r'\\}'
         else:
             label_str = fill(str(label_value), width=width)
         
@@ -328,7 +328,7 @@ def _form_edge_label(edge_data, label_def,
             label_str = label_value
         elif isinstance(label_value, Iterable):
             s = ', '.join([str(x) for x in label_value])
-            label_str = '{' + fill(s) + '}'
+            label_str = r'\\{' + fill(s) + r'\\}'
         else:
             label_str = str(label_value)
         
