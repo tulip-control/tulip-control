@@ -339,7 +339,7 @@ def _form_edge_label(edge_data, label_def,
                   label_str + sep_label_sets)
     
     if tikz:
-        label = r'$\\begin{matrix}' + label + r'\\end{matrix}$'
+        label = r'\\begin{matrix}' + label + r'\\end{matrix}'
     
     label = '"' + label + '"'
     
