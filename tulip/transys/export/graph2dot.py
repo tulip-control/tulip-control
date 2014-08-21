@@ -47,24 +47,23 @@ import numpy as np
 import networkx as nx
 from networkx.utils import make_str
 
-try:
-    import pydot
-except ImportError:
-    logger.error('pydot package not found.\nHence dot export not unavailable.')
-    pydot = None
+# inline:
+#
+# import pydot
+# import webcolors
 
 def _states2dot_str(graph, to_pydot_graph, wrap=10,
                     tikz=False, rankdir='TB'):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
-    # TODO option to replace with int to reduce size,
-    # TODO generate separate LaTeX legend table (PNG option ?)
+    # TODO generate LaTeX legend table for edge labels
     
     states = graph.states
     
     # get labeling def
     if hasattr(graph, '_state_label_def'):
         label_def = graph._state_label_def
+    
     if hasattr(graph, '_state_dot_label_format'):
         label_format = graph._state_dot_label_format
     else:
@@ -238,6 +237,12 @@ def _format_color(color, prog='tikz'):
     return s
 
 def _place_initial_states(trs_graph, pd_graph):
+    try:
+        import pydot
+    except:
+        logger.error('failed to import pydot')
+        return
+    
     init_subg = pydot.Subgraph('initial')
     init_subg.set_rank('source')
     
@@ -405,15 +410,6 @@ def _form_edge_label(edge_data, label_def,
     label = '"' + label + '"'
     
     return label
-
-def _pydot_missing():
-    if pydot is None:
-        msg = 'Attempted calling _to_pydot.\n'
-        msg += 'Unavailable due to pydot not installed.\n'
-        logger.warn(msg)
-        return True
-    
-    return False
     
 def _graph2pydot(graph, wrap=10, tikz=False,
                  rankdir='TB'):
@@ -423,7 +419,10 @@ def _graph2pydot(graph, wrap=10, tikz=False,
     
     @rtype: str
     """
-    if _pydot_missing():
+    try:
+        __import__('pydot')
+    except ImportError:
+        logger.error('failed to import pydot')
         return None
     
     dummy_nx_graph = nx.MultiDiGraph()
@@ -505,9 +504,10 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     
     @param ax: axes
     """
-    if pydot is None:
-        msg = 'Using plot_pydot requires that pydot be installed.'
-        logger.warn(msg)
+    try:
+        __import__('pydot')
+    except:
+        logger.error('failed to import pydot')
         return
     
     try:
