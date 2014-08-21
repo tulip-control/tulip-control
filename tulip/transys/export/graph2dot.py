@@ -43,6 +43,7 @@ from collections import Iterable
 from textwrap import fill
 from cStringIO import StringIO
 
+import numpy as np
 import networkx as nx
 from networkx.utils import make_str
 
@@ -69,62 +70,74 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
     else:
         label_format = {'type?label':'', 'separator':'\n'}
     
-    for (state, state_data) in graph.nodes_iter(data=True):
+    for u, d in graph.nodes_iter(data=True):
         # initial state ?
-        is_initial = state in states.initial
-        is_accepting = _is_accepting(graph, state)
+        is_initial = u in states.initial
+        is_accepting = _is_accepting(graph, u)
         
         # state annotation
         node_dot_label = _form_node_label(
-            state, state_data, label_def,
+            u, d, label_def,
             label_format, wrap, tikz=tikz
         )
     
         #node_dot_label = fill(str(state), width=wrap)
-    
-        # state boundary color
-        rim_color = 'black'
-        if state_data.has_key('color'):
-            rim_color = state_data['color']
         
-        # state interior color
-        fill_color = None
-        if state_data.has_key('fillcolor'):
-            fill_color = state_data['fillcolor']
+        rim_color = d.get('color', 'black')
         
         if tikz:
-            _state2tikz(graph, to_pydot_graph, state,
+            _state2tikz(graph, to_pydot_graph, u,
                         is_initial, is_accepting, rankdir,
-                        rim_color, fill_color, node_dot_label)
+                        rim_color, d, node_dot_label)
         else:
-            _state2dot(graph, to_pydot_graph, state,
+            _state2dot(graph, to_pydot_graph, u,
                        is_initial, is_accepting,
-                       rim_color, fill_color, node_dot_label)
+                       rim_color, d, node_dot_label)
 
 def _state2dot(graph, to_pydot_graph, state,
                is_initial, is_accepting,
-               rim_color, fill_color, node_dot_label):
+               rim_color, d, node_dot_label):
     if is_initial:
         _add_incoming_edge(to_pydot_graph, state)
     
-    shape = graph.dot_node_shape['normal']
-    if is_accepting:
-        shape = graph.dot_node_shape['accepting']
+    normal_shape = graph.dot_node_shape['normal']
+    accept_shape = graph.dot_node_shape.get('accepting', '')
     
-    corners = ''
-    if shape is 'rectangle':
-        corners = 'rounded'
+    shape = accept_shape if is_accepting else normal_shape
+    corners = 'rounded' if shape is 'rectangle' else ''
     
-    rim_color = '"' + rim_color + '"'
+    rim_color = '"' + _format_color(rim_color, 'dot') + '"'
     
-    filled = ''
-    if fill_color is not None:
-        filled = ',filled'
+    fc = d.get('fillcolor', 'none')
+    filled = '' if fc is 'none' else 'filled'
+    if fc is 'gradient':
+        # top/bottom colors not supported for dot
+        
+        lc = d.get('left_color', d['top_color'])
+        rc = d.get('right_color', d['bottom_color'])    
+        
+        if isinstance(lc, basestring):
+            fillcolor = lc
+        elif isinstance(lc, dict):
+            fillcolor = lc.keys()[0]
+        else:
+            raise TypeError('left_color must be str or dict.')
+        
+        if isinstance(rc, basestring):
+            fillcolor += ':' + rc
+        elif isinstance(rc, dict):
+            fillcolor += ':' + rc.keys()[0]
+        else:
+            raise TypeError('right_color must be str or dict.')
+    else:
+        fillcolor = _format_color(fc, 'dot')
     
-    if fill_color is None:
-        fill_color = 'none'
-    
-    node_style = '"' + corners + filled + '"'
+    if corners and filled:
+        node_style = '"' + corners + ', ' + filled + '"'
+    elif corners:
+        node_style = '"' + corners + '"'
+    else:
+        node_style ='"' + filled + '"'
     
     to_pydot_graph.add_node(
         state,
@@ -132,12 +145,12 @@ def _state2dot(graph, to_pydot_graph, state,
         shape=shape,
         style=node_style,
         color=rim_color,
-        fillcolor=fill_color
+        fillcolor='"' + fillcolor + '"'
     )
 
 def _state2tikz(graph, to_pydot_graph, state,
                 is_initial, is_accepting, rankdir,
-                rim_color, fill_color, node_dot_label):
+                rim_color, d, node_dot_label):
     style = 'state'
     
     if rankdir is 'LR':
@@ -159,24 +172,70 @@ def _state2tikz(graph, to_pydot_graph, state,
     if graph.dot_node_shape['normal'] is 'rectangle':
         style += ', shape = rectangle, rounded corners'
     
-    if 'black' not in rim_color:
-        tmp_rim_color = rim_color + '!black!30'
+    # darken the rim
+    if 'black' in rim_color:
+        c = _format_color(rim_color, 'tikz')
     else:
-        tmp_rim_color = rim_color
-    style += ', draw = ' + tmp_rim_color
+        c = _format_color(rim_color, 'tikz') + '!black!30'
+        
+    style += ', draw = ' + c
     
-    if fill_color is not None:
-        s = {'top color', 'bottom color', 'left color', 'right color'}
-        if any(x in fill_color for x in s):
-            style += ', ' + fill_color
-        else:
-            style += ', fill = ' + fill_color
+    fill = d.get('fillcolor')
+    
+    if fill is 'gradient':
+        s = {'top_color', 'bottom_color',
+             'left_color', 'right_color'}
+        
+        for x in s:
+            if x in d:
+                style += ', ' + x + ' = ' + _format_color(d[x], 'tikz')
+    elif fill is not None:
+        # not gradient
+        style += ', fill = ' + _format_color(fill, 'tikz')
+    else:
+        logger.debug('fillcolor is None')
     
     to_pydot_graph.add_node(
         state,
         texlbl=node_dot_label,
         style=style
     )
+
+def _format_color(color, prog='tikz'):
+    """Encode color in syntax for given program.
+    
+    @type color:
+      - C{str} for single color or
+      - C{dict} for weighted color mix
+    
+    @type prog: 'tikz' or 'dot'
+    """
+    if isinstance(color, basestring):
+        return color
+    
+    if not isinstance(color, dict):
+        raise Exception('color must be str or dict')
+    
+    if prog is 'tikz':
+        s = '!'.join([k + '!' + str(v) for k,v in color.iteritems()])
+    elif prog is 'dot':
+        t = sum(color.itervalues())
+        
+        try:
+            import webcolors
+            
+            # mix them
+            result = np.array((0.0, 0.0, 0.0))
+            for c, w in color.iteritems():
+                result += w/t * np.array(webcolors.name_to_rgb(c))
+            s = webcolors.rgb_to_hex(result)
+        except:
+            logger.warn('failed to import webcolors')
+            s = ':'.join([k + ';' + str(v/t) for k,v in color.iteritems()])
+    else:
+        raise ValueError('Unknown program: ' + str(prog) + '. '
+                         "Available options are: 'dot' or 'tikz'.")
+    return s
 
 def _place_initial_states(trs_graph, pd_graph):
     init_subg = pydot.Subgraph('initial')
