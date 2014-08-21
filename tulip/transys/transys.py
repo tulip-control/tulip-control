@@ -74,6 +74,18 @@ class KripkeStructure(LabeledDiGraph):
         }
         
         self.dot_node_shape = {'normal':'rectangle'}
+        
+        self._state_dot_label_format = {
+            'ap':'',
+           'type?label':'',
+           'separator':'\n'
+        }
+        self._transition_dot_label_format = {
+            'type?label':':',
+            'separator':'\n'
+        }
+        
+        self._transition_dot_mask = dict()
 
     def __str__(self):
         s = (
