@@ -482,10 +482,7 @@ def load_file(aut_file, spec):
 
         for to_state in transitions:
             guard = stateDict[to_state][0]
-            try:
-                m.transitions.add(from_state, to_state, **guard)
-            except Exception, e:
-                raise Exception('Failed to add transition:\n' +str(e) )
+            m.transitions.add(from_state, to_state, **guard)
     
     initial_state = 'Sinit'
     m.states.add(initial_state)

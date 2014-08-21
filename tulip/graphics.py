@@ -47,7 +47,7 @@ import numpy as np
 try:
     from matplotlib import pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
-except Exception, e:
+except Exception as e:
     logger.error(e)
 
 #from mayavi import mlab
@@ -167,7 +167,7 @@ def dom2vec(domain, resolution):
     See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
     """
     domain = _grouper(2, domain)
-    lambda_linspace = lambda (dom, res): np.linspace(dom[0], dom[1], res)
+    lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
     axis_grids = map(lambda_linspace, zip(domain, resolution) )
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(map(np.ravel, pnt_coor) )
