@@ -33,6 +33,8 @@
 Convert labeled graph to dot using
 pydot and custom filtering
 """
+from __future__ import division
+
 import logging
 logger = logging.getLogger(__name__)
 

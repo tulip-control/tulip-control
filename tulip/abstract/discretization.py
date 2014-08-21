@@ -37,6 +37,8 @@ See Also
 ========
 L{find_controller}
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -50,13 +52,13 @@ import numpy as np
 from scipy import sparse as sp
 import polytope as pc
 
+from polytope.plot import plot_partition, plot_transition_arrow
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
+
 from .prop2partition import (PropPreservingPartition,
                              pwa_partition, part2convex)
 from .feasible import is_feasible, solve_feasible
-
-from polytope.plot import plot_partition, plot_transition_arrow
 from .plot import plot_ts_on_partition
 
 # inline imports:

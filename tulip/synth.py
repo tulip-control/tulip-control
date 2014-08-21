@@ -32,16 +32,18 @@
 """
 Interface to library of synthesis tools, e.g., JTLV, gr1c
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
 import warnings
 
-from tulip import transys
-from tulip.spec import GRSpec
-from tulip.spec.form import check_var_conflicts
-from tulip.interfaces import jtlv
-from tulip.interfaces import gr1c
+from . import transys
+from .spec import GRSpec
+from .spec.form import check_var_conflicts
+from .interfaces import jtlv
+from .interfaces import gr1c
 
 _hl = '\n' +60*'-'
 

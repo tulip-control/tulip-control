@@ -45,13 +45,14 @@ reference
    50, pp. 33--45, 2011,
    http://doi.org/10.4204/EPTCS.50.3
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
-from tulip.spec import plyparser
 from tulip import transys as trs
-
-from tulip.spec import ast as sast
+from . import plyparser
+from . import ast as sast
 
 def check(formula):
     """Parse formula string and create abstract syntax tree (AST).

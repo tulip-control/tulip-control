@@ -44,6 +44,8 @@ See Also
 ========
 L{discretize}
 """
+from __future__ import absolute_import
+
 import numpy as np
 from cvxopt import matrix, solvers
 import polytope as pc

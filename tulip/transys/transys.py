@@ -32,6 +32,8 @@
 """
 Transition System Module
 """
+from __future__ import absolute_import
+
 import logging
 from collections import Iterable
 from pprint import pformat

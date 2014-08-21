@@ -33,6 +33,8 @@
 """ 
 Proposition preserving partition module.
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -42,9 +44,9 @@ import copy
 import numpy as np
 from scipy import sparse as sp
 import polytope as pc
+from polytope.plot import plot_partition
 
 from tulip import transys as trs
-from polytope.plot import plot_partition
 
 # inline imports:
 #

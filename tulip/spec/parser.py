@@ -33,10 +33,12 @@
 """
 LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 """
+from __future__ import absolute_import
+
 import sys
 import re
 
-from tulip.spec.ast import (
+from .ast import (
     LTLException, ASTVar, ASTUnTempOp,
     ASTBiTempOp, ASTUnary, ASTBinary, FULL_OPERATOR_NAMES
 )

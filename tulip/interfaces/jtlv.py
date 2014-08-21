@@ -38,9 +38,8 @@ Relevant links:
 import logging
 logger = logging.getLogger(__name__)
 
-import itertools, os, re, subprocess, tempfile, textwrap
+import os, re, subprocess, tempfile, textwrap
 import warnings
-from collections import OrderedDict
 
 from tulip.transys.machines import create_machine_ports
 from tulip import transys

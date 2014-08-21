@@ -32,6 +32,8 @@
 """
 Algorithms on Kripke structures and Automata
 """
+from __future__ import absolute_import
+
 import logging
 import copy
 

@@ -34,6 +34,8 @@
 PLY-based parser for TuLiP LTL syntax,
 using AST classes from spec.ast
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 from warnings import warn

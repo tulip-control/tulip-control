@@ -36,6 +36,8 @@ using AST classes from spec.ast
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
+from __future__ import absolute_import
+
 import pyparsing as pp
 import sys
 

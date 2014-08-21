@@ -32,6 +32,8 @@
 """
 Finite State Machines Module
 """
+from __future__ import absolute_import
+
 import copy
 from pprint import pformat
 from random import choice

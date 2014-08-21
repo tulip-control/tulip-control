@@ -32,5 +32,7 @@
 """
 Interfaces subpackage
 """
+from __future__ import absolute_import
+
 from . import gr1c as gr1cint
 from . import jtlv as jtlvint
