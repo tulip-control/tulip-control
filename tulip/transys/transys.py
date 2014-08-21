@@ -85,7 +85,6 @@ class KripkeStructure(LabeledDiGraph):
             _dumps_states(self) + 2*'\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2*'\n' +
-            'Actions:\n\t' + str(self.actions) + 2*'\n' +
             'Transitions:\n' +
             pformat(self.transitions(), indent=3) +
             '\n' + _hl + '\n'
