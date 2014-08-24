@@ -100,11 +100,14 @@ class LtiSysDyn(object):
             warn('Uset not given to LtiSysDyn()')
         elif not isinstance(Uset, pc.Polytope):
             raise Exception('`Uset` has to be a Polytope')
-           
         if domain is None:
-            warn('Domain is not given in LtiSysDyn()')
-        elif not isinstance(domain, pc.Polytope):
-            raise Exception('`domain` has to be a Polytope')
+            warn("Domain not given to LtiSysDyn()")
+        if ((domain is not None) and
+            (not (isinstance(domain, pc.Polytope) or
+                isinstance(domain, pc.Region))
+            )
+        ):
+            raise Exception('`domain` has to be a Polytope or Region')
         
         # check dimensions agree
         try:
