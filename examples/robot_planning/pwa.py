@@ -39,7 +39,7 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 # different parts of the surface can be modeled
 # using LtiSysDyn subsystems subsys0 and subsys1.
 #
-# Togetger they comprise a Piecewise Affine System:
+# Together they comprise a Piecewise Affine System:
 
 # @subsystem0@
 def subsys0():
