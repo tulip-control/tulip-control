@@ -73,7 +73,8 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a C{polytope.Polytope})
+        - Uset, Wset, (each a C{polytope.Polytope})
+        - domain (C{polytope.Polytope} or C{polytope.Region})
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'sampled' (if system is sampled from a continuous-time
           system)
@@ -218,7 +219,7 @@ class PwaSysDyn(object):
       - C{list_subsys}: list of L{LtiSysDyn}
 
       - C{domain}: domain over which piecewise affine system is defined,
-          type: polytope.Polytope
+          type: polytope.Polytope or polytope.Region
 
       - C{time_semantics}: 'discrete' (if system is originally a discrete-time
        system) or 'sampled' (if system is sampled from a continuous-time
