@@ -41,6 +41,10 @@ http://spot.lip6.fr/wiki/LtlSyntax
 import logging
 logger = logging.getLogger(__name__)
 
+# inline:
+#
+# import networkx
+
 TEMPORAL_OP_MAP = {
     'G':'G', 'F':'F', 'X':'X',
     '[]':'G', '<>':'F', 'next':'X',
@@ -83,6 +87,25 @@ FULL_OPERATOR_NAMES = {
 
 class LTLException(Exception):
     pass
+
+def to_nx(ast):
+    """Convert AST to C{NetworkX.DiGraph}.
+    
+    For example, the return value of a successful call to L{parser}.
+    
+    @param ast: L{ASTNode}
+    
+    @rtype: C{networkx.DiGraph}
+    """
+    try:
+        import networkx as nx
+    except ImportError:
+        logger.error('failed to import networkx')
+        return
+    
+    g = nx.DiGraph()
+    ast.to_nx(g)
+    return g
 
 def dump_dot(ast):
     """Create Graphiz DOT string from given AST.
