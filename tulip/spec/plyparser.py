@@ -137,7 +137,7 @@ def p_arithmetic(p):
                   | expression PLUS expression
                   | expression MINUS expression
     """
-    p[0] = ASTArithmetic(None, None, p[1:4])
+    p[0] = ASTArithmetic(p[2], p[1], p[3])
 
 def p_comparator(p):
     """expression : expression EQUALS expression
@@ -147,50 +147,50 @@ def p_comparator(p):
                   | expression GT expression
                   | expression GE expression
     """
-    p[0] = ASTComparator(None, None, p[1:4])
+    p[0] = ASTComparator(p[2], p[1], p[3])
 
 def p_and(p):
     """expression : expression AND expression
     """
-    p[0] = ASTAnd(None, None, p[1:4])
+    p[0] = ASTAnd(p[2], p[1], p[3])
 
 def p_or(p):
     """expression : expression OR expression
     """
-    p[0] = ASTOr(None, None, p[1:4])
+    p[0] = ASTOr(p[2], p[1], p[3])
 
 def p_xor(p):
     """expression : expression XOR expression
     """
-    p[0] = ASTXor(None, None, p[1:4])
+    p[0] = ASTXor(p[2], p[1], p[3])
 
 def p_imp(p):
     """expression : expression IMP expression
     """
-    p[0] = ASTImp(None, None, p[1:4])
+    p[0] = ASTImp(p[2], p[1], p[3])
 
 def p_bimp(p):
     """expression : expression BIMP expression
     """
-    p[0] = ASTBiImp(None, None, p[1:4])
+    p[0] = ASTBiImp(p[2], p[1], p[3])
 
 def p_unary_temp_op(p):
     """expression : NEXT expression
                   | ALWAYS expression
                   | EVENTUALLY expression
     """
-    p[0] = ASTUnTempOp(None, None, p[1:3])
+    p[0] = ASTUnTempOp(p[1], p[2])
 
 def p_bin_temp_op(p):
     """expression : expression UNTIL expression
                   | expression RELEASE expression
     """
-    p[0] = ASTBiTempOp(None, None, p[1:4])
+    p[0] = ASTBiTempOp(p[2], p[1], p[3])
 
 def p_not(p):
     """expression : NOT expression
     """
-    p[0] = ASTNot(None, None, p[1:3])
+    p[0] = ASTNot(p[1], p[2])
 
 def p_group(p):
     """expression : LPAREN expression RPAREN
@@ -200,18 +200,18 @@ def p_group(p):
 def p_number(p):
     """expression : NUMBER
     """
-    p[0] = ASTNum(None, None, [p[1]])
+    p[0] = ASTNum([p[1]])
 
 def p_expression_name(p):
     """expression : NAME
     """
-    p[0] = ASTVar(None, None, [p[1]])
+    p[0] = ASTVar([p[1]])
 
 def p_bool(p):
     """expression : TRUE
                   | FALSE
     """
-    p[0] = ASTBool(None, None, [p[1]])
+    p[0] = ASTBool([p[1]])
 
 def p_error(p):
     warn("Syntax error at '%s'" % p.value)

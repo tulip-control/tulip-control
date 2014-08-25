@@ -106,18 +106,6 @@ def _flatten_Promela(node):
     return node.to_promela()
 
 class ASTNode(object):
-    def __init__(self, s, l, t):
-        # t can be a list or a list of lists, handle both
-        try:
-            tok = sum(t.asList(), [])
-        except:
-            try:
-                tok = t.asList()
-            except:
-                # not a ParseResult
-                tok = t
-        self.init(tok)
-    
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
     
@@ -131,14 +119,14 @@ class ASTNode(object):
         return self.flatten(_flatten_Promela)
     
     def map(self, f):
-        n = self.__class__(None, None, [str(self.val)])
+        n = self.__class__([str(self.val)])
         return f(n)
     
     def __len__(self):
         return 1
     
 class ASTNum(ASTNode):
-    def init(self, t):
+    def __init__(self, t):
         self.val = int(t[0])
     
     def __repr__(self):
@@ -154,7 +142,7 @@ class ASTNum(ASTNode):
         )
 
 class ASTVar(ASTNode):
-    def init(self, t):
+    def __init__(self, t):
         self.val = t[0]
     
     def __repr__(self):
@@ -183,7 +171,7 @@ class ASTVar(ASTNode):
         )
         
 class ASTBool(ASTNode):
-    def init(self, t):
+    def __init__(self, t):
         if t[0].upper() == 'TRUE':
             self.val = True
         else:
@@ -225,20 +213,11 @@ class ASTBool(ASTNode):
 class ASTUnary(ASTNode):
     @classmethod
     def new(cls, op_node, operator=None):
-        return cls(None, None, [operator, op_node])
+        return cls([operator, op_node])
     
-    def init(self, tok):
-        if tok[1] == "'":
-            if len(tok) > 2:
-                # handle left-associative chains, e.g. Y''
-                t = self.__class__(None, None, tok[:-1])
-                tok = [t, tok[-1]]
-            
-            self.operator = 'X'
-            self.operand = tok[0]
-        else:
-            self.operator = tok[0]
-            self.operand = tok[1]
+    def __init__(self, operator, operand):
+        self.operator = operator
+        self.operand = operand
     
     def __repr__(self):
         return ' '.join(['(', self.op(), str(self.operand), ')'])
@@ -271,9 +250,9 @@ class ASTNot(ASTUnary):
         return '!'
 
 class ASTUnTempOp(ASTUnary):
-    def init(self, tok):
-        super(ASTUnTempOp, self).init(tok)
-        self.operator = TEMPORAL_OP_MAP[self.operator]
+    def __init__(self, operator, operand):
+        self.operator = TEMPORAL_OP_MAP[operator]
+        self.operand = operand
     
     def op(self):
         return self.operator
@@ -316,17 +295,12 @@ class ASTUnTempOp(ASTUnary):
 class ASTBinary(ASTNode):
     @classmethod
     def new(cls, op_l, op_r, operator=None):
-        return cls(None, None, [op_l, operator, op_r])
+        return cls([op_l, operator, op_r])
     
-    def init(self, tok):
-        # handle left-associative chains e.g. x && y && z
-        if len(tok) > 3:
-            t = self.__class__(None, None, tok[:-2])
-            tok = [t, tok[-2], tok[-1]]
-        
-        self.operator = tok[1]
-        self.op_l = tok[0]
-        self.op_r = tok[2]
+    def __init__(self, operator, x, y):
+        self.operator = operator
+        self.op_l = x
+        self.op_r = y
         
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
@@ -392,9 +366,9 @@ class ASTBiImp(ASTBinary):
         return '<->'
 
 class ASTBiTempOp(ASTBinary):
-    def init(self, tok):
-        # generalise temporal operator
-        super(ASTBiTempOp, self).init(tok)
+    def __init__(self, operator, x, y):
+        print('operator is: '  + str(operator))
+        super(ASTBiTempOp, self).__init__(operator, x, y)
         
         self.operator = TEMPORAL_OP_MAP[self.operator]
     
@@ -432,8 +406,8 @@ class ASTBiTempOp(ASTBinary):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
     
 class ASTComparator(ASTBinary):
-    def init(self, tok):
-        super(ASTComparator, self).init(tok)
+    def __init__(self, operator, x, y):
+        super(ASTComparator, self).__init__(operator, x, y)
         
         if self.operator is '==':
             self.operator = '='
