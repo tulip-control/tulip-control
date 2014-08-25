@@ -38,10 +38,7 @@ from __future__ import absolute_import
 import sys
 import re
 
-from .ast import (
-    LTLException, ASTVar, ASTUnTempOp,
-    ASTBiTempOp, ASTUnary, ASTBinary, FULL_OPERATOR_NAMES
-)
+from . import ast
 
 def _replace_full_name_operators(formula):
     """Replace full names with symbols for temporal and Boolean operators.
@@ -49,14 +46,14 @@ def _replace_full_name_operators(formula):
     Each operator must be a word (as defined by \b in regexp).
     Substitution is case insensitive.
     """
-    for name, symbol in FULL_OPERATOR_NAMES.iteritems():
+    for name, symbol in ast.FULL_OPERATOR_NAMES.iteritems():
         formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
     return formula
 
 def extract_vars(tree):
     v = []
     def f(t):
-        if isinstance(t, ASTVar):
+        if isinstance(t, ast.Var):
             v.append(t.val)
         return t
     tree.map(f)
@@ -65,13 +62,13 @@ def extract_vars(tree):
 # Crude test for safety spec
 def issafety(tree):
     def f(t):
-        if isinstance(t, ASTUnTempOp) and not t.operator == "G":
+        if isinstance(t, ast.UnTempOp) and not t.operator == "G":
             return False
-        if isinstance(t, ASTBiTempOp):
+        if isinstance(t, ast.BiTempOp):
             return False
-        if isinstance(t, ASTUnary):
+        if isinstance(t, ast.Unary):
             return t.operand
-        if isinstance(t, ASTBinary):
+        if isinstance(t, ast.Binary):
             return (t.op_l and t.op_r)
         return True
     return tree.map(f)

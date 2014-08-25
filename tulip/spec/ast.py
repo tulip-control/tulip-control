@@ -136,7 +136,7 @@ def _flatten_SMV(node):
 def _flatten_Promela(node):
     return node.to_promela()
 
-class ASTNode(object):
+class Node(object):
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
     
@@ -161,7 +161,7 @@ class ASTNode(object):
         g.add_node(u, label=self.val)
         return u
     
-class ASTNum(ASTNode):
+class Num(Node):
     def __init__(self, t):
         self.val = int(t[0])
     
@@ -171,7 +171,7 @@ class ASTNum(ASTNode):
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
 
-class ASTVar(ASTNode):
+class Var(Node):
     def __init__(self, t):
         self.val = t[0]
     
@@ -194,7 +194,7 @@ class ASTVar(ASTNode):
     def to_smv(self):
         return str(self)
         
-class ASTBool(ASTNode):
+class Bool(Node):
     def __init__(self, t):
         if t[0].upper() == 'TRUE':
             self.val = True
@@ -228,7 +228,7 @@ class ASTBool(ASTNode):
                 '" not supported in JTLV syntax map'
             )
 
-class ASTUnary(ASTNode):
+class Unary(Node):
     @classmethod
     def new(cls, op_node, operator=None):
         return cls([operator, op_node])
@@ -264,12 +264,12 @@ class ASTUnary(ASTNode):
     def __len__(self):
         return 1 + len(self.operand)
 
-class ASTNot(ASTUnary):
+class Not(Unary):
     @property
     def op(self):
         return '!'
 
-class ASTUnTempOp(ASTUnary):
+class UnTempOp(Unary):
     def __init__(self, operator, operand):
         self.operator = TEMPORAL_OP_MAP[operator]
         self.operand = operand
@@ -313,7 +313,7 @@ class ASTUnTempOp(ASTUnary):
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op])
 
-class ASTBinary(ASTNode):
+class Binary(Node):
     @classmethod
     def new(cls, op_l, op_r, operator=None):
         return cls([op_l, operator, op_r])
@@ -359,7 +359,7 @@ class ASTBinary(ASTNode):
     def __len__(self):
         return 1 + len(self.op_l) + len(self.op_r)
 
-class ASTAnd(ASTBinary):
+class And(Binary):
     @property
     def op(self):
         return '&'
@@ -370,7 +370,7 @@ class ASTAnd(ASTBinary):
     def to_promela(self):
         return self.flatten(_flatten_Promela, '&&')
 
-class ASTOr(ASTBinary):
+class Or(Binary):
     @property
     def op(self):
         return '|'
@@ -381,24 +381,24 @@ class ASTOr(ASTBinary):
     def to_promela(self):
         return self.flatten(_flatten_Promela, '||')
 
-class ASTXor(ASTBinary):
+class Xor(Binary):
     @property
     def op(self):
         return 'xor'
     
-class ASTImp(ASTBinary):
+class Imp(Binary):
     @property
     def op(self):
         return '->'
 
-class ASTBiImp(ASTBinary):
+class BiImp(Binary):
     def op(self):
         return '<->'
 
-class ASTBiTempOp(ASTBinary):
+class BiTempOp(Binary):
     def __init__(self, operator, x, y):
         print('operator is: '  + str(operator))
-        super(ASTBiTempOp, self).__init__(operator, x, y)
+        super(BiTempOp, self).__init__(operator, x, y)
         
         self.operator = TEMPORAL_OP_MAP[self.operator]
     
@@ -436,9 +436,9 @@ class ASTBiTempOp(ASTBinary):
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op])
     
-class ASTComparator(ASTBinary):
+class Comparator(Binary):
     def __init__(self, operator, x, y):
-        super(ASTComparator, self).__init__(operator, x, y)
+        super(Comparator, self).__init__(operator, x, y)
         
         if self.operator is '==':
             self.operator = '='
@@ -453,7 +453,7 @@ class ASTComparator(ASTBinary):
         else:
             return self.flatten(_flatten_Promela)
     
-class ASTArithmetic(ASTBinary):
+class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
@@ -466,11 +466,11 @@ def get_vars(ast):
         x = Q.pop()
         logger.debug('visiting: ' + str(type(x) ) )
         
-        if isinstance(x, ASTUnary):
+        if isinstance(x, Unary):
             Q.add(x.operand)
-        elif isinstance(x, ASTBinary):
+        elif isinstance(x, Binary):
             Q.add(x.op_l)
             Q.add(x.op_r)
-        elif isinstance(x, ASTVar):
+        elif isinstance(x, Var):
             var.add(x)
     return var

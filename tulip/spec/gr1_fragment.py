@@ -108,7 +108,7 @@ def check(formula):
         s, q = Q.pop()
         logger.info('visiting: ' + str(s) + ', ' + str(q) )
         
-        if isinstance(s, sast.ASTUnary):
+        if isinstance(s, sast.Unary):
             op = s.operator
             
             if op in {'!', 'G', 'F'}:
@@ -123,7 +123,7 @@ def check(formula):
             else:
                 # ignore
                 Q.append((s.operand, q))
-        elif isinstance(s, sast.ASTBinary):
+        elif isinstance(s, sast.Binary):
             op = s.operator
             
             if op in {'W', 'U'}:
@@ -154,7 +154,7 @@ def check(formula):
                 # ignore
                 Q.append((s.op_l, q))
                 Q.append((s.op_r, q))
-        elif isinstance(s, sast.ASTVar):
+        elif isinstance(s, sast.Var):
             print('reached var')
     
     return ast

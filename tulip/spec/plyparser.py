@@ -43,9 +43,7 @@ from warnings import warn
 import ply.lex as lex
 import ply.yacc as yacc
 
-from .ast import (ASTVar, ASTNum, ASTBool, ASTArithmetic,
-    ASTComparator, ASTUnTempOp, ASTBiTempOp,
-    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp)
+from . import ast
 
 tokens = (
     'TRUE', 'FALSE',
@@ -137,7 +135,7 @@ def p_arithmetic(p):
                   | expression PLUS expression
                   | expression MINUS expression
     """
-    p[0] = ASTArithmetic(p[2], p[1], p[3])
+    p[0] = ast.Arithmetic(p[2], p[1], p[3])
 
 def p_comparator(p):
     """expression : expression EQUALS expression
@@ -147,50 +145,50 @@ def p_comparator(p):
                   | expression GT expression
                   | expression GE expression
     """
-    p[0] = ASTComparator(p[2], p[1], p[3])
+    p[0] = ast.Comparator(p[2], p[1], p[3])
 
 def p_and(p):
     """expression : expression AND expression
     """
-    p[0] = ASTAnd(p[2], p[1], p[3])
+    p[0] = ast.And(p[2], p[1], p[3])
 
 def p_or(p):
     """expression : expression OR expression
     """
-    p[0] = ASTOr(p[2], p[1], p[3])
+    p[0] = ast.Or(p[2], p[1], p[3])
 
 def p_xor(p):
     """expression : expression XOR expression
     """
-    p[0] = ASTXor(p[2], p[1], p[3])
+    p[0] = ast.Xor(p[2], p[1], p[3])
 
 def p_imp(p):
     """expression : expression IMP expression
     """
-    p[0] = ASTImp(p[2], p[1], p[3])
+    p[0] = ast.Imp(p[2], p[1], p[3])
 
 def p_bimp(p):
     """expression : expression BIMP expression
     """
-    p[0] = ASTBiImp(p[2], p[1], p[3])
+    p[0] = ast.BiImp(p[2], p[1], p[3])
 
 def p_unary_temp_op(p):
     """expression : NEXT expression
                   | ALWAYS expression
                   | EVENTUALLY expression
     """
-    p[0] = ASTUnTempOp(p[1], p[2])
+    p[0] = ast.UnTempOp(p[1], p[2])
 
 def p_bin_temp_op(p):
     """expression : expression UNTIL expression
                   | expression RELEASE expression
     """
-    p[0] = ASTBiTempOp(p[2], p[1], p[3])
+    p[0] = ast.BiTempOp(p[2], p[1], p[3])
 
 def p_not(p):
     """expression : NOT expression
     """
-    p[0] = ASTNot(p[1], p[2])
+    p[0] = ast.Not(p[1], p[2])
 
 def p_group(p):
     """expression : LPAREN expression RPAREN
@@ -200,18 +198,18 @@ def p_group(p):
 def p_number(p):
     """expression : NUMBER
     """
-    p[0] = ASTNum([p[1]])
+    p[0] = ast.Num([p[1]])
 
 def p_expression_name(p):
     """expression : NAME
     """
-    p[0] = ASTVar([p[1]])
+    p[0] = ast.Var([p[1]])
 
 def p_bool(p):
     """expression : TRUE
                   | FALSE
     """
-    p[0] = ASTBool([p[1]])
+    p[0] = ast.Bool([p[1]])
 
 def p_error(p):
     warn("Syntax error at '%s'" % p.value)

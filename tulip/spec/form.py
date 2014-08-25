@@ -554,13 +554,13 @@ class GRSpec(LTL):
         #             t = ltl_parse.parse(f)
         #             # assign appropriate temporal operators
         #             for op in ops:
-        #                 t = ltl_parse.ASTUnTempOp.new(t, op)
+        #                 t = ltl_parse.UnTempOp.new(t, op)
         #             subtrees.append(t)
         #         # & together expressions
-        #         t = reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), subtrees)
+        #         t = reduce(lambda x, y: ltl_parse.And.new(x, y), subtrees)
         #         trees.append(t)
         # # & together converted subformulae
-        # return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
+        # return reduce(lambda x, y: ltl_parse.And.new(x, y), trees)
 
     def to_jtlv(self):
         """Return specification as list of two strings [assumption, guarantee].
