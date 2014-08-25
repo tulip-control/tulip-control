@@ -125,6 +125,11 @@ class ASTNode(object):
     def __len__(self):
         return 1
     
+    def to_nx(self, g):
+        u = id(self)
+        g.add_node(u, label=self.val)
+        return u
+    
 class ASTNum(ASTNode):
     def __init__(self, t):
         self.val = int(t[0])
@@ -134,12 +139,6 @@ class ASTNum(ASTNode):
     
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
-    
-    def dump_dot(self):
-        return (
-            str(id(self)) + '\n' +
-            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
-        )
 
 class ASTVar(ASTNode):
     def __init__(self, t):
@@ -163,12 +162,6 @@ class ASTVar(ASTNode):
         
     def to_smv(self):
         return str(self)
-        
-    def dump_dot(self):
-        return (
-            str(id(self)) + '\n' +
-            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
-        )
         
 class ASTBool(ASTNode):
     def __init__(self, t):
@@ -203,12 +196,6 @@ class ASTBool(ASTNode):
                 'Reserved word "' + self.op +
                 '" not supported in JTLV syntax map'
             )
-    
-    def dump_dot(self):
-        return (
-            str(id(self)) + '\n' +
-            str(id(self)) + ' [label="' + str(self.val) + '"]\n'
-        )
 
 class ASTUnary(ASTNode):
     @classmethod
@@ -231,12 +218,13 @@ class ASTUnary(ASTNode):
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
     
-    def dump_dot(self):
-        return (
-            str(id(self)) + '\n' +
-            str(id(self)) + ' [label="' + str(self.op()) + '"]\n' +
-            str(id(self)) + ' -> ' + self.operand.dump_dot()
-        )
+    def to_nx(self, g):
+        u = id(self)
+        g.add_node(u, label=self.op)
+        
+        v = self.operand.to_nx(g)
+        g.add_edge(u, v)
+        return u
     
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op)
@@ -321,12 +309,17 @@ class ASTBinary(ASTNode):
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
     
-    def dump_dot(self):
-        return (
-            str(id(self)) + '\n' +
-            str(id(self)) + ' [label="' + str(self.op()) + '"]\n' +
-            str(id(self)) + ' -> ' + self.op_l.dump_dot() +
-            str(id(self)) + ' -> ' + self.op_r.dump_dot())
+    def to_nx(self, g):
+        u = id(self)
+        
+        v = self.op_l.to_nx(g)
+        w = self.op_r.to_nx(g)
+        
+        g.add_node(u, label=self.op)
+        g.add_edge(u, v)
+        g.add_edge(u, w)
+        
+        return u
     
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op)
