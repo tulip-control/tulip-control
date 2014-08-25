@@ -59,7 +59,7 @@ def check(formula):
     """
     ast = plyparser.parse(formula)
     
-    dfa = trs.automata.DFA(atomic_proposition_based=False)
+    dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False, deterministic=True)
     
     dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
                      'U_left', 'U_right',
