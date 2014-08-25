@@ -97,9 +97,7 @@ def check(formula):
     #dfa.save('dfa.pdf')
     
     # plot parse tree
-    f = open('ast.dot', 'w')
-    f.write(sast.dump_dot(ast) )
-    f.close()
+    sast.dump_dot(ast, 'ast.dot')
     
     # sync product of AST with DFA,
     # to check acceptance
