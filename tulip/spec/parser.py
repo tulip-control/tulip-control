@@ -58,9 +58,10 @@ def extract_vars(tree):
         return t
     tree.map(f)
     return v
-    
-# Crude test for safety spec
+
 def issafety(tree):
+    """Crude test for safety spec.
+    """
     def f(t):
         if isinstance(t, ast.UnTempOp) and not t.operator == "G":
             return False
@@ -109,19 +110,14 @@ def parse(formula, parser='ply', full_operators=False):
     return spec
 
 if __name__ == "__main__":
-    try:
-        from .pyparser import parse as pyparse
-        ast = pyparse(sys.argv[1])
-    except Exception as e:
-        print("Parse error: " + str(e) )
-        sys.exit(1)
-    print("Parsed expression: " + str(ast) )
-    print("Length: " +str( len(ast) ) )
-    print("Variables: " + str(extract_vars(ast) ) )
-    print("Safety: " +str(issafety(ast) ) )
-    try:
-        print("JTLV syntax: " +str(ast.to_jtlv() ) )
-        print("SMV syntax: " +str(ast.to_smv() ) )
-        print("Promela syntax: " +str(ast.to_promela() ) )
-    except LTLException as e:
-        print(e.message)
+    from .pyparser import parse as pyparse
+    a = pyparse(sys.argv[1])
+    
+    print("Parsed expression: " + str(a) )
+    print("Length: " +str( len(a) ) )
+    print("Variables: " + str(extract_vars(a) ) )
+    print("Safety: " +str(issafety(a) ) )
+    
+    print("JTLV syntax: " +str(a.to_jtlv() ) )
+    print("SMV syntax: " +str(a.to_smv() ) )
+    print("Promela syntax: " +str(a.to_promela() ) )
