@@ -107,13 +107,21 @@ def to_nx(ast):
     ast.to_nx(g)
     return g
 
-def dump_dot(ast):
-    """Create Graphiz DOT string from given AST.
-
-    @param ast: L{ASTNode}, etc., that has a dump_dot() method; for
-        example, the return value of a successful call to L{parser}.
+def dump_dot(ast, filename):
+    """Create GraphViz dot string from given AST.
+    
+    @type ast: L{ASTNode}
+    
+    @rtype: str
     """
-    return 'digraph AST {\n' + ast.dump_dot() + '}\n'
+    try:
+        import networkx as nx
+    except ImportError:
+        logger.error('failed to import networkx')
+        return
+    
+    g = to_nx(ast)
+    nx.write_dot(g, filename)
 
 # Flattener helpers
 def _flatten_gr1c(node, **args):
