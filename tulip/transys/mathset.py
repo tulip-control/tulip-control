@@ -785,12 +785,14 @@ class TypedDict(dict):
         """Raise ValueError if value y not allowed for key i.
         """
         valid_y = True
-        try:
-            if i in self.allowed_values:
-                if y not in self.allowed_values[i]:
-                    valid_y = False
-        except:
-            pass
+        
+        if i in self.allowed_values:
+            valid_y = False
+            try:
+                if y in self.allowed_values[i]:
+                    valid_y = True
+            except:
+                valid_y = False
         
         if not valid_y:
             msg = 'key: ' + str(i) + ', cannot be'
