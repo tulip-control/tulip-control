@@ -723,10 +723,7 @@ class GRSpec(LTL):
         return {'env_init':env_init, 'sys_init':sys_init}
 
 def _eval_formula(f):
-    f = re.sub(r'\|\|', ' or ', f)
-    f = re.sub(r'&&', ' and ', f)
-    f = re.sub(r'!', ' not ', f)
-    f = re.sub(r'=', ' == ', f)
+    f = parser.parse(f).to_python()
     
     if re.findall(r'->', f) or re.findall(r'<->', f):
             raise NotImplementedError('todo: Eval of -> and <->')

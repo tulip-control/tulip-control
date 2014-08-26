@@ -69,6 +69,8 @@ SMV_MAP = {'G':'G', 'F':'F', 'X':'X', 'U':'U', 'R':'V'}
 
 SPIN_MAP = {'G':'[]', 'F':'<>', 'U':'U', 'R':'V'}
 
+PYTHON_MAP = {'&&':'and', '||':'or', '!':'not', 'xor':'^'}
+
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
 FULL_OPERATOR_NAMES = {
@@ -152,6 +154,9 @@ def _flatten_SMV(node):
 def _flatten_Promela(node):
     return node.to_promela()
 
+def _flatten_python(node):
+    return node.to_python()
+
 class Node(object):
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
@@ -164,6 +169,9 @@ class Node(object):
     
     def to_promela(self):
         return self.flatten(_flatten_Promela)
+    
+    def to_python(self):
+        return self.flatten(_flatten_python)
     
     def map(self, f):
         n = self.__class__([str(self.val)])
@@ -306,6 +314,9 @@ class Not(Unary):
     @property
     def op(self):
         return '!'
+    
+    def to_python(self):
+        return PYTHON_MAP['!']
 
 class UnTempOp(Unary):
     def __init__(self, operator, operand):
@@ -407,6 +418,9 @@ class And(Binary):
     
     def to_promela(self):
         return self.flatten(_flatten_Promela, '&&')
+    
+    def to_python(self):
+        return self.flatten(_flatten_python, 'and')
 
 class Or(Binary):
     @property
@@ -418,20 +432,48 @@ class Or(Binary):
     
     def to_promela(self):
         return self.flatten(_flatten_Promela, '||')
+    
+    def to_python(self):
+        return self.flatten(_flatten_python, 'or')
 
 class Xor(Binary):
     @property
     def op(self):
         return 'xor'
     
+    def to_python(self):
+        return self.flatten(_flatten_python, '^')
+    
 class Imp(Binary):
     @property
     def op(self):
         return '->'
+    
+    def to_python(self, flattener=str, op=None, **args):
+        try:
+            l = flattener(self.op_l, **args)
+        except AttributeError:
+            l = str(self.op_l)
+        try:
+            r = flattener(self.op_r, **args)
+        except AttributeError:
+            r = str(self.op_r)
+        return '( (not (' + l + ')) or ' + r + ')'
 
 class BiImp(Binary):
     def op(self):
         return '<->'
+    
+    def to_python(self, flattener=str, op=None, **args):
+        try:
+            l = flattener(self.op_l, **args)
+        except AttributeError:
+            l = str(self.op_l)
+        try:
+            r = flattener(self.op_r, **args)
+        except AttributeError:
+            r = str(self.op_r)
+        return '( ' + l + ' and ' + r + ' ) or not ( ' + l + ' or ' + r + ' )'
 
 class BiTempOp(Binary):
     def __init__(self, operator, x, y):
@@ -486,6 +528,12 @@ class Comparator(Binary):
         return self.operator
     
     def to_promela(self):
+        if self.operator == '=':
+            return self.flatten(_flatten_Promela, '==')
+        else:
+            return self.flatten(_flatten_Promela)
+    
+    def to_python(self):
         if self.operator == '=':
             return self.flatten(_flatten_Promela, '==')
         else:
