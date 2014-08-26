@@ -504,6 +504,37 @@ class GRSpec(LTL):
         else:
             return "True"
     
+    def parse(self):
+        """Parse each clause and store it.
+        
+        The AST resulting from each clause is stored
+        in the C{dict} attribute C{ast}.
+        """
+        parts = {self.env_init, self.env_safety, self.env_prog,
+                 self.sys_init, self.sys_safety, self.sys_prog}
+        
+        # parse new clauses and cache the resulting ASTs
+        for s in parts:
+            for x in s:
+                if x not in self._ast:
+                    self._ast[x] = parser.parse(x)
+        
+        # rm cached ASTs that correspond to deleted clauses
+        for x in self._ast:
+            for s in parts:
+                if x not in s:
+                    self._ast.pop(x)
+    
+    def ast(self, x):
+        """Return AST corresponding to formula x.
+        
+        If AST for formula C{x} has already been computed earlier,
+        then return cached result.
+        """
+        if x not in self._ast:
+            self.parse()
+        return self._ast[x]
+    
     def sym_to_prop(self, props):
         """Replace the symbols of propositions with the actual propositions.
 
@@ -576,7 +607,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[0] += '-- valid initial env states\n'
                     desc_added = True
-                spec[0] += '\t' + parser.parse(env_init).to_jtlv()
+                spec[0] += '\t' + self.ast(env_init).to_jtlv()
 
         desc_added = False
         for env_safety in self.env_safety:
@@ -586,7 +617,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[0] += '-- safety assumption on environment\n'
                     desc_added = True
-                env_safety = parser.parse(env_safety).to_jtlv()
+                env_safety = self.ast(env_safety).to_jtlv()
                 spec[0] += '\t[](' +re.sub(r"next\s*\(", "next(", env_safety) +')'
 
         desc_added = False
@@ -597,7 +628,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[0] += '-- justice assumption on environment\n'
                     desc_added = True
-                spec[0] += '\t[]<>(' + parser.parse(prog).to_jtlv() + ')'
+                spec[0] += '\t[]<>(' + self.ast(prog).to_jtlv() + ')'
 
         desc_added = False
         for sys_init in self.sys_init:
@@ -607,7 +638,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[1] += '-- valid initial system states\n'
                     desc_added = True
-                spec[1] += '\t' + parser.parse(sys_init).to_jtlv()
+                spec[1] += '\t' + self.ast(sys_init).to_jtlv()
 
         desc_added = False
         for sys_safety in self.sys_safety:
@@ -617,7 +648,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[1] += '-- safety requirement on system\n'
                     desc_added = True
-                sys_safety = parser.parse(sys_safety).to_jtlv()
+                sys_safety = self.ast(sys_safety).to_jtlv()
                 spec[1] += '\t[](' +re.sub(r"next\s*\(", "next(", sys_safety) +')'
 
         desc_added = False
@@ -628,7 +659,7 @@ class GRSpec(LTL):
                 if (not desc_added):
                     spec[1] += '-- progress requirement on system\n'
                     desc_added = True
-                spec[1] += '\t[]<>(' + parser.parse(prog).to_jtlv() + ')'
+                spec[1] += '\t[]<>(' + self.ast(prog).to_jtlv() + ')'
         return spec
 
     def to_gr1c(self):
@@ -657,40 +688,40 @@ class GRSpec(LTL):
         output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
 
         output += "ENVINIT: "+"\n& ".join([
-            "("+parser.parse(s).to_gr1c()+")"
+            "("+self.ast(s).to_gr1c()+")"
             for s in self.env_init
         ]) + ";\n"
         if len(self.env_safety) == 0:
             output += "ENVTRANS:;\n"
         else:
             output += "ENVTRANS: "+"\n& ".join([
-                "[]("+parser.parse(s).to_gr1c()+")"
+                "[]("+self.ast(s).to_gr1c()+")"
                 for s in self.env_safety
             ]) + ";\n"
         if len(self.env_prog) == 0:
             output += "ENVGOAL:;\n\n"
         else:
             output += "ENVGOAL: "+"\n& ".join([
-                "[]<>("+parser.parse(s).to_gr1c()+")"
+                "[]<>("+self.ast(s).to_gr1c()+")"
                 for s in self.env_prog
             ]) + ";\n\n"
         
         output += "SYSINIT: "+"\n& ".join([
-            "("+parser.parse(s).to_gr1c()+")"
+            "("+self.ast(s).to_gr1c()+")"
             for s in self.sys_init
         ]) + ";\n"
         if len(self.sys_safety) == 0:
             output += "SYSTRANS:;\n"
         else:
             output += "SYSTRANS: "+"\n& ".join([
-                "[]("+parser.parse(s).to_gr1c()+")"
+                "[]("+self.ast(s).to_gr1c()+")"
                 for s in self.sys_safety
             ]) + ";\n"
         if len(self.sys_prog) == 0:
             output += "SYSGOAL:;\n"
         else:
             output += "SYSGOAL: "+"\n& ".join([
-                "[]<>("+parser.parse(s).to_gr1c()+")"
+                "[]<>("+self.ast(s).to_gr1c()+")"
                 for s in self.sys_prog
             ]) + ";\n"
         return output
