@@ -156,7 +156,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-def aut_xml2mealy(x, namespace=DEFAULT_NAMESPACE):
+def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
     @param x: a string or an instance of
@@ -170,7 +170,7 @@ def aut_xml2mealy(x, namespace=DEFAULT_NAMESPACE):
         string x.  If you are unsure what to do, try setting spec0 to
         whatever L{gr1cint.synthesize} was invoked with.
 
-    
+    @rtype: L{GRSpec}
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
         raise TypeError("tag to be parsed must be given " +
@@ -403,7 +403,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
     
     if p.returncode == 0:
-        strategy = aut_xml2mealy(stdoutdata)
+        strategy = load_aut_xml(stdoutdata)
         return strategy
     else:
         print(30*' ' + '\n gr1c return code:\n' + 30*' ')
@@ -422,7 +422,7 @@ def load_mealy(filename):
     @rtype: L{MealyMachine}
     """
     s = open(filename, 'r').read()
-    strategy = aut_xml2mealy(s)
+    strategy = load_aut_xml(s)
     #logger.info('Loaded spec: \n' + spec.pretty() )
     return strategy
 
