@@ -376,7 +376,7 @@ class Binary(Node):
         return ' '.join (['(', str(self.op_l), self.op, str(self.op_r), ')'])
     
     def flatten(self, flattener=str, op=None, **args):
-        if not op:
+        if op is None:
             op = self.op
         
         try:
