@@ -1344,16 +1344,12 @@ def strategy2mealy(A, spec):
     env_vars = spec.env_vars
     sys_vars = spec.sys_vars
     
-    # show port only when true (or non-zero for int-valued vars)
-    mask_func = bool
-    
     mach = transys.MealyMachine()
     inputs = transys.machines.create_machine_ports(spec.env_vars)
     mach.add_inputs(inputs)
     
     outputs = transys.machines.create_machine_ports(spec.sys_vars)
-    masks = {k:mask_func for k in sys_vars}
-    mach.add_outputs(outputs, masks)
+    mach.add_outputs(outputs)
     
     arbitrary_domains  = {
         k:v for k, v in spec.env_vars.items()
@@ -1444,3 +1440,11 @@ def _map_int2dom(label, arbitrary_domains):
         if var in arbitrary_domains:
             label[var] = arbitrary_domains[var][int(value)]
     return label
+
+def mask_outputs(machine):
+    """Erase outputs from each edge where they are zero.
+    """
+    for u, v, d in machine.edges_iter(data=True):
+        for k in d:
+            if k in machine.outputs and d[k] == 0:
+                d.pop(k)
