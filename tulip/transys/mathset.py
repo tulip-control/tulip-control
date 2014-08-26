@@ -787,11 +787,14 @@ class TypedDict(dict):
         
         if i in self.allowed_values:
             valid_y = False
-            try:
-                if y in self.allowed_values[i]:
-                    valid_y = True
-            except:
-                valid_y = False
+            if self.allowed_values[i] is None:
+                valid_y = True
+            else:
+                try:
+                    if y in self.allowed_values[i]:
+                        valid_y = True
+                except:
+                    valid_y = False
         
         if not valid_y:
             msg = (
@@ -832,6 +835,9 @@ class TypedDict(dict):
             
             C{values} must implement C{__contains__}
             to enable checking validity of values.
+            
+            If C{values} is C{None},
+            then any value is allowed.
         """
         self.allowed_values = allowed_values
     
