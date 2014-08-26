@@ -209,7 +209,29 @@ class Var(Node):
         
     def to_smv(self):
         return str(self)
+
+class Const(Node):
+    def __init__(self, t):
+        self.val = r'"' + t + r'"'
+    
+    def __repr__(self):
+        return  self.val
+    
+    def flatten(self, flattener=str, op=None, **args):
+        return str(self)
         
+    def to_gr1c(self, primed=False):
+        if primed:
+            return str(self) + "'"
+        else:
+            return str(self)
+        
+    def to_jtlv(self):
+        return '(' + str(self) + ')'
+        
+    def to_smv(self):
+        return str(self)
+
 class Bool(Node):
     def __init__(self, t):
         if t[0].upper() == 'TRUE':

@@ -53,7 +53,7 @@ tokens = (
     'PRIME', 'ALWAYS', 'EVENTUALLY', 'NEXT',
     'UNTIL', 'RELEASE',
     'PLUS', 'MINUS', 'TIMES', 'DIV',
-    'LPAREN','RPAREN',
+    'LPAREN','RPAREN', 'DQUOTES'
 )
 
 # Tokens
@@ -93,6 +93,8 @@ t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIV = r'/'
+
+t_DQUOTES = r'\"'
 
 # Ignored characters
 t_ignore = " \t"
@@ -204,6 +206,10 @@ def p_expression_name(p):
     """expression : NAME
     """
     p[0] = ast.Var([p[1]])
+def p_expression_const(p):
+    """expression : DQUOTES NAME DQUOTES
+    """
+    p[0] = ast.Const(p[2])
 
 def p_bool(p):
     """expression : TRUE
