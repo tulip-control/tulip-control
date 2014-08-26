@@ -504,72 +504,6 @@ class GRSpec(LTL):
         else:
             return "True"
     
-    def parse(self):
-        """Parse each clause and store it.
-        
-        The AST resulting from each clause is stored
-        in the C{dict} attribute C{ast}.
-        """
-        parts = {self.env_init, self.env_safety, self.env_prog,
-                 self.sys_init, self.sys_safety, self.sys_prog}
-        
-        # parse new clauses and cache the resulting ASTs
-        for s in parts:
-            for x in s:
-                if x not in self._ast:
-                    self._ast[x] = parser.parse(x)
-        
-        # rm cached ASTs that correspond to deleted clauses
-        for x in self._ast:
-            for s in parts:
-                if x not in s:
-                    self._ast.pop(x)
-    
-    def ast(self, x):
-        """Return AST corresponding to formula x.
-        
-        If AST for formula C{x} has already been computed earlier,
-        then return cached result.
-        """
-        if x not in self._ast:
-            self.parse()
-        return self._ast[x]
-    
-    def sym_to_prop(self, props):
-        """Replace the symbols of propositions with the actual propositions.
-
-        @type props: dict
-        @param props: a dictionary describing subformula (e.g.,
-            variable name) substitutions, where for each key-value
-            pair, all occurrences of key are replaced with value in
-            all components of this GRSpec object.  However, env_vars
-            and sys_vars are not changed.
-        """
-        if props is None:
-            return
-        
-        symfound = True
-        while (symfound):
-            for propSymbol, prop in props.iteritems():
-                logger.debug('propSymbol: ' + str(propSymbol))
-                logger.debug('prop: ' + str(prop))
-                
-                if not isinstance(propSymbol, str):
-                    raise TypeError('propSymbol: ' + str(propSymbol) +
-                                    'is not a string.')
-                
-                if propSymbol[-1] != "'":  # To handle gr1c primed variables
-                    propSymbol += r"\b"
-                logger.debug('\t' + propSymbol + ' -> ' + prop)
-                
-                symfound  = _sub_all(self.env_init, propSymbol, prop)
-                symfound |= _sub_all(self.env_safety, propSymbol, prop)
-                symfound |= _sub_all(self.env_prog, propSymbol, prop)
-                
-                symfound |= _sub_all(self.sys_init, propSymbol, prop)
-                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
-                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
-    
     def to_smv(self):
         raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
         # trees = []
@@ -725,6 +659,72 @@ class GRSpec(LTL):
                 for s in self.sys_prog
             ]) + ";\n"
         return output
+    
+    def parse(self):
+        """Parse each clause and store it.
+        
+        The AST resulting from each clause is stored
+        in the C{dict} attribute C{ast}.
+        """
+        parts = {self.env_init, self.env_safety, self.env_prog,
+                 self.sys_init, self.sys_safety, self.sys_prog}
+        
+        # parse new clauses and cache the resulting ASTs
+        for s in parts:
+            for x in s:
+                if x not in self._ast:
+                    self._ast[x] = parser.parse(x)
+        
+        # rm cached ASTs that correspond to deleted clauses
+        for x in self._ast:
+            for s in parts:
+                if x not in s:
+                    self._ast.pop(x)
+    
+    def ast(self, x):
+        """Return AST corresponding to formula x.
+        
+        If AST for formula C{x} has already been computed earlier,
+        then return cached result.
+        """
+        if x not in self._ast:
+            self.parse()
+        return self._ast[x]
+    
+    def sym_to_prop(self, props):
+        """Replace the symbols of propositions with the actual propositions.
+
+        @type props: dict
+        @param props: a dictionary describing subformula (e.g.,
+            variable name) substitutions, where for each key-value
+            pair, all occurrences of key are replaced with value in
+            all components of this GRSpec object.  However, env_vars
+            and sys_vars are not changed.
+        """
+        if props is None:
+            return
+        
+        symfound = True
+        while (symfound):
+            for propSymbol, prop in props.iteritems():
+                logger.debug('propSymbol: ' + str(propSymbol))
+                logger.debug('prop: ' + str(prop))
+                
+                if not isinstance(propSymbol, str):
+                    raise TypeError('propSymbol: ' + str(propSymbol) +
+                                    'is not a string.')
+                
+                if propSymbol[-1] != "'":  # To handle gr1c primed variables
+                    propSymbol += r"\b"
+                logger.debug('\t' + propSymbol + ' -> ' + prop)
+                
+                symfound  = _sub_all(self.env_init, propSymbol, prop)
+                symfound |= _sub_all(self.env_safety, propSymbol, prop)
+                symfound |= _sub_all(self.env_prog, propSymbol, prop)
+                
+                symfound |= _sub_all(self.sys_init, propSymbol, prop)
+                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
+                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
     
     def evaluate(self, var_values):
         """Evaluate env_init, sys_init, given a valuation of variables.
