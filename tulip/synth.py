@@ -1323,3 +1323,115 @@ def spec_plus_sys(
         
     logger.info('Overall Spec:\n' + str(specs.pretty() ) +_hl)
     return specs
+
+def strategy2mealy(A, env_vars, sys_vars, spec, spec0):
+    """
+    
+    @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
+        or both can be None if the corresponding part is missing.
+        Note that the returned GRSpec instance depends only on what is
+        in the given tulipcon XML string x, not on the argument spec0.
+    """
+    if spec0 is None:
+        spec0 = spec
+    
+    # show port only when true (or non-zero for int-valued vars)
+    mask_func = bool
+    
+    mach = MealyMachine()
+    inputs = create_machine_ports(spec0.env_vars)
+    mach.add_inputs(inputs)
+    
+    outputs = create_machine_ports(spec0.sys_vars)
+    masks = {k:mask_func for k in sys_vars}
+    mach.add_outputs(outputs, masks)
+    
+    arbitrary_domains  = {
+        k:v for k, v in spec0.env_vars.items()
+        if isinstance(v, list)
+    }
+    arbitrary_domains.update({
+        k:v for k, v in spec0.sys_vars.items()
+        if isinstance(v, list)
+    })
+    
+    state_vars = OrderedDict()
+    varname = 'loc'
+    if varname in outputs:
+        state_vars[varname] = outputs[varname]
+    varname = 'eloc'
+    if varname in inputs:
+        state_vars[varname] = inputs[varname]
+    mach.add_state_vars(state_vars)
+    
+    # states and state variables
+    mach.states.add_from(A.nodes())
+    for state in mach.states:
+        label = _map_int2dom(A.node[state]["state"],
+                                 arbitrary_domains)
+        
+        label = {k:v for k,v in label.iteritems()
+                 if k in {'loc', 'eloc'}}
+        mach.states.add(state, **label)
+    
+    # transitions labeled with I/O
+    for u in A.nodes_iter():
+        for v in A.successors_iter(u):
+            logger.info('node: ' +str(v) +', state: ' +
+                        str(A.node[v]["state"]) )
+            
+            label = _map_int2dom(A.node[v]["state"],
+                                 arbitrary_domains)
+            mach.transitions.add(u, v, **label)
+    
+    # special initial state, for first input
+    initial_state = 'Sinit'
+    mach.states.add(initial_state)
+    mach.states.initial |= [initial_state]
+    
+    # replace values of arbitrary variables by ints
+    spec1 = spec0.copy()
+    for variable, domain in arbitrary_domains.items():
+        values2ints = {var:str(i) for i, var in enumerate(domain)}
+        
+        # replace symbols by ints
+        spec1.sym_to_prop(values2ints)
+    
+    # Mealy reaction to initial env input
+    for node in A.nodes_iter():
+        var_values = A.node[node]['state']
+        
+        bool_values = {}
+        for k, v in var_values.iteritems():
+            is_bool = False
+            if k in env_vars:
+                if env_vars[k] == 'boolean':
+                    is_bool = True
+            if k in sys_vars:
+                if sys_vars[k] == 'boolean':
+                    is_bool = True
+            
+            if is_bool:
+                bool_values.update({k:str(bool(v) )})
+            else:
+                bool_values.update({k:str(v)})
+        
+        logger.info('Boolean values: ' +str(bool_values) )
+        t = spec1.evaluate(bool_values)
+        logger.info('evaluates to: ' +str(t) )
+        
+        if t['env_init'] and t['sys_init']:
+            label = _map_int2dom(var_values, arbitrary_domains)
+            mach.transitions.add(initial_state, node, **label)
+    
+    return (spec, mach)
+
+def _map_int2dom(label, arbitrary_domains):
+    """For custom finite domains map int values to domain elements.
+    """
+    label = dict(label)
+    
+    for var, value in label.items():
+        if var in arbitrary_domains:
+            label[var] = arbitrary_domains[var][int(value)]
+    return label
