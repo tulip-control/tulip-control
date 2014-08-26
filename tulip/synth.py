@@ -1326,7 +1326,7 @@ def spec_plus_sys(
     logger.info('Overall Spec:\n' + str(specs.pretty() ) +_hl)
     return specs
 
-def strategy2mealy(A, spec0):
+def strategy2mealy(A, spec):
     """Convert strategy to Mealy transducer.
     
     Note that the strategy is a deterministic game graph,
@@ -1341,26 +1341,26 @@ def strategy2mealy(A, spec0):
         Note that the returned GRSpec instance depends only on what is
         in the given tulipcon XML string x, not on the argument spec0.
     """
-    env_vars = spec0.env_vars
-    sys_vars = spec0.sys_vars
+    env_vars = spec.env_vars
+    sys_vars = spec.sys_vars
     
     # show port only when true (or non-zero for int-valued vars)
     mask_func = bool
     
     mach = transys.MealyMachine()
-    inputs = transys.machines.create_machine_ports(spec0.env_vars)
+    inputs = transys.machines.create_machine_ports(spec.env_vars)
     mach.add_inputs(inputs)
     
-    outputs = transys.machines.create_machine_ports(spec0.sys_vars)
+    outputs = transys.machines.create_machine_ports(spec.sys_vars)
     masks = {k:mask_func for k in sys_vars}
     mach.add_outputs(outputs, masks)
     
     arbitrary_domains  = {
-        k:v for k, v in spec0.env_vars.items()
+        k:v for k, v in spec.env_vars.items()
         if isinstance(v, list)
     }
     arbitrary_domains.update({
-        k:v for k, v in spec0.sys_vars.items()
+        k:v for k, v in spec.sys_vars.items()
         if isinstance(v, list)
     })
     
@@ -1399,7 +1399,7 @@ def strategy2mealy(A, spec0):
     mach.states.initial |= [initial_state]
     
     # replace values of arbitrary variables by ints
-    spec1 = spec0.copy()
+    spec1 = spec.copy()
     for variable, domain in arbitrary_domains.items():
         values2ints = {var:str(i) for i, var in enumerate(domain)}
         
