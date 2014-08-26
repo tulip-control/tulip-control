@@ -41,7 +41,6 @@ from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 
-
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.
     
@@ -795,10 +794,12 @@ class TypedDict(dict):
                 valid_y = False
         
         if not valid_y:
-            msg = 'key: ' + str(i) + ', cannot be'
-            msg += ' assigned value: ' + str(y) + '\n'
-            msg += 'Admissible values are:\n\t'
-            msg += str(self.allowed_values[i])
+            msg = (
+                'key: ' + str(i) + ', cannot be'
+                ' assigned value: ' + str(y) + '\n'
+                'Admissible values are:\n\t'
+                + str(self.allowed_values[i])
+            )
             raise ValueError(msg)
         
         super(TypedDict, self).__setitem__(i, y)
