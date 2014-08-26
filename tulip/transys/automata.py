@@ -91,7 +91,8 @@ class FiniteStateAutomaton(LabeledDiGraph):
     def __init__(
             self, deterministic=False,
             accepting_states_type=None,
-            atomic_proposition_based=True
+            atomic_proposition_based=True,
+            symbolic=False,
         ):
         """Initialize FiniteStateAutomaton.
 
@@ -101,14 +102,19 @@ class FiniteStateAutomaton(LabeledDiGraph):
             is represented by a set.  If True, then the alphabet is
             represented by a powerset 2^AP.
         """
+        self.atomic_proposition_based = atomic_proposition_based
+        self.symbolic = symbolic
+        
         # edge labeling
-        if atomic_proposition_based:
-            self.atomic_proposition_based = True
-            alphabet = PowerSet([])
-            self.atomic_propositions = alphabet.math_set
+        if symbolic:
+            alphabet = None # no checks
         else:
-            self.atomic_proposition_based = False
-            alphabet = set()
+            if atomic_proposition_based:
+                alphabet = PowerSet([])
+                self.atomic_propositions = alphabet.math_set
+            else:
+                alphabet = set()
+        self.alphabet = alphabet
         
         edge_label_types = [
             {'name':'letter',
@@ -118,7 +124,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types
         )
-        self.alphabet = alphabet
+        
         
         # accepting states
         if accepting_states_type is None:
@@ -159,9 +165,10 @@ class FiniteStateAutomaton(LabeledDiGraph):
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\in 2^AP):\n\t'
         else:
-            s += 'Input Alphabet Letters:\n\t'
+            if hasattr(self, 'alphabet'):
+                s += ('Input Alphabet Letters:\n\t' +
+                      str(self.alphabet) + 2*'\n')
         s += (
-            str(self.alphabet) + 2*'\n' +
             'Transitions & labeling w/ Input Letters:\n' +
             pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n'
@@ -218,11 +225,13 @@ class OmegaAutomaton(FiniteStateAutomaton):
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(
             self, deterministic=False,
-            atomic_proposition_based=True
+            atomic_proposition_based=True,
+            symbolic=False
         ):
         super(BuchiAutomaton, self).__init__(
             deterministic=deterministic,
-            atomic_proposition_based=atomic_proposition_based
+            atomic_proposition_based=atomic_proposition_based,
+            symbolic=symbolic
         )
         self.automaton_type = 'Buchi Automaton'
 
