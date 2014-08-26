@@ -187,7 +187,7 @@ class Node(object):
     
 class Num(Node):
     def __init__(self, t):
-        self.val = int(t[0])
+        self.val = int(t)
     
     def __repr__(self):
         return str(self.val)
@@ -197,7 +197,7 @@ class Num(Node):
 
 class Var(Node):
     def __init__(self, t):
-        self.val = t[0]
+        self.val = t
     
     def __repr__(self):
         return self.val

@@ -200,12 +200,13 @@ def p_group(p):
 def p_number(p):
     """expression : NUMBER
     """
-    p[0] = ast.Num([p[1]])
+    p[0] = ast.Num(p[1])
 
 def p_expression_name(p):
     """expression : NAME
     """
-    p[0] = ast.Var([p[1]])
+    p[0] = ast.Var(p[1])
+
 def p_expression_const(p):
     """expression : DQUOTES NAME DQUOTES
     """
