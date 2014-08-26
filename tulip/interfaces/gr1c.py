@@ -46,14 +46,11 @@ logger = logging.getLogger(__name__)
 
 import copy
 import subprocess
-from collections import OrderedDict
 import tempfile
 import xml.etree.ElementTree as ET
 import networkx as nx
 
-from tulip.transys.machines import create_machine_ports
 from tulip.spec import GRSpec
-from tulip.transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
 _hl = '\n' +60*'-'
@@ -406,8 +403,8 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
     
     if p.returncode == 0:
-        (spec, aut) = aut_xml2mealy(stdoutdata, spec0=spec)
-        return aut
+        strategy = aut_xml2mealy(stdoutdata)
+        return strategy
     else:
         print(30*' ' + '\n gr1c return code:\n' + 30*' ')
         print(p.returncode)
@@ -425,9 +422,9 @@ def load_mealy(filename):
     @rtype: L{MealyMachine}
     """
     s = open(filename, 'r').read()
-    spec, aut = aut_xml2mealy(s)
-    logger.info('Loaded spec: \n' + spec.pretty() )
-    return aut
+    strategy = aut_xml2mealy(s)
+    #logger.info('Loaded spec: \n' + spec.pretty() )
+    return strategy
 
 class GR1CSession:
     """Manage interactive session with gr1c.

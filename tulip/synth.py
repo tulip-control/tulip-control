@@ -38,6 +38,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import warnings
+from collections import OrderedDict
 
 from . import transys
 from .spec import GRSpec
@@ -1243,7 +1244,8 @@ def synthesize(
                           bool_actions)
     
     if option == 'gr1c':
-        ctrl = gr1c.synthesize(specs)
+        strategy = gr1c.synthesize(specs)
+        ctrl = strategy2mealy(strategy, specs)
     elif option == 'jtlv':
         ctrl = jtlv.synthesize(specs)
     else:
@@ -1324,25 +1326,32 @@ def spec_plus_sys(
     logger.info('Overall Spec:\n' + str(specs.pretty() ) +_hl)
     return specs
 
-def strategy2mealy(A, env_vars, sys_vars, spec, spec0):
-    """
+def strategy2mealy(A, spec0):
+    """Convert strategy to Mealy transducer.
+    
+    Note that the strategy is a deterministic game graph,
+    but the input C{A} is given as the contraction of
+    this game graph (which directly )
+    
+    @param A: strategy
+    @type A: C{networkx.DiGraph}
     
     @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
         or both can be None if the corresponding part is missing.
         Note that the returned GRSpec instance depends only on what is
         in the given tulipcon XML string x, not on the argument spec0.
     """
-    if spec0 is None:
-        spec0 = spec
+    env_vars = spec0.env_vars
+    sys_vars = spec0.sys_vars
     
     # show port only when true (or non-zero for int-valued vars)
     mask_func = bool
     
-    mach = MealyMachine()
-    inputs = create_machine_ports(spec0.env_vars)
+    mach = transys.MealyMachine()
+    inputs = transys.machines.create_machine_ports(spec0.env_vars)
     mach.add_inputs(inputs)
     
-    outputs = create_machine_ports(spec0.sys_vars)
+    outputs = transys.machines.create_machine_ports(spec0.sys_vars)
     masks = {k:mask_func for k in sys_vars}
     mach.add_outputs(outputs, masks)
     
@@ -1424,7 +1433,7 @@ def strategy2mealy(A, env_vars, sys_vars, spec, spec0):
             label = _map_int2dom(var_values, arbitrary_domains)
             mach.transitions.add(initial_state, node, **label)
     
-    return (spec, mach)
+    return mach
 
 def _map_int2dom(label, arbitrary_domains):
     """For custom finite domains map int values to domain elements.
