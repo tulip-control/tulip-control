@@ -41,6 +41,8 @@ http://spot.lip6.fr/wiki/LtlSyntax
 import logging
 logger = logging.getLogger(__name__)
 
+import subprocess
+
 # inline:
 #
 # import networkx
@@ -107,7 +109,7 @@ def to_nx(ast):
     ast.to_nx(g)
     return g
 
-def dump_dot(ast, filename):
+def dump_dot(ast, filename, detailed=False):
     """Create GraphViz dot string from given AST.
     
     @type ast: L{ASTNode}
@@ -121,7 +123,21 @@ def dump_dot(ast, filename):
         return
     
     g = to_nx(ast)
+    
+    # show both repr and AST node class in each vertex
+    if detailed:
+        for u, d in g.nodes_iter(data=True):
+            lb = d['label']
+            nd = d['node']
+            g.node[u]['label'] = str(lb) + '\n' + str(type(nd).__name__)
+    
     nx.write_dot(g, filename)
+
+def write_pdf(ast, filename, detailed=False):
+    """Layout AST and save result in PDF file.
+    """
+    dump_dot(ast, filename, detailed)
+    subprocess.call(['dot', '-Tpdf', '-O', filename])
 
 # Flattener helpers
 def _flatten_gr1c(node, **args):
@@ -158,7 +174,7 @@ class Node(object):
     
     def to_nx(self, g):
         u = id(self)
-        g.add_node(u, label=self.val)
+        g.add_node(u, label=self.val, node=self)
         return u
     
 class Num(Node):
@@ -251,7 +267,7 @@ class Unary(Node):
     
     def to_nx(self, g):
         u = id(self)
-        g.add_node(u, label=self.op)
+        g.add_node(u, label=self.op, node=self)
         
         v = self.operand.to_nx(g)
         g.add_edge(u, v)
@@ -346,7 +362,7 @@ class Binary(Node):
         v = self.op_l.to_nx(g)
         w = self.op_r.to_nx(g)
         
-        g.add_node(u, label=self.op)
+        g.add_node(u, label=self.op, node=self)
         g.add_edge(u, v)
         g.add_edge(u, w)
         
