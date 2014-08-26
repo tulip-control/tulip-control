@@ -461,6 +461,7 @@ class Imp(Binary):
         return '( (not (' + l + ')) or ' + r + ')'
 
 class BiImp(Binary):
+    @property
     def op(self):
         return '<->'
     
