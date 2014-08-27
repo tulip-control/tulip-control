@@ -88,7 +88,7 @@ def question(string):
             print("Please respond with 'yes' or 'no'\n")
 
 def load_file(aut_file):
-    """Construct an Automatonstate object from aut_file and place in a Queue.
+    """Construct an AutomatonState object from aut_file and place in a Queue.
 
     @param aut_file: the name of the text file containing the
         automaton, or an (open) file-like object.
