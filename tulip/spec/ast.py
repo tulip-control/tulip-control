@@ -184,22 +184,6 @@ class LTL_AST(nx.DiGraph):
             
             d['ast_node'] = nd
 
-# Flattener helpers
-def _flatten_gr1c(node, **args):
-    return node.to_gr1c(**args)
-
-def _flatten_JTLV(node):
-    return node.to_jtlv()
-
-def _flatten_SMV(node):
-    return node.to_smv()
-
-def _flatten_Promela(node):
-    return node.to_promela()
-
-def _flatten_python(node):
-    return node.to_python()
-
 class Node(object):
     def __init__(self, graph):
         # skip addition ?
@@ -606,3 +590,19 @@ class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
+
+# Flattener helpers
+def _flatten_gr1c(node, **args):
+    return node.to_gr1c(**args)
+
+def _flatten_JTLV(node):
+    return node.to_jtlv()
+
+def _flatten_SMV(node):
+    return node.to_smv()
+
+def _flatten_Promela(node):
+    return node.to_promela()
+
+def _flatten_python(node):
+    return node.to_python()
