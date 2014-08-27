@@ -330,6 +330,8 @@ class GRSpec(LTL):
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
+        self._ast = dict()
+        
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
@@ -666,20 +668,25 @@ class GRSpec(LTL):
         The AST resulting from each clause is stored
         in the C{dict} attribute C{ast}.
         """
-        parts = {self.env_init, self.env_safety, self.env_prog,
-                 self.sys_init, self.sys_safety, self.sys_prog}
+        logger.debug('parsing to cache asts...')
+        
+        parts = {'env_init', 'env_safety', 'env_prog',
+                 'sys_init', 'sys_safety', 'sys_prog'}
         
         # parse new clauses and cache the resulting ASTs
-        for s in parts:
+        for p in parts:
+            s = getattr(self, p)
             for x in s:
                 if x not in self._ast:
                     self._ast[x] = parser.parse(x)
         
         # rm cached ASTs that correspond to deleted clauses
-        for x in self._ast:
-            for s in parts:
-                if x not in s:
-                    self._ast.pop(x)
+        s = set(self._ast)
+        for p in parts:
+            s.difference_update(getattr(self, p))
+        
+        for x in s:
+            self._ast.pop(x)
     
     def ast(self, x):
         """Return AST corresponding to formula x.

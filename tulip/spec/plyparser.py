@@ -255,7 +255,7 @@ class LTLParser(object):
 
 def parse(formula):
     parser = LTLParser()
-    parser.parse(formula)
+    return parser.parse(formula)
 
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'

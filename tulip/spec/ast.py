@@ -41,6 +41,7 @@ http://spot.lip6.fr/wiki/LtlSyntax
 import logging
 logger = logging.getLogger(__name__)
 
+import re
 import subprocess
 import networkx as nx
 
@@ -268,10 +269,10 @@ class Var(Node):
 class Const(Node):
     def __init__(self, t, g):
         super(Const, self).__init__(g)
-        self.val = r'"' + t + r'"'
+        self.val = re.sub(r'^"|"$', '', t)
     
     def __repr__(self):
-        return  self.val
+        return  r'"' + self.val + r'"'
     
     def flatten(self, flattener=str, op=None, **args):
         return str(self)
@@ -344,8 +345,10 @@ class Unary(Node):
         n = len(self.graph.succ[u])
         if n != 1:
             logger.error('Unary AST node has %d children.' % n)
-            
-        return set(self.graph.succ[u]).pop()
+        
+        v = set(self.graph.succ[u]).pop()
+        
+        return self.graph.node[v]['ast_node']
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
@@ -446,7 +449,7 @@ class Binary(Node):
         
         for u_, v, d in self.graph.edges_iter([u], data=True):
             if d['pos'] == pos:
-                return v
+                return self.graph.node[v]['ast_node']
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
