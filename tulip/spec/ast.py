@@ -41,8 +41,8 @@ http://spot.lip6.fr/wiki/LtlSyntax
 import logging
 logger = logging.getLogger(__name__)
 
+import os
 import re
-import subprocess
 import networkx as nx
 
 TEMPORAL_OP_MAP = {
@@ -105,7 +105,7 @@ def ast_to_labeled_graph(tree, detailed):
         if isinstance(nd, (Unary, Binary)):
             label = nd.op
         elif isinstance(nd, Node):
-            label = nd.val
+            label = str(nd)
         else:
             raise TypeError('ast_node must be or subclass Node.')
         
@@ -129,7 +129,7 @@ class LTL_AST(nx.DiGraph):
         self.root = None
         super(LTL_AST, self).__init__()
     
-    def dump_dot(self, filename, detailed=False):
+    def to_pydot(self, detailed=False):
         """Create GraphViz dot string from given AST.
         
         @type ast: L{ASTNode}
@@ -137,13 +137,15 @@ class LTL_AST(nx.DiGraph):
         @rtype: str
         """
         g = ast_to_labeled_graph(self, detailed)
-        nx.write_dot(g, filename)
+        return nx.to_pydot(g)
     
-    def write_pdf(self, filename, detailed=False):
+    def write(self, filename, detailed=False):
         """Layout AST and save result in PDF file.
         """
-        self.dump_dot(filename, detailed)
-        subprocess.call(['dot', '-Tpdf', '-O', filename])
+        fname, fext = os.path.splitext(filename)
+        fext = fext[1:] # drop .
+        p = self.to_pydot(detailed)
+        p.write(filename, format=fext)
     
     def get_vars(self):
         """Return the set of variables in C{tree}.
