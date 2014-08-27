@@ -184,6 +184,18 @@ class LTL_AST(nx.DiGraph):
             nd.graph = self
             
             d['ast_node'] = nd
+    
+    def to_gr1c(self):
+        return self.root.to_gr1c()
+    
+    def to_jtlv(self):
+        return self.root.to_jtlv()
+    
+    def to_promela(self):
+        return self.root.to_promela()
+    
+    def to_python(self):
+        return self.root.to_python()
 
 class Node(object):
     def __init__(self, graph):
