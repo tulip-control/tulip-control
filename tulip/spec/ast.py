@@ -151,6 +151,38 @@ class LTL_AST(nx.DiGraph):
         return {d['ast_node'] for u, d in self.nodes_iter(data=True)
                               if isinstance(d['ast_node'], Var)}
     
+    def sub_values(self, var_values):
+        """Substitute given values for variables.
+        
+        @param tree: AST
+        
+        @type var_values: C{dict}
+        
+        @return: AST with L{Var} nodes replaces by
+            L{Num}, L{Const}, or L{Bool}
+        """
+        for u, d in self.nodes_iter(data=True):
+            old = d['ast_node']
+            
+            if not isinstance(old, Var):
+                continue
+            
+            val = var_values[str(old)]
+            
+            # instantiate appropriate value type
+            if isinstance(val, bool):
+                nd = Bool(val, g=None)
+            elif isinstance(val, int):
+                nd = Num(val, g=None)
+            elif isinstance(val, str):
+                nd = Const(val, g=None)
+            
+            # replace variable by value,
+            # don't touch the underlying graph
+            nd.id = old.id
+            nd.graph = self
+            
+            d['ast_node'] = nd
 
 # Flattener helpers
 def _flatten_gr1c(node, **args):
@@ -170,7 +202,12 @@ def _flatten_python(node):
 
 class Node(object):
     def __init__(self, graph):
+        # skip addition ?
+        if graph is None:
+            return
+        
         u = id(self)
+        self.id = u
         graph.add_node(u, ast_node=self)
         self.graph = graph
     
@@ -298,14 +335,14 @@ class Unary(Node):
     def __init__(self, operator, x, g):
         super(Unary, self).__init__(g)
         self.operator = operator
-        self.graph.add_edge(id(self), id(x))
+        self.graph.add_edge(self.id, x.id)
     
     def __repr__(self):
         return ' '.join(['(', self.op, str(self.operand), ')'])
     
     @property
     def operand(self):
-        u = id(self)
+        u = self.id
         
         n = len(self.graph.succ[u])
         if n != 1:
@@ -389,8 +426,8 @@ class Binary(Node):
     def __init__(self, operator, x, y, g):
         super(Binary, self).__init__(g)
         self.operator = operator
-        self.graph.add_edge(id(self), id(x), pos='left')
-        self.graph.add_edge(id(self), id(y), pos='right')
+        self.graph.add_edge(self.id, x.id, pos='left')
+        self.graph.add_edge(self.id, y.id, pos='right')
         
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op, str(self.op_r), ')'])
@@ -404,7 +441,7 @@ class Binary(Node):
         return self._child('right')
     
     def _child(self, pos):
-        u = id(self)
+        u = self.id
         
         n = len(self.graph.successors(u))
         if n != 2:
