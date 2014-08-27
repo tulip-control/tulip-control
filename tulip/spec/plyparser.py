@@ -138,6 +138,7 @@ class LTLParser(object):
     def __init__(self):
         self.graph = None
         self.tokens = tokens
+        self.precedence = precedence
     
     def build(self):
         self.parser = yacc.yacc(
