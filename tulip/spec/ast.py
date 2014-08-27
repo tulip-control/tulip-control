@@ -135,6 +135,14 @@ def write_pdf(ast, filename, detailed=False):
     dump_dot(ast, filename, detailed)
     subprocess.call(['dot', '-Tpdf', '-O', filename])
 
+def get_vars(tree):
+    """Return the set of variables in C{tree}.
+    
+    @rtype: C{set} of L{Var}
+    """
+    return {d['ast_node'] for u, d in tree.nodes_iter(data=True)
+                          if isinstance(d['ast_node'], Var)}
+
 # Flattener helpers
 def _flatten_gr1c(node, **args):
     return node.to_gr1c(**args)
@@ -552,20 +560,3 @@ class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
-
-def get_vars(ast):
-    var = set()
-    Q = {ast}
-    #tree S = {ast}
-    while Q:
-        x = Q.pop()
-        logger.debug('visiting: ' + str(type(x) ) )
-        
-        if isinstance(x, Unary):
-            Q.add(x.operand)
-        elif isinstance(x, Binary):
-            Q.add(x.op_l)
-            Q.add(x.op_r)
-        elif isinstance(x, Var):
-            var.add(x)
-    return var

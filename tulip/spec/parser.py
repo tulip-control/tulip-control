@@ -50,15 +50,6 @@ def _replace_full_name_operators(formula):
         formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
     return formula
 
-def extract_vars(tree):
-    v = []
-    def f(t):
-        if isinstance(t, ast.Var):
-            v.append(t.val)
-        return t
-    tree.map(f)
-    return v
-
 def issafety(tree):
     """Crude test for safety spec.
     """
@@ -115,7 +106,7 @@ if __name__ == "__main__":
     
     print("Parsed expression: " + str(a) )
     print("Length: " +str( len(a) ) )
-    print("Variables: " + str(extract_vars(a) ) )
+    print("Variables: " + str(ast.get_vars(a) ) )
     print("Safety: " +str(issafety(a) ) )
     
     print("JTLV syntax: " +str(a.to_jtlv() ) )
