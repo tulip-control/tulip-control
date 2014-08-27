@@ -692,7 +692,13 @@ class GRSpec(LTL):
         return self._ast[x]
     
     def sym_to_prop(self, props):
-        """Replace the symbols of propositions with the actual propositions.
+        """Word-based replacement of proposition symbols by values.
+        
+        For each key in C{props}, all its occurrences in
+        the formula will be replaced by the value C{props[key]}.
+        
+        This is lexical substitution that does not take
+        syntax into account.
 
         @type props: dict
         @param props: a dictionary describing subformula (e.g.,
@@ -705,7 +711,7 @@ class GRSpec(LTL):
             return
         
         symfound = True
-        while (symfound):
+        while symfound:
             for propSymbol, prop in props.iteritems():
                 logger.debug('propSymbol: ' + str(propSymbol))
                 logger.debug('prop: ' + str(prop))
@@ -714,7 +720,8 @@ class GRSpec(LTL):
                     raise TypeError('propSymbol: ' + str(propSymbol) +
                                     'is not a string.')
                 
-                if propSymbol[-1] != "'":  # To handle gr1c primed variables
+                 # To handle gr1c primed variables
+                if propSymbol[-1] != "'":
                     propSymbol += r"\b"
                 logger.debug('\t' + propSymbol + ' -> ' + prop)
                 

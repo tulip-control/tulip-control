@@ -413,7 +413,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         return None
 
 def load_mealy(filename):
-    """Load gr1c stratgy from C{xml} file to a MealyMachine.
+    """Load gr1c strategy from C{xml} file to a MealyMachine.
     
     @param filename: xml file name
     @type filename: C{str}
