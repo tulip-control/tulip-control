@@ -42,10 +42,8 @@ Co-mentors Mumu Xu, Necmiye Ozay and Ufuk Topcu.
 """
 
 from __future__ import print_function
-import re, copy, os, random, sys
-import xml.etree.ElementTree as ET
+import re, copy, os, sys
 import Queue
-import exceptions
 
 
 class AutomatonState:
