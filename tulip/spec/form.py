@@ -353,18 +353,19 @@ class GRSpec(LTL):
 
         for formula_component in ["env_init", "env_safety", "env_prog",
                                   "sys_init", "sys_safety", "sys_prog"]:
-            if isinstance(getattr(self, formula_component), str):
-                if len(getattr(self, formula_component)) == 0:
+            x = getattr(self, formula_component)
+            
+            if isinstance(x, str):
+                if not x:
                     setattr(self, formula_component, [])
                 else:
-                    setattr(self, formula_component,
-                            [getattr(self, formula_component)])
-            elif not isinstance(getattr(self, formula_component), list):
-                setattr(self, formula_component,
-                        list(getattr(self, formula_component)))
+                    setattr(self, formula_component, [x])
+            elif not isinstance(x, list):
+                setattr(self, formula_component, list(x))
+            
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
-
+        
         LTL.__init__(self, formula=self.to_canon(),
                      input_variables=self.env_vars,
                      output_variables=self.sys_vars)
@@ -498,13 +499,13 @@ class GRSpec(LTL):
             guarantee += conj_cstr(guarantee) + _conj(self.sys_prog, '[]<>')
 
         # Put the parts together, simplifying in special cases
-        if len(guarantee) > 0:
-            if len(assumption) > 0:
-                return "("+assumption+") -> ("+guarantee+")"
+        if guarantee:
+            if assumption:
+                return '(' + assumption + ') -> (' + guarantee + ')'
             else:
                 return guarantee
         else:
-            return "True"
+            return 'True'
     
     def to_smv(self):
         raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
@@ -535,68 +536,42 @@ class GRSpec(LTL):
         Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
         spec = ['', '']
-        desc_added = False
-        for env_init in self.env_init:
-            if (len(env_init) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- valid initial env states\n'
-                    desc_added = True
-                spec[0] += '\t' + self.ast(env_init).to_jtlv()
-
-        desc_added = False
-        for env_safety in self.env_safety:
-            if (len(env_safety) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- safety assumption on environment\n'
-                    desc_added = True
-                env_safety = self.ast(env_safety).to_jtlv()
-                spec[0] += '\t[](' +re.sub(r"next\s*\(", "next(", env_safety) +')'
-
-        desc_added = False
-        for prog in self.env_prog:
-            if (len(prog) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- justice assumption on environment\n'
-                    desc_added = True
-                spec[0] += '\t[]<>(' + self.ast(prog).to_jtlv() + ')'
-
-        desc_added = False
-        for sys_init in self.sys_init:
-            if (len(sys_init) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- valid initial system states\n'
-                    desc_added = True
-                spec[1] += '\t' + self.ast(sys_init).to_jtlv()
-
-        desc_added = False
-        for sys_safety in self.sys_safety:
-            if (len(sys_safety) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- safety requirement on system\n'
-                    desc_added = True
-                sys_safety = self.ast(sys_safety).to_jtlv()
-                spec[1] += '\t[](' +re.sub(r"next\s*\(", "next(", sys_safety) +')'
-
-        desc_added = False
-        for prog in self.sys_prog:
-            if (len(prog) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- progress requirement on system\n'
-                    desc_added = True
-                spec[1] += '\t[]<>(' + self.ast(prog).to_jtlv() + ')'
+        
+        f = self._jtlv_str
+        
+        parts = [f(self.env_init, 'valid initial env states', ''),
+                 f(self.env_safety, 'safety assumption on environment', '[]'),
+                 f(self.env_prog, 'justice assumption on environment', '[]<>')]
+        
+        spec[0] += ' && \n'.join(parts)
+        
+        parts = [f(self.sys_init, 'valid initial system states', ''),
+                 f(self.sys_safety, 'safety requirement on system', '[]'),
+                 f(self.sys_prog, 'progress requirement on system', '[]<>')]
+        
+        spec[1] += ' && \n'.join(parts)
         return spec
+    
+    def _jtlv_str(self, m, txt='progress requirement on system', prefix='[]<>'):
+        w = []
+        s = ''
+        
+        for x in m:
+            if not x:
+                continue
+            
+            if not s:
+                s += '-- ' + txt + '\n'
+            
+            c = self.ast(x).to_jtlv()
+            
+            if prefix == '[]':
+                c = re.sub(r'next\s*\(', 'next(', c)
+            
+            s += '\t' + prefix + '(' + c + ')'
+            w.append(s)
+        
+        return ' && \n'.join(w)
 
     def to_gr1c(self):
         """Dump to gr1c specification string.
@@ -612,7 +587,7 @@ class GRSpec(LTL):
                     output += " "+variable+" ["+str(domain[0]) +\
                         ", "+str(domain[1])+"]"
                 else:
-                    raise ValueError("Domain type unsupported by gr1c: " +
+                    raise ValueError("Domain not supported by gr1c: " +
                         str(domain))
             return output
         
@@ -620,47 +595,27 @@ class GRSpec(LTL):
         if tmp is not None:
             return tmp.to_gr1c()
         
-        output = "ENV:"+_to_gr1c_print_vars(self.env_vars)+";\n"
-        output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
-
-        output += "ENVINIT: "+"\n& ".join([
-            "("+self.ast(s).to_gr1c()+")"
-            for s in self.env_init
-        ]) + ";\n"
-        if len(self.env_safety) == 0:
-            output += "ENVTRANS:;\n"
-        else:
-            output += "ENVTRANS: "+"\n& ".join([
-                "[]("+self.ast(s).to_gr1c()+")"
-                for s in self.env_safety
-            ]) + ";\n"
-        if len(self.env_prog) == 0:
-            output += "ENVGOAL:;\n\n"
-        else:
-            output += "ENVGOAL: "+"\n& ".join([
-                "[]<>("+self.ast(s).to_gr1c()+")"
-                for s in self.env_prog
-            ]) + ";\n\n"
+        output = 'ENV:' + _to_gr1c_print_vars(self.env_vars) + ';\n'
+        output += 'SYS:' + _to_gr1c_print_vars(self.sys_vars) + ';\n'
         
-        output += "SYSINIT: "+"\n& ".join([
-            "("+self.ast(s).to_gr1c()+")"
-            for s in self.sys_init
-        ]) + ";\n"
-        if len(self.sys_safety) == 0:
-            output += "SYSTRANS:;\n"
-        else:
-            output += "SYSTRANS: "+"\n& ".join([
-                "[]("+self.ast(s).to_gr1c()+")"
-                for s in self.sys_safety
-            ]) + ";\n"
-        if len(self.sys_prog) == 0:
-            output += "SYSGOAL:;\n"
-        else:
-            output += "SYSGOAL: "+"\n& ".join([
-                "[]<>("+self.ast(s).to_gr1c()+")"
-                for s in self.sys_prog
-            ]) + ";\n"
+        output += self._gr1c_str(self.env_init, 'ENVINIT', '')
+        output += self._gr1c_str(self.env_safety, 'ENVTRANS', '[]')
+        output += self._gr1c_str(self.env_prog, 'ENVGOAL', '[]<>') + '\n'
+        
+        output += self._gr1c_str(self.sys_init, 'SYSINIT', '')
+        output += self._gr1c_str(self.sys_safety, 'SYSTRANS', '[]')
+        output += self._gr1c_str(self.sys_prog, 'SYSGOAL', '[]<>')
+        
         return output
+    
+    def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
+        if len(s) == 0:
+            return name + ':;\n'
+        else:
+            return name + ': ' + '\n& '.join([
+                prefix + '(' + self.ast(x).to_gr1c() + ')'
+                for x in s
+            ]) + ';\n'
     
     def parse(self):
         """Parse each clause and store it.
@@ -824,19 +779,19 @@ def finite_domain2ints(spec):
     Otherwise it returns a copy of spec with all arbitrary
     finite vars replaced by int-valued vars.
     """
-    ints_only = True
+    not_list = True
     for domain in spec.env_vars.itervalues():
         if isinstance(domain, list):
-            ints_only = False
+            not_list = False
             break
-    if ints_only:
+    if not_list:
         for domain in spec.sys_vars.itervalues():
             if isinstance(domain, list):
-                ints_only = False
+                not_list = False
                 break
     
     # nothing todo ?
-    if ints_only:
+    if not_list:
         return None
     
     spec0 = spec.copy()
