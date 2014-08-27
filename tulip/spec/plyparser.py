@@ -42,6 +42,7 @@ from warnings import warn
 
 import ply.lex as lex
 import ply.yacc as yacc
+import networkx as nx
 
 from . import ast
 
@@ -131,16 +132,46 @@ precedence = (
 # dictionary of names
 #names = {'var':'replacement'}
 
+TABMODULE = 'tulip.spec.parsetab'
+
 class LTLParser(object):
-    def p_arithmetic(p):
+    def __init__(self):
+        self.graph = None
+        self.tokens = tokens
+    
+    def build(self):
+        self.parser = yacc.yacc(
+            tabmodule=TABMODULE, module=self,
+            write_tables=False, debug=False
+        )
+    
+    def rebuild_parsetab(self, tabmodule):
+        yacc.yacc(
+            tabmodule=tabmodule, module=self,
+            write_tables=True, debug=True
+        )
+    
+    def parse(self, formula):
+        """Parse formula string and create abstract syntax tree (AST).
+        """
+        self.build()
+        g = nx.DiGraph()
+        self.graph = g
+        root_node = self.parser.parse(formula, lexer=lexer, debug=logger)
+        
+        # mark root
+        self.graph.root = id(root_node)
+        return root_node
+    
+    def p_arithmetic(self, p):
         """expression : expression TIMES expression
                       | expression DIV expression
                       | expression PLUS expression
                       | expression MINUS expression
         """
-        p[0] = ast.Arithmetic(p[2], p[1], p[3])
+        p[0] = ast.Arithmetic(p[2], p[1], p[3], self.graph)
     
-    def p_comparator(p):
+    def p_comparator(self, p):
         """expression : expression EQUALS expression
                       | expression NEQUALS expression
                       | expression LT expression
@@ -148,94 +179,86 @@ class LTLParser(object):
                       | expression GT expression
                       | expression GE expression
         """
-        p[0] = ast.Comparator(p[2], p[1], p[3])
+        p[0] = ast.Comparator(p[2], p[1], p[3], self.graph)
     
-    def p_and(p):
+    def p_and(self, p):
         """expression : expression AND expression
         """
-        p[0] = ast.And(p[2], p[1], p[3])
+        p[0] = ast.And(p[2], p[1], p[3], self.graph)
     
-    def p_or(p):
+    def p_or(self, p):
         """expression : expression OR expression
         """
-        p[0] = ast.Or(p[2], p[1], p[3])
+        p[0] = ast.Or(p[2], p[1], p[3], self.graph)
     
-    def p_xor(p):
+    def p_xor(self, p):
         """expression : expression XOR expression
         """
-        p[0] = ast.Xor(p[2], p[1], p[3])
+        p[0] = ast.Xor(p[2], p[1], p[3], self.graph)
     
-    def p_imp(p):
+    def p_imp(self, p):
         """expression : expression IMP expression
         """
-        p[0] = ast.Imp(p[2], p[1], p[3])
+        p[0] = ast.Imp(p[2], p[1], p[3], self.graph)
     
-    def p_bimp(p):
+    def p_bimp(self, p):
         """expression : expression BIMP expression
         """
-        p[0] = ast.BiImp(p[2], p[1], p[3])
+        p[0] = ast.BiImp(p[2], p[1], p[3], self.graph)
     
-    def p_unary_temp_op(p):
+    def p_unary_temp_op(self, p):
         """expression : NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
-        p[0] = ast.UnTempOp(p[1], p[2])
+        p[0] = ast.UnTempOp(p[1], p[2], self.graph)
     
-    def p_bin_temp_op(p):
+    def p_bin_temp_op(self, p):
         """expression : expression UNTIL expression
                       | expression RELEASE expression
         """
-        p[0] = ast.BiTempOp(p[2], p[1], p[3])
+        p[0] = ast.BiTempOp(p[2], p[1], p[3], self.graph)
     
-    def p_not(p):
+    def p_not(self, p):
         """expression : NOT expression
         """
-        p[0] = ast.Not(p[1], p[2])
+        p[0] = ast.Not(p[1], p[2], self.graph)
     
-    def p_group(p):
+    def p_group(self, p):
         """expression : LPAREN expression RPAREN
         """
         p[0] = p[2]
     
-    def p_number(p):
+    def p_number(self, p):
         """expression : NUMBER
         """
-        p[0] = ast.Num(p[1])
+        p[0] = ast.Num(p[1], self.graph)
     
-    def p_expression_name(p):
+    def p_expression_name(self, p):
         """expression : NAME
         """
-        p[0] = ast.Var(p[1])
+        p[0] = ast.Var(p[1], self.graph)
     
-    def p_expression_const(p):
+    def p_expression_const(self, p):
         """expression : DQUOTES NAME DQUOTES
         """
-        p[0] = ast.Const(p[2])
+        p[0] = ast.Const(p[2], self.graph)
     
-    def p_bool(p):
+    def p_bool(self, p):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = ast.Bool([p[1]])
+        p[0] = ast.Bool([p[1]], self.graph)
     
-    def p_error(p):
+    def p_error(self, p):
         warn("Syntax error at '%s'" % p.value)
-    
-    parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
-                       write_tables=0, debug=0)
-    
-    def rebuild_parsetab():
-        yacc.yacc(tabmodule="parsetab",
-                  write_tables=1, debug=1)
-    
-    def parse(formula):
-        """Parse formula string and create abstract syntax tree (AST).
-        """
-        return parser.parse(formula, lexer=lexer, debug=logger)
-    
+
+def parse(formula):
+    parser = LTLParser()
+    parser.parse(formula)
+
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
-    parsed_formula = parser.parse(s)
+    parsed_formula = parse(s)
     
     print('Parsing result: ' + str(parsed_formula.to_gr1c()))

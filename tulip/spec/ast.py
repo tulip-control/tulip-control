@@ -42,10 +42,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import subprocess
-
-# inline:
-#
-# import networkx
+import networkx as nx
 
 TEMPORAL_OP_MAP = {
     'G':'G', 'F':'F', 'X':'X',
@@ -92,23 +89,34 @@ FULL_OPERATOR_NAMES = {
 class LTLException(Exception):
     pass
 
-def to_nx(ast):
-    """Convert AST to C{NetworkX.DiGraph}.
+def ast_to_labeled_graph(ast, detailed):
+    """Convert AST to C{NetworkX.DiGraph} for graphics.
     
-    For example, the return value of a successful call to L{parser}.
-    
-    @param ast: L{ASTNode}
+    @param ast: Abstract syntax tree
     
     @rtype: C{networkx.DiGraph}
     """
-    try:
-        import networkx as nx
-    except ImportError:
-        logger.error('failed to import networkx')
-        return
-    
     g = nx.DiGraph()
-    ast.to_nx(g)
+    
+    for u, d in ast.graph.nodes_iter(data=True):
+        nd = d['ast_node']
+        
+        if isinstance(nd, (Unary, Binary)):
+            label = nd.op
+        elif isinstance(nd, Node):
+            label = nd.val
+        else:
+            raise TypeError('ast_node must be or subclass Node.')
+        
+        # show both repr and AST node class in each vertex
+        if detailed:
+            label += '\n' + str(type(nd).__name__)
+        
+        g.add_node(u, label=label)
+    
+    for u, v in ast.graph.edges_iter():
+        g.add_edge(u, v)
+    
     return g
 
 def dump_dot(ast, filename, detailed=False):
@@ -118,21 +126,7 @@ def dump_dot(ast, filename, detailed=False):
     
     @rtype: str
     """
-    try:
-        import networkx as nx
-    except ImportError:
-        logger.error('failed to import networkx')
-        return
-    
-    g = to_nx(ast)
-    
-    # show both repr and AST node class in each vertex
-    if detailed:
-        for u, d in g.nodes_iter(data=True):
-            lb = d['label']
-            nd = d['node']
-            g.node[u]['label'] = str(lb) + '\n' + str(type(nd).__name__)
-    
+    g = ast_to_labeled_graph(ast, detailed)
     nx.write_dot(g, filename)
 
 def write_pdf(ast, filename, detailed=False):
@@ -158,6 +152,11 @@ def _flatten_python(node):
     return node.to_python()
 
 class Node(object):
+    def __init__(self, graph):
+        u = id(self)
+        graph.add_node(u, ast_node=self)
+        self.graph = graph
+    
     def to_gr1c(self, primed=False):
         return self.flatten(_flatten_gr1c, primed=primed)
     
@@ -179,14 +178,10 @@ class Node(object):
     
     def __len__(self):
         return 1
-    
-    def to_nx(self, g):
-        u = id(self)
-        g.add_node(u, label=self.val, node=self)
-        return u
-    
+
 class Num(Node):
-    def __init__(self, t):
+    def __init__(self, t, g):
+        super(Num, self).__init__(g)
         self.val = int(t)
     
     def __repr__(self):
@@ -196,7 +191,8 @@ class Num(Node):
         return str(self)
 
 class Var(Node):
-    def __init__(self, t):
+    def __init__(self, t, g):
+        super(Var, self).__init__(g)
         self.val = t
     
     def __repr__(self):
@@ -219,7 +215,8 @@ class Var(Node):
         return str(self)
 
 class Const(Node):
-    def __init__(self, t):
+    def __init__(self, t, g):
+        super(Const, self).__init__(g)
         self.val = r'"' + t + r'"'
     
     def __repr__(self):
@@ -241,8 +238,10 @@ class Const(Node):
         return str(self)
 
 class Bool(Node):
-    def __init__(self, t):
-        if t[0].upper() == 'TRUE':
+    def __init__(self, t, g):
+        super(Bool, self).__init__(g)
+        
+        if t.upper() == 'TRUE':
             self.val = True
         else:
             self.val = False
@@ -279,12 +278,23 @@ class Unary(Node):
     def new(cls, op_node, operator=None):
         return cls([operator, op_node])
     
-    def __init__(self, operator, operand):
+    def __init__(self, operator, x, g):
+        super(Unary, self).__init__(g)
         self.operator = operator
-        self.operand = operand
+        self.graph.add_edge(id(self), id(x))
     
     def __repr__(self):
         return ' '.join(['(', self.op, str(self.operand), ')'])
+    
+    @property
+    def operand(self):
+        u = id(self)
+        
+        n = len(self.graph.succ[u])
+        if n != 1:
+            logger.error('Unary AST node has %d children.' % n)
+            
+        return set(self.graph.succ[u]).pop()
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
@@ -294,14 +304,6 @@ class Unary(Node):
         except AttributeError:
             o = str(self.operand)
         return ' '.join(['(', op, o, ')'])
-    
-    def to_nx(self, g):
-        u = id(self)
-        g.add_node(u, label=self.op, node=self)
-        
-        v = self.operand.to_nx(g)
-        g.add_edge(u, v)
-        return u
     
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op)
@@ -319,9 +321,9 @@ class Not(Unary):
         return PYTHON_MAP['!']
 
 class UnTempOp(Unary):
-    def __init__(self, operator, operand):
-        self.operator = TEMPORAL_OP_MAP[operator]
-        self.operand = operand
+    def __init__(self, operator, x, g):
+        operator = TEMPORAL_OP_MAP[operator]
+        super(UnTempOp, self).__init__(operator, x, g)
     
     @property
     def op(self):
@@ -367,13 +369,33 @@ class Binary(Node):
     def new(cls, op_l, op_r, operator=None):
         return cls([op_l, operator, op_r])
     
-    def __init__(self, operator, x, y):
+    def __init__(self, operator, x, y, g):
+        super(Binary, self).__init__(g)
         self.operator = operator
-        self.op_l = x
-        self.op_r = y
+        self.graph.add_edge(id(self), id(x), pos='left')
+        self.graph.add_edge(id(self), id(y), pos='right')
         
     def __repr__(self):
         return ' '.join (['(', str(self.op_l), self.op, str(self.op_r), ')'])
+    
+    @property
+    def op_l(self):
+        return self._child('left')
+    
+    @property
+    def op_r(self):
+        return self._child('right')
+    
+    def _child(self, pos):
+        u = id(self)
+        
+        n = len(self.graph.successors(u))
+        if n != 2:
+            logger.error('Binary AST node has %d children.' % n)
+        
+        for u_, v, d in self.graph.edges_iter([u], data=True):
+            if d['pos'] == pos:
+                return v
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
@@ -388,18 +410,6 @@ class Binary(Node):
         except AttributeError:
             r = str(self.op_r)
         return ' '.join (['(', l, op, r, ')'])
-    
-    def to_nx(self, g):
-        u = id(self)
-        
-        v = self.op_l.to_nx(g)
-        w = self.op_r.to_nx(g)
-        
-        g.add_node(u, label=self.op, node=self)
-        g.add_edge(u, v)
-        g.add_edge(u, w)
-        
-        return u
     
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op)
@@ -477,11 +487,9 @@ class BiImp(Binary):
         return '( ' + l + ' and ' + r + ' ) or not ( ' + l + ' or ' + r + ' )'
 
 class BiTempOp(Binary):
-    def __init__(self, operator, x, y):
-        print('operator is: '  + str(operator))
-        super(BiTempOp, self).__init__(operator, x, y)
-        
-        self.operator = TEMPORAL_OP_MAP[self.operator]
+    def __init__(self, operator, x, y, g):
+        operator = TEMPORAL_OP_MAP[operator]
+        super(BiTempOp, self).__init__(operator, x, y, g)
     
     @property
     def op(self):
@@ -516,10 +524,10 @@ class BiTempOp(Binary):
     
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op])
-    
+
 class Comparator(Binary):
-    def __init__(self, operator, x, y):
-        super(Comparator, self).__init__(operator, x, y)
+    def __init__(self, operator, x, y, g):
+        super(Comparator, self).__init__(operator, x, y, g)
         
         if self.operator is '==':
             self.operator = '='

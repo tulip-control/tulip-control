@@ -220,8 +220,13 @@ if perform_setup:
     try:
         import os
         import tulip.spec.plyparser
-        tulip.spec.plyparser.rebuild_parsetab()
-        os.rename("parsetab.py", "tulip/spec/parsetab.py")
+        
+        tabmodule = 'parsetab.py'
+        
+        parser = tulip.spec.plyparser.LTLParser()
+        parser.rebuild_parsetab(tabmodule)
+        
+        os.rename(tabmodule, "tulip/spec/parsetab.py")
         plytable_build_failed = False
     except:
         plytable_build_failed = True
