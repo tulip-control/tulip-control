@@ -119,6 +119,14 @@ def ast_to_labeled_graph(ast, detailed):
     
     return g
 
+class LTL_AST(nx.DiGraph):
+    """Abstract Syntax Tree of LTL.
+    
+    The tree's root node is C{self.root}.
+    """
+    def __init__(self):
+        self.root = None
+    
 def dump_dot(ast, filename, detailed=False):
     """Create GraphViz dot string from given AST.
     
