@@ -32,13 +32,16 @@
 """
 This program takes an aut and smv file from a generated TuLiP controller
 and automatically writes the MATLAB compatible script for that controller.
-Run this program by typing "python programfile.py nameofautfile nameofmatlabfile", aut and smv file shall have the same name.
+
+Run this program by typing "python programfile.py nameofautfile
+nameofmatlabfile", aut and smv file shall have the same name.
 Do not include file extensions.
 
 Written by Robert Rogersten during SURF June 2012,
 Co-mentors Mumu Xu, Necmiye Ozay and Ufuk Topcu.
 """
 
+from __future__ import print_function
 import re, copy, os, random, sys
 import xml.etree.ElementTree as ET
 import Queue
@@ -51,7 +54,7 @@ class AutomatonState:
     fields:
 
     - `stateid`: an integer specifying the state id of this AutomatonState object.
-        - `state`: a dictionary whose keys are the names of the variables
+    - `state`: a dictionary whose keys are the names of the variables
       and whose values are the values of the variables.
     - `transition`: a list of id's of the AutomatonState objects to
       which this AutomatonState object can transition.
@@ -62,32 +65,33 @@ class AutomatonState:
         self.transition = transition[:]
 
 def question(string):
-    """This function ask a yes/no question and return their answer.
-    The "answer" return value is one of "yes" or "no".
+    """This function asks a yes/no question and returns the answer.
+
+    @param string: The question to use as the prompt.
+
+    @return: The "answer" return value is one of "yes" or "no".  The
+        default is "yes". (The default occurs if the user only presses
+        the RETURN button.)
     """
     default="yes"
     valid = {"yes":True,   "y":True,  "ye":True,
              "no":False,     "n":False}
     prompt = " [Y/n] "
     while True:
-        print string
+        print(string)
         choice = raw_input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
             return valid[choice]
         else:
-            print "Please respond with 'yes' or 'no'\n"
+            print("Please respond with 'yes' or 'no'\n")
 
-def loadFile(aut_file):
-    """
-    Construct an Automatonstate object from aut_file and
-    put that object in a Queue.
+def load_file(aut_file):
+    """Construct an Automatonstate object from aut_file and place in a Queue.
 
-    Input:
-
-    - `aut_file`: the name of the text file containing the
-    automaton, or an (open) file-like object.
+    @param aut_file: the name of the text file containing the
+        automaton, or an (open) file-like object.
     """
     if isinstance(aut_file, str):
         f = open(aut_file, 'r')
@@ -109,15 +113,12 @@ def loadFile(aut_file):
             queue1.put(automaton)
             queue2.put(automaton)
             
-def readVariables(smv_file):
-    """
-    readVariables puts the enviroment and system variables from smv_file in two different
+def read_variables(smv_file):
+    """Put the enviroment and system variables from smv_file in two different
     Queues called system and enviroment.
 
-    Input:
-
-    - `smv_file`: the name of the text file containing the
-      automaton, or an (open) file-like object.
+    @param smv_file: the name of the text file containing the
+        automaton, or an (open) file-like object.
     """
     if isinstance(smv_file, str):
         f = open(smv_file, 'r')
@@ -139,10 +140,8 @@ def readVariables(smv_file):
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 
-def writeStartLine(enviroment,system,f):
-    """
-    writeStartLine writes the first lines before the
-    switch cases in the matlab file.
+def write_startline(enviroment,system,f):
+    """Write the first lines before the switch cases in the matlab file.
 
     Input:
 
@@ -170,10 +169,8 @@ def writeStartLine(enviroment,system,f):
         enviroment.put(temp)
     f.write(")\nglobal state;\ncoder.extrinsic('disp');\nswitch state\n")
 
-def writeCase(enviroment,system,f,verbosem):
-    """
-    writeCase writes the
-    switch cases in the matlab file.
+def write_case(enviroment,system,f,verbosem):
+    """Write the switch cases in the matlab file.
 
     Input:
 
@@ -265,10 +262,9 @@ def writeCase(enviroment,system,f,verbosem):
         system.put(temp1)
     f.write('end')
 
-def writeCaseNo(enviroment,system,f,verbosem):
-    """
-    writeCase writes the
-    switch cases in the matlab file and exclude no successors.
+def write_case_no(enviroment,system,f,verbosem):
+    """Write the switch cases in the matlab file and exclude no
+    successors.
 
     Input:
 
@@ -372,8 +368,8 @@ queue2=Queue.Queue()
 enviroment=Queue.Queue()
 system=Queue.Queue()
 try:
-    loadFile(sys.argv[1]+'.aut')
-    readVariables(sys.argv[1]+'.smv')
+    load_file(sys.argv[1]+'.aut')
+    read_variables(sys.argv[1]+'.smv')
     q=question('Shall there be a semicolon printed after each variable assignment? [Y/n]')
     q2=question('Shall the script exclude no successors? [Y/n]')
     if q:
@@ -382,7 +378,7 @@ try:
         verbosem=0
     if not os.path.isfile(sys.argv[2]+'.m'):
         f=open(sys.argv[2]+'.m','w')
-        writeStartLine(enviroment,system,f)
+        write_startline(enviroment,system,f)
         if q2:
             for i in range(queue.qsize()):
                 temp=queue.get()
@@ -390,16 +386,19 @@ try:
                 if not temp[2] == []:
                     queue.put(temp)
                     queue1.put(temp1)
-            writeCaseNo(enviroment,system,f,verbosem)
+            write_case_no(enviroment,system,f,verbosem)
         else:
-            writeCase(enviroment,system,f,verbosem)
+            write_case(enviroment,system,f,verbosem)
         f.close()
         if queue.get()[0]==-1:
             raise IOError
-        print 'MATLAB script written to '+sys.argv[2]+'.m'+' with success\n'
+        print('MATLAB script written to '+sys.argv[2]+'.m'+' with success\n')
     else:
-        print 'Enter a matlab filename that not exists'
+        print('Enter a matlab filename that does not exist.')
 except IOError:
-    print 'Enter correct filename for a TuLiP generated controller, aut and smv file shall have the same name'
+    print('Enter correct filename for a TuLiP generated controller, '+ \
+        'aut and\nsmv file must have the same name')
 except IndexError:
-    print 'Run this program by typing "python programfile.py nameofautfile nameofmatlabfile", aut and smv file shall have the same name'
+    print('Usage: aut2simulink.py JTLV-AUT-FILE MATLAB-FILE\n\n'+ \
+          '    aut and smv file must have the same name.\n'+ \
+          '    Do not include file extensions.')
