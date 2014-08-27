@@ -798,10 +798,12 @@ def _eval_bool_formula(clauses, var_values):
 
 def _sub_all(formula, propSymbol, prop):
     symfound = False
-    for i in xrange(0, len(formula)):
-        if (len(re.findall(r'\b'+propSymbol, formula[i])) > 0):
-            formula[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                      formula[i])
+    old = r'\b' + propSymbol
+    new = '(' + prop + ')'
+    
+    for i, f in enumerate(formula):
+        if re.findall(old, f):
+            formula[i] = re.sub(old, new, f)
             symfound = True
     return symfound
 
