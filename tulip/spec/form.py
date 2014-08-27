@@ -733,7 +733,7 @@ class GRSpec(LTL):
                 symfound |= _sub_all(self.sys_safety, propSymbol, prop)
                 symfound |= _sub_all(self.sys_prog, propSymbol, prop)
     
-    def evaluate(self, var_values):
+    def eval_init(self, var_values):
         """Evaluate env_init, sys_init, given a valuation of variables.
         
         Returns the Boolean value of the subformulas env_init, sys_init,
@@ -743,31 +743,31 @@ class GRSpec(LTL):
         Note: variable value type checking not implemented yet.
         
         @param var_values: valuation of env_vars and sys_vars
-        @type var_values: {'var_name':'var_value', ...}
+        @type var_values: C{{'var_name':var_value, ...}}
+            where: C{var_value} should be:
+            
+              - C{bool} for Boolean variables
+              - C{int} for integers
+              - C{str} for arbitrary finite types
         
         @return: truth values of spec parts::
         
-            {'env_init' : env_init[var_values],
-             'sys_init' : sys_init[var_values] }
+          C{{'env_init' : C{env_init} given C{var_values},
+             'sys_init' : C{sys_init} given C{var_values} }}
         
         @rtype: dict
         """
-        cp = self.copy()
-        cp.sym_to_prop(var_values)
-        
-        env_init = _eval_formula(_conj(cp.env_init) )
-        sys_init = _eval_formula(_conj(cp.sys_init) )
+        env_init = _eval_bool_formula(self.env_init, var_values)
+        sys_init = _eval_bool_formula(self.sys_init, var_values)
         
         return {'env_init':env_init, 'sys_init':sys_init}
 
-def _eval_formula(f):
-    f = parser.parse(f).to_python()
+def _eval_bool_formula(clauses, var_values):
+    f = _conj(clauses, op='and')
+    s = f.to_python()
     
-    if re.findall(r'->', f) or re.findall(r'<->', f):
-            raise NotImplementedError('todo: Eval of -> and <->')
-    
-    if len(f) > 0:
-        return eval(f)
+    if len(s) > 0:
+        return eval(s, var_values)
     else:
         return True
 
@@ -780,8 +780,8 @@ def _sub_all(formula, propSymbol, prop):
             symfound = True
     return symfound
 
-def _conj(iterable, unary=''):
-    return ' && '.join([unary + '(' + s + ')' for s in iterable])
+def _conj(iterable, unary='', op='&&'):
+    return (' ' + op + ' ').join([unary + '(' + s + ')' for s in iterable])
 
 def finite_domain2ints(spec):
     """Replace arbitrary finite vars with int vars.
