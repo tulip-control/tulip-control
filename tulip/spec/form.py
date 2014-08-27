@@ -733,6 +733,31 @@ class GRSpec(LTL):
                 symfound |= _sub_all(self.sys_safety, propSymbol, prop)
                 symfound |= _sub_all(self.sys_prog, propSymbol, prop)
     
+    def sub_values(self, var_values):
+        """Substitute given values for variables.
+        
+        Note that there are three ways to substitute values for variables:
+        
+          - lexical using L{sym_to_prop}
+          
+          - syntactic using this function
+          
+          - no substitution by user code, instead flatten to python and
+            use C{eval} together with a C{dict} defining
+            the values of variables, as done in L{eval_init}.
+        
+        For converting non-integer finite types to
+        integer types, use L{replace_finite_by_int}.
+        
+        @return: C{dict} of ASTs after the substitutions,
+            keyed by original clause (before substitution).
+        """
+        a = copy.deepcopy(self._ast)
+        
+        for formula, tree in a.iteritems():
+            a[formula] = ast.sub_values(tree, var_values)
+        return a
+    
     def eval_init(self, var_values):
         """Evaluate env_init, sys_init, given a valuation of variables.
         
