@@ -131,107 +131,108 @@ precedence = (
 # dictionary of names
 #names = {'var':'replacement'}
 
-def p_arithmetic(p):
-    """expression : expression TIMES expression
-                  | expression DIV expression
-                  | expression PLUS expression
-                  | expression MINUS expression
-    """
-    p[0] = ast.Arithmetic(p[2], p[1], p[3])
-
-def p_comparator(p):
-    """expression : expression EQUALS expression
-                  | expression NEQUALS expression
-                  | expression LT expression
-                  | expression LE expression
-                  | expression GT expression
-                  | expression GE expression
-    """
-    p[0] = ast.Comparator(p[2], p[1], p[3])
-
-def p_and(p):
-    """expression : expression AND expression
-    """
-    p[0] = ast.And(p[2], p[1], p[3])
-
-def p_or(p):
-    """expression : expression OR expression
-    """
-    p[0] = ast.Or(p[2], p[1], p[3])
-
-def p_xor(p):
-    """expression : expression XOR expression
-    """
-    p[0] = ast.Xor(p[2], p[1], p[3])
-
-def p_imp(p):
-    """expression : expression IMP expression
-    """
-    p[0] = ast.Imp(p[2], p[1], p[3])
-
-def p_bimp(p):
-    """expression : expression BIMP expression
-    """
-    p[0] = ast.BiImp(p[2], p[1], p[3])
-
-def p_unary_temp_op(p):
-    """expression : NEXT expression
-                  | ALWAYS expression
-                  | EVENTUALLY expression
-    """
-    p[0] = ast.UnTempOp(p[1], p[2])
-
-def p_bin_temp_op(p):
-    """expression : expression UNTIL expression
-                  | expression RELEASE expression
-    """
-    p[0] = ast.BiTempOp(p[2], p[1], p[3])
-
-def p_not(p):
-    """expression : NOT expression
-    """
-    p[0] = ast.Not(p[1], p[2])
-
-def p_group(p):
-    """expression : LPAREN expression RPAREN
-    """
-    p[0] = p[2]
-
-def p_number(p):
-    """expression : NUMBER
-    """
-    p[0] = ast.Num(p[1])
-
-def p_expression_name(p):
-    """expression : NAME
-    """
-    p[0] = ast.Var(p[1])
-
-def p_expression_const(p):
-    """expression : DQUOTES NAME DQUOTES
-    """
-    p[0] = ast.Const(p[2])
-
-def p_bool(p):
-    """expression : TRUE
-                  | FALSE
-    """
-    p[0] = ast.Bool([p[1]])
-
-def p_error(p):
-    warn("Syntax error at '%s'" % p.value)
-
-parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
-                   write_tables=0, debug=0)
-
-def rebuild_parsetab():
-    yacc.yacc(tabmodule="parsetab",
-              write_tables=1, debug=1)
-
-def parse(formula):
-    """Parse formula string and create abstract syntax tree (AST).
-    """
-    return parser.parse(formula, lexer=lexer, debug=logger)
+class LTLParser(object):
+    def p_arithmetic(p):
+        """expression : expression TIMES expression
+                      | expression DIV expression
+                      | expression PLUS expression
+                      | expression MINUS expression
+        """
+        p[0] = ast.Arithmetic(p[2], p[1], p[3])
+    
+    def p_comparator(p):
+        """expression : expression EQUALS expression
+                      | expression NEQUALS expression
+                      | expression LT expression
+                      | expression LE expression
+                      | expression GT expression
+                      | expression GE expression
+        """
+        p[0] = ast.Comparator(p[2], p[1], p[3])
+    
+    def p_and(p):
+        """expression : expression AND expression
+        """
+        p[0] = ast.And(p[2], p[1], p[3])
+    
+    def p_or(p):
+        """expression : expression OR expression
+        """
+        p[0] = ast.Or(p[2], p[1], p[3])
+    
+    def p_xor(p):
+        """expression : expression XOR expression
+        """
+        p[0] = ast.Xor(p[2], p[1], p[3])
+    
+    def p_imp(p):
+        """expression : expression IMP expression
+        """
+        p[0] = ast.Imp(p[2], p[1], p[3])
+    
+    def p_bimp(p):
+        """expression : expression BIMP expression
+        """
+        p[0] = ast.BiImp(p[2], p[1], p[3])
+    
+    def p_unary_temp_op(p):
+        """expression : NEXT expression
+                      | ALWAYS expression
+                      | EVENTUALLY expression
+        """
+        p[0] = ast.UnTempOp(p[1], p[2])
+    
+    def p_bin_temp_op(p):
+        """expression : expression UNTIL expression
+                      | expression RELEASE expression
+        """
+        p[0] = ast.BiTempOp(p[2], p[1], p[3])
+    
+    def p_not(p):
+        """expression : NOT expression
+        """
+        p[0] = ast.Not(p[1], p[2])
+    
+    def p_group(p):
+        """expression : LPAREN expression RPAREN
+        """
+        p[0] = p[2]
+    
+    def p_number(p):
+        """expression : NUMBER
+        """
+        p[0] = ast.Num(p[1])
+    
+    def p_expression_name(p):
+        """expression : NAME
+        """
+        p[0] = ast.Var(p[1])
+    
+    def p_expression_const(p):
+        """expression : DQUOTES NAME DQUOTES
+        """
+        p[0] = ast.Const(p[2])
+    
+    def p_bool(p):
+        """expression : TRUE
+                      | FALSE
+        """
+        p[0] = ast.Bool([p[1]])
+    
+    def p_error(p):
+        warn("Syntax error at '%s'" % p.value)
+    
+    parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
+                       write_tables=0, debug=0)
+    
+    def rebuild_parsetab():
+        yacc.yacc(tabmodule="parsetab",
+                  write_tables=1, debug=1)
+    
+    def parse(formula):
+        """Parse formula string and create abstract syntax tree (AST).
+        """
+        return parser.parse(formula, lexer=lexer, debug=logger)
     
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
