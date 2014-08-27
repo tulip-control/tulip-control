@@ -89,7 +89,7 @@ FULL_OPERATOR_NAMES = {
 class LTLException(Exception):
     pass
 
-def ast_to_labeled_graph(ast, detailed):
+def ast_to_labeled_graph(tree, detailed):
     """Convert AST to C{NetworkX.DiGraph} for graphics.
     
     @param ast: Abstract syntax tree
@@ -98,7 +98,7 @@ def ast_to_labeled_graph(ast, detailed):
     """
     g = nx.DiGraph()
     
-    for u, d in ast.nodes_iter(data=True):
+    for u, d in tree.nodes_iter(data=True):
         nd = d['ast_node']
         
         if isinstance(nd, (Unary, Binary)):
@@ -114,7 +114,7 @@ def ast_to_labeled_graph(ast, detailed):
         
         g.add_node(u, label=label)
     
-    for u, v in ast.graph.edges_iter():
+    for u, v in tree.edges_iter():
         g.add_edge(u, v)
     
     return g
@@ -126,6 +126,7 @@ class LTL_AST(nx.DiGraph):
     """
     def __init__(self):
         self.root = None
+        super(LTL_AST, self).__init__()
     
     def dump_dot(self, filename, detailed=False):
         """Create GraphViz dot string from given AST.
@@ -140,7 +141,7 @@ class LTL_AST(nx.DiGraph):
     def write_pdf(self, filename, detailed=False):
         """Layout AST and save result in PDF file.
         """
-        self.dump_dot(self, filename, detailed)
+        self.dump_dot(filename, detailed)
         subprocess.call(['dot', '-Tpdf', '-O', filename])
     
     def get_vars(self):

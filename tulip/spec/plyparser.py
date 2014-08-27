@@ -155,13 +155,13 @@ class LTLParser(object):
         """Parse formula string and create abstract syntax tree (AST).
         """
         self.build()
-        g = nx.DiGraph()
+        g = ast.LTL_AST()
         self.graph = g
-        root_node = self.parser.parse(formula, lexer=lexer, debug=logger)
+        root_nd = self.parser.parse(formula, lexer=lexer, debug=logger)
         
         # mark root
-        self.graph.root = id(root_node)
-        return root_node
+        self.graph.root = root_nd
+        return g
     
     def p_arithmetic(self, p):
         """expression : expression TIMES expression
