@@ -276,7 +276,7 @@ class Bool(Node):
 class Unary(Node):
     @classmethod
     def new(cls, op_node, operator=None):
-        return cls([operator, op_node])
+        return cls(operator, op_node)
     
     def __init__(self, operator, x, g):
         super(Unary, self).__init__(g)
@@ -366,8 +366,8 @@ class UnTempOp(Unary):
 
 class Binary(Node):
     @classmethod
-    def new(cls, op_l, op_r, operator=None):
-        return cls([op_l, operator, op_r])
+    def new(cls, x, y, operator=None):
+        return cls(x, operator, y)
     
     def __init__(self, operator, x, y, g):
         super(Binary, self).__init__(g)
