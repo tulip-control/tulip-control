@@ -841,12 +841,12 @@ def finite_domain2ints(spec):
     
     spec0 = spec.copy()
     
-    _sub_var(spec0, spec0.env_vars)
-    _sub_var(spec0, spec0.sys_vars)
+    vars_dict = dict(spec0.env_vars)
+    vars_dict.update(spec0.sys_vars)
     
-    return spec0
+    changed_vars = dict()
+    var_const2int = dict()
     
-def _sub_var(spec, vars_dict):
     for variable, domain in vars_dict.items():
         if not isinstance(domain, list):
             continue
@@ -855,23 +855,44 @@ def _sub_var(spec, vars_dict):
             raise Exception('variable: ' + str(variable) +
                             'has empty domain: ' + str(domain))
         
-        logger.debug('mapping arbitrary finite domain to integers...')
+        logger.debug('mapping domain of var: ' + str(variable) +
+                     ' to integers')
         
         # integers cannot be an arbitrary finite domain,
         # neither as integers (like 1), nor as strings (like '1')
         # because they will be indistinguishable from
         # from values of gr1c integer variables        
-        if any([not isinstance(x, str) for x in domain]):
-            msg = 'Found non-string elements in domain: ' + str(domain) + '\n'
-            msg += 'only string elements allowed in arbitrary finite domains.'
-            raise TypeError(msg)
+        if not all({isinstance(x, basestring) for x in domain}):
+            raise TypeError(
+                'Finite domain must contain only strings. '
+                'Found instead:\n' + str(domain) + '\n'
+            )
         
         # the order provided will be the map to ints
-        vars_dict[variable] = (0, len(domain)-1)
-        values2ints = {var:str(i) for i, var in enumerate(domain)}
+        changed_vars[variable] = (0, len(domain)-1)
+        var_const2int[variable] = domain
+    
+    logger.debug('sub using var_const2int: ' + str(var_const2int))
+    
+    # replace symbols by ints
+    for y in {'env_init', 'env_safety', 'env_prog',
+              'sys_init', 'sys_safety', 'sys_prog'}:
+        s = getattr(spec0, y)
         
-        # replace symbols by ints
-        spec.sym_to_prop(values2ints)
+        new_s = []
+        for x in s:
+            spec0.ast(x).sub_constants(var_const2int)
+            z = str(spec0.ast(x).root)
+            new_s.append(z)
+        
+        setattr(spec0, y, new_s)
+    
+    # update variable types
+    for s in [spec0.env_vars, spec0.sys_vars]:
+        for var in s:
+            if var in changed_vars:
+                s[var] = changed_vars[var]
+    return spec0
 
 def stability_to_gr1(p, aux='aux'):
     """Convert C{<>[] p} to GR(1).
