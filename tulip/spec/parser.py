@@ -53,17 +53,14 @@ def _replace_full_name_operators(formula):
 def issafety(tree):
     """Crude test for safety spec.
     """
-    def f(t):
-        if isinstance(t, ast.UnTempOp) and not t.operator == "G":
+    for u, d in tree.nodes_iter(data=True):
+        t = d['ast_node']
+        
+        if isinstance(t, ast.UnTempOp) and t.operator != "G":
             return False
         if isinstance(t, ast.BiTempOp):
             return False
-        if isinstance(t, ast.Unary):
-            return t.operand
-        if isinstance(t, ast.Binary):
-            return (t.op_l and t.op_r)
-        return True
-    return tree.map(f)
+    return True
 
 def parse(formula, parser='ply', full_operators=False):
     """Parse formula string and create abstract syntax tree (AST).
