@@ -186,6 +186,61 @@ class LTL_AST(nx.DiGraph):
             
             d['ast_node'] = nd
     
+    def sub_constants(self, var_const2int):
+        """Replace string constants by integers.
+        
+        To be used for converting arbitrary finite domains
+        to integer domains prior to calling gr1c.
+        
+        @param const2int: {'varname':['const_val0', ...], ...}
+        @type const2int: C{dict} of C{list}
+        """
+        logger.info('substitute ints for constants in ' + str(self))
+        
+        for u, d in self.nodes_iter(data=True):
+            nd = d['ast_node']
+            
+            if not isinstance(nd, Const):
+                continue
+            
+            # find parent Binary operator
+            b = nd
+            while True:
+                old = b
+                bid = self.predecessors(old.id)[0]
+                b = self.node[bid]['ast_node']
+                
+                if isinstance(b, Binary):
+                    break
+            
+            succ = self.successors(b.id)
+            
+            var_branch = succ[0] if succ[1] == old.id else succ[1]
+            
+            # go down until var found
+            # assuming correct syntax for gr1c
+            v = self.node[var_branch]['ast_node']
+            while True:
+                if isinstance(v, Var):
+                    break
+                
+                old = v
+                vid = self.successors(old.id)[0]
+                v = self.node[vid]['ast_node']
+            
+            # now: b, is the operator and: v, the variable
+            const2int = var_const2int[str(v)]
+            x = const2int.index(nd.val)
+            
+            val = Num(x, None)
+            
+            # replace Const with Num
+            # dn't touch the underlying graph
+            val.id = nd.id
+            val.graph = self
+            
+            d['ast_node'] = val
+    
     def to_gr1c(self):
         return self.root.to_gr1c()
     
