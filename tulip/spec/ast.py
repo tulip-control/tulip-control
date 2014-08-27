@@ -98,7 +98,7 @@ def ast_to_labeled_graph(ast, detailed):
     """
     g = nx.DiGraph()
     
-    for u, d in ast.graph.nodes_iter(data=True):
+    for u, d in ast.nodes_iter(data=True):
         nd = d['ast_node']
         
         if isinstance(nd, (Unary, Binary)):
@@ -127,29 +127,30 @@ class LTL_AST(nx.DiGraph):
     def __init__(self):
         self.root = None
     
-def dump_dot(ast, filename, detailed=False):
-    """Create GraphViz dot string from given AST.
+    def dump_dot(self, filename, detailed=False):
+        """Create GraphViz dot string from given AST.
+        
+        @type ast: L{ASTNode}
+        
+        @rtype: str
+        """
+        g = ast_to_labeled_graph(self, detailed)
+        nx.write_dot(g, filename)
     
-    @type ast: L{ASTNode}
+    def write_pdf(self, filename, detailed=False):
+        """Layout AST and save result in PDF file.
+        """
+        self.dump_dot(self, filename, detailed)
+        subprocess.call(['dot', '-Tpdf', '-O', filename])
     
-    @rtype: str
-    """
-    g = ast_to_labeled_graph(ast, detailed)
-    nx.write_dot(g, filename)
-
-def write_pdf(ast, filename, detailed=False):
-    """Layout AST and save result in PDF file.
-    """
-    dump_dot(ast, filename, detailed)
-    subprocess.call(['dot', '-Tpdf', '-O', filename])
-
-def get_vars(tree):
-    """Return the set of variables in C{tree}.
+    def get_vars(self):
+        """Return the set of variables in C{tree}.
+        
+        @rtype: C{set} of L{Var}
+        """
+        return {d['ast_node'] for u, d in self.nodes_iter(data=True)
+                              if isinstance(d['ast_node'], Var)}
     
-    @rtype: C{set} of L{Var}
-    """
-    return {d['ast_node'] for u, d in tree.nodes_iter(data=True)
-                          if isinstance(d['ast_node'], Var)}
 
 # Flattener helpers
 def _flatten_gr1c(node, **args):
