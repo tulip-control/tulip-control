@@ -1007,6 +1007,38 @@ def _paren(x):
     """
     return '(' + x + ')'
 
+def infer_constants(formula, variables):
+    """Enclose all non-variable names in quotes.
+    
+    @param formula: well-formed LTL formula
+    @type formula: C{str} or L{LTL_AST}
+    
+    @param variables: names
+    @type variables: iterable container of C{str}
+    
+    @return: C{formula} with all string literals not in C{variables}
+        enclosed in double quotes
+    @rtype: C{str}
+    """
+    tree = parser.parse(formula)
+    for u, d in tree.nodes_iter(data=True):
+        nd = d['ast_node']
+        
+        if not isinstance(nd, ast.Var):
+            continue
+        
+        if str(nd) in variables:
+            continue
+        
+        # Var (so NAME token) but not a variable
+        # turn it into a string constant
+        new = ast.Const(str(nd), g=None)
+        new.id = nd.id
+        new.graph = nd.graph
+        
+        d['ast_node'] = new
+    return str(tree)
+
 def check_var_conflicts(s, variables):
     """Raise exception if set intersects existing variable name, or values.
     
