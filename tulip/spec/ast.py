@@ -498,13 +498,9 @@ class Binary(Node):
         return self._child('right')
     
     def _child(self, pos):
-        u = self.id
+        assert(len(self.graph.succ[self.id]) == 2)
         
-        n = len(self.graph.successors(u))
-        if n != 2:
-            logger.error('Binary AST node has %d children.' % n)
-        
-        for u_, v, d in self.graph.edges_iter([u], data=True):
+        for v, d in self.graph.succ[self.id].iteritems():
             if d['pos'] == pos:
                 return self.graph.node[v]['ast_node']
     
