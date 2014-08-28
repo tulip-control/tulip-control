@@ -37,7 +37,7 @@ from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
 
-import time, re, copy
+import pprint, time, re, copy
 
 from tulip.spec import parser
 from . import ast
@@ -535,6 +535,7 @@ class GRSpec(LTL):
 
         Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
+        logger.info('convert to jtlv...')
         spec = ['', '']
         
         f = self._jtlv_str
@@ -557,6 +558,8 @@ class GRSpec(LTL):
         s = ''
         
         for x in m:
+            logger.debug('convert clause: ' + str(x))
+            
             if not x:
                 continue
             
@@ -578,6 +581,8 @@ class GRSpec(LTL):
 
         Cf. L{interfaces.gr1c}.
         """
+        logger.info('convert to gr1c...')
+        
         def _to_gr1c_print_vars(vardict):
             output = ""
             for variable, domain in vardict.items():
@@ -623,7 +628,7 @@ class GRSpec(LTL):
         The AST resulting from each clause is stored
         in the C{dict} attribute C{ast}.
         """
-        logger.debug('parsing to cache asts...')
+        logger.debug('parsing ASTs to cache them...')
         
         parts = {'env_init', 'env_safety', 'env_prog',
                  'sys_init', 'sys_safety', 'sys_prog'}
@@ -632,8 +637,11 @@ class GRSpec(LTL):
         for p in parts:
             s = getattr(self, p)
             for x in s:
-                if x not in self._ast:
+                if x in self._ast:
+                    logger.debug(str(x) + ' is already in cache')
+                else:
                     self._ast[x] = parser.parse(x)
+                    logger.debug('parse: ' + str(x))
         
         # rm cached ASTs that correspond to deleted clauses
         s = set(self._ast)
@@ -649,8 +657,15 @@ class GRSpec(LTL):
         If AST for formula C{x} has already been computed earlier,
         then return cached result.
         """
-        if x not in self._ast:
+        if logger.getEffectiveLevel() <= logging.DEBUG:
+            logger.debug('current cache of ASTs:\n' + pprint.pformat(self._ast) + 3*'\n')
+            logger.debug('check if: %s, is in cache.' % x)
+        if x in self._ast:
+            logger.info('no need to parse')
+        else:
+            logger.info('it is not. need to parse')
             self.parse()
+            
         return self._ast[x]
     
     def sym_to_prop(self, props):
@@ -714,6 +729,8 @@ class GRSpec(LTL):
         @return: C{dict} of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
+        logger.info('substitute values for variables')
+        
         a = copy.deepcopy(self._ast)
         
         for formula, tree in a.iteritems():
