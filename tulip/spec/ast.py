@@ -187,7 +187,7 @@ class LTL_AST(nx.DiGraph):
             # replace variable by value,
             # don't touch the underlying graph
             nd.id = old.id
-            nd.graph = self
+            nd.graph = old.graph
             
             d['ast_node'] = nd
     
@@ -242,7 +242,7 @@ class LTL_AST(nx.DiGraph):
             # replace Const with Num
             # dn't touch the underlying graph
             val.id = nd.id
-            val.graph = self
+            val.graph = nd.graph
             
             d['ast_node'] = val
     
