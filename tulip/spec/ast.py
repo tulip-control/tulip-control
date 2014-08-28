@@ -129,6 +129,9 @@ class LTL_AST(nx.DiGraph):
         self.root = None
         super(LTL_AST, self).__init__()
     
+    def __repr__(self):
+        return repr(self.root)
+    
     def to_pydot(self, detailed=False):
         """Create GraphViz dot string from given AST.
         

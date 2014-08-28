@@ -818,7 +818,7 @@ def finite_domain2ints(spec):
             a.sub_constants(fvars)
             
             # formula of int/bool AST
-            f = str(a.root)
+            f = str(a)
             spec._ast[f] = a # cache
             
             # remember map from clauses to int/bool clauses
