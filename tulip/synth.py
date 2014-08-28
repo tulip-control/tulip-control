@@ -440,7 +440,7 @@ def actions2ints(actions, actionvar, min_one=False):
     if int_actions:
         logger.debug('actions modeled as an integer variable')
         
-        action_ids = {x:x for x in actions}
+        action_ids = {x:actionvar + '=' + str(x) for x in actions}
         n_actions = len(actions)
         
         # extra value modeling all False ?
