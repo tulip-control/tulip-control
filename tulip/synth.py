@@ -49,30 +49,30 @@ from .interfaces import gr1c
 _hl = '\n' +60*'-'
 
 def _pstr(s):
-    return '(' +str(s) +')'
+    return '(' + str(s) + ')'
 
 def _disj(set0):
-    return " || ".join([
-        "(" +str(x) +")"
+    return ' || '.join([
+        '(' + str(x) + ')'
         for x in set0
     ])
 
 def _conj(set0):
-    return " && ".join([
-        "(" +str(x) +")"
+    return ' && '.join([
+        '(' + str(x) + ')'
         for x in set0
         if x != ''
     ])
 
 def _conj_intersection(set0, set1, parenth=True):
     if parenth:
-        return " && ".join([
-            "("+str(x)+")"
+        return ' && '.join([
+            '(' + str(x) + ')'
             for x in set0
             if x in set1
         ])
     else:
-        return " && ".join([
+        return ' && '.join([
             str(x)
             for x in set0
             if x in set1
@@ -80,26 +80,26 @@ def _conj_intersection(set0, set1, parenth=True):
 
 def _conj_neg(set0, parenth=True):
     if parenth:
-        return " && ".join([
-            "!("+str(x)+")"
+        return ' && '.join([
+            '!(' + str(x) + ')'
             for x in set0
         ])
     else:
-        return " && ".join([
-            "!"+str(x)
+        return ' && '.join([
+            '!' + str(x)
             for x in set0
         ])
 
 def _conj_neg_diff(set0, set1, parenth=True):
     if parenth:
-        return " && ".join([
-            "!("+str(x)+")"
+        return ' && '.join([
+            '!(' + str(x) + ')'
             for x in set0
             if x not in set1
         ])
     else:
-        return " && ".join([
-            "!"+str(x)
+        return ' && '.join([
+            '!' + str(x)
             for x in set0
             if x not in set1
         ])
@@ -368,9 +368,11 @@ def create_actions(
                         str(actions_must) )
     
     yesno = lambda x: 'Yes' if x else 'No'
-    msg = 'options for modeling actions:\n\t' +\
-          'mutex: ' + yesno(use_mutex) +'\n\t' +\
-          'min_one: ' + yesno(min_one)
+    msg = (
+        'options for modeling actions:\n\t'
+        'mutex: ' + yesno(use_mutex) +'\n\t'
+        'min_one: ' + yesno(min_one)
+    )
     logger.debug(msg)
     
     # too few values for gr1c ?
@@ -415,10 +417,12 @@ def create_actions(
               'with domain: ' + str(domain)
         logger.debug(msg)
     
-    msg = 'for tulip variable: ' + str(actionvar) +\
-          ' (an action type)\n\t' +\
-          'the map from [tulip action values] ---> ' +\
-          '[solver expressions] is:\n' + 2*'\t' + str(action_ids)
+    msg = (
+        'for tulip variable: ' + str(actionvar) +
+        ' (an action type)\n\t'
+        'the map from [tulip action values] ---> '
+        '[solver expressions] is:\n' + 2*'\t' + str(action_ids)
+    )
     logger.debug(msg)
     return action_ids
 
@@ -454,8 +458,8 @@ def actions2ints(actions, actionvar, min_one=False):
         if not min_one:
             domain += [actionvar + 'none']
             
-            msg = 'domain has been extended, because all actions\n\t' +\
-                  'could be False (constraint: min_one = False).'
+            msg = ('domain has been extended, because all actions\n\t'
+                   'could be False (constraint: min_one = False).')
             logger.debug(msg)
         
     return (action_ids, domain)
@@ -789,12 +793,14 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         return init
     
     if not states.initial:
-        msg = 'FTS has no initial states.\n'
-        msg += 'Enforcing this renders False the GR(1):\n'
-        msg += ' - guarantee if this is a system TS,\n'
-        msg += '   so the spec becomes trivially False.\n'
-        msg += ' - assumption if this is an environment TS,\n'
-        msg += '   so the spec becomes trivially True.'
+        msg = (
+            'FTS has no initial states.\n'
+            'Enforcing this renders False the GR(1):\n'
+            ' - guarantee if this is a system TS,\n'
+            '   so the spec becomes trivially False.\n'
+            ' - assumption if this is an environment TS,\n'
+            '   so the spec becomes trivially True.'
+        )
         raise Exception(msg)
         
         init += ['False']
@@ -870,8 +876,8 @@ def sys_trans_from_ts(
         
         cur_trans = trans.find([from_state])
         
-        msg = 'from state: ' + str(from_state) +\
-              ', the available transitions are:\n\t' + str(cur_trans)
+        msg = ('from state: ' + str(from_state) +\
+               ', the available transitions are:\n\t' + str(cur_trans))
         logger.debug(msg)
         
         # no successor states ?
@@ -924,9 +930,11 @@ def sys_trans_from_ts(
             
             cur_str += [_conj(postcond)]
             
-            msg = 'guard to state: ' + str(to_state) +\
-                  ', with state_id: ' + str(to_state_id) +\
-                  ', has post-conditions: ' + str(postcond)
+            msg = (
+                'guard to state: ' + str(to_state) +
+                ', with state_id: ' + str(to_state_id) +
+                ', has post-conditions: ' + str(postcond)
+            )
             logger.debug(msg)
             
         sys_trans += [precond + ' -> (' + _disj(cur_str) + ')']
@@ -1017,10 +1025,12 @@ def env_trans_from_env_ts(
         if not cur_trans:
             env_trans += [precond + ' -> X(False)']
                 
-            msg = 'Environment dead-end found.\n'
-            msg += 'If sys can force env to dead-end,\n'
-            msg += 'then GR(1) assumption becomes False,\n'
-            msg += 'and spec trivially True.'
+            msg = (
+                'Environment dead-end found.\n'
+                'If sys can force env to dead-end,\n'
+                'then GR(1) assumption becomes False,\n'
+                'and spec trivially True.'
+            )
             warnings.warn(msg)
             
             continue
@@ -1060,9 +1070,11 @@ def env_trans_from_env_ts(
                 conj = _conj_neg(codomain.itervalues() )
                 cur_list += [conj]
                 
-                msg = 'for action_type: ' + str(action_type) +'\n' +\
-                      'with codomain: ' + str(codomain) +'\n' +\
-                      'the negated conjunction is: ' + str(conj)
+                msg = (
+                    'for action_type: ' + str(action_type) +'\n' +
+                    'with codomain: ' + str(codomain) +'\n' +
+                    'the negated conjunction is: ' + str(conj)
+                )
                 logger.debug(msg)
         
         env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) +')']
@@ -1096,17 +1108,17 @@ def ap_trans_from_ts(states, state_ids, aps):
         if not tmp:
             continue
         
-        trans += ["X(("+ str(state_id) +") -> ("+ tmp +"))"]
+        trans += ['X((' + str(state_id) + ') -> (' + tmp + '))']
     
     return (init, trans)
 
 def sprint_aps(label, aps):
-    if label.has_key("ap"):
+    if label.has_key('ap'):
         tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
     else:
         tmp0 = ''
     
-    if label.has_key("ap"):
+    if label.has_key('ap'):
         tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
     else:
         tmp1 = _conj_neg(aps, parenth=False)
