@@ -331,6 +331,7 @@ class GRSpec(LTL):
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
         self._ast = dict()
+        self._bool_int = dict()
         
         if env_vars is None:
             env_vars = dict()
@@ -584,21 +585,19 @@ class GRSpec(LTL):
         logger.info('convert to gr1c...')
         
         def _to_gr1c_print_vars(vardict):
-            output = ""
-            for variable, domain in vardict.items():
-                if domain == "boolean":
-                    output += " "+variable
-                elif isinstance(domain, tuple) and len(domain) == 2:
-                    output += " "+variable+" ["+str(domain[0]) +\
-                        ", "+str(domain[1])+"]"
+            output = ''
+            for var, dom in vardict.items():
+                if dom == 'boolean':
+                    output += ' ' + var
+                elif isinstance(dom, tuple) and len(dom) == 2:
+                    output += ' %s [%d, %d]' % (var, dom[0], dom[1])
+                elif isinstance(dom, list) and len(dom) > 0:
+                    output += ' %s [%d, %d]' % (var, 0, len(dom)-1)
                 else:
-                    raise ValueError("Domain not supported by gr1c: " +
-                        str(domain))
+                    raise ValueError('Domain not supported by gr1c: ' + str(dom))
             return output
         
-        tmp = finite_domain2ints(self)
-        if tmp is not None:
-            return tmp.to_gr1c()
+        finite_domain2ints(self)
         
         output = 'ENV:' + _to_gr1c_print_vars(self.env_vars) + ';\n'
         output += 'SYS:' + _to_gr1c_print_vars(self.sys_vars) + ';\n'
@@ -618,7 +617,7 @@ class GRSpec(LTL):
             return name + ':;\n'
         else:
             return name + ': ' + '\n& '.join([
-                prefix + '(' + self.ast(x).to_gr1c() + ')'
+                prefix + '(' + self.ast(self._bool_int[x]).to_gr1c() + ')'
                 for x in s
             ]) + ';\n'
     
@@ -646,7 +645,9 @@ class GRSpec(LTL):
         # rm cached ASTs that correspond to deleted clauses
         s = set(self._ast)
         for p in parts:
-            s.difference_update(getattr(self, p))
+            w = getattr(self, p)
+            s.difference_update(w)
+            s.difference_update({self._bool_int.get(x) for x in w})
         
         for x in s:
             self._ast.pop(x)
@@ -796,75 +797,32 @@ def finite_domain2ints(spec):
     Otherwise it returns a copy of spec with all arbitrary
     finite vars replaced by int-valued vars.
     """
-    not_list = True
-    for domain in spec.env_vars.itervalues():
-        if isinstance(domain, list):
-            not_list = False
-            break
-    if not_list:
-        for domain in spec.sys_vars.itervalues():
-            if isinstance(domain, list):
-                not_list = False
-                break
+    vars_dict = dict(spec.env_vars)
+    vars_dict.update(spec.sys_vars)
     
-    # nothing todo ?
-    if not_list:
-        return None
-    
-    spec0 = spec.copy()
-    
-    vars_dict = dict(spec0.env_vars)
-    vars_dict.update(spec0.sys_vars)
-    
-    changed_vars = dict()
-    var_const2int = dict()
-    
-    for variable, domain in vars_dict.items():
-        if not isinstance(domain, list):
-            continue
-        
-        if len(domain) == 0:
-            raise Exception('variable: ' + str(variable) +
-                            'has empty domain: ' + str(domain))
-        
-        logger.debug('mapping domain of var: ' + str(variable) +
-                     ' to integers')
-        
-        # integers cannot be an arbitrary finite domain,
-        # neither as integers (like 1), nor as strings (like '1')
-        # because they will be indistinguishable from
-        # from values of gr1c integer variables        
-        if not all({isinstance(x, basestring) for x in domain}):
-            raise TypeError(
-                'Finite domain must contain only strings. '
-                'Found instead:\n' + str(domain) + '\n'
-            )
-        
-        # the order provided will be the map to ints
-        changed_vars[variable] = (0, len(domain)-1)
-        var_const2int[variable] = domain
-    
-    logger.debug('sub using var_const2int: ' + str(var_const2int))
+    fvars = {v:d for v, d in vars_dict.iteritems() if isinstance(d, list)}
     
     # replace symbols by ints
-    for y in {'env_init', 'env_safety', 'env_prog',
-              'sys_init', 'sys_safety', 'sys_prog'}:
-        s = getattr(spec0, y)
-        
-        new_s = []
-        for x in s:
-            spec0.ast(x).sub_constants(var_const2int)
-            z = str(spec0.ast(x).root)
-            new_s.append(z)
-        
-        setattr(spec0, y, new_s)
-    
-    # update variable types
-    for s in [spec0.env_vars, spec0.sys_vars]:
-        for var in s:
-            if var in changed_vars:
-                s[var] = changed_vars[var]
-    return spec0
+    parts = {'env_init', 'env_safety', 'env_prog',
+             'sys_init', 'sys_safety', 'sys_prog'}
+    for p in parts:
+        for x in getattr(spec, p):
+            if spec._bool_int.get(x) in spec._ast:
+                return
+            
+            # get AST
+            a = spec.ast(x)
+            
+            # create AST copy with int and bool vars only
+            a = copy.deepcopy(a)
+            a.sub_constants(fvars)
+            
+            # formula of int/bool AST
+            f = str(a.root)
+            spec._ast[f] = a # cache
+            
+            # remember map from clauses to int/bool clauses
+            spec._bool_int[x] = f
 
 def stability_to_gr1(p, aux='aux'):
     """Convert C{<>[] p} to GR(1).
