@@ -621,6 +621,24 @@ class GRSpec(LTL):
                 for x in s
             ]) + ';\n'
     
+    def ast(self, x):
+        """Return AST corresponding to formula x.
+        
+        If AST for formula C{x} has already been computed earlier,
+        then return cached result.
+        """
+        if logger.getEffectiveLevel() <= logging.DEBUG:
+            logger.debug('current cache of ASTs:\n' +
+                         pprint.pformat(self._ast) + 3*'\n')
+            logger.debug('check if: ' + str(x) + ', is in cache.')
+        if x in self._ast:
+            logger.info('no need to parse')
+        else:
+            logger.info(str(x) + ' is not in cache. Need to parse.')
+            self.parse()
+            
+        return self._ast[x]
+    
     def parse(self):
         """Parse each clause and store it.
         
@@ -651,23 +669,6 @@ class GRSpec(LTL):
         
         for x in s:
             self._ast.pop(x)
-    
-    def ast(self, x):
-        """Return AST corresponding to formula x.
-        
-        If AST for formula C{x} has already been computed earlier,
-        then return cached result.
-        """
-        if logger.getEffectiveLevel() <= logging.DEBUG:
-            logger.debug('current cache of ASTs:\n' + pprint.pformat(self._ast) + 3*'\n')
-            logger.debug('check if: %s, is in cache.' % x)
-        if x in self._ast:
-            logger.info('no need to parse')
-        else:
-            logger.info('it is not. need to parse')
-            self.parse()
-            
-        return self._ast[x]
     
     def sym_to_prop(self, props):
         """Word-based replacement of proposition symbols by values.
