@@ -228,6 +228,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     node_list = aut_elem.findall(ns_prefix+"node")
     id_list = []  # For more convenient searching, and to catch redundancy
     A = nx.DiGraph()
+    A.env_vars = env_vars
+    A.sys_vars = sys_vars
     for node in node_list:
         this_id = int(node.find(ns_prefix+"id").text)
         #this_name = node.find(ns_prefix+"anno").text  # Assume version 1
