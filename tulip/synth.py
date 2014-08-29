@@ -42,7 +42,7 @@ from collections import OrderedDict
 
 from . import transys
 from .spec import GRSpec
-from .spec.form import check_var_conflicts
+#from .spec.form import check_var_conflicts
 from .interfaces import jtlv
 from .interfaces import gr1c
 
@@ -217,8 +217,6 @@ def create_states(states, variables, trans, statevar, bool_states):
         The latter is overridden in case < 3 states exist,
         to avoid issues with gr1c.
     """
-    check_var_conflicts(states, variables)
-    
     if bool_states:
         logger.debug('states modeled as Boolean variables')
         
@@ -229,8 +227,6 @@ def create_states(states, variables, trans, statevar, bool_states):
         logger.debug('states not modeled as Booleans')
         
         state_ids, domain = states2ints(states, statevar)
-        
-        check_var_conflicts({statevar}, variables)
         
         variables[statevar] = domain
     return state_ids
@@ -371,7 +367,6 @@ def create_actions(
     )
     logger.debug(msg)
     
-    check_var_conflicts(actions, variables)
     
     # no mutex -> cannot use int variable
     if not use_mutex:
@@ -401,7 +396,6 @@ def create_actions(
         assert(use_mutex)
         action_ids, domain = actions2ints(actions, actionvar, min_one)
         
-        check_var_conflicts({actionvar}, variables)
         
         variables[actionvar] = domain
         
