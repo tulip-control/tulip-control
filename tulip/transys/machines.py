@@ -768,8 +768,8 @@ def random_run(mealy, from_state=None, N=10):
         trans = mealy.transitions.find([state])
         
         selected_trans = choice(list(trans))
+        _, new_state, attr_dict  = selected_trans
         
-        _, state, attr_dict  = selected_trans[0]
         
         states_seq.append(state)
         
