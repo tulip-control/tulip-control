@@ -489,7 +489,7 @@ class Unary(Operator):
         self.graph.add_edge(self.id, x.id)
     
     def __repr__(self):
-        return ' '.join(['(', self.op, str(self.operand), ')'])
+        return '( %s %s )' % (self.op, str(self.operand))
     
     @property
     def operand(self):
@@ -510,7 +510,8 @@ class Unary(Operator):
             o = flattener(self.operand, **args)
         except AttributeError:
             o = str(self.operand)
-        return ' '.join(['(', op, o, ')'])
+        
+        return '( %s %s )' % (op, o)
     
     def map(self, f):
         n = self.__class__.new(self.operand.map(f), self.op)
@@ -551,7 +552,7 @@ class Binary(Operator):
         self.graph.add_edge(self.id, y.id, pos='right')
         
     def __repr__(self):
-        return ' '.join (['(', str(self.op_l), self.op, str(self.op_r), ')'])
+        return '( %s %s %s )' % (str(self.op_l), self.op, str(self.op_r))
     
     @property
     def op_l(self):
@@ -580,7 +581,7 @@ class Binary(Operator):
             r = flattener(self.op_r, **args)
         except AttributeError:
             r = str(self.op_r)
-        return ' '.join (['(', l, op, r, ')'])
+        return '( %s %s %s )' % (l, op, r)
     
     def map(self, f):
         n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op)
