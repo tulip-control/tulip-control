@@ -197,113 +197,75 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     else:
         return _pstr(conjuncted_actions)
 
-def create_states(states, variables, trans, statevar, bool_states):
-    """Create bool or int state variables in GR(1).
-    
-    Return map of TS states to spec variable valuations.
-    
-    @param states: TS states
-    
-    @param variables: to be augmented with state variables
-    
-    @param trans: to be augmented with state variable constraints.
-        Such a constraint is necessary only in case of bool states.
-        It requires that exactly one bool variable be True at a time.
-    
-    @param statevar: name to use for int-valued state variabe.
-    
-    @param bool_states: if True, then use bool variables.
-        Otherwise use int-valued variable.
-        The latter is overridden in case < 3 states exist,
-        to avoid issues with gr1c.
-    """
-    if bool_states:
-        logger.debug('states modeled as Boolean variables')
-        
-        state_ids = {x:x for x in states}
-        variables.update({s:'boolean' for s in states})
-        trans += exactly_one(states)
-    else:
-        logger.debug('states not modeled as Booleans')
-        
-        state_ids, domain = states2ints(states, statevar)
-        
-        variables[statevar] = domain
-    return state_ids
+# duplicate states are impossible, because each networkx vertex is unique
+# non-contiguous integerss for states fine: you are lossing efficiency
+# - synth doesn't care about that
 
-def states2ints(states, statevar):
-    """Return states of form 'statevar = #'.
+def iter2var(states, variables, statevar, bool_states, must):
+    """Represent finite domain in GR(1).
     
+    An integer or string variable can be used,
+    or multiple Boolean variables.
     
-    @param statevar: name of int variable representing
-        the current state
-    @type statevar: str
+    If the possible values are:
     
-    @rtype: {state : state_id}
-    """
-    # TODO: merge with actions2ints, don't strip letter
-    msg = 'mapping states: ' + str(states) +\
-          '\n\t to expressions understood by solver.'
-    logger.debug(msg)
+      - mutually exclusive (use_mutex == True)
+      - bool actions have not been requested (bool_actions == False)
     
-    if not states:
-        raise Exception('No states given, got: ' + str(states))
+    then an integer or string variable represents the variable in GR(1).
     
+    If all values are integers, then an integer is used.
+    If all values are strings, then a string variable is used.
+    Otherwise an exception is raised, unless Booleans have been requested.
     
-    logger.debug('all states are strings')
-    # try arbitrary finite domain
-    if not letter_int:
-        logger.debug('string states modeled as an arbitrary finite domain')
-        setloc = lambda s: statevar + ' = ' + str(s)
-        state_ids = {s:setloc(s) for s in states}
-        domain = list(states)
+    If the values are not mutually exclusive,
+    then only Boolean variables can represent them.
     
-    return (state_ids, domain)
-
-def create_actions(
-    actions, variables, trans, init,
-    actionvar, bool_actions, actions_must
-):
-    """Represent actions by bool or int GR(1) variables.
-    
-    Similar to the int representation of states.
-    
-    If the actions are:
-    
-       - mutually exclusive (use_mutex == True)
-       - bool actions have not been requested (bool_actions == False)
-      
-    then an int variable represents actions in GR(1).
-    
-    If actions are not mutually exclusive,
-    then only bool variables can represent them.
-    
-    Suppose N actions are defined.
+    Suppose N ossible values are defined.
     The int variable is allowed to take N+1 values.
-    The additional value corresponds to all actions being False.
+    The additional value corresponds to all, e.g., actions, being False.
     
-    If FTS actions are integers,
+    If FTS values are integers,
     then the additional action is an int value.
     
-    If FTS actions are strings (e.g., 'park', 'wait'),
+    If FTS values are strings (e.g., 'park', 'wait'),
     then the additional action is 'none'.
-    They are treated by gr1cint as an arbitrary finite domain.
+    They are treated by C{spec} as an arbitrary finite domain.
     
-    An option 'min_one' is internally available,
-    in order to allow only N values of the action variable.
-    This requires that at least one action be True each time.
+    An option C{min_one} is internally available,
+    in order to allow only N values of the variable.
+    This requires that the variable takes at least one value each time.
+    
     Combined with a mutex constraint, it yields an n-ary xor constraint.
     
-    @return: mapping from FTS actions, to GR(1) actions.
-        If bools are used, then GR(1) are the same.
-        Otherwise, they map to e.g. 'act = wait'
-    @rtype: dict
-    """
-    if not actions:
-        logger.debug('actions empty, empty dict for solver expr')
-        return dict()
+    @param states: values of domain.
+    @type states: iterable container of C{int}
+        or iterable container of C{str}
     
-    logger.debug('creating actions from: ' + str(actions) )
+    @param variables: to be augmented with integer or string variable
+        or Boolean variables.
+    
+    @param statevar: name to use for integer or string valued variabe.
+    @type statevar: C{str}
+    
+    @param bool_states: if True, then use bool variables.
+        Otherwise use integer or string valued variable.
+    
+    @return: C{tuple} of:
+      - mapping from values to GR(1) actions.
+        If Booleans are used, then GR(1) are the same.
+        Otherwise, they map to e.g. 'act = "wait"' or 'act = 3'
+        
+      - constraints to be added to C{trans} and/or C{init} in GR(1)
+    @rtype: C{dict}, C{list}
+    """
+    if not states:
+        logger.debug('empty container, so empty dict for solver expr')
+        return dict(), None
+    
+    logger.debug('mapping domain: ' + str(states) + '\n\t'
+                 'to expression understood by a GR(1) solver.')
+    
     assert(must in {'mutex', 'xor', None})
     
     # options for modeling actions
@@ -328,78 +290,80 @@ def create_actions(
         'min_one: ' + str(min_one)
     )
     
+    all_str = all(isinstance(x, str) for x in states)
     
-    if bool_actions:
-        logger.debug('actions modeled as Boolean variables')
+    if bool_states:
+        logger.debug('states modeled as Boolean variables')
+        if not all_str:
+            raise TypeError('If Boolean, all states must be strings.')
         
-        action_ids = {x:x for x in actions}
-        variables.update({a:'boolean' for a in actions})
+        state_ids = {x:x for x in states}
+        variables.update({s:'boolean' for s in states})
         
         # single action ?
-        if not mutex(action_ids.values()):
-            return action_ids
+        if len(mutex(state_ids.values()) ) == 0:
+            return state_ids
         
+        # handle multiple actions
         if use_mutex and not min_one:
-            trans += ['X (' + mutex(action_ids.values())[0] + ')']
-            init += mutex(action_ids.values())
+            constraint = mutex(state_ids.values())[0]
         elif use_mutex and min_one:
-            trans += ['X (' + exactly_one(action_ids.values())[0] + ')']
-            init += exactly_one(action_ids.values())
+            constraint = exactly_one(state_ids.values())[0]
         elif min_one:
             raise Exception('min_one requires mutex')
     else:
-        logger.debug('actions not modeled as Booleans')
-        assert(use_mutex)
-        action_ids, domain = actions2ints(actions, actionvar, min_one)
+        logger.debug('states not modeled as Booleans')
+        if statevar in variables:
+            raise ValueError('state variable: ' + str(statevar) +
+                             ' already exists in: ' + str(variables))
         
+        all_int = all(isinstance(x, int) for x in states)
         
-        variables[actionvar] = domain
-        
-        msg = 'created solver variable: ' + str(actionvar) + '\n\t' +\
-              'with domain: ' + str(domain)
-        logger.debug(msg)
-    
-    msg = (
-        'for tulip variable: ' + str(actionvar) +
-        ' (an action type)\n\t'
-        'the map from [tulip action values] ---> '
-        '[solver expressions] is:\n' + 2*'\t' + str(action_ids)
-    )
-    logger.debug(msg)
-    return action_ids
-
-def actions2ints(actions, actionvar, min_one=False):
-    msg = 'mapping domain of action_type: ' + str(actionvar) +\
-          '\n\t to expressions understood by solver.'
-    logger.debug(msg)
-    
-    int_actions = True
-    if int_actions:
-        logger.debug('actions modeled as an integer variable')
-        
-        action_ids = {x:actionvar + '=' + str(x) for x in actions}
-        n_actions = len(actions)
-        
-        # extra value modeling all False ?
-        if min_one:
-            n = n_actions -1
-        else:
-            n = n_actions
-        domain = (0, n)
-    else:
-        logger.debug('modeling actions as arbitrary finite domain')
-        
-        setact = lambda s: actionvar + ' = ' + s
-        action_ids = {s:setact(s) for s in actions}
-        domain = list(actions)
-        if not min_one:
-            domain += [actionvar + 'none']
+        if all_int:
+            logger.debug('all states are integers')
             
-            msg = ('domain has been extended, because all actions\n\t'
-                   'could be False (constraint: min_one = False).')
-            logger.debug(msg)
+            # extra value modeling all False ?
+            if min_one:
+                n = max(states)
+            else:
+                n = max(states) + 1
+            
+            f = lambda x: statevar + ' = ' + str(x)
+            domain = (min(states), n)
+            
+            logger.debug('created solver variable: ' + str(statevar) +
+                         '\n\t with domain: ' + str(domain))
+        elif all_str:
+            logger.debug('all states are strings')
+            assert(use_mutex)
+            
+            f = lambda x: statevar + ' = "' + str(x) + '"'
+            domain = list(states)
+            
+            if not min_one:
+                domain += [statevar + 'none']
+                
+                logger.debug('domain has been extended, because all actions\n\t'
+                             'could be False (constraint: min_one = False).')
+        else:
+            raise TypeError('Integer and string states must not be mixed.')
         
-    return (action_ids, domain)
+        state_ids = {x:f(x) for x in states}
+        variables[statevar] = domain
+        constraint = None
+    
+    logger.debug(
+        'for tulip variable: ' + str(statevar) + '\n'
+        'the map from [tulip action values] ---> '
+        '[solver expressions] is:\n' + 2*'\t' + str(state_ids)
+    )
+    return state_ids, constraint
+
+def add_actions(constraint, init, trans):
+    if constraint is None:
+        return
+    trans += ['X (' + constraint[0] + ')']
+    init += constraint
 
 def sys_to_spec(sys, ignore_initial=False, statevar='loc',
                 bool_states=False, bool_actions=False):
