@@ -813,7 +813,10 @@ def finite_domain2ints(spec):
     for p in parts:
         for x in getattr(spec, p):
             if spec._bool_int.get(x) in spec._ast:
-                return
+                logger.debug(str(x) + ' is in _bool_int cache')
+                continue
+            else:
+                logger.debug(str(x) + ' is not in _bool_int cache')
             
             # get AST
             a = spec.ast(x)
