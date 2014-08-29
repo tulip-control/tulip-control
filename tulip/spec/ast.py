@@ -675,9 +675,9 @@ class Comparator(Binary):
     
     def to_python(self):
         if self.operator == '=':
-            return self.flatten(_flatten_Promela, '==')
+            return self.flatten(_flatten_python, '==')
         else:
-            return self.flatten(_flatten_Promela)
+            return self.flatten(_flatten_python)
     
 class Arithmetic(Binary):
     @property
