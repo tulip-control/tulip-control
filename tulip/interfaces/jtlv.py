@@ -48,6 +48,10 @@ from tulip.spec.parser import parse
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
 
+DEBUG_SMV_FILE = 'smv.txt'
+DEBUG_LTL_FILE = 'ltl.txt'
+DEBUG_AUT_FILE = 'aut.txt'
+
 def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
                      init_option=1):
     """Decide realizability of specification defined by given GRSpec object.
@@ -247,16 +251,28 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
 
     if (len(JTLV_EXE) > 0):
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-        logger.debug(jtlv_grgame)
-        logger.debug(
-            '  java ' + str(heap_size) +
-            ' -jar ' + str(jtlv_grgame) +
-            ' ' + str(fSMV) +
-            ' ' + str(fLTL) +
-            ' ' + str(fAUT) +
-            ' ' + str(priority_kind) +
-            ' ' + str(init_option)
-        )
+        
+        # debugging log
+        if logger.getEffectiveLevel() <= logging.DEBUG:
+            logger.debug(jtlv_grgame)
+            logger.debug(
+                '  java ' + str(heap_size) +
+                ' -jar ' + str(jtlv_grgame) +
+                ' ' + str(fSMV) +
+                ' ' + str(fLTL) +
+                ' ' + str(fAUT) +
+                ' ' + str(priority_kind) +
+                ' ' + str(init_option)
+            )
+            
+            # besides dumping to debug logging stream,
+            # also copy files to ease manual debugging
+            import shutil
+            
+            shutil.copyfile(fSMV, DEBUG_SMV_FILE)
+            shutil.copyfile(fLTL, DEBUG_LTL_FILE)
+            shutil.copyfile(fAUT, DEBUG_AUT_FILE)
+        
         cmd = subprocess.call( \
             ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
                  str(priority_kind), str(init_option)])

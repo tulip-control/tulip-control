@@ -230,6 +230,11 @@ if perform_setup:
         plytable_build_failed = False
     except:
         plytable_build_failed = True
+    
+    # rm trash
+    if not plytable_build_failed:
+        print('deleting parser.out log file created by ply')
+        os.remove('parser.out')
 
     # If .git directory is present, create commit_hash.txt accordingly
     # to indicate version information
