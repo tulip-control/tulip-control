@@ -102,6 +102,22 @@ FULL_OPERATOR_NAMES = {
     'or':'||',
 }
 
+# Flattener helpers
+def _flatten_gr1c(node, **args):
+    return node.to_gr1c(**args)
+
+def _flatten_JTLV(node):
+    return node.to_jtlv()
+
+def _flatten_SMV(node):
+    return node.to_smv()
+
+def _flatten_Promela(node):
+    return node.to_promela()
+
+def _flatten_python(node):
+    return node.to_python()
+
 flatteners = {'gr1c':_flatten_gr1c,
               'jtlv':_flatten_JTLV,
               'smv':_flatten_SMV,
@@ -159,23 +175,6 @@ class LTL_AST(nx.DiGraph):
     def __repr__(self):
         return repr(self.root)
     
-    def to_pydot(self, detailed=False):
-        """Create GraphViz dot string from given AST.
-        
-        @type ast: L{ASTNode}
-        
-        @rtype: str
-        """
-        g = ast_to_labeled_graph(self, detailed)
-        return nx.to_pydot(g)
-    
-    def write(self, filename, detailed=False):
-        """Layout AST and save result in PDF file.
-        """
-        fname, fext = os.path.splitext(filename)
-        fext = fext[1:] # drop .
-        p = self.to_pydot(detailed)
-        p.write(filename, format=fext)
     
     def get_vars(self):
         """Return the set of variables in C{tree}.
@@ -284,6 +283,24 @@ class LTL_AST(nx.DiGraph):
     
     def to_python(self):
         return self.root.to_python()
+    
+    def to_pydot(self, detailed=False):
+        """Create GraphViz dot string from given AST.
+        
+        @type ast: L{ASTNode}
+        
+        @rtype: str
+        """
+        g = ast_to_labeled_graph(self, detailed)
+        return nx.to_pydot(g)
+    
+    def write(self, filename, detailed=False):
+        """Layout AST and save result in PDF file.
+        """
+        fname, fext = os.path.splitext(filename)
+        fext = fext[1:] # drop .
+        p = self.to_pydot(detailed)
+        p.write(filename, format=fext)
 
 class Node(object):
     def __init__(self, graph):
@@ -633,19 +650,3 @@ class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
-
-# Flattener helpers
-def _flatten_gr1c(node, **args):
-    return node.to_gr1c(**args)
-
-def _flatten_JTLV(node):
-    return node.to_jtlv()
-
-def _flatten_SMV(node):
-    return node.to_smv()
-
-def _flatten_Promela(node):
-    return node.to_promela()
-
-def _flatten_python(node):
-    return node.to_python()
