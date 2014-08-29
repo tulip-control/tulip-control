@@ -41,8 +41,8 @@ logger = logging.getLogger(__name__)
 import os, re, subprocess, tempfile, textwrap
 import warnings
 
-from tulip.transys.machines import create_machine_ports
-from tulip import transys
+import networkx as nx
+
 from tulip.spec.parser import parse
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -415,27 +415,16 @@ def load_file(aut_file, spec):
         # assume aut_file behaves as file object
         f = aut_file
 
-    #build Mealy Machine
-    m = transys.MealyMachine()
+    varnames = set(spec.sys_vars)
+    varnames.update(spec.env_vars)
     
-    # input defs
-    inputs = create_machine_ports(spec.env_vars)
-    m.add_inputs(inputs)
-
-    # outputs def
-    outputs = create_machine_ports(spec.sys_vars)
-    m.add_outputs(outputs)
-
-    varnames = spec.sys_vars.keys()+spec.env_vars.keys()
-
-    stateDict = {}
+    g = nx.DiGraph()
     for line in f:
         # parse states
-        if (line.find('State ') >= 0):
-            stateID = re.search('State (\d+)', line)
-            stateID = int(stateID.group(1))
-
-
+        if line.find('State ') >= 0:
+            state_id = re.search('State (\d+)', line)
+            state_id = int(state_id.group(1))
+            
             state = dict(re.findall('(\w+):(\w+)', line))
             for var, val in state.iteritems():
                 try:
@@ -452,60 +441,13 @@ def load_file(aut_file, spec):
                     logger.error('Variable ' + var + ' not assigned')
 
         # parse transitions
-
-            m.states.add(stateID)
         if line.find('successors') >= 0:
             succ = [int(x) for x in re.findall(' (\d+)', line)]
             
-            # mark initial states (states that
-            # do not appear in previous transitions)
-            #seenSoFar = [t for (s,trans) in stateDict.values() for t in trans]
-            #if stateID not in seenSoFar:
-                #m.states.initial.add(stateID)
-                
-            stateDict[stateID] = (state,transition)
-
-    # add transitions with guards to the Mealy Machine
-    for from_state in stateDict.keys():
-        state, transitions = stateDict[from_state]
-
-        for to_state in transitions:
-            guard = stateDict[to_state][0]
-            m.transitions.add(from_state, to_state, **guard)
+            g.add_node(state_id, state=state)
+            g.add_edges_from([(state_id, v) for v in succ])
     
-    initial_state = 'Sinit'
-    m.states.add(initial_state)
-    m.states.initial |= [initial_state]
-    
-    # Mealy reaction to initial env input
-    for v in m.states:
-        if v is 'Sinit':
-            continue
-        
-        var_values = stateDict[v][0]
-        bool_values = {k:str(bool(v) ) for k, v in var_values.iteritems() }
-        
-        t = spec.evaluate(bool_values)
-        
-        if t['env_init'] and t['sys_init']:
-            m.transitions.add(initial_state, v, **var_values)
-    """
-    # label states with variable valuations
-    # TODO: consider adding typed states to Mealy machines
-    for to_state in m.states:
-        predecessors = m.states.pre(to_state)
-
-        # any incoming edges ?
-        if predecessors:
-            # pick a predecessor
-            from_state = predecessors[0]
-            trans = m.transitions.find([from_state], [to_state] )
-            (from_, to_, trans_label) = trans[0]
-
-            state_label = {k:trans_label[k] for k in m.state_vars}
-            m.states.add(to_state, **state_label)
-    """
-    return m
+    return g
             
 def get_counterexamples(aut_file):
     """Return a list of dictionaries, each representing a counter example.
