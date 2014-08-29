@@ -1262,37 +1262,37 @@ def strategy2mealy(A, spec):
     sys_vars = spec.sys_vars
     
     mach = transys.MealyMachine()
-    inputs = transys.machines.create_machine_ports(spec.env_vars)
+    
+    inputs = transys.machines.create_machine_ports(env_vars)
     mach.add_inputs(inputs)
     
-    outputs = transys.machines.create_machine_ports(spec.sys_vars)
+    outputs = transys.machines.create_machine_ports(sys_vars)
     mach.add_outputs(outputs)
     
-    arbitrary_domains  = {
-        k:v for k, v in spec.env_vars.items()
+    str_vars = {
+        k:v for k, v in env_vars.items()
         if isinstance(v, list)
     }
-    arbitrary_domains.update({
-        k:v for k, v in spec.sys_vars.items()
+    str_vars.update({
+        k:v for k, v in sys_vars.items()
         if isinstance(v, list)
     })
     
-    mach.states.add_from(A.nodes())
+    mach.states.add_from(A)
     
     # transitions labeled with I/O
-    for u in A.nodes_iter():
+    for u in A:
         for v in A.successors_iter(u):
-            logger.info('node: ' +str(v) +', state: ' +
-                        str(A.node[v]["state"]) )
+            d = A.node[v]['state']
+            d = _int2str(d, str_vars)
+            mach.transitions.add(u, v, **d)
             
-            label = _map_int2dom(A.node[v]["state"],
-                                 arbitrary_domains)
-            mach.transitions.add(u, v, **label)
+            logger.info('node: ' + str(v) + ', state: ' + str(d))
     
-    # special initial state, for first input
+    # special initial state, for first reaction
     initial_state = 'Sinit'
     mach.states.add(initial_state)
-    mach.states.initial |= [initial_state]
+    mach.states.initial.add(initial_state)
     
     # replace values of arbitrary variables by ints
     spec1 = spec.copy()
@@ -1303,8 +1303,8 @@ def strategy2mealy(A, spec):
         spec1.sym_to_prop(values2ints)
     
     # Mealy reaction to initial env input
-    for node in A.nodes_iter():
-        var_values = A.node[node]['state']
+    for u, d in A.nodes_iter(data=True):
+        var_values = d['state']
         
         bool_values = {}
         for k, v in var_values.iteritems():
@@ -1331,14 +1331,12 @@ def strategy2mealy(A, spec):
     
     return mach
 
-def _map_int2dom(label, arbitrary_domains):
-    """For custom finite domains map int values to domain elements.
+def _int2str(label, str_vars):
+    """Replace integers with string values for string variables in C{label}.
     """
     label = dict(label)
-    
-    for var, value in label.items():
-        if var in arbitrary_domains:
-            label[var] = arbitrary_domains[var][int(value)]
+    label.update({k:str_vars[k][int(v)] for k,v in label.iteritems()
+                                        if k in str_vars})
     return label
 
 def mask_outputs(machine):

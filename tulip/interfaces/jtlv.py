@@ -411,10 +411,9 @@ def load_file(aut_file, spec):
     """
     if isinstance(aut_file, str):
         f = open(aut_file, 'r')
-        closable = True
     else:
-        f = aut_file  # Else, assume aut_file behaves as file object.
-        closable = False
+        # assume aut_file behaves as file object
+        f = aut_file
 
     #build Mealy Machine
     m = transys.MealyMachine()
@@ -443,22 +442,20 @@ def load_file(aut_file, spec):
                     state[var] = int(val)
                 except:
                     state[var] = val
-                if (len(varnames) > 0):
+                
+                if varnames:
                     if not var in varnames:
                         logger.error('Unknown variable ' + var)
-
-
+            
             for var in varnames:
                 if not var in state.keys():
                     logger.error('Variable ' + var + ' not assigned')
 
         # parse transitions
-        if (line.find('successors') >= 0):
-            transition = re.findall(' (\d+)', line)
-            for i in xrange(0,len(transition)):
-                transition[i] = int(transition[i])
 
             m.states.add(stateID)
+        if line.find('successors') >= 0:
+            succ = [int(x) for x in re.findall(' (\d+)', line)]
             
             # mark initial states (states that
             # do not appear in previous transitions)
