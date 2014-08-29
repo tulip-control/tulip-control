@@ -427,10 +427,6 @@ def load_file(aut_file, spec):
     outputs = create_machine_ports(spec.sys_vars)
     m.add_outputs(outputs)
 
-    # state variables def
-    state_vars = outputs
-    m.add_state_vars(state_vars)
-
     varnames = spec.sys_vars.keys()+spec.env_vars.keys()
 
     stateDict = {}
