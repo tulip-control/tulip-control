@@ -175,6 +175,10 @@ class LTL_AST(nx.DiGraph):
     def __repr__(self):
         return repr(self.root)
     
+    def __str__(self):
+        # need to define __str__ only
+        # to override networkx.DiGraph.__str__
+        return repr(self)
     
     def get_vars(self):
         """Return the set of variables in C{tree}.
