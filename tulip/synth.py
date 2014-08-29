@@ -447,13 +447,15 @@ def _fts2spec(
     
     sys_vars = {ap:'boolean' for ap in aps}
     
-    action_ids = create_actions(
-        actions, sys_vars, sys_trans, sys_init,
-        actionvar, bool_actions, fts.actions_must
+    action_ids, constraint = iter2var(
+        actions, sys_vars, actionvar, bool_actions, fts.actions_must
     )
+    add_actions(constraint, sys_init, sys_trans)
     
-    state_ids = create_states(states, sys_vars, sys_trans,
-                              statevar, bool_states)
+    state_ids, constraint = iter2var(states, sys_vars, statevar,
+                                     bool_states, must='xor')
+    if constraint is not None:
+        sys_trans += constraint
     
     sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -562,26 +564,29 @@ def sys_open_fts2spec(
         if 'sys' in action_type:
             logger.debug('Found sys action')
             
-            action_ids = create_actions(
-                codomain, sys_vars, sys_trans, sys_init,
+            action_ids, constraint = iter2var(
+                codomain, sys_vars,
                 action_type, bool_actions, ofts.sys_actions_must
             )
+            add_actions(constraint, sys_init, sys_trans)
             
             logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             logger.debug('Found env action')
             
-            action_ids = create_actions(
-                codomain, env_vars, env_trans, env_init,
+            action_ids, constrait = iter2var(
+                codomain, env_vars,
                 action_type, bool_actions, ofts.env_actions_must
             )
+            add_actions(constraint, env_init, env_trans)
             
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids[action_type] = action_ids
     
-    state_ids = create_states(states, sys_vars, sys_trans,
-                              statevar, bool_states)
+    state_ids, constraint = iter2var(states, sys_vars, statevar, bool_states, must='xor')
+    if constraint is not None:
+        sys_trans += constraint
     
     sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
@@ -648,16 +653,14 @@ def env_open_fts2spec(
     
     for action_type, codomain in actions.iteritems():
         if 'sys' in action_type:
-            action_ids = create_actions(
-                codomain, sys_vars, sys_trans, sys_init,
-                action_type, bool_actions, ofts.sys_actions_must
-            )
+            action_ids, constraint = iter2var(codomain, sys_vars, action_type,
+                                              bool_actions, ofts.sys_actions_must)
+            add_actions(constraint, sys_init, sys_trans)
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
-            action_ids = create_actions(
-                codomain, env_vars, env_trans, env_init,
-                action_type, bool_actions, ofts.env_actions_must
-            )
+            action_ids, constraint = iter2var(codomain, env_vars, action_type,
+                                              bool_actions, ofts.env_actions_must)
+            add_actions(constraint, env_init, env_trans)
             env_action_ids[action_type] = action_ids
     
     # some duplication here, because we don't know
@@ -665,8 +668,9 @@ def env_open_fts2spec(
     # and whether that TS will contain all the system actions
     # defined in the environment TS
     
-    state_ids = create_states(states, env_vars, env_trans,
-                              statevar, bool_states)
+    state_ids, constraint = iter2var(states, env_vars, statevar, bool_states, must='xor')
+    if constraint is not None:
+        env_trans += constraint
     
     env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
