@@ -493,19 +493,14 @@ class Unary(Operator):
     
     @property
     def operand(self):
-        u = self.id
-        
-        n = len(self.graph.succ[u])
-        if n != 1:
-            logger.error('Unary AST node has %d children.' % n)
-        
-        v = set(self.graph.succ[u]).pop()
-        
+        assert(len(self.graph.succ[self.id]) == 1)
+        v = set(self.graph.succ[self.id]).pop()
         return self.graph.node[v]['ast_node']
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
             op = self.op
+        
         try:
             o = flattener(self.operand, **args)
         except AttributeError:
