@@ -741,43 +741,43 @@ class GRSpec(LTL):
             a[formula] = ast.sub_values(tree, var_values)
         return a
     
-    def eval_init(self, var_values):
-        """Evaluate env_init, sys_init, given a valuation of variables.
+    def compile_init(self, no_str):
+        """Compile python expression for initial conditions.
         
-        Returns the Boolean value of the subformulas env_init, sys_init,
-        resulting from substitution of env_vars and sys_vars symbols
-        by the given assignment var_values of values to them.
+        The returned bytecode can be used with C{eval}
+        and a C{dict} assigning values to variables.
+        Its value is the conjunction of C{env_init} and C{sys_init}.
         
-        Note: variable value type checking not implemented yet.
-        
-        @param var_values: valuation of env_vars and sys_vars
-        @type var_values: C{{'var_name':var_value, ...}}
-            where: C{var_value} should be:
+        Use the corresponding python data types
+        for the C{dict} values:
             
               - C{bool} for Boolean variables
               - C{int} for integers
               - C{str} for arbitrary finite types
         
-        @return: truth values of spec parts::
+        @param no_str: if True, then compile the formula
+            where all string variables have been replaced by integers.
+            Otherwise compile the original formula containing strings.
         
-          C{{'env_init' : C{env_init} given C{var_values},
-             'sys_init' : C{sys_init} given C{var_values} }}
-        
-        @rtype: dict
+        @return: python expression compiled for C{eval}
+        @rtype: C{code}
         """
-        env_init = _eval_bool_formula(self.env_init, var_values)
-        sys_init = _eval_bool_formula(self.sys_init, var_values)
+        clauses = self.env_init + self.sys_init
         
-        return {'env_init':env_init, 'sys_init':sys_init}
-
-def _eval_bool_formula(clauses, var_values):
-    f = _conj(clauses, op='and')
-    s = f.to_python()
-    
-    if len(s) > 0:
-        return eval(s, var_values)
-    else:
-        return True
+        if no_str:
+            clauses = [self._bool_int[x] for x in clauses]
+        
+        logger.info('clauses to compile: ' + str(clauses))
+        
+        c = [self.ast(x).to_python() for x in clauses]
+        logger.info('after to_python: ' + str(c))
+        
+        s = _conj(c, op='and')
+        
+        if not s:
+            s = 'True'
+        
+        return compile(s, '<string>', 'eval')
 
 def _sub_all(formula, propSymbol, prop):
     symfound = False
