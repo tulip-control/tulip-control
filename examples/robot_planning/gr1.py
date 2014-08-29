@@ -36,10 +36,8 @@ We must convert this specification into GR(1) form:
 """
 
 # Import the packages that we need
-import sys
-
 from tulip import spec, synth
-
+from tulip.transys import machines
 
 #
 # Environment specification
@@ -113,12 +111,9 @@ ctrl = synth.synthesize('jtlv', specs)
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-if not ctrl.save('gr1.png'):
-    print(ctrl)
+if not mealy_controller.save('gr1.png'):
+    print(mealy_controller)
 
-# either select current state before simulation
-ctrl.states.current = [0]
-ctrl.simulate(inputs_sequence='random', iterations=10)
-    
-# or pass it to simulate
-ctrl.simulate(inputs_sequence='random', iterations=10, current_state=0)
+# simulate
+print(mealy_controller)
+machines.random_run(mealy_controller, N=10)
