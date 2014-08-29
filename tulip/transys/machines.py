@@ -775,6 +775,19 @@ def random_run(mealy, from_state=None, N=10):
         outputs = project_dict(attr_dict, mealy.outputs)
         for k in output_seqs:
             output_seqs[k].append(outputs[k])
+        
+        old_state = state
+        state = new_state
+        
+        # printing
+        inputs = project_dict(attr_dict, mealy.inputs)
+        
+        print(
+            'move from\n\t state: ' + str(old_state) +
+            '\n\t with input:' + str(inputs) +
+            '\n\t to state: ' + str(new_state) +
+            '\n\t reacting by producing output: ' + str(outputs)
+        )
     
     return (states_seq, output_seqs)
 
