@@ -1336,6 +1336,18 @@ def strategy2mealy(A, spec):
             ', var values: ' + str(var_values)
         )
     
+    if not mach.successors('Sinit'):
+        import pprint
+        raise Exception(
+            'The machine obtained from the strategy '
+            'does not have any initial states !\n'
+            'The strategy is:\n'
+            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2*'\n' +
+            'edges:\n' + str(A.edges()) + 2*'\n' +
+            'and the machine:\n' + str(mach) + 2*'\n' +
+            'and the specification is:\n' + str(spec.pretty()) + 2*'\n'
+        )
+    
     return mach
 
 def _int2str(label, str_vars):
