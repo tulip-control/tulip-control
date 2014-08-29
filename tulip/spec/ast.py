@@ -278,6 +278,8 @@ class LTL_AST(nx.DiGraph):
         
         logger.info('result after substitution:\n\t' + str(self) + '\n')
     
+    def eval(self, d):
+        return self.root.eval(d)
     
     def to_gr1c(self):
         return self.root.to_gr1c()
@@ -352,6 +354,9 @@ class Num(Node):
     
     def flatten(self, flattener=None, op=None, **args):
         return str(self)
+    
+    def eval(self, d):
+        return self.val
 
 class Var(Node):
     def __init__(self, t, g):
@@ -376,6 +381,9 @@ class Var(Node):
         
     def to_smv(self):
         return str(self)
+    
+    def eval(self, d):
+        return d[self.val]
 
 class Const(Node):
     def __init__(self, t, g):
@@ -399,6 +407,9 @@ class Const(Node):
         
     def to_smv(self):
         return str(self)
+    
+    def eval(self, d):
+        return self.val
 
 class Bool(Node):
     def __init__(self, t, g):
@@ -435,6 +446,10 @@ class Bool(Node):
                 'Reserved word "' + self.op +
                 '" not supported in JTLV syntax map'
             )
+    
+    def eval(self, d):
+        return self.val
+
 class Operator(Node):
     def to_promela(self):
         return _to_lang(self, 'spin')
@@ -511,6 +526,9 @@ class Not(Unary):
     
     def to_python(self):
         return PYTHON_MAP['!']
+    
+    def eval(self, d):
+        return not self.operand.eval(d)
 
 class UnTempOp(Unary):
     def __init__(self, operator, x, g):
@@ -576,23 +594,32 @@ class And(Binary):
     def op(self):
         return '&'
     
+    def eval(self, d):
+        return self.op_l.eval(d) and self.op_r.eval(d)
 
 class Or(Binary):
     @property
     def op(self):
         return '|'
     
+    def eval(self, d):
+        return self.op_l.eval(d) or self.op_r.eval(d)
 
 class Xor(Binary):
     @property
     def op(self):
         return 'xor'
     
+    def eval(self, d):
+        return self.op_l.eval(self, d) ^ self.op_r.eval(d)
     
 class Imp(Binary):
     @property
     def op(self):
         return '->'
+    
+    def eval(self, d):
+        return not self.op_l.eval(d) or self.op_r.eval(d)
     
     def to_python(self, flattener=str, op=None, **args):
         try:
@@ -609,6 +636,9 @@ class BiImp(Binary):
     @property
     def op(self):
         return '<->'
+    
+    def eval(self, d):
+        return self.op_l.eval(d) == self.op_r.eval(d)
     
     def to_python(self, flattener=str, op=None, **args):
         try:
