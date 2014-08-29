@@ -323,6 +323,8 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    logger.info('checking realizability...')
+    
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
@@ -395,9 +397,21 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
-    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
+    s = spec.to_gr1c()
+    logger.info('gr1c input:\n' + s +_hl)
     
-    (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
+    # to make debugging by manually running gr1c easier
+    fname = 'spec.gr1c'
+    try:
+        if logger.getEffectiveLevel() < logging.DEBUG:
+            logger.debug('writing ' + fname)
+            f = open(fname, 'w')
+            f.write(s)
+            f.close()
+    except:
+        logger.error('failed to write ' + fname + ' file')
+    
+    (stdoutdata, stderrdata) = p.communicate(s)
     
     logger.debug('gr1c returned:\n' + str(p.returncode) )
     logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)

@@ -230,7 +230,7 @@ class LTL_AST(nx.DiGraph):
         @param const2int: {'varname':['const_val0', ...], ...}
         @type const2int: C{dict} of C{list}
         """
-        logger.info('substitute ints for constants in ' + str(self))
+        logger.info('substitute ints for constants in:\n\t' + str(self))
         
         for u, d in self.nodes_iter(data=True):
             nd = d['ast_node']
@@ -275,6 +275,9 @@ class LTL_AST(nx.DiGraph):
             val.graph = nd.graph
             
             d['ast_node'] = val
+        
+        logger.info('result after substitution:\n\t' + str(self) + '\n')
+    
     
     def to_gr1c(self):
         return self.root.to_gr1c()

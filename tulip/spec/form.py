@@ -632,9 +632,9 @@ class GRSpec(LTL):
                          pprint.pformat(self._ast) + 3*'\n')
             logger.debug('check if: ' + str(x) + ', is in cache.')
         if x in self._ast:
-            logger.info('no need to parse')
+            logger.info(str(x) + ' is in cache')
         else:
-            logger.info(str(x) + ' is not in cache. Need to parse.')
+            logger.info('Cache does not contain:\n\t' + str(x) + '\nNeed to parse.')
             self.parse()
             
         return self._ast[x]
@@ -798,6 +798,8 @@ def finite_domain2ints(spec):
     Otherwise it returns a copy of spec with all arbitrary
     finite vars replaced by int-valued vars.
     """
+    logger.info('finite_domain2ints')
+    
     vars_dict = dict(spec.env_vars)
     vars_dict.update(spec.sys_vars)
     

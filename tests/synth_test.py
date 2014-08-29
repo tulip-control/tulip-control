@@ -3,6 +3,7 @@ Tests for the tulip.synth module.
 """
 import logging
 logging.basicConfig(level=logging.WARNING)
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.ERROR)
 
 from nose.tools import assert_raises
 
