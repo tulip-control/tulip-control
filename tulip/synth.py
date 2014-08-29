@@ -38,7 +38,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 import warnings
-from collections import OrderedDict
 
 from . import transys
 from .spec import GRSpec
@@ -1258,6 +1257,8 @@ def strategy2mealy(A, spec):
         Note that the returned GRSpec instance depends only on what is
         in the given tulipcon XML string x, not on the argument spec0.
     """
+    logger.info('converting strategy (compact) to Mealy machine')
+    
     env_vars = spec.env_vars
     sys_vars = spec.sys_vars
     
@@ -1294,40 +1295,45 @@ def strategy2mealy(A, spec):
     mach.states.add(initial_state)
     mach.states.initial.add(initial_state)
     
-    # replace values of arbitrary variables by ints
-    spec1 = spec.copy()
-    for variable, domain in arbitrary_domains.items():
-        values2ints = {var:str(i) for i, var in enumerate(domain)}
-        
-        # replace symbols by ints
-        spec1.sym_to_prop(values2ints)
+    # fix an ordering for keys
+    # because tuple(dict.iteritems()) is not safe:
+    # https://docs.python.org/2/library/stdtypes.html#dict.items
+    try:
+        u = next(iter(A))
+        keys = A.node[u]['state'].keys()
+    except:
+        logger.warn('strategy has no states.')
+    
+    # to store tuples of dict values for fast search
+    init_valuations = set()
+    isinit = spec.compile_init(no_str=True)
     
     # Mealy reaction to initial env input
+    tmp = dict()
     for u, d in A.nodes_iter(data=True):
         var_values = d['state']
+        vals = tuple(var_values[k] for k in keys)
         
-        bool_values = {}
-        for k, v in var_values.iteritems():
-            is_bool = False
-            if k in env_vars:
-                if env_vars[k] == 'boolean':
-                    is_bool = True
-            if k in sys_vars:
-                if sys_vars[k] == 'boolean':
-                    is_bool = True
+        # already an initial valuation ?
+        if vals in init_valuations:
+            continue
+        
+        # add edge: Sinit -> u ?
+        tmp.update(var_values)
+        if eval(isinit, tmp):
+            label = _int2str(var_values, str_vars)
+            mach.transitions.add(initial_state, u, **label)
             
-            if is_bool:
-                bool_values.update({k:str(bool(v) )})
-            else:
-                bool_values.update({k:str(v)})
+            # remember variable values to avoid
+            # spurious non-determinism wrt the machine's memory
+            init_valuations.add(vals)
+            
+            logger.debug('found initial state: ' + str(u))
         
-        logger.info('Boolean values: ' +str(bool_values) )
-        t = spec1.evaluate(bool_values)
-        logger.info('evaluates to: ' +str(t) )
-        
-        if t['env_init'] and t['sys_init']:
-            label = _map_int2dom(var_values, arbitrary_domains)
-            mach.transitions.add(initial_state, node, **label)
+        logger.debug(
+            'in state: ' + str(u) +
+            ', var values: ' + str(var_values)
+        )
     
     return mach
 
