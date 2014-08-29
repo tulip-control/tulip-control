@@ -521,7 +521,7 @@ class Not(Unary):
         return '!'
     
     def to_python(self):
-        return PYTHON_MAP['!']
+        return self.flatten(_flatten_python, PYTHON_MAP['!'])
     
     def eval(self, d):
         return not self.operand.eval(d)
