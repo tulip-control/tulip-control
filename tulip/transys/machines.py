@@ -718,7 +718,7 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     # initial sys edge non-determinism checked instead (more restrictive)
     
     if from_state is None:
-        state = set(mealy.states.initial).pop()
+        state = next(iter(mealy.states.initial))
     else:
         state = from_state
     
@@ -757,7 +757,7 @@ def random_run(mealy, from_state=None, N=10):
     @return: same as L{guided_run}
     """
     if from_state is None:
-        state = set(mealy.states.initial).pop()
+        state = next(iter(mealy.states.initial))
     else:
         state = from_state
     
@@ -770,8 +770,7 @@ def random_run(mealy, from_state=None, N=10):
         selected_trans = choice(list(trans))
         _, new_state, attr_dict  = selected_trans
         
-        
-        states_seq.append(state)
+        states_seq.append(new_state)
         
         outputs = project_dict(attr_dict, mealy.outputs)
         for k in output_seqs:
@@ -786,7 +785,7 @@ def interactive_run(mealy, from_state=None):
     @type mealy: L{MealyMachine}
     """
     if from_state is None:
-        state = set(mealy.states.initial).pop()
+        state = next(iter(mealy.states.initial))
     else:
         state = from_state
     

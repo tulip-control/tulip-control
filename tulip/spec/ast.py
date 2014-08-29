@@ -494,7 +494,7 @@ class Unary(Operator):
     @property
     def operand(self):
         assert(len(self.graph.succ[self.id]) == 1)
-        v = set(self.graph.succ[self.id]).pop()
+        v = next(iter(self.graph.succ[self.id]))
         return self.graph.node[v]['ast_node']
     
     def flatten(self, flattener=str, op=None, **args):
