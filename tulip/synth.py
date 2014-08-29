@@ -344,34 +344,30 @@ def create_actions(
         return dict()
     
     logger.debug('creating actions from: ' + str(actions) )
+    assert(must in {'mutex', 'xor', None})
     
     # options for modeling actions
-    if actions_must is None:
+    if must in {'mutex', 'xor'}:
+        use_mutex = True
+    else:
         use_mutex = False
-        min_one = False
-    elif actions_must == 'mutex':
-        use_mutex = True
-        min_one = False
-    elif actions_must == 'xor':
-        use_mutex = True
+    
+    if must == 'xor':
         min_one = True
     else:
-        raise Exception('Unknown value: actions_must = ' +
-                        str(actions_must) )
-    
-    yesno = lambda x: 'Yes' if x else 'No'
-    msg = (
-        'options for modeling actions:\n\t'
-        'mutex: ' + yesno(use_mutex) +'\n\t'
-        'min_one: ' + yesno(min_one)
-    )
-    logger.debug(msg)
-    
+        min_one = False
     
     # no mutex -> cannot use int variable
     if not use_mutex:
         logger.debug('not using mutex: Booleans must model actions')
-        bool_actions = True
+        bool_states = True
+    
+    logger.debug(
+        'options for modeling actions:\n\t'
+        'mutex: ' + str(use_mutex) +'\n\t'
+        'min_one: ' + str(min_one)
+    )
+    
     
     if bool_actions:
         logger.debug('actions modeled as Boolean variables')
