@@ -80,6 +80,7 @@ def parse(formula, parser='ply', full_operators=False):
         formula = _replace_full_name_operators(formula)
     
     if parser == 'pyparsing':
+        raise Exception('pyparsing support currently defunct')
         from .pyparser import parse as pyparse
         spec = pyparse(formula)
     elif parser == 'ply':

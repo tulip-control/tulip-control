@@ -161,6 +161,9 @@ class LTLParser(object):
         self.graph = g
         root_nd = self.parser.parse(formula, lexer=lexer, debug=logger)
         
+        if root_nd is None:
+            raise Exception('failed to parse:\n\t' + str(formula))
+        
         # mark root
         self.graph.root = root_nd
         return g
