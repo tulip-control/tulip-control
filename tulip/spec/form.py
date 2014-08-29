@@ -537,6 +537,8 @@ class GRSpec(LTL):
         Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
         logger.info('convert to jtlv...')
+        finite_domain2ints(self)
+        
         spec = ['', '']
         
         f = self._jtlv_str
@@ -997,7 +999,7 @@ def until_to_gr1(p, q, aux='aux'):
     
 def _check_var_name_conflict(f, varname):
     t = parser.parse(f)
-    v = {x.val for x in ast.get_vars(t)}
+    v = {x.val for x in t.get_vars()}
     
     if varname in v:
         raise ValueError('var name "' + varname + '" already used')
