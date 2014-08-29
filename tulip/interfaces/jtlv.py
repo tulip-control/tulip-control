@@ -419,17 +419,13 @@ def load_file(aut_file, spec):
     #build Mealy Machine
     m = transys.MealyMachine()
     
-    # show port only when true
-    mask_func = lambda x: bool(x)
-    
     # input defs
     inputs = create_machine_ports(spec.env_vars)
     m.add_inputs(inputs)
 
     # outputs def
     outputs = create_machine_ports(spec.sys_vars)
-    masks = {k:mask_func for k in spec.sys_vars.keys()}
-    m.add_outputs(outputs, masks)
+    m.add_outputs(outputs)
 
     # state variables def
     state_vars = outputs
