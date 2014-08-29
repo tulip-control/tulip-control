@@ -645,7 +645,7 @@ class BiImp(Binary):
             r = flattener(self.op_r, **args)
         except AttributeError:
             r = str(self.op_r)
-        return '( ' + l + ' and ' + r + ' ) or not ( ' + l + ' or ' + r + ' )'
+        return '( ' + l + ' == ' + r + ' )'
 
 class BiTempOp(Binary):
     def __init__(self, operator, x, y, g):
