@@ -22,8 +22,8 @@ def sys_fts_2_states():
     sys.transitions.add('X1', 'X1')
     
     sys.atomic_propositions.add_from({'home', 'lot'})
-    sys.states.add('X0', ap='home')
-    sys.states.add('X1', ap='lot')
+    sys.states.add('X0', ap={'home'})
+    sys.states.add('X1', ap={'lot'})
     
     #sys.plot()
     return sys
@@ -80,56 +80,14 @@ def parking_spec():
     
     # one additional requirement: if in lot,
     # then stay there until park signal is turned off
-    sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !(eact = park) )',
-                '((lot & (eact = park) ) -> X(lot))'}
+    sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !(eact = "park") )',
+                '((lot & (eact = "park") ) -> X(lot))'}
     sys_prog |= {'X0reach'}
     
     specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                         sys_safety=sys_safe,
                         env_prog=env_prog, sys_prog=sys_prog)
     return specs
-
-def test_sys_fts_bool_states():
-    """Sys FTS has 2 states, must become 2 bool vars in GR(1)
-    """
-    sys = sys_fts_2_states()
-    sys.sys_actions_must = 'mutex'
-
-    spec = synth.sys_to_spec(
-        sys,
-        ignore_initial=False,
-        bool_actions=False
-    )
-    
-    assert('loc' not in spec.sys_vars)
-    assert('eloc' not in spec.sys_vars)
-    
-    assert('X0' in spec.sys_vars)
-    assert(spec.sys_vars['X0'] == 'boolean')
-    
-    assert('X1' in spec.sys_vars)
-    assert(spec.sys_vars['X1'] == 'boolean')
-
-def test_env_fts_bool_states():
-    """Env FTS has 2 states, must become 2 bool vars in GR(1).
-    """
-    env = env_fts_2_states()
-    env.env_actions_must = 'mutex'
-    
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        bool_actions=False
-    )
-    
-    assert('loc' not in spec.env_vars)
-    assert('eloc' not in spec.env_vars)
-    
-    assert('e0' in spec.env_vars)
-    assert(spec.env_vars['e0'] == 'boolean')
-    
-    assert('e1' in spec.env_vars)
-    assert(spec.env_vars['e1'] == 'boolean')
 
 def test_sys_fts_int_states():
     """Sys FTS has 3 states, must become 1 int var in GR(1).
@@ -150,7 +108,7 @@ def test_sys_fts_int_states():
     
     assert('eloc' not in spec.sys_vars)
     assert('loc' in spec.sys_vars)
-    assert(spec.sys_vars['loc'] == (0, 2))
+    assert(sorted(spec.sys_vars['loc']) == ['X0', 'X1', 'X2'])
 
 def test_env_fts_int_states():
     """Env FTS has 3 states, must become 1 int var in GR(1).
@@ -171,7 +129,8 @@ def test_env_fts_int_states():
     
     assert('loc' not in spec.env_vars)
     assert('eloc' in spec.env_vars)
-    assert(spec.env_vars['eloc'] == (0, 2))
+    print(spec.env_vars['eloc'])
+    assert(sorted(spec.env_vars['eloc']) == ['e0', 'e1', 'e2'])
 
 def test_sys_fts_no_actions():
     """Sys FTS has no actions.
@@ -359,7 +318,7 @@ def test_only_mode_control():
     env_sws.atomic_propositions.add_from(['home','lot'])
     
     # label TS with APs
-    ap_labels = [set(),set(),{'home'},{'lot'}]
+    ap_labels = [set(), set(), {'home'}, {'lot'}]
     for i, label in enumerate(ap_labels):
         state = 's' + str(i)
         env_sws.states.add(state, ap=label)
@@ -384,12 +343,12 @@ def test_only_mode_control():
     )
     
     env_vars = {'park'}
-    env_init = {'eloc = 0', 'park'}
+    env_init = {'eloc = "s0"', 'park'}
     env_prog = {'!park'}
     env_safe = set()
     
     sys_vars = {'X0reach'}
-    sys_init = {'X0reach'}          
+    sys_init = {'X0reach'}
     sys_prog = {'home'}
     sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
     sys_prog |= {'X0reach'}
@@ -430,8 +389,8 @@ def multiple_env_actions_test():
     
     logging.debug(sys)
     
-    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = bright) )'}
-    sys_prog = {'loc = s1', 'loc = s2'}
+    env_safe = {'(loc = "s1") -> X( (env_alice = "left") && (env_bob = "bright") )'}
+    sys_prog = {'loc = "s1"', 'loc = "s2"'}
     
     specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
     

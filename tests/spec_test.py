@@ -8,7 +8,7 @@ import nose.tools as nt
 
 from tulip.spec import LTL, GRSpec, mutex
 from tulip.spec.parser import parse
-from tulip.spec.ast import to_nx
+from tulip.spec.ast import ast_to_labeled_graph
 
 def GR1specs_equal(s1, s2):
     """Return True if s1 and s2 are *roughly* syntactically equal.
@@ -138,14 +138,18 @@ def full_name_operators_test():
     
     for f, correct in formulas.iteritems():
         ast = parse(f, full_operators=True)
+        print(ast)
         assert(str(ast) == correct)
 
-def test_to_networkx():
+def test_to_labeled_graph():
     f = ('( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & '
          '( G ( X g ) ) ) )')
-    ast = parse(f)
-    g = to_nx(ast)
-    assert(len(g) == 18)
+    tree = parse(f)
+    assert(len(tree) == 18)
     nodes = {'p', 'q', 'w', 'z', 'b', 'g', 'G', 'U', 'X', '&', '|', '!', '->'}
-    labels = {d['label'] for d in g.node.values()}
+    
+    g = ast_to_labeled_graph(tree, detailed=False)
+    labels = {d['label'] for u, d in g.nodes_iter(data=True)}
+        
+    print(labels)
     assert(labels == nodes)

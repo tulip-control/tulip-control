@@ -1161,12 +1161,13 @@ def synthesize(
     
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
-        ctrl = strategy2mealy(strategy, specs)
     elif option == 'jtlv':
-        ctrl = jtlv.synthesize(specs)
+        strategy = jtlv.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
                         'Current options are "jtlv" and "gr1c"')
+    
+    ctrl = strategy2mealy(strategy, specs)
     
     try:
         logger.debug('Mealy machine has: n = ' +
