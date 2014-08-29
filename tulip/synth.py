@@ -219,10 +219,6 @@ def create_states(states, variables, trans, statevar, bool_states):
     """
     check_var_conflicts(states, variables)
     
-    # too few states for a gr1c int variable ?
-    if len(states) < 3:
-        bool_states = True
-    
     if bool_states:
         logger.debug('states modeled as Boolean variables')
         
@@ -374,10 +370,6 @@ def create_actions(
         'min_one: ' + yesno(min_one)
     )
     logger.debug(msg)
-    
-    # too few values for gr1c ?
-    #if len(actions) < 3:
-    #    bool_actions = True
     
     check_var_conflicts(actions, variables)
     
