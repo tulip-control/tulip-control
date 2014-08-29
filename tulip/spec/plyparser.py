@@ -253,7 +253,7 @@ class LTLParser(object):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = ast.Bool([p[1]], self.graph)
+        p[0] = ast.Bool(p[1], self.graph)
     
     def p_error(self, p):
         warn("Syntax error at '%s'" % p.value)
