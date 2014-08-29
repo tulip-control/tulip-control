@@ -87,6 +87,18 @@ FULL_OPERATOR_NAMES = {
     'or':'||',
 }
 
+flatteners = {'gr1c':_flatten_gr1c,
+              'jtlv':_flatten_JTLV,
+              'smv':_flatten_SMV,
+              'spin':_flatten_Promela,
+              'python':_flatten_python}
+
+maps = {'gr1c':GR1C_MAP,
+        'jtlv':JTLV_MAP,
+        'smv':SMV_MAP,
+        'spin':SPIN_MAP,
+        'python':PYTHON_MAP}
+
 class LTLException(Exception):
     pass
 
@@ -384,8 +396,35 @@ class Bool(Node):
                 'Reserved word "' + self.op +
                 '" not supported in JTLV syntax map'
             )
+class Operator(Node):
+    def to_promela(self):
+        return _to_lang(self, 'spin')
+    
+    def to_gr1c(self, primed=False):
+        return _to_lang(self, 'gr1c', primed=primed)
+    
+    def to_jtlv(self):
+        return _to_lang(self, 'jtlv')
+    
+    def to_python(self):
+        return _to_lang(self, 'python')
+    
+    def to_smv(self):
+        return _to_lang(self, 'smv')
 
-class Unary(Node):
+def _to_lang(node, lang, **k):
+    if node.op == 'X':
+        return node.flatten(_flatten_gr1c, '', primed=True)
+    
+    try:
+        return node.flatten(flatteners[lang], maps[lang][node.op], **k)
+    except KeyError:
+        raise LTLException(
+            'Operator ' + node.op +
+            ' not supported in ' + lang + ' syntax map'
+        )
+
+class Unary(Operator):
     @classmethod
     def new(cls, op_node, operator=None):
         return cls(operator, op_node)
@@ -442,43 +481,8 @@ class UnTempOp(Unary):
     @property
     def op(self):
         return self.operator
-    
-    def to_promela(self):
-        try:
-            return self.flatten(_flatten_Promela, SPIN_MAP[self.op])
-        except KeyError:
-            raise LTLException(
-                'Operator ' + self.op +
-                ' not supported in Promela syntax map'
-            )
-    
-    def to_gr1c(self, primed=False):
-        if self.op == 'X':
-            return self.flatten(_flatten_gr1c, '', primed=True)
-        else:
-            try:
-                return self.flatten(
-                    _flatten_gr1c, GR1C_MAP[self.op], primed=primed
-                )
-            except KeyError:
-                raise LTLException(
-                    'Operator ' + self.op +
-                    ' not supported in gr1c syntax map'
-                )
-    
-    def to_jtlv(self):
-        try:
-            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op])
-        except KeyError:
-            raise LTLException(
-                'Operator ' + self.op +
-                ' not supported in JTLV syntax map'
-            )
-    
-    def to_smv(self):
-        return self.flatten(_flatten_SMV, SMV_MAP[self.op])
 
-class Binary(Node):
+class Binary(Operator):
     @classmethod
     def new(cls, x, y, operator=None):
         return cls(x, operator, y)
@@ -533,36 +537,18 @@ class And(Binary):
     def op(self):
         return '&'
     
-    def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, '&&')
-    
-    def to_promela(self):
-        return self.flatten(_flatten_Promela, '&&')
-    
-    def to_python(self):
-        return self.flatten(_flatten_python, 'and')
 
 class Or(Binary):
     @property
     def op(self):
         return '|'
     
-    def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, '||')
-    
-    def to_promela(self):
-        return self.flatten(_flatten_Promela, '||')
-    
-    def to_python(self):
-        return self.flatten(_flatten_python, 'or')
 
 class Xor(Binary):
     @property
     def op(self):
         return 'xor'
     
-    def to_python(self):
-        return self.flatten(_flatten_python, '^')
     
 class Imp(Binary):
     @property
@@ -604,36 +590,6 @@ class BiTempOp(Binary):
     @property
     def op(self):
         return self.operator
-    
-    def to_promela(self):
-        try:
-            return self.flatten(_flatten_Promela, SPIN_MAP[self.op])
-        except KeyError:
-            raise LTLException(
-                'Operator ' + self.op +
-                ' not supported in Promela syntax map'
-            )
-    
-    def to_gr1c(self, primed=False):
-        try:
-            return self.flatten(_flatten_gr1c, GR1C_MAP[self.op])
-        except KeyError:
-            raise LTLException(
-                'Operator ' + self.op +
-                ' not supported in gr1c syntax map'
-            )
-    
-    def to_jtlv(self):
-        try:
-            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op])
-        except KeyError:
-            raise LTLException(
-                'Operator ' + self.op +
-                ' not supported in JTLV syntax map'
-            )
-    
-    def to_smv(self):
-        return self.flatten(_flatten_SMV, SMV_MAP[self.op])
 
 class Comparator(Binary):
     def __init__(self, operator, x, y, g):
