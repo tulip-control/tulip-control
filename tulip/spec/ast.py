@@ -33,7 +33,12 @@
 """
 Abstract Syntax Tree classes for LTL,
 
-supporting JTLV, SPIN, SMV, and gr1c syntax
+supporting syntax of:
+    gr1c: http://slivingston.github.io/gr1c/md_spc_format.html
+    JTLV
+    SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
+    SPIN: http://spinroot.com/spin/Man/ltl.html
+    python (Boolean formulas only)
 
 Syntax taken originally roughly from:
 http://spot.lip6.fr/wiki/LtlSyntax
@@ -46,28 +51,38 @@ import re
 import networkx as nx
 
 TEMPORAL_OP_MAP = {
-    'G':'G', 'F':'F', 'X':'X',
-    '[]':'G', '<>':'F', 'next':'X',
-    'U':'U', 'V':'R', 'R':'R', 
-    "'":'X', 'FALSE':'False', 'TRUE':'True'
+    '[]':'G', 'G':'G',
+    'F':'F', '<>':'F',
+    'X':'X', 'next':'X', "'":'X',
+    'U':'U', 'V':'R', 'R':'R'
 }
 
 JTLV_MAP = {
+    'False':'FALSE', 'True':'TRUE',
+    '!':'!',
+    '|':'||', '&':'&&', '->':'->', '<->':'<->',
     'G':'[]', 'F':'<>', 'X':'next',
-    'U':'U', '||':'||', '&&':'&&',
-    'False':'FALSE', 'True':'TRUE'
+    'U':'U',
 }
 
 GR1C_MAP = {
-    'G':'[]', 'F':'<>', 'X':"'", '||':'|', '&&':'&',
-    'False':'False', 'True':'True'
+    'False':'False', 'True':'True',
+    '!':'!',
+    '|':'|', '&':'&', '->':'->', '<->':'<->',
+    'G':'[]', 'F':'<>', 'X':"'",
+    '<=':'<=', '=':'=', '>=':'>=', '>':'>'
 }
 
 SMV_MAP = {'G':'G', 'F':'F', 'X':'X', 'U':'U', 'R':'V'}
 
-SPIN_MAP = {'G':'[]', 'F':'<>', 'U':'U', 'R':'V'}
+SPIN_MAP = {
+    'True':'true', 'False':'false',
+    '!':'!',
+    '|':'||', '&':'&&', '->':'->', '<->':'<->',
+    'G':'[]', 'F':'<>', 'U':'U', 'R':'V'
+}
 
-PYTHON_MAP = {'&&':'and', '||':'or', '!':'not', 'xor':'^'}
+PYTHON_MAP = {'!':'not', '&':'and', '|':'or', 'xor':'^'}
 
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
