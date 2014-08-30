@@ -51,7 +51,20 @@ _hl = 40 *'-'
 logger = logging.getLogger(__name__)
 
 class KripkeStructure(LabeledDiGraph):
-    """Directed graph with vertex labeling and initial vertices.
+    """Directed graph with labeled vertices and initial vertices.
+
+    References
+    ==========
+    1. Kripke S.
+      Semantical Considerations on Modal Logic
+      Acta Philosophica Fennica, 16, pp. 83-94, 1963
+
+    2. Clarke E.M.; Grumberg O.; Peled D.A.
+      Model Checking, MIT Press, 1999, p.14
+
+    3. Schneider K.
+      Verification of Reactive Systems
+      Springer, 2004, Def. 2.1, p.45
     """
     def __init__(self):
         ap_labels = PowerSet()

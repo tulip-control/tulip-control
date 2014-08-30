@@ -273,7 +273,7 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             shutil.copyfile(fLTL, DEBUG_LTL_FILE)
             shutil.copyfile(fAUT, DEBUG_AUT_FILE)
         
-        cmd = subprocess.call( \
+        subprocess.call( \
             ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
                  str(priority_kind), str(init_option)])
     else: # For debugging purpose
@@ -288,14 +288,10 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             ' ' + str(priority_kind) +
             ' ' + str(init_option)
         )
-        cmd = subprocess.call([
+        subprocess.call([
             "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
             fAUT, str(priority_kind), str(init_option)
         ])
-#       cmd = subprocess.Popen( \
-#           ["java", heap_size, "-cp", classpath, "GRMain", smv_file, ltl_file, \
-#                aut_file, str(priority_kind), str(init_option)], \
-#               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
 
 def canon_to_jtlv_domain(dom):
@@ -430,11 +426,12 @@ def load_file(aut_file, spec):
     else:
         # assume aut_file behaves as file object
         f = aut_file
-
+    
+    g = nx.DiGraph()
+    
     varnames = set(spec.sys_vars)
     varnames.update(spec.env_vars)
     
-    g = nx.DiGraph()
     for line in f:
         # parse states
         if line.find('State ') >= 0:

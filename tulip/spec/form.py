@@ -659,8 +659,8 @@ class GRSpec(LTL):
                 if x in self._ast:
                     logger.debug(str(x) + ' is already in cache')
                 else:
-                    self._ast[x] = parser.parse(x)
                     logger.debug('parse: ' + str(x))
+                    self._ast[x] = parser.parse(x)
         
         # rm cached ASTs that correspond to deleted clauses
         s = set(self._ast)
