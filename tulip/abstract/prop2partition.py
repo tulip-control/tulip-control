@@ -590,14 +590,13 @@ class PropPreservingPartition(pc.MetricPartition):
     
     def plot(
         self, trans=None, ppp2trans=None, only_adjacent=False,
-        ax=None, plot_numbers=True, color_seed=None,
-        show=False
+        ax=None, plot_numbers=True, color_seed=None
     ):
-        """For details see plot.plot_partition.
+        """For details see C{polytope.plot.plot_partition}.
         """
         return plot_partition(
             self, trans, ppp2trans, only_adjacent,
-            ax, plot_numbers, color_seed, show
+            ax, plot_numbers, color_seed
         )
     
     def plot_props(self, ax=None, text_color='yellow'):
