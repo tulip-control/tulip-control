@@ -547,13 +547,13 @@ class GRSpec(LTL):
                  f(self.env_safety, 'safety assumption on environment', '[]'),
                  f(self.env_prog, 'justice assumption on environment', '[]<>')]
         
-        spec[0] += ' && \n'.join(parts)
+        spec[0] += ' & \n'.join(x for x in parts if x)
         
         parts = [f(self.sys_init, 'valid initial system states', ''),
                  f(self.sys_safety, 'safety requirement on system', '[]'),
                  f(self.sys_prog, 'progress requirement on system', '[]<>')]
         
-        spec[1] += ' && \n'.join(parts)
+        spec[1] += ' & \n'.join(x for x in parts if x)
         return spec
     
     def _jtlv_str(self, m, txt='progress requirement on system', prefix='[]<>'):

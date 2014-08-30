@@ -371,20 +371,6 @@ def generate_JTLV_LTL(spec):
     assumption = specLTL[0]
     guarantee = specLTL[1]
     
-    assumption = re.sub(r'\b'+'True'+r'\b', 'TRUE', assumption)
-    guarantee = re.sub(r'\b'+'True'+r'\b', 'TRUE', guarantee)
-    assumption = re.sub(r'\b'+'False'+r'\b', 'FALSE', assumption)
-    guarantee = re.sub(r'\b'+'False'+r'\b', 'FALSE', guarantee)
-
-    assumption = assumption.replace('==', '=')
-    guarantee = guarantee.replace('==', '=')
-    
-    assumption = assumption.replace('&&', '&')
-    guarantee = guarantee.replace('&&', '&')
-    
-    assumption = assumption.replace('||', '|')
-    guarantee = guarantee.replace('||', '|')
-    
     # Replace any environment variable var in spec with e.var and replace any 
     # system variable var with s.var
     for var in spec.env_vars.keys():
