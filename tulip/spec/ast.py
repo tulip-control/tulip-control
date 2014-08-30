@@ -456,6 +456,9 @@ class Operator(Node):
         return _to_lang(self, 'spin')
     
     def to_gr1c(self, primed=False):
+        if self.op == 'X':
+            return self.flatten(_flatten_gr1c, '', primed=True)
+        
         return _to_lang(self, 'gr1c', primed=primed)
     
     def to_jtlv(self):
@@ -468,9 +471,6 @@ class Operator(Node):
         return _to_lang(self, 'smv')
 
 def _to_lang(node, lang, **k):
-    if node.op == 'X':
-        return node.flatten(_flatten_gr1c, '', primed=True)
-    
     try:
         return node.flatten(flatteners[lang], maps[lang][node.op], **k)
     except KeyError:
