@@ -1025,13 +1025,37 @@ def infer_constants(formula, variables):
     @param formula: well-formed LTL formula
     @type formula: C{str} or L{LTL_AST}
     
-    @param variables: names
-    @type variables: iterable container of C{str}
+    @param variables: domains of variables, or only their names.
+        If the domains are given, then they are checked
+        for ambiguities as for example a variable name
+        duplicated as a possible value in the domain of
+        a string variable (the same or another).
+        
+        If the names are given only, then a warning is raised,
+        because ambiguities cannot be checked in that case,
+        since they depend on what domains will be used.
+    @type variables: C{dict} as accepted by L{GRSpec} or
+        container of C{str}
     
     @return: C{formula} with all string literals not in C{variables}
         enclosed in double quotes
     @rtype: C{str}
     """
+    if isinstance(variables, dict):
+        for var in variables:
+            other_vars = dict(variables)
+            other_vars.pop(var)
+            
+            check_var_conflicts({var}, other_vars)
+    else:
+        logger.error('infer constants does not know the variable domains.')
+        warnings.warn(
+            'infer_constants can give an incorrect result '
+            'depending on the variable domains.\n'
+            'If you give the variable domain definitions as dict, '
+            'then infer_constants will check for ambiguities.'
+        )
+    
     tree = parser.parse(formula)
     for u, d in tree.nodes_iter(data=True):
         nd = d['ast_node']
