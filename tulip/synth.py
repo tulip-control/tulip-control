@@ -41,7 +41,6 @@ import warnings
 
 from . import transys
 from .spec import GRSpec
-#from .spec.form import check_var_conflicts
 from .interfaces import jtlv
 from .interfaces import gr1c
 

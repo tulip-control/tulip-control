@@ -38,6 +38,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import pprint, time, re, copy
+import warnings
 
 from tulip.spec import parser
 from . import ast
@@ -160,16 +161,6 @@ class LTL(object):
         if common_vars:
             raise Exception('Env and sys have variables in common: ' +
                             str(common_vars))
-        
-        # having just checked there are no duplicate keys
-        all_vars = dict(self.input_variables)
-        all_vars.update(self.output_variables)
-        
-        for var in all_vars:
-            other_vars = dict(all_vars)
-            other_vars.pop(var)
-            
-            check_var_conflicts({var}, other_vars)
 
     def check_form(self, check_undeclared_identifiers=False):
         """Verify formula syntax and type-check variable domains.
