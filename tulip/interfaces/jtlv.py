@@ -418,6 +418,9 @@ def load_file(aut_file, spec):
     varnames = set(spec.sys_vars)
     varnames.update(spec.env_vars)
     
+    g.env_vars = spec.env_vars.copy()
+    g.sys_vars = spec.sys_vars.copy()
+    
     for line in f:
         # parse states
         if line.find('State ') >= 0:
