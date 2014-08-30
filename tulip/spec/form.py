@@ -557,27 +557,27 @@ class GRSpec(LTL):
         return spec
     
     def _jtlv_str(self, m, txt='progress requirement on system', prefix='[]<>'):
-        w = []
-        s = ''
+        # no clauses ?
+        if not m:
+            return ''
         
+        w = []
         for x in m:
             logger.debug('convert clause: ' + str(x))
             
             if not x:
                 continue
             
-            if not s:
-                s += '-- ' + txt + '\n'
+            c = self.ast(self._bool_int[x]).to_jtlv()
             
-            c = self.ast(x).to_jtlv()
-            
+            # collapse any whitespace between any
+            # "next" operator that precedes parenthesis
             if prefix == '[]':
                 c = re.sub(r'next\s*\(', 'next(', c)
             
-            s += '\t' + prefix + '(' + c + ')'
-            w.append(s)
+            w.append('\t%s(%s)' % (prefix, c))
         
-        return ' && \n'.join(w)
+        return '-- %s\n' % txt + ' & \n'.join(w)
 
     def to_gr1c(self):
         """Dump to gr1c specification string.
