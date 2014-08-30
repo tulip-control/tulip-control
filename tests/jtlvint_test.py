@@ -5,7 +5,7 @@ Tests for the interface with JTLV.
 
 from tulip.spec import GRSpec
 from tulip.interfaces.jtlv import check_realizable, synthesize
-from tulip.transys import MealyMachine
+import networkx as nx
 
 
 class basic_test:
@@ -33,33 +33,30 @@ class basic_test:
         assert check_realizable(self.dcounter)
 
     def test_synthesize(self):
-        mach = synthesize(self.f_un)
-        assert not isinstance(mach, MealyMachine)
+        g = synthesize(self.f_un)
+        assert not isinstance(g, nx.DiGraph)
 
-        mach = synthesize(self.f)
+        g = synthesize(self.f)
         # There is more than one possible strategy realizing this
         # specification.  Checking only for one here makes this more like
         # a regression test (fragile).  However, it is more meaningful
         # than simply checking that synthesize() returns something
         # non-None (i.e., realizability, which is tested elsewhere).
-        assert mach is not None
-        assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
-        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
-        assert len(mach.states()) == 6
-        assert set(mach.transitions()) == set([(0, 1), (0, 2), (1, 3), (1, 4),
+        assert g is not None
+        
+        assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
+        assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
+        print(g.nodes())
+        assert len(g) == 5
+        assert set(g.edges()) == set([(0, 1), (0, 2), (1, 3), (1, 4),
                                               (2, 3), (2, 4), (3, 0), (3, 3),
-                                              (4, 0), (4, 3), ("Sinit", 0)])
-        label_reference = {(0, 1) : (0,0),  # value is bitvector of x,y
-                           (0, 2) : (1,0),
-                           (1, 3) : (0,0),
-                           (1, 4) : (1,0),
-                           (2, 3) : (0,0),
-                           (2, 4) : (1,0),
-                           (3, 0) : (1,1),
-                           (3, 3) : (0,0),
-                           (4, 0) : (1,1),
-                           (4, 3) : (0,0),
-                           ("Sinit", 0) : (1,1)}
-        for (from_state, to_state, slabel) in mach.transitions(data=True):
-            assert label_reference[(from_state, to_state)] == (slabel["x"],
-                                                               slabel["y"])
+                                              (4, 0), (4, 3)])
+        label_reference = {0: (1,1), # value is bitvector of x,y
+                           1: (0,0),
+                           2: (1,0),
+                           3: (0,0),
+                           4: (1,0)}
+        for u, d in g.nodes_iter(data=True):
+            state = d['state']
+            assert(len(state) == 2)
+            assert(label_reference[u] == (state['x'], state['y']))
