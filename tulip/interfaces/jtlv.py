@@ -306,10 +306,10 @@ def canon_to_jtlv_domain(dom):
     @return: variable domain string, ready for use in an SMV file, as
         expected by the JTLV solver.
     """
-    if dom == "boolean":
+    if dom == 'boolean':
         return dom
     elif isinstance(dom, tuple) and len(dom) == 2:
-        return "{"+", ".join([str(i) for i in range(dom[0], dom[1]+1)])+"}"
+        return '{%s}' % ', '.join([str(i) for i in xrange(dom[0], dom[1]+1)])
     else:
         raise ValueError("Unrecognized domain type: "+str(dom))
 
@@ -326,24 +326,25 @@ def generate_JTLV_SMV(spec):
     smv = ""
 
     # Write the header
-    smv+=textwrap.dedent("""
+    smv += textwrap.dedent("""
 
     MODULE main
         VAR
             e : env();
             s : sys();
     """);
-
+    
     # Define env vars
-    smv+=(textwrap.dedent("""
+    smv += textwrap.dedent("""
     MODULE env -- inputs
         VAR
-    """))
-    for var, dom in spec.env_vars.items():
+    """)
+    for var, dom in spec.env_vars.iteritems():
         int_dom = form.convert_domain(dom)
-        smv+= '\t\t'
-        smv+= var
-        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
+        
+        smv += '\t\t'
+        smv += var
+        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
 
     
     # Define sys vars
@@ -351,11 +352,12 @@ def generate_JTLV_SMV(spec):
     MODULE sys -- outputs
         VAR
     """))
-    for var, dom in spec.sys_vars.items():
+    for var, dom in spec.sys_vars.iteritems():
         int_dom = form.convert_domain(dom)
-        smv+= '\t\t'
-        smv+= var
-        smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
+        
+        smv += '\t\t'
+        smv += var
+        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
     
     logger.debug(smv)
     return smv
