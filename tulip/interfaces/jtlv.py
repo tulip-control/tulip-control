@@ -44,6 +44,7 @@ import warnings
 import networkx as nx
 
 from tulip.spec.parser import parse
+from tulip.spec import form
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
@@ -339,6 +340,7 @@ def generate_JTLV_SMV(spec):
         VAR
     """))
     for var, dom in spec.env_vars.items():
+        int_dom = form.convert_domain(dom)
         smv+= '\t\t'
         smv+= var
         smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'
@@ -350,6 +352,7 @@ def generate_JTLV_SMV(spec):
         VAR
     """))
     for var, dom in spec.sys_vars.items():
+        int_dom = form.convert_domain(dom)
         smv+= '\t\t'
         smv+= var
         smv+= ' : '+canon_to_jtlv_domain(dom)+';\n'

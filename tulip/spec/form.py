@@ -594,7 +594,8 @@ class GRSpec(LTL):
                 elif isinstance(dom, tuple) and len(dom) == 2:
                     output += ' %s [%d, %d]' % (var, dom[0], dom[1])
                 elif isinstance(dom, list) and len(dom) > 0:
-                    output += ' %s [%d, %d]' % (var, 0, len(dom)-1)
+                    int_dom = convert_domain(dom)
+                    output += ' %s [%d, %d]' % (var, int_dom[0], int_dom[1])
                 else:
                     raise ValueError('Domain not supported by gr1c: ' + str(dom))
             return output
@@ -1014,6 +1015,18 @@ def _paren(x):
     @type x: str
     """
     return '(' + x + ')'
+
+def convert_domain(dom):
+    """Return equivalent integer domain if C{dom} contais strings.
+    
+    @type dom: C{list} of C{str}
+    @rtype: C{'boolean'} or C{(min_int, max_int)}
+    """
+    # not a string variable ?
+    if not isinstance(dom, list):
+        return dom
+    
+    return (0, len(dom)-1)
 
 def infer_constants(formula, variables):
     """Enclose all non-variable names in quotes.
