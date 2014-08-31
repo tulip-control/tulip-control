@@ -240,32 +240,9 @@ class LTL_AST(nx.DiGraph):
             if not isinstance(nd, Const):
                 continue
             
-            # find parent Binary operator
-            b = nd
-            while True:
-                old = b
-                bid = self.predecessors(old.id)[0]
-                b = self.node[bid]['ast_node']
-                
-                if isinstance(b, Binary):
-                    break
+            v, c = pair_node_to_var(self, nd)
             
-            succ = self.successors(b.id)
-            
-            var_branch = succ[0] if succ[1] == old.id else succ[1]
-            
-            # go down until var found
-            # assuming correct syntax for gr1c
-            v = self.node[var_branch]['ast_node']
-            while True:
-                if isinstance(v, Var):
-                    break
-                
-                old = v
-                vid = self.successors(old.id)[0]
-                v = self.node[vid]['ast_node']
-            
-            # now: b, is the operator and: v, the variable
+            # now: c, is the operator and: v, the variable
             const2int = var_const2int[str(v)]
             x = const2int.index(nd.val)
             
@@ -685,3 +662,47 @@ class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
+def pair_node_to_var(tree, c):
+    """Find variable under L{Binary} operator above given node.
+    
+    First move up from C{nd}, stop at first L{Binary} node.
+    Then move down, until first C{Var}.
+    This assumes that only L{Unary} operators appear between a
+    L{Binary} and its variable and constant operands.
+    
+    May be extended in the future, depending on what the
+    tools support and is thus needed here.
+    
+    @type tree: L{LTL_AST}
+    
+    @type L{nd}: L{Const} or L{Num}
+    
+    @return: variable, constant
+    @rtype: C{(L{Var}, L{Const})}
+    """
+    # find parent Binary operator
+    while True:
+        old = c
+        bid = tree.predecessors(old.id)[0]
+        c = tree.node[bid]['ast_node']
+        
+        if isinstance(c, Binary):
+            break
+    
+    succ = tree.successors(c.id)
+    
+    var_branch = succ[0] if succ[1] == old.id else succ[1]
+    
+    # go down until var found
+    # assuming correct syntax for gr1c
+    v = tree.node[var_branch]['ast_node']
+    while True:
+        if isinstance(v, Var):
+            break
+        
+        old = v
+        vid = tree.successors(old.id)[0]
+        v = tree.node[vid]['ast_node']
+    
+    # now: b, is the operator and: v, the variable
+    return v, c
