@@ -363,68 +363,6 @@ def _add_actions(constraint, init, trans):
     trans += ['X (' + constraint[0] + ')']
     init += constraint
 
-def sys_to_spec(sys, ignore_initial=False, statevar='loc',
-                bool_states=False, bool_actions=False):
-    """Convert system's transition system to GR(1) representation.
-    
-    The term GR(1) representation is preferred to GR(1) spec,
-    because an FTS can represent sys_init, sys_safety, but
-    not other spec forms.
-    
-    See also
-    ========
-    L{env_to_spec}, L{sys_open_fts2spec}, L{fts2spec}
-    
-    @type sys: L{FTS}
-    
-    @param ignore_initial: Do not include initial state info from TS.
-        Enable this to mask absence of FTS initial states.
-        Useful when initial states are specified in another way,
-        e.g., directly augmenting the spec part.
-    @type ignore_initial: bool
-    
-    @param state_var: name of int variable used to represent
-        the current state
-    @type state_var: str
-    
-    @param bool_states: if True,
-        then use one bool variable for each state,
-        otherwise use an int variable called loc.
-    @type bool_states: bool
-    
-    @param bool_actions: if True,
-        then use one bool variable for each state,
-        otherwise use an int variable with same name as the action type.
-    @type bool_actions: bool
-    
-    @rtype: L{GRSpec}
-    """
-    if isinstance(sys, transys.FiniteTransitionSystem):
-        return sys_open_fts2spec(
-            sys, ignore_initial, statevar,
-            bool_states, bool_actions
-        )
-    else:
-        raise TypeError('synth.sys_to_spec must be FTS, got ' +
-                        str(type(sys)) + ' instead.')
-
-def env_to_spec(env, ignore_initial=False, statevar='eloc',
-                bool_states=False, bool_actions=False):
-    """Convert environment transition system to GR(1) representation.
-    
-    For details see L{sys_to_spec}.
-    
-    @type env: L{FTS}
-    """
-    if isinstance(env, transys.FiniteTransitionSystem):
-        return env_open_fts2spec(
-            env, ignore_initial, statevar,
-            bool_states, bool_actions
-        )
-    else:
-        raise TypeError('synth.env_to_spec must be FTS, got ' +
-                        str(type(env)) + ' instead.')
-
 def _fts2spec(
     fts, ignore_initial=False,
     statevar='loc', actionvar=None,
@@ -467,19 +405,22 @@ def _fts2spec(
     
     return (sys_vars, sys_init, sys_trans)
 
-def sys_open_fts2spec(
-    ofts, ignore_initial=False, statevar='loc',
+def sys_to_spec(
+    ofts, ignore_initial, statevar,
     bool_states=False, bool_actions=False
 ):
-    """Convert transition system to GR(1) representation.
+    """Convert transition system to GR(1) fragment of LTL.
     
-    The following are represented by system variables:
+    The attribute C{FTS.owner} defines who controls the system,
+    as described next. It can take values C{'env'} or C{'sys'}.
+    
+    The following are represented by variables controlled by C{ofts.owner}:
     
       - the current state
       - the atomic propositions annotating states
       - the system actions annotating edges
     
-    The following are represented by environment variables:
+    The following are represented by variables controlled by the other player:
     
       - the environment actions annotating edges
     
@@ -488,17 +429,13 @@ def sys_open_fts2spec(
     C{'env'} or C{'sys'} are part of the action type names,
     so that L{synth.synthesize} can recognize them.
     
-    Current limitations
-    ===================
-    Note that not any GR(1) can be represented by an FTS,
-    the way that L{FTS} is currently defined.
-    For that purpose, a GameStructure would be needed instead.
-    
-    Besides, there are aspects of L{FTS} that
+    Caution
+    =======
+    There are aspects of L{FTS} that
     need to be separately specified in a logic formula.
     
-    An example is initial conditions constraining the values
-    of environment or system actions.
+    An example are the initial conditions constraining the values
+    of environment and system actions.
     
     See also
     ========
@@ -507,15 +444,19 @@ def sys_open_fts2spec(
     
     @param ofts: L{FTS}
     
-    @param ignore_initial: if C{True}, then do not represent in logic
-        the set of initial states of C{ofts}.
-    @type ignore_initial: bool
+    @param ignore_initial: Do not include initial state info from TS.
+        Enable this to mask absence of FTS initial states.
+        Useful when initial states are specified in another way,
+        e.g., directly augmenting the spec part.
+    @type ignore_initial: C{bool}
     
-    @param statevar: name of integer variable used in GR(1)
-        to store the current state.
-    @type statevar: str
+    @param state_var: name to be used for the integer or string
+        variable that equals the current transition system state.
+    @type state_var: C{str}
     
-    @param bool_states: if C{True}, then use one Boolean variable
+    @param bool_states: deprecated as inefficient
+        
+        if C{True}, then use one Boolean variable
         to represent each state in GR(1).
         Otherwise use a single integer variable,
         different values of which correspond to states of C{ofts}.
@@ -532,9 +473,11 @@ def sys_open_fts2spec(
             that ranges over the possible action values.
     
     @return: logic formula in GR(1) form representing C{ofts}.
-    @rtype: L{spec.GRSpec}
+    @rtype: L{GRSpec}
     """
-    assert(isinstance(ofts, transys.FiniteTransitionSystem))
+    if not isinstance(ofts, transys.FiniteTransitionSystem):
+        raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
+    
     assert(ofts.owner == 'sys')
     
     aps = ofts.aps
@@ -606,8 +549,8 @@ def sys_open_fts2spec(
         env_safety=env_trans, sys_safety=sys_trans
     )
 
-def env_open_fts2spec(
-    ofts, ignore_initial=False, statevar='eloc',
+def env_to_spec(
+    ofts, ignore_initial, statevar,
     bool_states=False, bool_actions=False
 ):
     """Convert env transition system to GR(1) representation.
@@ -624,11 +567,15 @@ def env_open_fts2spec(
     
     Multiple types of environment and system actions can be defined.
     
+    For more details see L{sys_to_spec}.
+    
     See also
     ========
     L{sys_open_fts2spec}
     """
-    assert(isinstance(ofts, transys.FiniteTransitionSystem))
+    if not isinstance(ofts, transys.FiniteTransitionSystem):
+        raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
+    
     assert(ofts.owner == 'env')
     
     aps = ofts.aps
