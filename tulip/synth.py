@@ -983,6 +983,43 @@ def synthesize_many(specs, ts=None, ignore_init=None,
                     bool_actions=None, solver='gr1c'):
     """Synthesize from logic specs and multiple transition systems.
     
+    The states of the transition system can be either:
+    
+      - all integers, or
+      - all strings
+    
+    In either case the transition system state will be
+    represented in logic with a single variable,
+    that ranges over a finite set of integers or strings, respectively.
+    
+    The keys of C{ts} are used to name each state variable.
+    So the logic formula for C{ts['name']} will be C{'name'}.
+    
+    Who controls this state variable is determined from
+    the attribute C{FTS.owner} that can take the values:
+    
+      - C{'env'}
+      - C{'sys'}
+    
+    For example:
+    
+      >>> ts.states.add_from(xrange(4))
+      >>> ts['door'].owner = 'env'
+    
+    will result in a logic formula with
+    an integer variable C{'door'}
+    controlled by the environment and
+    taking values over C{{0, 1, 2, 3}}.
+    
+    The example:
+    
+      >>> ts.states.add_from(['a', 'b', 'c'])
+      >>> ts['door'].owner = 'sys'
+    
+    will instead result in a string variable C{'door'}
+    controlled by the system and taking
+    values over C{{'a', 'b', 'c'}}.
+    
     @type specs: L{GRSpec}
     
     @type ts: C{dict} of L{FiniteTransitionSystem}
@@ -1001,7 +1038,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
         
         ignore = name in ignore_init
         bool_act = name in bool_actions
-        statevar = name + '_state'
+        statevar = name
         
         if t.owner == 'sys':
             specs |= sys_to_spec(t, ignore, statevar,
