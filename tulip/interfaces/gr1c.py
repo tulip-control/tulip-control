@@ -429,17 +429,21 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         return None
 
 def load_mealy(filename):
-    """Load gr1c strategy from C{xml} file to a MealyMachine.
+    """Load C{gr1c} strategy from C{xml} file.
     
     @param filename: xml file name
     @type filename: C{str}
     
-    @return: loaded strategy as a Mealy machine
-    @rtype: L{MealyMachine}
+    @return: loaded strategy as an annotated graph.
+    @rtype: C{networkx.Digraph}
     """
     s = open(filename, 'r').read()
     strategy = load_aut_xml(s)
-    #logger.info('Loaded spec: \n' + spec.pretty() )
+    
+    logger.debug(
+        'Loaded strategy with nodes: \n' + str(strategy.nodes()) +
+        '\nand edges: \n' + str(strategy.edges())
+    )
     return strategy
 
 class GR1CSession:
