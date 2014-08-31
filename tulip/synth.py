@@ -364,8 +364,8 @@ def _add_actions(constraint, init, trans):
     init += constraint
 
 def _fts2spec(
-    fts, ignore_initial=False,
-    statevar='loc', actionvar=None,
+    fts, ignore_initial,
+    statevar, actionvar=None,
     bool_states=False, bool_actions=False
 ):
     """Convert closed FTS to GR(1) representation.
@@ -1073,16 +1073,25 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False,
-    bool_actions=False, rm_deadends=True
+    bool_states=False, bool_actions=False, rm_deadends=True
 ):
     """Function to call the appropriate synthesis tool on the specification.
-
-    Beware!  This function provides a generic interface to a variety
+    
+    The states of the transition system can be either:
+    
+      - all integers, or
+      - all strings
+    
+    For more details of how the transition system is represented in
+    logic look at L{synthesize_many}.
+    
+    Beware!
+    =======
+    This function provides a generic interface to a variety
     of routines.  Being under active development, the types of
     arguments supported and types of objects returned may change
     without notice.
-
+    
     @param option: Magic string that declares what tool to invoke,
         what method to use, etc.  Currently recognized forms:
 
@@ -1118,24 +1127,23 @@ def synthesize(
         contained in sys.
     @type ignore_env_init: bool
     
-    @param bool_states: if True,
-        then use one bool variable for each state.
-        Otherwise use a single int variable for all states.
+    @param bool_states: deprecated as inefficient
         
-        Currently int state implemented only for gr1c.
+        if True,
+        then use one bool variable for each state.
+        Otherwise use a single integer variable for all states.
     @type bool_states: bool
     
-    @param bool_actions: model actions using bool variables
+    @param bool_actions: model actions using bool variables, otherwise integers.
     @type bool_actions: bool
 
-    @param rm_deadends: if True,
-        then the returned strategy contains no terminal states.
+    @param rm_deadends: return a strategy that contains no terminal states.
     @type rm_deadends: bool
     
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return None.
-    @rtype: L{transys.MealyMachine} or None
+    @rtype: L{MealyMachine} or None
     """
     specs = _spec_plus_sys(
         specs, env, sys,
