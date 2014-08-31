@@ -357,7 +357,7 @@ def iter2var(states, variables, statevar, bool_states, must):
     )
     return state_ids, constraint
 
-def add_actions(constraint, init, trans):
+def _add_actions(constraint, init, trans):
     if constraint is None:
         return
     trans += ['X (' + constraint[0] + ')']
@@ -448,20 +448,20 @@ def _fts2spec(
     action_ids, constraint = iter2var(
         actions, sys_vars, actionvar, bool_actions, fts.actions_must
     )
-    add_actions(constraint, sys_init, sys_trans)
+    _add_actions(constraint, sys_init, sys_trans)
     
     state_ids, constraint = iter2var(states, sys_vars, statevar,
                                      bool_states, must='xor')
     if constraint is not None:
         sys_trans += constraint
     
-    sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_ts(
+    sys_trans += _sys_trans_from_ts(
         states, state_ids, fts.transitions,
         action_ids=action_ids
     )
-    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
     sys_init += tmp_init
     sys_trans += tmp_trans
     
@@ -566,7 +566,7 @@ def sys_open_fts2spec(
                 codomain, sys_vars,
                 action_type, bool_actions, ofts.sys_actions_must
             )
-            add_actions(constraint, sys_init, sys_trans)
+            _add_actions(constraint, sys_init, sys_trans)
             
             logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
             sys_action_ids[action_type] = action_ids
@@ -577,7 +577,7 @@ def sys_open_fts2spec(
                 codomain, env_vars,
                 action_type, bool_actions, ofts.env_actions_must
             )
-            add_actions(constraint, env_init, env_trans)
+            _add_actions(constraint, env_init, env_trans)
             
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids[action_type] = action_ids
@@ -586,17 +586,17 @@ def sys_open_fts2spec(
     if constraint is not None:
         sys_trans += constraint
     
-    sys_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    sys_trans += sys_trans_from_ts(
+    sys_trans += _sys_trans_from_ts(
         states, state_ids, trans,
         sys_action_ids=sys_action_ids, env_action_ids=env_action_ids
     )
-    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
     sys_init += tmp_init
     sys_trans += tmp_trans
     
-    env_trans += env_trans_from_sys_ts(
+    env_trans += _env_trans_from_sys_ts(
         states, state_ids, trans, env_action_ids
     )
     
@@ -653,12 +653,12 @@ def env_open_fts2spec(
         if 'sys' in action_type:
             action_ids, constraint = iter2var(codomain, sys_vars, action_type,
                                               bool_actions, ofts.sys_actions_must)
-            add_actions(constraint, sys_init, sys_trans)
+            _add_actions(constraint, sys_init, sys_trans)
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             action_ids, constraint = iter2var(codomain, env_vars, action_type,
                                               bool_actions, ofts.env_actions_must)
-            add_actions(constraint, env_init, env_trans)
+            _add_actions(constraint, env_init, env_trans)
             env_action_ids[action_type] = action_ids
     
     # some duplication here, because we don't know
@@ -670,13 +670,13 @@ def env_open_fts2spec(
     if constraint is not None:
         env_trans += constraint
     
-    env_init += sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    env_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
     
-    env_trans += env_trans_from_env_ts(
+    env_trans += _env_trans_from_env_ts(
         states, state_ids, trans,
         env_action_ids=env_action_ids, sys_action_ids=sys_action_ids
     )
-    tmp_init, tmp_trans = ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
     env_init += tmp_init
     env_trans += tmp_trans
     
@@ -686,7 +686,7 @@ def env_open_fts2spec(
         env_safety=env_trans, sys_safety=sys_trans
     )
 
-def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
+def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """Initial state, including enforcement of exactly one.
     """
     init = []
@@ -712,7 +712,7 @@ def sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     init += [_disj([state_ids[s] for s in states.initial])]
     return init
 
-def sys_trans_from_ts(
+def _sys_trans_from_ts(
     states, state_ids, trans,
     action_ids=None, sys_action_ids=None, env_action_ids=None):
     """Convert transition relation to GR(1) sys_safety.
@@ -843,7 +843,7 @@ def sys_trans_from_ts(
         sys_trans += [precond + ' -> (' + _disj(cur_str) + ')']
     return sys_trans
 
-def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
+def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     """Convert environment actions to GR(1) env_safety.
     
     This constrains the actions available next to the environment
@@ -905,7 +905,7 @@ def env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
                       next_env_actions + ')']
     return env_trans
 
-def env_trans_from_env_ts(
+def _env_trans_from_env_ts(
     states, state_ids, trans,
     action_ids=None, env_action_ids=None, sys_action_ids=None
 ):
@@ -983,7 +983,7 @@ def env_trans_from_env_ts(
         env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) +')']
     return env_trans
 
-def ap_trans_from_ts(states, state_ids, aps):
+def _ap_trans_from_ts(states, state_ids, aps):
     """Require atomic propositions to follow states according to label.
     """
     init = []
@@ -997,7 +997,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     for state in states:
         state_id = state_ids[state]
         label = states[state]
-        ap_str = sprint_aps(label, aps)
+        ap_str = _sprint_aps(label, aps)
         if not ap_str:
             continue
         init += ['!(' + _pstr(state_id) + ') || (' + ap_str +')']
@@ -1007,7 +1007,7 @@ def ap_trans_from_ts(states, state_ids, aps):
         label = states[state]
         state_id = state_ids[state]
         
-        tmp = sprint_aps(label, aps)
+        tmp = _sprint_aps(label, aps)
         if not tmp:
             continue
         
@@ -1015,7 +1015,7 @@ def ap_trans_from_ts(states, state_ids, aps):
     
     return (init, trans)
 
-def sprint_aps(label, aps):
+def _sprint_aps(label, aps):
     if label.has_key('ap'):
         tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
     else:
@@ -1153,10 +1153,13 @@ def synthesize(
         Otherwise return None.
     @rtype: L{transys.MealyMachine} or None
     """
-    specs = spec_plus_sys(specs, env, sys,
-                          ignore_env_init, ignore_sys_init,
-                          bool_states,
-                          bool_actions)
+    specs = _spec_plus_sys(
+        specs, env, sys,
+        ignore_env_init,
+        ignore_sys_init,
+        bool_states,
+        bool_actions
+    )
     
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
@@ -1195,7 +1198,7 @@ def is_realizable(
     
     For details see L{synthesize}.
     """
-    specs = spec_plus_sys(
+    specs = _spec_plus_sys(
         specs, env, sys,
         ignore_env_init, ignore_sys_init,
         bool_states, bool_actions
@@ -1216,7 +1219,7 @@ def is_realizable(
     
     return r
 
-def spec_plus_sys(
+def _spec_plus_sys(
     specs, env, sys,
     ignore_env_init, ignore_sys_init,
     bool_states, bool_actions
