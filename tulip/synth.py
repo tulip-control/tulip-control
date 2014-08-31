@@ -1172,19 +1172,35 @@ def _spec_plus_sys(
     bool_states, bool_actions
 ):
     if sys is not None:
+        if hasattr(sys, 'state_varname'):
+            statevar = sys.state_varname
+        else:
+            logger.info('sys.state_varname undefined. '
+                        'Will use the default variable name: "loc".')
+            statevar = 'loc'
+        
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
             bool_states=bool_states,
-            bool_actions=bool_actions
+            bool_actions=bool_actions,
+            statevar=statevar
         )
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
     
     if env is not None:
+        if hasattr(env, 'state_varname'):
+            statevar = sys.state_varname
+        else:
+            logger.info('env.state_varname undefined. '
+                        'Will use the default variable name: "eloc".')
+            statevar = 'eloc'
+        
         env_formula = env_to_spec(
             env, ignore_env_init,
             bool_states=bool_states,
-            bool_actions=bool_actions
+            bool_actions=bool_actions,
+            statevar=statevar
         )
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty() ) + _hl)
