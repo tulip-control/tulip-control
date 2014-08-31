@@ -249,7 +249,7 @@ class LTL_AST(nx.DiGraph):
             val = Num(x, None)
             
             # replace Const with Num
-            # dn't touch the underlying graph
+            # don't touch the underlying graph
             val.id = nd.id
             val.graph = nd.graph
             
@@ -258,6 +258,15 @@ class LTL_AST(nx.DiGraph):
         logger.info('result after substitution:\n\t' + str(self) + '\n')
     
     def eval(self, d):
+        """Evaluate over variable valuation C{d}.
+        
+        @param d: assignment of values to variables.
+            Available types are Boolean, integer, and string.
+        @type d: C{dict}
+        
+        @return: value of formula for the given valuation C{d} (model).
+        @rtype: C{bool}
+        """
         return self.root.eval(d)
     
     def to_gr1c(self):
