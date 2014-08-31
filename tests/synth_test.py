@@ -99,6 +99,7 @@ def test_sys_fts_int_states():
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
+        statevar='loc',
         bool_actions=False
     )
     
@@ -120,6 +121,7 @@ def test_env_fts_int_states():
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -141,6 +143,7 @@ def test_sys_fts_no_actions():
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
+        statevar='loc',
         bool_actions=False
     )
     
@@ -155,6 +158,7 @@ def test_env_fts_bool_actions():
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
+        statevar='eloc',
         bool_actions=True,
     )
     
@@ -177,6 +181,7 @@ def test_env_fts_int_actions():
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -202,6 +207,7 @@ def test_env_ofts_bool_actions():
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
+        statevar='eloc',
         bool_actions=True
     )
     
@@ -219,6 +225,7 @@ def test_sys_ofts_bool_actions():
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
+        statevar='loc',
         bool_actions=True
     )
     
@@ -251,6 +258,7 @@ def test_env_ofts_int_actions():
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -266,6 +274,7 @@ def test_sys_ofts_int_actions():
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
+        statevar='loc',
         bool_actions=False
     )
     
@@ -410,6 +419,7 @@ def test_var_name_conflicts():
         assert_raises(
         Exception, spec=x, sys=y,
         ignore_initial=True,
+        statevar='loc',
         bool_actions=False
     )
     
