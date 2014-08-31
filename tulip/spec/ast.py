@@ -671,6 +671,73 @@ class Arithmetic(Binary):
     @property
     def op(self):
         return self.operator
+
+def check_for_undefined_identifiers(tree, domains):
+    """Check that types in C{tree} are incompatible with C{domains}.
+    
+    Raise a C{ValueError} if C{tree} either:
+    
+      - contains a variable missing from C{domains}
+      - binary operator between variable and
+        invalid value for that variable.
+    
+    @type tree: L{LTL_AST}
+    
+    @param domains: variable definitions:
+        
+        C{{'varname': domain}}
+        
+        See L{GRSpec} for more details of available domain types.
+    @type domains: C{dict}
+    """
+    for u, d in tree.nodes_iter(data=True):
+        nd = d['ast_node']
+        print(nd)
+        
+        if isinstance(nd, Var) and nd.val not in domains:
+            var = nd.val
+            raise ValueError('undefined variable: ' + str(var) +
+                             ', in subformula:\n\t' + str(tree))
+        
+        if not isinstance(nd, (Const, Num)):
+            continue
+        
+        # is a Const or Num
+        var, c = pair_node_to_var(tree, nd)
+        
+        if isinstance(c, Const):
+            dom = domains[var]
+            
+            if not isinstance(dom, list):
+                raise Exception(
+                    'String constant: ' + str(c) +
+                    ', assigned to non-string variable: ' +
+                    str(var) + ', whose domain is:\n\t' + str(dom)
+                )
+            
+            if c.val not in domains[var.val]:
+                raise ValueError(
+                    'String constant: ' + str(c) +
+                    ', is not in the domain of variable: ' + str(var)
+                )
+        
+        if isinstance(c, Num):
+            dom = domains[var]
+            
+            if not isinstance(dom, tuple):
+                raise Exception(
+                    'Number: ' + str(c) +
+                    ', assigned to non-integer variable: ' +
+                    str(var) + ', whose domain is:\n\t' + str(dom)
+                )
+            
+            if not dom[0] <= c.val <= dom[1]:
+                raise Exception(
+                    'Integer variable: ' + str(var) +
+                    ', is assigned the value: ' + str(c) +
+                    ', that is out of its range: %d ... %d ' % dom
+                )
+        
 def pair_node_to_var(tree, c):
     """Find variable under L{Binary} operator above given node.
     

@@ -670,6 +670,9 @@ class GRSpec(LTL):
         parts = {'env_init', 'env_safety', 'env_prog',
                  'sys_init', 'sys_safety', 'sys_prog'}
         
+        vardoms = dict(self.env_vars)
+        vardoms.update(self.sys_vars)
+        
         # parse new clauses and cache the resulting ASTs
         for p in parts:
             s = getattr(self, p)
@@ -678,7 +681,11 @@ class GRSpec(LTL):
                     logger.debug(str(x) + ' is already in cache')
                 else:
                     logger.debug('parse: ' + str(x))
-                    self._ast[x] = parser.parse(x)
+                    tree = parser.parse(x)
+                    
+                    ast.check_for_undefined_identifiers(tree, vardoms)
+                    
+                    self._ast[x] = tree
         
         # rm cached ASTs that correspond to deleted clauses
         s = set(self._ast)
