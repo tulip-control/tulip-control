@@ -37,8 +37,11 @@ from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
 
-import pprint, time, re, copy
 import warnings
+import pprint
+import time
+import re
+import copy
 
 from tulip.spec import parser
 from . import ast
@@ -52,10 +55,10 @@ def mutex(varnames):
     mutex = set()
     numVars = len(varnames)
     varnames = list(varnames)
-    for i in range(0,numVars-1):
-        mut_str = varnames[i]+' -> ! ('+varnames[i+1]
-        for j in range(i+2,numVars):
-            mut_str += ' || '+varnames[j]
+    for i in range(0, numVars - 1):
+        mut_str = varnames[i] + ' -> ! (' + varnames[i + 1]
+        for j in range(i + 2, numVars):
+            mut_str += ' || ' + varnames[j]
         mut_str += ')'
         mutex |= {mut_str}
     return mutex
@@ -119,9 +122,9 @@ class LTL(object):
         if d == "boolean":
             return d
         elif isinstance(d, tuple) and len(d) == 2:
-            return "["+str(d[0])+", "+str(d[1])+"]"
+            return "[" + str(d[0]) + ", " + str(d[1]) + "]"
         elif hasattr(d, "__iter__"):
-            return "{"+", ".join([str(e) for e in d])+"}"
+            return "{" + ", ".join([str(e) for e in d]) + "}"
         else:
             raise ValueError("Unrecognized variable domain type.")
 
@@ -132,20 +135,20 @@ class LTL(object):
             current time in UTC.
         """
         if timestamp:
-            output = "# Generated at "+time.strftime(
-                "%Y-%m-%d %H:%M:%S UTC", time.gmtime() )+"\n"
+            output = "# Generated at " + time.strftime(
+                "%Y-%m-%d %H:%M:%S UTC", time.gmtime()) + "\n"
         else:
             output = ""
         output += "0  # Version\n%%\n"
         if len(self.input_variables) > 0:
             output += "INPUT:\n"
-            for (k,v) in self.input_variables.items():
+            for k, v in self.input_variables.items():
                 output += str(k) + " : " + self._domain_str(v) + ";\n"
         if len(self.output_variables) > 0:
             output += "\nOUTPUT:\n"
-            for (k,v) in self.output_variables.items():
+            for k, v in self.output_variables.items():
                 output += str(k) + " : " + self._domain_str(v) + ";\n"
-        return output + "\n%%\n"+self.formula
+        return output + "\n%%\n" + self.formula
     
     def check_vars(self):
         """Raise Exception if variabe definitions are invalid.
@@ -157,7 +160,7 @@ class LTL(object):
             (of arbitrary finite data type)
         """
         common_vars = {x for x in self.input_variables
-                         if x in self.output_variables}
+                       if x in self.output_variables}
         if common_vars:
             raise Exception('Env and sys have variables in common: ' +
                             str(common_vars))
@@ -187,7 +190,7 @@ class LTL(object):
                     raise ValueError("Malformed version number.")
                 if version != 0:
                     raise ValueError("Unrecognized version number: " +
-                        str(version))
+                                     str(version))
                 break
         try:
             s = re.sub(r"#.*(\n|$)", "", s)  # Strip comments
@@ -219,8 +222,10 @@ class LTL(object):
                     domain = domain.lstrip().rstrip(";")
                     if domain[0] == "[":  # Range-type domain
                         domain = domain.split(",")
-                        variables[i][name] = (int(domain[0][1:]),
-                            int(domain[1][:domain[1].index("]")]))
+                        variables[i][name] = (
+                            int(domain[0][1:]),
+                            int(domain[1][:domain[1].index("]")])
+                        )
                     elif domain[0] == "{":  # Finite set domain
                         domain.strip()
                         assert domain[-1] == "}"
@@ -327,11 +332,11 @@ class GRSpec(LTL):
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
-            env_vars = dict([(v,"boolean") for v in env_vars])
+            env_vars = dict([(v, "boolean") for v in env_vars])
         if sys_vars is None:
             sys_vars = dict()
         elif not isinstance(sys_vars, dict):
-            sys_vars = dict([(v,"boolean") for v in sys_vars])
+            sys_vars = dict([(v, "boolean") for v in sys_vars])
 
         self.env_vars = copy.deepcopy(env_vars)
         self.sys_vars = copy.deepcopy(sys_vars)
@@ -391,38 +396,56 @@ class GRSpec(LTL):
         """Return pretty printing string."""
         output = "ENVIRONMENT VARIABLES:\n"
         if len(self.env_vars) > 0:
-            for (k,v) in self.env_vars.items():
-                output += "\t"+str(k)+"\t"+str(v)+"\n"
+            for k, v in self.env_vars.items():
+                output += "\t" + str(k) + "\t" + str(v) + "\n"
         else:
             output += "\t(none)\n"
         output += "\nSYSTEM VARIABLES:\n"
         if len(self.sys_vars) > 0:
-            for (k,v) in self.sys_vars.items():
-                output += "\t"+str(k)+"\t"+str(v)+"\n"
+            for k, v in self.sys_vars.items():
+                output += "\t" + str(k) + "\t" + str(v) + "\n"
         else:
             output += "\t(none)\n"
         output += "\nFORMULA:\n"
         output += "ASSUMPTION:\n"
         if len(self.env_init) > 0:
             output += "    INITIAL\n\t  "
-            output += "\n\t& ".join(["("+f+")" for f in self.env_init])+"\n"
+            output += "\n\t& ".join([
+                "(" + f + ")"
+                for f in self.env_init
+            ]) + "\n"
         if len(self.env_safety) > 0:
             output += "    SAFETY\n\t  []"
-            output += "\n\t& []".join(["("+f+")" for f in self.env_safety])+"\n"
+            output += "\n\t& []".join([
+                "(" + f + ")"
+                for f in self.env_safety
+            ]) + "\n"
         if len(self.env_prog) > 0:
             output += "    LIVENESS\n\t  []<>"
-            output += "\n\t& []<>".join(["("+f+")" for f in self.env_prog])+"\n"
+            output += "\n\t& []<>".join([
+                "(" + f + ")"
+                for f in self.env_prog
+            ]) + "\n"
 
         output += "GUARANTEE:\n"
         if len(self.sys_init) > 0:
             output += "    INITIAL\n\t  "
-            output += "\n\t& ".join(["("+f+")" for f in self.sys_init])+"\n"
+            output += "\n\t& ".join([
+                "(" + f + ")"
+                for f in self.sys_init
+            ]) + "\n"
         if len(self.sys_safety) > 0:
             output += "    SAFETY\n\t  []"
-            output += "\n\t& []".join(["("+f+")" for f in self.sys_safety])+"\n"
+            output += "\n\t& []".join([
+                "(" + f + ")"
+                for f in self.sys_safety
+            ]) + "\n"
         if len(self.sys_prog) > 0:
             output += "    LIVENESS\n\t  []<>"
-            output += "\n\t& []<>".join(["("+f+")" for f in self.sys_prog])+"\n"
+            output += "\n\t& []<>".join([
+                "(" + f + ")"
+                for f in self.sys_prog
+            ]) + "\n"
         return output
 
     def check_form(self):
@@ -459,11 +482,12 @@ class GRSpec(LTL):
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
         
-        s = {x + y for x in {'env_', 'sys_'}
-                   for y in {'init', 'safety', 'prog'} }
+        s = {x + y
+             for x in {'env_', 'sys_'}
+             for y in {'init', 'safety', 'prog'}}
         
         for x in s:
-            getattr(result, x).extend(getattr(other, x) )
+            getattr(result, x).extend(getattr(other, x))
         
         return result
 
@@ -547,7 +571,7 @@ class GRSpec(LTL):
         spec[1] += ' & \n'.join(x for x in parts if x)
         return spec
     
-    def _jtlv_str(self, m, txt='progress requirement on system', prefix='[]<>'):
+    def _jtlv_str(self, m, txt, prefix='[]<>'):
         # no clauses ?
         if not m:
             return ''
@@ -588,7 +612,8 @@ class GRSpec(LTL):
                     int_dom = convert_domain(dom)
                     output += ' %s [%d, %d]' % (var, int_dom[0], int_dom[1])
                 else:
-                    raise ValueError('Domain not supported by gr1c: ' + str(dom))
+                    raise ValueError('Domain not supported by gr1c: ' +
+                                     str(dom))
             return output
         
         finite_domain2ints(self)
@@ -623,12 +648,13 @@ class GRSpec(LTL):
         """
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug('current cache of ASTs:\n' +
-                         pprint.pformat(self._ast) + 3*'\n')
+                         pprint.pformat(self._ast) + 3 * '\n')
             logger.debug('check if: ' + str(x) + ', is in cache.')
         if x in self._ast:
             logger.info(str(x) + ' is in cache')
         else:
-            logger.info('Cache does not contain:\n\t' + str(x) + '\nNeed to parse.')
+            logger.info('Cache does not contain:\n\t' + str(x) +
+                        '\nNeed to parse.')
             self.parse()
             
         return self._ast[x]
@@ -693,12 +719,12 @@ class GRSpec(LTL):
                     raise TypeError('propSymbol: ' + str(propSymbol) +
                                     'is not a string.')
                 
-                 # To handle gr1c primed variables
+                # To handle gr1c primed variables
                 if propSymbol[-1] != "'":
                     propSymbol += r"\b"
                 logger.debug('\t' + propSymbol + ' -> ' + prop)
                 
-                symfound  = _sub_all(self.env_init, propSymbol, prop)
+                symfound = _sub_all(self.env_init, propSymbol, prop)
                 symfound |= _sub_all(self.env_safety, propSymbol, prop)
                 symfound |= _sub_all(self.env_prog, propSymbol, prop)
                 
@@ -797,7 +823,7 @@ def finite_domain2ints(spec):
     vars_dict = dict(spec.env_vars)
     vars_dict.update(spec.sys_vars)
     
-    fvars = {v:d for v, d in vars_dict.iteritems() if isinstance(d, list)}
+    fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
     
     # replace symbols by ints
     parts = {'env_init', 'env_safety', 'env_prog',
@@ -819,7 +845,7 @@ def finite_domain2ints(spec):
             
             # formula of int/bool AST
             f = str(a)
-            spec._ast[f] = a # cache
+            spec._ast[f] = a  # cache
             
             # remember map from clauses to int/bool clauses
             spec._bool_int[x] = f
@@ -900,14 +926,14 @@ def response_to_gr1(p, q, aux='aux'):
     v = _check_var_name_conflict(s, a0)
     
     sys_vars = v | {a0}
-    #sys_init = {a}
+    # sys_init = {a}
     sys_safe = {
         '(' + p + ' && !' + q + ') -> X !' + a,
         '(!' + a + ' && !' + q + ') -> X !' + a
     }
     sys_prog = {a}
     
-    return GRSpec(sys_vars=sys_vars, #sys_init=sys_init,
+    return GRSpec(sys_vars=sys_vars,  # sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def eventually_to_gr1(p, aux='aux'):
@@ -1017,7 +1043,7 @@ def convert_domain(dom):
     if not isinstance(dom, list):
         return dom
     
-    return (0, len(dom)-1)
+    return (0, len(dom) - 1)
 
 def infer_constants(formula, variables):
     """Enclose all non-variable names in quotes.

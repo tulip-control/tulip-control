@@ -59,7 +59,8 @@ def check(formula):
     """
     ast = plyparser.parse(formula)
     
-    dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False, deterministic=True)
+    dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False,
+                                           deterministic=True)
     
     dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
                      'U_left', 'U_right',
@@ -94,7 +95,7 @@ def check(formula):
     dfa.transitions.add('f', 'f', letter='F')
     
     # plot tree automaton
-    #dfa.save('dfa.pdf')
+    # dfa.save('dfa.pdf')
     
     # plot parse tree
     sast.dump_dot(ast, 'ast.dot')
@@ -104,7 +105,7 @@ def check(formula):
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
-        logger.info('visiting: ' + str(s) + ', ' + str(q) )
+        logger.info('visiting: ' + str(s) + ', ' + str(q))
         
         if isinstance(s, sast.Unary):
             op = s.operator

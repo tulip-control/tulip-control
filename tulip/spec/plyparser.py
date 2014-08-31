@@ -42,19 +42,19 @@ from warnings import warn
 
 import ply.lex as lex
 import ply.yacc as yacc
-#import networkx as nx
+# import networkx as nx
 
 from . import ast
 
 tokens = (
     'TRUE', 'FALSE',
-    'NAME','NUMBER',
-    'NOT', 'AND','OR', 'XOR', 'IMP', 'BIMP',
+    'NAME', 'NUMBER',
+    'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
     'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-    'ALWAYS', 'EVENTUALLY', 'NEXT', #'PRIME',
+    'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
     'UNTIL', 'RELEASE',
     'PLUS', 'MINUS', 'TIMES', 'DIV',
-    'LPAREN','RPAREN', 'DQUOTES'
+    'LPAREN', 'RPAREN', 'DQUOTES'
 )
 
 # Tokens
@@ -62,7 +62,7 @@ t_TRUE = 'TRUE|True|true'
 t_FALSE = 'FALSE|False|false'
 
 t_NEXT = r'X|next'
-#t_PRIME  = r'\''
+# t_PRIME  = r'\''
 t_ALWAYS = r'\[\]|G'
 t_EVENTUALLY = r'\<\>|F'
 
@@ -85,7 +85,7 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 
 t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
-         r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
+          r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
 t_NUMBER = r'\d+'
 
 t_IMP = '->'
@@ -123,7 +123,7 @@ precedence = (
     ('right', 'ALWAYS', 'EVENTUALLY'),
     ('right', 'NEXT'),
     ('right', 'NOT'),
-    #('left', 'PRIME'),
+    # ('left', 'PRIME'),
     ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
     ('nonassoc', 'TIMES', 'DIV'),
     ('nonassoc', 'PLUS', 'MINUS'),
@@ -131,7 +131,7 @@ precedence = (
 )
 
 # dictionary of names
-#names = {'var':'replacement'}
+# names = {'var':'replacement'}
 
 TABMODULE = 'tulip.spec.parsetab'
 

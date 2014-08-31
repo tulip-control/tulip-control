@@ -44,7 +44,7 @@ from .spec import GRSpec
 from .interfaces import jtlv
 from .interfaces import gr1c
 
-_hl = '\n' +60*'-'
+_hl = '\n' + 60 * '-'
 
 def _pstr(s):
     return '(' + str(s) + ')'
@@ -112,9 +112,9 @@ def mutex(iterable):
         return []
     
     return [_conj([
-        '!(' + str(x) + ') || (' + _conj_neg_diff(iterable, [x]) +')'
+        '!(' + str(x) + ') || (' + _conj_neg_diff(iterable, [x]) + ')'
         for x in iterable
-    ]) ]
+    ])]
 
 def exactly_one(iterable):
     """N-ary xor.
@@ -125,7 +125,7 @@ def exactly_one(iterable):
         return [_pstr(x) for x in iterable]
     
     return ['(' + _disj([
-        '(' +str(x) + ') && ' + _conj_neg_diff(iterable, [x])
+        '(' + str(x) + ') && ' + _conj_neg_diff(iterable, [x])
         for x in iterable
     ]) + ')']
 
@@ -141,7 +141,8 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     @param nxt: prepend or not with the next operator
     @type nxt: bool
     
-    @param ids: map C{action_value} -> value used in solver input, e.g., for gr1c
+    @param ids: map C{action_value} -> value used in solver input,
+        for example, for gr1c
     @type ids: dict
     
     @return:
@@ -188,7 +189,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     logger.debug('after substitution: ' + str(actions))
     
     conjuncted_actions = _conj(actions)
-    logger.debug('conjuncted actions: ' + str(conjuncted_actions) +'\n')
+    logger.debug('conjuncted actions: ' + str(conjuncted_actions) + '\n')
     
     if nxt:
         return ' X' + _pstr(conjuncted_actions)
@@ -284,7 +285,7 @@ def iter2var(states, variables, statevar, bool_states, must):
     
     logger.debug(
         'options for modeling actions:\n\t'
-        'mutex: ' + str(use_mutex) +'\n\t'
+        'mutex: ' + str(use_mutex) + '\n\t'
         'min_one: ' + str(min_one)
     )
     
@@ -295,11 +296,11 @@ def iter2var(states, variables, statevar, bool_states, must):
         if not all_str:
             raise TypeError('If Boolean, all states must be strings.')
         
-        state_ids = {x:x for x in states}
-        variables.update({s:'boolean' for s in states})
+        state_ids = {x: x for x in states}
+        variables.update({s: 'boolean' for s in states})
         
         # single action ?
-        if len(mutex(state_ids.values()) ) == 0:
+        if len(mutex(state_ids.values())) == 0:
             return state_ids
         
         # handle multiple actions
@@ -341,19 +342,21 @@ def iter2var(states, variables, statevar, bool_states, must):
             if not min_one:
                 domain += [statevar + 'none']
                 
-                logger.debug('domain has been extended, because all actions\n\t'
-                             'could be False (constraint: min_one = False).')
+                logger.debug(
+                    'domain has been extended, because all actions\n\t'
+                    'could be False (constraint: min_one = False).'
+                )
         else:
             raise TypeError('Integer and string states must not be mixed.')
         
-        state_ids = {x:f(x) for x in states}
+        state_ids = {x: f(x) for x in states}
         variables[statevar] = domain
         constraint = None
     
     logger.debug(
         'for tulip variable: ' + str(statevar) + '\n'
         'the map from [tulip action values] ---> '
-        '[solver expressions] is:\n' + 2*'\t' + str(state_ids)
+        '[solver expressions] is:\n' + 2 * '\t' + str(state_ids)
     )
     return state_ids, constraint
 
@@ -381,7 +384,7 @@ def _fts2spec(
     sys_init = []
     sys_trans = []
     
-    sys_vars = {ap:'boolean' for ap in aps}
+    sys_vars = {ap: 'boolean' for ap in aps}
     
     action_ids, constraint = iter2var(
         actions, sys_vars, actionvar, bool_actions, fts.actions_must
@@ -489,7 +492,7 @@ def sys_to_spec(
     env_init = []
     env_trans = []
     
-    sys_vars = {ap:'boolean' for ap in aps}
+    sys_vars = {ap: 'boolean' for ap in aps}
     env_vars = dict()
     
     actions = ofts.actions
@@ -498,7 +501,7 @@ def sys_to_spec(
     env_action_ids = dict()
     
     for action_type, codomain in actions.iteritems():
-        msg = 'action_type:\n\t' + str(action_type) +'\n'
+        msg = 'action_type:\n\t' + str(action_type) + '\n'
         msg += 'with codomain:\n\t' + str(codomain)
         logger.debug(msg)
         
@@ -525,7 +528,8 @@ def sys_to_spec(
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids[action_type] = action_ids
     
-    state_ids, constraint = iter2var(states, sys_vars, statevar, bool_states, must='xor')
+    state_ids, constraint = iter2var(states, sys_vars, statevar,
+                                     bool_states, must='xor')
     if constraint is not None:
         sys_trans += constraint
     
@@ -588,7 +592,7 @@ def env_to_spec(
     env_trans = []
     
     # since APs are tied to env states, let them be env variables
-    env_vars = {ap:'boolean' for ap in aps}
+    env_vars = {ap: 'boolean' for ap in aps}
     sys_vars = dict()
     
     actions = ofts.actions
@@ -598,13 +602,17 @@ def env_to_spec(
     
     for action_type, codomain in actions.iteritems():
         if 'sys' in action_type:
-            action_ids, constraint = iter2var(codomain, sys_vars, action_type,
-                                              bool_actions, ofts.sys_actions_must)
+            action_ids, constraint = iter2var(
+                codomain, sys_vars, action_type,
+                bool_actions, ofts.sys_actions_must
+            )
             _add_actions(constraint, sys_init, sys_trans)
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
-            action_ids, constraint = iter2var(codomain, env_vars, action_type,
-                                              bool_actions, ofts.env_actions_must)
+            action_ids, constraint = iter2var(
+                codomain, env_vars, action_type,
+                bool_actions, ofts.env_actions_must
+            )
             _add_actions(constraint, env_init, env_trans)
             env_action_ids[action_type] = action_ids
     
@@ -613,7 +621,8 @@ def env_to_spec(
     # and whether that TS will contain all the system actions
     # defined in the environment TS
     
-    state_ids, constraint = iter2var(states, env_vars, statevar, bool_states, must='xor')
+    state_ids, constraint = iter2var(states, env_vars, statevar,
+                                     bool_states, must='xor')
     if constraint is not None:
         env_trans += constraint
     
@@ -661,7 +670,8 @@ def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
 
 def _sys_trans_from_ts(
     states, state_ids, trans,
-    action_ids=None, sys_action_ids=None, env_action_ids=None):
+    action_ids=None, sys_action_ids=None, env_action_ids=None
+):
     """Convert transition relation to GR(1) sys_safety.
     
     The transition relation may be closed or open,
@@ -726,7 +736,7 @@ def _sys_trans_from_ts(
         
         cur_trans = trans.find([from_state])
         
-        msg = ('from state: ' + str(from_state) +\
+        msg = ('from state: ' + str(from_state) +
                ', the available transitions are:\n\t' + str(cur_trans))
         logger.debug(msg)
         
@@ -749,23 +759,27 @@ def _sys_trans_from_ts(
                 previous = set()
             logger.debug('previous = ' + str(previous))
             
-            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
-            prev_env_act = {k:v for k,v in env_actions.iteritems()
+            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
+            prev_env_act = {k: v for k, v in env_actions.iteritems()
                             if k in previous}
-            next_env_act = {k:v for k,v in env_actions.iteritems()
+            next_env_act = {k: v for k, v in env_actions.iteritems()
                             if k not in previous}
             
-            postcond += [_conj_actions(prev_env_act, env_action_ids, nxt=False)]
-            postcond += [_conj_actions(next_env_act, env_action_ids, nxt=True)]
+            postcond += [_conj_actions(prev_env_act, env_action_ids,
+                                       nxt=False)]
+            postcond += [_conj_actions(next_env_act, env_action_ids,
+                                       nxt=True)]
             
-            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
-            prev_sys_act = {k:v for k,v in sys_actions.iteritems()
+            sys_actions = {k: v for k, v in label.iteritems() if 'sys' in k}
+            prev_sys_act = {k: v for k, v in sys_actions.iteritems()
                             if k in previous}
-            next_sys_act = {k:v for k,v in sys_actions.iteritems()
+            next_sys_act = {k: v for k, v in sys_actions.iteritems()
                             if k not in previous}
             
-            postcond += [_conj_actions(prev_sys_act, sys_action_ids, nxt=False)]
-            postcond += [_conj_actions(next_sys_act, sys_action_ids, nxt=True)]
+            postcond += [_conj_actions(prev_sys_act, sys_action_ids,
+                                       nxt=False)]
+            postcond += [_conj_actions(next_sys_act, sys_action_ids,
+                                       nxt=True)]
             
             # if system FTS given
             # in case 'actions in label, then action_ids is a dict,
@@ -820,14 +834,14 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         # no successor states ?
         if not cur_trans:
             # nothing modeled for env, since sys has X(False) anyway
-            #for action_type, codomain_map in env_action_ids.iteritems():
-            #env_trans += [precond + ' -> X(' + s + ')']
+            # for action_type, codomain_map in env_action_ids.iteritems():
+            # env_trans += [precond + ' -> X(' + s + ')']
             continue
         
         # collect possible next env actions
         next_env_action_combs = set()
         for (from_state, to_state, label) in cur_trans:
-            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
             
             if not env_actions:
                 continue
@@ -886,27 +900,28 @@ def _env_trans_from_env_ts(
             continue
         
         cur_list = []
-        found_free = False # any environment transition
+        found_free = False  # any environment transition
         # not conditioned on the previous system output ?
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             
             postcond = ['X' + _pstr(to_state_id)]
             
-            env_actions = {k:v for k,v in label.iteritems() if 'env' in k}
+            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
             postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
             
             # remember: this is an environment FTS, so no next for sys
-            sys_actions = {k:v for k,v in label.iteritems() if 'sys' in k}
+            sys_actions = {k: v for k, v in label.iteritems() if 'sys' in k}
             postcond += [_conj_actions(sys_actions, sys_action_ids)]
             
-            postcond += [_conj_action(label, 'actions', nxt=True, ids=action_ids)]
+            postcond += [_conj_action(label, 'actions', nxt=True,
+                                      ids=action_ids)]
             
             # todo: test this claus
             if not sys_actions:
                 found_free = True
             
-            cur_list += [_conj(postcond) ]
+            cur_list += [_conj(postcond)]
         
         # can sys kill env by setting all previous sys outputs to False ?
         # then env assumption becomes False,
@@ -917,17 +932,17 @@ def _env_trans_from_env_ts(
             logger.debug(msg)
             
             for action_type, codomain in sys_action_ids.iteritems():
-                conj = _conj_neg(codomain.itervalues() )
+                conj = _conj_neg(codomain.itervalues())
                 cur_list += [conj]
                 
                 msg = (
-                    'for action_type: ' + str(action_type) +'\n' +
-                    'with codomain: ' + str(codomain) +'\n' +
+                    'for action_type: ' + str(action_type) + '\n' +
+                    'with codomain: ' + str(codomain) + '\n' +
                     'the negated conjunction is: ' + str(conj)
                 )
                 logger.debug(msg)
         
-        env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) +')']
+        env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) + ')']
     return env_trans
 
 def _ap_trans_from_ts(states, state_ids, aps):
@@ -947,7 +962,7 @@ def _ap_trans_from_ts(states, state_ids, aps):
         ap_str = _sprint_aps(label, aps)
         if not ap_str:
             continue
-        init += ['!(' + _pstr(state_id) + ') || (' + ap_str +')']
+        init += ['!(' + _pstr(state_id) + ') || (' + ap_str + ')']
     
     # transitions of labels
     for state in states:
@@ -963,18 +978,18 @@ def _ap_trans_from_ts(states, state_ids, aps):
     return (init, trans)
 
 def _sprint_aps(label, aps):
-    if label.has_key('ap'):
+    if 'ap' in label:
         tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
     else:
         tmp0 = ''
     
-    if label.has_key('ap'):
+    if 'ap' in label:
         tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
     else:
         tmp1 = _conj_neg(aps, parenth=False)
     
     if len(tmp0) > 0 and len(tmp1) > 0:
-        tmp = tmp0 +' && '+ tmp1
+        tmp = tmp0 + ' && ' + tmp1
     else:
         tmp = tmp0 + tmp1
     return tmp
@@ -1057,7 +1072,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     
     try:
         logger.debug('Mealy machine has: n = ' +
-                     str(len(ctrl.states) ) +' states.')
+                     str(len(ctrl.states)) + ' states.')
     except:
         logger.debug('No Mealy machine returned.')
     
@@ -1134,7 +1149,8 @@ def synthesize(
         Otherwise use a single integer variable for all states.
     @type bool_states: bool
     
-    @param bool_actions: model actions using bool variables, otherwise integers.
+    @param bool_actions: model actions using bool variables,
+        otherwise use integers.
     @type bool_actions: bool
 
     @param rm_deadends: return a strategy that contains no terminal states.
@@ -1165,7 +1181,7 @@ def synthesize(
     
     try:
         logger.debug('Mealy machine has: n = ' +
-            str(len(ctrl.states) ) +' states.')
+                     str(len(ctrl.states)) + ' states.')
     except:
         logger.debug('No Mealy machine returned.')
     
@@ -1231,7 +1247,7 @@ def _spec_plus_sys(
             statevar=statevar
         )
         specs = specs | sys_formula
-        logger.debug('sys TS:\n' + str(sys_formula.pretty() ) + _hl)
+        logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
     
     if env is not None:
         if hasattr(env, 'state_varname'):
@@ -1248,9 +1264,9 @@ def _spec_plus_sys(
             statevar=statevar
         )
         specs = specs | env_formula
-        logger.debug('env TS:\n' + str(env_formula.pretty() ) + _hl)
+        logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
         
-    logger.info('Overall Spec:\n' + str(specs.pretty() ) +_hl)
+    logger.info('Overall Spec:\n' + str(specs.pretty()) + _hl)
     return specs
 
 def strategy2mealy(A, spec):
@@ -1282,11 +1298,11 @@ def strategy2mealy(A, spec):
     mach.add_outputs(outputs)
     
     str_vars = {
-        k:v for k, v in env_vars.items()
+        k: v for k, v in env_vars.items()
         if isinstance(v, list)
     }
     str_vars.update({
-        k:v for k, v in sys_vars.items()
+        k: v for k, v in sys_vars.items()
         if isinstance(v, list)
     })
     
@@ -1352,10 +1368,10 @@ def strategy2mealy(A, spec):
             'The machine obtained from the strategy '
             'does not have any initial states !\n'
             'The strategy is:\n'
-            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2*'\n' +
-            'edges:\n' + str(A.edges()) + 2*'\n' +
-            'and the machine:\n' + str(mach) + 2*'\n' +
-            'and the specification is:\n' + str(spec.pretty()) + 2*'\n'
+            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
+            'edges:\n' + str(A.edges()) + 2 * '\n' +
+            'and the machine:\n' + str(mach) + 2 * '\n' +
+            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n'
         )
     
     return mach
@@ -1364,8 +1380,9 @@ def _int2str(label, str_vars):
     """Replace integers with string values for string variables in C{label}.
     """
     label = dict(label)
-    label.update({k:str_vars[k][int(v)] for k,v in label.iteritems()
-                                        if k in str_vars})
+    label.update({k: str_vars[k][int(v)]
+                 for k, v in label.iteritems()
+                 if k in str_vars})
     return label
 
 def mask_outputs(machine):

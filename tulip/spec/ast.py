@@ -51,56 +51,56 @@ import re
 import networkx as nx
 
 TEMPORAL_OP_MAP = {
-    '[]':'G', 'G':'G',
-    'F':'F', '<>':'F',
-    'X':'X', 'next':'X', "'":'X',
-    'U':'U', 'V':'R', 'R':'R'
+    '[]': 'G', 'G': 'G',
+    'F': 'F', '<>': 'F',
+    'X': 'X', 'next': 'X', "'": 'X',
+    'U': 'U', 'V': 'R', 'R': 'R'
 }
 
 JTLV_MAP = {
-    'False':'FALSE', 'True':'TRUE',
-    '!':'!',
-    '|':'|', '&':'&', '->':'->', '<->':'<->',
-    'G':'[]', 'F':'<>', 'X':'next',
-    'U':'U',
-    '<=':'<=', '=':'=', '>=':'>=', '>':'>', '!=':'!='
+    'False': 'FALSE', 'True': 'TRUE',
+    '!': '!',
+    '|': '|', '&': '&', '->': '->', '<->': '<->',
+    'G': '[]', 'F': '<>', 'X': 'next',
+    'U': 'U',
+    '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
 }
 
 GR1C_MAP = {
-    'False':'False', 'True':'True',
-    '!':'!',
-    '|':'|', '&':'&', '->':'->', '<->':'<->',
-    'G':'[]', 'F':'<>', 'X':"'",
-    '<=':'<=', '=':'=', '>=':'>=', '>':'>'
+    'False': 'False', 'True': 'True',
+    '!': '!',
+    '|': '|', '&': '&', '->': '->', '<->': '<->',
+    'G': '[]', 'F': '<>', 'X': "'",
+    '<=': '<=', '=': '=', '>=': '>=', '>': '>'
 }
 
-SMV_MAP = {'G':'G', 'F':'F', 'X':'X', 'U':'U', 'R':'V'}
+SMV_MAP = {'G': 'G', 'F': 'F', 'X': 'X', 'U': 'U', 'R': 'V'}
 
 SPIN_MAP = {
-    'True':'true', 'False':'false',
-    '!':'!',
-    '|':'||', '&':'&&', '->':'->', '<->':'<->',
-    'G':'[]', 'F':'<>', 'U':'U', 'R':'V'
+    'True': 'true', 'False': 'false',
+    '!': '!',
+    '|': '||', '&': '&&', '->': '->', '<->': '<->',
+    'G': '[]', 'F': '<>', 'U': 'U', 'R': 'V'
 }
 
-PYTHON_MAP = {'!':'not', '&':'and', '|':'or', 'xor':'^'}
+PYTHON_MAP = {'!': 'not', '&': 'and', '|': 'or', 'xor': '^'}
 
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
 FULL_OPERATOR_NAMES = {
-    'next':'X',
-    'always':'[]',
-    'eventually':'<>',
-    'until':'U',
-    'stronguntil':'U',
-    'weakuntil':'W',
-    'unless':'W', # see Baier - Katoen
-    'release':'V',
-    'implies':'->',
-    'equivalent':'<->',
-    'not':'!',
-    'and':'&&',
-    'or':'||',
+    'next': 'X',
+    'always': '[]',
+    'eventually': '<>',
+    'until': 'U',
+    'stronguntil': 'U',
+    'weakuntil': 'W',
+    'unless': 'W',  # see Baier - Katoen
+    'release': 'V',
+    'implies': '->',
+    'equivalent': '<->',
+    'not': '!',
+    'and': '&&',
+    'or': '||',
 }
 
 # Flattener helpers
@@ -119,17 +119,17 @@ def _flatten_Promela(node):
 def _flatten_python(node):
     return node.to_python()
 
-flatteners = {'gr1c':_flatten_gr1c,
-              'jtlv':_flatten_JTLV,
-              'smv':_flatten_SMV,
-              'spin':_flatten_Promela,
-              'python':_flatten_python}
+flatteners = {'gr1c': _flatten_gr1c,
+              'jtlv': _flatten_JTLV,
+              'smv': _flatten_SMV,
+              'spin': _flatten_Promela,
+              'python': _flatten_python}
 
-maps = {'gr1c':GR1C_MAP,
-        'jtlv':JTLV_MAP,
-        'smv':SMV_MAP,
-        'spin':SPIN_MAP,
-        'python':PYTHON_MAP}
+maps = {'gr1c': GR1C_MAP,
+        'jtlv': JTLV_MAP,
+        'smv': SMV_MAP,
+        'spin': SPIN_MAP,
+        'python': PYTHON_MAP}
 
 class LTLException(Exception):
     pass
@@ -186,8 +186,9 @@ class LTL_AST(nx.DiGraph):
         
         @rtype: C{set} of L{Var}
         """
-        return {d['ast_node'] for u, d in self.nodes_iter(data=True)
-                              if isinstance(d['ast_node'], Var)}
+        return {d['ast_node']
+                for u, d in self.nodes_iter(data=True)
+                if isinstance(d['ast_node'], Var)}
     
     def sub_values(self, var_values):
         """Substitute given values for variables.
@@ -308,7 +309,7 @@ class LTL_AST(nx.DiGraph):
         """Layout AST and save result in PDF file.
         """
         fname, fext = os.path.splitext(filename)
-        fext = fext[1:] # drop .
+        fext = fext[1:]  # drop .
         p = self.to_pydot(detailed)
         p.write(filename, format=fext)
 
@@ -373,7 +374,7 @@ class Var(Node):
         
     def to_gr1c(self, primed=False):
         if primed:
-            return str(self)+"'"
+            return str(self) + "'"
         else:
             return str(self)
         
@@ -392,7 +393,7 @@ class Const(Node):
         self.val = re.sub(r'^"|"$', '', t)
     
     def __repr__(self):
-        return  r'"' + self.val + r'"'
+        return r'"' + self.val + r'"'
     
     def flatten(self, flattener=str, op=None, **args):
         return str(self)

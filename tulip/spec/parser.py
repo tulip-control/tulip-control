@@ -102,11 +102,11 @@ if __name__ == "__main__":
     from .pyparser import parse as pyparse
     a = pyparse(sys.argv[1])
     
-    print("Parsed expression: " + str(a) )
-    print("Length: " +str( len(a) ) )
-    print("Variables: " + str(ast.get_vars(a) ) )
-    print("Safety: " +str(issafety(a) ) )
+    print("Parsed expression: " + str(a))
+    print("Length: " + str(len(a)))
+    print("Variables: " + str(ast.get_vars(a)))
+    print("Safety: " + str(issafety(a)))
     
-    print("JTLV syntax: " +str(a.to_jtlv() ) )
-    print("SMV syntax: " +str(a.to_smv() ) )
-    print("Promela syntax: " +str(a.to_promela() ) )
+    print("JTLV syntax: " + str(a.to_jtlv()))
+    print("SMV syntax: " + str(a.to_smv()))
+    print("Promela syntax: " + str(a.to_promela()))

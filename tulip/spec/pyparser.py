@@ -55,7 +55,7 @@ _restricted_alphas = filter(lambda x: x not in "GFX", pp.alphas)
 _bool_keyword = pp.CaselessKeyword("TRUE") | pp.CaselessKeyword("FALSE")
 
 _var = ~_bool_keyword + (
-    pp.Word(_restricted_alphas, pp.alphanums + "._:") | \
+    pp.Word(_restricted_alphas, pp.alphanums + "._:") |
     pp.Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | pp.QuotedString('"')
 ).setParseAction(ast.Var)
 
@@ -80,7 +80,7 @@ _comparison_expr = pp.Group(
 _proposition = _comparison_expr | _atom
 
 # hack so G/F/X doesn't mess with keywords
-#(i.e. FALSE) or variables like X0, X_0_1
+# (i.e. FALSE) or variables like X0, X_0_1
 _UnaryTempOps = ~_bool_keyword + \
     pp.oneOf("G F X [] <> next") + ~pp.Word(pp.nums + "_")
 
@@ -90,16 +90,16 @@ def parse(formula):
     # LTL expression
     _ltl_expr = pp.operatorPrecedence(
         _proposition,
-       [("'", 1, pp.opAssoc.LEFT, ast.UnTempOp),
-        ("!", 1, pp.opAssoc.RIGHT, ast.Not),
-        (_UnaryTempOps, 1, pp.opAssoc.RIGHT, ast.UnTempOp),
-        (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ast.And),
-        (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ast.Or),
-        (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ast.Xor),
-        ("->", 2, pp.opAssoc.RIGHT, ast.Imp),
-        ("<->", 2, pp.opAssoc.RIGHT, ast.BiImp),
-        (pp.oneOf("= == !="), 2, pp.opAssoc.RIGHT, ast.Comparator),
-        (pp.oneOf("U V R"), 2, pp.opAssoc.RIGHT, ast.BiTempOp)]
+        [("'", 1, pp.opAssoc.LEFT, ast.UnTempOp),
+         ("!", 1, pp.opAssoc.RIGHT, ast.Not),
+         (_UnaryTempOps, 1, pp.opAssoc.RIGHT, ast.UnTempOp),
+         (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ast.And),
+         (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ast.Or),
+         (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ast.Xor),
+         ("->", 2, pp.opAssoc.RIGHT, ast.Imp),
+         ("<->", 2, pp.opAssoc.RIGHT, ast.BiImp),
+         (pp.oneOf("= == !="), 2, pp.opAssoc.RIGHT, ast.Comparator),
+         (pp.oneOf("U V R"), 2, pp.opAssoc.RIGHT, ast.BiTempOp)]
     )
     _ltl_expr.ignore(pp.LineStart() + "--" + pp.restOfLine)
 
