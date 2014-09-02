@@ -167,17 +167,13 @@ pip install numpy
 pip install scipy
 pip install ply
 
-# pyparsing needed as pydot dependency
-# downgrade pyparsing
 if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
 	echo "correct pydot version installed locally: skip"
 else
 	echo "pydot to be installed locally"
 	cd $DOWNLOAD_LOC
 	
-	/usr/bin/yes | pip uninstall pyparsing
-	pip install -Iv \
-	  https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
+	pip install pyparsing
 
 	# install latest pydot version
 	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
@@ -195,7 +191,6 @@ pip install ipython
 #sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
 #source $CFG_FILE
 
-# downgrade pyparsing
 #------------------------------------------------------------
 # install glpk
 if [ "$install_glpk" = "true" ]; then
