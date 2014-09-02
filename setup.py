@@ -200,11 +200,14 @@ if check_deps:
             print('ERROR: CVXOPT not found.')
             raise
 
-        # Other dependencies
-        for (dep_key, dep_val) in other_depends.items():
-            if not dep_val[0]():
-                print(dep_val[1] )
-                raise Exception('Failed dependency: '+dep_key)
+    # Other dependencies
+    for (dep_key, dep_val) in other_depends.items():
+        print('Probing for required dependency:' + dep_key + '...')
+        if dep_val[0]():
+            print('\t' + dep_val[1])
+        else:
+            print('\t' + dep_val[2])
+            raise Exception('Failed dependency: '+dep_key)
 
     # Optional stuff
     for (opt_key, opt_val) in optionals.items():
