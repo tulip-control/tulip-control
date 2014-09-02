@@ -274,9 +274,15 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             shutil.copyfile(fLTL, DEBUG_LTL_FILE)
             shutil.copyfile(fAUT, DEBUG_AUT_FILE)
         
-        subprocess.call( \
-            ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
-                 str(priority_kind), str(init_option)])
+        try:
+            subprocess.call( \
+                ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
+                     str(priority_kind), str(init_option)])
+        except OSError as e:
+            if e.errno == os.errno.ENOENT:
+                raise('Java not found: cannot run jtlv.')
+            else:
+                raise
     else: # For debugging purpose
         classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
             os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
