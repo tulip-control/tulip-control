@@ -8,6 +8,7 @@ SCL; 16 Jan 2014.
 import imp
 import sys
 import os.path
+from os import walk
 import argparse
 
 import nose
@@ -96,9 +97,24 @@ if __name__ == "__main__":
     if measure_coverage:
         argv.extend(["--with-coverage", "--cover-html", "--cover-package=tulip"])
     
+    available = []
+    for dirpath, dirnames, filenames in walk(tests_dir):
+        available.extend(filenames)
+        break
+    
     testfiles = []
     excludefiles = []
     for basename in basenames:
+        match = [f for f in available
+                 if f.startswith(basename) and f.endswith('.py')]
+        
+        if len(match) > 1:
+            raise Exception('ambiguous base name: %s, matches: %s' %
+                            (basename, match))
+        elif match[0].endswith('_test.py'):
+            testfiles.append(match[0])
+            continue
+        
         if os.path.exists(os.path.join(tests_dir, basename + '_test.py')):
             testfiles.append(basename + '_test.py')
         elif basename[0] == '-':
