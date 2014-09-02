@@ -12,7 +12,7 @@ readdstar.py, spin2dstar.py
 AES
   specification generation for an electric power system.  Consult AES/README.
 
-matlab
+matlabsim
   files required to export controllers to Simulink blocks and a couple examples
   for reference.  Consult matlab/README.
 
