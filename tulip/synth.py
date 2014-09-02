@@ -998,7 +998,12 @@ def synthesize_many(specs, ts=None, ignore_init=None,
                     bool_actions=None, solver='gr1c'):
     """Synthesize from logic specs and multiple transition systems.
     
-    The states of the transition system can be either:
+    The transition systems are composed synchronously, i.e.,
+    they all have to take a transition at each time step.
+    The synchronous composition is obtained by taking the
+    conjunction of the formulas describing each transition system.
+    
+    The states of each transition system can be either:
     
       - all integers, or
       - all strings
