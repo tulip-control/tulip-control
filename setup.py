@@ -152,7 +152,10 @@ def retrieve_git_info():
 
 perform_setup = True
 check_deps = False
-if 'install' in sys.argv[1:] and 'nocheck' not in sys.argv[1:]:
+if (
+    ('install' in sys.argv[1:] or 'develop' in sys.argv[1:]) and
+    'nocheck' not in sys.argv[1:]
+):
     check_deps = True
 elif 'dry-check' in sys.argv[1:]:
     perform_setup = False
