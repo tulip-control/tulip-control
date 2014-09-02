@@ -40,11 +40,11 @@ import copy
 from .transys import FiniteTransitionSystem
 from .automata import BuchiAutomaton
 
-_hl = 40 *'-'
+_hl = 40 * '-'
 
 logger = logging.getLogger(__name__)
 
-#TODO BA x BA sync prod algorithm
+# TODO BA x BA sync prod algorithm
 
 def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     def prod_ids2states(prod_state_id, self, other):
@@ -60,7 +60,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         
         if v1 is None or v2 is None:
             raise Exception(
-                'At least one factor has unlabeled state, '+
+                'At least one factor has unlabeled state, '
                 "or the state sublabel types don't match."
             )
         
@@ -70,7 +70,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
             pass
         
         try:
-            return v2 +v2
+            return v2 + v2
         except:
             raise TypeError(
                 'The state sublabel types should support ' +
@@ -79,7 +79,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     
     def state_label_union(attr_dict):
         prod_attr_dict = dict()
-        for k,v in attr_dict.iteritems():
+        for k, v in attr_dict.iteritems():
             prod_attr_dict[k] = label_union(v)
         return prod_attr_dict
     
@@ -114,7 +114,8 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     # action labeling is taken care by nx,
     # since transition taken at a time
     for from_state_id, to_state_id, edge_dict in \
-    prod_graph.edges_iter(data=True):            
+        prod_graph.edges_iter(data=True):
+        
         from_state = prod_ids2states(from_state_id, self, other)
         to_state = prod_ids2states(to_state_id, self, other)
         
@@ -229,7 +230,7 @@ def ts_sync_prod(ts1, ts2):
     # use more label sets, instead of this explicit approach
     #
     # for synchronous product: Cartesian product of action sets
-    #prod_ts.actions |= ts1.actions * ts2.actions
+    # prod_ts.actions |= ts1.actions * ts2.actions
     
     prod_ts = super(FiniteTransitionSystem, self).tensor_product(
         ts, prod_sys=prod_ts
@@ -321,12 +322,12 @@ def add(self, other):
     >>> L = n*['p'] # state labeling
     >>> ts1 = line_labeled_with(L, n-1)
     >>> ts1.plot()
-    >>> 
+    >>>
     >>> L = n*['p']
     >>> ts2 = cycle_labeled_with(L)
     >>> ts2.states.add('s3', ap={'!p'})
     >>> ts2.plot()
-    >>> 
+    >>>
     >>> ts3 = ts1 +ts2
     >>> ts3.transitions.add('s'+str(n-1), 's'+str(n) )
     >>> ts3.default_layout = 'circo'
@@ -345,9 +346,11 @@ def add(self, other):
     @rtype: L{FiniteTransitionSystem}
     """
     if not isinstance(other, FiniteTransitionSystem):
-        msg = 'other class must be FiniteTransitionSystem.\n'
-        msg += 'Got instead:\n\t' +str(other)
-        msg += '\nof type:\n\t' +str(type(other) )
+        msg = (
+            'other class must be FiniteTransitionSystem.\n'
+            'Got instead:\n\t' + str(other) +
+            '\nof type:\n\t' + str(type(other))
+        )
         raise TypeError(msg)
     
     self.atomic_propositions |= other.atomic_propositions
@@ -364,8 +367,7 @@ def add(self, other):
     self.states.initial |= set(other.states.initial)
     
     # copy extra transitions (be careful w/ labeling)
-    for (from_state, to_state, label_dict) in \
-        other.transitions.find():
+    for (from_state, to_state, label_dict) in other.transitions.find():
         # labeled edge ?
         if not label_dict:
             self.transitions.add(from_state, to_state)

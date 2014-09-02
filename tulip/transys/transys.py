@@ -46,7 +46,7 @@ from .mathset import PowerSet, MathSet
 #
 # from .export import graph2promela
 
-_hl = 40 *'-'
+_hl = 40 * '-'
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +69,10 @@ class KripkeStructure(LabeledDiGraph):
     def __init__(self):
         ap_labels = PowerSet()
         node_label_types = [
-            {'name':'ap',
-             'values':ap_labels,
-             'setter':ap_labels.math_set,
-             'default':set()}
+            {'name': 'ap',
+             'values': ap_labels,
+             'setter': ap_labels.math_set,
+             'default': set()}
         ]
         
         super(KripkeStructure, self).__init__(node_label_types)
@@ -81,21 +81,21 @@ class KripkeStructure(LabeledDiGraph):
         
         # dot formatting
         self._state_dot_label_format = {
-            'ap':'',
-           'type?label':'',
-           'separator':'\n'
+            'ap': '',
+            'type?label': '',
+            'separator': '\n'
         }
         
-        self.dot_node_shape = {'normal':'rectangle'}
+        self.dot_node_shape = {'normal': 'rectangle'}
         
         self._state_dot_label_format = {
-            'ap':'',
-           'type?label':'',
-           'separator':'\n'
+            'ap': '',
+            'type?label': '',
+            'separator': '\n'
         }
         self._transition_dot_label_format = {
-            'type?label':':',
-            'separator':'\n'
+            'type?label': ':',
+            'separator': '\n'
         }
         
         self._transition_dot_mask = dict()
@@ -105,11 +105,11 @@ class KripkeStructure(LabeledDiGraph):
             'Kripke Structure: ' + self.name + '\n' +
             _hl + '\n' +
             'Atomic Propositions (APs):\n\t' +
-            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
+            pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self) + 2*'\n' +
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2*'\n' +
+            pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Transitions:\n' +
             pformat(self.transitions(), indent=3) +
             '\n' + _hl + '\n'
@@ -345,16 +345,16 @@ class FiniteTransitionSystem(LabeledDiGraph):
         
         if env_actions is None:
             env_actions = [
-                {'name':'env_actions',
-                 'values':MathSet(),
-                 'setter':True}
+                {'name': 'env_actions',
+                 'values': MathSet(),
+                 'setter': True}
             ]
         
         if sys_actions is None:
             sys_actions = [
-                {'name':'sys_actions',
-                 'values':MathSet(),
-                 'setter':True}
+                {'name': 'sys_actions',
+                 'values': MathSet(),
+                 'setter': True}
             ]
         # note: "sys_actions" used to be "actions"
         # in closed systems (old FTS)
@@ -365,10 +365,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
         ap_labels = PowerSet()
         
         node_label_types = [
-            {'name':'ap',
-             'values':ap_labels,
-             'setter':ap_labels.math_set,
-             'default':set()}
+            {'name': 'ap',
+             'values': ap_labels,
+             'setter': ap_labels.math_set,
+             'default': set()}
         ]
         
         super(FiniteTransitionSystem, self).__init__(
@@ -377,7 +377,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
-        actions = {x['name']:x['values'] for x in edge_label_types}
+        actions = {x['name']: x['values'] for x in edge_label_types}
         
         if 'actions' in actions:
             msg = '"actions" cannot be used as an action type name,\n'
@@ -388,7 +388,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         
         self.actions = actions
         self.atomic_propositions = self.ap
-        self.aps = self.atomic_propositions # shortcut
+        self.aps = self.atomic_propositions  # shortcut
         
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
@@ -396,25 +396,25 @@ class FiniteTransitionSystem(LabeledDiGraph):
         
         # dot formatting
         self._state_dot_label_format = {
-            'ap':'',
-           'type?label':'',
-           'separator':'\n'
+            'ap': '',
+            'type?label': '',
+            'separator': '\n'
         }
         self._transition_dot_label_format = {
-            'sys_actions':'sys', # todo: '' if no env
-            'env_actions':'env',
-            'type?label':':', # todo: '' if no env
-            'separator':'\n'
+            'sys_actions': 'sys',  # todo: '' if no env
+            'env_actions': 'env',
+            'type?label': ':',  # todo: '' if no env
+            'separator': '\n'
         }
         
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal':'box'} # todo: rectangle if no env
+        self.dot_node_shape = {'normal': 'box'}  # todo: rectangle if no env
         self.default_export_fname = 'fts'
     
     def __str__(self):
         isopen = (
-            ('sys' and any({'env' in x for x in self.actions}) ) or
-            ('env' and any({'sys' in x for x in self.actions}) )
+            ('sys' and any({'env' in x for x in self.actions})) or
+            ('env' and any({'sys' in x for x in self.actions}))
         )
         
         if isopen:
@@ -423,42 +423,45 @@ class FiniteTransitionSystem(LabeledDiGraph):
             t = 'closed'
         
         s = (
-            _hl +'\nFinite Transition System (' + t + '): ' +
+            _hl + '\nFinite Transition System (' + t + '): ' +
             self.name + '\n' + _hl + '\n' +
             
             'Atomic Propositions (APs):\n' +
-            pformat(self.atomic_propositions, indent=3) + 2*'\n' +
+            pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             
             'States labeled with sets of APs:\n' +
-            _dumps_states(self) + 2*'\n' +
+            _dumps_states(self) + 2 * '\n' +
             
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2*'\n'
+            pformat(self.states.initial, indent=3) + 2 * '\n'
         )
-        
-        #'Actions:\n\t' +str(self.actions) + 2*'\n' +
         
         for action_type, codomain in self.actions.iteritems():
             if 'sys' in action_type:
-                s += 'System Action Type: ' + str(action_type) +\
-                     ', with possible values: ' + str(codomain) + '\n'
-                s += pformat(codomain, indent=3) +2*'\n'
+                s += (
+                    'System Action Type: ' + str(action_type) +
+                    ', with possible values: ' + str(codomain) + '\n' +
+                    pformat(codomain, indent=3) + 2 * '\n'
+                )
             elif 'env' in action_type:
-                s += 'Environment Action Type: ' + str(action_type) +\
-                     ', with possible values:\n\t' + str(codomain) + '\n'
-                s += pformat(codomain, indent=3) +2*'\n'
+                s += (
+                    'Environment Action Type: ' + str(action_type) +
+                    ', with possible values:\n\t' + str(codomain) + '\n' +
+                    pformat(codomain, indent=3) + 2 * '\n'
+                )
             else:
-                s += 'Action type controlled by neither env nor sys\n' +\
-                     ' (will cause you errors later)' +\
-                     ', with possible values:\n\t'
-                s += pformat(codomain, indent=3) +2*'\n'
+                s += (
+                    'Action type controlled by neither env nor sys\n'
+                    ' (will cause you errors later)'
+                    ', with possible values:\n\t' +
+                    pformat(codomain, indent=3) + 2 * '\n'
+                )
         
         s += (
             'Transitions labeled with sys and env actions:\n' +
             pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n'
         )
-        
         return s
     
     @property
@@ -576,7 +579,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             return state_labeling
         
         logger.debug('State labeling L not tuples (state, ap_label),\n'
-                   'zipping with states S...\n')
+                     'zipping with states S...\n')
         state_labeling = zip(states, state_labeling)
         return state_labeling
     
@@ -598,13 +601,13 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     
     # prepending states with given str
     if prepend_str:
-        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.')
+        logger.debug('Given string:\n\t' + str(prepend_str) + '\n' +
+                     'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     
     ts = FTS()
-    ts.name=name
+    ts.name = name
     
     ts.states.add_from(states)
     ts.states.initial |= initial_states
@@ -623,8 +626,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             ap_label = str2singleton(ap_label)
             state = prepend_str + str(state)
             
-            logger.debug('Labeling state:\n\t' +str(state) +'\n' +
-                  'with label:\n\t' +str(ap_label) +'\n')
+            logger.debug('Labeling state:\n\t' + str(state) + '\n' +
+                         'with label:\n\t' + str(ap_label) + '\n')
             ts.states[state]['ap'] = ap_label
     
     # any transition labeling ?
@@ -632,17 +635,19 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         for (from_state, to_state) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            logger.debug('Added unlabeled edge:\n\t' +str(from_state) +
-                   '--->' +str(to_state) +'\n')
+            logger.debug('Added unlabeled edge:\n\t' + str(from_state) +
+                         '--->' + str(to_state) + '\n')
             ts.transitions.add(from_state, to_state)
     else:
         ts.actions |= actions
         for (from_state, to_state, act) in transitions:
             (from_state, to_state) = prepend_with([from_state, to_state],
                                                   prepend_str)
-            logger.debug('Added labeled edge (=transition):\n\t' +
-                   str(from_state) +'---[' +str(act) +']--->' +
-                   str(to_state) +'\n')
+            logger.debug(
+                'Added labeled edge (=transition):\n\t' +
+                str(from_state) + '---[' + str(act) + ']--->' +
+                str(to_state) + '\n'
+            )
             ts.transitions.add(from_state, to_state, actions=act)
     
     return ts
@@ -674,8 +679,8 @@ def line_labeled_with(L, m=0):
             - s_{i} ---> s_{i+1}, for: 0 <= i < N
     """
     n = len(L)
-    S = range(m, m+n)
-    S0 = [] # user will define them
+    S = range(m, m + n)
+    S0 = []  # user will define them
     AP = {True}
     for ap_subset in L:
         # skip empty label ?
@@ -683,8 +688,8 @@ def line_labeled_with(L, m=0):
             continue
         AP |= set(ap_subset)
     Act = None
-    from_states = range(m, m+n-1)
-    to_states = range(m+1, m+n)
+    from_states = range(m, m + n - 1)
+    to_states = range(m + 1, m + n)
     trans = zip(from_states, to_states)
     
     ts = tuple2fts(S, S0, AP, L, Act, trans, prepend_str='s')
@@ -714,10 +719,10 @@ def cycle_labeled_with(L):
             - s_N ---> s_0
     """
     ts = line_labeled_with(L)
-    last_state = 's' +str(len(L)-1)
+    last_state = 's' + str(len(L) - 1)
     ts.transitions.add(last_state, 's0')
     
-    #trans += [(n-1, 0)] # close cycle
+    # trans += [(n-1, 0)] # close cycle
     return ts
 
 def add_initial_states(ts, ap_labels):
@@ -755,7 +760,7 @@ def _dumps_states(g):
         
         s += ', '.join([
             str(k) + ': ' + str(v)
-            for k,v in g.states[state]
+            for k, v in g.states[state]
             if k is not 'ap'
         ])
     return s
@@ -783,9 +788,9 @@ class GameGraph(LabeledDiGraph):
     def __init__(self, node_label_types, edge_label_types):
         node_label_types += [
             {
-                'name':'player',
-                'values':{0, 1},
-                'default':0
+                'name': 'player',
+                'values': {0, 1},
+                'default': 0
             }
         ]
         
@@ -833,10 +838,10 @@ class LabeledGameGraph(GameGraph):
     def __init__(self):
         ap_labels = PowerSet()
         node_label_types = [
-            {'name':'ap',
-             'values':ap_labels,
-             'setter':ap_labels.math_set,
-             'default':set()}
+            {'name': 'ap',
+             'values': ap_labels,
+             'setter': ap_labels.math_set,
+             'default': set()}
         ]
         
         super(LabeledGameGraph, self).__init__(node_label_types)
@@ -845,9 +850,9 @@ class LabeledGameGraph(GameGraph):
         
         # dot formatting
         self._state_dot_label_format = {
-            'ap':'',
-           'type?label':'',
-           'separator':'\n'
+            'ap': '',
+            'type?label': '',
+            'separator': '\n'
         }
         
-        self.dot_node_shape = {'normal':'rectangle'}
+        self.dot_node_shape = {'normal': 'rectangle'}
