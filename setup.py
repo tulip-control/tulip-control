@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 from setuptools import setup
 import subprocess
 import sys
-import os.path
+import os
 
 ###########################################
 # Dependency or optional-checking functions
@@ -32,6 +32,16 @@ def check_gr1c():
             return False
     except:
         return False
+    return True
+
+def check_java():
+    try:
+        subprocess.check_output(['java', '-help'])
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            return False
+        else:
+            raise
     return True
 
 def check_glpk():
@@ -64,6 +74,13 @@ def check_pydot():
 # "install" is given, unless both "install" and "nocheck" are given
 # (but typical users do not need "nocheck").
 
+java_msg = (
+    'java not found.\n'
+    "The jtlv synthesis tool included in the tulip distribution\n"
+    'will not be able to run. Unless the tool gr1c is installed,\n'
+    'it will not be possible to solve games.'
+)
+
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
 #
@@ -72,7 +89,7 @@ def check_pydot():
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {}
+other_depends = {'java': [check_java, 'Java  found.', java_msg]}
 
 glpk_msg = 'GLPK seems to be missing\n' +\
     'and thus apparently not used by your installation of CVXOPT.\n' +\
