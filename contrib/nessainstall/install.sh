@@ -30,6 +30,7 @@ export CFG_FILE=~/.bash_profile
 # will contain python, ATLAS, LAPACK, glpk, gr1c
 INSTALL_LOC=~
 
+install_graphviz=true
 install_glpk=true
 install_atlas=false
 tulip_develop=true # if 1, then tulip installed in develop mode
@@ -166,7 +167,10 @@ fi
 pip install numpy
 pip install scipy
 pip install ply
+pip install networkx
 
+#------------------------------------------------------------
+# optional python installs
 if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
 	echo "correct pydot version installed locally: skip"
 else
@@ -179,9 +183,6 @@ else
 	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 fi
 
-pip install networkx
-#------------------------------------------------------------
-# optional python installs
 pip install matplotlib
 pip install ipython
 
@@ -190,6 +191,27 @@ pip install ipython
 #sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
 #sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
 #source $CFG_FILE
+
+#------------------------------------------------------------
+# install graphviz dot (needed by pydot)
+if [ "$install_graphviz" = "true" ]; then
+	if [ -f "$TMPBIN/dot" ]; then
+		echo "GraphViz already installed locally: skip"
+	else
+		echo "GraphViz not found locally: install"
+		cd $DOWNLOAD_LOC
+		
+		# cvxopt is incompatible with newer versions
+		git clone https://github.com/ellson/graphviz.git
+		cd graphviz
+		./autogen.sh
+		./configure --prefix=$TMPLIB
+		
+		make
+		make check
+		make install
+	fi
+fi
 
 #------------------------------------------------------------
 # install glpk
@@ -213,6 +235,7 @@ if [ "$install_glpk" = "true" ]; then
 		hash glpsol
 	fi
 fi
+
 #------------------------------------------------------------
 # install cvxopt
 
