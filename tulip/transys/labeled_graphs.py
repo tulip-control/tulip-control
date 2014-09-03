@@ -847,33 +847,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
             return labeling, defaults
         
         if not label_types:
-            logger.debug('label types absent (given: ' +
-                         str(label_types) + ')')
-            return labeling, defaults
+            logger.warn('empty label types: %s' % str(label_types))
         
-        label_types = list(label_types)
+        labeling = {d['name']: d['values'] for d in label_types}
+        defaults = {d['name']: d.get('default') for d in label_types
+                    if 'default' in d}
         
-        for label_type in label_types:
-            type_name = label_type['name']
-            codomain = label_type['values']
-            labeling[type_name] = codomain
-            
-            setter = label_type.get('setter')
-            
-            if setter is None:
-                # don't create attribute unless told to do so
-                pass
-            elif setter is True:
-                # create attribute, point it directly to D_i
-                setattr(self, type_name, labeling[type_name])
-            else:
-                # custom setter
-                setattr(self, type_name, setter)
-            
-            default_value = label_type.get('default')
-            
-            if default_value is not None:
-                defaults[type_name] = default_value
+        setters = {d['name']: d.get('setter') for d in label_types
+                   if 'setter' in d}
+        
+        for name, setter in setters.iteritems():
+            # point to given values ?
+            if setter is True:
+                setter = labeling[name]
+            setattr(self, name, setter)
                 
         return labeling, defaults
     
