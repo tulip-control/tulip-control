@@ -654,7 +654,7 @@ class Transitions(object):
 class LabeledDiGraph(nx.MultiDiGraph):
     """Directed multi-graph with constrained labeling.
     
-    Provided facilities to define labeling functions on
+    Provides facilities to define labeling functions on
     vertices and edges, with given co-domains,
     so that labels are type-checked, not arbitrary.
     
@@ -674,6 +674,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
     but mixing labeled with unlabeled edges for the same
     edge is not allowed, to simplify and avoid confusion.
     
+    Deprecated dot export
+    =====================
+    BEWARE: the dot interface will be separated from
+    the class itself. Some basic style definitions as
+    below may remain, but masking selected labels and
+    other features will be accessible only via functions.
+    
     For dot export subclasses must define:
         
         - _state_label_def
@@ -684,41 +691,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         - _transition_dot_mask
     
     Note: this interface will be improved in the future.
-    
-    Example
-    =======
-    Initialize and define one label type called C{'fruits'}.
-    This also creates a field C{g.fruits}.
-    
-    >>> from tulip.transys import LabeledDiGraph
-    >>> node_label_types = [('fruits', set(), True)]
-    >>> g = LabeledDiGraph(node_label_types=node_label_types)
-    
-    Add some value to the codomain of type C{'fruits'}.
-    
-    >>> g.fruits |= ['apple', 'lemon']
-    
-    The label key 'day' will be untyped,
-    so the class accepts 'Jan', though incorrect.
-    
-    >>> g.add_nodes_from([(1, {'fruit':'apple'}),
-                          (2, {'fruit':'lemon', 'day':'Jan'})])
-    
-    Note
-    ====
-    1. Edge labeling implies the "multi",
-       so it is omitted from the class name.
-    
-    2. From its name, C{networkx} targets networks, so vertices
-       are called nodes. Here a general graph-theoretic
-       viewpoint is more appropriate, so vertices would be
-       preferred. But to maintain uniform terminology,
-       the term node is used (plus it is shorter to write).
-    
-    3. Label ordering will be disabled (i.e., internal use of OrderedDict),
-       because it is unreliable, so user will be encouraged to use dicts,
-       or key-value pairs. For figure saving purposes it will be
-       possible to define an order independently, as an export filter.
     
     Credits
     =======
@@ -733,28 +705,83 @@ class LabeledDiGraph(nx.MultiDiGraph):
     ):
         """Initialize the types of labelings on states and edges.
         
-        @param node_label_types: defines the state labeling functions::
-            
-            L_i : V -> D_i
-            
-        each from vertices C{V} to some co-domain C{D_i}.
+        Label types by example
+        ======================
+        Use a C{dict} for each label type you want to define,
+        like this:
         
-        Each labeling function is defined by a C{dict}
-        with the required key-value pairs:
+          >>> types = [
+                  {'name': 'drink',
+                   'values': {'tea', 'coffee'},
+                   'setter': True,
+                   'default': 'tea'},
+              ]
         
-          - C{name : A} is a C{str}
-            naming the labeling function.
+        This will create a label type named C{'drink'} that can
+        take the values C{'tea'} and C{'coffee'}.
+        
+        Assuming this label type applies to nodes,
+        you can now label a new node as:
+        
+          >>> g = LabeledDiGraph(types)
+          >>> g.add_node(1, drink='coffee')
+        
+        If you omit the label when adding a new node,
+        it gets the default value:
+        
+          >>> g.add_node(2)
+          >>> g.node[2]
+          {'drink': 'tea'}
+        
+        The main difference with vanilla C{networkx} is
+        that the dict above includes type checking:
+        
+          >>> type(g.node[2])
+          tulip.transys.mathset.TypedDict
+        
+        The C{'setter'} key with value C{True}
+        creates also a field C{g.drink}.
+        Be careful to avoid name conflicts with existing
+        networkx C{MultiDiGraph} attributes.
+        
+        This allows us to add more values after creating
+        the graph:
+        
+          >>> g.drink
+          {'coffee', 'tea'}
+          >>> g.drink.add('water')
+          {'coffee', 'tea', 'water'}
+        
+        Finally, the graph will prevent us from
+        accidentally using an untyped label name,
+        by raising an C{AttributeError}:
+        
+          >>> g.add_node(3, day='Jan')
+          AttributeError: ...
+        
+        To add untyped labels, do so explicitly:
+        
+          >>> g.add_node(3, day='Jan', check=False)
+          >>> g.node[3]
+          {'day': 'Jan', 'drink': 'tea'}
+        
+        Details on label types
+        ======================
+        Each label type is defined by a C{dict} that
+        must have the keys C{'name'} and C{'values'}:
+        
+          - C{'name'}: with C{str} value
             
-          - C{values : B} implements C{__contains__}
+          - C{'values' : B} implements C{__contains__}
             used to check label validity.
             
             If you want the codomain C{B} to be
             extensible even after initialization,
             it must implement method C{add}.
           
-        and the optional key-value pairs:
+        and optionally the keys:
           
-          - C{setter : C} with 3 possibilities:
+          - C{'setter': C} with 3 possibilities:
             
             - if absent,
               then no C{setter} attribute is created
@@ -767,16 +794,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 
                 - C{C}, otherwise.
           
-          - C{default : d} is a value in C{B}
+          - C{'default': d} is a value in C{B}
             to be returned for node and edge labels
             not yet explicitly specified by the user.
         
-        Be careful to avoid name conflicts with existing
-        networkx C{MultiDiGraph} attributes.
-        @type node_label_types: C{[(L_i, D_i, setter), ...]}
+        @param node_label_types: applies to nodes, as described above.
+        @type node_label_types: C{list} of C{dict}
         
-        @param edge_label_types: labeling functions for edges,
-            defined similarly to C{node_label_types}.
+        @param edge_label_types: applies to edges, as described above.
+        @type node_label_types: C{list} of C{dict}
         
         @param deterministic: if True, then edge-label-deterministic
         """
