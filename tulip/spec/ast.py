@@ -181,6 +181,18 @@ class LTL_AST(nx.DiGraph):
         # to override networkx.DiGraph.__str__
         return repr(self)
     
+    def replace_node(self, old, new):
+        """Replace AST node, w/o touching the underlying graph.
+        
+        @type old: L{Node}
+        
+        @type new: L{Node}
+        """
+        new.id = old.id
+        new.graph = old.graph
+        
+        self.node[old.id]['ast_node'] = new
+    
     def get_vars(self):
         """Return the set of variables in C{tree}.
         
@@ -216,12 +228,8 @@ class LTL_AST(nx.DiGraph):
             elif isinstance(val, str):
                 nd = Const(val, g=None)
             
-            # replace variable by value,
-            # don't touch the underlying graph
-            nd.id = old.id
-            nd.graph = old.graph
-            
-            d['ast_node'] = nd
+            # replace variable by value
+            self.replace_node(old, nd)
     
     def sub_constants(self, var_const2int):
         """Replace string constants by integers.
@@ -249,11 +257,7 @@ class LTL_AST(nx.DiGraph):
             val = Num(x, None)
             
             # replace Const with Num
-            # don't touch the underlying graph
-            val.id = nd.id
-            val.graph = nd.graph
-            
-            d['ast_node'] = val
+            self.replace_node(nd, val)
         
         logger.info('result after substitution:\n\t' + str(self) + '\n')
     
