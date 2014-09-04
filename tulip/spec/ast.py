@@ -170,7 +170,7 @@ def ast_to_labeled_graph(tree, detailed):
 class LTL_AST(nx.DiGraph):
     """Abstract Syntax Tree of LTL.
     
-    The tree's root node is C{self.root}.
+    The tree's root node is a L{Node} at C{self.root}.
     """
     def __init__(self):
         self.root = None
@@ -377,6 +377,16 @@ def sub_bool_with_subtree(tree, bool2subtree):
         #tree.write(str(id(tree)) + '_after.png')
 
 class Node(object):
+    """Base class for deriving AST nodes.
+    
+    The attributes:
+    
+      - C{id}
+      - C{graph}
+    
+    are the vertex annotated with this node,
+    in graph C{graph}.
+    """
     def __init__(self, graph):
         # skip addition ?
         if graph is None:
@@ -630,6 +640,9 @@ class Binary(Operator):
         for v, d in self.graph.succ[self.id].iteritems():
             if d['pos'] == pos:
                 return self.graph.node[v]['ast_node']
+        
+        # must have left and right successors
+        assert(False)
     
     def flatten(self, flattener=str, op=None, **args):
         if op is None:
@@ -771,7 +784,6 @@ def check_for_undefined_identifiers(tree, domains):
     """
     for u, d in tree.nodes_iter(data=True):
         nd = d['ast_node']
-        print(nd)
         
         if isinstance(nd, Var) and nd.val not in domains:
             var = nd.val
