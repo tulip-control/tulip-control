@@ -994,6 +994,59 @@ def _sprint_aps(label, aps):
         tmp = tmp0 + tmp1
     return tmp
 
+def build_dependent_var_table(fts, statevar):
+    """Return a C{dict} of substitution rules for dependent variables.
+    
+    The dependent variables in a transition system are the
+    atomic propositions that are used to label states.
+    
+    They are "dependent" because their values are completely
+    determined by knowledge of the current state in the
+    transition system.
+    
+    The returned substitutions can be used 
+    
+    @type fts: L{FTS}
+    
+    @param statevar: name of variable used for the current state
+        For example if it is 'loc', then the states
+        C{'s0', 's1'} are mapped to::
+        
+          {'s0': '(loc = "s0")',
+           's1': '(loc = "s1")'}
+        
+    @type state_ids: C{dict}
+    
+    @rtype: C{{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}}
+        where:
+        
+          - C{'p'} is a proposition in C{fts.atomic_propositions}
+          - the states "s1", "s2" are labeled with C{'p'}
+          - C{loc} is the string variable used for the state of C{fts}.
+    """
+    state_ids, __ = iter2var(fts.states, variables=dict(), statevar=statevar,
+                             bool_states=False, must='xor')
+    
+    ap2states = map_ap_to_states(fts)
+    return {k: _disj(state_ids[x] for x in v)
+            for k, v in ap2states.iteritems()}
+
+def map_ap_to_states(fts):
+    """For each proposition find the states labeled with it.
+    
+    @type fts: L{FTS}
+    
+    @rtype: C{{'p': s, ...}} where C{'p'} a proposition and
+        C{s} a set of states in C{fts}.
+    """
+    table = {p: set() for p in fts.atomic_propositions}
+    
+    for u in fts:
+        for p in fts.node[u]['ap']:
+            table[p].add(u)
+    
+    return table
+
 def synthesize_many(specs, ts=None, ignore_init=None,
                     bool_actions=None, solver='gr1c'):
     """Synthesize from logic specs and multiple transition systems.

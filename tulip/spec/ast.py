@@ -193,6 +193,49 @@ class LTL_AST(nx.DiGraph):
         
         self.node[old.id]['ast_node'] = new
     
+    def add_subtree(self, ast_node, tree):
+        """Return the C{tree} at node C{nd}.
+        
+        @type nd: L{Node}
+        
+        @param tree: to be added, w/o copying AST nodes.
+        @type tree: L{LTL_AST}
+        """
+        # nd must be a leaf
+        assert(not self.successors(ast_node.id))
+        
+        # add new nodes
+        for v, d in tree.nodes_iter(data=True):
+            nd = d['ast_node']
+            nd.graph = self
+            self.add_node(v, ast_node=nd)
+        
+        # add edges
+        for u, v, d in tree.edges_iter(data=True):
+            if 'pos' in d:
+                self.add_edge(u, v, pos=d['pos'])
+            else:
+                self.add_edge(u, v)
+        
+        # replace old leaf with subtree root
+        u = ast_node.id
+        pred = self.predecessors(u)
+        if pred:
+            parent = next(iter(pred))
+            pos = self[parent][u].get('pos')
+            self.remove_node(u)
+            if pos:
+                self.add_edge(parent, tree.root.id, pos=pos)
+            else:
+                self.add_edge(parent, tree.root.id)
+        else:
+            self.remove_node(u)
+            self.root = tree.root
+        
+        if logger.getEffectiveLevel() <= logging.DEBUG:
+            for u, d in self.nodes_iter(data=True):
+                assert(d['ast_node'].graph is self)
+    
     def get_vars(self):
         """Return the set of variables in C{tree}.
         
@@ -302,6 +345,32 @@ class LTL_AST(nx.DiGraph):
         fext = fext[1:]  # drop .
         p = self.to_pydot(detailed)
         p.write(filename, format=fext)
+
+def sub_bool_with_subtree(tree, bool2subtree):
+    """Replace selected Boolean variables with given AST.
+    
+    @type tree: L{LTL_AST}
+    
+    @param bool2form: map from each Boolean variable to some
+        equivalent formula. A subset of Boolean varibles may be used.
+        
+        Note that the types of variables in C{tree}
+        are defined by C{bool2form}.
+    @type bool2form: C{dict} from C{str} to L{LTL_AST}
+    """
+    for u in tree.nodes():
+        nd = tree.node[u]['ast_node']
+        
+        if not isinstance(nd, Var):
+            continue
+        
+        # not Boolean var ?
+        if nd.val not in bool2subtree:
+            continue
+        
+        #tree.write(str(id(tree)) + '_before.png')
+        tree.add_subtree(nd, bool2subtree[nd.val])
+        #tree.write(str(id(tree)) + '_after.png')
 
 class Node(object):
     def __init__(self, graph):

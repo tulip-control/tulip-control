@@ -857,6 +857,47 @@ def finite_domain2ints(spec):
             # remember map from clauses to int/bool clauses
             spec._bool_int[x] = f
 
+def replace_dependent_vars(spec, bool2form):
+    logger.debug('replacing dependent variables using map:\n\t' +
+                 str(bool2form))
+    
+    vs = dict(spec.env_vars)
+    vs.update(spec.sys_vars)
+    
+    logger.debug('variables:\n\t' + str(vs))
+    
+    bool2subtree = dict()
+    for boolvar, formula in bool2form.iteritems():
+        logger.debug('checking var: ' + str(boolvar))
+        
+        if boolvar in vs:
+            assert(vs[boolvar] == 'boolean')
+            logger.debug(str(boolvar) + ' is indeed Boolean')
+        else:
+            logger.debug('spec does not contain var: ' + str(boolvar))
+        
+        tree = parser.parse(formula)
+        bool2subtree[boolvar] = tree
+    
+    for s in {'env_init', 'env_safety', 'env_prog',
+              'sys_init', 'sys_safety', 'sys_prog'}:
+        part = getattr(spec, s)
+        
+        new = []
+        
+        for clause in part:
+            logger.debug('replacing in clause:\n\t' + clause)
+            
+            tree = spec.ast(clause)
+            ast.sub_bool_with_subtree(tree, bool2subtree)
+            
+            f = str(tree)
+            new.append(f)
+            
+            logger.debug('caluse tree after replacement:\n\t' + f)
+        
+        setattr(spec, s, new)
+
 def stability_to_gr1(p, aux='aux'):
     """Convert C{<>[] p} to GR(1).
     

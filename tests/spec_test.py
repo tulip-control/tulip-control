@@ -8,7 +8,8 @@ import nose.tools as nt
 
 from tulip.spec import LTL, GRSpec, mutex
 from tulip.spec.parser import parse
-from tulip.spec.ast import ast_to_labeled_graph
+from tulip.spec import ast as ast
+from tulip.spec import form
 
 def GR1specs_equal(s1, s2):
     """Return True if s1 and s2 are *roughly* syntactically equal.
@@ -148,8 +149,24 @@ def test_to_labeled_graph():
     assert(len(tree) == 18)
     nodes = {'p', 'q', 'w', 'z', 'b', 'g', 'G', 'U', 'X', '&', '|', '!', '->'}
     
-    g = ast_to_labeled_graph(tree, detailed=False)
+    g = ast.ast_to_labeled_graph(tree, detailed=False)
     labels = {d['label'] for u, d in g.nodes_iter(data=True)}
         
     print(labels)
     assert(labels == nodes)
+
+def test_replace_dependent_vars():
+    sys_vars = {'a': 'boolean', 'locA':(0, 4)}
+    sys_safe = ['!a', 'a & (locA = 3)']
+    
+    spc = GRSpec(sys_vars=sys_vars, sys_safety=sys_safe)
+    
+    bool2form = {'a':'(locA = 0) | (locA = 2)', 'b':'(locA = 1)'}
+    
+    form.replace_dependent_vars(spc, bool2form)
+    
+    correct_result = (
+        '[](( ! ( ( locA = 0 ) | ( locA = 2 ) ) )) && '
+        '[](( ( ( locA = 0 ) | ( locA = 2 ) ) & ( locA = 3 ) ))'
+    )
+    assert(str(spc) == correct_result)
