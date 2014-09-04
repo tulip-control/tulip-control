@@ -149,7 +149,7 @@ def ast_to_labeled_graph(tree, detailed):
         if isinstance(nd, (Unary, Binary)):
             label = nd.op
         elif isinstance(nd, Node):
-            label = str(nd)
+            label = str(nd.val)
         else:
             raise TypeError('ast_node must be or subclass Node.')
         
