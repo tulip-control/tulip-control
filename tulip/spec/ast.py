@@ -159,8 +159,11 @@ def ast_to_labeled_graph(tree, detailed):
         
         g.add_node(u, label=label)
     
-    for u, v in tree.edges_iter():
-        g.add_edge(u, v)
+    for u, v, d in tree.edges_iter(data=True):
+        if 'pos' in d:
+            g.add_edge(u, v, label=d['pos'])
+        else:
+            g.add_edge(u, v)
     
     return g
 
@@ -344,6 +347,7 @@ class LTL_AST(nx.DiGraph):
         fname, fext = os.path.splitext(filename)
         fext = fext[1:]  # drop .
         p = self.to_pydot(detailed)
+        p.set_ordering('out')
         p.write(filename, format=fext)
 
 def sub_bool_with_subtree(tree, bool2subtree):
