@@ -376,6 +376,8 @@ class Node(object):
     def __init__(self, graph):
         # skip addition ?
         if graph is None:
+            self.id = None
+            self.graph = None
             return
         
         u = id(self)
