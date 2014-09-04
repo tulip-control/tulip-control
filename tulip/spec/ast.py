@@ -146,7 +146,7 @@ def ast_to_labeled_graph(tree, detailed):
     for u, d in tree.nodes_iter(data=True):
         nd = d['ast_node']
         
-        if isinstance(nd, (Unary, Binary)):
+        if isinstance(nd, Operator):
             label = nd.op
         elif isinstance(nd, Node):
             label = str(nd.val)
