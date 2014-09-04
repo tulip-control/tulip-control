@@ -2,6 +2,8 @@
 """
 Tests for the tulip.spec subpackage.
 """
+import logging
+#logging.basicConfig(level=logging.DEBUG)
 
 import copy
 import nose.tools as nt
@@ -139,7 +141,7 @@ def full_name_operators_test():
     
     for f, correct in formulas.iteritems():
         ast = parse(f, full_operators=True)
-        print(ast)
+        #ast.write('hehe.png')
         assert(str(ast) == correct)
 
 def test_to_labeled_graph():

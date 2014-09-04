@@ -159,14 +159,29 @@ class LTLParser(object):
         self.build()
         g = ast.LTL_AST()
         self.graph = g
-        root_nd = self.parser.parse(formula, lexer=lexer, debug=logger)
+        root = self.parser.parse(formula, lexer=lexer, debug=logger)
         
-        if root_nd is None:
+        if root is None:
             raise Exception('failed to parse:\n\t' + str(formula))
         
         # mark root
-        self.graph.root = root_nd
+        self.graph.root = root
         return g
+    
+    def add_identifier(self, Type, x):
+        identifier = Type(x)
+        self.graph.add_identifier(identifier)
+        return identifier
+    
+    def add_unary(self, Type, p):
+        operator = Type(p[1])
+        self.graph.add_unary(operator, p[2])
+        return operator
+    
+    def add_binary(self, Type, p):
+        operator = Type(p[2])
+        self.graph.add_binary(operator, p[1], p[3])
+        return operator
     
     def p_arithmetic(self, p):
         """expression : expression TIMES expression
@@ -174,7 +189,7 @@ class LTLParser(object):
                       | expression PLUS expression
                       | expression MINUS expression
         """
-        p[0] = ast.Arithmetic(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.Arithmetic, p)
     
     def p_comparator(self, p):
         """expression : expression EQUALS expression
@@ -184,50 +199,50 @@ class LTLParser(object):
                       | expression GT expression
                       | expression GE expression
         """
-        p[0] = ast.Comparator(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.Comparator, p)
     
     def p_and(self, p):
         """expression : expression AND expression
         """
-        p[0] = ast.And(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.And, p)
     
     def p_or(self, p):
         """expression : expression OR expression
         """
-        p[0] = ast.Or(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.Or, p)
     
     def p_xor(self, p):
         """expression : expression XOR expression
         """
-        p[0] = ast.Xor(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.Xor, p)
     
     def p_imp(self, p):
         """expression : expression IMP expression
         """
-        p[0] = ast.Imp(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.Imp, p)
     
     def p_bimp(self, p):
         """expression : expression BIMP expression
         """
-        p[0] = ast.BiImp(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.BiImp, p)
     
     def p_unary_temp_op(self, p):
         """expression : NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
-        p[0] = ast.UnTempOp(p[1], p[2], self.graph)
+        p[0] = self.add_unary(ast.UnTempOp, p)
     
     def p_bin_temp_op(self, p):
         """expression : expression UNTIL expression
                       | expression RELEASE expression
         """
-        p[0] = ast.BiTempOp(p[2], p[1], p[3], self.graph)
+        p[0] = self.add_binary(ast.BiTempOp, p)
     
     def p_not(self, p):
         """expression : NOT expression
         """
-        p[0] = ast.Not(p[1], p[2], self.graph)
+        p[0] = self.add_unary(ast.Not, p)
     
     def p_group(self, p):
         """expression : LPAREN expression RPAREN
@@ -237,23 +252,23 @@ class LTLParser(object):
     def p_number(self, p):
         """expression : NUMBER
         """
-        p[0] = ast.Num(p[1], self.graph)
+        p[0] = self.add_identifier(ast.Num, p[1])
     
     def p_expression_name(self, p):
         """expression : NAME
         """
-        p[0] = ast.Var(p[1], self.graph)
+        p[0] = self.add_identifier(ast.Var, p[1])
     
     def p_expression_const(self, p):
         """expression : DQUOTES NAME DQUOTES
         """
-        p[0] = ast.Const(p[2], self.graph)
+        p[0] = self.add_identifier(ast.Const, p[2])
     
     def p_bool(self, p):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = ast.Bool(p[1], self.graph)
+        p[0] = self.add_identifier(ast.Bool, p[1])
     
     def p_error(self, p):
         warn("Syntax error at '%s'" % p.value)
