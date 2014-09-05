@@ -349,22 +349,31 @@ def flatten(tree, node, lang):
     
     while Q:
         u = Q[-1]
-        logger.debug('visit: ' + str(u))
-        logger.debug('current stack:\n\t' + str(stack))
+        #logger.debug('visit: ' + str(u))
+        #logger.debug('current stack:\n\t' + str(stack))
         
-        succ = tree.children(u)
-        not_expanded = set(succ).difference(S)
+        not_expanded = False
+        for s in tree.succ[u]:
+            if s not in S:
+                not_expanded = True
+                break
         
         if not_expanded:
             # for example: prime
             if hasattr(u, 'apply_context'):
                 u.apply_context(context)
-            logger.debug('current context: ' + str(context))
+            #logger.debug('current context: ' + str(context))
+            
+            succ = tree.succ[u]
+            if len(succ) == 2:
+                l, r = succ
+                if succ[r]['pos'] == 'left':
+                    l, r = r, l
             
             Q.extend(succ)
             S.update(succ)
             
-            logger.debug('not expanded yet')
+            #logger.debug('not expanded yet')
             continue
         
         # eval only if fully expanded
@@ -379,7 +388,7 @@ def flatten(tree, node, lang):
                     ' not supported in ' + lang + ' syntax map'
                 )
         
-        logger.debug('push to stack: ' + str(r))
+        #logger.debug('push to stack: ' + str(r))
         stack.append(r)
         
         if hasattr(u, 'clear_context'):
