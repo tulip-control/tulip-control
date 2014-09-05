@@ -1068,6 +1068,33 @@ def _split_io(attr_dict, machine):
     return input_values, output_values
 
 project_dict = lambda x, y: {k: x[k] for k in x if k in y}
+trim_dict = lambda x, y: {k: x[k] for k in x if k not in y}
+
+def strip_ports(mealy, names):
+    """Remove ports in C{names}.
+    
+    For example, to remove the atomic propositions
+    labeling the transition system C{ts} used
+    (so they are dependent variables), call it as:
+    
+      >>> strip_ports(mealy, ts.atomic_propositions)
+    
+    @type mealy: L{MealyMachine}
+    
+    @type names: iterable container of C{str}
+    """
+    new = MealyMachine()
+    
+    new.add_inputs(trim_dict(mealy.inputs, names))
+    new.add_outputs(trim_dict(mealy.outputs, names))
+    
+    new.add_nodes_from(mealy)
+    new.states.initial.add_from(mealy.states.initial)
+    
+    for u, v, d in mealy.edges_iter(data=True):
+        d = trim_dict(d, names)
+        new.add_edge(u, v, **d)
+    return new
 
 ####
 # Program Graph (memo)
