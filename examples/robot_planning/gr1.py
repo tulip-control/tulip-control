@@ -34,6 +34,8 @@ We must convert this specification into GR(1) form:
   env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Import the packages that we need
 from tulip import spec, synth
