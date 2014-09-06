@@ -1,7 +1,7 @@
 *~
 *.log
 *.out
-parsetab.py
+*parsetab.py
 *.gr1
 *.m
 *.pyc

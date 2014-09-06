@@ -288,7 +288,7 @@ def convert(formula):
     ba = trs.BA(symbolic=True)
     
     lexer = lex.lex()
-    parser = yacc.yacc(tabmodule='ltl2ba_table',
+    parser = yacc.yacc(tabmodule='ltl2ba_parsetab',
                        write_tables=True, debug=False)
     
     parser.parse(ltl2ba_out, lexer=lexer)
