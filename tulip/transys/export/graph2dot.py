@@ -236,7 +236,7 @@ def _format_color(color, prog='tikz'):
                          "Available options are: 'dot' or 'tikz'.")
     return s
 
-def _place_initial_states(trs_graph, pd_graph):
+def _place_initial_states(trs_graph, pd_graph, tikz):
     try:
         import pydot
     except:
@@ -248,6 +248,10 @@ def _place_initial_states(trs_graph, pd_graph):
     
     for node in trs_graph.states.initial:
         pd_node = pydot.Node(make_str(node) )
+        init_subg.add_node(pd_node)
+        
+        phantom_node = 'phantominit' + str(node)
+        pd_node = pydot.Node(make_str(phantom_node) )
         init_subg.add_node(pd_node)
     
     pd_graph.add_subgraph(init_subg)
@@ -432,7 +436,7 @@ def _graph2pydot(graph, wrap=10, tikz=False,
     _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
-    _place_initial_states(graph, pydot_graph)
+    _place_initial_states(graph, pydot_graph, tikz)
     
     pydot_graph.set_overlap('false')
     #pydot_graph.set_size('"0.25,1"')
