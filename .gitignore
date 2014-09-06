@@ -3,6 +3,9 @@
 *.out
 *parsetab.py
 *.gr1
+*.gr1c
+*.txt
+*.xml
 *.m
 *.pyc
 *.egg-info
