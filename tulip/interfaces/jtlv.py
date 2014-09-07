@@ -43,7 +43,6 @@ import warnings
 
 import networkx as nx
 
-from tulip.spec.parser import parse
 from tulip.spec import form
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -373,8 +372,6 @@ def generate_JTLV_LTL(spec):
 
     It takes as input a GRSpec object.
     """
-    formula = spec.to_canon()
-    parse(formula)  # Raises exception if syntax error
 
     specLTL = spec.to_jtlv()
     logger.debug(''.join([str(x) for x in specLTL]) )
