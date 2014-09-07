@@ -699,14 +699,26 @@ class GRSpec(LTL):
                     self._ast[x] = tree
         
         # rm cached ASTs that correspond to deleted clauses
-        s = set(self._ast)
+        self._collect_cache_garbage(self._ast)
+    
+    def _collect_cache_garbage(self, cache):
+        # rm cached ASTs that correspond to deleted clauses
+        s = set(cache)
         for p in self._parts:
+            # emptied earlier ?
+            if not s:
+                return
+            
             w = getattr(self, p)
+            
+            # exclude given formulas
             s.difference_update(w)
+            
+            # exclude int/bool-only forms of formulas
             s.difference_update({self._bool_int.get(x) for x in w})
         
         for x in s:
-            self._ast.pop(x)
+            cache.pop(x)
     
     def sym_to_prop(self, props):
         """Word-based replacement of proposition symbols by values.
