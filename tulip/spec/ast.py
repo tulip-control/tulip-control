@@ -413,6 +413,9 @@ class Node(object):
     
     def to_smv(self, *arg, **kw):
         return self.flatten('smv', *arg, **kw)
+    
+    def to_python(self, *arg, **kw):
+        return self.flatten('python', *arg, **kw)
 
 class Term(Node):
     def __init__(self, t):
