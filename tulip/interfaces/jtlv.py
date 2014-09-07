@@ -169,19 +169,27 @@ def synthesize(
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
                             priority_kind, init_option)
 
-    # Build Automaton
-    if (not realizable):
+    if realizable:
+        logger.info('loading JTLV output...')
+    
+        with open(fAUT, 'r') as f:
+            lines = f.readlines()
+        
+        logger.info('JTLV returned:\n' + '\n'.join(lines))
+        
+        aut = jtlv_output_to_networkx(lines, spec)
+        
+        os.unlink(fSMV)
+        os.unlink(fLTL)
+        os.unlink(fAUT)
+        return aut
+    else:
         counter_examples = get_counterexamples(fAUT)
         os.unlink(fSMV)
         os.unlink(fLTL)
         os.unlink(fAUT)
         return counter_examples
-    else: 
-        aut = load_file(fAUT, spec)
-        os.unlink(fSMV)
-        os.unlink(fLTL)
-        os.unlink(fAUT)
-        return aut
+        
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
@@ -400,20 +408,17 @@ LTLSPEC
 );
 '''
 
-def load_file(aut_file, spec):
-    """Construct a Mealy Machine from an aut_file.
+def jtlv_output_to_networkx(lines, spec):
+    """Return a graph after parsing JTLV's output.
 
-    @param aut_file: the name of the text file containing the
-        automaton, or an (open) file-like object.
+    @param lines: as loaded from file
+    @type lines: C{list} of C{str}
+    
     @type spec: L{GRSpec}
 
-    @rtype: L{MealyMachine}
+    @rtype: C{networkx.DiGraph}
     """
-    if isinstance(aut_file, str):
-        f = open(aut_file, 'r')
-    else:
-        # assume aut_file behaves as file object
-        f = aut_file
+    logger.info('parsing jtlv output to create a graph...')
     
     g = nx.DiGraph()
     
@@ -423,7 +428,7 @@ def load_file(aut_file, spec):
     g.env_vars = spec.env_vars.copy()
     g.sys_vars = spec.sys_vars.copy()
     
-    for line in f:
+    for line in lines:
         # parse states
         if line.find('State ') >= 0:
             state_id = re.search('State (\d+)', line)
@@ -441,7 +446,7 @@ def load_file(aut_file, spec):
                         logger.error('Unknown variable ' + var)
             
             for var in varnames:
-                if not var in state.keys():
+                if not var in state:
                     logger.error('Variable ' + var + ' not assigned')
 
         # parse transitions
@@ -451,6 +456,7 @@ def load_file(aut_file, spec):
             g.add_node(state_id, state=state)
             g.add_edges_from([(state_id, v) for v in succ])
     
+    logger.info('done parsing jtlv output.\n')
     return g
             
 def get_counterexamples(aut_file):
