@@ -185,14 +185,13 @@ def synthesize(
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
-    fSMV = tempfile.NamedTemporaryFile(delete=False,suffix="smv")
+    fSMV = tempfile.NamedTemporaryFile(delete=False, suffix="smv")
     fSMV.write(generate_JTLV_SMV(spec))
     fSMV.close()
     
-    fLTL = tempfile.NamedTemporaryFile(delete=False,suffix="ltl")
+    fLTL = tempfile.NamedTemporaryFile(delete=False, suffix="ltl")
     fLTL.write(generate_JTLV_LTL(spec))
     fLTL.close()
-    
     
     fAUT = tempfile.NamedTemporaryFile(delete=False)
     fAUT.close()
@@ -249,7 +248,7 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
     logger.info('  jtlv path: ' + JTLV_PATH)
     logger.info('  priority_kind: ' + str(priority_kind) + '\n')
 
-    if (len(JTLV_EXE) > 0):
+    if JTLV_EXE:
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         
         # debugging log
@@ -326,76 +325,80 @@ def generate_JTLV_SMV(spec):
     @type spec: L{GRSpec}
 
     @rtype: str
-    @return: string conforming to the SMV file format that JTLV expects.
+    @return: string conforming to SMV file format that JTLV expects.
     """
-    smv = ""
-
-    # Write the header
-    smv += textwrap.dedent("""
-
-    MODULE main
-        VAR
-            e : env();
-            s : sys();
-    """);
-    
     # Define env vars
-    smv += textwrap.dedent("""
-    MODULE env -- inputs
-        VAR
-    """)
+    env = []
     for var, dom in spec.env_vars.iteritems():
         int_dom = form.convert_domain(dom)
         
-        smv += '\t\t'
-        smv += var
-        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
+        env.append('\t\t{v} : {c};'.format(
+            v=var, c=canon_to_jtlv_domain(int_dom)
+        ))
 
-    
     # Define sys vars
-    smv+=(textwrap.dedent("""
-    MODULE sys -- outputs
-        VAR
-    """))
+    sys = []
     for var, dom in spec.sys_vars.iteritems():
         int_dom = form.convert_domain(dom)
         
-        smv += '\t\t'
-        smv += var
-        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
+        sys.append('\t\t{v} : {c};'.format(
+            v=var, c=canon_to_jtlv_domain(int_dom)
+        ))
     
-    logger.debug(smv)
+    env_vars = '\n'.join(env)
+    sys_vars = '\n'.join(sys)
+    
+    smv = smv_template.format(env_vars=env_vars, sys_vars=sys_vars)
+    
+    logger.debug('SMV file:\n' + smv)
     return smv
 
+smv_template = '''
+MODULE main
+    VAR
+        e : env();
+        s : sys();
+
+MODULE env -- inputs
+    VAR
+{env_vars}
+
+
+MODULE sys -- outputs
+    VAR
+{sys_vars}
+'''
+
 def generate_JTLV_LTL(spec):
-    """Return the LTLSPEC for JTLV.
+    """Return LTL specification for JTLV.
 
-    It takes as input a GRSpec object.
+    @type spec: L{GRSpec}
     """
+    a, g = spec.to_jtlv()
 
-    specLTL = spec.to_jtlv()
-    logger.debug(''.join([str(x) for x in specLTL]) )
+    if not a:
+        a = 'TRUE'
+
+    if not g:
+        g = 'TRUE'
     
-    assumption = specLTL[0]
-    guarantee = specLTL[1]
+    ltl = ltl_template.format(a=a, g=g)
     
-    # Assumption
-    ltl = 'LTLSPEC\n(\n'
-    if assumption:
-        ltl += assumption
-    else:
-        ltl += "TRUE"
-    ltl += '\n);\n'
-
-    # Guarantee
-    ltl += '\nLTLSPEC\n(\n'
-    if guarantee:
-        ltl += guarantee
-    else:
-        ltl += "TRUE"
-    ltl += '\n);'    
-
+    logger.debug('JTLV input formula:\n' + ltl)
+    
     return ltl
+
+ltl_template = '''
+LTLSPEC
+(
+{a}
+);
+
+LTLSPEC
+(
+{g}
+);
+'''
 
 def load_file(aut_file, spec):
     """Construct a Mealy Machine from an aut_file.

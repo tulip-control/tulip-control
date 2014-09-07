@@ -569,9 +569,7 @@ class GRSpec(LTL):
 
         Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
-        logger.info('convert to jtlv...')
-        
-        spec = ['', '']
+        logger.info('translate to jtlv...')
         _finite_domain2ints(self)
         
         f = self._jtlv_str
@@ -580,14 +578,15 @@ class GRSpec(LTL):
                  f(self.env_safety, 'safety assumption on environment', '[]'),
                  f(self.env_prog, 'justice assumption on environment', '[]<>')]
         
-        spec[0] += ' & \n'.join(x for x in parts if x)
+        assumption = ' & \n'.join(x for x in parts if x)
         
         parts = [f(self.sys_init, 'valid initial system states', ''),
                  f(self.sys_safety, 'safety requirement on system', '[]'),
                  f(self.sys_prog, 'progress requirement on system', '[]<>')]
         
-        spec[1] += ' & \n'.join(x for x in parts if x)
-        return spec
+        guarantee = ' & \n'.join(x for x in parts if x)
+
+        return (assumption, guarantee)
     
     def _jtlv_str(self, m, txt, prefix='[]<>'):
         # no clauses ?
@@ -596,7 +595,7 @@ class GRSpec(LTL):
         
         w = []
         for x in m:
-            logger.debug('convert clause: ' + str(x))
+            logger.debug('translate clause: ' + str(x))
             
             if not x:
                 continue
@@ -617,7 +616,7 @@ class GRSpec(LTL):
 
         Cf. L{interfaces.gr1c}.
         """
-        logger.info('convert to gr1c...')
+        logger.info('translate to gr1c...')
         
         def _to_gr1c_print_vars(vardict):
             output = ''
@@ -652,12 +651,13 @@ class GRSpec(LTL):
     
     def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
         if s:
-            return name + ': ' + '\n& '.join([
+            f = '\n& '.join([
                 prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
                 for x in s
-            ]) + ';\n'
+            ])
+            return '{name}: {f};\n'.format(name=name, f=f)
         else:
-            return name + ':;\n'
+            return '{name}:;\n'.format(name=name)
     
     def ast(self, x):
         """Return AST corresponding to formula x.
@@ -669,10 +669,11 @@ class GRSpec(LTL):
             logger.debug('current cache of ASTs:\n' +
                          pprint.pformat(self._ast) + 3 * '\n')
             logger.debug('check if: ' + str(x) + ', is in cache.')
+        
         if x in self._ast:
-            logger.info(str(x) + ' is in cache')
+            logger.debug(str(x) + ' is already in cache')
         else:
-            logger.info('Cache does not contain:\n\t' + str(x) +
+            logger.info('AST cache does not contain:\n\t' + str(x) +
                         '\nNeed to parse.')
             self.parse()
             
@@ -684,7 +685,7 @@ class GRSpec(LTL):
         The AST resulting from each clause is stored
         in the C{dict} attribute C{ast}.
         """
-        logger.debug('parsing ASTs to cache them...')
+        logger.info('parsing ASTs to cache them...')
         
         vardoms = dict(self.env_vars)
         vardoms.update(self.sys_vars)
@@ -695,24 +696,29 @@ class GRSpec(LTL):
             for x in s:
                 if x in self._ast:
                     logger.debug(str(x) + ' is already in cache')
-                else:
-                    logger.debug('parse: ' + str(x))
-                    tree = parser.parse(x)
-                    
-                    ast.check_for_undefined_identifiers(tree, vardoms)
-                    
-                    self._ast[x] = tree
+                    continue
+                
+                logger.debug('parse: ' + str(x))
+                tree = parser.parse(x)
+                
+                ast.check_for_undefined_identifiers(tree, vardoms)
+                
+                self._ast[x] = tree
         
         # rm cached ASTs that correspond to deleted clauses
         self._collect_cache_garbage(self._ast)
+        
+        logger.info('done parsing ASTs.\n')
     
     def _collect_cache_garbage(self, cache):
+        logger.info('collecting garbage from GRSpec cache...')
+        
         # rm cached ASTs that correspond to deleted clauses
         s = set(cache)
         for p in self._parts:
             # emptied earlier ?
             if not s:
-                return
+                break
             
             w = getattr(self, p)
             
@@ -724,6 +730,8 @@ class GRSpec(LTL):
         
         for x in s:
             cache.pop(x)
+        
+        logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
     
     def sym_to_prop(self, props):
         """Word-based replacement of proposition symbols by values.
@@ -786,12 +794,14 @@ class GRSpec(LTL):
         @return: C{dict} of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
-        logger.info('substitute values for variables')
+        logger.info('substitute values for variables...')
         
         a = copy.deepcopy(self._ast)
         
         for formula, tree in a.iteritems():
             a[formula] = ast.sub_values(tree, var_values)
+        
+        logger.info('done with substitutions.\n')
         return a
     
     def compile_init(self, no_str):
@@ -861,9 +871,7 @@ def _finite_domain2ints(spec):
     fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
     
     # replace symbols by ints
-    parts = {'env_init', 'env_safety', 'env_prog',
-             'sys_init', 'sys_safety', 'sys_prog'}
-    for p in parts:
+    for p in spec._parts:
         for x in getattr(spec, p):
             if spec._bool_int.get(x) in spec._ast:
                 logger.debug(str(x) + ' is in _bool_int cache')
