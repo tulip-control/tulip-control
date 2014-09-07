@@ -38,7 +38,7 @@ Relevant links:
 import logging
 logger = logging.getLogger(__name__)
 
-import os, re, subprocess, tempfile, textwrap
+import os, re, subprocess, tempfile
 import warnings
 
 import networkx as nx
@@ -382,15 +382,6 @@ def generate_JTLV_LTL(spec):
     assumption = specLTL[0]
     guarantee = specLTL[1]
     
-    # Replace any environment variable var in spec with e.var and replace any 
-    # system variable var with s.var
-    for var in spec.env_vars.keys():
-        assumption = re.sub(r'\b'+var+r'\b', 'e.'+var, assumption)
-        guarantee = re.sub(r'\b'+var+r'\b', 'e.'+var, guarantee)
-    for var in spec.sys_vars.keys():
-        assumption = re.sub(r'\b'+var+r'\b', 's.'+var, assumption)
-        guarantee = re.sub(r'\b'+var+r'\b', 's.'+var, guarantee)
-
     # Assumption
     ltl = 'LTLSPEC\n(\n'
     if assumption:

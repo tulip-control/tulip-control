@@ -295,8 +295,9 @@ class LTL_AST(nx.DiGraph):
     def to_gr1c(self):
         return flatten(self, self.root, _to_gr1c)
     
-    def to_jtlv(self):
-        return flatten(self, self.root, _to_jtlv)
+    def to_jtlv(self, env_vars, sys_vars):
+        return flatten(self, self.root, _to_jtlv,
+                       env_vars=env_vars, sys_vars=sys_vars)
     
     def to_promela(self):
         return flatten(self, self.root, _to_promela)
@@ -442,10 +443,17 @@ class Num(Term):
 
 class Var(Term):
     def to_gr1c(self, prime=None, **kw):
-        return str(self) + "'" if prime else str(self)
+        return self.val + "'" if prime else self.val
         
-    def to_jtlv(self, **kw):
-        return '(%s)' % str(self)
+    def to_jtlv(self, env_vars=None, sys_vars=None, **kw):
+        if self.val in env_vars:
+            return '(e.{v})'.format(v=self.val)
+        elif self.val in sys_vars:
+            return '(s.{v})'.format(v=self.val)
+        else:
+            raise ValueError(
+                '{v} is neither env nor sys variable'.format(self.val)
+            )
     
     def eval(self, d):
         return d[self.val]
