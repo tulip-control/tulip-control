@@ -107,7 +107,7 @@ class KripkeStructure(LabeledDiGraph):
             'Atomic Propositions (APs):\n\t' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self) + 2 * '\n' +
+            _dumps_states(self, sort=True) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Transitions:\n' +
@@ -412,6 +412,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
     
     def __str__(self):
+        sort = True
+        
         isopen = (
             ('sys' and any({'env' in x for x in self.actions})) or
             ('env' and any({'sys' in x for x in self.actions}))
@@ -430,7 +432,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             
             'States labeled with sets of APs:\n' +
-            _dumps_states(self) + 2 * '\n' +
+            _dumps_states(self, sort=sort) + 2 * '\n' +
             
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n'
@@ -457,9 +459,18 @@ class FiniteTransitionSystem(LabeledDiGraph):
                     pformat(codomain, indent=3) + 2 * '\n'
                 )
         
+        if sort:
+            import natsort
+            
+            edges = self.edges(data=True)
+            edges = natsort.natsorted(edges)
+        else:
+            edges = self.edges_iter(data=True)
+        edges_str = pformat(edges, indent=3)
+        
         s += (
             'Transitions labeled with sys and env actions:\n' +
-            pformat(self.transitions(data=True), indent=3) +
+            edges_str +
             '\n' + _hl + '\n'
         )
         return s
@@ -744,26 +755,30 @@ def add_initial_states(ts, ap_labels):
         new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
 
-def _dumps_states(g):
+def _dumps_states(g, sort):
     """Dump string of transition system states.
     
     @type g: L{FTS}
     """
-    s = ''
-    for state in g:
-        s += '\t State: ' + str(state)
-        s += ', AP: ' + str(g.states[state]['ap']) + '\n'
+    if sort:
+        import natsort
         
-        # more labels than only AP ?
-        if len(g.states[state]) == 1:
-            continue
-        
-        s += ', '.join([
-            str(k) + ': ' + str(v)
-            for k, v in g.states[state]
+        nodes = natsort.natsorted(g)
+    else:
+        nodes = g
+    
+    a = []
+    for u in nodes:
+        s = '\t State: {u}, AP: {ap}\n'.format(
+            u=u, ap=g.node[u]['ap']
+        ) + ', '.join([
+            '{k}: {v}'.format(k=k, v=v)
+            for k, v in g.node[u].iteritems()
             if k is not 'ap'
         ])
-    return s
+        
+        a.append(s)
+    return ''.join(a)
 
 class GameGraph(LabeledDiGraph):
     """Store a game graph.
