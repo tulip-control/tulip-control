@@ -328,6 +328,11 @@ class GRSpec(LTL):
         """
         self._ast = dict()
         self._bool_int = dict()
+        self._parts = {
+            x + y
+            for x in {'env_', 'sys_'}
+            for y in {'init', 'safety', 'prog'}
+        }
         
         if env_vars is None:
             env_vars = dict()
@@ -348,8 +353,7 @@ class GRSpec(LTL):
         self.env_prog = env_prog
         self.sys_prog = sys_prog
 
-        for formula_component in ['env_init', 'env_safety', 'env_prog',
-                                  'sys_init', 'sys_safety', 'sys_prog']:
+        for formula_component in self._parts:
             x = getattr(self, formula_component)
             
             if isinstance(x, str):
@@ -493,11 +497,7 @@ class GRSpec(LTL):
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
         
-        s = {x + y
-             for x in {'env_', 'sys_'}
-             for y in {'init', 'safety', 'prog'}}
-        
-        for x in s:
+        for x in self._parts:
             getattr(result, x).extend(getattr(other, x))
         
         return result
@@ -681,14 +681,11 @@ class GRSpec(LTL):
         """
         logger.debug('parsing ASTs to cache them...')
         
-        parts = {'env_init', 'env_safety', 'env_prog',
-                 'sys_init', 'sys_safety', 'sys_prog'}
-        
         vardoms = dict(self.env_vars)
         vardoms.update(self.sys_vars)
         
         # parse new clauses and cache the resulting ASTs
-        for p in parts:
+        for p in self._parts:
             s = getattr(self, p)
             for x in s:
                 if x in self._ast:
@@ -703,7 +700,7 @@ class GRSpec(LTL):
         
         # rm cached ASTs that correspond to deleted clauses
         s = set(self._ast)
-        for p in parts:
+        for p in self._parts:
             w = getattr(self, p)
             s.difference_update(w)
             s.difference_update({self._bool_int.get(x) for x in w})
