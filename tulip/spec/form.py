@@ -327,6 +327,11 @@ class GRSpec(LTL):
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
         self._ast = dict()
+        self._cache = {
+            'string': dict(),
+            'jtlv': dict(),
+            'gr1c': dict()
+        }
         self._bool_int = dict()
         self._parts = {
             x + y
@@ -596,7 +601,7 @@ class GRSpec(LTL):
             if not x:
                 continue
             
-            c = self.ast(self._bool_int[x]).to_jtlv()
+            c = _to_lang(self, x, 'jtlv')
             
             # collapse any whitespace between any
             # "next" operator that precedes parenthesis
@@ -648,7 +653,7 @@ class GRSpec(LTL):
     def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
         if s:
             return name + ': ' + '\n& '.join([
-                prefix + '(' + self.ast(self._bool_int[x]).to_gr1c() + ')'
+                prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
                 for x in s
             ]) + ';\n'
         else:
@@ -879,6 +884,46 @@ def finite_domain2ints(spec):
             
             # remember map from clauses to int/bool clauses
             spec._bool_int[x] = f
+    
+    logger.info('done converting to integer variables.\n')
+
+def _to_lang(spec, s, lang):
+        """Get cached jtlv string.
+        
+        If not found, then it translates all clauses to
+        jtlv syntax and caches the results.
+        
+        It also collects garbage from the jtlv cache.
+        """
+        if spec._bool_int.get(s) in spec._cache[lang]:
+            logger.info('{s} is in {lang} cache.'.format(s=s, lang=lang))
+        else:
+            logger.info(
+                ('{s} not found in {lang} cache, '
+                'have to flatten...').format(s=s, lang=lang)
+            )
+            
+            for p in spec._parts:
+                for x in getattr(spec, p):
+                    z = spec._bool_int[x]
+                    
+                    if z in spec._cache[lang]:
+                        continue
+                    
+                    if lang is 'gr1c':
+                        w = spec.ast(z).to_gr1c()
+                        spec._cache[lang][z] = w
+                    elif lang is 'jtlv':
+                        w = spec.ast(z).to_jtlv(spec.env_vars,
+                                                spec.sys_vars)
+                        spec._cache[lang][z] = w
+                    else:
+                        raise Exception('Unknown language')
+            
+            logger.info('collect garbage from {0} cache.\n'.format(lang))
+            spec._collect_cache_garbage(spec._cache[lang])
+        
+        return spec._cache[lang][spec._bool_int[s]]
 
 def replace_dependent_vars(spec, bool2form):
     logger.debug('replacing dependent variables using map:\n\t' +
