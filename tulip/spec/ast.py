@@ -318,8 +318,7 @@ class LTL_AST(nx.DiGraph):
         return nx.to_pydot(g)
     
     def write(self, filename, detailed=False):
-        """Layout AST and save result in PDF file.
-        """
+        """Layout AST and save result in PDF file."""
         fname, fext = os.path.splitext(filename)
         fext = fext[1:]  # drop .
         p = self.to_pydot(detailed)
@@ -346,6 +345,10 @@ def _to_python(u, *arg, **kw):
 
 #@profile
 def flatten(tree, u, to_lang, **kw):
+    """Recursively flatten C{tree}.
+    
+    @rtype: C{str}
+    """
     s = tree.succ[u]
     if not s:
         return to_lang(u, **kw)
@@ -388,8 +391,7 @@ def sub_bool_with_subtree(tree, bool2subtree):
         #tree.write(str(id(tree)) + '_after.png')
 
 class Node(object):
-    """Base class for deriving AST nodes.
-    """
+    """Base class for deriving AST nodes."""
     # Caution
     # =======
     # Do **NOT** implement C{__hash__}, because you
@@ -666,7 +668,6 @@ def pair_node_to_var(tree, c):
         if isinstance(c, Binary):
             break
     
-    print('Binary: ' + str(c))
     succ = tree.successors(c)
     
     v = succ[0] if succ[1] == old else succ[1]
@@ -674,7 +675,6 @@ def pair_node_to_var(tree, c):
     # go down until var found
     # assuming correct syntax for gr1c
     while True:
-        print('v: ' + str(v))
         if isinstance(v, Var):
             break
         
