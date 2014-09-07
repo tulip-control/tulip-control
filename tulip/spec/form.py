@@ -570,9 +570,9 @@ class GRSpec(LTL):
         Format is that of JTLV.  Cf. L{interfaces.jtlv}.
         """
         logger.info('convert to jtlv...')
-        finite_domain2ints(self)
         
         spec = ['', '']
+        _finite_domain2ints(self)
         
         f = self._jtlv_str
         
@@ -634,7 +634,7 @@ class GRSpec(LTL):
                                      str(dom))
             return output
         
-        finite_domain2ints(self)
+        _finite_domain2ints(self)
         
         output = (
             'ENV:' + _to_gr1c_print_vars(self.env_vars) + ';\n' +
@@ -846,14 +846,14 @@ def _sub_all(formula, propSymbol, prop):
 def _conj(iterable, unary='', op='&&'):
     return (' ' + op + ' ').join([unary + '(' + s + ')' for s in iterable])
 
-def finite_domain2ints(spec):
+def _finite_domain2ints(spec):
     """Replace arbitrary finite vars with int vars.
     
     Returns spec itself if it contains only int vars.
     Otherwise it returns a copy of spec with all arbitrary
     finite vars replaced by int-valued vars.
     """
-    logger.info('finite_domain2ints')
+    logger.info('convert string variables to integers...')
     
     vars_dict = dict(spec.env_vars)
     vars_dict.update(spec.sys_vars)
