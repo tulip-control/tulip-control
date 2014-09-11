@@ -46,75 +46,71 @@ import ply.yacc as yacc
 
 from . import ast
 
-tokens = (
-    'TRUE', 'FALSE',
-    'NAME', 'NUMBER',
-    'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
-    'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-    'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
-    'UNTIL', 'RELEASE',
-    'PLUS', 'MINUS', 'TIMES', 'DIV',
-    'LPAREN', 'RPAREN', 'DQUOTES'
-)
-
-# Tokens
-t_TRUE = 'TRUE|True|true'
-t_FALSE = 'FALSE|False|false'
-
-t_NEXT = r'X|next'
-# t_PRIME  = r'\''
-t_ALWAYS = r'\[\]|G'
-t_EVENTUALLY = r'\<\>|F'
-
-t_UNTIL = r'U'
-t_RELEASE = r'R'
-
-t_NOT = r'\!'
-t_AND = r'\&\&|\&'
-t_OR = r'\|\||\|'
-t_XOR = r'\^'
-
-t_EQUALS = r'\=|\=\='
-t_NEQUALS = r'\!\='
-t_LT = r'\<'
-t_LE = r'\<\='
-t_GT = r'>\='
-t_GE = r'>'
-
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-
-t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
-          r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
-t_NUMBER = r'\d+'
-
-t_IMP = '->'
-t_BIMP = '\<->'
-
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIV = r'/'
-
-t_DQUOTES = r'\"'
-
-# Ignored characters
-t_ignore = " \t"
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
+class Lexer(object):
+    """Token rules to build LTL lexer."""
     
-def t_error(t):
-    warn("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    tokens = (
+        'TRUE', 'FALSE',
+        'NAME', 'NUMBER',
+        'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
+        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
+        'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
+        'UNTIL', 'RELEASE',
+        'PLUS', 'MINUS', 'TIMES', 'DIV',
+        'LPAREN', 'RPAREN', 'DQUOTES'
+    )
     
-# Build the lexer
-lexer = lex.lex()
+    # Tokens
+    t_TRUE = 'TRUE|True|true'
+    t_FALSE = 'FALSE|False|false'
+    
+    t_NEXT = r'X|next'
+    # t_PRIME  = r'\''
+    t_ALWAYS = r'\[\]|G'
+    t_EVENTUALLY = r'\<\>|F'
+    
+    t_UNTIL = r'U'
+    t_RELEASE = r'R'
+    
+    t_NOT = r'\!'
+    t_AND = r'\&\&|\&'
+    t_OR = r'\|\||\|'
+    t_XOR = r'\^'
+    
+    t_EQUALS = r'\=|\=\='
+    t_NEQUALS = r'\!\='
+    t_LT = r'\<'
+    t_LE = r'\<\='
+    t_GT = r'>\='
+    t_GE = r'>'
+    
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    
+    t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
+              r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
+    t_NUMBER = r'\d+'
+    
+    t_IMP = '->'
+    t_BIMP = '\<->'
+    
+    t_PLUS = r'\+'
+    t_MINUS = r'-'
+    t_TIMES = r'\*'
+    t_DIV = r'/'
+    
+    t_DQUOTES = r'\"'
 
+    # Ignored characters
+    t_ignore = " \t"
 
-# dictionary of names
-# names = {'var':'replacement'}
+    def t_newline(self, t):
+        r'\n+'
+        t.lexer.lineno += t.value.count("\n")
+        
+    def t_error(self, t):
+        warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
+        t.lexer.skip(1)
 
 TABMODULE = 'tulip.spec.parsetab'
 
@@ -139,7 +135,9 @@ class LTLParser(object):
     
     def __init__(self):
         self.graph = None
-        self.tokens = tokens
+        
+        self.lexer = Lexer()
+        self.tokens = self.lexer.tokens
     
     def build(self):
         self.parser = yacc.yacc(
