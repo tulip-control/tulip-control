@@ -112,23 +112,6 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-# lowest to highest
-precedence = (
-    ('right', 'UNTIL', 'RELEASE'),
-    ('right', 'BIMP'),
-    ('right', 'IMP'),
-    ('left', 'XOR'),
-    ('left', 'OR'),
-    ('left', 'AND'),
-    ('right', 'ALWAYS', 'EVENTUALLY'),
-    ('right', 'NEXT'),
-    ('right', 'NOT'),
-    # ('left', 'PRIME'),
-    ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
-    ('nonassoc', 'TIMES', 'DIV'),
-    ('nonassoc', 'PLUS', 'MINUS'),
-    ('nonassoc', 'TRUE', 'FALSE')
-)
 
 # dictionary of names
 # names = {'var':'replacement'}
@@ -136,10 +119,27 @@ precedence = (
 TABMODULE = 'tulip.spec.parsetab'
 
 class LTLParser(object):
+    # lowest to highest
+    precedence = (
+        ('right', 'UNTIL', 'RELEASE'),
+        ('right', 'BIMP'),
+        ('right', 'IMP'),
+        ('left', 'XOR'),
+        ('left', 'OR'),
+        ('left', 'AND'),
+        ('right', 'ALWAYS', 'EVENTUALLY'),
+        ('right', 'NEXT'),
+        ('right', 'NOT'),
+        # ('left', 'PRIME'),
+        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
+        ('nonassoc', 'TIMES', 'DIV'),
+        ('nonassoc', 'PLUS', 'MINUS'),
+        ('nonassoc', 'TRUE', 'FALSE')
+    )
+    
     def __init__(self):
         self.graph = None
         self.tokens = tokens
-        self.precedence = precedence
     
     def build(self):
         self.parser = yacc.yacc(
