@@ -38,11 +38,11 @@ from __future__ import absolute_import
 
 import logging
 logger = logging.getLogger(__name__)
-from warnings import warn
 
-import ply.lex as lex
-import ply.yacc as yacc
-# import networkx as nx
+import warnings
+
+import ply.lex
+import ply.yacc
 
 from . import ast
 
@@ -140,13 +140,13 @@ class LTLParser(object):
         self.tokens = self.lexer.tokens
     
     def build(self):
-        self.parser = yacc.yacc(
+        self.parser = ply.yacc.yacc(
             tabmodule=TABMODULE, module=self,
             write_tables=False, debug=False
         )
     
     def rebuild_parsetab(self, tabmodule):
-        yacc.yacc(
+        self.parser = ply.yacc.yacc(
             tabmodule=tabmodule, module=self,
             write_tables=True, debug=True
         )
@@ -157,7 +157,7 @@ class LTLParser(object):
         self.build()
         g = ast.LTL_AST()
         self.graph = g
-        root = self.parser.parse(formula, lexer=lexer, debug=logger)
+        root = self.parser.parse(formula, lexer=self.lexer.lexer, debug=logger)
         
         if root is None:
             raise Exception('failed to parse:\n\t' + str(formula))
@@ -269,7 +269,7 @@ class LTLParser(object):
         p[0] = self.add_identifier(ast.Bool, p[1])
     
     def p_error(self, p):
-        warn("Syntax error at '%s'" % p.value)
+        warnings.warn('Syntax error at "{p}"'.format(p=p.value))
 
 def parse(formula):
     parser = LTLParser()
