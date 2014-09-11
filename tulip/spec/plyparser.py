@@ -51,7 +51,7 @@ TABMODULE = 'tulip.spec.parsetab'
 
 LEX_LOGGER = 'tulip.spec.plyparser.lex_logger'
 YACC_LOGGER = 'tulip.spec.plyparser.yacc_logger'
-PARSING_LOGGER = 'tulip.spec.plyparser.parsing_logger'
+PARSER_LOGGER = 'tulip.spec.plyparser.parser_logger'
 
 
 def _format_docstring(**kwargs):
@@ -219,7 +219,7 @@ class Parser(object):
             debuglog=debuglog
         )
     
-    @_format_docstring(logger=PARSING_LOGGER)
+    @_format_docstring(logger=PARSER_LOGGER)
     def parse(self, formula, debuglog=None):
         """Parse formula string and create abstract syntax tree (AST).
         
@@ -227,7 +227,7 @@ class Parser(object):
         @type logger: C{{logging.Logger}}
         """
         if debuglog is None:
-            debuglog = logging.getLogger(PARSING_LOGGER)
+            debuglog = logging.getLogger(PARSER_LOGGER)
         
         g = ast.LTL_AST()
         self.graph = g
