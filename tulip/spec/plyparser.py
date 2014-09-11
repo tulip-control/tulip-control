@@ -46,8 +46,30 @@ import ply.yacc
 
 from . import ast
 
+
+TABMODULE = 'tulip.spec.parsetab'
+
+LEX_LOGGER = 'tulip.spec.plyparser.lex_logger'
+YACC_LOGGER = 'tulip.spec.plyparser.yacc_logger'
+PARSING_LOGGER = 'tulip.spec.plyparser.parsing_logger'
+
+
+def _format_docstring(**kwargs):
+    """Apply C{kwargs} to function docstring using C{format}."""
+    
+    def dec(func):
+        func.__doc__ = func.__doc__.format(**kwargs)
+        return func
+    
+    return dec
+
+
 class Lexer(object):
     """Token rules to build LTL lexer."""
+    
+    def __init__(self, debug=False):
+        # for setting the logger, call build explicitly
+        self.build(debug=debug)
     
     tokens = (
         'TRUE', 'FALSE',
@@ -112,7 +134,6 @@ class Lexer(object):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
 
-TABMODULE = 'tulip.spec.parsetab'
 
 class Parser(object):
     # lowest to highest
@@ -146,19 +167,50 @@ class Parser(object):
             tabmodule=TABMODULE, module=self,
             write_tables=False, debug=False
         )
-    
-    def rebuild_parsetab(self, tabmodule):
+
+    @_format_docstring(logger=YACC_LOGGER)
+    def rebuild_parsetab(self, tabmodule, outputdir='',
+                         debug=True, debuglog=None):
+        """Rebuild parsetable in debug mode.
+        
+        @param tabmodule: name of table file
+        @type tabmodule: C{{str}}
+        
+        @param outputdir: save C{{tabmodule}} in this directory.
+        @type outputdir: c{{str}}
+        
+        @param debuglog: defaults to logger C{{"{logger}"}}.
+        @type debuglog: C{{logging.Logger}}
+        """
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(YACC_LOGGER)
+        
+        self.lexer.build(debug=debug)
+        
         self.parser = ply.yacc.yacc(
-            tabmodule=tabmodule, module=self,
-            write_tables=True, debug=True
+            module=self,
+            tabmodule=tabmodule,
+            outputdir=outputdir,
+            write_tables=True,
+            debug=debug,
+            debuglog=debuglog
         )
     
-    def parse(self, formula):
+    @_format_docstring(logger=PARSING_LOGGER)
+    def parse(self, formula, debuglog=None):
         """Parse formula string and create abstract syntax tree (AST).
+        
+        @param logger: defaults to logger C{{"{logger}"}}.
+        @type logger: C{{logging.Logger}}
         """
+        if debuglog is None:
+            debuglog = logging.getLogger(PARSING_LOGGER)
+        
         g = ast.LTL_AST()
         self.graph = g
-        root = self.parser.parse(formula, lexer=self.lexer.lexer, debug=logger)
+
+        root = self.parser.parse(formula, lexer=self.lexer.lexer,
+                                 debug=debuglog)
         
         if root is None:
             raise Exception('failed to parse:\n\t' + str(formula))
