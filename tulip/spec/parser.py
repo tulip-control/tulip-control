@@ -84,8 +84,7 @@ def parse(formula, parser='ply', full_operators=False):
         from .pyparser import parse as pyparse
         spec = pyparse(formula)
     elif parser == 'ply':
-        from .plyparser import parse as plyparse
-        spec = plyparse(formula)
+        from . import plyparser
     else:
         raise ValueError(
             'Unknown parser: ' + str(parser) + '\n' +

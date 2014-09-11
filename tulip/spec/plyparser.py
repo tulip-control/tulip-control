@@ -114,7 +114,7 @@ class Lexer(object):
 
 TABMODULE = 'tulip.spec.parsetab'
 
-class LTLParser(object):
+class Parser(object):
     # lowest to highest
     precedence = (
         ('right', 'UNTIL', 'RELEASE'),
@@ -272,7 +272,7 @@ class LTLParser(object):
         warnings.warn('Syntax error at "{p}"'.format(p=p.value))
 
 def parse(formula):
-    parser = LTLParser()
+    parser = Parser()
     return parser.parse(formula)
 
 if __name__ == '__main__':
