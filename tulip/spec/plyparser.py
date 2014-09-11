@@ -155,6 +155,8 @@ class Lexer(object):
 
 
 class Parser(object):
+    """Production rules to build LTL parser."""
+    
     # lowest to highest
     precedence = (
         ('right', 'UNTIL', 'RELEASE'),
@@ -183,8 +185,10 @@ class Parser(object):
     
     def build(self):
         self.parser = ply.yacc.yacc(
-            tabmodule=TABMODULE, module=self,
-            write_tables=False, debug=False
+            module=self,
+            tabmodule=TABMODULE,
+            write_tables=False,
+            debug=False
         )
 
     @_format_docstring(logger=YACC_LOGGER)
@@ -227,15 +231,16 @@ class Parser(object):
         
         g = ast.LTL_AST()
         self.graph = g
-
-        root = self.parser.parse(formula, lexer=self.lexer.lexer,
-                                 debug=debuglog)
+        root = self.parser.parse(
+            formula,
+            lexer=self.lexer.lexer,
+            debug=debuglog
+        )
         
         if root is None:
-            raise Exception('failed to parse:\n\t' + str(formula))
+            raise Exception('failed to parse:\n\t{f}'.format(f=formula))
         
-        # mark root
-        self.graph.root = root
+        g.root = root
         return g
     
     def add_identifier(self, Type, x):
@@ -272,28 +277,23 @@ class Parser(object):
         p[0] = self.add_binary(ast.Comparator, p)
     
     def p_and(self, p):
-        """expression : expression AND expression
-        """
+        """expression : expression AND expression"""
         p[0] = self.add_binary(ast.And, p)
     
     def p_or(self, p):
-        """expression : expression OR expression
-        """
+        """expression : expression OR expression"""
         p[0] = self.add_binary(ast.Or, p)
     
     def p_xor(self, p):
-        """expression : expression XOR expression
-        """
+        """expression : expression XOR expression"""
         p[0] = self.add_binary(ast.Xor, p)
     
     def p_imp(self, p):
-        """expression : expression IMP expression
-        """
+        """expression : expression IMP expression"""
         p[0] = self.add_binary(ast.Imp, p)
     
     def p_bimp(self, p):
-        """expression : expression BIMP expression
-        """
+        """expression : expression BIMP expression"""
         p[0] = self.add_binary(ast.BiImp, p)
     
     def p_unary_temp_op(self, p):
@@ -310,28 +310,23 @@ class Parser(object):
         p[0] = self.add_binary(ast.BiTempOp, p)
     
     def p_not(self, p):
-        """expression : NOT expression
-        """
+        """expression : NOT expression"""
         p[0] = self.add_unary(ast.Not, p)
     
     def p_group(self, p):
-        """expression : LPAREN expression RPAREN
-        """
+        """expression : LPAREN expression RPAREN"""
         p[0] = p[2]
     
     def p_number(self, p):
-        """expression : NUMBER
-        """
+        """expression : NUMBER"""
         p[0] = self.add_identifier(ast.Num, p[1])
     
     def p_expression_name(self, p):
-        """expression : NAME
-        """
+        """expression : NAME"""
         p[0] = self.add_identifier(ast.Var, p[1])
     
     def p_expression_const(self, p):
-        """expression : DQUOTES NAME DQUOTES
-        """
+        """expression : DQUOTES NAME DQUOTES"""
         p[0] = self.add_identifier(ast.Const, p[2])
     
     def p_bool(self, p):
@@ -343,12 +338,14 @@ class Parser(object):
     def p_error(self, p):
         warnings.warn('Syntax error at "{p}"'.format(p=p.value))
 
+
 def parse(formula):
+    warnings.warn('Deprecated: Better to instantiate a Parser once only.')
     parser = Parser()
     return parser.parse(formula)
+
 
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
     parsed_formula = parse(s)
-    
-    print('Parsing result: ' + str(parsed_formula.to_gr1c()))
+    print('Parsing result: {s}'.format(s=parsed_formula.to_gr1c()))
