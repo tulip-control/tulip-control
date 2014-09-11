@@ -133,6 +133,25 @@ class Lexer(object):
     def t_error(self, t):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
+    
+    @_format_docstring(logger=LEX_LOGGER)
+    def build(self, debug=False, debuglog=None, **kwargs):
+        """Create a lexer.
+        
+        @param kwargs: Same arguments as C{{ply.lex.lex}}:
+        
+          - except for C{{module}} (fixed to C{{self}})
+          - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
+        """
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(LEX_LOGGER)
+        
+        self.lexer = ply.lex.lex(
+            module=self,
+            debug=debug,
+            debuglog=debuglog,
+            **kwargs
+        )
 
 
 class Parser(object):
