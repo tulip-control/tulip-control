@@ -138,6 +138,8 @@ class Parser(object):
         
         self.lexer = Lexer()
         self.tokens = self.lexer.tokens
+        
+        self.build()
     
     def build(self):
         self.parser = ply.yacc.yacc(
@@ -154,7 +156,6 @@ class Parser(object):
     def parse(self, formula):
         """Parse formula string and create abstract syntax tree (AST).
         """
-        self.build()
         g = ast.LTL_AST()
         self.graph = g
         root = self.parser.parse(formula, lexer=self.lexer.lexer, debug=logger)
