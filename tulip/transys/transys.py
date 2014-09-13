@@ -35,8 +35,16 @@ Transition System Module
 from __future__ import absolute_import
 
 import logging
+logger = logging.getLogger(__name__)
+
 from collections import Iterable
 from pprint import pformat
+
+try:
+    import natsort
+except ImportError:
+    logger.error('failed to import natsort')
+    natsort = None
 
 from .labeled_graphs import LabeledDiGraph, str2singleton
 from .labeled_graphs import prepend_with
@@ -47,8 +55,6 @@ from .mathset import PowerSet, MathSet
 # from .export import graph2promela
 
 _hl = 40 * '-'
-
-logger = logging.getLogger(__name__)
 
 class KripkeStructure(LabeledDiGraph):
     """Directed graph with labeled vertices and initial vertices.
@@ -459,9 +465,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                     pformat(codomain, indent=3) + 2 * '\n'
                 )
         
-        if sort:
-            import natsort
-            
+        if sort and natsort is not None:
             edges = self.edges(data=True)
             edges = natsort.natsorted(edges)
         else:
@@ -760,9 +764,7 @@ def _dumps_states(g, sort):
     
     @type g: L{FTS}
     """
-    if sort:
-        import natsort
-        
+    if sort and natsort is not None:
         nodes = natsort.natsorted(g)
     else:
         nodes = g
