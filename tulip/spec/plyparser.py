@@ -49,9 +49,9 @@ from . import ast
 
 TABMODULE = 'tulip.spec.parsetab'
 
-LEX_LOGGER = 'tulip.spec.plyparser.lex_logger'
-YACC_LOGGER = 'tulip.spec.plyparser.yacc_logger'
-PARSER_LOGGER = 'tulip.spec.plyparser.parser_logger'
+LEX_LOGGER = '{name}.lex_logger'.format(name=__name__)
+YACC_LOGGER = '{name}.yacc_logger'.format(name=__name__)
+PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
 
 
 def _format_docstring(**kwargs):
