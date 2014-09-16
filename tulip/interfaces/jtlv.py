@@ -286,7 +286,7 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
                      str(priority_kind), str(init_option)])
         except OSError as e:
             if e.errno == os.errno.ENOENT:
-                raise('Java not found: cannot run jtlv.')
+                raise Exception('Java not found in path: cannot run jtlv.')
             else:
                 raise
     else: # For debugging purpose

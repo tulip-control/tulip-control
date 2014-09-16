@@ -411,7 +411,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
             f.write(s)
             f.close()
     except:
-        logger.error('failed to write ' + fname + ' file')
+        logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
     
     (stdoutdata, stderrdata) = p.communicate(s)
     
