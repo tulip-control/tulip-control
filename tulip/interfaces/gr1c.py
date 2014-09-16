@@ -393,11 +393,19 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
                          "interpretation (init_option)")
-
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
-                          "-n", init_option, "-t", "tulip"],
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        p = subprocess.Popen(
+            [GR1C_BIN_PREFIX + "gr1c",
+             "-n", init_option,
+             "-t", "tulip"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            raise Exception('gr1c not found in path.')
+        else:
+            raise
     
     s = spec.to_gr1c()
     logger.info('gr1c input:\n' + s +_hl)
