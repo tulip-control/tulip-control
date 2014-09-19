@@ -418,8 +418,16 @@ def multiple_env_actions_test():
     # 1 <---> 2
     #    ---> 3
     
-    env_actions = [('env_alice', transys.MathSet({'left', 'right'}) ),
-                   ('env_bob', transys.MathSet({'left', 'right'}) )]
+    env_actions = [
+        {
+            'name':'env_alice',
+            'values':transys.MathSet({'left', 'right'})
+        },
+        {
+            'name':'env_bob',
+            'values':transys.MathSet({'left', 'right'})
+        }
+    ]
     
     sys = transys.OpenFTS(env_actions)
     sys.states.add_from({'s1', 's2', 's3'})

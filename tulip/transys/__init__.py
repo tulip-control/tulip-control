@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ Suggested abbreviation:
 
     >>> from tulip import transys as trs
 """
-from .mathset import MathSet, SubSet, PowerSet
+from .mathset import MathSet, SubSet, PowerSet, TypedDict
 
 from .labeled_graphs import prepend_with
 
@@ -52,4 +52,4 @@ from .automata import (
     RabinAutomaton, DRA
 )
 
-from .machines import MooreMachine, MealyMachine, Mealy
+from .machines import MooreMachine, MealyMachine
