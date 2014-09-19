@@ -571,6 +571,51 @@ def test_var_name_conflicts():
     
     conversion_raises(synth.env_to_spec, sys)
 
+
+def test_determinize_machine_init():
+    mach = transys.MealyMachine()
+    mach.add_inputs({'a': {0, 1}})
+    mach.add_outputs({'b': {0, 1}, 'c': {0, 1}})
+    u = 'Sinit'
+    mach.add_nodes_from([u, 1, 2])
+    
+    # initial reactions:
+    
+    # to input: a=0
+    mach.add_edge(u, 1, a=0, b=0, c=1)
+    mach.add_edge(u, 2, a=0, b=0, c=1)
+    mach.add_edge(u, 1, a=0, b=1, c=0)
+    mach.add_edge(u, 2, a=0, b=1, c=1)
+    
+    # to input: a=1
+    mach.add_edge(u, 1, a=1, b=0, c=1)
+    mach.add_edge(u, 2, a=1, b=0, c=1)
+    mach.add_edge(u, 1, a=1, b=1, c=0)
+    mach.add_edge(u, 2, a=1, b=1, c=1)
+    
+    # determinize all outputs arbitrarily
+    detmach = synth.determinize_machine_init(mach)
+    assert(detmach is not mach)
+    
+    for a in {0, 1}:
+        edges = [(i, j) for (i, j, d) in detmach.edges_iter(u, data=True)
+                 if d['a'] == a]
+        assert(len(edges) == 1)
+    
+    # determinize output b arbitrarily,
+    # but output c is constrained to the initial value 0
+    detmach = synth.determinize_machine_init(mach, {'c': 0})
+    
+    for a in {0, 1}:
+        edges = [(i, j, d) for (i, j, d) in detmach.edges_iter(u, data=True)
+                 if d['a'] == a]
+        assert(len(edges) == 1)
+        
+        ((i, j, d), ) = edges
+        assert(j == 1)
+        assert(d['b'] == 1)
+
+
 class synthesize_test:
     def setUp(self):
         self.f_triv = spec.GRSpec(sys_vars="y")
