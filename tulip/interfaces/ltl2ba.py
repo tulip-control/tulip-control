@@ -129,29 +129,24 @@ def t_name(t):
     return t
 
 def p_claim(p):
-    """claim : NEVER LBRACE COMMENT clauses RBRACE
-    """
+    """claim : NEVER LBRACE COMMENT clauses RBRACE"""
     p[0] = p[4]
 
 def p_clauses(p):
-    """clauses : clauses clause
-    """
+    """clauses : clauses clause"""
     p[0] = p[1] + [p[2]]
         
 
 def p_clauses_end(p):
-    """clauses : clause
-    """
+    """clauses : clause"""
     p[0] = [p[1]]
 
 def p_clause(p):
-    """clause : if_clause
-    """
+    """clause : if_clause"""
     p[0] = p[1]
 
 def p_clause_labeled(p):
-    """clause : state COLON if_clause
-    """
+    """clause : state COLON if_clause"""
     u = p[1]
     if_clause = p[3]
     
@@ -161,63 +156,51 @@ def p_clause_labeled(p):
     p[0] = (u, if_clause)
 
 def p_if_clause(p):
-    """if_clause : IF cases FI SEMI
-    """
+    """if_clause : IF cases FI SEMI"""
     p[0] = p[2]
 
 def p_cases(p):
-    """cases : cases case
-    """
+    """cases : cases case"""
     p[0] = p[1] + [p[2]]
         
 def p_cases_end(p):
-    """cases : case
-    """
+    """cases : case"""
     p[0] = [p[1]]
 
 def p_case(p):
-    """case : COLON2 expr IMP goto
-    """
+    """case : COLON2 expr IMP goto"""
     p[0] = (p[2], p[4])
 
 def p_expr_paren(p):
-    """expr : LPAREN expr RPAREN
-    """
+    """expr : LPAREN expr RPAREN"""
     p[0] = p[2]
 
 def p_and(p):
-    """expr : expr AND expr
-    """
+    """expr : expr AND expr"""
     p[0] = ast.And(p[2], p[1], p[3])
 
 def p_or(p):
-    """expr : expr OR expr
-    """
+    """expr : expr OR expr"""
     p[0] = ast.Or(p[2], p[1], p[3])
 
 def p_not(p):
-    """expr : NOT expr 
-    """
+    """expr : NOT expr"""
     p[0] = ast.Not(p[1], p[2])
 
 def p_number(p):
-    """expr : NUMBER
-    """
+    """expr : NUMBER"""
     p[0] = p[1]
 
 def p_expr_name(p):
-    """expr : NAME
-    """
+    """expr : NAME"""
     p[0] = ast.Var(p[1])
 
 def p_goto(p):
-    """goto : GOTO state
-    """
+    """goto : GOTO state"""
     p[0] = p[2]
 
 def p_state(p):
-    """state : NAME
-    """
+    """state : NAME"""
     state = p[1]
     
     ba.states.add(state)
@@ -230,8 +213,7 @@ def p_state(p):
     p[0] = p[1]
 
 def p_empty(p):
-    """empty :
-    """
+    """empty :"""
 
 def p_error(p):
     logger.error('Syntax error at ' + p.value)
