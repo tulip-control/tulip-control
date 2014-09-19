@@ -37,11 +37,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 import subprocess
-from ply import lex, yacc
+import ply.lex
+import ply.yacc
 
 from tulip import transys as trs
 from tulip.spec import ast
 
+TABMODULE = 'ltl2ba_parsetab'
 
 
 class Lexer(object):
@@ -97,6 +99,10 @@ class Lexer(object):
     
     # Ignored characters
     t_ignore = ' \t'
+    
+    def __init__(self):
+        self.lexer = ply.lex.lex(module=self, debug=False)
+    
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
@@ -131,10 +137,21 @@ class Parser(object):
         ('nonassoc', 'TRUE', 'FALSE')
     )
     
+    def __init__(self):
+        """Build lexer and parser."""
+        self.lexer = Lexer()
+        self.tokens = self.lexer.tokens
         
-        self.parser = ply.yacc.yacc(module=self, tabmodule=TABMODULE)
+        self.parser = ply.yacc.yacc(module=self, tabmodule=TABMODULE,
+                                    write_tables=True, debug=False)
         
-        self.ba = trs.BA()
+        self.ba = None
+    
+    def parse(self, ltl2ba_output):
+        """Return a Buchi automaton from parsing C{ltl2ba_output}."""
+        self.ba = trs.BA(symbolic=True)
+        self.parser.parse(ltl2ba_output, lexer=self.lexer.lexer)
+        return self.ba
     
     def p_claim(self, p):
         """claim : NEVER LBRACE COMMENT clauses RBRACE"""
@@ -264,6 +281,9 @@ def _call_ltl2ba(formula, prefix=''):
     
     return ltl2ba_output
 
+# build parser once only
+parser = Parser()
+
 def convert(formula):
     """Convert LTL formula to Buchi Automaton using ltl2ba.
     
@@ -274,16 +294,7 @@ def convert(formula):
     @rtype: L{BuchiAutomaton}
     """
     ltl2ba_out = _call_ltl2ba(str(formula))
-    
-    global ba
-    ba = trs.BA(symbolic=True)
-    
-    lexer = lex.lex()
-    parser = yacc.yacc(tabmodule='ltl2ba_parsetab',
-                       write_tables=True, debug=False)
-    
-    parser.parse(ltl2ba_out, lexer=lexer)
-    
+    ba = parser.parse(ltl2ba_out)
     logger.info('Resulting automaton:\n' + str(ba))
     return ba
 
