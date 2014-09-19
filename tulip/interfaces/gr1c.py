@@ -49,12 +49,13 @@ import os
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
+
 import networkx as nx
 
 from tulip.spec import GRSpec
 
 GR1C_BIN_PREFIX=""
-_hl = '\n' +60*'-'
+_hl = 60 * '-'
 
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
 
@@ -409,32 +410,33 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
             raise
     
     s = spec.to_gr1c()
-    logger.info('gr1c input:\n' + s +_hl)
+    logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
     
     # to make debugging by manually running gr1c easier
     fname = 'spec.gr1c'
     try:
         if logger.getEffectiveLevel() < logging.DEBUG:
-            logger.debug('writing ' + fname)
-            f = open(fname, 'w')
-            f.write(s)
-            f.close()
+            with open(fname, 'w') as f:
+                f.write(s)
+            logger.debug('wrote input to file "{f}"'.format(f=fname))
     except:
         logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
     
     (stdoutdata, stderrdata) = p.communicate(s)
     
-    logger.debug('gr1c returned:\n' + str(p.returncode) )
-    logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
+    msg = (
+        ('{spaces} gr1c return code: {c}\n\n'
+         '{spaces} gr1c stdout, stderr:\n {out}\n\n').format(
+             c=p.returncode, out=stdoutdata, spaces=30 * ' '
+        )
+    )
     
     if p.returncode == 0:
+        logger.debug(msg)
         strategy = load_aut_xml(stdoutdata)
         return strategy
     else:
-        print(30*' ' + '\n gr1c return code:\n' + 30*' ')
-        print(p.returncode)
-        print(30*' ' + '\n gr1c stdout, stderr:\n' + 30*' ')
-        print(stdoutdata)
+        print(msg)
         return None
 
 def load_mealy(filename):

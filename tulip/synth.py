@@ -104,8 +104,7 @@ def _conj_neg_diff(set0, set1, parenth=True):
         ])
 
 def mutex(iterable):
-    """Mutual exclusion for all time.
-    """
+    """Mutual exclusion for all time."""
     iterable = filter(lambda x: x != '', iterable)
     if not iterable:
         return []
@@ -1333,10 +1332,12 @@ def strategy2mealy(A, spec):
     
     Note that the strategy is a deterministic game graph,
     but the input C{A} is given as the contraction of
-    this game graph (which directly )
+    this game graph.
     
     @param A: strategy
     @type A: C{networkx.DiGraph}
+    
+    @type spec: L{GRSpec}
     
     @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
         or both can be None if the corresponding part is missing.
@@ -1374,7 +1375,7 @@ def strategy2mealy(A, spec):
             d = _int2str(d, str_vars)
             mach.transitions.add(u, v, **d)
             
-            logger.info('node: ' + str(v) + ', state: ' + str(d))
+            logger.info('node: {v}, state: {d}'.format(v=v, d=d))
     
     # special initial state, for first reaction
     initial_state = 'Sinit'
@@ -1414,12 +1415,10 @@ def strategy2mealy(A, spec):
             # spurious non-determinism wrt the machine's memory
             init_valuations.add(vals)
             
-            logger.debug('found initial state: ' + str(u))
+            logger.debug('found initial state: {u}'.format(u=u))
         
-        logger.debug(
-            'in state: ' + str(u) +
-            ', var values: ' + str(var_values)
-        )
+        logger.debug('machine vertex: {u}, has var values: {v}'.format(
+                     u=u, v=var_values))
     
     if not mach.successors('Sinit'):
         import pprint
@@ -1436,7 +1435,19 @@ def strategy2mealy(A, spec):
     return mach
 
 def _int2str(label, str_vars):
-    """Replace integers with string values for string variables in C{label}.
+    """Replace integers with string values for string variables.
+    
+    @param: mapping from variable names, to integer (as strings)
+    @type label: C{dict}
+    
+    @param str_vars: mapping that defines those variables that
+        should be converted from integer to string variables.
+        Each variable is mapped to a list of strings that
+        comprise its range. This list defines how integer values
+        correspond to string literals for that variable.
+    @type str_vars: C{dict}
+    
+    @rtype: C{dict}
     """
     label = dict(label)
     label.update({k: str_vars[k][int(v)]
@@ -1445,8 +1456,7 @@ def _int2str(label, str_vars):
     return label
 
 def mask_outputs(machine):
-    """Erase outputs from each edge where they are zero.
-    """
+    """Erase outputs from each edge where they are zero."""
     for u, v, d in machine.edges_iter(data=True):
         for k in d:
             if k in machine.outputs and d[k] == 0:
