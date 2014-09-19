@@ -45,6 +45,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import copy
+import os
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
