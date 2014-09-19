@@ -41,7 +41,6 @@ import ply.lex
 import ply.yacc
 
 from tulip import transys as trs
-from tulip.spec import ast
 
 TABMODULE = 'ltl2ba_parsetab'
 
@@ -198,27 +197,27 @@ class Parser(object):
     
     def p_expr_paren(self, p):
         """expr : LPAREN expr RPAREN"""
-        p[0] = p[2]
+        p[0] = '({expr})'.format(expr=p[2])
     
     def p_and(self, p):
         """expr : expr AND expr"""
-        p[0] = ast.And(p[2], p[1], p[3])
+        p[0] = '({x} and {y})'.format(x=p[1], y=p[3])
     
     def p_or(self, p):
         """expr : expr OR expr"""
-        p[0] = ast.Or(p[2], p[1], p[3])
+        p[0] = '({x} or {y})'.format(x=p[1], y=p[3])
     
     def p_not(self, p):
         """expr : NOT expr"""
-        p[0] = ast.Not(p[1], p[2])
+        p[0] = '(not {expr})'.format(expr=p[2])
     
     def p_number(self, p):
         """expr : NUMBER"""
-        p[0] = p[1]
+        p[0] = int(p[1])
     
     def p_expr_name(self, p):
         """expr : NAME"""
-        p[0] = ast.Var(p[1])
+        p[0] = p[1]
     
     def p_goto(self, p):
         """goto : GOTO state"""
