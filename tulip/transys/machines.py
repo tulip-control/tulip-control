@@ -558,20 +558,22 @@ class MealyMachine(FiniteStateMachine):
         @rtype: (outputs, next_state)
           where C{outputs}: C{{'port_name':port_value, ...}}
         """
-        trans = self.transitions.find([from_state])
-        
-        enabled_trans = set()
-        for i, j, attr_dict in trans:
-            # match only inputs (explicit valuations, not symbolic)
-            trans_inputs = project_dict(attr_dict, self.inputs)
-            
-            if trans_inputs == inputs:
-                enabled_trans.add((i, j, attr_dict))
+        # match only inputs (explicit valuations, not symbolic)
+        enabled_trans = [
+            (i, j, d)
+            for (i, j, d) in self.edges_iter([from_state], data=True)
+            if project_dict(d, self.inputs) == inputs
+        ]
         
         # must be deterministic
-        assert(len(enabled_trans) <= 1)
-        
-        _, next_state, attr_dict = enabled_trans[0]
+        try:
+            ((_, next_state, attr_dict), ) = enabled_trans
+        except ValueError:
+            raise Exception(
+                'must be input-deterministic, '
+                'found enabled transitions: '
+                '{t}'.format(t=enabled_trans)
+            )
         
         outputs = project_dict(attr_dict, self.outputs)
         
