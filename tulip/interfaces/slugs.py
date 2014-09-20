@@ -91,6 +91,13 @@ def synthesize(spec, only_realizability=False, options=None):
         lines = [_bitwise_to_int_domain(line, spec)
                  for line in out.split('\n')]
         g = jtlv.jtlv_output_to_networkx(lines, spec)
+        logger.debug(
+            ('loaded strategy with vertices:\n  {v}\n'
+             'and edges:\n {e}\n').format(
+                v='\n  '.join(str(x) for x in g.nodes(data=True)),
+                e=g.edges()
+            )
+        )
         return g
     else:
         return None
