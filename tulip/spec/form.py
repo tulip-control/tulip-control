@@ -661,6 +661,42 @@ class GRSpec(LTL):
         else:
             return '{name}:;\n'.format(name=name)
     
+    def to_slugs(self):
+        """Return structured slugs spec.
+    
+        @type spec: L{GRSpec}.
+        """
+        s = ['INPUT', 'OUTPUT',
+             'ENV_TRANS', 'ENV_LIVENESS', 'ENV_INIT',
+             'SYS_TRANS', 'SYS_LIVENESS', 'SYS_INIT']
+        s = ['[{x}]\n'.format(x=x) for x in s]
+        
+        s[0] += self._format_slugs_vars(self.env_vars)
+        s[1] += self._format_slugs_vars(self.sys_vars)
+        
+        s[2] += '\n'.join(self.env_safety)
+        s[3] += '\n'.join(self.env_prog)
+        s[4] += ' & '.join(self.env_init)
+        
+        s[5] += '\n'.join(self.sys_safety)
+        s[6] += '\n'.join(self.sys_prog)
+        s[7] += ' & '.join(self.sys_init)
+    
+        return '\n\n'.join(s)
+    
+    def _format_slugs_vars(self, vardict):
+        a = []
+        for var, dom in vardict.iteritems():
+            if dom == 'boolean':
+                a.append(var)
+            elif isinstance(dom, tuple) and len(dom) == 2:
+                a.append('{var}: {min}...{max}'.format(
+                    var=var, min=dom[0], max=dom[1])
+                )
+            else:
+                raise ValueError('unknown domain type: {dom}'.format(dom=dom))
+        return ' '.join(a)
+    
     def ast(self, x):
         """Return AST corresponding to formula x.
         

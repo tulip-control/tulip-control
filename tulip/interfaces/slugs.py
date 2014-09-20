@@ -69,7 +69,7 @@ def synthesize(spec, only_realizability=False, options=None):
     if options is None:
         options = []
     
-    struct = generate_structured_slugs(spec)
+    struct = spec.to_slugs()
     s = slugs.compiler.performConversion(struct, True)
     
     with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -125,44 +125,6 @@ def _call_slugs(f, options):
     if not realizable:
         assert('Specification is unrealizable' in out)
     return realizable, out
-
-
-def generate_structured_slugs(spec):
-    """Return the slugs spec.
-
-    @type spec: L{GRSpec}.
-    """
-    s = ['INPUT', 'OUTPUT',
-         'ENV_TRANS', 'ENV_LIVENESS', 'ENV_INIT',
-         'SYS_TRANS', 'SYS_LIVENESS', 'SYS_INIT']
-    s = ['[{x}]\n'.format(x=x) for x in s]
-    
-    s[0] += get_vars_for_slugs(spec.env_vars)
-    s[1] += get_vars_for_slugs(spec.sys_vars)
-    
-    s[2] += '\n'.join(spec.env_safety)
-    s[3] += '\n'.join(spec.env_prog)
-    s[4] += ' & '.join(spec.env_init)
-    
-    s[5] += '\n'.join(spec.sys_safety)
-    s[6] += '\n'.join(spec.sys_prog)
-    s[7] += ' & '.join(spec.sys_init)
-
-    return '\n\n'.join(s)
-
-
-def get_vars_for_slugs(vardict):
-    a = []
-    for var, dom in vardict.iteritems():
-        if dom == 'boolean':
-            a.append(var)
-        elif isinstance(dom, tuple) and len(dom) == 2:
-            a.append('{var}: {min}...{max}'.format(
-                var=var, min=dom[0], max=dom[1])
-            )
-        else:
-            raise ValueError('unknown domain type: {dom}'.format(dom=dom))
-    return ' '.join(a)
 
     
 def bool_to_int_val(var, dom, boolValDict):
