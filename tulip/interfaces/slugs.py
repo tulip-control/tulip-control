@@ -154,12 +154,10 @@ def _bool_to_int_val(var, dom, boolValDict):
     assert(min_int >= 0)
     assert(max_int >= 0)
     
-    val = 0
-    for i in xrange(int(math.ceil(math.log(max_int))) + 1):
-        current_key = '{var}@{i}'.format(var=var, i=i)
-        val += int(boolValDict[current_key]) * (2 ** i)
-    
-    return val
+    # note: little-endian
+    s = ''.join(boolValDict['{var}@{i}'.format(var=var, i=i)]
+                for i in xrange(int(math.ceil(math.log(max_int))), -1, -1))
+    return int(s, 2)
 
 
 def _bitwise_to_int_domain(line, spec):
