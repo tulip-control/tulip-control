@@ -155,10 +155,9 @@ def _bool_to_int_val(var, dom, boolValDict):
     assert(max_int >= 0)
     
     val = 0
-    
-    for i in range(min_int, int(math.ceil(math.log(max_int))) + 1):
-        current_key = var + "@" + str(i)
-        val += 2 ** int(boolValDict[current_key])
+    for i in xrange(int(math.ceil(math.log(max_int))) + 1):
+        current_key = '{var}@{i}'.format(var=var, i=i)
+        val += int(boolValDict[current_key]) * (2 ** i)
     
     return val
 
