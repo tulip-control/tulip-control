@@ -75,10 +75,8 @@ def synthesize(spec, only_realizability=False, options=None):
     with tempfile.NamedTemporaryFile(delete=False) as f:
         f.write(s)
     
-    logger.info(
-        ('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
-         '\n\n slugs in:\n\n {s}\n').format(s=s)
-    )
+    logger.info('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
+                '\n\n slugs in:\n\n {s}\n'.format(s=s))
     
     realizable, out = _call_slugs(f.name, options + ['--onlyRealizability'])
     
