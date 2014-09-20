@@ -683,6 +683,13 @@ class GRSpec(LTL):
         s[7] += ' & '.join(self.sys_init)
     
         return '\n\n'.join(s)
+    def _slugs_str(self, r, name, sep='\n'):
+        if not r:
+            return '[{name}]\n'.format(name=name)
+        
+        sep = ' {sep} '.format(sep=sep)
+        f = sep.join(_to_lang(self, x, 'gr1c') for x in r if x)
+        return '[{name}]\n{f}\n\n'.format(name=name, f=f)
     
     def _format_slugs_vars(self, vardict):
         a = []
