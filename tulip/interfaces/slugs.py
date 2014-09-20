@@ -36,7 +36,7 @@ Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
 """
 
-from __future__ import absolute_imports
+from __future__ import absolute_import
 
 import logging
 logger = logging.getLogger(__name__)
