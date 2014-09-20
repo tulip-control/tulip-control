@@ -652,14 +652,14 @@ class GRSpec(LTL):
         return output
     
     def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
-        if s:
-            f = '\n& '.join([
-                prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
-                for x in s
-            ])
-            return '{name}: {f};\n'.format(name=name, f=f)
-        else:
+        if not s:
             return '{name}:;\n'.format(name=name)
+        
+        f = '\n& '.join([
+            prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
+            for x in s
+        ])
+        return '{name}: {f};\n'.format(name=name, f=f)
     
     def to_slugs(self):
         """Return structured slugs spec.
