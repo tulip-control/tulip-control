@@ -30,9 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-"""
-interface to ltl2ba
-"""
+"""interface to ltl2ba"""
 import logging
 logger = logging.getLogger(__name__)
 
@@ -159,7 +157,6 @@ class Parser(object):
     def p_clauses(self, p):
         """clauses : clauses clause"""
         p[0] = p[1] + [p[2]]
-            
     
     def p_clauses_end(self, p):
         """clauses : clause"""
@@ -265,23 +262,22 @@ def _call_ltl2ba(formula, prefix=''):
         raise Exception('cannot find ltl2ba on path')
     
     p = subprocess.Popen(
-        [prefix + 'ltl2ba', '-f', '"' + formula + '"'],
+        [prefix + 'ltl2ba', '-f', '"{f}"'.format(f=formula)],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT
     )
     p.wait()
-    
     ltl2ba_output = p.stdout.read()
-    
-    logger.info('ltl2ba output:\n\n' + ltl2ba_output)
+    logger.info('ltl2ba output:\n\n{s}\n'.format(s=ltl2ba_output))
     
     if p.returncode != 0:
         raise Exception('Error when converting LTL to Buchi.')
-    
     return ltl2ba_output
+
 
 # build parser once only
 parser = Parser()
+
 
 def convert(formula):
     """Convert LTL formula to Buchi Automaton using ltl2ba.
@@ -294,8 +290,9 @@ def convert(formula):
     """
     ltl2ba_out = _call_ltl2ba(str(formula))
     ba = parser.parse(ltl2ba_out)
-    logger.info('Resulting automaton:\n' + str(ba))
+    logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
     return ba
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

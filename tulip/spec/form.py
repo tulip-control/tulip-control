@@ -588,7 +588,7 @@ class GRSpec(LTL):
 
         return (assumption, guarantee)
     
-    def _jtlv_str(self, m, txt, prefix='[]<>'):
+    def _jtlv_str(self, m, comment, prefix='[]<>'):
         # no clauses ?
         if not m:
             return ''
@@ -607,9 +607,11 @@ class GRSpec(LTL):
             if prefix == '[]':
                 c = re.sub(r'next\s*\(', 'next(', c)
             
-            w.append('\t%s(%s)' % (prefix, c))
+            w.append('\t{prefix}({formula})'.format(prefix=prefix, formula=c))
         
-        return '-- %s\n' % txt + ' & \n'.join(w)
+        return '-- {comment}\n{formula}'.format(
+            comment=comment, formula=' & \n'.join(w)
+        )
 
     def to_gr1c(self):
         """Dump to gr1c specification string.
