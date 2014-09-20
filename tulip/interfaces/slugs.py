@@ -132,73 +132,37 @@ def generate_structured_slugs(spec):
 
     @type spec: L{GRSpec}.
     """
-    specStr = ['[INPUT]', '[OUTPUT]', '[ENV_TRANS]', '[ENV_LIVENESS]',
-               '[ENV_INIT]', '[SYS_TRANS]', '[SYS_LIVENESS]', '[SYS_INIT]']
+    s = ['INPUT', 'OUTPUT',
+         'ENV_TRANS', 'ENV_LIVENESS', 'ENV_INIT',
+         'SYS_TRANS', 'SYS_LIVENESS', 'SYS_INIT']
+    s = ['[{x}]\n'.format(x=x) for x in s]
     
-    specStr[0] += get_vars_for_slugs(spec.env_vars)
-    specStr[1] += get_vars_for_slugs(spec.sys_vars)
-        
-    first = True
-    for env_init in spec.env_init:
-        env_init = format_for_slugs(env_init)
-        if env_init:
-            if first:
-                specStr[4] += ' \n ' + env_init
-                first = False
-            else:
-                specStr[4] += ' & ' + env_init
+    s[0] += get_vars_for_slugs(spec.env_vars)
+    s[1] += get_vars_for_slugs(spec.sys_vars)
     
-    for env_safety in spec.env_safety:
-        env_safety = format_for_slugs(env_safety)
-        if env_safety:
-            specStr[2] += '\n' + env_safety
+    s[2] += '\n'.join(spec.env_safety)
+    s[3] += '\n'.join(spec.env_prog)
+    s[4] += ' & '.join(spec.env_init)
     
-    for env_prog in spec.env_prog:
-        env_prog = format_for_slugs(env_prog)
-        if env_prog:
-            specStr[3] += '\n' + env_prog        
+    s[5] += '\n'.join(spec.sys_safety)
+    s[6] += '\n'.join(spec.sys_prog)
+    s[7] += ' & '.join(spec.sys_init)
 
-    first = True
-    for sys_init in spec.sys_init:
-        sys_init = format_for_slugs(sys_init)
-        if sys_init:
-            if first:
-                specStr[7] += ' \n ' + sys_init
-                first = False
-            else:
-                specStr[7] += ' & ' + sys_init
-    
-    for sys_safety in spec.sys_safety:
-        sys_safety = format_for_slugs(sys_safety)
-        if sys_safety:
-            specStr[5] += '\n' + sys_safety
-    
-    for sys_prog in spec.sys_prog:
-        sys_prog = format_for_slugs(sys_prog)
-        if sys_prog:
-            specStr[6] += '\n' + sys_prog 
-    return '\n\n'.join(specStr)
+    return '\n\n'.join(s)
 
 
 def get_vars_for_slugs(vardict):
-    output = ''
-    for variable, domain in vardict.items():
-        if domain == 'boolean':
-            output += "\n" + variable
-        elif isinstance(domain, tuple) and len(domain) == 2:
-            output += (
-                "\n" + variable + ": " +
-                str(domain[0]) + "..." + str(domain[1])
+    a = []
+    for var, dom in vardict.iteritems():
+        if dom == 'boolean':
+            a.append(var)
+        elif isinstance(dom, tuple) and len(dom) == 2:
+            a.append('{var}: {min}...{max}'.format(
+                var=var, min=dom[0], max=dom[1])
             )
         else:
-            raise ValueError("Domain type unsupported by slugs: " +
-                str(domain))
-    return output
-
-
-def format_for_slugs(spec):
-    spec = re.sub(r'X\((\w+)\)', r"\1'", spec)
-    return spec
+            raise ValueError('unknown domain type: {dom}'.format(dom=dom))
+    return ' '.join(a)
 
     
 def bool_to_int_val(var, dom, boolValDict):
