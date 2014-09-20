@@ -90,7 +90,7 @@ def synthesize(spec, only_realizability=False, options=None):
         __, out = _call_slugs(f.name, options)
         os.unlink(f.name)
         
-        lines = [bitwise_to_int_domain(line, spec)
+        lines = [_bitwise_to_int_domain(line, spec)
                  for line in out.split('\n')]
         g = jtlv.jtlv_output_to_networkx(lines, spec)
         return g
@@ -127,7 +127,7 @@ def _call_slugs(f, options):
     return realizable, out
 
     
-def bool_to_int_val(var, dom, boolValDict):
+def _bool_to_int_val(var, dom, boolValDict):
     for boolVar, boolVal in boolValDict.iteritems():
         m = re.search(
             r'(' + var + r'@\w+\.' +
@@ -153,7 +153,7 @@ def bool_to_int_val(var, dom, boolValDict):
     return val
 
 
-def bitwise_to_int_domain(line, spec):
+def _bitwise_to_int_domain(line, spec):
     """Convert bitwise representation to integer domain defined in spec."""
     allVars = dict(spec.sys_vars.items() + spec.env_vars.items())
     for var, dom in allVars.iteritems():
@@ -165,7 +165,7 @@ def bitwise_to_int_domain(line, spec):
             ))
             
             if boolValDict:
-                intVal = bool_to_int_val(var, dom,
+                intVal = _bool_to_int_val(var, dom,
                                          copy.deepcopy(boolValDict))
                 
                 first = True
