@@ -133,7 +133,7 @@ def solve_game(
         init_option = 1
 
     
-    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
+    call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
     
     realizable = False
     
@@ -194,11 +194,11 @@ def synthesize(
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
     fSMV = tempfile.NamedTemporaryFile(delete=False, suffix="smv")
-    fSMV.write(generate_JTLV_SMV(spec))
+    fSMV.write(generate_jtlv_smv(spec))
     fSMV.close()
     
     fLTL = tempfile.NamedTemporaryFile(delete=False, suffix="ltl")
-    fLTL.write(generate_JTLV_LTL(spec))
+    fLTL.write(generate_jtlv_ltl(spec))
     fLTL.close()
     
     fAUT = tempfile.NamedTemporaryFile(delete=False)
@@ -248,13 +248,13 @@ def get_priority(priority_kind):
         priority_kind = 3
     return priority_kind
 
-def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
     """Subprocess calls to JTLV.
     """
     logger.info('Calling jtlv with the following arguments:')
     logger.info('  heap size: ' + heap_size)
     logger.info('  jtlv path: ' + JTLV_PATH)
     logger.info('  priority_kind: ' + str(priority_kind) + '\n')
+def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
 
     if JTLV_EXE:
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
@@ -325,7 +325,7 @@ def canon_to_jtlv_domain(dom):
     else:
         raise ValueError("Unrecognized domain type: "+str(dom))
 
-def generate_JTLV_SMV(spec):
+def generate_jtlv_smv(spec):
     """Return the SMV module definitions needed by JTLV.
 
     Raises exception if malformed GRSpec object is detected.
@@ -377,7 +377,7 @@ MODULE sys -- outputs
 {sys_vars}
 '''
 
-def generate_JTLV_LTL(spec):
+def generate_jtlv_ltl(spec):
     """Return LTL specification for JTLV.
 
     @type spec: L{GRSpec}
