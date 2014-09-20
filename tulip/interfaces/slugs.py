@@ -144,10 +144,12 @@ def _bool_to_int_val(var, dom, boolValDict):
             str(dom[0]) + r'\.' + str(dom[1]) + r')',
             boolVar
         )
-        if m:
-           min_int = dom[0]
-           max_int = dom[1]
-           boolValDict[boolVar.split('.')[0]] = boolValDict.pop(boolVar)
+        if not m:
+            continue
+        
+        min_int = dom[0]
+        max_int = dom[1]
+        boolValDict[boolVar.split('.')[0]] = boolValDict.pop(boolVar)
     
     assert(min_int >= 0)
     assert(max_int >= 0)
@@ -167,33 +169,31 @@ def _bitwise_to_int_domain(line, spec):
     allVars.update(spec.env_vars)
     
     for var, dom in allVars.iteritems():
-        if isinstance(dom, tuple) and len(dom) == 2:
+        if not isinstance(dom, tuple) or len(dom) != 2:
+            continue
             
-            boolValDict = dict(re.findall(
-                r'(' + var + r'@\w+|' + var + r'@\w+\.' + 
-                str(dom[0]) + r'\.' + str(dom[1]) + r'):(\w+)', line
-            ))
-            
-            if boolValDict:
-                intVal = _bool_to_int_val(var, dom,
-                                         copy.deepcopy(boolValDict))
-                
-                first = True
-                for key,val in boolValDict.iteritems():
-                    if first:
-                        line = re.sub(
-                            r'(' + re.escape(key) + r'\w*:' +
-                            str(val) + r')',
-                            var + ":" + str(intVal),
-                            line
-                        )
-                        first=False
-                    else:
-                        line = re.sub(
-                            r'(' + re.escape(key) + r'\w*:' +
-                            str(val) + r'[,]*)',
-                            "",
-                            line
-                        )
+        boolValDict = dict(re.findall(
+            r'(' + var + r'@\w+|' + var + r'@\w+\.' +
+            str(dom[0]) + r'\.' + str(dom[1]) + r'):(\w+)', line
+        ))
+        
+        if not boolValDict:
+            continue
+
+        intVal = _bool_to_int_val(var, dom, copy.deepcopy(boolValDict))
+        
+        first = True
+        for key, val in boolValDict.iteritems():
+            if first:
+                line = re.sub(
+                    r'(' + re.escape(key) + r'\w*:' + str(val) + r')',
+                    var + ':' + str(intVal), line
+                )
+                first=False
+            else:
+                line = re.sub(
+                    r'(' + re.escape(key) + r'\w*:' + str(val) + r'[,]*)',
+                    '', line
+                )
 
     return line
