@@ -99,7 +99,7 @@ def synthesize(spec, only_realizability=False, options=None):
 
 
 def _call_slugs(f, options):
-    c = ['slugs'] + options + ['"{file}"'.format(file=f)]
+    c = ['slugs'] + options + ['{file}'.format(file=f)]
     logger.debug('Calling: ' + ' '.join(c))
     try:
         p = subprocess.Popen(
