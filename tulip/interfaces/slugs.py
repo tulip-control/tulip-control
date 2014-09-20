@@ -35,158 +35,96 @@ Interface to the slugs implementation of GR(1) synthesis.
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
 """
-import sys
 
-import math,copy
+from __future__ import absolute_imports
 
 import logging
 logger = logging.getLogger(__name__)
 
-import os, re, subprocess, tempfile
+import math
+import copy
+import os
+import re
+import subprocess
+import tempfile
+
+import slugs.compiler
+from . import jtlv
 
 
-SLUGS_PATH = os.path.abspath(os.path.dirname(__file__))
-SLUGS_EXE = 'slugs/src/slugs'
-
-
-def check_realizable(spec, options=''):
-    """Decide realizability of specification defined by given GRSpec object.
-
-    ...for standalone use
-
-    @return: True if realizable, False if not, or an error occurs.
-    """
-    fSlugs, fAUT = create_files(spec)
+def synthesize(spec, only_realizability=False, options=None):
+    """Return strategy satisfying the specification.
     
-    realizable = solve_game(spec, fSlugs, fAUT, '--onlyRealizability'+options)
-    os.unlink(fSlugs)
-    os.unlink(fAUT)
-    
-    return realizable
-
-
-def synthesize(
-    spec, options=''
-):
-    """Synthesize a strategy satisfying the specification.
-
-    Arguments are described in documentation for L{solve_game}.
-    
-    @return: Return strategy as instance of L{MealyMachine}, or a list
-        of counter-examples as returned by L{get_counterexamples}.
-    """
-    realizable = check_realizable(spec, options)
-    
-    fSlugs, fAUT = create_files(spec)
-
-    # Build Automaton
-    if (not realizable):
-        solve_game(spec, fSlugs, fAUT, "--counterStrategy"+options)
-        #counter_examples = get_counterexamples(fAUT)
-        counter_aut = load_file(fAUT, spec, False)
-        #os.unlink(fAUT)
-        os.unlink(fSlugs)
-        return fAUT
-    else:
-        solve_game(spec, fSlugs, fAUT, options)
-        aut = load_file(fAUT, spec)
-        #os.unlink(fAUT)
-        os.unlink(fSlugs)
-        return aut
-
-
-def create_files(spec):
-    """Create temporary files for read/write by slugs."""
-    fStructuredSlugs = tempfile.NamedTemporaryFile(delete=False,suffix="structuredslugs")
-    fStructuredSlugs.write(generate_structured_slugs(spec))
-    fStructuredSlugs.close()
-    
-    structured_slugs_compiler_path = os.path.join(SLUGS_PATH, "slugs", "tools", "StructuredSlugsParser")
-    sys.path.insert(0, structured_slugs_compiler_path)
-    from compiler import performConversion
-    
-    # Call the conversion script
-    fSlugs = tempfile.NamedTemporaryFile(delete=False,suffix="slugsin")
-    sys.stdout = fSlugs
-    performConversion(fStructuredSlugs.name, True)
-    fSlugs.close()
-    sys.stdout = sys.__stdout__
-
-    
-    os.unlink(fStructuredSlugs.name)
-    
-    #fAUT = tempfile.NamedTemporaryFile(delete=False,suffix="aut")
-    fAUT = open(os.path.join(os.path.abspath(os.path.dirname(__file__)),"counter.aut"),'w+')
-    fAUT.close()
-    
-    return fSlugs.name, fAUT.name
-
-
-def solve_game(spec, fSlugs, fAUT, options):
-    """Decide realizability of specification.
-
-    Return True if realizable, False if not, or an error occurs.
-    Automaton is extracted for file names by fAUT.
-    
-
     @type spec: L{GRSpec}
-    @param fSlugs, fAUT: file name for use with slugs format. This
-        enables synthesize() to access them later on.
-
-    @param options: a string containing options for syntheiss with slugs.
-        Possible values of C{priority_kind} are:
+    
+    @type only_realizability: bool
+    
+    @param options: list of options for C{slugs},
+        passed to C{subprocess.call}.
+    
+    @return: Return synthesized strategy if realizable,
+        otherwise C{None}.
+    @rtype: C{networkx.DiGraph}
     """
-    call_slugs(fSlugs, fAUT, options)
+    if options is None:
+        options = []
     
-    realizable = False
+    struct = generate_structured_slugs(spec)
+    s = slugs.compiler.performConversion(struct, True)
     
-    f = open(fAUT, 'r')
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(s)
     
-    for line in f:
-        if ("Specification is realizable" in line):
-            realizable = True
-            break
-        elif ("Specification is unrealizable" in line):
-            realizable = False
-            break
+    logger.info(
+        ('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
+         '\n\n slugs in:\n\n {s}\n').format(s=s)
+    )
+    
+    realizable, out = _call_slugs(f.name, options + ['--onlyRealizability'])
+    
+    if only_realizability:
+        os.unlink(f.name)
+        return realizable
+    
+    if realizable:
+        __, out = _call_slugs(f.name, options)
+        os.unlink(f.name)
         
-    if '--onlyRealizability' not in options:
-        if (realizable):
-            print("\nAutomaton successfully synthesized.\n")
+        lines = [bitwise_to_int_domain(line, spec)
+                 for line in out.split('\n')]
+        g = jtlv.jtlv_output_to_networkx(lines, spec)
+        return g
+    else:
+        return None
+
+
+def _call_slugs(f, options):
+    c = ['slugs'] + options + ['"{file}"'.format(file=f)]
+    logger.debug('Calling: ' + ' '.join(c))
+    try:
+        p = subprocess.Popen(
+            c,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            raise Exception('slugs not found in path.')
         else:
-            print("\nERROR: Specification was unrealizable.\n")
-
-    return realizable
-
-
-def call_slugs(fSlugs, fAUT, options):
-    """Subprocess calls to slugs."""
-    logger.info('Calling slugs with the following arguments:')
-    logger.info('  slugs path: ' + SLUGS_PATH)
-    logger.info('  options: ' + options)
-         
+            raise
     
-    if (len(SLUGS_EXE) > 0):
-        slugs_grgame = os.path.join(SLUGS_PATH, SLUGS_EXE)
-        logger.debug(slugs_grgame)
-        slugs_cmd = [str(slugs_grgame) ,\
-            ' ' , options ,\
-            ' \"' , str(fSlugs),\
-            '\" > ' , str(fAUT), ' 2>&1']
-        logger.debug(
-            "".join(slugs_cmd)
-        )
-        os.system("".join(slugs_cmd))
-    else: # For debugging purpose
-        slugs_grgame = os.path.join(SLUGS_PATH, "slugs/src/slugs")
-        slugs_cmd = [str(slugs_grgame),\
-            ' ' , options, \
-            ' ' , str(fSlugs) ,\
-            ' > ' , str(fAUT)] 
-        logger.debug(
-            "".join(slugs_cmd)
-        )
-        os.system("".join(slugs_cmd))
+    out, err = p.communicate()
+    logger.debug(
+        '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
+        '\n slugs stdout:\n\n {out}\n\n'.format(out=out)
+    )
+    
+    realizable = 'Specification is realizable' in out
+    # check sanity
+    if not realizable:
+        assert('Specification is unrealizable' in out)
+    return realizable, out
 
 
 def generate_structured_slugs(spec):
