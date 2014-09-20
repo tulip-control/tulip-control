@@ -148,8 +148,6 @@ def _bool_to_int_val(var, dom, boolValDict):
            min_int = dom[0]
            max_int = dom[1]
            boolValDict[boolVar.split('.')[0]] = boolValDict.pop(boolVar)
-           if len(boolValDict) != max_int - min_int:
-                logger.error('Error in boolean representation of ' + var)
     
     assert(min_int >= 0)
     assert(max_int >= 0)
