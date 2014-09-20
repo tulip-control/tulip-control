@@ -666,23 +666,22 @@ class GRSpec(LTL):
     
         @type spec: L{GRSpec}.
         """
-        s = ['INPUT', 'OUTPUT',
-             'ENV_TRANS', 'ENV_LIVENESS', 'ENV_INIT',
-             'SYS_TRANS', 'SYS_LIVENESS', 'SYS_INIT']
-        s = ['[{x}]\n'.format(x=x) for x in s]
+        _finite_domain2ints(self)
         
-        s[0] += self._format_slugs_vars(self.env_vars)
-        s[1] += self._format_slugs_vars(self.sys_vars)
+        f = self._slugs_str
+        return (
+            self._format_slugs_vars(self.env_vars, 'INPUT') +
+            self._format_slugs_vars(self.sys_vars, 'OUTPUT') +
         
-        s[2] += '\n'.join(self.env_safety)
-        s[3] += '\n'.join(self.env_prog)
-        s[4] += ' & '.join(self.env_init)
+            f(self.env_safety, 'ENV_TRANS') +
+            f(self.env_prog, 'ENV_LIVENESS') +
+            f(self.env_init, 'ENV_INIT', sep='&') +
         
-        s[5] += '\n'.join(self.sys_safety)
-        s[6] += '\n'.join(self.sys_prog)
-        s[7] += ' & '.join(self.sys_init)
+            f(self.sys_safety, 'SYS_TRANS') +
+            f(self.sys_prog, 'SYS_LIVENESS') +
+            f(self.sys_init, 'SYS_INIT', sep='&')
+        )
     
-        return '\n\n'.join(s)
     def _slugs_str(self, r, name, sep='\n'):
         if not r:
             return '[{name}]\n'.format(name=name)
@@ -691,7 +690,7 @@ class GRSpec(LTL):
         f = sep.join(_to_lang(self, x, 'gr1c') for x in r if x)
         return '[{name}]\n{f}\n\n'.format(name=name, f=f)
     
-    def _format_slugs_vars(self, vardict):
+    def _format_slugs_vars(self, vardict, name):
         a = []
         for var, dom in vardict.iteritems():
             if dom == 'boolean':
@@ -702,7 +701,7 @@ class GRSpec(LTL):
                 )
             else:
                 raise ValueError('unknown domain type: {dom}'.format(dom=dom))
-        return ' '.join(a)
+        return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
     
     def ast(self, x):
         """Return AST corresponding to formula x.
