@@ -163,7 +163,9 @@ def _bool_to_int_val(var, dom, boolValDict):
 
 def _bitwise_to_int_domain(line, spec):
     """Convert bitwise representation to integer domain defined in spec."""
-    allVars = dict(spec.sys_vars.items() + spec.env_vars.items())
+    allVars = dict(spec.sys_vars)
+    allVars.update(spec.env_vars)
+    
     for var, dom in allVars.iteritems():
         if isinstance(dom, tuple) and len(dom) == 2:
             
