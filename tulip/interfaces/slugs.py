@@ -30,9 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """ 
-Interface to the slugs implementation of GR(1) synthesis
-Author: Vasu Raman
-Date: August 8, 2014
+Interface to the slugs implementation of GR(1) synthesis.
 
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
