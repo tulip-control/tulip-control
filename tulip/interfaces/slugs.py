@@ -192,61 +192,68 @@ def call_slugs(fSlugs, fAUT, options):
 
 
 def generate_structured_slugs(spec):
-    """Return the slugs spec
+    """Return the slugs spec.
 
-    It takes as input a GRSpec object.
+    @type spec: L{GRSpec}.
     """
     specStr = ['[INPUT]', '[OUTPUT]', '[ENV_TRANS]', '[ENV_LIVENESS]',
                '[ENV_INIT]', '[SYS_TRANS]', '[SYS_LIVENESS]', '[SYS_INIT]']
     
     specStr[0] += get_vars_for_slugs(spec.env_vars)
-    specStr[1] +=get_vars_for_slugs(spec.sys_vars)
+    specStr[1] += get_vars_for_slugs(spec.sys_vars)
         
     first = True
     for env_init in spec.env_init:
         env_init = format_for_slugs(env_init)
-        if (len(env_init) > 0):
+        if env_init:
             if first:
                 specStr[4] += ' \n ' + env_init
                 first = False
             else:
                 specStr[4] += ' & ' + env_init
+    
     for env_safety in spec.env_safety:
         env_safety = format_for_slugs(env_safety)
-        if (len(env_safety) > 0):
-            specStr[2] += '\n'+env_safety
+        if env_safety:
+            specStr[2] += '\n' + env_safety
+    
     for env_prog in spec.env_prog:
         env_prog = format_for_slugs(env_prog)
-        if (len(env_prog) > 0):
-            specStr[3] += '\n'+env_prog        
+        if env_prog:
+            specStr[3] += '\n' + env_prog        
 
     first = True
     for sys_init in spec.sys_init:
         sys_init = format_for_slugs(sys_init)
-        if (len(sys_init) > 0):
+        if sys_init:
             if first:
                 specStr[7] += ' \n ' + sys_init
                 first = False
             else:
                 specStr[7] += ' & ' + sys_init
+    
     for sys_safety in spec.sys_safety:
         sys_safety = format_for_slugs(sys_safety)
-        if (len(sys_safety) > 0):
-            specStr[5] += '\n'+sys_safety
+        if sys_safety:
+            specStr[5] += '\n' + sys_safety
+    
     for sys_prog in spec.sys_prog:
         sys_prog = format_for_slugs(sys_prog)
-        if (len(sys_prog) > 0):
-            specStr[6] += '\n'+sys_prog 
+        if sys_prog:
+            specStr[6] += '\n' + sys_prog 
     return '\n\n'.join(specStr)
 
 
 def get_vars_for_slugs(vardict):
-    output = ""
+    output = ''
     for variable, domain in vardict.items():
-        if domain == "boolean":
-            output += "\n"+variable
+        if domain == 'boolean':
+            output += "\n" + variable
         elif isinstance(domain, tuple) and len(domain) == 2:
-            output += "\n"+variable+": "+str(domain[0])+"..."+str(domain[1])
+            output += (
+                "\n" + variable + ": " +
+                str(domain[0]) + "..." + str(domain[1])
+            )
         else:
             raise ValueError("Domain type unsupported by slugs: " +
                 str(domain))
@@ -260,7 +267,11 @@ def format_for_slugs(spec):
     
 def bool_to_int_val(var, dom, boolValDict):
     for boolVar, boolVal in boolValDict.iteritems():
-        m = re.search(r'('+var+r'@\w+\.'+str(dom[0])+r'\.'+str(dom[1])+r')', boolVar)
+        m = re.search(
+            r'(' + var + r'@\w+\.' +
+            str(dom[0]) + r'\.' + str(dom[1]) + r')',
+            boolVar
+        )
         if m:
            min_int = dom[0]
            max_int = dom[1]
@@ -268,35 +279,49 @@ def bool_to_int_val(var, dom, boolValDict):
            if len(boolValDict) != max_int - min_int:
                 logger.error('Error in boolean representation of ' + var)
     
-    assert(min_int>=0)
-    assert(max_int>=0)
+    assert(min_int >= 0)
+    assert(max_int >= 0)
     
     val = 0
     
-    for i in range(min_int, int(math.ceil(math.log(max_int)))+1):
-        current_key = var+"@"+str(i)
-        val += 2**int(boolValDict[current_key])
+    for i in range(min_int, int(math.ceil(math.log(max_int))) + 1):
+        current_key = var + "@" + str(i)
+        val += 2 ** int(boolValDict[current_key])
     
     return val
 
 
 def bitwise_to_int_domain(line, spec):
-    """Convert bitwise representation in line to integer domain defined in spec."""
+    """Convert bitwise representation to integer domain defined in spec."""
     allVars = dict(spec.sys_vars.items() + spec.env_vars.items())
     for var, dom in allVars.iteritems():
         if isinstance(dom, tuple) and len(dom) == 2:
             
-            boolValDict = dict(re.findall(r'('+var+r'@\w+|'+var+r'@\w+\.'+str(dom[0])+r'\.'+str(dom[1])+r'):(\w+)',line))
+            boolValDict = dict(re.findall(
+                r'(' + var + r'@\w+|' + var + r'@\w+\.' + 
+                str(dom[0]) + r'\.' + str(dom[1]) + r'):(\w+)', line
+            ))
             
             if boolValDict:
-                intVal = bool_to_int_val(var, dom, copy.deepcopy(boolValDict))
+                intVal = bool_to_int_val(var, dom,
+                                         copy.deepcopy(boolValDict))
                 
-                first=True
+                first = True
                 for key,val in boolValDict.iteritems():
                     if first:
-                        line = re.sub(r'('+re.escape(key)+r'\w*:'+str(val)+r')', var+":"+str(intVal),line)
+                        line = re.sub(
+                            r'(' + re.escape(key) + r'\w*:' +
+                            str(val) + r')',
+                            var + ":" + str(intVal),
+                            line
+                        )
                         first=False
                     else:
-                        line = re.sub(r'('+re.escape(key)+r'\w*:'+str(val)+r'[,]*)', "",line)
+                        line = re.sub(
+                            r'(' + re.escape(key) + r'\w*:' +
+                            str(val) + r'[,]*)',
+                            "",
+                            line
+                        )
 
     return line
