@@ -120,10 +120,15 @@ def _call_slugs(f, options):
             raise
     
     out, err = p.communicate()
-    logger.debug(
+    msg = (
         '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
         '\n slugs stdout:\n\n {out}\n\n'.format(out=out)
     )
+    logger.debug(msg)
+    
+    # error ?
+    if p.returncode != 0:
+        raise Exception(msg)
     
     realizable = 'Specification is realizable' in out
     # check sanity
