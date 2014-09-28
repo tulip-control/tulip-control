@@ -48,7 +48,7 @@ import re
 import subprocess
 import tempfile
 
-import slugs.compiler
+import slugs
 from . import jtlv
 
 
@@ -70,7 +70,7 @@ def synthesize(spec, only_realizability=False, options=None):
         options = []
     
     struct = spec.to_slugs()
-    s = slugs.compiler.performConversion(struct, True)
+    s = slugs.convert_to_slugsin(struct, True)
     
     with tempfile.NamedTemporaryFile(delete=False) as f:
         f.write(s)
