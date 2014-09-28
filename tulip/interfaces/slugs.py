@@ -155,6 +155,9 @@ def _bitfield_to_int(var, dom, bools):
     # rename LSB
     lsb = '{var}@0.{min}.{max}'.format(var=var, min=dom[0], max=dom[1])
     name = '{var}@0'.format(var=var)
+    if lsb not in bits:
+        raise ValueError('"{lsb}" expected in {bits}'.format(
+                         lsb=lsb, bits=bits))
     bits[name] = bits.pop(lsb)
     
     # note: little-endian
