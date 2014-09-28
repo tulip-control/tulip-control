@@ -183,12 +183,12 @@ def _replace_bitfield_with_int(line, vrs):
         
         # replace LSB with integer variable and its value
         k, v = bools[0]
-        p = r'({key}\w*:{val})'.format(key=re.escape(k), val=v)
-        r = '{var}:{intval}'.format(var=var, intval=i)
+        p = r'{key}\w*:{val}[,\s*]*'.format(key=re.escape(k), val=v)
+        r = '{var}:{intval}, '.format(var=var, intval=i)
         line = re.sub(p, r, line)
         
         # erase other bits
         for key, val in bools[1:]:
-            p = r'({key}\w*:{val}[,]*)'.format(key=re.escape(key), val=val)
+            p = r'({key}\w*:{val}[,\s*]*)'.format(key=re.escape(key), val=val)
             line = re.sub(p, '', line)
     return line
