@@ -41,8 +41,6 @@ from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
 
-import math
-import copy
 import os
 import re
 import subprocess
@@ -88,7 +86,7 @@ def synthesize(spec, only_realizability=False, options=None):
         __, out = _call_slugs(f.name, options)
         os.unlink(f.name)
         
-        lines = [_bitwise_to_int_domain(line, spec)
+        lines = [_replace_bitfield_with_int(line, spec)
                  for line in out.split('\n')]
         g = jtlv.jtlv_output_to_networkx(lines, spec)
         logger.debug(
@@ -137,60 +135,60 @@ def _call_slugs(f, options):
     return realizable, out
 
     
-def _bool_to_int_val(var, dom, boolValDict):
-    for boolVar, boolVal in boolValDict.iteritems():
-        m = re.search(
-            r'(' + var + r'@\w+\.' +
-            str(dom[0]) + r'\.' + str(dom[1]) + r')',
-            boolVar
-        )
-        if not m:
-            continue
-        
-        min_int = dom[0]
-        max_int = dom[1]
-        boolValDict[boolVar.split('.')[0]] = boolValDict.pop(boolVar)
+def _bitfield_to_int(var, dom, bools):
+    """Return integer value of bitfield.
     
-    assert(min_int >= 0)
-    assert(max_int >= 0)
+    @type var: str
+    
+    @type dom: 2-tuple of int
+    
+    @type bools: list of tuples
+    """
+    bits = dict(bools)
+    
+    # rename LSB
+    lsb = '{var}@0.{min}.{max}'.format(var=var, min=dom[0], max=dom[1])
+    name = '{var}@0'.format(var=var)
+    bits[name] = bits.pop(lsb)
     
     # note: little-endian
-    s = ''.join(boolValDict['{var}@{i}'.format(var=var, i=i)]
-                for i in xrange(int(math.ceil(math.log(max_int))), -1, -1))
+    s = ''.join(bits['{var}@{i}'.format(var=var, i=i)]
+                for i in xrange(len(bits)))
     return int(s, 2)
 
 
-def _bitwise_to_int_domain(line, spec):
-    """Convert bitwise representation to integer domain defined in spec."""
-    allVars = dict(spec.sys_vars)
-    allVars.update(spec.env_vars)
+def _replace_bitfield_with_int(line, spec):
+    """Convert bitfield representation to integers.
     
-    for var, dom in allVars.iteritems():
+    @type line: str
+    
+    @type spec: L{GRSpec}
+    """
+    vrs = dict(spec.sys_vars)
+    vrs.update(spec.env_vars)
+    
+    for var, dom in vrs.iteritems():
         if not isinstance(dom, tuple) or len(dom) != 2:
             continue
-            
-        boolValDict = dict(re.findall(
-            r'(' + var + r'@\w+|' + var + r'@\w+\.' +
-            str(dom[0]) + r'\.' + str(dom[1]) + r'):(\w+)', line
-        ))
         
-        if not boolValDict:
+        p = r'({var}@\w+|{var}@\w+\.{min}\.{max}):(\w+)'.format(
+            var=var, min=dom[0], max=dom[1]
+        )
+        # [(varname, bool), ...]
+        bools = re.findall(p, line)
+        if not bools:
             continue
 
-        intVal = _bool_to_int_val(var, dom, copy.deepcopy(boolValDict))
+        i = _bitfield_to_int(var, dom, bools)
         
-        first = True
-        for key, val in boolValDict.iteritems():
-            if first:
-                line = re.sub(
-                    r'(' + re.escape(key) + r'\w*:' + str(val) + r')',
-                    var + ':' + str(intVal), line
-                )
-                first=False
-            else:
-                line = re.sub(
-                    r'(' + re.escape(key) + r'\w*:' + str(val) + r'[,]*)',
-                    '', line
-                )
-
+        # replace LSB with integer variable and its value
+        k, v = bools[0]
+        p = r'({key}\w*:{val})'.format(key=re.escape(k), val=v)
+        r = '{var}:{intval}'.format(var=var, intval=i)
+        line = re.sub(p, r, line)
+        
+        # erase other bits
+        for key, val in bools[1:]:
+            p = r'({key}\w*:{val}[,]*)'.format(key=re.escape(key), val=val)
+            line = re.sub(p, '', line)
     return line
