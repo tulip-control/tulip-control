@@ -81,12 +81,18 @@ def synthesize(spec, only_realizability=False, options=None):
     if only_realizability:
         os.unlink(f.name)
         return realizable
-    
+
     if realizable:
         __, out = _call_slugs(f.name, options)
         os.unlink(f.name)
         
-        lines = [_replace_bitfield_with_int(line, spec)
+        # collect int vars
+        vrs = dict(spec.sys_vars)
+        vrs.update(spec.env_vars)
+               if isinstance(dom, tuple) and len(dom) == 2}
+        vrs = {k: dom for k, dom in vrs.iteritems()
+
+        lines = [_replace_bitfield_with_int(line, vrs)
                  for line in out.split('\n')]
         g = jtlv.jtlv_output_to_networkx(lines, spec)
         logger.debug(
@@ -157,20 +163,14 @@ def _bitfield_to_int(var, dom, bools):
     return int(s, 2)
 
 
-def _replace_bitfield_with_int(line, spec):
+def _replace_bitfield_with_int(line, vrs):
     """Convert bitfield representation to integers.
     
     @type line: str
     
-    @type spec: L{GRSpec}
+    @type vrs: dict
     """
-    vrs = dict(spec.sys_vars)
-    vrs.update(spec.env_vars)
-    
     for var, dom in vrs.iteritems():
-        if not isinstance(dom, tuple) or len(dom) != 2:
-            continue
-        
         p = r'({var}@\w+|{var}@\w+\.{min}\.{max}):(\w+)'.format(
             var=var, min=dom[0], max=dom[1]
         )
