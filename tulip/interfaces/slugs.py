@@ -81,30 +81,30 @@ def synthesize(spec, only_realizability=False, options=None):
     if only_realizability:
         os.unlink(f.name)
         return realizable
-
-    if realizable:
-        __, out = _call_slugs(f.name, options)
-        os.unlink(f.name)
-        
-        # collect int vars
-        vrs = dict(spec.sys_vars)
-        vrs.update(spec.env_vars)
-               if isinstance(dom, tuple) and len(dom) == 2}
-        vrs = {k: dom for k, dom in vrs.iteritems()
-
-        lines = [_replace_bitfield_with_int(line, vrs)
-                 for line in out.split('\n')]
-        g = jtlv.jtlv_output_to_networkx(lines, spec)
-        logger.debug(
-            ('loaded strategy with vertices:\n  {v}\n'
-             'and edges:\n {e}\n').format(
-                v='\n  '.join(str(x) for x in g.nodes(data=True)),
-                e=g.edges()
-            )
-        )
-        return g
-    else:
+    
+    if not realizable:
         return None
+
+    __, out = _call_slugs(f.name, options)
+    os.unlink(f.name)
+    
+    # collect int vars
+    vrs = dict(spec.sys_vars)
+    vrs.update(spec.env_vars)
+    vrs = {k: dom for k, dom in vrs.iteritems()
+           if isinstance(dom, tuple) and len(dom) == 2}
+    
+    lines = [_replace_bitfield_with_int(line, vrs)
+             for line in out.split('\n')]
+    g = jtlv.jtlv_output_to_networkx(lines, spec)
+    logger.debug(
+        ('loaded strategy with vertices:\n  {v}\n'
+         'and edges:\n {e}\n').format(
+            v='\n  '.join(str(x) for x in g.nodes(data=True)),
+            e=g.edges()
+        )
+    )
+    return g
 
 
 def _call_slugs(f, options):
@@ -140,7 +140,7 @@ def _call_slugs(f, options):
         assert('Specification is unrealizable' in out)
     return realizable, out
 
-    
+
 def _bitfield_to_int(var, dom, bools):
     """Return integer value of bitfield.
     
