@@ -159,7 +159,7 @@ def _bitfield_to_int(var, dom, bools):
     
     # note: little-endian
     s = ''.join(bits['{var}@{i}'.format(var=var, i=i)]
-                for i in xrange(len(bits)))
+                for i in xrange(len(bits)-1, -1, -1))
     return int(s, 2)
 
 
