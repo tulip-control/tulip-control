@@ -50,6 +50,7 @@ from collections import Iterable
 import numpy as np
 import polytope as pc
 from cvxopt import matrix, solvers
+lp_solver = 'mosek'
 
 def is_feasible(
     from_region, to_region, sys, N,
