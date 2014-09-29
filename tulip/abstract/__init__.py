@@ -39,7 +39,7 @@ from .discretization import (
     discretize, discretize_switched,
     multiproc_discretize_switched
 )
-from .feasible import is_feasible, solve_feasible
+from .feasible import is_feasible, solve_feasible, is_feasible_alternative
 
 from .prop2partition import (
     prop2part, part2convex,
