@@ -34,8 +34,16 @@ TuLiP toolbox
 
 The Temporal Logic Planning (TuLiP) Toolbox provides functions
 for verifying and constructing control protocols.
+
+Notes
+=====
+Citations are used throughout the documentation.  References
+corresponding to these citations are defined in doc/bibliography.rst
+of the TuLiP source distribution.  E.g., [BK08] used in various
+docstrings is listed in doc/bibliography.rst as the book "Principles
+of Model Checking" by Baier and Katoen (2008).
 """
 
-__all__ = ["abstract", "hybrid", "transys"]
+# __all__ = ["abstract", "hybrid", "transys"]
 
-__version__ = "1.0b"
+from .version import version as __version__

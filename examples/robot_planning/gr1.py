@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# robot_gr1.py - example of direct GR(1) specification
+# gr1.py - example of direct GR(1) specification,
+#          using only boolean variables.
 #
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 """
@@ -35,10 +36,8 @@ We must convert this specification into GR(1) form:
 """
 
 # Import the packages that we need
-import sys
-
 from tulip import spec, synth
-
+from tulip.transys import machines
 
 #
 # Environment specification
@@ -108,21 +107,13 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # using one of the available methods.
 # Here we make use of jtlv.
 #
-ctrl = synth.synthesize('jtlv', specs)
-
-
-# if the spec is unrealizable, ctrl is a list of counterexamples
-if ctrl is None:
-    sys.exit()
+mealy_controller = synth.synthesize('jtlv', specs)
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-if not ctrl.save('gr1.png'):
-    print(ctrl)
+if not mealy_controller.save('gr1.png'):
+    print(mealy_controller)
 
-# either select current state before simulation
-ctrl.states.current = [0]
-ctrl.simulate(inputs_sequence='random', iterations=10)
-    
-# or pass it to simulate
-ctrl.simulate(inputs_sequence='random', iterations=10, current_state=0)
+# simulate
+print(mealy_controller)
+machines.random_run(mealy_controller, N=10)

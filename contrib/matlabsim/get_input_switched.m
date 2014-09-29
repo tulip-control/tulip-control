@@ -26,7 +26,7 @@ for i = 1:num_modes
         break
     end
 end
-MPTsys = MPTsys(mode);
+MPTsys = MPTsys(mode).system;
 
 % Get Chebyshev center of end region
 end_region = regions{end_loc+1}.region;

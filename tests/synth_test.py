@@ -3,13 +3,14 @@ Tests for the tulip.synth module.
 """
 import logging
 logging.basicConfig(level=logging.WARNING)
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.ERROR)
 
-logging.getLogger('tulip.transys').setLevel(logging.ERROR)
-logging.getLogger('tulip.spec').setLevel(logging.DEBUG)
+from nose.tools import assert_raises
 
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+
+from tulip import spec, synth, transys
 
 def sys_fts_2_states():
     sys = transys.FTS()
@@ -21,28 +22,32 @@ def sys_fts_2_states():
     sys.transitions.add('X1', 'X1')
     
     sys.atomic_propositions.add_from({'home', 'lot'})
-    sys.states.add('X0', ap='home')
-    sys.states.add('X1', ap='lot')
+    sys.states.add('X0', ap={'home'})
+    sys.states.add('X1', ap={'lot'})
     
     #sys.plot()
     return sys
 
 def env_fts_2_states():
     env = transys.FTS()
+    env.owner = 'env'
+    
     env.states.add_from({'e0', 'e1'})
     env.states.initial.add('e0')
     
     # Park as an env action
-    env.actions.add_from({'park', 'go'})
+    env.env_actions.add_from({'park', 'go'})
     
-    env.transitions.add('e0', 'e0', actions='park')
-    env.transitions.add('e0', 'e0', actions='go')
+    env.transitions.add('e0', 'e0', env_actions='park')
+    env.transitions.add('e0', 'e0', env_actions='go')
     
     #env.plot()
     return env
 
 def env_ofts_bool_actions():
-    env = transys.OpenFTS()
+    env = transys.FTS()
+    env.owner = 'env'
+    
     env.states.add_from({'e0', 'e1', 'e2'})
     env.states.initial.add('e0')
     
@@ -75,8 +80,8 @@ def parking_spec():
     
     # one additional requirement: if in lot,
     # then stay there until park signal is turned off
-    sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !(eact = park) )',
-                '((lot & (eact = park) ) -> X(lot))'}
+    sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !(eact = "park") )',
+                '((lot & (eact = "park") ) -> X(lot))'}
     sys_prog |= {'X0reach'}
     
     specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
@@ -84,64 +89,17 @@ def parking_spec():
                         env_prog=env_prog, sys_prog=sys_prog)
     return specs
 
-def test_sys_fts_bool_states():
-    """Sys FTS has 2 states, must become 2 bool vars in GR(1)
-    """
-    sys = sys_fts_2_states()
-    sys.actions_must = 'mutex'
-
-    spec = synth.sys_to_spec(
-        sys,
-        ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
-        bool_actions=False
-    )
-    
-    assert('loc' not in spec.sys_vars)
-    assert('eloc' not in spec.sys_vars)
-    
-    assert('X0' in spec.sys_vars)
-    assert(spec.sys_vars['X0'] == 'boolean')
-    
-    assert('X1' in spec.sys_vars)
-    assert(spec.sys_vars['X1'] == 'boolean')
-
-def test_env_fts_bool_states():
-    """Env FTS has 2 states, must become 2 bool vars in GR(1).
-    """
-    env = env_fts_2_states()
-    env.actions_must = 'mutex'
-    
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
-        bool_actions=False
-    )
-    
-    assert('loc' not in spec.env_vars)
-    assert('eloc' not in spec.env_vars)
-    
-    assert('e0' in spec.env_vars)
-    assert(spec.env_vars['e0'] == 'boolean')
-    
-    assert('e1' in spec.env_vars)
-    assert(spec.env_vars['e1'] == 'boolean')
-
 def test_sys_fts_int_states():
     """Sys FTS has 3 states, must become 1 int var in GR(1).
     """
     sys = sys_fts_2_states()
-    sys.actions_must='mutex'
+    sys.sys_actions_must='mutex'
     sys.states.add('X2')
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='loc',
         bool_actions=False
     )
     
@@ -151,20 +109,19 @@ def test_sys_fts_int_states():
     
     assert('eloc' not in spec.sys_vars)
     assert('loc' in spec.sys_vars)
-    assert(spec.sys_vars['loc'] == (0, 2))
+    assert(sorted(spec.sys_vars['loc']) == ['X0', 'X1', 'X2'])
 
 def test_env_fts_int_states():
     """Env FTS has 3 states, must become 1 int var in GR(1).
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     env.states.add('e2')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -174,19 +131,19 @@ def test_env_fts_int_states():
     
     assert('loc' not in spec.env_vars)
     assert('eloc' in spec.env_vars)
-    assert(spec.env_vars['eloc'] == (0, 2))
+    print(spec.env_vars['eloc'])
+    assert(sorted(spec.env_vars['eloc']) == ['e0', 'e1', 'e2'])
 
 def test_sys_fts_no_actions():
     """Sys FTS has no actions.
     """
     sys = sys_fts_2_states()
-    sys.actions_must='mutex'
+    sys.sys_actions_must='mutex'
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='loc',
         bool_actions=False
     )
     
@@ -196,13 +153,12 @@ def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested.
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='eloc',
         bool_actions=True,
     )
     
@@ -219,14 +175,13 @@ def test_env_fts_int_actions():
     """Env FTS actions must become 1 int var in GR(1).
     """
     env = env_fts_2_states()
-    env.actions_must='mutex'
-    env.actions.add('stop')
+    env.env_actions_must = 'mutex'
+    env.env_actions.add('stop')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -245,15 +200,14 @@ def test_env_ofts_bool_actions():
     """Env OpenFTS has 2 actions, bools requested.
     """
     env = env_ofts_int_actions()
-    env.actions_must='mutex'
+    env.env_actions_must='mutex'
     env.env_actions.remove('stop')
     env.sys_actions.remove('hover')
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='eloc',
         bool_actions=True
     )
     
@@ -263,15 +217,15 @@ def test_sys_ofts_bool_actions():
     """Sys OpenFTS has 2 actions, bools requested.
     """
     sys = env_ofts_int_actions()
-    sys.actions_must='mutex'
+    sys.owner = 'sys'
+    sys.sys_actions_must='mutex'
     sys.env_actions.remove('stop')
     sys.sys_actions.remove('hover')
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='loc',
         bool_actions=True
     )
     
@@ -299,13 +253,12 @@ def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1).
     """
     env = env_ofts_int_actions()
-    env.actions_must='mutex'
+    env.sys_actions_must='mutex'
     
     spec = synth.env_to_spec(
         env,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='eloc',
         bool_actions=False
     )
     
@@ -315,13 +268,13 @@ def test_sys_ofts_int_actions():
     """Sys OpenFTS actions must become 1 int var in GR(1).
     """
     sys = env_ofts_int_actions()
-    sys.actions_must='mutex'
+    sys.owner = 'sys'
+    sys.sys_actions_must='mutex'
     
     spec = synth.sys_to_spec(
         sys,
         ignore_initial=False,
-        bool_states=False,
-        action_vars=('eact', 'act'),
+        statevar='loc',
         bool_actions=False
     )
     
@@ -331,6 +284,7 @@ def _check_ofts_int_actions(spec):
     """Common assertion checking for 2 function above.
     """
     print(spec.env_vars)
+    print(spec.sys_vars)
     assert('park' not in spec.env_vars)
     assert('go' not in spec.env_vars)
     assert('stop' not in spec.env_vars)
@@ -343,7 +297,8 @@ def _check_ofts_int_actions(spec):
     assert(set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'})
     
     assert('sys_actions' in spec.sys_vars)
-    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover'})
+    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover',
+           'sys_actionsnone'})
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
@@ -360,7 +315,8 @@ def test_only_mode_control():
     bad low-level feedback controllers.
     """
     # Create a finite transition system
-    env_sws = transys.OpenFTS()
+    env_sws = transys.FTS()
+    env_sws.owner = 'env'
     
     env_sws.sys_actions.add_from({'right','left'})
     
@@ -371,7 +327,7 @@ def test_only_mode_control():
     env_sws.atomic_propositions.add_from(['home','lot'])
     
     # label TS with APs
-    ap_labels = [set(),set(),{'home'},{'lot'}]
+    ap_labels = [set(), set(), {'home'}, {'lot'}]
     for i, label in enumerate(ap_labels):
         state = 's' + str(i)
         env_sws.states.add(state, ap=label)
@@ -396,12 +352,12 @@ def test_only_mode_control():
     )
     
     env_vars = {'park'}
-    env_init = {'eloc = 0', 'park'}
+    env_init = {'eloc = "s0"', 'park'}
     env_prog = {'!park'}
     env_safe = set()
     
     sys_vars = {'X0reach'}
-    sys_init = {'X0reach'}          
+    sys_init = {'X0reach'}
     sys_prog = {'home'}
     sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
     sys_prog |= {'X0reach'}
@@ -421,21 +377,29 @@ def multiple_env_actions_test():
     # 1 <---> 2
     #    ---> 3
     
-    env_actions = [('env_alice', transys.MathSet({'left', 'right'}) ),
-                   ('env_bob', transys.MathSet({'left', 'right'}) )]
+    env_actions = [
+        {
+            'name':'env_alice',
+            'values':transys.MathSet({'left', 'right'})
+        },
+        {
+            'name':'env_bob',
+            'values':transys.MathSet({'bleft', 'bright'})
+        }
+    ]
     
-    sys = transys.OpenFTS(env_actions)
+    sys = transys.FTS(env_actions)
     sys.states.add_from({'s1', 's2', 's3'})
     sys.states.initial.add_from({'s1'})
     
-    sys.add_edge('s1', 's2', env_alice='left', env_bob='right')
-    sys.add_edge('s1', 's3', env_alice='right', env_bob='left') # at state 3 sys loses
-    sys.add_edge('s2', 's1', env_alice='left', env_bob='right')
+    sys.add_edge('s1', 's2', env_alice='left', env_bob='bright')
+    sys.add_edge('s1', 's3', env_alice='right', env_bob='bleft') # at state 3 sys loses
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
     
     logging.debug(sys)
     
-    env_safe = {'(loc = s1) -> X( (env_alice = left) && (env_bob = right) )'}
-    sys_prog = {'loc = s1', 'loc = s2'}
+    env_safe = {'(loc = "s1") -> X( (env_alice = "left") && (env_bob = "bright") )'}
+    sys_prog = {'loc = "s1"', 'loc = "s2"'}
     
     specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
     
@@ -447,3 +411,218 @@ def multiple_env_actions_test():
     
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert(not r)
+
+def test_var_name_conflicts():
+    """Check redefinitions between states, actions, atomic props.
+    """
+    conversion_raises = lambda x, y: \
+        assert_raises(
+        Exception, spec=x, sys=y,
+        ignore_initial=True,
+        statevar='loc',
+        bool_actions=False
+    )
+    
+    # FTS to spec
+    
+    # states vs APs
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # states vs sys_actions
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('sys_actions')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # states vs env_actions
+    env = transys.FTS()
+    env.states.add('out')
+    env.env_actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    env = transys.FTS()
+    env.states.add('env_actions')
+    env.env_actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    # APs vs sys_actions
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.atomic_propositions.add('out')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.atomic_propositions.add('sys_actions')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    # APs vs env_actions
+    env = transys.FTS()
+    env.states.add('s0')
+    env.atomic_propositions.add('out')
+    env.env_actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    env = transys.FTS()
+    env.states.add('s0')
+    env.atomic_propositions.add('env_actions')
+    env.env_actions.add('out')
+    
+    conversion_raises(synth.env_to_spec, env)
+    
+    # OpenFTS to spec
+    
+    # states vs APs
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # states vs sys_actions
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('sys_actions')
+    sys.sys_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # states vs env_actions
+    sys = transys.FTS()
+    sys.states.add('out')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('env_actions')
+    sys.env_actions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # sys_actions vs APs
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.sys_actions.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.sys_actions.add('out')
+    sys.atomic_propositions.add('sys_actions')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    # env_actions vs APs
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.env_actions.add('out')
+    sys.atomic_propositions.add('out')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+    
+    sys = transys.FTS()
+    sys.states.add('s0')
+    sys.env_actions.add('out')
+    sys.atomic_propositions.add('env_actions')
+    
+    conversion_raises(synth.sys_to_spec, sys)
+    
+    conversion_raises(synth.env_to_spec, sys)
+
+
+def test_determinize_machine_init():
+    mach = transys.MealyMachine()
+    mach.add_inputs({'a': {0, 1}})
+    mach.add_outputs({'b': {0, 1}, 'c': {0, 1}})
+    u = 'Sinit'
+    mach.add_nodes_from([u, 1, 2])
+    
+    # initial reactions:
+    
+    # to input: a=0
+    mach.add_edge(u, 1, a=0, b=0, c=1)
+    mach.add_edge(u, 2, a=0, b=0, c=1)
+    mach.add_edge(u, 1, a=0, b=1, c=0)
+    mach.add_edge(u, 2, a=0, b=1, c=1)
+    
+    # to input: a=1
+    mach.add_edge(u, 1, a=1, b=0, c=1)
+    mach.add_edge(u, 2, a=1, b=0, c=1)
+    mach.add_edge(u, 1, a=1, b=1, c=0)
+    mach.add_edge(u, 2, a=1, b=1, c=1)
+    
+    # determinize all outputs arbitrarily
+    detmach = synth.determinize_machine_init(mach)
+    assert(detmach is not mach)
+    
+    for a in {0, 1}:
+        edges = [(i, j) for (i, j, d) in detmach.edges_iter(u, data=True)
+                 if d['a'] == a]
+        assert(len(edges) == 1)
+    
+    # determinize output b arbitrarily,
+    # but output c is constrained to the initial value 0
+    detmach = synth.determinize_machine_init(mach, {'c': 0})
+    
+    for a in {0, 1}:
+        edges = [(i, j, d) for (i, j, d) in detmach.edges_iter(u, data=True)
+                 if d['a'] == a]
+        assert(len(edges) == 1)
+        
+        ((i, j, d), ) = edges
+        assert(j == 1)
+        assert(d['b'] == 1)
+
+
+class synthesize_test:
+    def setUp(self):
+        self.f_triv = spec.GRSpec(sys_vars="y")
+
+    def tearDown(self):
+        self.f_triv = None
+
+    def test_gr1c_basic(self):
+        assert isinstance(synth.synthesize("gr1c", self.f_triv),
+                          transys.MealyMachine)

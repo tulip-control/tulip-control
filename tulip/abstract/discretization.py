@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,8 @@ See Also
 ========
 L{find_controller}
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -50,17 +52,18 @@ import numpy as np
 from scipy import sparse as sp
 import polytope as pc
 
+from polytope.plot import plot_partition, plot_transition_arrow
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from .prop2partition import PropPreservingPartition, pwa_partition, part2convex
+
+from .prop2partition import (PropPreservingPartition,
+                             pwa_partition, part2convex)
 from .feasible import is_feasible, solve_feasible
 from .plot import plot_ts_on_partition
 
-try:
-    import matplotlib.pyplot as plt
-except Exception, e:
-    plt = None
-    logger.error(e)
+# inline imports:
+#
+# inline: import matplotlib.pyplot as plt
 
 debug = False
 
@@ -202,7 +205,7 @@ class AbstractPwa(object):
           Each state corresponds to a Region in C{ppp.regions}.
           It can be fed into discrete synthesis algorithms.
 
-          type: L{transys.OpenFTS}
+          type: L{FTS}
 
       - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
           Has common indices with C{ppp.regions}.
@@ -442,6 +445,7 @@ def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
     )
+    
     #ax = self.ts.plot()
     
     return ax
@@ -575,19 +579,17 @@ def discretize(
     
     # init graphics
     if plotit:
-        # here to avoid loading matplotlib unless requested
         try:
-            from plot import plot_partition, plot_transition_arrow
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
-        
-        if plt is not None:
+            import matplotlib.pyplot as plt
+            
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
-            file_extension = 'png'
+            file_extension = 'pdf'
+        except:
+            logger.error('failed to import matplotlib')
+            plt = None
         
     iter_count = 0
     
@@ -861,7 +863,7 @@ def discretize(
         # no plotting ?
         if not plotit:
             continue
-        if plot_partition is None:
+        if plt is None or plot_partition is None:
             continue
         if iter_count % plot_every != 0:
             continue
@@ -917,15 +919,14 @@ def discretize(
         tmp_part.compute_adj()
     
     # Generate transition system and add transitions       
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
     
-    # add set to destroy ordering
-    ofts.states.add_from(set(ofts_states) )
+    ofts.states.add_from(ofts_states)
     
     ofts.transitions.add_adj(adj, ofts_states)
     
@@ -954,7 +955,7 @@ def discretize(
     print(msg)
     logger.info(msg)
     
-    if plt is not None and save_img:
+    if save_img and plt is not None:
         fig, ax = plt.subplots(1, 1)
         plt.plot(progress)
         ax.set_xlabel('iteration')
@@ -997,7 +998,11 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 
 # DEFUNCT until further notice
 def discretize_overlap(closed_loop=False, conservative=False):
-    """default False."""
+    """default False.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
+    """
     raise NotImplementedError
 #         
 #         if rdiff < abs_tol:
@@ -1243,13 +1248,12 @@ def discretize_switched(
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
-    try:
-        import matplotlib
-    except:
-        warnings.warn('could not import matplotlib, no partitions plotted.')
+    axs = swab.plot(show_ts, only_adjacent)
+    
+    if not axs:
+        logger.error('failed to plot the partitions.')
         return
     
-    axs = swab.plot(show_ts, only_adjacent)
     n = len(swab.modes)
     assert(len(axs) == 2*n)
     
@@ -1288,7 +1292,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     logger.info('APs: ' + str(aps))
     
-    sys_ts = trs.OpenFTS()
+    sys_ts = trs.FTS()
     
     # create stats
     n = len(merged_abstr.ppp)
@@ -1413,6 +1417,9 @@ def multiproc_merge_partitions(abstractions):
     """LOGTIME in #processors parallel merging.
     
     Assuming sufficient number of processors.
+
+    UNDER DEVELOPMENT; function signature may change without notice.
+    Calling will result in NotImplementedError.
     """
     raise NotImplementedError
 

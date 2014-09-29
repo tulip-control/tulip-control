@@ -47,10 +47,10 @@ import numpy as np
 try:
     from matplotlib import pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
-except Exception, e:
+except Exception as e:
     logger.error(e)
 
-#from mayavi import mlab
+# from mayavi import mlab
 
 def dimension(ndarray):
     """dimension of ndarray
@@ -64,7 +64,7 @@ def dimension(ndarray):
         return ndarray.ndim
     return ndarray.shape[0]
 
-def newax(subplots=(1,1), fig=None,
+def newax(subplots=(1, 1), fig=None,
           mode='list', dim=2):
     """Create (possibly multiple) new axes handles.
     
@@ -103,8 +103,8 @@ def newax(subplots=(1,1), fig=None,
     
     # reasonable layout ?
     if len(subplot_layout) != 2:
-        raise Exception('newax:' +
-            'subplot layout should be 2-tuple or int.')
+        raise Exception('newax:'
+                        'subplot layout should be 2-tuple or int.')
     
     # which figure ?
     if fig is None:
@@ -118,26 +118,26 @@ def newax(subplots=(1,1), fig=None,
         dim = tuple(dim)
     except:
         # all same dim
-        dim = [dim] *n
+        dim = [dim] * n
     
     # matplotlib (2D) or mayavi (3D) ?
     ax = []
     for (i, curdim) in enumerate(dim):
         if curdim == 2:
-            curax = fig.add_subplot(nv, nh, i+1)
+            curax = fig.add_subplot(nv, nh, i + 1)
             ax.append(curax)
         else:
-            curax = fig.add_subplot(nv, nh, i+1, projection='3d')
+            curax = fig.add_subplot(nv, nh, i + 1, projection='3d')
             ax.append(curax)
                       
         if curdim > 3:
             warn('ndim > 3, but plot limited to 3.')
     
     if mode is 'matrix':
-        ax = list(_grouper(nh, ax) )
+        ax = list(_grouper(nh, ax))
     
     # single axes ?
-    if subplot_layout == (1,1):
+    if subplot_layout == (1, 1):
         ax = ax[0]
     
     return (ax, fig)
@@ -167,10 +167,10 @@ def dom2vec(domain, resolution):
     See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
     """
     domain = _grouper(2, domain)
-    lambda_linspace = lambda (dom, res): np.linspace(dom[0], dom[1], res)
-    axis_grids = map(lambda_linspace, zip(domain, resolution) )
+    lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
+    axis_grids = map(lambda_linspace, zip(domain, resolution))
     pnt_coor = np.meshgrid(*axis_grids)
-    q = np.vstack(map(np.ravel, pnt_coor) )
+    q = np.vstack(map(np.ravel, pnt_coor))
     
     return q
 

@@ -33,7 +33,7 @@ from scipy import sparse as sp
 # Create a finite transition system
 sys_sws = transys.FTS()
 
-sys_sws.actions.add_from({'right','up','left','down'})
+sys_sws.sys_actions.add_from({'right','up','left','down'})
 
 # str states
 n = 6
@@ -56,7 +56,7 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
 sys_sws.transitions.add_adj(
-    sp.lil_matrix(transmat1), states, actions='right'
+    sp.lil_matrix(transmat1), states, sys_actions='right'
 )
                       
 # mode2 transitions
@@ -67,7 +67,7 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
 sys_sws.transitions.add_adj(
-    sp.lil_matrix(transmat2), states, actions='up'
+    sp.lil_matrix(transmat2), states, sys_actions='up'
 )
                       
 # mode3 transitions
@@ -78,7 +78,7 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
 sys_sws.transitions.add_adj(
-    sp.lil_matrix(transmat3), states, actions='left'
+    sp.lil_matrix(transmat3), states, sys_actions='left'
 )
                       
 # mode4 transitions
@@ -89,7 +89,7 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
 sys_sws.transitions.add_adj(
-    sp.lil_matrix(transmat4), states, actions='down'
+    sp.lil_matrix(transmat4), states, sys_actions='down'
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)
@@ -121,7 +121,7 @@ env_safe = set()                # empty set
 # variable X0reach that is initialized to True and the specification
 # [](park -> <>lot) becomes
 #
-#     [](next(X0reach) <-> lot || (X0reach && !park))
+#     [](X (X0reach) <-> lot || (X0reach && !park))
 #
 
 # Augment the environmental description to make it GR(1)
@@ -132,9 +132,9 @@ env_safe = set()                # empty set
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach', 'sys_actions = right'}
+sys_init = {'X0reach', 'sys_actions = "right"'}
 sys_prog = {'home'}               # []<>home
-sys_safe = {'next(X0reach) <-> lot || (X0reach && !park)'}
+sys_safe = {'X (X0reach) <-> lot || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 
 # Create the specification

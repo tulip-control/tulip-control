@@ -37,11 +37,8 @@ Bibliography:
 [LS11] E.A. Lee and S.A. Seshia. *Introduction to Embedded Systems - A Cyber-
 Physical Systems Approach*. `LeeSeshia.org <http://LeeSeshia.org>`_, 2011.
 """
-import networkx as nx
-from collections import OrderedDict
 import tulip.transys as trs
 import tulip.transys.machines as mc
-import warnings
 
 hl = 60*'='
 save_fig = False
@@ -127,20 +124,21 @@ def mealy_machine_example():
     m.states.add_from(['s1', 's2'])
     m.states.initial.add('s0')
     
-    m.states.label('s0', {'light':'on'} )
-    m.states.label('s1', ('off') )
+    m.transitions.add(
+        's0', 's1',
+        speed='low',
+        seats=(0, 1),
+        aperture=0.3,
+        camera=np.array([0,0,1]),
+        photo='capture'
+    )
     
-    # guard defined using input sub-label ordering
-    guard = ('low', (0, 1), 0.3, np.array([0,0,1]), 'capture')
-    m.transitions.add_labeled('s0', 's1', guard)
-    
-    # guard defined using input sub-label names
     guard = {'camera':np.array([1,1,1]),
              'speed':'high',
              'aperture':0.3,
              'seats':(2, 3),
              'photo':'wait'}
-    m.transitions.add_labeled('s1', 's2', guard)
+    m.transitions.add('s1', 's2', **guard)
     
     m.plot(rankdir='TB')
     
@@ -165,11 +163,11 @@ def garage_counter(ploting=True):
     m.states.add_from(range(3) )
     m.states.initial.add(0)
     
-    m.transitions.add_labeled(0, 1, ('present', 'absent', 1) )
-    m.transitions.add_labeled(1, 0, ('absent', 'present', 0) )
+    m.transitions.add(0, 1, up='present', down='absent', count=1)
+    m.transitions.add(1, 0, up='absent', down='present', count=0)
     
-    m.transitions.add_labeled(1, 2, ('present', 'absent', 2) )
-    m.transitions.add_labeled(2, 1, ('absent', 'present', 1) )
+    m.transitions.add(1, 2, up='present', down='absent', count=2)
+    m.transitions.add(2, 1, up='absent', down='present', count=1)
     
     if ploting:
         m.plot()
@@ -183,9 +181,9 @@ def garage_counter_with_state_vars():
     m = garage_counter(ploting=False)
     
     m.add_state_vars([('c', range(3)) ])
-    m.states.label(0, 0)
-    m.states.label(1, 1)
-    m.states.label(2, 2)
+    m.states.add(0, c=0)
+    m.states.add(1, c=1)
+    m.states.add(2, c=2)
     
     m.plot()
     
@@ -210,7 +208,7 @@ def thermostat_with_hysteresis():
     
     m.add_inputs([('temperature', ) ])
 
-def traffic_light_1():
+def traffic_light():
     m = trs.Mealy()
     pure_signal = {'present', 'absent'}
     
@@ -223,32 +221,9 @@ def traffic_light_1():
     p = 'present'
     a = 'absent'
     
-    m.transitions.add_labeled('red', 'green', (p, p, a) )
-    m.transitions.add_labeled('green', 'yellow', (p, a, p) )
-    m.transitions.add_labeled('yellow', 'red', (p, a, p) )
-    
-    m.plot()
-    return m
-
-def traffic_light_2():
-    m = trs.Mealy()
-    pure_signal = {'present', 'absent'}
-    
-    m.add_inputs([('tick', pure_signal) ])
-    m.add_outputs([('go', pure_signal), ('stop', pure_signal) ])
-    
-    m.states.add_from(['red', 'green', 'yellow'])
-    m.states.initial.add('red')
-    
-    p = 'present'
-    a = 'absent'
-    
-    m.transitions.add_labeled('red', 'green',
-                              {'tick':p, 'go':p, 'stop':a} )
-    m.transitions.add_labeled('green', 'yellow',
-                              {'tick':p, 'go':a, 'stop':p} )
-    m.transitions.add_labeled('yellow', 'red',
-                              {'tick':p, 'go':a, 'stop':p} )
+    m.transitions.add('red', 'green', tick=p, go=p, stop=a)
+    m.transitions.add('green', 'yellow', tick=p, go=a, stop=p)
+    m.transitions.add('yellow', 'red', tick=p, go=a, stop=p)
     
     m.plot()
     return m
@@ -274,20 +249,28 @@ def pedestrians():
     for sigR in mc.pure:
         for sigG in mc.pure:
             for sigY in mc.pure:
-                m.transitions.add_labeled(
+                m.transitions.add(
                     'none', 'none',
-                    (sigR, sigG, sigY, 'absent')
+                    sigR=sigR, sigG=sigG, sigY=sigY,
+                    pedestrian='absent'
                 )
                 
-                m.transitions.add_labeled(
+                m.transitions.add(
                     'none', 'waiting',
-                    (sigR, sigG, sigY, 'present')
+                    sigR=sigR, sigG=sigG, sigY=sigY,
+                    pedestrian='present'
                 )
     
-    m.transitions.add_labeled('waiting', 'crossing',
-                              ('present', 'absent', 'absent', 'absent') )
-    m.transitions.add_labeled('crossing', 'none',
-                              ('absent', 'present', 'absent', 'absent') )
+    m.transitions.add(
+        'waiting', 'crossing',
+        sigR='present', sigG='absent', sigY='absent',
+        pedestrian='absent'
+    )
+    m.transitions.add(
+        'crossing', 'none',
+        sigR='absent', sigG='present', sigY='absent',
+        pedestrian='absent'
+    )
     m.plot()
     return m
 
@@ -298,10 +281,9 @@ if __name__ == '__main__':
     m2 = garage_counter()
     m3 = garage_counter_with_state_vars()
     m4 = pedestrians()
-    m5 = traffic_light_1()
-    m6 = traffic_light_2()
+    m5 = traffic_light()
     
-    m6.simulate('random', 4)
+    m5.simulate('random', 4)
     #m6.simulate() for manual simulation
     
     # save animated javascript

@@ -2,13 +2,16 @@
 """
 Tests for the tulip.spec subpackage.
 """
+import logging
+#logging.basicConfig(level=logging.DEBUG)
 
 import copy
 import nose.tools as nt
 
 from tulip.spec import LTL, GRSpec, mutex
 from tulip.spec.parser import parse
-
+from tulip.spec import ast as ast
+from tulip.spec import form
 
 def GR1specs_equal(s1, s2):
     """Return True if s1 and s2 are *roughly* syntactically equal.
@@ -79,6 +82,15 @@ class GRSpec_test:
         assert len(h.env_vars) == 2 and h.env_vars.has_key("z")
         assert len(h.env_prog) == len(self.f.env_prog)+1 and "!z" in h.env_prog
 
+        # Domain mismatch on system variable y
+        g.sys_vars = {"y": (0,5)}
+        nt.assert_raises(ValueError, self.f.__or__, g)
+
+        # Domain mismatch on environment variable x
+        g.sys_vars = dict()
+        g.env_vars["x"] = (0,3)
+        nt.assert_raises(ValueError, self.f.__or__, g)
+
     def test_to_canon(self):
         # Fragile!
         assert self.f.to_canon() == "((x) && []<>(!x) && []<>(x)) -> ([](y) && []<>(y&&!x))"
@@ -118,3 +130,45 @@ def form_mutex_test():
                                       (set(), set()),
                                       ({"cat"}, set())]:
         yield form_mutex_check, varnames, expected_form
+
+def full_name_operators_test():
+    formulas = {
+        'always eventually p':'( G ( F p ) )',
+        'ALwaYs EvenTUAlly(p)':'( G ( F p ) )',
+        '(p and q) UNtIl (q or ((p -> w) and not (z implies b))) and always next g':
+        '( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )'
+    }
+    
+    for f, correct in formulas.iteritems():
+        ast = parse(f, full_operators=True)
+        #ast.write('hehe.png')
+        assert(str(ast) == correct)
+
+def test_to_labeled_graph():
+    f = ('( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & '
+         '( G ( X g ) ) ) )')
+    tree = parse(f)
+    assert(len(tree) == 18)
+    nodes = {'p', 'q', 'w', 'z', 'b', 'g', 'G', 'U', 'X', '&', '|', '!', '->'}
+    
+    g = ast.ast_to_labeled_graph(tree, detailed=False)
+    labels = {d['label'] for u, d in g.nodes_iter(data=True)}
+        
+    print(labels)
+    assert(labels == nodes)
+
+def test_replace_dependent_vars():
+    sys_vars = {'a': 'boolean', 'locA':(0, 4)}
+    sys_safe = ['!a', 'a & (locA = 3)']
+    
+    spc = GRSpec(sys_vars=sys_vars, sys_safety=sys_safe)
+    
+    bool2form = {'a':'(locA = 0) | (locA = 2)', 'b':'(locA = 1)'}
+    
+    form.replace_dependent_vars(spc, bool2form)
+    
+    correct_result = (
+        '[](( ! ( ( locA = 0 ) | ( locA = 2 ) ) )) && '
+        '[](( ( ( locA = 0 ) | ( locA = 2 ) ) & ( locA = 3 ) ))'
+    )
+    assert(str(spc) == correct_result)

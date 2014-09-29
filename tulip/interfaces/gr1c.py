@@ -45,17 +45,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 import copy
+import os
 import subprocess
-from collections import OrderedDict
 import tempfile
 import xml.etree.ElementTree as ET
+
 import networkx as nx
 
 from tulip.spec import GRSpec
-from tulip.transys import MealyMachine
 
 GR1C_BIN_PREFIX=""
-_hl = '\n' +60*'-'
+_hl = 60 * '-'
 
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
 
@@ -158,7 +158,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     else:
         return (elem.tag, di)
 
-def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
+def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
 
     @param x: a string or an instance of
@@ -172,10 +172,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
         string x.  If you are unsure what to do, try setting spec0 to
         whatever L{gr1cint.synthesize} was invoked with.
 
-    @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
-        or both can be None if the corresponding part is missing.
-        Note that the returned GRSpec instance depends only on what is
-        in the given tulipcon XML string x, not on the argument spec0.
+    @rtype: L{GRSpec}
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
         raise TypeError("tag to be parsed must be given " +
@@ -233,6 +230,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
     node_list = aut_elem.findall(ns_prefix+"node")
     id_list = []  # For more convenient searching, and to catch redundancy
     A = nx.DiGraph()
+    A.env_vars = env_vars
+    A.sys_vars = sys_vars
     for node in node_list:
         this_id = int(node.find(ns_prefix+"id").text)
         #this_name = node.find(ns_prefix+"anno").text  # Assume version 1
@@ -269,133 +268,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE, spec0=None):
                    mode=mode, rgrad=rgrad)
         for next_node in this_child_list:
             A.add_edge(this_id, next_node)
-
-    if spec0 is None:
-        spec0 = spec
-    
-    # show port only when true (or non-zero for int-valued vars)
-    mask_func = bool
-    
-    mach = MealyMachine()
-    inputs = _create_machine_ports(spec0.env_vars)
-    mach.add_inputs(inputs)
-    
-    outputs = _create_machine_ports(spec0.sys_vars)
-    masks = {k:mask_func for k in sys_vars}
-    mach.add_outputs(outputs, masks)
-    
-    arbitrary_domains  = {
-        k:v for k, v in spec0.env_vars.items()
-        if isinstance(v, list)
-    }
-    arbitrary_domains.update({
-        k:v for k, v in spec0.sys_vars.items()
-        if isinstance(v, list)
-    })
-    
-    state_vars = OrderedDict()
-    varname = 'loc'
-    if varname in outputs:
-        state_vars[varname] = outputs[varname]
-    varname = 'eloc'
-    if varname in inputs:
-        state_vars[varname] = inputs[varname]
-    mach.add_state_vars(state_vars)
-    
-    # states and state variables
-    mach.states.add_from(A.nodes())
-    for state in mach.states:
-        label = _map_int2dom(A.node[state]["state"],
-                                 arbitrary_domains)
-        
-        label = {k:v for k,v in label.iteritems()
-                 if k in {'loc', 'eloc'}}
-        mach.states.add(state, **label)
-    
-    # transitions labeled with I/O
-    for u in A.nodes_iter():
-        for v in A.successors_iter(u):
-            logger.info('node: ' +str(v) +', state: ' +
-                        str(A.node[v]["state"]) )
-            
-            label = _map_int2dom(A.node[v]["state"],
-                                 arbitrary_domains)
-            mach.transitions.add(u, v, **label)
-    
-    # special initial state, for first input
-    initial_state = 'Sinit'
-    mach.states.add(initial_state)
-    mach.states.initial |= [initial_state]
-    
-    # replace values of arbitrary variables by ints
-    spec1 = spec0.copy()
-    for variable, domain in arbitrary_domains.items():
-        values2ints = {var:str(i) for i, var in enumerate(domain)}
-        
-        # replace symbols by ints
-        spec1.sym_to_prop(values2ints)
-    
-    # Mealy reaction to initial env input
-    for node in A.nodes_iter():
-        var_values = A.node[node]['state']
-        
-        bool_values = {}
-        for k, v in var_values.iteritems():
-            is_bool = False
-            if k in env_vars:
-                if env_vars[k] == 'boolean':
-                    is_bool = True
-            if k in sys_vars:
-                if sys_vars[k] == 'boolean':
-                    is_bool = True
-            
-            if is_bool:
-                bool_values.update({k:str(bool(v) )})
-            else:
-                bool_values.update({k:str(v)})
-        
-        logger.info('Boolean values: ' +str(bool_values) )
-        t = spec1.evaluate(bool_values)
-        logger.info('evaluates to: ' +str(t) )
-        
-        if t['env_init'] and t['sys_init']:
-            label = _map_int2dom(var_values, arbitrary_domains)
-            mach.transitions.add(initial_state, node, **label)
-    
-    return (spec, mach)
-
-def _create_machine_ports(spec0_vars):
-    """Create proper port domains of valuations, given port types.
-    
-    @param spec0_vars: port names and types inside tulip.
-        For arbitrary finite types the type can be a list of strings,
-        instead of a range of integers.
-        These are as originally defined by the user or synth.
-    """
-    ports = OrderedDict()
-    for env_var, var_type in spec0_vars.items():
-        if var_type == 'boolean':
-            domain = {0,1}
-        elif isinstance(var_type, tuple):
-            # integer domain
-            start, end = var_type
-            domain = set(range(start, end+1))
-        elif isinstance(var_type, list):
-            # arbitrary finite domain defined by list var_type
-            domain = set(var_type)
-        
-        ports[env_var] = domain
-    return ports
-
-def _map_int2dom(label, arbitrary_domains):
-    """For custom finite domains map int values to domain elements.
-    """
-    label = dict(label)
-    
-    for var, value in label.items():
-        if var in arbitrary_domains:
-            label[var] = arbitrary_domains[var][int(value)]
-    return label
+    return A
 
 def _parse_vars(variables, vardict):
     """Helper for parsing env, sys variables.
@@ -419,8 +292,8 @@ def _parse_vars(variables, vardict):
             raise ValueError("unrecognized type of domain for variable \""+
                 str(v)+"\": "+str(dom))
     variables = dict([
-        (variables[i], domains[i])
-        for i in range(len(variables))
+        (v, domains[i])
+        for i, v in enumerate(variables)
     ])
     return variables
 
@@ -447,17 +320,25 @@ def check_syntax(spec_str):
         logger.info(p.stdout.read() )
         return False
 
-def check_realizable(spec):
+def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     """Decide realizability of specification.
 
-    @type spec: L{GRSpec}
+    Consult the documentation of L{synthesize} about parameters.
+
     @return: True if realizable, False if not, or an error occurs.
     """
+    logger.info('checking realizability...')
+    
+    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
+                           "ALL_INIT", "ONE_SIDE_INIT"):
+        raise ValueError("Unrecognized initial condition" +
+                         "interpretation (init_option)")
+
     f = tempfile.TemporaryFile()
     f.write(spec.to_gr1c())
     f.seek(0)
     logger.info('starting realizability check')
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-r"],
+    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
@@ -470,34 +351,111 @@ def check_realizable(spec):
         logger.info(p.stdout.read() )
         return False
 
-def synthesize(spec):
-    """Synthesize strategy.
+def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
+    """Synthesize strategy realizing the given specification.
 
     @type spec: L{GRSpec}
+    @param spec: specification, which is incomplete without an
+        interpretation of initial conditions (init_option).
+
+    @type init_option: str
+    @param init_option: string declaration of the initial condition
+        interpretation to use.  This parameter corresponds to that of
+        the -n command-line flag of gr1c.  It is one of:
+
+            - "ALL_ENV_EXIST_SYS_INIT" (default) - For each initial
+              valuation of environment variables that satisfies
+              spec.env_init, the strategy must provide some valuation
+              of system variables that satisfies spec.sys_init.  Only
+              environment variables (spec.env_vars) may appear in
+              spec.env_init, and only system variables (spec.sys_vars)
+              may appear in spec.sys_init.
+
+            - "ALL_INIT" - Any state that satisfies the conjunction of
+              spec.env_init an spec.sys_init can occur initially.
+
+            - "ONE_SIDE_INIT" - At most one of spec.env_init and
+              spec.sys_init is nonempty, and the nonempty one can
+              include both environment and system variables
+              (spec.env_vars and spec.sys_vars, respectively).  Both
+              being empty is equivalent to spec.env_init=["True"].  If
+              spec.env_init is nonempty, then any state satisfying it
+              is possible initially.  If spec.sys_init is nonempty,
+              then the strategy need only choose one initial state
+              satisfying it.
+
+        Consult the U{documentation of gr1c
+        <http://slivingston.github.io/gr1c/md_spc_format.html#initconditions>}
+        for detailed descriptions.
 
     @return: strategy as L{MealyMachine},
         or None if unrealizable or error occurs.
     """
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-t", "tulip"],
-                         stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
+                           "ALL_INIT", "ONE_SIDE_INIT"):
+        raise ValueError("Unrecognized initial condition" +
+                         "interpretation (init_option)")
+    try:
+        p = subprocess.Popen(
+            [GR1C_BIN_PREFIX + "gr1c",
+             "-n", init_option,
+             "-t", "tulip"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            raise Exception('gr1c not found in path.')
+        else:
+            raise
     
-    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
+    s = spec.to_gr1c()
+    logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
     
-    (stdoutdata, stderrdata) = p.communicate(spec.to_gr1c())
+    # to make debugging by manually running gr1c easier
+    fname = 'spec.gr1c'
+    try:
+        if logger.getEffectiveLevel() < logging.DEBUG:
+            with open(fname, 'w') as f:
+                f.write(s)
+            logger.debug('wrote input to file "{f}"'.format(f=fname))
+    except:
+        logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
     
-    logger.debug('gr1c returned:\n' + str(p.returncode) )
-    logger.debug('gr1c stdout, stderr:\n' + str(stdoutdata) +_hl)
+    (stdoutdata, stderrdata) = p.communicate(s)
+    
+    msg = (
+        ('{spaces} gr1c return code: {c}\n\n'
+         '{spaces} gr1c stdout, stderr:\n {out}\n\n').format(
+             c=p.returncode, out=stdoutdata, spaces=30 * ' '
+        )
+    )
     
     if p.returncode == 0:
-        (spec, aut) = load_aut_xml(stdoutdata, spec0=spec)
-        return aut
+        logger.debug(msg)
+        strategy = load_aut_xml(stdoutdata)
+        return strategy
     else:
-        print(30*' ' + '\n gr1c return code:\n' + 30*' ')
-        print(p.returncode)
-        print(30*' ' + '\n gr1c stdout, stderr:\n' + 30*' ')
-        print(stdoutdata)
+        print(msg)
         return None
+
+def load_mealy(filename):
+    """Load C{gr1c} strategy from C{xml} file.
+    
+    @param filename: xml file name
+    @type filename: C{str}
+    
+    @return: loaded strategy as an annotated graph.
+    @rtype: C{networkx.Digraph}
+    """
+    s = open(filename, 'r').read()
+    strategy = load_aut_xml(s)
+    
+    logger.debug(
+        'Loaded strategy with nodes: \n' + str(strategy.nodes()) +
+        '\nand edges: \n' + str(strategy.edges())
+    )
+    return strategy
 
 class GR1CSession:
     """Manage interactive session with gr1c.

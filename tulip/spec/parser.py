@@ -33,35 +33,39 @@
 """
 LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
 """
+from __future__ import absolute_import
+
 import sys
+import re
 
-from .ast import LTLException, ASTVar, ASTUnTempOp, \
-    ASTBiTempOp, ASTUnary, ASTBinary
+from . import ast
 
-def extract_vars(tree):
-    v = []
-    def f(t):
-        if isinstance(t, ASTVar):
-            v.append(t.val)
-        return t
-    tree.map(f)
-    return v
+def _replace_full_name_operators(formula):
+    """Replace full names with symbols for temporal and Boolean operators.
     
-# Crude test for safety spec
-def issafety(tree):
-    def f(t):
-        if isinstance(t, ASTUnTempOp) and not t.operator == "G":
-            return False
-        if isinstance(t, ASTBiTempOp):
-            return False
-        if isinstance(t, ASTUnary):
-            return t.operand
-        if isinstance(t, ASTBinary):
-            return (t.op_l and t.op_r)
-        return True
-    return tree.map(f)
+    Each operator must be a word (as defined by \b in regexp).
+    Substitution is case insensitive.
+    """
+    for name, symbol in ast.FULL_OPERATOR_NAMES.iteritems():
+        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
+    return formula
 
-def parse(formula, parser='ply'):
+def issafety(tree):
+    """Crude test for safety spec.
+    """
+    for u, d in tree.nodes_iter(data=True):
+        t = d['ast_node']
+        
+        if isinstance(t, ast.UnTempOp) and t.operator != "G":
+            return False
+        if isinstance(t, ast.BiTempOp):
+            return False
+    return True
+
+# cache
+parsers = dict()
+
+def parse(formula, parser='ply', full_operators=False):
     """Parse formula string and create abstract syntax tree (AST).
     
     Both PyParsing and PLY are available for the parsing.
@@ -69,13 +73,27 @@ def parse(formula, parser='ply'):
     
     @param parser: python package to use for generating lexer and parser
     @type parser: 'pyparsing' | 'ply'
+    
+    @param full_operators: replace full names of operators
+        with their symbols (case insensitive,
+        each operator must be a separate word).
+    @type full_operators: C{bool}
     """
+    if full_operators:
+        formula = _replace_full_name_operators(formula)
+    
     if parser == 'pyparsing':
-        from .pyparser import parse as pyparse
-        spec = pyparse(formula)
+        raise Exception('pyparsing support currently defunct')
+        from . import pyparser
+        
+        spec = pyparser.parse(formula)
     elif parser == 'ply':
-        from .plyparser import parse as plyparse
-        spec = plyparse(formula)
+        from . import plyparser
+        
+        if 'ply' not in parsers:
+            parsers['ply'] = plyparser.Parser()
+            
+        spec = parsers['ply'].parse(formula)
     else:
         raise ValueError(
             'Unknown parser: ' + str(parser) + '\n' +
@@ -89,19 +107,14 @@ def parse(formula, parser='ply'):
     return spec
 
 if __name__ == "__main__":
-    try:
-        from .pyparser import parse as pyparse
-        ast = pyparse(sys.argv[1])
-    except Exception as e:
-        print("Parse error: " + str(e) )
-        sys.exit(1)
-    print("Parsed expression: " + str(ast) )
-    print("Length: " +str( len(ast) ) )
-    print("Variables: " + str(extract_vars(ast) ) )
-    print("Safety: " +str(issafety(ast) ) )
-    try:
-        print("JTLV syntax: " +str(ast.to_jtlv() ) )
-        print("SMV syntax: " +str(ast.to_smv() ) )
-        print("Promela syntax: " +str(ast.to_promela() ) )
-    except LTLException as e:
-        print(e.message)
+    from .pyparser import parse as pyparse
+    a = pyparse(sys.argv[1])
+    
+    print("Parsed expression: " + str(a))
+    print("Length: " + str(len(a)))
+    print("Variables: " + str(ast.get_vars(a)))
+    print("Safety: " + str(issafety(a)))
+    
+    print("JTLV syntax: " + str(a.to_jtlv()))
+    print("SMV syntax: " + str(a.to_smv()))
+    print("Promela syntax: " + str(a.to_promela()))

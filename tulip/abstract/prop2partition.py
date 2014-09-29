@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 """ 
 Proposition preserving partition module.
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -42,14 +44,13 @@ import copy
 import numpy as np
 from scipy import sparse as sp
 import polytope as pc
+from polytope.plot import plot_partition
 
-from .plot import plot_partition
+from tulip import transys as trs
 
-try:
-    import matplotlib as mpl
-except Exception, e:
-    logger.error(e)
-    mpl = None
+# inline imports:
+#
+# from tulip.graphics import newax
 
 _hl = 40 * '-'
 
@@ -589,25 +590,26 @@ class PropPreservingPartition(pc.MetricPartition):
     
     def plot(
         self, trans=None, ppp2trans=None, only_adjacent=False,
-        ax=None, plot_numbers=True, color_seed=None,
-        show=False
+        ax=None, plot_numbers=True, color_seed=None
     ):
-        """For details see plot.plot_partition.
+        """For details see C{polytope.plot.plot_partition}.
         """
         return plot_partition(
             self, trans, ppp2trans, only_adjacent,
-            ax, plot_numbers, color_seed, show
+            ax, plot_numbers, color_seed
         )
     
-    def plot_props(self, ax=None):
+    def plot_props(self, ax=None, text_color='yellow'):
         """Plot labeled regions of continuous propositions.
         """
-        if mpl is None:
-            warnings.warn('No matplotlib')
+        try:
+            from tulip.graphics import newax
+        except:
+            logger.error('failed to import graphics')
             return
         
         if ax is None:
-            ax = mpl.pyplot.subplot(111)
+            ax, fig = newax()
         
         l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
@@ -617,7 +619,7 @@ class PropPreservingPartition(pc.MetricPartition):
             isect_poly = poly.intersect(self.domain)
             
             isect_poly.plot(ax, color='none', hatch='/')
-            isect_poly.text(prop, ax, color='yellow')
+            isect_poly.text(prop, ax, color=text_color)
         return ax
 
 class PPP(PropPreservingPartition):
@@ -627,3 +629,38 @@ class PPP(PropPreservingPartition):
     """
     def __init__(self, **args):
         PropPreservingPartition.__init__(self, **args)
+
+def ppp2ts(part):
+    """Derive transition system from proposition preserving partition.
+    
+    @param part: labeled polytopic partition from
+        which to derive the transition system
+    @type part: L{PropPreservingPartition}
+    
+    @return: C{(ts, state_map)}
+        finite transition system labeled with propositions
+        from the given partition, and map of
+        polytope indices to transition system states.
+        
+    @rtype: (L{transys.FTS}, \C{dict})
+    """
+    # generate transition system and add transitions       
+    ofts = trs.FTS()
+    
+    adj = part.adj #sp.lil_matrix
+    n = adj.shape[0]
+    ofts_states = range(n)
+    ofts_states = trs.prepend_with(ofts_states, 's')
+    
+    ofts.states.add_from(ofts_states)
+    
+    ofts.transitions.add_adj(adj, ofts_states)
+    
+    # decorate TS with state labels
+    atomic_propositions = set(part.prop_regions)
+    ofts.atomic_propositions.add_from(atomic_propositions)
+    for state, region in zip(ofts_states, part.regions):
+        state_prop = region.props.copy()
+        ofts.states.add(state, ap=state_prop)
+    
+    return (ofts, ofts_states)

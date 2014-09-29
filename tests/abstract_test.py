@@ -7,6 +7,10 @@ logger = logging.getLogger(__name__)
 #logging.getLogger('tulip').setLevel(logging.ERROR)
 logger.setLevel(logging.DEBUG)
 
+import matplotlib
+# to avoid the need for using: ssh -X when running tests remotely
+matplotlib.use('Agg')
+
 import numpy as np
 
 from tulip import abstract, hybrid

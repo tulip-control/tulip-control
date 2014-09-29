@@ -1,8 +1,11 @@
 *~
 *.log
 *.out
-parsetab.py
+*parsetab.py
 *.gr1
+*.gr1c
+*.txt
+*.xml
 *.m
 *.pyc
 *.egg-info
@@ -12,5 +15,11 @@ parsetab.py
 *.PNG
 *.pdf
 *.PDF
+*.dot
+*.swp
 /build/
 /dist/
+/tulip/commit_hash.txt
+/MANIFEST
+/.coverage
+/tests/cover/

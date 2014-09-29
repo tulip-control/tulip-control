@@ -36,12 +36,12 @@ using AST classes from spec.ast
 
 Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
 """
+from __future__ import absolute_import
+
 import pyparsing as pp
 import sys
 
-from .ast import (ASTVar, ASTNum, ASTBool, ASTArithmetic,
-    ASTComparator, ASTUnTempOp, ASTBiTempOp,
-    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp)
+from . import ast
 
 # Packrat parsing - it's much faster
 pp.ParserElement.enablePackrat()
@@ -55,32 +55,32 @@ _restricted_alphas = filter(lambda x: x not in "GFX", pp.alphas)
 _bool_keyword = pp.CaselessKeyword("TRUE") | pp.CaselessKeyword("FALSE")
 
 _var = ~_bool_keyword + (
-    pp.Word(_restricted_alphas, pp.alphanums + "._:") | \
+    pp.Word(_restricted_alphas, pp.alphanums + "._:") |
     pp.Regex("[A-Za-z][0-9_][A-Za-z0-9._:]*") | pp.QuotedString('"')
-).setParseAction(ASTVar)
+).setParseAction(ast.Var)
 
-_atom = _var | _bool_keyword.setParseAction(ASTBool)
-_number = _var | pp.Word(pp.nums).setParseAction(ASTNum)
+_atom = _var | _bool_keyword.setParseAction(ast.Bool)
+_number = _var | pp.Word(pp.nums).setParseAction(ast.Num)
 
 # arithmetic expression
 _arith_expr = pp.operatorPrecedence(
     _number,
     [
-        (pp.oneOf("* /"), 2, pp.opAssoc.LEFT, ASTArithmetic),
-        (pp.oneOf("+ -"), 2, pp.opAssoc.LEFT, ASTArithmetic),
-        ("mod", 2, pp.opAssoc.LEFT, ASTArithmetic)
+        (pp.oneOf("* /"), 2, pp.opAssoc.LEFT, ast.Arithmetic),
+        (pp.oneOf("+ -"), 2, pp.opAssoc.LEFT, ast.Arithmetic),
+        ("mod", 2, pp.opAssoc.LEFT, ast.Arithmetic)
     ]
 )
 
 # integer comparison expression
 _comparison_expr = pp.Group(
     _arith_expr + pp.oneOf("< <= > >= != = ==") + _arith_expr
-).setParseAction(ASTComparator)
+).setParseAction(ast.Comparator)
 
 _proposition = _comparison_expr | _atom
 
 # hack so G/F/X doesn't mess with keywords
-#(i.e. FALSE) or variables like X0, X_0_1
+# (i.e. FALSE) or variables like X0, X_0_1
 _UnaryTempOps = ~_bool_keyword + \
     pp.oneOf("G F X [] <> next") + ~pp.Word(pp.nums + "_")
 
@@ -90,16 +90,16 @@ def parse(formula):
     # LTL expression
     _ltl_expr = pp.operatorPrecedence(
         _proposition,
-       [("'", 1, pp.opAssoc.LEFT, ASTUnTempOp),
-        ("!", 1, pp.opAssoc.RIGHT, ASTNot),
-        (_UnaryTempOps, 1, pp.opAssoc.RIGHT, ASTUnTempOp),
-        (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ASTAnd),
-        (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ASTOr),
-        (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ASTXor),
-        ("->", 2, pp.opAssoc.RIGHT, ASTImp),
-        ("<->", 2, pp.opAssoc.RIGHT, ASTBiImp),
-        (pp.oneOf("= == !="), 2, pp.opAssoc.RIGHT, ASTComparator),
-        (pp.oneOf("U V R"), 2, pp.opAssoc.RIGHT, ASTBiTempOp)]
+        [("'", 1, pp.opAssoc.LEFT, ast.UnTempOp),
+         ("!", 1, pp.opAssoc.RIGHT, ast.Not),
+         (_UnaryTempOps, 1, pp.opAssoc.RIGHT, ast.UnTempOp),
+         (pp.oneOf("& &&"), 2, pp.opAssoc.LEFT, ast.And),
+         (pp.oneOf("| ||"), 2, pp.opAssoc.LEFT, ast.Or),
+         (pp.oneOf("xor ^"), 2, pp.opAssoc.LEFT, ast.Xor),
+         ("->", 2, pp.opAssoc.RIGHT, ast.Imp),
+         ("<->", 2, pp.opAssoc.RIGHT, ast.BiImp),
+         (pp.oneOf("= == !="), 2, pp.opAssoc.RIGHT, ast.Comparator),
+         (pp.oneOf("U V R"), 2, pp.opAssoc.RIGHT, ast.BiTempOp)]
     )
     _ltl_expr.ignore(pp.LineStart() + "--" + pp.restOfLine)
 

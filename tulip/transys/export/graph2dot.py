@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 Convert labeled graph to dot using
 pydot and custom filtering
 """
+from __future__ import division
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -41,81 +43,218 @@ from collections import Iterable
 from textwrap import fill
 from cStringIO import StringIO
 
+import numpy as np
 import networkx as nx
+from networkx.utils import make_str
 
-try:
-    import pydot
-except ImportError:
-    logger.error('pydot package not found.\nHence dot export not unavailable.')
-    pydot = None
+# inline:
+#
+# import pydot
+# import webcolors
 
-try:
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-    matplotlib = True
-except ImportError:
-    logger.error('matplotlib package not found.\nSo no loading of dot plots.')
-    matplotlib = None
-
-try:
-    from IPython.display import display, Image
-    IPython = True
-except ImportError:
-    logger.error('IPython not found.\nSo loaded dot images not inline.')
-    IPython = None
-
-def _states2dot_str(graph, to_pydot_graph, wrap=10, latex=False):
+def _states2dot_str(graph, to_pydot_graph, wrap=10,
+                    tikz=False, rankdir='TB'):
     """Copy nodes to given Pydot graph, with attributes for dot export.
     """
+    # TODO generate LaTeX legend table for edge labels
+    
     states = graph.states
     
     # get labeling def
     if hasattr(graph, '_state_label_def'):
-        label_def = states.graph._state_label_def
-    if hasattr(graph, '_state_dot_label_format'):
-        label_format = states.graph._state_dot_label_format
-    else:
-        label_format = {'type?label':'', 'separator':'\\n'}
+        label_def = graph._state_label_def
     
-    for (state, state_data) in states.graph.nodes_iter(data=True):
-        if state in states.initial:
-            _add_incoming_edge(to_pydot_graph, state)
-        
-        node_shape = _decide_node_shape(states.graph, state)
+    if hasattr(graph, '_state_dot_label_format'):
+        label_format = graph._state_dot_label_format
+    else:
+        label_format = {'type?label':'', 'separator':'\n'}
+    
+    for u, d in graph.nodes_iter(data=True):
+        # initial state ?
+        is_initial = u in states.initial
+        is_accepting = _is_accepting(graph, u)
         
         # state annotation
         node_dot_label = _form_node_label(
-            state, state_data, label_def, label_format, wrap, latex
+            u, d, label_def,
+            label_format, wrap, tikz=tikz
         )
     
         #node_dot_label = fill(str(state), width=wrap)
-        #node_dot_label.replace('\n', '\\n')
         
-        # state boundary color
-        if state_data.has_key('color'):
-            node_color = state_data['color']
+        rim_color = d.get('color', 'black')
+        
+        if tikz:
+            _state2tikz(graph, to_pydot_graph, u,
+                        is_initial, is_accepting, rankdir,
+                        rim_color, d, node_dot_label)
         else:
-            node_color = '"black"'
+            _state2dot(graph, to_pydot_graph, u,
+                       is_initial, is_accepting,
+                       rim_color, d, node_dot_label)
+
+def _state2dot(graph, to_pydot_graph, state,
+               is_initial, is_accepting,
+               rim_color, d, node_dot_label):
+    if is_initial:
+        _add_incoming_edge(to_pydot_graph, state)
+    
+    normal_shape = graph.dot_node_shape['normal']
+    accept_shape = graph.dot_node_shape.get('accepting', '')
+    
+    shape = accept_shape if is_accepting else normal_shape
+    corners = 'rounded' if shape is 'rectangle' else ''
+    
+    rim_color = '"' + _format_color(rim_color, 'dot') + '"'
+    
+    fc = d.get('fillcolor', 'none')
+    filled = '' if fc is 'none' else 'filled'
+    if fc is 'gradient':
+        # top/bottom colors not supported for dot
         
-        # state interior color
-        node_style = '"rounded'
-        if state_data.has_key('fillcolor'):
-            node_style += ',filled"'
-            fill_color = state_data['fillcolor']
+        lc = d.get('left_color', d['top_color'])
+        rc = d.get('right_color', d['bottom_color'])    
+        
+        if isinstance(lc, basestring):
+            fillcolor = lc
+        elif isinstance(lc, dict):
+            fillcolor = lc.keys()[0]
         else:
-            node_style += '"'
-            fill_color = "none"
+            raise TypeError('left_color must be str or dict.')
         
-        # TODO option to replace with int to reduce size,
-        # TODO generate separate LaTeX legend table (PNG option ?)
-        to_pydot_graph.add_node(
-            state,
-            label=node_dot_label,
-            shape=node_shape,
-            style=node_style,
-            color=node_color,
-            fillcolor=fill_color
-        )
+        if isinstance(rc, basestring):
+            fillcolor += ':' + rc
+        elif isinstance(rc, dict):
+            fillcolor += ':' + rc.keys()[0]
+        else:
+            raise TypeError('right_color must be str or dict.')
+    else:
+        fillcolor = _format_color(fc, 'dot')
+    
+    if corners and filled:
+        node_style = '"' + corners + ', ' + filled + '"'
+    elif corners:
+        node_style = '"' + corners + '"'
+    else:
+        node_style ='"' + filled + '"'
+    
+    to_pydot_graph.add_node(
+        state,
+        label=node_dot_label,
+        shape=shape,
+        style=node_style,
+        color=rim_color,
+        fillcolor='"' + fillcolor + '"'
+    )
+
+def _state2tikz(graph, to_pydot_graph, state,
+                is_initial, is_accepting, rankdir,
+                rim_color, d, node_dot_label):
+    style = 'state'
+    
+    if rankdir is 'LR':
+        init_dir = 'initial left'
+    elif rankdir is 'RL':
+        init_dir = 'initial right'
+    elif rankdir is 'TB':
+        init_dir = 'initial above'
+    elif rankdir is 'BT':
+        init_dir = 'initial below'
+    else:
+        raise ValueError('Unknown rankdir')
+    
+    if is_initial:
+        style += ', initial by arrow, ' + init_dir + ', initial text='
+    if is_accepting:
+        style += ', accepting'
+    
+    if graph.dot_node_shape['normal'] is 'rectangle':
+        style += ', shape = rectangle, rounded corners'
+    
+    # darken the rim
+    if 'black' in rim_color:
+        c = _format_color(rim_color, 'tikz')
+    else:
+        c = _format_color(rim_color, 'tikz') + '!black!30'
+        
+    style += ', draw = ' + c
+    
+    fill = d.get('fillcolor')
+    
+    if fill is 'gradient':
+        s = {'top_color', 'bottom_color',
+             'left_color', 'right_color'}
+        
+        for x in s:
+            if x in d:
+                style += ', ' + x + ' = ' + _format_color(d[x], 'tikz')
+    elif fill is not None:
+        # not gradient
+        style += ', fill = ' + _format_color(fill, 'tikz')
+    else:
+        logger.debug('fillcolor is None')
+    
+    to_pydot_graph.add_node(
+        state,
+        texlbl=node_dot_label,
+        style=style
+    )
+
+def _format_color(color, prog='tikz'):
+    """Encode color in syntax for given program.
+    
+    @type color:
+      - C{str} for single color or
+      - C{dict} for weighted color mix
+    
+    @type prog: 'tikz' or 'dot'
+    """
+    if isinstance(color, basestring):
+        return color
+    
+    if not isinstance(color, dict):
+        raise Exception('color must be str or dict')
+    
+    if prog is 'tikz':
+        s = '!'.join([k + '!' + str(v) for k,v in color.iteritems()])
+    elif prog is 'dot':
+        t = sum(color.itervalues())
+        
+        try:
+            import webcolors
+            
+            # mix them
+            result = np.array((0.0, 0.0, 0.0))
+            for c, w in color.iteritems():
+                result += w/t * np.array(webcolors.name_to_rgb(c))
+            s = webcolors.rgb_to_hex(result)
+        except:
+            logger.warn('failed to import webcolors')
+            s = ':'.join([k + ';' + str(v/t) for k,v in color.iteritems()])
+    else:
+        raise ValueError('Unknown program: ' + str(prog) + '. '
+                         "Available options are: 'dot' or 'tikz'.")
+    return s
+
+def _place_initial_states(trs_graph, pd_graph, tikz):
+    try:
+        import pydot
+    except:
+        logger.error('failed to import pydot')
+        return
+    
+    init_subg = pydot.Subgraph('initial')
+    init_subg.set_rank('source')
+    
+    for node in trs_graph.states.initial:
+        pd_node = pydot.Node(make_str(node) )
+        init_subg.add_node(pd_node)
+        
+        phantom_node = 'phantominit' + str(node)
+        pd_node = pydot.Node(make_str(phantom_node) )
+        init_subg.add_node(pd_node)
+    
+    pd_graph.add_subgraph(init_subg)
 
 def _add_incoming_edge(g, state):
     phantom_node = 'phantominit' +str(state)
@@ -124,27 +263,36 @@ def _add_incoming_edge(g, state):
     g.add_edge(phantom_node, state)
 
 def _form_node_label(state, state_data, label_def,
-                     label_format, width=10, latex=False):
+                     label_format, width=10, tikz=False):
     # node itself
     state_str = str(state)
     state_str = state_str.replace("'", "")
     
-    if latex:
-        s = state_str
-        
+    # rm parentheses to reduce size of states in fig
+    if tikz:
+        state_str = state_str.replace('(', '')
+        state_str = state_str.replace(')', '')
+    
+    # make indices subscripts
+    if tikz:
         pattern = '([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
-        s = '$' + re.sub(pattern, make_subscript, s) + '$'
-        
-        state_str = s
+        state_str = re.sub(pattern, make_subscript, state_str)
     
-    state_str = fill(state_str, width=width)
-    #state_str = state_str.replace('\n', '\\n')
-    node_dot_label = '"' +state_str +'\\n'
+    # SVG requires breaking the math environment into
+    # one math env per line. Just make 1st line math env
+    #if latex:
+    #    state_str = '$' + state_str + '$'
+    #    state_str = fill(state_str, width=width)
+    node_dot_label = state_str
+    
+    # newline between state name and label, only if state is labeled
+    if len(state_data) != 0:
+        node_dot_label += r'\n'
     
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
-    sep_label_sets = label_format['separator']
+    pieces = list()
     for (label_type, label_value) in state_data.iteritems():
         if label_type not in label_def:
             continue
@@ -159,35 +307,37 @@ def _form_node_label(state, state_data, label_def,
             label_str = fill(label_value, width=width)
         elif isinstance(label_value, Iterable): # and not str
             s = ', '.join([str(x) for x in label_value])
-            label_str = '{' + fill(s, width=width) + '}'
+            label_str = r'\\{' + fill(s, width=width) + r'\\}'
         else:
             label_str = fill(str(label_value), width=width)
-        label_str = label_str.replace('\n', '\\n')
         
-        node_dot_label += type_name +sep_type_value
-        node_dot_label += label_str +sep_label_sets
-    node_dot_label += '"'
+        pieces.append(type_name + sep_type_value + label_str)
     
-    if latex:
-        node_dot_label = node_dot_label.replace(r'{', r'\\{')
-        node_dot_label = node_dot_label.replace(r'}', r'\\}')
+    sep_label_sets = label_format['separator']
+    node_dot_label += sep_label_sets.join(pieces)
+    
+    if tikz:
+        # replace LF by latex newline
+        node_dot_label = node_dot_label.replace(r'\n', r'\\\\ ')
+        
+        # dot2tex math mode doesn't handle newlines properly
+        node_dot_label = (
+            r'$\\begin{matrix} ' + node_dot_label +
+            r'\\end{matrix}$'
+        )
     
     return node_dot_label
 
-def _decide_node_shape(graph, state):
-    node_shape = graph.dot_node_shape['normal']
-    
-    # check if accepting states defined
+def _is_accepting(graph, state):
+    """accepting state ?
+    """
+    # no accepting states defined ?
     if not hasattr(graph.states, 'accepting'):
-        return node_shape
+        return False
     
-    # check for accepting states
-    if state in graph.states.accepting:
-        node_shape = graph.dot_node_shape['accepting']
-        
-    return node_shape
+    return state in graph.states.accepting
 
-def _transitions2dot_str(trans, to_pydot_graph, latex):
+def _transitions2dot_str(trans, to_pydot_graph, tikz=False):
     """Convert transitions to dot str.
     
     @rtype: str
@@ -208,17 +358,21 @@ def _transitions2dot_str(trans, to_pydot_graph, latex):
     trans.graph.edges_iter(data=True, keys=True):
         edge_dot_label = _form_edge_label(
             edge_data, label_def,
-            label_format, label_mask, latex
+            label_format, label_mask, tikz
         )
+        
+        edge_color = edge_data.get('color', 'black')
+        
         to_pydot_graph.add_edge(u, v, key=key,
-                                label=edge_dot_label)
+                                label=edge_dot_label,
+                                color=edge_color)
 
 def _form_edge_label(edge_data, label_def,
-                     label_format, label_mask, latex):
-    edge_dot_label = '"'
+                     label_format, label_mask, tikz):
+    label = '' # dot label for edge
     sep_label_sets = label_format['separator']
     
-    for (label_type, label_value) in edge_data.iteritems():
+    for label_type, label_value in edge_data.iteritems():
         if label_type not in label_def:
             continue
         
@@ -235,57 +389,64 @@ def _form_edge_label(edge_data, label_def,
             sep_type_value = label_format['type?label']
         else:
             type_name = ':'
-            sep_type_value = ','
+            sep_type_value = r',\n'
         
-        if isinstance(label_value, str):
+        # format iterable containers using
+        # mathematical set notation: {...}
+        if isinstance(label_value, basestring):
             # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
             s = ', '.join([str(x) for x in label_value])
-            label_str = '{' + fill(s) + '}'
+            label_str = r'\\{' + fill(s) + r'\\}'
         else:
             label_str = str(label_value)
         
-        edge_dot_label += type_name +sep_type_value
-        edge_dot_label += label_str +sep_label_sets
-    edge_dot_label += '"'
+        if tikz:
+            type_name = r'\mathrm' + '{' + type_name + '}'
+        
+        label += (type_name + sep_type_value +
+                  label_str + sep_label_sets)
     
-    if latex:
-        edge_dot_label = edge_dot_label.replace(r'{', r'\\{')
-        edge_dot_label = edge_dot_label.replace(r'}', r'\\}')
+    if tikz:
+        label = r'\\begin{matrix}' + label + r'\\end{matrix}'
     
-    return edge_dot_label
-
-def _pydot_missing():
-    if pydot is None:
-        msg = 'Attempted calling _to_pydot.\n'
-        msg += 'Unavailable due to pydot not installed.\n'
-        logger.warn(msg)
-        return True
+    label = '"' + label + '"'
     
-    return False
+    return label
     
-def _graph2pydot(graph, wrap=10, latex=False):
+def _graph2pydot(graph, wrap=10, tikz=False,
+                 rankdir='TB'):
     """Convert (possibly labeled) state graph to dot str.
     
     @type graph: L{LabeledDiGraph}
     
     @rtype: str
     """
-    if _pydot_missing():
+    try:
+        __import__('pydot')
+    except ImportError:
+        logger.error('failed to import pydot')
         return None
     
     dummy_nx_graph = nx.MultiDiGraph()
     
-    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, latex=latex)
-    _transitions2dot_str(graph.transitions, dummy_nx_graph, latex)
+    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, tikz=tikz,
+                    rankdir=rankdir)
+    _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
+    _place_initial_states(graph, pydot_graph, tikz)
+    
     pydot_graph.set_overlap('false')
+    #pydot_graph.set_size('"0.25,1"')
+    #pydot_graph.set_ratio('"compress"')
+    pydot_graph.set_nodesep(0.5)
+    pydot_graph.set_ranksep(0.1)
     
     return pydot_graph
 
-def graph2dot_str(graph, wrap=10, latex=False):
+def graph2dot_str(graph, wrap=10, tikz=False):
     """Convert graph to dot string.
     
     Requires pydot.
@@ -296,11 +457,11 @@ def graph2dot_str(graph, wrap=10, latex=False):
     
     @rtype: str
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, latex=latex)
+    pydot_graph = _graph2pydot(graph, wrap=wrap, tikz=tikz)
     
     return pydot_graph.to_string()
 
-def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex):
+def save_dot(graph, path, fileformat, rankdir, prog, wrap, tikz=False):
     """Save state graph to dot file.
     
     @type graph: L{LabeledDiGraph}
@@ -308,12 +469,18 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, latex):
     @return: True upon success
     @rtype: bool
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, latex=latex)
+    pydot_graph = _graph2pydot(graph, wrap=wrap, tikz=tikz,
+                               rankdir=rankdir)
     if pydot_graph is None:
         # graph2dot must have printed warning already
         return False
     pydot_graph.set_rankdir(rankdir)
     pydot_graph.set_splines('true')
+    
+    # turn off graphviz warnings caused by tikz labels
+    if tikz:
+        prog = [prog, '-q 1']
+    
     pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 
@@ -341,9 +508,10 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     
     @param ax: axes
     """
-    if pydot is None:
-        msg = 'Using plot_pydot requires that pydot be installed.'
-        logger.warn(msg)
+    try:
+        __import__('pydot')
+    except:
+        logger.error('failed to import pydot')
         return
     
     try:
@@ -361,7 +529,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     png_str = pydot_graph.create_png(prog=prog)
     
     # installed ?
-    if IPython:
+    try:
+        from IPython.display import display, Image
         logger.debug('IPython installed.')
         
         # called by IPython ?
@@ -379,29 +548,31 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
                 return True
         except:
             print('IPython installed, but not called from it.')
-    else:
-        logger.debug('IPython not installed.')
+    except ImportError:
+        logger.warn('IPython not found.\nSo loaded dot images not inline.')
     
     # not called from IPython QtConsole, try Matplotlib...
     
     # installed ?
-    if matplotlib:
-        logger.debug('Matplotlib installed.')
-        
-        if ax is None:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-        
-        sio = StringIO()
-        sio.write(png_str)
-        sio.seek(0)
-        img = mpimg.imread(sio)
-        ax.imshow(img, aspect='equal')
-        plt.show(block=False)
-        
-        return ax
-    else:
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.image as mpimg
+    except:
         logger.debug('Matplotlib not installed.')
+        logger.warn('Neither IPython QtConsole nor Matplotlib available.')
+        return None
     
-    logger.warn('Neither IPython QtConsole nor Matplotlib available.')
-    return None
+    logger.debug('Matplotlib installed.')
+    
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    
+    sio = StringIO()
+    sio.write(png_str)
+    sio.seek(0)
+    img = mpimg.imread(sio)
+    ax.imshow(img, aspect='equal')
+    plt.show(block=False)
+    
+    return ax

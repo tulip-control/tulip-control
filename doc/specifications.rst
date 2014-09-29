@@ -15,7 +15,7 @@ To create an empty LTL formula and print it, try
 
   from tulip.spec import LTL
   f = LTL()
-  print f
+  print(f)
 
 The GR(1) formula :math:`\square \Diamond p`, in which the environment is empty
 (so, there is no "assumption" part of the specification), and where :math:`p` is
@@ -26,26 +26,28 @@ Boolean and controlled, can be created and printed as a specification string
 
   from tulip.spec import GRSpec
   f = GRSpec(sys_vars={"p"}, sys_prog=["p"])
-  print f.dumps()
+  print(f.dumps())
 
 The result of which should look similar to
 
 .. code-block:: none
 
   0  # Version
+  
   %%
   OUTPUT:
   p : boolean;
+  
   %%
-  []<> p
+  []<>(p)
 
 If you are only interested in the formula itself, presented minimally or with
 pretty-formatting, then also try
 
 .. code-block:: python
 
-  print f
-  print f.pretty()
+  print(f)
+  print(f.pretty())
 
 The result of the second line (using ``pretty()``) should look similar to
 
@@ -67,6 +69,96 @@ The result of the second line (using ``pretty()``) should look similar to
 
 TuLiP LTL syntax
 ----------------
+The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.plyparser``::
+
+  expr ::= expr '*' expr
+         | expr '/' expr
+         | expr '+' expr
+         | expr '-' expr
+         
+         | expr '=' expr | expr '==' expr
+         | expr '!=' expr
+         | expr '<=' expr
+         | expr '>=' expr
+         
+         | '!' expr
+         | expr '&' expr | expr '&&' expr
+         | expr '|' expr | expr '||' expr
+         | expr '^' expr # xor
+         
+         | expr '->' expr
+         | expr '<->' expr
+         
+         | 'X' expr | 'next' expr
+         | '[]' expr | 'G' expr
+         | '<>' expr | 'F' expr
+         
+         | expr 'U' expr
+         | expr 'R' expr
+         
+         | '(' expr ')'
+         
+         | TRUE | FALSE
+         | NUMBER
+         | variable
+         | string
+
+  variable ::= NAME
+  
+  string ::= '"' NAME '"'
+
+where:
+
+- NAME can be any alphanumeric other than ``next`` that does not start with any character from ``'F', 'G', 'R', 'U', 'X'``.
+- NUMBER any non-negative integer
+- TRUE is case-insensitive 'true'
+- FALSE is case-insensitive 'false'
+
+The token precedence (lowest to highest) and associativity (r = right, l = left, n = none) is:
+
+- **U**, **R** (r)
+- **<->** (r)
+- **->** (r)
+- **^** (l)
+- **|** (l)
+- **&** (l)
+- **[]**, **<>** (r)
+- **X** (r)
+- **!** (r)
+- **=**, **<=**, **>=**, **>** (n)
+- **\***, **/** (n)
+- **+**, **-** (n)
+- TRUE, FALSE
+
+Expressions of the above form are successfully parsed.
+This does *not* mean that they can be used to produce valid output to be fed to specific solvers.
+In other words the parser is more permissive than what each tool (and others to be added in the future) supports.
+
+For example: ``variable '+' variable`` is valid as parser input, but **may be invalid** when passed to a particular solver.
+
+Full operator names
+```````````````````
+If you would like to use as operators strings like: ``and``, then your input can be converted automatically to the above syntax by the following lexical substitutions:
+
+- ``next`` -> ``X``
+- ``always`` -> ``[]``
+- ``eventually`` -> ``<>``
+- ``until`` -> ``U``
+- ``stronguntil`` -> ``U``
+- ``weakuntil`` -> ``W``
+- ``unless`` -> ``W``
+- ``release`` -> ``V``
+- ``implies`` -> ``->``
+- ``equivalent`` -> ``<->``
+- ``not`` -> ``!``
+- ``and`` -> ``&&``
+- ``or`` -> ``||``
+
+These substitutions are **not** enabled by default.
+In order to enable them, pass the argument ``full_operators = True`` to ``tulip.spec.parser.parser``.
+
+TuLiP LTL specification files
+-----------------------------
 
 *The description of format here is normative.* While details may
 vary among versions of the format, it is always the case that the first
@@ -118,11 +210,11 @@ BNF grammar, the formula syntax is descibed in the following.
 3. Boolean operators are **!** (negation), **&&** (conjunction), **||**
    (disjunction), **->** (implication), and **<->** (equivalence).
 4. Temporal operators are **[]** (always), **<>** (eventually), **X** (next),
-   **U** (until), **V** (release).
+   **U** (until), **V** or **R** (release).
 5. Notice that the alternative operators **/\\** and **\\/** for **&&** and
    **||**, respectively, are not included; cf. the `Spin LTL formula syntax
    <http://spinroot.com/spin/Man/ltl.html>`_.  Furthermore, **W** (weak until)
-   is not included.
+   is not included, except for the parser of the GR(1) fragment.
 6. Space is required wherever its absence would cause parsing ambiguity.  E.g.,
    ``Xp`` is always an identifier, whereas ``X p`` is a formula in which the next
    operator is applied to the identifier ``p``.
