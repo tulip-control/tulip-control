@@ -52,11 +52,10 @@ DEBUG_SMV_FILE = 'smv.txt'
 DEBUG_LTL_FILE = 'ltl.txt'
 DEBUG_AUT_FILE = 'aut.txt'
 
+
 def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
                      init_option=1):
     """Decide realizability of specification defined by given GRSpec object.
-
-    ...for standalone use
 
     @return: True if realizable, False if not, or an error occurs.
     """
@@ -67,6 +66,7 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
     os.unlink(fLTL)
     os.unlink(fAUT)
     return realizable
+
 
 def solve_game(
     spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m',
@@ -133,7 +133,7 @@ def solve_game(
         init_option = 1
 
     
-    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
+    call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
     
     realizable = False
     
@@ -153,9 +153,10 @@ def solve_game(
 
     return realizable
 
+
 def synthesize(
-    spec, heap_size='-Xmx128m', priority_kind = 3,
-    init_option = 1
+    spec, heap_size='-Xmx128m', priority_kind=3,
+    init_option=1
 ):
     """Synthesize a strategy satisfying the specification.
 
@@ -193,17 +194,18 @@ def synthesize(
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
-    fSMV = tempfile.NamedTemporaryFile(delete=False, suffix="smv")
-    fSMV.write(generate_JTLV_SMV(spec))
+    fSMV = tempfile.NamedTemporaryFile(delete=False, suffix='smv')
+    fSMV.write(generate_jtlv_smv(spec))
     fSMV.close()
     
     fLTL = tempfile.NamedTemporaryFile(delete=False, suffix="ltl")
-    fLTL.write(generate_JTLV_LTL(spec))
+    fLTL.write(generate_jtlv_ltl(spec))
     fLTL.close()
     
     fAUT = tempfile.NamedTemporaryFile(delete=False)
     fAUT.close()
     return fSMV.name, fLTL.name, fAUT.name
+
 
 def get_priority(priority_kind):
     """Validate and convert priority_kind to the corresponding integer.
@@ -217,7 +219,7 @@ def get_priority(priority_kind):
     @return: if given priority_kind is permissible, then return
         integer representation of it.  Else, return default ("ZYX").
     """
-    if (isinstance(priority_kind, str)):
+    if isinstance(priority_kind, str):
         if (priority_kind == 'ZYX'):
             priority_kind = 3
         elif (priority_kind == 'ZXY'):
@@ -234,10 +236,10 @@ def get_priority(priority_kind):
             warnings.warn('Unknown priority_kind.' +
                 'Setting it to the default (ZYX)')
             priority_kind = 3
-    elif (isinstance(priority_kind, int)):
-        if (priority_kind > 0 and priority_kind != 3 and \
-            priority_kind != 7 and priority_kind != 11 and \
-            priority_kind != 15 and priority_kind != 19 and \
+    elif isinstance(priority_kind, int):
+        if (priority_kind > 0 and priority_kind != 3 and
+            priority_kind != 7 and priority_kind != 11 and
+            priority_kind != 15 and priority_kind != 19 and
             priority_kind != 23
         ):
             warnings.warn("Unknown priority_kind." +
@@ -248,29 +250,30 @@ def get_priority(priority_kind):
         priority_kind = 3
     return priority_kind
 
-def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
-    """Subprocess calls to JTLV.
-    """
-    logger.info('Calling jtlv with the following arguments:')
-    logger.info('  heap size: ' + heap_size)
-    logger.info('  jtlv path: ' + JTLV_PATH)
-    logger.info('  priority_kind: ' + str(priority_kind) + '\n')
+
+def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
+    """Subprocess calls to JTLV."""
+    logger.info(
+        ('Calling jtlv with arguments:\n'
+         '  heap size: {heap}\n'
+         '  jtlv path: {path}\n'
+         '  priority_kind: {priority}\n').format(
+            heap=heap_size,
+            path=JTLV_PATH,
+            priority=priority_kind
+        )
+    )
 
     if JTLV_EXE:
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
         
+        cmd = ['java', heap_size, '-jar', jtlv_grgame, fSMV, fLTL, fAUT,
+               str(priority_kind), str(init_option)]
+        
         # debugging log
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug(jtlv_grgame)
-            logger.debug(
-                '  java ' + str(heap_size) +
-                ' -jar ' + str(jtlv_grgame) +
-                ' ' + str(fSMV) +
-                ' ' + str(fLTL) +
-                ' ' + str(fAUT) +
-                ' ' + str(priority_kind) +
-                ' ' + str(init_option)
-            )
+            logger.debug(' '.join(cmd))
             
             # besides dumping to debug logging stream,
             # also copy files to ease manual debugging
@@ -281,30 +284,24 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             shutil.copyfile(fAUT, DEBUG_AUT_FILE)
         
         try:
-            subprocess.call( \
-                ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
-                     str(priority_kind), str(init_option)])
+            subprocess.call(cmd)
         except OSError as e:
             if e.errno == os.errno.ENOENT:
                 raise Exception('Java not found in path: cannot run jtlv.')
             else:
                 raise
-    else: # For debugging purpose
-        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
-            os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
-        logger.debug(
-            '  java ' + str(heap_size) +
-            ' -cp ' + str(classpath) +
-            ' GRMain ' + str(fSMV) +
-            ' ' + str(fLTL) +
-            ' ' + str(fAUT) +
-            ' ' + str(priority_kind) +
-            ' ' + str(init_option)
+    else:
+        # For debugging purposes
+        classpath = '{a}:{b}'.format(
+            a=os.path.join(JTLV_PATH, 'JTLV'),
+            b=os.path.join(JTLV_PATH, "JTLV", 'jtlv-prompt1.4.1.jar')
         )
-        subprocess.call([
-            "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
-            fAUT, str(priority_kind), str(init_option)
-        ])
+        
+        cmd = ['java', heap_size, '-cp', classpath, 'GRMain',
+               fSMV, fLTL, fAUT, priority_kind, init_option]
+        
+        logger.debug(' '.join(cmd))
+        subprocess.call(cmd)
 
 
 def canon_to_jtlv_domain(dom):
@@ -325,7 +322,8 @@ def canon_to_jtlv_domain(dom):
     else:
         raise ValueError("Unrecognized domain type: "+str(dom))
 
-def generate_JTLV_SMV(spec):
+
+def generate_jtlv_smv(spec):
     """Return the SMV module definitions needed by JTLV.
 
     Raises exception if malformed GRSpec object is detected.
@@ -377,7 +375,8 @@ MODULE sys -- outputs
 {sys_vars}
 '''
 
-def generate_JTLV_LTL(spec):
+
+def generate_jtlv_ltl(spec):
     """Return LTL specification for JTLV.
 
     @type spec: L{GRSpec}
@@ -443,11 +442,13 @@ def jtlv_output_to_networkx(lines, spec):
                 
                 if varnames:
                     if not var in varnames:
-                        logger.error('Unknown variable ' + var)
+                        logger.error('Unknown variable "{var}"'.format(
+                                     var=var))
             
             for var in varnames:
-                if not var in state:
-                    logger.error('Variable ' + var + ' not assigned')
+                if var not in state:
+                    logger.error('Variable "{var}" not assigned'.format(
+                                 var=var))
 
         # parse transitions
         if line.find('successors') >= 0:
@@ -458,7 +459,8 @@ def jtlv_output_to_networkx(lines, spec):
     
     logger.info('done parsing jtlv output.\n')
     return g
-            
+        
+        
 def get_counterexamples(aut_file):
     """Return a list of dictionaries, each representing a counter example.
 
@@ -492,9 +494,9 @@ def remove_comments(spec):
             newspec+=line+'\n'
     return newspec
 
+
 def check_vars(varNames):
-    """Complain if any variable name is a number or not a string.
-    """
+    """Complain if any variable name is a number or not a string."""
     for item in varNames:
         # Check that the vars are strings
         if type(item) != str:
@@ -511,9 +513,9 @@ def check_vars(varNames):
             continue
     return True
 
+
 def check_spec(spec, varNames):
-    """Verify that all non-operators in "spec" are in the list of vars.
-    """
+    """Verify that all non-operators in "spec" are in the list of vars."""
     # Replace all special characters with whitespace
     special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
       "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
