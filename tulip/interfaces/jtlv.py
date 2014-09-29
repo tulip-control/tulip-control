@@ -447,8 +447,9 @@ def jtlv_output_to_networkx(lines, spec):
             
             for var in varnames:
                 if var not in state:
-                    logger.error('Variable "{var}" not assigned'.format(
-                                 var=var))
+                    raise ValueError(
+                        'Variable "{var}" not assigned in "{line}"'.format(
+                        var=var, line=line))
 
         # parse transitions
         if line.find('successors') >= 0:
