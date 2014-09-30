@@ -212,7 +212,7 @@ def get_input(
         conservative = True
        
     P_start = regions[abstraction.ppp2ts.index(start)]
-    P_end = regions[abstraction.ppp2ts.index(start)]
+    P_end = regions[abstraction.ppp2ts.index(end)]
     
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
