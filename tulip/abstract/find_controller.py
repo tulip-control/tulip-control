@@ -106,7 +106,7 @@ def get_input(
     @param ssys: system dynamics
     @type ssys: L{LtiSysDyn}
     
-    @param abstraction: state space partition
+    @param abstraction: abstract system dynamics
     @type abstraction: L{AbstractPwa}
     
     @param start: index of the initial state in C{abstraction.ts}
@@ -162,7 +162,7 @@ def get_input(
     regions = part.regions
     
     ofts = abstraction.ts
-    original_regions = abstraction.original_regions
+    original_regions = abstraction.orig_ppp
     orig = abstraction._ppp2orig
     
     params = abstraction.disc_params
