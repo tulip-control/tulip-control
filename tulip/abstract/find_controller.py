@@ -108,14 +108,14 @@ def get_input(
     @param ssys: system dynamics
     @type ssys: L{LtiSysDyn}
     
-    @param abstraction: state space partition
+    @param abstraction: abstract system dynamics
     @type abstraction: L{AbstractPwa}
     
-    @param start: the initial state in C{abstraction.ts}
-    @type start: state of C{abstraction.ts}
+    @param start: index of the initial state in C{abstraction.ts}
+    @type start: int >= 0
     
-    @param end: the end state in C{abstraction.ts}
-    @type end: state of C{abstraction.ts}
+    @param end: index of the end state in C{abstraction.ts}
+    @type end: int >= 0
     
     @param R: state cost matrix for::
             x = [x(1)' x(2)' .. x(N)']'
@@ -164,7 +164,7 @@ def get_input(
     regions = part.regions
     
     ofts = abstraction.ts
-    original_regions = abstraction.pwa_ppp
+    original_regions = abstraction.orig_ppp
     orig = abstraction._ppp2orig
     
     params = abstraction.disc_params
@@ -194,13 +194,13 @@ def get_input(
         raise Exception("get_input: "
             "Q must be square and have side N * dim(input space)")
     if ofts is not None:
-        start_state = start
-        end_state = end
+        start_state = 's' +str(start)
+        end_state = 's' +str(end)
         
         if end_state not in ofts.states.post(start_state):
             raise Exception('get_input: '
-                'no transition from state ' + start +
-                ' to state ' +end
+                'no transition from state s' +str(start) +
+                ' to state s' +str(end)
             )
     else:
         print("get_input: "
@@ -211,8 +211,8 @@ def get_input(
             "partitions not given, reverting to conservative mode")
         conservative = True
        
-    P_start = regions[abstraction.ppp2ts.index(start)]
-    P_end = regions[abstraction.ppp2ts.index(start)]
+    P_start = regions[start]
+    P_end = regions[end]
     
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
