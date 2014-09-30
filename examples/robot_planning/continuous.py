@@ -44,7 +44,7 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
 # Continuous dynamics
 A = np.array([[1.0, 0.], [ 0., 1.0]])
-B = np.array([[0.1, 0.], [ 0., 0.1]])
+B = np.array([[0.2, 0.], [ 0., 0.2]])
 E = np.array([[1,0], [0,1]])
 
 # Available control, possible disturbances
@@ -106,8 +106,8 @@ ctrl = synth.synthesize('jtlv', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 
 # Generate a graphical representation of the controller for viewing
-if not ctrl.save('continuous.png'):
-    print(ctrl)
+#if not ctrl.save('continuous.png'):
+#    print(ctrl)
 # @synthesize_section_end@
 
 # Simulation
