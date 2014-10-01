@@ -103,6 +103,17 @@ class ASTNode(object):
     
     def to_promela(self):
         return self.flatten(_flatten_Promela)
+
+    def to_bdd(self, mgr, vars):
+        """
+        Generate DBB using pycudd
+
+        @type mgr: DdManager
+        @type vars: dict of DdNode
+        @rtype: DdNode
+        """
+        raise NotImplementedError("BDD not supported for this node type "
+                                  + str(self.__class__))
     
     def map(self, f):
         n = self.__class__(None, None, [str(self.val)])
@@ -147,6 +158,14 @@ class ASTVar(ASTNode):
         
     def to_smv(self):
         return str(self)
+
+    def to_bdd(self, mgr, vars):
+        if self.val in vars:
+            return vars[self.val][0]
+        else:
+            var = mgr.NewVar()
+            vars[self.val] = (var,len(vars))
+            return var
         
     def dump_dot(self):
         return str(id(self)) + "\n" + \
@@ -185,6 +204,12 @@ class ASTBool(ASTNode):
                 "Reserved word \"" + self.op() +
                 "\" not supported in JTLV syntax map"
             )
+
+    def to_bdd(self, mgr, vars):
+        if self.val:
+            return mgr.ReadOne()
+        else:
+            return mgr.ReadLogicZero()
     
     def dump_dot(self):
         return str(id(self)) + "\n" + \
@@ -235,6 +260,9 @@ class ASTNot(ASTUnary):
     def op(self):
         return "!"
 
+    def to_bdd(self, mgr, vars):
+        return ~self.operand.to_bdd(mgr, vars)
+
 class ASTUnTempOp(ASTUnary):
     def op(self):
         return self.operator
@@ -270,6 +298,24 @@ class ASTUnTempOp(ASTUnary):
                 "Operator " + self.op() +
                 " not supported in JTLV syntax map"
             )
+
+    def to_bdd(self, mgr, vars):
+        """
+        Generate DBB through pycudd
+
+        @type mgr: DdManager
+        @type vars: dict of DdNode
+        @rtype: DdNode
+        """
+        if not isinstance(self.operand, ASTVar):
+            raise NotImplementedError("")
+        var_name = "X "+self.operand.val
+        if var_name in vars:
+            return vars[var_name][0]
+        else:
+            var = mgr.NewVar()
+            vars[var_name] = (var, len(vars))
+            return var
     
     def to_smv(self):
         return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
@@ -332,6 +378,12 @@ class ASTAnd(ASTBinary):
     def to_promela(self):
         return self.flatten(_flatten_Promela, "&&")
 
+    def to_bdd(self, mgr, vars):
+        return (
+                self.op_l.to_bdd(mgr, vars) &
+                self.op_r.to_bdd(mgr, vars)
+        )
+
 class ASTOr(ASTBinary):
     def op(self):
         return "|"
@@ -342,17 +394,35 @@ class ASTOr(ASTBinary):
     def to_promela(self):
         return self.flatten(_flatten_Promela, "||")
 
+    def to_bdd(self, mgr, vars):
+        return self.op_l.to_bdd(mgr, vars) | self.op_r.to_bdd(mgr, vars)
+
 class ASTXor(ASTBinary):
     def op(self):
         return "xor"
+
+    def to_bdd(self, mgr, vars):
+        l_bdd = self.op_l.to_bdd(mgr, vars)
+        r_bdd = self.op_r.to_bdd(mgr, vars)
+        return ( l_bdd | r_bdd ) & ( ~l_bdd | ~r_bdd )
     
 class ASTImp(ASTBinary):
     def op(self):
         return "->"
 
+    def to_bdd(self, mgr, vars):
+        l_bdd = self.op_l.to_bdd(mgr, vars)
+        r_bdd = self.op_r.to_bdd(mgr, vars)
+        return ~l_bdd | r_bdd
+
 class ASTBiImp(ASTBinary):
     def op(self):
         return "<->"
+
+    def to_bdd(self, mgr, vars):
+        l_bdd = self.op_l.to_bdd(mgr, vars)
+        r_bdd = self.op_r.to_bdd(mgr, vars)
+        return ( l_bdd & r_bdd ) | ( ~l_bdd & ~r_bdd )
 
 class ASTBiTempOp(ASTBinary):
     def op(self):

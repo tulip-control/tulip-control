@@ -1157,7 +1157,7 @@ def synthesize(
     if option == 'gr1c':
         ctrl = gr1c.synthesize(specs)
     elif option == 'jtlv':
-        ctrl = jtlv.synthesize(specs)
+        ctrl = jtlv.synthesize(specs,init_option=1)
     else:
         raise Exception('Undefined synthesis option. '+\
                         'Current options are "jtlv" and "gr1c"')
