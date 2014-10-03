@@ -295,8 +295,9 @@ class LTL_AST(nx.DiGraph):
     def to_gr1c(self):
         return flatten(self, self.root, _to_gr1c)
     
-    def to_jtlv(self):
-        return flatten(self, self.root, _to_jtlv)
+    def to_jtlv(self, env_vars, sys_vars):
+        return flatten(self, self.root, _to_jtlv,
+                       env_vars=env_vars, sys_vars=sys_vars)
     
     def to_promela(self):
         return flatten(self, self.root, _to_promela)
@@ -318,8 +319,7 @@ class LTL_AST(nx.DiGraph):
         return nx.to_pydot(g)
     
     def write(self, filename, detailed=False):
-        """Layout AST and save result in PDF file.
-        """
+        """Layout AST and save result in PDF file."""
         fname, fext = os.path.splitext(filename)
         fext = fext[1:]  # drop .
         p = self.to_pydot(detailed)
@@ -346,6 +346,10 @@ def _to_python(u, *arg, **kw):
 
 #@profile
 def flatten(tree, u, to_lang, **kw):
+    """Recursively flatten C{tree}.
+    
+    @rtype: C{str}
+    """
     s = tree.succ[u]
     if not s:
         return to_lang(u, **kw)
@@ -388,8 +392,7 @@ def sub_bool_with_subtree(tree, bool2subtree):
         #tree.write(str(id(tree)) + '_after.png')
 
 class Node(object):
-    """Base class for deriving AST nodes.
-    """
+    """Base class for deriving AST nodes."""
     # Caution
     # =======
     # Do **NOT** implement C{__hash__}, because you
@@ -411,6 +414,9 @@ class Node(object):
     
     def to_smv(self, *arg, **kw):
         return self.flatten('smv', *arg, **kw)
+    
+    def to_python(self, *arg, **kw):
+        return self.flatten('python', *arg, **kw)
 
 class Term(Node):
     def __init__(self, t):
@@ -437,10 +443,17 @@ class Num(Term):
 
 class Var(Term):
     def to_gr1c(self, prime=None, **kw):
-        return str(self) + "'" if prime else str(self)
+        return self.val + "'" if prime else self.val
         
-    def to_jtlv(self, **kw):
-        return '(%s)' % str(self)
+    def to_jtlv(self, env_vars=None, sys_vars=None, **kw):
+        if self.val in env_vars:
+            return '(e.{v})'.format(v=self.val)
+        elif self.val in sys_vars:
+            return '(s.{v})'.format(v=self.val)
+        else:
+            raise ValueError(
+                '{v} is neither env nor sys variable'.format(self.val)
+            )
     
     def eval(self, d):
         return d[self.val]
@@ -666,7 +679,6 @@ def pair_node_to_var(tree, c):
         if isinstance(c, Binary):
             break
     
-    print('Binary: ' + str(c))
     succ = tree.successors(c)
     
     v = succ[0] if succ[1] == old else succ[1]
@@ -674,7 +686,6 @@ def pair_node_to_var(tree, c):
     # go down until var found
     # assuming correct syntax for gr1c
     while True:
-        print('v: ' + str(v))
         if isinstance(v, Var):
             break
         

@@ -38,12 +38,11 @@ Relevant links:
 import logging
 logger = logging.getLogger(__name__)
 
-import os, re, subprocess, tempfile, textwrap
+import os, re, subprocess, tempfile
 import warnings
 
 import networkx as nx
 
-from tulip.spec.parser import parse
 from tulip.spec import form
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -53,11 +52,10 @@ DEBUG_SMV_FILE = 'smv.txt'
 DEBUG_LTL_FILE = 'ltl.txt'
 DEBUG_AUT_FILE = 'aut.txt'
 
+
 def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
                      init_option=1):
     """Decide realizability of specification defined by given GRSpec object.
-
-    ...for standalone use
 
     @return: True if realizable, False if not, or an error occurs.
     """
@@ -68,6 +66,7 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
     os.unlink(fLTL)
     os.unlink(fAUT)
     return realizable
+
 
 def solve_game(
     spec, fSMV, fLTL, fAUT, heap_size='-Xmx128m',
@@ -134,7 +133,7 @@ def solve_game(
         init_option = 1
 
     
-    call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
+    call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
     
     realizable = False
     
@@ -154,9 +153,10 @@ def solve_game(
 
     return realizable
 
+
 def synthesize(
-    spec, heap_size='-Xmx128m', priority_kind = 3,
-    init_option = 1
+    spec, heap_size='-Xmx128m', priority_kind=3,
+    init_option=1
 ):
     """Synthesize a strategy satisfying the specification.
 
@@ -170,34 +170,42 @@ def synthesize(
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
                             priority_kind, init_option)
 
-    # Build Automaton
-    if (not realizable):
+    if realizable:
+        logger.info('loading JTLV output...')
+    
+        with open(fAUT, 'r') as f:
+            lines = f.readlines()
+        
+        logger.info('JTLV returned:\n' + '\n'.join(lines))
+        
+        aut = jtlv_output_to_networkx(lines, spec)
+        
+        os.unlink(fSMV)
+        os.unlink(fLTL)
+        os.unlink(fAUT)
+        return aut
+    else:
         counter_examples = get_counterexamples(fAUT)
         os.unlink(fSMV)
         os.unlink(fLTL)
         os.unlink(fAUT)
         return counter_examples
-    else: 
-        aut = load_file(fAUT, spec)
-        os.unlink(fSMV)
-        os.unlink(fLTL)
-        os.unlink(fAUT)
-        return aut
+        
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
-    fSMV = tempfile.NamedTemporaryFile(delete=False,suffix="smv")
-    fSMV.write(generate_JTLV_SMV(spec))
+    fSMV = tempfile.NamedTemporaryFile(delete=False, suffix='smv')
+    fSMV.write(generate_jtlv_smv(spec))
     fSMV.close()
     
-    fLTL = tempfile.NamedTemporaryFile(delete=False,suffix="ltl")
-    fLTL.write(generate_JTLV_LTL(spec))
+    fLTL = tempfile.NamedTemporaryFile(delete=False, suffix="ltl")
+    fLTL.write(generate_jtlv_ltl(spec))
     fLTL.close()
-    
     
     fAUT = tempfile.NamedTemporaryFile(delete=False)
     fAUT.close()
     return fSMV.name, fLTL.name, fAUT.name
+
 
 def get_priority(priority_kind):
     """Validate and convert priority_kind to the corresponding integer.
@@ -211,7 +219,7 @@ def get_priority(priority_kind):
     @return: if given priority_kind is permissible, then return
         integer representation of it.  Else, return default ("ZYX").
     """
-    if (isinstance(priority_kind, str)):
+    if isinstance(priority_kind, str):
         if (priority_kind == 'ZYX'):
             priority_kind = 3
         elif (priority_kind == 'ZXY'):
@@ -228,10 +236,10 @@ def get_priority(priority_kind):
             warnings.warn('Unknown priority_kind.' +
                 'Setting it to the default (ZYX)')
             priority_kind = 3
-    elif (isinstance(priority_kind, int)):
-        if (priority_kind > 0 and priority_kind != 3 and \
-            priority_kind != 7 and priority_kind != 11 and \
-            priority_kind != 15 and priority_kind != 19 and \
+    elif isinstance(priority_kind, int):
+        if (priority_kind > 0 and priority_kind != 3 and
+            priority_kind != 7 and priority_kind != 11 and
+            priority_kind != 15 and priority_kind != 19 and
             priority_kind != 23
         ):
             warnings.warn("Unknown priority_kind." +
@@ -242,29 +250,30 @@ def get_priority(priority_kind):
         priority_kind = 3
     return priority_kind
 
-def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
-    """Subprocess calls to JTLV.
-    """
-    logger.info('Calling jtlv with the following arguments:')
-    logger.info('  heap size: ' + heap_size)
-    logger.info('  jtlv path: ' + JTLV_PATH)
-    logger.info('  priority_kind: ' + str(priority_kind) + '\n')
 
-    if (len(JTLV_EXE) > 0):
+def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
+    """Subprocess calls to JTLV."""
+    logger.info(
+        ('Calling jtlv with arguments:\n'
+         '  heap size: {heap}\n'
+         '  jtlv path: {path}\n'
+         '  priority_kind: {priority}\n').format(
+            heap=heap_size,
+            path=JTLV_PATH,
+            priority=priority_kind
+        )
+    )
+
+    if JTLV_EXE:
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
+        
+        cmd = ['java', heap_size, '-jar', jtlv_grgame, fSMV, fLTL, fAUT,
+               str(priority_kind), str(init_option)]
         
         # debugging log
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug(jtlv_grgame)
-            logger.debug(
-                '  java ' + str(heap_size) +
-                ' -jar ' + str(jtlv_grgame) +
-                ' ' + str(fSMV) +
-                ' ' + str(fLTL) +
-                ' ' + str(fAUT) +
-                ' ' + str(priority_kind) +
-                ' ' + str(init_option)
-            )
+            logger.debug(' '.join(cmd))
             
             # besides dumping to debug logging stream,
             # also copy files to ease manual debugging
@@ -275,30 +284,24 @@ def call_JTLV(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             shutil.copyfile(fAUT, DEBUG_AUT_FILE)
         
         try:
-            subprocess.call( \
-                ["java", heap_size, "-jar", jtlv_grgame, fSMV, fLTL, fAUT, \
-                     str(priority_kind), str(init_option)])
+            subprocess.call(cmd)
         except OSError as e:
             if e.errno == os.errno.ENOENT:
-                raise('Java not found: cannot run jtlv.')
+                raise Exception('Java not found in path: cannot run jtlv.')
             else:
                 raise
-    else: # For debugging purpose
-        classpath = os.path.join(JTLV_PATH, "JTLV") + ":" + \
-            os.path.join(JTLV_PATH, "JTLV", "jtlv-prompt1.4.1.jar")
-        logger.debug(
-            '  java ' + str(heap_size) +
-            ' -cp ' + str(classpath) +
-            ' GRMain ' + str(fSMV) +
-            ' ' + str(fLTL) +
-            ' ' + str(fAUT) +
-            ' ' + str(priority_kind) +
-            ' ' + str(init_option)
+    else:
+        # For debugging purposes
+        classpath = '{a}:{b}'.format(
+            a=os.path.join(JTLV_PATH, 'JTLV'),
+            b=os.path.join(JTLV_PATH, "JTLV", 'jtlv-prompt1.4.1.jar')
         )
-        subprocess.call([
-            "java", heap_size, "-cp", classpath, "GRMain", fSMV, fLTL,
-            fAUT, str(priority_kind), str(init_option)
-        ])
+        
+        cmd = ['java', heap_size, '-cp', classpath, 'GRMain',
+               fSMV, fLTL, fAUT, priority_kind, init_option]
+        
+        logger.debug(' '.join(cmd))
+        subprocess.call(cmd)
 
 
 def canon_to_jtlv_domain(dom):
@@ -319,7 +322,8 @@ def canon_to_jtlv_domain(dom):
     else:
         raise ValueError("Unrecognized domain type: "+str(dom))
 
-def generate_JTLV_SMV(spec):
+
+def generate_jtlv_smv(spec):
     """Return the SMV module definitions needed by JTLV.
 
     Raises exception if malformed GRSpec object is detected.
@@ -327,102 +331,93 @@ def generate_JTLV_SMV(spec):
     @type spec: L{GRSpec}
 
     @rtype: str
-    @return: string conforming to the SMV file format that JTLV expects.
+    @return: string conforming to SMV file format that JTLV expects.
     """
-    smv = ""
-
-    # Write the header
-    smv += textwrap.dedent("""
-
-    MODULE main
-        VAR
-            e : env();
-            s : sys();
-    """);
-    
     # Define env vars
-    smv += textwrap.dedent("""
-    MODULE env -- inputs
-        VAR
-    """)
+    env = []
     for var, dom in spec.env_vars.iteritems():
         int_dom = form.convert_domain(dom)
         
-        smv += '\t\t'
-        smv += var
-        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
+        env.append('\t\t{v} : {c};'.format(
+            v=var, c=canon_to_jtlv_domain(int_dom)
+        ))
 
-    
     # Define sys vars
-    smv+=(textwrap.dedent("""
-    MODULE sys -- outputs
-        VAR
-    """))
+    sys = []
     for var, dom in spec.sys_vars.iteritems():
         int_dom = form.convert_domain(dom)
         
-        smv += '\t\t'
-        smv += var
-        smv += ' : '+ canon_to_jtlv_domain(int_dom) + ';\n'
+        sys.append('\t\t{v} : {c};'.format(
+            v=var, c=canon_to_jtlv_domain(int_dom)
+        ))
     
-    logger.debug(smv)
+    env_vars = '\n'.join(env)
+    sys_vars = '\n'.join(sys)
+    
+    smv = smv_template.format(env_vars=env_vars, sys_vars=sys_vars)
+    
+    logger.debug('SMV file:\n' + smv)
     return smv
 
-def generate_JTLV_LTL(spec):
-    """Return the LTLSPEC for JTLV.
+smv_template = '''
+MODULE main
+    VAR
+        e : env();
+        s : sys();
 
-    It takes as input a GRSpec object.
+MODULE env -- inputs
+    VAR
+{env_vars}
+
+
+MODULE sys -- outputs
+    VAR
+{sys_vars}
+'''
+
+
+def generate_jtlv_ltl(spec):
+    """Return LTL specification for JTLV.
+
+    @type spec: L{GRSpec}
     """
-    formula = spec.to_canon()
-    parse(formula)  # Raises exception if syntax error
+    a, g = spec.to_jtlv()
 
-    specLTL = spec.to_jtlv()
-    logger.debug(''.join([str(x) for x in specLTL]) )
+    if not a:
+        a = 'TRUE'
+
+    if not g:
+        g = 'TRUE'
     
-    assumption = specLTL[0]
-    guarantee = specLTL[1]
+    ltl = ltl_template.format(a=a, g=g)
     
-    # Replace any environment variable var in spec with e.var and replace any 
-    # system variable var with s.var
-    for var in spec.env_vars.keys():
-        assumption = re.sub(r'\b'+var+r'\b', 'e.'+var, assumption)
-        guarantee = re.sub(r'\b'+var+r'\b', 'e.'+var, guarantee)
-    for var in spec.sys_vars.keys():
-        assumption = re.sub(r'\b'+var+r'\b', 's.'+var, assumption)
-        guarantee = re.sub(r'\b'+var+r'\b', 's.'+var, guarantee)
-
-    # Assumption
-    ltl = 'LTLSPEC\n(\n'
-    if assumption:
-        ltl += assumption
-    else:
-        ltl += "TRUE"
-    ltl += '\n);\n'
-
-    # Guarantee
-    ltl += '\nLTLSPEC\n(\n'
-    if guarantee:
-        ltl += guarantee
-    else:
-        ltl += "TRUE"
-    ltl += '\n);'    
-
+    logger.debug('JTLV input formula:\n' + ltl)
+    
     return ltl
 
-def load_file(aut_file, spec):
-    """Construct a Mealy Machine from an aut_file.
+ltl_template = '''
+LTLSPEC
+(
+{a}
+);
 
-    @param aut_file: the name of the text file containing the
-        automaton, or an (open) file-like object.
+LTLSPEC
+(
+{g}
+);
+'''
+
+def jtlv_output_to_networkx(lines, spec):
+    """Return a graph after parsing JTLV's output.
+
+    @param lines: as loaded from file
+    @type lines: C{list} of C{str}
+    
     @type spec: L{GRSpec}
 
-    @rtype: L{MealyMachine}
+    @rtype: C{networkx.DiGraph}
     """
-    if isinstance(aut_file, str):
-        f = open(aut_file, 'r')
-    else:
-        # assume aut_file behaves as file object
-        f = aut_file
+    logger.info('parsing jtlv output to create a graph...')
     
     g = nx.DiGraph()
     
@@ -432,7 +427,7 @@ def load_file(aut_file, spec):
     g.env_vars = spec.env_vars.copy()
     g.sys_vars = spec.sys_vars.copy()
     
-    for line in f:
+    for line in lines:
         # parse states
         if line.find('State ') >= 0:
             state_id = re.search('State (\d+)', line)
@@ -447,11 +442,14 @@ def load_file(aut_file, spec):
                 
                 if varnames:
                     if not var in varnames:
-                        logger.error('Unknown variable ' + var)
+                        logger.error('Unknown variable "{var}"'.format(
+                                     var=var))
             
             for var in varnames:
-                if not var in state.keys():
-                    logger.error('Variable ' + var + ' not assigned')
+                if var not in state:
+                    raise ValueError(
+                        'Variable "{var}" not assigned in "{line}"'.format(
+                        var=var, line=line))
 
         # parse transitions
         if line.find('successors') >= 0:
@@ -460,8 +458,10 @@ def load_file(aut_file, spec):
             g.add_node(state_id, state=state)
             g.add_edges_from([(state_id, v) for v in succ])
     
+    logger.info('done parsing jtlv output.\n')
     return g
-            
+        
+        
 def get_counterexamples(aut_file):
     """Return a list of dictionaries, each representing a counter example.
 
@@ -495,9 +495,9 @@ def remove_comments(spec):
             newspec+=line+'\n'
     return newspec
 
+
 def check_vars(varNames):
-    """Complain if any variable name is a number or not a string.
-    """
+    """Complain if any variable name is a number or not a string."""
     for item in varNames:
         # Check that the vars are strings
         if type(item) != str:
@@ -514,9 +514,9 @@ def check_vars(varNames):
             continue
     return True
 
+
 def check_spec(spec, varNames):
-    """Verify that all non-operators in "spec" are in the list of vars.
-    """
+    """Verify that all non-operators in "spec" are in the list of vars."""
     # Replace all special characters with whitespace
     special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
       "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]

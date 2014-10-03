@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import logging
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 from setuptools import setup
@@ -241,23 +242,19 @@ if check_deps:
 if perform_setup:
     # Build PLY table, to be installed as tulip package data
     try:
-        import os
         import tulip.spec.plyparser
         
         tabmodule = 'parsetab'
+        outputdir = 'tulip/spec'
         
-        parser = tulip.spec.plyparser.LTLParser()
-        parser.rebuild_parsetab(tabmodule)
+        parser = tulip.spec.plyparser.Parser()
+        parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
+                                debuglog=logger)
         
-        os.rename(tabmodule + '.py', "tulip/spec/parsetab.py")
         plytable_build_failed = False
-    except:
+    except Exception as e:
+        logger.debug('Failed to build PLY tables: {e}'.format(e=e))
         plytable_build_failed = True
-    
-    # rm trash
-    if not plytable_build_failed:
-        print('deleting parser.out log file created by ply')
-        os.remove('parser.out')
 
     # If .git directory is present, create commit_hash.txt accordingly
     # to indicate version information

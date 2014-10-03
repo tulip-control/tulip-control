@@ -3,9 +3,10 @@
 Tests for the interface with JTLV.
 """
 
+import networkx as nx
+import nose.tools as nt
 from tulip.spec import GRSpec
 from tulip.interfaces.jtlv import check_realizable, synthesize
-import networkx as nx
 
 
 class basic_test:
@@ -60,3 +61,18 @@ class basic_test:
             state = d['state']
             assert(len(state) == 2)
             assert(label_reference[u] == (state['x'], state['y']))
+
+
+def hash_question_mark_test():
+    specs = GRSpec(env_vars={'w': ['low', 'medium', 'high']},
+                   sys_vars={'a': (0, 2)},
+
+                    env_init=['w="low"'],
+                    env_safety=['(a=1) -> ((w="low") || (w="medium"))'],
+                    env_prog=['(w="high")'],
+
+                    sys_init=['a=2'],
+                    sys_safety=['a=2'],
+                    sys_prog=['a=2'])
+    with nt.assert_raises(ValueError):
+        synthesize(specs)

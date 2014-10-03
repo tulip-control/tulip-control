@@ -37,6 +37,7 @@ from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
 
+import copy
 import warnings
 
 from . import transys
@@ -103,8 +104,7 @@ def _conj_neg_diff(set0, set1, parenth=True):
         ])
 
 def mutex(iterable):
-    """Mutual exclusion for all time.
-    """
+    """Mutual exclusion for all time."""
     iterable = filter(lambda x: x != '', iterable)
     if not iterable:
         return []
@@ -1332,10 +1332,12 @@ def strategy2mealy(A, spec):
     
     Note that the strategy is a deterministic game graph,
     but the input C{A} is given as the contraction of
-    this game graph (which directly )
+    this game graph.
     
     @param A: strategy
     @type A: C{networkx.DiGraph}
+    
+    @type spec: L{GRSpec}
     
     @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
         or both can be None if the corresponding part is missing.
@@ -1373,7 +1375,7 @@ def strategy2mealy(A, spec):
             d = _int2str(d, str_vars)
             mach.transitions.add(u, v, **d)
             
-            logger.info('node: ' + str(v) + ', state: ' + str(d))
+            logger.info('node: {v}, state: {d}'.format(v=v, d=d))
     
     # special initial state, for first reaction
     initial_state = 'Sinit'
@@ -1413,12 +1415,10 @@ def strategy2mealy(A, spec):
             # spurious non-determinism wrt the machine's memory
             init_valuations.add(vals)
             
-            logger.debug('found initial state: ' + str(u))
+            logger.debug('found initial state: {u}'.format(u=u))
         
-        logger.debug(
-            'in state: ' + str(u) +
-            ', var values: ' + str(var_values)
-        )
+        logger.debug('machine vertex: {u}, has var values: {v}'.format(
+                     u=u, v=var_values))
     
     if not mach.successors('Sinit'):
         import pprint
@@ -1435,7 +1435,19 @@ def strategy2mealy(A, spec):
     return mach
 
 def _int2str(label, str_vars):
-    """Replace integers with string values for string variables in C{label}.
+    """Replace integers with string values for string variables.
+    
+    @param: mapping from variable names, to integer (as strings)
+    @type label: C{dict}
+    
+    @param str_vars: mapping that defines those variables that
+        should be converted from integer to string variables.
+        Each variable is mapped to a list of strings that
+        comprise its range. This list defines how integer values
+        correspond to string literals for that variable.
+    @type str_vars: C{dict}
+    
+    @rtype: C{dict}
     """
     label = dict(label)
     label.update({k: str_vars[k][int(v)]
@@ -1444,9 +1456,124 @@ def _int2str(label, str_vars):
     return label
 
 def mask_outputs(machine):
-    """Erase outputs from each edge where they are zero.
-    """
+    """Erase outputs from each edge where they are zero."""
     for u, v, d in machine.edges_iter(data=True):
         for k in d:
             if k in machine.outputs and d[k] == 0:
                 d.pop(k)
+
+
+def determinize_machine_init(mach, init_out_values=None):
+    """Return a determinized copy of C{mach} with given initial outputs.
+    
+    The transducers produced by synthesis can have multiple
+    initial output valuations as possible reactions to a
+    given input valuation.
+    
+    Possible reasons for this are:
+    
+      1. the system does not have full control over its initial state.
+        For example the option "ALL_INIT" of C{gr1c}.
+    
+      2. the strategy returned by the solver has multiple
+        vertices that satisfy the initial conditions.
+    
+    Case 1
+    ======
+    Requires an initial condition to be specified for
+    each run of the transducer, because the transducer does
+    not have full freedom to pick the initial output values.
+    
+    Note that solver options like "ALL_INIT"
+    assume that the system has no control initially.
+    Any output valuation that satisfies the initial
+    conditions can occur.
+    
+    However, this may be too restrictive.
+    The system may have control over the initial values of
+    some outputs, but not others.
+    
+    For the outputs it can initially control,
+    the non-determinism resulting from synthesis is redundancy
+    and can be removed arbitrarily, as in Case 2.
+    
+    Case 2
+    ======
+    The function L{strategy2mealy} returns a transducer that
+    for each initial input valuation,
+    for each initial output valuation,
+    reacts with a unique transition.
+    
+    But this can yield multile reactions to a single input,
+    even for solver options like "ALL_ENV_EXIST_SYS_INIT" for C{gr1c}.
+    The reason is that there can be multiple strategy vertices
+    that satisfy the initial conditions, but the solver
+    included them not because they are needed as initial reactions,
+    but to be visited later by the strategy.
+    
+    These redundant initial reactions can be removed,
+    and because the system has full control over their values,
+    they can be removed in an arbitrary manner,
+    keeping only a single reaction, for each input valuation.
+    
+    Algorithm
+    =========
+    Returns a deterministic transducer.
+    This means that at each transducer vertex,
+    for each input valuation,
+    there is only a single reaction (output valuation) available.
+    
+    The non-determinism is resolved for the initial reaction
+    by ensuring the outputs given in C{init_out_values}
+    take those values.
+    The remaining outputs are determinized arbitrarily.
+    
+    See also
+    ========
+    L{synthesize}, L{strategy2mealy}
+    
+    @param mach: possibly non-deterministic transducer,
+        as produced, for example, by L{synthesize}.
+    @type mach: L{MealyMachine}
+    
+    @param init_out_values: mapping from output ports that
+        the system cannot control initially,
+        to the initial values they take in this instance of the game.
+    @type init_out_values: C{dict}
+    
+    @rtype: L{MealyMachine}
+    """
+    mach = copy.deepcopy(mach)
+    if init_out_values is None:
+        init_out_values = dict()
+    
+    '''determinize given outputs (uncontrolled)'''
+    # restrict attention to given output ports only
+    given_ports = tuple(k for k in mach.outputs if k in init_out_values)
+    rm_edges = set()
+    for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
+        for k in given_ports:
+            if d[k] != init_out_values[k]:
+                rm_edges.add((i, j, key))
+                break
+    mach.remove_edges_from(rm_edges)
+    
+    '''determinize arbitrarily any remnant non-determinism'''
+    # input valuations already seen
+    # tuples of values used for efficiency (have __hash__)
+    possible_inputs = set()
+    # fix a key order
+    inputs = tuple(k for k in mach.inputs)
+    rm_edges = set()
+    for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
+        in_values = tuple(d[k] for k in inputs)
+        
+        # newly encountered input valuation ?
+        if in_values not in possible_inputs:
+            possible_inputs.add(in_values)
+            continue
+        else:
+            rm_edges.add((i, j, key))
+    mach.remove_edges_from(rm_edges)
+    
+    return mach

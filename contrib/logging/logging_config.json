@@ -1,0 +1,39 @@
+{
+	"version": 1,
+	"disable_existing_loggers": 0,
+	
+	"handlers": {
+		"console": {
+			"class": "logging.StreamHandler"
+		}
+	},
+	
+	"loggers": {
+		"tulip": {
+			"level": "WARNING",
+			"propagate": "False"
+		},
+		"tulip.spec.plyparser": {
+			"level": "ERROR"
+		},
+		"tulip.spec.plyparser.lex_logger": {
+			"level": "WARNING"
+		},
+		"tulip.spec.plyparser.yacc_logger": {
+			"level": "WARNING"
+		},
+		"tulip.spec.plyparser.parser_logger": {
+			"level": "WARNING"
+		},
+		"tulip.interfaces.jtlv": {
+			"level": "DEBUG"
+		},
+		"tulip.interfaces.gr1c": {
+			"level": "DEBUG"
+		}
+    },
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["console"]
+    }
+}

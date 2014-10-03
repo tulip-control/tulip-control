@@ -38,134 +38,209 @@ from __future__ import absolute_import
 
 import logging
 logger = logging.getLogger(__name__)
-from warnings import warn
 
-import ply.lex as lex
-import ply.yacc as yacc
-# import networkx as nx
+import warnings
+
+import ply.lex
+import ply.yacc
 
 from . import ast
 
-tokens = (
-    'TRUE', 'FALSE',
-    'NAME', 'NUMBER',
-    'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
-    'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-    'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
-    'UNTIL', 'RELEASE',
-    'PLUS', 'MINUS', 'TIMES', 'DIV',
-    'LPAREN', 'RPAREN', 'DQUOTES'
-)
-
-# Tokens
-t_TRUE = 'TRUE|True|true'
-t_FALSE = 'FALSE|False|false'
-
-t_NEXT = r'X|next'
-# t_PRIME  = r'\''
-t_ALWAYS = r'\[\]|G'
-t_EVENTUALLY = r'\<\>|F'
-
-t_UNTIL = r'U'
-t_RELEASE = r'R'
-
-t_NOT = r'\!'
-t_AND = r'\&\&|\&'
-t_OR = r'\|\||\|'
-t_XOR = r'\^'
-
-t_EQUALS = r'\=|\=\='
-t_NEQUALS = r'\!\='
-t_LT = r'\<'
-t_LE = r'\<\='
-t_GT = r'>\='
-t_GE = r'>'
-
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-
-t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
-          r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
-t_NUMBER = r'\d+'
-
-t_IMP = '->'
-t_BIMP = '\<->'
-
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIV = r'/'
-
-t_DQUOTES = r'\"'
-
-# Ignored characters
-t_ignore = " \t"
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
-    
-def t_error(t):
-    warn("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
-    
-# Build the lexer
-lexer = lex.lex()
-
-# lowest to highest
-precedence = (
-    ('right', 'UNTIL', 'RELEASE'),
-    ('right', 'BIMP'),
-    ('right', 'IMP'),
-    ('left', 'XOR'),
-    ('left', 'OR'),
-    ('left', 'AND'),
-    ('right', 'ALWAYS', 'EVENTUALLY'),
-    ('right', 'NEXT'),
-    ('right', 'NOT'),
-    # ('left', 'PRIME'),
-    ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
-    ('nonassoc', 'TIMES', 'DIV'),
-    ('nonassoc', 'PLUS', 'MINUS'),
-    ('nonassoc', 'TRUE', 'FALSE')
-)
-
-# dictionary of names
-# names = {'var':'replacement'}
 
 TABMODULE = 'tulip.spec.parsetab'
 
-class LTLParser(object):
+LEX_LOGGER = '{name}.lex_logger'.format(name=__name__)
+YACC_LOGGER = '{name}.yacc_logger'.format(name=__name__)
+PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
+
+
+def _format_docstring(**kwargs):
+    """Apply C{kwargs} to function docstring using C{format}."""
+    
+    def dec(func):
+        func.__doc__ = func.__doc__.format(**kwargs)
+        return func
+    
+    return dec
+
+
+class Lexer(object):
+    """Token rules to build LTL lexer."""
+    
+    def __init__(self, debug=False):
+        # for setting the logger, call build explicitly
+        self.build(debug=debug)
+    
+    tokens = (
+        'TRUE', 'FALSE',
+        'NAME', 'NUMBER',
+        'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
+        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
+        'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
+        'UNTIL', 'RELEASE',
+        'PLUS', 'MINUS', 'TIMES', 'DIV',
+        'LPAREN', 'RPAREN', 'DQUOTES'
+    )
+    
+    # Tokens
+    t_TRUE = 'TRUE|True|true'
+    t_FALSE = 'FALSE|False|false'
+    
+    t_NEXT = r'X|next'
+    # t_PRIME  = r'\''
+    t_ALWAYS = r'\[\]|G'
+    t_EVENTUALLY = r'\<\>|F'
+    
+    t_UNTIL = r'U'
+    t_RELEASE = r'R'
+    
+    t_NOT = r'\!'
+    t_AND = r'\&\&|\&'
+    t_OR = r'\|\||\|'
+    t_XOR = r'\^'
+    
+    t_EQUALS = r'\=|\=\='
+    t_NEQUALS = r'\!\='
+    t_LT = r'\<'
+    t_LE = r'\<\='
+    t_GT = r'>\='
+    t_GE = r'>'
+    
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    
+    t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
+              r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
+    t_NUMBER = r'\d+'
+    
+    t_IMP = '->'
+    t_BIMP = '\<->'
+    
+    t_PLUS = r'\+'
+    t_MINUS = r'-'
+    t_TIMES = r'\*'
+    t_DIV = r'/'
+    
+    t_DQUOTES = r'\"'
+
+    # Ignored characters
+    t_ignore = " \t"
+
+    def t_newline(self, t):
+        r'\n+'
+        t.lexer.lineno += t.value.count("\n")
+        
+    def t_error(self, t):
+        warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
+        t.lexer.skip(1)
+    
+    @_format_docstring(logger=LEX_LOGGER)
+    def build(self, debug=False, debuglog=None, **kwargs):
+        """Create a lexer.
+        
+        @param kwargs: Same arguments as C{{ply.lex.lex}}:
+        
+          - except for C{{module}} (fixed to C{{self}})
+          - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
+        """
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(LEX_LOGGER)
+        
+        self.lexer = ply.lex.lex(
+            module=self,
+            debug=debug,
+            debuglog=debuglog,
+            **kwargs
+        )
+
+
+class Parser(object):
+    """Production rules to build LTL parser."""
+    
+    # lowest to highest
+    precedence = (
+        ('right', 'UNTIL', 'RELEASE'),
+        ('right', 'BIMP'),
+        ('right', 'IMP'),
+        ('left', 'XOR'),
+        ('left', 'OR'),
+        ('left', 'AND'),
+        ('right', 'ALWAYS', 'EVENTUALLY'),
+        ('right', 'NEXT'),
+        ('right', 'NOT'),
+        # ('left', 'PRIME'),
+        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
+        ('nonassoc', 'TIMES', 'DIV'),
+        ('nonassoc', 'PLUS', 'MINUS'),
+        ('nonassoc', 'TRUE', 'FALSE')
+    )
+    
     def __init__(self):
         self.graph = None
-        self.tokens = tokens
-        self.precedence = precedence
+        
+        self.lexer = Lexer()
+        self.tokens = self.lexer.tokens
+        
+        self.build()
     
     def build(self):
-        self.parser = yacc.yacc(
-            tabmodule=TABMODULE, module=self,
-            write_tables=False, debug=False
+        self.parser = ply.yacc.yacc(
+            module=self,
+            tabmodule=TABMODULE,
+            write_tables=False,
+            debug=False
         )
-    
-    def rebuild_parsetab(self, tabmodule):
-        yacc.yacc(
-            tabmodule=tabmodule, module=self,
-            write_tables=True, debug=True
-        )
-    
-    def parse(self, formula):
-        """Parse formula string and create abstract syntax tree (AST).
+
+    @_format_docstring(logger=YACC_LOGGER)
+    def rebuild_parsetab(self, tabmodule, outputdir='',
+                         debug=True, debuglog=None):
+        """Rebuild parsetable in debug mode.
+        
+        @param tabmodule: name of table file
+        @type tabmodule: C{{str}}
+        
+        @param outputdir: save C{{tabmodule}} in this directory.
+        @type outputdir: c{{str}}
+        
+        @param debuglog: defaults to logger C{{"{logger}"}}.
+        @type debuglog: C{{logging.Logger}}
         """
-        self.build()
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(YACC_LOGGER)
+        
+        self.lexer.build(debug=debug)
+        
+        self.parser = ply.yacc.yacc(
+            module=self,
+            tabmodule=tabmodule,
+            outputdir=outputdir,
+            write_tables=True,
+            debug=debug,
+            debuglog=debuglog
+        )
+    
+    @_format_docstring(logger=PARSER_LOGGER)
+    def parse(self, formula, debuglog=None):
+        """Parse formula string and create abstract syntax tree (AST).
+        
+        @param logger: defaults to logger C{{"{logger}"}}.
+        @type logger: C{{logging.Logger}}
+        """
+        if debuglog is None:
+            debuglog = logging.getLogger(PARSER_LOGGER)
+        
         g = ast.LTL_AST()
         self.graph = g
-        root = self.parser.parse(formula, lexer=lexer, debug=logger)
+        root = self.parser.parse(
+            formula,
+            lexer=self.lexer.lexer,
+            debug=debuglog
+        )
         
         if root is None:
-            raise Exception('failed to parse:\n\t' + str(formula))
+            raise Exception('failed to parse:\n\t{f}'.format(f=formula))
         
-        # mark root
-        self.graph.root = root
+        g.root = root
         return g
     
     def add_identifier(self, Type, x):
@@ -202,28 +277,23 @@ class LTLParser(object):
         p[0] = self.add_binary(ast.Comparator, p)
     
     def p_and(self, p):
-        """expression : expression AND expression
-        """
+        """expression : expression AND expression"""
         p[0] = self.add_binary(ast.And, p)
     
     def p_or(self, p):
-        """expression : expression OR expression
-        """
+        """expression : expression OR expression"""
         p[0] = self.add_binary(ast.Or, p)
     
     def p_xor(self, p):
-        """expression : expression XOR expression
-        """
+        """expression : expression XOR expression"""
         p[0] = self.add_binary(ast.Xor, p)
     
     def p_imp(self, p):
-        """expression : expression IMP expression
-        """
+        """expression : expression IMP expression"""
         p[0] = self.add_binary(ast.Imp, p)
     
     def p_bimp(self, p):
-        """expression : expression BIMP expression
-        """
+        """expression : expression BIMP expression"""
         p[0] = self.add_binary(ast.BiImp, p)
     
     def p_unary_temp_op(self, p):
@@ -240,28 +310,23 @@ class LTLParser(object):
         p[0] = self.add_binary(ast.BiTempOp, p)
     
     def p_not(self, p):
-        """expression : NOT expression
-        """
+        """expression : NOT expression"""
         p[0] = self.add_unary(ast.Not, p)
     
     def p_group(self, p):
-        """expression : LPAREN expression RPAREN
-        """
+        """expression : LPAREN expression RPAREN"""
         p[0] = p[2]
     
     def p_number(self, p):
-        """expression : NUMBER
-        """
+        """expression : NUMBER"""
         p[0] = self.add_identifier(ast.Num, p[1])
     
     def p_expression_name(self, p):
-        """expression : NAME
-        """
+        """expression : NAME"""
         p[0] = self.add_identifier(ast.Var, p[1])
     
     def p_expression_const(self, p):
-        """expression : DQUOTES NAME DQUOTES
-        """
+        """expression : DQUOTES NAME DQUOTES"""
         p[0] = self.add_identifier(ast.Const, p[2])
     
     def p_bool(self, p):
@@ -271,14 +336,16 @@ class LTLParser(object):
         p[0] = self.add_identifier(ast.Bool, p[1])
     
     def p_error(self, p):
-        warn("Syntax error at '%s'" % p.value)
+        warnings.warn('Syntax error at "{p}"'.format(p=p.value))
+
 
 def parse(formula):
-    parser = LTLParser()
+    warnings.warn('Deprecated: Better to instantiate a Parser once only.')
+    parser = Parser()
     return parser.parse(formula)
+
 
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
     parsed_formula = parse(s)
-    
-    print('Parsing result: ' + str(parsed_formula.to_gr1c()))
+    print('Parsing result: {s}'.format(s=parsed_formula.to_gr1c()))

@@ -62,6 +62,9 @@ def issafety(tree):
             return False
     return True
 
+# cache
+parsers = dict()
+
 def parse(formula, parser='ply', full_operators=False):
     """Parse formula string and create abstract syntax tree (AST).
     
@@ -81,11 +84,16 @@ def parse(formula, parser='ply', full_operators=False):
     
     if parser == 'pyparsing':
         raise Exception('pyparsing support currently defunct')
-        from .pyparser import parse as pyparse
-        spec = pyparse(formula)
+        from . import pyparser
+        
+        spec = pyparser.parse(formula)
     elif parser == 'ply':
-        from .plyparser import parse as plyparse
-        spec = plyparse(formula)
+        from . import plyparser
+        
+        if 'ply' not in parsers:
+            parsers['ply'] = plyparser.Parser()
+            
+        spec = parsers['ply'].parse(formula)
     else:
         raise ValueError(
             'Unknown parser: ' + str(parser) + '\n' +
