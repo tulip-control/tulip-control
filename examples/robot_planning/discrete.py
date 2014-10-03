@@ -13,6 +13,12 @@ transition system.
 # strings of the form @label@ are used for this purpose.
 #
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
+logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
+logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG - 3)
+
 # @import_section@
 # Import the packages that we need
 from tulip import transys, spec, synth
