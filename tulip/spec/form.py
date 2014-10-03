@@ -652,14 +652,56 @@ class GRSpec(LTL):
         return output
     
     def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
-        if s:
-            f = '\n& '.join([
-                prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
-                for x in s
-            ])
-            return '{name}: {f};\n'.format(name=name, f=f)
-        else:
+        if not s:
             return '{name}:;\n'.format(name=name)
+        
+        f = '\n& '.join([
+            prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
+            for x in s
+        ])
+        return '{name}: {f};\n'.format(name=name, f=f)
+    
+    def to_slugs(self):
+        """Return structured slugs spec.
+    
+        @type spec: L{GRSpec}.
+        """
+        _finite_domain2ints(self)
+        
+        f = self._slugs_str
+        return (
+            self._format_slugs_vars(self.env_vars, 'INPUT') +
+            self._format_slugs_vars(self.sys_vars, 'OUTPUT') +
+        
+            f(self.env_safety, 'ENV_TRANS') +
+            f(self.env_prog, 'ENV_LIVENESS') +
+            f(self.env_init, 'ENV_INIT', sep='&') +
+        
+            f(self.sys_safety, 'SYS_TRANS') +
+            f(self.sys_prog, 'SYS_LIVENESS') +
+            f(self.sys_init, 'SYS_INIT', sep='&')
+        )
+    
+    def _slugs_str(self, r, name, sep='\n'):
+        if not r:
+            return '[{name}]\n'.format(name=name)
+        
+        sep = ' {sep} '.format(sep=sep)
+        f = sep.join(_to_lang(self, x, 'gr1c') for x in r if x)
+        return '[{name}]\n{f}\n\n'.format(name=name, f=f)
+    
+    def _format_slugs_vars(self, vardict, name):
+        a = []
+        for var, dom in vardict.iteritems():
+            if dom == 'boolean':
+                a.append(var)
+            elif isinstance(dom, tuple) and len(dom) == 2:
+                a.append('{var}: {min}...{max}'.format(
+                    var=var, min=dom[0], max=dom[1])
+                )
+            else:
+                raise ValueError('unknown domain type: {dom}'.format(dom=dom))
+        return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
     
     def ast(self, x):
         """Return AST corresponding to formula x.
