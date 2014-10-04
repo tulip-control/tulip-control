@@ -33,12 +33,14 @@
 """
 Abstract Syntax Tree classes for LTL,
 
-supporting syntax of:
+can translate to syntax of:
     gr1c: http://slivingston.github.io/gr1c/md_spc_format.html
     JTLV
     SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
     SPIN: http://spinroot.com/spin/Man/ltl.html
     python (Boolean formulas only)
+    WRING: http://vlsi.colorado.edu/~rbloem/wring.html
+        (see top of file: LTL.pm)
 
 Syntax taken originally roughly from:
 http://spot.lip6.fr/wiki/LtlSyntax
@@ -90,6 +92,15 @@ SPIN_MAP = {
 
 PYTHON_MAP = {'!': 'not', '&': 'and', '|': 'or', 'xor': '^', '=': '=='}
 
+WRING_MAP = {
+    'False': '0', 'True': '1',
+    '!': '!',
+    '|': '+', '&': '*', '->': '->', '<->': '<->', 'xor': '^',
+    'G': 'G', 'F': 'F', 'X': 'X',
+    'U': 'U', 'R': 'R', 'V': 'V'
+}
+
+
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
 FULL_OPERATOR_NAMES = {
@@ -114,7 +125,8 @@ maps = {
     'jtlv': JTLV_MAP,
     'smv': SMV_MAP,
     'spin': SPIN_MAP,
-    'python': PYTHON_MAP
+    'python': PYTHON_MAP,
+    'wring': WRING_MAP
 }
 
 class LTLException(Exception):
@@ -308,6 +320,9 @@ class LTL_AST(nx.DiGraph):
     def to_python(self):
         return flatten(self, self.root, _to_python)
     
+    def to_wring(self, all_vars):
+        return flatten(self, self.root, _to_wring, all_vars=all_vars)
+    
     def to_pydot(self, detailed=False):
         """Create GraphViz dot string from given AST.
         
@@ -343,6 +358,9 @@ def _to_smv(u, *arg, **kw):
 
 def _to_python(u, *arg, **kw):
     return u.to_python(*arg, **kw)
+
+def _to_wring(u, *arg, **kw):
+    return u.to_wring(*arg, **kw)
 
 #@profile
 def flatten(tree, u, to_lang, **kw):
@@ -417,6 +435,9 @@ class Node(object):
     
     def to_python(self, *arg, **kw):
         return self.flatten('python', *arg, **kw)
+    
+    def to_wring(self, *arg, **kw):
+        return self.flatten('wring', *arg, **kw)
 
 class Term(Node):
     def __init__(self, t):
@@ -454,6 +475,18 @@ class Var(Term):
             raise ValueError(
                 '{v} is neither env nor sys variable'.format(self.val)
             )
+    
+    def to_wring(self, all_vars=None, **kw):
+        if self.val not in all_vars:
+            raise TypeError(
+                '"{v}" is not defined as a variable in {t}'.format(
+                v=self.val, t=all_vars))
+        
+        if all_vars[self.val] != 'boolean':
+            raise TypeError('"{v}" is not Boolean, but {type}'.format(
+                v=self.val, type=all_vars[self.val]))
+        
+        return '({var}=1)'.format(var=self.val)
     
     def eval(self, d):
         return d[self.val]
