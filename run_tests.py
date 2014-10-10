@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
-
-SCL; 16 Jan 2014.
 """
 
 import imp
