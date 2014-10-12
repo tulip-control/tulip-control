@@ -45,7 +45,7 @@ from .labeled_graphs import LabeledDiGraph, str2singleton, prepend_with
 from .mathset import SubSet, PowerSet
 from .transys import GameGraph
 
-_hl = 40 *'-'
+_hl = 40 * '-'
 
 class FiniteStateAutomaton(LabeledDiGraph):
     """Generic automaton.
@@ -91,8 +91,9 @@ class FiniteStateAutomaton(LabeledDiGraph):
     def __init__(
             self, deterministic=False,
             accepting_states_type=None,
-            atomic_proposition_based=True
-        ):
+            atomic_proposition_based=True,
+            symbolic=False,
+    ):
         """Initialize FiniteStateAutomaton.
 
         Additional keyword arguments are passed to L{LabeledDiGraph.__init__}.
@@ -101,24 +102,28 @@ class FiniteStateAutomaton(LabeledDiGraph):
             is represented by a set.  If True, then the alphabet is
             represented by a powerset 2^AP.
         """
+        self.atomic_proposition_based = atomic_proposition_based
+        self.symbolic = symbolic
+        
         # edge labeling
-        if atomic_proposition_based:
-            self.atomic_proposition_based = True
-            alphabet = PowerSet([])
-            self.atomic_propositions = alphabet.math_set
+        if symbolic:
+            alphabet = None  # no checks
         else:
-            self.atomic_proposition_based = False
-            alphabet = set()
+            if atomic_proposition_based:
+                alphabet = PowerSet([])
+                self.atomic_propositions = alphabet.math_set
+            else:
+                alphabet = set()
+        self.alphabet = alphabet
         
         edge_label_types = [
-            {'name':'letter',
-             'values':alphabet,
-             'setter':True}
+            {'name': 'letter',
+             'values': alphabet,
+             'setter': True}
         ]
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types
         )
-        self.alphabet = alphabet
         
         # accepting states
         if accepting_states_type is None:
@@ -130,13 +135,13 @@ class FiniteStateAutomaton(LabeledDiGraph):
         self.states.accepting = self._accepting
         
         # used before label value
-        self._transition_dot_label_format = {'letter':'',
-                                             'type?label':'',
-                                             'separator':'\n'}
+        self._transition_dot_label_format = {'letter': '',
+                                             'type?label': '',
+                                             'separator': '\n'}
         self._transition_dot_mask = dict()
         
-        self.dot_node_shape = {'normal':'circle',
-                               'accepting':'doublecircle'}
+        self.dot_node_shape = {'normal': 'circle',
+                               'accepting': 'doublecircle'}
         self.default_export_fname = 'fsa'
         self.automaton_type = 'Finite State Automaton'
     
@@ -149,19 +154,20 @@ class FiniteStateAutomaton(LabeledDiGraph):
             _hl + '\n' + self.automaton_type + ': ' +
             self.name + '\n' + _hl + '\n' +
             'States:\n' +
-            pformat(self.states(data=False), indent=3) + 2*'\n' +
+            pformat(self.states(data=False), indent=3) + 2 * '\n' +
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2*'\n' +
+            pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Accepting States:\n' +
-            pformat(self.states.accepting, indent=3) +2*'\n'
+            pformat(self.states.accepting, indent=3) + 2 * '\n'
         )
         
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\in 2^AP):\n\t'
         else:
-            s += 'Input Alphabet Letters:\n\t'
+            if hasattr(self, 'alphabet'):
+                s += ('Input Alphabet Letters:\n\t' +
+                      str(self.alphabet) + 2 * '\n')
         s += (
-            str(self.alphabet) + 2*'\n' +
             'Transitions & labeling w/ Input Letters:\n' +
             pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n'
@@ -218,11 +224,13 @@ class OmegaAutomaton(FiniteStateAutomaton):
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(
             self, deterministic=False,
-            atomic_proposition_based=True
-        ):
+            atomic_proposition_based=True,
+            symbolic=False
+    ):
         super(BuchiAutomaton, self).__init__(
             deterministic=deterministic,
-            atomic_proposition_based=atomic_proposition_based
+            atomic_proposition_based=atomic_proposition_based,
+            symbolic=symbolic
         )
         self.automaton_type = 'Buchi Automaton'
 
@@ -291,8 +299,8 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     
     # prepending states with given str
     if prepend_str:
-        logger.debug('Given string:\n\t' +str(prepend_str) +'\n' +
-               'will be prepended to all states.')
+        logger.debug('Given string:\n\t' + str(prepend_str) + '\n' +
+                     'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     accepting_states = prepend_with(accepting_states, prepend_str)
@@ -369,7 +377,7 @@ class RabinPairs(object):
         self._pairs = []
     
     def __str__(self):
-        s = 'L = Good states, U = Bad states\n' +30*'-' +'\n'
+        s = 'L = Good states, U = Bad states\n' + 30 * '-' + '\n'
         for index, (good, bad) in enumerate(self._pairs):
             s += (
                 'Pair: ' + str(index) + ', L = ' + str(good) +
@@ -407,7 +415,7 @@ class RabinPairs(object):
         bad_set = SubSet(self._states)
         bad_set |= bad_states
         
-        self._pairs.append((good_set, bad_set) )
+        self._pairs.append((good_set, bad_set))
     
     def remove(self, good_states, bad_states):
         """Delete pair (L, U) of good-bad sets of states.
@@ -432,7 +440,7 @@ class RabinPairs(object):
         add
         
         @param good_states: set of good states of this pair
-        @type good_states: 
+        @type good_states: iterable container
         """
         good_set = SubSet(self._states)
         good_set |= good_states
@@ -440,7 +448,7 @@ class RabinPairs(object):
         bad_set = SubSet(self._states)
         bad_set |= bad_states
         
-        self._pairs.remove((good_set, bad_set) )
+        self._pairs.remove((good_set, bad_set))
     
     def add_states(self, pair_index, good_states, bad_states):
         try:
@@ -477,7 +485,7 @@ class RabinAutomaton(OmegaAutomaton):
     See Also
     ========
     L{DRA}, L{BuchiAutomaton}
-    """    
+    """
     def __init__(self, deterministic=False,
                  atomic_proposition_based=False):
         super(RabinAutomaton, self).__init__(
@@ -539,9 +547,9 @@ class ParityGame(GameGraph):
     def __init__(self, c=2):
         node_label_types = [
             {
-                'name':'color',
-                'values':range(c),
-                'default':0
+                'name': 'color',
+                'values': range(c),
+                'default': 0
             }
         ]
         
@@ -565,9 +573,9 @@ class ParityGame(GameGraph):
     @property
     def max_color(self):
         max_c = -1
-        #node = None
+        # node = None
         for x in self:
             if self.node[x]['color'] > max_c:
                 max_c = self.node[x]['color']
-                #node = x
+                # node = x
         return max_c

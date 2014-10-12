@@ -30,6 +30,7 @@ export CFG_FILE=~/.bash_profile
 # will contain python, ATLAS, LAPACK, glpk, gr1c
 INSTALL_LOC=~
 
+install_graphviz=true
 install_glpk=true
 install_atlas=false
 tulip_develop=true # if 1, then tulip installed in develop mode
@@ -166,26 +167,22 @@ fi
 pip install numpy
 pip install scipy
 pip install ply
+pip install networkx
 
-# pyparsing needed as pydot dependency
-# downgrade pyparsing
+#------------------------------------------------------------
+# optional python installs
 if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
 	echo "correct pydot version installed locally: skip"
 else
 	echo "pydot to be installed locally"
 	cd $DOWNLOAD_LOC
 	
-	/usr/bin/yes | pip uninstall pyparsing
-	pip install -Iv \
-	  https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
+	pip install pyparsing
 
 	# install latest pydot version
 	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 fi
 
-pip install networkx
-#------------------------------------------------------------
-# optional python installs
 pip install matplotlib
 pip install ipython
 
@@ -195,7 +192,27 @@ pip install ipython
 #sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
 #source $CFG_FILE
 
-# downgrade pyparsing
+#------------------------------------------------------------
+# install graphviz dot (needed by pydot)
+if [ "$install_graphviz" = "true" ]; then
+	if [ -f "$TMPBIN/dot" ]; then
+		echo "GraphViz already installed locally: skip"
+	else
+		echo "GraphViz not found locally: install"
+		cd $DOWNLOAD_LOC
+		
+		# cvxopt is incompatible with newer versions
+		git clone https://github.com/ellson/graphviz.git
+		cd graphviz
+		./autogen.sh
+		./configure --prefix=$TMPLIB
+		
+		make
+		make check
+		make install
+	fi
+fi
+
 #------------------------------------------------------------
 # install glpk
 if [ "$install_glpk" = "true" ]; then
@@ -218,6 +235,7 @@ if [ "$install_glpk" = "true" ]; then
 		hash glpsol
 	fi
 fi
+
 #------------------------------------------------------------
 # install cvxopt
 

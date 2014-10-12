@@ -95,13 +95,13 @@ def transition_directions_test():
     )
     
     ts = swab.modes[('normal', 'fly')].ts
-    edges = {('s0', 's0'), ('s1', 's1'), ('s2', 's2'), ('s3', 's3'),
-             ('s4', 's4'), ('s5', 's5'),
-             ('s1', 's2'), ('s1', 's4'), ('s1', 's5'),
-             ('s2', 's3'), ('s2', 's5'), ('s2', 's0'),
-             ('s3', 's0'),
-             ('s4', 's5'),
-             ('s5', 's0')}
+    edges = {(0, 0), (1, 1), (2, 2), (3, 3),
+             (4, 4), (5, 5),
+             (1, 2), (1, 4), (1, 5),
+             (2, 3), (2, 5), (2, 0),
+             (3, 0),
+             (4, 5),
+             (5, 0)}
     
     logger.debug(set(ts.edges() ).symmetric_difference(edges) )
     assert(set(ts.edges() ) == edges)

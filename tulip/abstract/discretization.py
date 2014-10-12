@@ -924,7 +924,6 @@ def discretize(
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
     ofts_states = range(n)
-    ofts_states = trs.prepend_with(ofts_states, 's')
     
     ofts.states.add_from(ofts_states)
     
@@ -1296,7 +1295,7 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     # create stats
     n = len(merged_abstr.ppp)
-    states = ['s'+str(i) for i in xrange(n) ]
+    states = range(n)
     sys_ts.states.add_from(states)
     
     sys_ts.atomic_propositions.add_from(aps)
@@ -1606,7 +1605,7 @@ def merge_partition_pair(
             
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
-            ap_label_2 = ab2.ts.states['s'+str(j)]['ap']
+            ap_label_2 = ab2.ts.states[j]['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))

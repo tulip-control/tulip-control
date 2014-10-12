@@ -59,7 +59,8 @@ def check(formula):
     """
     ast = plyparser.parse(formula)
     
-    dfa = trs.automata.DFA(atomic_proposition_based=False)
+    dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False,
+                                           deterministic=True)
     
     dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
                      'U_left', 'U_right',
@@ -94,21 +95,19 @@ def check(formula):
     dfa.transitions.add('f', 'f', letter='F')
     
     # plot tree automaton
-    #dfa.save('dfa.pdf')
+    # dfa.save('dfa.pdf')
     
     # plot parse tree
-    f = open('ast.dot', 'w')
-    f.write(sast.dump_dot(ast) )
-    f.close()
+    sast.dump_dot(ast, 'ast.dot')
     
     # sync product of AST with DFA,
     # to check acceptance
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
-        logger.info('visiting: ' + str(s) + ', ' + str(q) )
+        logger.info('visiting: ' + str(s) + ', ' + str(q))
         
-        if isinstance(s, sast.ASTUnary):
+        if isinstance(s, sast.Unary):
             op = s.operator
             
             if op in {'!', 'G', 'F'}:
@@ -123,7 +122,7 @@ def check(formula):
             else:
                 # ignore
                 Q.append((s.operand, q))
-        elif isinstance(s, sast.ASTBinary):
+        elif isinstance(s, sast.Binary):
             op = s.operator
             
             if op in {'W', 'U'}:
@@ -154,7 +153,7 @@ def check(formula):
                 # ignore
                 Q.append((s.op_l, q))
                 Q.append((s.op_r, q))
-        elif isinstance(s, sast.ASTVar):
+        elif isinstance(s, sast.Var):
             print('reached var')
     
     return ast

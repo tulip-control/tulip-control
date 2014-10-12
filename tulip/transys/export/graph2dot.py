@@ -42,6 +42,7 @@ import re
 from collections import Iterable
 from textwrap import fill
 from cStringIO import StringIO
+import warnings
 
 import numpy as np
 import networkx as nx
@@ -51,6 +52,19 @@ from networkx.utils import make_str
 #
 # import pydot
 # import webcolors
+
+def import_pydot():
+    try:
+        import pydot
+    except ImportError:
+        logger.error('failed to import pydot')
+        return None
+    from distutils.version import StrictVersion
+    if StrictVersion(pydot.__version__) < StrictVersion('1.0.28'):
+        warnings.warn('pydot not v1.0.28')
+        return None
+    return pydot
+
 
 def _states2dot_str(graph, to_pydot_graph, wrap=10,
                     tikz=False, rankdir='TB'):
@@ -236,11 +250,9 @@ def _format_color(color, prog='tikz'):
                          "Available options are: 'dot' or 'tikz'.")
     return s
 
-def _place_initial_states(trs_graph, pd_graph):
-    try:
-        import pydot
-    except:
-        logger.error('failed to import pydot')
+def _place_initial_states(trs_graph, pd_graph, tikz):
+    pydot = import_pydot()
+    if pydot is None:
         return
     
     init_subg = pydot.Subgraph('initial')
@@ -248,6 +260,10 @@ def _place_initial_states(trs_graph, pd_graph):
     
     for node in trs_graph.states.initial:
         pd_node = pydot.Node(make_str(node) )
+        init_subg.add_node(pd_node)
+        
+        phantom_node = 'phantominit' + str(node)
+        pd_node = pydot.Node(make_str(phantom_node) )
         init_subg.add_node(pd_node)
     
     pd_graph.add_subgraph(init_subg)
@@ -419,10 +435,8 @@ def _graph2pydot(graph, wrap=10, tikz=False,
     
     @rtype: str
     """
-    try:
-        __import__('pydot')
-    except ImportError:
-        logger.error('failed to import pydot')
+    pydot = import_pydot()
+    if pydot is None:
         return None
     
     dummy_nx_graph = nx.MultiDiGraph()
@@ -432,12 +446,12 @@ def _graph2pydot(graph, wrap=10, tikz=False,
     _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
     
     pydot_graph = nx.to_pydot(dummy_nx_graph)
-    _place_initial_states(graph, pydot_graph)
+    _place_initial_states(graph, pydot_graph, tikz)
     
     pydot_graph.set_overlap('false')
     #pydot_graph.set_size('"0.25,1"')
     #pydot_graph.set_ratio('"compress"')
-    pydot_graph.set_nodesep(0.3)
+    pydot_graph.set_nodesep(0.5)
     pydot_graph.set_ranksep(0.1)
     
     return pydot_graph
@@ -504,10 +518,8 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
     
     @param ax: axes
     """
-    try:
-        __import__('pydot')
-    except:
-        logger.error('failed to import pydot')
+    pydot = import_pydot()
+    if pydot is None:
         return
     
     try:
