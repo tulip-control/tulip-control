@@ -438,9 +438,7 @@ class ShortRHTLProb:
         bool_states=True
         action_vars=None
         bool_actions=False
-        bool_states, action_vars, bool_actions = synth._check_solver_options(
-            'gr1c', bool_states, action_vars, bool_actions
-        )
+        
         full_spec = synth.spec_plus_sys(specs=spec,\
                                              env = None,\
                                              sys=self.local_disc_dyn,\
