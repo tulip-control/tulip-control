@@ -420,8 +420,8 @@ def jtlv_output_to_networkx(lines, spec):
     logger.info('parsing jtlv output to create a graph...')
 
     g = nx.DiGraph()
-    varnames = set(spec.sys_vars)
 
+    varnames = dict(spec.sys_vars)
     varnames.update(spec.env_vars)
 
     g.env_vars = spec.env_vars.copy()
@@ -441,11 +441,19 @@ def jtlv_output_to_networkx(lines, spec):
                     state[var] = val
 
                 if varnames:
-                    if not var in varnames:
+                    if var not in varnames:
                         logger.error('Unknown variable "{var}"'.format(
                                      var=var))
-            
-            for var in varnames:
+
+            for var, dom in varnames.iteritems():
+                # singleton domain ?
+                if isinstance(dom, tuple):
+                    if dom[0] == dom[1]:
+                        state[var] = dom[0]
+                if isinstance(dom, list):
+                    if len(dom) == 1:
+                        state[var] = dom[0]
+                # still missing ?
                 if var not in state:
                     raise ValueError(
                         'Variable "{var}" not assigned in "{line}"'.format(
