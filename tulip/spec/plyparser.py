@@ -172,12 +172,12 @@ class Parser(object):
         ('left', 'OR'),
         ('left', 'AND'),
         ('right', 'ALWAYS', 'EVENTUALLY'),
-        ('right', 'NEXT'),
         ('right', 'NOT'),
         ('left', 'EQUALS', 'NEQUALS'),
         ('left', 'LT', 'LE', 'GT', 'GE'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIV'),
+        ('right', 'NEXT'),
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE')
     )
