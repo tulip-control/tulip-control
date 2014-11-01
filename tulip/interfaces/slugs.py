@@ -50,44 +50,25 @@ import slugs
 from . import jtlv
 
 
-def synthesize(spec, only_realizability=False, options=None):
-    """Return strategy satisfying the specification.
-    
+def synthesize(spec):
+    """Return strategy satisfying the specification C{spec}.
+
     @type spec: L{GRSpec}
-    
-    @type only_realizability: bool
-    
-    @param options: list of options for C{slugs},
-        passed to C{subprocess.call}.
-    
-    @return: Return synthesized strategy if realizable,
-        otherwise C{None}.
+    @return: If realizable return synthesized strategy, otherwise C{None}.
     @rtype: C{networkx.DiGraph}
     """
-    if options is None:
-        options = []
-    
     struct = spec.to_slugs()
     s = slugs.convert_to_slugsin(struct, True)
-    
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        f.write(s)
-    
+
+    with tempfile.NamedTemporaryFile(delete=False) as fin:
+        fin.write(s)
+
     logger.info('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
                 '\n\n slugs in:\n\n {s}\n'.format(s=s))
-    
-    realizable, out = _call_slugs(f.name, options + ['--onlyRealizability'])
-    
-    if only_realizability:
-        os.unlink(f.name)
-        return realizable
-    
     if not realizable:
         return None
 
-    __, out = _call_slugs(f.name, options)
-    os.unlink(f.name)
-    
+    os.unlink(fin.name)
     # collect int vars
     vrs = dict(spec.sys_vars)
     vrs.update(spec.env_vars)
@@ -107,8 +88,8 @@ def synthesize(spec, only_realizability=False, options=None):
     return g
 
 
-def _call_slugs(f, options):
-    c = ['slugs'] + options + ['{file}'.format(file=f)]
+def _call_slugs(options):
+    c = ['slugs'] + options
     logger.debug('Calling: ' + ' '.join(c))
     try:
         p = subprocess.Popen(
