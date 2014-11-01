@@ -38,6 +38,7 @@ supporting syntax of:
     JTLV
     SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
     SPIN: http://spinroot.com/spin/Man/ltl.html
+        http://spinroot.com/spin/Man/operators.html
     python (Boolean formulas only)
 
 Syntax taken originally roughly from:
@@ -76,7 +77,7 @@ GR1C_MAP = {
     '!': '!',
     '|': '|', '&': '&', '->': '->', '<->': '<->',
     'G': '[]', 'F': '<>', 'X': '',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>'
+    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
 }
 
 SMV_MAP = {'G': 'G', 'F': 'F', 'X': 'X', 'U': 'U', 'R': 'V'}
@@ -86,7 +87,7 @@ SPIN_MAP = {
     '!': '!',
     '|': '||', '&': '&&', '->': '->', '<->': '<->',
     'G': '[]', 'F': '<>', 'U': 'U', 'R': 'V',
-    '=': '=='
+    '=': '==', '!=': '!='
 }
 
 PYTHON_MAP = {'!': 'not', '&': 'and', '|': 'or', 'xor': '^', '=': '=='}
