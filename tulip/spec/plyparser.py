@@ -347,7 +347,7 @@ class Parser(object):
         p[0] = self.add_identifier(ast.Bool, p[1])
 
     def p_error(self, p):
-        warnings.warn('Syntax error at "{p}"'.format(p=p.value))
+        print('Syntax error at "{p}"'.format(p=p.value))
 
 
 def parse(formula):
