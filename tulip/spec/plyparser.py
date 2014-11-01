@@ -98,8 +98,8 @@ class Lexer(object):
     t_AND = r'\&\&|\&'
     t_OR = r'\|\||\|'
     t_XOR = r'\^'
-    
-    t_EQUALS = r'\=|\=\='
+
+    t_EQUALS = r'\=\=|\='
     t_NEQUALS = r'\!\='
     t_LT = r'\<'
     t_LE = r'\<\='
