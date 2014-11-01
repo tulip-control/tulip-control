@@ -80,6 +80,7 @@ class Lexer(object):
         'UNTIL', 'RELEASE',
         'PLUS', 'MINUS', 'TIMES', 'DIV',
         'LPAREN', 'RPAREN', 'DQUOTES'
+        'COMMENT', 'NEWLINE'
     )
 
     # Tokens
@@ -126,6 +127,10 @@ class Lexer(object):
 
     # Ignored characters
     t_ignore = " \t"
+
+    def t_COMMENT(self, t):
+        r'\#.*'
+        return
 
     def t_NEWLINE(self, t):
         r'\n+'
