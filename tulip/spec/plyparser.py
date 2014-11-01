@@ -127,7 +127,7 @@ class Lexer(object):
     # Ignored characters
     t_ignore = " \t"
 
-    def t_newline(self, t):
+    def t_NEWLINE(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
 
