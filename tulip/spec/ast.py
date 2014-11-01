@@ -80,6 +80,14 @@ GR1C_MAP = {
     '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
 }
 
+SLUGS_MAP = {
+    'False': 'FALSE', 'True': 'TRUE',
+    '!': '!',
+    '|': '|', '&': '&', '->': '->', '<->': '<->',
+    'G': '[]', 'F': '<>', 'X': '',
+    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
+}
+
 SMV_MAP = {'G': 'G', 'F': 'F', 'X': 'X', 'U': 'U', 'R': 'V'}
 
 SPIN_MAP = {
@@ -113,6 +121,7 @@ FULL_OPERATOR_NAMES = {
 maps = {
     'string':OP_MAP,
     'gr1c': GR1C_MAP,
+    'slugs': SLUGS_MAP,
     'jtlv': JTLV_MAP,
     'smv': SMV_MAP,
     'spin': SPIN_MAP,
@@ -337,6 +346,9 @@ def _to_string(u, *arg, **kw):
 def _to_gr1c(u, *arg, **kw):
     return u.to_gr1c(*arg, **kw)
 
+def _to_slugs(u, *arg, **kw):
+    return u.to_slugs(*arg, **kw)
+
 def _to_jtlv(u, *arg, **kw):
     return u.to_jtlv(*arg, **kw)
 
@@ -410,7 +422,10 @@ class Node(object):
 
     def to_gr1c(self, *arg, **kw):
         return self.flatten('gr1c', *arg, **kw)
-    
+
+    def to_slugs(self, *arg, **kw):
+        return self.flatten('slugs', *arg, **kw)
+
     def to_jtlv(self, *arg, **kw):
         return self.flatten('jtlv', *arg, **kw)
 
@@ -448,8 +463,15 @@ class Num(Term):
 
 class Var(Term):
     def to_gr1c(self, prime=None, **kw):
-        return self.val + "'" if prime else self.val
-        
+        return '{val}{prime}'.format(
+            val=self.val,
+            prime="'" if prime else '')
+
+    def to_slugs(self, prime=None, **kw):
+        return '{val}{prime}'.format(
+            val=self.val,
+            prime="'" if prime else '')
+
     def to_jtlv(self, env_vars=None, sys_vars=None, **kw):
         if self.val in env_vars:
             return '(e.{v})'.format(v=self.val)

@@ -330,7 +330,8 @@ class GRSpec(LTL):
         self._cache = {
             'string': dict(),
             'jtlv': dict(),
-            'gr1c': dict()
+            'gr1c': dict(),
+            'slugs': dict()
         }
         self._bool_int = dict()
         self._parts = {
@@ -687,7 +688,7 @@ class GRSpec(LTL):
             return '[{name}]\n'.format(name=name)
 
         sep = ' {sep} '.format(sep=sep)
-        f = sep.join(_to_lang(self, x, 'gr1c') for x in r if x)
+        f = sep.join(_to_lang(self, x, 'slugs') for x in r if x)
         return '[{name}]\n{f}\n\n'.format(name=name, f=f)
 
     def _format_slugs_vars(self, vardict, name):
@@ -961,17 +962,18 @@ def _to_lang(spec, s, lang):
 
                     if z in spec._cache[lang]:
                         continue
-                    if lang is 'gr1c':
 
+                    if lang == 'gr1c':
                         w = spec.ast(z).to_gr1c()
-                        spec._cache[lang][z] = w
-                    elif lang is 'jtlv':
+                    elif lang == 'slugs':
+                        w = spec.ast(z).to_slugs()
+                    elif lang == 'jtlv':
                         w = spec.ast(z).to_jtlv(spec.env_vars,
                                                 spec.sys_vars)
-                        spec._cache[lang][z] = w
                     else:
                         raise Exception('Unknown language')
-            
+                    spec._cache[lang][z] = w
+
             logger.info('collect garbage from {0} cache.\n'.format(lang))
             spec._collect_cache_garbage(spec._cache[lang])
 
