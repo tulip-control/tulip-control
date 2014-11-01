@@ -76,10 +76,10 @@ class Lexer(object):
         'NAME', 'NUMBER',
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
+        'ALWAYS', 'EVENTUALLY', 'NEXT',
         'UNTIL', 'RELEASE',
         'PLUS', 'MINUS', 'TIMES', 'DIV',
-        'LPAREN', 'RPAREN', 'DQUOTES'
+        'LPAREN', 'RPAREN', 'DQUOTES', 'PRIME',
         'COMMENT', 'NEWLINE'
     )
 
@@ -174,10 +174,10 @@ class Parser(object):
         ('right', 'ALWAYS', 'EVENTUALLY'),
         ('right', 'NEXT'),
         ('right', 'NOT'),
-        # ('left', 'PRIME'),
         ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
         ('nonassoc', 'TIMES', 'DIV'),
         ('nonassoc', 'PLUS', 'MINUS'),
+        ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE')
     )
 
@@ -308,7 +308,11 @@ class Parser(object):
                       | EVENTUALLY expression
         """
         p[0] = self.add_unary(ast.UnTempOp, p)
-    
+
+    def p_postfix_next(self, p):
+        """expression : expression PRIME"""
+        p[0] = self.add_unary(ast.UnTempOp, [None, 'X', p[1]])
+
     def p_bin_temp_op(self, p):
         """expression : expression UNTIL expression
                       | expression RELEASE expression
