@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-""" 
+"""
 Interface to the slugs implementation of GR(1) synthesis.
 
 Relevant links:
@@ -93,7 +93,7 @@ def synthesize(spec, only_realizability=False, options=None):
     vrs.update(spec.env_vars)
     vrs = {k: dom for k, dom in vrs.iteritems()
            if isinstance(dom, tuple) and len(dom) == 2}
-    
+
     lines = [_replace_bitfield_with_int(line, vrs)
              for line in out.split('\n')]
     g = jtlv.jtlv_output_to_networkx(lines, spec)
@@ -122,18 +122,18 @@ def _call_slugs(f, options):
             raise Exception('slugs not found in path.')
         else:
             raise
-    
+
     out, err = p.communicate()
     msg = (
         '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
         '\n slugs stdout:\n\n {out}\n\n'.format(out=out)
     )
     logger.debug(msg)
-    
+
     # error ?
     if p.returncode != 0:
         raise Exception(msg)
-    
+
     realizable = 'Specification is realizable' in out
     # check sanity
     if not realizable:
@@ -143,15 +143,15 @@ def _call_slugs(f, options):
 
 def _bitfield_to_int(var, dom, bools):
     """Return integer value of bitfield.
-    
+
     @type var: str
-    
+
     @type dom: 2-tuple of int
-    
+
     @type bools: list of tuples
     """
     bits = dict(bools)
-    
+
     # rename LSB
     lsb = '{var}@0.{min}.{max}'.format(var=var, min=dom[0], max=dom[1])
     name = '{var}@0'.format(var=var)
@@ -159,7 +159,7 @@ def _bitfield_to_int(var, dom, bools):
         raise ValueError('"{lsb}" expected in {bits}'.format(
                          lsb=lsb, bits=bits))
     bits[name] = bits.pop(lsb)
-    
+
     # note: little-endian
     s = ''.join(str(bits['{var}@{i}'.format(var=var, i=i)])
                 for i in xrange(len(bits)-1, -1, -1))
@@ -168,9 +168,9 @@ def _bitfield_to_int(var, dom, bools):
 
 def _replace_bitfield_with_int(line, vrs):
     """Convert bitfield representation to integers.
-    
+
     @type line: str
-    
+
     @type vrs: dict
     """
     for var, dom in vrs.iteritems():
@@ -183,13 +183,13 @@ def _replace_bitfield_with_int(line, vrs):
             continue
 
         i = _bitfield_to_int(var, dom, bools)
-        
+
         # replace LSB with integer variable and its value
         k, v = bools[0]
         p = r'{key}\w*:{val}[,\s*]*'.format(key=re.escape(k), val=v)
         r = '{var}:{intval}, '.format(var=var, intval=i)
         line = re.sub(p, r, line)
-        
+
         # erase other bits
         for key, val in bools[1:]:
             p = r'({key}\w*:{val}[,\s*]*)'.format(key=re.escape(key), val=val)
