@@ -51,6 +51,7 @@ import re
 import networkx as nx
 
 OP_MAP = {
+    'False': 'False', 'True': 'True',
     '!':'!',
     '|': '|', '&': '&', '->': '->', '<->': '<->',
     '[]': 'G', 'G': 'G',
@@ -478,27 +479,9 @@ class Bool(Term):
 
     def __repr__(self):
         return self.str
-    
-    def flatten(self, *arg, **kw):
-        return self.str
-    
-    def to_gr1c(self, **kw):
-        try:
-            return GR1C_MAP[str(self)]
-        except KeyError:
-            raise LTLException(
-                'Reserved word "' + self.op +
-                '" not supported in gr1c syntax map'
-            )
-    
-    def to_jtlv(self, **kw):
-        try:
-            return JTLV_MAP[str(self)]
-        except KeyError:
-            raise LTLException(
-                'Reserved word "' + self.op +
-                '" not supported in JTLV syntax map'
-            )
+
+    def flatten(self, lang, **kw):
+        return maps[lang][str(self)]
 
 class Operator(Node):
     def __init__(self, operator):
