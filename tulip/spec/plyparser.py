@@ -174,9 +174,10 @@ class Parser(object):
         ('right', 'ALWAYS', 'EVENTUALLY'),
         ('right', 'NEXT'),
         ('right', 'NOT'),
-        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
-        ('nonassoc', 'TIMES', 'DIV'),
-        ('nonassoc', 'PLUS', 'MINUS'),
+        ('left', 'EQUALS', 'NEQUALS'),
+        ('left', 'LT', 'LE', 'GT', 'GE'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIV'),
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE')
     )
