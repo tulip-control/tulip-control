@@ -1,0 +1,17 @@
+This directory contains the python and C files to export the TuLiP controller and a Functional Mock-up Unit (FMU) for co-simulation
+
+Python Files:
+
+ctrlexport.py : exporting the Mealy meachine
+pppexport.py : exporting the proposition preserving partition
+poly2str.py : miscellaneous functions for converting matrices and polytopes to C code
+exportfmu.py : generating FMU
+
+For compiling:
+
+Makefile : The makefile for generating FMU
+
+Example:
+
+robotfmu.py : exporting the controller from robot_planning/continuous.py to FMU  
+model.xml : the Ptolemy II file to run the simulation of robot_planning/continuous.py example
