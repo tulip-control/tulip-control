@@ -20,8 +20,8 @@ def mealyexport(ctrl, filename="mealydata"):
 
         return result
 
-    fh = open('TuLiPFMU/include/'+filename+".h", 'w')
-    fc = open('TuLiPFMU/sources/'+filename+".c", 'w')
+    fh = open('include/'+filename+".h", 'w')
+    fc = open('sources/'+filename+".c", 'w')
 
     fh.write('''\
 #ifndef __MEALY_H_
