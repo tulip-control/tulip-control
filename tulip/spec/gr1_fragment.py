@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -30,8 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-Test if given formula belongs to an LTL fragment that
+"""Test if given formula belongs to an LTL fragment that
 is convertible to deterministic Buchi Automata
 (readily expressible in GR(1) ).
 
@@ -58,22 +57,22 @@ def check(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
     ast = plyparser.parse(formula)
-    
+
     dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False,
                                            deterministic=True)
-    
+
     dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
                      'U_left', 'U_right',
                      'W_left', 'W_right'}
-    
+
     dfa.states.add_from({'gf', 'fg', 'g', 'f'})
     dfa.states.initial.add('gf')
-    
+
     dfa.transitions.add('gf', 'fg', letter='!')
     dfa.transitions.add('fg', 'gf', letter='!')
     dfa.transitions.add('g', 'f', letter='!')
     dfa.transitions.add('f', 'g', letter='!')
-    
+
     dfa.transitions.add('gf', 'gf', letter='W')
     dfa.transitions.add('gf', 'gf', letter='U_left')
     dfa.transitions.add('gf', 'gf', letter='G')
@@ -81,50 +80,50 @@ def check(formula):
     dfa.transitions.add('fg', 'fg', letter='U')
     dfa.transitions.add('fg', 'fg', letter='F')
     dfa.transitions.add('fg', 'fg', letter='W_right')
-    
+
     dfa.transitions.add('gf', 'f', letter='U_right')
     dfa.transitions.add('gf', 'f', letter='F')
-    
+
     dfa.transitions.add('fg', 'g', letter='W_left')
     dfa.transitions.add('fg', 'g', letter='G')
-    
+
     dfa.transitions.add('g', 'g', letter='W')
     dfa.transitions.add('g', 'g', letter='G')
-    
+
     dfa.transitions.add('f', 'f', letter='U')
     dfa.transitions.add('f', 'f', letter='F')
-    
+
     # plot tree automaton
     # dfa.save('dfa.pdf')
-    
+
     # plot parse tree
     sast.dump_dot(ast, 'ast.dot')
-    
+
     # sync product of AST with DFA,
     # to check acceptance
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
         logger.info('visiting: ' + str(s) + ', ' + str(q))
-        
+
         if isinstance(s, sast.Unary):
             op = s.operator
-            
+
             if op in {'!', 'G', 'F'}:
                 t = dfa.transitions.find(q, letter=op)
-                
+
                 if not t:
                     raise Exception('not in fragment')
-                
+
                 qi, qj, w = t[0]
-                
+
                 Q.append((s.operand, qj))
             else:
                 # ignore
                 Q.append((s.operand, q))
         elif isinstance(s, sast.Binary):
             op = s.operator
-            
+
             if op in {'W', 'U'}:
                 t = dfa.transitions.find(q, letter=op)
                 if t:
@@ -133,21 +132,21 @@ def check(formula):
                     Q.append((s.op_r, qj))
                 else:
                     t = dfa.transitions.find(q, letter=op + '_left')
-                    
+
                     if not t:
                         raise Exception('not in fragment')
-                    
+
                     qi, qj, w = t[0]
-                    
+
                     Q.append((s.op_l, qj))
-                    
+
                     t = dfa.transitions.find(q, letter=op + '_right')
-                    
+
                     if not t:
                         raise Exception('not in fragment')
-                    
+
                     qi, qj, w = t[0]
-                    
+
                     Q.append((s.op_r, qj))
             else:
                 # ignore
@@ -155,13 +154,13 @@ def check(formula):
                 Q.append((s.op_r, q))
         elif isinstance(s, sast.Var):
             print('reached var')
-    
+
     return ast
-    
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    
+
     s = '(a U b) && []a && <>a && <>a && []<>(<>z)'
     parsed_formula = check(s)
-    
+
     print('Parsing result: ' + str(parsed_formula))

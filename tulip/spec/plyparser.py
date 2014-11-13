@@ -30,20 +30,15 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-PLY-based parser for TuLiP LTL syntax,
+"""PLY-based parser for TuLiP LTL syntax,
 using AST classes from spec.ast
 """
 from __future__ import absolute_import
-
 import logging
 logger = logging.getLogger(__name__)
-
 import warnings
-
 import ply.lex
 import ply.yacc
-
 from . import ast
 
 
@@ -98,6 +93,7 @@ class Lexer(object):
     t_NOT = r'\!'
     t_AND = r'\&\&|\&'
     t_OR = r'\|\||\|'
+
     t_XOR = r'\^'
 
     t_EQUALS = r'\=\=|\='
@@ -109,7 +105,6 @@ class Lexer(object):
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-
     t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
               r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
     t_NUMBER = r'\d+'
@@ -156,8 +151,7 @@ class Lexer(object):
             module=self,
             debug=debug,
             debuglog=debuglog,
-            **kwargs
-        )
+            **kwargs)
 
 
 class Parser(object):
@@ -179,15 +173,12 @@ class Parser(object):
         ('left', 'TIMES', 'DIV'),
         ('right', 'NEXT'),
         ('left', 'PRIME'),
-        ('nonassoc', 'TRUE', 'FALSE')
-    )
+        ('nonassoc', 'TRUE', 'FALSE'))
 
     def __init__(self):
         self.graph = None
-
         self.lexer = Lexer()
         self.tokens = self.lexer.tokens
-
         self.build()
 
     def build(self):
@@ -195,8 +186,7 @@ class Parser(object):
             module=self,
             tabmodule=TABMODULE,
             write_tables=False,
-            debug=False
-        )
+            debug=False)
 
     @_format_docstring(logger=YACC_LOGGER)
     def rebuild_parsetab(self, tabmodule, outputdir='',
@@ -214,17 +204,14 @@ class Parser(object):
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(YACC_LOGGER)
-
         self.lexer.build(debug=debug)
-
         self.parser = ply.yacc.yacc(
             module=self,
             tabmodule=tabmodule,
             outputdir=outputdir,
             write_tables=True,
             debug=debug,
-            debuglog=debuglog
-        )
+            debuglog=debuglog)
 
     @_format_docstring(logger=PARSER_LOGGER)
     def parse(self, formula, debuglog=None):
@@ -241,9 +228,7 @@ class Parser(object):
         root = self.parser.parse(
             formula,
             lexer=self.lexer.lexer,
-            debug=debuglog
-        )
-
+            debug=debuglog)
         if root is None:
             raise Exception('failed to parse:\n\t{f}'.format(f=formula))
 

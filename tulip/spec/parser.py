@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,12 +29,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
-"""
-LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax
-"""
+#
+"""LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
 from __future__ import absolute_import
-
 import sys
 import re
 
@@ -73,7 +70,7 @@ def parse(formula, parser='ply', full_operators=False):
     
     @param parser: python package to use for generating lexer and parser
     @type parser: 'pyparsing' | 'ply'
-    
+
     @param full_operators: replace full names of operators
         with their symbols (case insensitive,
         each operator must be a separate word).
@@ -102,8 +99,7 @@ def parse(formula, parser='ply', full_operators=False):
     
     # did ply fail merely printing warnings ?
     if spec is None:
-        raise Exception('Parsing formula:\n' +
-                        str(formula) + 'failed.')
+        raise Exception('Parsing formula:\n{f}\nfailed'.format(f=formula))
     return spec
 
 if __name__ == "__main__":

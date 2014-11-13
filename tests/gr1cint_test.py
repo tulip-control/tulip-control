@@ -5,7 +5,6 @@ Tests for the interface with gr1c.
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
-
 from nose.tools import raises
 import os
 
@@ -54,11 +53,12 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 
 class basic_test:
     def setUp(self):
-        self.f_un = GRSpec(env_vars="x", sys_vars="y",
-                           env_init="x", env_prog="x",
-                           sys_init="y",sys_safety=["y -> X(!y)","!y -> X(y)"],
-                           sys_prog="y && x")
-        self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
+        self.f_un = GRSpec(
+            env_vars="x", sys_vars="y",
+            env_init="x", env_prog="x",
+            sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
+            sys_prog="y && x")
+        self.dcounter = GRSpec(sys_vars={"y": (0, 5)}, sys_init=["y=0"],
                                sys_prog=["y=0", "y=5"])
 
     def tearDown(self):
@@ -120,7 +120,9 @@ class GR1CSession_test:
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
             f.write(REFERENCE_SPECFILE)
-        self.gs = gr1cint.GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
+        self.gs = gr1c.GR1CSession("trivial_partwin.spc",
+                                   env_vars=["x", "ze"],
+                                   sys_vars=["y", "zs"])
 
     def tearDown(self):
         self.gs.close()
@@ -163,19 +165,23 @@ def test_aut_xml2mealy():
     print(g.nodes())
     assert len(g) == 3
 
+
 @raises(ValueError)
 def synth_init_illegal_check(init_option):
     spc = GRSpec()
     gr1cint.synthesize(spc, init_option=init_option)
 
+
 def synth_init_illegal_test():
     for init_option in ["Caltech", 1]:
         yield synth_init_illegal_check, init_option
+
 
 @raises(ValueError)
 def realiz_init_illegal_check(init_option):
     spc = GRSpec()
     gr1cint.check_realizable(spc, init_option=init_option)
+
 
 def realiz_init_illegal_test():
     for init_option in ["Caltech", 1]:

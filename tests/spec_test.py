@@ -1,13 +1,9 @@
 #!/usr/bin/env python
-"""
-Tests for the tulip.spec subpackage.
-"""
+"""Tests for the tulip.spec subpackage."""
 import logging
 #logging.basicConfig(level=logging.DEBUG)
-
 import copy
 import nose.tools as nt
-
 from tulip.spec import LTL, GRSpec, mutex
 from tulip.spec.parser import parse
 from tulip.spec import ast as ast
@@ -113,6 +109,7 @@ def parse_parse_check(formula, expected_length):
         assert len(parse(formula)) == expected_length
     else:
         nt.assert_raises(Exception, parse, formula)
+
 
 def parse_parse_test():
     for (formula, expected_len) in [("G p", 2),

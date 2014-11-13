@@ -47,7 +47,7 @@ class basic_test(object):
         # than simply checking that synthesize() returns something
         # non-None (i.e., realizability, which is tested elsewhere).
         assert g is not None
-        
+
         assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
         assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
         print(g.nodes())

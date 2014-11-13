@@ -37,10 +37,11 @@ Relevant links:
 """
 import logging
 logger = logging.getLogger(__name__)
-
-import os, re, subprocess, tempfile
+import os
+import re
+import subprocess
+import tempfile
 import warnings
-
 import networkx as nx
 
 from tulip.spec import form
@@ -131,7 +132,6 @@ def solve_game(
     else:
         warnings.warn("Unknown init_option. Setting it to the default (1)")
         init_option = 1
-
 
     call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
 
@@ -234,16 +234,17 @@ def get_priority(priority_kind):
             priority_kind = 23
         else:
             warnings.warn('Unknown priority_kind.' +
-                'Setting it to the default (ZYX)')
+                          'Setting it to the default (ZYX)')
             priority_kind = 3
     elif isinstance(priority_kind, int):
-        if (priority_kind > 0 and priority_kind != 3 and
+        if (
+            priority_kind > 0 and priority_kind != 3 and
             priority_kind != 7 and priority_kind != 11 and
             priority_kind != 15 and priority_kind != 19 and
             priority_kind != 23
         ):
             warnings.warn("Unknown priority_kind." +
-                " Setting it to the default (ZYX)")
+                          " Setting it to the default (ZYX)")
             priority_kind = 3
     else:
         warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
@@ -359,6 +360,7 @@ def generate_jtlv_smv(spec):
     logger.debug('SMV file:\n' + smv)
     return smv
 
+
 smv_template = '''
 MODULE main
     VAR
@@ -395,6 +397,7 @@ def generate_jtlv_ltl(spec):
 
     return ltl
 
+
 ltl_template = '''
 LTLSPEC
 (
@@ -406,6 +409,7 @@ LTLSPEC
 {g}
 );
 '''
+
 
 def jtlv_output_to_networkx(lines, spec):
     """Return a graph after parsing JTLV's output.
@@ -457,7 +461,7 @@ def jtlv_output_to_networkx(lines, spec):
                 if var not in state:
                     raise ValueError(
                         'Variable "{var}" not assigned in "{line}"'.format(
-                        var=var, line=line))
+                            var=var, line=line))
 
         # parse transitions
         if line.find('successors') >= 0:
@@ -499,8 +503,8 @@ def remove_comments(spec):
     speclines = spec.split('\n')
     newspec = ''
     for line in speclines:
-        if not '--' in line:
-            newspec+=line+'\n'
+        if '--' not in line:
+            newspec += line + '\n'
     return newspec
 
 
@@ -526,8 +530,9 @@ def check_vars(varNames):
 def check_spec(spec, varNames):
     """Verify that all non-operators in "spec" are in the list of vars."""
     # Replace all special characters with whitespace
-    special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
-      "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
+    special_characters = [
+        "next(", "[]", "<>", "->", "&", "|", "!",
+        "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
     for word in special_characters:
         spec = spec.replace(word, "")
 

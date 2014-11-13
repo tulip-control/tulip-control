@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,13 @@
 Formulae constituting specifications
 """
 from __future__ import absolute_import
-
 import logging
 logger = logging.getLogger(__name__)
-
 import warnings
 import pprint
 import time
 import re
 import copy
-
 from tulip.spec import parser
 from . import ast
 
@@ -95,6 +92,7 @@ class LTL(object):
     finite_set.  However, a range domain must be a C{tuple} of length
     2; otherwise it is ambiguous with finite_set.
     """
+
     def __init__(self, formula=None, input_variables=None,
                  output_variables=None):
         """Instantiate an LTL object.
@@ -262,6 +260,7 @@ class LTL(object):
             f = open(f, 'rU')
         return LTL.loads(f.read())
 
+
 class GRSpec(LTL):
     """GR(1) specification
 
@@ -304,6 +303,7 @@ class GRSpec(LTL):
     Consult L{GRSpec.__init__} concerning arguments at the time of
     instantiation.
     """
+
     def __init__(self, env_vars=None, sys_vars=None, env_init='', sys_init='',
                  env_safety='', sys_safety='', env_prog='', sys_prog=''):
         """Instantiate a GRSpec object.
@@ -714,14 +714,12 @@ class GRSpec(LTL):
             logger.debug('current cache of ASTs:\n' +
                          pprint.pformat(self._ast) + 3 * '\n')
             logger.debug('check if: ' + str(x) + ', is in cache.')
-
         if x in self._ast:
             logger.debug(str(x) + ' is already in cache')
         else:
             logger.info('AST cache does not contain:\n\t' + str(x) +
                         '\nNeed to parse.')
             self.parse()
-
         return self._ast[x]
 
     def parse(self):
@@ -731,10 +729,8 @@ class GRSpec(LTL):
         in the C{dict} attribute C{ast}.
         """
         logger.info('parsing ASTs to cache them...')
-
         vardoms = dict(self.env_vars)
         vardoms.update(self.sys_vars)
-
         # parse new clauses and cache the resulting ASTs
         for p in self._parts:
             s = getattr(self, p)
@@ -742,40 +738,31 @@ class GRSpec(LTL):
                 if x in self._ast:
                     logger.debug(str(x) + ' is already in cache')
                     continue
-
                 logger.debug('parse: ' + str(x))
                 tree = parser.parse(x)
 
                 ast.check_for_undefined_identifiers(tree, vardoms)
 
                 self._ast[x] = tree
-
         # rm cached ASTs that correspond to deleted clauses
         self._collect_cache_garbage(self._ast)
-
         logger.info('done parsing ASTs.\n')
 
     def _collect_cache_garbage(self, cache):
         logger.info('collecting garbage from GRSpec cache...')
-
         # rm cached ASTs that correspond to deleted clauses
         s = set(cache)
         for p in self._parts:
             # emptied earlier ?
             if not s:
                 break
-
             w = getattr(self, p)
-
             # exclude given formulas
             s.difference_update(w)
-
             # exclude int/bool-only forms of formulas
             s.difference_update({self._bool_int.get(x) for x in w})
-
         for x in s:
             cache.pop(x)
-
         logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
 
     def sym_to_prop(self, props):
@@ -982,42 +969,32 @@ def _to_lang(spec, s, lang):
 def replace_dependent_vars(spec, bool2form):
     logger.debug('replacing dependent variables using map:\n\t' +
                  str(bool2form))
-
     vs = dict(spec.env_vars)
     vs.update(spec.sys_vars)
-
     logger.debug('variables:\n\t' + str(vs))
-
     bool2subtree = dict()
     for boolvar, formula in bool2form.iteritems():
         logger.debug('checking var: ' + str(boolvar))
-
         if boolvar in vs:
             assert(vs[boolvar] == 'boolean')
             logger.debug(str(boolvar) + ' is indeed Boolean')
         else:
             logger.debug('spec does not contain var: ' + str(boolvar))
-
         tree = parser.parse(formula)
         bool2subtree[boolvar] = tree
 
     for s in {'env_init', 'env_safety', 'env_prog',
               'sys_init', 'sys_safety', 'sys_prog'}:
         part = getattr(spec, s)
-
         new = []
-
         for clause in part:
             logger.debug('replacing in clause:\n\t' + clause)
-
             tree = spec.ast(clause)
             ast.sub_bool_with_subtree(tree, bool2subtree)
 
             f = str(tree)
             new.append(f)
-
             logger.debug('caluse tree after replacement:\n\t' + f)
-
         setattr(spec, s, new)
 
 def stability_to_gr1(p, aux='aux'):
