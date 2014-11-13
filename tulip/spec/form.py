@@ -765,54 +765,11 @@ class GRSpec(LTL):
             cache.pop(x)
         logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
 
-    def sym_to_prop(self, props):
-        """Word-based replacement of proposition symbols by values.
-
-        For each key in C{props}, all its occurrences in
-        the formula will be replaced by the value C{props[key]}.
-
-        This is lexical substitution that does not take
-        syntax into account.
-
-        @type props: dict
-        @param props: a dictionary describing subformula (e.g.,
-            variable name) substitutions, where for each key-value
-            pair, all occurrences of key are replaced with value in
-            all components of this GRSpec object.  However, env_vars
-            and sys_vars are not changed.
-        """
-        if props is None:
-            return
-
-        symfound = True
-        while symfound:
-            for propSymbol, prop in props.iteritems():
-                logger.debug('propSymbol: ' + str(propSymbol))
-                logger.debug('prop: ' + str(prop))
-
-                if not isinstance(propSymbol, str):
-                    raise TypeError('propSymbol: ' + str(propSymbol) +
-                                    'is not a string.')
-
-                # To handle gr1c primed variables
-                if propSymbol[-1] != "'":
-                    propSymbol += r'\b'
-                logger.debug('\t' + propSymbol + ' -> ' + prop)
-
-                symfound = _sub_all(self.env_init, propSymbol, prop)
-                symfound |= _sub_all(self.env_safety, propSymbol, prop)
-                symfound |= _sub_all(self.env_prog, propSymbol, prop)
-
-                symfound |= _sub_all(self.sys_init, propSymbol, prop)
-                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
-                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
 
     def sub_values(self, var_values):
         """Substitute given values for variables.
 
         Note that there are three ways to substitute values for variables:
-
-          - lexical using L{sym_to_prop}
 
           - syntactic using this function
 
@@ -874,16 +831,6 @@ class GRSpec(LTL):
 
         return compile(s, '<string>', 'eval')
 
-def _sub_all(formula, propSymbol, prop):
-    symfound = False
-    old = r'\b' + propSymbol
-    new = '(' + prop + ')'
-
-    for i, f in enumerate(formula):
-        if re.findall(old, f):
-            formula[i] = re.sub(old, new, f)
-            symfound = True
-    return symfound
 
 def _conj(iterable, unary='', op='&&'):
     return (' ' + op + ' ').join([unary + '(' + s + ')' for s in iterable])
