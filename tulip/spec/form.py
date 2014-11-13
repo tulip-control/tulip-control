@@ -526,28 +526,6 @@ class GRSpec(LTL):
         else:
             return 'True'
 
-    def to_smv(self):
-        raise Exception('GRSpec.to_smv is defunct, possibly temporarily')
-        # trees = []
-        # # NuSMV can only handle system states
-        # for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
-        #                 (self.sys_prog, ['[]', '<>'])]:
-        #     if s:
-        #         if isinstance(s, str):
-        #             s = [s]
-        #         subtrees = []
-        #         ops.reverse() # so we apply operators outwards
-        #         for f in s:
-        #             t = ltl_parse.parse(f)
-        #             # assign appropriate temporal operators
-        #             for op in ops:
-        #                 t = ltl_parse.UnTempOp.new(t, op)
-        #             subtrees.append(t)
-        #         # & together expressions
-        #         t = reduce(lambda x, y: ltl_parse.And.new(x, y), subtrees)
-        #         trees.append(t)
-        # # & together converted subformulae
-        # return reduce(lambda x, y: ltl_parse.And.new(x, y), trees)
 
     def to_jtlv(self):
         """Return specification as list of two strings [assumption, guarantee].
