@@ -43,22 +43,6 @@ import copy
 from tulip.spec import parser
 from . import ast
 
-def mutex(varnames):
-    """Create mutual exclusion formulae from iterable of variables.
-
-    E.g., given a set of variable names {"a", "b", "c"}, return a set
-    of formulae {"a -> ! (c || b)", "c -> ! (b)"}.
-    """
-    mutex = set()
-    numVars = len(varnames)
-    varnames = list(varnames)
-    for i in range(0, numVars - 1):
-        mut_str = varnames[i] + ' -> ! (' + varnames[i + 1]
-        for j in range(i + 2, numVars):
-            mut_str += ' || ' + varnames[j]
-        mut_str += ')'
-        mutex |= {mut_str}
-    return mutex
 
 class LTL(object):
     """LTL formula (specification)

@@ -110,17 +110,6 @@ def parse_parse_test():
         yield parse_parse_check, formula, expected_len
 
 
-def form_mutex_check(varnames, expected_formulae):
-    # More like a regression test given fragility of formula strings.
-    assert mutex(varnames) == expected_formulae
-
-def form_mutex_test():
-    for (varnames, expected_form) in [(["a", "b", "c"], {"a -> ! (b || c)",
-                                                         "b -> ! (c)"}),
-                                      (set(), set()),
-                                      ({"cat"}, set())]:
-        yield form_mutex_check, varnames, expected_form
-
 def full_name_operators_test():
     formulas = {
         'always eventually p':'( G ( F p ) )',
