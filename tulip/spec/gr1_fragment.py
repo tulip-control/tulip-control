@@ -50,8 +50,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 from tulip import transys as trs
-from . import plyparser
-from . import ast as sast
+from tulip.spec import plyparser, GRSpec
+from tulip.spec import transformation as tx
+from tulip.spec import ast as sast
+
 
 def check(formula):
     """Parse formula string and create abstract syntax tree (AST).
@@ -156,6 +158,179 @@ def check(formula):
             print('reached var')
 
     return ast
+
+
+def stability_to_gr1(p, aux='aux'):
+    """Convert C{<>[] p} to GR(1).
+
+    Warning: This conversion is sound, but not complete.
+    See p.2, U{[E10]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#e10>}
+
+    GR(1) form::
+
+        !(aux) &&
+        [](aux -> X aux) &&
+        []<>(aux) &&
+
+        [](aux -> p)
+
+    @type p: str
+
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+
+    @rtype: L{GRSpec}
+    """
+    logging.warning(
+        'Conversion of stability (<>[]p) to GR(1)' +
+        'is sound, but NOT complete.'
+    )
+
+    a = aux
+    a0 = a
+
+    p = _paren(p)
+    a = _paren(a)
+
+    v = tx.check_var_name_conflict(p, a0)
+
+    sys_vars = v | {a0}
+    sys_init = {'!' + a}
+    sys_safe = {a + ' -> ' + p,
+                a + ' -> X ' + a}
+    sys_prog = {a}
+
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+
+def response_to_gr1(p, q, aux='aux'):
+    """Convert C{[](p -> <> q)} to GR(1).
+
+    GR(1) form::
+
+        []<>(aux) &&
+
+        []( (p && !q) -> X ! aux) &&
+        []( (! aux && !q) -> X ! aux)
+
+    @type p: str
+
+    @type q: str
+
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+
+    @rtype: L{GRSpec}
+    """
+    a = aux
+    a0 = a
+
+    p = _paren(p)
+    q = _paren(q)
+    a = _paren(a)
+
+    s = p + ' -> <> ' + q
+    v = tx.check_var_name_conflict(s, a0)
+
+    sys_vars = v | {a0}
+    # sys_init = {a}
+    sys_safe = {
+        '(' + p + ' && !' + q + ') -> X !' + a,
+        '(!' + a + ' && !' + q + ') -> X !' + a
+    }
+    sys_prog = {a}
+
+    return GRSpec(sys_vars=sys_vars,  # sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+
+def eventually_to_gr1(p, aux='aux'):
+    """Convert C{<> p} to GR(1).
+
+    GR(1) form::
+
+        !(aux) &&
+        [](aux -> X aux) &&
+        []<>(aux) &&
+
+        []( (!p && !aux) -> X!(aux) )
+
+    @type p: str
+
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+
+    @rtype: L{GRSpec}
+    """
+    a = aux
+    a0 = a
+
+    p = _paren(p)
+    a = _paren(a)
+
+    v = tx.check_var_name_conflict(p, a0)
+
+    sys_vars = v | {a0}
+    sys_init = {'!(' + a + ')'}
+    sys_safe = {
+        '(!' + p + ' && !' + a + ') -> X !' + a,
+        a + ' -> X ' + a
+    }
+    sys_prog = {a}
+
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+
+def until_to_gr1(p, q, aux='aux'):
+    """Convert C{p U q} to GR(1).
+
+    GR(1) form::
+
+        (!q -> !aux) &&
+        [](q -> aux)
+        [](aux -> X aux) &&
+        []<>(aux) &&
+
+        []( (!aux && X(!q) ) -> X!(aux) ) &&
+        [](!aux -> p)
+
+    @type p: str
+
+    @param aux: name to use for auxiliary variable
+    @type aux: str
+
+    @rtype: L{GRSpec}
+    """
+    a = aux
+    a0 = a
+
+    p = _paren(p)
+    q = _paren(q)
+    a = _paren(a)
+
+    s = p + ' && ' + q
+    v = tx.check_var_name_conflict(s, a0)
+
+    sys_vars = v | {a0}
+    sys_init = {'!' + q + ' -> !' + a}
+    sys_safe = {
+        q + ' -> ' + a,
+        '( (X !' + q + ') && !' + a + ') -> X !' + a,
+        a + ' -> X ' + a,
+        '(!' + a + ') -> ' + p
+    }
+    sys_prog = {a}
+
+    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
+                  sys_safety=sys_safe, sys_prog=sys_prog)
+
+
+def _paren(x):
+    return '({x})'.format(x=x)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
