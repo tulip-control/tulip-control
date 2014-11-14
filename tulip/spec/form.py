@@ -527,144 +527,21 @@ class GRSpec(LTL):
             return 'True'
 
 
-    def to_jtlv(self):
-        """Return specification as list of two strings [assumption, guarantee].
 
-        Format is that of JTLV.  Cf. L{interfaces.jtlv}.
+
+
+
         """
-        logger.info('translate to jtlv...')
-        _finite_domain2ints(self)
 
-        f = self._jtlv_str
 
-        parts = [f(self.env_init, 'valid initial env states', ''),
-                 f(self.env_safety, 'safety assumption on environment', '[]'),
-                 f(self.env_prog, 'justice assumption on environment', '[]<>')]
 
-        assumption = ' & \n'.join(x for x in parts if x)
 
-        parts = [f(self.sys_init, 'valid initial system states', ''),
-                 f(self.sys_safety, 'safety requirement on system', '[]'),
-                 f(self.sys_prog, 'progress requirement on system', '[]<>')]
 
-        guarantee = ' & \n'.join(x for x in parts if x)
 
-        return (assumption, guarantee)
-
-    def _jtlv_str(self, m, comment, prefix='[]<>'):
-        # no clauses ?
-        if not m:
-            return ''
-
-        w = []
-        for x in m:
-            logger.debug('translate clause: ' + str(x))
-
-            if not x:
-                continue
-
-            c = _to_lang(self, x, 'jtlv')
-
-            # collapse any whitespace between any
-            # "next" operator that precedes parenthesis
-            if prefix == '[]':
-                c = re.sub(r'next\s*\(', 'next(', c)
-
-            w.append('\t{prefix}({formula})'.format(prefix=prefix, formula=c))
-
-        return '-- {comment}\n{formula}'.format(
-            comment=comment, formula=' & \n'.join(w)
-        )
-
-    def to_gr1c(self):
-        """Dump to gr1c specification string.
-
-        Cf. L{interfaces.gr1c}.
-        """
-        logger.info('translate to gr1c...')
-
-        def _to_gr1c_print_vars(vardict):
-            output = ''
-            for var, dom in vardict.iteritems():
-                if dom == 'boolean':
-                    output += ' ' + var
-                elif isinstance(dom, tuple) and len(dom) == 2:
-                    output += ' %s [%d, %d]' % (var, dom[0], dom[1])
-                elif isinstance(dom, list) and len(dom) > 0:
-                    int_dom = convert_domain(dom)
-                    output += ' %s [%d, %d]' % (var, int_dom[0], int_dom[1])
-                else:
-                    raise ValueError('Domain not supported by gr1c: ' +
-                                     str(dom))
-            return output
-
-        _finite_domain2ints(self)
-
-        output = (
-            'ENV:' + _to_gr1c_print_vars(self.env_vars) + ';\n' +
-            'SYS:' + _to_gr1c_print_vars(self.sys_vars) + ';\n' +
-
-            self._gr1c_str(self.env_init, 'ENVINIT', '') +
-            self._gr1c_str(self.env_safety, 'ENVTRANS', '[]') +
-            self._gr1c_str(self.env_prog, 'ENVGOAL', '[]<>') + '\n' +
-
-            self._gr1c_str(self.sys_init, 'SYSINIT', '') +
-            self._gr1c_str(self.sys_safety, 'SYSTRANS', '[]') +
-            self._gr1c_str(self.sys_prog, 'SYSGOAL', '[]<>')
-        )
-        return output
-
-    def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
         if not s:
-            return '{name}:;\n'.format(name=name)
 
-        f = '\n& '.join([
-            prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
-            for x in s
-        ])
-        return '{name}: {f};\n'.format(name=name, f=f)
 
-    def to_slugs(self):
-        """Return structured slugs spec.
-
-        @type spec: L{GRSpec}.
         """
-        _finite_domain2ints(self)
-
-        f = self._slugs_str
-        return (
-            self._format_slugs_vars(self.env_vars, 'INPUT') +
-            self._format_slugs_vars(self.sys_vars, 'OUTPUT') +
-
-            f(self.env_safety, 'ENV_TRANS') +
-            f(self.env_prog, 'ENV_LIVENESS') +
-            f(self.env_init, 'ENV_INIT', sep='&') +
-
-            f(self.sys_safety, 'SYS_TRANS') +
-            f(self.sys_prog, 'SYS_LIVENESS') +
-            f(self.sys_init, 'SYS_INIT', sep='&')
-        )
-
-    def _slugs_str(self, r, name, sep='\n'):
-        if not r:
-            return '[{name}]\n'.format(name=name)
-
-        sep = ' {sep} '.format(sep=sep)
-        f = sep.join(_to_lang(self, x, 'slugs') for x in r if x)
-        return '[{name}]\n{f}\n\n'.format(name=name, f=f)
-
-    def _format_slugs_vars(self, vardict, name):
-        a = []
-        for var, dom in vardict.iteritems():
-            if dom == 'boolean':
-                a.append(var)
-            elif isinstance(dom, tuple) and len(dom) == 2:
-                a.append('{var}: {min}...{max}'.format(
-                    var=var, min=dom[0], max=dom[1])
-                )
-            else:
-                raise ValueError('unknown domain type: {dom}'.format(dom=dom))
-        return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
 
     def ast(self, x):
         """Return AST corresponding to formula x.
@@ -836,44 +713,6 @@ def _finite_domain2ints(spec):
 
     logger.info('done converting to integer variables.\n')
 
-def _to_lang(spec, s, lang):
-        """Get cached jtlv string.
-
-        If not found, then it translates all clauses to
-        jtlv syntax and caches the results.
-
-        It also collects garbage from the jtlv cache.
-        """
-        if spec._bool_int.get(s) in spec._cache[lang]:
-            logger.info('{s} is in {lang} cache.'.format(s=s, lang=lang))
-        else:
-            logger.info(
-                ('{s} not found in {lang} cache, '
-                'have to flatten...').format(s=s, lang=lang)
-            )
-
-            for p in spec._parts:
-                for x in getattr(spec, p):
-                    z = spec._bool_int[x]
-
-                    if z in spec._cache[lang]:
-                        continue
-
-                    if lang == 'gr1c':
-                        w = spec.ast(z).to_gr1c()
-                    elif lang == 'slugs':
-                        w = spec.ast(z).to_slugs()
-                    elif lang == 'jtlv':
-                        w = spec.ast(z).to_jtlv(spec.env_vars,
-                                                spec.sys_vars)
-                    else:
-                        raise Exception('Unknown language')
-                    spec._cache[lang][z] = w
-
-            logger.info('collect garbage from {0} cache.\n'.format(lang))
-            spec._collect_cache_garbage(spec._cache[lang])
-
-        return spec._cache[lang][spec._bool_int[s]]
 
 def replace_dependent_vars(spec, bool2form):
     logger.debug('replacing dependent variables using map:\n\t' +
@@ -914,19 +753,6 @@ def _check_var_name_conflict(f, varname):
     if varname in v:
         raise ValueError('var name "' + varname + '" already used')
     return v
-
-
-def convert_domain(dom):
-    """Return equivalent integer domain if C{dom} contais strings.
-
-    @type dom: C{list} of C{str}
-    @rtype: C{'boolean'} or C{(min_int, max_int)}
-    """
-    # not a string variable ?
-    if not isinstance(dom, list):
-        return dom
-
-    return (0, len(dom) - 1)
 
 def infer_constants(formula, variables):
     """Enclose all non-variable names in quotes.

@@ -33,13 +33,6 @@
 """
 Abstract Syntax Tree classes for LTL,
 
-supporting syntax of:
-    gr1c: http://slivingston.github.io/gr1c/md_spc_format.html
-    JTLV
-    SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
-    SPIN: http://spinroot.com/spin/Man/ltl.html
-        http://spinroot.com/spin/Man/operators.html
-    python (Boolean formulas only)
 
 Syntax taken originally roughly from:
 http://spot.lip6.fr/wiki/LtlSyntax
@@ -63,42 +56,7 @@ OP_MAP = {
     '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
 }
 
-JTLV_MAP = {
-    'False': 'FALSE', 'True': 'TRUE',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': 'next',
-    'U': 'U',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
 
-GR1C_MAP = {
-    'False': 'False', 'True': 'True',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': '',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
-
-SLUGS_MAP = {
-    'False': 'FALSE', 'True': 'TRUE',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': '',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
-
-SMV_MAP = {'G': 'G', 'F': 'F', 'X': 'X', 'U': 'U', 'R': 'V'}
-
-SPIN_MAP = {
-    'True': 'true', 'False': 'false',
-    '!': '!',
-    '|': '||', '&': '&&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'U': 'U', 'R': 'V',
-    '=': '==', '!=': '!='
-}
-
-PYTHON_MAP = {'!': 'not', '&': 'and', '|': 'or', 'xor': '^', '=': '=='}
 
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
@@ -118,15 +76,6 @@ FULL_OPERATOR_NAMES = {
     'or': '||',
 }
 
-maps = {
-    'string':OP_MAP,
-    'gr1c': GR1C_MAP,
-    'slugs': SLUGS_MAP,
-    'jtlv': JTLV_MAP,
-    'smv': SMV_MAP,
-    'spin': SPIN_MAP,
-    'python': PYTHON_MAP
-}
 
 def ast_to_labeled_graph(tree, detailed):
     """Convert AST to C{NetworkX.DiGraph} for graphics.
@@ -300,25 +249,6 @@ class LTL_AST(nx.DiGraph):
         # to override networkx.DiGraph.__str__
         return repr(self)
 
-    def to_gr1c(self):
-        return flatten(self, self.root, _to_gr1c)
-
-    def to_slugs(self):
-        return flatten(self, self.root, _to_slugs)
-
-    def to_jtlv(self, env_vars, sys_vars):
-        return flatten(self, self.root, _to_jtlv,
-                       env_vars=env_vars, sys_vars=sys_vars)
-
-    def to_promela(self):
-        return flatten(self, self.root, _to_promela)
-
-    def to_smv(self):
-        return flatten(self, self.root, _to_smv)
-
-    def to_python(self):
-        return flatten(self, self.root, _to_python)
-
     def to_pydot(self, detailed=False):
         """Create GraphViz dot string from given AST.
 
@@ -337,26 +267,6 @@ class LTL_AST(nx.DiGraph):
         p.set_ordering('out')
         p.write(filename, format=fext)
 
-def _to_string(u, *arg, **kw):
-    return u.to_string(*arg, **kw)
-
-def _to_gr1c(u, *arg, **kw):
-    return u.to_gr1c(*arg, **kw)
-
-def _to_slugs(u, *arg, **kw):
-    return u.to_slugs(*arg, **kw)
-
-def _to_jtlv(u, *arg, **kw):
-    return u.to_jtlv(*arg, **kw)
-
-def _to_promela(u, *arg, **kw):
-    return u.to_promela(*arg, **kw)
-
-def _to_smv(u, *arg, **kw):
-    return u.to_smv(*arg, **kw)
-
-def _to_python(u, *arg, **kw):
-    return u.to_python(*arg, **kw)
 
 #@profile
 def flatten(tree, u, to_lang, **kw):
@@ -417,23 +327,6 @@ class Node(object):
     def to_string(self, *arg, **kw):
         return self.flatten('string', *arg, **kw)
 
-    def to_gr1c(self, *arg, **kw):
-        return self.flatten('gr1c', *arg, **kw)
-
-    def to_slugs(self, *arg, **kw):
-        return self.flatten('slugs', *arg, **kw)
-
-    def to_jtlv(self, *arg, **kw):
-        return self.flatten('jtlv', *arg, **kw)
-
-    def to_spin(self, *arg, **kw):
-        return self.flatten('spin', *arg, **kw)
-
-    def to_smv(self, *arg, **kw):
-        return self.flatten('smv', *arg, **kw)
-
-    def to_python(self, *arg, **kw):
-        return self.flatten('python', *arg, **kw)
 
 class Term(Node):
     def __init__(self, t):
@@ -459,25 +352,6 @@ class Num(Term):
         return str(self.val)
 
 class Var(Term):
-    def to_gr1c(self, prime=None, **kw):
-        return '{val}{prime}'.format(
-            val=self.val,
-            prime="'" if prime else '')
-
-    def to_slugs(self, prime=None, **kw):
-        return '{val}{prime}'.format(
-            val=self.val,
-            prime="'" if prime else '')
-
-    def to_jtlv(self, env_vars=None, sys_vars=None, **kw):
-        if self.val in env_vars:
-            return '(e.{v})'.format(v=self.val)
-        elif self.val in sys_vars:
-            return '(s.{v})'.format(v=self.val)
-        else:
-            raise ValueError(
-                '{v} is neither env nor sys variable'.format(self.val)
-            )
 
     def eval(self, d):
         return d[self.val]
@@ -489,8 +363,6 @@ class Const(Term):
     def __repr__(self):
         return r'"%s"' % self.val
 
-    def to_jtlv(self, **kw):
-        return '(%s)' % str(self)
 
 class Bool(Term):
     def __init__(self, t):
@@ -573,9 +445,6 @@ class Imp(Binary):
     def _eval(self, l, r):
         return not l or r
 
-    def to_python(self, l, r, **kw):
-        return '( (not (' + l + ')) or ' + r + ')'
-
 class BiImp(Binary):
     @property
     def op(self):
@@ -583,9 +452,6 @@ class BiImp(Binary):
 
     def _eval(self, l, r):
         return l == r
-
-    def to_python(self, l, r, **kw):
-        return '( ' + l + ' == ' + r + ' )'
 
 class BiTempOp(Binary):
     pass

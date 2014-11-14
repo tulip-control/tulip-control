@@ -32,4 +32,4 @@
 """Specification subpackage of TuLiP"""
 from __future__ import absolute_import
 from .form import LTL, GRSpec
-from .form import mutex
+from .translation import translate
