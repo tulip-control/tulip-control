@@ -78,4 +78,4 @@ def hash_question_mark_test():
                     sys_safety=['a=2'],
                     sys_prog=['a=2'])
     with nt.assert_raises(ValueError):
-        synthesize(specs)
+        jtlv.synthesize(specs)
