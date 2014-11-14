@@ -141,18 +141,12 @@ class Operator(Node):
     def __repr__(self):
         return self.op
 
-    @property
-    def op(self):
-        return self.operator
 
 class Unary(Operator):
     def flatten(self, lang, x, **kw):
         return '( %s %s )' % (maps[lang][self.op], x)
 
 class Not(Unary):
-    @property
-    def op(self):
-        return '!'
 
 
 class UnTempOp(Unary):
@@ -165,32 +159,17 @@ class Binary(Operator):
 
 
 class And(Binary):
-    @property
-    def op(self):
-        return '&'
 
 
 class Or(Binary):
-    @property
-    def op(self):
-        return '|'
 
 class Xor(Binary):
-    @property
-    def op(self):
-        return 'xor'
 
 
 class Imp(Binary):
-    @property
-    def op(self):
-        return '->'
 
 
 class BiImp(Binary):
-    @property
-    def op(self):
-        return '<->'
 
 
 class BiTempOp(Binary):
