@@ -41,13 +41,13 @@ namely the sections of a specification file.
 from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
-import warnings
 import pprint
 import time
 import re
 import copy
 from tulip.spec import parser
-from . import ast
+from tulip.spec import transformation as tx
+from tulip.spec.translation import translate
 
 
 class LTL(object):
@@ -532,22 +532,95 @@ class GRSpec(LTL):
         else:
             return 'True'
 
+    def sub_values(self, var_values):
+        """Substitute given values for variables.
 
+        Note that there are three ways to substitute values for variables:
 
+          - syntactic using this function
 
+          - no substitution by user code, instead flatten to python and
+            use C{eval} together with a C{dict} defining
+            the values of variables, as done in L{eval_init}.
 
+        For converting non-integer finite types to
+        integer types, use L{replace_finite_by_int}.
 
+        @return: C{dict} of ASTs after the substitutions,
+            keyed by original clause (before substitution).
         """
+        logger.info('substitute values for variables...')
+        a = copy.deepcopy(self._ast)
+        for formula, tree in a.iteritems():
+            g = tx.Tree.from_recursive_ast(tree)
+            tx.sub_values(g, var_values)
+            a[formula] = g.to_recursive_ast()
+        logger.info('done with substitutions.\n')
+        return a
 
+    def compile_init(self, no_str):
+        """Compile python expression for initial conditions.
 
+        The returned bytecode can be used with C{eval}
+        and a C{dict} assigning values to variables.
+        Its value is the conjunction of C{env_init} and C{sys_init}.
 
+        Use the corresponding python data types
+        for the C{dict} values:
 
+              - C{bool} for Boolean variables
+              - C{int} for integers
+              - C{str} for arbitrary finite types
 
+        @param no_str: if True, then compile the formula
+            where all string variables have been replaced by integers.
+            Otherwise compile the original formula containing strings.
 
+        @return: python expression compiled for C{eval}
+        @rtype: C{code}
+        """
+        clauses = self.env_init + self.sys_init
+        if no_str:
+            clauses = [self._bool_int[x] for x in clauses]
+        logger.info('clauses to compile: ' + str(clauses))
+        c = [translate(self.ast(x), 'python') for x in clauses]
+        logger.info('after translation to python: ' + str(c))
+        s = _conj(c, op='and')
         if not s:
+            s = 'True'
+        return compile(s, '<string>', 'eval')
 
+    def str_to_int(self):
+        """Replace arbitrary finite vars with int vars.
 
+        Returns spec itself if it contains only int vars.
+        Otherwise it returns a copy of spec with all arbitrary
+        finite vars replaced by int-valued vars.
         """
+        logger.info('convert string variables to integers...')
+        vars_dict = dict(self.env_vars)
+        vars_dict.update(self.sys_vars)
+        fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
+        # replace symbols by ints
+        for p in self._parts:
+            for x in getattr(self, p):
+                if self._bool_int.get(x) in self._ast:
+                    logger.debug(str(x) + ' is in _bool_int cache')
+                    continue
+                else:
+                    logger.debug(str(x) + ' is not in _bool_int cache')
+                # get AST
+                a = self.ast(x)
+                # create AST copy with int and bool vars only
+                g = tx.Tree.from_recursive_ast(a)
+                tx.sub_constants(g, fvars)
+                b = g.to_recursive_ast()
+                # formula of int/bool AST
+                f = b.flatten()
+                self._ast[f] = b  # cache
+                # remember map from clauses to int/bool clauses
+                self._bool_int[x] = f
+        logger.info('done converting to integer variables.\n')
 
     def ast(self, x):
         """Return AST corresponding to formula x.
@@ -609,112 +682,6 @@ class GRSpec(LTL):
         for x in s:
             cache.pop(x)
         logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
-
-
-    def sub_values(self, var_values):
-        """Substitute given values for variables.
-
-        Note that there are three ways to substitute values for variables:
-
-          - syntactic using this function
-
-          - no substitution by user code, instead flatten to python and
-            use C{eval} together with a C{dict} defining
-            the values of variables, as done in L{eval_init}.
-
-        For converting non-integer finite types to
-        integer types, use L{replace_finite_by_int}.
-
-        @return: C{dict} of ASTs after the substitutions,
-            keyed by original clause (before substitution).
-        """
-        logger.info('substitute values for variables...')
-
-        a = copy.deepcopy(self._ast)
-
-        for formula, tree in a.iteritems():
-            a[formula] = ast.sub_values(tree, var_values)
-
-        logger.info('done with substitutions.\n')
-        return a
-
-    def compile_init(self, no_str):
-        """Compile python expression for initial conditions.
-
-        The returned bytecode can be used with C{eval}
-        and a C{dict} assigning values to variables.
-        Its value is the conjunction of C{env_init} and C{sys_init}.
-
-        Use the corresponding python data types
-        for the C{dict} values:
-
-              - C{bool} for Boolean variables
-              - C{int} for integers
-              - C{str} for arbitrary finite types
-
-        @param no_str: if True, then compile the formula
-            where all string variables have been replaced by integers.
-            Otherwise compile the original formula containing strings.
-
-        @return: python expression compiled for C{eval}
-        @rtype: C{code}
-        """
-        clauses = self.env_init + self.sys_init
-
-        if no_str:
-            clauses = [self._bool_int[x] for x in clauses]
-
-        logger.info('clauses to compile: ' + str(clauses))
-
-        c = [self.ast(x).to_python() for x in clauses]
-        logger.info('after to_python: ' + str(c))
-
-        s = _conj(c, op='and')
-
-        if not s:
-            s = 'True'
-
-        return compile(s, '<string>', 'eval')
-
-
-def _finite_domain2ints(spec):
-    """Replace arbitrary finite vars with int vars.
-
-    Returns spec itself if it contains only int vars.
-    Otherwise it returns a copy of spec with all arbitrary
-    finite vars replaced by int-valued vars.
-    """
-    logger.info('convert string variables to integers...')
-
-    vars_dict = dict(spec.env_vars)
-    vars_dict.update(spec.sys_vars)
-
-    fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
-
-    # replace symbols by ints
-    for p in spec._parts:
-        for x in getattr(spec, p):
-            if spec._bool_int.get(x) in spec._ast:
-                logger.debug(str(x) + ' is in _bool_int cache')
-                continue
-            else:
-                logger.debug(str(x) + ' is not in _bool_int cache')
-
-            # get AST
-            a = spec.ast(x)
-
-            # create AST copy with int and bool vars only
-            a = copy.deepcopy(a)
-            a.sub_constants(fvars)
-
-            # formula of int/bool AST
-            f = str(a)
-            spec._ast[f] = a  # cache
-
-            # remember map from clauses to int/bool clauses
-            spec._bool_int[x] = f
-
-    logger.info('done converting to integer variables.\n')
 
 
 def replace_dependent_vars(spec, bool2form):
