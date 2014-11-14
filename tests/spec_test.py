@@ -39,18 +39,6 @@ def full_name_operators_test():
         assert tree.flatten() == correct
 
 
-def test_to_labeled_graph():
-    f = ('( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & '
-         '( G ( X g ) ) ) )')
-    tree = parse(f)
-    assert(len(tree) == 18)
-    nodes = {'p', 'q', 'w', 'z', 'b', 'g', 'G', 'U', 'X', '&', '|', '!', '->'}
-    
-    g = ast.ast_to_labeled_graph(tree, detailed=False)
-    labels = {d['label'] for u, d in g.nodes_iter(data=True)}
-        
-    print(labels)
-    assert(labels == nodes)
 def test_ast_nodes():
     nodes = ast.make_nodes()
     # test Terminal

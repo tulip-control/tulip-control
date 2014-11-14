@@ -112,6 +112,17 @@ class GRSpec_test:
                 self.f.sys_vars["y"] == "boolean")
 
 
+def test_str_to_int():
+    x = "a' = \"hehe\""
+    s = GRSpec(sys_vars={'a': ['hehe', 'haha']},
+               sys_safety=[x])
+    s.str_to_int()
+    assert x in s._ast
+    assert x in s._bool_int
+    print(s._bool_int[x])
+    assert s._bool_int[x] == "( ( X a ) = 0 )"
+
+
 def test_replace_dependent_vars():
     sys_vars = {'a': 'boolean', 'locA': (0, 4)}
     sys_safe = ['!a', 'a & (locA = 3)']
