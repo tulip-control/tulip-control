@@ -4,6 +4,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
 import nose.tools as nt
+from tulip.spec import ast, plyparser
 from tulip.spec.parser import parse
 
 
@@ -24,16 +25,19 @@ def parse_parse_test():
 
 def full_name_operators_test():
     formulas = {
-        'always eventually p':'( G ( F p ) )',
-        'ALwaYs EvenTUAlly(p)':'( G ( F p ) )',
-        '(p and q) UNtIl (q or ((p -> w) and not (z implies b))) and always next g':
-        '( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )'
-    }
-    
+        'always eventually p': '( G ( F p ) )',
+        'ALwaYs EvenTUAlly(p)': '( G ( F p ) )',
+        ('(p and q) UNtIl (q or ((p -> w) and '
+         'not (z implies b))) and always next g'):
+        ('( ( p & q ) U ( ( q | ( ( p -> w ) & '
+         '( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )')}
+
     for f, correct in formulas.iteritems():
-        ast = parse(f, full_operators=True)
-        #ast.write('hehe.png')
-        assert(str(ast) == correct)
+        tree = parse(f, full_operators=True)
+        print(tree)
+        # g.write('hehe.png')
+        assert tree.flatten() == correct
+
 
 def test_to_labeled_graph():
     f = ('( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & '
