@@ -128,9 +128,6 @@ maps = {
     'python': PYTHON_MAP
 }
 
-class LTLException(Exception):
-    pass
-
 def ast_to_labeled_graph(tree, detailed):
     """Convert AST to C{NetworkX.DiGraph} for graphics.
 
