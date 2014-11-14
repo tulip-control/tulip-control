@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 import warnings
 import ply.lex
 import ply.yacc
-from . import ast
+from tulip.spec import ast
 
 
 TABMODULE = 'tulip.spec.parsetab'

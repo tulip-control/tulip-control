@@ -44,7 +44,7 @@ import re
 import subprocess
 import tempfile
 import slugs
-from . import jtlv
+from tulip.interfaces import jtlv
 
 
 def synthesize(spec):
