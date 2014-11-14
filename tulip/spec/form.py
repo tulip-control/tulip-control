@@ -658,9 +658,8 @@ class GRSpec(LTL):
                     continue
                 logger.debug('parse: ' + str(x))
                 tree = parser.parse(x)
-
-                ast.check_for_undefined_identifiers(tree, vardoms)
-
+                g = tx.Tree.from_recursive_ast(tree)
+                tx.check_for_undefined_identifiers(g, vardoms)
                 self._ast[x] = tree
         # rm cached ASTs that correspond to deleted clauses
         self._collect_cache_garbage(self._ast)
@@ -699,8 +698,7 @@ def replace_dependent_vars(spec, bool2form):
         else:
             logger.debug('spec does not contain var: ' + str(boolvar))
         tree = parser.parse(formula)
-        bool2subtree[boolvar] = tree
-
+        bool2subtree[boolvar] = tx.Tree.from_recursive_ast(tree)
     for s in {'env_init', 'env_safety', 'env_prog',
               'sys_init', 'sys_safety', 'sys_prog'}:
         part = getattr(spec, s)
@@ -708,9 +706,9 @@ def replace_dependent_vars(spec, bool2form):
         for clause in part:
             logger.debug('replacing in clause:\n\t' + clause)
             tree = spec.ast(clause)
-            ast.sub_bool_with_subtree(tree, bool2subtree)
-
-            f = str(tree)
+            g = tx.Tree.from_recursive_ast(tree)
+            tx.sub_bool_with_subtree(g, bool2subtree)
+            f = g.to_recursive_ast().flatten()
             new.append(f)
             logger.debug('caluse tree after replacement:\n\t' + f)
         setattr(spec, s, new)
