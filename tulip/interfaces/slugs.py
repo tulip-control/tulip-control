@@ -45,23 +45,27 @@ import subprocess
 import tempfile
 import slugs
 from tulip.interfaces import jtlv
+from tulip.spec import GRSpec, translate
 
 
 def synthesize(spec):
     """Return strategy satisfying the specification C{spec}.
 
-    @type spec: L{GRSpec}
+    @type spec: L{GRSpec} or C{str} in structured slugs syntax.
     @return: If realizable return synthesized strategy, otherwise C{None}.
     @rtype: C{networkx.DiGraph}
     """
-    struct = spec.to_slugs()
+    if isinstance(spec, GRSpec):
+        struct = translate(spec, 'slugs')
+    else:
+        struct = spec
     s = slugs.convert_to_slugsin(struct, True)
 
     with tempfile.NamedTemporaryFile(delete=False) as fin:
         fin.write(s)
 
-    logger.info('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
-                '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    logger.info('\n\n structured slugs:\n\n {struct}'.format(
+        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
     if not realizable:
         return None
 

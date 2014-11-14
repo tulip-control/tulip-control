@@ -49,8 +49,8 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 import networkx as nx
+from tulip.spec import GRSpec, translate
 
-from tulip.spec import GRSpec
 
 GR1C_BIN_PREFIX = ""
 _hl = 60 * '-'
@@ -331,16 +331,17 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
                          "interpretation (init_option)")
+    s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
-    f.write(spec.to_gr1c())
+    f.write(s)
     f.seek(0)
     logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
 
+    logger.info('gr1c input:\n' + s +_hl)
 
     if p.returncode == 0:
         return True
@@ -405,8 +406,8 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
             raise Exception('gr1c not found in path.')
         else:
             raise
-    s = spec.to_gr1c()
 
+    s = translate(spec, 'gr1c')
     logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
 
     # to make debugging by manually running gr1c easier

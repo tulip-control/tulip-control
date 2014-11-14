@@ -43,8 +43,8 @@ import subprocess
 import tempfile
 import warnings
 import networkx as nx
+from tulip.spec import translation
 
-from tulip.spec import form
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
@@ -337,7 +337,7 @@ def generate_jtlv_smv(spec):
     # Define env vars
     env = []
     for var, dom in spec.env_vars.iteritems():
-        int_dom = form.convert_domain(dom)
+        int_dom = translation.convert_domain(dom)
 
         env.append('\t\t{v} : {c};'.format(
             v=var, c=canon_to_jtlv_domain(int_dom)
@@ -346,7 +346,7 @@ def generate_jtlv_smv(spec):
     # Define sys vars
     sys = []
     for var, dom in spec.sys_vars.iteritems():
-        int_dom = form.convert_domain(dom)
+        int_dom = translation.convert_domain(dom)
 
         sys.append('\t\t{v} : {c};'.format(
             v=var, c=canon_to_jtlv_domain(int_dom)
@@ -383,7 +383,7 @@ def generate_jtlv_ltl(spec):
 
     @type spec: L{GRSpec}
     """
-    a, g = spec.to_jtlv()
+    a, g = translation.translate(spec, 'jtlv')
 
     if not a:
         a = 'TRUE'

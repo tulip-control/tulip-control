@@ -7,9 +7,9 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
 from nose.tools import raises
 import os
+from tulip.spec import GRSpec, translate
+from tulip.interfaces import gr1c
 
-from tulip.spec import GRSpec
-from tulip.interfaces import gr1cint
 
 REFERENCE_SPECFILE = """
 # For example, regarding states as bitvectors, 1011 is not in winning
@@ -66,38 +66,38 @@ class basic_test:
         self.dcounter = None
 
     def test_check_syntax(self):
-        assert gr1cint.check_syntax(REFERENCE_SPECFILE)
-        assert not gr1cint.check_syntax("foo")
+        assert gr1c.check_syntax(REFERENCE_SPECFILE)
+        assert not gr1c.check_syntax("foo")
 
     def test_to_gr1c(self):
-        assert gr1cint.check_syntax(self.f_un.to_gr1c() )
-        assert gr1cint.check_syntax(self.dcounter.to_gr1c() )
+        assert gr1c.check_syntax(translate(self.f_un, 'gr1c'))
+        assert gr1c.check_syntax(translate(self.dcounter, 'gr1c'))
 
     def test_check_realizable(self):
-        assert not gr1cint.check_realizable(self.f_un,
-                                            init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert not gr1c.check_realizable(self.f_un,
+                                         init_option="ALL_ENV_EXIST_SYS_INIT")
         self.f_un.sys_safety = []
-        assert gr1cint.check_realizable(self.f_un,
-                                        init_option="ALL_ENV_EXIST_SYS_INIT")
-        assert gr1cint.check_realizable(self.f_un,
-                                        init_option="ALL_INIT")
+        assert gr1c.check_realizable(self.f_un,
+                                     init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert gr1c.check_realizable(self.f_un,
+                                     init_option="ALL_INIT")
 
-        assert gr1cint.check_realizable(self.dcounter,
-                                        init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert gr1c.check_realizable(self.dcounter,
+                                     init_option="ALL_ENV_EXIST_SYS_INIT")
         self.dcounter.sys_init = []
-        assert gr1cint.check_realizable(self.dcounter,
-                                        init_option="ALL_INIT")
+        assert gr1c.check_realizable(self.dcounter,
+                                     init_option="ALL_INIT")
 
     def test_synthesize(self):
         self.f_un.sys_safety = []  # Make it realizable
-        g = gr1cint.synthesize(self.f_un,
-                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        g = gr1c.synthesize(self.f_un,
+                            init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
         assert len(g.env_vars) == 1 and 'x' in g.env_vars
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
 
-        g = gr1cint.synthesize(self.dcounter,
-                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        g = gr1c.synthesize(self.dcounter,
+                            init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
@@ -106,8 +106,8 @@ class basic_test:
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
         self.dcounter.sys_init = []
-        g = gr1cint.synthesize(self.dcounter,
-                               init_option="ALL_INIT")
+        g = gr1c.synthesize(self.dcounter,
+                            init_option="ALL_INIT")
         assert g is not None
         print g
         assert len(g.env_vars) == 0
@@ -172,7 +172,7 @@ class GR1CSession_test:
 
 
 def test_aut_xml2mealy():
-    g = gr1cint.load_aut_xml(REFERENCE_AUTXML)
+    g = gr1c.load_aut_xml(REFERENCE_AUTXML)
     assert g.env_vars == {"x": "boolean"}
     assert g.sys_vars == {"y": "boolean"}
     print(g.nodes())
@@ -182,7 +182,7 @@ def test_aut_xml2mealy():
 @raises(ValueError)
 def synth_init_illegal_check(init_option):
     spc = GRSpec()
-    gr1cint.synthesize(spc, init_option=init_option)
+    gr1c.synthesize(spc, init_option=init_option)
 
 
 def synth_init_illegal_test():
@@ -193,7 +193,7 @@ def synth_init_illegal_test():
 @raises(ValueError)
 def realiz_init_illegal_check(init_option):
     spc = GRSpec()
-    gr1cint.check_realizable(spc, init_option=init_option)
+    gr1c.check_realizable(spc, init_option=init_option)
 
 
 def realiz_init_illegal_test():
