@@ -146,9 +146,6 @@ class Unary(Operator):
     def flatten(self, lang, x, **kw):
         return '( %s %s )' % (maps[lang][self.op], x)
 
-class Not(Unary):
-
-
 class UnTempOp(Unary):
     def context(self):
         return self.op == 'X'
@@ -158,22 +155,6 @@ class Binary(Operator):
         return '( %s %s %s )' % (l, maps[lang][self.op], r)
 
 
-class And(Binary):
-
-
-class Or(Binary):
-
-class Xor(Binary):
-
-
-class Imp(Binary):
-
-
-class BiImp(Binary):
-
-
-class BiTempOp(Binary):
-    pass
 
 class Comparator(Binary):
     pass
