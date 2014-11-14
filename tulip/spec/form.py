@@ -29,8 +29,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Formulae constituting specifications
+"""Formulae constituting specifications
+
+what this module adds to the pure syntactic manipulations of
+L{transformation} is a variable table, with game semantics in particular.
+
+Also, those modules are for manipulating expressions.
+This module knows about program structure,
+namely the sections of a specification file.
 """
 from __future__ import absolute_import
 import logging
@@ -746,94 +752,3 @@ def replace_dependent_vars(spec, bool2form):
         setattr(spec, s, new)
 
 
-def _check_var_name_conflict(f, varname):
-    t = parser.parse(f)
-    v = {x.val for x in t.get_vars()}
-
-    if varname in v:
-        raise ValueError('var name "' + varname + '" already used')
-    return v
-
-def infer_constants(formula, variables):
-    """Enclose all non-variable names in quotes.
-
-    @param formula: well-formed LTL formula
-    @type formula: C{str} or L{LTL_AST}
-
-    @param variables: domains of variables, or only their names.
-        If the domains are given, then they are checked
-        for ambiguities as for example a variable name
-        duplicated as a possible value in the domain of
-        a string variable (the same or another).
-
-        If the names are given only, then a warning is raised,
-        because ambiguities cannot be checked in that case,
-        since they depend on what domains will be used.
-    @type variables: C{dict} as accepted by L{GRSpec} or
-        container of C{str}
-
-    @return: C{formula} with all string literals not in C{variables}
-        enclosed in double quotes
-    @rtype: C{str}
-    """
-    import networkx as nx
-
-    if isinstance(variables, dict):
-        for var in variables:
-            other_vars = dict(variables)
-            other_vars.pop(var)
-
-            check_var_conflicts({var}, other_vars)
-    else:
-        logger.error('infer constants does not know the variable domains.')
-        warnings.warn(
-            'infer_constants can give an incorrect result '
-            'depending on the variable domains.\n'
-            'If you give the variable domain definitions as dict, '
-            'then infer_constants will check for ambiguities.'
-        )
-
-    tree = parser.parse(formula)
-    old2new = dict()
-
-    for u in tree:
-        if not isinstance(u, ast.Var):
-            continue
-
-        if str(u) in variables:
-            continue
-
-        # Var (so NAME token) but not a variable
-        # turn it into a string constant
-        old2new[u] = ast.Const(str(u))
-
-    nx.relabel_nodes(tree, old2new, copy=False)
-    return str(tree)
-
-def check_var_conflicts(s, variables):
-    """Raise exception if set intersects existing variable name, or values.
-
-    Values refers to arbitrary finite data types.
-
-    @param s: set
-
-    @param variables: definitions of variable types
-    @type variables: C{dict}
-    """
-    # check conflicts with variable names
-    vars_redefined = {x for x in s if x in variables}
-
-    if vars_redefined:
-        raise Exception('Variables redefined: ' + str(vars_redefined))
-
-    # check conflicts with values of arbitrary finite data types
-    for var, domain in variables.iteritems():
-        # not arbitrary finite type ?
-        if not isinstance(domain, list):
-            continue
-
-        # var has arbitrary finite type
-        conflicting_values = {x for x in s if x in domain}
-
-        if conflicting_values:
-            raise Exception('Values redefined: ' + str(conflicting_values))
