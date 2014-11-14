@@ -32,8 +32,8 @@
 #
 """LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
 from __future__ import absolute_import
-import sys
 import re
+from tulip.spec import ast, plyparser
 
 from . import ast
 
@@ -62,14 +62,9 @@ def issafety(tree):
 # cache
 parsers = dict()
 
-def parse(formula, parser='ply', full_operators=False):
+
+def parse(formula, full_operators=False):
     """Parse formula string and create abstract syntax tree (AST).
-    
-    Both PyParsing and PLY are available for the parsing.
-    For large formulae and repeated parsing PLY is faster.
-    
-    @param parser: python package to use for generating lexer and parser
-    @type parser: 'pyparsing' | 'ply'
 
     @param full_operators: replace full names of operators
         with their symbols (case insensitive,
@@ -78,39 +73,11 @@ def parse(formula, parser='ply', full_operators=False):
     """
     if full_operators:
         formula = _replace_full_name_operators(formula)
-    
-    if parser == 'pyparsing':
-        raise Exception('pyparsing support currently defunct')
-        from . import pyparser
-        
-        spec = pyparser.parse(formula)
-    elif parser == 'ply':
-        from . import plyparser
-        
-        if 'ply' not in parsers:
-            parsers['ply'] = plyparser.Parser()
-            
-        spec = parsers['ply'].parse(formula)
-    else:
-        raise ValueError(
-            'Unknown parser: ' + str(parser) + '\n' +
-            "Available options: 'ply' | 'pyparsing'"
-        )
-    
+    if parsers.get('ply') is None:
+        parsers['ply'] = plyparser.Parser()
+    spec = parsers['ply'].parse(formula)
     # did ply fail merely printing warnings ?
     if spec is None:
         raise Exception('Parsing formula:\n{f}\nfailed'.format(f=formula))
     return spec
 
-if __name__ == "__main__":
-    from .pyparser import parse as pyparse
-    a = pyparse(sys.argv[1])
-    
-    print("Parsed expression: " + str(a))
-    print("Length: " + str(len(a)))
-    print("Variables: " + str(ast.get_vars(a)))
-    print("Safety: " + str(issafety(a)))
-    
-    print("JTLV syntax: " + str(a.to_jtlv()))
-    print("SMV syntax: " + str(a.to_smv()))
-    print("Promela syntax: " + str(a.to_promela()))
