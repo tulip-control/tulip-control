@@ -885,7 +885,7 @@ def replace_dependent_vars(spec, bool2form):
     for boolvar, formula in bool2form.iteritems():
         logger.debug('checking var: ' + str(boolvar))
         if boolvar in vs:
-            assert(vs[boolvar] == 'boolean')
+            assert vs[boolvar] == 'boolean'
             logger.debug(str(boolvar) + ' is indeed Boolean')
         else:
             logger.debug('spec does not contain var: ' + str(boolvar))

@@ -93,14 +93,14 @@ class basic_test:
         g = gr1cint.synthesize(self.f_un,
                                init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
-        assert len(g.env_vars) == 1 and g.env_vars.has_key("x")
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.env_vars) == 1 and 'x' in g.env_vars
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
 
         g = gr1cint.synthesize(self.dcounter,
                                init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
         assert len(g.env_vars) == 0
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 2
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
@@ -111,7 +111,7 @@ class basic_test:
         assert g is not None
         print g
         assert len(g.env_vars) == 0
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 6
 
 
@@ -140,22 +140,35 @@ class GR1CSession_test:
         assert vars_list == ["x (0)", "ze (1)", "y (2)", "zs (3)"]
 
     def test_getindex(self):
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 1
+        assert self.gs.getindex({"x": 0, "y": 0, "ze": 0, "zs": 0}, 0) == 1
+        assert self.gs.getindex({"x": 0, "y": 0, "ze": 0, "zs": 0}, 1) == 1
 
     def test_iswinning(self):
-        assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
-        assert not self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":1})
+        assert self.gs.iswinning({"x": 1, "y": 1, "ze": 0, "zs": 0})
+        assert not self.gs.iswinning({"x": 1, "y": 1, "ze": 0, "zs": 1})
 
     def test_env_next(self):
-        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":0}) == [{'x': 0, 'ze': 0}, {'x': 1, 'ze': 0}]
-        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":1}) == [{'x': 0, 'ze': 1}, {'x': 1, 'ze': 1}]
+        assert (self.gs.env_next({"x": 1, "y": 1, "ze": 0, "zs": 0}) ==
+                [{'x': 0, 'ze': 0}, {'x': 1, 'ze': 0}])
+        assert (self.gs.env_next({"x": 1, "y": 1, "ze": 0, "zs": 1}) ==
+                [{'x': 0, 'ze': 1}, {'x': 1, 'ze': 1}])
 
     def test_sys_nexta(self):
-        assert self.gs.sys_nexta({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}) == [{'y': 0, 'zs': 0}, {'y': 0, 'zs': 1}, {'y': 1, 'zs': 0}, {'y': 1, 'zs': 1}]
+        assert (
+            self.gs.sys_nexta(
+                {"x": 1, "y": 1, "ze": 0, "zs": 0},
+                {"x": 0, "ze": 0}
+            ) == [
+                {'y': 0, 'zs': 0},
+                {'y': 0, 'zs': 1},
+                {'y': 1, 'zs': 0},
+                {'y': 1, 'zs': 1}
+            ])
 
     def test_sys_nextfeas(self):
-        assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
+        assert self.gs.sys_nextfeas(
+            {"x": 1, "y": 1, "ze": 0, "zs": 0},
+            {"x": 0, "ze": 0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
 
 
 def test_aut_xml2mealy():

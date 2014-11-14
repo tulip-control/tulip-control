@@ -105,14 +105,14 @@ def test_sys_fts_int_states():
         statevar='loc',
         bool_actions=False
     )
-    
-    assert('X0' not in spec.sys_vars)
-    assert('X1' not in spec.sys_vars)
-    assert('X2' not in spec.sys_vars)
-    
-    assert('eloc' not in spec.sys_vars)
-    assert('loc' in spec.sys_vars)
-    assert(sorted(spec.sys_vars['loc']) == ['X0', 'X1', 'X2'])
+
+    assert 'X0' not in spec.sys_vars
+    assert 'X1' not in spec.sys_vars
+    assert 'X2' not in spec.sys_vars
+
+    assert 'eloc' not in spec.sys_vars
+    assert 'loc' in spec.sys_vars
+    assert sorted(spec.sys_vars['loc']) == ['X0', 'X1', 'X2']
 
 
 def test_env_fts_int_states():
@@ -128,15 +128,15 @@ def test_env_fts_int_states():
         statevar='eloc',
         bool_actions=False
     )
-    
-    assert('e0' not in spec.env_vars)
-    assert('e1' not in spec.env_vars)
-    assert('e2' not in spec.env_vars)
-    
-    assert('loc' not in spec.env_vars)
-    assert('eloc' in spec.env_vars)
+
+    assert 'e0' not in spec.env_vars
+    assert 'e1' not in spec.env_vars
+    assert 'e2' not in spec.env_vars
+
+    assert 'loc' not in spec.env_vars
+    assert 'eloc' in spec.env_vars
     print(spec.env_vars['eloc'])
-    assert(sorted(spec.env_vars['eloc']) == ['e0', 'e1', 'e2'])
+    assert sorted(spec.env_vars['eloc']) == ['e0', 'e1', 'e2']
 
 
 def test_sys_fts_no_actions():
@@ -148,7 +148,8 @@ def test_sys_fts_no_actions():
         sys,
         ignore_initial=False,
         statevar='loc',
-    assert('actions' not in spec.sys_vars)
+        bool_actions=False)
+    assert 'actions' not in spec.sys_vars
 
 
 def test_env_fts_bool_actions():
@@ -162,15 +163,16 @@ def test_env_fts_bool_actions():
         statevar='eloc',
         bool_actions=True,
     )
-    
-    assert('sys_actions' not in spec.env_vars)
-    assert('env_actions' not in spec.env_vars)
-    
-    assert('park' in spec.env_vars)
-    assert(spec.env_vars['park'] == 'boolean')
-    
-    assert('go' in spec.env_vars)
-    assert(spec.env_vars['go'] == 'boolean')
+
+    assert 'sys_actions' not in spec.env_vars
+    assert 'env_actions' not in spec.env_vars
+
+    assert 'park' in spec.env_vars
+    assert spec.env_vars['park'] == 'boolean'
+
+    assert 'go' in spec.env_vars
+    assert spec.env_vars['go'] == 'boolean'
+
 
 def test_env_fts_int_actions():
     """Env FTS actions must become 1 int var in GR(1).
@@ -185,17 +187,17 @@ def test_env_fts_int_actions():
         statevar='eloc',
         bool_actions=False
     )
-    
-    assert('park' not in spec.env_vars)
-    assert('go' not in spec.env_vars)
-    assert('stop' not in spec.env_vars)
-    
-    assert('sys_actions' not in spec.env_vars)
-    assert('env_actions' in spec.env_vars)    
-    
+
+    assert 'park' not in spec.env_vars
+    assert 'go' not in spec.env_vars
+    assert 'stop' not in spec.env_vars
+
+    assert 'sys_actions' not in spec.env_vars
+    assert 'env_actions' in spec.env_vars
+
     print spec.env_vars['env_actions']
-    assert(set(spec.env_vars['env_actions']) ==
-           {'park', 'go', 'stop', 'env_actionsnone'})
+    assert (set(spec.env_vars['env_actions']) ==
+            {'park', 'go', 'stop', 'env_actionsnone'})
 
 
 def test_env_ofts_bool_actions():
@@ -236,22 +238,22 @@ def test_sys_ofts_bool_actions():
 
 
 def _check_ofts_bool_actions(spec):
-    """Common assertion checking for 2 functions above.
-    """
-    assert('park' in spec.env_vars)
-    assert(spec.env_vars['park'] == 'boolean')
-    
-    assert('go' in spec.env_vars)
-    assert(spec.env_vars['go'] == 'boolean')
-    
-    assert('up' in spec.sys_vars)
-    assert(spec.sys_vars['up'] == 'boolean')
-    
-    assert('down' in spec.sys_vars)
-    assert(spec.sys_vars['down'] == 'boolean')
-    
-    assert('env_actions' not in spec.env_vars)
-    assert('sys_actions' not in spec.sys_vars)
+    """Common assertion checking for 2 functions above."""
+    assert 'park' in spec.env_vars
+    assert spec.env_vars['park'] == 'boolean'
+
+    assert 'go' in spec.env_vars
+    assert spec.env_vars['go'] == 'boolean'
+
+    assert 'up' in spec.sys_vars
+    assert spec.sys_vars['up'] == 'boolean'
+
+    assert 'down' in spec.sys_vars
+    assert spec.sys_vars['down'] == 'boolean'
+
+    assert 'env_actions' not in spec.env_vars
+    assert 'sys_actions' not in spec.sys_vars
+
 
 def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1)."""
@@ -283,20 +285,21 @@ def _check_ofts_int_actions(spec):
     """Common assertion checking for 2 function above."""
     print(spec.env_vars)
     print(spec.sys_vars)
-    assert('park' not in spec.env_vars)
-    assert('go' not in spec.env_vars)
-    assert('stop' not in spec.env_vars)
-    
-    assert('up' not in spec.sys_vars)
-    assert('down' not in spec.sys_vars)
-    assert('hover' not in spec.sys_vars)
-    
-    assert('env_actions' in spec.env_vars)
-    assert(set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'})
-    
-    assert('sys_actions' in spec.sys_vars)
-    assert(set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover',
-           'sys_actionsnone'})
+    assert 'park' not in spec.env_vars
+    assert 'go' not in spec.env_vars
+    assert 'stop' not in spec.env_vars
+
+    assert 'up' not in spec.sys_vars
+    assert 'down' not in spec.sys_vars
+    assert 'hover' not in spec.sys_vars
+
+    assert 'env_actions' in spec.env_vars
+    assert set(spec.env_vars['env_actions']) == {'park', 'go', 'stop'}
+
+    assert 'sys_actions' in spec.sys_vars
+    assert (set(spec.sys_vars['sys_actions']) == {'up', 'down', 'hover',
+            'sys_actionsnone'})
+
 
 def test_only_mode_control():
     """Unrealizable due to non-determinism.
@@ -361,7 +364,7 @@ def test_only_mode_control():
                         env_safe, sys_safe, env_prog, sys_prog)
 
     r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
-    assert(not r)
+    assert not r
 
 
 def multiple_env_actions_test():
@@ -402,13 +405,14 @@ def multiple_env_actions_test():
     specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
 
     r = synth.is_realizable('gr1c', specs, sys=sys)
-    assert(r)
-    
+    assert r
+
     # slightly relax assumption
     specs = spec.GRSpec(sys_prog=sys_prog)
 
     r = synth.is_realizable('gr1c', specs, sys=sys)
-    assert(not r)
+    assert not r
+
 
 def test_var_name_conflicts():
     """Check redefinitions between states, actions, atomic props."""
@@ -590,12 +594,12 @@ def test_determinize_machine_init():
 
     # determinize all outputs arbitrarily
     detmach = synth.determinize_machine_init(mach)
-    assert(detmach is not mach)
+    assert detmach is not mach
 
     for a in {0, 1}:
         edges = [(i, j) for (i, j, d) in detmach.edges_iter(u, data=True)
                  if d['a'] == a]
-        assert(len(edges) == 1)
+        assert len(edges) == 1
 
     # determinize output b arbitrarily,
     # but output c is constrained to the initial value 0
@@ -604,11 +608,11 @@ def test_determinize_machine_init():
     for a in {0, 1}:
         edges = [(i, j, d) for (i, j, d) in detmach.edges_iter(u, data=True)
                  if d['a'] == a]
-        assert(len(edges) == 1)
+        assert len(edges) == 1
 
         ((i, j, d), ) = edges
-        assert(j == 1)
-        assert(d['b'] == 1)
+        assert j == 1
+        assert d['b'] == 1
 
 
 class synthesize_test:
