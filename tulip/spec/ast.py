@@ -104,8 +104,6 @@ class Term(Node):
     def flatten(self, *arg, **kw):
         return self.val
 
-    def eval(self, d):
-        return self.val
 
 class Num(Term):
     def __init__(self, t):
@@ -116,8 +114,6 @@ class Num(Term):
 
 class Var(Term):
 
-    def eval(self, d):
-        return d[self.val]
 
 class Const(Term):
     def __init__(self, t):
@@ -158,8 +154,6 @@ class Not(Unary):
     def op(self):
         return '!'
 
-    def eval(self, d):
-        return not self.operand.eval(d)
 
 class UnTempOp(Unary):
     def context(self):
@@ -169,52 +163,35 @@ class Binary(Operator):
     def flatten(self, lang, l, r, **kw):
         return '( %s %s %s )' % (l, maps[lang][self.op], r)
 
-    def eval(self, stack, d):
-        try:
-            l, r = self._consume(stack)
-            return self._eval(l, r)
-        except AttributeError:
-            raise LTLException()
 
 class And(Binary):
     @property
     def op(self):
         return '&'
 
-    def _eval(self, l, r):
-        return l and r
 
 class Or(Binary):
     @property
     def op(self):
         return '|'
 
-    def _eval(self, l, r):
-        return l or r
-
 class Xor(Binary):
     @property
     def op(self):
         return 'xor'
 
-    def _eval(self, l, r):
-        return l ^ r
 
 class Imp(Binary):
     @property
     def op(self):
         return '->'
 
-    def _eval(self, l, r):
-        return not l or r
 
 class BiImp(Binary):
     @property
     def op(self):
         return '<->'
 
-    def _eval(self, l, r):
-        return l == r
 
 class BiTempOp(Binary):
     pass
