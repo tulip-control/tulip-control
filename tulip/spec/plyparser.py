@@ -43,20 +43,9 @@ from . import ast
 
 
 TABMODULE = 'tulip.spec.parsetab'
-
-LEX_LOGGER = '{name}.lex_logger'.format(name=__name__)
-YACC_LOGGER = '{name}.yacc_logger'.format(name=__name__)
-PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
-
-
-def _format_docstring(**kwargs):
-    """Apply C{kwargs} to function docstring using C{format}."""
-
-    def dec(func):
-        func.__doc__ = func.__doc__.format(**kwargs)
-        return func
-
-    return dec
+LEX_LOGGER = 'tulip.ltl_lex_log'.format(name=__name__)
+YACC_LOGGER = 'tulip.ltl_yacc_log'.format(name=__name__)
+PARSER_LOGGER = 'tulip.ltl_parser_log'.format(name=__name__)
 
 
 class Lexer(object):
@@ -164,14 +153,13 @@ class Lexer(object):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
 
-    @_format_docstring(logger=LEX_LOGGER)
     def build(self, debug=False, debuglog=None, **kwargs):
         """Create a lexer.
 
-        @param kwargs: Same arguments as C{{ply.lex.lex}}:
+        @param kwargs: Same arguments as C{ply.lex.lex}:
 
-          - except for C{{module}} (fixed to C{{self}})
-          - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
+          - except for C{module} (fixed to C{self})
+          - C{debuglog} defaults to the logger C{"ltl_lex_log"}.
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(LEX_LOGGER)
@@ -219,19 +207,18 @@ class Parser(object):
             write_tables=False,
             debug=False)
 
-    @_format_docstring(logger=YACC_LOGGER)
     def rebuild_parsetab(self, tabmodule, outputdir='',
                          debug=True, debuglog=None):
         """Rebuild parsetable in debug mode.
 
         @param tabmodule: name of table file
-        @type tabmodule: C{{str}}
+        @type tabmodule: C{str}
 
-        @param outputdir: save C{{tabmodule}} in this directory.
-        @type outputdir: c{{str}}
+        @param outputdir: save C{tabmodule} in this directory.
+        @type outputdir: c{str}
 
-        @param debuglog: defaults to logger C{{"{logger}"}}.
-        @type debuglog: C{{logging.Logger}}
+        @param debuglog: defaults to logger C{"ltl_yacc_log"}.
+        @type debuglog: C{logging.Logger}
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(YACC_LOGGER)
@@ -244,12 +231,11 @@ class Parser(object):
             debug=debug,
             debuglog=debuglog)
 
-    @_format_docstring(logger=PARSER_LOGGER)
     def parse(self, formula, debuglog=None):
         """Parse formula string and create abstract syntax tree (AST).
 
-        @param logger: defaults to logger C{{"{logger}"}}.
-        @type logger: C{{logging.Logger}}
+        @param logger: defaults to logger C{"ltl_parser_log"}.
+        @type logger: C{logging.Logger}
         """
         if debuglog is None:
             debuglog = logging.getLogger(PARSER_LOGGER)

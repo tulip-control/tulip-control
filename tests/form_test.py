@@ -2,6 +2,7 @@
 """Tests for GR(1) specification formulas module."""
 import logging
 logging.basicConfig(level=logging.ERROR)
+logging.getLogger('ltl_parser_log').setLevel(logging.WARNING)
 import nose.tools as nt
 from tulip.spec.form import LTL, GRSpec, replace_dependent_vars
 

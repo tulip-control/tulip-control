@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Tests for the tulip.spec subpackage."""
 import logging
-#logging.basicConfig(level=logging.DEBUG)
-import copy
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
 import nose.tools as nt
 from tulip.spec.parser import parse
 
