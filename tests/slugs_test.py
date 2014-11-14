@@ -73,5 +73,5 @@ def replace_bitfield_with_int_test():
 class basic_test(jtlvint_test.basic_test):
     def setUp(self):
         super(basic_test, self).setUp()
-        self.check_realizable = lambda x: slugs.synthesize(x, only_realizability=True)
+        self.check_realizable = lambda x: slugs.synthesize(x) is not None
         self.synthesize = slugs.synthesize
