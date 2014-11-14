@@ -78,25 +78,56 @@ class Lexer(object):
         'COMMENT', 'NEWLINE'
     )
 
-    # Tokens
-    t_TRUE = 'TRUE|True|true'
-    t_FALSE = 'FALSE|False|false'
+    def t_NAME(self, t):
+        r"""(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|"""\
+        r"""[A-Za-z][0-9_][a-zA-Z0-9._:]*)"""
+        return t
 
-    t_NEXT = r'X|next'
+    def t_TRUE(self, t):
+        r'TRUE|True|true'
+        return t
+
+    def t_FALSE(self, t):
+        r'FALSE|False|false'
+        return t
+
+    def t_NEXT(self, t):
+        r'X|next'
+        t.value = 'X'
+        return t
+
     # t_PRIME  = r'\''
-    t_ALWAYS = r'\[\]|G'
-    t_EVENTUALLY = r'\<\>|F'
 
+    def t_ALWAYS(self, t):
+        r'\[\]|G'
+        # use single letter as more readable and efficient
+        t.value = 'G'
+        return t
+
+    def t_EVENTUALLY(self, t):
+        r'\<\>|F'
+        t.value = 'F'
+        return t
+
+    def t_AND(self, t):
+        r'\&\&|\&'
+        t.value = '&'
+        return t
+
+    def t_OR(self, t):
+        r'\|\||\|'
+        t.value = '|'
+        return t
+
+    # Tokens
     t_UNTIL = r'U'
     t_RELEASE = r'R'
 
     t_NOT = r'\!'
-    t_AND = r'\&\&|\&'
-    t_OR = r'\|\||\|'
 
     t_XOR = r'\^'
 
-    t_EQUALS = r'\=\=|\='
+    t_EQUALS = r'\='  # a declarative language has no assignment
     t_NEQUALS = r'\!\='
     t_LT = r'\<'
     t_LE = r'\<\='
@@ -105,8 +136,6 @@ class Lexer(object):
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-    t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
-              r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
     t_NUMBER = r'\d+'
 
     t_IMP = '->'
