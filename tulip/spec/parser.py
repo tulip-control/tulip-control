@@ -35,20 +35,6 @@ from __future__ import absolute_import
 import re
 from tulip.spec import ast, plyparser
 
-from . import ast
-
-
-def issafety(tree):
-    """Crude test for safety spec.
-    """
-    for u, d in tree.nodes_iter(data=True):
-        t = d['ast_node']
-        
-        if isinstance(t, ast.UnTempOp) and t.operator != "G":
-            return False
-        if isinstance(t, ast.BiTempOp):
-            return False
-    return True
 
 # cache
 parsers = dict()
