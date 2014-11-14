@@ -204,6 +204,8 @@ class Parser(object):
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE'))
 
+    ast = ast.nodes
+
     def __init__(self):
         self.graph = None
         self.lexer = Lexer()
@@ -251,33 +253,13 @@ class Parser(object):
         """
         if debuglog is None:
             debuglog = logging.getLogger(PARSER_LOGGER)
-
-        g = ast.LTL_AST()
-        self.graph = g
         root = self.parser.parse(
             formula,
             lexer=self.lexer.lexer,
             debug=debuglog)
         if root is None:
             raise Exception('failed to parse:\n\t{f}'.format(f=formula))
-
-        g.root = root
-        return g
-
-    def add_identifier(self, Type, x):
-        identifier = Type(x)
-        self.graph.add_identifier(identifier)
-        return identifier
-
-    def add_unary(self, Type, p):
-        operator = Type(p[1])
-        self.graph.add_unary(operator, p[2])
-        return operator
-
-    def add_binary(self, Type, p):
-        operator = Type(p[2])
-        self.graph.add_binary(operator, p[1], p[3])
-        return operator
+        return root
 
     def p_arithmetic(self, p):
         """expression : expression TIMES expression
@@ -285,7 +267,7 @@ class Parser(object):
                       | expression PLUS expression
                       | expression MINUS expression
         """
-        p[0] = self.add_binary(ast.Arithmetic, p)
+        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
 
     def p_comparator(self, p):
         """expression : expression EQUALS expression
@@ -295,48 +277,30 @@ class Parser(object):
                       | expression GT expression
                       | expression GE expression
         """
-        p[0] = self.add_binary(ast.Comparator, p)
+        p[0] = self.ast.Comparator(p[2], p[1], p[3])
 
-    def p_and(self, p):
-        """expression : expression AND expression"""
-        p[0] = self.add_binary(ast.And, p)
+    def p_binary(self, p):
+        """expression : expression AND expression
+                      | expression OR expression
+                      | expression XOR expression
+                      | expression IMP expression
+                      | expression BIMP expression
+                      | expression UNTIL expression
+                      | expression RELEASE expression
+        """
+        p[0] = self.ast.Binary(p[2], p[1], p[3])
 
-    def p_or(self, p):
-        """expression : expression OR expression"""
-        p[0] = self.add_binary(ast.Or, p)
-
-    def p_xor(self, p):
-        """expression : expression XOR expression"""
-        p[0] = self.add_binary(ast.Xor, p)
-
-    def p_imp(self, p):
-        """expression : expression IMP expression"""
-        p[0] = self.add_binary(ast.Imp, p)
-
-    def p_bimp(self, p):
-        """expression : expression BIMP expression"""
-        p[0] = self.add_binary(ast.BiImp, p)
-
-    def p_unary_temp_op(self, p):
-        """expression : NEXT expression
+    def p_unary(self, p):
+        """expression : NOT expression
+                      | NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
-        p[0] = self.add_unary(ast.UnTempOp, p)
+        p[0] = self.ast.Unary(p[1], p[2])
 
     def p_postfix_next(self, p):
         """expression : expression PRIME"""
-        p[0] = self.add_unary(ast.UnTempOp, [None, 'X', p[1]])
-
-    def p_bin_temp_op(self, p):
-        """expression : expression UNTIL expression
-                      | expression RELEASE expression
-        """
-        p[0] = self.add_binary(ast.BiTempOp, p)
-
-    def p_not(self, p):
-        """expression : NOT expression"""
-        p[0] = self.add_unary(ast.Not, p)
+        p[0] = self.ast.Unary('X', p[1])
 
     def p_group(self, p):
         """expression : LPAREN expression RPAREN"""
@@ -344,21 +308,21 @@ class Parser(object):
 
     def p_number(self, p):
         """expression : NUMBER"""
-        p[0] = self.add_identifier(ast.Num, p[1])
+        p[0] = self.ast.Num(p[1])
 
     def p_expression_name(self, p):
         """expression : NAME"""
-        p[0] = self.add_identifier(ast.Var, p[1])
+        p[0] = self.ast.Var(p[1])
 
-    def p_expression_const(self, p):
+    def p_expression_str(self, p):
         """expression : DQUOTES NAME DQUOTES"""
-        p[0] = self.add_identifier(ast.Const, p[2])
+        p[0] = self.ast.Str(p[2])
 
     def p_bool(self, p):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = self.add_identifier(ast.Bool, p[1])
+        p[0] = self.ast.Bool(p[1])
 
     def p_error(self, p):
         print('Syntax error at "{p}"'.format(p=p.value))
@@ -373,4 +337,4 @@ def parse(formula):
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
     parsed_formula = parse(s)
-    print('Parsing result: {s}'.format(s=parsed_formula.to_gr1c()))
+    print('Parsing result: {s}'.format(s=parsed_formula))
