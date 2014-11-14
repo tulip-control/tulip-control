@@ -677,9 +677,6 @@ class GRSpec(LTL):
         return compile(s, '<string>', 'eval')
 
 
-def _conj(iterable, unary='', op='&&'):
-    return (' ' + op + ' ').join([unary + '(' + s + ')' for s in iterable])
-
 def _finite_domain2ints(spec):
     """Replace arbitrary finite vars with int vars.
 
@@ -752,3 +749,6 @@ def replace_dependent_vars(spec, bool2form):
         setattr(spec, s, new)
 
 
+def _conj(iterable, unary='', op='&&'):
+    return ' {op} '.format(op=op).join(
+        ['{u}({s})'.format(u=unary, s=s) for s in iterable])

@@ -37,15 +37,6 @@ from tulip.spec import ast, plyparser
 
 from . import ast
 
-def _replace_full_name_operators(formula):
-    """Replace full names with symbols for temporal and Boolean operators.
-    
-    Each operator must be a word (as defined by \b in regexp).
-    Substitution is case insensitive.
-    """
-    for name, symbol in ast.FULL_OPERATOR_NAMES.iteritems():
-        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
-    return formula
 
 def issafety(tree):
     """Crude test for safety spec.
@@ -81,3 +72,13 @@ def parse(formula, full_operators=False):
         raise Exception('Parsing formula:\n{f}\nfailed'.format(f=formula))
     return spec
 
+
+def _replace_full_name_operators(formula):
+    """Replace full names with symbols for temporal and Boolean operators.
+
+    Each operator must be a word (as defined by \b in regexp).
+    Substitution is case insensitive.
+    """
+    for name, symbol in ast.FULL_OPERATOR_NAMES.iteritems():
+        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
+    return formula
