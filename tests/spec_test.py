@@ -4,7 +4,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
 import nose.tools as nt
-from tulip.spec import ast, plyparser
+from tulip.spec import ast, lexyacc
 from tulip.spec.parser import parse
 
 
@@ -102,7 +102,7 @@ def test_lex():
     # then "False" is parsed as "EVENTUALLY", "NAME", where
     # "NAME" is equal to "alse".
     s = 'False'
-    lexer = plyparser.Lexer()
+    lexer = lexyacc.Lexer()
     lexer.lexer.input(s)
     r = list(lexer.lexer)
     assert len(r) == 1

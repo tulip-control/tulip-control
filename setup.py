@@ -242,12 +242,12 @@ if check_deps:
 if perform_setup:
     # Build PLY table, to be installed as tulip package data
     try:
-        import tulip.spec.plyparser
-        
+        import tulip.spec.lexyacc
+
         tabmodule = 'parsetab'
         outputdir = 'tulip/spec'
-        
-        parser = tulip.spec.plyparser.Parser()
+
+        parser = tulip.spec.lexyacc.Parser()
         parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
                                 debuglog=logger)
         

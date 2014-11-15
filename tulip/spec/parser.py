@@ -33,7 +33,7 @@
 """LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
 from __future__ import absolute_import
 import re
-from tulip.spec import ast, plyparser
+from tulip.spec import ast, lexyacc
 
 
 # cache
@@ -51,7 +51,7 @@ def parse(formula, full_operators=False):
     if full_operators:
         formula = _replace_full_name_operators(formula)
     if parsers.get('ply') is None:
-        parsers['ply'] = plyparser.Parser()
+        parsers['ply'] = lexyacc.Parser()
     spec = parsers['ply'].parse(formula)
     # did ply fail merely printing warnings ?
     if spec is None:

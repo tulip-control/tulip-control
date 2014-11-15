@@ -4,7 +4,7 @@ Tests for the interface with gr1c.
 """
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
+logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
 from nose.tools import raises
 import os
 from tulip.spec import GRSpec, translate
