@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 import warnings
 import ply.lex
 import ply.yacc
-from tulip.spec import ast
+import tulip.spec.ast
 
 
 TABMODULE = 'tulip.spec.parsetab'
@@ -172,6 +172,9 @@ class Lexer(object):
 class Parser(object):
     """Production rules to build LTL parser."""
 
+    tabmodule = TABMODULE
+    start = 'expression'
+
     # lowest to highest
     precedence = (
         ('right', 'UNTIL', 'RELEASE'),
@@ -190,18 +193,20 @@ class Parser(object):
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE'))
 
-    ast = ast.nodes
-
-    def __init__(self):
-        self.graph = None
-        self.lexer = Lexer()
+    def __init__(self, ast=None, lexer=None):
+        if ast is None:
+            ast = tulip.spec.ast.nodes
+        if lexer is None:
+            lexer = Lexer()
+        self.ast = ast
+        self.lexer = lexer
         self.tokens = self.lexer.tokens
         self.build()
 
     def build(self):
         self.parser = ply.yacc.yacc(
             module=self,
-            tabmodule=TABMODULE,
+            tabmodule=self.tabmodule,
             write_tables=False,
             debug=False)
 
