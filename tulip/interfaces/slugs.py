@@ -66,6 +66,8 @@ def synthesize(spec):
 
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    realizable, out = _call_slugs(options)
+
     if not realizable:
         return None
 
