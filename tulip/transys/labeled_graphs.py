@@ -465,7 +465,8 @@ class Transitions(object):
         """Wrapper of L{LabeledDiGraph.add_edge}.
         """
         # self._breaks_determinism(from_state, labels)
-        self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
+        self.graph.add_edge(from_state, to_state,
+                            attr_dict=attr_dict, check=check, **attr)
     
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
         """Wrapper of L{LabeledDiGraph.add_edges_from}.
@@ -970,7 +971,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.add_node(node, attr_dict=attr_dict, check=check)
     
-    def add_edge(self, u, v, attr_dict=None, check=True, **attr):
+    def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
         
           - Raise ValueError if C{u} or C{v} are not already nodes.
@@ -1066,13 +1067,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             keydict = self.adj[u][v]
             # find a unique integer key
-            key = len(keydict)
-            while key in keydict:
-                key -= 1
-            
+            if key is None:
+                key = len(keydict)
+                while key in keydict:
+                    key -= 1
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            
             keydict[key] = datadict
         else:
             logger.debug('first directed edge between these nodes')
@@ -1104,17 +1104,21 @@ class LabeledDiGraph(nx.MultiDiGraph):
             datadict = dict(attr_dict)
             
             ne = len(e)
-            if ne == 3:
+            if ne == 4:
+                u, v, key, dd = e
+            elif ne == 3:
                 u, v, dd = e
-                datadict.update(dd)
+                key = None
             elif ne == 2:
                 u, v = e
+                dd = {}
+                key = None
             else:
                 raise ValueError(
-                    'Edge tuple %s must be a 2- or 3-tuple .' % (e,)
+                    'Edge tuple %s must be a 2-, 3-, or 4-tuple .' % (e,)
                 )
-            
-            self.add_edge(u, v, attr_dict=datadict, check=check)
+            datadict.update(dd)
+            self.add_edge(u, v, key=key, attr_dict=datadict, check=check)
     
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
