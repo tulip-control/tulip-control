@@ -69,7 +69,7 @@ class Lexer(object):
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'PRIME']
 
-    misc = ['NAME', 'NUMBER', 'COMMENT', 'NEWLINE']
+    misc = ['NAME', 'NUMBER']
 
     def __init__(self, debug=False):
         # for setting the logger, call build explicitly
@@ -137,11 +137,11 @@ class Lexer(object):
 
     t_ignore = " \t"
 
-    def t_COMMENT(self, t):
+    def t_comment(self, t):
         r'\#.*'
         return
 
-    def t_NEWLINE(self, t):
+    def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
 
