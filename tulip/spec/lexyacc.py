@@ -54,7 +54,7 @@ class Lexer(object):
 
     reserved = {
         'next': 'NEXT',
-        'X': 'NEXT',
+        'X': 'XNEXT',
         'false': 'FALSE',
         'true': 'TRUE',
         'G': 'ALWAYS',
@@ -84,8 +84,6 @@ class Lexer(object):
         # special treatment
         if t.value.lower() in {'false', 'true'}:
             t.type = self.reserved[t.value.lower()]
-        if t.value == 'next':
-            t.value = 'X'
         return t
 
     # t_PRIME  = r'\''
@@ -281,11 +279,16 @@ class Parser(object):
 
     def p_unary(self, p):
         """expression : NOT expression
-                      | NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
         p[0] = self.ast.Unary(p[1], p[2])
+
+    def p_prefix_next(self, p):
+        """expression : NEXT expression
+                      | XNEXT expression
+        """
+        p[0] = self.ast.Unary('X', p[2])
 
     def p_postfix_next(self, p):
         """expression : expression PRIME"""
