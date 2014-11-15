@@ -71,7 +71,7 @@ sys_safe = {
     'X5 -> X (X4 || X2)',
 }
 
-sys_safe |= spec.mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
+sys_safe.add(synth.exactly_one({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})[0])
 
 sys_prog = set()                # empty set
 

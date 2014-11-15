@@ -47,7 +47,7 @@ import re
 import copy
 from tulip.spec import parser
 from tulip.spec import transformation as tx
-from tulip.spec.translation import translate
+from tulip.spec import translation as ts
 
 
 class LTL(object):
@@ -583,7 +583,8 @@ class GRSpec(LTL):
         if no_str:
             clauses = [self._bool_int[x] for x in clauses]
         logger.info('clauses to compile: ' + str(clauses))
-        c = [translate(self.ast(x), 'python') for x in clauses]
+        c = [ts.translate_ast(self.ast(x), 'python').flatten()
+             for x in clauses]
         logger.info('after translation to python: ' + str(c))
         s = _conj(c, op='and')
         if not s:

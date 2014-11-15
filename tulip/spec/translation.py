@@ -139,11 +139,13 @@ def make_python_nodes():
 
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '((not ({l})) or {r})'.format(l=self.left, r=self.right)
+            return '((not ({l})) or {r})'.format(l=self.left.flatten(),
+                                                 r=self.right.flatten())
 
     class BiImp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '({l} == {r})'.format(l=self.left, r=self.right)
+            return '({l} == {r})'.format(l=self.left.flatten(),
+                                         r=self.right.flatten())
 
     nodes.Imp = Imp
     nodes.BiImp = BiImp
@@ -356,11 +358,12 @@ def _ast_to_python(u, nodes):
         return cls(u.value)
     elif isinstance(u, ast.nodes.Unary):
         assert u.operator == '!'
-        return cls(u.operator, _ast_to_lang(u.operand))
+        return cls(u.operator, _ast_to_python(u.operand, nodes))
     elif isinstance(u, ast.nodes.Binary):
         assert u.operator in {'&', '|', '^', '=', '->', '<->'}
         if u.operator == '->':
             cls = nodes.Imp
         elif u.operator == '<->':
             cls = nodes.BiImp
-        return cls(u.operator, _ast_to_lang(u.left), _ast_to_lang(u.right))
+        return cls(u.operator, _ast_to_python(u.left, nodes),
+                   _ast_to_python(u.right, nodes))

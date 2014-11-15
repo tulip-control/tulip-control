@@ -43,9 +43,10 @@ from tulip.spec import ast
 
 
 TABMODULE = 'tulip.spec.parsetab'
-LEX_LOGGER = 'tulip.ltl_lex_log'.format(name=__name__)
-YACC_LOGGER = 'tulip.ltl_yacc_log'.format(name=__name__)
-PARSER_LOGGER = 'tulip.ltl_parser_log'.format(name=__name__)
+LEX_LOGGER = 'tulip.ltl_lex_log'
+YACC_LOGGER = 'tulip.ltl_yacc_log'
+PARSER_LOGGER = 'tulip.ltl_parser_log'
+# TODO: add past fragment of LTL
 
 
 class Lexer(object):
