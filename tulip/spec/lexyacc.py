@@ -52,50 +52,52 @@ PARSER_LOGGER = 'tulip.ltl_parser_log'
 class Lexer(object):
     """Token rules to build LTL lexer."""
 
-    def __init__(self, debug=False):
-        # for setting the logger, call build explicitly
-        self.build(debug=debug)
+    reserved = {
+        'next': 'NEXT',
+        'X': 'NEXT',
+        'false': 'FALSE',
+        'true': 'TRUE',
+        'G': 'ALWAYS',
+        'F': 'EVENTUALLY',
+        'U': 'UNTIL',
+        'R': 'RELEASE'}
 
-    tokens = (
-        'TRUE', 'FALSE',
-        'NAME', 'NUMBER',
+    delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
+
+    operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'ALWAYS', 'EVENTUALLY', 'NEXT',
-        'UNTIL', 'RELEASE',
-        'PLUS', 'MINUS', 'TIMES', 'DIV',
-        'LPAREN', 'RPAREN', 'DQUOTES', 'PRIME',
-        'COMMENT', 'NEWLINE'
-    )
+        'PLUS', 'MINUS', 'TIMES', 'DIV', 'PRIME']
+
+    misc = ['NAME', 'NUMBER', 'COMMENT', 'NEWLINE']
+
+    def __init__(self, debug=False):
+        # for setting the logger, call build explicitly
+        self.tokens = (
+            self.delimiters + self.operators +
+            self.misc + self.reserved.values())
+        self.build(debug=debug)
 
     def t_NAME(self, t):
-        r"""(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|"""\
-        r"""[A-Za-z][0-9_][a-zA-Z0-9._:]*)"""
-        return t
-
-    def t_TRUE(self, t):
-        r'TRUE|True|true'
-        return t
-
-    def t_FALSE(self, t):
-        r'FALSE|False|false'
-        return t
-
-    def t_NEXT(self, t):
-        r'X|next'
-        t.value = 'X'
+        r'[A-Za-z_][A-za-z0-9._:]*'
+        t.type = self.reserved.get(t.value, 'NAME')
+        # special treatment
+        if t.value.lower() in {'false', 'true'}:
+            t.type = self.reserved[t.value.lower()]
+        if t.value == 'next':
+            t.value = 'X'
         return t
 
     # t_PRIME  = r'\''
 
     def t_ALWAYS(self, t):
-        r'\[\]|G'
+        r'\[\]'
         # use single letter as more readable and efficient
         t.value = 'G'
         return t
 
     def t_EVENTUALLY(self, t):
-        r'\<\>|F'
+        r'\<\>'
         t.value = 'F'
         return t
 
@@ -108,10 +110,6 @@ class Lexer(object):
         r'\|\||\|'
         t.value = '|'
         return t
-
-    # Tokens
-    t_UNTIL = r'U'
-    t_RELEASE = r'R'
 
     t_NOT = r'\!'
 
@@ -139,7 +137,6 @@ class Lexer(object):
     t_DQUOTES = r'\"'
     t_PRIME = r"\'"
 
-    # Ignored characters
     t_ignore = " \t"
 
     def t_COMMENT(self, t):
