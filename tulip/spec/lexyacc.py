@@ -182,12 +182,12 @@ class Parser(object):
         ('left', 'OR'),
         ('left', 'AND'),
         ('right', 'ALWAYS', 'EVENTUALLY'),
-        ('right', 'NOT'),
         ('left', 'EQUALS', 'NEQUALS'),
         ('left', 'LT', 'LE', 'GT', 'GE'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIV'),
-        ('right', 'NEXT'),
+        ('right', 'NOT', 'UMINUS'),
+        ('right', 'NEXT', 'XNEXT'),
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE'))
 
@@ -301,6 +301,10 @@ class Parser(object):
     def p_number(self, p):
         """expression : NUMBER"""
         p[0] = self.ast.Num(p[1])
+
+    def p_negative_number(self, p):
+        """expression : MINUS NUMBER %prec UMINUS"""
+        p[0] = self.ast.Num('-' + p[2])
 
     def p_expression_name(self, p):
         """expression : NAME"""
