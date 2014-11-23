@@ -428,8 +428,8 @@ def jtlv_output_to_networkx(lines, spec):
     varnames = dict(spec.sys_vars)
     varnames.update(spec.env_vars)
 
-    g.env_vars = spec.env_vars.copy()
-    g.sys_vars = spec.sys_vars.copy()
+    # g.env_vars = spec.env_vars.copy()
+    # g.sys_vars = spec.sys_vars.copy()
 
     for line in lines:
         # parse states
