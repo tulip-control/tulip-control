@@ -41,7 +41,7 @@
 """
 import logging
 logger = logging.getLogger(__name__)
-import pprint
+# import pprint
 import re
 from tulip.spec import ast
 
@@ -139,13 +139,15 @@ def make_python_nodes():
 
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '((not ({l})) or {r})'.format(l=self.left.flatten(),
-                                                 r=self.right.flatten())
+            return '((not ({l})) or {r})'.format(
+                l=self.operands[0].flatten(),
+                r=self.operands[1].flatten())
 
     class BiImp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '({l} == {r})'.format(l=self.left.flatten(),
-                                         r=self.right.flatten())
+            return '({l} == {r})'.format(
+                l=self.operands[0].flatten(),
+                r=self.operands[1].flatten())
 
     nodes.Imp = Imp
     nodes.BiImp = BiImp
@@ -313,11 +315,11 @@ def translate(spec, lang):
     @rtype: C{str}
     """
     spec.str_to_int()
-    pprint.pprint(spec._bool_int)
+    # pprint.pprint(spec._bool_int)
     d = {p: [translate_ast(spec.ast(spec._bool_int[x]), lang).flatten(
              env_vars=spec.env_vars, sys_vars=spec.sys_vars)
          for x in getattr(spec, p)] for p in spec._parts}
-    pprint.pprint(d)
+    # pprint.pprint(d)
     d['env_vars'] = spec.env_vars
     d['sys_vars'] = spec.sys_vars
     return to_lang[lang](d)
@@ -343,13 +345,12 @@ def _ast_to_lang(u, nodes):
     cls = getattr(nodes, type(u).__name__)
     if isinstance(u, ast.nodes.Terminal):
         return cls(u.value)
-    elif isinstance(u, ast.nodes.Unary):
-        x = _ast_to_lang(u.operand, nodes)
-        return cls(u.operator, x)
-    elif isinstance(u, ast.nodes.Binary):
-        x = _ast_to_lang(u.left, nodes)
-        y = _ast_to_lang(u.right, nodes)
-        return cls(u.operator, x, y)
+    elif isinstance(u, ast.nodes.Operator):
+        xyz = [_ast_to_lang(x, nodes) for x in u.operands]
+        return cls(u.operator, *xyz)
+    else:
+        raise TypeError('Unknown node type "{t}"'.format(
+            t=type(u).__name__))
 
 
 def _ast_to_python(u, nodes):
@@ -358,12 +359,13 @@ def _ast_to_python(u, nodes):
         return cls(u.value)
     elif isinstance(u, ast.nodes.Unary):
         assert u.operator == '!'
-        return cls(u.operator, _ast_to_python(u.operand, nodes))
+        return cls(u.operator, _ast_to_python(u.operands[0], nodes))
     elif isinstance(u, ast.nodes.Binary):
-        assert u.operator in {'&', '|', '^', '=', '->', '<->'}
+        assert u.operator in {'&', '|', '^', '=', '!=', '->', '<->'}
         if u.operator == '->':
             cls = nodes.Imp
         elif u.operator == '<->':
             cls = nodes.BiImp
-        return cls(u.operator, _ast_to_python(u.left, nodes),
-                   _ast_to_python(u.right, nodes))
+        return cls(u.operator,
+                   _ast_to_python(u.operands[0], nodes),
+                   _ast_to_python(u.operands[1], nodes))

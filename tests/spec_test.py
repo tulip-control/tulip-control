@@ -59,16 +59,17 @@ def test_ast_nodes():
     # test Unary
     u = nodes.Unary('!', t)
     assert u.operator == '!'
-    assert u.operand is t
+    assert u.operands[0] is t
     assert repr(u) == "Unary('!', Terminal('a'))"
-    assert str(u) == '!'
+    print(u)
+    assert str(u) == '(! a)'
     assert len(u) == 2
     assert u.flatten() == '( ! a )'
     # test Binary
     v = nodes.Binary('+', t, t2)
     assert v.operator == '+'
-    assert v.left is t
-    assert v.right is t2
+    assert v.operands[0] is t
+    assert v.operands[1] is t2
     assert repr(v) == "Binary('+', Terminal('a'), Terminal('b'))"
     assert len(v) == 3
     assert v.flatten() == "( a + b )"
@@ -139,16 +140,16 @@ def lexer_token_precedence_test():
     r = parse(s)
     assert isinstance(r, ast.nodes.Unary)
     assert r.operator == 'G'
-    assert isinstance(r.operand, ast.nodes.Var)
-    assert r.operand.value == 'a'
+    assert isinstance(r.operands[0], ast.nodes.Var)
+    assert r.operands[0].value == 'a'
     s = 'a U b'
     r = parse(s)
     assert isinstance(r, ast.nodes.Binary)
     assert r.operator == 'U'
-    assert isinstance(r.left, ast.nodes.Var)
-    assert r.left.value == 'a'
-    assert isinstance(r.right, ast.nodes.Var)
-    assert r.right.value == 'b'
+    assert isinstance(r.operands[0], ast.nodes.Var)
+    assert r.operands[0].value == 'a'
+    assert isinstance(r.operands[1], ast.nodes.Var)
+    assert r.operands[1].value == 'b'
     s = '( a )'
     r = parse(s)
     assert isinstance(r, ast.nodes.Var)
@@ -156,11 +157,11 @@ def lexer_token_precedence_test():
     r = parse(s)
     assert isinstance(r, ast.nodes.Comparator)
     assert r.operator == '='
-    x = r.left
+    x = r.operands[0]
     assert isinstance(x, ast.nodes.Unary)
     assert x.operator == 'X'
-    assert isinstance(x.operand, ast.nodes.Var)
-    assert x.operand.value == 'a'
-    y = r.right
+    assert isinstance(x.operands[0], ast.nodes.Var)
+    assert x.operands[0].value == 'a'
+    y = r.operands[1]
     assert isinstance(y, ast.nodes.Num)
     assert y.value == '1'

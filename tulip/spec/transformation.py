@@ -84,14 +84,10 @@ class Tree(nx.DiGraph):
         if isinstance(u, nodes.Terminal):
             # necessary this terminal is the root
             self.add_node(u)
-        elif isinstance(u, nodes.Unary):
-            self.add_edge(u, u.operand, pos=None)
-            self._recurse(u.operand)
-        elif isinstance(u, nodes.Binary):
-            self.add_edge(u, u.left, pos='left')
-            self.add_edge(u, u.right, pos='right')
-            self._recurse(u.left)
-            self._recurse(u.right)
+        elif isinstance(u, nodes.Operator):
+            for i, v in enumerate(u.operands):
+                self.add_edge(u, v, pos=i)
+                self._recurse(v)
         else:
             raise Exception('unknown node type')
         return u
@@ -103,19 +99,12 @@ class Tree(nx.DiGraph):
         s = self.succ[u]
         if not s:
             assert isinstance(u, nodes.Terminal)
-        elif len(s) == 2:
-            assert isinstance(u, nodes.Binary)
-            l, r = s
-            newl = self.to_recursive_ast(l)
-            newr = self.to_recursive_ast(r)
-            if s[l]['pos'] == 'right':
-                v.left, v.right = newr, newl
-            else:
-                v.left, v.right = newl, newr
         else:
-            assert isinstance(u, nodes.Unary)
-            (r, ) = s
-            v.operand = self.to_recursive_ast(r)
+            v.operands = [self.to_recursive_ast(x)
+                          for _, x, d in sorted(
+                              self.out_edges_iter(u, data=True),
+                              key=lambda y: y[2]['pos'])]
+            assert len(u.operands) == len(v.operands)
         return v
 
     def add_subtree(self, leaf, tree):
