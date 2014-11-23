@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 """Tests for the interface with slugs."""
-
 import logging
 logger = logging.getLogger(__name__)
-
 import nose.tools as nt
 from tulip.interfaces import slugs
-
 import jtlvint_test
 
 

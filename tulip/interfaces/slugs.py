@@ -35,7 +35,6 @@ Interface to the slugs implementation of GR(1) synthesis.
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
 """
-
 from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
@@ -60,17 +59,13 @@ def synthesize(spec):
     else:
         struct = spec
     s = slugs.convert_to_slugsin(struct, True)
-
     with tempfile.NamedTemporaryFile(delete=False) as fin:
         fin.write(s)
-
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
     realizable, out = _call_slugs(options)
-
     if not realizable:
         return None
-
     os.unlink(fin.name)
     # collect int vars
     vrs = dict(spec.sys_vars)

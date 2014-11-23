@@ -122,13 +122,13 @@ optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
 
 def retrieve_git_info():
     """Return commit hash of HEAD, or "release", or None if failure.
-    
+
     If the git command fails, then return None.
 
     If HEAD has tag with prefix "tulip-" or "vM" where M is an
     integer, then return 'release'.
     Tags with such names are regarded as version or release tags.
-    
+
     Otherwise, return the commit hash as str.
     """
     # Is Git installed?
@@ -250,7 +250,7 @@ if perform_setup:
         parser = tulip.spec.lexyacc.Parser()
         parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
                                 debuglog=logger)
-        
+
         plytable_build_failed = False
     except Exception as e:
         logger.debug('Failed to build PLY tables: {e}'.format(e=e))
