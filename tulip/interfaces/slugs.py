@@ -125,27 +125,23 @@ def _call_slugs(options):
             c,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+            stderr=subprocess.PIPE)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             raise Exception('slugs not found in path.')
         else:
             raise
-
     out, err = p.communicate()
     msg = (
         '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
-        '\n slugs stdout:\n\n {out}\n\n'.format(out=out)
-    )
+        '\n slugs stdrr: {c}\n\n'.format(c=err) +
+        '\n slugs stdout:\n\n {out}\n\n'.format(out=out))
     logger.debug(msg)
-
     # error ?
     if p.returncode != 0:
         raise Exception(msg)
-
-    realizable = 'Specification is realizable' in out
+    realizable = 'Specification is realizable' in err
     # check sanity
     if not realizable:
-        assert('Specification is unrealizable' in out)
+        assert 'Specification is unrealizable' in err
     return realizable, out
