@@ -253,9 +253,7 @@ def iter2var(states, variables, statevar, bool_states, must):
         return dict(), None
     logger.debug('mapping domain: ' + str(states) + '\n\t'
                  'to expression understood by a GR(1) solver.')
-
-    assert(must in {'mutex', 'xor', None})
-
+    assert must in {'mutex', 'xor', None}
     # options for modeling actions
     if must in {'mutex', 'xor'}:
         use_mutex = True
@@ -309,8 +307,7 @@ def iter2var(states, variables, statevar, bool_states, must):
                          '\n\t with domain: ' + str(domain))
         elif all_str:
             logger.debug('all states are strings')
-            assert(use_mutex)
-
+            assert use_mutex
             f = lambda x: statevar + ' = "' + str(x) + '"'
             domain = list(states)
             if not min_one:
@@ -345,9 +342,7 @@ def _fts2spec(
 ):
     """Convert closed FTS to GR(1) representation."""
     raise Exception('deprecated')
-
-    assert(isinstance(fts, transys.FiniteTransitionSystem))
-
+    assert isinstance(fts, transys.FiniteTransitionSystem)
     aps = fts.aps
     states = fts.states
     actions = fts.actions
@@ -443,9 +438,7 @@ def sys_to_spec(
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
         raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
-
-    assert(ofts.owner == 'sys')
-
+    assert ofts.owner == 'sys'
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
@@ -524,9 +517,7 @@ def env_to_spec(
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
         raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
-
-    assert(ofts.owner == 'env')
-
+    assert ofts.owner == 'env'
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
@@ -981,11 +972,9 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     @param solver: 'gr1c' or 'jtlv'
     @type solver: str
     """
-    assert(isinstance(ts, dict))
-
+    assert isinstance(ts, dict)
     for name, t in ts.iteritems():
-        assert(isinstance(t, transys.FiniteTransitionSystem))
-
+        assert isinstance(t, transys.FiniteTransitionSystem)
         ignore = name in ignore_init
         bool_act = name in bool_actions
         statevar = name
