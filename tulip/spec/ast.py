@@ -134,7 +134,8 @@ def make_nodes(opmap=None):
             return '{t}({v})'.format(t=type(self).__name__,
                                      v=repr(self.value))
 
-        def __str__(self):
+        def __str__(self, *arg, **kw):
+            # *arg accommodates "depth" arg of Operator.__str__
             return self.value
 
         def __len__(self):
@@ -166,62 +167,62 @@ def make_nodes(opmap=None):
               maps (wff)^n to wff
         """
 
-        def __str__(self):
-            return self.operator
+        def __init__(self, operator, *operands):
+            try:
+                operator + 'a'
+            except TypeError:
+                raise TypeError(
+                    'operator must be string, got: {op}'.format(
+                        op=operator))
+            self.operator = operator
+            self.operands = list(operands)
+
+        # ''.join would be faster, but __repr__ is for debugging,
+        # not for flattening, so readability takes precedence
+        def __repr__(self):
+            return '{t}({op}, {xyz})'.format(
+                t=type(self).__name__,
+                op=repr(self.operator),
+                xyz=', '.join(repr(x) for x in self.operands))
+
+        # more readable recursive counterpart of __repr__
+        # depth allows limiting recursion to see a shallower view
+        def __str__(self, depth=None):
+            if depth is not None:
+                depth = depth - 1
+            if depth == 0:
+                return '...'
+            return '({op} {xyz})'.format(
+                op=self.operator,
+                xyz=' '.join(x.__str__(depth=depth)
+                             for x in self.operands))
+
+        def __len__(self):
+            return 1 + sum(len(x) for x in self.operands)
+
+        def flatten(self, *arg, **kw):
+            return ' '.join([
+                '(',
+                self.opmap[self.operator],
+                ' '.join(x.flatten(*arg, **kw) for x in self.operands),
+                ')'])
 
     # Distinguish operators by arity
     class Unary(Operator):
-        def __init__(self, operator, operand):
-            if not isinstance(operator, basestring):
-                raise TypeError(
-                    'operator must be a string, got: {op}'.format(
-                        op=operator))
-            self.operator = operator
-            self.operand = operand
-
-        def __repr__(self):
-            return '{t}({op}, {x})'.format(
-                t=type(self).__name__,
-                op=repr(self.operator),
-                x=repr(self.operand))
-
-        def __len__(self):
-            return 1 + len(self.operand)
-
-        def flatten(self, *arg, **kw):
-            return '( {op} {x} )'.format(
-                op=self.opmap[self.operator],
-                x=self.operand.flatten(*arg, **kw))
+        pass
 
     class Binary(Operator):
-        def __init__(self, operator, left, right):
-            if not isinstance(operator, basestring):
-                raise TypeError(
-                    'operator must be a string, got: {op}'.format(
-                        op=operator))
-            self.operator = operator
-            self.left = left
-            self.right = right
-
-        def __repr__(self):
-            return '{t}({op}, {x}, {y})'.format(
-                t=type(self).__name__,
-                op=repr(self.operator),
-                x=repr(self.left),
-                y=repr(self.right))
-
-        def __len__(self):
-            return 1 + len(self.left) + len(self.right)
-
         def flatten(self, *arg, **kw):
-            """Infix flattener.
+            """Infix flattener for consistency with parser.
 
             Override it if you want prefix or postfix.
             """
-            return '( {x} {op} {y} )'.format(
-                op=self.opmap[self.operator],
-                x=self.left.flatten(*arg, **kw),
-                y=self.right.flatten(*arg, **kw))
+            return ' '.join([
+                '(',
+                self.operands[0].flatten(*arg, **kw),
+                self.opmap[self.operator],
+                self.operands[1].flatten(*arg, **kw),
+                ')'])
 
     class Nodes(object):
         """AST nodes for a generic grammar."""
