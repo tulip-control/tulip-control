@@ -21,3 +21,6 @@ nessainstall
   useful for similar settings, in particular in which there are old versions of
   system software, where only SSH access is available, and on a non-superuser
   account.  Consult nessainstall/README.md.
+
+fmu
+  routines to export a TuLiP controller as a Functional Mock-up Unit (FMU).
