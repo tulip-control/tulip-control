@@ -10,7 +10,7 @@ Installation
 Just do it
 ``````````
 
-In most cases, preparing the dependencies is achieved by ::
+In most cases, preparing the dependencies is achieved by (building ecos is not necessary) ::
 
   cd ../../extern/ecos
   ./get.sh
