@@ -25,6 +25,7 @@ Unless stated otherwise, paths are relative to the directory of this README,
 i.e. ``contrib/fmu`` in the TuLiP source tree.
 
 There are two notable external dependencies:
+
 * `ECOS <https://github.com/embotech/ecos>`_ : Consult ``../../extern/ecos/README``.
 * FMI headers : Copies of these are provided under ``../../extern/fmi``.
 
@@ -38,10 +39,11 @@ It is *not* necessary to build ecos.  Building of ecos (and other items
 distributed with it) is performed via the Makefile of the example.
 
 As demonstrated in the example, it is possible to use the FMU in Ptolemy II,
-which can be obtained from <http://ptolemy.eecs.berkeley.edu/>
+which can be obtained from http://ptolemy.eecs.berkeley.edu/
 However, Ptolemy II is not necessary for the export routine.
 
 The following standard tools must also be installed:
+
 * C compiler (e.g., `gcc`)
 * ``make``
 * ``zip``
