@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+"""Demonstration of FMU export from a controller synthesized using TuLiP
+
+This is a modified copy from the TuLiP sources of
+examples/robot_planning/continuous.py that exports an FMU.  The key
+changes are
+
+* caching of the abstraction and controller in AbstractPwa.p and FSM.p, and
+* calling exportFMU() and `make testController` (near end of this file).
+"""
+
 import os.path
 import os
 import pickle
