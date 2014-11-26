@@ -10,7 +10,6 @@ then
 	tar xzf v1.0.4.tar.gz
 	cd ecos-1.0.4
 	sed -i.orig '10s/-Wextra/-Wextra -fPIC/' ecos.mk
-	make ecos
 else
 	echo "The checksums do not match"
 fi
