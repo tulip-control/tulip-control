@@ -1,19 +1,27 @@
-CFLAGS = -O2 -Wall -DLDL_LONG -DDLONG -Wextra -fPIC
+ECOSDIR=../../extern/ecos/ecos-1.0.4
+FMIinclude=../../extern/fmi
 
-LIBS = -lm -lrt
+CFLAGS = -O2 -Wall -DLDL_LONG -DDLONG -Wextra -fPIC
+LIBS = -lm
+
+# rt is linked in the same manner as in the Makefile of ecos.
+# For Linux `-lrt` may be required with clock_gettime().
+ifeq ($(shell uname), Linux)
+LIBS += -lrt
+endif
 
 OBJ = polytope.o FSM.o mealydata.o pppdata.o TuLiPControl.o data.o
 
 # FILES TO CLEAN UP
 CLEAN = *.o 
 
-C = $(CC) $(CFLAGS) -Iinclude -I../../extern/ecos-1.0.4/external/ldl/include -I../../extern/ecos-1.0.4/external/amd/include -I../../extern/ecos-1.0.4/external/SuiteSparse_config -I../../extern/ecos-1.0.4/include -I../../extern/fmi
+C = $(CC) $(CFLAGS) -Iinclude -I$(ECOSDIR)/external/ldl/include -I$(ECOSDIR)/external/amd/include -I$(ECOSDIR)/external/SuiteSparse_config -I$(ECOSDIR)/include -I$(FMIinclude)
 
 all: fmu ecos test obj
 
 # build the ecos library 
 ecos:
-	(cd ../../extern/ecos-1.0.4	; $(MAKE) ldl amd ecos)
+	(cd $(ECOSDIR)	; $(MAKE) ldl amd ecos)
 
 # builde the .o files
 
@@ -40,7 +48,7 @@ data.o: sources/data.c include/data.h include/polytope.h
 fmu:ecos obj
 	mkdir -p binaries/linux64
 	$(C) -DFMI_COSIMULATION -c sources/TuLiPFMU.c -o TuLiPFMU.o 
-	$(C) -DFMI_COSIMULATION -shared -Wl,-soname,TuLiPFMU.so -L../../extern/ecos-1.0.4 TuLiPFMU.o $(OBJ) -lecos $(LIBS) -o binaries/linux64/TuLiPFMU.so 
+	$(C) -DFMI_COSIMULATION -shared -Wl,-soname,TuLiPFMU.so -L$(ECOSDIR) TuLiPFMU.o $(OBJ) -lecos $(LIBS) -o binaries/linux64/TuLiPFMU.so 
 	zip -r TuLiPFMU.fmu binaries/ include/ sources/ modelDescription.xml 
 
 test: testController testFSM
@@ -50,16 +58,16 @@ testFSM: ecos obj test/testFSM.c
 	echo testFSM successfully built. Type ./testFSM to run 
 
 testController: ecos obj test/testController.c 
-	$(C) -L../../extern/ecos-1.0.4 test/testController.c ../../extern/ecos-1.0.4/libecos.a $(OBJ) -lecos $(LIBS) -o testController 
+	$(C) -L$(ECOSDIR) test/testController.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o testController 
 	echo testController successfully built. Type ./testController to run 
 
 # remove object files, but keep the compiled programs 
 clean:
-	( cd ../../extern/ecos-1.0.4    ; $(MAKE) clean )
+	( cd $(ECOSDIR)    ; $(MAKE) clean )
 	- $(RM) $(CLEAN)
 
 # clean, and then remove compiled programs 
 purge: clean
-	( cd ../../extern/ecos-1.0.4    ; $(MAKE) purge )
+	( cd $(ECOSDIR)    ; $(MAKE) purge )
 	- $(RM) testFSM testController TuLiPFMU.fmu
 
