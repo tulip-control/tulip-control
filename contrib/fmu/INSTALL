@@ -1,7 +1,0 @@
-The FMU export functionality requires the ecos software package:
-
-https://github.com/embotech/ecos
-
-To install, run the following script:
-
-../../extern/ecos-1.0.4/install.sh 
