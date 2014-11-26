@@ -7,7 +7,18 @@
 
 wget https://github.com/embotech/ecos/archive/v1.0.4.tar.gz
 MD5CHECKSUM=9846bfa7817d3669f3c9269bf5567811
-FILECHECKSUM=`md5sum v1.0.4.tar.gz| sed 's/ .*//'`
+
+# check for md5sum (Linux) or md5 (Darwin)
+if hash md5sum >/dev/null 2>&1; then
+	FILECHECKSUM=`md5sum v1.0.4.tar.gz| sed 's/ .*//'`
+elif hash md5 >/dev/null 2>&1; then
+	FILECHECKSUM=`md5 -r v1.0.4.tar.gz| sed 's/ .*//'`
+else
+	echo "Neither md5sum nor md5 found in the PATH."
+	exit 1
+fi
+
+# fetch and verify checksum
 if [ "$MD5CHECKSUM" = "$FILECHECKSUM" ]
 then
 	tar xzf v1.0.4.tar.gz
