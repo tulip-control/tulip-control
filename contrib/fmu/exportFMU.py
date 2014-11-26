@@ -1,5 +1,5 @@
 """
-    Export the TuLiP output as an FMU
+Export the TuLiP output as an FMU
 """
 import uuid
 import numpy
@@ -10,8 +10,8 @@ from poly2str import matrix2str, polytope2str
 
 
 def exportXML(ctrl, pwa, uid, filename="modelDescription"):
-    """
-    Generate the modelDescription.xml for the FMU
+    """Generate the modelDescription.xml for the FMU
+
     @param ctrl: tulip.transys.machines.MealyMachine
     @param pwa: tulip.abstract,discretization.AbstractPwa
     @param uid: the uid the FMU (uuid.UUID)
@@ -71,8 +71,8 @@ def exportXML(ctrl, pwa, uid, filename="modelDescription"):
 
 
 def exportFMUheader(uid, tick, filename="TuLiPFMU"):
-    """
-    exporting the TuLiPFMU.h file
+    """Export the TuLiPFMU.h file
+
     @param uid: the uid of the FMU (uuid.UUID)
     @param tick: the time for one MPC step
     @param filename: a string of the export filename
@@ -90,8 +90,8 @@ def exportFMUheader(uid, tick, filename="TuLiPFMU"):
 
 
 def exportSysData(ctrl, pwa, initState, initRegion, filename="data"):
-    """
-    exporting the data.c file
+    """Export the data.c file
+
     @param ctrl: tulip.transys.machines.MealyMachine
     @param pwa: tulip.abstract,discretization.AbstractPwa
     @param initState: the initial state of the continuous system (numpy.array)
@@ -130,8 +130,8 @@ def exportSysData(ctrl, pwa, initState, initRegion, filename="data"):
 
 
 def exportFMU(ctrl, pwa, initState, initRegion, tick=1):
-    """
-    generating the fmu
+    """Generate the fmu
+
     @param ctrl: tulip.transys.machines.MealyMachine
     @param pwa: tulip.abstract,discretization.AbstractPwa
     @param initState: the initial state of the continuous system (numpy.array)

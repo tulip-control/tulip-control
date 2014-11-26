@@ -1,17 +1,16 @@
-"""
-Restrictions:
-    Each region is assumed to be a convex polytope
-    If not, then only the first polytope inside the region is exported
-    Hence, the MPC may be infeasible
-"""
 import polytope
 import numpy
 from poly2str import matrix2str, polytope2str
 
 
 def pppexport(ppp, filename="pppdata"):
-    """
-    export a proposition preserving partition to a c file
+    """Export a proposition preserving partition to a C file
+
+    Restrictions:
+        - Each region is assumed to be a convex polytope.
+        - If not, then only the first polytope inside the region is
+          exported. Hence, the MPC may be infeasible
+
     @param ppp: tulip.abstract.prop2partition.PropPreservingPartition
     @param filename: a string of the export filename
     @rtype: None

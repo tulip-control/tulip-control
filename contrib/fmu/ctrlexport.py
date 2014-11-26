@@ -1,7 +1,8 @@
 """
-    Export the controller synthesized by TuLiP
-    only support Deterministic Mealy machine, with 1 init state
-    only support controller synthesized by gr1c, NOT jtlv!!
+Export the controller synthesized by TuLiP
+
+- only support Deterministic Mealy machine, with 1 init state
+- only support controller synthesized by gr1c, NOT jtlv!!
 """
 import numpy
 

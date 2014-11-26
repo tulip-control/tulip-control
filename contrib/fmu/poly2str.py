@@ -2,8 +2,8 @@ import numpy
 
 
 def matrix2str(A):
-    """
-    converting a matrix A into a string
+    """Convert a matrix A into a string
+
     @param A: a numpy.array matrix
     @rtype string
     """
@@ -15,8 +15,8 @@ def matrix2str(A):
 
 
 def polytope2str(p, name):
-    """
-    converting a polytope into C code
+    """Convert a polytope into C code
+
     @param p: a polytope.polytope.Polytope
     @param name: the name of the polytope in C code
     @rtype string
