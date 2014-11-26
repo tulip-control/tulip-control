@@ -20,7 +20,6 @@ from polytope import box2poly
 from tulip.abstract import prop2part, discretize
 
 from exportFMU import exportFMU
-# @import_section_end@
 
 
 if os.path.isfile('AbstractPwa.p') and os.path.isfile('FSM.p'):
@@ -50,9 +49,7 @@ else:
 
     # Construct the LTI system describing the dynamics
     sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, cont_state_space)
-    # @dynamics_section_end@
 
-    # @partition_section@
     # Define atomic propositions for relevant regions of state space
     cont_props = {}
     cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
@@ -60,14 +57,11 @@ else:
 
     # Compute proposition preserving partition of the continuous state space
     cont_partition = prop2part(cont_state_space, cont_props)
-    # @partition_section_end@
 
-    # @discretize_section@
     pwa = discretize(
         cont_partition, sys_dyn, closed_loop=True,
         N=8, min_cell_volume=0.1, plotit=False
     )
-    # @discretize_section_end@
 
     """Specifications"""
     # Environment variables and assumptions
@@ -87,7 +81,6 @@ else:
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
 
-    # @synthesize_section@
     """Synthesize"""
     ctrl = synth.synthesize('gr1c', specs,
                             sys=pwa.ts, ignore_sys_init=True)
