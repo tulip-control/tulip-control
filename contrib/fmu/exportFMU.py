@@ -146,4 +146,3 @@ def exportFMU(ctrl, pwa, initState, initRegion, tick=1):
     pppexport(pwa.ppp)
     mealyexport(ctrl)
     os.system("make fmu")
-    return

@@ -49,4 +49,3 @@ void free_region() {
 };""")
 
     f.close()
-    return

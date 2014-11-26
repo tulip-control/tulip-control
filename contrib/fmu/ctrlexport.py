@@ -114,4 +114,3 @@ def mealyexport(ctrl, filename="mealydata"):
     fh.write("#endif")
     fc.close()
     fh.close()
-    return
