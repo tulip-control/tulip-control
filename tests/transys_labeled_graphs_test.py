@@ -6,7 +6,7 @@ Tests for transys.labeled_graphs (part of transys subpackage)
 from nose.tools import raises, assert_raises
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
-from tulip.transys.transys import OpenFTS
+from tulip.transys.transys import FTS
 
 
 def str2singleton_test():
@@ -149,7 +149,10 @@ class Transitions_test:
 
 class States_labeling_test:
     def setUp(self):
-        node_label_def = [('ap', PowerSet({'p', 'q', 'r', 'x', 'a', 'b'}) )]
+        node_label_def = [{
+            'name':'ap',
+            'values':PowerSet({'p', 'q', 'r', 'x', 'a', 'b'})
+        }]
         G = labeled_graphs.LabeledDiGraph(node_label_def)
         self.S_ap = labeled_graphs.States(G)
         G.states = self.S_ap
@@ -222,9 +225,21 @@ class States_labeling_test:
 class LabeledDiGraph_test():
     def setUp(self):
         p = PowerSet({1, 2})
-        node_labeling = [('month', ['Jan', 'Feb']),
-                         ('day', ['Mon', 'Tue']),
-                         ('comb', p, p.math_set)]
+        node_labeling = [
+            {
+                'name':'month',
+                'values':['Jan', 'Feb']
+            },
+            {
+                'name':'day',
+                'values':['Mon', 'Tue']
+            },
+            {
+                'name':'comb',
+                'values':p,
+                'setter':p.math_set
+            }
+        ]
         edge_labeling = node_labeling
         G = labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
         
@@ -273,9 +288,18 @@ def open_fts_multiple_env_actions_test():
     env_modes = MathSet({'up', 'down'})
     env_choice = MathSet({'left', 'right'})
     
-    env_actions = [('env_modes', env_modes, True),
-                   ('env_choices', env_choice)]
-    ts = OpenFTS(env_actions)
+    env_actions = [
+        {
+            'name':'env_modes',
+            'values':env_modes,
+            'setter':True
+        },
+        {
+            'name':'env_choices',
+            'values':env_choice
+        }
+    ]
+    ts = FTS(env_actions)
     
     assert(ts.env_modes is env_modes)
     assert(not hasattr(ts, 'env_choices') )

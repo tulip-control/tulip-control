@@ -34,7 +34,7 @@ tulip package version
 """
 version_info = (1, 1, 'a')
 
-version = '.'.join([str(x) for x in version_info[:2] ])
+version = '.'.join([str(x) for x in version_info[:2]])
 version += version_info[2]
 
 

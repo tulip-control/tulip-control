@@ -32,10 +32,13 @@
 """
 Base classes for labeled directed graphs
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
 import os
+import copy
 from pprint import pformat
 from collections import Iterable
 import warnings
@@ -43,7 +46,12 @@ import warnings
 import networkx as nx
 
 from .mathset import SubSet, TypedDict
-from .export import save_d3, graph2dot
+
+# inline imports:
+#
+# from .export import graph2dot
+# from .export import save_d3
+# from .export import graph2dot
 
 def label_is_desired(attr_dict, desired_dict):
     """Return True if all labels match.
@@ -52,7 +60,7 @@ def label_is_desired(attr_dict, desired_dict):
     """
     if not isinstance(attr_dict, TypedDict):
         raise Exception('attr_dict must be TypedDict' +
-                        ', instead: ' + str(type(attr_dict) ))
+                        ', instead: ' + str(type(attr_dict)))
     
     if attr_dict == desired_dict:
         return True
@@ -65,7 +73,7 @@ def label_is_desired(attr_dict, desired_dict):
     # any labels have symbolic semantics ?
     label_def = attr_dict.allowed_values
     for type_name, value in attr_dict.iteritems():
-        logger.debug('Checking label type:\n\t' +str(type_name))
+        logger.debug('Checking label type:\n\t' + str(type_name))
         
         type_def = label_def[type_name]
         desired_value = desired_dict[type_name]
@@ -87,19 +95,23 @@ def label_is_desired(attr_dict, desired_dict):
     return True
 
 def test_common_bug(value, desired_value):
-    logger.debug('Label value:\n\t' +str(value) )
-    logger.debug('Desired value:\n\t' +str(desired_value) )
+    logger.debug('Label value:\n\t' + str(value))
+    logger.debug('Desired value:\n\t' + str(desired_value))
     
-    if isinstance(value, (set, list) ) and \
-    isinstance(desired_value, (set, list) ) and \
-    value.__class__ != desired_value.__class__:
-       msg = 'Set SubLabel:\n\t' +str(value)
-       msg += 'compared to list SubLabel:\n\t' +str(desired_value)
-       msg += 'Did you mix sets & lists when setting AP labels ?'
-       raise Exception(msg)
+    if (
+        isinstance(value, (set, list)) and
+        isinstance(desired_value, (set, list)) and
+        value.__class__ != desired_value.__class__
+    ):
+        msg = (
+            'Set SubLabel:\n\t' + str(value) +
+            'compared to list SubLabel:\n\t' + str(desired_value) +
+            'Did you mix sets & lists when setting AP labels ?'
+        )
+        raise Exception(msg)
 
 class States(object):
-    """Methods to manage states, initial states, current state.
+    """Methods to manage states and initial states.
     """
     def __init__(self, graph):
         """
@@ -108,7 +120,6 @@ class States(object):
         """
         self.graph = graph
         self.initial = []
-        self.current = []
     
     def __getitem__(self, state):
         return self.graph.node[state]
@@ -121,7 +132,7 @@ class States(object):
         return self.graph.nodes(*args, **kwargs)
     
     def __str__(self):
-        return 'States:\n' +pformat(self(data=False) )
+        return 'States:\n' + pformat(self(data=False))
     
     def __len__(self):
         """Total number of states.
@@ -129,10 +140,10 @@ class States(object):
         return self.graph.number_of_nodes()
     
     def __iter__(self):
-        return iter(self() )
+        return iter(self())
         
     def __ior__(self, new_states):
-        #TODO carefully test this
+        # TODO carefully test this
         self.add_from(new_states)
         return self
     
@@ -152,24 +163,6 @@ class States(object):
         s = SubSet(self)
         s |= states
         self._initial = s
-    
-    @property
-    def current(self):
-        """Return L{SubSet} of current states.
-        
-        Non-deterministic automata can have multiple current states.
-        """
-        return self._current
-    
-    @current.setter
-    def current(self, states):
-        """Set current states.
-        
-        If state not in states, exception raised.
-        """
-        s = SubSet(self)
-        s |= states
-        self._current = s
     
     def _warn_if_state_exists(self, state):
         if state in self:
@@ -191,7 +184,7 @@ class States(object):
         """
         self._warn_if_state_exists(new_state)
         
-        logger.debug('Adding new id: ' +str(new_state) )
+        logger.debug('Adding new id: ' + str(new_state))
         self.graph.add_node(new_state, attr_dict, check, **attr)
     
     def add_from(self, new_states, check=True, **attr):
@@ -213,14 +206,10 @@ class States(object):
         for state in states:
             self.remove(state)
     
-    def post(self, states):
+    def post(self, states=None):
         """Direct successor set (1-hop) for given states.
         
-        Over all actions or letters, i.e., edge labeling is ignored,
-        because it may be undefined. Only classes which have an action
-        set, alphabet, or other transition labeling set provide a
-        pre(state, label) method, as for example pre(state, action) in
-        the case of closed transition systems.
+        Edge labels are ignored.
         
         If multiple states provided,
         then union Post(s) for s in states provided.
@@ -230,9 +219,17 @@ class States(object):
           - L{pre}
           - Def. 2.3, p.23 U{[BK08]
             <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        
+        @param states:
+          - None, so initial states returned
+          - single state or
+          - set of states or
 
         @rtype: set
         """
+        if states is None:
+            return set(self.initial)
+        
         states = self._single_state2singleton(states)
         
         successors = set()
@@ -355,26 +352,31 @@ class States(object):
             # singleton check
             if states in self:
                 state = states
-                msg = 'LabeledStates.find got single state: ' +str(state) +'\n'
-                msg += 'instead of Iterable of states.\n'
+                msg = (
+                    'LabeledStates.find got single state: ' +
+                    str(state) + '\n'
+                    'instead of Iterable of states.\n'
+                )
                 states = [state]
-                msg += 'Replaced given states = ' +str(state)
-                msg += ' with states = ' +str(states)
+                msg += 'Replaced given states = ' + str(state)
+                msg += ' with states = ' + str(states)
                 logger.debug(msg)
         
         found_state_label_pairs = []
         for state, attr_dict in self.graph.nodes_iter(data=True):
-            logger.debug('Checking state_id = ' +str(state) +
-                          ', with attr_dict = ' +str(attr_dict) )
+            logger.debug('Checking state_id = ' + str(state) +
+                         ', with attr_dict = ' + str(attr_dict))
             
             if states is not None:
                 if state not in states:
-                    logger.debug('state_id = ' +str(state) +', not desired.')
+                    logger.debug('state_id = ' + str(state) + ', not desired.')
                     continue
             
-            msg = 'Checking state label:\n\t attr_dict = '
-            msg += str(attr_dict)
-            msg += '\n vs:\n\t desired_label = ' + str(with_attr_dict)
+            msg = (
+                'Checking state label:\n\t attr_dict = ' +
+                str(attr_dict) +
+                '\n vs:\n\t desired_label = ' + str(with_attr_dict)
+            )
             logger.debug(msg)
             
             if not with_attr_dict:
@@ -384,8 +386,8 @@ class States(object):
                 ok = label_is_desired(attr_dict, with_attr_dict)
             
             if ok:
-                logger.debug('Label Matched:\n\t' +str(attr_dict) +
-                              ' == ' +str(with_attr_dict) )
+                logger.debug('Label Matched:\n\t' + str(attr_dict) +
+                             ' == ' + str(with_attr_dict))
                 state_label_pair = (state, dict(attr_dict))
                 
                 found_state_label_pairs.append(state_label_pair)
@@ -395,18 +397,14 @@ class States(object):
         return found_state_label_pairs
     
     def is_terminal(self, state):
-        """Check if state has no outgoing transitions.
+        """Return True if state has no outgoing transitions.
         
         See Also
         ========
         Def. 2.4, p.23 U{[BK08]
         <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
         """
-        successors = self.post(state)
-        if successors:
-            return False
-        else:
-            return True
+        return not bool(self.graph.successors(state))
     
     def is_blocking(self, state):
         """Check if state has outgoing transitions for each label.
@@ -438,7 +436,7 @@ class Transitions(object):
         return self.graph.edges(**kwargs)
     
     def __str__(self):
-        return 'Transitions:\n' +pformat(self() )
+        return 'Transitions:\n' + pformat(self())
     
     def __len__(self):
         """Count transitions."""
@@ -450,22 +448,25 @@ class Transitions(object):
         if not self._deterministic:
             return
         
-        if not from_state in self.graph.states:
+        if from_state not in self.graph.states:
             raise Exception('from_state \notin graph')
         
-        same_labeled = self.find([from_state], with_attr_dict=sublabels)        
+        same_labeled = self.find([from_state], with_attr_dict=sublabels)
         
         if same_labeled:
-            msg = 'Candidate transition violates determinism.\n'
-            msg += 'Existing transitions with same label:\n'
-            msg += str(same_labeled)
+            msg = (
+                'Candidate transition violates determinism.\n'
+                'Existing transitions with same label:\n' +
+                str(same_labeled)
+            )
             raise Exception(msg)
     
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
         """Wrapper of L{LabeledDiGraph.add_edge}.
         """
-        #self._breaks_determinism(from_state, labels)
-        self.graph.add_edge(from_state, to_state, attr_dict, check, **attr)
+        # self._breaks_determinism(from_state, labels)
+        self.graph.add_edge(from_state, to_state,
+                            attr_dict=attr_dict, check=check, **attr)
     
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
         """Wrapper of L{LabeledDiGraph.add_edges_from}.
@@ -510,7 +511,7 @@ class Transitions(object):
     def add_adj(
             self, adj, adj2states, attr_dict=None,
             check=True, **attr
-        ):
+    ):
         """Add multiple labeled transitions from adjacency matrix.
         
         The label can be empty.
@@ -533,7 +534,10 @@ class Transitions(object):
 
             If C{adj2states} includes a state not in sys.states,
             no transition is added and an exception raised.
-        @type adj2states: list of existing states
+        @type adj2states: either of:
+            - C{dict} from adjacency matrix indices to
+              existing, or
+            - C{list} of existing states
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -543,7 +547,7 @@ class Transitions(object):
         for state in adj2states:
             if state not in self.graph:
                 raise Exception(
-                    'State: ' +str(state) +' not found.'
+                    'State: ' + str(state) + ' not found.'
                     ' Consider adding it with sys.states.add'
                 )
         
@@ -615,7 +619,7 @@ class Transitions(object):
           - C{label}: dict
         """
         if with_attr_dict is None:
-            with_attr_dict = with_attr 
+            with_attr_dict = with_attr
         try:
             with_attr_dict.update(with_attr)
         except:
@@ -626,8 +630,9 @@ class Transitions(object):
         u_v_edges = self.graph.edges_iter(nbunch=from_states, data=True)
         
         if to_states is not None:
-            u_v_edges = [(u,v,d) for u,v,d in u_v_edges
-                                 if v in to_states]
+            u_v_edges = [(u, v, d)
+                         for u, v, d in u_v_edges
+                         if v in to_states]
         
         for u, v, attr_dict in u_v_edges:
             ok = True
@@ -650,7 +655,7 @@ class Transitions(object):
 class LabeledDiGraph(nx.MultiDiGraph):
     """Directed multi-graph with constrained labeling.
     
-    Provided facilities to define labeling functions on
+    Provides facilities to define labeling functions on
     vertices and edges, with given co-domains,
     so that labels are type-checked, not arbitrary.
     
@@ -670,6 +675,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
     but mixing labeled with unlabeled edges for the same
     edge is not allowed, to simplify and avoid confusion.
     
+    Deprecated dot export
+    =====================
+    BEWARE: the dot interface will be separated from
+    the class itself. Some basic style definitions as
+    below may remain, but masking selected labels and
+    other features will be accessible only via functions.
+    
     For dot export subclasses must define:
         
         - _state_label_def
@@ -681,41 +693,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
     
     Note: this interface will be improved in the future.
     
-    Example
-    =======
-    Initialize and define one label type called C{'fruits'}.
-    This also creates a field C{g.fruits}.
-    
-    >>> from tulip.transys import LabeledDiGraph
-    >>> node_label_types = [('fruits', set(), True)]
-    >>> g = LabeledDiGraph(node_label_types=node_label_types)
-    
-    Add some value to the codomain of type C{'fruits'}.
-    
-    >>> g.fruits |= ['apple', 'lemon']
-    
-    The label key 'day' will be untyped,
-    so the class accepts 'Jan', though incorrect.
-    
-    >>> g.add_nodes_from([(1, {'fruit':'apple'}),
-                          (2, {'fruit':'lemon', 'day':'Jan'})])
-    
-    Note
-    ====
-    1. Edge labeling implies the "multi",
-       so it is omitted from the class name.
-    
-    2. From its name, C{networkx} targets networks, so vertices
-       are called nodes. Here a general graph-theoretic
-       viewpoint is more appropriate, so vertices would be
-       preferred. But to maintain uniform terminology,
-       the term node is used (plus it is shorter to write).
-    
-    3. Label ordering will be disabled (i.e., internal use of OrderedDict),
-       because it is unreliable, so user will be encouraged to use dicts,
-       or key-value pairs. For figure saving purposes it will be
-       possible to define an order independently, as an export filter.
-    
     Credits
     =======
     Some code in overridden methods of networkx.MultiDiGraph
@@ -725,78 +702,133 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self,
         node_label_types=None,
         edge_label_types=None,
-        max_outdegree=None,
-        **kwargs
+        deterministic=False
     ):
         """Initialize the types of labelings on states and edges.
         
-        @param node_label_types: defines the state labeling functions::
-            
-            L_i : V -> D_i
-            
-        each from vertices C{V} to some co-domain C{D_i}.
-
-        Each labeling function is defined by
-        a tuple C{(L_i, D_i, setter)}:
-
-          - C{L_i} is a C{str} naming the labeling function.
-
-          - C{D_i} implements C{__contains__}
-              to enable checking label validity.
-              If you want co-domain C{D_i} to be extensible,
-              it must implement C{add}.
-
-          - C{setter}: 3 cases:
-
-            - if 2-tuple C{(L_i, D_i)} provided,
-              then no C{setter} attributes created
-
-            - if C{setter} is C{True},
-              then an attribute C{self.L_i} is created
-              pointing at the given co-domain C{D_i}
-
-            - Otherwise an attribute C{self.Li}
-              is created pointing at the given C{setter}.
-
+        Label types by example
+        ======================
+        Use a C{dict} for each label type you want to define,
+        like this:
+        
+          >>> types = [
+                  {'name': 'drink',
+                   'values': {'tea', 'coffee'},
+                   'setter': True,
+                   'default': 'tea'},
+              ]
+        
+        This will create a label type named C{'drink'} that can
+        take the values C{'tea'} and C{'coffee'}.
+        
+        Assuming this label type applies to nodes,
+        you can now label a new node as:
+        
+          >>> g = LabeledDiGraph(types)
+          >>> g.add_node(1, drink='coffee')
+        
+        If you omit the label when adding a new node,
+        it gets the default value:
+        
+          >>> g.add_node(2)
+          >>> g.node[2]
+          {'drink': 'tea'}
+        
+        The main difference with vanilla C{networkx} is
+        that the dict above includes type checking:
+        
+          >>> type(g.node[2])
+          tulip.transys.mathset.TypedDict
+        
+        The C{'setter'} key with value C{True}
+        creates also a field C{g.drink}.
         Be careful to avoid name conflicts with existing
         networkx C{MultiDiGraph} attributes.
-        @type node_label_types: C{[(L_i, D_i, setter), ...]}
         
-        @param edge_label_types: labeling functions for edges,
-            defined similarly to C{node_label_types}.
+        This allows us to add more values after creating
+        the graph:
         
-        @param max_outdegree: upper bound on the outdegree of each node.
-            Labels are ignored while counting edges,
-            so edges with different labels count as two edges.
-        @type max_outdegree: int
-        """
-        #todo
-        """
-        @param max_outdegree_per_label: like C{max_outdegree},
-            but outgoing edges are counted separately for each
-            labeling function.
-        @type max_outdegree_per_label: int
-        """
-        self._state_label_def = self._init_labeling(node_label_types)
-        self._transition_label_def = self._init_labeling(edge_label_types)
+          >>> g.drink
+          {'coffee', 'tea'}
+          >>> g.drink.add('water')
+          {'coffee', 'tea', 'water'}
+        
+        Finally, the graph will prevent us from
+        accidentally using an untyped label name,
+        by raising an C{AttributeError}:
+        
+          >>> g.add_node(3, day='Jan')
+          AttributeError: ...
+        
+        To add untyped labels, do so explicitly:
+        
+          >>> g.add_node(3, day='Jan', check=False)
+          >>> g.node[3]
+          {'day': 'Jan', 'drink': 'tea'}
+        
+        Details on label types
+        ======================
+        Each label type is defined by a C{dict} that
+        must have the keys C{'name'} and C{'values'}:
+        
+          - C{'name'}: with C{str} value
             
+          - C{'values' : B} implements C{__contains__}
+            used to check label validity.
+            
+            If you want the codomain C{B} to be
+            extensible even after initialization,
+            it must implement method C{add}.
+          
+        and optionally the keys:
+          
+          - C{'setter': C} with 3 possibilities:
+            
+            - if absent,
+              then no C{setter} attribute is created
+            
+            - otherwise an attribute C{self.A}
+              is created, pointing at:
+              
+                - the given co-domain C{B}
+                  if C{C is True}
+                
+                - C{C}, otherwise.
+          
+          - C{'default': d} is a value in C{B}
+            to be returned for node and edge labels
+            not yet explicitly specified by the user.
+        
+        @param node_label_types: applies to nodes, as described above.
+        @type node_label_types: C{list} of C{dict}
+        
+        @param edge_label_types: applies to edges, as described above.
+        @type node_label_types: C{list} of C{dict}
+        
+        @param deterministic: if True, then edge-label-deterministic
+        """
+        node_labeling, node_defaults = self._init_labeling(node_label_types)
+        edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
+        
+        self._state_label_def = node_labeling
+        self._node_label_defaults = node_defaults
+        
+        self._transition_label_def = edge_labeling
+        self._edge_label_defaults = edge_defaults
+        
         # temporary hack until rename
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
         
-        nx.MultiDiGraph.__init__(self, **kwargs)
+        nx.MultiDiGraph.__init__(self)
         
         self.states = States(self)
         
-        #todo: handle accepting states separately
-        if max_outdegree == 1:
-            deterministic = True
-        else:
-            deterministic = False
+        # todo: handle accepting states separately
         self.transitions = Transitions(self, deterministic)
         
         # export properties
-        self.dot_node_shape = {'normal':'circle'}
+        self.dot_node_shape = {'normal': 'circle'}
         self.default_layout = 'dot'
         
     def _init_labeling(self, label_types):
@@ -809,66 +841,76 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param label_types: see L{__init__}.
         """
         labeling = dict()
+        defaults = dict()
         
         if label_types is None:
             logger.debug('no label types passed')
-            return labeling
+            return labeling, defaults
         
         if not label_types:
-            logger.debug('label types absent (given: ' +
-                         str(label_types) + ')')
-            return labeling
+            logger.warn('empty label types: %s' % str(label_types))
         
-        label_types = list(label_types)
+        labeling = {d['name']: d['values'] for d in label_types}
+        defaults = {d['name']: d.get('default') for d in label_types
+                    if 'default' in d}
         
-        for label_type in label_types:
-            if len(label_type) == 2:
-                type_name, codomain = label_type
-                setter = None
-            elif len(label_type) == 3:
-                type_name, codomain, setter = label_type
-            else:
-                msg = 'label_type can be 2 or 3-tuple, '
-                msg += 'got instead:\n\t' + str(label_type)
-                raise ValueError(msg)
-            
-            labeling[type_name] = codomain
-            
-            if setter is None:
-                # don't create attribute unless told to do so
-                pass
-            elif setter is True:
-                # create attribute, point it directly to D_i
-                setattr(self, type_name, labeling[type_name])
-            else:
-                # custom setter
-                setattr(self, type_name, setter)
-        return labeling
+        setters = {d['name']: d.get('setter') for d in label_types
+                   if 'setter' in d}
+        
+        for name, setter in setters.iteritems():
+            # point to given values ?
+            if setter is True:
+                setter = labeling[name]
+            setattr(self, name, setter)
+                
+        return labeling, defaults
     
     def _check_for_untyped_keys(self, typed_attr, type_defs, check):
         untyped_keys = set(typed_attr).difference(type_defs)
         
-        msg = 'checking for untyped keys...\n'
-        msg += 'attribute dict: ' + str(typed_attr) + '\n'
-        msg += 'type definitions: ' + str(type_defs) + '\n'
-        msg += 'untyped_keys: ' + str(untyped_keys)
+        msg = (
+            'checking for untyped keys...\n' +
+            'attribute dict: ' + str(typed_attr) + '\n' +
+            'type definitions: ' + str(type_defs) + '\n' +
+            'untyped_keys: ' + str(untyped_keys)
+        )
         logger.debug(msg)
         
         if untyped_keys:
-            msg = 'The following edge attributes:\n' +\
-                  str({k:typed_attr[k] for k in untyped_keys}) +'\n' +\
-                  'are not allowed.\n' +\
-                  'Currently the allowed attributes are:' +\
-                  ', '.join([str(x) for x in type_defs])
+            msg = (
+                'The following edge attributes:\n' +
+                str({k: typed_attr[k] for k in untyped_keys}) + '\n' +
+                'are not allowed.\n' +
+                'Currently the allowed attributes are:' +
+                ', '.join([str(x) for x in type_defs])
+            )
             if check:
-                msg += '\nTo set attributes not included '+\
-                       'in the existing types, pass: check = False'
+                msg += ('\nTo set attributes not included ' +
+                        'in the existing types, pass: check = False')
                 raise AttributeError(msg)
             else:
                 msg += '\nAllowed because you passed: check = True'
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
+    
+    def is_consistent(self):
+        """Check if labels are consistent with their type definitions.
+        
+        Use case: removing values from a label type
+        can invalidate existing labels that use them.
+        
+        @rtype: bool
+        """
+        for node, attr_dict in self.nodes_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        for node_i, node_j, attr_dict in self.edges_iter(data=True):
+            if not attr_dict.is_consistent():
+                return False
+        
+        return True
     
     def _update_attr_dict_with_attr(self, attr_dict, attr):
         if attr_dict is None:
@@ -893,13 +935,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # avoid multiple additions
         if n in self:
-            logger.warn('Graph alreay has node: ' + str(n))
+            logger.debug('Graph already has node: ' + str(n))
         
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
-        typed_attr.update(attr_dict) # type checking happens here
+        typed_attr.update(copy.deepcopy(self._node_label_defaults))
+        
+        typed_attr.update(attr_dict)  # type checking happens here
         
         logger.debug('node typed_attr: ' + str(typed_attr))
         
@@ -927,13 +971,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             self.add_node(node, attr_dict=attr_dict, check=check)
     
-    def add_edge(self, u, v, attr_dict=None, check=True, **attr):
+    def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
         
           - Raise ValueError if C{u} or C{v} are not already nodes.
           - Raise Exception if edge (u, v, {}) exists.
           - Log warning if edge (u, v, attr_dict) exists.
-          - Raise ValueError if C{attr_dict} contains typed key with invalid value.
+          - Raise ValueError if C{attr_dict} contains
+            typed key with invalid value.
           - Raise AttributeError if C{attr_dict} contains untyped keys,
             unless C{check=False}.
         
@@ -974,7 +1019,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
-        typed_attr.update(attr_dict) # type checking happens here
+        typed_attr.update(copy.deepcopy(self._edge_label_defaults))
+        
+        typed_attr.update(attr_dict)  # type checking happens here
         
         logger.debug('Given: attr_dict = ' + str(attr_dict))
         logger.debug('Stored in: typed_attr = ' + str(typed_attr))
@@ -983,25 +1030,29 @@ class LabeledDiGraph(nx.MultiDiGraph):
         existing_u_v = self.get_edge_data(u, v, default={})
         
         if dict() in existing_u_v.values():
-            msg = 'Unlabeled transition: '
-            msg += 'from_state-> to_state already exists,\n'
-            msg += 'where:\t from_state = ' +str(u) +'\n'
-            msg += 'and:\t to_state = ' +str(v) +'\n'
+            msg = (
+                'Unlabeled transition: '
+                'from_state-> to_state already exists,\n'
+                'where:\t from_state = ' + str(u) + '\n'
+                'and:\t to_state = ' + str(v) + '\n'
+            )
             raise Exception(msg)
         
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
-            msg = 'Same labeled transition:\n'
-            msg += 'from_state---[label]---> to_state\n'
-            msg += 'already exists, where:\n'
-            msg += '\t from_state = ' +str(u) +'\n'
-            msg += '\t to_state = ' +str(v) +'\n'
-            msg += '\t label = ' +str(typed_attr) +'\n'
+            msg = (
+                'Same labeled transition:\n'
+                'from_state---[label]---> to_state\n'
+                'already exists, where:\n'
+                '\t from_state = ' + str(u) + '\n'
+                '\t to_state = ' + str(v) + '\n'
+                '\t label = ' + str(typed_attr) + '\n'
+            )
             warnings.warn(msg)
             logger.warning(msg)
             return
         
-        #self._breaks_determinism(from_state, labels)
+        # self._breaks_determinism(from_state, labels)
         
         self._check_for_untyped_keys(typed_attr,
                                      self._edge_label_types,
@@ -1016,19 +1067,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
             
             keydict = self.adj[u][v]
             # find a unique integer key
-            key = len(keydict)
-            while key in keydict:
-                key-=1
-            
+            if key is None:
+                key = len(keydict)
+                while key in keydict:
+                    key -= 1
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            
             keydict[key] = datadict
         else:
             logger.debug('first directed edge between these nodes')
             # selfloops work this way without special treatment
             key = 0
-            keydict = {key:typed_attr}
+            keydict = {key: typed_attr}
             self.succ[u][v] = keydict
             self.pred[v][u] = keydict
     
@@ -1054,16 +1104,21 @@ class LabeledDiGraph(nx.MultiDiGraph):
             datadict = dict(attr_dict)
             
             ne = len(e)
-            if ne == 3:
+            if ne == 4:
+                u, v, key, dd = e
+            elif ne == 3:
                 u, v, dd = e
-                datadict.update(dd)
+                key = None
             elif ne == 2:
                 u, v = e
+                dd = {}
+                key = None
             else:
-                raise ValueError(\
-                    "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
-            
-            self.add_edge(u, v, attr_dict=datadict, check=check)
+                raise ValueError(
+                    'Edge tuple %s must be a 2-, 3-, or 4-tuple .' % (e,)
+                )
+            datadict.update(dd)
+            self.add_edge(u, v, key=key, attr_dict=datadict, check=check)
     
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
@@ -1085,7 +1140,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         for key in rm_keys:
             self.remove_edge(u, v, key=key)
     
-    def remove_labeled_edges_from(self, labeled_ebunch, attr_dict=None, **attr):
+    def remove_labeled_edges_from(self, labeled_ebunch,
+                                  attr_dict=None, **attr):
         """Remove labeled edges.
         
         Example
@@ -1116,11 +1172,22 @@ class LabeledDiGraph(nx.MultiDiGraph):
             elif ne == 2:
                 u, v = e
             else:
-                raise ValueError(\
-                    "Edge tuple %s must be a 2- or 3-tuple ."%(e,))
+                raise ValueError(
+                    'Edge tuple %s must be a 2- or 3-tuple .' % (e,)
+                )
             
             self.remove_labeled_edge(u, v, attr_dict=datadict)
-
+    
+    def has_deadends(self):
+        """Return False if all nodes have outgoing edges.
+        
+        Edge labels are not taken into account.
+        """
+        for n in self:
+            if not self.succ[n]:
+                return True
+        return False
+    
     def remove_deadends(self):
         """Recursively delete nodes with no outgoing transitions.
         """
@@ -1128,25 +1195,27 @@ class LabeledDiGraph(nx.MultiDiGraph):
         while s:
             s = {n for n in self if not self.succ[n]}
             self.states.remove_from(s)
-                    
-    def dot_str(self, wrap=10):
+    
+    def dot_str(self, wrap=10, **kwargs):
         """Return dot string.
         
-        Requires pydot.        
+        Requires pydot.
         """
-        return graph2dot.graph2dot_str(self, wrap)
+        from .export import graph2dot
+        return graph2dot.graph2dot_str(self, wrap, **kwargs)
     
     def save(self, filename=None, fileformat=None,
              rankdir='LR', prog=None,
-             wrap=10, latex=False):
+             wrap=10, tikz=False):
         """Save image to file.
         
         Recommended file formats:
-        
-            - pdf, eps
-            - png, gif
-            - svg (can render LaTeX labels with inkscape export)
+            
+            - tikz (via dot2tex)
+            - pdf
+            - svg
             - dot
+            - png
         
         Any other format supported by C{pydot.write} is available.
         
@@ -1157,7 +1226,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         
         Requires
         ========
-        dot, pydot
+          - graphviz dot: http://www.graphviz.org/
+          - pydot: https://pypi.python.org/pypi/pydot
+          
+        and for tikz:
+          
+          - dot2tex: https://pypi.python.org/pypi/dot2tex
+          - dot2texi: http://www.ctan.org/pkg/dot2texi
+            (to automate inclusion)
         
         See Also
         ========
@@ -1188,9 +1264,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param wrap: max width of node strings
         @type wrap: int
         
-        @param latex: when printing states,
-            prepend underscores to numbers that follow letters,
-            enclose the string is $ to create a math environment.
+        @param tikz: use tikz automata library in dot
         
         @rtype: bool
         @return: True if saving completed successfully, False otherwise.
@@ -1213,9 +1287,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         filename = fname + fextension
         
         # drop '.'
-        fileformat = fextension[1:]    
+        fileformat = fextension[1:]
         
         if fileformat is 'html':
+            from .export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         
         # subclass has extra export formats ?
@@ -1226,8 +1301,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         
+        from .export import graph2dot
         graph2dot.save_dot(self, filename, fileformat, rankdir,
-                           prog, wrap, latex)
+                           prog, wrap, tikz=tikz)
         
         return True
     
@@ -1251,198 +1327,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # anything to plot ?
         if not self.states:
-            print(60*'!'+"\nThe system doesn't have any states to plot.\n"+60*'!')
+            print(
+                60 * '!' +
+                "\nThe system doesn't have any states to plot.\n"
+                + 60 * '!')
             return
         
         if prog is None:
             prog = self.default_layout
         
+        from .export import graph2dot
         return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
-
-class _LabeledStateDiGraph(nx.MultiDiGraph):
-    def _multiply_mutable_states(self, other, prod_graph, prod_sys):
-        def prod_ids2states(prod_state_id, self, other):
-            (idx1, idx2) = prod_state_id
-            state1 = self.states._int2mutant(idx1)
-            state2 = other.states._int2mutant(idx2)
-            prod_state = (state1, state2)
-            
-            return prod_state
-        
-        def label_union(nx_label):
-            (v1, v2) = nx_label
-            
-            if v1 is None or v2 is None:
-                raise Exception(
-                    'At least one factor has unlabeled state, '+
-                    "or the state sublabel types don't match."
-                )
-            
-            try:
-                return v1 | v2
-            except:
-                pass
-            
-            try:
-                return v2 +v2
-            except:
-                raise TypeError(
-                    'The state sublabel types should support ' +
-                    'either | or + for labeled system products.'
-                )
-        
-        def state_label_union(attr_dict):
-            prod_attr_dict = dict()
-            for k,v in attr_dict.iteritems():
-                prod_attr_dict[k] = label_union(v)
-            return prod_attr_dict
-        
-        # union of state labels from the networkx tuples
-        for prod_state_id, attr_dict in prod_graph.nodes_iter(data=True):
-            prod_attr_dict = state_label_union(attr_dict)
-            prod_state = prod_ids2states(prod_state_id, self, other)
-            
-            prod_sys.states.add(prod_state)
-            prod_sys.states.add(prod_state, **prod_attr_dict)
-        print(prod_sys.states)
-        
-        # prod of initial states
-        inits1 = self.states.initial
-        inits2 = other.states.initial
-        
-        prod_init = []
-        for (init1, init2) in zip(inits1, inits2):
-            new_init = (init1, init2)
-            prod_init.append(new_init)
-        prod_sys.states.initial |= prod_init
-        
-        # # multiply mutable states (only the reachable added)
-        # if self.states.mutants or other.states.mutants:
-        #     for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
-        #         prod_state = prod_ids2states(prod_state_id, self, other)
-        #         prod_sys.states.mutants[idx] = prod_state
-        #
-        #     prod_sys.states.min_free_id = idx +1
-        # # no else needed: otherwise self already not mutant
-        
-        # action labeling is taken care by nx,
-        # since transition taken at a time
-        for from_state_id, to_state_id, edge_dict in \
-        prod_graph.edges_iter(data=True):            
-            from_state = prod_ids2states(from_state_id, self, other)
-            to_state = prod_ids2states(to_state_id, self, other)
-            
-            prod_sys.transitions.add(
-                from_state, to_state, **edge_dict
-            )
-        return prod_sys
-    
-    # binary operators (for magic binary operators: see above)
-    def tensor_product(self, other, prod_sys=None):
-        """Return strong product with given graph.
-        
-        Reference
-        =========
-        http://en.wikipedia.org/wiki/Strong_product_of_graphs
-        nx.algorithms.operators.product.strong_product
-        """
-        prod_graph = nx.product.tensor_product(self, other)
-        
-        # not populating ?
-        if prod_sys is None:
-            if self.states.mutants or other.states.mutants:
-                mutable = True
-            else:
-                mutable = False
-            prod_sys = LabeledDiGraph(mutable=mutable)
-        
-        prod_sys = self._multiply_mutable_states(
-            other, prod_graph, prod_sys
-        )
-        
-        return prod_sys
-        
-    def cartesian_product(self, other, prod_sys=None):
-        """Return Cartesian product with given graph.
-        
-        If u,v are nodes in C{self} and z,w nodes in C{other},
-        then ((u,v), (z,w) ) is an edge in the Cartesian product of
-        self with other if and only if:
-            - (u == v) and (z,w) is an edge of C{other}
-            OR
-            - (u,v) is an edge in C{self} and (z == w)
-            
-        In system-theoretic terms, the Cartesian product
-        is the interleaving where at each step,
-        only one system/process/player makes a move/executes.
-        
-        So it is a type of parallel system.
-        
-        This is an important distinction with the C{strong_product},
-        because that includes "diagonal" transitions, i.e., two
-        processes executing truly concurrently.
-        
-        Note that a Cartesian interleaving is different from a
-        strong interleaving, because the latter can skip states
-        and transition directly along the diagonal.
-        
-        For a model of computation, strong interleaving
-        would accurately model the existence of multiple cores,
-        not just multiple processes executing on a single core.
-        
-        References
-        ==========
-          - U{http://en.wikipedia.org/wiki/Cartesian_product_of_graphs}
-          - networkx.algorithms.operators.product.cartesian_product
-        """
-        prod_graph = nx.product.cartesian_product(self, other)
-        
-        # not populating ?
-        if prod_sys is None:
-            if self.states.mutants or other.states.mutants:
-                mutable = True
-            else:
-                mutable = False
-            prod_sys = LabeledDiGraph(mutable=mutable)
-        
-        prod_sys = self._multiply_mutable_states(
-            other, prod_graph, prod_sys
-        )
-        
-        return prod_sys
-    
-    def strong_product(self, other):
-        """Return strong product with given graph.
-        
-        Reference
-        =========
-          - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
-          - networkx.algorithms.operators.product.strong_product
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-        # An issue here is that transitions are possible both
-        # in sequence and simultaneously. So the actions set
-        # is the product of the factor ones and an empty action
-        # should also be introduced
-        
-    def is_blocking(self):
-        """Does each state have at least one outgoing transition ?
-        
-        Note that edge labels are NOT checked, i.e.,
-        it is not checked whether for each state and each possible symbol/letter
-        in the input alphabet, there exists at least one transition.
-        
-        The reason is that edge labels do not have any semantics at this level,
-        so they are not yet regarded as guards.
-        For more semantics, use a L{FiniteStateMachine}.
-        """
-        for state in self.states():
-            if self.states.is_terminal(state):
-                return True
-        return False
 
 def str2singleton(ap_label):
         """If string, convert to set(string).
@@ -1451,9 +1346,9 @@ def str2singleton(ap_label):
         can be passed as str '*' instead.
         """
         if isinstance(ap_label, str):
-            logger.debug('Saw str state label:\n\t' +str(ap_label))
+            logger.debug('Saw str state label:\n\t' + str(ap_label))
             ap_label = {ap_label}
-            logger.debug('Replaced with singleton:\n\t' +str(ap_label) +'\n')
+            logger.debug('Replaced with singleton:\n\t' + str(ap_label) + '\n')
         return ap_label
 
 def prepend_with(states, prepend_str):
@@ -1479,12 +1374,12 @@ def prepend_with(states, prepend_str):
     """
     if not isinstance(states, Iterable):
         raise TypeError('states must be Iterable. Got:\n\t' +
-                        str(states) +'\ninstead.')
+                        str(states) + '\ninstead.')
     if not isinstance(prepend_str, str) and prepend_str is not None:
         raise TypeError('prepend_str must be of type str. Got:\n\t' +
-                        str(prepend_str) +'\ninstead.')
+                        str(prepend_str) + '\ninstead.')
     
     if prepend_str is None:
         return states
     
-    return [prepend_str +str(s) for s in states]
+    return [prepend_str + str(s) for s in states]

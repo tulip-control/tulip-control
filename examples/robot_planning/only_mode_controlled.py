@@ -34,7 +34,8 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-env_sws = transys.OpenFTS()
+env_sws = transys.FTS()
+env_sws.owner = 'env'
 
 env_sws.sys_actions.add_from({'right','up','left','down'})
 
@@ -135,7 +136,7 @@ env_safe = set()                # empty set
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach','sys_actions = right'}          
+sys_init = {'X0reach','sys_actions = "right"'}
 sys_prog = {'home'}               # []<>home
 sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}

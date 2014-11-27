@@ -4,13 +4,13 @@ Tests for the interface with gr1c.
 """
 import logging
 logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
 
 from nose.tools import raises
 import os
 
 from tulip.spec import GRSpec
 from tulip.interfaces import gr1cint
-
 
 REFERENCE_SPECFILE = """
 # For example, regarding states as bitvectors, 1011 is not in winning
@@ -90,29 +90,29 @@ class basic_test:
 
     def test_synthesize(self):
         self.f_un.sys_safety = []  # Make it realizable
-        mach = gr1cint.synthesize(self.f_un,
-                                  init_option="ALL_ENV_EXIST_SYS_INIT")
-        assert mach is not None
-        assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
-        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+        g = gr1cint.synthesize(self.f_un,
+                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert g is not None
+        assert len(g.env_vars) == 1 and g.env_vars.has_key("x")
+        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
 
-        mach = gr1cint.synthesize(self.dcounter,
-                                  init_option="ALL_ENV_EXIST_SYS_INIT")
-        assert mach is not None
-        assert len(mach.inputs) == 0
-        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
-        assert len(mach.states) == 3
+        g = gr1cint.synthesize(self.dcounter,
+                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert g is not None
+        assert len(g.env_vars) == 0
+        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g) == 2
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
         self.dcounter.sys_init = []
-        mach = gr1cint.synthesize(self.dcounter,
-                                  init_option="ALL_INIT")
-        assert mach is not None
-        print mach
-        assert len(mach.inputs) == 0
-        assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
-        assert len(mach.states) == 7
+        g = gr1cint.synthesize(self.dcounter,
+                               init_option="ALL_INIT")
+        assert g is not None
+        print g
+        assert len(g.env_vars) == 0
+        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g) == 6
 
 
 class GR1CSession_test:
@@ -156,13 +156,12 @@ class GR1CSession_test:
         assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
 
 
-def test_load_autxml():
-    (spec, mach) = gr1cint.load_aut_xml(REFERENCE_AUTXML)
-    assert spec.env_vars == {"x": "boolean"}
-    assert spec.sys_vars == {"y": "boolean"}
-    assert len(mach.states) == 4
-    assert len(mach.inputs) == 1 and mach.inputs.has_key("x")
-    assert len(mach.outputs) == 1 and mach.outputs.has_key("y")
+def test_aut_xml2mealy():
+    g = gr1cint.load_aut_xml(REFERENCE_AUTXML)
+    assert g.env_vars == {"x": "boolean"}
+    assert g.sys_vars == {"y": "boolean"}
+    print(g.nodes())
+    assert len(g) == 3
 
 @raises(ValueError)
 def synth_init_illegal_check(init_option):

@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@ See Also
 ========
 L{discretize}
 """
+from __future__ import absolute_import
+
 import numpy as np
 from cvxopt import matrix, solvers
 import polytope as pc

@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,19 +37,25 @@ Suggested abbreviation:
 
     >>> from tulip import transys as trs
 """
-from .mathset import MathSet, SubSet, PowerSet
+from __future__ import absolute_import
+
+from .mathset import MathSet, SubSet, PowerSet, TypedDict
 
 from .labeled_graphs import prepend_with
 
 from .transys import (
-    FiniteTransitionSystem, FTS,
-    OpenFiniteTransitionSystem, OpenFTS,
+    KripkeStructure, FiniteTransitionSystem, FTS,
+    LabeledGameGraph,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
 
 from .automata import (
     BuchiAutomaton, BA, tuple2ba,
-    RabinAutomaton, DRA
+    RabinAutomaton, DRA,
+    ParityGame
 )
 
-from .machines import MooreMachine, MealyMachine, Mealy
+
+from .machines import MooreMachine, MealyMachine
+
+from .products import OnTheFlyProductAutomaton

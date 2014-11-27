@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,19 +32,26 @@
 """
 Finite State Machines Module
 """
-from collections import OrderedDict
+from __future__ import absolute_import
+
+import copy
 from pprint import pformat
 from random import choice
 
 from .labeled_graphs import LabeledDiGraph
-from . import executions
-from .export import machine2scxml
 
-_hl = 40 *'-'
+# inline imports:
+#
+# from .export import machine2scxml
+
+_hl = 40 * '-'
+
+# port type
+pure = {'present', 'absent'}
 
 def is_valuation(ports, valuations):
     for name, port_type in ports.items():
-        curvaluation = valuations[name]     
+        curvaluation = valuations[name]
         
         # functional set membership description ?
         if callable(port_type):
@@ -63,21 +70,20 @@ def create_machine_ports(spc_vars):
         instead of a range of integers.
         These are as originally defined by the user or synth.
     """
-    ports = OrderedDict()
+    ports = dict()
     for env_var, var_type in spc_vars.items():
         if var_type == 'boolean':
-            domain = {0,1}
+            domain = {0, 1}
         elif isinstance(var_type, tuple):
             # integer domain
             start, end = var_type
-            domain = set(range(start, end+1))
+            domain = set(range(start, end + 1))
         elif isinstance(var_type, list):
             # arbitrary finite domain defined by list var_type
             domain = set(var_type)
 
         ports[env_var] = domain
     return ports
-
 
 class FiniteStateMachine(LabeledDiGraph):
     """Transducer, i.e., a system with inputs and outputs.
@@ -91,7 +97,7 @@ class FiniteStateMachine(LabeledDiGraph):
     
     We call "inputs" the set of pairs::
     
-        {(p_i, Vp_i),...}
+      {(p_i, Vp_i),...}
     
     of input ports p_i and their corresponding types Vp_i.
     
@@ -99,101 +105,97 @@ class FiniteStateMachine(LabeledDiGraph):
     A guard is defined by a set and evaluated using set membership.
     So given an input port value p=x, then if::
     
-        x \in guard_set
+      x \in guard_set
     
     then the guard is True, otherwise it is False.
     
     The "inputs" are defined by an OrderedDict::
     
-        {'p1':explicit, 'p2':check, 'p3':None, ...}
+      {'p1':explicit, 'p2':check, 'p3':None, ...}
     
     where:
-        - C{explicit}:
-          is an iterable representation of Vp,
-          possible only for discrete Vp.
-          If 'p1' is explicitly typed, then guards are evaluated directly::
-            
-                input_port_value == guard_value ?
+      - C{explicit}:
+        is an iterable representation of Vp,
+        possible only for discrete Vp.
+        If 'p1' is explicitly typed, then guards are evaluated directly::
         
-        - C{check}:
-          is a class with methods:
-            
-                - C{__contains__(x) }:
-                  check if guard value given to input port 'p1' is
-                  in the set of possible values Vp.
-                
-                - C{__call__(guard_set, input_port_value) }:
-                  check if C{input_port_value} \\in C{guard_set}
-                  This allows symbolic type definitions.
-                    
-                  For example, C{input_port_value} might be assigned
-                  int values, but the C{guard_set} be defined by
-                  a symbolic expression as the str: 'x<=5'.
-                    
-                  Then the user is responsible for providing
-                  the appropriate method to the Mealy Machine,
-                  using the custom C{check} class described here.
-                    
-                  Note that we could provide a rudimentary library
-                  for the basic types of checks, e.g., for
-                  the above simple symbolic case, where using
-                  function eval() is sufficient.
-            
-        - C{None}:
-          signifies that no type is currently defined for
-          this input port, so input type checking and guard
-          evaluation are disabled.
-            
-          This can be used to skip type definitions when
-          they are not needed by the user.
-            
-          However, since Machines are in general the output
-          of synthesis, it follows that they are constructed
-          by code, so the benefits of typedefs will be
-          considerable compared to the required coding effort.
+          input_port_value == guard_value ?
     
-    An OrderedDict is used to allow setting guards using tuples
-    (so order of inputs) or dicts, to avoid writing dicts for each
-    guard definition (which would be quite cumbersome).
+      - C{check}:
+        is a class with methods:
+        
+          - C{__contains__(x) }:
+            check if guard value given to input port 'p1' is
+            in the set of possible values Vp.
+            
+          - C{__call__(guard_set, input_port_value) }:
+            check if C{input_port_value} \\in C{guard_set}
+            This allows symbolic type definitions.
+              
+            For example, C{input_port_value} might be assigned
+            int values, but the C{guard_set} be defined by
+            a symbolic expression as the str: 'x<=5'.
+              
+            Then the user is responsible for providing
+            the appropriate method to the Mealy Machine,
+            using the custom C{check} class described here.
+              
+            Note that we could provide a rudimentary library
+            for the basic types of checks, e.g., for
+            the above simple symbolic case, where using
+            function eval() is sufficient.
     
+      - C{None}:
+        signifies that no type is currently defined for
+        this input port, so input type checking and guard
+        evaluation are disabled.
+        
+        This can be used to skip type definitions when
+        they are not needed by the user.
+        
+        However, since Machines are in general the output
+        of synthesis, it follows that they are constructed
+        by code, so the benefits of typedefs will be
+        considerable compared to the required coding effort.
+      
     Guards annotate transitions::
         
-        Guards: States x States ---> Input_Predicates
+      Guards: States x States ---> Input_Predicates
     
     Outputs
     =======
     Similarly defined to inputs, but:
     
-        - for Mealy Machines they annotate transitions
-        - for Moore Machines they annotate states
+      - for Mealy Machines they annotate transitions
+      - for Moore Machines they annotate states
     
     State Variables
     ===============
     Similarly defined to inputs, they annotate states,
     for both Mealy and Moore machines::
     
-        States ---> State_Variables
+      States ---> State_Variables
     
     Update Function
     ===============
     The transition relation:
     
-        - for Mealy Machines::
+      - for Mealy Machines::
         
-                States x Input_Valuations ---> Output_Valuations x States
-                
-          Note that in the range Output_Valuations are ordered before States
-          to emphasize that an output_valuation is produced
-          during the transition, NOT at the next state.
-            
-          The data structure representation of the update function is
-          by storage of the Guards function and definition of Guard
-          evaluation for each input port via the OrderedDict discussed above.
+        States x Input_Valuations ---> Output_Valuations x States
+              
+        Note that in the range Output_Valuations are ordered before States
+        to emphasize that an output_valuation is produced
+        during the transition, NOT at the next state.
+          
+        The data structure representation of the update function is
+        by storage of the Guards function and definition of Guard
+        evaluation for each input port via the OrderedDict discussed above.
         
-        - for Moore Machines::
+      - for Moore Machines::
         
-            States x Input_Valuations ---> States
-            States ---> Output_valuations
+        States x Input_Valuations ---> States
+        States ---> Output_valuations
     
     Note
     ====
@@ -210,78 +212,67 @@ class FiniteStateMachine(LabeledDiGraph):
     ========
     FSM, MealyMachine, MooreMachine
     """
-    def __init__(self, **args):
+    def __init__(self):
         # values will point to values of _*_label_def below
-        self.state_vars = OrderedDict()
-        self.inputs = OrderedDict()
-        self.outputs = OrderedDict()
-        #self.set_actions = {}
+        self.state_vars = dict()
+        self.inputs = dict()
+        self.outputs = dict()
+        # self.set_actions = {}
         
         # state labeling
-        self._state_label_def = OrderedDict()
-        self._state_dot_label_format = {'type?label':':',
-                                        'separator':'\\n'}
+        self._state_label_def = dict()
+        self._state_dot_label_format = {'type?label': ':',
+                                        'separator': '\n'}
         
         # edge labeling
-        self._transition_label_def = OrderedDict()
-        self._transition_dot_label_format = {'type?label':':',
-                                             'separator':'\\n'}
+        self._transition_label_def = dict()
+        self._transition_dot_label_format = {'type?label': ':',
+                                             'separator': '\n'}
         self._transition_dot_mask = dict()
+        self._state_dot_mask = dict()
         
         self.default_export_fname = 'fsm'
         
-        LabeledDiGraph.__init__(self, **args)
+        LabeledDiGraph.__init__(self)
         
-        self.dot_node_shape = {'normal':'ellipse'}
+        self.dot_node_shape = {'normal': 'ellipse'}
         self.default_export_fname = 'fsm'
     
-    def _to_ordered_dict(self, x):
-        if not isinstance(x, OrderedDict):
-            try:
-                x = OrderedDict(x)
-            except:
-                raise TypeError('Argument must be an OrderedDict, ' +
-                                'or be directly convertible to an OrderedDict.')
-        return x
-    
-    def add_inputs(self, new_inputs, masks={}):
+    def add_inputs(self, new_inputs, masks=None):
         """Create new inputs.
         
-        @param new_inputs: ordered pairs of port_name : port_type
-        @type new_inputs: OrderedDict | list, of::
-                (port_name, port_type)
+        @param new_inputs: C{dict} of pairs {port_name : port_type}
             where:
                 - port_name: str
                 - port_type: Iterable | check class
+        @type new_inputs: dict
         
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
                 - True, if the sublabel should be shown
                 - False, otherwise (to hide it)
-        @type masks: dict of functions
-            keys are port_names (see arg: new_outputs)
-            each function returns bool
+        @type masks: C{dict} of functions C{{port_name : mask_function}}
+            each C{mask_function} returns bool
         """
-        new_inputs = self._to_ordered_dict(new_inputs)
-        
-        for (in_port_name, in_port_type) in new_inputs.iteritems():
+        for (port_name, port_type) in new_inputs.iteritems():
             # append
-            self._transition_label_def[in_port_name] = in_port_type
+            self._transition_label_def[port_name] = port_type
             
             # inform inputs
-            self.inputs[in_port_name] = self._transition_label_def[in_port_name]
+            self.inputs[port_name] = port_type
             
             # printing format
-            self._transition_dot_label_format[in_port_name] = str(in_port_name)
+            self._transition_dot_label_format[port_name] = str(port_name)
             
-            if in_port_name in masks:
-                mask_func = masks[in_port_name]
-                self._transition_dot_mask[in_port_name] = mask_func
+            if masks is None:
+                continue
+            
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._transition_dot_mask[port_name] = mask_func
     
     def add_state_vars(self, new_state_vars):
-        new_state_vars = self._to_ordered_dict(new_state_vars)
-        
         for (var_name, var_type) in new_state_vars.iteritems():
             # append
             self._state_label_def[var_name] = var_type
@@ -291,52 +282,6 @@ class FiniteStateMachine(LabeledDiGraph):
             
             # printing format
             self._state_dot_label_format[var_name] = str(var_name)
-    
-    def is_blocking(self, state):
-        """From this state, for each input valuation, there exists a transition.
-        
-        @param state: state to be checked as blocking
-        @type state: single state to be checked
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-    
-    def is_receptive(self, states='all'):
-        """For each state, for each input valuation, there exists a transition.
-        
-        @param states: states to be checked whether blocking
-        @type states: iterable container of states
-        """
-        for state in states:
-            if self.is_blocking(state):
-                return False
-                
-        return True
-
-    # operations between state machines
-    def sync_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-        
-    def async_product(self):
-        """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-
-class FSM(FiniteStateMachine):
-    """Alias for Finite-state Machine."""
-    
-    def __init__(self, **args):
-        FiniteStateMachine.__init__(self, **args)
 
 class MooreMachine(FiniteStateMachine):
     """Moore machine.
@@ -357,50 +302,83 @@ class MooreMachine(FiniteStateMachine):
     Note
     ====
     valuation: assignment of values to each port
+    
+    Reference
+    =========
+    U{[M56]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#m56>}
     """
-    def __init__(self, **args):
+    def __init__(self):
+        """Instantiate a Moore state machine.
         """
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        FiniteStateMachine.__init__(self, **args)
+        FiniteStateMachine.__init__(self)
         
-        self.dot_node_shape = {'normal':'ellipse'}
+        self.dot_node_shape = {'normal': 'ellipse'}
         self.default_export_fname = 'moore'
-        
-        raise NotImplementedError
     
     def __str__(self):
-        """Get informal string representation."""
-        #TODO: improve port formatting
-        s = _hl +'\nMoore Machine: ' +self.name +'\n' +_hl +'\n'
-        s += 'State Variables:\n\t' +pformat(self.state_vars) +'\n'
-        s += 'Output ports:\n\t' +pformat(self.outputs) +'\n'
-        s += 'States & labeling w/ State Vars & Output Ports:\n\t'
-        s += str(self.states(data=True) ) +'\n'
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
-        s += 'Input ports:\n\t' +pformat(self.inputs) +'\n'
-        s += 'Transitions & labeling w/ Input Port guards:\n\t'
-        s += str(self.transitions(data=True) ) +'\n' +_hl +'\n'
+        """Get informal string representation.
+        """
+        s = (
+            _hl + '\nMoore Machine: ' + self.name + '\n' + _hl + '\n' +
+            'State Variables:\n\t(name : type)\n' +
+            _print_ports(self.state_vars) +
+            
+            'Input Ports:\n\t(name : type)\n' +
+            _print_ports(self.inputs) +
+        
+            'Output Ports:\n\t(name : type)\n' +
+            _print_ports(self.outputs) +
+        
+            'States & State Var Values: (state : outputs : vars)\n'
+        )
+        
+        for (state, label_dict) in self.states(data=True):
+            s += '\t' + str(state) + ' :\n'
+            
+            # split into vars and outputs
+            var_values = {k: v for k, v in label_dict.iteritems()
+                          if k in self.state_vars}
+            output_values = {k: v for k, v in label_dict.iteritems()
+                             if k in self.outputs}
+            
+            s += (_print_label(var_values) + ' : ' +
+                  _print_label(output_values))
+        
+        s += (
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2 * '\n'
+        )
+        
+        s += 'Transitions & Labels: (from --> to : label)\n'
+        for (from_state, to_state, label_dict) in self.transitions(data=True):
+            s += (
+                '\t' + str(from_state) + ' ---> ' +
+                str(to_state) + ' :\n' +
+                _print_label(label_dict)
+            )
+        s += _hl + '\n'
         
         return s
     
-    def add_outputs(self, new_outputs):
-        new_outputs = self._to_ordered_dict(new_outputs)
-        
-        for (out_port_name, out_port_type) in new_outputs.iteritems():
+    def add_outputs(self, new_outputs, masks=None):
+        for (port_name, port_type) in new_outputs.iteritems():
             # append
-            self._state_label_def[out_port_name] = out_port_type
+            self._state_label_def[port_name] = port_type
             
             # inform state vars
-            self.outputs[out_port_name] = \
-                self._state_label_def[out_port_name]
+            self.outputs[port_name] = port_type
             
             # printing format
-            self._state_dot_label_format[out_port_name] = \
-                '/out:' +str(out_port_name)
+            self._state_dot_label_format[port_name] = \
+                '/' + str(port_name)
+            
+            if masks is None:
+                continue
+            
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._state_dot_mask[port_name] = mask_func
 
 class MealyMachine(FiniteStateMachine):
     """Mealy machine.
@@ -456,56 +434,52 @@ class MealyMachine(FiniteStateMachine):
     Note
     ====
     valuation: assignment of values to each port
+    
+    Reference
+    =========
+    U{[M55]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#m55>}
     """
-    def __init__(self, **args):
-        FiniteStateMachine.__init__(self, **args)
+    def __init__(self):
+        FiniteStateMachine.__init__(self)
         
         # will point to selected values of self._transition_label_def
-        self.dot_node_shape = {'normal':'ellipse'}
+        self.dot_node_shape = {'normal': 'ellipse'}
         self.default_export_fname = 'mealy'
     
     def __str__(self):
-        """Get informal string representation."""
-        def print_ports(port_dict):
-            s = ''
-            for (port_name, port_type) in port_dict.iteritems():
-                s += '\t' +str(port_name) +' : '
-                s += pformat(port_type) +'\n'
-            s += '\n'
-            return s
-        
-        def print_label(label_dict):
-            s = ''
-            for (name, value) in label_dict.iteritems():
-                s += '\t\t' +str(name) +' : ' +str(value) +'\n'
-            s += '\n'
-            return s
-        
-        s = _hl +'\nMealy Machine: ' +self.name +'\n' +_hl +'\n'
-        s += 'State Variables:\n\t(name : type)\n'
-        s += print_ports(self.state_vars)
+        """Get informal string representation.
+        """
+        s = (
+            _hl + '\nMealy Machine: ' + self.name + '\n' + _hl + '\n' +
+            'State Variables:\n\t(name : type)\n' +
+            _print_ports(self.state_vars)
+        )
         
         s += 'States & State Var Values:\n'
         for (state, label_dict) in self.states(data=True):
-            s += '\t' +str(state) +' :\n'
-            s += print_label(label_dict)
+            s += ('\t' + str(state) + ' :\n' +
+                  _print_label(label_dict))
         
-        s += 'Initial States:\n'
-        s += pformat(self.states.initial, indent=3) +2*'\n'
+        s += (
+            'Initial States:\n' +
+            pformat(self.states.initial, indent=3) + 2 * '\n' +
         
-        s += 'Input Ports:\n\t(name : type)\n'
-        s += print_ports(self.inputs)
+            'Input Ports:\n\t(name : type)\n' +
+            _print_ports(self.inputs) +
         
-        s += 'Output Ports:\n\t(name : type)\n'
-        s += print_ports(self.outputs)
+            'Output Ports:\n\t(name : type)\n' +
+            _print_ports(self.outputs) +
         
-        s += 'Transitions & Labels: (from --> to : label)\n'
-        for (from_state, to_state, label_dict) in \
-        self.transitions(data=True):
-            s += '\t' +str(from_state) +' ---> '
-            s += str(to_state) +' :\n'
-            s += print_label(label_dict)
-        s += _hl +'\n'
+            'Transitions & Labels: (from --> to : label)\n'
+        )
+        for (from_state, to_state, label_dict) in self.transitions(data=True):
+            s += (
+                '\t' + str(from_state) + ' ---> ' +
+                str(to_state) + ' :\n' +
+                _print_label(label_dict)
+            )
+        s += _hl + '\n'
         
         return s
     
@@ -517,6 +491,7 @@ class MealyMachine(FiniteStateMachine):
         if fileformat != 'scxml':
             return False
         
+        from .export import machine2scxml
         s = machine2scxml.mealy2scxml(self)
         
         # dump to file
@@ -525,232 +500,603 @@ class MealyMachine(FiniteStateMachine):
         f.close()
         return True
     
-    def add_outputs(self, new_outputs, masks={}):
+    def add_outputs(self, new_outputs, masks=None):
         """Add new outputs.
         
-        @param new_outputs: ordered pairs of port_name : port_type
-        @type new_outputs: OrderedDict | list, of::
-                (port_name, port_type)
-        where:
+        @param new_outputs: dict of pairs {port_name : port_type}
+          where:
             - port_name: str
             - port_type: Iterable | check class
+        @type new_outputs: dict
         
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
-                - True, if the sublabel should be shown
-                - False, otherwise (to hide it)
+              - True, if the sublabel should be shown
+              - False, otherwise (to hide it)
         @type masks: dict of functions
             keys are port_names (see arg: new_outputs)
             each function returns bool
         """
-        new_outputs = self._to_ordered_dict(new_outputs)
-        
-        for (out_port_name, out_port_type) in new_outputs.iteritems():
+        for (port_name, port_type) in new_outputs.iteritems():
             # append
-            self._transition_label_def[out_port_name] = out_port_type
+            self._transition_label_def[port_name] = port_type
             
             # inform state vars
-            self.outputs[out_port_name] = \
-                self._transition_label_def[out_port_name]
+            self.outputs[port_name] = \
+                self._transition_label_def[port_name]
             
             # printing format
-            self._transition_dot_label_format[out_port_name] = \
-                '/out:' +str(out_port_name)
+            self._transition_dot_label_format[port_name] = \
+                '/' + str(port_name)
             
-            if out_port_name in masks:
-                mask_func = masks[out_port_name]
-                self._transition_dot_mask[out_port_name] = mask_func
+            if masks is None:
+                continue
+            
+            if port_name in masks:
+                mask_func = masks[port_name]
+                self._transition_dot_mask[port_name] = mask_func
     
-    def simulate(
-            self, inputs_sequence='manual', iterations=100,
-            current_state=None
-        ):
-        """Manual, random or guided machine run.
+    def reaction(self, from_state, inputs):
+        """Return next state and output, when reacting to given inputs.
         
-        If the argument current_state is passed,
-        then simulation starts from there.
+        The machine must be deterministic.
+        (for each state and input at most a single transition enabled,
+        this notion does not coincide with output-determinism)
         
-        Otherwise if MealyMachine.states.current is non-empty,
-        then simulation starts from there.
+        Not exactly a wrapper of L{Transitions.find},
+        because it matches only that part of an edge label
+        that corresponds to the inputs.
         
-        If current states are empty,
-        then if MealyMachine.states.initial is non-empty,
-        then simulation starts from there.
+        @param from_state: transition starts from this state.
+        @type from_state: element of C{self.states}
         
-        Otherwise an exception is raised.
+        @param inputs: C{dict} assigning a valid value to each input port.
+        @type inputs: {'port_name':port_value, ...}
         
-        @param inputs_sequence: inputs for guided simulation
-        @type inputs_sequence: 'manual' | list of input valuations
-        
-        @param iterations: number of steps for manual or random simulation
-        @type iterations: int
-        
-        @param current_state: state from where to start the simulation
-        @type current_state: element in MealyMachine.states
-            Note that this allows simulating from any desired state,
-            irrespective of whether it is reachable from the subset of
-            initial states.
+        @return: output values and next state.
+        @rtype: (outputs, next_state)
+          where C{outputs}: C{{'port_name':port_value, ...}}
         """
-        max_count = iterations
-        if inputs_sequence not in ['manual', 'random'] and \
-        not isinstance(inputs_sequence, executions.MachineInputSequence):
+        # match only inputs (explicit valuations, not symbolic)
+        enabled_trans = [
+            (i, j, d)
+            for (i, j, d) in self.edges_iter([from_state], data=True)
+            if project_dict(d, self.inputs) == inputs
+        ]
+        
+        # must be deterministic
+        try:
+            ((_, next_state, attr_dict), ) = enabled_trans
+        except ValueError:
             raise Exception(
-                'Available simulation modes:\n' +
-                'manual, random, or guided by given MachineInputSequence.'
+                'must be input-deterministic, '
+                'found enabled transitions: '
+                '{t}'.format(t=enabled_trans)
             )
         
-        if current_state:
-            self.states.select_current([current_state] )
-        elif not self.states.current:
-            print('Current state unset.')
-            if not self.states.initial:
-                msg = 'Initial state(s) unset.\n'
-                msg += 'Set either states.current, or states.initial\n'
-                msg += 'before calling .simulate.'
-                print(msg)
-            else:
-                self.states.current = set(self.states.initial)
+        outputs = project_dict(attr_dict, self.outputs)
         
-        if isinstance(inputs_sequence, executions.MachineInputSequence):
-            self._guided_simulation(inputs_sequence)
-            return
-        
-        count = 1
-        stop = False
-        mode = inputs_sequence
-        while not stop:
-            print(60 *'-' +'\n Current States:\t' +
-                  str(self.states.current) +2*'\n')
-            
-            count = self._step_simulation(mode, count)
-            
-            if mode == 'manual':
-                stop = count is None
-            elif mode == 'random':
-                stop = count is None or count > max_count
-            else:
-                raise Exception('Bug: mode has unkown value.')
+        return (next_state, outputs)
     
-    def _guided_simulation(self, inputs_sequence):
-        raise NotImplementedError
+    def run(self, from_state=None, input_sequences=None):
+        """Guided or interactive run.
+        
+        @param input_sequences: if C{None}, then call L{interactive_run},
+            otherwise call L{guided_run}.
+        
+        @return: output of L{guided_run}, otherwise C{None}.
+        """
+        if input_sequences is None:
+            interactive_run(self, from_state=from_state)
+        else:
+            return guided_run(self, from_state=from_state,
+                              input_sequences=input_sequences)
+
+# note on non-determinism and simulation:
+# =====
+#
+# Transducers here have deterministic semantics,
+# even if the exist non-deterministic choices of
+# After all, this turns out to be the essentialy distinction
+# between a non-deterministic game graph (generator) and
+# a machine (transducer).
+# (Modulo some graph and labeling transformations.)
+#
+# A Game Graph (or a transition system if only one player exists,
+# so no partition on the states accompanies the labeled directed graph)
+# is a generator, which takes "all possible transitions".
+# Same for acceptors, in which case the resulting language is filtered
+# by the accepting condition, to yield the language
+# represented by the acceptor.
+#
+# In other words: syntactically they are more or less the same,
+# but semantically they are different.
+# Therefore the methods or functions that manipulate them differ,
+# because they involve their semantics.
+#
+# A possible alternative in the future would be to
+#   - raise an exception in case of non-determinism
+#   - unless the user explicitly allows non-determinism
+# In the latter case, machine non-determinism is resolved
+# arbitrarily during simulation.
+# I think this would correspond to what happens to random simulation
+# in SPIN also.
+
+# note on impossibility to simulate non-deterministic machine
+# =====
+#
+# It is currently impossible to simulate a non-deterministic machine.
+# A non-deterministic machine represents a set of transducers that
+# are all valid solutions to the synthesis problem.
+#
+# But because the semantics of real-world execution require that only
+# a single trace be produced (so resolve the non-determinism in an
+# arbitrary way), this use is discouraged.
+#
+# In the future, such an option could be added.
+# However, it may be a bad design approach.
+# Instead, since a non-deterministic machine is a set of satisfying models
+# (= solutions), a better approach would be to first fix one deterministic
+# alternative as the desired solution, then simulate it.
+#
+# Finally there also exists the issue of initial condition interpretation.
+# Formally, if the initial condition of sys is interpreted as an env var,
+# then after we learn the initial system state of the particular instance
+# that will be simulated, a deterministic transducer should be obtained
+# with only that state as initial, then simulated.
+#
+# A possible alternative in the future would be to
+# allow for initial system state
+# non-determinism, but require that the initial system state be passed as
+# an argument in this case.
+
+
+# note on dict of lists vs list of dicts
+# =====
+#
+# Typically there are few ports but many time indices
+# so checking for equal len of all input sequences is cheaper
+# than checking no port is missing for each dict in a list of dicts over time.
+#
+# Also less memory is needed (one dict of a few lists of 1000 items each,
+#   not 1000 dicts with the same keys of a few items each)
+#
+# Absent inputs at certain times can still be represented,
+# by explicictly assigning them the value None.
+# This avoids mistakes (explicit better than inplicit, cf Zen of Python)
+# and ensures uniformity in the data structure (no absent terms)
+#
+# Also, the dict of lists representation is friendly for adding/removing
+# ports. This may prove convenient if working with a network of machines.
+# For example splitting many output sequences
+# to become inputs for other machines.
+
+# note on terminology
+# =====
+#
+# The term "simulation" is ambiguous and not used any more:
+#
+# 1. it is too general
+# 2. it is dangerous, because it has also another meaning in this context
+# 3. "run" is also wrongly used here (i.e., more than the sequence )
+
+def guided_run(mealy, from_state=None, input_sequences=None):
+    """Run deterministic machine reacting to given inputs.
     
-    def _step_simulation(self, mode, count):
-        def select_state(cur_states, mode):
-            if mode == 'random':
-                return choice(cur_states)
-            
-            cur_states = list(cur_states) # order them
-            while True:
-                msg = 'Found more than 1 current state.\n'
-                msg += 'Select from which state to step forward.\n'
-                msg += 'Available choices:' +2*'\n'
-                for (num, state) in enumerate(cur_states):
-                    msg += '\t' +str(num) +' : '
-                    msg += str(state) +'\n'
-                msg += '\n'
-                msg += 'Select from the above states by giving\n'
-                msg += 'the integer corresponding to your selection.\n'
-                msg += 'Press "Enter" to terminate the simulation:\n'
-                msg += '\t int = '
-                
-                id_selected = raw_input(msg)
-                if not id_selected:
-                    return None
-                try:
-                    return cur_states[int(id_selected) ]
-                except:
-                    print('Could not convert your input to integer.\n' +
-                          'Please try again.\n')
-        
-        def select_transition(transitions, mode):
-            if mode == 'random':
-                return choice(transitions)
-            
-            while True:
-                msg = 'Found more than 1 outgoing transitions:' +2*'\n'
-                for (num, transition) in enumerate(transitions):
-                    (from_state, to_state, guard) = transition
-                    msg += '\t' +str(num) +' : '
-                    msg += str(from_state) +' ---> ' +str(to_state) +'\n'
-                    msg += '\t\t' +str(guard) +'\n'
-                msg += '\n'
-                msg += 'Select from the available transitions above\n'
-                msg += 'by giving its integer,\n'
-                msg += 'Press "Enter" to stop the simulation:\n'
-                msg += '\t int = '
-                
-                id_selected = raw_input(msg)
-                if not id_selected:
-                    return None
-                try:
-                    return transitions[int(id_selected) ]
-                except:
-                    print('Could not convert your input to integer.\n' +
-                          'Please try again.\n')
-        
-        count += 1
-        cur_states = self.states.current
-        
-        if not cur_states:
-            print('No current states: Stopping simulation.')
-            return None
-        
-        if len(cur_states) > 1:
-            state_selected = select_state(cur_states, mode)
-            if state_selected is None:
-                return None
-        elif cur_states:
-            state_selected = choice(list(cur_states) )
-        else:
-            raise Exception('Bug: "if not" above must have caught this.')
-            
-        print('State to step from:\t' +str(state_selected) )
-        from_state = state_selected
-        
-        transitions = self.transitions.find([from_state] )
-        
-        if not transitions:
-            print('Did not find any outgoing transitions:\n' +
-                  'Stopping simulation.')
-            return None
-        
-        if len(transitions) > 1:
-            transition_selected = select_transition(transitions, mode)
-            if transition_selected is None:
-                return None
-        elif transitions:
-            transition_selected = transitions[0]
-        else:
-            raise Exception('Bug: must have been caught by "if not" above.')
-        
-        (from_, to_state, guard) = transition_selected
-        
-        msg = 'Moving (from state ---> to state):\n\t'
-        msg += str(from_state) +' ---> ' +str(to_state) +'\n'
-        msg += 'via transition with guard:\n\t' +str(guard) +'\n'
-        print(msg)
-        
-        self.states._current.remove(from_state)
-        self.states._current.add(to_state)
-        
-        return count
-
-class Mealy(MealyMachine):
-    """Alias to Mealy machine.
+    @param from_state: start simulation
+    
+    @param mealy: input-deterministic Mealy machine
+    @type mealy: L{MealyMachine}
+    
+    @param from_state: start simulation at this state.
+        If C{None}, then use the unique initial state C{Sinit}.
+    
+    @param input_sequences: one sequence of values for each input port
+    @type input_sequences: C{dict} of C{lists}
+    
+    @return: sequence of states and sequence of output valuations
+    @rtype: (states, output_sequences)
+      where:
+        - C{states} is a C{list} of states excluding C{from_state}
+        - C{output_sequences} is a C{dict} of C{lists}
     """
-    def __init__(self, *args, **kwargs):
-        MealyMachine.__init__(self, *args, **kwargs)
+    seqs = input_sequences  # abbrv
+    
+    missing_ports = set(mealy.inputs).difference(seqs)
+    if missing_ports:
+        raise ValueError('missing input port(s): ' + missing_ports)
+    
+    # dict of lists ?
+    non_lists = {k: v for k, v in seqs.iteritems() if isinstance(v, list)}
+    
+    if non_lists:
+        raise TypeError('Values must be lists, for: ' + str(non_lists))
+    
+    # uniform list len ?
+    if len(set(len(x) for x in seqs.itervalues())) > 1:
+        raise ValueError('All input sequences must be of equal length.')
+    
+    # note: initial sys state non-determinism not checked
+    # initial sys edge non-determinism checked instead (more restrictive)
+    
+    if from_state is None:
+        state = next(iter(mealy.states.initial))
+    else:
+        state = from_state
+    
+    n = len(seqs.itervalues()[0])
+    states_seq = []
+    output_seqs = {k: list() for k in mealy.outputs}
+    
+    for i in range(n):
+        inputs = {k: v[i] for k, v in seqs.iteritems()}
+        
+        outputs, state = mealy.reaction(state, inputs)
+        
+        states_seq.append(state)
+        
+        for k in output_seqs:
+            output_seqs[k].append(outputs[k])
+    
+    return (states_seq, output_seqs)
 
-pure = {'present', 'absent'}
-
-def moore2mealy(moore_machine, mealy_machine):
-    """Convert Moore machine to equivalent Mealy machine
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
+def random_run(mealy, from_state=None, N=10):
+    """Return run from given state for N random inputs.
+    
+    Inputs selected randomly in a way that does not block the machine
+    So they are not arbitrarily random.
+    If the machine is a valid synthesis solution,
+    then all safe environment inputs can be generated this way.
+    
+    Randomly generated inputs may violate liveness assumption on environment.
+    
+    @param mealy: input-deterministic Mealy machine
+    @type mealy: C{MealyMachine}
+    
+    @param N: number of reactions (inputs)
+    @type N: int
+    
+    @return: same as L{guided_run}
     """
-    raise NotImplementedError
+    if from_state is None:
+        state = next(iter(mealy.states.initial))
+    else:
+        state = from_state
+    
+    states_seq = []
+    output_seqs = {k: list() for k in mealy.outputs}
+    
+    for i in xrange(N):
+        trans = mealy.transitions.find([state])
+        
+        selected_trans = choice(list(trans))
+        _, new_state, attr_dict = selected_trans
+        
+        states_seq.append(new_state)
+        
+        outputs = project_dict(attr_dict, mealy.outputs)
+        for k in output_seqs:
+            output_seqs[k].append(outputs[k])
+        
+        old_state = state
+        state = new_state
+        
+        # printing
+        inputs = project_dict(attr_dict, mealy.inputs)
+        
+        print(
+            'move from\n\t state: ' + str(old_state) +
+            '\n\t with input:' + str(inputs) +
+            '\n\t to state: ' + str(new_state) +
+            '\n\t reacting by producing output: ' + str(outputs)
+        )
+    
+    return (states_seq, output_seqs)
+
+def interactive_run(mealy, from_state=None):
+    """Run input-deterministic Mealy machine using user input.
+    
+    @param mealy: input-deterministic Mealy machine
+    @type mealy: L{MealyMachine}
+    """
+    if from_state is None:
+        state = next(iter(mealy.states.initial))
+    else:
+        state = from_state
+    
+    while True:
+        print('\n Current state: ' + str(state))
+        
+        if _interactive_run_step(mealy) is None:
+            break
+
+def _interactive_run_step(mealy, state):
+    if state is None:
+        raise Exception('Current state is None')
+    
+    # note: the spaghettiness of previous version was caused
+    #   by interactive simulation allowing both output-non-determinism
+    #   and implementing spawning (which makes sense only for generators,
+    #   *not* for transducers)
+    
+    trans = mealy.transitions.find([state])
+    
+    if not trans:
+        print('Stop: no outgoing transitions.')
+        return None
+    
+    while True:
+        try:
+            selected_trans = _select_transition(mealy, trans)
+        except:
+            print('Selection not recognized. Please try again.')
+    
+    if selected_trans is None:
+        return None
+    
+    (from_, to_state, attr_dict) = selected_trans
+    
+    inputs = project_dict(attr_dict, mealy.inputs)
+    outputs = project_dict(attr_dict, mealy.outputs)
+    
+    print(
+        'Moving from state: ' + str(state) +
+        ', to state: ' + str(to_state) + '\n' +
+        'given inputs: ' + str(inputs) + '\n' +
+        'reacting with outputs: ' + str(outputs)
+    )
+    
+    return True
+
+def _select_transition(mealy, trans):
+    msg = 'Found more than 1 outgoing transitions:' + 2 * '\n'
+    
+    for i, t in enumerate(trans):
+        (from_state, to_state, attr_dict) = t
+        
+        inputs = project_dict(attr_dict, mealy.inputs)
+        outputs = project_dict(attr_dict, mealy.outputs)
+        
+        msg += (
+            '\t' + str(i) + ' : ' +
+            str(from_state) + ' ---> ' + str(to_state) + '\n' +
+            '\t inputs:' + str(inputs) +
+            '\t outputs:' + str(outputs) +
+            '\n\n'
+        )
+    
+    msg += (
+        '\n' +
+        'Select from the available transitions above\n' +
+        'by giving its integer,\n' +
+        'Press "Enter" to stop the simulation:\n' +
+        '\t int = '
+    )
+    
+    id_selected = raw_input(msg)
+    
+    if not id_selected:
+        return None
+    
+    return trans[int(id_selected)]
+
+def moore2mealy(moore):
+    """Convert Moore machine to equivalent Mealy machine.
+    
+    Reference
+    =========
+    U{[LS11]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    
+    @type moore: L{MooreMachine}
+    
+    @rtype: L{MealyMachine}
+    """
+    if not isinstance(moore, MooreMachine):
+        raise TypeError('moore must be a MooreMachine')
+    
+    mealy = MealyMachine()
+    
+    # cp inputs
+    for port_name, port_type in moore.inputs.iteritems():
+        mask_func = moore._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name: mask_func}
+        
+        mealy.add_inputs({port_name: port_type}, masks=masks)
+    
+    # cp outputs
+    for port_name, port_type in moore.outputs.iteritems():
+        mask_func = moore._state_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name: mask_func}
+        
+        mealy.add_outputs({port_name: port_type}, masks=masks)
+    
+    # cp states
+    mealy.states.add_from(moore.states())
+    mealy.states.initial.add_from(moore.states.initial)
+    
+    # cp transitions
+    for si in moore:
+        output_values = {
+            k: v for k, v in moore.states[si].iteritems()
+            if k in moore.outputs
+        }
+        output_values = copy.deepcopy(output_values)
+        
+        for si_, sj, attr_dict in moore.transitions.find(si):
+            # note that we don't filter only input ports,
+            # so other edge annotation is preserved
+            attr_dict = copy.deepcopy(attr_dict)
+            attr_dict.update(output_values)
+            
+            mealy.transitions.add(si, sj, attr_dict)
+    
+    return mealy
+
+def mealy2moore(mealy):
+    """Convert Mealy machine to almost equivalent Moore machine.
+    
+    A Mealy machine cannot be transformed to an equivalent Moore machine.
+    It can be converted to a Moore machine with an arbitrary initial output,
+    which outputs the Mealy output at its next reaction.
+    
+    Reference
+    =========
+    U{[LS11]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    
+    @type mealy: L{MealyMachine}
+    
+    @rtype: L{MooreMachine}
+    """
+    # TODO: check for when Mealy is exactly convertible to Moore
+    
+    if not isinstance(mealy, MealyMachine):
+        raise TypeError('moore must be a MealyMachine')
+    
+    moore = MooreMachine()
+    
+    # cp inputs
+    for port_name, port_type in mealy.inputs.iteritems():
+        mask_func = mealy._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name: mask_func}
+        
+        moore.add_inputs({port_name: port_type}, masks=masks)
+    
+    # cp outputs
+    for port_name, port_type in mealy.outputs.iteritems():
+        mask_func = mealy._transition_dot_mask.get(port_name)
+        if mask_func is None:
+            masks = None
+        else:
+            masks = {port_name: mask_func}
+        
+        moore.add_outputs({port_name: port_type}, masks=masks)
+    
+    # initial state with arbitrary label
+    out = {k: list(v)[0] for k, v in mealy.outputs.iteritems()}
+    s0 = list(mealy.states.initial)[0]
+    
+    moore2mealy_states = dict()  # {qj : si} (function)
+    mealy2moore_states = dict()  # {si : {qj, qk, ...} } (relation)
+    
+    new_s0 = _create_state_str(
+        s0, out, moore, moore2mealy_states,
+        mealy2moore_states
+    )
+    
+    moore.states.add(new_s0, out)
+    moore.states.initial.add(new_s0)
+    
+    # cp transitions and create appropriate states
+    Q = set()
+    S = set()
+    
+    Q.add(new_s0)
+    S.add(new_s0)
+    while Q:
+        new_si = Q.pop()
+        si = moore2mealy_states[new_si]
+        
+        for si_, sj, attr_dict in mealy.transitions.find(si):
+            in_values, out_values = _split_io(attr_dict, mealy)
+            
+            new_sj = _create_state_str(
+                sj, out_values, moore, moore2mealy_states,
+                mealy2moore_states
+            )
+            
+            moore.transitions.add(new_si, new_sj, in_values)
+            
+            if new_sj not in S:
+                Q.add(new_sj)
+                S.add(new_sj)
+    
+    return moore
+
+def _print_ports(port_dict):
+    s = ''
+    for (port_name, port_type) in port_dict.iteritems():
+        s += '\t' + str(port_name) + ' : '
+        s += pformat(port_type) + '\n'
+    s += '\n'
+    return s
+
+def _print_label(label_dict):
+    s = ''
+    for (name, value) in label_dict.iteritems():
+        s += '\t\t' + str(name) + ' : ' + str(value) + '\n'
+    s += '\n'
+    return s
+
+def _create_state_str(mealy_state, output, moore,
+                      moore2mealy_states,
+                      mealy2moore_states):
+    """Used to create Moore states when converting Mealy -> Moore.
+    """
+    for s in mealy2moore_states.setdefault(mealy_state, set()):
+        # check output values
+        if moore.states[s] == output:
+            return s
+    
+    # create new
+    n = len(moore)
+    s = 's' + str(n)
+    
+    moore.states.add(s, output)
+    
+    moore2mealy_states[s] = mealy_state
+    mealy2moore_states[mealy_state].add(s)
+    
+    return s
+
+def _split_io(attr_dict, machine):
+    """Split into inputs and outputs.
+    """
+    input_values = {k: v for k, v in attr_dict.iteritems()
+                    if k in machine.inputs}
+    output_values = {k: v for k, v in attr_dict.iteritems()
+                     if k in machine.outputs}
+    return input_values, output_values
+
+project_dict = lambda x, y: {k: x[k] for k in x if k in y}
+trim_dict = lambda x, y: {k: x[k] for k in x if k not in y}
+
+def strip_ports(mealy, names):
+    """Remove ports in C{names}.
+    
+    For example, to remove the atomic propositions
+    labeling the transition system C{ts} used
+    (so they are dependent variables), call it as:
+    
+      >>> strip_ports(mealy, ts.atomic_propositions)
+    
+    @type mealy: L{MealyMachine}
+    
+    @type names: iterable container of C{str}
+    """
+    new = MealyMachine()
+    
+    new.add_inputs(trim_dict(mealy.inputs, names))
+    new.add_outputs(trim_dict(mealy.outputs, names))
+    
+    new.add_nodes_from(mealy)
+    new.states.initial.add_from(mealy.states.initial)
+    
+    for u, v, d in mealy.edges_iter(data=True):
+        d = trim_dict(d, names)
+        new.add_edge(u, v, **d)
+    return new
 
 ####
 # Program Graph (memo)

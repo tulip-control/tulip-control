@@ -1,5 +1,4 @@
-# Copyright (c) 2013, 2014 by California Institute of Technology
-# and 2014 The Regents of the University of Michigan
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +32,8 @@
 # 
 """TuLiP Toolbox Abstract subpackage
 """
+from __future__ import absolute_import
+
 # avoid shadowing modules
 from .discretization import (
     discretize, discretize_switched,

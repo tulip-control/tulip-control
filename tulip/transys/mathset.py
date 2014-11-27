@@ -1,4 +1,4 @@
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 
-
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.
     
@@ -59,10 +58,10 @@ def compare_lists(list1, list2):
     @rtype: bool
     """
     if not isinstance(list1, list):
-        raise TypeError('Not a list, instead list1:\n\t' +str(list1) )
+        raise TypeError('Not a list, instead list1:\n\t' + str(list1))
     
     if not isinstance(list2, list):
-        raise TypeError('Not a list, instead list2:\n\t' +str(list2) )
+        raise TypeError('Not a list, instead list2:\n\t' + str(list2))
     
     dummy_list = list(list1)
     same_lists = True
@@ -107,7 +106,7 @@ class MathSet(object):
     See Also
     ========
     L{SubSet}, L{PowerSet}, set
-    """    
+    """
     def __init__(self, iterable=[]):
         """Initialize by adding elements from iterable.
         
@@ -123,11 +122,11 @@ class MathSet(object):
         self.add_from(iterable)
     
     def __repr__(self):
-        return 'MathSet(' +pformat(list(self._set) +self._list) +')'
+        return 'MathSet(' + pformat(list(self._set) + self._list) + ')'
     
     def _debug_repr(self):
-        set_str = ', '.join([repr(i) for i in self._set] )
-        return 'MathSet({' +set_str +'} +' +str(self._list) +')'
+        set_str = ', '.join([repr(i) for i in self._set])
+        return 'MathSet({' + set_str + '} +' + str(self._list) + ')'
     
     def __or__(self, other):
         """Union with another mathematical set.
@@ -188,8 +187,7 @@ class MathSet(object):
         @return: Cartesian product of C{self} with C{other}.
         @rtype: C{MathSet} (explicit construction)
         """
-        cartesian = [(x, y) for x in self
-                            for y in other]
+        cartesian = [(x, y) for x in self for y in other]
         return MathSet(cartesian)
     
     def __ior__(self, iterable):
@@ -217,16 +215,17 @@ class MathSet(object):
     
     def __sub__(self, rm_items):
         s = MathSet(self)
-        print('s = ' +str(s) )
+        print('s = ' + str(s))
         print(rm_items)
         for item in rm_items:
             if item in s:
-                print('Removing...: ' +str(item) )
+                print('Removing...: ' + str(item))
                 s.remove(item)
         return s
     
     def __isub__(self, rm_items):
-        """Delete multiple elements."""
+        """Delete multiple elements.
+        """
         for item in rm_items:
             if item in self:
                 self.remove(item)
@@ -235,9 +234,11 @@ class MathSet(object):
     
     def __eq__(self, other):
         if not isinstance(other, MathSet):
-            raise TypeError('For now comparison only to another MathSet.\n' +
-                            'Got:\n\t' +str(other) +'\n of type: ' +
-                            str(type(other) ) +', instead.')
+            raise TypeError(
+                'For now comparison only to another MathSet.\n'
+                'Got:\n\t' + str(other) + '\n of type: ' +
+                str(type(other)) + ', instead.'
+            )
         
         same_lists = compare_lists(self._list, other._list)
         
@@ -256,8 +257,9 @@ class MathSet(object):
         return iter(self._list + list(self._set))
     
     def __len__(self):
-        """Number of elements in set."""
-        return len(self._set) +len(self._list)
+        """Number of elements in set.
+        """
+        return len(self._set) + len(self._list)
     
     def _filter_hashables(self, iterable):
         return filter(lambda x: isinstance(x, Hashable), iterable)
@@ -321,12 +323,14 @@ class MathSet(object):
         @type iterable: iterable containing (possibly not hashable) elements
         """
         if not isinstance(iterable, Iterable):
-            raise TypeError('Can only add elements to MathSet from Iterable.\n' +
-                            'Got:\n\t' +str(iterable) +'\n instead.')
+            raise TypeError(
+                'Can only add elements to MathSet from Iterable.\n'
+                'Got:\n\t' + str(iterable) + '\n instead.'
+            )
         
         if isinstance(iterable, MathSet):
             self._set |= set(iterable._set)
-            self._list = list(unique(self._list +iterable._list) )
+            self._list = list(unique(self._list + iterable._list))
             return
         
         # speed up
@@ -336,14 +340,14 @@ class MathSet(object):
         
         # filter to optimize storage
         try:
-            self._set |= set(self._filter_hashables(iterable) )
+            self._set |= set(self._filter_hashables(iterable))
             self._list = list(unique(
                 self._list + self._filter_unhashables(iterable)
             ))
             return
         except:
             # ...if contents of elements in iterable are mutable
-            self._list = list(unique(self._list +list(iterable) ) )
+            self._list = list(unique(self._list + list(iterable)))
     
     def remove(self, item):
         """Remove existing element from mathematical set.
@@ -364,7 +368,7 @@ class MathSet(object):
         """
         if item not in self:
             warnings.warn(
-                'Set element not in set S.\n'+
+                'Set element not in set S.\n'
                 'Maybe you targeted another element for removal ?'
             )
         
@@ -373,7 +377,7 @@ class MathSet(object):
                 self._set.remove(item)
                 return
             except:
-                logger.debug('item: ' +str(item) +', contains unhashables.')
+                logger.debug('item: ' + str(item) + ', contains unhashables.')
             
         self._list.remove(item)
     
@@ -472,15 +476,15 @@ class SubSet(MathSet):
         super(SubSet, self).__init__([])
         
         if not isinstance(superset, Container):
-            raise TypeError('superset must be Iterable,\n' +
-                            'Got instead:\n\t' +str(superset) )
+            raise TypeError('superset must be Iterable,\n'
+                            'Got instead:\n\t' + str(superset))
     
     def __repr__(self):
-        return 'SubSet(' +pformat(list(self._set) +self._list) +')'
+        return 'SubSet(' + pformat(list(self._set) + self._list) + ')'
     
     def _debug_repr(self):
-        set_str = ', '.join([repr(i) for i in self._set] )
-        return 'SubSet({' +set_str +'} +' +str(self._list) +')'
+        set_str = ', '.join([repr(i) for i in self._set])
+        return 'SubSet({' + set_str + '} +' + str(self._list) + ')'
     
     @property
     def superset(self):
@@ -501,12 +505,12 @@ class SubSet(MathSet):
         ========
         L{MathSet.add}
         """
-        if not new_element in self._superset:
+        if new_element not in self._superset:
             raise Exception(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
-                'FYI: new element:\n\t' +str(new_element) +'\n'
-                'and superset:\n\t' +str(self._superset)
+                'FYI: new element:\n\t' + str(new_element) + '\n'
+                'and superset:\n\t' + str(self._superset)
             )
         
         super(SubSet, self).add(new_element)
@@ -529,9 +533,9 @@ class SubSet(MathSet):
         L{add}, L{__ior__}
         """
         if not is_subset(new_elements, self._superset):
-            raise Exception('All new_elements:\n\t' +str(new_elements) +
+            raise Exception('All new_elements:\n\t' + str(new_elements) +
                             '\nshould already be \\in ' +
-                            'self.superset = ' +str(self._superset) )
+                            'self.superset = ' + str(self._superset))
         super(SubSet, self).add_from(new_elements)
 
 class CartesianProduct(object):
@@ -541,11 +545,11 @@ class CartesianProduct(object):
         self.mathsets = []
     
     def __contains__(self, element):
-        #TODO check ordered
+        # TODO check ordered
         if not isinstance(element, Iterable):
             raise TypeError(
-                'Argument element must be Iterable, otherwise cannot ' +
-                'recover which item in it belongs to which set in the ' +
+                'Argument element must be Iterable, otherwise cannot '
+                'recover which item in it belongs to which set in the '
                 'Cartesian product.'
             )
         
@@ -600,8 +604,9 @@ def unique(iterable):
     return unique_items
 
 def contains_multiple(iterable):
-    """Does iterable contain any item multiple times ?"""    
-    return len(iterable) != len(unique(iterable) )
+    """Does iterable contain any item multiple times ?
+    """
+    return len(iterable) != len(unique(iterable))
 
 def is_subset(small_iterable, big_iterable):
     """Comparison for handling list <= set, and lists with unhashable items.
@@ -610,15 +615,15 @@ def is_subset(small_iterable, big_iterable):
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
-    if not isinstance(big_iterable, (Iterable, Container) ):
+    if not isinstance(big_iterable, (Iterable, Container)):
         raise TypeError('big_iterable must be either Iterable or Container, '
                         'otherwise subset relation undefined.\n'
-                        'Got:\n\t' +str(big_iterable) +'\ninstead.')
+                        'Got:\n\t' + str(big_iterable) + '\ninstead.')
     
     if not isinstance(small_iterable, Iterable):
         raise TypeError('small_iterable must be Iterable, '
                         'otherwise subset relation undefined.\n'
-                        'Got:\n\t' +str(small_iterable) +'\ninstead.')
+                        'Got:\n\t' + str(small_iterable) + '\ninstead.')
     
     # nxor
     if isinstance(small_iterable, str) != isinstance(big_iterable, str):
@@ -626,7 +631,7 @@ def is_subset(small_iterable, big_iterable):
                         'big_iterable should be strings.\n'
                         'Otherwise subset relation between string '
                         'and non-string may introduce bugs.\nGot:\n\t' +
-                        str(small_iterable) +',\t' +str(big_iterable) +
+                        str(small_iterable) + ',\t' + str(big_iterable) +
                         '\ninstead.')
     
     try:
@@ -663,7 +668,8 @@ def powerset(iterable):
         also in https://pypi.python.org/pypi/more-itertools
         """
         s = list(iterable)
-        return chain.from_iterable(combinations(s, r) for r in range(len(s)+1) )
+        return chain.from_iterable(combinations(s, r)
+                                   for r in xrange(len(s) + 1))
 
 class PowerSet(object):
     """Efficiently store power set of a mathematical set.
@@ -700,7 +706,7 @@ class PowerSet(object):
     
     @param iterable: mathematical set S of elements, on which this 2^S defined.
     @type iterable: iterable container
-    """    
+    """
     def __init__(self, iterable=None):
         """Create new PowerSet over elements contained in S = C{iterable}.
         
@@ -717,12 +723,12 @@ class PowerSet(object):
         return self()
     
     def __repr__(self):
-        return 'PowerSet(' +str(self.math_set) +' )'
+        return 'PowerSet(' + str(self.math_set) + ' )'
     
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
         if not isinstance(item, Iterable):
-            raise Exception('Not iterable:\n\t' +str(item) +',\n'
+            raise Exception('Not iterable:\n\t' + str(item) + ',\n'
                             'this is a powerset, so it contains (math) sets.')
         
         return is_subset(item, self.math_set)
@@ -731,12 +737,12 @@ class PowerSet(object):
         return powerset(self.math_set)
     
     def __len__(self):
-        return 2**len(self.math_set)
+        return 2 ** len(self.math_set)
     
     def __add__(self, other):
         if not isinstance(other, PowerSet):
-            raise TypeError('Addition defined only between PowerSets.\n' +
-                            'Got instead:\n\t other = ' +str(other) )
+            raise TypeError('Addition defined only between PowerSets.\n'
+                            'Got instead:\n\t other = ' + str(other))
         
         list1 = self.math_set
         list2 = other.math_set
@@ -751,9 +757,11 @@ class PowerSet(object):
     
     def __setattr__(self, name, value):
         if name is 'math_set' and not isinstance(value, MathSet):
-            msg = 'PowerSet.math_set must be of class MathSet.\n'
-            msg += 'Got instead:\n\t' +str(value)
-            msg += '\nof class:\nt\t' +str(type(value) )
+            msg = (
+                'PowerSet.math_set must be of class MathSet.\n'
+                'Got instead:\n\t' + str(value) +
+                '\nof class:\nt\t' + str(type(value))
+            )
             raise Exception(msg)
         
         object.__setattr__(self, name, value)
@@ -764,6 +772,17 @@ class TypedDict(dict):
     For each key, a domain can optionally be defined,
     which restricts the admissible values that can be
     paired with that key.
+    
+    Example
+    =======
+    
+    >>> d = TypedDict()
+    >>> allowed_values = {'name': {'Maria', 'John'},
+                          'age': range(122)}
+    >>> default_values = {'name': 'Maria',
+                          'age': 30}
+    >>> d.set_types(allowed_types)
+    >>> d.update(default_values)
     """
     # credits for debugging this go here:
     #   http://stackoverflow.com/questions/2060972/
@@ -774,18 +793,25 @@ class TypedDict(dict):
         """Raise ValueError if value y not allowed for key i.
         """
         valid_y = True
-        try:
-            if i in self.allowed_values:
-                if y not in self.allowed_values[i]:
+        
+        if i in self.allowed_values:
+            valid_y = False
+            if self.allowed_values[i] is None:
+                valid_y = True
+            else:
+                try:
+                    if y in self.allowed_values[i]:
+                        valid_y = True
+                except:
                     valid_y = False
-        except:
-            pass
         
         if not valid_y:
-            msg = 'key: ' + str(i) + ', cannot be'
-            msg += ' assigned value: ' + str(y) + '\n'
-            msg += 'Admissible values are:\n\t'
-            msg += str(self.allowed_values[i])
+            msg = (
+                'key: ' + str(i) + ', cannot be'
+                ' assigned value: ' + str(y) + '\n'
+                'Admissible values are:\n\t'
+                + str(self.allowed_values[i])
+            )
             raise ValueError(msg)
         
         super(TypedDict, self).__setitem__(i, y)
@@ -812,11 +838,28 @@ class TypedDict(dict):
     def set_types(self, allowed_values):
         """Restrict values the key can be paired with.
         
-        @param allowed_values: dict of the form:
+        @param allowed_values: dict of the form::
             
                 {key : values}
             
-                C{values} must implement C{__contains__}
-                to enable checking validity of values.
+            C{values} must implement C{__contains__}
+            to enable checking validity of values.
+            
+            If C{values} is C{None},
+            then any value is allowed.
         """
         self.allowed_values = allowed_values
+    
+    def is_consistent(self):
+        """Check if typed keys have consistent values.
+        
+        Use case: changing the object that allowed_values
+        points to can invalidate the assigned values.
+        
+        @rtype: bool
+        """
+        for k, v in self:
+            if k in self.allowed_values:
+                if v in self.allowed_values[k]:
+                    return False
+        return True

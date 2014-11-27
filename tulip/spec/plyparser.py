@@ -34,200 +34,318 @@
 PLY-based parser for TuLiP LTL syntax,
 using AST classes from spec.ast
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
-from warnings import warn
 
-import ply.lex as lex
-import ply.yacc as yacc
+import warnings
 
-from .ast import (ASTVar, ASTNum, ASTBool, ASTArithmetic,
-    ASTComparator, ASTUnTempOp, ASTBiTempOp,
-    ASTNot, ASTAnd, ASTOr, ASTXor, ASTImp, ASTBiImp)
+import ply.lex
+import ply.yacc
 
-tokens = (
-    'TRUE', 'FALSE',
-    'NAME','NUMBER',
-    'NOT', 'AND','OR', 'XOR', 'IMP', 'BIMP',
-    'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-    'PRIME', 'ALWAYS', 'EVENTUALLY', 'NEXT',
-    'UNTIL', 'RELEASE',
-    'PLUS', 'MINUS', 'TIMES', 'DIV',
-    'LPAREN','RPAREN',
-)
+from . import ast
 
-# Tokens
-t_TRUE = 'TRUE|True|true'
-t_FALSE = 'FALSE|False|false'
 
-t_NEXT = r'X|next'
-t_PRIME  = r'\''
-t_ALWAYS = r'\[\]|G'
-t_EVENTUALLY = r'\<\>|F'
+TABMODULE = 'tulip.spec.parsetab'
 
-t_UNTIL = r'U'
-t_RELEASE = r'R'
+LEX_LOGGER = '{name}.lex_logger'.format(name=__name__)
+YACC_LOGGER = '{name}.yacc_logger'.format(name=__name__)
+PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
 
-t_NOT = r'\!'
-t_AND = r'\&\&|\&'
-t_OR = r'\|\||\|'
-t_XOR = r'\^'
 
-t_EQUALS = r'\=|\=\='
-t_NEQUALS = r'\!\='
-t_LT = r'\<'
-t_LE = r'\<\='
-t_GT = r'>\='
-t_GE = r'>'
-
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-
-t_NAME = r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|[A-Za-z][0-9_][a-zA-Z0-9._:]*)'
-t_NUMBER = r'\d+'
-
-t_IMP = '->'
-t_BIMP = '\<->'
-
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIV = r'/'
-
-# Ignored characters
-t_ignore = " \t"
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
+def _format_docstring(**kwargs):
+    """Apply C{kwargs} to function docstring using C{format}."""
     
-def t_error(t):
-    warn("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    def dec(func):
+        func.__doc__ = func.__doc__.format(**kwargs)
+        return func
     
-# Build the lexer
-lexer = lex.lex()
+    return dec
 
-# lowest to highest
-precedence = (
-    ('right', 'UNTIL', 'RELEASE'),
-    ('right', 'BIMP'),
-    ('right', 'IMP'),
-    ('left', 'XOR'),
-    ('left', 'OR'),
-    ('left', 'AND'),
-    ('right', 'ALWAYS', 'EVENTUALLY'),
-    ('right', 'NEXT'),
-    ('right', 'NOT'),
-    ('left', 'PRIME'),
-    ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
-    ('nonassoc', 'TIMES', 'DIV'),
-    ('nonassoc', 'PLUS', 'MINUS'),
-    ('nonassoc', 'TRUE', 'FALSE')
-)
 
-# dictionary of names
-#names = {'var':'replacement'}
+class Lexer(object):
+    """Token rules to build LTL lexer."""
+    
+    def __init__(self, debug=False):
+        # for setting the logger, call build explicitly
+        self.build(debug=debug)
+    
+    tokens = (
+        'TRUE', 'FALSE',
+        'NAME', 'NUMBER',
+        'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
+        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
+        'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
+        'UNTIL', 'RELEASE',
+        'PLUS', 'MINUS', 'TIMES', 'DIV',
+        'LPAREN', 'RPAREN', 'DQUOTES'
+    )
+    
+    # Tokens
+    t_TRUE = 'TRUE|True|true'
+    t_FALSE = 'FALSE|False|false'
+    
+    t_NEXT = r'X|next'
+    # t_PRIME  = r'\''
+    t_ALWAYS = r'\[\]|G'
+    t_EVENTUALLY = r'\<\>|F'
+    
+    t_UNTIL = r'U'
+    t_RELEASE = r'R'
+    
+    t_NOT = r'\!'
+    t_AND = r'\&\&|\&'
+    t_OR = r'\|\||\|'
+    t_XOR = r'\^'
+    
+    t_EQUALS = r'\=|\=\='
+    t_NEQUALS = r'\!\='
+    t_LT = r'\<'
+    t_LE = r'\<\='
+    t_GT = r'>\='
+    t_GE = r'>'
+    
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    
+    t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
+              r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
+    t_NUMBER = r'\d+'
+    
+    t_IMP = '->'
+    t_BIMP = '\<->'
+    
+    t_PLUS = r'\+'
+    t_MINUS = r'-'
+    t_TIMES = r'\*'
+    t_DIV = r'/'
+    
+    t_DQUOTES = r'\"'
 
-def p_arithmetic(p):
-    """expression : expression TIMES expression
-                  | expression DIV expression
-                  | expression PLUS expression
-                  | expression MINUS expression
-    """
-    p[0] = ASTArithmetic(None, None, p[1:4])
+    # Ignored characters
+    t_ignore = " \t"
 
-def p_comparator(p):
-    """expression : expression EQUALS expression
-                  | expression NEQUALS expression
-                  | expression LT expression
-                  | expression LE expression
-                  | expression GT expression
-                  | expression GE expression
-    """
-    p[0] = ASTComparator(None, None, p[1:4])
+    def t_newline(self, t):
+        r'\n+'
+        t.lexer.lineno += t.value.count("\n")
+        
+    def t_error(self, t):
+        warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
+        t.lexer.skip(1)
+    
+    @_format_docstring(logger=LEX_LOGGER)
+    def build(self, debug=False, debuglog=None, **kwargs):
+        """Create a lexer.
+        
+        @param kwargs: Same arguments as C{{ply.lex.lex}}:
+        
+          - except for C{{module}} (fixed to C{{self}})
+          - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
+        """
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(LEX_LOGGER)
+        
+        self.lexer = ply.lex.lex(
+            module=self,
+            debug=debug,
+            debuglog=debuglog,
+            **kwargs
+        )
 
-def p_and(p):
-    """expression : expression AND expression
-    """
-    p[0] = ASTAnd(None, None, p[1:4])
 
-def p_or(p):
-    """expression : expression OR expression
-    """
-    p[0] = ASTOr(None, None, p[1:4])
+class Parser(object):
+    """Production rules to build LTL parser."""
+    
+    # lowest to highest
+    precedence = (
+        ('right', 'UNTIL', 'RELEASE'),
+        ('right', 'BIMP'),
+        ('right', 'IMP'),
+        ('left', 'XOR'),
+        ('left', 'OR'),
+        ('left', 'AND'),
+        ('right', 'ALWAYS', 'EVENTUALLY'),
+        ('right', 'NEXT'),
+        ('right', 'NOT'),
+        # ('left', 'PRIME'),
+        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
+        ('nonassoc', 'TIMES', 'DIV'),
+        ('nonassoc', 'PLUS', 'MINUS'),
+        ('nonassoc', 'TRUE', 'FALSE')
+    )
+    
+    def __init__(self):
+        self.graph = None
+        
+        self.lexer = Lexer()
+        self.tokens = self.lexer.tokens
+        
+        self.build()
+    
+    def build(self):
+        self.parser = ply.yacc.yacc(
+            module=self,
+            tabmodule=TABMODULE,
+            write_tables=False,
+            debug=False
+        )
 
-def p_xor(p):
-    """expression : expression XOR expression
-    """
-    p[0] = ASTXor(None, None, p[1:4])
+    @_format_docstring(logger=YACC_LOGGER)
+    def rebuild_parsetab(self, tabmodule, outputdir='',
+                         debug=True, debuglog=None):
+        """Rebuild parsetable in debug mode.
+        
+        @param tabmodule: name of table file
+        @type tabmodule: C{{str}}
+        
+        @param outputdir: save C{{tabmodule}} in this directory.
+        @type outputdir: c{{str}}
+        
+        @param debuglog: defaults to logger C{{"{logger}"}}.
+        @type debuglog: C{{logging.Logger}}
+        """
+        if debug and debuglog is None:
+            debuglog = logging.getLogger(YACC_LOGGER)
+        
+        self.lexer.build(debug=debug)
+        
+        self.parser = ply.yacc.yacc(
+            module=self,
+            tabmodule=tabmodule,
+            outputdir=outputdir,
+            write_tables=True,
+            debug=debug,
+            debuglog=debuglog
+        )
+    
+    @_format_docstring(logger=PARSER_LOGGER)
+    def parse(self, formula, debuglog=None):
+        """Parse formula string and create abstract syntax tree (AST).
+        
+        @param logger: defaults to logger C{{"{logger}"}}.
+        @type logger: C{{logging.Logger}}
+        """
+        if debuglog is None:
+            debuglog = logging.getLogger(PARSER_LOGGER)
+        
+        g = ast.LTL_AST()
+        self.graph = g
+        root = self.parser.parse(
+            formula,
+            lexer=self.lexer.lexer,
+            debug=debuglog
+        )
+        
+        if root is None:
+            raise Exception('failed to parse:\n\t{f}'.format(f=formula))
+        
+        g.root = root
+        return g
+    
+    def add_identifier(self, Type, x):
+        identifier = Type(x)
+        self.graph.add_identifier(identifier)
+        return identifier
+    
+    def add_unary(self, Type, p):
+        operator = Type(p[1])
+        self.graph.add_unary(operator, p[2])
+        return operator
+    
+    def add_binary(self, Type, p):
+        operator = Type(p[2])
+        self.graph.add_binary(operator, p[1], p[3])
+        return operator
+    
+    def p_arithmetic(self, p):
+        """expression : expression TIMES expression
+                      | expression DIV expression
+                      | expression PLUS expression
+                      | expression MINUS expression
+        """
+        p[0] = self.add_binary(ast.Arithmetic, p)
+    
+    def p_comparator(self, p):
+        """expression : expression EQUALS expression
+                      | expression NEQUALS expression
+                      | expression LT expression
+                      | expression LE expression
+                      | expression GT expression
+                      | expression GE expression
+        """
+        p[0] = self.add_binary(ast.Comparator, p)
+    
+    def p_and(self, p):
+        """expression : expression AND expression"""
+        p[0] = self.add_binary(ast.And, p)
+    
+    def p_or(self, p):
+        """expression : expression OR expression"""
+        p[0] = self.add_binary(ast.Or, p)
+    
+    def p_xor(self, p):
+        """expression : expression XOR expression"""
+        p[0] = self.add_binary(ast.Xor, p)
+    
+    def p_imp(self, p):
+        """expression : expression IMP expression"""
+        p[0] = self.add_binary(ast.Imp, p)
+    
+    def p_bimp(self, p):
+        """expression : expression BIMP expression"""
+        p[0] = self.add_binary(ast.BiImp, p)
+    
+    def p_unary_temp_op(self, p):
+        """expression : NEXT expression
+                      | ALWAYS expression
+                      | EVENTUALLY expression
+        """
+        p[0] = self.add_unary(ast.UnTempOp, p)
+    
+    def p_bin_temp_op(self, p):
+        """expression : expression UNTIL expression
+                      | expression RELEASE expression
+        """
+        p[0] = self.add_binary(ast.BiTempOp, p)
+    
+    def p_not(self, p):
+        """expression : NOT expression"""
+        p[0] = self.add_unary(ast.Not, p)
+    
+    def p_group(self, p):
+        """expression : LPAREN expression RPAREN"""
+        p[0] = p[2]
+    
+    def p_number(self, p):
+        """expression : NUMBER"""
+        p[0] = self.add_identifier(ast.Num, p[1])
+    
+    def p_expression_name(self, p):
+        """expression : NAME"""
+        p[0] = self.add_identifier(ast.Var, p[1])
+    
+    def p_expression_const(self, p):
+        """expression : DQUOTES NAME DQUOTES"""
+        p[0] = self.add_identifier(ast.Const, p[2])
+    
+    def p_bool(self, p):
+        """expression : TRUE
+                      | FALSE
+        """
+        p[0] = self.add_identifier(ast.Bool, p[1])
+    
+    def p_error(self, p):
+        warnings.warn('Syntax error at "{p}"'.format(p=p.value))
 
-def p_imp(p):
-    """expression : expression IMP expression
-    """
-    p[0] = ASTImp(None, None, p[1:4])
-
-def p_bimp(p):
-    """expression : expression BIMP expression
-    """
-    p[0] = ASTBiImp(None, None, p[1:4])
-
-def p_unary_temp_op(p):
-    """expression : NEXT expression
-                  | ALWAYS expression
-                  | EVENTUALLY expression
-    """
-    p[0] = ASTUnTempOp(None, None, p[1:3])
-
-def p_bin_temp_op(p):
-    """expression : expression UNTIL expression
-                  | expression RELEASE expression
-    """
-    p[0] = ASTBiTempOp(None, None, p[1:4])
-
-def p_not(p):
-    """expression : NOT expression
-    """
-    p[0] = ASTNot(None, None, p[1:3])
-
-def p_group(p):
-    """expression : LPAREN expression RPAREN
-    """
-    p[0] = p[2]
-
-def p_number(p):
-    """expression : NUMBER
-    """
-    p[0] = ASTNum(None, None, [p[1]])
-
-def p_expression_name(p):
-    """expression : NAME
-    """
-    p[0] = ASTVar(None, None, [p[1]])
-
-def p_bool(p):
-    """expression : TRUE
-                  | FALSE
-    """
-    p[0] = ASTBool(None, None, [p[1]])
-
-def p_error(p):
-    warn("Syntax error at '%s'" % p.value)
-
-parser = yacc.yacc(tabmodule="tulip.spec.parsetab",
-                   write_tables=0, debug=0)
-
-def rebuild_parsetab():
-    yacc.yacc(tabmodule="parsetab",
-              write_tables=1, debug=1)
 
 def parse(formula):
-    """Parse formula string and create abstract syntax tree (AST).
-    """
-    return parser.parse(formula, lexer=lexer, debug=logger)
-    
+    warnings.warn('Deprecated: Better to instantiate a Parser once only.')
+    parser = Parser()
+    return parser.parse(formula)
+
+
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
-    parsed_formula = parser.parse(s)
-    
-    print('Parsing result: ' + str(parsed_formula.to_gr1c()))
+    parsed_formula = parse(s)
+    print('Parsing result: {s}'.format(s=parsed_formula.to_gr1c()))

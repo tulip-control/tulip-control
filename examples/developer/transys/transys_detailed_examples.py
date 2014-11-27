@@ -102,7 +102,8 @@ def fts_maximal_example():
     """
     
     print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
-    fts = trs.FiniteTransitionSystem(name='Beverage vending machine')
+    fts = trs.FiniteTransitionSystem()
+    fts.name = 'Beverage vending machine'
     
     # add state info
     fts.states.add('pay')
@@ -215,8 +216,8 @@ def fts_maximal_example():
     #   transition addition is strictly monitored
     #   each transition is identified uniquely with its set of labels (key=values)
     #   see Transitions.add_labeled()
-    fts.actions.add('insert_coin')
-    fts.actions.add_from({'get_soda', 'get_beer', ''} )
+    fts.sys_actions.add('insert_coin')
+    fts.sys_actions.add_from({'get_soda', 'get_beer', ''} )
     
     try:
         fts.transitions.add_labeled('pay', 'select', 'insert_coin')
@@ -230,9 +231,9 @@ def fts_maximal_example():
     # first remove unlabeled, then add new labeled
     fts.transitions.remove('pay', 'select')
     fts.plot()
-    fts.transitions.add('pay', 'select', actions='insert_coin')
+    fts.transitions.add('pay', 'select', sys_actions='insert_coin')
     fts.plot()
-    fts.transitions.remove('pay', 'select', actions='insert_coin')
+    fts.transitions.remove('pay', 'select', sys_actions='insert_coin')
     
     try:
         fts.transitions.add_labeled('pay', 'new state', 'insert_coin')
@@ -247,15 +248,15 @@ def fts_maximal_example():
     # to override and add new state and/or new labels
     fts.plot()
     fts.states.add_from({'pay', 'new_state'})
-    fts.actions.add('new_action')
+    fts.sys_actions.add('new_action')
     
-    fts.transitions.add('pay', 'new_state', actions='new_action')
+    fts.transitions.add('pay', 'new_state', sys_actions='new_action')
     fts.plot()
     fts.states.remove('new_state')
-    fts.actions.remove('new_action')
+    fts.sys_actions.remove('new_action')
     fts.plot()
     
-    fts.transitions.add('pay', 'select', actions='insert_coin')
+    fts.transitions.add('pay', 'select', sys_actions='insert_coin')
     fts.transitions.remove_from(
         [('select', x) for x in {'soda', 'beer'}]
     )
@@ -263,18 +264,18 @@ def fts_maximal_example():
         [('select', x) for x in {'soda', 'beer'}]
     )
     fts.transitions.remove('soda', 'pay')
-    fts.transitions.add('soda', 'pay', actions='get_soda')
+    fts.transitions.add('soda', 'pay', sys_actions='get_soda')
     
     fts.plot()
     
     print('Types of actions: ' +str(fts._transition_label_def.keys() ) )
-    print('Number of actions: ' +str(len(fts.actions) ) )
-    print('Actions: ' +str(fts.actions ) )
+    print('Number of actions: ' +str(len(fts.sys_actions) ) )
+    print('Actions: ' +str(fts.sys_actions ) )
     print('Labeled transitions: ' +str(fts.transitions() ) )
     fts.plot()
     
     # fast way to get all edges with value of actions
-    nx.get_edge_attributes(fts, 'actions')
+    nx.get_edge_attributes(fts, 'sys_actions')
     
     # Atomic Propositions (AP)
     fts.atomic_propositions.add('paid')
@@ -361,7 +362,7 @@ def scipy_sparse_labeled_adj():
     
     print(A)
     
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     ofts.states.add_from(set(range(10) ) )
     
     ofts.sys_actions.add('move')
@@ -383,7 +384,7 @@ def scipy_sparse_labeled_adj():
     
     print(A)
     
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     ofts.states.add_from(set(range(10) ) )
     
     ofts.sys_actions.add('move')
