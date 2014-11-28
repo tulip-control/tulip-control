@@ -4,6 +4,15 @@ FMIinclude=../../extern/fmi
 CFLAGS = -O2 -Wall -DLDL_LONG -DDLONG -Wextra -fPIC
 LIBS = -lm
 
+# Try to determine architecture if user did not specify it.
+ifndef $(ARCH)
+ifeq ($(shell uname), Linux)
+ARCH=linux64
+else
+ARCH=darwin64
+endif
+endif
+
 # rt is linked in the same manner as in the Makefile of ecos.
 # For Linux `-lrt` may be required with clock_gettime().
 ifeq ($(shell uname), Linux)
@@ -46,9 +55,12 @@ data.o: sources/data.c include/data.h include/polytope.h
 	$(C) -c sources/data.c -o data.o
 
 fmu:ecos obj
-	mkdir -p binaries/linux64
-	$(C) -DFMI_COSIMULATION -c sources/TuLiPFMU.c -o TuLiPFMU.o 
-	$(C) -DFMI_COSIMULATION -shared -Wl,-soname,TuLiPFMU.so -L$(ECOSDIR) TuLiPFMU.o $(OBJ) -lecos $(LIBS) -o binaries/linux64/TuLiPFMU.so 
+	mkdir -p binaries/$(ARCH)
+ifeq ($(ARCH), darwin64)
+	$(C) -DFMI_COSIMULATION -shared -Wl,-dylib -L$(ECOSDIR) sources/TuLiPFMU.c $(OBJ) -lecos $(LIBS) -o binaries/$(ARCH)/TuLiPFMU.dylib
+else
+	$(C) -DFMI_COSIMULATION -shared -Wl,-soname,TuLiPFMU.so -L$(ECOSDIR) sources/TuLiPFMU.c $(OBJ) -lecos $(LIBS) -o binaries/$(ARCH)/TuLiPFMU.so
+endif
 	zip -r TuLiPFMU.fmu binaries/ include/ sources/ modelDescription.xml 
 
 test: testController testFSM

@@ -49,6 +49,11 @@ The following standard tools must also be installed:
 * ``make``
 * ``zip``
 
+Finally, the manner of building the FMU depends on the target platform.  This
+can be indicated manually by defining the ARCH variable in the Makefile.  E.g.,
+64-bit Mac OS can be forced by adding ``ARCH=darwin64`` at the beginning of
+``Makefile``.  If undefined, then ``ARCH`` will be determined from ``uname``.
+
 
 Example
 -------
