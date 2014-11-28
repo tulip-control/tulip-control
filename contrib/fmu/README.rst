@@ -10,7 +10,8 @@ Installation
 Just do it
 ``````````
 
-In most cases, preparing the dependencies is achieved by (building ecos is not necessary) ::
+In most cases, preparing the dependencies is achieved by (building ecos is not
+necessary) ::
 
   cd ../../extern/ecos
   ./get.sh
@@ -75,7 +76,8 @@ is by reading the documentation inside robotfmu.py and the following:
 
 * ctrlexport.py : exporting the Mealy meachine
 * pppexport.py : exporting the proposition preserving partition
-* poly2str.py : miscellaneous functions for converting matrices and polytopes to C code
+* poly2str.py : miscellaneous functions for converting matrices and polytopes to
+  C code
 * exportFMU.py : generating FMU
 
 Note that ``make`` is invoked from within robotfmu.py and exportFMU.py using
