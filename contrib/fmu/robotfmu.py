@@ -8,7 +8,6 @@ changes are
 * caching of the abstraction and controller in AbstractPwa.p and FSM.p, and
 * calling exportFMU() and `make testController` (near end of this file).
 """
-
 import os.path
 import os
 import pickle
