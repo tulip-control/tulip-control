@@ -3,7 +3,8 @@
 NOTES:
 
 - In ECOS 1.0.4 and possibly other versions, idxint is defined as
-  SuiteSparse_long in glblopts.h, which is included by ecos.h.
+  SuiteSparse_long and pfloat is defined as double in glblopts.h,
+  which is included by ecos.h.
 */
 
 #ifndef __TULIPCONTROL_H__
