@@ -10,6 +10,7 @@ NOTES:
 #ifndef __TULIPCONTROL_H__
 #define __TULIPCONTROL_H__
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <ecos.h>
 #include "polytope.h"

@@ -3,10 +3,10 @@
 int main() {
 	int i,j,t;
 	Controller *c;
-	idxint *dInput = MALLOC(sizeof(idxint)*nInputVariable);
-	pfloat *x = MALLOC(sizeof(pfloat)*n);
-	pfloat *nextx = MALLOC(sizeof(pfloat)*n);
-	pfloat *u = MALLOC(sizeof(pfloat)*p);
+	idxint *dInput = malloc(sizeof(idxint)*nInputVariable);
+	pfloat *x = malloc(sizeof(pfloat)*n);
+	pfloat *nextx = malloc(sizeof(pfloat)*n);
+	pfloat *u = malloc(sizeof(pfloat)*p);
 	for(i=0;i<n;i++)
 	{
 		*(x+i) = x0[i];
@@ -84,9 +84,9 @@ int main() {
 		}
 	}
 	free_controller(c);
-	FREE(x);
-	FREE(nextx);
-	FREE(u);
-	FREE(dInput);
+	free(x);
+	free(nextx);
+	free(u);
+	free(dInput);
 	return 0;
 }

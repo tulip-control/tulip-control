@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "polytope.h"
 
@@ -44,18 +45,18 @@ int isInside(const Polytope* p, const pfloat x[]) {
 }
 
 Polytope* from_box(idxint l,pfloat* upper,pfloat* lower){
-	Polytope *p = (Polytope*)MALLOC(sizeof(Polytope));
+	Polytope *p = (Polytope*)malloc(sizeof(Polytope));
 	int i;
 	idxint k = l*2;
 	p->k = k;
 	p->l = l;
-	p->A = (pfloat*)MALLOC(sizeof(pfloat)*l*k);
+	p->A = (pfloat*)malloc(sizeof(pfloat)*l*k);
 	for(i=0;i< l*k;i++)
 	{
 		*(p->A+i) = 0;
 	}
-	p->b = (pfloat*)MALLOC(sizeof(pfloat)*k);
-	p->center = (pfloat*)MALLOC(sizeof(pfloat)*l);
+	p->b = (pfloat*)malloc(sizeof(pfloat)*k);
+	p->center = (pfloat*)malloc(sizeof(pfloat)*l);
 	for(i=0;i<l;i++)
 	{
 		*(p->A+i*k+2*i) = 1;	
@@ -68,7 +69,7 @@ Polytope* from_box(idxint l,pfloat* upper,pfloat* lower){
 }
 
 Polytope* create_poly(idxint k,idxint l,pfloat* A,pfloat* b,pfloat* center){
-	Polytope *p = (Polytope*)MALLOC(sizeof(Polytope));
+	Polytope *p = (Polytope*)malloc(sizeof(Polytope));
 	p->k = k;
 	p->l = l;
 	p->A = A;
@@ -85,9 +86,9 @@ Polytope* cartesian_prod(Polytope* p1, Polytope* p2)
 	idxint l2 = p2->l;
 	idxint k = k1+k2;
 	idxint l = l1+l2;
-	pfloat* A = (pfloat*) MALLOC(sizeof(pfloat)*k*l);
-	pfloat* b = (pfloat*) MALLOC(sizeof(pfloat)*k);
-	pfloat* center = (pfloat*) MALLOC(sizeof(pfloat)*l);
+	pfloat* A = (pfloat*) malloc(sizeof(pfloat)*k*l);
+	pfloat* b = (pfloat*) malloc(sizeof(pfloat)*k);
+	pfloat* center = (pfloat*) malloc(sizeof(pfloat)*l);
 	int i,j;
 	Polytope *p;
 	for(i=0;i<k;i++)
@@ -137,8 +138,8 @@ Polytope* cartesian_prod(Polytope* p1, Polytope* p2)
 
 void free_polytope(Polytope* p)
 {
-	FREE(p->A);
-	FREE(p->b);
-	FREE(p->center);
-	FREE(p);
+	free(p->A);
+	free(p->b);
+	free(p->center);
+	free(p);
 }

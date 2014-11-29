@@ -44,7 +44,7 @@ void free_region() {
     int i;
     for (i=0;i<nRegion;i++)
     {
-        FREE(regions[i]);
+        free(regions[i]);
     }
 }""")
 

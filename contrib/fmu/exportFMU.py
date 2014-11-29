@@ -121,7 +121,7 @@ def exportSysData(ctrl, pwa, initState, initRegion, filename="data"):
     f.write('}\n\n')
 
     f.write('void free_input_bound(void){\n')
-    f.write('		FREE(input_bound);\n')
+    f.write('		free(input_bound);\n')
     f.write('}\n')
 
     f.write('pfloat x0[] = {' + matrix2str(initState) + '};\n')
