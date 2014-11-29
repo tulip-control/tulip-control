@@ -31,11 +31,11 @@ Controller* instantiate_controller(){
 }
 
 void init_controller(Controller* controller) {
+	int i;
 	init_input_bound();
 	init_region();
 	printf("successful init input and ppp polytopes\n");
 	fflush(stdout);
-	int i;
 	for(i=0;i<n;i++)
 	{
 		*(controller->hatx+i) = x0[i];
@@ -151,17 +151,34 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 	idxint ecos_p = n*(N+1) + 2;
 	idxint ecos_l = l1 * N + l2;
 	idxint ecos_ncones = 1;
-	idxint ecos_q[1] = {p*N + n + 2};
+	idxint ecos_q[1];
+
+	idxint nnzG;
+	pfloat *ecos_Gpr;
+	idxint *ecos_Gjc;
+	idxint *ecos_Gir;
+
+	idxint nnzA;
+	idxint nnzAblock;
+	pfloat *ecos_Apr;
+	idxint *ecos_Ajc;
+	idxint *ecos_Air;
+
+	pfloat *ecos_c;
+	pfloat *ecos_h;
+	pfloat *ecos_b;
+
+	ecos_q[0] = p*N + n + 2;
 
 	/*generating matrix G of ECOS*/	
-	idxint nnzG = N*p + n + N*(n+p)*l1 + n*l2 + 2;
-	pfloat *ecos_Gpr = (pfloat*)MALLOC(sizeof(pfloat)*nnzG);
+	nnzG = N*p + n + N*(n+p)*l1 + n*l2 + 2;
+	ecos_Gpr = (pfloat*)MALLOC(sizeof(pfloat)*nnzG);
 	if (ecos_Gpr == NULL)
 		return ECOS_FATAL;
-	idxint *ecos_Gjc = (idxint*)MALLOC(sizeof(idxint)*(ecos_n+1));
+	ecos_Gjc = (idxint*)MALLOC(sizeof(idxint)*(ecos_n+1));
 	if (ecos_Gjc == NULL)
 		return ECOS_FATAL;
-	idxint *ecos_Gir = (idxint*)MALLOC(sizeof(idxint)*nnzG);
+	ecos_Gir = (idxint*)MALLOC(sizeof(idxint)*nnzG);
 	if (ecos_Gir == NULL)
 		return ECOS_FATAL;
 	sparsepr = 0;
@@ -212,16 +229,16 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 	*(ecos_Gjc+ecos_n) = nnzG;
 
 	/*generating matrix A of ECOS*/	
-	idxint nnzA = (N+1)*n + N*n*n + N*n*p + 4;
+	nnzA = (N+1)*n + N*n*n + N*n*p + 4;
 	/*The number of none zero entries in the block [I,0;-A,-B]*/
-	idxint nnzAblock = n*n + n*p + n;
-	pfloat *ecos_Apr = (pfloat*)MALLOC(sizeof(pfloat)*nnzA);
+	nnzAblock = n*n + n*p + n;
+	ecos_Apr = (pfloat*)MALLOC(sizeof(pfloat)*nnzA);
 	if (ecos_Apr == NULL)
 		return ECOS_FATAL;
-	idxint *ecos_Ajc = (idxint*)MALLOC(sizeof(idxint)*(ecos_n+1));
+	ecos_Ajc = (idxint*)MALLOC(sizeof(idxint)*(ecos_n+1));
 	if (ecos_Ajc == NULL)
 		return ECOS_FATAL;
-	idxint *ecos_Air = (idxint*)MALLOC(sizeof(pfloat)*nnzA);
+	ecos_Air = (idxint*)MALLOC(sizeof(pfloat)*nnzA);
 	if (ecos_Air == NULL)
 		return ECOS_FATAL;
 
@@ -293,7 +310,7 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 
 	/*The objective function is equivalent to -2xc'*xN + t + xc'*xc
 	 * (the constant xc'*xc is omitted )*/
-	pfloat *ecos_c = (pfloat*)MALLOC(sizeof(pfloat)*ecos_n);
+	ecos_c = (pfloat*)MALLOC(sizeof(pfloat)*ecos_n);
 	if (ecos_c == NULL)
 		return ECOS_FATAL;
 	for(i = 0; i < ecos_n; i++)
@@ -313,7 +330,7 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 	}
 
 	/* h is of the form [-b1,...,-b1,-b2,0,...,0] */
-	pfloat *ecos_h = (pfloat*)MALLOC(sizeof(pfloat)*ecos_m);
+	ecos_h = (pfloat*)MALLOC(sizeof(pfloat)*ecos_m);
 	if (ecos_h == NULL)
 		return ECOS_FATAL;
 	for (i = 0; i < ecos_m; i++)
@@ -333,7 +350,7 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 	}
 
 	/*b is of the form [x0,0,...,0,-0.5,0.5]*/
-	pfloat *ecos_b = (pfloat*)MALLOC(sizeof(pfloat)*ecos_p);
+	ecos_b = (pfloat*)MALLOC(sizeof(pfloat)*ecos_p);
 	if (ecos_b == NULL)
 		return ECOS_FATAL;
 	for (i = 0; i < ecos_p; i++)

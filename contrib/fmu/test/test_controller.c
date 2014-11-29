@@ -2,6 +2,7 @@
 
 int main() {
 	int i,j,t;
+	Controller *c;
 	idxint *dInput = MALLOC(sizeof(idxint)*nInputVariable);
 	pfloat *x = MALLOC(sizeof(pfloat)*n);
 	pfloat *nextx = MALLOC(sizeof(pfloat)*n);
@@ -10,7 +11,6 @@ int main() {
 	{
 		*(x+i) = x0[i];
 	}
-	Controller *c;
 
 	c = instantiate_controller();
 	init_controller(c);

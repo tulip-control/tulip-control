@@ -89,6 +89,7 @@ Polytope* cartesian_prod(Polytope* p1, Polytope* p2)
 	pfloat* b = (pfloat*) MALLOC(sizeof(pfloat)*k);
 	pfloat* center = (pfloat*) MALLOC(sizeof(pfloat)*l);
 	int i,j;
+	Polytope *p;
 	for(i=0;i<k;i++)
 	{
 		for(j=0;j<l;j++)
@@ -130,7 +131,7 @@ Polytope* cartesian_prod(Polytope* p1, Polytope* p2)
 		}
 
 	}
-	Polytope* p = create_poly(k,l,A,b,center);
+	p = create_poly(k,l,A,b,center);
 	return p;
 }
 
