@@ -37,7 +37,7 @@ def pppexport(ppp, filename="pppdata"):
                 "k,p" + str(index) + "l,p" + str(index) + "A,p" + str(index) +
                 "b,p" + str(index) + "center);\n")
 
-    f.write("};\n\n")
+    f.write("}\n\n")
 
     f.write("""\
 void free_region() {
@@ -46,6 +46,6 @@ void free_region() {
     {
         FREE(regions[i]);
     }
-};""")
+}""")
 
     f.close()

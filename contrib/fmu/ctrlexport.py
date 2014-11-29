@@ -109,7 +109,7 @@ def mealyexport(ctrl, filename="mealydata"):
     fc.write('		tmp *= nInputValue[i];\n')
     fc.write('	}\n')
     fc.write('	return result;\n')
-    fc.write('};\n')
+    fc.write('}\n')
 
     fh.write("#endif")
     fc.close()
