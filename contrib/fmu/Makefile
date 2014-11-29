@@ -70,11 +70,11 @@ test: test_controller test_fsm
 
 test_fsm: ecos obj test/test_fsm.c
 	$(C) -o $(BUILD)test_fsm test/test_fsm.c $(BUILD)FSM.o $(BUILD)mealydata.o $(LIBS)
-	echo test_fsm successfully built. Type $(BUILD)test_fsm to run
+	@echo test_fsm successfully built. Type $(BUILD)test_fsm to run
 
 test_controller: ecos obj test/test_controller.c
 	$(C) -L$(ECOSDIR) test/test_controller.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o $(BUILD)test_controller
-	echo test_controller successfully built. Type $(BUILD)test_controller to run
+	@echo test_controller successfully built. Type $(BUILD)test_controller to run
 
 # remove object files, but keep the compiled programs 
 clean:
