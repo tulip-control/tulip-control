@@ -25,8 +25,8 @@ def mealyexport(ctrl, filename="mealydata"):
     fc = open('sources/'+filename+".c", 'w')
 
     fh.write('''\
-#ifndef __MEALY_H_
-#define __MEALY_H_\n''')
+#ifndef __MEALY_H__
+#define __MEALY_H__\n''')
     fc.write('#include "'+filename+'.h"\n')
 
     inputs = ctrl.inputs

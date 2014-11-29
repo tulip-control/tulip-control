@@ -79,8 +79,8 @@ def exportFMUheader(uid, tick, filename="TuLiPFMU"):
     @rtype: None
     """
     f = open("include/" + filename + ".h", 'w')
-    f.write('#ifndef __TULIPFMU_H_\n')
-    f.write('#define __TULIPFMI_H_\n')
+    f.write('#ifndef __TULIPFMU_H__\n')
+    f.write('#define __TULIPFMI_H__\n')
     f.write('#define MODEL_IDENTIFIER TuLiPFMU\n')
     f.write('#define MODEL_GUID "{' + str(uid) + '}"\n')
     f.write('#define EPSILON 1e-9\n')
