@@ -27,6 +27,7 @@ def mealyexport(ctrl, filename="mealydata"):
     fh.write('''\
 #ifndef __MEALY_H__
 #define __MEALY_H__\n''')
+    fh.write('#include <ecos.h>\n')
     fc.write('#include "'+filename+'.h"\n')
 
     inputs = ctrl.inputs
@@ -34,14 +35,14 @@ def mealyexport(ctrl, filename="mealydata"):
     if inputs is None:
         raise NotImplementedError
 
-    fh.write('extern int nInputVariable;\n')
-    fh.write('extern int nInputValue[];\n')
+    fh.write('extern idxint nInputVariable;\n')
+    fh.write('extern idxint nInputValue[];\n')
 
     numinputs = 1
 
     index = 0
-    fc.write('int nInputVariable = ' + str(len(inputs.items())) + ';\n')
-    fc.write('int nInputValue[] = {')
+    fc.write('idxint nInputVariable = ' + str(len(inputs.items())) + ';\n')
+    fc.write('idxint nInputValue[] = {')
     for inputname, inputset in inputs.items():
         fc.write(str(len(inputset))+",")
         numinputs = numinputs * len(inputset)
@@ -95,12 +96,12 @@ def mealyexport(ctrl, filename="mealydata"):
         fc.write("},\n")
     fc.write("};\n\n")
 
-    fh.write('int value2index(int inputValue[]);\n')
+    fh.write('int value2index(idxint inputValue[]);\n')
 
-    fc.write('int value2index(int inputValue[]){\n')
-    fc.write('	int result = 0;\n')
+    fc.write('int value2index(idxint inputValue[]){\n')
+    fc.write('	idxint result = 0;\n')
     fc.write('	int tmp = 1;\n')
-    fc.write('	int valuation;\n')
+    fc.write('	idxint valuation;\n')
     fc.write('	int i;\n')
     fc.write('	for(i=0;i<nInputVariable;i++)\n')
     fc.write('	{\n')
