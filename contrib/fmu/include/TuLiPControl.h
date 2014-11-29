@@ -1,3 +1,11 @@
+/*
+
+NOTES:
+
+- In ECOS 1.0.4 and possibly other versions, idxint is defined as
+  SuiteSparse_long in glblopts.h, which is included by ecos.h.
+*/
+
 #ifndef __TULIPCONTROL_H__
 #define __TULIPCONTROL_H__
 
