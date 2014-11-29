@@ -6,7 +6,7 @@ examples/robot_planning/continuous.py that exports an FMU.  The key
 changes are
 
 * caching of the abstraction and controller in AbstractPwa.p and FSM.p, and
-* calling exportFMU() and `make testController` (near end of this file).
+* calling exportFMU() and `make test_controller` (near end of this file).
 """
 import os.path
 import os
@@ -93,4 +93,4 @@ x0 = np.array([1.5, 1.5])
 d0 = 18
 
 exportFMU(ctrl, pwa, x0, d0)
-os.system("make testController")
+os.system("make test_controller")

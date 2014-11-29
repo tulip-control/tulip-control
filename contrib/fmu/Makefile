@@ -63,15 +63,15 @@ else
 endif
 	zip -r TuLiPFMU.fmu binaries/ include/ sources/ modelDescription.xml 
 
-test: testController testFSM
+test: test_controller test_fsm
 
-testFSM: ecos obj test/testFSM.c 
-	$(C) -o testFSM test/testFSM.c FSM.o mealydata.o $(LIBS)
-	echo testFSM successfully built. Type ./testFSM to run 
+test_fsm: ecos obj test/test_fsm.c
+	$(C) -o test_fsm test/test_fsm.c FSM.o mealydata.o $(LIBS)
+	echo test_fsm successfully built. Type ./test_fsm to run
 
-testController: ecos obj test/testController.c 
-	$(C) -L$(ECOSDIR) test/testController.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o testController 
-	echo testController successfully built. Type ./testController to run 
+test_controller: ecos obj test/test_controller.c
+	$(C) -L$(ECOSDIR) test/test_controller.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o test_controller
+	echo test_controller successfully built. Type ./test_controller to run
 
 # remove object files, but keep the compiled programs 
 clean:
@@ -81,5 +81,5 @@ clean:
 # clean, and then remove compiled programs 
 purge: clean
 	( cd $(ECOSDIR)    ; $(MAKE) purge )
-	- $(RM) testFSM testController TuLiPFMU.fmu
+	- $(RM) test_fsm test_controller TuLiPFMU.fmu
 
