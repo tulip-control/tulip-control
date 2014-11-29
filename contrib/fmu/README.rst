@@ -71,6 +71,12 @@ A demo of the generated C code is given by ::
 
   build/test_controller
 
+To remove all generated files except the FMU and any executables, ::
+
+  make clean
+
+To return to a pristine directory, use ``make purge``.
+
 
 Organization
 ------------
