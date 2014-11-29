@@ -23,7 +23,7 @@ endif
 
 OBJ = $(BUILD)polytope.o $(BUILD)FSM.o $(BUILD)mealydata.o $(BUILD)pppdata.o $(BUILD)TuLiPControl.o $(BUILD)data.o
 
-# FILES TO CLEAN UP
+# Files to clean up
 CLEAN = *.o 
 
 C = $(CC) $(CFLAGS) -Iinclude -I$(ECOSDIR)/external/ldl/include -I$(ECOSDIR)/external/amd/include -I$(ECOSDIR)/external/SuiteSparse_config -I$(ECOSDIR)/include -I$(FMIinclude)
@@ -34,7 +34,7 @@ all: fmu ecos test obj
 ecos:
 	(cd $(ECOSDIR)	; $(MAKE) ldl amd ecos)
 
-# builde the .o files
+# build the .o files
 
 # Keep in sync with OBJ variable
 obj: polytope.o FSM.o mealydata.o pppdata.o TuLiPControl.o data.o
