@@ -21,9 +21,11 @@ from tulip.abstract import prop2part, discretize
 from exportFMU import exportFMU
 
 
-if os.path.isfile('AbstractPwa.p') and os.path.isfile('FSM.p'):
-    pwa = pickle.load(open("AbstractPwa.p", "rb"))
-    ctrl = pickle.load(open("FSM.p", "rb"))
+BUILDDIR="build/"
+
+if os.path.isfile(BUILDDIR+'AbstractPwa.p') and os.path.isfile(BUILDDIR+'FSM.p'):
+    pwa = pickle.load(open(BUILDDIR+"AbstractPwa.p", "rb"))
+    ctrl = pickle.load(open(BUILDDIR+"FSM.p", "rb"))
 else:
     # the code in robot_planning/continuous.py
     # Problem parameters
@@ -86,8 +88,10 @@ else:
     # end of the code in robot_planning/continuous.py
 
     # store the result for future use
-    pickle.dump(ctrl, open('FSM.p', 'wb'))
-    pickle.dump(pwa, open('AbstractPwa.p', 'wb'))
+    if len(BUILDDIR) > 0 and not os.path.exists(BUILDDIR):
+        os.mkdir(BUILDDIR)
+    pickle.dump(ctrl, open(BUILDDIR+'FSM.p', 'wb'))
+    pickle.dump(pwa, open(BUILDDIR+'AbstractPwa.p', 'wb'))
 
 x0 = np.array([1.5, 1.5])
 d0 = 18

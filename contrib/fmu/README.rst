@@ -69,7 +69,7 @@ run a simulation using the FMU ::
 
 A demo of the generated C code is given by ::
 
-  ./test_controller
+  build/test_controller
 
 
 Organization

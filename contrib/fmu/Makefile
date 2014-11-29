@@ -1,6 +1,8 @@
 ECOSDIR=../../extern/ecos/ecos-1.0.4
 FMIinclude=../../extern/fmi
 
+BUILD=build/
+
 CFLAGS = -O2 -Wall -DLDL_LONG -DDLONG -Wextra -fPIC
 LIBS = -lm
 
@@ -19,7 +21,7 @@ ifeq ($(shell uname), Linux)
 LIBS += -lrt
 endif
 
-OBJ = polytope.o FSM.o mealydata.o pppdata.o TuLiPControl.o data.o
+OBJ = $(BUILD)polytope.o $(BUILD)FSM.o $(BUILD)mealydata.o $(BUILD)pppdata.o $(BUILD)TuLiPControl.o $(BUILD)data.o
 
 # FILES TO CLEAN UP
 CLEAN = *.o 
@@ -34,25 +36,26 @@ ecos:
 
 # builde the .o files
 
+# Keep in sync with OBJ variable
 obj: polytope.o FSM.o mealydata.o pppdata.o TuLiPControl.o data.o
 
 polytope.o: include/polytope.h sources/polytope.c 
-	$(C) -c sources/polytope.c -o polytope.o
+	$(C) -c sources/polytope.c -o $(BUILD)polytope.o
 
 FSM.o: include/FSM.h sources/FSM.c include/mealydata.h
-	$(C) -c sources/FSM.c -o FSM.o
+	$(C) -c sources/FSM.c -o $(BUILD)FSM.o
 
 mealydata.o: include/mealydata.h sources/mealydata.c 
-	$(C) -c sources/mealydata.c -o mealydata.o
+	$(C) -c sources/mealydata.c -o $(BUILD)mealydata.o
 
 pppdata.o: include/pppdata.h sources/pppdata.c 
-	$(C) -c sources/pppdata.c -o pppdata.o
+	$(C) -c sources/pppdata.c -o $(BUILD)pppdata.o
 
 TuLiPControl.o: sources/TuLiPControl.c include/TuLiPControl.h include/polytope.h include/data.h include/pppdata.h include/FSM.h include/mealydata.h
-	$(C) -c sources/TuLiPControl.c -o TuLiPControl.o
+	$(C) -c sources/TuLiPControl.c -o $(BUILD)TuLiPControl.o
 
 data.o: sources/data.c include/data.h include/polytope.h 
-	$(C) -c sources/data.c -o data.o
+	$(C) -c sources/data.c -o $(BUILD)data.o
 
 fmu:ecos obj
 	mkdir -p binaries/$(ARCH)
@@ -66,20 +69,22 @@ endif
 test: test_controller test_fsm
 
 test_fsm: ecos obj test/test_fsm.c
-	$(C) -o test_fsm test/test_fsm.c FSM.o mealydata.o $(LIBS)
-	echo test_fsm successfully built. Type ./test_fsm to run
+	$(C) -o $(BUILD)test_fsm test/test_fsm.c $(BUILD)FSM.o $(BUILD)mealydata.o $(LIBS)
+	echo test_fsm successfully built. Type $(BUILD)test_fsm to run
 
 test_controller: ecos obj test/test_controller.c
-	$(C) -L$(ECOSDIR) test/test_controller.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o test_controller
-	echo test_controller successfully built. Type ./test_controller to run
+	$(C) -L$(ECOSDIR) test/test_controller.c $(ECOSDIR)/libecos.a $(OBJ) -lecos $(LIBS) -o $(BUILD)test_controller
+	echo test_controller successfully built. Type $(BUILD)test_controller to run
 
 # remove object files, but keep the compiled programs 
 clean:
 	( cd $(ECOSDIR)    ; $(MAKE) clean )
-	- $(RM) $(CLEAN)
+	- $(RM) $(BUILD)$(CLEAN) modelDescription.xml sources/data.c sources/mealydata.c sources/pppdata.c include/TuLiPFMU.h include/mealydata.h
+	- $(RM) $(BUILD)*.p
+	- rm -rf binaries
 
 # clean, and then remove compiled programs 
 purge: clean
 	( cd $(ECOSDIR)    ; $(MAKE) purge )
-	- $(RM) test_fsm test_controller TuLiPFMU.fmu
+	- $(RM) $(BUILD)test_fsm $(BUILD)test_controller TuLiPFMU.fmu
 
