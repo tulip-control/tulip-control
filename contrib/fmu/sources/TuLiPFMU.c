@@ -19,7 +19,6 @@
 
 /* Used by FMI 2.0.  See FMIFuctions.h */
 #define FMIAPI_FUNCTION_PREFIX TuLiPFMU_
-#define FMIAPI
 
 
 /*****************************************************************************************
