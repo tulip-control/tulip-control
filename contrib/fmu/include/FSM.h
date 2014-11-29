@@ -1,5 +1,5 @@
-#ifndef __FSM_H_
-#define __FSM_H_
+#ifndef __FSM_H__
+#define __FSM_H__
 
 #include <stdlib.h>
 #include "mealydata.h"
