@@ -1,17 +1,17 @@
 #include "TuLiPControl.h"
 
-//not implemented yet
+/* not implemented yet */
 void abstract(Controller* controller) {
 	return;
 }
 
-//compute the control input u(k) and store it in controller.u
+/* compute the control input u(k) and store it in controller.u */
 void compute_control(Controller* controller)
 {
 
 	Polytope* currentRegion = cartesian_prod(regions[controller->dRegion],input_bound);
 	Polytope* projGoalRegion = regions[controller->goal];
-	//todo: check if the computation is successful
+	/* todo: check if the computation is successful */
         get_input_helper(n, p, controller->nSteps, A, B, currentRegion->A, currentRegion->b, currentRegion->k, projGoalRegion->A, projGoalRegion->b, projGoalRegion->k,controller->hatx, projGoalRegion->center, controller->u);
 	free_polytope(currentRegion);
 }
@@ -62,18 +62,18 @@ void free_controller(Controller* controller) {
 
 void transition_function(Controller* controller) {
 	estimate_function(controller);
-	//arrives at the goal
+	/* arrives at the goal */
 	if (controller->nSteps<=0)
 	{
-		//todo:check if the goal is really reached 
+		/* todo:check if the goal is really reached */
 		controller->dRegion = controller->goal;
-		//reset nSteps
+		/* reset nSteps */
 		controller->nSteps = totalSteps;
 		controller->goal = fsm_transition(controller->fsm, controller->dInput);
 	}
 	compute_control(controller);
 	controller->nSteps--;
-	//display_controller(controller);
+	/* display_controller(controller); */
 }
 
 
@@ -97,8 +97,8 @@ void input_function(Controller* controller,const pfloat y[], const idxint dInput
 	}
 }
 
-//assuming perfect full state observation
-//possibly consider noisy observations in the future
+/* assuming perfect full state observation
+   possibly consider noisy observations in the future */
 void estimate_function(Controller* controller){
 	int i;
 	for(i=0;i<n;i++)
@@ -353,7 +353,7 @@ idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pf
 	mywork = ECOS_setup(ecos_n, ecos_m, ecos_p, ecos_l, ecos_ncones, ecos_q, ecos_Gpr, ecos_Gjc, ecos_Gir, ecos_Apr, ecos_Ajc, ecos_Air, ecos_c, ecos_h, ecos_b);
 	if( mywork != NULL ){
 		mywork->stgs->verbose = 0;
-		// solve 	
+		/* solve */
 		exitflag = ECOS_solve(mywork);
 
 		for (i = 0; i < p; i++)

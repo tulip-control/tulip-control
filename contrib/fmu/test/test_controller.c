@@ -30,12 +30,12 @@ int main() {
 	while(1)
 	{
 		output_function(c, u);
-		//reset nextx
+		/* reset nextx */
 		for(i=0;i<n;i++)
 		{
 			*(nextx+i) = 0;
 		}
-		//compute Ax(k) first
+		/* compute Ax(k) first */
 		for(i=0;i<n;i++)
 		{
 			for(j=0;j<n;j++)
@@ -43,7 +43,7 @@ int main() {
 				*(nextx+i) += (*(A+i+j*n)) * (*(x+j));
 			}
 		}
-		//add Bu(k)
+		/* add Bu(k) */
 		for(i=0;i<n;i++)
 		{
 			for(j=0;j<p;j++)
@@ -51,7 +51,7 @@ int main() {
 				*(nextx+i) += (*(B+i+j*n)) * (*(u+j));
 			}
 		}
-		//copy nextx to x
+		/* copy nextx to x */
 		for(i=0;i<n;i++)
 		{
 			*(x+i) = *(nextx+i);

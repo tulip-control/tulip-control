@@ -13,11 +13,11 @@
 #include <string.h>
 #include "TuLiPFMU.h"
 
-// include fmu header files, typedefs and macros
+/* include fmu header files, typedefs and macros */
 #include <fmiFunctions.h>
 #include <TuLiPControl.h>
 
-// Used by FMI 2.0.  See FMIFuctions.h
+/* Used by FMI 2.0.  See FMIFuctions.h */
 #define FMIAPI_FUNCTION_PREFIX TuLiPFMU_
 #define FMIAPI
 
@@ -30,11 +30,11 @@ typedef struct {
 	pfloat* input;
 	pfloat* output;
 	idxint* dInput;
-	fmiBoolean atBreakpoint;    // Indicator that the first output at a step 
-	// time has been produced.
-	// General states
-	fmiReal currentCount;       // The current count (the output).
-	fmiReal lastSuccessfulTime; // The time to which this FMU has advanced.
+	fmiBoolean atBreakpoint;    /* Indicator that the first output at a step */
+	/* time has been produced. */
+	/* General states */
+	fmiReal currentCount;       /* The current count (the output). */
+	fmiReal lastSuccessfulTime; /* The time to which this FMU has advanced. */
 	const fmiCallbackFunctions *functions;
 	fmiString instanceName;
 } ModelInstance;
@@ -60,11 +60,11 @@ int checkFMU(
 		const fmiCallbackFunctions *functions,
 		fmiBoolean visible,
 		fmiBoolean loggingOn)  {
-	// Logger callback is required.
+	/* Logger callback is required. */
 	if (!functions->logger) {
 		return 0;
 	}
-	// Functions to allocate and free memory are required.
+	/* Functions to allocate and free memory are required. */
 	if (!functions->allocateMemory || !functions->freeMemory) {
 		functions->logger(NULL, instanceName, fmiError, "error",
 				"fmiInstantiateSlave: Missing callback function: freeMemory");
@@ -76,11 +76,11 @@ int checkFMU(
 		return 0;
 	}
 	if (strcmp(GUID, modelGUID)) {
-		// FIXME: Remove printfs. Replace with logger calls when they work.
+		/* FIXME: Remove printfs. Replace with logger calls when they work. */
 		fprintf(stderr,"fmiInstantiateSlave: Wrong GUID %s. Expected %s.\n", GUID, modelGUID);
 		fflush(stderr);
-		//functions->logger(NULL, instanceName, fmiError, "error",
-		//                  "fmiInstantiateSlave: Wrong GUID %s. Expected %s.", GUID, modelGUID);
+		/*functions->logger(NULL, instanceName, fmiError, "error",
+		  "fmiInstantiateSlave: Wrong GUID %s. Expected %s.", GUID, modelGUID); */
 		return 0;
 	}
 	return 1;
@@ -102,25 +102,25 @@ fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint,
 		fmiReal communicationStepSize, fmiBoolean noSetFMUStatePriorToCurrentPoint) {
 	ModelInstance* component = (ModelInstance *) c;
 
-	// If current time is greater than period * (value + 1), then it is
-	// time for another increment.
+	/* If current time is greater than period * (value + 1), then it is
+	   time for another increment. */
 	double endOfStepTime = currentCommunicationPoint + communicationStepSize;
 	double targetTime = TICK_PERIOD * (component->currentCount + 1);
 	if (endOfStepTime >= targetTime - EPSILON) {
-		// It is time for an increment.
-		// Is it too late for the increment?
+		/* It is time for an increment. */
+		/* Is it too late for the increment? */
 		if (endOfStepTime > targetTime + EPSILON) {
-			// Indicate that the last successful time is
-			// at the target time.
+			/* Indicate that the last successful time is
+			   at the target time. */
 			component->lastSuccessfulTime = targetTime;
 			fflush(stdout);
 			return fmiDiscard;
 		}
-		// We are at the target time. Are we
-		// ready for the increment yet? Have to have already
-		// completed one firing at this time.
+		/* We are at the target time. Are we
+		   ready for the increment yet? Have to have already
+		   completed one firing at this time. */
 		if (component->atBreakpoint) {
-			// Not the first firing. Go ahead an increment.
+			/* Not the first firing. Go ahead an increment. */
 			component->currentCount++;
 
 			input_function(component->controller,component->input,component->dInput);
@@ -128,12 +128,12 @@ fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint,
 			transition_function(component->controller);
 
 			output_function(component->controller,component->output);
-			// Reset the indicator that the increment is needed.
+			/* Reset the indicator that the increment is needed. */
 			component->atBreakpoint = fmiFalse;
 		} else {
-			// This will complete the first firing at the target time.
-			// We don't want to increment yet, but we set an indicator
-			// that we have had a firing at this time.
+			/* This will complete the first firing at the target time.
+			   We don't want to increment yet, but we set an indicator
+			   that we have had a firing at this time. */
 			fflush(stdout);
 			component->atBreakpoint = fmiTrue;
 		}
@@ -216,7 +216,7 @@ fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s, fmiReal* value
 
 		return fmiOK;
 	}
-	// Since this FMU does not return fmiPending, there shouldn't be other queries of status.
+	/* Since this FMU does not return fmiPending, there shouldn't be other queries of status. */
 	return fmiDiscard;
 }
 
@@ -241,7 +241,7 @@ fmiComponent fmiInstantiateSlave(
 		fmiBoolean loggingOn)  {
 	ModelInstance* component;
 
-	// Perform checks.
+	/* Perform checks. */
 	if (!checkFMU(instanceName, GUID, MODEL_GUID, fmuResourceLocation, functions, visible, loggingOn)) {
 		return NULL;
 	}
@@ -256,8 +256,8 @@ fmiComponent fmiInstantiateSlave(
 	component->output= (pfloat*)functions->allocateMemory(p,sizeof(pfloat));
 	component->dInput= (idxint*)functions->allocateMemory(nInputVariable,sizeof(idxint));
 
-	// Need to allocate memory and copy the string because JNA stores the string
-	// in a temporary buffer that gets GC'd.
+	/* Need to allocate memory and copy the string because JNA stores the string
+	   in a temporary buffer that gets GC'd. */
 	component->instanceName = (char*)functions->allocateMemory(1 + strlen(instanceName), sizeof(char));
 	strcpy((char *)component->instanceName, instanceName);
 

@@ -10,13 +10,13 @@
 #include "mealydata.h"
 
 typedef struct Controller {
-    pfloat *u;            // The output of the feedback controller
-    pfloat *y;            // The input of the feedback controller
-    pfloat *hatx;         // The state estimates 
-    idxint dRegion;       // The discrete region of the system
-    idxint goal;          // The next discrete region of the system 
-    idxint nSteps;        // The number of steps left to reach the goal
-    idxint *dInput;       // The discrete input
+    pfloat *u;            /* The output of the feedback controller */
+    pfloat *y;            /* The input of the feedback controller */
+    pfloat *hatx;         /* The state estimates */
+    idxint dRegion;       /* The discrete region of the system */
+    idxint goal;          /* The next discrete region of the system */
+    idxint nSteps;        /* The number of steps left to reach the goal */
+    idxint *dInput;       /* The discrete input */
     FSM *fsm;		
 }Controller;
 
