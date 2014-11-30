@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include "polytope.h"
 
-void display_polytope(Polytope* p){
+void display_polytope(Polytope* p)
+{
 	int i;
 	printf("Number of inequalities: %d, Dimension of the polytope: %d\n",p->k,p->l);
 	printf("A matrix: ");
@@ -23,7 +24,8 @@ void display_polytope(Polytope* p){
 	printf("\n");
 }
 
-int isInside(const Polytope* p, const pfloat x[]) {
+int isInside(const Polytope* p, const pfloat x[])
+{
 	idxint k = p->k;
 	idxint l = p->l;
 	pfloat *A = p->A;
@@ -44,7 +46,8 @@ int isInside(const Polytope* p, const pfloat x[]) {
 	return 1;
 }
 
-Polytope* from_box(idxint l,pfloat* upper,pfloat* lower){
+Polytope* from_box(idxint l,pfloat* upper,pfloat* lower)
+{
 	Polytope *p = (Polytope*)malloc(sizeof(Polytope));
 	int i;
 	idxint k = l*2;
@@ -68,7 +71,8 @@ Polytope* from_box(idxint l,pfloat* upper,pfloat* lower){
 	return p;
 }
 
-Polytope* create_poly(idxint k,idxint l,pfloat* A,pfloat* b,pfloat* center){
+Polytope* create_poly(idxint k,idxint l,pfloat* A,pfloat* b,pfloat* center)
+{
 	Polytope *p = (Polytope*)malloc(sizeof(Polytope));
 	p->k = k;
 	p->l = l;

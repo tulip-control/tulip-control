@@ -1,6 +1,7 @@
 #include "TuLiPControl.h"
 
-int main() {
+int main()
+{
 	int i,j,t;
 	Controller *c;
 	idxint *dInput = malloc(sizeof(idxint)*nInputVariable);

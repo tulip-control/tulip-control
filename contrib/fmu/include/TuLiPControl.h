@@ -28,7 +28,7 @@ typedef struct Controller {
     idxint nSteps;        /* The number of steps left to reach the goal */
     idxint *dInput;       /* The discrete input */
     FSM *fsm;		
-}Controller;
+} Controller;
 
 /*Methods-----------------------------------------*/
 
@@ -70,9 +70,10 @@ void display_controller(Controller* controller);
  * u0 is the input at time 0, which is the solution of the optimization problem 
  * the entries of any n by m matrix X is assumed to be arranged as[X11,X21,...,Xn1,X12,...,Xn2,...,X1m,...,Xnm]
  */
-idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pfloat* A, const pfloat* B, 
-		const pfloat* A1, const pfloat* b1, const idxint l1, 
-		const pfloat* A2, const pfloat* b2, const idxint l2,
-	       	const pfloat* x0, const pfloat* xc, pfloat* u0);
+idxint get_input_helper(const idxint n, const idxint p, const idxint N,
+						const pfloat* A, const pfloat* B,
+						const pfloat* A1, const pfloat* b1, const idxint l1,
+						const pfloat* A2, const pfloat* b2, const idxint l2,
+						const pfloat* x0, const pfloat* xc, pfloat* u0);
 
 #endif

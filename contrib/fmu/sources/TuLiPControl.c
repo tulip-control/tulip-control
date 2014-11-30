@@ -1,7 +1,8 @@
 #include "TuLiPControl.h"
 
 /* not implemented yet */
-void abstract(Controller* controller) {
+void abstract(Controller* controller)
+{
 	return;
 }
 
@@ -12,11 +13,16 @@ void compute_control(Controller* controller)
 	Polytope* currentRegion = cartesian_prod(regions[controller->dRegion],input_bound);
 	Polytope* projGoalRegion = regions[controller->goal];
 	/* todo: check if the computation is successful */
-        get_input_helper(n, p, controller->nSteps, A, B, currentRegion->A, currentRegion->b, currentRegion->k, projGoalRegion->A, projGoalRegion->b, projGoalRegion->k,controller->hatx, projGoalRegion->center, controller->u);
+	get_input_helper(n, p, controller->nSteps,
+					 A, B,
+					 currentRegion->A, currentRegion->b, currentRegion->k,
+					 projGoalRegion->A, projGoalRegion->b, projGoalRegion->k,
+					 controller->hatx, projGoalRegion->center, controller->u);
 	free_polytope(currentRegion);
 }
 
-Controller* instantiate_controller(){
+Controller* instantiate_controller()
+{
 	Controller *c = malloc(sizeof(Controller));
 	int i;
 	c->u = (pfloat*)malloc(p*sizeof(pfloat));
@@ -30,7 +36,8 @@ Controller* instantiate_controller(){
 	return c;
 }
 
-void init_controller(Controller* controller) {
+void init_controller(Controller* controller)
+{
 	int i;
 	init_input_bound();
 	init_region();
@@ -50,7 +57,8 @@ void init_controller(Controller* controller) {
 	controller->nSteps--;
 }
 
-void free_controller(Controller* controller) {
+void free_controller(Controller* controller)
+{
 	free(controller->u);
 	free(controller->y);
 	free(controller->hatx);
@@ -60,7 +68,8 @@ void free_controller(Controller* controller) {
 	free_input_bound();
 }
 
-void transition_function(Controller* controller) {
+void transition_function(Controller* controller)
+{
 	estimate_function(controller);
 	/* arrives at the goal */
 	if (controller->nSteps<=0)
@@ -77,7 +86,8 @@ void transition_function(Controller* controller) {
 }
 
 
-void output_function(Controller* controller, pfloat u[]){
+void output_function(Controller* controller, pfloat u[])
+{
 	int i;
 	for(i=0;i<p;i++)
 	{
@@ -85,7 +95,8 @@ void output_function(Controller* controller, pfloat u[]){
 	}
 }
 
-void input_function(Controller* controller,const pfloat y[], const idxint dInput[]){
+void input_function(Controller* controller,const pfloat y[], const idxint dInput[])
+{
 	int i;
 	for(i=0;i<m;i++)
 	{
@@ -99,7 +110,8 @@ void input_function(Controller* controller,const pfloat y[], const idxint dInput
 
 /* assuming perfect full state observation
    possibly consider noisy observations in the future */
-void estimate_function(Controller* controller){
+void estimate_function(Controller* controller)
+{
 	int i;
 	for(i=0;i<n;i++)
 	{
@@ -108,7 +120,8 @@ void estimate_function(Controller* controller){
 }
 
 
-void display_controller(Controller* controller){
+void display_controller(Controller* controller)
+{
 	int i;
 	printf("State Estimation: ");
 	for(i=0;i<n;i++)
@@ -133,10 +146,12 @@ void display_controller(Controller* controller){
 	return;
 }
 
-idxint get_input_helper(const idxint n, const idxint p, const idxint N, const pfloat* A, const pfloat* B, 
-		const pfloat* A1, const pfloat* b1, const idxint l1, 
-		const pfloat* A2, const pfloat* b2, const idxint l2,
-		const pfloat* x0, const pfloat* xc, pfloat* u0) {
+idxint get_input_helper(const idxint n, const idxint p, const idxint N,
+						const pfloat* A, const pfloat* B, 
+						const pfloat* A1, const pfloat* b1, const idxint l1,
+						const pfloat* A2, const pfloat* b2, const idxint l2,
+						const pfloat* x0, const pfloat* xc, pfloat* u0)
+{
 	idxint i, j, k, l, sparsepr;
 
 	idxint exitflag = ECOS_FATAL;
