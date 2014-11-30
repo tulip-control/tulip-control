@@ -184,6 +184,8 @@ Types forFunctions for FMI for Co-Simulation
    typedef fmiStatus fmiGetRealOutputDerivativesTYPE(fmiComponent, const fmiValueReference [], size_t, const fmiInteger [], fmiReal []);
 
    typedef fmiStatus fmiDoStepTYPE     (fmiComponent, fmiReal, fmiReal, fmiBoolean);
+/* FMI 2.0 co-simulation extension to handle predictable breakpoints - fmiGetMaxStepSize */
+   typedef fmiStatus  fmiGetMaxStepSizeTYPE (fmiComponent , fmiReal *);
    typedef fmiStatus fmiCancelStepTYPE (fmiComponent);
 
 /* Inquire slave status */

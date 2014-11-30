@@ -126,6 +126,7 @@ extern "C" {
         defined before including this file.        For instance,
         it may be set to __declspec(dllimport).
 */
+
 #if !defined(FMIAPI) && !defined(FMIAPI_FUNCTION_PREFIX)
  #if defined _WIN32 || defined __CYGWIN__
         /* Note: both gcc & MSVC on Windows support this syntax. */
@@ -203,6 +204,8 @@ Functions for FMI for Co-Simulation
 #define fmiSetRealInputDerivatives  fmiFullName(fmiSetRealInputDerivatives)
 #define fmiGetRealOutputDerivatives fmiFullName(fmiGetRealOutputDerivatives)
 #define fmiDoStep                   fmiFullName(fmiDoStep)
+/* FMI 2.0 co-simulation extension to handle predictable breakpoints - fmiGetMaxStepSize */
+#define fmiGetMaxStepSize           fmiFullName(fmiGetMaxStepSize)
 #define fmiCancelStep               fmiFullName(fmiCancelStep)
 #define fmiGetStatus                fmiFullName(fmiGetStatus)
 #define fmiGetRealStatus            fmiFullName(fmiGetRealStatus)
@@ -289,6 +292,8 @@ Functions for FMI for Co-Simulation
    FMIAPI fmiGetRealOutputDerivativesTYPE fmiGetRealOutputDerivatives;
 
    FMIAPI fmiDoStepTYPE     fmiDoStep;
+/* FMI 2.0 co-simulation extension to handle predictable breakpoints - fmiGetMaxStepSize */
+   FMIAPI fmiGetMaxStepSizeTYPE     fmiGetMaxStepSize;
    FMIAPI fmiCancelStepTYPE fmiCancelStep;
 
 /* Inquire slave status */
