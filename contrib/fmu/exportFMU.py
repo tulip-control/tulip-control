@@ -116,11 +116,11 @@ def exportSysData(ctrl, pwa, initState, initRegion, filename="data"):
     f.write('Polytope *input_bound;\n')
 
     f.write(polytope2str(pwa.pwa.Uset, 'pu'))
-    f.write('\nvoid init_input_bound(void){\n')
+    f.write('\nvoid init_input_bound(void)\n{\n')
     f.write('   input_bound=create_poly(puk,pul,puA,pub,pucenter);\n')
     f.write('}\n\n')
 
-    f.write('void free_input_bound(void){\n')
+    f.write('void free_input_bound(void)\n{\n')
     f.write('		free(input_bound);\n')
     f.write('}\n')
 

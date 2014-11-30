@@ -31,7 +31,7 @@ def pppexport(ppp, filename="pppdata"):
         f.write("/****Polytope "+str(index) + " ****/\n")
         f.write(s+"\n")
 
-    f.write("void init_region() {\n")
+    f.write("void init_region()\n{\n")
     for index in range(0, numregions):
         f.write("   regions[" + str(index) + "]=create_poly(p" + str(index) +
                 "k,p" + str(index) + "l,p" + str(index) + "A,p" + str(index) +
@@ -40,7 +40,7 @@ def pppexport(ppp, filename="pppdata"):
     f.write("}\n\n")
 
     f.write("""\
-void free_region() {
+void free_region()\n{
     int i;
     for (i=0;i<nRegion;i++)
     {

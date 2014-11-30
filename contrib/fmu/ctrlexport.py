@@ -98,7 +98,7 @@ def mealyexport(ctrl, filename="mealydata"):
 
     fh.write('int value2index(idxint inputValue[]);\n')
 
-    fc.write('int value2index(idxint inputValue[]){\n')
+    fc.write('int value2index(idxint inputValue[])\n{\n')
     fc.write('	idxint result = 0;\n')
     fc.write('	int tmp = 1;\n')
     fc.write('	idxint valuation;\n')
