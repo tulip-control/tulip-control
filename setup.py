@@ -36,7 +36,7 @@ def check_gr1c():
 
 def check_java():
     try:
-        subprocess.check_output(['java', '-help'])
+        subprocess.check_output(['java', '-help'], stderr=subprocess.STDOUT)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             return False
