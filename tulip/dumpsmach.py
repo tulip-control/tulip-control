@@ -40,6 +40,12 @@ import time
 
 
 def write_python_case(filename, *args, **kwargs):
+    """Convenience wrapper for writing output of python_case to file
+
+    @type  filename: str
+    @param filename: Name of file in which to place the code generated
+        by L{python_case}.
+    """
     with open(filename, "w") as f:
         f.write(python_case(*args, **kwargs))
 
