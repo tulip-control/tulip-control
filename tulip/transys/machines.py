@@ -991,8 +991,3 @@ def strip_ports(mealy, names):
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)
     return new
-
-####
-# Program Graph (memo)
-####
-
