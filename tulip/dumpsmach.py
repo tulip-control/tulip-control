@@ -57,19 +57,14 @@ def python_case(M, classname="TulipStrategy"):
     - Initial state is "Sinit".
 
     @type M: L{MealyMachine}
+
     @rtype: str
+    @return: The returned string is valid Python code and can, for
+        example, be saved directly into a .py file.
     """
     tab = 4*" "
     nl = "\n"
     state_table = dict([(s,i) for (i,s) in enumerate(M.states)])
-    if len(M.outputs) == 1:
-        output_prefix = ""
-        output_suffix = ""
-    else:
-        output_prefix = "("
-        output_suffix = ")"
-    output_tuple = output_prefix+", ".join([str(v) for v in M.outputs])+output_suffix
-
     code = "class "+classname+":" + nl
 
     code += tab + "\"\"\"" + 2*nl
@@ -85,9 +80,12 @@ def python_case(M, classname="TulipStrategy"):
         code += ", "+", ".join(M.inputs)
     code += "):" + nl
     code += 2*tab + "\"\"\"Given inputs, take move and return outputs." + 2*nl
-    code += 2*tab + "@return: "+output_tuple + nl
+    code += 2*tab + "@rtype: dict" + nl
+    code += 2*tab + "@return: dictionary with keys of the output variable names:" + nl
+    code += 2*tab + " "*4 + str([str(v) for v in M.outputs]) + nl
     code += 2*tab + "\"\"\"" + nl
     first = True
+    code += 2*tab + "output = dict()" + nl
     for state in M.states:
         code += 2*tab
         if first:
@@ -112,7 +110,7 @@ def python_case(M, classname="TulipStrategy"):
             else:
                 code += " True:" + nl
             code += 4*tab + "self.state = "+str(state_table[to_state]) + nl
-            code += 4*tab + (nl+4*tab).join([str(k)+" = "+str(v) for (k,v) in label_dict.items() if k in M.outputs]) + nl
+            code += 4*tab + (nl+4*tab).join(["output[\""+str(k)+"\"] = "+str(v) for (k,v) in label_dict.items() if k in M.outputs]) + nl
 
         if len(M.inputs) > 0:
             code += 3*tab + "else:" + nl
@@ -123,6 +121,6 @@ def python_case(M, classname="TulipStrategy"):
     code += 2*tab + "else:" + nl
     code += 3*tab + "raise Exception(\"Unrecognized internal state: \"+str(self.state))" + nl
 
-    code += 2*tab + "return " + output_tuple + nl
+    code += 2*tab + "return output" + nl
 
     return code
