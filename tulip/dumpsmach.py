@@ -36,8 +36,6 @@ concern multiple aspects of solutions created by TuLiP and accordingly
 should not be placed under a specific subpackage, like tulip.transys.
 """
 
-import Queue
-import re
 import time
 
 
