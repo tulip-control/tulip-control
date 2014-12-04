@@ -34,8 +34,8 @@ from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
 import warnings
-from . import transys
-from . import automata
+from tulip.transys import transys
+from tulip.transys import automata
 
 _hl = 40 * '-'
 

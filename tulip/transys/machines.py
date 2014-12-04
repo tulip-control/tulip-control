@@ -34,11 +34,11 @@ from __future__ import absolute_import
 import copy
 from pprint import pformat
 from random import choice
-from .labeled_graphs import LabeledDiGraph
+from tulip.transys.labeled_graphs import LabeledDiGraph
 
 # inline imports:
 #
-# from .export import machine2scxml
+# from tulip.transys.export import machine2scxml
 
 _hl = 40 * '-'
 
@@ -455,7 +455,7 @@ class MealyMachine(FiniteStateMachine):
         """
         if fileformat != 'scxml':
             return False
-        from .export import machine2scxml
+        from tulip.transys.export import machine2scxml
         s = machine2scxml.mealy2scxml(self)
         # dump to file
         f = open(path, 'w')

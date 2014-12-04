@@ -36,10 +36,11 @@ logger = logging.getLogger(__name__)
 import copy
 from collections import Iterable
 from pprint import pformat
+from tulip.transys.labeled_graphs import (
+    LabeledDiGraph, str2singleton, prepend_with)
+from tulip.transys.mathset import SubSet, PowerSet
+from tulip.transys.transys import GameGraph
 
-from .labeled_graphs import LabeledDiGraph, str2singleton, prepend_with
-from .mathset import SubSet, PowerSet
-from .transys import GameGraph
 
 _hl = 40 * '-'
 

@@ -40,12 +40,13 @@ try:
 except ImportError:
     logger.error('failed to import natsort')
     natsort = None
-from .labeled_graphs import LabeledDiGraph, str2singleton
-from .labeled_graphs import prepend_with
-from .mathset import PowerSet, MathSet
+from tulip.transys.labeled_graphs import (
+    LabeledDiGraph, str2singleton, prepend_with)
+from tulip.transys.mathset import PowerSet, MathSet
 # inline imports
 #
-# from .export import graph2promela
+# from tulip.transys.export import graph2promela
+
 
 _hl = 40 * '-'
 
@@ -459,7 +460,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         # closed ?
         if self.env_vars:
             return False
-        from .export import graph2promela
+        from tulip.transys.export import graph2promela
         s = graph2promela.fts2promela(self, self.name)
         # dump to file
         f = open(path, 'w')

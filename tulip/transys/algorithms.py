@@ -33,8 +33,8 @@
 from __future__ import absolute_import
 import logging
 import copy
-from .transys import FiniteTransitionSystem
-from .automata import BuchiAutomaton
+from tulip.transys.transys import FiniteTransitionSystem
+from tulip.transys.automata import BuchiAutomaton
 
 _hl = 40 * '-'
 

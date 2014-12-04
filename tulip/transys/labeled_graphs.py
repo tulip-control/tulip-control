@@ -39,13 +39,13 @@ from pprint import pformat
 from collections import Iterable
 import warnings
 import networkx as nx
-from .mathset import SubSet, TypedDict
+from tulip.transys.mathset import SubSet, TypedDict
 
 # inline imports:
 #
-# from .export import graph2dot
-# from .export import save_d3
-# from .export import graph2dot
+# from tulip.transys.export import graph2dot
+# from tulip.transys.export import save_d3
+# from tulip.transys.export import graph2dot
 
 
 def label_is_desired(attr_dict, desired_dict):
@@ -1117,7 +1117,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Requires pydot.
         """
-        from .export import graph2dot
+        from tulip.transys.export import graph2dot
         return graph2dot.graph2dot_str(self, wrap, **kwargs)
 
     def save(self, filename=None, fileformat=None,
@@ -1201,7 +1201,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         fileformat = fextension[1:]
         # check for html
         if fileformat is 'html':
-            from .export import save_d3
+            from tulip.transys.export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         # subclass has extra export formats ?
         if hasattr(self, '_save'):
@@ -1209,7 +1209,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 return True
         if prog is None:
             prog = self.default_layout
-        from .export import graph2dot
+        from tulip.transys.export import graph2dot
         graph2dot.save_dot(self, filename, fileformat, rankdir,
                            prog, wrap, tikz=tikz)
         return True
@@ -1241,7 +1241,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             return
         if prog is None:
             prog = self.default_layout
-        from .export import graph2dot
+        from tulip.transys.export import graph2dot
         return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
 
 
