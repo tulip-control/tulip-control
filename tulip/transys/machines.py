@@ -81,8 +81,8 @@ def create_machine_ports(spc_vars):
     return ports
 
 
-class FiniteStateMachine(LabeledDiGraph):
-    """Transducer, i.e., a system with inputs and outputs.
+class Transducer(LabeledDiGraph):
+    """Sequential Transducer, i.e., a letter-to-letter function.
 
     Inputs
     ======
@@ -275,7 +275,7 @@ class FiniteStateMachine(LabeledDiGraph):
             self._state_dot_label_format[var_name] = str(var_name)
 
 
-class MooreMachine(FiniteStateMachine):
+class MooreMachine(Transducer):
     """Moore machine.
 
     A Moore machine implements the discrete dynamics::
@@ -303,7 +303,7 @@ class MooreMachine(FiniteStateMachine):
 
     def __init__(self):
         """Instantiate a Moore state machine."""
-        FiniteStateMachine.__init__(self)
+        Transducer.__init__(self)
         self.dot_node_shape = {'normal': 'ellipse'}
         self.default_export_fname = 'moore'
 
@@ -355,7 +355,7 @@ class MooreMachine(FiniteStateMachine):
                 self._state_dot_mask[port_name] = mask_func
 
 
-class MealyMachine(FiniteStateMachine):
+class MealyMachine(Transducer):
     """Mealy machine.
 
     Examples
@@ -417,7 +417,7 @@ class MealyMachine(FiniteStateMachine):
     """
 
     def __init__(self):
-        FiniteStateMachine.__init__(self)
+        Transducer.__init__(self)
         # will point to selected values of self._transition_label_def
         self.dot_node_shape = {'normal': 'ellipse'}
         self.default_export_fname = 'mealy'
