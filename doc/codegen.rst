@@ -10,7 +10,7 @@ various exporting routines available.
 ``python_case``
 ---------------
 
-Given a Mealy machine as would be obtained, for example, from an invocation of
+Given a Mealy machine (Sec. 3.3 in [LS11]_) as would be obtained, for example, from an invocation of
 ``tulip.synth.synthesize``, the function ``python_case`` in ``tulip.dumpsmach``
 generates an implementation as a standalone Python class.  The class implements
 the machine by
@@ -55,7 +55,7 @@ implements ``ctrl``, as demonstrated by the following script.
 
   M = ExampleCtrl()
   for i in xrange(10):
-      input_values = {"park":0}
+      input_values = {"park": 0}
       print(M.move(**input_values))
 
 Alternatively, the above code can be modified by calling ``M.move`` with the
