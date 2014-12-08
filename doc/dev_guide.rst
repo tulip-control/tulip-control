@@ -114,7 +114,7 @@ committers.
 	e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis (pyflakes) checked).
 .. advice for emacs users ?
 
-- Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.  Avoid `this <https://github.com/mdipierro/gluino/blob/master/gluino/dal.py>`_.
+- Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.
 
 Further reading, of general interest:
 
