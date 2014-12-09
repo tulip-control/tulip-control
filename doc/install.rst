@@ -43,6 +43,10 @@ packages, listed with a summary of dependent features:
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code
 
+In previous versions of TuLiP, ``polytope`` was a subpackage of ``tulip``.  It
+is now a separate package, but for convenience, a copy is bundled with some
+releases of TuLiP.
+
 Once all of the above preparations are completed, you can install TuLiP.  As
 with most `Distutils <http://docs.python.org/install/index.html>`_-based
 packages, installation proceeds with::
