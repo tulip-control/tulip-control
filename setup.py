@@ -12,7 +12,7 @@ import os
 ###########################################
 # (see notes below.)
 
-GR1C_MIN_VERSION = (0,7,4)
+GR1C_MIN_VERSION = (0,9,0)
 def check_gr1c():
     try:
         v_str = subprocess.check_output(["gr1c", "-V"])
