@@ -662,7 +662,7 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     if missing_ports:
         raise ValueError('missing input port(s): ' + missing_ports)
     # dict of lists ?
-    non_lists = {k: v for k, v in seqs.iteritems() if isinstance(v, list)}
+    non_lists = {k: v for k, v in seqs.iteritems() if not isinstance(v, list)}
     if non_lists:
         raise TypeError('Values must be lists, for: ' + str(non_lists))
     # uniform list len ?
@@ -674,12 +674,12 @@ def guided_run(mealy, from_state=None, input_sequences=None):
         state = next(iter(mealy.states.initial))
     else:
         state = from_state
-    n = len(seqs.itervalues()[0])
+    n = len(next(seqs.itervalues()))
     states_seq = []
     output_seqs = {k: list() for k in mealy.outputs}
     for i in range(n):
         inputs = {k: v[i] for k, v in seqs.iteritems()}
-        outputs, state = mealy.reaction(state, inputs)
+        state, outputs = mealy.reaction(state, inputs)
         states_seq.append(state)
         for k in output_seqs:
             output_seqs[k].append(outputs[k])
