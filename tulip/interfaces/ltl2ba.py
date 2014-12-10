@@ -245,7 +245,7 @@ class Parser(object):
         logger.error('Syntax error at ' + p.value)
 
 
-def _call_ltl2ba(formula, prefix=''):
+def call_ltl2ba(formula, prefix=''):
     """Load a Buchi Automaton from a Never Claim.
 
     depends
@@ -301,6 +301,6 @@ if __name__ == '__main__':
     logger.setLevel(level=logging.DEBUG)
     parser = Parser()
     f = '[] !s && <> (a || c) && <> (b U c)'
-    out = _call_ltl2ba(f)
+    out = call_ltl2ba(f)
     symbols, g, initial, accepting = parser.parse(out)
     g.save('ba.pdf')
