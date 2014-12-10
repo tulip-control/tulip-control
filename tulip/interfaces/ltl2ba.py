@@ -277,25 +277,6 @@ def call_ltl2ba(formula, prefix=''):
     return ltl2ba_output
 
 
-# build parser once only
-parser = Parser()
-
-
-def convert(formula):
-    """Convert LTL formula to Buchi Automaton using ltl2ba.
-    
-    @type formula: str(formula) must be admissible ltl2ba input
-    
-    @return: Buchi automaton whose edges are annotated
-        with Boolean formulas (in parsed form, see L{spec.ast.Node})
-    @rtype: L{BuchiAutomaton}
-    """
-    ltl2ba_out = _call_ltl2ba(str(formula))
-    ba = parser.parse(ltl2ba_out)
-    logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
-    return ba
-
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logger.setLevel(level=logging.DEBUG)
