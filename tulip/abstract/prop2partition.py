@@ -46,7 +46,9 @@ from scipy import sparse as sp
 import polytope as pc
 from polytope.plot import plot_partition
 
+
 from tulip import transys as trs
+
 
 # inline imports:
 #
@@ -271,6 +273,120 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         prop_regions = ppp.prop_regions
     )
     return (new_ppp, subsys_list, parents)
+
+def pwa_shrunk_partition(pwa_sys, ppp, eps, abs_tol=1e-5):
+    """This function takes:
+    
+      - a piecewise affine system C{pwa_sys} and
+      - a proposition-preserving partition C{ppp}
+          whose domain is a subset of the domain of C{pwa_sys}
+      - a shrinkage factor C{eps}
+    
+    and returns a *refined* proposition preserving partition
+    where in each region a unique subsystem of pwa_sys is active
+    and pwa_sys domains are shrunk to account for estimation 
+    errors.
+
+    See Also
+    ========
+    L{pwa_partition}
+    
+    @type pwa_sys: L{hybrid.PwaSysDyn}
+    @type ppp: L{PropPreservingPartition}
+    
+    @return: new partition and associated maps:
+        
+        - new partition C{new_ppp}
+        - map of C{new_ppp.regions} to C{pwa_sys.list_subsys}
+        - map of C{new_ppp.regions} to C{ppp.regions}
+    
+    @rtype: C{(L{PropPreservingPartition}, list, list)}
+    """
+
+    new_list = []
+    subsys_list = []
+    parents = []
+    for i, subsys in enumerate(pwa_sys.list_subsys):
+        dom = shrinkPoly(subsys.domain, eps)
+        for j, region in enumerate(ppp.regions):
+            isect = region.intersect(dom)
+            
+            if pc.is_fulldim(isect):
+                rc, xc = pc.cheby_ball(isect)
+                
+                if rc < abs_tol:
+                    msg = 'One of the regions in the refined PPP is '
+                    msg += 'too small, this may cause numerical problems'
+                    warnings.warn(msg)
+                
+                # not Region yet, but Polytope ?
+                if len(isect) == 0:
+                    isect = pc.Region([isect])
+                
+                # label with AP
+                isect.props = region.props.copy()
+                
+                # store new Region
+                new_list.append(isect)
+                
+                # keep track of original Region in ppp.regions
+                parents.append(j)
+                
+                # index of subsystem active within isect
+                subsys_list.append(i)
+    
+    # compute spatial adjacency matrix
+    n = len(new_list)
+    adj = sp.lil_matrix((n, n), dtype=np.int8)
+    for i, ri in enumerate(new_list):
+        pi = parents[i]
+        for j, rj in enumerate(new_list[0:i]):
+            pj = parents[j]
+            
+            if (ppp.adj[pi, pj] == 1) or (pi == pj):
+                # account for shrinkage in adjacency check
+                if pc.is_adjacent(ri, rj, 2*eps):  
+                    adj[i, j] = 1
+                    adj[j, i] = 1
+        adj[i, i] = 1
+            
+    new_ppp = PropPreservingPartition(
+        domain = ppp.domain,
+        regions = new_list,
+        adj = adj,
+        prop_regions = ppp.prop_regions
+    )
+    return (new_ppp, subsys_list, parents)
+
+def shrinkPoly(origPoly, epsilon):
+	"""Returns a polytope shrunk a distance 'epsilon'
+	to the edges from the Polytope origPoly.
+	"""
+	A = origPoly.A.copy()
+	b = origPoly.b.copy()
+	for i in range(A.shape[0]):
+		b[i] = b[i] - epsilon*np.linalg.norm(A[i][:])
+	return pc.Polytope(A,b)
+
+def shrinkRegion(origRegion, epsilon):
+	"""Returns a region where all polytopes in the Region
+	origRegion have been shrunk a distance 'epsilon'"""
+	list_poly = deepcopy(origRegion.list_poly)
+	props = deepcopy(origRegion.props)
+	lengthie = len(list_poly)
+	for i in range(lengthie):
+		list_poly[i] = shrinkPoly(list_poly[i], epsilon)
+	return pc.Region(list_poly=list_poly, props=props)
+
+def shrinkPartition(origPartition, epsilon):
+	"""Returns a PropositionPreservingPartition where every
+	Region has been shrunk a distance 'epsilon'
+	"""
+	newPartition = deepcopy(origPartition)
+	lengthie = len(newPartition.regions)
+	for i in range(lengthie):
+		newPartition.regions[i] = shrinkRegion(newPartition.regions[i], epsilon)
+	return newPartition
                 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     """ This function takes a proposition preserving partition ppp and the size 
