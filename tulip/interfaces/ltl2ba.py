@@ -33,10 +33,10 @@
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
+import networkx as nx
 import ply.lex
 import ply.yacc
 
-from tulip import transys as trs
 
 TABMODULE = 'ltl2ba_parsetab'
 
@@ -135,13 +135,29 @@ class Parser(object):
         self.tokens = self.lexer.tokens
         self.parser = ply.yacc.yacc(module=self, tabmodule=TABMODULE,
                                     write_tables=True, debug=False)
-        self.ba = None
+        self.g = None
+        self.initial_nodes = None
+        self.accepting_nodes = None
+        self.symbols = None
 
     def parse(self, ltl2ba_output):
-        """Return a Buchi automaton from parsing C{ltl2ba_output}."""
-        self.ba = trs.BA(symbolic=True)
+        """Return a Buchi automaton from parsing C{ltl2ba_output}.
+
+        @return: Buchi automaton as a 3-`tuple` containing:
+          - `dict` mapping symbols to types (all `"boolean"`)
+          - `networkx.MultiDiGraph`, each edge labeled with a
+            `"guard"` that is a Boolean formula as `str`
+          - `set` of initial nodes
+          - `set` of accepting nodes
+        """
+        self.g = nx.MultiDiGraph()
+        # flat is better than nested
+        self.initial_nodes = set()
+        self.accepting_nodes = set()
+        self.symbols = dict()
         self.parser.parse(ltl2ba_output, lexer=self.lexer.lexer)
-        return self.ba
+        return (self.symbols, self.g,
+                self.initial_nodes, self.accepting_nodes)
 
     def p_claim(self, p):
         """claim : NEVER LBRACE COMMENT clauses RBRACE"""
@@ -163,8 +179,8 @@ class Parser(object):
         """clause : state COLON if_clause"""
         u = p[1]
         if_clause = p[3]
-        for g, v in if_clause:
-            self.ba.transitions.add(u, v, letter=g)
+        for guard, v in if_clause:
+            self.g.add_edge(u, v, guard=guard)
         p[0] = (u, if_clause)
 
     def p_if_clause(self, p):
@@ -215,11 +231,11 @@ class Parser(object):
     def p_state(self, p):
         """state : NAME"""
         state = p[1]
-        self.ba.states.add(state)
+        self.g.add_node(state)
         if 'init' in state:
-            self.ba.states.initial.add(state)
+            self.initial_nodes.add(state)
         elif 'accept' in state:
-            self.ba.states.accepting.add(state)
+            self.accepting_nodes.add(state)
         p[0] = p[1]
 
     def p_empty(self, p):
@@ -283,6 +299,8 @@ def convert(formula):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logger.setLevel(level=logging.DEBUG)
+    parser = Parser()
     f = '[] !s && <> (a || c) && <> (b U c)'
-    fba = convert(f)
-    #fba.save('ba.pdf')
+    out = _call_ltl2ba(f)
+    symbols, g, initial, accepting = parser.parse(out)
+    g.save('ba.pdf')
