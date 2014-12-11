@@ -35,12 +35,40 @@ import logging
 import copy
 from tulip.transys.transys import FiniteTransitionSystem
 from tulip.transys.automata import BuchiAutomaton
+import networkx as nx
+from tulip.interfaces import ltl2ba as ltl2baint
+# possible future:
+# from tulip.transys.transys import TransitionSystem
+# from tulip.transys.automata import Automaton
+from tulip.transys.labeled_graphs import LabeledDiGraph
+
 
 _hl = 40 * '-'
-
 logger = logging.getLogger(__name__)
 
-# TODO BA x BA sync prod algorithm
+
+# build parser once only
+parser = ltl2baint.Parser()
+
+
+def ltl2ba(formula):
+    """Convert LTL formula to Buchi Automaton using ltl2ba.
+
+    @type formula: `str(formula)` must be admissible ltl2ba input
+
+    @return: Buchi automaton whose edges are annotated
+        with Boolean formulas as `str`
+    @rtype: [`Automaton`]
+    """
+    ltl2ba_out = ltl2baint.call_ltl2ba(str(formula))
+    symbols, g, initial, accepting = parser.parse(ltl2ba_out)
+    ba = Automaton('Buchi', alphabet=symbols)
+    ba.add_nodes_from(g)
+    ba.add_edges_from(g.edges_iter(data=True))
+    ba.initial_nodes = initial
+    ba.accepting_sets = accepting
+    logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
+    return ba
 
 
 def _multiply_mutable_states(self, other, prod_graph, prod_sys):
