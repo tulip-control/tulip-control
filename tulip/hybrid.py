@@ -303,7 +303,7 @@ class LtiOutSysDyn(LtiSysDyn):
             try:
                 nC, mC = C.shape
             except:
-                raise TypeError('B matrix must be 2d array')
+                raise TypeError('C matrix must be 2d array')
             if mA != mC:
                 raise ValueError('A and C must have same number of columns')
         
@@ -812,6 +812,7 @@ def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False):
 		result = np.hstack([result, matrix(1., (1,1))])
 		if opt_dist:
 			result = np.hstack([result, matrix(0., (1,1))])
+		print 'heyo', G, result
 		G = np.vstack([G, result])
 		G = matrix(G) #G done!
 		b = matrix(b)
