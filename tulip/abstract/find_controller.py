@@ -48,6 +48,8 @@ from __future__ import absolute_import
 
 import numpy as np
 from cvxopt import matrix, solvers
+solvers.options['msg_lev'] = 'GLP_MSG_OFF'
+
 import polytope as pc
 
 from .feasible import solve_feasible, createLM, _block_diag2
