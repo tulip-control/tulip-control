@@ -64,23 +64,21 @@ be followed:
 Version naming
 --------------
 
-(Copied verbatim from an email sent by Richard Murray on the TuLiP-discuss mailing list on 17 May 2011.)
-
-For version numbers, the style I like is N.mx where
+For version numbers, the style is N.m.x where
 
 * N = major version; everything that worked before could break
 * m = revision; most functions should work, but might need (minor) modifications
 * x = minor revision; code that ran should continue running
 
-So, if you go from version 1.2c to 1.2d, then no interfaces should
-change, code should continue to run, etc.  If you go from 1.2d to
-1.3a, then there might be changes in some arguments lists or other
+So, if you go from version 1.2.2 to 1.2.3, then no interfaces should
+change, code should continue to run, etc.  If you go from 1.2.3 to
+1.3.0, then there might be changes in some arguments lists or other
 small things, but previous functionality still in place (somewhow).
-If you go from 1.3a to 2.0a, then we can make whatever changes we
+If you go from 1.3.0 to 2.0.0, then we can make whatever changes we
 want.
 
-None of these version numbers would go in individual files, but would
-be a label for the entire package.
+None of these version numbers go in individual files, but
+the version number is a label for the entire package.
 
 
 Advice
