@@ -17,7 +17,7 @@ EPYOPTS       = -v --graph=classtree --no-sourcecode --no-private
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = _build
+BUILDDIR      = _build/
 
 .PHONY: api
 
@@ -28,13 +28,13 @@ help:
 	@echo "  clean      delete build output"
 
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(BUILDDIR)*
 
 html:
-	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)html
 	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)html."
 
 api:
-	mkdir -p $(BUILDDIR)/$(EPYBUILDDIR)
-	$(EPYDOC) $(EPYOPTS) --html --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)/$(EPYBUILDDIR) $(TULIP_REL) --exclude=parsetab\|version\|graphics
+	mkdir -p $(BUILDDIR)$(EPYBUILDDIR)
+	$(EPYDOC) $(EPYOPTS) --html --name=TuLiP --url=http://tulip-control.org -o $(BUILDDIR)$(EPYBUILDDIR) $(TULIP_REL) --exclude=parsetab\|version\|graphics
