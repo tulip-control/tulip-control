@@ -109,7 +109,7 @@ if __name__ == "__main__":
         if len(match) > 1:
             raise Exception('ambiguous base name: %s, matches: %s' %
                             (basename, match))
-        elif match[0].endswith('_test.py'):
+        elif len(match) == 1 and match[0].endswith('_test.py'):
             testfiles.append(match[0])
             continue
 
