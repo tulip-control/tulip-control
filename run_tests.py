@@ -103,14 +103,21 @@ if __name__ == "__main__":
     testfiles = []
     excludefiles = []
     for basename in basenames:
+        if basename[0] == '-':
+            matchstart = lambda f, bname: f.startswith(bname[1:])
+        else:
+            matchstart = lambda f, bname: f.startswith(bname)
         match = [f for f in available
-                 if f.startswith(basename) and f.endswith('.py')]
+                 if matchstart(f, basename) and f.endswith('.py')]
 
         if len(match) > 1:
             raise Exception('ambiguous base name: %s, matches: %s' %
                             (basename, match))
         elif len(match) == 1 and match[0].endswith('_test.py'):
-            testfiles.append(match[0])
+            if basename[0] == '-':
+                excludefiles.append(match[0])
+            else:
+                testfiles.append(match[0])
             continue
 
         if os.path.exists(os.path.join(tests_dir, basename + '_test.py')):
