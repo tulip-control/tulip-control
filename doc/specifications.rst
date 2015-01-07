@@ -69,7 +69,7 @@ The result of the second line (using ``pretty()``) should look similar to
 
 TuLiP LTL syntax
 ----------------
-The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.plyparser``::
+The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.lexyacc``::
 
   expr ::= expr '*' expr
          | expr '/' expr
