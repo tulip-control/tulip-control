@@ -437,21 +437,21 @@ class GRSpec(LTL):
         output += 'GUARANTEE:\n'
         if self.sys_init:
             output += (
-                '    INITIAL\n\t  '
+                '    INITIAL\n\t  ' +
                 '\n\t& '.join([
                     '(' + f + ')' for f in self.sys_init
                 ]) + '\n'
             )
         if self.sys_safety:
             output += (
-                '    SAFETY\n\t  []'
+                '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
                     '(' + f + ')' for f in self.sys_safety
                 ]) + '\n'
             )
         if self.sys_prog:
             output += (
-                '    LIVENESS\n\t  []<>'
+                '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
                     '(' + f + ')' for f in self.sys_prog
                 ]) + '\n'
