@@ -71,7 +71,7 @@ class Tree(nx.DiGraph):
 
         @rtype: C{set} of L{Var}
         """
-        return {u for u in self if isinstance(u, nodes.Var)}
+        return {u for u in self if u.type == 'var'}
 
     @classmethod
     def from_recursive_ast(cls, u):
@@ -81,10 +81,10 @@ class Tree(nx.DiGraph):
         return tree
 
     def _recurse(self, u):
-        if isinstance(u, nodes.Terminal):
+        if hasattr(u, 'value'):
             # necessary this terminal is the root
             self.add_node(u)
-        elif isinstance(u, nodes.Operator):
+        elif hasattr(u, 'operator'):
             for i, v in enumerate(u.operands):
                 self.add_edge(u, v, pos=i)
                 self._recurse(v)
@@ -98,7 +98,7 @@ class Tree(nx.DiGraph):
         v = copy.copy(u)
         s = self.succ[u]
         if not s:
-            assert isinstance(u, nodes.Terminal)
+            assert hasattr(u, 'value')
         else:
             v.operands = [self.to_recursive_ast(x)
                           for _, x, d in sorted(
@@ -155,9 +155,9 @@ def ast_to_labeled_graph(tree, detailed):
     """
     g = nx.DiGraph()
     for u in tree:
-        if isinstance(u, nodes.Operator):
+        if hasattr(u, 'operator'):
             label = u.operator
-        elif isinstance(u, nodes.Terminal):
+        elif hasattr(u, 'value'):
             label = u.value
         else:
             raise TypeError(
@@ -192,18 +192,18 @@ def check_for_undefined_identifiers(tree, domains):
     @type domains: C{dict}
     """
     for u in tree:
-        if isinstance(u, nodes.Var) and u.value not in domains:
+        if u.type == 'var' and u.value not in domains:
             var = u.value
             raise ValueError('undefined variable: ' + str(var) +
                              ', in subformula:\n\t' + str(tree))
 
-        if not isinstance(u, (nodes.Str, nodes.Num)):
+        if u.type not in {'str', 'num'}:
             continue
 
         # is a Const or Num
         var, c = pair_node_to_var(tree, u)
 
-        if isinstance(c, nodes.Str):
+        if c.type == 'str':
             dom = domains[var]
 
             if not isinstance(dom, list):
@@ -217,7 +217,7 @@ def check_for_undefined_identifiers(tree, domains):
                     'String constant: ' + str(c) +
                     ', is not in the domain of variable: ' + str(var))
 
-        if isinstance(c, nodes.Num):
+        if c.type == 'num':
             dom = domains[var]
 
             if not isinstance(dom, tuple):
@@ -245,7 +245,7 @@ def sub_values(tree, var_values):
     """
     old2new = dict()
     for u in tree.nodes_iter():
-        if not isinstance(u, nodes.Var):
+        if u.type != 'var':
             continue
         val = var_values[u.value]
         # instantiate appropriate value type
@@ -272,7 +272,7 @@ def sub_constants(tree, var_str2int):
     # logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
     for u in tree.nodes_iter():
-        if not isinstance(u, nodes.Str):
+        if u.type != 'str':
             continue
         var, op = pair_node_to_var(tree, u)
         # now: c, is the operator and: v, the variable
@@ -298,7 +298,7 @@ def sub_bool_with_subtree(tree, bool2subtree):
     @type bool2form: C{dict} from C{str} to L{Tree}
     """
     for u in tree.nodes():
-        if isinstance(u, nodes.Var) and u.value in bool2subtree:
+        if u.type == 'var' and u.value in bool2subtree:
             # tree.write(str(id(tree)) + '_before.png')
             tree.add_subtree(u, bool2subtree[u.value])
             # tree.write(str(id(tree)) + '_after.png')
@@ -326,14 +326,15 @@ def pair_node_to_var(tree, c):
     while True:
         old = c
         c = next(iter(tree.predecessors(c)))
-        if isinstance(c, nodes.Binary):
-            break
+        if c.type == 'operator':
+            if len(c.operands) == 2:
+                break
     succ = tree.successors(c)
     v = succ[0] if succ[1] == old else succ[1]
     # go down until var found
     # assuming correct syntax for gr1c
     while True:
-        if isinstance(v, nodes.Var):
+        if v.type == 'var':
             break
         v = next(iter(tree.successors(v)))
     # now: b, is the operator and: v, the variable
@@ -377,7 +378,7 @@ def infer_constants(formula, variables):
     tree = parser.parse(formula)
     old2new = dict()
     for u in tree:
-        if not isinstance(u, nodes.Var):
+        if u.type != 'var':
             continue
         if str(u) in variables:
             continue

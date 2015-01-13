@@ -343,9 +343,9 @@ def translate_ast(tree, lang):
 
 def _ast_to_lang(u, nodes):
     cls = getattr(nodes, type(u).__name__)
-    if isinstance(u, ast.nodes.Terminal):
+    if hasattr(u, 'value'):
         return cls(u.value)
-    elif isinstance(u, ast.nodes.Operator):
+    elif hasattr(u, 'operator'):
         xyz = [_ast_to_lang(x, nodes) for x in u.operands]
         return cls(u.operator, *xyz)
     else:
@@ -355,12 +355,16 @@ def _ast_to_lang(u, nodes):
 
 def _ast_to_python(u, nodes):
     cls = getattr(nodes, type(u).__name__)
-    if isinstance(u, ast.nodes.Terminal):
+    if hasattr(u, 'value'):
         return cls(u.value)
-    elif isinstance(u, ast.nodes.Unary):
+    elif not hasattr(u, 'operands'):
+        raise TypeError(
+            'AST node: {u}'.format(u=type(u).__name__) +
+            ', is neither terminal nor operator.')
+    elif len(u.operands) == 1:
         assert u.operator == '!'
         return cls(u.operator, _ast_to_python(u.operands[0], nodes))
-    elif isinstance(u, ast.nodes.Binary):
+    elif len(u.operands) == 2:
         assert u.operator in {'&', '|', '^', '=', '!=', '->', '<->'}
         if u.operator == '->':
             cls = nodes.Imp
@@ -369,3 +373,6 @@ def _ast_to_python(u, nodes):
         return cls(u.operator,
                    _ast_to_python(u.operands[0], nodes),
                    _ast_to_python(u.operands[1], nodes))
+    else:
+        raise ValueError(
+            'Operator: {u}, is neither unary nor binary.'.format(u=u))

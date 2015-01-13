@@ -128,6 +128,7 @@ def make_nodes(opmap=None):
                 raise TypeError(
                     'value must be a string, got: {v}'.format(
                         v=value))
+            self.type = 'terminal'
             self.value = value
 
         def __repr__(self):
@@ -174,6 +175,7 @@ def make_nodes(opmap=None):
                 raise TypeError(
                     'operator must be string, got: {op}'.format(
                         op=operator))
+            self.type = 'operator'
             self.operator = operator
             self.operands = list(operands)
 
@@ -249,6 +251,10 @@ def make_fol_nodes(opmap=None):
           - 0-ary propositional variable (atomic proposition)
         """
 
+        def __init__(self, value):
+            super(Var, self).__init__(value)
+            self.type = 'var'
+
     class Bool(nodes.Terminal):
         """A 0-ary connective."""
 
@@ -261,6 +267,7 @@ def make_fol_nodes(opmap=None):
                     'value must be "true" or "false" '
                     '(case insensitive), got: {v}'.format(v=value))
             self.value = 'True' if (value.lower() == 'true') else 'False'
+            self.type = 'bool'
 
         def flatten(self, *arg, **kw):
             return self.opmap[self.value]
@@ -270,9 +277,17 @@ def make_fol_nodes(opmap=None):
         # self.value is str,
         # use int(self.value) if you need to
 
+        def __init__(self, value):
+            super(Num, self).__init__(value)
+            self.type = 'num'
+
     class Str(nodes.Terminal):
         """A 0-ary function."""
         # parser ensures that value has no quotes
+
+        def __init__(self, value):
+            super(Str, self).__init__(value)
+            self.type = 'str'
 
     class Comparator(nodes.Binary):
         """Binary relational operator (2-ary predicate)."""
