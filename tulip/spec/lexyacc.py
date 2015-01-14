@@ -321,7 +321,15 @@ class Parser(object):
         p[0] = self.ast.Bool(p[1])
 
     def p_error(self, p):
-        raise Exception('Syntax error at "{p}"'.format(p=p.value))
+        s = list()
+        while True:
+            tok = ply.yacc.token()
+            if tok is None:
+                break
+            s.append(tok.value)
+        raise Exception(
+            'Syntax error at "{p}"\n'.format(p=p.value) +
+            'remaining input:\n{s}\n'.format(s=' '.join(s)))
 
 
 def parse(formula):
