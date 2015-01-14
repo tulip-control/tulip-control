@@ -314,6 +314,7 @@ def translate(spec, lang):
     @return: spec formatted for input to tool
     @rtype: C{str}
     """
+    spec.check_syntax()
     spec.str_to_int()
     # pprint.pprint(spec._bool_int)
     d = {p: [translate_ast(spec.ast(spec._bool_int[x]), lang).flatten(

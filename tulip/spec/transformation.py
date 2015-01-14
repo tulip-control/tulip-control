@@ -423,6 +423,27 @@ def check_var_name_conflict(f, varname):
     return v
 
 
+def collect_primed_vars(t):
+    """Return `set` of variable identifiers in the context of a next operator.
+
+    @type t: recursive AST
+    """
+    g = Tree.from_recursive_ast(t)
+    # (node, context)
+    Q = [(t, False)]
+    primed = set()
+    while Q:
+        u, c = Q.pop()
+        if u.type == 'var' and c:
+            primed.add(u.value)
+        try:
+            c = (u.operator == 'X') or c
+        except AttributeError:
+            pass
+        Q.extend((v, c) for v in g.successors(u))
+    return primed
+
+
 # defunct until further notice
 def _flatten(tree, u, to_lang, **kw):
     """Recursively flatten C{tree}.

@@ -458,9 +458,30 @@ class GRSpec(LTL):
             )
         return output
 
-    def check_form(self):
-        self.formula = self.to_canon()
-        return LTL.check_form(self)
+    def check_syntax(self):
+        self._assert_no_primed(self.env_init, 'assumed initial condition')
+        self._assert_no_primed(self.sys_init, 'guaranteed initial condition')
+        self._assert_no_primed(self.env_prog, 'liveness assumption')
+        self._assert_no_primed(self.env_prog, 'liveness guarantee')
+        for f in self.env_safety:
+            a = self.ast(f)
+            primed = tx.collect_primed_vars(a)
+            for var in primed:
+                if var in self.sys_vars:
+                    raise Exception(
+                        'Syntax error: ' +
+                        'primed system variable "{var}"'.format(var=var) +
+                        ' found in syssafety: {f}'.format(f=f))
+
+    def _assert_no_primed(self, formulae, name):
+        for f in formulae:
+            a = self.ast(f)
+            primed = tx.collect_primed_vars(a)
+            if primed:
+                raise Exception(
+                    'Syntax error: ' +
+                    'primed variables: {primed}'.format(primed=primed) +
+                    ' found in {name}: {f}'.format(f=f, name=name))
 
     def copy(self):
         return GRSpec(
