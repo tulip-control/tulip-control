@@ -327,18 +327,18 @@ def pair_node_to_var(tree, c):
     # find parent Binary operator
     while True:
         old = c
-        c = next(iter(tree.predecessors(c)))
+        c = next(iter(tree.predecessors_iter(c)))
         if c.type == 'operator':
             if len(c.operands) == 2:
                 break
-    succ = tree.successors(c)
-    v = succ[0] if succ[1] == old else succ[1]
+    p, q = tree.successors_iter(c)
+    v = p if q == old else q
     # go down until var found
     # assuming correct syntax for gr1c
     while True:
         if v.type == 'var':
             break
-        v = next(iter(tree.successors(v)))
+        v = next(iter(tree.successors_iter(v)))
     # now: b, is the operator and: v, the variable
     return v, c
 
@@ -443,7 +443,7 @@ def collect_primed_vars(t):
             c = (u.operator == 'X') or c
         except AttributeError:
             pass
-        Q.extend((v, c) for v in g.successors(u))
+        Q.extend((v, c) for v in g.successors_iter(u))
     return primed
 
 
