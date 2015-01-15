@@ -206,6 +206,7 @@ class Parser(object):
             module=self,
             tabmodule=self.tabmodule,
             write_tables=False,
+            start=self.start,
             debug=False)
 
     def rebuild_parsetab(self, tabmodule, outputdir='',
@@ -229,6 +230,7 @@ class Parser(object):
             tabmodule=tabmodule,
             outputdir=outputdir,
             write_tables=True,
+            start=self.start,
             debug=debug,
             debuglog=debuglog)
 
