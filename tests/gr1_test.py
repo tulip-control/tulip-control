@@ -1,11 +1,58 @@
 #!/usr/bin/env python
 """Tests for gr1 fragment untilities."""
 import logging
-logging.basicConfig(level=logging.ERROR)
-logging.getLogger('ltl_parser_log').setLevel(logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('tulip.ltl_parser_log').setLevel(logging.WARNING)
 from nose.tools import assert_raises
 from tulip import spec, synth
+from tulip.spec import parser, transformation
 from tulip.spec import gr1_fragment as gr1
+
+
+def test_split_gr1():
+    # init
+    f = '(x > 0) & (y + 1 < 2)'
+    d = gr1.split_gr1(f)
+    assert d['init'] == '( x > 0 ) & ( ( y + 1 ) < 2 )', d
+    assert d['G'] == '', d
+    assert d['GF'] == '', d
+    # safety
+    f = '[]((x > 0) & (z = 3 + y))'
+    d = gr1.split_gr1(f)
+    assert d['init'] == '', d
+    assert d['G'] == '( ( x > 0 ) & ( z = ( 3 + y ) ) )', d
+    assert d['GF'] == '', d
+    # recurrence
+    f = '[]<>(x > 0)'
+    d = gr1.split_gr1(f)
+    assert d['init'] == '', d
+    assert d['G'] == '', d
+    assert d['GF'] == '( x > 0 )', d
+    # all together
+    f = (
+        '(x > 0) & (y + 1 < 2) & '
+        '[]( (X y) > 0) & '
+        '[]<>((z - x <= 0) | (p -> q))')
+    d = gr1.split_gr1(f)
+    assert d['init'] == '( x > 0 ) & ( ( y + 1 ) < 2 )', d
+    assert d['G'] == '( ( X y ) > 0 )', d
+    assert d['GF'] == '( ( ( z - x ) <= 0 ) | ( p -> q ) )', d
+    # not in fragment
+    with assert_raises(AssertionError):
+        gr1.split_gr1('[]( [] p )')
+    with assert_raises(AssertionError):
+        gr1.split_gr1('<>( [] p )')
+    with assert_raises(AssertionError):
+        gr1.split_gr1('(X p ) & ( [] p )')
+    with assert_raises(AssertionError):
+        gr1.split_gr1('[]<> ( x & (X y) )')
+
+
+def test_has_operator():
+    t = parser.parse(' [](x & y) ')
+    g = transformation.Tree.from_recursive_ast(t)
+    assert gr1.has_operator(t, g, {'&'}) == '&'
+    assert gr1.has_operator(t, g, {'G'}) == 'G'
 
 
 def test_name_conflict():
