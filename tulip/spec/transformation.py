@@ -194,8 +194,10 @@ def check_for_undefined_identifiers(tree, domains):
     for u in tree:
         if u.type == 'var' and u.value not in domains:
             var = u.value
-            raise ValueError('undefined variable: ' + str(var) +
-                             ', in subformula:\n\t' + str(tree))
+            raise ValueError(
+                ('Undefined variable "{var}", '
+                 'in subformula:\n\t{f}').format(
+                     var=var, f=tree))
 
         if u.type not in {'str', 'num'}:
             continue
@@ -208,29 +210,30 @@ def check_for_undefined_identifiers(tree, domains):
 
             if not isinstance(dom, list):
                 raise Exception(
-                    'String constant: ' + str(c) +
-                    ', assigned to non-string variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom))
+                    ('String constant "{c}" assigned to non-string '
+                     'variable "{var}" with domain:\n\t{dom}').format(
+                         var=var, c=c, dom=dom))
 
             if c.value not in domains[var.value]:
                 raise ValueError(
-                    'String constant: ' + str(c) +
-                    ', is not in the domain of variable: ' + str(var))
+                    ('String constant "{c}" is not in the domain '
+                     'of variable "{var}"').format(var=var, c=c))
 
         if c.type == 'num':
             dom = domains[var]
 
             if not isinstance(dom, tuple):
                 raise Exception(
-                    'Number: ' + str(c) +
-                    ', assigned to non-integer variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom))
+                    ('Number: {c}, assigned to non-integer ' + str(c) +
+                     'variable "{var}" with domain:\n\t{dom}').format(
+                         var=var, c=c, dom=dom))
 
             if not dom[0] <= c.value <= dom[1]:
                 raise Exception(
-                    'Integer variable: ' + str(var) +
-                    ', is assigned the value: ' + str(c) +
-                    ', that is out of its range: %d ... %d ' % dom)
+                    ('Integer variable "{var}", is assigned the '
+                     'value: {c}, that is out of its domain:'
+                     '{dom[0]} ... {dom[1]}').format(
+                         var=var, c=c, dom=dom))
 
 
 def sub_values(tree, var_values):
@@ -402,7 +405,7 @@ def _check_var_conflicts(s, variables):
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
     if vars_redefined:
-        raise Exception('Variables redefined: ' + str(vars_redefined))
+        raise Exception('Variables redefined: {v}'.format(v=vars_redefined))
     # check conflicts with values of arbitrary finite data types
     for var, domain in variables.iteritems():
         # not arbitrary finite type ?
@@ -411,7 +414,8 @@ def _check_var_conflicts(s, variables):
         # var has arbitrary finite type
         conflicting_values = {x for x in s if x in domain}
         if conflicting_values:
-            raise Exception('Values redefined: ' + str(conflicting_values))
+            raise Exception(
+                'Values redefined: {v}'.format(v=conflicting_values))
 
 
 def check_var_name_conflict(f, varname):
@@ -419,7 +423,7 @@ def check_var_name_conflict(f, varname):
     g = Tree.from_recursive_ast(t)
     v = {x.value for x in g.variables}
     if varname in v:
-        raise ValueError('var name "' + varname + '" already used')
+        raise ValueError('var name "{v}" already used'.format(v=varname))
     return v
 
 

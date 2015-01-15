@@ -471,7 +471,7 @@ class GRSpec(LTL):
                     raise Exception(
                         'Syntax error: ' +
                         'primed system variable "{var}"'.format(var=var) +
-                        ' found in syssafety: {f}'.format(f=f))
+                        ' found in sys safety: {f}'.format(f=f))
 
     def _assert_no_primed(self, formulae, name):
         for f in formulae:
