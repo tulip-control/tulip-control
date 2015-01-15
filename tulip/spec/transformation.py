@@ -41,7 +41,7 @@ from tulip.spec.ast import nodes
 from tulip.spec import parser
 
 
-class Tree(nx.DiGraph):
+class Tree(nx.MultiDiGraph):
     """Abstract syntax tree as a graph data structure.
 
     Use this as a scaffold for syntactic manipulation.
@@ -63,7 +63,7 @@ class Tree(nx.DiGraph):
         # need to override networkx.DiGraph.__str__
         return ('Abstract syntax tree as graph with edges:\n' +
                 str([(str(u), str(v))
-                    for u, v, d in self.edges_iter(data=True)]))
+                    for u, v, k in self.edges_iter(keys=True)]))
 
     @property
     def variables(self):
@@ -86,7 +86,7 @@ class Tree(nx.DiGraph):
             self.add_node(u)
         elif hasattr(u, 'operator'):
             for i, v in enumerate(u.operands):
-                self.add_edge(u, v, pos=i)
+                self.add_edge(u, v, key=i)
                 self._recurse(v)
         else:
             raise Exception('unknown node type')
@@ -95,17 +95,16 @@ class Tree(nx.DiGraph):
     def to_recursive_ast(self, u=None):
         if u is None:
             u = self.root
-        v = copy.copy(u)
-        s = self.succ[u]
-        if not s:
+        w = copy.copy(u)
+        if not self.succ.get(u):
             assert hasattr(u, 'value')
         else:
-            v.operands = [self.to_recursive_ast(x)
-                          for _, x, d in sorted(
-                              self.out_edges_iter(u, data=True),
-                              key=lambda y: y[2]['pos'])]
-            assert len(u.operands) == len(v.operands)
-        return v
+            w.operands = [self.to_recursive_ast(v)
+                          for _, v, _ in sorted(
+                              self.edges_iter(u, keys=True),
+                              key=lambda x: x[2])]
+            assert len(u.operands) == len(w.operands)
+        return w
 
     def add_subtree(self, leaf, tree):
         """Add the C{tree} at node C{nd}.
@@ -115,15 +114,15 @@ class Tree(nx.DiGraph):
         @param tree: to be added, w/o copying AST nodes.
         @type tree: L{Tree}
         """
-        assert not self.successors(leaf)
-        for u, v, d in tree.edges_iter(data=True):
-            self.add_edge(u, v, pos=d['pos'])
+        assert not self.succ.get(leaf)
+        for u, v, k in tree.edges_iter(keys=True):
+            self.add_edge(u, v, key=k)
         # replace old leaf with subtree root
-        ine = self.in_edges(leaf, data=True)
+        ine = self.in_edges(leaf, keys=True)
         if ine:
             assert len(ine) == 1
-            ((parent, _, d), ) = ine
-            self.add_edge(parent, tree.root, **d)
+            ((parent, _, k), ) = ine
+            self.add_edge(parent, tree.root, key=k)
         else:
             self.root = tree.root
         self.remove_node(leaf)
@@ -168,8 +167,8 @@ def ast_to_labeled_graph(tree, detailed):
         if detailed:
             label += '\n' + str(type(u).__name__)
         g.add_node(id(u), label=label)
-    for u, v, d in tree.edges_iter(data=True):
-        g.add_edge(id(u), id(v), label=d['pos'])
+    for u, v, k in tree.edges_iter(keys=True):
+        g.add_edge(id(u), id(v), label=k)
     return g
 
 
@@ -459,7 +458,7 @@ def _flatten(tree, u, to_lang, **kw):
         return to_lang(u, **kw)
     elif len(s) == 2:
         l, r = s
-        if s[l]['pos'] == 'right':
+        if 1 in s[l]:
             l, r = r, l
         l = _flatten(tree, l, to_lang, **kw)
         r = _flatten(tree, r, to_lang, **kw)
