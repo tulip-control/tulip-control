@@ -175,14 +175,15 @@ class Parser(object):
     tabmodule = TABMODULE
     start = 'expr'
     # lowest to highest
+    # closely follows `spin.y`
     precedence = (
-        ('right', 'UNTIL', 'RELEASE'),
-        ('right', 'BIMP'),
-        ('right', 'IMP'),
+    	('left', 'UNTIL', 'RELEASE'),
+        ('left', 'BIMP'),
+        ('left', 'IMP'),
         ('left', 'XOR'),
         ('left', 'OR'),
         ('left', 'AND'),
-        ('right', 'ALWAYS', 'EVENTUALLY'),
+        ('left', 'ALWAYS', 'EVENTUALLY'),
         ('left', 'EQUALS', 'NEQUALS'),
         ('left', 'LT', 'LE', 'GT', 'GE'),
         ('left', 'PLUS', 'MINUS'),
