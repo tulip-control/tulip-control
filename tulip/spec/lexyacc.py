@@ -297,8 +297,12 @@ class Parser(object):
         """expr : NAME"""
         p[0] = self.ast.Var(p[1])
 
+    def p_number_expr(self, p):
+        """expr : number"""
+        p[0] = p[1]
+
     def p_number(self, p):
-        """expression : NUMBER"""
+        """number : NUMBER"""
         p[0] = self.ast.Num(p[1])
 
     def p_negative_number(self, p):
