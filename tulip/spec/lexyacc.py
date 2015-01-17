@@ -68,8 +68,7 @@ class Lexer(object):
     operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'PLUS', 'MINUS', 'TIMES', 'DIV', 'PRIME']
-
+        'PLUS', 'MINUS', 'TIMES', 'DIV', 'TRUNCATE', 'PRIME']
     misc = ['NAME', 'NUMBER']
 
     def __init__(self, debug=False):
@@ -133,6 +132,7 @@ class Lexer(object):
     t_MINUS = r'-'
     t_TIMES = r'\*'
     t_DIV = r'/'
+    t_TRUNCATE = r'<<>>'
 
     t_DQUOTES = r'\"'
     t_PRIME = r"\'"
@@ -280,6 +280,9 @@ class Parser(object):
         """
         p[0] = self.ast.Comparator(p[2], p[1], p[3])
 
+    def p_truncator(self, p):
+        """expr : expr TRUNCATE number"""
+        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
 
     def p_binary_function(self, p):
         """expr : expr TIMES expr
