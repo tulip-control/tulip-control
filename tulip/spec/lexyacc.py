@@ -201,36 +201,24 @@ class Parser(object):
         self.tokens = self.lexer.tokens
         self.build()
 
-    def build(self):
-        self.parser = ply.yacc.yacc(
-            module=self,
-            tabmodule=self.tabmodule,
-            write_tables=False,
-            start=self.start,
-            debug=False)
+    def build(self, tabmodule=None, outputdir='', write_tables=False,
+              debug=False, debuglog=None):
+        """Build parser using `ply.yacc`.
 
-    def rebuild_parsetab(self, tabmodule, outputdir='',
-                         debug=True, debuglog=None):
-        """Rebuild parsetable in debug mode.
-
-        @param tabmodule: name of table file
-        @type tabmodule: C{str}
-
-        @param outputdir: save C{tabmodule} in this directory.
-        @type outputdir: c{str}
-
-        @param debuglog: defaults to logger C{"ltl_yacc_log"}.
-        @type debuglog: C{logging.Logger}
+        Default table module is `self.tabmodule`.
+        Default logger is `YACC_LOGGER`
         """
+        if tabmodule is None:
+            tabmodule = self.tabmodule
         if debug and debuglog is None:
             debuglog = logging.getLogger(YACC_LOGGER)
-        self.lexer.build(debug=debug)
         self.parser = ply.yacc.yacc(
+            method='LALR',
             module=self,
+            start=self.start,
             tabmodule=tabmodule,
             outputdir=outputdir,
-            write_tables=True,
-            start=self.start,
+            write_tables=write_tables,
             debug=debug,
             debuglog=debuglog)
 
@@ -341,6 +329,24 @@ def parse(formula):
 
 
 if __name__ == '__main__':
-    s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
-    parsed_formula = parse(s)
-    print('Parsing result: {s}'.format(s=parsed_formula))
+    h = logging.FileHandler('log.txt', mode='w')
+    h.setLevel(logging.DEBUG)
+    log = logging.getLogger(YACC_LOGGER)
+    log.setLevel(logging.DEBUG)
+    log.addHandler(h)
+    import os
+    tabmodule = TABMODULE.split('.')[-1]
+    outputdir = './'
+    tablepy = tabmodule + '.py'
+    tablepyc = tabmodule + '.pyc'
+    try:
+        os.remove(tablepy)
+    except:
+        print('no "{t}" found'.format(t=tablepy))
+    try:
+        os.remove(tablepyc)
+    except:
+        print('no "{t}" found'.format(t=tablepyc))
+    parser = Parser()
+    parser.build(tabmodule, outputdir=outputdir,
+                 write_tables=True, debug=True)

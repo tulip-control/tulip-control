@@ -245,10 +245,10 @@ if perform_setup:
         import tulip.spec.lexyacc
         tabmodule = tulip.spec.lexyacc.TABMODULE.split('.')[-1]
         outputdir = 'tulip/spec'
-
         parser = tulip.spec.lexyacc.Parser()
-        parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
-                                debuglog=logger)
+        parser.build(tabmodule, outputdir=outputdir,
+                     write_tables=True,
+                     debug=True, debuglog=logger)
 
         plytable_build_failed = False
     except Exception as e:
