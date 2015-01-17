@@ -89,7 +89,7 @@ class Tree(nx.MultiDiGraph):
                 self.add_edge(u, v, key=i)
                 self._recurse(v)
         else:
-            raise Exception('unknown node type')
+            raise Exception('unknown node type: {u}'.format(u=u))
         return u
 
     def to_recursive_ast(self, u=None):
