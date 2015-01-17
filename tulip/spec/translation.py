@@ -131,7 +131,8 @@ def make_smv_nodes():
 
 
 def make_python_nodes():
-    opmap = {'!': 'not', '&': 'and', '|': 'or',
+    opmap = {'True': 'True', 'False': 'False',
+             '!': 'not', '&': 'and', '|': 'or',
              '^': '^', '=': '==', '!=': '!=',
              '<': '<', '<': '<', '>=': '>=', '>': '>',
              '+': '+', '-': '-'}
