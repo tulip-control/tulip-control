@@ -294,8 +294,11 @@ class GRSpec(LTL):
     instantiation.
     """
 
-    def __init__(self, env_vars=None, sys_vars=None, env_init='', sys_init='',
-                 env_safety='', sys_safety='', env_prog='', sys_prog=''):
+    def __init__(self, env_vars=None, sys_vars=None,
+                 env_init='', sys_init='',
+                 env_safety='', sys_safety='',
+                 env_prog='', sys_prog='',
+                 parser=parser):
         """Instantiate a GRSpec object.
 
         Instantiating GRSpec without arguments results in an empty
@@ -316,6 +319,7 @@ class GRSpec(LTL):
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
+        self.parser = parser
         self._ast = dict()
         self._cache = {
             'string': dict(),
@@ -685,7 +689,7 @@ class GRSpec(LTL):
                     logger.debug(str(x) + ' is already in cache')
                     continue
                 logger.debug('parse: ' + str(x))
-                tree = parser.parse(x)
+                tree = self.parser.parse(x)
                 g = tx.Tree.from_recursive_ast(tree)
                 tx.check_for_undefined_identifiers(g, vardoms)
                 self._ast[x] = tree
