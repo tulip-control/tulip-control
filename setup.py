@@ -243,8 +243,7 @@ if perform_setup:
     # Build PLY table, to be installed as tulip package data
     try:
         import tulip.spec.lexyacc
-
-        tabmodule = 'parsetab'
+        tabmodule = tulip.spec.lexyacc.TABMODULE.split('.')[-1]
         outputdir = 'tulip/spec'
 
         parser = tulip.spec.lexyacc.Parser()
