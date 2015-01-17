@@ -60,8 +60,8 @@ class Lexer(object):
         'G': 'ALWAYS',
         'F': 'EVENTUALLY',
         'U': 'UNTIL',
-        'R': 'RELEASE'}
-
+        'W': 'WEAK_UNTIL',
+        'V': 'RELEASE'}
     values = {'next': 'X'}
     delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
 
