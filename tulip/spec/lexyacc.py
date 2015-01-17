@@ -177,13 +177,13 @@ class Parser(object):
     # lowest to highest
     # closely follows `spin.y`
     precedence = (
-    	('left', 'UNTIL', 'RELEASE'),
         ('left', 'BIMP'),
         ('left', 'IMP'),
         ('left', 'XOR'),
         ('left', 'OR'),
         ('left', 'AND'),
         ('left', 'ALWAYS', 'EVENTUALLY'),
+        ('left', 'UNTIL', 'WEAK_UNTIL', 'RELEASE'),
         ('left', 'EQUALS', 'NEQUALS'),
         ('left', 'LT', 'LE', 'GT', 'GE'),
         ('left', 'PLUS', 'MINUS'),

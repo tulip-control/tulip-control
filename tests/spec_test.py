@@ -29,14 +29,13 @@ def full_name_operators_test():
         'ALwaYs EvenTUAlly(p)': '( G ( F p ) )',
         ('(p and q) UNtIl (q or ((p -> w) and '
          'not (z implies b))) and always next g'):
-        ('( ( p & q ) U ( ( q | ( ( p -> w ) & '
-         '( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )')}
+        ('( ( ( p & q ) U ( q | ( ( p -> w ) & '
+         '( ! ( z -> b ) ) ) ) ) & ( G ( X g ) ) )')}
 
     for f, correct in formulas.iteritems():
         tree = parse(f, full_operators=True)
-        print(tree)
         # g.write('hehe.png')
-        assert tree.flatten() == correct
+        assert tree.flatten() == correct, tree.flatten()
 
 
 def test_ast_nodes():
