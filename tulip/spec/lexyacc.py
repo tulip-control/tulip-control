@@ -42,7 +42,7 @@ import ply.yacc
 import tulip.spec.ast
 
 
-TABMODULE = 'tulip.spec.parsetab'
+TABMODULE = 'tulip.spec.ltl_parsetab'
 LEX_LOGGER = 'tulip.ltl_lex_log'
 YACC_LOGGER = 'tulip.ltl_yacc_log'
 PARSER_LOGGER = 'tulip.ltl_parser_log'
