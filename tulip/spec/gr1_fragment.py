@@ -205,6 +205,7 @@ def split_gr1(f):
         `'init', 'G', 'GF'`
     @rtype: `dict` of `str`: `list` of `str`
     """
+    # TODO: preprocess by applying syntactic identities: [][] = [] etc
     try:
         f + 's'
         t = parser.parse(f)

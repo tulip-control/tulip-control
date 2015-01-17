@@ -64,7 +64,6 @@ class Lexer(object):
         'V': 'RELEASE'}
     values = {'next': 'X'}
     delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
-
     operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
@@ -161,7 +160,6 @@ class Lexer(object):
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(LEX_LOGGER)
-
         self.lexer = ply.lex.lex(
             module=self,
             debug=debug,
