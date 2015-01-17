@@ -54,7 +54,7 @@ class Lexer(object):
 
     reserved = {
         'next': 'NEXT',
-        'X': 'XNEXT',
+        'X': 'NEXT',
         'false': 'FALSE',
         'true': 'TRUE',
         'G': 'ALWAYS',
@@ -62,6 +62,7 @@ class Lexer(object):
         'U': 'UNTIL',
         'R': 'RELEASE'}
 
+    values = {'next': 'X'}
     delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
 
     operators = [
@@ -75,11 +76,12 @@ class Lexer(object):
         # for setting the logger, call build explicitly
         self.tokens = (
             self.delimiters + self.operators +
-            self.misc + self.reserved.values())
+            self.misc + list(set(self.reserved.values())))
         self.build(debug=debug)
 
     def t_NAME(self, t):
         r'[A-Za-z_][A-za-z0-9._:]*'
+        t.value = self.values.get(t.value, t.value)
         t.type = self.reserved.get(t.value, 'NAME')
         # special treatment
         if t.value.lower() in {'false', 'true'}:
@@ -171,8 +173,7 @@ class Parser(object):
     """Production rules to build LTL parser."""
 
     tabmodule = TABMODULE
-    start = 'expression'
-
+    start = 'expr'
     # lowest to highest
     precedence = (
         ('right', 'UNTIL', 'RELEASE'),
@@ -238,77 +239,75 @@ class Parser(object):
             raise Exception('failed to parse:\n\t{f}'.format(f=formula))
         return root
 
-    def p_arithmetic(self, p):
-        """expression : expression TIMES expression
-                      | expression DIV expression
-                      | expression PLUS expression
-                      | expression MINUS expression
+    def p_nullary_connective(self, p):
+        """expr : TRUE
+                | FALSE
         """
-        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
+        p[0] = self.ast.Bool(p[1])
 
-    def p_comparator(self, p):
-        """expression : expression EQUALS expression
-                      | expression NEQUALS expression
-                      | expression LT expression
-                      | expression LE expression
-                      | expression GT expression
-                      | expression GE expression
-        """
-        p[0] = self.ast.Comparator(p[2], p[1], p[3])
-
-    def p_binary(self, p):
-        """expression : expression AND expression
-                      | expression OR expression
-                      | expression XOR expression
-                      | expression IMP expression
-                      | expression BIMP expression
-                      | expression UNTIL expression
-                      | expression RELEASE expression
-        """
-        p[0] = self.ast.Binary(p[2], p[1], p[3])
-
-    def p_unary(self, p):
-        """expression : NOT expression
-                      | ALWAYS expression
-                      | EVENTUALLY expression
+    def p_unary_connective(self, p):
+        """expr : NOT expr
+                | ALWAYS expr
+                | EVENTUALLY expr
+                | NEXT expr
         """
         p[0] = self.ast.Unary(p[1], p[2])
 
-    def p_prefix_next(self, p):
-        """expression : NEXT expression
-                      | XNEXT expression
-        """
-        p[0] = self.ast.Unary('X', p[2])
-
+    # both function and connective
     def p_postfix_next(self, p):
-        """expression : expression PRIME"""
+        """expr : expr PRIME"""
         p[0] = self.ast.Unary('X', p[1])
 
-    def p_group(self, p):
-        """expression : LPAREN expression RPAREN"""
+    def p_binary_connective(self, p):
+        """expr : expr AND expr
+                | expr OR expr
+                | expr XOR expr
+                | expr IMP expr
+                | expr BIMP expr
+                | expr UNTIL expr
+                | expr WEAK_UNTIL expr
+                | expr RELEASE expr
+        """
+        p[0] = self.ast.Binary(p[2], p[1], p[3])
+
+    def p_binary_predicate(self, p):
+        """expr : expr EQUALS expr
+                | expr NEQUALS expr
+                | expr LT expr
+                | expr LE expr
+                | expr GT expr
+                | expr GE expr
+        """
+        p[0] = self.ast.Comparator(p[2], p[1], p[3])
+
+
+    def p_binary_function(self, p):
+        """expr : expr TIMES expr
+                | expr DIV expr
+                | expr PLUS expr
+                | expr MINUS expr
+        """
+        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
+
+    def p_paren(self, p):
+        """expr : LPAREN expr RPAREN"""
         p[0] = p[2]
+
+    def p_var(self, p):
+        """expr : NAME"""
+        p[0] = self.ast.Var(p[1])
 
     def p_number(self, p):
         """expression : NUMBER"""
         p[0] = self.ast.Num(p[1])
 
     def p_negative_number(self, p):
-        """expression : MINUS NUMBER %prec UMINUS"""
+        """expr : MINUS NUMBER %prec UMINUS"""
         p[0] = self.ast.Num('-' + p[2])
 
-    def p_expression_name(self, p):
-        """expression : NAME"""
-        p[0] = self.ast.Var(p[1])
-
-    def p_expression_str(self, p):
-        """expression : DQUOTES NAME DQUOTES"""
+    def p_string(self, p):
+        """expr : DQUOTES NAME DQUOTES"""
         p[0] = self.ast.Str(p[2])
-
-    def p_bool(self, p):
-        """expression : TRUE
-                      | FALSE
-        """
-        p[0] = self.ast.Bool(p[1])
 
     def p_error(self, p):
         s = list()
