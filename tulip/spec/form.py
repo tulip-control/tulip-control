@@ -600,16 +600,22 @@ class GRSpec(LTL):
         @return: python expression compiled for C{eval}
         @rtype: C{code}
         """
-        clauses = self.env_init + self.sys_init
-        if no_str:
-            clauses = [self._bool_int[x] for x in clauses]
-        logger.info('clauses to compile: ' + str(clauses))
-        c = [ts.translate_ast(self.ast(x), 'python').flatten()
-             for x in clauses]
-        logger.info('after translation to python: ' + str(c))
-        s = _conj(c, op='and')
-        if not s:
-            s = 'True'
+        init = {'env': self.env_init, 'sys': self.sys_init}
+        pyinit = dict()
+        for side, clauses in init.iteritems():
+            if no_str:
+                clauses = [self._bool_int[x] for x in clauses]
+            logger.info('clauses to compile: ' + str(clauses))
+            c = [ts.translate_ast(self.ast(x), 'python').flatten()
+                 for x in clauses]
+            logger.info('after translation to python: ' + str(c))
+            s = _conj(c, op='and')
+            if not s:
+                s = 'True'
+            pyinit[side] = s
+        s = 'not ({assumption})'.format(
+            assumption=pyinit['env'],
+            assertion=pyinit['sys'])
         return compile(s, '<string>', 'eval')
 
     def str_to_int(self):
