@@ -189,7 +189,7 @@ class Parser(object):
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIV'),
         ('right', 'NOT', 'UMINUS'),
-        ('right', 'NEXT', 'XNEXT'),
+        ('right', 'NEXT'),
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE'))
 
