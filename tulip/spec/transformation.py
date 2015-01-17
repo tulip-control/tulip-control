@@ -333,10 +333,10 @@ def pair_node_to_var(tree, c):
                 break
     p, q = tree.successors_iter(c)
     v = p if q == old else q
-    # go down until var found
+    # go down until terminal found
     # assuming correct syntax for gr1c
     while True:
-        if v.type == 'var':
+        if not tree.succ.get(v):
             break
         v = next(iter(tree.successors_iter(v)))
     # now: b, is the operator and: v, the variable
