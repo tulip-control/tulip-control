@@ -604,6 +604,7 @@ class GRSpec(LTL):
         @return: python expression compiled for C{eval}
         @rtype: C{code}
         """
+        self.str_to_int()
         init = {'env': self.env_init, 'sys': self.sys_init}
         pyinit = dict()
         for side, clauses in init.iteritems():

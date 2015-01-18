@@ -1226,7 +1226,6 @@ def strategy2mealy(A, spec):
     except:
         logger.warn('strategy has no states.')
     # to store tuples of dict values for fast search
-    spec.str_to_int()
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
     init_valuations = set()
