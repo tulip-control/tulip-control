@@ -371,6 +371,26 @@ class GRSpec(LTL):
                      input_variables=self.env_vars,
                      output_variables=self.sys_vars)
 
+    def __repr__(self):
+        args = (',\n\n'.join([
+                'env_vars={ev}',
+                'sys_vars={sv}',
+                'env_init={ei}',
+                'sys_init={si}',
+                'env_safety={es}',
+                'sys_safety={ss},',
+                'env_prog={ep}',
+                'sys_prog={sp}']).format(
+                ev=repr(self.env_vars),
+                sv=repr(self.sys_vars),
+                ei=repr(self.env_init),
+                si=repr(self.sys_init),
+                es=repr(self.env_safety),
+                ss=repr(self.sys_safety),
+                ep=repr(self.env_prog),
+                sp=repr(self.sys_prog)))
+        return '{cls}({args})'.format(cls=type(self).__name__, args=args)
+
     def __str__(self):
         return self.to_canon()
 
