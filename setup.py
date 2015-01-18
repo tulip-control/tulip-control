@@ -285,6 +285,7 @@ if perform_setup:
         author = 'Caltech Control and Dynamical Systems',
         author_email = 'tulip@tulip-control.org',
         url = 'http://tulip-control.org',
+        bugtrack_url='http://github.com/tulip-control/tulip-control/issues',
         license = 'BSD',
         requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx'],
         install_requires = [
