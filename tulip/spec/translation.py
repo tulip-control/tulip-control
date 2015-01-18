@@ -96,6 +96,7 @@ def make_gr1c_nodes(opmap=None):
         def flatten(self, *arg, **kw):
             if self.operator == 'X':
                 kw.update(prime=True)
+                return self.operands[0].flatten(*arg, **kw)
             return super(Unary, self).flatten(*arg, **kw)
 
     nodes.Var = Var
