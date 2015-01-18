@@ -638,7 +638,7 @@ class GRSpec(LTL):
             if not s:
                 s = 'True'
             pyinit[side] = s
-        s = 'not ({assumption})'.format(
+        s = 'not ({assumption}) or ({assertion})'.format(
             assumption=pyinit['env'],
             assertion=pyinit['sys'])
         return compile(s, '<string>', 'eval')
