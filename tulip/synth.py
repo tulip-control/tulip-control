@@ -1264,7 +1264,7 @@ def strategy2mealy(A, spec):
 def _int2str(label, str_vars):
     """Replace integers with string values for string variables.
 
-    @param: mapping from variable names, to integer (as strings)
+    @param label: mapping from variable names, to integer (as strings)
     @type label: C{dict}
 
     @param str_vars: mapping that defines those variables that

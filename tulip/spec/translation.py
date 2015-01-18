@@ -262,8 +262,6 @@ def _gr1c_str(s, name='SYSGOAL', prefix='[]<>'):
 
 def _to_slugs(d):
     """Return structured slugs spec.
-
-    @type spec: L{GRSpec}.
     """
     f = _slugs_str
     return (
@@ -306,13 +304,19 @@ to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs}
 
 
 def translate(spec, lang):
-    """Return str in tool format.
+    """Return str or tuple in tool format.
+
+    Consult the respective documentation in L{tulip.interfaces}
+    concerning formats and links to further reading.
 
     @type spec: L{GRSpec}
     @type lang: 'gr1c' or 'slugs' or 'jtlv'
 
-    @return: spec formatted for input to tool
-    @rtype: C{str}
+    @return: spec formatted for input to tool; the type of the return
+    value depends on the tool:
+
+        - C{str} if gr1c or slugs
+        - (assumption, guarantee), where each element of the tuple is C{str}
     """
     spec.str_to_int()
     # pprint.pprint(spec._bool_int)
