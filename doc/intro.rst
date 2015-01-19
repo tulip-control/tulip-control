@@ -23,6 +23,12 @@ in LTL.
 The approach used by TuLiP is outlined in the figure below:
 
 .. image:: approach.png
+   :alt: Block diagram of the flow from a system model and specification to
+         continuous and discrete parts of a constructed controller. Between
+         these inputs and outputs, several blocks are grouped together
+         indicating various kinds of routines and objects in TuLiP:
+         proposition-preserving partition, continuous state space
+         discretization, finite transition system, and synthesis.
 
 The procedure that we used is broken down into three primary steps:
 
