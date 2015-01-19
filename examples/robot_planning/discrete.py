@@ -13,6 +13,12 @@ transition system.
 # strings of the form @label@ are used for this purpose.
 #
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
+logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
+logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG - 3)
+
 # @import_section@
 # Import the packages that we need
 from tulip import transys, spec, synth
@@ -38,7 +44,7 @@ from tulip import transys, spec, synth
 
 # @system_dynamics_section@
 # Create a finite transition system
-sys = transys.FTS()          
+sys = transys.FTS()
 
 # Define the states of the system
 sys.states.add_from(['X0', 'X1', 'X2', 'X3', 'X4', 'X5'])
@@ -80,13 +86,13 @@ env_prog = '!park'
 env_safe = set()                # empty set
 # @environ_section_end@
 
-# 
+#
 # System specification
 #
 # The system specification is that the robot should repeatedly revisit
 # the upper right corner of the grid while at the same time responding
 # to the park signal by visiting the lower left corner.  The LTL
-# specification is given by 
+# specification is given by
 #
 #     []<> home && [](park -> <>lot)
 #
@@ -100,11 +106,11 @@ env_safe = set()                # empty set
 # @specs_setup_section@
 # Augment the system description to make it GR(1)
 #! TODO: create a function to convert this type of spec automatically
-sys_vars = {'X0reach'}          # infer the rest from TS 
-sys_init = {'X0reach'}          
+sys_vars = {'X0reach'}          # infer the rest from TS
+sys_init = {'X0reach'}
 sys_prog = {'home'}             # []<>home
 sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
-sys_prog |= {'X0reach'} 
+sys_prog |= {'X0reach'}
 # @specs_setup_section_end@
 
 # @specs_create_section@

@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -43,21 +43,19 @@ Use the logging module to throttle verbosity.
 """
 import logging
 logger = logging.getLogger(__name__)
-
 import copy
 import os
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
-
 import networkx as nx
+from tulip.spec import GRSpec, translate
 
-from tulip.spec import GRSpec
 
-GR1C_BIN_PREFIX=""
+GR1C_BIN_PREFIX = ""
 _hl = 60 * '-'
-
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
+
 
 def _untaglist(x, cast_f=float,
                namespace=DEFAULT_NAMESPACE):
@@ -201,10 +199,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         ns_prefix+"env_vars"), get_order=True)
     (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
         ns_prefix+"sys_vars"), get_order=True)
-    
+
     env_vars = _parse_vars(env_vars, env_vardict)
     sys_vars = _parse_vars(sys_vars, sys_vardict)
-    
+
     s_elem = elem.find(ns_prefix+"spec")
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
@@ -223,7 +221,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         mach = None
         return (spec, mach)
-        
+
     # Assume version 1 of tulipcon XML
     if aut_elem.attrib["type"] != "basic":
         raise ValueError("Automaton class only recognizes type \"basic\".")
@@ -261,9 +259,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             logger.warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
             continue
         id_list.append(this_id)
-        
+
         logger.info('loaded from gr1c result:\n\t' +str(this_state) )
-        
+
         A.add_node(this_id, state=copy.copy(this_state),
                    mode=mode, rgrad=rgrad)
         for next_node in this_child_list:
@@ -305,15 +303,15 @@ def check_syntax(spec_str):
     f = tempfile.TemporaryFile()
     f.write(spec_str)
     f.seek(0)
-    
+
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    
+
     logger.debug('gr1c returncode: ' + str(p.returncode) )
     logger.debug('gr1c stdout: ' + p.stdout.read() )
-    
+
     if p.returncode == 0:
         return True
     else:
@@ -328,23 +326,23 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     @return: True if realizable, False if not, or an error occurs.
     """
     logger.info('checking realizability...')
-    
+
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
                          "interpretation (init_option)")
-
+    s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
-    f.write(spec.to_gr1c())
+    f.write(s)
     f.seek(0)
     logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    
-    logger.info('gr1c input:\n' + spec.to_gr1c() +_hl)
-    
+
+    logger.info('gr1c input:\n' + s +_hl)
+
     if p.returncode == 0:
         return True
     else:
@@ -408,10 +406,10 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
             raise Exception('gr1c not found in path.')
         else:
             raise
-    
-    s = spec.to_gr1c()
+
+    s = translate(spec, 'gr1c')
     logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-    
+
     # to make debugging by manually running gr1c easier
     fname = 'spec.gr1c'
     try:
@@ -421,16 +419,16 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
             logger.debug('wrote input to file "{f}"'.format(f=fname))
     except:
         logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
-    
+
     (stdoutdata, stderrdata) = p.communicate(s)
-    
+
     msg = (
         ('{spaces} gr1c return code: {c}\n\n'
          '{spaces} gr1c stdout, stderr:\n {out}\n\n').format(
              c=p.returncode, out=stdoutdata, spaces=30 * ' '
         )
     )
-    
+
     if p.returncode == 0:
         logger.debug(msg)
         strategy = load_aut_xml(stdoutdata)
@@ -441,16 +439,16 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
 def load_mealy(filename):
     """Load C{gr1c} strategy from C{xml} file.
-    
+
     @param filename: xml file name
     @type filename: C{str}
-    
+
     @return: loaded strategy as an annotated graph.
     @rtype: C{networkx.Digraph}
     """
     s = open(filename, 'r').read()
     strategy = load_aut_xml(s)
-    
+
     logger.debug(
         'Loaded strategy with nodes: \n' + str(strategy.nodes()) +
         '\nand edges: \n' + str(strategy.edges())

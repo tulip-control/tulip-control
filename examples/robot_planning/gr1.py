@@ -34,6 +34,8 @@ We must convert this specification into GR(1) form:
   env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Import the packages that we need
 from tulip import spec, synth
@@ -56,7 +58,7 @@ env_prog = '!park'              # []<>(!park)
 #
 # The system specification describes how the system is allowed to move
 # and what the system is required to do in response to an environmental
-# action.  
+# action.
 #
 sys_vars = {'X0', 'X1', 'X2', 'X3', 'X4', 'X5'}
 sys_init = {'X0'}
@@ -69,17 +71,17 @@ sys_safe = {
     'X5 -> X (X4 || X2)',
 }
 
-sys_safe |= spec.mutex({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})
+sys_safe.add(synth.exactly_one({'X0', 'X1', 'X2', 'X3', 'X4', 'X5'})[0])
 
 sys_prog = set()                # empty set
 
-# 
+#
 # System specification
 #
 # The system specification is that the robot should repeatedly revisit
 # the upper right corner of the grid while at the same time responding
 # to the park signal by visiting the lower left corner.  The LTL
-# specification is given by 
+# specification is given by
 #
 #     []<> X5 && [](park -> <>X0)
 #

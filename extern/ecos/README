@@ -1,0 +1,14 @@
+This directory is a landing point for ECOS (https://github.com/embotech/ecos).
+
+The shell script get.sh, in this same directory, automatically obtains and
+patches the appropriate release.  If it fails, then please manually attempt the
+commands listed therein.  Should small modifications be necessary, the key
+points are to obtain the version of ecos consistent with the following
+
+  Repository: https://github.com/embotech/ecos.git
+  Commit: cb4056369ecd6008b2cb0445ca680770911863e1
+
+  download address: https://github.com/embotech/ecos/archive/v1.0.4.tar.gz
+  md5 checksum: 9846bfa7817d3669f3c9269bf5567811
+
+and add -fPIC to CFLAGS in ecos.mk.

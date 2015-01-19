@@ -45,3 +45,32 @@ Version 1.0 of TuLiP represents a major overhaul of the structure of the
 code to allow better support for integration with other tools and adding
 functionality.  Code and examples for version 0.x of TuLiP are not
 compatible with version 1.0+ and must be rewritten from scratch.
+
+Other sources of documentation
+------------------------------
+
+You are currently reading the User's Guide.  There is also API documentation,
+which provides details about the various classes, methods, etc. in TuLiP.  This
+can be accessed using the standard `pydoc
+<https://docs.python.org/2.7/library/pydoc.html>`_ tool.  E.g., ::
+
+  pydoc tulip
+
+The API documentation is also available through a richer interface that
+includes, among other things, hyperlinks and inheritance diagrams.  It is
+generated using `Epydoc <http://epydoc.sourceforge.net/>`_ and can be built from
+the ``doc`` directory in the TuLiP sources::
+
+  make api
+
+Built copies for the most recent release of TuLiP are available online at:
+
+* http://tulip-control.sourceforge.net/doc/
+* http://tulip-control.sourceforge.net/api-doc/
+
+Getting help
+------------
+
+* Visit the `#tulip-control <https://webchat.freenode.net/?channels=tulip-control>`_ channel of the `freenode <http://freenode.net/>`_ IRC network.
+* Contact project members at tulip@tulip-control.org.
+* Possible bug reports and feature requests can be made by `opening an issue <https://github.com/tulip-control/tulip-control/issues>`_ on `the project site at GitHub <https://github.com/tulip-control/tulip-control/>`_
