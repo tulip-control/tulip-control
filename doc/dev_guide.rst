@@ -123,6 +123,8 @@ Further reading, of general interest:
   <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
   Hutterer (28 Dec 2009).
 
+- `Google Python Style Guide <https://google-styleguide.googlecode.com/svn/trunk/pyguide.html>`_
+
 - Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide <https://www.kernel.org/doc/Documentation/CodingStyle>`_
 
 - `The Power of 10: Rules for Developing Safety-Critical Code <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
