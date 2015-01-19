@@ -4,6 +4,8 @@ Developer's Guide
 The purpose of this page is to provide guidelines for contributors to the TuLiP
 project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_ and the `tulip-control-discuss mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_ (members only).
 
+.. _sec:code-style-guidelines:
+
 Organization and Rules
 ----------------------
 
@@ -86,7 +88,8 @@ Advice
 
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
-committers.
+committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
+entirely ignored.
 
 - Keep function length to a minimum.
 	As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_, `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_ included the rule that no function should be longer than 75 lines of code.
