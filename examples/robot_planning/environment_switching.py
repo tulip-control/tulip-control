@@ -25,7 +25,7 @@ from scipy import sparse as sp
 # Environment switched system with 2 modes:
 ###########################################
 
-sys_swe = transys.OpenFTS()
+sys_swe = transys.FTS()
 
 # We assume robots ability to transition between cells depends on the surface
 # characteristics which could be slippery or normal. This is controlled by the

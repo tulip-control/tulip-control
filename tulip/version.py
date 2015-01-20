@@ -32,10 +32,9 @@
 """
 tulip package version
 """
-version_info = (1, 1, 'a')
+version_info = (1, 2, 0)
 
-version = '.'.join([str(x) for x in version_info[:2] ])
-version += version_info[2]
+version = '.'.join([str(x) for x in version_info])
 
 
 # Append annotation to version string to indicate development versions.

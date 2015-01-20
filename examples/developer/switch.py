@@ -12,7 +12,7 @@ from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
 
-sys_swe = transys.OpenFTS()
+sys_swe = transys.FTS()
 sys_swe.env_actions.add_from({'sun','rain'})
 
 # Environment actions are mutually exclusive.

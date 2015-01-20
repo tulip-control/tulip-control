@@ -1,5 +1,4 @@
-# Copyright (c) 2011, 2012, 2013, 2014 by California Institute of Technology
-# and 2014 The Regents of the University of Michigan
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,6 +37,8 @@ See Also
 ========
 L{find_controller}
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -51,18 +52,20 @@ import numpy as np
 from scipy import sparse as sp
 import polytope as pc
 
+from polytope.plot import plot_partition, plot_transition_arrow
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
-from tulip.abstract.prop2partition import PropPreservingPartition, pwa_partition, part2convex
-from tulip.abstract.feasible import is_feasible, solve_feasible
-from tulip.abstract.plot import plot_ts_on_partition
-from tulip.abstract import prop2partition as p2p
 
-try:
-    import matplotlib.pyplot as plt
-except Exception, e:
-    plt = None
-    logger.error(e)
+from .prop2partition import (PropPreservingPartition,
+                             pwa_partition, part2convex, 
+                             find_equilibria, prop2part
+                             )
+from .feasible import is_feasible, solve_feasible
+from .plot import plot_ts_on_partition
+
+# inline imports:
+#
+# inline: import matplotlib.pyplot as plt
 
 debug = False
 
@@ -204,7 +207,7 @@ class AbstractPwa(object):
           Each state corresponds to a Region in C{ppp.regions}.
           It can be fed into discrete synthesis algorithms.
 
-          type: L{transys.OpenFTS}
+          type: L{FTS}
 
       - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
           Has common indices with C{ppp.regions}.
@@ -428,46 +431,51 @@ class AbstractPwa(object):
             else:
                 logger.info('correct transition: ' + msg)
 
-class AbstractModeSwitched(AbstractSwitched):
+class AbstractModeOnlySwitched(AbstractSwitched):# MS Added
     """Abstraction of SwitchedSysDyn, with mode-specific and common info.
     
-    The key difference between AbstractSwitched and AbstractModeSwitched
-    is that the plot function is different. AbstractModeSwitched, creates
+    The key difference between AbstractSwitched and AbstractModeOnlySwitched
+    is that the plot function is different. AbstractModeOnlySwitched, creates
     a plot from a partition where transitions sometimes go outside the 
-    domain. This allows for that and shows these transitions. 
+    domain. This allows for that and shows these transitions. It also
+    includes a progress map
 
     Attributes:
     
       - ppp: merged partition, if any
           Preserves both propositions and dynamics
     
-      - ts: common TS, if any
+      - ts: common Augmented Fintite TS, if any
       
       - ppp2ts: map from C{ppp.regions} to C{ts.states}
+           In this case, its a list of states, since each region is
+           a state
       
       - modes: list of modes
+
+      - prog_map: progress map of the transition system
       
     """
     def __init__(
-        self, ppp=None, ts=None, ppp2ts=None,
-        modes=None
+        self, ppp=None, ts=None, modes=None,
         ):
         if modes is None:
             modes = dict()
         
         self.ppp = ppp
         self.ts = ts
-        self.ppp2ts = ppp2ts
+        self.ppp2ts = ts.states
         self.modes = modes
+        self.prog_map = ts.progress_map
     
     def __str__(self):
-        s = 'Abstraction of switched system\n'
-        s += str('common PPP:\n') + str(self.ppp)
+        s = '\nAbstraction of Mode Only Switched system\n'
+        s += str('common PPP:\n') + str(self.ppp) +'\n\n'
         s += str('common ts:\n') + str(self.ts)
         
         for mode in self.modes:
-            s += 'mode: ' + str(mode)
-        
+            s += 'mode: ' + str(mode) +'\n'
+        s+='\n'
         return s
 
     def plot(self, show_ts=False, only_adjacent=False):
@@ -482,7 +490,7 @@ class AbstractModeSwitched(AbstractSwitched):
         bounds=self.ppp.domain.b
         xlim=bounds[0]
         ylim=bounds[1]
-        out=[box2poly([[xlim,xlim+1],[ylim,ylim+1]])]
+        out=[pc.box2poly([[xlim,xlim+1],[ylim,ylim+1]])]
         self.ppp.regions.append(pc.Region(out))
 
         axs = []
@@ -522,6 +530,7 @@ def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
     )
+    
     #ax = self.ts.plot()
     
     return ax
@@ -655,19 +664,17 @@ def discretize(
     
     # init graphics
     if plotit:
-        # here to avoid loading matplotlib unless requested
         try:
-            from plot import plot_partition, plot_transition_arrow
-        except Exception, e:
-            logger.error(e)
-            plot_partition = None
-        
-        if plt is not None:
+            import matplotlib.pyplot as plt
+            
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
             ax2.axis('scaled')
-            file_extension = 'png'
+            file_extension = 'pdf'
+        except:
+            logger.error('failed to import matplotlib')
+            plt = None
         
     iter_count = 0
     
@@ -947,7 +954,7 @@ def discretize(
         # no plotting ?
         if not plotit:
             continue
-        if plot_partition is None:
+        if plt is None or plot_partition is None:
             continue
         if iter_count % plot_every != 0:
             continue
@@ -1003,15 +1010,13 @@ def discretize(
         tmp_part.compute_adj()
     
     # Generate transition system and add transitions       
-    ofts = trs.OpenFTS()
+    ofts = trs.FTS()
     
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
     ofts_states = range(n)
-    ofts_states = trs.prepend_with(ofts_states, 's')
     
-    # add set to destroy ordering
-    ofts.states.add_from(set(ofts_states) )
+    ofts.states.add_from(ofts_states)
     
     ofts.transitions.add_adj(adj, ofts_states)
     
@@ -1040,7 +1045,7 @@ def discretize(
     print(msg)
     logger.info(msg)
     
-    if plt is not None and save_img:
+    if save_img and plt is not None:
         fig, ax = plt.subplots(1, 1)
         plt.plot(progress)
         ax.set_xlabel('iteration')
@@ -1333,13 +1338,12 @@ def discretize_switched(
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
-    try:
-        import matplotlib
-    except:
-        warnings.warn('could not import matplotlib, no partitions plotted.')
+    axs = swab.plot(show_ts, only_adjacent)
+    
+    if not axs:
+        logger.error('failed to plot the partitions.')
         return
     
-    axs = swab.plot(show_ts, only_adjacent)
     n = len(swab.modes)
     #assert(len(axs) == 2*n)
     
@@ -1378,11 +1382,11 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     
     logger.info('APs: ' + str(aps))
     
-    sys_ts = trs.OpenFTS()
+    sys_ts = trs.FTS()
     
     # create stats
     n = len(merged_abstr.ppp)
-    states = ['s'+str(i) for i in xrange(n) ]
+    states = range(n)
     sys_ts.states.add_from(states)
     
     sys_ts.atomic_propositions.add_from(aps)
@@ -1692,7 +1696,7 @@ def merge_partition_pair(
             
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
-            ap_label_2 = ab2.ts.states['s'+str(j)]['ap']
+            ap_label_2 = ab2.ts.states[j]['ap']
             
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
@@ -1712,7 +1716,7 @@ def merge_partition_pair(
     
     return new_list, parents, ap_labeling
 
-def create_prog_map(modes, ppp):
+def create_prog_map(modes, ppp):# MS Added
     """ Creates a progress group map for a proposition preserving partition
 
     A progress group map for a mode is a set of tuples that contains the 
@@ -1742,7 +1746,36 @@ def create_prog_map(modes, ppp):
 
     return prog_map
 
-def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):
+def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):# MS Added
+    """ Find the possible post areas for a given state
+    """
+    if list_extp_d==None:
+        for m in range(len(ppp_region.list_poly)):
+            extp=pc.extreme(ppp_region.list_poly[m])
+            j=1
+            post_extp_N=extp
+            while j <=N:
+                 post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T
+                 j+=1
+            post_area_hull=pc.qhull(post_extp_N)
+    else:
+        list_post_extp_d =[]
+        extp=pc.extreme(ppp_region.list_poly[0])
+        for m in range(0, len(list_extp_d)):
+            post_extp_N=extp
+            j=1
+            while j<= N:
+                 post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+np.dot(list_extp_d[m], sys_dyn.E.T)
+                 j+=1
+            list_post_extp_d.append(post_extp_N)
+            if m==0:
+                post_extp_n = list_post_extp_d[m]
+            else:
+                post_extp_n=np.vstack([post_extp_n, list_post_extp_d[m]])
+        post_area_hull=pc.qhull(post_extp_n)
+    return post_area_hull
+
+def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):# MS Added
     """Find the possible transitions between states in a system
 
     @param ppp: Partitioned State Space 
@@ -1760,39 +1793,101 @@ def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):
     Warning: Running this in parrallel with glpk as a solver is unstable. 
     Please use MOSEK in this case for accuracy
     """
-    list_post_area={}
     list_extp_d=pc.extreme(sys_dyn.Wset)
     transitions = np.zeros([len(ppp.regions),(len(ppp.regions)+1)], dtype = int)
-    if list_extp_d==None:
-        for i in range(0,len(ppp.regions)):
-            list_post_area[i]=[]
-            p_current=ppp.regions[i]
-            for m in range(len(ppp.regions[i].list_poly)):
-                extp=pc.extreme(p_current.list_poly[m])
-                j=1
-                post_extp_N=extp
-                while j <=N:
-                     post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T
-                     j+=1
-                post_area_hull=pc.qhull(post_extp_N)
-                list_post_area[i].append(post_area_hull)
-
-                for k in range(0,len(ppp.regions)):
-                    inters_region=pc.intersect(list_post_area[i][m],ppp.regions[k])
-                    if (pc.is_empty(inters_region)== False and i!=k):
-                        trans=1
-                    else:
-                        trans=0
-                    transitions[i,k]=trans
-
-                inters=pc.mldivide(post_area_hull,ppp.domain)
-                if pc.is_empty(inters)== False:
-                    transend=1
+    
+    for i in range(0,len(ppp.regions)):
+            post_area=get_postarea(ppp.regions[i],sys_dyn,list_extp_d)
+            for k in range(0,len(ppp.regions)):
+                inters_region=pc.intersect(post_area,ppp.regions[k])
+                if (pc.is_empty(inters_region)== False and i!=k):
+                    trans=1
                 else:
-                    transend=0
-                transitions[i,len(ppp.regions)]=transend
+                    trans=0
+                transitions[i,k]=trans
+
+            inters=pc.mldivide(post_area,ppp.domain)
+            if pc.is_empty(inters)== False:
+                transend=1
+            else:
+                transend=0
+            transitions[i,len(ppp.regions)]=transend
 
     return transitions
+
+def create_afts(owner, ssd, cont_props, ref_grid, prog_map, trans):# MS Added
+
+    cnt=0
+    afts=trs.AFTS()
+    afts.owner=owner
+    actions_per_mode= {
+                (e,s):{'env_actions':str(e), 'sys_actions':str(s)}
+                for e,s in ssd.modes
+                }
+    for mode in ssd.modes:
+        r,c=trans[mode].shape
+        trans[mode]=np.vstack((trans[mode],np.zeros((1,c))))
+        trans[mode][c-1][c-1]=1 
+        adj=sp.lil_matrix(trans[mode])
+        if cnt==0:
+            afts_states = range(adj.shape[0]-1)
+            afts_states = trs.prepend_with(afts_states, 's')
+            afts_states.append('sOut')
+            afts.states.add_from(set(afts_states))
+            afts.atomic_propositions.add_from(set(cont_props))
+            afts.states.initial.add('s0')
+            afts.set_progress_map(prog_map)
+            for (i, state) in enumerate(afts_states):
+                props=set()
+                if i==c-1:
+                    props=set(['OUTSIDE'])
+                else:
+                    for p in ref_grid[i].props:
+                        if p in cont_props:
+                            props|={p}
+                afts.states[state]['ap'] = props
+            cnt=1
+
+        afts.env_actions.add_from([str(e) for e,s in ssd.modes])
+        afts.sys_actions.add_from([str(s) for e,s in ssd.modes])
+        afts.transitions.add_adj(adj=adj,adj2states=afts_states,**actions_per_mode[mode])
+    return afts
+
+def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
+                                visualize=False,eps=0.1, is_convex=True,
+                                N=1,abs_tol=1e-7):# MS Added
+    cont_dyn={}
+    outside_props=set() #MS is outside_props needed?
+    trans={}
+    cont_state_space=ssd.cts_ss
+    find_equilibria(ssd=ssd,cont_props=cont_props,outside_props=outside_props,eps=0.4)
+    cont_part = prop2part(cont_state_space, cont_props)
+    plot_partition(cont_part, show=visualize)
+    if is_convex:
+        cont_part, new2old = part2convex(cont_part)
+        print "Convexify DONE!!"
+        plot_partition(cont_part, show=visualize)
+
+    if grid_size==-1.:
+        ref_grid=cont_part
+    else:
+        ref_grid=add_grid(ppp=cont_part, grid_size=grid_size)
+    plot_partition(ref_grid, show=visualize)
+    
+    prog_map=create_prog_map(ssd.modes,ref_grid)
+
+    for mode in ssd.modes:
+        cont_dyn = ssd.dynamics[mode].list_subsys[0]
+        trans[mode] = get_postarea_transitions(ref_grid,cont_dyn)
+    
+    afts=create_afts(owner=owner,ssd=ssd,cont_props=cont_props,ref_grid=ref_grid,
+        prog_map=prog_map, trans=trans)
+
+    abstMOS=AbstractModeOnlySwitched(ppp=ref_grid,ts=afts,modes=ssd.modes)
+    if visualize:
+        plot_mode_partitions(abstMOS, show_ts=True, only_adjacent=False)
+    return abstMOS
+   
 
 def multiproc_posttrans(q,mode,i,ref_grid,cont_dyn,N=1,abs_tol=1e-7):
     """Accessorry function 2 to enable parallelization of posttrans

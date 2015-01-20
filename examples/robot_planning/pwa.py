@@ -20,7 +20,7 @@ from polytope import box2poly
 from tulip.abstract import prop2part, discretize
 from tulip.abstract.plot import plot_strategy
 
-plotting = False
+plotting = True
 
 # Problem parameters
 input_bound = 0.4
@@ -39,7 +39,7 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 # different parts of the surface can be modeled
 # using LtiSysDyn subsystems subsys0 and subsys1.
 #
-# Togetger they comprise a Piecewise Affine System:
+# Together they comprise a Piecewise Affine System:
 
 # @subsystem0@
 def subsys0():
@@ -86,6 +86,8 @@ subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
 sys_dyn = PwaSysDyn(subsystems, cont_state_space)
+ax = sys_dyn.plot()
+ax.figure.savefig('pwa_sys_dyn.pdf')
 # @pwasystem_end@
 
 # Continuous proposition
@@ -96,11 +98,19 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 # Compute the proposition preserving partition
 # of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
+ax = cont_partition.plot()
+cont_partition.plot_props(ax=ax)
+ax.figure.savefig('spec_ppp.pdf')
+
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
-    N=8, min_cell_volume=0.1, plotit=plotting,
+    N=8, min_cell_volume=0.1, plotit=plotting, save_img=True,
     cont_props=cont_props
 )
+ax = disc_dynamics.plot(show_ts=True)
+ax.figure.savefig('abs_pwa.pdf')
+
+disc_dynamics.ts.save('ts.pdf')
 
 # Specifications
 

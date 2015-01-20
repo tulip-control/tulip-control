@@ -2,22 +2,38 @@ This ``contrib`` directory is a place for things that are not a part of TuLiP
 per se but are still closely dependent and generally useful.  Their versions (if
 given) are entirely independent of TuLiP.  Below is a summary of contents.
 
-macports
-  packaging via MacPorts <http://www.macports.org/>
-
-readdstar.py, spin2dstar.py
-  interfacing with LTL2DSTAR <http://ltl2dstar.de/>.  These may later be
-  incorporated into TuLiP, in particular the tulip.spec subpackage.
-
 AES
   specification generation for an electric power system.  Consult AES/README.
 
-matlab
+fmu
+  routines to export a TuLiP controller as a Functional Mock-up Unit (FMU).
+
+logging
+  JSON file containing a default logging configuration and an example using it.
+
+macports
+  packaging via MacPorts <http://www.macports.org/>
+
+matlabsim
   files required to export controllers to Simulink blocks and a couple examples
   for reference.  Consult matlab/README.
+
+mptmodels
+  functions for exporting [MPT](http://people.ee.ethz.ch/~mpt/3/) dynamic models
+  to matlab ``mat`` files and then importing those to ``tulip`` data structures.
 
 nessainstall
   instructions for installing TuLiP on a big computer at Caltech but likely
   useful for similar settings, in particular in which there are old versions of
   system software, where only SSH access is available, and on a non-superuser
   account.  Consult nessainstall/README.md.
+
+parity games
+  experimental implementation of algorithms for solving parity games.
+
+readdstar.py, spin2dstar.py
+  interfacing with LTL2DSTAR <http://ltl2dstar.de/>.  These may later be
+  incorporated into TuLiP, in particular the tulip.spec subpackage.
+
+xml
+  functions for dumping/loading tulip data structures to/from XML.

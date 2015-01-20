@@ -1,5 +1,4 @@
-# Copyright (c) 2011 - 2014 by California Institute of Technology
-# and 2014 The Regents of the University of Michigan
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,6 +33,8 @@
 """ 
 Proposition preserving partition module.
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -43,14 +44,13 @@ import copy
 import numpy as np
 from scipy import sparse as sp
 import polytope as pc
+from polytope.plot import plot_partition
 
-from .plot import plot_partition
+from tulip import transys as trs
 
-try:
-    import matplotlib as mpl
-except Exception, e:
-    logger.error(e)
-    mpl = None
+# inline imports:
+#
+# from tulip.graphics import newax
 
 _hl = 40 * '-'
 
@@ -426,7 +426,7 @@ def product_interval(list1, list2):
             new_list.append(list1[m]+list2[n])
     return new_list
 
-def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
+def find_equilibria(ssd,cont_props,outside_props,eps=0.1): # MS Added
     """ Finds the polytope that contains the equilibrium points
 
     @param ssd: The dynamics of the switched system
@@ -439,10 +439,6 @@ def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
     @param outside_props: The set of names of atomic propositions 
     that are beyond the domain (i.e. 'OUTSIDE')
     @type outside_props: set()
-
-    @param eq_props: The set of names of atomic propositions 
-    where equilibrium points for a mode can be found
-    @type eq_props: set()
 
     @param eps: The value by which the width of all polytopes
     containing equilibrium points is increased.
@@ -471,57 +467,50 @@ def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
         return A,B
 
     cont_ss=ssd.cts_ss
+    min_outx=cont_ss.b[0]
+    min_outy=cont_ss.b[1]
+    max_outx=min_outx+1
+    max_outy=min_outy+1
+    abs_tol=1e-7
+
     for mode in ssd.modes:
         cont_dyn=ssd.dynamics[mode].list_subsys[0]
         A=cont_dyn.A
         K=cont_dyn.K.T[0]
-        #cont_ss.b=np.array([cont_ss.b]).T
         I=np.eye(len(A),dtype=float)
         rank_IA=np.linalg.matrix_rank(I-A)
         concat=np.hstack((I-A,K.reshape(len(A),1)))
         rank_concat=np.linalg.matrix_rank(concat)
         soln=pc.Polytope()
         props_sym='eqpnt_'+str(mode[1])
-        eq_props|={props_sym}
 
         if (rank_IA==rank_concat):
             if (rank_IA==len(A)):
                 equil=np.dot(np.linalg.inv(I-A),K)
-                print "Equilibrium Points: "+str(mode)
-                print equil
-                print "---------------------------------"
                 if (equil[0]>=(-cont_ss.b[2]) and equil[0]<=cont_ss.b[0] 
                         and equil[1]>=(-cont_ss.b[3]) 
                         and equil[1]<=cont_ss.b[1]):
                     delta=equil/100
-                    soln=box2poly([[equil[0]-delta[0], equil[0]+delta[0]],
+                    soln=pc.box2poly([[equil[0]-delta[0], equil[0]+delta[0]],
                         [equil[1]-delta[1], equil[1]+delta[1]]]) 
                 else:
-                    soln=box2poly([[24.,25.],[24.,25.]])
+                    soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
                     outside_props|={props_sym}
             elif (rank_IA<len(A)):
-                #eps=abs(min(np.amin(K),np.amin(I-A)))
-                #eps=0.0005
-                eps=0.2
                 if eps==0:
                     eps=abs(min(np.amin(-K),np.amin(A-I)))
                 IAn,Kn = normalize(I-A,K)
                 soln=pc.Polytope(np.vstack((IAn,-IAn)), 
                         np.hstack((Kn+eps,-Kn+eps)))
 
-                print "First soln: "+str(mode)
-                print soln
-                print "---------------------------------"
                 relevantsoln=pc.intersect(soln,cont_ss,abs_tol)
                 if pc.is_empty(relevantsoln):
                     print "Intersect "+str(mode)+" is empty"
                 else:
                     print "Intersect "+str(mode)+" is not empty - good job!!"
-                print relevantsoln
-                print "---------------------------------"
 
                 if(pc.is_empty(relevantsoln) & ~pc.is_empty(soln)):
-                    soln=box2poly([[24.,25.],[24.,25.]])
+                    soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
                     outside_props|={props_sym}
                 else:
                     soln=relevantsoln
@@ -529,13 +518,10 @@ def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
         else:
             #Assuming trajectories go to infinity as there are no 
             #equilibrium points
-            soln=box2poly([[24.,25.],[24.,25.]])
+            soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
             outside_props|={props_sym}
             print str(mode)+" trajectories go to infinity! No solution"
 
-        print "Normalized soln: "+str(mode)
-        print soln
-        print "---------------------------------"
         cont_props[props_sym]=soln
 
 ################################
@@ -702,25 +688,26 @@ class PropPreservingPartition(pc.MetricPartition):
     
     def plot(
         self, trans=None, ppp2trans=None, only_adjacent=False,
-        ax=None, plot_numbers=True, color_seed=None,
-        show=False
+        ax=None, plot_numbers=True, color_seed=None
     ):
-        """For details see plot.plot_partition.
+        """For details see C{polytope.plot.plot_partition}.
         """
         return plot_partition(
             self, trans, ppp2trans, only_adjacent,
-            ax, plot_numbers, color_seed, show
+            ax, plot_numbers, color_seed
         )
     
-    def plot_props(self, ax=None):
+    def plot_props(self, ax=None, text_color='yellow'):
         """Plot labeled regions of continuous propositions.
         """
-        if mpl is None:
-            warnings.warn('No matplotlib')
+        try:
+            from tulip.graphics import newax
+        except:
+            logger.error('failed to import graphics')
             return
         
         if ax is None:
-            ax = mpl.pyplot.subplot(111)
+            ax, fig = newax()
         
         l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
@@ -730,7 +717,7 @@ class PropPreservingPartition(pc.MetricPartition):
             isect_poly = poly.intersect(self.domain)
             
             isect_poly.plot(ax, color='none', hatch='/')
-            isect_poly.text(prop, ax, color='yellow')
+            isect_poly.text(prop, ax, color=text_color)
         return ax
 
 class PPP(PropPreservingPartition):
@@ -740,3 +727,38 @@ class PPP(PropPreservingPartition):
     """
     def __init__(self, **args):
         PropPreservingPartition.__init__(self, **args)
+
+def ppp2ts(part):
+    """Derive transition system from proposition preserving partition.
+    
+    @param part: labeled polytopic partition from
+        which to derive the transition system
+    @type part: L{PropPreservingPartition}
+    
+    @return: C{(ts, state_map)}
+        finite transition system labeled with propositions
+        from the given partition, and map of
+        polytope indices to transition system states.
+        
+    @rtype: (L{transys.FTS}, \C{dict})
+    """
+    # generate transition system and add transitions       
+    ofts = trs.FTS()
+    
+    adj = part.adj #sp.lil_matrix
+    n = adj.shape[0]
+    ofts_states = range(n)
+    ofts_states = trs.prepend_with(ofts_states, 's')
+    
+    ofts.states.add_from(ofts_states)
+    
+    ofts.transitions.add_adj(adj, ofts_states)
+    
+    # decorate TS with state labels
+    atomic_propositions = set(part.prop_regions)
+    ofts.atomic_propositions.add_from(atomic_propositions)
+    for state, region in zip(ofts_states, part.regions):
+        state_prop = region.props.copy()
+        ofts.states.add(state, ap=state_prop)
+    
+    return (ofts, ofts_states)
