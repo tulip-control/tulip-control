@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # import pprint
 import re
 from tulip.spec import ast
+import tulip.spec.form
 
 
 def make_jtlv_nodes():
@@ -318,6 +319,8 @@ def translate(spec, lang):
         - C{str} if gr1c or slugs
         - (assumption, guarantee), where each element of the tuple is C{str}
     """
+    if not isinstance(spec, tulip.spec.form.GRSpec):
+        raise TypeError('translate requires first argument (spec) to be of type GRSpec')
     spec.str_to_int()
     # pprint.pprint(spec._bool_int)
     d = {p: [translate_ast(spec.ast(spec._bool_int[x]), lang).flatten(
