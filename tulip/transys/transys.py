@@ -35,11 +35,6 @@ import logging
 logger = logging.getLogger(__name__)
 from collections import Iterable
 from pprint import pformat
-try:
-    import natsort
-except ImportError:
-    logger.error('failed to import natsort')
-    natsort = None
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
@@ -99,7 +94,7 @@ class KripkeStructure(LabeledDiGraph):
             'Atomic Propositions (APs):\n\t' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self, sort=True) + 2 * '\n' +
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Transitions:\n' +
@@ -388,7 +383,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
-        sort = True
         isopen = (
             ('sys' and any({'env' in x for x in self.actions})) or
             ('env' and any({'sys' in x for x in self.actions})))
@@ -402,7 +396,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'Atomic Propositions (APs):\n' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self, sort=sort) + 2 * '\n' +
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n')
 
@@ -423,11 +417,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                     ' (will cause you errors later)'
                     ', with possible values:\n\t' +
                     pformat(codomain, indent=3) + 2 * '\n')
-        if sort and natsort is not None:
-            edges = self.edges(data=True)
-            edges = natsort.natsorted(edges)
-        else:
-            edges = self.edges_iter(data=True)
+        edges = self.edges_iter(data=True)
         edges_str = pformat(edges, indent=3)
 
         s += (
@@ -698,15 +688,12 @@ def add_initial_states(ts, ap_labels):
         ts.states.initial |= new_init_states
 
 
-def _dumps_states(g, sort):
+def _dumps_states(g):
     """Dump string of transition system states.
 
     @type g: L{FTS}
     """
-    if sort and natsort is not None:
-        nodes = natsort.natsorted(g)
-    else:
-        nodes = g
+    nodes = g
     a = []
     for u in nodes:
         s = '\t State: {u}, AP: {ap}\n'.format(
