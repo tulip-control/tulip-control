@@ -104,6 +104,9 @@ swab = abstract.multiproc_discretize_switched(
     plot=True, show_ts=True
 )
 print(swab)
+axs = swab.plot(show_ts=True)
+for i, ax in enumerate(axs):
+    ax.figure.savefig('swab_' + str(i) + '.pdf')
 
 #ax = sys_ts.ts.plot()
 

@@ -13,7 +13,7 @@ import os
 ###########################################
 # (see notes below.)
 
-GR1C_MIN_VERSION = (0,7,4)
+GR1C_MIN_VERSION = (0,9,0)
 def check_gr1c():
     try:
         v_str = subprocess.check_output(["gr1c", "-V"])
@@ -37,7 +37,7 @@ def check_gr1c():
 
 def check_java():
     try:
-        subprocess.check_output(['java', '-help'])
+        subprocess.check_output(['java', '-help'], stderr=subprocess.STDOUT)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             return False
@@ -122,13 +122,13 @@ optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
 
 def retrieve_git_info():
     """Return commit hash of HEAD, or "release", or None if failure.
-    
+
     If the git command fails, then return None.
 
     If HEAD has tag with prefix "tulip-" or "vM" where M is an
     integer, then return 'release'.
     Tags with such names are regarded as version or release tags.
-    
+
     Otherwise, return the commit hash as str.
     """
     # Is Git installed?
@@ -242,15 +242,15 @@ if check_deps:
 if perform_setup:
     # Build PLY table, to be installed as tulip package data
     try:
-        import tulip.spec.plyparser
-        
+        import tulip.spec.lexyacc
+
         tabmodule = 'parsetab'
         outputdir = 'tulip/spec'
-        
-        parser = tulip.spec.plyparser.Parser()
+
+        parser = tulip.spec.lexyacc.Parser()
         parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
                                 debuglog=logger)
-        
+
         plytable_build_failed = False
     except Exception as e:
         logger.debug('Failed to build PLY tables: {e}'.format(e=e))

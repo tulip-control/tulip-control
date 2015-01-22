@@ -4,6 +4,8 @@ Developer's Guide
 The purpose of this page is to provide guidelines for contributors to the TuLiP
 project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_ and the `tulip-control-discuss mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_ (members only).
 
+.. _sec:code-style-guidelines:
+
 Organization and Rules
 ----------------------
 
@@ -64,23 +66,21 @@ be followed:
 Version naming
 --------------
 
-(Copied verbatim from an email sent by Richard Murray on the TuLiP-discuss mailing list on 17 May 2011.)
-
-For version numbers, the style I like is N.mx where
+For version numbers, the style is N.m.x where
 
 * N = major version; everything that worked before could break
 * m = revision; most functions should work, but might need (minor) modifications
 * x = minor revision; code that ran should continue running
 
-So, if you go from version 1.2c to 1.2d, then no interfaces should
-change, code should continue to run, etc.  If you go from 1.2d to
-1.3a, then there might be changes in some arguments lists or other
+So, if you go from version 1.2.2 to 1.2.3, then no interfaces should
+change, code should continue to run, etc.  If you go from 1.2.3 to
+1.3.0, then there might be changes in some arguments lists or other
 small things, but previous functionality still in place (somewhow).
-If you go from 1.3a to 2.0a, then we can make whatever changes we
+If you go from 1.3.0 to 2.0.0, then we can make whatever changes we
 want.
 
-None of these version numbers would go in individual files, but would
-be a label for the entire package.
+None of these version numbers go in individual files, but
+the version number is a label for the entire package.
 
 
 Advice
@@ -88,7 +88,8 @@ Advice
 
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
-committers.
+committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
+entirely ignored.
 
 - Keep function length to a minimum.
 	As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_, `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_ included the rule that no function should be longer than 75 lines of code.
@@ -114,13 +115,15 @@ committers.
 	e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis (pyflakes) checked).
 .. advice for emacs users ?
 
-- Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.  Avoid `this <https://github.com/mdipierro/gluino/blob/master/gluino/dal.py>`_.
+- Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.
 
 Further reading, of general interest:
 
 - "`On commit messages
   <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
   Hutterer (28 Dec 2009).
+
+- `Google Python Style Guide <https://google-styleguide.googlecode.com/svn/trunk/pyguide.html>`_
 
 - Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide <https://www.kernel.org/doc/Documentation/CodingStyle>`_
 

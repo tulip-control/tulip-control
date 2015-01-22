@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-""" 
+"""
 Interface to the JTLV implementation of GR(1) synthesis
 
 Relevant links:
@@ -37,13 +37,14 @@ Relevant links:
 """
 import logging
 logger = logging.getLogger(__name__)
-
-import os, re, subprocess, tempfile
+import os
+import re
+import subprocess
+import tempfile
 import warnings
-
 import networkx as nx
+from tulip.spec import translation
 
-from tulip.spec import form
 
 JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
 JTLV_EXE = 'jtlv_grgame.jar'
@@ -76,7 +77,7 @@ def solve_game(
 
     Return True if realizable, False if not, or an error occurs.
     Automaton is extracted for file names by fAUT, unless priority_kind == -1
-    
+
 
     @type spec: L{GRSpec}
     @param fSMV, fLTL, fAUT: file name for use with JTLV.  This
@@ -107,14 +108,14 @@ def solve_game(
             - 0 - The system has to be able to handle all
                 the possible initial system
                 states specified on the guarantee side of the specification.
-                
+
             - 1 (default) - The system can choose its initial state,
                 in response to the initial
                 environment state. For each initial environment state,
                 the resulting automaton contains
                 exactly one initial system state,
                 starting from which the system can satisfy the specification.
-                
+
             - 2 - The system can choose its initial state,
                 in response to the initial environment state.
                 For each initial environment state, the resulting
@@ -122,7 +123,7 @@ def solve_game(
                 starting from which the system can satisfy the specification.
     """
     priority_kind = get_priority(priority_kind)
-    
+
     # init_option
     if (isinstance(init_option, int)):
         if (init_option < 0 or init_option > 2):
@@ -132,11 +133,10 @@ def solve_game(
         warnings.warn("Unknown init_option. Setting it to the default (1)")
         init_option = 1
 
-    
     call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option)
-    
+
     realizable = False
-    
+
     f = open(fAUT, 'r')
     for line in f:
         if ("Specification is realizable" in line):
@@ -145,7 +145,7 @@ def solve_game(
         elif ("Specification is unrealizable" in line):
             realizable = False
             break
-        
+
     if (realizable and priority_kind > 0):
         print("\nAutomaton successfully synthesized.\n")
     elif (priority_kind > 0):
@@ -161,7 +161,7 @@ def synthesize(
     """Synthesize a strategy satisfying the specification.
 
     Arguments are described in documentation for L{solve_game}.
-    
+
     @return: Return strategy as instance of L{MealyMachine}, or a list
         of counter-examples as returned by L{get_counterexamples}.
     """
@@ -172,14 +172,14 @@ def synthesize(
 
     if realizable:
         logger.info('loading JTLV output...')
-    
+
         with open(fAUT, 'r') as f:
             lines = f.readlines()
-        
+
         logger.info('JTLV returned:\n' + '\n'.join(lines))
-        
+
         aut = jtlv_output_to_networkx(lines, spec)
-        
+
         os.unlink(fSMV)
         os.unlink(fLTL)
         os.unlink(fAUT)
@@ -190,18 +190,18 @@ def synthesize(
         os.unlink(fLTL)
         os.unlink(fAUT)
         return counter_examples
-        
+
 
 def create_files(spec):
     """Create temporary files for read/write by JTLV."""
     fSMV = tempfile.NamedTemporaryFile(delete=False, suffix='smv')
     fSMV.write(generate_jtlv_smv(spec))
     fSMV.close()
-    
+
     fLTL = tempfile.NamedTemporaryFile(delete=False, suffix="ltl")
     fLTL.write(generate_jtlv_ltl(spec))
     fLTL.close()
-    
+
     fAUT = tempfile.NamedTemporaryFile(delete=False)
     fAUT.close()
     return fSMV.name, fLTL.name, fAUT.name
@@ -234,16 +234,17 @@ def get_priority(priority_kind):
             priority_kind = 23
         else:
             warnings.warn('Unknown priority_kind.' +
-                'Setting it to the default (ZYX)')
+                          'Setting it to the default (ZYX)')
             priority_kind = 3
     elif isinstance(priority_kind, int):
-        if (priority_kind > 0 and priority_kind != 3 and
+        if (
+            priority_kind > 0 and priority_kind != 3 and
             priority_kind != 7 and priority_kind != 11 and
             priority_kind != 15 and priority_kind != 19 and
             priority_kind != 23
         ):
             warnings.warn("Unknown priority_kind." +
-                " Setting it to the default (ZYX)")
+                          " Setting it to the default (ZYX)")
             priority_kind = 3
     else:
         warnings.warn("Unknown priority_kind. Setting it to the default (ZYX)")
@@ -266,23 +267,23 @@ def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
 
     if JTLV_EXE:
         jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-        
+
         cmd = ['java', heap_size, '-jar', jtlv_grgame, fSMV, fLTL, fAUT,
                str(priority_kind), str(init_option)]
-        
+
         # debugging log
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug(jtlv_grgame)
             logger.debug(' '.join(cmd))
-            
+
             # besides dumping to debug logging stream,
             # also copy files to ease manual debugging
             import shutil
-            
+
             shutil.copyfile(fSMV, DEBUG_SMV_FILE)
             shutil.copyfile(fLTL, DEBUG_LTL_FILE)
             shutil.copyfile(fAUT, DEBUG_AUT_FILE)
-        
+
         try:
             subprocess.call(cmd)
         except OSError as e:
@@ -296,10 +297,10 @@ def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             a=os.path.join(JTLV_PATH, 'JTLV'),
             b=os.path.join(JTLV_PATH, "JTLV", 'jtlv-prompt1.4.1.jar')
         )
-        
+
         cmd = ['java', heap_size, '-cp', classpath, 'GRMain',
                fSMV, fLTL, fAUT, priority_kind, init_option]
-        
+
         logger.debug(' '.join(cmd))
         subprocess.call(cmd)
 
@@ -336,8 +337,8 @@ def generate_jtlv_smv(spec):
     # Define env vars
     env = []
     for var, dom in spec.env_vars.iteritems():
-        int_dom = form.convert_domain(dom)
-        
+        int_dom = translation.convert_domain(dom)
+
         env.append('\t\t{v} : {c};'.format(
             v=var, c=canon_to_jtlv_domain(int_dom)
         ))
@@ -345,19 +346,20 @@ def generate_jtlv_smv(spec):
     # Define sys vars
     sys = []
     for var, dom in spec.sys_vars.iteritems():
-        int_dom = form.convert_domain(dom)
-        
+        int_dom = translation.convert_domain(dom)
+
         sys.append('\t\t{v} : {c};'.format(
             v=var, c=canon_to_jtlv_domain(int_dom)
         ))
-    
+
     env_vars = '\n'.join(env)
     sys_vars = '\n'.join(sys)
-    
+
     smv = smv_template.format(env_vars=env_vars, sys_vars=sys_vars)
-    
+
     logger.debug('SMV file:\n' + smv)
     return smv
+
 
 smv_template = '''
 MODULE main
@@ -381,19 +383,20 @@ def generate_jtlv_ltl(spec):
 
     @type spec: L{GRSpec}
     """
-    a, g = spec.to_jtlv()
+    a, g = translation.translate(spec, 'jtlv')
 
     if not a:
         a = 'TRUE'
 
     if not g:
         g = 'TRUE'
-    
+
     ltl = ltl_template.format(a=a, g=g)
-    
+
     logger.debug('JTLV input formula:\n' + ltl)
-    
+
     return ltl
+
 
 ltl_template = '''
 LTLSPEC
@@ -407,61 +410,70 @@ LTLSPEC
 );
 '''
 
+
 def jtlv_output_to_networkx(lines, spec):
     """Return a graph after parsing JTLV's output.
 
     @param lines: as loaded from file
     @type lines: C{list} of C{str}
-    
+
     @type spec: L{GRSpec}
 
     @rtype: C{networkx.DiGraph}
     """
     logger.info('parsing jtlv output to create a graph...')
-    
+
     g = nx.DiGraph()
-    
-    varnames = set(spec.sys_vars)
+
+    varnames = dict(spec.sys_vars)
     varnames.update(spec.env_vars)
-    
-    g.env_vars = spec.env_vars.copy()
-    g.sys_vars = spec.sys_vars.copy()
-    
+
+    # g.env_vars = spec.env_vars.copy()
+    # g.sys_vars = spec.sys_vars.copy()
+
     for line in lines:
         # parse states
         if line.find('State ') >= 0:
             state_id = re.search('State (\d+)', line)
             state_id = int(state_id.group(1))
-            
+
             state = dict(re.findall('(\w+):(\w+)', line))
             for var, val in state.iteritems():
                 try:
                     state[var] = int(val)
                 except:
                     state[var] = val
-                
+
                 if varnames:
-                    if not var in varnames:
+                    if var not in varnames:
                         logger.error('Unknown variable "{var}"'.format(
                                      var=var))
-            
-            for var in varnames:
+
+            for var, dom in varnames.iteritems():
+                # singleton domain ?
+                if isinstance(dom, tuple):
+                    if dom[0] == dom[1]:
+                        state[var] = dom[0]
+                if isinstance(dom, list):
+                    if len(dom) == 1:
+                        state[var] = dom[0]
+                # still missing ?
                 if var not in state:
                     raise ValueError(
                         'Variable "{var}" not assigned in "{line}"'.format(
-                        var=var, line=line))
+                            var=var, line=line))
 
         # parse transitions
         if line.find('successors') >= 0:
             succ = [int(x) for x in re.findall(' (\d+)', line)]
-            
+
             g.add_node(state_id, state=state)
             g.add_edges_from([(state_id, v) for v in succ])
-    
+
     logger.info('done parsing jtlv output.\n')
     return g
-        
-        
+
+
 def get_counterexamples(aut_file):
     """Return a list of dictionaries, each representing a counter example.
 
@@ -491,8 +503,8 @@ def remove_comments(spec):
     speclines = spec.split('\n')
     newspec = ''
     for line in speclines:
-        if not '--' in line:
-            newspec+=line+'\n'
+        if '--' not in line:
+            newspec += line + '\n'
     return newspec
 
 
@@ -518,11 +530,12 @@ def check_vars(varNames):
 def check_spec(spec, varNames):
     """Verify that all non-operators in "spec" are in the list of vars."""
     # Replace all special characters with whitespace
-    special_characters = ["next(", "[]", "<>", "->", "&", "|", "!",  \
-      "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
+    special_characters = [
+        "next(", "[]", "<>", "->", "&", "|", "!",
+        "(", ")", "\n", "<", ">", "<=", ">=", "<->", "\t", "="]
     for word in special_characters:
         spec = spec.replace(word, "")
-        
+
     # Now, replace all variable names and values with whitespace as well.
     for value in varNames:
         if isinstance(value, (list, tuple)):
@@ -533,11 +546,11 @@ def check_spec(spec, varNames):
 
     # Remove all instances of "true" and "false"
     spec = spec.lower()
-        
+
     spec = spec.replace("true", "")
     spec = spec.replace("false", "")
 
     # Make sure that the resulting string is empty
     spec = spec.split()
-        
+
     return not spec

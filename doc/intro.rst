@@ -23,6 +23,12 @@ in LTL.
 The approach used by TuLiP is outlined in the figure below:
 
 .. image:: approach.png
+   :alt: Block diagram of the flow from a system model and specification to
+         continuous and discrete parts of a constructed controller. Between
+         these inputs and outputs, several blocks are grouped together
+         indicating various kinds of routines and objects in TuLiP:
+         proposition-preserving partition, continuous state space
+         discretization, finite transition system, and synthesis.
 
 The procedure that we used is broken down into three primary steps:
 
@@ -45,3 +51,32 @@ Version 1.0 of TuLiP represents a major overhaul of the structure of the
 code to allow better support for integration with other tools and adding
 functionality.  Code and examples for version 0.x of TuLiP are not
 compatible with version 1.0+ and must be rewritten from scratch.
+
+Other sources of documentation
+------------------------------
+
+You are currently reading the User's Guide.  There is also API documentation,
+which provides details about the various classes, methods, etc. in TuLiP.  This
+can be accessed using the standard `pydoc
+<https://docs.python.org/2.7/library/pydoc.html>`_ tool.  E.g., ::
+
+  pydoc tulip
+
+The API documentation is also available through a richer interface that
+includes, among other things, hyperlinks and inheritance diagrams.  It is
+generated using `Epydoc <http://epydoc.sourceforge.net/>`_ and can be built from
+the ``doc`` directory in the TuLiP sources::
+
+  make api
+
+Built copies for the most recent release of TuLiP are available online at:
+
+* http://tulip-control.sourceforge.net/doc/
+* http://tulip-control.sourceforge.net/api-doc/
+
+Getting help
+------------
+
+* Visit the `#tulip-control <https://webchat.freenode.net/?channels=tulip-control>`_ channel of the `freenode <http://freenode.net/>`_ IRC network.
+* Contact project members at tulip@tulip-control.org.
+* Possible bug reports and feature requests can be made by `opening an issue <https://github.com/tulip-control/tulip-control/issues>`_ on `the project site at GitHub <https://github.com/tulip-control/tulip-control/>`_

@@ -8,3 +8,4 @@ include README.rst
 include doc/*
 exclude doc/*.sh
 recursive-include contrib *
+recursive-include extern *
