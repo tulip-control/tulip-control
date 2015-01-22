@@ -103,6 +103,12 @@ class LTL(object):
 
         self.check_vars()
 
+    def __repr__(self):
+        return ('LTL(\'{f}\', input_variables={inputv}, ' +
+                'output_variables={outv})').format(f=self.formula,
+                                                   inputv=self.input_variables,
+                                                   outv=self.output_variables)
+
     def __str__(self):
         return str(self.formula)
 
