@@ -195,20 +195,3 @@ def _parse_label(s):
     """
     l = re.findall('(\w+)=(0|1)', s)
     return {k: bool(int(v)) for k, v in l}
-
-
-if __name__ == '__main__':
-    # f = '([]<>(!a)) -> ([](a -> <> b) & [](a -> !Xb))'
-    # f = '[]<>b'
-    # f = '[]<>b & []<>!b'
-    f = """
-    G(F(timer)) -> (G(fl -> (fl U timer)) &
-                  G(hl -> (hl U timer)) &
-                  G(car -> F(fl)) &
-                  G(F(hl)) &
-                  G(!(hl & fl)))
-    """
-    env_vars = {'timer': 'boolean', 'car': 'boolean'}
-    sys_vars = {'hl': 'boolean', 'fl': 'boolean'}
-    moore = synthesize(f, env_vars, sys_vars)
-    print(moore)
