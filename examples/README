@@ -1,6 +1,9 @@
-This directory contains some examples of the use of the TuLiP toolbox.  The
-following examples are included here:
+This directory contains some examples of the use of the TuLiP toolbox.
+Organization is by topic matter or relevant part of the API; summaries of
+subdirectories are given below.
 
 * robot_planning/ - simple motion planning examples
+
 * developer/ - various examples used during development, unstable directory
 * developer/transys/ - examples focusing on the tulip.transys subpackage
+* developer/interfaces/ - demonstrations of interfaces to tools outside Python
