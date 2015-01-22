@@ -1,4 +1,4 @@
-# Copyright (c) 2014 by California Institute of Technology
+# Copyright (c) 2014, 2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,9 @@ import re
 import subprocess
 
 import networkx as nx
+from tulip.spec.translation import translate, translate_ast
 from tulip.spec.parser import parse
+from tulip.spec.form import LTL, GRSpec
 from tulip.transys import MooreMachine
 
 
@@ -57,34 +59,45 @@ DOTFILE = 'ltl2vl-synthesis.dot'
 def synthesize(formula, env_vars=None, sys_vars=None):
     """Return Moore transducer if C{formula} is realizable.
 
-    Currently if variable definitions are missing,
-    an error will occur during AST flattening.
-
-    Variable C{dict}s have variable names as keys and
-    their type as value. The types should be 'boolean'.
+    Variable C{dict}s have variable names as keys and their type as
+    value. The types should be 'boolean'. These parameters are only
+    used if formula is of type C{str}. Else, the variable dictionaries
+    associated with the L{LTL} or L{GRSpec} object are used.
 
     @param formula: linear temporal logic formula
-    @type formula: C{str} or L{LTL}
+    @type formula: C{str}, L{LTL}, or L{GRSpec}
 
-    @param env_vars: uncontrolled variables (inputs)
-    @type env_vars: C{dict}
+    @param env_vars: uncontrolled variables (inputs); used only if
+        C{formula} is of type C{str}
+    @type env_vars: C{dict} or None
 
-    @param sys_vars: controlled variables (outputs)
-    @type sys_vars: C{dict}
+    @param sys_vars: controlled variables (outputs); used only if
+        C{formula} is of type C{str}
+    @type sys_vars: C{dict} or None
 
     @return: symbolic Moore transducer
         (guards are conjunctions, not sets)
     @rtype: L{MooreMachine}
     """
+    if isinstance(formula, GRSpec):
+        env_vars = formula.env_vars
+        sys_vars = formula.sys_vars
+    elif isinstance(formula, LTL):
+        env_vars = formula.input_variables
+        sys_vars = formula.output_variables
+
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
     if not all(v == 'boolean' for v in all_vars.itervalues()):
         raise TypeError(
             'all variables should be Boolean:\n{v}'.format(v=all_vars))
 
-    formula = str(formula)
-    tree = parse(formula)
-    f = tree.to_wring(all_vars=all_vars)
+    if isinstance(formula, GRSpec):
+        f = translate(formula, 'wring')
+    else:
+        T = parse(str(formula))
+        f = translate_ast(T, 'wring').flatten(env_vars=env_vars,
+                                              sys_vars=sys_vars)
 
     # dump partition file
     s = '.inputs {inp}\n.outputs {out}'.format(
@@ -96,18 +109,22 @@ def synthesize(formula, env_vars=None, sys_vars=None):
 
     # call lily
     try:
-        cmd = [LILY, '-f', f, '-syn', IO_PARTITION_FILE]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        out, err = p.communicate()
+        p = subprocess.Popen([LILY, '-f', f, '-syn', IO_PARTITION_FILE],
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        out = p.stdout.read()
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             raise Exception('lily.pl not found in path.')
         else:
             raise
 
-    if 'Formula is not realizable' in out:
+    dotf = open(DOTFILE, 'r')
+    fail_msg = 'Formula is not realizable'
+    if dotf.read(len(fail_msg)) == fail_msg:
         return None
-    g = nx.read_dot(DOTFILE)
+    dotf.seek(0)
+    g = nx.read_dot(dotf)
+    dotf.close()
     moore = lily_strategy2moore(g, env_vars, sys_vars)
     return moore
 
