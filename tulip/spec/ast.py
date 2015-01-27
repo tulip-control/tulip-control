@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,375 +29,267 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
+#
+"""Abstract syntax tree classes for LTL.
+
+Syntax taken originally roughly from:
+http://spot.lip6.fr/wiki/LtlSyntax
 """
-Abstract Syntax Tree classes for LTL,
+import logging
+logger = logging.getLogger(__name__)
+from abc import ABCMeta, abstractmethod
 
-supporting JTLV, SPIN, SMV, and gr1c syntax
 
-Syntax taken originally roughly from http://spot.lip6.fr/wiki/LtlSyntax
-"""
-TEMPORAL_OP_MAP = \
-        { "G" : "G", "F" : "F", "X" : "X",
-        "[]" : "G", "<>" : "F", "next" : "X",
-        "U" : "U", "V" : "R", "R" : "R", 
-          "'" : "X", "FALSE" : "False", "TRUE" : "True"}
+# prototype for flattening to a "canonical" string
+OPMAP = {
+    'False': 'False', 'True': 'True',
+    '!': '!',
+    '|': '|', '&': '&', '->': '->', '<->': '<->', '^': '^',
+    'X': 'X', 'G': 'G', 'F': 'F',
+    'U': 'U', 'V': 'R', 'R': 'R',
+    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!=',
+    '+': '+', '-': '-'  # linear arithmetic
+}
 
-JTLV_MAP = { "G" : "[]", "F" : "<>", "X" : "next",
-             "U" : "U", "||" : "||", "&&" : "&&",
-             "False" : "FALSE", "True" : "TRUE" }
+# this mapping is based on SPIN documentation:
+#   http://spinroot.com/spin/Man/ltl.html
+FULL_OPERATOR_NAMES = {
+    'next': 'X',
+    'always': '[]',
+    'eventually': '<>',
+    'until': 'U',
+    'stronguntil': 'U',
+    'weakuntil': 'W',
+    'unless': 'W',  # see Baier - Katoen
+    'release': 'V',
+    'implies': '->',
+    'equivalent': '<->',
+    'not': '!',
+    'and': '&&',
+    'or': '||',
+}
 
-GR1C_MAP = {"G" : "[]", "F" : "<>", "X" : "'", "||" : "|", "&&" : "&",
-            "False" : "False", "True" : "True"}
 
-SMV_MAP = { "G" : "G", "F" : "F", "X" : "X",
-        "U" : "U", "R" : "V" }
+def make_nodes(opmap=None):
+    """Return class with attributes the AST node classes.
 
-SPIN_MAP = { "G" : "[]", "F" : "<>", "U" : "U",
-        "R" : "V" }
-
-class LTLException(Exception):
-    pass
-
-def dump_dot(ast):
-    """Create Graphiz DOT string from given AST.
-
-    @param ast: L{ASTNode}, etc., that has a dump_dot() method; for
-        example, the return value of a successful call to L{parser}.
+    The tree is defined recursively,
+    not with a graph data structure.
+    L{Tree} is a graph data structure for that purpose.
     """
-    return "digraph AST {\n"+ast.dump_dot()+"}\n"
+    if opmap is None:
+        opmap = OPMAP
 
-# Flattener helpers
-def _flatten_gr1c(node, **args):
-    return node.to_gr1c(**args)
+    class Node(object):
+        """Base class for AST nodes."""
 
-def _flatten_JTLV(node):
-    return node.to_jtlv()
+        # Caution
+        # =======
+        # Do **NOT** implement C{__hash__}, because you
+        # will unintendently identify different AST nodes !
+        # Only leaf nodes can be safely identified.
+        #
+        # The default for user-defined classes is
+        # C{__hash__ == _}
+        __metaclass__ = ABCMeta
+        opmap = None
 
-def _flatten_SMV(node):
-    return node.to_smv()
+        @abstractmethod
+        def __init__(self):
+            pass
 
-def _flatten_Promela(node):
-    return node.to_promela()
+        @abstractmethod
+        def __repr__(self):
+            pass
 
-class ASTNode(object):
-    def __init__(self, s, l, t):
-        # t can be a list or a list of lists, handle both
-        try:
-            tok = sum(t.asList(), [])
-        except:
+        @abstractmethod
+        def flatten(self):
+            pass
+
+    Node.opmap = opmap
+
+    # Do not confuse "term" with the abbreviation of "terminal".
+    # A "term" in FOL can comprise of terminals,
+    # for example a function together with parentheses and its args.
+    class Terminal(Node):
+        """Terminal symbols of grammar.
+
+        Include:
+
+          - 0-ary function constants (numbers, strings)
+          - 0-ary function variables (integer or string variable)
+          - 0-ary connectives (Boolean constants)
+          - 0-ary predicate constants
+          - 0-ary predicate variables
+        """
+
+        def __init__(self, value):
+            if not isinstance(value, basestring):
+                raise TypeError(
+                    'value must be a string, got: {v}'.format(
+                        v=value))
+            self.value = value
+
+        def __repr__(self):
+            return '{t}({v})'.format(t=type(self).__name__,
+                                     v=repr(self.value))
+
+        def __str__(self, *arg, **kw):
+            # *arg accommodates "depth" arg of Operator.__str__
+            return self.value
+
+        def __len__(self):
+            """Return the number of operators and terminals.
+
+            Note that this definition differs from the
+            theoretical definition that a formula's length
+            is the number of operators it contains.
+            """
+            return 1
+
+        def __eq__(self, other):
+            return (isinstance(other, type(self)) and
+                    self.value == other.value)
+
+        def flatten(self, *arg, **kw):
+            return self.value
+
+    class Operator(Node):
+        """Takes a non-zero number of operands and returns a result.
+
+        Cases:
+
+          - function (arithmetic):
+              maps (terms)^n to terms
+          - predicate (relational operator):
+              maps (terms)^n to atomic formulas
+          - connective (logical operator):
+              maps (wff)^n to wff
+        """
+
+        def __init__(self, operator, *operands):
             try:
-                tok = t.asList()
-            except:
-                # not a ParseResult
-                tok = t
-        self.init(tok)
-    def to_gr1c(self, primed=False):
-        return self.flatten(_flatten_gr1c, primed=primed)
-    
-    def to_jtlv(self):
-        return self.flatten(_flatten_JTLV)
-    
-    def to_smv(self):
-        return self.flatten(_flatten_SMV)
-    
-    def to_promela(self):
-        return self.flatten(_flatten_Promela)
-    
-    def map(self, f):
-        n = self.__class__(None, None, [str(self.val)])
-        return f(n)
-    
-    def __len__(self):
-        return 1
-    
-class ASTNum(ASTNode):
-    def init(self, t):
-        self.val = int(t[0])
-    
-    def __repr__(self):
-        return str(self.val)
-    
-    def flatten(self, flattener=None, op=None, **args):
-        return str(self)
-    
-    def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
+                operator + 'a'
+            except TypeError:
+                raise TypeError(
+                    'operator must be string, got: {op}'.format(
+                        op=operator))
+            self.operator = operator
+            self.operands = list(operands)
 
-class ASTVar(ASTNode):
-    def init(self, t):
-        self.val = t[0]
-    
-    def __repr__(self):
-        return self.val
-    
-    def flatten(self, flattener=str, op=None, **args):
-        # just return variable name (quoted?)
-        return str(self)
-        
-    def to_gr1c(self, primed=False):
-        if primed:
-            return str(self)+"'"
-        else:
-            return str(self)
-        
-    def to_jtlv(self):
-        return "(" + str(self) + ")"
-        
-    def to_smv(self):
-        return str(self)
-        
-    def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
-        
-class ASTBool(ASTNode):
-    def init(self, t):
-        if t[0].upper() == "TRUE":
-            self.val = True
-        else:
-            self.val = False
-    
-    def __repr__(self):
-        if self.val:
-            return "True"
-        else:
-            return "False"
-    
-    def flatten(self, flattener=None, op=None, **args):
-        return str(self)
-    
-    def to_gr1c(self, primed=False):
-        try:
-            return GR1C_MAP[str(self)]
-        except KeyError:
-            raise LTLException(
-                "Reserved word \"" + self.op() +
-                "\" not supported in gr1c syntax map"
-            )
-    
-    def to_jtlv(self):
-        try:
-            return JTLV_MAP[str(self)]
-        except KeyError:
-            raise LTLException(
-                "Reserved word \"" + self.op() +
-                "\" not supported in JTLV syntax map"
-            )
-    
-    def dump_dot(self):
-        return str(id(self)) + "\n" + \
-               str(id(self)) + " [label=\"" + str(self.val) + "\"]\n"
+        # ''.join would be faster, but __repr__ is for debugging,
+        # not for flattening, so readability takes precedence
+        def __repr__(self):
+            return '{t}({op}, {xyz})'.format(
+                t=type(self).__name__,
+                op=repr(self.operator),
+                xyz=', '.join(repr(x) for x in self.operands))
 
-class ASTUnary(ASTNode):
-    @classmethod
-    def new(cls, op_node, operator=None):
-        return cls(None, None, [operator, op_node])
-    
-    def init(self, tok):
-        if tok[1] == "'":
-            if len(tok) > 2:
-                # handle left-associative chains, e.g. Y''
-                t = self.__class__(None, None, tok[:-1])
-                tok = [t, tok[-1]]
-            self.operand = tok[0]
-            self.operator = "X"
-        else:
-            self.operand = tok[1]
-            if isinstance(self, ASTUnTempOp):
-                self.operator = TEMPORAL_OP_MAP[tok[0]]
-    def __repr__(self):
-        return ' '.join(['(', self.op(), str(self.operand), ')'])
-    
-    def flatten(self, flattener=str, op=None, **args):
-        if op is None:
-            op = self.op()
-        try:
-            o = flattener(self.operand, **args)
-        except AttributeError:
-            o = str(self.operand)
-        return ' '.join(['(', op, o, ')'])
-    
-    def dump_dot(self):
-        return (str(id(self))+"\n"
-                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
-                + str(id(self))+" -> "+self.operand.dump_dot())
-    
-    def map(self, f):
-        n = self.__class__.new(self.operand.map(f), self.op())
-        return f(n)
-    
-    def __len__(self):
-        return 1 + len(self.operand)
+        # more readable recursive counterpart of __repr__
+        # depth allows limiting recursion to see a shallower view
+        def __str__(self, depth=None):
+            if depth is not None:
+                depth = depth - 1
+            if depth == 0:
+                return '...'
+            return '({op} {xyz})'.format(
+                op=self.operator,
+                xyz=' '.join(x.__str__(depth=depth)
+                             for x in self.operands))
 
-class ASTNot(ASTUnary):
-    def op(self):
-        return "!"
+        def __len__(self):
+            return 1 + sum(len(x) for x in self.operands)
 
-class ASTUnTempOp(ASTUnary):
-    def op(self):
-        return self.operator
-    
-    def to_promela(self):
-        try:
-            return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
-        except KeyError:
-            raise LTLException(
-                "Operator " + self.op() +
-                " not supported in Promela syntax map"
-            )
-    
-    def to_gr1c(self, primed=False):
-        if self.op() == "X":
-            return self.flatten(_flatten_gr1c, "", primed=True)
-        else:
-            try:
-                return self.flatten(
-                    _flatten_gr1c, GR1C_MAP[self.op()], primed=primed
-                )
-            except KeyError:
-                raise LTLException(
-                    "Operator " + self.op() +
-                    " not supported in gr1c syntax map"
-                )
-    
-    def to_jtlv(self):
-        try:
-            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
-        except KeyError:
-            raise LTLException(
-                "Operator " + self.op() +
-                " not supported in JTLV syntax map"
-            )
-    
-    def to_smv(self):
-        return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
+        def flatten(self, *arg, **kw):
+            return ' '.join([
+                '(',
+                self.opmap[self.operator],
+                ' '.join(x.flatten(*arg, **kw) for x in self.operands),
+                ')'])
 
-class ASTBinary(ASTNode):
-    @classmethod
-    def new(cls, op_l, op_r, operator=None):
-        return cls(None, None, [op_l, operator, op_r])
-    
-    def init(self, tok):
-        # handle left-associative chains e.g. x && y && z
-        if len(tok) > 3:
-            t = self.__class__(None, None, tok[:-2])
-            tok = [t, tok[-2], tok[-1]]
-        self.op_l = tok[0]
-        self.op_r = tok[2]
-        # generalise temporal operator
-        if isinstance(self, ASTBiTempOp):
-            self.operator = TEMPORAL_OP_MAP[tok[1]]
-        elif isinstance(self, ASTComparator) or isinstance(self, ASTArithmetic):
-            if tok[1] == "==":
-                self.operator = "="
-            else:
-                self.operator = tok[1]
-    def __repr__(self):
-        return ' '.join (['(', str(self.op_l), self.op(), str(self.op_r), ')'])
-    
-    def flatten(self, flattener=str, op=None, **args):
-        if not op: op = self.op()
-        try:
-            l = flattener(self.op_l, **args)
-        except AttributeError:
-            l = str(self.op_l)
-        try:
-            r = flattener(self.op_r, **args)
-        except AttributeError:
-            r = str(self.op_r)
-        return ' '.join (['(', l, op, r, ')'])
-    
-    def dump_dot(self):
-        return (str(id(self))+"\n"
-                + str(id(self))+" [label=\""+str(self.op())+"\"]\n"
-                + str(id(self))+" -> "+self.op_l.dump_dot()
-                + str(id(self))+" -> "+self.op_r.dump_dot())
-    
-    def map(self, f):
-        n = self.__class__.new(self.op_l.map(f), self.op_r.map(f), self.op())
-        return f(n)
-    
-    def __len__(self):
-        return 1 + len(self.op_l) + len(self.op_r)
+    # Distinguish operators by arity
+    class Unary(Operator):
+        pass
 
-class ASTAnd(ASTBinary):
-    def op(self):
-        return "&"
-    
-    def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, "&&")
-    
-    def to_promela(self):
-        return self.flatten(_flatten_Promela, "&&")
+    class Binary(Operator):
+        def flatten(self, *arg, **kw):
+            """Infix flattener for consistency with parser.
 
-class ASTOr(ASTBinary):
-    def op(self):
-        return "|"
-    
-    def to_jtlv(self):
-        return self.flatten(_flatten_JTLV, "||")
-    
-    def to_promela(self):
-        return self.flatten(_flatten_Promela, "||")
+            Override it if you want prefix or postfix.
+            """
+            return ' '.join([
+                '(',
+                self.operands[0].flatten(*arg, **kw),
+                self.opmap[self.operator],
+                self.operands[1].flatten(*arg, **kw),
+                ')'])
 
-class ASTXor(ASTBinary):
-    def op(self):
-        return "xor"
-    
-class ASTImp(ASTBinary):
-    def op(self):
-        return "->"
+    class Nodes(object):
+        """AST nodes for a generic grammar."""
 
-class ASTBiImp(ASTBinary):
-    def op(self):
-        return "<->"
+    nodes = Nodes()
+    nodes.Node = Node
+    nodes.Terminal = Terminal
+    nodes.Operator = Operator
+    nodes.Unary = Unary
+    nodes.Binary = Binary
+    return nodes
 
-class ASTBiTempOp(ASTBinary):
-    def op(self):
-        return self.operator
-    
-    def to_promela(self):
-        try:
-            return self.flatten(_flatten_Promela, SPIN_MAP[self.op()])
-        except KeyError:
-            raise LTLException(
-                "Operator " + self.op() +
-                " not supported in Promela syntax map"
-            )
-    
-    def to_gr1c(self, primed=False):
-        try:
-            return self.flatten(_flatten_gr1c, GR1C_MAP[self.op()])
-        except KeyError:
-            raise LTLException(
-                "Operator " + self.op() +
-                " not supported in gr1c syntax map"
-            )
-    
-    def to_jtlv(self):
-        try:
-            return self.flatten(_flatten_JTLV, JTLV_MAP[self.op()])
-        except KeyError:
-            raise LTLException(
-                "Operator " + self.op() +
-                " not supported in JTLV syntax map"
-            )
-    
-    def to_smv(self):
-        return self.flatten(_flatten_SMV, SMV_MAP[self.op()])
-    
-class ASTComparator(ASTBinary):
-    def op(self):
-        return self.operator
-    
-    def to_promela(self):
-        if self.operator == "=":
-            return self.flatten(_flatten_Promela, "==")
-        else:
-            return self.flatten(_flatten_Promela)
-    
-class ASTArithmetic(ASTBinary):
-    def op(self):
-        return self.operator
+
+def make_fol_nodes(opmap=None):
+    """AST classes for fragment of first-order logic."""
+    nodes = make_nodes(opmap)
+
+    class Var(nodes.Terminal):
+        """A 0-ary variable.
+
+        Two cases:
+
+          - 0-ary function variable (integer or string variable)
+          - 0-ary propositional variable (atomic proposition)
+        """
+
+    class Bool(nodes.Terminal):
+        """A 0-ary connective."""
+
+        def __init__(self, value):
+            if not isinstance(value, basestring):
+                raise TypeError(
+                    'value must be string, got: {v}'.format(v=value))
+            if value.lower() not in {'true', 'false'}:
+                raise TypeError(
+                    'value must be "true" or "false" '
+                    '(case insensitive), got: {v}'.format(v=value))
+            self.value = 'True' if (value.lower() == 'true') else 'False'
+
+        def flatten(self, *arg, **kw):
+            return self.opmap[self.value]
+
+    class Num(nodes.Terminal):
+        """A 0-ary function."""
+        # self.value is str,
+        # use int(self.value) if you need to
+
+    class Str(nodes.Terminal):
+        """A 0-ary function."""
+        # parser ensures that value has no quotes
+
+    class Comparator(nodes.Binary):
+        """Binary relational operator (2-ary predicate)."""
+
+    class Arithmetic(nodes.Binary):
+        """Binary function.
+
+        Maps terms to terms.
+        """
+
+    nodes.Var = Var
+    nodes.Bool = Bool
+    nodes.Num = Num
+    nodes.Str = Str
+    nodes.Comparator = Comparator
+    nodes.Arithmetic = Arithmetic
+    return nodes
+
+
+nodes = make_fol_nodes()

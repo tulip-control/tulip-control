@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,32 +29,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-""" 
-Formulae constituting specifications
+"""Formulae constituting specifications
+
+what this module adds to the pure syntactic manipulations of
+L{transformation} is a variable table, with game semantics in particular.
+
+Also, those modules are for manipulating expressions.
+This module knows about program structure,
+namely the sections of a specification file.
 """
+from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)
-
-import time, re, copy
-
+import pprint
+import time
+import re
+import copy
 from tulip.spec import parser
+from tulip.spec import transformation as tx
+from tulip.spec import translation as ts
 
-def mutex(varnames):
-    """Create mutual exclusion formulae from iterable of variables.
-
-    E.g., given a set of variable names {"a", "b", "c"}, return a set
-    of formulae {"a -> ! (c || b)", "c -> ! (b)"}.
-    """
-    mutex = set()
-    numVars = len(varnames)
-    varnames = list(varnames)
-    for i in range(0,numVars-1):
-        mut_str = varnames[i]+' -> ! ('+varnames[i+1]
-        for j in range(i+2,numVars):
-            mut_str += ' || '+varnames[j]
-        mut_str += ')'
-        mutex |= {mut_str}
-    return mutex
 
 class LTL(object):
     """LTL formula (specification)
@@ -88,6 +82,7 @@ class LTL(object):
     finite_set.  However, a range domain must be a C{tuple} of length
     2; otherwise it is ambiguous with finite_set.
     """
+
     def __init__(self, formula=None, input_variables=None,
                  output_variables=None):
         """Instantiate an LTL object.
@@ -96,27 +91,30 @@ class LTL(object):
         attribute by reference.
         """
         if formula is None:
-            formula = ""
+            formula = ''
         if input_variables is None:
             input_variables = dict()
         if output_variables is None:
             output_variables = dict()
+
         self.formula = formula
         self.input_variables = input_variables
         self.output_variables = output_variables
+
+        self.check_vars()
 
     def __str__(self):
         return str(self.formula)
 
     def _domain_str(self, d):
-        if d == "boolean":
+        if d == 'boolean':
             return d
         elif isinstance(d, tuple) and len(d) == 2:
-            return "["+str(d[0])+", "+str(d[1])+"]"
-        elif hasattr(d, "__iter__"):
-            return "{"+", ".join([str(e) for e in d])+"}"
+            return '[' + str(d[0]) + ', ' + str(d[1]) + ']'
+        elif hasattr(d, '__iter__'):
+            return '{' + ', '.join([str(e) for e in d]) + '}'
         else:
-            raise ValueError("Unrecognized variable domain type.")
+            raise ValueError('Unrecognized variable domain type.')
 
     def dumps(self, timestamp=False):
         """Dump TuLiP LTL file string.
@@ -125,20 +123,35 @@ class LTL(object):
             current time in UTC.
         """
         if timestamp:
-            output = "# Generated at "+time.strftime(
-                "%Y-%m-%d %H:%M:%S UTC", time.gmtime() )+"\n"
+            output = '# Generated at ' + time.strftime(
+                '%Y-%m-%d %H:%M:%S UTC', time.gmtime()) + '\n'
         else:
-            output = ""
-        output += "0  # Version\n%%\n"
-        if len(self.input_variables) > 0:
-            output += "INPUT:\n"
-            for (k,v) in self.input_variables.items():
-                output += str(k) + " : " + self._domain_str(v) + ";\n"
-        if len(self.output_variables) > 0:
-            output += "\nOUTPUT:\n"
-            for (k,v) in self.output_variables.items():
-                output += str(k) + " : " + self._domain_str(v) + ";\n"
-        return output + "\n%%\n"+self.formula
+            output = ''
+        output += '0  # Version\n%%\n'
+        if self.input_variables:
+            output += 'INPUT:\n'
+            for k, v in self.input_variables.items():
+                output += str(k) + ' : ' + self._domain_str(v) + ';\n'
+        if self.output_variables:
+            output += '\nOUTPUT:\n'
+            for k, v in self.output_variables.items():
+                output += str(k) + ' : ' + self._domain_str(v) + ';\n'
+        return output + '\n%%\n' + self.formula
+
+    def check_vars(self):
+        """Raise Exception if variabe definitions are invalid.
+
+        Checks:
+
+          - env and sys have common vars
+          - some var is also a possible value of some var (including itself)
+            (of arbitrary finite data type)
+        """
+        common_vars = {x for x in self.input_variables
+                       if x in self.output_variables}
+        if common_vars:
+            raise Exception('Env and sys have variables in common: ' +
+                            str(common_vars))
 
     def check_form(self, check_undeclared_identifiers=False):
         """Verify formula syntax and type-check variable domains.
@@ -155,27 +168,27 @@ class LTL(object):
         """Create LTL object from TuLiP LTL file string."""
         for line in s.splitlines():
             line = line.strip()  # Ignore leading and trailing whitespace
-            comment_ind = line.find("#")
+            comment_ind = line.find('#')
             if comment_ind > -1:
                 line = line[:comment_ind]
-            if len(line) > 0:  # Version number is the first nonblank line
+            if line:  # Version number is the first nonblank line
                 try:
                     version = int(line)
                 except ValueError:
                     raise ValueError("Malformed version number.")
                 if version != 0:
                     raise ValueError("Unrecognized version number: " +
-                        str(version))
+                                     str(version))
                 break
         try:
-            s = re.sub(r"#.*(\n|$)", "", s)  # Strip comments
-            preamble, declar, formula = s.split("%%\n")
-            input_ind = declar.find("INPUT:")
-            output_ind = declar.find("OUTPUT:")
+            s = re.sub(r'#.*(\n|$)', '', s)  # Strip comments
+            preamble, declar, formula = s.split('%%\n')
+            input_ind = declar.find('INPUT:')
+            output_ind = declar.find('OUTPUT:')
             if output_ind == -1:
                 output_ind = 0  # Default is OUTPUT
             if input_ind == -1:
-                input_section = ""
+                input_section = ''
                 output_section = declar[output_ind:]
             elif input_ind < output_ind:
                 input_section = declar[input_ind:output_ind]
@@ -183,40 +196,42 @@ class LTL(object):
             else:
                 output_section = declar[output_ind:input_ind]
                 input_section = declar[input_ind:]
-            input_section = input_section.replace("INPUT:", "")
-            output_section = output_section.replace("OUTPUT:", "")
+            input_section = input_section.replace('INPUT:', '')
+            output_section = output_section.replace('OUTPUT:', '')
 
             variables = [dict(), dict()]
             sections = [input_section, output_section]
             for i in range(2):
-                for var_declar in sections[i].split(";"):
-                    if len(var_declar.strip()) == 0:
+                for var_declar in sections[i].split(';'):
+                    if not var_declar.strip():
                         continue
-                    name, domain = var_declar.split(":")
+                    name, domain = var_declar.split(':')
                     name = name.strip()
-                    domain = domain.lstrip().rstrip(";")
-                    if domain[0] == "[":  # Range-type domain
-                        domain = domain.split(",")
-                        variables[i][name] = (int(domain[0][1:]),
-                            int(domain[1][:domain[1].index("]")]))
-                    elif domain[0] == "{":  # Finite set domain
+                    domain = domain.lstrip().rstrip(';')
+                    if domain[0] == '[':  # Range-type domain
+                        domain = domain.split(',')
+                        variables[i][name] = (
+                            int(domain[0][1:]),
+                            int(domain[1][:domain[1].index(']')])
+                        )
+                    elif domain[0] == '{':  # Finite set domain
                         domain.strip()
-                        assert domain[-1] == "}"
+                        assert domain[-1] == '}'
                         domain = domain[1:-1]  # Remove opening, closing braces
                         variables[i][name] = list()
-                        for elem in domain.split(","):
+                        for elem in domain.split(','):
                             try:
                                 variables[i][name].append(int(elem))
                             except ValueError:
                                 variables[i][name].append(str(elem))
                         variables[i][name] = set(variables[i][name])
-                    elif domain == "boolean":
+                    elif domain == 'boolean':
                         variables[i][name] = domain
                     else:
                         raise TypeError
 
         except (ValueError, TypeError):
-            raise ValueError("Malformed TuLiP LTL specification string.")
+            raise ValueError('Malformed TuLiP LTL specification string.')
 
         return LTL(
             formula=formula,
@@ -232,8 +247,9 @@ class LTL(object):
             file named "f" read-only.
         """
         if isinstance(f, str):
-            f = open(f, "rU")
+            f = open(f, 'rU')
         return LTL.loads(f.read())
+
 
 class GRSpec(LTL):
     """GR(1) specification
@@ -277,6 +293,7 @@ class GRSpec(LTL):
     Consult L{GRSpec.__init__} concerning arguments at the time of
     instantiation.
     """
+
     def __init__(self, env_vars=None, sys_vars=None, env_init='', sys_init='',
                  env_safety='', sys_safety='', env_prog='', sys_prog=''):
         """Instantiate a GRSpec object.
@@ -299,14 +316,28 @@ class GRSpec(LTL):
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
+        self._ast = dict()
+        self._cache = {
+            'string': dict(),
+            'jtlv': dict(),
+            'gr1c': dict(),
+            'slugs': dict()
+        }
+        self._bool_int = dict()
+        self._parts = {
+            x + y
+            for x in {'env_', 'sys_'}
+            for y in {'init', 'safety', 'prog'}
+        }
+
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
-            env_vars = dict([(v,"boolean") for v in env_vars])
+            env_vars = dict([(v, 'boolean') for v in env_vars])
         if sys_vars is None:
             sys_vars = dict()
         elif not isinstance(sys_vars, dict):
-            sys_vars = dict([(v,"boolean") for v in sys_vars])
+            sys_vars = dict([(v, 'boolean') for v in sys_vars])
 
         self.env_vars = copy.deepcopy(env_vars)
         self.sys_vars = copy.deepcopy(sys_vars)
@@ -318,17 +349,17 @@ class GRSpec(LTL):
         self.env_prog = env_prog
         self.sys_prog = sys_prog
 
-        for formula_component in ["env_init", "env_safety", "env_prog",
-                                  "sys_init", "sys_safety", "sys_prog"]:
-            if isinstance(getattr(self, formula_component), str):
-                if len(getattr(self, formula_component)) == 0:
+        for formula_component in self._parts:
+            x = getattr(self, formula_component)
+
+            if isinstance(x, str):
+                if not x:
                     setattr(self, formula_component, [])
                 else:
-                    setattr(self, formula_component,
-                            [getattr(self, formula_component)])
-            elif not isinstance(getattr(self, formula_component), list):
-                setattr(self, formula_component,
-                        list(getattr(self, formula_component)))
+                    setattr(self, formula_component, [x])
+            elif not isinstance(x, list):
+                setattr(self, formula_component, list(x))
+
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
 
@@ -363,40 +394,68 @@ class GRSpec(LTL):
 
     def pretty(self):
         """Return pretty printing string."""
-        output = "ENVIRONMENT VARIABLES:\n"
-        if len(self.env_vars) > 0:
-            for (k,v) in self.env_vars.items():
-                output += "\t"+str(k)+"\t"+str(v)+"\n"
-        else:
-            output += "\t(none)\n"
-        output += "\nSYSTEM VARIABLES:\n"
-        if len(self.sys_vars) > 0:
-            for (k,v) in self.sys_vars.items():
-                output += "\t"+str(k)+"\t"+str(v)+"\n"
-        else:
-            output += "\t(none)\n"
-        output += "\nFORMULA:\n"
-        output += "ASSUMPTION:\n"
-        if len(self.env_init) > 0:
-            output += "    INITIAL\n\t  "
-            output += "\n\t& ".join(["("+f+")" for f in self.env_init])+"\n"
-        if len(self.env_safety) > 0:
-            output += "    SAFETY\n\t  []"
-            output += "\n\t& []".join(["("+f+")" for f in self.env_safety])+"\n"
-        if len(self.env_prog) > 0:
-            output += "    LIVENESS\n\t  []<>"
-            output += "\n\t& []<>".join(["("+f+")" for f in self.env_prog])+"\n"
 
-        output += "GUARANTEE:\n"
-        if len(self.sys_init) > 0:
-            output += "    INITIAL\n\t  "
-            output += "\n\t& ".join(["("+f+")" for f in self.sys_init])+"\n"
-        if len(self.sys_safety) > 0:
-            output += "    SAFETY\n\t  []"
-            output += "\n\t& []".join(["("+f+")" for f in self.sys_safety])+"\n"
-        if len(self.sys_prog) > 0:
-            output += "    LIVENESS\n\t  []<>"
-            output += "\n\t& []<>".join(["("+f+")" for f in self.sys_prog])+"\n"
+        output = 'ENVIRONMENT VARIABLES:\n'
+        if self.env_vars:
+            for k, v in self.env_vars.iteritems():
+                output += '\t' + str(k) + '\t' + str(v) + '\n'
+        else:
+            output += '\t(none)\n'
+
+        output += '\nSYSTEM VARIABLES:\n'
+        if self.sys_vars:
+            for k, v in self.sys_vars.iteritems():
+                output += '\t' + str(k) + '\t' + str(v) + '\n'
+        else:
+            output += '\t(none)\n'
+
+        output += '\nFORMULA:\n'
+
+        output += 'ASSUMPTION:\n'
+        if self.env_init:
+            output += (
+                '    INITIAL\n\t  ' +
+                '\n\t& '.join([
+                    '(' + f + ')' for f in self.env_init
+                ]) + '\n'
+            )
+        if self.env_safety:
+            output += (
+                '    SAFETY\n\t  []' +
+                '\n\t& []'.join([
+                    '(' + f + ')' for f in self.env_safety
+                ]) + '\n'
+            )
+        if self.env_prog:
+            output += (
+                '    LIVENESS\n\t  []<>' +
+                '\n\t& []<>'.join([
+                    '(' + f + ')' for f in self.env_prog
+                ]) + '\n'
+            )
+
+        output += 'GUARANTEE:\n'
+        if self.sys_init:
+            output += (
+                '    INITIAL\n\t  ' +
+                '\n\t& '.join([
+                    '(' + f + ')' for f in self.sys_init
+                ]) + '\n'
+            )
+        if self.sys_safety:
+            output += (
+                '    SAFETY\n\t  []' +
+                '\n\t& []'.join([
+                    '(' + f + ')' for f in self.sys_safety
+                ]) + '\n'
+            )
+        if self.sys_prog:
+            output += (
+                '    LIVENESS\n\t  []<>' +
+                '\n\t& []<>'.join([
+                    '(' + f + ')' for f in self.sys_prog
+                ]) + '\n'
+            )
         return output
 
     def check_form(self):
@@ -404,32 +463,39 @@ class GRSpec(LTL):
         return LTL.check_form(self)
 
     def copy(self):
-        return GRSpec(env_vars=dict(self.env_vars),
-                      sys_vars=dict(self.sys_vars),
-                      env_init=copy.copy(self.env_init),
-                      env_safety=copy.copy(self.env_safety),
-                      env_prog=copy.copy(self.env_prog),
-                      sys_init=copy.copy(self.sys_init),
-                      sys_safety=copy.copy(self.sys_safety),
-                      sys_prog=copy.copy(self.sys_prog))
+        return GRSpec(
+            env_vars=dict(self.env_vars),
+            sys_vars=dict(self.sys_vars),
+            env_init=copy.copy(self.env_init),
+            env_safety=copy.copy(self.env_safety),
+            env_prog=copy.copy(self.env_prog),
+            sys_init=copy.copy(self.sys_init),
+            sys_safety=copy.copy(self.sys_safety),
+            sys_prog=copy.copy(self.sys_prog)
+        )
 
     def __or__(self, other):
         """Create union of two specifications."""
         result = self.copy()
-        for varname in other.env_vars.keys():
-            if result.env_vars.has_key(varname) and \
-                other.env_vars[varname] != result.env_vars[varname]:
-                raise ValueError("Mismatched variable domains")
-        for varname in other.sys_vars.keys():
-            if result.sys_vars.has_key(varname) and \
-                other.sys_vars[varname] != result.sys_vars[varname]:
-                raise ValueError("Mismatched variable domains")
+
+        if not isinstance(other, GRSpec):
+            raise TypeError('type(other) must be GRSpec')
+
+        # common vars have same types ?
+        for varname in set(other.env_vars) & set(result.env_vars):
+            if other.env_vars[varname] != result.env_vars[varname]:
+                raise ValueError('Mismatched variable domains')
+
+        for varname in set(other.sys_vars) & set(result.sys_vars):
+            if other.sys_vars[varname] != result.sys_vars[varname]:
+                raise ValueError('Mismatched variable domains')
+
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
-        for formula_component in ["env_init", "env_safety", "env_prog",
-                                  "sys_init", "sys_safety", "sys_prog"]:
-            getattr(result, formula_component).extend(
-                getattr(other, formula_component))
+
+        for x in self._parts:
+            getattr(result, x).extend(getattr(other, x))
+
         return result
 
     def to_canon(self):
@@ -439,327 +505,216 @@ class GRSpec(LTL):
         <http://tulip-control.sourceforge.net/doc/specifications.html>}
         of the TuLiP User's Guide.
         """
-        conj_cstr = lambda s: " && " if len(s) > 0 else ""
-        assumption = ""
-        if len(self.env_init) > 0:
+        conj_cstr = lambda s: ' && ' if s else ''
+
+        assumption = ''
+        if self.env_init:
             assumption += _conj(self.env_init)
-        if len(self.env_safety) > 0:
+        if self.env_safety:
             assumption += conj_cstr(assumption) + _conj(self.env_safety, '[]')
-        if len(self.env_prog) > 0:
+        if self.env_prog:
             assumption += conj_cstr(assumption) + _conj(self.env_prog, '[]<>')
-        guarantee = ""
-        if len(self.sys_init) > 0:
+
+        guarantee = ''
+        if self.sys_init:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_init)
-        if len(self.sys_safety) > 0:
+        if self.sys_safety:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_safety, '[]')
-        if len(self.sys_prog) > 0:
+        if self.sys_prog:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_prog, '[]<>')
 
         # Put the parts together, simplifying in special cases
-        if len(guarantee) > 0:
-            if len(assumption) > 0:
-                return "("+assumption+") -> ("+guarantee+")"
+        if guarantee:
+            if assumption:
+                return '(' + assumption + ') -> (' + guarantee + ')'
             else:
                 return guarantee
         else:
-            return "True"
-    
-    def sym_to_prop(self, props):
-        """Replace the symbols of propositions with the actual propositions.
+            return 'True'
 
-        @type props: dict
-        @param props: a dictionary describing subformula (e.g.,
-            variable name) substitutions, where for each key-value
-            pair, all occurrences of key are replaced with value in
-            all components of this GRSpec object.  However, env_vars
-            and sys_vars are not changed.
+    def sub_values(self, var_values):
+        """Substitute given values for variables.
+
+        Note that there are three ways to substitute values for variables:
+
+          - syntactic using this function
+
+          - no substitution by user code, instead flatten to python and
+            use C{eval} together with a C{dict} defining
+            the values of variables, as done in L{eval_init}.
+
+        For converting non-integer finite types to
+        integer types, use L{replace_finite_by_int}.
+
+        @return: C{dict} of ASTs after the substitutions,
+            keyed by original clause (before substitution).
         """
-        if props is None:
-            return
-        
-        symfound = True
-        while (symfound):
-            for propSymbol, prop in props.iteritems():
-                logger.debug('propSymbol: ' + str(propSymbol))
-                logger.debug('prop: ' + str(prop))
-                
-                if not isinstance(propSymbol, str):
-                    raise TypeError('propSymbol: ' + str(propSymbol) +
-                                    'is not a string.')
-                
-                if propSymbol[-1] != "'":  # To handle gr1c primed variables
-                    propSymbol += r"\b"
-                logger.debug('\t' + propSymbol + ' -> ' + prop)
-                
-                symfound  = _sub_all(self.env_init, propSymbol, prop)
-                symfound |= _sub_all(self.env_safety, propSymbol, prop)
-                symfound |= _sub_all(self.env_prog, propSymbol, prop)
-                
-                symfound |= _sub_all(self.sys_init, propSymbol, prop)
-                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
-                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
-    
-    def to_smv(self):
-        raise Exception("GRSpec.to_smv is defunct, possibly temporarily")
-        # trees = []
-        # # NuSMV can only handle system states
-        # for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
-        #                 (self.sys_prog, ['[]', '<>'])]:
-        #     if s:
-        #         if isinstance(s, str):
-        #             s = [s]
-        #         subtrees = []
-        #         ops.reverse() # so we apply operators outwards
-        #         for f in s:
-        #             t = ltl_parse.parse(f)
-        #             # assign appropriate temporal operators
-        #             for op in ops:
-        #                 t = ltl_parse.ASTUnTempOp.new(t, op)
-        #             subtrees.append(t)
-        #         # & together expressions
-        #         t = reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), subtrees)
-        #         trees.append(t)
-        # # & together converted subformulae
-        # return reduce(lambda x, y: ltl_parse.ASTAnd.new(x, y), trees)
+        logger.info('substitute values for variables...')
+        a = copy.deepcopy(self._ast)
+        for formula, tree in a.iteritems():
+            g = tx.Tree.from_recursive_ast(tree)
+            tx.sub_values(g, var_values)
+            a[formula] = g.to_recursive_ast()
+        logger.info('done with substitutions.\n')
+        return a
 
-    def to_jtlv(self):
-        """Return specification as list of two strings [assumption, guarantee].
+    def compile_init(self, no_str):
+        """Compile python expression for initial conditions.
 
-        Format is that of JTLV.  Cf. L{interfaces.jtlv}.
+        The returned bytecode can be used with C{eval}
+        and a C{dict} assigning values to variables.
+        Its value is the conjunction of C{env_init} and C{sys_init}.
+
+        Use the corresponding python data types
+        for the C{dict} values:
+
+              - C{bool} for Boolean variables
+              - C{int} for integers
+              - C{str} for arbitrary finite types
+
+        @param no_str: if True, then compile the formula
+            where all string variables have been replaced by integers.
+            Otherwise compile the original formula containing strings.
+
+        @return: python expression compiled for C{eval}
+        @rtype: C{code}
         """
-        spec = ['', '']
-        desc_added = False
-        for env_init in self.env_init:
-            if (len(env_init) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- valid initial env states\n'
-                    desc_added = True
-                spec[0] += '\t' + parser.parse(env_init).to_jtlv()
+        clauses = self.env_init + self.sys_init
+        if no_str:
+            clauses = [self._bool_int[x] for x in clauses]
+        logger.info('clauses to compile: ' + str(clauses))
+        c = [ts.translate_ast(self.ast(x), 'python').flatten()
+             for x in clauses]
+        logger.info('after translation to python: ' + str(c))
+        s = _conj(c, op='and')
+        if not s:
+            s = 'True'
+        return compile(s, '<string>', 'eval')
 
-        desc_added = False
-        for env_safety in self.env_safety:
-            if (len(env_safety) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- safety assumption on environment\n'
-                    desc_added = True
-                env_safety = parser.parse(env_safety).to_jtlv()
-                spec[0] += '\t[](' +re.sub(r"next\s*\(", "next(", env_safety) +')'
+    def str_to_int(self):
+        """Replace arbitrary finite vars with int vars.
 
-        desc_added = False
-        for prog in self.env_prog:
-            if (len(prog) > 0):
-                if (len(spec[0]) > 0):
-                    spec[0] += ' && \n'
-                if (not desc_added):
-                    spec[0] += '-- justice assumption on environment\n'
-                    desc_added = True
-                spec[0] += '\t[]<>(' + parser.parse(prog).to_jtlv() + ')'
-
-        desc_added = False
-        for sys_init in self.sys_init:
-            if (len(sys_init) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- valid initial system states\n'
-                    desc_added = True
-                spec[1] += '\t' + parser.parse(sys_init).to_jtlv()
-
-        desc_added = False
-        for sys_safety in self.sys_safety:
-            if (len(sys_safety) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- safety requirement on system\n'
-                    desc_added = True
-                sys_safety = parser.parse(sys_safety).to_jtlv()
-                spec[1] += '\t[](' +re.sub(r"next\s*\(", "next(", sys_safety) +')'
-
-        desc_added = False
-        for prog in self.sys_prog:
-            if (len(prog) > 0):
-                if (len(spec[1]) > 0):
-                    spec[1] += ' && \n'
-                if (not desc_added):
-                    spec[1] += '-- progress requirement on system\n'
-                    desc_added = True
-                spec[1] += '\t[]<>(' + parser.parse(prog).to_jtlv() + ')'
-        return spec
-
-    def to_gr1c(self):
-        """Dump to gr1c specification string.
-
-        Cf. L{interfaces.gr1c}.
+        Returns spec itself if it contains only int vars.
+        Otherwise it returns a copy of spec with all arbitrary
+        finite vars replaced by int-valued vars.
         """
-        def _to_gr1c_print_vars(vardict):
-            output = ""
-            for variable, domain in vardict.items():
-                if domain == "boolean":
-                    output += " "+variable
-                elif isinstance(domain, tuple) and len(domain) == 2:
-                    output += " "+variable+" ["+str(domain[0]) +\
-                        ", "+str(domain[1])+"]"
-                else:
-                    raise ValueError("Domain type unsupported by gr1c: " +
-                        str(domain))
-            return output
-        
-        tmp = finite_domain2ints(self)
-        if tmp is not None:
-            return tmp.to_gr1c()
-        
-        output = "ENV:"+_to_gr1c_print_vars(self.env_vars)+";\n"
-        output += "SYS:"+_to_gr1c_print_vars(self.sys_vars)+";\n"
-
-        output += "ENVINIT: "+"\n& ".join([
-            "("+parser.parse(s).to_gr1c()+")"
-            for s in self.env_init
-        ]) + ";\n"
-        if len(self.env_safety) == 0:
-            output += "ENVTRANS:;\n"
-        else:
-            output += "ENVTRANS: "+"\n& ".join([
-                "[]("+parser.parse(s).to_gr1c()+")"
-                for s in self.env_safety
-            ]) + ";\n"
-        if len(self.env_prog) == 0:
-            output += "ENVGOAL:;\n\n"
-        else:
-            output += "ENVGOAL: "+"\n& ".join([
-                "[]<>("+parser.parse(s).to_gr1c()+")"
-                for s in self.env_prog
-            ]) + ";\n\n"
-        
-        output += "SYSINIT: "+"\n& ".join([
-            "("+parser.parse(s).to_gr1c()+")"
-            for s in self.sys_init
-        ]) + ";\n"
-        if len(self.sys_safety) == 0:
-            output += "SYSTRANS:;\n"
-        else:
-            output += "SYSTRANS: "+"\n& ".join([
-                "[]("+parser.parse(s).to_gr1c()+")"
-                for s in self.sys_safety
-            ]) + ";\n"
-        if len(self.sys_prog) == 0:
-            output += "SYSGOAL:;\n"
-        else:
-            output += "SYSGOAL: "+"\n& ".join([
-                "[]<>("+parser.parse(s).to_gr1c()+")"
-                for s in self.sys_prog
-            ]) + ";\n"
-        return output
-    
-    def evaluate(self, var_values):
-        """Evaluate env_init, sys_init, given a valuation of variables.
-        
-        Returns the Boolean value of the subformulas env_init, sys_init,
-        resulting from substitution of env_vars and sys_vars symbols
-        by the given assignment var_values of values to them.
-        
-        Note: variable value type checking not implemented yet.
-        
-        @param var_values: valuation of env_vars and sys_vars
-        @type var_values: {'var_name':'var_value', ...}
-        
-        @return: truth values of spec parts::
-        
-            {'env_init' : env_init[var_values],
-             'sys_init' : sys_init[var_values] }
-        
-        @rtype: dict
-        """
-        cp = self.copy()
-        cp.sym_to_prop(var_values)
-        
-        env_init = _eval_formula(_conj(cp.env_init) )
-        sys_init = _eval_formula(_conj(cp.sys_init) )
-        
-        return {'env_init':env_init, 'sys_init':sys_init}
-
-def _eval_formula(f):
-    f = re.sub(r'\|\|', ' or ', f)
-    f = re.sub(r'&&', ' and ', f)
-    f = re.sub(r'!', ' not ', f)
-    f = re.sub(r'=', ' == ', f)
-    
-    if re.findall(r'->', f) or re.findall(r'<->', f):
-            raise NotImplementedError('todo: Eval of -> and <->')
-    
-    if len(f) > 0:
-        return eval(f)
-    else:
-        return True
-
-def _sub_all(formula, propSymbol, prop):
-    symfound = False
-    for i in xrange(0, len(formula)):
-        if (len(re.findall(r'\b'+propSymbol, formula[i])) > 0):
-            formula[i] = re.sub(r'\b'+propSymbol, '('+prop+')',
-                                      formula[i])
-            symfound = True
-    return symfound
-
-def _conj(iterable, unary=''):
-    return ' && '.join([unary + '(' + s + ')' for s in iterable])
-
-def finite_domain2ints(spec):
-    """Replace arbitrary finite vars with int vars.
-    
-    Returns spec itself if it contains only int vars.
-    Otherwise it returns a copy of spec with all arbitrary
-    finite vars replaced by int-valued vars.
-    """
-    ints_only = True
-    for domain in spec.env_vars.itervalues():
-        if isinstance(domain, list):
-            ints_only = False
-            break
-    if ints_only:
-        for domain in spec.sys_vars.itervalues():
-            if isinstance(domain, list):
-                ints_only = False
-                break
-    
-    # nothing todo ?
-    if ints_only:
-        return None
-    
-    spec0 = spec.copy()
-    
-    _sub_var(spec0, spec0.env_vars)
-    _sub_var(spec0, spec0.sys_vars)
-    
-    return spec0
-    
-def _sub_var(spec, vars_dict):
-    for variable, domain in vars_dict.items():
-        if not isinstance(domain, list):
-            continue
-        
-        if len(domain) == 0:
-            raise Exception('variable: ' + str(variable) +
-                            'has empty domain: ' + str(domain))
-        
-        logger.debug('mapping arbitrary finite domain to integers...')
-        
-        # integers cannot be an arbitrary finite domain,
-        # neither as integers (like 1), nor as strings (like '1')
-        # because they will be indistinguishable from
-        # from values of gr1c integer variables        
-        if any([not isinstance(x, str) for x in domain]):
-            msg = 'Found non-string elements in domain: ' + str(domain) + '\n'
-            msg += 'only string elements allowed in arbitrary finite domains.'
-            raise TypeError(msg)
-        
-        # the order provided will be the map to ints
-        vars_dict[variable] = (0, len(domain)-1)
-        values2ints = {var:str(i) for i, var in enumerate(domain)}
-        
+        logger.info('convert string variables to integers...')
+        vars_dict = dict(self.env_vars)
+        vars_dict.update(self.sys_vars)
+        fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
         # replace symbols by ints
-        spec.sym_to_prop(values2ints)
+        for p in self._parts:
+            for x in getattr(self, p):
+                if self._bool_int.get(x) in self._ast:
+                    logger.debug(str(x) + ' is in _bool_int cache')
+                    continue
+                else:
+                    logger.debug(str(x) + ' is not in _bool_int cache')
+                # get AST
+                a = self.ast(x)
+                # create AST copy with int and bool vars only
+                g = tx.Tree.from_recursive_ast(a)
+                tx.sub_constants(g, fvars)
+                b = g.to_recursive_ast()
+                # formula of int/bool AST
+                f = b.flatten()
+                self._ast[f] = b  # cache
+                # remember map from clauses to int/bool clauses
+                self._bool_int[x] = f
+        logger.info('done converting to integer variables.\n')
+
+    def ast(self, x):
+        """Return AST corresponding to formula x.
+
+        If AST for formula C{x} has already been computed earlier,
+        then return cached result.
+        """
+        if logger.getEffectiveLevel() <= logging.DEBUG:
+            logger.debug('current cache of ASTs:\n' +
+                         pprint.pformat(self._ast) + 3 * '\n')
+            logger.debug('check if: ' + str(x) + ', is in cache.')
+        if x in self._ast:
+            logger.debug(str(x) + ' is already in cache')
+        else:
+            logger.info('AST cache does not contain:\n\t' + str(x) +
+                        '\nNeed to parse.')
+            self.parse()
+        return self._ast[x]
+
+    def parse(self):
+        """Parse each clause and store it.
+
+        The AST resulting from each clause is stored
+        in the C{dict} attribute C{ast}.
+        """
+        logger.info('parsing ASTs to cache them...')
+        vardoms = dict(self.env_vars)
+        vardoms.update(self.sys_vars)
+        # parse new clauses and cache the resulting ASTs
+        for p in self._parts:
+            s = getattr(self, p)
+            for x in s:
+                if x in self._ast:
+                    logger.debug(str(x) + ' is already in cache')
+                    continue
+                logger.debug('parse: ' + str(x))
+                tree = parser.parse(x)
+                g = tx.Tree.from_recursive_ast(tree)
+                tx.check_for_undefined_identifiers(g, vardoms)
+                self._ast[x] = tree
+        # rm cached ASTs that correspond to deleted clauses
+        self._collect_cache_garbage(self._ast)
+        logger.info('done parsing ASTs.\n')
+
+    def _collect_cache_garbage(self, cache):
+        logger.info('collecting garbage from GRSpec cache...')
+        # rm cached ASTs that correspond to deleted clauses
+        s = set(cache)
+        for p in self._parts:
+            # emptied earlier ?
+            if not s:
+                break
+            w = getattr(self, p)
+            # exclude given formulas
+            s.difference_update(w)
+            # exclude int/bool-only forms of formulas
+            s.difference_update({self._bool_int.get(x) for x in w})
+        for x in s:
+            cache.pop(x)
+        logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
+
+
+def replace_dependent_vars(spec, bool2form):
+    logger.debug('replacing dependent variables using map:\n\t' +
+                 str(bool2form))
+    vs = dict(spec.env_vars)
+    vs.update(spec.sys_vars)
+    logger.debug('variables:\n\t' + str(vs))
+    bool2subtree = dict()
+    for boolvar, formula in bool2form.iteritems():
+        logger.debug('checking var: ' + str(boolvar))
+        if boolvar in vs:
+            assert vs[boolvar] == 'boolean'
+            logger.debug(str(boolvar) + ' is indeed Boolean')
+        else:
+            logger.debug('spec does not contain var: ' + str(boolvar))
+        tree = parser.parse(formula)
+        bool2subtree[boolvar] = tx.Tree.from_recursive_ast(tree)
+    for s in {'env_init', 'env_safety', 'env_prog',
+              'sys_init', 'sys_safety', 'sys_prog'}:
+        part = getattr(spec, s)
+        new = []
+        for clause in part:
+            logger.debug('replacing in clause:\n\t' + clause)
+            tree = spec.ast(clause)
+            g = tx.Tree.from_recursive_ast(tree)
+            tx.sub_bool_with_subtree(g, bool2subtree)
+            f = g.to_recursive_ast().flatten()
+            new.append(f)
+            logger.debug('caluse tree after replacement:\n\t' + f)
+        setattr(spec, s, new)
+
+
+def _conj(iterable, unary='', op='&&'):
+    return ' {op} '.format(op=op).join(
+        ['{u}({s})'.format(u=unary, s=s) for s in iterable])

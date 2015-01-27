@@ -158,9 +158,9 @@ def merge_example():
     ts1.transitions.remove('s3', 's4')
     ts1.transitions.remove('s5', 's6')
     
-    ts1.actions |= ['step', 'jump']
-    ts1.transitions.add('s3', 's4', actions='step')
-    ts1.transitions.add('s5', 's6', actions='jump')
+    ts1.sys_actions |= ['step', 'jump']
+    ts1.transitions.add('s3', 's4', sys_actions='step')
+    ts1.transitions.add('s5', 's6', sys_actions='jump')
     
     ts1.plot()
     
@@ -171,9 +171,9 @@ def merge_example():
     ts2.transitions.remove('s0', 's1')
     ts2.transitions.remove('s1', 's2')
     
-    ts2.actions |= ['up', 'down']
-    ts2.transitions.add('s0', 's1', actions='up')
-    ts2.transitions.add('s1', 's2', actions='down')
+    ts2.sys_actions |= ['up', 'down']
+    ts2.transitions.add('s0', 's1', sys_actions='up')
+    ts2.transitions.add('s1', 's2', sys_actions='down')
     
     ts2.plot()
     

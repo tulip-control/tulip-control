@@ -1,0 +1,12 @@
+This ``extern`` directory is a place for dependencies that cannot be easily met
+by standard installation procedures of the dependency.  E.g., patch files and a
+reference to the appropriate version should be given, or copies of a few
+relevant headers may be copied here.
+
+You should not install from ``extern`` unless you are instructed to do so.  In
+particular, some things here may be dependencies of code under the ``contrib``
+directory and thus are not dependencies of TuLiP per se.  Furthermore,
+instructions herein may be incomplete or only intended to augment the
+installation instructions of TuLiP or something under ``contrib``.
+
+BEWARE THAT CODE HEREIN MAY BE UNDER A DIFFERENT LICENSE THAN THAT OF TULIP.

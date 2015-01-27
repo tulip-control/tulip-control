@@ -33,6 +33,8 @@
 # 
 """TuLiP Toolbox Abstract subpackage
 """
+from __future__ import absolute_import
+
 # avoid shadowing modules
 from .discretization import (
     discretize, discretize_switched,

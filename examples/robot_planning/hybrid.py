@@ -20,6 +20,11 @@
 #     +---+---+---+
 #
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('tulip.spec').setLevel(logging.ERROR)
+logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
+
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
@@ -29,7 +34,7 @@ from scipy import sparse as sp
 # Hybrid system with 2 env, 2 system modes:
 ###########################################
 
-sys_hyb = transys.OpenFTS()
+sys_hyb = transys.FTS()
 
 # We assume robots ability to transition between cells depends both on
 # discrete controlled modes (e.g., gears) and environment modes (e.g., surface
@@ -140,7 +145,8 @@ sys_prog |= {'X0reach'}
 
 # Possible additional specs
 # It is unsafe to "break" (switch to gear0) when road is slippery
-sys_safe |= {'(gear1 && slippery) -> X (gear1)'}
+sys_safe |= {'(sys_actions = "gear1" && env_actions = "slippery") -> ' +
+             'X (sys_actions = "gear1")'}
 
 # to use int actions:
 # sys_safe |= {'((act = gear1) && (eact = slippery)) -> X (act = gear1)'}

@@ -1,4 +1,4 @@
-# Copyright (c) 2011, 2012, 2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 """
 Classes representing hybrid dynamical systems.
 """
+from __future__ import absolute_import
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -43,11 +45,9 @@ from pprint import pformat
 import numpy as np
 import polytope as pc
 
-try:
-    from tulip.graphics import newax, quiver
-except Exception, e:
-    logger.error(e)
-    quiver = None
+# inline imports:
+#
+# from tulip.graphics import newax, quiver
 
 def _indent(s, n):
     s = s.split('\n')
@@ -73,7 +73,8 @@ class LtiSysDyn(object):
     A LtiSysDyn object contains the fields:
     
         - A, B, E, K, (matrices)
-        - Uset, Wset and domain (each a C{polytope.Polytope})
+        - Uset, Wset, (each a C{polytope.Polytope})
+        - domain (C{polytope.Polytope} or C{polytope.Region})
         - time_semantics: 'discrete' (if system is originally a discrete-time
           system) or 'sampled' (if system is sampled from a continuous-time
           system)
@@ -100,11 +101,14 @@ class LtiSysDyn(object):
             warn('Uset not given to LtiSysDyn()')
         elif not isinstance(Uset, pc.Polytope):
             raise Exception('`Uset` has to be a Polytope')
-           
         if domain is None:
-            warn('Domain is not given in LtiSysDyn()')
-        elif not isinstance(domain, pc.Polytope):
-            raise Exception('`domain` has to be a Polytope')
+            warn("Domain not given to LtiSysDyn()")
+        if ((domain is not None) and
+            (not (isinstance(domain, pc.Polytope) or
+                isinstance(domain, pc.Region))
+            )
+        ):
+            raise Exception('`domain` has to be a Polytope or Region')
         
         # check dimensions agree
         try:
@@ -189,22 +193,27 @@ class LtiSysDyn(object):
         output += '\nWset =\n' + _indent(str(self.Wset), n)
         return output
     
-    def plot(self, ax=None, color=np.random.rand(3), show_domain=True):
-        if quiver is None:
+    def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
+             res=(5, 5), **kwargs):
+        try:
+            from tulip.graphics import newax, quiver
+        except:
+            logger.error('failed to import graphics')
             warn('pyvectorized not found. No plotting.')
             return
         
-        (x, res) = pc.grid_region(self.domain)
+        (x, res) = pc.grid_region(self.domain, res=res)
         n = self.A.shape[0]
         DA = self.A - np.eye(n)
-        v = DA.dot(x)
+        v = DA.dot(x) + self.K
         
         if ax is None:
             ax, fig = newax()
         
         if show_domain:
             self.domain.plot(ax, color)
-        quiver(x, v, ax)
+        
+        quiver(x, v, ax, **kwargs)
         
         return ax
 
@@ -215,7 +224,7 @@ class PwaSysDyn(object):
       - C{list_subsys}: list of L{LtiSysDyn}
 
       - C{domain}: domain over which piecewise affine system is defined,
-          type: polytope.Polytope
+          type: polytope.Polytope or polytope.Region
 
       - C{time_semantics}: 'discrete' (if system is originally a discrete-time
        system) or 'sampled' (if system is sampled from a continuous-time
@@ -304,13 +313,19 @@ class PwaSysDyn(object):
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
     
-    def plot(self, ax=None, show_domain=True):
+    def plot(self, ax=None, show_domain=True, **kwargs):
+        try:
+            from tulip.graphics import newax
+        except:
+            logger.error('failed to import graphics')
+            return
+        
         if ax is None:
             ax, fig = newax()
         
         for subsystem in self.list_subsys:
             subsystem.plot(ax, color=np.random.rand(3),
-                           show_domain=show_domain)
+                           show_domain=show_domain, **kwargs)
         return ax
 
 class SwitchedSysDyn(object):

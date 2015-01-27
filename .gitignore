@@ -1,8 +1,14 @@
 *~
 *.log
 *.out
-parsetab.py
+*parsetab.py
 *.gr1
+*.gr1c
+
+*.txt
+!/doc/**/*.txt
+
+*.xml
 *.m
 *.pyc
 *.egg-info
