@@ -40,6 +40,7 @@ from .mathset import MathSet, SubSet, PowerSet, TypedDict
 from .labeled_graphs import prepend_with
 from .transys import (
     KripkeStructure, FiniteTransitionSystem, FTS,
+    AugmentedFiniteTransitionSystem, AFTS,
     LabeledGameGraph,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
