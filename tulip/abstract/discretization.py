@@ -1764,8 +1764,8 @@ def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):
             post_extp_N=extp
             j=1
             while j<= N:
-                 post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+
-                    np.dot(list_extp_d[m], sys_dyn.E.T)
+                 post_extp_N=(np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+
+                    np.dot(list_extp_d[m], sys_dyn.E.T))
                  j+=1
             list_post_extp_d.append(post_extp_N)
             if m==0:
