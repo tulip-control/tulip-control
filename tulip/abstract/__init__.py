@@ -1,5 +1,5 @@
-# Copyright (c) 2013, 2014 by California Institute of Technology
-# and 2014 The Regents of the University of Michigan
+# Copyright (c) 2013-2014 by California Institute of Technology
+# and 2014-2015 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ from .discretization import (
     discretize, discretize_switched,
     multiproc_discretize_switched,
     create_prog_map, 
-    get_postarea_transitions,
+    discretize_modeonlyswitched,
     multiproc_posttrans,
     multiproc_postarea_transitions
 )
