@@ -116,18 +116,20 @@ where:
 
 The token precedence (lowest to highest) and associativity (r = right, l = left, n = none) is:
 
-- **U**, **R** (r)
-- **<->** (r)
-- **->** (r)
+- **<->** (l)
+- **->** (l)
 - **^** (l)
 - **|** (l)
 - **&** (l)
-- **[]**, **<>** (r)
-- **X** (r)
+- **[]**, **<>** (l)
+- **U**, **W**, **R** (l)
+- **=**, **!=** (l)
+- **<=**, **>=**, **>** (l)
+- **+**, **-** (l)
+- **\***, **/** (l)
 - **!** (r)
-- **=**, **<=**, **>=**, **>** (n)
-- **\***, **/** (n)
-- **+**, **-** (n)
+- **X** (r)
+- **'** (l)
 - TRUE, FALSE
 
 Expressions of the above form are successfully parsed.
