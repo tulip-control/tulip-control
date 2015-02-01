@@ -368,7 +368,9 @@ def _ast_to_python(u, nodes):
         assert u.operator == '!'
         return cls(u.operator, _ast_to_python(u.operands[0], nodes))
     elif len(u.operands) == 2:
-        assert u.operator in {'&', '|', '^', '=', '!=', '->', '<->'}
+        assert u.operator in {'&', '|', '^', '->', '<->',
+                              '>', '>=', '=', '!=', '<=', '<',
+                              '+', '-', '*', '/'}
         if u.operator == '->':
             cls = nodes.Imp
         elif u.operator == '<->':
