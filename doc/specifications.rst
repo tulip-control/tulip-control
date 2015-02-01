@@ -33,11 +33,11 @@ The result of which should look similar to
 .. code-block:: none
 
   0  # Version
-  
+
   %%
   OUTPUT:
   p : boolean;
-  
+
   %%
   []<>(p)
 
@@ -75,36 +75,35 @@ The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E
          | expr '/' expr
          | expr '+' expr
          | expr '-' expr
-         
+
          | expr '=' expr | expr '==' expr
          | expr '!=' expr
          | expr '<=' expr
          | expr '>=' expr
-         
+
          | '!' expr
          | expr '&' expr | expr '&&' expr
          | expr '|' expr | expr '||' expr
          | expr '^' expr # xor
-         
+
          | expr '->' expr
          | expr '<->' expr
-         
          | 'X' expr | 'next' expr
          | '[]' expr | 'G' expr
          | '<>' expr | 'F' expr
-         
+
          | expr 'U' expr
          | expr 'R' expr
-         
+
          | '(' expr ')'
-         
+
          | TRUE | FALSE
          | NUMBER
          | variable
          | string
 
   variable ::= NAME
-  
+
   string ::= '"' NAME '"'
 
 where:
