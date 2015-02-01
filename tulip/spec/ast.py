@@ -206,7 +206,7 @@ def make_nodes(opmap=None):
             return ' '.join([
                 '(',
                 self.opmap[self.operator],
-                ' '.join(x.flatten(*arg, **kw) for x in self.operands),
+                ', '.join(x.flatten(*arg, **kw) for x in self.operands),
                 ')'])
 
     # Distinguish operators by arity
