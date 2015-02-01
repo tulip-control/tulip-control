@@ -53,6 +53,7 @@ class Lexer(object):
     """Token rules to build LTL lexer."""
 
     reserved = {
+        'ite': 'ITE',
         'next': 'NEXT',
         'X': 'NEXT',
         'false': 'FALSE',
@@ -63,7 +64,7 @@ class Lexer(object):
         'W': 'WEAK_UNTIL',
         'V': 'RELEASE'}
     values = {'next': 'X'}
-    delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
+    delimiters = ['LPAREN', 'RPAREN', 'DQUOTES', 'COMMA']
     operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
@@ -132,6 +133,7 @@ class Lexer(object):
     t_TIMES = r'\*'
     t_DIV = r'/'
     t_TRUNCATE = r'<<>>'
+    t_COMMA = r','
 
     t_DQUOTES = r'\"'
     t_PRIME = r"\'"
@@ -268,6 +270,11 @@ class Parser(object):
                 | expr RELEASE expr
         """
         p[0] = self.ast.Binary(p[2], p[1], p[3])
+
+    # both function and connective
+    def p_ternary_conditional(self, p):
+        """expr : LPAREN ITE expr COMMA expr COMMA expr RPAREN"""
+        p[0] = self.ast.Operator(p[2], p[3], p[5], p[7])
 
     def p_binary_predicate(self, p):
         """expr : expr EQUALS expr
