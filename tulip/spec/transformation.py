@@ -194,9 +194,10 @@ def check_for_undefined_identifiers(tree, domains):
         if u.type == 'var' and u.value not in domains:
             var = u.value
             raise ValueError(
-                ('Undefined variable "{var}", '
+                ('Undefined variable "{var}" missing from '
+                 'symbol table:\n\t{doms}\n'
                  'in subformula:\n\t{f}').format(
-                     var=var, f=tree))
+                     var=var, f=tree.to_recursive_ast(), doms=domains))
 
         if u.type not in {'str', 'num'}:
             continue
