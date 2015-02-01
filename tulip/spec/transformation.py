@@ -181,7 +181,7 @@ def check_for_undefined_identifiers(tree, domains):
       - binary operator between variable and
         invalid value for that variable.
 
-    @type tree: L{LTL_AST}
+    @type tree: L{Tree}
 
     @param domains: variable definitions:
 
