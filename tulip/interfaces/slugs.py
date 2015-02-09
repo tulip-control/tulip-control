@@ -63,7 +63,7 @@ def synthesize(spec):
         fin.write(s)
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
-    options = [fin.name]
+    options = [fin.name, '--jsonOutput']
     realizable, out = _call_slugs(options)
     if not realizable:
         return None
