@@ -47,6 +47,27 @@ import slugs
 from tulip.spec import GRSpec, translate
 
 
+def check_realizable(spec):
+    """Decide realizability of specification.
+
+    Consult the documentation of L{synthesize} about parameters.
+
+    @return: True if realizable, False if not, or an error occurs.
+    """
+    if isinstance(spec, GRSpec):
+        struct = translate(spec, 'slugs')
+    else:
+        struct = spec
+    s = slugs.convert_to_slugsin(struct, True)
+    with tempfile.NamedTemporaryFile(delete=False) as fin:
+        fin.write(s)
+    logger.info('\n\n structured slugs:\n\n {struct}'.format(
+        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    options = [fin.name, '--onlyRealizability']
+    realizable, out = _call_slugs(options)
+    return realizable
+
+
 def synthesize(spec):
     """Return strategy satisfying the specification C{spec}.
 
