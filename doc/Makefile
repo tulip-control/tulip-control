@@ -31,6 +31,8 @@ clean:
 	-rm -rf $(BUILDDIR)*
 
 html:
+	@echo "Generating bibliography.rst..."
+	./genbib.py bib.txt
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)html."
