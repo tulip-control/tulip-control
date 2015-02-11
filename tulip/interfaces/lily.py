@@ -114,7 +114,9 @@ def synthesize(formula, env_vars=None, sys_vars=None):
         out = p.stdout.read()
     except OSError as e:
         if e.errno == os.errno.ENOENT:
-            raise Exception('lily.pl not found in path.')
+            raise Exception(
+                'lily.pl not found in path.\n'
+                'See the Lily docs for setting PERL5LIB and PATH.')
         else:
             raise
 
