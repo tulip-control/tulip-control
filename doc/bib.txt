@@ -29,4 +29,4 @@ Technical Journal (BSTJ)*, Vol.34, No.5, pp. 1045 -- 1079, September,
 1955.
 
 [M56]
-E.F. Moore. `Gedanken-experiments on Sequential Machines <http://people.mokk.bme.hu/~kornai/termeszetes/moore_1956.pdf>`. *Annals of Mathematical Studies*, No. 34 (Automata Studies), pp 129 – 153, Princeton University Press, Princeton, N. J., 1956.
+E.F. Moore. `Gedanken-experiments on Sequential Machines <http://people.mokk.bme.hu/~kornai/termeszetes/moore_1956.pdf>`_. *Annals of Mathematical Studies*, No. 34 (Automata Studies), pp 129 – 153, Princeton University Press, Princeton, N. J., 1956.
