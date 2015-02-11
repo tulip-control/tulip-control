@@ -41,12 +41,16 @@ be followed:
   (i.e., leave one blank) before beginning with details.
 
 - When referring to publications, check for a corresponding entry in
-  ``doc/bibliography.rst`` and create one if needed, following the `BibTeX
-  alpha.bst style <http://sites.stat.psu.edu/~surajit/present/bib.htm#alpha>`_.
-  References in the Sphinx-built documentation are as usual, e.g.,
-  ``[WTOXM11]_``.  References in docstrings (in the code) should be to the URL
-  of the corresponding entry on the TuLiP website, using `Epydoc syntax
-  <http://epydoc.sourceforge.net/manual-epytext.html>`_, e.g., ::
+  ``doc/bib.txt`` and create one if needed. The syntax is described in
+  ``genbib.py``. References in the Sphinx-built documentation are achieved by
+  including a link, e.g., inline like ::
+
+    `[WTOXM11] <bibliography.html#wtoxm11>`_
+
+  which renders as `[WTOXM11] <bibliography.html#wtoxm11>`_.  References in docstrings (in the
+  code) should be to the URL of the corresponding entry on the TuLiP website,
+  using `Epydoc syntax <http://epydoc.sourceforge.net/manual-epytext.html>`_,
+  e.g., ::
 
     U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
 
