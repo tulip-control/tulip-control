@@ -75,13 +75,6 @@ def check_pydot():
 # "install" is given, unless both "install" and "nocheck" are given
 # (but typical users do not need "nocheck").
 
-java_msg = (
-    'java not found.\n'
-    "The jtlv synthesis tool included in the tulip distribution\n"
-    'will not be able to run. Unless the tool gr1c is installed,\n'
-    'it will not be possible to solve games.'
-)
-
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
 #
@@ -90,8 +83,13 @@ java_msg = (
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {'java': [check_java, 'Java  found.', java_msg]}
+other_depends = dict()
 
+java_msg = (
+    'java not found.\n'
+    "The jtlv synthesis tool included in the tulip distribution\n"
+    'will not be able to run. Unless `gr1c` or `slugs` is installed,\n'
+    'it will not be possible to solve games.')
 glpk_msg = (
     'GLPK seems to be missing\n'
     'and thus apparently not used by your installation of CVXOPT.\n'
@@ -119,7 +117,8 @@ pydot_msg = (
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+optionals = {'java': [check_java, 'Java found.', java_msg],
+             'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
              'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
