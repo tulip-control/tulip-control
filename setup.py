@@ -290,14 +290,16 @@ if perform_setup:
         url = 'http://tulip-control.org',
         bugtrack_url='http://github.com/tulip-control/tulip-control/issues',
         license = 'BSD',
-        requires = ['numpy', 'scipy', 'polytope', 'ply', 'networkx'],
         install_requires = [
-            'numpy >= 1.7',
-            'polytope >= 0.1.0',
             'ply >= 3.4',
             'networkx >= 1.6',
-            'cvxopt'
         ],
+        extras_require={
+            'hybrid': ['numpy >= 1.7',
+                       'scipy',
+                       'cvxopt >= 1.1.7',
+                       'polytope >= 0.1.0']},
+        tests_require=['nose'],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
