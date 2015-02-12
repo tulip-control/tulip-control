@@ -92,21 +92,25 @@ java_msg = (
 #           True to be success, and False failure.
 other_depends = {'java': [check_java, 'Java  found.', java_msg]}
 
-glpk_msg = 'GLPK seems to be missing\n' +\
-    'and thus apparently not used by your installation of CVXOPT.\n' +\
-    'If you\'re interested, see http://www.gnu.org/s/glpk/'
-gr1c_msg = 'gr1c not found or of version prior to ' +\
-    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
-    '.\n' +\
-    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
-    'see http://scottman.net/2012/gr1c'
-mpl_msg = 'matplotlib not found.\n' +\
-    'For many graphics drawing features in TuLiP, you must install\n' +\
-    'matplotlib (http://matplotlib.org/).'
-pydot_msg = 'pydot not found.\n' +\
-    'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
-    'export routines will be unavailable unless you install\n' +\
-    'pydot (http://code.google.com/p/pydot/).'
+glpk_msg = (
+    'GLPK seems to be missing\n'
+    'and thus apparently not used by your installation of CVXOPT.\n'
+    'If you\'re interested, see http://www.gnu.org/s/glpk/')
+gr1c_msg = (
+    'gr1c not found or of version prior to '
+    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +
+    '.\n'
+    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n'
+    'see http://scottman.net/2012/gr1c')
+mpl_msg = (
+    'matplotlib not found.\n'
+    'For many graphics drawing features in TuLiP, you must install\n'
+    'matplotlib (http://matplotlib.org/).')
+pydot_msg = (
+    'pydot not found.\n'
+    'Several graph image file creation and dot (http://www.graphviz.org/)\n'
+    'export routines will be unavailable unless you install\n'
+    'pydot (http://code.google.com/p/pydot/).')
 
 # These are nice to have but not necessary. Each item is of the form
 #
