@@ -4,7 +4,7 @@ Introduction
 The `Temporal Logic Planning (TuLiP) Toolbox
 <http://tulip-control.org>`_ is a collection of Python-based code for
 automatic synthesis of correct-by-construction embedded control software as
-discussed in [WTOXM11]_.  This chapter contains a brief overview of the toolbox,
+discussed in `[WTOXM11] <bibliography.html#wtoxm11>`_.  This chapter contains a brief overview of the toolbox,
 along with instructions on how to install the software.
 
 Though installation should be easy (and standardized) through setup.py, there
@@ -42,7 +42,7 @@ The procedure that we used is broken down into three primary steps:
 
   * Design a continuous controller that implements the discrete plan.
 
-More information on the solution strategy is available in [WTOXM11]_ and
+More information on the solution strategy is available in `[WTOXM11] <bibliography.html#wtoxm11>`_ and
 :doc:`formulations`.
 
 Version 1.0 Release Notes

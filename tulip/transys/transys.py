@@ -417,12 +417,9 @@ class FiniteTransitionSystem(LabeledDiGraph):
                     ' (will cause you errors later)'
                     ', with possible values:\n\t' +
                     pformat(codomain, indent=3) + 2 * '\n')
-        edges = self.edges_iter(data=True)
-        edges_str = pformat(edges, indent=3)
-
         s += (
             'Transitions labeled with sys and env actions:\n' +
-            edges_str +
+            pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n')
         return s
 
