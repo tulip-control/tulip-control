@@ -726,14 +726,14 @@ class SwitchedSysDyn(object):
         return cls((1,1), {(0,0):pwa_sys}, domain)
 
 
-def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False):
+def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False, opt_dist_weight=1.):
 	"""Generates a linear filter L that minimizes a certain infinity norm.
 	Inputs:
 	'Ain' - A-matrix in state space representation
 	'Cin' - C-matrix
-	'bound' - guarantee that |A-LC| < bound
+	'bound' - guarantee that |A-LC| <= bound
 	'use_mosek' - mosek will be used as solver if true
-	'opt_dist' - if true, the filter will minimize |A-LC| + |LC|
+	'opt_dist' - if true, the filter will minimize |A-LC| + opt_dist_weight*|LC|
 		   if false, the filter will minimize |A-LC|
 	"""
 	try:
@@ -751,23 +751,22 @@ def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False):
 	#Auxiliary vector
 	B = C.T
 	# Cost vector
-	c = []
-	if opt_dist == True:
-		cmax = 2
-	else:
-		cmax = 1
-	for i in range(C.size[0]):
-		c.append(0.)
-	for i in range(cmax):
-		c.append(1.)
+	c = matrix(0., (1,B.size[1]))
+	c = np.hstack([c, matrix(1., (1,B.size[0]))])
+	if opt_dist:
+		c = np.hstack([c, matrix(opt_dist_weight, (1,B.size[0]))])
 	c = matrix(c)
+	c = matrix(c).T
 
-	# Matrices to give the constraint Gx \leq b,
-	# with x = (L[i,1], L[i,2], ..., L[i, C.size[0]], z1, ..., zB.size[0], y1, ..., yB.size[0]), for i=1,..., A.size[0]
+	# Matrices to give the constraint Gx <= b,
+	# with x = (L[i,1], L[i,2], ..., L[i, C.size[0]], z1, ..., zB.size[0], y1, ..., yB.size[0]), for i=1,..., A.size[0].
+	# Here, zi are variables representing the elements in |A-LC| and yi the elements in |LC|, where these absolute values
+	# are to be interpreted element-wise.
 	for i in range(A.size[0]):
 		a = A[i,:].T
 		b = []
 		## Building b
+		# These constraints represent zi, yi as the above absolute values.
 		for index in range(B.size[0]):
 			b.append(-a[index])
 		for index in range(B.size[0]):
@@ -775,49 +774,58 @@ def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False):
 		if opt_dist:
 			for index in range(2*B.size[0]):
 				b.append(0)
-		b.append(bound/A.size[1])
+		# This constraint ensures that |A-LC| <= bound.
+		b.append(bound)
 		b = matrix(b) #b done!
 		## Building matrix
 		for index in range(B.size[0]):
+			# These constraints represent zi as the above absolute values.
 			result = -B[index,:]
+			result = np.hstack([result, matrix(0., (1,index))])
 			result = np.hstack([result, matrix(-1., (1,1))])
+			result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
 			if opt_dist:
-				result = np.hstack([result, matrix(0., (1,1))])
+			# These constraints represent yi as the above absolute values.
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
 			if index == 0:
 				G = result
 			else:
 				G = np.vstack([G, result])
 		for index in range(B.size[0]):
+			# These constraints represent zi as the above absolute values.
 			result = B[index,:]
+			result = np.hstack([result, matrix(0., (1,index))])
 			result = np.hstack([result, matrix(-1., (1,1))])
+			result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
 			if opt_dist:
-				result = np.hstack([result, matrix(0., (1,1))])
+			# These constraints represent yi as the above absolute values.
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
 			G = np.vstack([G, result])
 		if opt_dist:
+		# These constraints represent yi as the above absolute values.
 			for index in range(B.size[0]):
 				result = -B[index,:]
-				result = np.hstack([result, matrix(0., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+				result = np.hstack([result, matrix(0., (1,index))])
 				result = np.hstack([result, matrix(-1., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
 				G = np.vstack([G, result])
 			for index in range(B.size[0]):
 				result = B[index,:]
-				result = np.hstack([result, matrix(0., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+				result = np.hstack([result, matrix(0., (1,index))])
 				result = np.hstack([result, matrix(-1., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
 				G = np.vstack([G, result])
-		## Including the bound
-		offset = 0
-		if B.size[1] == 1:
-			offset = 1
-		result = matrix(0., (1,B.size[0]-offset))
-		result = np.hstack([result, matrix(1., (1,1))])
+		# This constraint ensures that |A-LC| <= bound.
+		result = matrix(0., (1,B.size[1]))
+		result = np.hstack([result, matrix(1., (1,B.size[0]))])
 		if opt_dist:
-			result = np.hstack([result, matrix(0., (1,1))])
-		print 'heyo', G, result
+			result = np.hstack([result, matrix(0., (1,B.size[0]))])
 		G = np.vstack([G, result])
 		G = matrix(G) #G done!
 		b = matrix(b)
 		c = matrix(c)
-
 		if use_mosek:
 			try:
 				sol = solvers.lp(c,G,b, solver='mosek')
@@ -828,14 +836,15 @@ def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False):
 				sol = solvers.lp(c,G,b)
 			except:
 				raise Exception("No optimal solution found in generateFilter.generateFilter when using default solver")
-		x = sol['x']
-		
-		if i == 0:
-			L = x[0:B.size[0]-offset].T
-		else:
-			L = np.vstack([L, x[0:B.size[0]-offset].T])
+		try:
+			x = sol['x']
+			if i == 0:
+				L = x[0:B.size[1]].T
+			else:
+				L = np.vstack([L, x[0:B.size[1]].T])
+		except:
+			raise Exception("No optimal solution found in generateFilter.generateFilter")
 	return L	# L done!
-
 
 def _push_time_data(system_list, time_semantics, timestep):
     """Overwrite the time data in system list. Throws warnings if overwriting
