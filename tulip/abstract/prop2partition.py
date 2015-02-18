@@ -371,8 +371,8 @@ def shrinkPoly(origPoly, epsilon):
 def shrinkRegion(origRegion, epsilon):
 	"""Returns a region where all polytopes in the Region
 	origRegion have been shrunk a distance 'epsilon'"""
-	list_poly = deepcopy(origRegion.list_poly)
-	props = deepcopy(origRegion.props)
+	list_poly = copy.deepcopy(origRegion.list_poly)
+	props = copy.deepcopy(origRegion.props)
 	lengthie = len(list_poly)
 	for i in range(lengthie):
 		list_poly[i] = shrinkPoly(list_poly[i], epsilon)
@@ -382,7 +382,7 @@ def shrinkPartition(origPartition, epsilon):
 	"""Returns a PropositionPreservingPartition where every
 	Region has been shrunk a distance 'epsilon'
 	"""
-	newPartition = deepcopy(origPartition)
+	newPartition = copy.deepcopy(origPartition)
 	lengthie = len(newPartition.regions)
 	for i in range(lengthie):
 		newPartition.regions[i] = shrinkRegion(newPartition.regions[i], epsilon)
