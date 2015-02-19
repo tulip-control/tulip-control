@@ -5,6 +5,9 @@ given) are entirely independent of TuLiP.  Below is a summary of contents.
 AES
   specification generation for an electric power system.  Consult AES/README.
 
+fmu
+  routines to export a TuLiP controller as a Functional Mock-up Unit (FMU).
+
 logging
   JSON file containing a default logging configuration and an example using it.
 

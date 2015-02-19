@@ -20,6 +20,11 @@
 #     +---+---+---+
 #
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('tulip.spec').setLevel(logging.ERROR)
+logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
+
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp

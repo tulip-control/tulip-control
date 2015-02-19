@@ -4,7 +4,7 @@ Additional Problem Formulations
 Discrete-time linear with disturbances
 --------------------------------------
 
-E.g., described in [WTOXM11]_, [W10]_.
+E.g., described in `[WTOXM11] <bibliography.html#wtoxm11>`_, `[W10] <bibliography.html#w10>`_.
 
 Problem description
 ```````````````````

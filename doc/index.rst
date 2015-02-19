@@ -15,6 +15,7 @@ Contents:
    install
    tutorial
    specifications
+   codegen
    benchmarks
    formulations
    dev_guide

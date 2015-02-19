@@ -32,8 +32,10 @@
 """
 Convenience functions for plotting
 
-from here:
-    https://github.com/johnyf/pyvectorized
+WARNING: The public functions dimension, newax, dom2vec, quiver will
+eventually be removed.  Their use in new applications is discouraged.
+
+They come from https://github.com/johnyf/pyvectorized
 """
 from __future__ import division
 
@@ -53,7 +55,7 @@ except Exception as e:
 # from mayavi import mlab
 
 def dimension(ndarray):
-    """dimension of ndarray
+    """dimension of ndarray  (DEPRECATED)
     
     - ndim == 1:
         dimension = 1
@@ -66,7 +68,7 @@ def dimension(ndarray):
 
 def newax(subplots=(1, 1), fig=None,
           mode='list', dim=2):
-    """Create (possibly multiple) new axes handles.
+    """Create (possibly multiple) new axes handles.  (DEPRECATED)
     
     @param fig: attach axes to this figure
     @type fig: figure object,
@@ -143,7 +145,7 @@ def newax(subplots=(1, 1), fig=None,
     return (ax, fig)
 
 def dom2vec(domain, resolution):
-    """Matrix of column vectors for meshgrid points.
+    """Matrix of column vectors for meshgrid points.  (DEPRECATED)
     
     Returns a matrix of column vectors for the meshgrid
     point coordinates over a parallelepiped domain
@@ -175,7 +177,7 @@ def dom2vec(domain, resolution):
     return q
 
 def quiver(x, v, ax=None, **kwargs):
-    """Multi-dimensional quiver.
+    """Multi-dimensional quiver.  (DEPRECATED)
     
     Plot v columns at points in columns of x
     in axes ax with plot formatting options in kwargs.

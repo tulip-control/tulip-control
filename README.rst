@@ -14,6 +14,10 @@ To avoid checking for optional dependencies, add the option "nocheck"::
 
   python setup.py install nocheck
 
+TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
+
+  pip install tulip
+
 Detailed instructions, including notes about dependencies and troubleshooting,
 are available at http://tulip-control.sourceforge.net/doc/install.html
 
@@ -49,11 +53,9 @@ may also read API documentation using the standard pydoc tool.  E.g., ::
 Testing
 -------
 
-Tests are performed using nose; see http://readthedocs.org/docs/nose/ for
-details.  From the root of the source tree (i.e., where setup.py is located),
-run::
+Tests are performed using `nose <http://readthedocs.org/docs/nose/>`_.  From the
+root of the source tree (i.e., where setup.py is located), ::
 
   ./run_tests.py
 
-to run all available tests.  Use the flag "-h" to see driver script options.  To
-disable output capture, add the flag "-s" when invoking nose.
+to run all available tests.  For a summary of usage, ``./run_tests.py -h``
