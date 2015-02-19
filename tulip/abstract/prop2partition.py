@@ -309,7 +309,7 @@ def pwa_shrunk_partition(pwa_sys, ppp, eps, abs_tol=1e-5):
     for i, subsys in enumerate(pwa_sys.list_subsys):
         dom = shrinkPoly(subsys.domain, eps)
         for j, region in enumerate(ppp.regions):
-            isect = region.intersect(dom)
+            isect = pc.reduce(region.intersect(dom))
             
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
@@ -366,7 +366,7 @@ def shrinkPoly(origPoly, epsilon):
 	b = origPoly.b.copy()
 	for i in range(A.shape[0]):
 		b[i] = b[i] - epsilon*np.linalg.norm(A[i][:])
-	return pc.Polytope(A,b)
+	return pc.reduce(pc.Polytope(A,b))
 
 def shrinkRegion(origRegion, epsilon):
 	"""Returns a region where all polytopes in the Region
