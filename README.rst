@@ -55,3 +55,9 @@ run::
 
 to run all available tests.  Use the flag "-h" to see driver script options.  To
 disable output capture, add the flag "-s" when invoking nose.
+
+
+Dependencies
+------------
+
+It requires slugs and ltl2ba folders to be located under interfaces directory
