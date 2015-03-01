@@ -50,7 +50,7 @@ _hl = 40 * '-'
 pure = {'present', 'absent'}
 
 def is_valuation(ports, valuations):
-    for name, port_type in ports.items():
+    for name, port_type in ports.iteritems():
         curvaluation = valuations[name]
         
         # functional set membership description ?
@@ -71,7 +71,7 @@ def create_machine_ports(spc_vars):
         These are as originally defined by the user or synth.
     """
     ports = dict()
-    for env_var, var_type in spc_vars.items():
+    for env_var, var_type in spc_vars.iteritems():
         if var_type == 'boolean':
             domain = {0, 1}
         elif isinstance(var_type, tuple):
@@ -1097,8 +1097,3 @@ def strip_ports(mealy, names):
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)
     return new
-
-####
-# Program Graph (memo)
-####
-

@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -56,96 +56,102 @@ PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
 
 def _format_docstring(**kwargs):
     """Apply C{kwargs} to function docstring using C{format}."""
-    
+
     def dec(func):
         func.__doc__ = func.__doc__.format(**kwargs)
         return func
-    
+
     return dec
 
 
 class Lexer(object):
     """Token rules to build LTL lexer."""
-    
+
     def __init__(self, debug=False):
         # for setting the logger, call build explicitly
         self.build(debug=debug)
-    
+
     tokens = (
         'TRUE', 'FALSE',
         'NAME', 'NUMBER',
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'ALWAYS', 'EVENTUALLY', 'NEXT',  # 'PRIME',
+        'ALWAYS', 'EVENTUALLY', 'NEXT',
         'UNTIL', 'RELEASE',
         'PLUS', 'MINUS', 'TIMES', 'DIV',
-        'LPAREN', 'RPAREN', 'DQUOTES'
+        'LPAREN', 'RPAREN', 'DQUOTES', 'PRIME',
+        'COMMENT', 'NEWLINE'
     )
-    
+
     # Tokens
     t_TRUE = 'TRUE|True|true'
     t_FALSE = 'FALSE|False|false'
-    
+
     t_NEXT = r'X|next'
     # t_PRIME  = r'\''
     t_ALWAYS = r'\[\]|G'
     t_EVENTUALLY = r'\<\>|F'
-    
+
     t_UNTIL = r'U'
     t_RELEASE = r'R'
-    
+
     t_NOT = r'\!'
     t_AND = r'\&\&|\&'
     t_OR = r'\|\||\|'
     t_XOR = r'\^'
-    
-    t_EQUALS = r'\=|\=\='
+
+    t_EQUALS = r'\=\=|\='
     t_NEQUALS = r'\!\='
     t_LT = r'\<'
     t_LE = r'\<\='
     t_GT = r'>\='
     t_GE = r'>'
-    
+
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-    
+
     t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
               r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
     t_NUMBER = r'\d+'
-    
+
     t_IMP = '->'
     t_BIMP = '\<->'
-    
+
     t_PLUS = r'\+'
     t_MINUS = r'-'
     t_TIMES = r'\*'
     t_DIV = r'/'
-    
+
     t_DQUOTES = r'\"'
+    t_PRIME = r"\'"
 
     # Ignored characters
     t_ignore = " \t"
 
-    def t_newline(self, t):
+    def t_COMMENT(self, t):
+        r'\#.*'
+        return
+
+    def t_NEWLINE(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
-        
+
     def t_error(self, t):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
-    
+
     @_format_docstring(logger=LEX_LOGGER)
     def build(self, debug=False, debuglog=None, **kwargs):
         """Create a lexer.
-        
+
         @param kwargs: Same arguments as C{{ply.lex.lex}}:
-        
+
           - except for C{{module}} (fixed to C{{self}})
           - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(LEX_LOGGER)
-        
+
         self.lexer = ply.lex.lex(
             module=self,
             debug=debug,
@@ -156,7 +162,7 @@ class Lexer(object):
 
 class Parser(object):
     """Production rules to build LTL parser."""
-    
+
     # lowest to highest
     precedence = (
         ('right', 'UNTIL', 'RELEASE'),
@@ -166,23 +172,26 @@ class Parser(object):
         ('left', 'OR'),
         ('left', 'AND'),
         ('right', 'ALWAYS', 'EVENTUALLY'),
-        ('right', 'NEXT'),
-        ('right', 'NOT'),
-        # ('left', 'PRIME'),
-        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
-        ('nonassoc', 'TIMES', 'DIV'),
-        ('nonassoc', 'PLUS', 'MINUS'),
+        ('left', 'EQUALS', 'NEQUALS'),
+        ('left', 'LT', 'LE', 'GT', 'GE'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIV'),
+        ('right', 'NOT', 'UMINUS'),
+        ('right', 'NEXT', 'XNEXT'),
+        ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE')
     )
-    
+
+    ast = ast.nodes
+
     def __init__(self):
         self.graph = None
-        
+
         self.lexer = Lexer()
         self.tokens = self.lexer.tokens
-        
+
         self.build()
-    
+
     def build(self):
         self.parser = ply.yacc.yacc(
             module=self,
@@ -195,21 +204,21 @@ class Parser(object):
     def rebuild_parsetab(self, tabmodule, outputdir='',
                          debug=True, debuglog=None):
         """Rebuild parsetable in debug mode.
-        
+
         @param tabmodule: name of table file
         @type tabmodule: C{{str}}
-        
+
         @param outputdir: save C{{tabmodule}} in this directory.
         @type outputdir: c{{str}}
-        
+
         @param debuglog: defaults to logger C{{"{logger}"}}.
         @type debuglog: C{{logging.Logger}}
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(YACC_LOGGER)
-        
+
         self.lexer.build(debug=debug)
-        
+
         self.parser = ply.yacc.yacc(
             module=self,
             tabmodule=tabmodule,
@@ -218,54 +227,34 @@ class Parser(object):
             debug=debug,
             debuglog=debuglog
         )
-    
+
     @_format_docstring(logger=PARSER_LOGGER)
     def parse(self, formula, debuglog=None):
         """Parse formula string and create abstract syntax tree (AST).
-        
+
         @param logger: defaults to logger C{{"{logger}"}}.
         @type logger: C{{logging.Logger}}
         """
         if debuglog is None:
             debuglog = logging.getLogger(PARSER_LOGGER)
-        
-        g = ast.LTL_AST()
-        self.graph = g
         root = self.parser.parse(
             formula,
             lexer=self.lexer.lexer,
             debug=debuglog
         )
-        
+
         if root is None:
             raise Exception('failed to parse:\n\t{f}'.format(f=formula))
-        
-        g.root = root
-        return g
-    
-    def add_identifier(self, Type, x):
-        identifier = Type(x)
-        self.graph.add_identifier(identifier)
-        return identifier
-    
-    def add_unary(self, Type, p):
-        operator = Type(p[1])
-        self.graph.add_unary(operator, p[2])
-        return operator
-    
-    def add_binary(self, Type, p):
-        operator = Type(p[2])
-        self.graph.add_binary(operator, p[1], p[3])
-        return operator
-    
+        return root
+
     def p_arithmetic(self, p):
         """expression : expression TIMES expression
                       | expression DIV expression
                       | expression PLUS expression
                       | expression MINUS expression
         """
-        p[0] = self.add_binary(ast.Arithmetic, p)
-    
+        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
+
     def p_comparator(self, p):
         """expression : expression EQUALS expression
                       | expression NEQUALS expression
@@ -274,69 +263,59 @@ class Parser(object):
                       | expression GT expression
                       | expression GE expression
         """
-        p[0] = self.add_binary(ast.Comparator, p)
-    
-    def p_and(self, p):
-        """expression : expression AND expression"""
-        p[0] = self.add_binary(ast.And, p)
-    
-    def p_or(self, p):
-        """expression : expression OR expression"""
-        p[0] = self.add_binary(ast.Or, p)
-    
-    def p_xor(self, p):
-        """expression : expression XOR expression"""
-        p[0] = self.add_binary(ast.Xor, p)
-    
-    def p_imp(self, p):
-        """expression : expression IMP expression"""
-        p[0] = self.add_binary(ast.Imp, p)
-    
-    def p_bimp(self, p):
-        """expression : expression BIMP expression"""
-        p[0] = self.add_binary(ast.BiImp, p)
-    
-    def p_unary_temp_op(self, p):
-        """expression : NEXT expression
+        p[0] = self.ast.Comparator(p[2], p[1], p[3])
+
+    def p_binary(self, p):
+        """expression : expression AND expression
+                      | expression OR expression
+                      | expression XOR expression
+                      | expression IMP expression
+                      | expression BIMP expression
+                      | expression UNTIL expression
+                      | expression RELEASE expression
+        """
+        p[0] = self.ast.Binary(p[2], p[1], p[3])
+
+    def p_unary(self, p):
+        """expression : NOT expression
+                      | NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
-        p[0] = self.add_unary(ast.UnTempOp, p)
-    
-    def p_bin_temp_op(self, p):
-        """expression : expression UNTIL expression
-                      | expression RELEASE expression
-        """
-        p[0] = self.add_binary(ast.BiTempOp, p)
-    
-    def p_not(self, p):
-        """expression : NOT expression"""
-        p[0] = self.add_unary(ast.Not, p)
-    
+        p[0] = self.ast.Unary(p[1], p[2])
+
+    def p_postfix_next(self, p):
+        """expression : expression PRIME"""
+        p[0] = self.ast.Unary('X', p[1])
+
     def p_group(self, p):
         """expression : LPAREN expression RPAREN"""
         p[0] = p[2]
-    
+
     def p_number(self, p):
         """expression : NUMBER"""
-        p[0] = self.add_identifier(ast.Num, p[1])
-    
+        p[0] = self.ast.Num(p[1])
+
+    def p_negative_number(self, p):
+        """expression : MINUS NUMBER %prec UMINUS"""
+        p[0] = self.ast.Num('-' + p[2])
+
     def p_expression_name(self, p):
         """expression : NAME"""
-        p[0] = self.add_identifier(ast.Var, p[1])
-    
-    def p_expression_const(self, p):
+        p[0] = self.ast.Var(p[1])
+
+    def p_expression_str(self, p):
         """expression : DQUOTES NAME DQUOTES"""
-        p[0] = self.add_identifier(ast.Const, p[2])
-    
+        p[0] = self.ast.Str(p[2])
+
     def p_bool(self, p):
         """expression : TRUE
                       | FALSE
         """
-        p[0] = self.add_identifier(ast.Bool, p[1])
-    
+        p[0] = self.ast.Bool(p[1])
+
     def p_error(self, p):
-        warnings.warn('Syntax error at "{p}"'.format(p=p.value))
+        raise Exception('Syntax error at "{p}"'.format(p=p.value))
 
 
 def parse(formula):
@@ -348,4 +327,4 @@ def parse(formula):
 if __name__ == '__main__':
     s = 'up && !(loc = 29) && X((u_in = 0) || (u_in = 2))'
     parsed_formula = parse(s)
-    print('Parsing result: {s}'.format(s=parsed_formula.to_gr1c()))
+    print('Parsing result: {s}'.format(s=parsed_formula))

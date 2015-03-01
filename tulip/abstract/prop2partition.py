@@ -426,7 +426,9 @@ def product_interval(list1, list2):
             new_list.append(list1[m]+list2[n])
     return new_list
 
-def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
+################################
+
+def find_equilibria(ssd,cont_props,eps=0): 
     """ Finds the polytope that contains the equilibrium points
 
     @param ssd: The dynamics of the switched system
@@ -435,14 +437,6 @@ def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
     @param cont_props: The polytope representations of the atomic 
     propositions of the state space to be used in partitiong 
     @type cont_props: dict of polytope.Polytope
-
-    @param outside_props: The set of names of atomic propositions 
-    that are beyond the domain (i.e. 'OUTSIDE')
-    @type outside_props: set()
-
-    @param eq_props: The set of names of atomic propositions 
-    where equilibrium points for a mode can be found
-    @type eq_props: set()
 
     @param eps: The value by which the width of all polytopes
     containing equilibrium points is increased.
@@ -471,74 +465,54 @@ def find_equilibria(ssd,cont_props,outside_props,eq_props,eps=0.1):
         return A,B
 
     cont_ss=ssd.cts_ss
+    min_outx=cont_ss.b[0]
+    min_outy=cont_ss.b[1]
+    max_outx=min_outx+1
+    max_outy=min_outy+1
+    abs_tol=1e-7
+
     for mode in ssd.modes:
         cont_dyn=ssd.dynamics[mode].list_subsys[0]
         A=cont_dyn.A
         K=cont_dyn.K.T[0]
-        #cont_ss.b=np.array([cont_ss.b]).T
         I=np.eye(len(A),dtype=float)
         rank_IA=np.linalg.matrix_rank(I-A)
         concat=np.hstack((I-A,K.reshape(len(A),1)))
         rank_concat=np.linalg.matrix_rank(concat)
         soln=pc.Polytope()
         props_sym='eqpnt_'+str(mode[1])
-        eq_props|={props_sym}
 
         if (rank_IA==rank_concat):
             if (rank_IA==len(A)):
                 equil=np.dot(np.linalg.inv(I-A),K)
-                print "Equilibrium Points: "+str(mode)
-                print equil
-                print "---------------------------------"
                 if (equil[0]>=(-cont_ss.b[2]) and equil[0]<=cont_ss.b[0] 
                         and equil[1]>=(-cont_ss.b[3]) 
                         and equil[1]<=cont_ss.b[1]):
-                    delta=equil/100
-                    soln=box2poly([[equil[0]-delta[0], equil[0]+delta[0]],
+                    delta=eps+equil/100
+                    soln=pc.box2poly([[equil[0]-delta[0], equil[0]+delta[0]],
                         [equil[1]-delta[1], equil[1]+delta[1]]]) 
                 else:
-                    soln=box2poly([[24.,25.],[24.,25.]])
-                    outside_props|={props_sym}
+                    soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
+
             elif (rank_IA<len(A)):
-                #eps=abs(min(np.amin(K),np.amin(I-A)))
-                #eps=0.0005
-                eps=0.2
                 if eps==0:
                     eps=abs(min(np.amin(-K),np.amin(A-I)))
                 IAn,Kn = normalize(I-A,K)
                 soln=pc.Polytope(np.vstack((IAn,-IAn)), 
                         np.hstack((Kn+eps,-Kn+eps)))
-
-                print "First soln: "+str(mode)
-                print soln
-                print "---------------------------------"
                 relevantsoln=pc.intersect(soln,cont_ss,abs_tol)
-                if pc.is_empty(relevantsoln):
-                    print "Intersect "+str(mode)+" is empty"
-                else:
-                    print "Intersect "+str(mode)+" is not empty - good job!!"
-                print relevantsoln
-                print "---------------------------------"
-
                 if(pc.is_empty(relevantsoln) & ~pc.is_empty(soln)):
-                    soln=box2poly([[24.,25.],[24.,25.]])
-                    outside_props|={props_sym}
+                    soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
                 else:
                     soln=relevantsoln
         
         else:
             #Assuming trajectories go to infinity as there are no 
             #equilibrium points
-            soln=box2poly([[24.,25.],[24.,25.]])
-            outside_props|={props_sym}
+            soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
             print str(mode)+" trajectories go to infinity! No solution"
 
-        print "Normalized soln: "+str(mode)
-        print soln
-        print "---------------------------------"
         cont_props[props_sym]=soln
-
-################################
 
 class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:

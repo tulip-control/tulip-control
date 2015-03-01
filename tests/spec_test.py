@@ -69,13 +69,6 @@ class GRSpec_test:
     def tearDown(self):
         self.f = None
 
-    def test_sym_to_prop(self):
-        original_env_vars = copy.copy(self.f.env_vars)
-        original_sys_vars = copy.copy(self.f.sys_vars)
-        self.f.sym_to_prop({"x":"bar", "y":"uber||cat"})
-        assert self.f.env_vars == original_env_vars and self.f.sys_vars == original_sys_vars
-        assert self.f.env_prog == ["!(bar)", "(bar)"] and self.f.sys_prog == ["(uber||cat)&&!(bar)"]
-
     def test_or(self):
         g = GRSpec(env_vars={"z"}, env_prog=["!z"])
         h = self.f | g
@@ -119,17 +112,6 @@ def parse_parse_test():
                                     ("p G", None)]:
         yield parse_parse_check, formula, expected_len
 
-
-def form_mutex_check(varnames, expected_formulae):
-    # More like a regression test given fragility of formula strings.
-    assert mutex(varnames) == expected_formulae
-
-def form_mutex_test():
-    for (varnames, expected_form) in [(["a", "b", "c"], {"a -> ! (b || c)",
-                                                         "b -> ! (c)"}),
-                                      (set(), set()),
-                                      ({"cat"}, set())]:
-        yield form_mutex_check, varnames, expected_form
 
 def full_name_operators_test():
     formulas = {

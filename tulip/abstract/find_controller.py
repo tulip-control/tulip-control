@@ -48,6 +48,8 @@ from __future__ import absolute_import
 
 import numpy as np
 from cvxopt import matrix, solvers
+solvers.options['msg_lev'] = 'GLP_MSG_OFF'
+
 import polytope as pc
 
 from .feasible import solve_feasible, createLM, _block_diag2
@@ -108,7 +110,7 @@ def get_input(
     @param ssys: system dynamics
     @type ssys: L{LtiSysDyn}
     
-    @param abstraction: state space partition
+    @param abstraction: abstract system dynamics
     @type abstraction: L{AbstractPwa}
     
     @param start: index of the initial state in C{abstraction.ts}
@@ -164,7 +166,7 @@ def get_input(
     regions = part.regions
     
     ofts = abstraction.ts
-    original_regions = abstraction.original_regions
+    original_regions = abstraction.orig_ppp
     orig = abstraction._ppp2orig
     
     params = abstraction.disc_params

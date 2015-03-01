@@ -39,11 +39,10 @@ logger = logging.getLogger(__name__)
 
 import copy
 import warnings
+from tulip import transys
+from tulip.spec import GRSpec
+from tulip.interfaces import jtlv, gr1c
 
-from . import transys
-from .spec import GRSpec
-from .interfaces import jtlv
-from .interfaces import gr1c
 
 _hl = '\n' + 60 * '-'
 

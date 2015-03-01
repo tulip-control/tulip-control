@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-""" 
+"""
 Formulae constituting specifications
 """
 from __future__ import absolute_import
@@ -46,22 +46,6 @@ import copy
 from tulip.spec import parser
 from . import ast
 
-def mutex(varnames):
-    """Create mutual exclusion formulae from iterable of variables.
-
-    E.g., given a set of variable names {"a", "b", "c"}, return a set
-    of formulae {"a -> ! (c || b)", "c -> ! (b)"}.
-    """
-    mutex = set()
-    numVars = len(varnames)
-    varnames = list(varnames)
-    for i in range(0, numVars - 1):
-        mut_str = varnames[i] + ' -> ! (' + varnames[i + 1]
-        for j in range(i + 2, numVars):
-            mut_str += ' || ' + varnames[j]
-        mut_str += ')'
-        mutex |= {mut_str}
-    return mutex
 
 class LTL(object):
     """LTL formula (specification)
@@ -108,11 +92,11 @@ class LTL(object):
             input_variables = dict()
         if output_variables is None:
             output_variables = dict()
-        
+
         self.formula = formula
         self.input_variables = input_variables
         self.output_variables = output_variables
-        
+
         self.check_vars()
 
     def __str__(self):
@@ -149,12 +133,12 @@ class LTL(object):
             for k, v in self.output_variables.items():
                 output += str(k) + ' : ' + self._domain_str(v) + ';\n'
         return output + '\n%%\n' + self.formula
-    
+
     def check_vars(self):
         """Raise Exception if variabe definitions are invalid.
-        
+
         Checks:
-        
+
           - env and sys have common vars
           - some var is also a possible value of some var (including itself)
             (of arbitrary finite data type)
@@ -330,7 +314,8 @@ class GRSpec(LTL):
         self._cache = {
             'string': dict(),
             'jtlv': dict(),
-            'gr1c': dict()
+            'gr1c': dict(),
+            'slugs': dict()
         }
         self._bool_int = dict()
         self._parts = {
@@ -338,7 +323,7 @@ class GRSpec(LTL):
             for x in {'env_', 'sys_'}
             for y in {'init', 'safety', 'prog'}
         }
-        
+
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
@@ -360,7 +345,7 @@ class GRSpec(LTL):
 
         for formula_component in self._parts:
             x = getattr(self, formula_component)
-            
+
             if isinstance(x, str):
                 if not x:
                     setattr(self, formula_component, [])
@@ -368,10 +353,10 @@ class GRSpec(LTL):
                     setattr(self, formula_component, [x])
             elif not isinstance(x, list):
                 setattr(self, formula_component, list(x))
-            
+
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
-        
+
         LTL.__init__(self, formula=self.to_canon(),
                      input_variables=self.env_vars,
                      output_variables=self.sys_vars)
@@ -403,23 +388,23 @@ class GRSpec(LTL):
 
     def pretty(self):
         """Return pretty printing string."""
-        
+
         output = 'ENVIRONMENT VARIABLES:\n'
         if self.env_vars:
             for k, v in self.env_vars.iteritems():
                 output += '\t' + str(k) + '\t' + str(v) + '\n'
         else:
             output += '\t(none)\n'
-        
+
         output += '\nSYSTEM VARIABLES:\n'
         if self.sys_vars:
             for k, v in self.sys_vars.iteritems():
                 output += '\t' + str(k) + '\t' + str(v) + '\n'
         else:
             output += '\t(none)\n'
-        
+
         output += '\nFORMULA:\n'
-        
+
         output += 'ASSUMPTION:\n'
         if self.env_init:
             output += (
@@ -446,21 +431,21 @@ class GRSpec(LTL):
         output += 'GUARANTEE:\n'
         if self.sys_init:
             output += (
-                '    INITIAL\n\t  '
+                '    INITIAL\n\t  ' +
                 '\n\t& '.join([
                     '(' + f + ')' for f in self.sys_init
                 ]) + '\n'
             )
         if self.sys_safety:
             output += (
-                '    SAFETY\n\t  []'
+                '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
                     '(' + f + ')' for f in self.sys_safety
                 ]) + '\n'
             )
         if self.sys_prog:
             output += (
-                '    LIVENESS\n\t  []<>'
+                '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
                     '(' + f + ')' for f in self.sys_prog
                 ]) + '\n'
@@ -486,25 +471,25 @@ class GRSpec(LTL):
     def __or__(self, other):
         """Create union of two specifications."""
         result = self.copy()
-        
+
         if not isinstance(other, GRSpec):
             raise TypeError('type(other) must be GRSpec')
-        
+
         # common vars have same types ?
         for varname in set(other.env_vars) & set(result.env_vars):
             if other.env_vars[varname] != result.env_vars[varname]:
                 raise ValueError('Mismatched variable domains')
-        
+
         for varname in set(other.sys_vars) & set(result.sys_vars):
             if other.sys_vars[varname] != result.sys_vars[varname]:
                 raise ValueError('Mismatched variable domains')
-        
+
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
-        
+
         for x in self._parts:
             getattr(result, x).extend(getattr(other, x))
-        
+
         return result
 
     def to_canon(self):
@@ -515,7 +500,7 @@ class GRSpec(LTL):
         of the TuLiP User's Guide.
         """
         conj_cstr = lambda s: ' && ' if s else ''
-        
+
         assumption = ''
         if self.env_init:
             assumption += _conj(self.env_init)
@@ -523,7 +508,7 @@ class GRSpec(LTL):
             assumption += conj_cstr(assumption) + _conj(self.env_safety, '[]')
         if self.env_prog:
             assumption += conj_cstr(assumption) + _conj(self.env_prog, '[]<>')
-        
+
         guarantee = ''
         if self.sys_init:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_init)
@@ -540,29 +525,7 @@ class GRSpec(LTL):
                 return guarantee
         else:
             return 'True'
-    
-    def to_smv(self):
-        raise Exception('GRSpec.to_smv is defunct, possibly temporarily')
-        # trees = []
-        # # NuSMV can only handle system states
-        # for s, ops in [(self.sys_init, []), (self.sys_safety, ['[]']),
-        #                 (self.sys_prog, ['[]', '<>'])]:
-        #     if s:
-        #         if isinstance(s, str):
-        #             s = [s]
-        #         subtrees = []
-        #         ops.reverse() # so we apply operators outwards
-        #         for f in s:
-        #             t = ltl_parse.parse(f)
-        #             # assign appropriate temporal operators
-        #             for op in ops:
-        #                 t = ltl_parse.UnTempOp.new(t, op)
-        #             subtrees.append(t)
-        #         # & together expressions
-        #         t = reduce(lambda x, y: ltl_parse.And.new(x, y), subtrees)
-        #         trees.append(t)
-        # # & together converted subformulae
-        # return reduce(lambda x, y: ltl_parse.And.new(x, y), trees)
+
 
     def to_jtlv(self):
         """Return specification as list of two strings [assumption, guarantee].
@@ -571,44 +534,44 @@ class GRSpec(LTL):
         """
         logger.info('translate to jtlv...')
         _finite_domain2ints(self)
-        
+
         f = self._jtlv_str
-        
+
         parts = [f(self.env_init, 'valid initial env states', ''),
                  f(self.env_safety, 'safety assumption on environment', '[]'),
                  f(self.env_prog, 'justice assumption on environment', '[]<>')]
-        
+
         assumption = ' & \n'.join(x for x in parts if x)
-        
+
         parts = [f(self.sys_init, 'valid initial system states', ''),
                  f(self.sys_safety, 'safety requirement on system', '[]'),
                  f(self.sys_prog, 'progress requirement on system', '[]<>')]
-        
+
         guarantee = ' & \n'.join(x for x in parts if x)
 
         return (assumption, guarantee)
-    
+
     def _jtlv_str(self, m, comment, prefix='[]<>'):
         # no clauses ?
         if not m:
             return ''
-        
+
         w = []
         for x in m:
             logger.debug('translate clause: ' + str(x))
-            
+
             if not x:
                 continue
-            
+
             c = _to_lang(self, x, 'jtlv')
-            
+
             # collapse any whitespace between any
             # "next" operator that precedes parenthesis
             if prefix == '[]':
                 c = re.sub(r'next\s*\(', 'next(', c)
-            
+
             w.append('\t{prefix}({formula})'.format(prefix=prefix, formula=c))
-        
+
         return '-- {comment}\n{formula}'.format(
             comment=comment, formula=' & \n'.join(w)
         )
@@ -619,7 +582,7 @@ class GRSpec(LTL):
         Cf. L{interfaces.gr1c}.
         """
         logger.info('translate to gr1c...')
-        
+
         def _to_gr1c_print_vars(vardict):
             output = ''
             for var, dom in vardict.iteritems():
@@ -634,36 +597,78 @@ class GRSpec(LTL):
                     raise ValueError('Domain not supported by gr1c: ' +
                                      str(dom))
             return output
-        
+
         _finite_domain2ints(self)
-        
+
         output = (
             'ENV:' + _to_gr1c_print_vars(self.env_vars) + ';\n' +
             'SYS:' + _to_gr1c_print_vars(self.sys_vars) + ';\n' +
-        
+
             self._gr1c_str(self.env_init, 'ENVINIT', '') +
             self._gr1c_str(self.env_safety, 'ENVTRANS', '[]') +
             self._gr1c_str(self.env_prog, 'ENVGOAL', '[]<>') + '\n' +
-        
+
             self._gr1c_str(self.sys_init, 'SYSINIT', '') +
             self._gr1c_str(self.sys_safety, 'SYSTRANS', '[]') +
             self._gr1c_str(self.sys_prog, 'SYSGOAL', '[]<>')
         )
         return output
-    
+
     def _gr1c_str(self, s, name='SYSGOAL', prefix='[]<>'):
-        if s:
-            f = '\n& '.join([
-                prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
-                for x in s
-            ])
-            return '{name}: {f};\n'.format(name=name, f=f)
-        else:
+        if not s:
             return '{name}:;\n'.format(name=name)
-    
+
+        f = '\n& '.join([
+            prefix + '({u})'.format(u=_to_lang(self, x, 'gr1c'))
+            for x in s
+        ])
+        return '{name}: {f};\n'.format(name=name, f=f)
+
+    def to_slugs(self):
+        """Return structured slugs spec.
+
+        @type spec: L{GRSpec}.
+        """
+        _finite_domain2ints(self)
+
+        f = self._slugs_str
+        return (
+            self._format_slugs_vars(self.env_vars, 'INPUT') +
+            self._format_slugs_vars(self.sys_vars, 'OUTPUT') +
+
+            f(self.env_safety, 'ENV_TRANS') +
+            f(self.env_prog, 'ENV_LIVENESS') +
+            f(self.env_init, 'ENV_INIT', sep='&') +
+
+            f(self.sys_safety, 'SYS_TRANS') +
+            f(self.sys_prog, 'SYS_LIVENESS') +
+            f(self.sys_init, 'SYS_INIT', sep='&')
+        )
+
+    def _slugs_str(self, r, name, sep='\n'):
+        if not r:
+            return '[{name}]\n'.format(name=name)
+
+        sep = ' {sep} '.format(sep=sep)
+        f = sep.join(_to_lang(self, x, 'slugs') for x in r if x)
+        return '[{name}]\n{f}\n\n'.format(name=name, f=f)
+
+    def _format_slugs_vars(self, vardict, name):
+        a = []
+        for var, dom in vardict.iteritems():
+            if dom == 'boolean':
+                a.append(var)
+            elif isinstance(dom, tuple) and len(dom) == 2:
+                a.append('{var}: {min}...{max}'.format(
+                    var=var, min=dom[0], max=dom[1])
+                )
+            else:
+                raise ValueError('unknown domain type: {dom}'.format(dom=dom))
+        return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
+
     def ast(self, x):
         """Return AST corresponding to formula x.
-        
+
         If AST for formula C{x} has already been computed earlier,
         then return cached result.
         """
@@ -671,27 +676,27 @@ class GRSpec(LTL):
             logger.debug('current cache of ASTs:\n' +
                          pprint.pformat(self._ast) + 3 * '\n')
             logger.debug('check if: ' + str(x) + ', is in cache.')
-        
+
         if x in self._ast:
             logger.debug(str(x) + ' is already in cache')
         else:
             logger.info('AST cache does not contain:\n\t' + str(x) +
                         '\nNeed to parse.')
             self.parse()
-            
+
         return self._ast[x]
-    
+
     def parse(self):
         """Parse each clause and store it.
-        
+
         The AST resulting from each clause is stored
         in the C{dict} attribute C{ast}.
         """
         logger.info('parsing ASTs to cache them...')
-        
+
         vardoms = dict(self.env_vars)
         vardoms.update(self.sys_vars)
-        
+
         # parse new clauses and cache the resulting ASTs
         for p in self._parts:
             s = getattr(self, p)
@@ -699,179 +704,125 @@ class GRSpec(LTL):
                 if x in self._ast:
                     logger.debug(str(x) + ' is already in cache')
                     continue
-                
+
                 logger.debug('parse: ' + str(x))
                 tree = parser.parse(x)
-                
-                ast.check_for_undefined_identifiers(tree, vardoms)
-                
+                g = tx.Tree.from_recursive_ast(tree)
+                tx.check_for_undefined_identifiers(g, vardoms)
                 self._ast[x] = tree
-        
+
         # rm cached ASTs that correspond to deleted clauses
         self._collect_cache_garbage(self._ast)
-        
+
         logger.info('done parsing ASTs.\n')
-    
+
     def _collect_cache_garbage(self, cache):
         logger.info('collecting garbage from GRSpec cache...')
-        
+
         # rm cached ASTs that correspond to deleted clauses
         s = set(cache)
         for p in self._parts:
             # emptied earlier ?
             if not s:
                 break
-            
+
             w = getattr(self, p)
-            
+
             # exclude given formulas
             s.difference_update(w)
-            
+
             # exclude int/bool-only forms of formulas
             s.difference_update({self._bool_int.get(x) for x in w})
-        
+
         for x in s:
             cache.pop(x)
-        
-        logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
-    
-    def sym_to_prop(self, props):
-        """Word-based replacement of proposition symbols by values.
-        
-        For each key in C{props}, all its occurrences in
-        the formula will be replaced by the value C{props[key]}.
-        
-        This is lexical substitution that does not take
-        syntax into account.
 
-        @type props: dict
-        @param props: a dictionary describing subformula (e.g.,
-            variable name) substitutions, where for each key-value
-            pair, all occurrences of key are replaced with value in
-            all components of this GRSpec object.  However, env_vars
-            and sys_vars are not changed.
-        """
-        if props is None:
-            return
-        
-        symfound = True
-        while symfound:
-            for propSymbol, prop in props.iteritems():
-                logger.debug('propSymbol: ' + str(propSymbol))
-                logger.debug('prop: ' + str(prop))
-                
-                if not isinstance(propSymbol, str):
-                    raise TypeError('propSymbol: ' + str(propSymbol) +
-                                    'is not a string.')
-                
-                # To handle gr1c primed variables
-                if propSymbol[-1] != "'":
-                    propSymbol += r'\b'
-                logger.debug('\t' + propSymbol + ' -> ' + prop)
-                
-                symfound = _sub_all(self.env_init, propSymbol, prop)
-                symfound |= _sub_all(self.env_safety, propSymbol, prop)
-                symfound |= _sub_all(self.env_prog, propSymbol, prop)
-                
-                symfound |= _sub_all(self.sys_init, propSymbol, prop)
-                symfound |= _sub_all(self.sys_safety, propSymbol, prop)
-                symfound |= _sub_all(self.sys_prog, propSymbol, prop)
-    
+        logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
+
+
     def sub_values(self, var_values):
         """Substitute given values for variables.
-        
+
         Note that there are three ways to substitute values for variables:
-        
-          - lexical using L{sym_to_prop}
-          
+
           - syntactic using this function
-          
+
           - no substitution by user code, instead flatten to python and
             use C{eval} together with a C{dict} defining
             the values of variables, as done in L{eval_init}.
-        
+
         For converting non-integer finite types to
         integer types, use L{replace_finite_by_int}.
-        
+
         @return: C{dict} of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
         logger.info('substitute values for variables...')
-        
+
         a = copy.deepcopy(self._ast)
-        
+
         for formula, tree in a.iteritems():
             a[formula] = ast.sub_values(tree, var_values)
-        
+
         logger.info('done with substitutions.\n')
         return a
-    
+
     def compile_init(self, no_str):
         """Compile python expression for initial conditions.
-        
+
         The returned bytecode can be used with C{eval}
         and a C{dict} assigning values to variables.
         Its value is the conjunction of C{env_init} and C{sys_init}.
-        
+
         Use the corresponding python data types
         for the C{dict} values:
-            
+
               - C{bool} for Boolean variables
               - C{int} for integers
               - C{str} for arbitrary finite types
-        
+
         @param no_str: if True, then compile the formula
             where all string variables have been replaced by integers.
             Otherwise compile the original formula containing strings.
-        
+
         @return: python expression compiled for C{eval}
         @rtype: C{code}
         """
         clauses = self.env_init + self.sys_init
-        
+
         if no_str:
             clauses = [self._bool_int[x] for x in clauses]
-        
+
         logger.info('clauses to compile: ' + str(clauses))
-        
+
         c = [self.ast(x).to_python() for x in clauses]
         logger.info('after to_python: ' + str(c))
-        
+
         s = _conj(c, op='and')
-        
+
         if not s:
             s = 'True'
-        
+
         return compile(s, '<string>', 'eval')
 
-def _sub_all(formula, propSymbol, prop):
-    symfound = False
-    old = r'\b' + propSymbol
-    new = '(' + prop + ')'
-    
-    for i, f in enumerate(formula):
-        if re.findall(old, f):
-            formula[i] = re.sub(old, new, f)
-            symfound = True
-    return symfound
 
 def _conj(iterable, unary='', op='&&'):
     return (' ' + op + ' ').join([unary + '(' + s + ')' for s in iterable])
 
 def _finite_domain2ints(spec):
     """Replace arbitrary finite vars with int vars.
-    
+
     Returns spec itself if it contains only int vars.
     Otherwise it returns a copy of spec with all arbitrary
     finite vars replaced by int-valued vars.
     """
     logger.info('convert string variables to integers...')
-    
+
     vars_dict = dict(spec.env_vars)
     vars_dict.update(spec.sys_vars)
-    
+
     fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
-    
+
     # replace symbols by ints
     for p in spec._parts:
         for x in getattr(spec, p):
@@ -880,29 +831,29 @@ def _finite_domain2ints(spec):
                 continue
             else:
                 logger.debug(str(x) + ' is not in _bool_int cache')
-            
+
             # get AST
             a = spec.ast(x)
-            
+
             # create AST copy with int and bool vars only
             a = copy.deepcopy(a)
             a.sub_constants(fvars)
-            
+
             # formula of int/bool AST
             f = str(a)
             spec._ast[f] = a  # cache
-            
+
             # remember map from clauses to int/bool clauses
             spec._bool_int[x] = f
-    
+
     logger.info('done converting to integer variables.\n')
 
 def _to_lang(spec, s, lang):
         """Get cached jtlv string.
-        
+
         If not found, then it translates all clauses to
         jtlv syntax and caches the results.
-        
+
         It also collects garbage from the jtlv cache.
         """
         if spec._bool_int.get(s) in spec._cache[lang]:
@@ -912,145 +863,145 @@ def _to_lang(spec, s, lang):
                 ('{s} not found in {lang} cache, '
                 'have to flatten...').format(s=s, lang=lang)
             )
-            
+
             for p in spec._parts:
                 for x in getattr(spec, p):
                     z = spec._bool_int[x]
-                    
+
                     if z in spec._cache[lang]:
                         continue
-                    
-                    if lang is 'gr1c':
+
+                    if lang == 'gr1c':
                         w = spec.ast(z).to_gr1c()
-                        spec._cache[lang][z] = w
-                    elif lang is 'jtlv':
+                    elif lang == 'slugs':
+                        w = spec.ast(z).to_slugs()
+                    elif lang == 'jtlv':
                         w = spec.ast(z).to_jtlv(spec.env_vars,
                                                 spec.sys_vars)
-                        spec._cache[lang][z] = w
                     else:
                         raise Exception('Unknown language')
-            
+                    spec._cache[lang][z] = w
+
             logger.info('collect garbage from {0} cache.\n'.format(lang))
             spec._collect_cache_garbage(spec._cache[lang])
-        
+
         return spec._cache[lang][spec._bool_int[s]]
 
 def replace_dependent_vars(spec, bool2form):
     logger.debug('replacing dependent variables using map:\n\t' +
                  str(bool2form))
-    
+
     vs = dict(spec.env_vars)
     vs.update(spec.sys_vars)
-    
+
     logger.debug('variables:\n\t' + str(vs))
-    
+
     bool2subtree = dict()
     for boolvar, formula in bool2form.iteritems():
         logger.debug('checking var: ' + str(boolvar))
-        
+
         if boolvar in vs:
             assert(vs[boolvar] == 'boolean')
             logger.debug(str(boolvar) + ' is indeed Boolean')
         else:
             logger.debug('spec does not contain var: ' + str(boolvar))
-        
+
         tree = parser.parse(formula)
-        bool2subtree[boolvar] = tree
-    
+        bool2subtree[boolvar] = tx.Tree.from_recursive_ast(tree)
     for s in {'env_init', 'env_safety', 'env_prog',
               'sys_init', 'sys_safety', 'sys_prog'}:
         part = getattr(spec, s)
-        
+
         new = []
-        
+
         for clause in part:
             logger.debug('replacing in clause:\n\t' + clause)
-            
+
             tree = spec.ast(clause)
-            ast.sub_bool_with_subtree(tree, bool2subtree)
-            
-            f = str(tree)
+            g = tx.Tree.from_recursive_ast(tree)
+            tx.sub_bool_with_subtree(g, bool2subtree)
+            f = g.to_recursive_ast().flatten()
             new.append(f)
-            
+
             logger.debug('caluse tree after replacement:\n\t' + f)
-        
+
         setattr(spec, s, new)
 
 def stability_to_gr1(p, aux='aux'):
     """Convert C{<>[] p} to GR(1).
-    
+
     Warning: This conversion is sound, but not complete.
     See p.2, U{[E10]
     <http://tulip-control.sourceforge.net/doc/bibliography.html#e10>}
-    
+
     GR(1) form::
-    
+
         !(aux) &&
         [](aux -> X aux) &&
         []<>(aux) &&
-        
+
         [](aux -> p)
-    
+
     @type p: str
-    
+
     @param aux: name to use for auxiliary variable
     @type aux: str
-    
+
     @rtype: L{GRSpec}
     """
     logging.warning(
         'Conversion of stability (<>[]p) to GR(1)' +
         'is sound, but NOT complete.'
     )
-    
+
     a = aux
-    
+
     p0, a0 = p, a
-    
+
     p = _paren(p)
     a = _paren(a)
-    
+
     v = _check_var_name_conflict(p, a0)
-    
+
     sys_vars = v | {a0}
     sys_init = {'!' + a}
     sys_safe = {a + ' -> ' + p,
                 a + ' -> X ' + a}
     sys_prog = {a}
-    
+
     return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def response_to_gr1(p, q, aux='aux'):
     """Convert C{[](p -> <> q)} to GR(1).
-    
+
     GR(1) form::
-        
+
         []<>(aux) &&
-        
+
         []( (p && !q) -> X ! aux) &&
         []( (! aux && !q) -> X ! aux)
-    
+
     @type p: str
-    
+
     @type q: str
-    
+
     @param aux: name to use for auxiliary variable
     @type aux: str
-    
+
     @rtype: L{GRSpec}
     """
     a = aux
-    
+
     p0, q0, a0 = p, q, a
-    
+
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
-    
+
     s = p + ' -> <> ' + q
     v = _check_var_name_conflict(s, a0)
-    
+
     sys_vars = v | {a0}
     # sys_init = {a}
     sys_safe = {
@@ -1058,37 +1009,37 @@ def response_to_gr1(p, q, aux='aux'):
         '(!' + a + ' && !' + q + ') -> X !' + a
     }
     sys_prog = {a}
-    
+
     return GRSpec(sys_vars=sys_vars,  # sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def eventually_to_gr1(p, aux='aux'):
     """Convert C{<> p} to GR(1).
-    
+
     GR(1) form::
-    
+
         !(aux) &&
         [](aux -> X aux) &&
         []<>(aux) &&
-        
+
         []( (!p && !aux) -> X!(aux) )
-    
+
     @type p: str
-    
+
     @param aux: name to use for auxiliary variable
     @type aux: str
-    
+
     @rtype: L{GRSpec}
     """
     a = aux
-    
+
     p0, a0 = p, a
-    
+
     p = _paren(p)
     a = _paren(a)
-    
+
     v = _check_var_name_conflict(p, a0)
-    
+
     sys_vars = v | {a0}
     sys_init = {'!(' + a + ')'}
     sys_safe = {
@@ -1096,41 +1047,41 @@ def eventually_to_gr1(p, aux='aux'):
         a + ' -> X ' + a
     }
     sys_prog = {a}
-    
+
     return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
 
 def until_to_gr1(p, q, aux='aux'):
     """Convert C{p U q} to GR(1).
-    
+
     GR(1) form::
-    
+
         (!q -> !aux) &&
         [](q -> aux)
         [](aux -> X aux) &&
         []<>(aux) &&
-        
+
         []( (!aux && X(!q) ) -> X!(aux) ) &&
         [](!aux -> p)
-    
+
     @type p: str
-    
+
     @param aux: name to use for auxiliary variable
     @type aux: str
-    
+
     @rtype: L{GRSpec}
     """
     a = aux
-    
+
     p0, q0, a0 = p, q, a
-    
+
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
-    
+
     s = p + ' && ' + q
     v = _check_var_name_conflict(s, a0)
-    
+
     sys_vars = v | {a0}
     sys_init = {'!' + q + ' -> !' + a}
     sys_safe = {
@@ -1140,66 +1091,66 @@ def until_to_gr1(p, q, aux='aux'):
         '(!' + a + ') -> ' + p
     }
     sys_prog = {a}
-    
+
     return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                   sys_safety=sys_safe, sys_prog=sys_prog)
-    
+
 def _check_var_name_conflict(f, varname):
     t = parser.parse(f)
     v = {x.val for x in t.get_vars()}
-    
+
     if varname in v:
         raise ValueError('var name "' + varname + '" already used')
     return v
 
 def _paren(x):
     """Enclose in parentheses.
-    
+
     @type x: str
     """
     return '(' + x + ')'
 
 def convert_domain(dom):
     """Return equivalent integer domain if C{dom} contais strings.
-    
+
     @type dom: C{list} of C{str}
     @rtype: C{'boolean'} or C{(min_int, max_int)}
     """
     # not a string variable ?
     if not isinstance(dom, list):
         return dom
-    
+
     return (0, len(dom) - 1)
 
 def infer_constants(formula, variables):
     """Enclose all non-variable names in quotes.
-    
+
     @param formula: well-formed LTL formula
     @type formula: C{str} or L{LTL_AST}
-    
+
     @param variables: domains of variables, or only their names.
         If the domains are given, then they are checked
         for ambiguities as for example a variable name
         duplicated as a possible value in the domain of
         a string variable (the same or another).
-        
+
         If the names are given only, then a warning is raised,
         because ambiguities cannot be checked in that case,
         since they depend on what domains will be used.
     @type variables: C{dict} as accepted by L{GRSpec} or
         container of C{str}
-    
+
     @return: C{formula} with all string literals not in C{variables}
         enclosed in double quotes
     @rtype: C{str}
     """
     import networkx as nx
-    
+
     if isinstance(variables, dict):
         for var in variables:
             other_vars = dict(variables)
             other_vars.pop(var)
-            
+
             check_var_conflicts({var}, other_vars)
     else:
         logger.error('infer constants does not know the variable domains.')
@@ -1209,48 +1160,48 @@ def infer_constants(formula, variables):
             'If you give the variable domain definitions as dict, '
             'then infer_constants will check for ambiguities.'
         )
-    
+
     tree = parser.parse(formula)
     old2new = dict()
-    
+
     for u in tree:
         if not isinstance(u, ast.Var):
             continue
-        
+
         if str(u) in variables:
             continue
-        
+
         # Var (so NAME token) but not a variable
         # turn it into a string constant
         old2new[u] = ast.Const(str(u))
-    
+
     nx.relabel_nodes(tree, old2new, copy=False)
     return str(tree)
 
 def check_var_conflicts(s, variables):
     """Raise exception if set intersects existing variable name, or values.
-    
+
     Values refers to arbitrary finite data types.
-    
+
     @param s: set
-    
+
     @param variables: definitions of variable types
     @type variables: C{dict}
     """
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
-    
+
     if vars_redefined:
         raise Exception('Variables redefined: ' + str(vars_redefined))
-    
+
     # check conflicts with values of arbitrary finite data types
     for var, domain in variables.iteritems():
         # not arbitrary finite type ?
         if not isinstance(domain, list):
             continue
-        
+
         # var has arbitrary finite type
         conflicting_values = {x for x in s if x in domain}
-        
+
         if conflicting_values:
             raise Exception('Values redefined: ' + str(conflicting_values))

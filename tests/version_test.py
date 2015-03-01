@@ -32,14 +32,14 @@ def version_test():
 
     ver = imp.load_module("version", *imp.find_module("version", [tul_path]))
     assert ver.version == \
-        '.'.join([str(x) for x in ver.version_info[:2]])+ver.version_info[2]
+        '.'.join([str(x) for x in ver.version_info])
 
     # Dev release
     with open(filename, "a") as f:
         f.write(SAMPLE_COMMIT_HASH)
 
     ver = imp.load_module("version", *imp.find_module("version", [tul_path]))
-    release_str = '.'.join([str(x) for x in ver.version_info[:2]])+ver.version_info[2]
+    release_str = '.'.join([str(x) for x in ver.version_info])
     assert ver.version == release_str+"-dev-"+SAMPLE_COMMIT_HASH.strip()
 
     # Unknown dev
