@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""interface to ltl2ba"""
+"""Interface to ltl2ba"""
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
@@ -248,7 +248,12 @@ class Parser(object):
 def call_ltl2ba(formula, prefix=''):
     """Load a Buchi Automaton from a Never Claim.
 
-    depends
+    TODO
+    ====
+    Make sure guard semantics properly accounted for:
+    'prop' | '!prop' | '1' and skip
+
+    Depends
     =======
     ltl2ba: http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/
 
@@ -257,9 +262,6 @@ def call_ltl2ba(formula, prefix=''):
 
     @return: Buchi Automaton
     @rtype: tulip.transys.BA
-
-    todo: make sure guard semantics properly accounted for:
-        'prop' | '!prop' | '1' and skip
     """
     try:
         subprocess.call(['ltl2ba', '-h'], stdout=subprocess.PIPE)
@@ -275,25 +277,6 @@ def call_ltl2ba(formula, prefix=''):
     if p.returncode != 0:
         raise Exception('Error when converting LTL to Buchi.')
     return ltl2ba_output
-
-
-# build parser once only
-parser = Parser()
-
-
-def convert(formula):
-    """Convert LTL formula to Buchi Automaton using ltl2ba.
-    
-    @type formula: str(formula) must be admissible ltl2ba input
-    
-    @return: Buchi automaton whose edges are annotated
-        with Boolean formulas (in parsed form, see L{spec.ast.Node})
-    @rtype: L{BuchiAutomaton}
-    """
-    ltl2ba_out = _call_ltl2ba(str(formula))
-    ba = parser.parse(ltl2ba_out)
-    logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
-    return ba
 
 
 if __name__ == '__main__':

@@ -1713,7 +1713,7 @@ def merge_partition_pair(
     
     return new_list, parents, ap_labeling
 
-def create_prog_map(modes, ppp):
+def create_prog_map(modes, ppp):# MS Added
     """ Creates a progress group map for a proposition preserving partition
 
     A progress group map for a mode is a set of tuples that contains the 

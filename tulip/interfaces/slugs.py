@@ -35,57 +35,85 @@ Interface to the slugs implementation of GR(1) synthesis.
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
 """
-
 from __future__ import absolute_import
-
 import logging
 logger = logging.getLogger(__name__)
-
+import json
 import os
-import re
 import subprocess
 import tempfile
-
+import networkx as nx
 import slugs
-from . import jtlv
+from tulip.spec import GRSpec, translate
 
 
 def synthesize(spec):
     """Return strategy satisfying the specification C{spec}.
-
-    @type spec: L{GRSpec}
+    @type spec: L{GRSpec} or C{str} in structured slugs syntax.
     @return: If realizable return synthesized strategy, otherwise C{None}.
     @rtype: C{networkx.DiGraph}
     """
-    struct = spec.to_slugs()
+    if isinstance(spec, GRSpec):
+        struct = translate(spec, 'slugs')
+    else:
+        struct = spec
     s = slugs.convert_to_slugsin(struct, True)
-
     with tempfile.NamedTemporaryFile(delete=False) as fin:
         fin.write(s)
-
-    logger.info('\n\n structured slugs:\n\n {struct}'.format(struct=struct) +
-                '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    logger.info('\n\n structured slugs:\n\n {struct}'.format(
+        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    options = [fin.name]
+    realizable, out = _call_slugs(options)
     if not realizable:
         return None
-
     os.unlink(fin.name)
     # collect int vars
     vrs = dict(spec.sys_vars)
     vrs.update(spec.env_vars)
-    vrs = {k: dom for k, dom in vrs.iteritems()
-           if isinstance(dom, tuple) and len(dom) == 2}
-
-    lines = [_replace_bitfield_with_int(line, vrs)
-             for line in out.split('\n')]
-    g = jtlv.jtlv_output_to_networkx(lines, spec)
+    dout = json.loads(out)
+    g = nx.DiGraph()
+    dvars = dout['variables']
+    for stru, d in dout['nodes'].iteritems():
+        u = int(stru)
+        state = dict(zip(dvars, d['state']))
+        g.add_node(u, state=state)
+        for v in d['trans']:
+            g.add_edge(u, v)
+    h = nx.DiGraph()
+    for u, d in g.nodes_iter(data=True):
+        bit_state = d['state']
+        int_state = _bitfields_to_ints(bit_state, vrs)
+        h.add_node(u, state=int_state)
+    for u, v in g.edges_iter():
+        h.add_edge(u, v)
     logger.debug(
         ('loaded strategy with vertices:\n  {v}\n'
          'and edges:\n {e}\n').format(
-            v='\n  '.join(str(x) for x in g.nodes(data=True)),
-            e=g.edges()
-        )
-    )
-    return g
+            v='\n  '.join(str(x) for x in h.nodes(data=True)),
+            e=h.edges()))
+    return h
+
+
+def _bitfields_to_ints(bit_state, vrs):
+    """Convert bitfield representation to integers.
+
+    @type line: C{str}
+    @type vrs: C{dict}
+    """
+    int_state = dict()
+    for var, dom in vrs.iteritems():
+        if dom == 'boolean':
+            int_state[var] = bit_state[var]
+            continue
+        bitnames = ['{var}@{i}'.format(var=var, i=i)
+                    for i in xrange(dom[1].bit_length())]
+        bitnames[0] = '{var}@0.{min}.{max}'.format(
+            var=var, min=dom[0], max=dom[1])
+        bitvalues = [bit_state[b] for b in bitnames]
+        # little-endian
+        val = int(''.join(str(b) for b in reversed(bitvalues)), 2)
+        int_state[var] = val
+    return int_state
 
 
 def _call_slugs(options):
@@ -116,59 +144,3 @@ def _call_slugs(options):
     if not realizable:
         assert 'Specification is unrealizable' in err
     return realizable, out
-
-
-def _bitfield_to_int(var, dom, bools):
-    """Return integer value of bitfield.
-
-    @type var: str
-
-    @type dom: 2-tuple of int
-
-    @type bools: list of tuples
-    """
-    bits = dict(bools)
-
-    # rename LSB
-    lsb = '{var}@0.{min}.{max}'.format(var=var, min=dom[0], max=dom[1])
-    name = '{var}@0'.format(var=var)
-    if lsb not in bits:
-        raise ValueError('"{lsb}" expected in {bits}'.format(
-                         lsb=lsb, bits=bits))
-    bits[name] = bits.pop(lsb)
-
-    # note: little-endian
-    s = ''.join(str(bits['{var}@{i}'.format(var=var, i=i)])
-                for i in xrange(len(bits)-1, -1, -1))
-    return int(s, 2)
-
-
-def _replace_bitfield_with_int(line, vrs):
-    """Convert bitfield representation to integers.
-
-    @type line: str
-
-    @type vrs: dict
-    """
-    for var, dom in vrs.iteritems():
-        p = r'({var}@\w+|{var}@\w+\.{min}\.{max}):(\w+)'.format(
-            var=var, min=dom[0], max=dom[1]
-        )
-        # [(varname, bool), ...]
-        bools = re.findall(p, line)
-        if not bools:
-            continue
-
-        i = _bitfield_to_int(var, dom, bools)
-
-        # replace LSB with integer variable and its value
-        k, v = bools[0]
-        p = r'{key}\w*:{val}[,\s*]*'.format(key=re.escape(k), val=v)
-        r = '{var}:{intval}, '.format(var=var, intval=i)
-        line = re.sub(p, r, line)
-
-        # erase other bits
-        for key, val in bools[1:]:
-            p = r'({key}\w*:{val}[,\s*]*)'.format(key=re.escape(key), val=val)
-            line = re.sub(p, '', line)
-    return line

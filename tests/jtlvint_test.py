@@ -6,11 +6,14 @@ Tests for the interface with JTLV.
 import networkx as nx
 import nose.tools as nt
 from tulip.spec import GRSpec
-from tulip.interfaces.jtlv import check_realizable, synthesize
+import tulip.interfaces.jtlv as jtlv
+import networkx as nx
 
 
-class basic_test:
+class basic_test(object):
     def setUp(self):
+        self.check_realizable = jtlv.check_realizable
+        self.synthesize = jtlv.synthesize
         self.f_un = GRSpec(env_vars="x", sys_vars="y",
                            env_init="x", env_prog="x",
                            sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
@@ -28,25 +31,25 @@ class basic_test:
         self.dcounter = None
 
     def test_check_realizable(self):
-        assert not check_realizable(self.f_un)
+        assert not self.check_realizable(self.f_un)
         self.f_un.sys_safety = []
-        assert check_realizable(self.f_un)
-        assert check_realizable(self.dcounter)
+        assert self.check_realizable(self.f_un)
+        assert self.check_realizable(self.dcounter)
 
     def test_synthesize(self):
-        g = synthesize(self.f_un)
+        g = self.synthesize(self.f_un)
         assert not isinstance(g, nx.DiGraph)
 
-        g = synthesize(self.f)
+        g = self.synthesize(self.f)
         # There is more than one possible strategy realizing this
         # specification.  Checking only for one here makes this more like
         # a regression test (fragile).  However, it is more meaningful
         # than simply checking that synthesize() returns something
         # non-None (i.e., realizability, which is tested elsewhere).
         assert g is not None
-        
-        assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
+
+        # assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
+        # assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
         print(g.nodes())
         assert len(g) == 5
         assert set(g.edges()) == set([(0, 1), (0, 2), (1, 3), (1, 4),

@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2013 by California Institute of Technology
+# Copyright (c) 2011-2014 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,75 +30,26 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-Abstract Syntax Tree classes for LTL,
-
-supporting syntax of:
-    gr1c: http://slivingston.github.io/gr1c/md_spc_format.html
-    JTLV
-    SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
-    SPIN: http://spinroot.com/spin/Man/ltl.html
-        http://spinroot.com/spin/Man/operators.html
-    python (Boolean formulas only)
+"""Abstract syntax tree classes for LTL.
 
 Syntax taken originally roughly from:
 http://spot.lip6.fr/wiki/LtlSyntax
 """
 import logging
 logger = logging.getLogger(__name__)
+from abc import ABCMeta, abstractmethod
 
-import os
-import re
-import networkx as nx
 
-OP_MAP = {
+# prototype for flattening to a "canonical" string
+OPMAP = {
     'False': 'False', 'True': 'True',
-    '!':'!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    '[]': 'G', 'G': 'G',
-    'F': 'F', '<>': 'F',
-    'X': 'X', 'next': 'X', "'": 'X',
+    '!': '!',
+    '|': '|', '&': '&', '->': '->', '<->': '<->', '^': '^',
+    'X': 'X', 'G': 'G', 'F': 'F',
     'U': 'U', 'V': 'R', 'R': 'R',
-    '==': '=',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
+    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!=',
+    '+': '+', '-': '-'  # linear arithmetic
 }
-
-JTLV_MAP = {
-    'False': 'FALSE', 'True': 'TRUE',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': 'next',
-    'U': 'U',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
-
-GR1C_MAP = {
-    'False': 'False', 'True': 'True',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': '',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
-
-SLUGS_MAP = {
-    'False': 'FALSE', 'True': 'TRUE',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'X': '',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='
-}
-
-SMV_MAP = {'G': 'G', 'F': 'F', 'X': 'X', 'U': 'U', 'R': 'V'}
-
-SPIN_MAP = {
-    'True': 'true', 'False': 'false',
-    '!': '!',
-    '|': '||', '&': '&&', '->': '->', '<->': '<->',
-    'G': '[]', 'F': '<>', 'U': 'U', 'R': 'V',
-    '=': '==', '!=': '!='
-}
-
-PYTHON_MAP = {'!': 'not', '&': 'and', '|': 'or', 'xor': '^', '=': '=='}
 
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
@@ -118,540 +69,227 @@ FULL_OPERATOR_NAMES = {
     'or': '||',
 }
 
-maps = {
-    'string':OP_MAP,
-    'gr1c': GR1C_MAP,
-    'slugs': SLUGS_MAP,
-    'jtlv': JTLV_MAP,
-    'smv': SMV_MAP,
-    'spin': SPIN_MAP,
-    'python': PYTHON_MAP
-}
 
-def ast_to_labeled_graph(tree, detailed):
-    """Convert AST to C{NetworkX.DiGraph} for graphics.
+def make_nodes(opmap=None):
+    """Return class with attributes the AST node classes.
 
-    @param ast: Abstract syntax tree
-
-    @rtype: C{networkx.DiGraph}
+    The tree is defined recursively,
+    not with a graph data structure.
+    L{Tree} is a graph data structure for that purpose.
     """
-    g = nx.DiGraph()
+    if opmap is None:
+        opmap = OPMAP
 
-    for u in tree:
-        if isinstance(u, Operator):
-            label = u.op
-        elif isinstance(u, Term):
-            label = str(u.val)
-        else:
-            raise TypeError(
-                'AST node must be Operator or Identifier, '
-                'got instead: ' + str(u) +
-                ', of type: ' + str(type(u))
-            )
+    class Node(object):
+        """Base class for AST nodes."""
 
-        # show both repr and AST node class in each vertex
-        if detailed:
-            label += '\n' + str(type(u).__name__)
+        # Caution
+        # =======
+        # Do **NOT** implement C{__hash__}, because you
+        # will unintendently identify different AST nodes !
+        # Only leaf nodes can be safely identified.
+        #
+        # The default for user-defined classes is
+        # C{__hash__ == _}
+        __metaclass__ = ABCMeta
+        opmap = None
 
-        g.add_node(id(u), label=label)
+        @abstractmethod
+        def __init__(self):
+            pass
 
-    for u, v, d in tree.edges_iter(data=True):
-        g.add_edge(id(u), id(v), label=d['pos'])
+        @abstractmethod
+        def __repr__(self):
+            pass
 
-    return g
+        @abstractmethod
+        def flatten(self):
+            pass
 
-class LTL_AST(nx.DiGraph):
-    """Abstract Syntax Tree of LTL.
+    Node.opmap = opmap
 
-    The tree's root node is a L{Node} at C{self.root}.
-    """
-    def __init__(self):
-        self.root = None
-        super(LTL_AST, self).__init__()
+    # Do not confuse "term" with the abbreviation of "terminal".
+    # A "term" in FOL can comprise of terminals,
+    # for example a function together with parentheses and its args.
+    class Terminal(Node):
+        """Terminal symbols of grammar.
 
-    def add_identifier(self, identifier):
-        self.add_node(identifier)
+        Include:
 
-    def add_unary(self, operator, operand):
-        self.add_edge(operator, operand, pos=None)
-
-    def add_binary(self, operator, left, right):
-        self.add_edge(operator, left, pos='left')
-        self.add_edge(operator, right, pos='right')
-
-    def add_subtree(self, leaf, tree):
-        """Return the C{tree} at node C{nd}.
-
-        @type nd: L{Node}
-
-        @param tree: to be added, w/o copying AST nodes.
-        @type tree: L{LTL_AST}
+          - 0-ary function constants (numbers, strings)
+          - 0-ary function variables (integer or string variable)
+          - 0-ary connectives (Boolean constants)
+          - 0-ary predicate constants
+          - 0-ary predicate variables
         """
-        # nd must be a leaf
-        assert(not self.successors(leaf))
 
-        # add new nodes
-        for v in tree:
-            self.add_node(v)
+        def __init__(self, value):
+            if not isinstance(value, basestring):
+                raise TypeError(
+                    'value must be a string, got: {v}'.format(
+                        v=value))
+            self.value = value
 
-        # add edges
-        for u, v, d in tree.edges_iter(data=True):
-            self.add_edge(u, v, pos=d['pos'])
+        def __repr__(self):
+            return '{t}({v})'.format(t=type(self).__name__,
+                                     v=repr(self.value))
 
-        # replace old leaf with subtree root
-        u = leaf
-        pred = self.predecessors(u)
-        if pred:
-            parent = next(iter(pred))
-            pos = self[parent][u].get('pos')
-            self.remove_node(u)
-            self.add_edge(parent, tree.root, pos=pos)
-        else:
-            self.remove_node(u)
-            self.root = tree.root
+        def __str__(self, *arg, **kw):
+            # *arg accommodates "depth" arg of Operator.__str__
+            return self.value
 
-    def get_vars(self):
-        """Return the set of variables in C{tree}.
+        def __len__(self):
+            """Return the number of operators and terminals.
 
-        @rtype: C{set} of L{Var}
+            Note that this definition differs from the
+            theoretical definition that a formula's length
+            is the number of operators it contains.
+            """
+            return 1
+
+        def __eq__(self, other):
+            return (isinstance(other, type(self)) and
+                    self.value == other.value)
+
+        def flatten(self, *arg, **kw):
+            return self.value
+
+    class Operator(Node):
+        """Takes a non-zero number of operands and returns a result.
+
+        Cases:
+
+          - function (arithmetic):
+              maps (terms)^n to terms
+          - predicate (relational operator):
+              maps (terms)^n to atomic formulas
+          - connective (logical operator):
+              maps (wff)^n to wff
         """
-        return {u for u in self if isinstance(u, Var)}
 
-    def sub_values(self, var_values):
-        """Substitute given values for variables.
+        def __init__(self, operator, *operands):
+            try:
+                operator + 'a'
+            except TypeError:
+                raise TypeError(
+                    'operator must be string, got: {op}'.format(
+                        op=operator))
+            self.operator = operator
+            self.operands = list(operands)
 
-        @param tree: AST
+        # ''.join would be faster, but __repr__ is for debugging,
+        # not for flattening, so readability takes precedence
+        def __repr__(self):
+            return '{t}({op}, {xyz})'.format(
+                t=type(self).__name__,
+                op=repr(self.operator),
+                xyz=', '.join(repr(x) for x in self.operands))
 
-        @type var_values: C{dict}
+        # more readable recursive counterpart of __repr__
+        # depth allows limiting recursion to see a shallower view
+        def __str__(self, depth=None):
+            if depth is not None:
+                depth = depth - 1
+            if depth == 0:
+                return '...'
+            return '({op} {xyz})'.format(
+                op=self.operator,
+                xyz=' '.join(x.__str__(depth=depth)
+                             for x in self.operands))
 
-        @return: AST with L{Var} nodes replaces by
-            L{Num}, L{Const}, or L{Bool}
+        def __len__(self):
+            return 1 + sum(len(x) for x in self.operands)
+
+        def flatten(self, *arg, **kw):
+            return ' '.join([
+                '(',
+                self.opmap[self.operator],
+                ' '.join(x.flatten(*arg, **kw) for x in self.operands),
+                ')'])
+
+    # Distinguish operators by arity
+    class Unary(Operator):
+        pass
+
+    class Binary(Operator):
+        def flatten(self, *arg, **kw):
+            """Infix flattener for consistency with parser.
+
+            Override it if you want prefix or postfix.
+            """
+            return ' '.join([
+                '(',
+                self.operands[0].flatten(*arg, **kw),
+                self.opmap[self.operator],
+                self.operands[1].flatten(*arg, **kw),
+                ')'])
+
+    class Nodes(object):
+        """AST nodes for a generic grammar."""
+
+    nodes = Nodes()
+    nodes.Node = Node
+    nodes.Terminal = Terminal
+    nodes.Operator = Operator
+    nodes.Unary = Unary
+    nodes.Binary = Binary
+    return nodes
+
+
+def make_fol_nodes(opmap=None):
+    """AST classes for fragment of first-order logic."""
+    nodes = make_nodes(opmap)
+
+    class Var(nodes.Terminal):
+        """A 0-ary variable.
+
+        Two cases:
+
+          - 0-ary function variable (integer or string variable)
+          - 0-ary propositional variable (atomic proposition)
         """
-        old2new = dict()
 
-        for u in self.nodes_iter():
-            if not isinstance(u, Var):
-                continue
+    class Bool(nodes.Terminal):
+        """A 0-ary connective."""
 
-            val = var_values[str(u)]
+        def __init__(self, value):
+            if not isinstance(value, basestring):
+                raise TypeError(
+                    'value must be string, got: {v}'.format(v=value))
+            if value.lower() not in {'true', 'false'}:
+                raise TypeError(
+                    'value must be "true" or "false" '
+                    '(case insensitive), got: {v}'.format(v=value))
+            self.value = 'True' if (value.lower() == 'true') else 'False'
 
-            # instantiate appropriate value type
-            if isinstance(val, bool):
-                v = Bool(val)
-            elif isinstance(val, int):
-                v = Num(val)
-            elif isinstance(val, str):
-                v = Const(val)
+        def flatten(self, *arg, **kw):
+            return self.opmap[self.value]
 
-            old2new[u] = v
+    class Num(nodes.Terminal):
+        """A 0-ary function."""
+        # self.value is str,
+        # use int(self.value) if you need to
 
-        # replace variable by value
-        nx.relabel_nodes(self, old2new, copy=False)
+    class Str(nodes.Terminal):
+        """A 0-ary function."""
+        # parser ensures that value has no quotes
 
-    def sub_constants(self, var_const2int):
-        """Replace string constants by integers.
+    class Comparator(nodes.Binary):
+        """Binary relational operator (2-ary predicate)."""
 
-        To be used for converting arbitrary finite domains
-        to integer domains prior to calling gr1c.
+    class Arithmetic(nodes.Binary):
+        """Binary function.
 
-        @param const2int: {'varname':['const_val0', ...], ...}
-        @type const2int: C{dict} of C{list}
+        Maps terms to terms.
         """
-        #logger.info('substitute ints for constants in:\n\t' + str(self))
 
-        old2new = dict()
+    nodes.Var = Var
+    nodes.Bool = Bool
+    nodes.Num = Num
+    nodes.Str = Str
+    nodes.Comparator = Comparator
+    nodes.Arithmetic = Arithmetic
+    return nodes
 
-        for u in self.nodes_iter():
-            if not isinstance(u, Const):
-                continue
 
-            var, op = pair_node_to_var(self, u)
-
-            # now: c, is the operator and: v, the variable
-            const2int = var_const2int[str(var)]
-            x = const2int.index(u.val)
-
-            num = Num(x)
-
-            # replace Const with Num
-            old2new[u] = num
-
-        nx.relabel_nodes(self, old2new, copy=False)
-
-        #logger.info('result after substitution:\n\t' + str(self) + '\n')
-
-    def eval(self, d):
-        """Evaluate over variable valuation C{d}.
-
-        @param d: assignment of values to variables.
-            Available types are Boolean, integer, and string.
-        @type d: C{dict}
-
-        @return: value of formula for the given valuation C{d} (model).
-        @rtype: C{bool}
-        """
-        return self.root.eval(d)
-
-    def __repr__(self):
-        return flatten(self, self.root, _to_string)
-
-    def __str__(self):
-        # need to define __str__ only
-        # to override networkx.DiGraph.__str__
-        return repr(self)
-
-    def to_gr1c(self):
-        return flatten(self, self.root, _to_gr1c)
-
-    def to_slugs(self):
-        return flatten(self, self.root, _to_slugs)
-
-    def to_jtlv(self, env_vars, sys_vars):
-        return flatten(self, self.root, _to_jtlv,
-                       env_vars=env_vars, sys_vars=sys_vars)
-
-    def to_promela(self):
-        return flatten(self, self.root, _to_promela)
-
-    def to_smv(self):
-        return flatten(self, self.root, _to_smv)
-
-    def to_python(self):
-        return flatten(self, self.root, _to_python)
-
-    def to_pydot(self, detailed=False):
-        """Create GraphViz dot string from given AST.
-
-        @type ast: L{ASTNode}
-
-        @rtype: str
-        """
-        g = ast_to_labeled_graph(self, detailed)
-        return nx.to_pydot(g)
-
-    def write(self, filename, detailed=False):
-        """Layout AST and save result in PDF file."""
-        fname, fext = os.path.splitext(filename)
-        fext = fext[1:]  # drop .
-        p = self.to_pydot(detailed)
-        p.set_ordering('out')
-        p.write(filename, format=fext)
-
-def _to_string(u, *arg, **kw):
-    return u.to_string(*arg, **kw)
-
-def _to_gr1c(u, *arg, **kw):
-    return u.to_gr1c(*arg, **kw)
-
-def _to_slugs(u, *arg, **kw):
-    return u.to_slugs(*arg, **kw)
-
-def _to_jtlv(u, *arg, **kw):
-    return u.to_jtlv(*arg, **kw)
-
-def _to_promela(u, *arg, **kw):
-    return u.to_promela(*arg, **kw)
-
-def _to_smv(u, *arg, **kw):
-    return u.to_smv(*arg, **kw)
-
-def _to_python(u, *arg, **kw):
-    return u.to_python(*arg, **kw)
-
-#@profile
-def flatten(tree, u, to_lang, **kw):
-    """Recursively flatten C{tree}.
-
-    @rtype: C{str}
-    """
-    s = tree.succ[u]
-    if not s:
-        return to_lang(u, **kw)
-    elif len(s) == 2:
-        l, r = s
-        if s[l]['pos'] == 'right':
-            l, r = r, l
-        l = flatten(tree, l, to_lang, **kw)
-        r = flatten(tree, r, to_lang, **kw)
-        return to_lang(u, l, r, **kw)
-    else:
-        (c,) = s
-        if u.op == 'X':
-            return to_lang(u, flatten(tree, c, to_lang, prime=True, **kw), **kw)
-        else:
-            return to_lang(u, flatten(tree, c, to_lang, **kw), **kw)
-
-def sub_bool_with_subtree(tree, bool2subtree):
-    """Replace selected Boolean variables with given AST.
-
-    @type tree: L{LTL_AST}
-
-    @param bool2form: map from each Boolean variable to some
-        equivalent formula. A subset of Boolean varibles may be used.
-
-        Note that the types of variables in C{tree}
-        are defined by C{bool2form}.
-    @type bool2form: C{dict} from C{str} to L{LTL_AST}
-    """
-    for u in tree.nodes():
-        if not isinstance(u, Var):
-            continue
-
-        # not Boolean var ?
-        if u.val not in bool2subtree:
-            continue
-
-        #tree.write(str(id(tree)) + '_before.png')
-        tree.add_subtree(u, bool2subtree[u.val])
-        #tree.write(str(id(tree)) + '_after.png')
-
-class Node(object):
-    """Base class for deriving AST nodes."""
-    # Caution
-    # =======
-    # Do **NOT** implement C{__hash__}, because you
-    # will unintendently identify different AST nodes !
-    #
-    # The default for user-defined classes is
-    # C{__hash__ == _}
-    def to_string(self, *arg, **kw):
-        return self.flatten('string', *arg, **kw)
-
-    def to_gr1c(self, *arg, **kw):
-        return self.flatten('gr1c', *arg, **kw)
-
-    def to_slugs(self, *arg, **kw):
-        return self.flatten('slugs', *arg, **kw)
-
-    def to_jtlv(self, *arg, **kw):
-        return self.flatten('jtlv', *arg, **kw)
-
-    def to_spin(self, *arg, **kw):
-        return self.flatten('spin', *arg, **kw)
-
-    def to_smv(self, *arg, **kw):
-        return self.flatten('smv', *arg, **kw)
-
-    def to_python(self, *arg, **kw):
-        return self.flatten('python', *arg, **kw)
-
-class Term(Node):
-    def __init__(self, t):
-        self.val = t
-
-    def __eq__(self, other):
-        return isinstance(other, type(self)) and self.val == other.val
-
-    def __repr__(self):
-        return str(self.val)
-
-    def flatten(self, *arg, **kw):
-        return self.val
-
-
-class Num(Term):
-    def __init__(self, t):
-        self.val = int(t)
-
-    def flatten(self, *arg, **kw):
-        return str(self.val)
-
-class Var(Term):
-    def to_gr1c(self, prime=None, **kw):
-        return '{val}{prime}'.format(
-            val=self.val,
-            prime="'" if prime else '')
-
-    def to_slugs(self, prime=None, **kw):
-        return '{val}{prime}'.format(
-            val=self.val,
-            prime="'" if prime else '')
-
-    def to_jtlv(self, env_vars=None, sys_vars=None, **kw):
-        if self.val in env_vars:
-            return '(e.{v})'.format(v=self.val)
-        elif self.val in sys_vars:
-            return '(s.{v})'.format(v=self.val)
-        else:
-            raise ValueError(
-                '{v} is neither env nor sys variable'.format(self.val)
-            )
-
-
-class Const(Term):
-    def __init__(self, t):
-        self.val = re.sub(r'^"|"$', '', t)
-
-    def __repr__(self):
-        return r'"%s"' % self.val
-
-    def to_jtlv(self, **kw):
-        return '(%s)' % str(self)
-
-class Bool(Term):
-    def __init__(self, t):
-        self.val = (t.upper() == 'TRUE')
-        self.str = 'True' if self.val else 'False'
-
-    def __repr__(self):
-        return self.str
-
-    def flatten(self, lang, **kw):
-        return maps[lang][str(self)]
-
-class Operator(Node):
-    def __init__(self, operator):
-        self.operator = OP_MAP.get(operator, operator)
-
-    def __repr__(self):
-        return self.op
-
-
-class Unary(Operator):
-    def flatten(self, lang, x, **kw):
-        return '( %s %s )' % (maps[lang][self.op], x)
-
-class Not(Unary):
-
-
-class UnTempOp(Unary):
-    def context(self):
-        return self.op == 'X'
-
-class Binary(Operator):
-    def flatten(self, lang, l, r, **kw):
-        return '( %s %s %s )' % (l, maps[lang][self.op], r)
-
-
-class And(Binary):
-
-
-class Or(Binary):
-
-class Xor(Binary):
-
-
-class Imp(Binary):
-
-
-    def to_python(self, l, r, **kw):
-        return '( (not (' + l + ')) or ' + r + ')'
-
-class BiImp(Binary):
-
-
-    def to_python(self, l, r, **kw):
-        return '( ' + l + ' == ' + r + ' )'
-
-class BiTempOp(Binary):
-    pass
-
-class Comparator(Binary):
-    pass
-
-class Arithmetic(Binary):
-    pass
-
-def check_for_undefined_identifiers(tree, domains):
-    """Check that types in C{tree} are incompatible with C{domains}.
-
-    Raise a C{ValueError} if C{tree} either:
-
-      - contains a variable missing from C{domains}
-      - binary operator between variable and
-        invalid value for that variable.
-
-    @type tree: L{LTL_AST}
-
-    @param domains: variable definitions:
-
-        C{{'varname': domain}}
-
-        See L{GRSpec} for more details of available domain types.
-    @type domains: C{dict}
-    """
-    for u in tree:
-        if isinstance(u, Var) and u.val not in domains:
-            var = u.val
-            raise ValueError('undefined variable: ' + str(var) +
-                             ', in subformula:\n\t' + str(tree))
-
-        if not isinstance(u, (Const, Num)):
-            continue
-
-        # is a Const or Num
-        var, c = pair_node_to_var(tree, u)
-
-        if isinstance(c, Const):
-            dom = domains[var]
-
-            if not isinstance(dom, list):
-                raise Exception(
-                    'String constant: ' + str(c) +
-                    ', assigned to non-string variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom)
-                )
-
-            if c.val not in domains[var.val]:
-                raise ValueError(
-                    'String constant: ' + str(c) +
-                    ', is not in the domain of variable: ' + str(var)
-                )
-
-        if isinstance(c, Num):
-            dom = domains[var]
-
-            if not isinstance(dom, tuple):
-                raise Exception(
-                    'Number: ' + str(c) +
-                    ', assigned to non-integer variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom)
-                )
-
-            if not dom[0] <= c.val <= dom[1]:
-                raise Exception(
-                    'Integer variable: ' + str(var) +
-                    ', is assigned the value: ' + str(c) +
-                    ', that is out of its range: %d ... %d ' % dom
-                )
-
-def pair_node_to_var(tree, c):
-    """Find variable under L{Binary} operator above given node.
-
-    First move up from C{nd}, stop at first L{Binary} node.
-    Then move down, until first C{Var}.
-    This assumes that only L{Unary} operators appear between a
-    L{Binary} and its variable and constant operands.
-
-    May be extended in the future, depending on what the
-    tools support and is thus needed here.
-
-    @type tree: L{LTL_AST}
-
-    @type L{nd}: L{Const} or L{Num}
-
-    @return: variable, constant
-    @rtype: C{(L{Var}, L{Const})}
-    """
-    # find parent Binary operator
-    while True:
-        old = c
-        c = next(iter(tree.predecessors(c)))
-
-        if isinstance(c, Binary):
-            break
-
-    succ = tree.successors(c)
-
-    v = succ[0] if succ[1] == old else succ[1]
-
-    # go down until var found
-    # assuming correct syntax for gr1c
-    while True:
-        if isinstance(v, Var):
-            break
-
-        v = next(iter(tree.successors(v)))
-
-    # now: b, is the operator and: v, the variable
-    return v, c
+nodes = make_fol_nodes()

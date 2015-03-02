@@ -1,102 +1,11 @@
 #!/usr/bin/env python
-"""
-Tests for the tulip.spec subpackage.
-"""
+"""Tests for the tulip.spec subpackage."""
 import logging
-#logging.basicConfig(level=logging.DEBUG)
-
-import copy
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
 import nose.tools as nt
-
-from tulip.spec import LTL, GRSpec, mutex
+from tulip.spec import ast, lexyacc
 from tulip.spec.parser import parse
-from tulip.spec import ast as ast
-from tulip.spec import form
-
-def GR1specs_equal(s1, s2):
-    """Return True if s1 and s2 are *roughly* syntactically equal.
-
-    This function seems to be of little or no use outside this test
-    module because of its fragility.
-    """
-    if s1 is None or s2 is None:
-        raise TypeError
-    for s in [s1, s2]:
-        if hasattr(s.env_init, "sort"):
-            s.env_init.sort()
-        if hasattr(s.env_safety, "sort"):
-            s.env_safety.sort()
-        if hasattr(s.env_prog, "sort"):
-            s.env_prog.sort()
-        if hasattr(s.sys_init, "sort"):
-            s.sys_init.sort()
-        if hasattr(s.sys_safety, "sort"):
-            s.sys_safety.sort()
-        if hasattr(s.sys_prog, "sort"):
-            s.sys_prog.sort()
-    if s1.env_vars != s2.env_vars or s1.sys_vars != s2.sys_vars:
-        return False
-    if s1.env_init != s2.env_init or s1.env_safety != s2.env_safety or s1.env_prog != s2.env_prog:
-        return False
-    if s1.sys_init != s2.sys_init or s1.sys_safety != s2.sys_safety or s1.sys_prog != s2.sys_prog:
-        return False
-    return True
-
-
-class LTL_test:
-    def setUp(self):
-        self.f = LTL("[](p -> <>q)", input_variables={"p":"boolean"},
-                     output_variables={"q":"boolean"})
-
-    def tearDown(self):
-        self.f = None
-
-    def test_loads_dumps_id(self):
-        # Dump/load identity test: Dumping the result from loading a
-        # dump should be identical to the original dump.
-        assert self.f.dumps() == LTL.loads(self.f.dumps()).dumps()
-
-
-class GRSpec_test:
-    def setUp(self):
-        self.f = GRSpec(env_vars={"x"}, sys_vars={"y"},
-                        env_init=["x"], sys_safety=["y"],
-                        env_prog=["!x", "x"], sys_prog=["y&&!x"])
-        self.triv = GRSpec(env_vars=["x"], sys_vars=["y"],
-                           env_init=["x && !x"])
-        self.empty = GRSpec()
-
-    def tearDown(self):
-        self.f = None
-
-    def test_or(self):
-        g = GRSpec(env_vars={"z"}, env_prog=["!z"])
-        h = self.f | g
-        assert len(h.env_vars) == 2 and h.env_vars.has_key("z")
-        assert len(h.env_prog) == len(self.f.env_prog)+1 and "!z" in h.env_prog
-
-        # Domain mismatch on system variable y
-        g.sys_vars = {"y": (0,5)}
-        nt.assert_raises(ValueError, self.f.__or__, g)
-
-        # Domain mismatch on environment variable x
-        g.sys_vars = dict()
-        g.env_vars["x"] = (0,3)
-        nt.assert_raises(ValueError, self.f.__or__, g)
-
-    def test_to_canon(self):
-        # Fragile!
-        assert self.f.to_canon() == "((x) && []<>(!x) && []<>(x)) -> ([](y) && []<>(y&&!x))"
-        # N.B., for self.triv, to_canon() returns a formula missing
-        # the assumption part not because it detected that the
-        # assumption is false, but rather the guarantee is empty (and
-        # thus interpreted as being "True").
-        assert self.triv.to_canon() == "True"
-        assert self.empty.to_canon() == "True"
-
-    def test_init(self):
-        assert len(self.f.env_vars) == 1 and len(self.f.sys_vars) == 1
-        assert self.f.env_vars["x"] == "boolean" and self.f.sys_vars["y"] == "boolean"
 
 
 def parse_parse_check(formula, expected_length):
@@ -107,6 +16,7 @@ def parse_parse_check(formula, expected_length):
     else:
         nt.assert_raises(Exception, parse, formula)
 
+
 def parse_parse_test():
     for (formula, expected_len) in [("G p", 2),
                                     ("p G", None)]:
@@ -115,42 +25,143 @@ def parse_parse_test():
 
 def full_name_operators_test():
     formulas = {
-        'always eventually p':'( G ( F p ) )',
-        'ALwaYs EvenTUAlly(p)':'( G ( F p ) )',
-        '(p and q) UNtIl (q or ((p -> w) and not (z implies b))) and always next g':
-        '( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )'
-    }
-    
+        'always eventually p': '( G ( F p ) )',
+        'ALwaYs EvenTUAlly(p)': '( G ( F p ) )',
+        ('(p and q) UNtIl (q or ((p -> w) and '
+         'not (z implies b))) and always next g'):
+        ('( ( p & q ) U ( ( q | ( ( p -> w ) & '
+         '( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )')}
+
     for f, correct in formulas.iteritems():
-        ast = parse(f, full_operators=True)
-        #ast.write('hehe.png')
-        assert(str(ast) == correct)
+        tree = parse(f, full_operators=True)
+        print(tree)
+        # g.write('hehe.png')
+        assert tree.flatten() == correct
 
-def test_to_labeled_graph():
-    f = ('( ( p & q ) U ( ( q | ( ( p -> w ) & ( ! ( z -> b ) ) ) ) & '
-         '( G ( X g ) ) ) )')
-    tree = parse(f)
-    assert(len(tree) == 18)
-    nodes = {'p', 'q', 'w', 'z', 'b', 'g', 'G', 'U', 'X', '&', '|', '!', '->'}
-    
-    g = ast.ast_to_labeled_graph(tree, detailed=False)
-    labels = {d['label'] for u, d in g.nodes_iter(data=True)}
-        
-    print(labels)
-    assert(labels == nodes)
 
-def test_replace_dependent_vars():
-    sys_vars = {'a': 'boolean', 'locA':(0, 4)}
-    sys_safe = ['!a', 'a & (locA = 3)']
-    
-    spc = GRSpec(sys_vars=sys_vars, sys_safety=sys_safe)
-    
-    bool2form = {'a':'(locA = 0) | (locA = 2)', 'b':'(locA = 1)'}
-    
-    form.replace_dependent_vars(spc, bool2form)
-    
-    correct_result = (
-        '[](( ! ( ( locA = 0 ) | ( locA = 2 ) ) )) && '
-        '[](( ( ( locA = 0 ) | ( locA = 2 ) ) & ( locA = 3 ) ))'
-    )
-    assert(str(spc) == correct_result)
+def test_ast_nodes():
+    nodes = ast.make_nodes()
+    # test Terminal
+    t = nodes.Terminal('a')
+    assert t.value == 'a'
+    assert repr(t) == "Terminal('a')"
+    assert str(t) == 'a'
+    assert len(t) == 1
+    t1 = nodes.Terminal('a')
+    assert t == t1
+    t2 = nodes.Terminal('b')
+    assert t != t2
+    assert t.flatten() == 'a'
+    # values and operators must be strings
+    nt.assert_raises(TypeError, nodes.Terminal, 2)
+    nt.assert_raises(TypeError, nodes.Unary, 2, 'v')
+    nt.assert_raises(TypeError, nodes.Binary, 2, 'v')
+    # test Unary
+    u = nodes.Unary('!', t)
+    assert u.operator == '!'
+    assert u.operands[0] is t
+    assert repr(u) == "Unary('!', Terminal('a'))"
+    print(u)
+    assert str(u) == '(! a)'
+    assert len(u) == 2
+    assert u.flatten() == '( ! a )'
+    # test Binary
+    v = nodes.Binary('+', t, t2)
+    assert v.operator == '+'
+    assert v.operands[0] is t
+    assert v.operands[1] is t2
+    assert repr(v) == "Binary('+', Terminal('a'), Terminal('b'))"
+    assert len(v) == 3
+    assert v.flatten() == "( a + b )"
+    # different operator map
+    opmap = {'!': '!', '+': '+'}
+    nodes = ast.make_nodes(opmap)
+    assert nodes.Node.opmap is opmap
+    assert nodes.Terminal.opmap is opmap
+    assert nodes.Unary.opmap is opmap
+    assert nodes.Binary.opmap is opmap
+
+
+def test_fol_nodes():
+    nodes = ast.make_fol_nodes()
+    # test Var
+    v = nodes.Var('a')
+    assert v.value == 'a'
+    nt.assert_raises(TypeError, nodes.Var, 2)
+    # test Bool
+    b = nodes.Bool('TRue')
+    print(b.value)
+    assert b.value == 'True'
+    assert b.flatten() == 'True'
+    nt.assert_raises(TypeError, nodes.Bool, 2)
+    nt.assert_raises(TypeError, nodes.Bool, 'bee')
+
+
+def test_lex():
+    # catch token precedence errors
+    # for example if "EVENTUALLY" is defined before "FALSE",
+    # then "False" is parsed as "EVENTUALLY", "NAME", where
+    # "NAME" is equal to "alse".
+    s = 'False'
+    lexer = lexyacc.Lexer()
+    lexer.lexer.input(s)
+    r = list(lexer.lexer)
+    assert len(r) == 1
+    (tok, ) = r
+    assert tok.value == 'False'
+    # another case, which needs that "NAME" be defined
+    # before "NEXT"
+    s = 'X0reach'
+    lexer.lexer.input(s)
+    r = list(lexer.lexer)
+    assert len(r) == 1
+    (tok, ) = r
+    assert tok.value == 'X0reach'
+
+
+def lexer_token_precedence_test():
+    s = 'False'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Bool)
+    assert r.value == 'False'
+    s = 'a'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Var)
+    assert r.value == 'a'
+    s = '"a"'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Str)
+    assert r.value == 'a'
+    s = '1'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Num)
+    assert r.value == '1'
+    s = '[] a'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Unary)
+    assert r.operator == 'G'
+    assert isinstance(r.operands[0], ast.nodes.Var)
+    assert r.operands[0].value == 'a'
+    s = 'a U b'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Binary)
+    assert r.operator == 'U'
+    assert isinstance(r.operands[0], ast.nodes.Var)
+    assert r.operands[0].value == 'a'
+    assert isinstance(r.operands[1], ast.nodes.Var)
+    assert r.operands[1].value == 'b'
+    s = '( a )'
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Var)
+    s = "(a ' = 1)"
+    r = parse(s)
+    assert isinstance(r, ast.nodes.Comparator)
+    assert r.operator == '='
+    x = r.operands[0]
+    assert isinstance(x, ast.nodes.Unary)
+    assert x.operator == 'X'
+    assert isinstance(x.operands[0], ast.nodes.Var)
+    assert x.operands[0].value == 'a'
+    y = r.operands[1]
+    assert isinstance(y, ast.nodes.Num)
+    assert y.value == '1'

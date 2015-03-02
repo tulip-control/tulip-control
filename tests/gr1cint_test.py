@@ -4,13 +4,12 @@ Tests for the interface with gr1c.
 """
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
-
+logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
 from nose.tools import raises
 import os
+from tulip.spec import GRSpec, translate
+from tulip.interfaces import gr1c
 
-from tulip.spec import GRSpec
-from tulip.interfaces import gr1cint
 
 REFERENCE_SPECFILE = """
 # For example, regarding states as bitvectors, 1011 is not in winning
@@ -54,11 +53,12 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 
 class basic_test:
     def setUp(self):
-        self.f_un = GRSpec(env_vars="x", sys_vars="y",
-                           env_init="x", env_prog="x",
-                           sys_init="y",sys_safety=["y -> X(!y)","!y -> X(y)"],
-                           sys_prog="y && x")
-        self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
+        self.f_un = GRSpec(
+            env_vars="x", sys_vars="y",
+            env_init="x", env_prog="x",
+            sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
+            sys_prog="y && x")
+        self.dcounter = GRSpec(sys_vars={"y": (0, 5)}, sys_init=["y=0"],
                                sys_prog=["y=0", "y=5"])
 
     def tearDown(self):
@@ -66,52 +66,52 @@ class basic_test:
         self.dcounter = None
 
     def test_check_syntax(self):
-        assert gr1cint.check_syntax(REFERENCE_SPECFILE)
-        assert not gr1cint.check_syntax("foo")
+        assert gr1c.check_syntax(REFERENCE_SPECFILE)
+        assert not gr1c.check_syntax("foo")
 
     def test_to_gr1c(self):
-        assert gr1cint.check_syntax(self.f_un.to_gr1c() )
-        assert gr1cint.check_syntax(self.dcounter.to_gr1c() )
+        assert gr1c.check_syntax(translate(self.f_un, 'gr1c'))
+        assert gr1c.check_syntax(translate(self.dcounter, 'gr1c'))
 
     def test_check_realizable(self):
-        assert not gr1cint.check_realizable(self.f_un,
-                                            init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert not gr1c.check_realizable(self.f_un,
+                                         init_option="ALL_ENV_EXIST_SYS_INIT")
         self.f_un.sys_safety = []
-        assert gr1cint.check_realizable(self.f_un,
-                                        init_option="ALL_ENV_EXIST_SYS_INIT")
-        assert gr1cint.check_realizable(self.f_un,
-                                        init_option="ALL_INIT")
+        assert gr1c.check_realizable(self.f_un,
+                                     init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert gr1c.check_realizable(self.f_un,
+                                     init_option="ALL_INIT")
 
-        assert gr1cint.check_realizable(self.dcounter,
-                                        init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert gr1c.check_realizable(self.dcounter,
+                                     init_option="ALL_ENV_EXIST_SYS_INIT")
         self.dcounter.sys_init = []
-        assert gr1cint.check_realizable(self.dcounter,
-                                        init_option="ALL_INIT")
+        assert gr1c.check_realizable(self.dcounter,
+                                     init_option="ALL_INIT")
 
     def test_synthesize(self):
         self.f_un.sys_safety = []  # Make it realizable
-        g = gr1cint.synthesize(self.f_un,
-                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        g = gr1c.synthesize(self.f_un,
+                            init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
-        assert len(g.env_vars) == 1 and g.env_vars.has_key("x")
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.env_vars) == 1 and 'x' in g.env_vars
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
 
-        g = gr1cint.synthesize(self.dcounter,
-                               init_option="ALL_ENV_EXIST_SYS_INIT")
+        g = gr1c.synthesize(self.dcounter,
+                            init_option="ALL_ENV_EXIST_SYS_INIT")
         assert g is not None
         assert len(g.env_vars) == 0
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 2
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
         self.dcounter.sys_init = []
-        g = gr1cint.synthesize(self.dcounter,
-                               init_option="ALL_INIT")
+        g = gr1c.synthesize(self.dcounter,
+                            init_option="ALL_INIT")
         assert g is not None
         print g
         assert len(g.env_vars) == 0
-        assert len(g.sys_vars) == 1 and g.sys_vars.has_key("y")
+        assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 6
 
 
@@ -120,7 +120,9 @@ class GR1CSession_test:
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
             f.write(REFERENCE_SPECFILE)
-        self.gs = gr1cint.GR1CSession("trivial_partwin.spc", env_vars=["x","ze"], sys_vars=["y","zs"])
+        self.gs = gr1c.GR1CSession("trivial_partwin.spc",
+                                   env_vars=["x", "ze"],
+                                   sys_vars=["y", "zs"])
 
     def tearDown(self):
         self.gs.close()
@@ -138,44 +140,61 @@ class GR1CSession_test:
         assert vars_list == ["x (0)", "ze (1)", "y (2)", "zs (3)"]
 
     def test_getindex(self):
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 0) == 1
-        assert self.gs.getindex({"x":0, "y":0, "ze":0, "zs":0}, 1) == 1
+        assert self.gs.getindex({"x": 0, "y": 0, "ze": 0, "zs": 0}, 0) == 1
+        assert self.gs.getindex({"x": 0, "y": 0, "ze": 0, "zs": 0}, 1) == 1
 
     def test_iswinning(self):
-        assert self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":0})
-        assert not self.gs.iswinning({"x":1, "y":1, "ze":0, "zs":1})
+        assert self.gs.iswinning({"x": 1, "y": 1, "ze": 0, "zs": 0})
+        assert not self.gs.iswinning({"x": 1, "y": 1, "ze": 0, "zs": 1})
 
     def test_env_next(self):
-        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":0}) == [{'x': 0, 'ze': 0}, {'x': 1, 'ze': 0}]
-        assert self.gs.env_next({"x":1, "y":1, "ze":0, "zs":1}) == [{'x': 0, 'ze': 1}, {'x': 1, 'ze': 1}]
+        assert (self.gs.env_next({"x": 1, "y": 1, "ze": 0, "zs": 0}) ==
+                [{'x': 0, 'ze': 0}, {'x': 1, 'ze': 0}])
+        assert (self.gs.env_next({"x": 1, "y": 1, "ze": 0, "zs": 1}) ==
+                [{'x': 0, 'ze': 1}, {'x': 1, 'ze': 1}])
 
     def test_sys_nexta(self):
-        assert self.gs.sys_nexta({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}) == [{'y': 0, 'zs': 0}, {'y': 0, 'zs': 1}, {'y': 1, 'zs': 0}, {'y': 1, 'zs': 1}]
+        assert (
+            self.gs.sys_nexta(
+                {"x": 1, "y": 1, "ze": 0, "zs": 0},
+                {"x": 0, "ze": 0}
+            ) == [
+                {'y': 0, 'zs': 0},
+                {'y': 0, 'zs': 1},
+                {'y': 1, 'zs': 0},
+                {'y': 1, 'zs': 1}
+            ])
 
     def test_sys_nextfeas(self):
-        assert self.gs.sys_nextfeas({"x":1, "y":1, "ze":0, "zs":0}, {"x":0, "ze":0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
+        assert self.gs.sys_nextfeas(
+            {"x": 1, "y": 1, "ze": 0, "zs": 0},
+            {"x": 0, "ze": 0}, 0) == [{'y': 0, 'zs': 0}, {'y': 1, 'zs': 0}]
 
 
 def test_aut_xml2mealy():
-    g = gr1cint.load_aut_xml(REFERENCE_AUTXML)
+    g = gr1c.load_aut_xml(REFERENCE_AUTXML)
     assert g.env_vars == {"x": "boolean"}
     assert g.sys_vars == {"y": "boolean"}
     print(g.nodes())
     assert len(g) == 3
 
+
 @raises(ValueError)
 def synth_init_illegal_check(init_option):
     spc = GRSpec()
-    gr1cint.synthesize(spc, init_option=init_option)
+    gr1c.synthesize(spc, init_option=init_option)
+
 
 def synth_init_illegal_test():
     for init_option in ["Caltech", 1]:
         yield synth_init_illegal_check, init_option
 
+
 @raises(ValueError)
 def realiz_init_illegal_check(init_option):
     spc = GRSpec()
-    gr1cint.check_realizable(spc, init_option=init_option)
+    gr1c.check_realizable(spc, init_option=init_option)
+
 
 def realiz_init_illegal_test():
     for init_option in ["Caltech", 1]:

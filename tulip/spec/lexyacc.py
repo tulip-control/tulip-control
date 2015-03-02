@@ -30,77 +30,89 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-PLY-based parser for TuLiP LTL syntax,
+"""PLY-based parser for TuLiP LTL syntax,
 using AST classes from spec.ast
 """
 from __future__ import absolute_import
-
 import logging
 logger = logging.getLogger(__name__)
-
 import warnings
-
 import ply.lex
 import ply.yacc
-
-from . import ast
+import tulip.spec.ast
 
 
 TABMODULE = 'tulip.spec.parsetab'
-
-LEX_LOGGER = '{name}.lex_logger'.format(name=__name__)
-YACC_LOGGER = '{name}.yacc_logger'.format(name=__name__)
-PARSER_LOGGER = '{name}.parser_logger'.format(name=__name__)
-
-
-def _format_docstring(**kwargs):
-    """Apply C{kwargs} to function docstring using C{format}."""
-
-    def dec(func):
-        func.__doc__ = func.__doc__.format(**kwargs)
-        return func
-
-    return dec
+LEX_LOGGER = 'tulip.ltl_lex_log'
+YACC_LOGGER = 'tulip.ltl_yacc_log'
+PARSER_LOGGER = 'tulip.ltl_parser_log'
+# TODO: add past fragment of LTL
 
 
 class Lexer(object):
     """Token rules to build LTL lexer."""
 
-    def __init__(self, debug=False):
-        # for setting the logger, call build explicitly
-        self.build(debug=debug)
+    reserved = {
+        'next': 'NEXT',
+        'X': 'XNEXT',
+        'false': 'FALSE',
+        'true': 'TRUE',
+        'G': 'ALWAYS',
+        'F': 'EVENTUALLY',
+        'U': 'UNTIL',
+        'R': 'RELEASE'}
 
-    tokens = (
-        'TRUE', 'FALSE',
-        'NAME', 'NUMBER',
+    delimiters = ['LPAREN', 'RPAREN', 'DQUOTES']
+
+    operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
         'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'ALWAYS', 'EVENTUALLY', 'NEXT',
-        'UNTIL', 'RELEASE',
-        'PLUS', 'MINUS', 'TIMES', 'DIV',
-        'LPAREN', 'RPAREN', 'DQUOTES', 'PRIME',
-        'COMMENT', 'NEWLINE'
-    )
+        'PLUS', 'MINUS', 'TIMES', 'DIV', 'PRIME']
 
-    # Tokens
-    t_TRUE = 'TRUE|True|true'
-    t_FALSE = 'FALSE|False|false'
+    misc = ['NAME', 'NUMBER']
 
-    t_NEXT = r'X|next'
+    def __init__(self, debug=False):
+        # for setting the logger, call build explicitly
+        self.tokens = (
+            self.delimiters + self.operators +
+            self.misc + self.reserved.values())
+        self.build(debug=debug)
+
+    def t_NAME(self, t):
+        r'[A-Za-z_][A-za-z0-9._:]*'
+        t.type = self.reserved.get(t.value, 'NAME')
+        # special treatment
+        if t.value.lower() in {'false', 'true'}:
+            t.type = self.reserved[t.value.lower()]
+        return t
+
     # t_PRIME  = r'\''
-    t_ALWAYS = r'\[\]|G'
-    t_EVENTUALLY = r'\<\>|F'
 
-    t_UNTIL = r'U'
-    t_RELEASE = r'R'
+    def t_ALWAYS(self, t):
+        r'\[\]'
+        # use single letter as more readable and efficient
+        t.value = 'G'
+        return t
+
+    def t_EVENTUALLY(self, t):
+        r'\<\>'
+        t.value = 'F'
+        return t
+
+    def t_AND(self, t):
+        r'\&\&|\&'
+        t.value = '&'
+        return t
+
+    def t_OR(self, t):
+        r'\|\||\|'
+        t.value = '|'
+        return t
 
     t_NOT = r'\!'
-    t_AND = r'\&\&|\&'
-    t_OR = r'\|\||\|'
-    t_XOR = r'\^'
 
-    t_EQUALS = r'\=\=|\='
+    t_XOR = r'\^'
+    t_EQUALS = r'\='  # a declarative language has no assignment
     t_NEQUALS = r'\!\='
     t_LT = r'\<'
     t_LE = r'\<\='
@@ -110,8 +122,6 @@ class Lexer(object):
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
 
-    t_NAME = (r'(?!next)([A-EH-QSTWYZa-z_][A-za-z0-9._:]*|'
-              r'[A-Za-z][0-9_][a-zA-Z0-9._:]*)')
     t_NUMBER = r'\d+'
 
     t_IMP = '->'
@@ -125,14 +135,13 @@ class Lexer(object):
     t_DQUOTES = r'\"'
     t_PRIME = r"\'"
 
-    # Ignored characters
     t_ignore = " \t"
 
-    def t_COMMENT(self, t):
+    def t_comment(self, t):
         r'\#.*'
         return
 
-    def t_NEWLINE(self, t):
+    def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
 
@@ -140,14 +149,13 @@ class Lexer(object):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
 
-    @_format_docstring(logger=LEX_LOGGER)
     def build(self, debug=False, debuglog=None, **kwargs):
         """Create a lexer.
 
-        @param kwargs: Same arguments as C{{ply.lex.lex}}:
+        @param kwargs: Same arguments as C{ply.lex.lex}:
 
-          - except for C{{module}} (fixed to C{{self}})
-          - C{{debuglog}} defaults to the logger C{{"{logger}"}}.
+          - except for C{module} (fixed to C{self})
+          - C{debuglog} defaults to the logger C{"ltl_lex_log"}.
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(LEX_LOGGER)
@@ -156,12 +164,14 @@ class Lexer(object):
             module=self,
             debug=debug,
             debuglog=debuglog,
-            **kwargs
-        )
+            **kwargs)
 
 
 class Parser(object):
     """Production rules to build LTL parser."""
+
+    tabmodule = TABMODULE
+    start = 'expression'
 
     # lowest to highest
     precedence = (
@@ -179,70 +189,61 @@ class Parser(object):
         ('right', 'NOT', 'UMINUS'),
         ('right', 'NEXT', 'XNEXT'),
         ('left', 'PRIME'),
-        ('nonassoc', 'TRUE', 'FALSE')
-    )
+        ('nonassoc', 'TRUE', 'FALSE'))
 
-    ast = ast.nodes
-
-    def __init__(self):
-        self.graph = None
-
-        self.lexer = Lexer()
+    def __init__(self, ast=None, lexer=None):
+        if ast is None:
+            ast = tulip.spec.ast.nodes
+        if lexer is None:
+            lexer = Lexer()
+        self.ast = ast
+        self.lexer = lexer
         self.tokens = self.lexer.tokens
-
         self.build()
 
     def build(self):
         self.parser = ply.yacc.yacc(
             module=self,
-            tabmodule=TABMODULE,
+            tabmodule=self.tabmodule,
             write_tables=False,
-            debug=False
-        )
+            debug=False)
 
-    @_format_docstring(logger=YACC_LOGGER)
     def rebuild_parsetab(self, tabmodule, outputdir='',
                          debug=True, debuglog=None):
         """Rebuild parsetable in debug mode.
 
         @param tabmodule: name of table file
-        @type tabmodule: C{{str}}
+        @type tabmodule: C{str}
 
-        @param outputdir: save C{{tabmodule}} in this directory.
-        @type outputdir: c{{str}}
+        @param outputdir: save C{tabmodule} in this directory.
+        @type outputdir: c{str}
 
-        @param debuglog: defaults to logger C{{"{logger}"}}.
-        @type debuglog: C{{logging.Logger}}
+        @param debuglog: defaults to logger C{"ltl_yacc_log"}.
+        @type debuglog: C{logging.Logger}
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(YACC_LOGGER)
-
         self.lexer.build(debug=debug)
-
         self.parser = ply.yacc.yacc(
             module=self,
             tabmodule=tabmodule,
             outputdir=outputdir,
             write_tables=True,
             debug=debug,
-            debuglog=debuglog
-        )
+            debuglog=debuglog)
 
-    @_format_docstring(logger=PARSER_LOGGER)
     def parse(self, formula, debuglog=None):
         """Parse formula string and create abstract syntax tree (AST).
 
-        @param logger: defaults to logger C{{"{logger}"}}.
-        @type logger: C{{logging.Logger}}
+        @param logger: defaults to logger C{"ltl_parser_log"}.
+        @type logger: C{logging.Logger}
         """
         if debuglog is None:
             debuglog = logging.getLogger(PARSER_LOGGER)
         root = self.parser.parse(
             formula,
             lexer=self.lexer.lexer,
-            debug=debuglog
-        )
-
+            debug=debuglog)
         if root is None:
             raise Exception('failed to parse:\n\t{f}'.format(f=formula))
         return root
@@ -278,11 +279,16 @@ class Parser(object):
 
     def p_unary(self, p):
         """expression : NOT expression
-                      | NEXT expression
                       | ALWAYS expression
                       | EVENTUALLY expression
         """
         p[0] = self.ast.Unary(p[1], p[2])
+
+    def p_prefix_next(self, p):
+        """expression : NEXT expression
+                      | XNEXT expression
+        """
+        p[0] = self.ast.Unary('X', p[2])
 
     def p_postfix_next(self, p):
         """expression : expression PRIME"""

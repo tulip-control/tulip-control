@@ -426,8 +426,6 @@ def product_interval(list1, list2):
             new_list.append(list1[m]+list2[n])
     return new_list
 
-################################
-
 def find_equilibria(ssd,cont_props,eps=0): 
     """ Finds the polytope that contains the equilibrium points
 
@@ -493,7 +491,6 @@ def find_equilibria(ssd,cont_props,eps=0):
                         [equil[1]-delta[1], equil[1]+delta[1]]]) 
                 else:
                     soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
-
             elif (rank_IA<len(A)):
                 if eps==0:
                     eps=abs(min(np.amin(-K),np.amin(A-I)))
