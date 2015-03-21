@@ -483,6 +483,7 @@ class GRSpec(LTL):
         return output
 
     def check_syntax(self):
+        """Raise `AssertionError` for misplaced primed variables."""
         self._assert_no_primed(self.env_init, 'assumed initial condition')
         self._assert_no_primed(self.sys_init, 'guaranteed initial condition')
         self._assert_no_primed(self.env_prog, 'liveness assumption')
@@ -492,17 +493,18 @@ class GRSpec(LTL):
             primed = tx.collect_primed_vars(a)
             for var in primed:
                 if var in self.sys_vars:
-                    raise Exception(
+                    raise AssertionError(
                         'Syntax error: ' +
                         'primed system variable "{var}"'.format(var=var) +
                         ' found in env safety: {f}'.format(f=f))
 
     def _assert_no_primed(self, formulae, name):
+        """Raise `AssertionError` if primed vars in `formulae`."""
         for f in formulae:
             a = self.ast(f)
             primed = tx.collect_primed_vars(a)
             if primed:
-                raise Exception(
+                raise AssertionError(
                     'Syntax error: ' +
                     'primed variables: {primed}'.format(primed=primed) +
                     ' found in {name}: {f}'.format(f=f, name=name))
