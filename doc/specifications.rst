@@ -88,7 +88,7 @@ The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E
 
          | expr '->' expr
          | expr '<->' expr
-         | 'ite' '(' expr ',' expr ',' expr ')'  # ternary conditional
+         | '(' 'ite' expr ',' expr ',' expr ')'  # ternary conditional
 
          | 'X' expr | 'next' expr | expr "'"
          | '[]' expr | 'G' expr
