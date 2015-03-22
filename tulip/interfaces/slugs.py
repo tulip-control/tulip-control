@@ -37,17 +37,18 @@ Relevant links:
 """
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import json
 import os
 import subprocess
 import tempfile
 import networkx as nx
-import slugs
 from tulip.spec import GRSpec, translate
+# inline:
+#   import slugs
 
 
 BDD_FILE = 'strategy_bdd.txt'
+logger = logging.getLogger(__name__)
 
 
 def check_realizable(spec):
@@ -57,6 +58,7 @@ def check_realizable(spec):
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    import slugs
     if isinstance(spec, GRSpec):
         struct = translate(spec, 'slugs')
     else:
@@ -81,6 +83,7 @@ def synthesize(spec, symbolic=False):
         struct = translate(spec, 'slugs')
     else:
         struct = spec
+    import slugs
     s = slugs.convert_to_slugsin(struct, True)
     with tempfile.NamedTemporaryFile(delete=False) as fin:
         fin.write(s)
