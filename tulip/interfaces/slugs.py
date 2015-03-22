@@ -47,6 +47,9 @@ import slugs
 from tulip.spec import GRSpec, translate
 
 
+BDD_FILE = 'strategy_bdd.txt'
+
+
 def check_realizable(spec):
     """Decide realizability of specification.
 
@@ -63,12 +66,11 @@ def check_realizable(spec):
         fin.write(s)
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
-    options = [fin.name, '--onlyRealizability']
-    realizable, out = _call_slugs(options)
+    realizable, out = _call_slugs(fin.name, synth=False)
     return realizable
 
 
-def synthesize(spec):
+def synthesize(spec, symbolic=False):
     """Return strategy satisfying the specification C{spec}.
 
     @type spec: L{GRSpec} or C{str} in structured slugs syntax.
@@ -84,8 +86,7 @@ def synthesize(spec):
         fin.write(s)
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
-    options = [fin.name, '--jsonOutput']
-    realizable, out = _call_slugs(options)
+    realizable, out = _call_slugs(fin.name, synth=True, symbolic=symbolic)
     if not realizable:
         return None
     os.unlink(fin.name)
@@ -138,12 +139,19 @@ def _bitfields_to_ints(bit_state, vrs):
     return int_state
 
 
-def _call_slugs(options):
-    c = ['slugs'] + options
-    logger.debug('Calling: ' + ' '.join(c))
+def _call_slugs(filename, synth=True, symbolic=True):
+    options = ['slugs', filename]
+    if synth:
+        if symbolic:
+            options.extend(['--symbolicStrategy', BDD_FILE])
+        else:
+            options.append('--jsonOutput')
+    else:
+        options.append('--onlyRealizability')
+    logger.debug('Calling: ' + ' '.join(options))
     try:
         p = subprocess.Popen(
-            c,
+            options,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
