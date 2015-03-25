@@ -134,7 +134,7 @@ For installing SciPy, NumPy, consider trying
 <http://fonnesbeck.github.com/ScipySuperpack/>`_ by Chris Fonnesbeck.
 
 When installing CVXOPT using MacPorts, there are some compatibility issues
-case CVXOPT to fail to install.  The following customizations will link
+that cause CVXOPT to fail to install.  The following customizations will link
 numpy against Apple's implementation of LAPACK and BLAS and bypass this
 issue:
 
