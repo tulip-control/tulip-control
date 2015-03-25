@@ -75,12 +75,13 @@ def check_pydot():
 # "install" is given, unless both "install" and "nocheck" are given
 # (but typical users do not need "nocheck").
 
-java_msg = (
-    'java not found.\n'
-    "The jtlv synthesis tool included in the tulip distribution\n"
-    'will not be able to run. Unless the tool gr1c is installed,\n'
-    'it will not be possible to solve games.'
-)
+gr1c_msg = 'gr1c not found or of version prior to ' +\
+    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
+    '.\n' +\
+    'Unless you have some alternative synthesis tool installed,\n' +\
+    'it will not be possible to realize GR(1) specifications.\n' +\
+    'Consult installation instructions for gr1c at http://scottman.net/2012/gr1c\n' +\
+    'or the TuLiP User\'s Guide about alternatives.'
 
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
@@ -90,16 +91,17 @@ java_msg = (
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {'java': [check_java, 'Java  found.', java_msg]}
+other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 
 glpk_msg = 'GLPK seems to be missing\n' +\
     'and thus apparently not used by your installation of CVXOPT.\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
-gr1c_msg = 'gr1c not found or of version prior to ' +\
-    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
-    '.\n' +\
-    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n' +\
-    'see http://scottman.net/2012/gr1c'
+java_msg = (
+    'java not found.\n'
+    "The jtlv synthesis tool included in the TuLiP distribution\n"
+    'will not be able to run. It is an optional alternative to gr1c,\n'
+    'the default GR(1) solver of TuLiP.'
+)
 mpl_msg = 'matplotlib not found.\n' +\
     'For many graphics drawing features in TuLiP, you must install\n' +\
     'matplotlib (http://matplotlib.org/).'
@@ -116,7 +118,7 @@ pydot_msg = 'pydot not found.\n' +\
 #           found); we interpret the return value True to be success,
 #           and False failure.
 optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
-             'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
+             'java': [check_java, 'Java  found.', java_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
