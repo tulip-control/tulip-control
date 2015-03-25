@@ -18,9 +18,9 @@ use the core functionality of TuLiP:
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
 
-The default synthesis tool for GR[1] specifications is implemented by Yaniv
+The default synthesis tool for GR(1) specifications is implemented by Yaniv
 Sa'ar `[BJPPS12] <bibliography.html#bjpps12>`_ and distributed with TuLiP.  To use it, you must have Java
-version 1.6 (or later) installed. An alternative GR[1] synthesis tool used by
+version 1.6 (or later) installed. An alternative GR(1) synthesis tool used by
 TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_; if you use gr1c, please install
 at least version 0.9.0.
 
