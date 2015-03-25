@@ -12,7 +12,7 @@ use the core functionality of TuLiP:
 * `SciPy <http://www.scipy.org/>`_
 * `CVXOPT <http://abel.ee.ucla.edu/cvxopt/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
-* `ply <http://www.dabeaz.com/ply/>`_
+* `PLY <http://www.dabeaz.com/ply/>`_
 * `polytope <https://pypi.python.org/pypi/polytope>`_
 
 Newcomers to scientific computing with Python should read
@@ -68,7 +68,7 @@ If you don't already use Python for scientific computing, consider using
 Canopy <https://www.enthought.com/products/canopy/>`_. This may make the
 installation process easier.  The EPD Free and Canopy Express distributions come
 with Python and includes NumPy, SciPy, matplotlib. EPD Free or Canopy Express
-together with networkx, cvxopt, and ply is sufficient to run TuLiP.
+together with networkx, cvxopt, and PLY is sufficient to run TuLiP.
 
 Alternatives to Enthought are listed on the `SciPy installation webpage
 <http://www.scipy.org/install.html>`_.  In particular, also try `Anaconda
@@ -185,7 +185,7 @@ Installing other Python dependencies
 ````````````````````````````````````
 
 The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
-get `ply <http://www.dabeaz.com/ply/>`_, try::
+get `PLY <http://www.dabeaz.com/ply/>`_, try::
 
   $ easy_install ply
 
