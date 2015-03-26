@@ -18,11 +18,9 @@ use the core functionality of TuLiP:
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
 
-The default synthesis tool for GR(1) specifications is implemented by Yaniv
-Sa'ar `[BJPPS12] <bibliography.html#bjpps12>`_ and distributed with TuLiP.  To use it, you must have Java
-version 1.6 (or later) installed. An alternative GR(1) synthesis tool used by
-TuLiP is `gr1c <http://scottman.net/2012/gr1c>`_; if you use gr1c, please install
-at least version 0.9.0.
+The default synthesis tool for GR(1) specifications is `gr1c
+<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0 (the
+current release at time of writing).
 
 For computing discrete abstractions from hybrid system descriptions, it is
 highly recommended---but not required---that you install `GLPK
@@ -32,8 +30,8 @@ CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
 `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
 do this linking automatically.
 
-Besides ``gr1c`` and ``GLPK`` mentioned above, the following are optional Python
-packages, listed with a summary of dependent features:
+The following are optional Python packages, listed with a summary of dependent
+features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
 
@@ -57,6 +55,40 @@ This script will also check for dependencies, i.e. look for NumPy, CVXOPT, etc.
 To only check for required and optional dependencies, but not install TuLiP, use ::
 
   $ python setup.py dry-check
+
+
+.. _synt-tools-sec-label:
+
+Alternative discrete synthesis tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While gr1c is required, as described in :doc:`install`, TuLiP can use other
+tools for formal synthesis. Those for which an interface is available are listed
+below. Also consult :doc:`specifications` concerning relevant syntax and
+summaries of the specification languages. Generally, direct interfaces are
+defined as modules in the subpackage ``tulip.interfaces``. However, these tools
+can be accessed indirectly by appropriately setting parameters for various
+functions in TuLiP, such as ``tulip.synth.synthesize()``.
+
+These are *optional dependencies*. TuLiP is useful without having them
+installed, but certain functionality is only available when they are.
+
+GR(1)
+`````
+
+* `slugs <https://github.com/LTLMoP/slugs>`_
+
+* a JTLV-based solver that has historically been included as part of the TuLiP
+  package itself. It was originally implemented by Yaniv Sa'ar `[BJPPS12]
+  <bibliography.html#bjpps12>`_.  To use it, you must have Java version 1.6 (or
+  later) installed.
+
+LTL
+```
+
+* `Lily <http://www.iaik.tugraz.at/content/research/design_verification/lily/>`_,
+  which is based on `Wring <http://vlsi.colorado.edu/~rbloem/wring.html>`_.
+
 
 .. _newbie-scipy-sec-label:
 
