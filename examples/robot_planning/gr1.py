@@ -107,9 +107,9 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # At this point we can synthesize the controller
 # using one of the available methods.
-# Here we make use of jtlv.
+# Here we make use of gr1c.
 #
-mealy_controller = synth.synthesize('jtlv', specs)
+mealy_controller = synth.synthesize('gr1c', specs)
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
