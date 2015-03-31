@@ -103,6 +103,12 @@ class LTL(object):
 
         self.check_vars()
 
+    def __repr__(self):
+        return ('LTL(\'{f}\', input_variables={inputv}, ' +
+                'output_variables={outv})').format(f=self.formula,
+                                                   inputv=self.input_variables,
+                                                   outv=self.output_variables)
+
     def __str__(self):
         return str(self.formula)
 
@@ -461,21 +467,21 @@ class GRSpec(LTL):
         output += 'GUARANTEE:\n'
         if self.sys_init:
             output += (
-                '    INITIAL\n\t  '
+                '    INITIAL\n\t  ' +
                 '\n\t& '.join([
                     '(' + f + ')' for f in self.sys_init
                 ]) + '\n'
             )
         if self.sys_safety:
             output += (
-                '    SAFETY\n\t  []'
+                '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
                     '(' + f + ')' for f in self.sys_safety
                 ]) + '\n'
             )
         if self.sys_prog:
             output += (
-                '    LIVENESS\n\t  []<>'
+                '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
                     '(' + f + ')' for f in self.sys_prog
                 ]) + '\n'

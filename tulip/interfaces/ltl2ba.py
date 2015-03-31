@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""interface to ltl2ba"""
+"""Interface to ltl2ba"""
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
@@ -248,7 +248,12 @@ class Parser(object):
 def call_ltl2ba(formula, prefix=''):
     """Load a Buchi Automaton from a Never Claim.
 
-    depends
+    TODO
+    ====
+    Make sure guard semantics properly accounted for:
+    'prop' | '!prop' | '1' and skip
+
+    Depends
     =======
     ltl2ba: http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/
 
@@ -257,9 +262,6 @@ def call_ltl2ba(formula, prefix=''):
 
     @return: Buchi Automaton
     @rtype: tulip.transys.BA
-
-    todo: make sure guard semantics properly accounted for:
-        'prop' | '!prop' | '1' and skip
     """
     try:
         subprocess.call(['ltl2ba', '-h'], stdout=subprocess.PIPE)

@@ -39,6 +39,11 @@ from tulip import transys
 from tulip.spec import GRSpec
 from tulip.interfaces import jtlv, gr1c
 
+# slugs is an optional dependency, so fail cleanly if it is missing.
+try:
+    from tulip.interfaces import slugs
+except ImportError:
+    slugs = None
 
 _hl = '\n' + 60 * '-'
 
@@ -968,7 +973,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     @type bool_actions: C{set} of keys from C{ts}
 
-    @param solver: 'gr1c' or 'jtlv'
+    @param solver: 'gr1c' or 'slugs' or 'jtlv'
     @type solver: str
     """
     assert isinstance(ts, dict)
@@ -985,11 +990,16 @@ def synthesize_many(specs, ts=None, ignore_init=None,
                                  bool_actions=bool_act)
     if solver == 'gr1c':
         ctrl = gr1c.synthesize(specs)
+    elif solver == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        ctrl = slugs.synthesize(specs)
     elif solver == 'jtlv':
         ctrl = jtlv.synthesize(specs)
     else:
         raise Exception('Unknown solver: ' + str(solver) + '. '
-                        'Available solvers: "jtlv" and "gr1c"')
+                        'Available solvers: "jtlv", "gr1c", and "slugs"')
     try:
         logger.debug('Mealy machine has: n = ' +
                      str(len(ctrl.states)) + ' states.')
@@ -1029,6 +1039,7 @@ def synthesize(
         what method to use, etc.  Currently recognized forms:
 
           - C{"gr1c"}: use gr1c for GR(1) synthesis via L{interfaces.gr1c}.
+          - C{"slugs"}: use slugs for GR(1) synthesis via L{interfaces.slugs}.
           - C{"jtlv"}: use JTLV for GR(1) synthesis via L{interfaces.jtlv}.
     @type specs: L{spec.GRSpec}
 
@@ -1087,11 +1098,16 @@ def synthesize(
         bool_actions)
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
+    elif option == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        strategy = slugs.synthesize(specs)
     elif option == 'jtlv':
         strategy = jtlv.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv" and "gr1c"')
+                        'Current options are "jtlv", "gr1c", and "slugs"')
     ctrl = strategy2mealy(strategy, specs)
     try:
         logger.debug('Mealy machine has: n = ' +
@@ -1124,11 +1140,16 @@ def is_realizable(
         bool_states, bool_actions)
     if option == 'gr1c':
         r = gr1c.check_realizable(specs)
+    elif option == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        r = slugs.check_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv" and "gr1c"')
+                        'Current options are "jtlv", "gr1c", and "slugs"')
     if r:
         logger.debug('is realizable')
     else:
@@ -1263,7 +1284,7 @@ def strategy2mealy(A, spec):
 def _int2str(label, str_vars):
     """Replace integers with string values for string variables.
 
-    @param: mapping from variable names, to integer (as strings)
+    @param label: mapping from variable names, to integer (as strings)
     @type label: C{dict}
 
     @param str_vars: mapping that defines those variables that

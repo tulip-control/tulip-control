@@ -136,7 +136,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
 # Synthesize
-ctrl = synth.synthesize('jtlv', specs,
+ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 if plotting:
     ax = plot_strategy(disc_dynamics, ctrl)

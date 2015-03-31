@@ -1,10 +1,13 @@
 Specifications
 ==============
 
-Currently only specifications expressed as GR(1) formulae (which constitutes a
-sublanguage of LTL) can be used for synthesis in TuLiP.  Nonetheless a more
+Currently the best support available in TuLiP is for specifications expressed as
+GR(1) formulae, which constitutes a sublanguage of LTL.  Nonetheless, a more
 general LTL specification string is described in the below section
-:ref:`tulip-ltl-label`, and it is supported through the class ``tulip.spec.LTL``.
+:ref:`tulip-ltl-label`, and it is supported through the class
+``tulip.spec.LTL``. Consult :doc:`install` (specifically,
+:ref:`synt-tools-sec-label`) about alternative solvers if you are interested in
+languages that are not equivalent to GR(1).
 
 Getting started
 ---------------
@@ -69,7 +72,7 @@ The result of the second line (using ``pretty()``) should look similar to
 
 TuLiP LTL syntax
 ----------------
-The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.plyparser``::
+The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.lexyacc``::
 
   expr ::= expr '*' expr
          | expr '/' expr

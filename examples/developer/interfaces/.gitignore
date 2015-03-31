@@ -1,0 +1,5 @@
+# Default by-products of tulip.interfaces.lily
+ltl2vl-verilog.v
+ltl2vl-synthesis.dot
+uct.uct
+io_partition.txt
