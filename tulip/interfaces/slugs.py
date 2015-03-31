@@ -166,7 +166,7 @@ def _call_slugs(filename, synth=True, symbolic=True):
     out, err = p.communicate()
     msg = (
         '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
-        '\n slugs stdrr: {c}\n\n'.format(c=err) +
+        '\n slugs stderr: {c}\n\n'.format(c=err) +
         '\n slugs stdout:\n\n {out}\n\n'.format(out=out))
     logger.debug(msg)
     # error ?
