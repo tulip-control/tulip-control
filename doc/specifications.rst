@@ -78,6 +78,7 @@ The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E
          | expr '/' expr
          | expr '+' expr
          | expr '-' expr
+         | expr '<<>>' NUMBER  # truncate
 
          | expr '=' expr | expr '==' expr
          | expr '!=' expr
