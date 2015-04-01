@@ -23,7 +23,7 @@ def test_translate_ast_to_gr1c():
     print(repr(r))
     print(r.flatten())
     assert r.flatten() == ("( ( loc = 1 ) -> "
-                           "(  ( ( env_alice' = 0 ) & ( env_bob' = 1 ) ) ) )")
+                           "( ( env_alice' = 0 ) & ( env_bob' = 1 ) ) )")
 
 
 @raises(TypeError)
