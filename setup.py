@@ -75,6 +75,14 @@ def check_pydot():
 # "install" is given, unless both "install" and "nocheck" are given
 # (but typical users do not need "nocheck").
 
+gr1c_msg = 'gr1c not found or of version prior to ' +\
+    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
+    '.\n' +\
+    'Unless you have some alternative synthesis tool installed,\n' +\
+    'it will not be possible to realize GR(1) specifications.\n' +\
+    'Consult installation instructions for gr1c at http://scottman.net/2012/gr1c\n' +\
+    'or the TuLiP User\'s Guide about alternatives.'
+
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
 #
@@ -83,32 +91,24 @@ def check_pydot():
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = dict()
+other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 
+glpk_msg = 'GLPK seems to be missing\n' +\
+    'and thus apparently not used by your installation of CVXOPT.\n' +\
+    'If you\'re interested, see http://www.gnu.org/s/glpk/'
 java_msg = (
     'java not found.\n'
-    "The jtlv synthesis tool included in the tulip distribution\n"
-    'will not be able to run. Unless `gr1c` or `slugs` is installed,\n'
-    'it will not be possible to solve games.')
-glpk_msg = (
-    'GLPK seems to be missing\n'
-    'and thus apparently not used by your installation of CVXOPT.\n'
-    'If you\'re interested, see http://www.gnu.org/s/glpk/')
-gr1c_msg = (
-    'gr1c not found or of version prior to '
-    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +
-    '.\n'
-    'If you\'re interested in a GR(1) synthesis tool besides JTLV,\n'
-    'see http://scottman.net/2012/gr1c')
-mpl_msg = (
-    'matplotlib not found.\n'
-    'For many graphics drawing features in TuLiP, you must install\n'
-    'matplotlib (http://matplotlib.org/).')
-pydot_msg = (
-    'pydot not found.\n'
-    'Several graph image file creation and dot (http://www.graphviz.org/)\n'
-    'export routines will be unavailable unless you install\n'
-    'pydot (http://code.google.com/p/pydot/).')
+    "The jtlv synthesis tool included in the TuLiP distribution\n"
+    'will not be able to run. It is an optional alternative to gr1c,\n'
+    'the default GR(1) solver of TuLiP.'
+)
+mpl_msg = 'matplotlib not found.\n' +\
+    'For many graphics drawing features in TuLiP, you must install\n' +\
+    'matplotlib (http://matplotlib.org/).'
+pydot_msg = 'pydot not found.\n' +\
+    'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
+    'export routines will be unavailable unless you install\n' +\
+    'pydot (http://code.google.com/p/pydot/).'
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -117,9 +117,8 @@ pydot_msg = (
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'java': [check_java, 'Java found.', java_msg],
-             'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
-             'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg],
+optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+             'java': [check_java, 'Java  found.', java_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
@@ -246,13 +245,12 @@ if perform_setup:
     # Build PLY table, to be installed as tulip package data
     try:
         import tulip.spec.lexyacc
-
-        tabmodule = 'parsetab'
+        tabmodule = tulip.spec.lexyacc.TABMODULE.split('.')[-1]
         outputdir = 'tulip/spec'
-
         parser = tulip.spec.lexyacc.Parser()
-        parser.rebuild_parsetab(tabmodule, outputdir=outputdir,
-                                debuglog=logger)
+        parser.build(tabmodule, outputdir=outputdir,
+                     write_tables=True,
+                     debug=True, debuglog=logger)
 
         plytable_build_failed = False
     except Exception as e:
