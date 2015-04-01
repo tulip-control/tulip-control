@@ -13,30 +13,30 @@ def test_split_gr1():
     # init
     f = '(x > 0) & (y + 1 < 2)'
     d = gr1.split_gr1(f)
-    assert d['init'] == '( x > 0 ) & ( ( y + 1 ) < 2 )', d
-    assert d['G'] == '', d
-    assert d['GF'] == '', d
+    assert d['init'] == ['( x > 0 ) & ( ( y + 1 ) < 2 )'], d
+    assert d['G'] == [''], d
+    assert d['GF'] == [], d
     # safety
     f = '[]((x > 0) & (z = 3 + y))'
     d = gr1.split_gr1(f)
-    assert d['init'] == '', d
-    assert d['G'] == '( ( x > 0 ) & ( z = ( 3 + y ) ) )', d
-    assert d['GF'] == '', d
+    assert d['init'] == [''], d
+    assert d['G'] == ['( ( x > 0 ) & ( z = ( 3 + y ) ) )'], d
+    assert d['GF'] == [], d
     # recurrence
     f = '[]<>(x > 0)'
     d = gr1.split_gr1(f)
-    assert d['init'] == '', d
-    assert d['G'] == '', d
-    assert d['GF'] == '( x > 0 )', d
+    assert d['init'] == [''], d
+    assert d['G'] == [''], d
+    assert d['GF'] == ['( x > 0 )'], d
     # all together
     f = (
         '(x > 0) & (y + 1 < 2) & '
         '[]( (X y) > 0) & '
         '[]<>((z - x <= 0) | (p -> q))')
     d = gr1.split_gr1(f)
-    assert d['init'] == '( x > 0 ) & ( ( y + 1 ) < 2 )', d
-    assert d['G'] == '( ( X y ) > 0 )', d
-    assert d['GF'] == '( ( ( z - x ) <= 0 ) | ( p -> q ) )', d
+    assert d['init'] == ['( x > 0 ) & ( ( y + 1 ) < 2 )'], d
+    assert d['G'] == ['( ( X y ) > 0 )'], d
+    assert d['GF'] == ['( ( ( z - x ) <= 0 ) | ( p -> q ) )'], d
     # not in fragment
     with assert_raises(AssertionError):
         gr1.split_gr1('[]( [] p )')
