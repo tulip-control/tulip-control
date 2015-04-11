@@ -33,6 +33,7 @@ sys.transitions.add_from(
 sys.atomic_propositions.add_from({'home', 'lot'})
 sys.states.add('X0', ap={'home'})
 sys.states.add('X5', ap={'lot'})
+print sys
 
 """Park as an env AP
 """

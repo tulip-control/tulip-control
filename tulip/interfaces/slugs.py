@@ -49,7 +49,6 @@ from tulip.spec import GRSpec, translate
 
 def synthesize(spec):
     """Return strategy satisfying the specification C{spec}.
-
     @type spec: L{GRSpec} or C{str} in structured slugs syntax.
     @return: If realizable return synthesized strategy, otherwise C{None}.
     @rtype: C{networkx.DiGraph}

@@ -15,7 +15,11 @@ transition system.
 
 import logging
 logging.basicConfig(level=logging.INFO)
+<<<<<<< HEAD
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
+=======
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
+>>>>>>> umich/aug_sys
 logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
 logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG - 3)
 

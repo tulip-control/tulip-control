@@ -59,7 +59,9 @@ from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from tulip.abstract import prop2partition as p2p
 
 from .prop2partition import (PropPreservingPartition,
-                             pwa_partition, part2convex)
+                             pwa_partition, part2convex, 
+                             find_equilibria, prop2part
+                             )
 from .feasible import is_feasible, solve_feasible
 from .plot import plot_ts_on_partition
 
@@ -823,7 +825,6 @@ def discretize(
             #n_cvol2ells = len(sol)
             n_cells=len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
-
             
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
@@ -1714,7 +1715,7 @@ def merge_partition_pair(
     
     return new_list, parents, ap_labeling
 
-def create_prog_map(modes, ppp):
+def create_prog_map(modes, ppp):# MS Added
     """ Creates a progress group map for a proposition preserving partition
 
     A progress group map for a mode is a set of tuples that contains the 
@@ -1872,6 +1873,7 @@ def create_afts(owner, ssd, cont_props, ref_grid, prog_map, trans):
         afts.sys_actions.add_from([str(s) for e,s in ssd.modes])
         afts.transitions.add_adj(adj=adj,adj2states=afts_states,**actions_per_mode[mode])
     return afts
+
 
 def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
                                 visualize=False,eps=0, is_convex=True,
