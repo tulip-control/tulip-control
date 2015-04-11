@@ -528,7 +528,7 @@ def env_to_spec(
     env_trans = list()
     # since APs are tied to env states, let them be env variables
     env_vars = {ap: 'boolean' for ap in aps}
-    sys_vars = dict()
+    sys_vars = {state:'boolean' for state in states}
     actions = ofts.actions
     sys_action_ids = dict()
     env_action_ids = dict()
@@ -1108,7 +1108,6 @@ def synthesize(
         ctrl.remove_deadends()
     return ctrl
 
-
 def is_realizable(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
@@ -1377,7 +1376,7 @@ def determinize_machine_init(mach, init_out_values=None):
         init_out_values = dict()
     '''determinize given outputs (uncontrolled)'''
     # restrict attention to given output ports only
-    given_ports = tuple(k for k in mach.outputs if k in init_out_values)
+    given_ports = tuple(k for k in mach.outputs if k in init_out_values) #MS added ".values()"
     rm_edges = set()
     for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
         for k in given_ports:

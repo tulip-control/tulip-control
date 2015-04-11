@@ -1906,8 +1906,8 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     cont_dyn={}
     trans={}
     cont_state_space=ssd.cts_ss
-    find_equilibria(ssd=ssd,cont_props=cont_props,eps=eps)
-    cont_part = prop2part(cont_state_space, cont_props)
+    p2p.find_equilibria(ssd=ssd,cont_props=cont_props,eps=eps)
+    cont_part = p2p.prop2part(cont_state_space, cont_props)
     plot_partition(cont_part, show=visualize)
     if is_convex:
         cont_part, new2old = part2convex(cont_part)
@@ -1917,7 +1917,7 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     if grid_size==-1.:
         ref_grid=cont_part
     else:
-        ref_grid=add_grid(ppp=cont_part, grid_size=grid_size)
+        ref_grid=p2p.add_grid(ppp=cont_part, grid_size=grid_size)
     plot_partition(ref_grid, show=visualize)
     
     prog_map=create_prog_map(ssd.modes,ref_grid)

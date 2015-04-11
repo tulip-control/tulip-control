@@ -39,6 +39,7 @@ from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
+import copy
 # inline imports
 #
 # from tulip.transys.export import graph2promela
