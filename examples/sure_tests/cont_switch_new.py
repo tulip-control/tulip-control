@@ -182,7 +182,7 @@ env_init = set()                # empty set
 env_prog = set()
 env_safe = set()
 cnt=0;
-safe = '('
+safe = ''
 for m in env_vars:
     safe+='('+m
     for n in env_vars:
@@ -194,21 +194,26 @@ for m in env_vars:
     if (cnt<4):
         safe+=' || '
     elif (cnt==4):
-        safe+= ')'
+        safe+= ''
 env_safe = {'!OUTSIDE'}                # empty set
 env_safe|={safe}
 
 prog=set()
-for x in abstMOS.ts.progress_map:
-    sp='(!('
-    for y in abstMOS.ts.progress_map[x]:
-        for i,z in enumerate(y):
-            sp+=z
-            if i!=len(y)-1:
-                sp+=' || '
-    sp+=') && '
-    sp+=x[1]
+for x in abstMOS.ts.sys_actions:
+    sp='(!eqpnt_'
+    sp+=x
+    sp+=' && '
+    sp+=x
     sp+=')'
+    # sp+=x
+    # for y in abstMOS.ts.progress_map[x]:
+    #     for i,z in enumerate(y):
+    #         sp+=z
+    #         if i!=len(y)-1:
+    #             sp+=' || '
+    # sp+=') && '
+    # sp+=x[1]
+    # sp+=')'
     prog|={sp}
 env_prog=prog
 
@@ -252,14 +257,10 @@ mach = synth.determinize_machine_init(ctrl, {'eloc':s0_loc})
 sim_hor = 130
 N=1 # N = number of steps between each sampled transition
 
-(s1, dum) = mach.reaction('Sinit', {'on': 1})
+(s1, dum) = mach.reaction('Sinit', {'eloc': s0_loc})
 (s1, dum) = mach.reaction(s1, {'on': 1})
 for sim_time in range(sim_hor):
-    for mode in ssd.modes:
-        if np.array([Tc[sim_time*N],Th[sim_time*N]]) in ssd.dynamics[mode].domain:
-        #Is the size fo TC supposed to be bigger in the beginning?
-        #what is the point of dum[loc]    
-            sysnow=mode
+    sysnow=dum['sys_actions']
     #sysnow = #find your mode (read from mach)
 
     for ind in range(N):

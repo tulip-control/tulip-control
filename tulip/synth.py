@@ -528,7 +528,7 @@ def env_to_spec(
     env_trans = list()
     # since APs are tied to env states, let them be env variables
     env_vars = {ap: 'boolean' for ap in aps}
-    sys_vars = {state:'boolean' for state in states}
+    sys_vars = dict()
     actions = ofts.actions
     sys_action_ids = dict()
     env_action_ids = dict()
