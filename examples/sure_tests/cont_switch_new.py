@@ -177,34 +177,34 @@ abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owne
                                 N=1,abs_tol=1e-7)
 #print abstMOS
 
-env_vars = {"cool","heat","off","on"} 
+env_vars = set()
 env_init = set()                # empty set
 env_prog = set()
 env_safe = set()
 cnt=0;
 safe = ''
-for m in env_vars:
-    safe+='('+m
-    for n in env_vars:
-        if n != m:
-            safe +=' && !'
-            safe += n
-    safe+=')'
-    cnt=cnt+1
-    if (cnt<4):
-        safe+=' || '
-    elif (cnt==4):
-        safe+= ''
-env_safe = {'!OUTSIDE'}                # empty set
-env_safe|={safe}
+# for m in env_vars:
+#     safe+='('+m
+#     for n in env_vars:
+#         if n != m:
+#             safe +=' && !'
+#             safe += n
+#     safe+=')'
+#     cnt=cnt+1
+#     if (cnt<4):
+#         safe+=' || '
+#     elif (cnt==4):
+#         safe+= ''
+env_safe = set()                # empty set
+# env_safe|={safe}
 
 prog=set()
 for x in abstMOS.ts.sys_actions:
-    sp='(!eqpnt_'
+    sp='(eqpnt_'
     sp+=x
-    sp+=' && '
+    sp+=' && sys_actions = "'
     sp+=x
-    sp+=')'
+    sp+='")'
     # sp+=x
     # for y in abstMOS.ts.progress_map[x]:
     #     for i,z in enumerate(y):
@@ -232,7 +232,7 @@ sys_vars=set()
 
 sys_init = set()            
 sys_prog = {'LOW','HIGH'}
-sys_safe = set()
+sys_safe = {'!OUTSIDE'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 """
@@ -243,13 +243,13 @@ Put !OUTSIDE inside env_spec.
 #jt_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts, ignore_env_init=True, rm_deadends=False)
 gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=True)
 #print (gr_fts)
-# if not gr_fts.save('gr_afts.png'):
+# if not gr_fts.save('gr_fts.png'):
 #     print(gr_fts)
 
 disc_dynamics=abstMOS
 ctrl=gr_fts
 Tc = [20.0]
-Th = [15.0]
+Th = [16.0]
 
 s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
 s0_loc = 's'+str(s0_part)
@@ -257,10 +257,10 @@ mach = synth.determinize_machine_init(ctrl, {'eloc':s0_loc})
 sim_hor = 130
 N=1 # N = number of steps between each sampled transition
 
-(s1, dum) = mach.reaction('Sinit', {'eloc': s0_loc})
-(s1, dum) = mach.reaction(s1, {'on': 1})
+(s1, dum) = mach.reaction('Sinit', {'env_actions': 'regular'})
+#(s1, dum) = mach.reaction(s1, {'on': 1})
 for sim_time in range(sim_hor):
-    sysnow=dum['sys_actions']
+    sysnow=('regular',dum['sys_actions'])
     #sysnow = #find your mode (read from mach)
 
     for ind in range(N):
@@ -273,16 +273,16 @@ for sim_time in range(sim_hor):
     s0_part = find_discrete_state([Tc[-1],Th[-1]],disc_dynamics.ppp)
     s0_part = 's'+str(s0_part)
     s0_loc = disc_dynamics.ppp2ts[s0_part]
-    print s0_loc
-    print dum['sys_actions']
+    print s0_part, s0_loc, dum['sys_actions']
+    (s1, dum) = mach.reaction(s1, {'env_actions': 'regular'})
     # if pc.is_inside(disc_dynamics.ppp[disc_dynamics.ppp2ts.index(dum['loc'])],[Tc[-1],Th[-1]]):
     #     s0_part = disc_dynamics.ppp2ts.index(dum['loc'])
-    if sim_time <= 10:
-        (s1, dum) = mach.reaction(s1, {'cool': 1})
-    elif sim_time <= 50:
-        (s1, dum) = mach.reaction(s1, {'heat': 1})
-    else:
-        (s1, dum) = mach.reaction(s1, {'off': 1}) 
+    # if sim_time <= 10:
+    #     (s1, dum) = mach.reaction(s1, {'env_actions': 'regular'})
+    # elif sim_time <= 50:
+    #     (s1, dum) = mach.reaction(s1, {'heat': 1})
+    # else:
+    #     (s1, dum) = mach.reaction(s1, {'off': 1}) 
 import pickle as pl
 # pl.dump(specs,open("jtlv_specs.p","wb"))
 # self_trans=pl.load(open("trans_self.p","rb"))
