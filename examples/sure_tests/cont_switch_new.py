@@ -177,7 +177,7 @@ abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owne
                                 N=1,abs_tol=1e-7)
 #print abstMOS
 
-env_vars = set()
+env_vars = set() #{'off','on','heat','cool'}
 env_init = set()                # empty set
 env_prog = set()
 env_safe = set()
@@ -198,11 +198,13 @@ safe = ''
 env_safe = set()                # empty set
 # env_safe|={safe}
 
+# prog={'(eqpnt_cool || sys_actions != "cool")','(!eqpnt_heat || sys_actions != "heat")',
+# '(eqpnt_off || sys_actions != "off")','(!eqpnt_on || sys_actions != "on")'}
 prog=set()
 for x in abstMOS.ts.sys_actions:
     sp='(eqpnt_'
     sp+=x
-    sp+=' && sys_actions = "'
+    sp+=' && sys_actions = !"'
     sp+=x
     sp+='")'
     # sp+=x
@@ -241,7 +243,7 @@ call env_open_fts2spec and then append equil pts. Allow self_trans and see what 
 Put !OUTSIDE inside env_spec. 
 """ 
 #jt_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts, ignore_env_init=True, rm_deadends=False)
-gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=True)
+gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=False)
 #print (gr_fts)
 # if not gr_fts.save('gr_fts.png'):
 #     print(gr_fts)
