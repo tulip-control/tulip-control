@@ -37,22 +37,28 @@ Relevant links:
 """
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import json
 import os
 import subprocess
 import tempfile
 import networkx as nx
-import slugs
 from tulip.spec import GRSpec, translate
+# inline:
+#   import slugs
 
 
-def synthesize(spec):
-    """Return strategy satisfying the specification C{spec}.
-    @type spec: L{GRSpec} or C{str} in structured slugs syntax.
-    @return: If realizable return synthesized strategy, otherwise C{None}.
-    @rtype: C{networkx.DiGraph}
+BDD_FILE = 'strategy_bdd.txt'
+logger = logging.getLogger(__name__)
+
+
+def check_realizable(spec):
+    """Decide realizability of specification.
+
+    Consult the documentation of L{synthesize} about parameters.
+
+    @return: True if realizable, False if not, or an error occurs.
     """
+    import slugs
     if isinstance(spec, GRSpec):
         struct = translate(spec, 'slugs')
     else:
@@ -62,8 +68,27 @@ def synthesize(spec):
         fin.write(s)
     logger.info('\n\n structured slugs:\n\n {struct}'.format(
         struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
-    options = [fin.name]
-    realizable, out = _call_slugs(options)
+    realizable, out = _call_slugs(fin.name, synth=False)
+    return realizable
+
+
+def synthesize(spec, symbolic=False):
+    """Return strategy satisfying the specification C{spec}.
+    @type spec: L{GRSpec} or C{str} in structured slugs syntax.
+    @return: If realizable return synthesized strategy, otherwise C{None}.
+    @rtype: C{networkx.DiGraph}
+    """
+    if isinstance(spec, GRSpec):
+        struct = translate(spec, 'slugs')
+    else:
+        struct = spec
+    import slugs
+    s = slugs.convert_to_slugsin(struct, True)
+    with tempfile.NamedTemporaryFile(delete=False) as fin:
+        fin.write(s)
+    logger.info('\n\n structured slugs:\n\n {struct}'.format(
+        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+    realizable, out = _call_slugs(fin.name, synth=True, symbolic=symbolic)
     if not realizable:
         return None
     os.unlink(fin.name)
@@ -116,12 +141,19 @@ def _bitfields_to_ints(bit_state, vrs):
     return int_state
 
 
-def _call_slugs(options):
-    c = ['slugs'] + options
-    logger.debug('Calling: ' + ' '.join(c))
+def _call_slugs(filename, synth=True, symbolic=True):
+    options = ['slugs', filename]
+    if synth:
+        if symbolic:
+            options.extend(['--symbolicStrategy', BDD_FILE])
+        else:
+            options.append('--jsonOutput')
+    else:
+        options.append('--onlyRealizability')
+    logger.debug('Calling: ' + ' '.join(options))
     try:
         p = subprocess.Popen(
-            c,
+            options,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
@@ -133,7 +165,7 @@ def _call_slugs(options):
     out, err = p.communicate()
     msg = (
         '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
-        '\n slugs stdrr: {c}\n\n'.format(c=err) +
+        '\n slugs stderr: {c}\n\n'.format(c=err) +
         '\n slugs stdout:\n\n {out}\n\n'.format(out=out))
     logger.debug(msg)
     # error ?

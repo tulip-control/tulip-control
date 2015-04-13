@@ -182,7 +182,7 @@ The specification of the robot is
    \wedge \square(park \implies \diamond(s \in C_0))).
 
 We cannot, however, deal with this specification directly since it is not in
-the form of GR[1].  An equivalent GR[1] specification of the above
+the form of GR(1).  An equivalent GR(1) specification of the above
 specification can be obtained by introducing an auxiliary discrete system
 variable :math:`X0reach,` initialized to `True`. The transition relation of
 :math:`X0reach,` is given by :math:`\square(\text{next}(X0reach) = (s \in

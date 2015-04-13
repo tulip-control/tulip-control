@@ -29,14 +29,13 @@ def full_name_operators_test():
         'ALwaYs EvenTUAlly(p)': '( G ( F p ) )',
         ('(p and q) UNtIl (q or ((p -> w) and '
          'not (z implies b))) and always next g'):
-        ('( ( p & q ) U ( ( q | ( ( p -> w ) & '
-         '( ! ( z -> b ) ) ) ) & ( G ( X g ) ) ) )')}
+        ('( ( ( p & q ) U ( q | ( ( p -> w ) & '
+         '( ! ( z -> b ) ) ) ) ) & ( G ( X g ) ) )')}
 
     for f, correct in formulas.iteritems():
         tree = parse(f, full_operators=True)
-        print(tree)
         # g.write('hehe.png')
-        assert tree.flatten() == correct
+        assert tree.flatten() == correct, tree.flatten()
 
 
 def test_ast_nodes():
@@ -128,14 +127,24 @@ def lexer_token_precedence_test():
     r = parse(s)
     assert isinstance(r, ast.nodes.Var)
     assert r.value == 'a'
-    s = '"a"'
+    s = 'x = "a"'
     r = parse(s)
-    assert isinstance(r, ast.nodes.Str)
-    assert r.value == 'a'
-    s = '1'
+    assert isinstance(r, ast.nodes.Binary)
+    assert r.operator == '='
+    x, a = r.operands
+    assert isinstance(x, ast.nodes.Var)
+    assert x.value == 'x'
+    assert isinstance(a, ast.nodes.Str)
+    assert a.value == 'a'
+    s = 'y = 1'
     r = parse(s)
-    assert isinstance(r, ast.nodes.Num)
-    assert r.value == '1'
+    assert isinstance(r, ast.nodes.Binary)
+    assert r.operator == '='
+    y, n = r.operands
+    assert isinstance(y, ast.nodes.Var)
+    assert y.value == 'y'
+    assert isinstance(n, ast.nodes.Num)
+    assert n.value == '1'
     s = '[] a'
     r = parse(s)
     assert isinstance(r, ast.nodes.Unary)
