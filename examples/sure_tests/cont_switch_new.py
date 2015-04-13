@@ -128,7 +128,7 @@ abs_tol=1e-7
 
 A_off=np.array([[0.9998,0.],[0.,1.]])
 A_heat=np.array([[0.9998,0.0002],[0.,1.]])
-A_cool=np.array([[0.9998,0.0002],[0.,1.]])
+A_cool=np.array([[0.9998,-0.0002],[0.,1.]])
 A_on=np.array([[0.9998,0.0002],[0.,1.]])
 
 K_off=np.array([[0.0032],[0.]])
@@ -172,7 +172,7 @@ ssd=hybrid.SwitchedSysDyn(disc_domain_size=(1,4),
 #print ssd;
 owner='env'
 
-abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=-1.,
+abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=1.,
                                 visualize=False,eps=0.3, is_convex=True,
                                 N=1,abs_tol=1e-7)
 #print abstMOS
@@ -198,25 +198,25 @@ safe = ''
 env_safe = set()                # empty set
 # env_safe|={safe}
 
-# prog={'(eqpnt_cool || sys_actions != "cool")','(!eqpnt_heat || sys_actions != "heat")',
-# '(eqpnt_off || sys_actions != "off")','(!eqpnt_on || sys_actions != "on")'}
+prog={'(eqpnt_cool || sys_actions != "cool")','(!eqpnt_heat || sys_actions != "heat")',
+'(eqpnt_off || sys_actions != "off")','(!eqpnt_on || sys_actions != "on")'}
 prog=set()
-for x in abstMOS.ts.sys_actions:
-    sp='(eqpnt_'
-    sp+=x
-    sp+=' && sys_actions = !"'
-    sp+=x
-    sp+='")'
-    # sp+=x
-    # for y in abstMOS.ts.progress_map[x]:
-    #     for i,z in enumerate(y):
-    #         sp+=z
-    #         if i!=len(y)-1:
-    #             sp+=' || '
-    # sp+=') && '
-    # sp+=x[1]
-    # sp+=')'
-    prog|={sp}
+# for x in abstMOS.ts.sys_actions:
+#     sp='(eqpnt_'
+#     sp+=x
+#     sp+=' && sys_actions = !"'
+#     sp+=x
+#     sp+='")'
+#     # sp+=x
+#     # for y in abstMOS.ts.progress_map[x]:
+#     #     for i,z in enumerate(y):
+#     #         sp+=z
+#     #         if i!=len(y)-1:
+#     #             sp+=' || '
+#     # sp+=') && '
+#     # sp+=x[1]
+#     # sp+=')'
+#     prog|={sp}
 env_prog=prog
 
 """ Assumption/prog - !<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei)
@@ -245,21 +245,20 @@ Put !OUTSIDE inside env_spec.
 #jt_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts, ignore_env_init=True, rm_deadends=False)
 gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=False)
 #print (gr_fts)
-# if not gr_fts.save('gr_fts.png'):
-#     print(gr_fts)
+if not gr_fts.save('gr_fts.eps'):
+    print(gr_fts)
 
 disc_dynamics=abstMOS
 ctrl=gr_fts
-Tc = [20.0]
+Tc = [18.0]
 Th = [16.0]
 
 s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
-s0_loc = 's'+str(s0_part)
-mach = synth.determinize_machine_init(ctrl, {'eloc':s0_loc})
+mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
 sim_hor = 130
 N=1 # N = number of steps between each sampled transition
 
-(s1, dum) = mach.reaction('Sinit', {'env_actions': 'regular'})
+(s1, dum) = mach.reaction('Sinit', {'eloc': 's0'})
 #(s1, dum) = mach.reaction(s1, {'on': 1})
 for sim_time in range(sim_hor):
     sysnow=('regular',dum['sys_actions'])
@@ -273,10 +272,9 @@ for sim_time in range(sim_hor):
         Th.append(x[1])
 
     s0_part = find_discrete_state([Tc[-1],Th[-1]],disc_dynamics.ppp)
-    s0_part = 's'+str(s0_part)
     s0_loc = disc_dynamics.ppp2ts[s0_part]
-    print s0_part, s0_loc, dum['sys_actions']
-    (s1, dum) = mach.reaction(s1, {'env_actions': 'regular'})
+    print s1, s0_loc, dum['sys_actions']
+    (s1, dum) = mach.reaction(s1, {'eloc': 's0'})
     # if pc.is_inside(disc_dynamics.ppp[disc_dynamics.ppp2ts.index(dum['loc'])],[Tc[-1],Th[-1]]):
     #     s0_part = disc_dynamics.ppp2ts.index(dum['loc'])
     # if sim_time <= 10:

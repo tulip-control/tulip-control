@@ -466,7 +466,10 @@ class AbstractModeOnlySwitched(AbstractSwitched):
         
         self.ppp = ppp
         self.ts = ts
-        self.ppp2ts = ts.states
+        ts_states=range(0,len(ts.states)-1)
+        ts_states = trs.prepend_with(ts_states, 's')
+        ts_states.append('sOut')
+        self.ppp2ts=ts_states
         self.modes = modes
         self.prog_map = ts.progress_map
     
@@ -1907,9 +1910,8 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     """
     cont_dyn={}
     trans={}
-    cont_state_space=ssd.cts_ss
     p2p.find_equilibria(ssd=ssd,cont_props=cont_props,eps=eps)
-    cont_part = p2p.prop2part(cont_state_space, cont_props)
+    cont_part = p2p.prop2part(ssd.cts_ss, cont_props)
     plot_partition(cont_part, show=visualize)
     if is_convex:
         cont_part, new2old = part2convex(cont_part)
