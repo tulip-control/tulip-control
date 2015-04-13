@@ -1,4 +1,5 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013, 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,12 +36,6 @@ import logging
 logger = logging.getLogger(__name__)
 from collections import Iterable
 from pprint import pformat
-try:
-    import natsort
-except ImportError:
-    logger.error('failed to import natsort')
-    natsort = None
-
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
@@ -101,7 +96,7 @@ class KripkeStructure(LabeledDiGraph):
             'Atomic Propositions (APs):\n\t' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self, sort=True) + 2 * '\n' +
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Transitions:\n' +
@@ -390,7 +385,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.default_export_fname = 'fts'
 
     def __str__(self):
-        sort = True
         isopen = (
             ('sys' and any({'env' in x for x in self.actions})) or
             ('env' and any({'sys' in x for x in self.actions})))
@@ -404,7 +398,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'Atomic Propositions (APs):\n' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
-            _dumps_states(self, sort=sort) + 2 * '\n' +
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n')
 
@@ -425,16 +419,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
                     ' (will cause you errors later)'
                     ', with possible values:\n\t' +
                     pformat(codomain, indent=3) + 2 * '\n')
-        if sort and natsort is not None:
-            edges = list(self.edges(data=True)) #MS added list function
-            edges = natsort.natsorted(edges)
-        else:
-            edges = list(self.edges_iter(data=True)) #MS added list function
-        edges_str = pformat(edges, indent=3)
 
         s += (
             'Transitions labeled with sys and env actions:\n' +
-            edges_str +
+            pformat(self.transitions(data=True), indent=3) +
             '\n' + _hl + '\n')
         return s
 
@@ -475,7 +463,7 @@ class FTS(FiniteTransitionSystem):
     """Alias to L{FiniteTransitionSystem}."""
 
 
-class AugmentedFiniteTransitionSystem(FiniteTransitionSystem):# MS Added
+class AugmentedFiniteTransitionSystem(FiniteTransitionSystem):
     """Augmented  Finite Transition System modeling an augmented system.
     
     Analogous to L{FTS}, but for augmented systems comprised of
@@ -504,76 +492,54 @@ class AugmentedFiniteTransitionSystem(FiniteTransitionSystem):# MS Added
         @param sys_actions: system (controlled) actions, defined as
             C{edge_label_types} in L{LabeledDiGraph.__init__}
         """
-        FiniteTransitionSystem.__init__(self);
+        FiniteTransitionSystem.__init__(self,env_actions=env_actions, 
+            sys_actions=sys_actions);
         
         prog_map = dict()
         self.progress_map=prog_map
         self.default_export_fname = 'afts'
     
     def __str__(self):
-        sort = True
-        
         isopen = (
             ('sys' and any({'env' in x for x in self.actions})) or
-            ('env' and any({'sys' in x for x in self.actions}))
-        )
-        
+            ('env' and any({'sys' in x for x in self.actions})))
         if isopen:
             t = 'open'
         else:
             t = 'closed'
-        
         s = (
-            _hl + '\nAugmented Finite Transition System (' + t + '): ' +
+            _hl + '\nFinite Transition System (' + t + '): ' +
             self.name + '\n' + _hl + '\n' +
-            
             'Atomic Propositions (APs):\n' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
-            
             'States labeled with sets of APs:\n' +
-            _dumps_states(self, sort=sort) + 2 * '\n' +
-            
-            'Progress Map:\n' +
-            '\n'.join([(3*" "+str(x)+": "+str(self.progress_map[x]))
-                 for x in self.progress_map]) +2*'\n' +
-
+            _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n'
-        )
-       
+            pformat(self.states.initial, indent=3) + 2 * '\n' +
+            'Progress Map:\n' +
+            pformat(self.progress_map,indent=3) +2*'\n')
+
         for action_type, codomain in self.actions.iteritems():
             if 'sys' in action_type:
                 s += (
                     'System Action Type: ' + str(action_type) +
                     ', with possible values: ' + str(codomain) + '\n' +
-                    pformat(codomain, indent=3) + 2 * '\n'
-                )
+                    pformat(codomain, indent=3) + 2 * '\n')
             elif 'env' in action_type:
                 s += (
                     'Environment Action Type: ' + str(action_type) +
                     ', with possible values:\n\t' + str(codomain) + '\n' +
-                    pformat(codomain, indent=3) + 2 * '\n'
-                )
+                    pformat(codomain, indent=3) + 2 * '\n')
             else:
                 s += (
                     'Action type controlled by neither env nor sys\n'
                     ' (will cause you errors later)'
                     ', with possible values:\n\t' +
-                    pformat(codomain, indent=3) + 2 * '\n'
-                )
-        
-        if sort and natsort is not None:
-            edges = list(self.edges(data=True))
-            edges = natsort.natsorted(edges)
-        else:
-            edges = list(self.edges_iter(data=True))
-        edges_str = pformat(edges, indent=3)
-        
+                    pformat(codomain, indent=3) + 2 * '\n')
         s += (
             'Transitions labeled with sys and env actions:\n' +
-            edges_str +
-            '\n' + _hl + '\n'
-        )
+            pformat(self.transitions(data=True), indent=3) +
+            '\n' + _hl + '\n')
         return s
 
     def set_progress_map(self,prog_map=dict()):
@@ -583,7 +549,7 @@ class AugmentedFiniteTransitionSystem(FiniteTransitionSystem):# MS Added
         
         self.progress_map=copy.deepcopy(prog_map)
 
-class AFTS(AugmentedFiniteTransitionSystem):# MS Added
+class AFTS(AugmentedFiniteTransitionSystem):
     """Alias to L{transys.AugmentedOpenFiniteTransitionSystem}
     """
     def __init__(self, *args, **kwargs):
@@ -814,15 +780,12 @@ def add_initial_states(ts, ap_labels):
         ts.states.initial |= new_init_states
 
 
-def _dumps_states(g, sort):
+def _dumps_states(g):
     """Dump string of transition system states.
 
     @type g: L{FTS}
     """
-    if sort and natsort is not None:
-        nodes = natsort.natsorted(g)
-    else:
-        nodes = g
+    nodes = g
     a = []
     for u in nodes:
         s = '\t State: {u}, AP: {ap}\n'.format(

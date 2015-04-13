@@ -1,4 +1,5 @@
-# Copyright (c) 2012-2014 by California Institute of Technology
+# Copyright (c) 2012 - 2014 by California Institute of Technology
+# and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +40,11 @@ from tulip import transys
 from tulip.spec import GRSpec
 from tulip.interfaces import jtlv, gr1c
 
+# slugs is an optional dependency, so fail cleanly if it is missing.
+try:
+    from tulip.interfaces import slugs
+except ImportError:
+    slugs = None
 
 _hl = '\n' + 60 * '-'
 
@@ -968,7 +974,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     @type bool_actions: C{set} of keys from C{ts}
 
-    @param solver: 'gr1c' or 'jtlv'
+    @param solver: 'gr1c' or 'slugs' or 'jtlv'
     @type solver: str
     """
     assert isinstance(ts, dict)
@@ -985,11 +991,16 @@ def synthesize_many(specs, ts=None, ignore_init=None,
                                  bool_actions=bool_act)
     if solver == 'gr1c':
         ctrl = gr1c.synthesize(specs)
+    elif solver == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        ctrl = slugs.synthesize(specs)
     elif solver == 'jtlv':
         ctrl = jtlv.synthesize(specs)
     else:
         raise Exception('Unknown solver: ' + str(solver) + '. '
-                        'Available solvers: "jtlv" and "gr1c"')
+                        'Available solvers: "jtlv", "gr1c", and "slugs"')
     try:
         logger.debug('Mealy machine has: n = ' +
                      str(len(ctrl.states)) + ' states.')
@@ -1029,6 +1040,7 @@ def synthesize(
         what method to use, etc.  Currently recognized forms:
 
           - C{"gr1c"}: use gr1c for GR(1) synthesis via L{interfaces.gr1c}.
+          - C{"slugs"}: use slugs for GR(1) synthesis via L{interfaces.slugs}.
           - C{"jtlv"}: use JTLV for GR(1) synthesis via L{interfaces.jtlv}.
     @type specs: L{spec.GRSpec}
 
@@ -1087,11 +1099,16 @@ def synthesize(
         bool_actions)
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
+    elif option == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        strategy = slugs.synthesize(specs)
     elif option == 'jtlv':
         strategy = jtlv.synthesize(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv" and "gr1c"')
+                        'Current options are "jtlv", "gr1c", and "slugs"')
     ctrl = strategy2mealy(strategy, specs)
     try:
         logger.debug('Mealy machine has: n = ' +
@@ -1106,7 +1123,6 @@ def synthesize(
     if rm_deadends:
         ctrl.remove_deadends()
     return ctrl
-
 
 def is_realizable(
     option, specs, env=None, sys=None,
@@ -1124,11 +1140,16 @@ def is_realizable(
         bool_states, bool_actions)
     if option == 'gr1c':
         r = gr1c.check_realizable(specs)
+    elif option == 'slugs':
+        if slugs is None:
+            raise ValueError('Import of slugs interface failed. ' +
+                             'Please verify installation of "slugs".')
+        r = slugs.check_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv" and "gr1c"')
+                        'Current options are "jtlv", "gr1c", and "slugs"')
     if r:
         logger.debug('is realizable')
     else:
@@ -1226,7 +1247,6 @@ def strategy2mealy(A, spec):
     except:
         logger.warn('strategy has no states.')
     # to store tuples of dict values for fast search
-    spec.str_to_int()
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
     init_valuations = set()
@@ -1376,7 +1396,7 @@ def determinize_machine_init(mach, init_out_values=None):
         init_out_values = dict()
     '''determinize given outputs (uncontrolled)'''
     # restrict attention to given output ports only
-    given_ports = tuple(k for k in mach.outputs if k in init_out_values)
+    given_ports = tuple(k for k in mach.outputs if k in init_out_values) #MS added ".values()"
     rm_edges = set()
     for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
         for k in given_ports:

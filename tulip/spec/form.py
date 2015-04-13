@@ -103,6 +103,12 @@ class LTL(object):
 
         self.check_vars()
 
+    def __repr__(self):
+        return ('LTL(\'{f}\', input_variables={inputv}, ' +
+                'output_variables={outv})').format(f=self.formula,
+                                                   inputv=self.input_variables,
+                                                   outv=self.output_variables)
+
     def __str__(self):
         return str(self.formula)
 
@@ -294,8 +300,11 @@ class GRSpec(LTL):
     instantiation.
     """
 
-    def __init__(self, env_vars=None, sys_vars=None, env_init='', sys_init='',
-                 env_safety='', sys_safety='', env_prog='', sys_prog=''):
+    def __init__(self, env_vars=None, sys_vars=None,
+                 env_init='', sys_init='',
+                 env_safety='', sys_safety='',
+                 env_prog='', sys_prog='',
+                 parser=parser):
         """Instantiate a GRSpec object.
 
         Instantiating GRSpec without arguments results in an empty
@@ -316,6 +325,7 @@ class GRSpec(LTL):
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. L{GRSpec}.
         """
+        self.parser = parser
         self._ast = dict()
         self._cache = {
             'string': dict(),
@@ -366,6 +376,26 @@ class GRSpec(LTL):
         LTL.__init__(self, formula=self.to_canon(),
                      input_variables=self.env_vars,
                      output_variables=self.sys_vars)
+
+    def __repr__(self):
+        args = (',\n\n'.join([
+                'env_vars={ev}',
+                'sys_vars={sv}',
+                'env_init={ei}',
+                'sys_init={si}',
+                'env_safety={es}',
+                'sys_safety={ss},',
+                'env_prog={ep}',
+                'sys_prog={sp}']).format(
+                ev=repr(self.env_vars),
+                sv=repr(self.sys_vars),
+                ei=repr(self.env_init),
+                si=repr(self.sys_init),
+                es=repr(self.env_safety),
+                ss=repr(self.sys_safety),
+                ep=repr(self.env_prog),
+                sp=repr(self.sys_prog)))
+        return '{cls}({args})'.format(cls=type(self).__name__, args=args)
 
     def __str__(self):
         return self.to_canon()
@@ -458,9 +488,32 @@ class GRSpec(LTL):
             )
         return output
 
-    def check_form(self):
-        self.formula = self.to_canon()
-        return LTL.check_form(self)
+    def check_syntax(self):
+        """Raise `AssertionError` for misplaced primed variables."""
+        self._assert_no_primed(self.env_init, 'assumed initial condition')
+        self._assert_no_primed(self.sys_init, 'guaranteed initial condition')
+        self._assert_no_primed(self.env_prog, 'liveness assumption')
+        self._assert_no_primed(self.env_prog, 'liveness guarantee')
+        for f in self.env_safety:
+            a = self.ast(f)
+            primed = tx.collect_primed_vars(a)
+            for var in primed:
+                if var in self.sys_vars:
+                    raise AssertionError(
+                        'Syntax error: ' +
+                        'primed system variable "{var}"'.format(var=var) +
+                        ' found in env safety: {f}'.format(f=f))
+
+    def _assert_no_primed(self, formulae, name):
+        """Raise `AssertionError` if primed vars in `formulae`."""
+        for f in formulae:
+            a = self.ast(f)
+            primed = tx.collect_primed_vars(a)
+            if primed:
+                raise AssertionError(
+                    'Syntax error: ' +
+                    'primed variables: {primed}'.format(primed=primed) +
+                    ' found in {name}: {f}'.format(f=f, name=name))
 
     def copy(self):
         return GRSpec(
@@ -579,16 +632,23 @@ class GRSpec(LTL):
         @return: python expression compiled for C{eval}
         @rtype: C{code}
         """
-        clauses = self.env_init + self.sys_init
-        if no_str:
-            clauses = [self._bool_int[x] for x in clauses]
-        logger.info('clauses to compile: ' + str(clauses))
-        c = [ts.translate_ast(self.ast(x), 'python').flatten()
-             for x in clauses]
-        logger.info('after translation to python: ' + str(c))
-        s = _conj(c, op='and')
-        if not s:
-            s = 'True'
+        self.str_to_int()
+        init = {'env': self.env_init, 'sys': self.sys_init}
+        pyinit = dict()
+        for side, clauses in init.iteritems():
+            if no_str:
+                clauses = [self._bool_int[x] for x in clauses]
+            logger.info('clauses to compile: ' + str(clauses))
+            c = [ts.translate_ast(self.ast(x), 'python').flatten()
+                 for x in clauses]
+            logger.info('after translation to python: ' + str(c))
+            s = _conj(c, op='and')
+            if not s:
+                s = 'True'
+            pyinit[side] = s
+        s = 'not ({assumption}) or ({assertion})'.format(
+            assumption=pyinit['env'],
+            assertion=pyinit['sys'])
         return compile(s, '<string>', 'eval')
 
     def str_to_int(self):
@@ -658,7 +718,7 @@ class GRSpec(LTL):
                     logger.debug(str(x) + ' is already in cache')
                     continue
                 logger.debug('parse: ' + str(x))
-                tree = parser.parse(x)
+                tree = self.parser.parse(x)
                 g = tx.Tree.from_recursive_ast(tree)
                 tx.check_for_undefined_identifiers(g, vardoms)
                 self._ast[x] = tree

@@ -9,7 +9,7 @@
 TULIP_REL     = ../tulip
 
 # Epydoc options
-EPYDOC        = epydoc
+EPYDOC        = python -c 'from epydoc.cli import cli; cli()'
 EPYBUILDDIR   = api_doc
 EPYOPTS       = -v --graph=classtree --no-sourcecode --no-private
 
@@ -31,6 +31,8 @@ clean:
 	-rm -rf $(BUILDDIR)*
 
 html:
+	@echo "Generating bibliography.rst..."
+	./genbib.py bib.txt
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)html."

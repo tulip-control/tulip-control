@@ -521,7 +521,8 @@ class MealyMachine(Transducer):
         enabled_trans = [
             (i, j, d)
             for i, j, d in self.edges_iter([from_state], data=True)
-            if project_dict(d, self.inputs) == inputs]
+            for k in inputs.iteritems() if k in project_dict(d, self.inputs).items()] #MS added
+            # if project_dict(d, self.inputs) == inputs]
         # must be deterministic
         try:
             ((_, next_state, attr_dict), ) = enabled_trans

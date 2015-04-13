@@ -123,6 +123,23 @@ def test_str_to_int():
     assert s._bool_int[x] == "( ( X a ) = 0 )"
 
 
+def test_compile_init():
+    env_vars = {'x': (0, 0), 'y': (0, 0), 'z': (0, 1)}
+    sys_vars = {'w': (0, 0)}
+    env_init = ['((((y = 0))) & (x = 0))']
+    sys_init = ['((w = 0))']
+    spc = GRSpec(
+        env_vars=env_vars, sys_vars=sys_vars,
+        env_init=env_init, sys_init=sys_init)
+    code = spc.compile_init(no_str=True)
+    d = dict(x=0, y=0, z=0, w=0)
+    assert eval(code, d)
+    d = dict(x=0, y=1, z=1, w=0)
+    assert eval(code, d)
+    d = dict(x=0, y=0, z=0, w=1)
+    assert not eval(code, d)
+
+
 def test_replace_dependent_vars():
     sys_vars = {'a': 'boolean', 'locA': (0, 4)}
     sys_safe = ['!a', 'a & (locA = 3)']

@@ -1,4 +1,5 @@
-# Copyright (c) 2011-2014 by California Institute of Technology
+# Copyright (c) 2011 - 2014 by California Institute of Technology
+# and 2014 - 2015 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -426,7 +427,9 @@ def product_interval(list1, list2):
             new_list.append(list1[m]+list2[n])
     return new_list
 
-def find_equilibria(ssd,cont_props,outside_props,eps=0.1): # MS Added
+################################
+
+def find_equilibria(ssd,cont_props,eps=0): 
     """ Finds the polytope that contains the equilibrium points
 
     @param ssd: The dynamics of the switched system
@@ -435,10 +438,6 @@ def find_equilibria(ssd,cont_props,outside_props,eps=0.1): # MS Added
     @param cont_props: The polytope representations of the atomic 
     propositions of the state space to be used in partitiong 
     @type cont_props: dict of polytope.Polytope
-
-    @param outside_props: The set of names of atomic propositions 
-    that are beyond the domain (i.e. 'OUTSIDE')
-    @type outside_props: set()
 
     @param eps: The value by which the width of all polytopes
     containing equilibrium points is increased.
@@ -490,28 +489,21 @@ def find_equilibria(ssd,cont_props,outside_props,eps=0.1): # MS Added
                 if (equil[0]>=(-cont_ss.b[2]) and equil[0]<=cont_ss.b[0] 
                         and equil[1]>=(-cont_ss.b[3]) 
                         and equil[1]<=cont_ss.b[1]):
-                    delta=equil/100
+                    delta=eps+equil/100
                     soln=pc.box2poly([[equil[0]-delta[0], equil[0]+delta[0]],
                         [equil[1]-delta[1], equil[1]+delta[1]]]) 
                 else:
                     soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
-                    outside_props|={props_sym}
+
             elif (rank_IA<len(A)):
                 if eps==0:
                     eps=abs(min(np.amin(-K),np.amin(A-I)))
                 IAn,Kn = normalize(I-A,K)
                 soln=pc.Polytope(np.vstack((IAn,-IAn)), 
                         np.hstack((Kn+eps,-Kn+eps)))
-
                 relevantsoln=pc.intersect(soln,cont_ss,abs_tol)
-                if pc.is_empty(relevantsoln):
-                    print "Intersect "+str(mode)+" is empty"
-                else:
-                    print "Intersect "+str(mode)+" is not empty - good job!!"
-
                 if(pc.is_empty(relevantsoln) & ~pc.is_empty(soln)):
                     soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
-                    outside_props|={props_sym}
                 else:
                     soln=relevantsoln
         
@@ -519,12 +511,9 @@ def find_equilibria(ssd,cont_props,outside_props,eps=0.1): # MS Added
             #Assuming trajectories go to infinity as there are no 
             #equilibrium points
             soln=pc.box2poly([[min_outx,max_outx],[min_outy,max_outy]])
-            outside_props|={props_sym}
             print str(mode)+" trajectories go to infinity! No solution"
 
         cont_props[props_sym]=soln
-
-################################
 
 class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:

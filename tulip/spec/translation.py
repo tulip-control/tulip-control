@@ -38,12 +38,15 @@
   - SPIN: http://spinroot.com/spin/Man/ltl.html
           http://spinroot.com/spin/Man/operators.html
   - python (Boolean formulas only)
+  - WRING: http://vlsi.colorado.edu/~rbloem/wring.html
+        (see top of file: LTL.pm)
 """
 import logging
 logger = logging.getLogger(__name__)
 # import pprint
 import re
 from tulip.spec import ast
+import tulip.spec.form
 
 
 def make_jtlv_nodes():
@@ -96,6 +99,7 @@ def make_gr1c_nodes(opmap=None):
         def flatten(self, *arg, **kw):
             if self.operator == 'X':
                 kw.update(prime=True)
+                return self.operands[0].flatten(*arg, **kw)
             return super(Unary, self).flatten(*arg, **kw)
 
     nodes.Var = Var
@@ -129,9 +133,39 @@ def make_smv_nodes():
     opmap = {'X': 'X', 'G': 'G', 'F': 'F', 'U': 'U', 'R': 'V'}
     return ast.make_fol_nodes(opmap)
 
+def make_wring_nodes():
+    opmap = {'False': '0', 'True': '1',
+             '!': '!',
+             '|': '+', '&': '*', '->': '->', '<->': '<->', 'xor': '^',
+             'G': 'G', 'F': 'F', 'X': 'X',
+             'U': 'U', 'R': 'R', 'V': 'V'}
+    nodes = ast.make_fol_nodes(opmap)
+
+    class Var(nodes.Var):
+        def flatten(self, *arg, **kw):
+            if kw.has_key('env_vars') or kw.has_key('sys_vars'):
+                env_vars = kw['env_vars']
+                sys_vars = kw['sys_vars']
+                if env_vars.has_key(self.value):
+                    this_type = env_vars[self.value]
+                elif sys_vars.has_key(self.value):
+                    this_type = sys_vars[self.value]
+                else:
+                    raise TypeError(
+                        '"{v}" is not defined as a variable in {t1} nor {t2}'.format(
+                            v=self.value, t1=env_vars, t2=sys_vars))
+
+                if this_type != 'boolean':
+                    raise TypeError('"{v}" is not Boolean, but {type}'.format(
+                        v=self.val, type=this_type))
+            return '({var}=1)'.format(var=self.value)
+
+    nodes.Var = Var
+    return nodes
 
 def make_python_nodes():
-    opmap = {'!': 'not', '&': 'and', '|': 'or',
+    opmap = {'True': 'True', 'False': 'False',
+             '!': 'not', '&': 'and', '|': 'or',
              '^': '^', '=': '==', '!=': '!=',
              '<': '<', '<': '<', '>=': '>=', '>': '>',
              '+': '+', '-': '-'}
@@ -160,7 +194,8 @@ lang2nodes = {
     'slugs': make_slugs_nodes(),
     'promela': make_promela_nodes(),
     'smv': make_smv_nodes(),
-    'python': make_python_nodes()}
+    'python': make_python_nodes(),
+    'wring': make_wring_nodes()}
 
 
 def _to_jtlv(d):
@@ -237,6 +272,45 @@ def _to_gr1c(d):
     )
     return output
 
+def _to_wring(d):
+    """Dump to LTL formula in Wring syntax
+
+    Assume that d is a dictionary describing a GR(1) formula in the
+    manner of tulip.spec.form.GRSpec; e.g., it should have a key named
+    'env_init'. Compare with _to_gr1c().
+    """
+    assumption = ''
+    if d['env_init']:
+        assumption += ' * '.join(['('+f+')' for f in d['env_init']])
+    if d['env_safety']:
+        if len(assumption) > 0:
+            assumption += ' * '
+        assumption += ' * '.join(['G('+f+')' for f in d['env_safety']])
+    if d['env_prog']:
+        if len(assumption) > 0:
+            assumption += ' * '
+        assumption += ' * '.join(['G(F('+f+'))' for f in d['env_prog']])
+
+    guarantee = ''
+    if d['sys_init']:
+        guarantee += ' * '.join(['('+f+')' for f in d['sys_init']])
+    if d['sys_safety']:
+        if len(guarantee) > 0:
+            guarantee += ' * '
+        guarantee += ' * '.join(['G('+f+')' for f in d['sys_safety']])
+    if d['sys_prog']:
+        if len(guarantee) > 0:
+            guarantee += ' * '
+        guarantee += ' * '.join(['G(F('+f+'))' for f in d['sys_prog']])
+
+    # Put the parts together, simplifying in special cases
+    if guarantee:
+        if assumption:
+            return '((' + assumption + ') -> (' + guarantee + '))'
+        else:
+            return '(' + guarantee + ')'
+    else:
+        return 'G(1)'
 
 # currently also used in interfaces.jtlv
 # eliminate it from there
@@ -300,7 +374,8 @@ def _format_slugs_vars(vardict, name):
     return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
 
 
-to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs}
+to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs,
+           'wring': _to_wring}
 
 
 def translate(spec, lang):
@@ -310,7 +385,7 @@ def translate(spec, lang):
     concerning formats and links to further reading.
 
     @type spec: L{GRSpec}
-    @type lang: 'gr1c' or 'slugs' or 'jtlv'
+    @type lang: 'gr1c', 'slugs', 'jtlv', or 'wring'
 
     @return: spec formatted for input to tool; the type of the return
     value depends on the tool:
@@ -318,6 +393,9 @@ def translate(spec, lang):
         - C{str} if gr1c or slugs
         - (assumption, guarantee), where each element of the tuple is C{str}
     """
+    if not isinstance(spec, tulip.spec.form.GRSpec):
+        raise TypeError('translate requires first argument (spec) to be of type GRSpec')
+    spec.check_syntax()
     spec.str_to_int()
     # pprint.pprint(spec._bool_int)
     d = {p: [translate_ast(spec.ast(spec._bool_int[x]), lang).flatten(
@@ -334,7 +412,7 @@ def translate_ast(tree, lang):
 
     @type tree: L{Nodes.Node}
     @type lang: 'gr1c' or 'slugs' or 'jtlv' or
-      'promela' or 'smv' or 'python'
+      'promela' or 'smv' or 'python' or 'wring'
 
     @return: tree using AST nodes of C{lang}
     @rtype: L{FOL.Node}
@@ -347,9 +425,9 @@ def translate_ast(tree, lang):
 
 def _ast_to_lang(u, nodes):
     cls = getattr(nodes, type(u).__name__)
-    if isinstance(u, ast.nodes.Terminal):
+    if hasattr(u, 'value'):
         return cls(u.value)
-    elif isinstance(u, ast.nodes.Operator):
+    elif hasattr(u, 'operator'):
         xyz = [_ast_to_lang(x, nodes) for x in u.operands]
         return cls(u.operator, *xyz)
     else:
@@ -359,13 +437,19 @@ def _ast_to_lang(u, nodes):
 
 def _ast_to_python(u, nodes):
     cls = getattr(nodes, type(u).__name__)
-    if isinstance(u, ast.nodes.Terminal):
+    if hasattr(u, 'value'):
         return cls(u.value)
-    elif isinstance(u, ast.nodes.Unary):
+    elif not hasattr(u, 'operands'):
+        raise TypeError(
+            'AST node: {u}'.format(u=type(u).__name__) +
+            ', is neither terminal nor operator.')
+    elif len(u.operands) == 1:
         assert u.operator == '!'
         return cls(u.operator, _ast_to_python(u.operands[0], nodes))
-    elif isinstance(u, ast.nodes.Binary):
-        assert u.operator in {'&', '|', '^', '=', '!=', '->', '<->'}
+    elif len(u.operands) == 2:
+        assert u.operator in {'&', '|', '^', '->', '<->',
+                              '>', '>=', '=', '!=', '<=', '<',
+                              '+', '-', '*', '/'}
         if u.operator == '->':
             cls = nodes.Imp
         elif u.operator == '<->':
@@ -373,3 +457,6 @@ def _ast_to_python(u, nodes):
         return cls(u.operator,
                    _ast_to_python(u.operands[0], nodes),
                    _ast_to_python(u.operands[1], nodes))
+    else:
+        raise ValueError(
+            'Operator: {u}, is neither unary nor binary.'.format(u=u))

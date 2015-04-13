@@ -4,6 +4,8 @@ Developer's Guide
 The purpose of this page is to provide guidelines for contributors to the TuLiP
 project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_ and the `tulip-control-discuss mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_ (members only).
 
+.. _sec:code-style-guidelines:
+
 Organization and Rules
 ----------------------
 
@@ -39,12 +41,16 @@ be followed:
   (i.e., leave one blank) before beginning with details.
 
 - When referring to publications, check for a corresponding entry in
-  ``doc/bibliography.rst`` and create one if needed, following the `BibTeX
-  alpha.bst style <http://sites.stat.psu.edu/~surajit/present/bib.htm#alpha>`_.
-  References in the Sphinx-built documentation are as usual, e.g.,
-  ``[WTOXM11]_``.  References in docstrings (in the code) should be to the URL
-  of the corresponding entry on the TuLiP website, using `Epydoc syntax
-  <http://epydoc.sourceforge.net/manual-epytext.html>`_, e.g., ::
+  ``doc/bib.txt`` and create one if needed. The syntax is described in
+  ``genbib.py``. References in the Sphinx-built documentation are achieved by
+  including a link, e.g., inline like ::
+
+    `[WTOXM11] <bibliography.html#wtoxm11>`_
+
+  which renders as `[WTOXM11] <bibliography.html#wtoxm11>`_.  References in docstrings (in the
+  code) should be to the URL of the corresponding entry on the TuLiP website,
+  using `Epydoc syntax <http://epydoc.sourceforge.net/manual-epytext.html>`_,
+  e.g., ::
 
     U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
 
@@ -86,7 +92,8 @@ Advice
 
 The following are software engineering best practices that you should try to
 follow.  We mention them here for convenience of reference and to aid new
-committers.
+committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
+entirely ignored.
 
 - Keep function length to a minimum.
 	As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_, `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_ included the rule that no function should be longer than 75 lines of code.
@@ -119,6 +126,8 @@ Further reading, of general interest:
 - "`On commit messages
   <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
   Hutterer (28 Dec 2009).
+
+- `Google Python Style Guide <https://google-styleguide.googlecode.com/svn/trunk/pyguide.html>`_
 
 - Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide <https://www.kernel.org/doc/Documentation/CodingStyle>`_
 

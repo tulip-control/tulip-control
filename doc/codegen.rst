@@ -10,7 +10,7 @@ various exporting routines available.
 ``python_case``
 ---------------
 
-Given a Mealy machine (Sec. 3.3 in [LS11]_) as would be obtained, for example, from an invocation of
+Given a Mealy machine (Sec. 3.3 in `[LS11] <bibliography.html#ls11>`_) as would be obtained, for example, from an invocation of
 ``tulip.synth.synthesize``, the function ``python_case`` in ``tulip.dumpsmach``
 generates an implementation as a standalone Python class.  The class implements
 the machine by

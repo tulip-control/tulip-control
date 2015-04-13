@@ -50,10 +50,10 @@ def tree_to_recursive_ast_test():
     # x - (z + 1)
     z = nodes.Var('z')
     g.root = minus
-    g.add_edge(minus, x, pos=0)
-    g.add_edge(minus, plus, pos=1)
-    g.add_edge(plus, z, pos=0)
-    g.add_edge(plus, one, pos=1)
+    g.add_edge(minus, x, key=0)
+    g.add_edge(minus, plus, key=1)
+    g.add_edge(plus, z, key=0)
+    g.add_edge(plus, one, key=1)
     t = g.to_recursive_ast()
     # -
     assert isinstance(t, nodes.Operator)

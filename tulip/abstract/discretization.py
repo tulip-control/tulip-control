@@ -1,4 +1,5 @@
 # Copyright (c) 2011-2014 by California Institute of Technology
+# and 2014-2015 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,6 +56,7 @@ import polytope as pc
 from polytope.plot import plot_partition, plot_transition_arrow
 from tulip import transys as trs
 from tulip.hybrid import LtiSysDyn, PwaSysDyn
+from tulip.abstract import prop2partition as p2p
 
 from .prop2partition import (PropPreservingPartition,
                              pwa_partition, part2convex, 
@@ -431,7 +433,7 @@ class AbstractPwa(object):
             else:
                 logger.info('correct transition: ' + msg)
 
-class AbstractModeOnlySwitched(AbstractSwitched):# MS Added
+class AbstractModeOnlySwitched(AbstractSwitched):
     """Abstraction of SwitchedSysDyn, with mode-specific and common info.
     
     The key difference between AbstractSwitched and AbstractModeOnlySwitched
@@ -464,7 +466,10 @@ class AbstractModeOnlySwitched(AbstractSwitched):# MS Added
         
         self.ppp = ppp
         self.ts = ts
-        self.ppp2ts = ts.states
+        ts_states=range(0,len(ts.states)-1)
+        ts_states = trs.prepend_with(ts_states, 's')
+        ts_states.append('sOut')
+        self.ppp2ts=ts_states
         self.modes = modes
         self.prog_map = ts.progress_map
     
@@ -823,14 +828,11 @@ def discretize(
             #n_cvol2ells = len(sol)
             n_cells=len(sol)
             new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
-
-            #n_cells=len(sol) #MS changed here
-            #logger.warning('\n n_cells %1f:'%n_cells)
             
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             
-            transitions[i, :] = np.zeros(n_cells) #MS Change
+            transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
                 #transitions[:, r] = transitions[:, i]
                 # All sets reachable from start are reachable from both part's
@@ -1733,12 +1735,13 @@ def create_prog_map(modes, ppp):# MS Added
     prog_map=dict()
     for mode in modes:
         for reg in ppp.prop_regions:
+            cur_region=ppp.prop_regions[reg]
             if mode[1] in reg:
                 mode_prog=set()
                 for i in range(len(ppp.regions)):
                     r_current=ppp.regions[i]
                     for j in range(len(r_current.list_poly)):
-                        if not ppp.prop_regions[reg].intersect(r_current.list_poly[j]):
+                        if not cur_region.intersect(r_current.list_poly[j]):
                             mode_prog|={'s'+str(i)}
                 if mode_prog:
                     prog_map[mode]=set()
@@ -1746,7 +1749,7 @@ def create_prog_map(modes, ppp):# MS Added
 
     return prog_map
 
-def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):# MS Added
+def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):
     """ Find the possible post areas for a given state
     """
     if list_extp_d==None:
@@ -1765,7 +1768,8 @@ def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):# MS Added
             post_extp_N=extp
             j=1
             while j<= N:
-                 post_extp_N=np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+np.dot(list_extp_d[m], sys_dyn.E.T)
+                 post_extp_N=(np.dot(post_extp_N,sys_dyn.A.T)+sys_dyn.K.T+
+                    np.dot(list_extp_d[m], sys_dyn.E.T))
                  j+=1
             list_post_extp_d.append(post_extp_N)
             if m==0:
@@ -1775,7 +1779,7 @@ def get_postarea(ppp_region, sys_dyn, list_extp_d, N=1, abs_tol=1e-7):# MS Added
         post_area_hull=pc.qhull(post_extp_n)
     return post_area_hull
 
-def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):# MS Added
+def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):
     """Find the possible transitions between states in a system
 
     @param ppp: Partitioned State Space 
@@ -1794,7 +1798,8 @@ def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):# MS Added
     Please use MOSEK in this case for accuracy
     """
     list_extp_d=pc.extreme(sys_dyn.Wset)
-    transitions = np.zeros([len(ppp.regions),(len(ppp.regions)+1)], dtype = int)
+    transitions = np.zeros([len(ppp.regions),(len(ppp.regions)+1)], 
+        dtype = int)
     
     for i in range(0,len(ppp.regions)):
             post_area=get_postarea(ppp.regions[i],sys_dyn,list_extp_d)
@@ -1815,8 +1820,27 @@ def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):# MS Added
 
     return transitions
 
-def create_afts(owner, ssd, cont_props, ref_grid, prog_map, trans):# MS Added
+def create_afts(owner, ssd, cont_props, ref_grid, prog_map, trans):
+    """Creates an Augmented Finite Transition System
 
+    @param owner: Decides who picks the next state 
+    @type ppp: 'env' or 'sys'
+
+    @param ssd: System Dynamics
+    @type ssd: L{SwitchedSysDyn}
+
+    @param cont_props: continuous propositions
+    @type cont_props: list of C{Polytope}
+
+    @param ref_grid: A refined proposition preserving partition
+    @type ref_grid: L{PropPreservingPartition}
+
+    @param prog_map: A progress group map for dynamics with equilibria
+    @type prog_map: dict of set of tuples. 
+
+    @param trans: A matrix showing the different transitions between states
+    @type trans: numpy array
+    """
     cnt=0
     afts=trs.AFTS()
     afts.owner=owner
@@ -1853,15 +1877,41 @@ def create_afts(owner, ssd, cont_props, ref_grid, prog_map, trans):# MS Added
         afts.transitions.add_adj(adj=adj,adj2states=afts_states,**actions_per_mode[mode])
     return afts
 
+
 def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
-                                visualize=False,eps=0.1, is_convex=True,
-                                N=1,abs_tol=1e-7):# MS Added
+                                visualize=False,eps=0, is_convex=True,
+                                N=1,abs_tol=1e-7):
+    """ Discretization function for Mode Only Switched systems
+
+    Takes in the system dynamics as input, and outputs an object of 
+    Abstract Mode Only Switched type. This function discretizes the 
+    continuous state space, adds a grid if required,creates a progress 
+    group map, and combines it all in the AbstractMOS object.
+
+    @param ssd: Dynamics of the switched system
+    @type ssd: L{SwitchedSysDyn}
+
+    @param cont_props: Continuous propositions
+    @type cont_props: List of C{Polytope}
+
+    @param owner: Who decides the next state
+    @type owner: 'env' or 'sys'
+
+    @param grid_size: Grid to be added on to PPP
+    @type: Natural Number
+
+    @param visualize: Choice of whether user wants to see plots
+    @type visualize: boolean
+
+    @param eps: used to expand the width of the equilibrium regions
+    @type eps: 0<eps<1
+
+
+    """
     cont_dyn={}
-    outside_props=set() #MS is outside_props needed?
     trans={}
-    cont_state_space=ssd.cts_ss
-    find_equilibria(ssd=ssd,cont_props=cont_props,outside_props=outside_props,eps=0.4)
-    cont_part = prop2part(cont_state_space, cont_props)
+    p2p.find_equilibria(ssd=ssd,cont_props=cont_props,eps=eps)
+    cont_part = p2p.prop2part(ssd.cts_ss, cont_props)
     plot_partition(cont_part, show=visualize)
     if is_convex:
         cont_part, new2old = part2convex(cont_part)
@@ -1871,7 +1921,7 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     if grid_size==-1.:
         ref_grid=cont_part
     else:
-        ref_grid=add_grid(ppp=cont_part, grid_size=grid_size)
+        ref_grid=p2p.add_grid(ppp=cont_part, grid_size=grid_size)
     plot_partition(ref_grid, show=visualize)
     
     prog_map=create_prog_map(ssd.modes,ref_grid)
@@ -1887,7 +1937,6 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     if visualize:
         plot_mode_partitions(abstMOS, show_ts=True, only_adjacent=False)
     return abstMOS
-   
 
 def multiproc_posttrans(q,mode,i,ref_grid,cont_dyn,N=1,abs_tol=1e-7):
     """Accessorry function 2 to enable parallelization of posttrans
