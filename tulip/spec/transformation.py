@@ -41,7 +41,7 @@ from tulip.spec.ast import nodes
 from tulip.spec import parser
 
 
-class Tree(nx.DiGraph):
+class Tree(nx.MultiDiGraph):
     """Abstract syntax tree as a graph data structure.
 
     Use this as a scaffold for syntactic manipulation.
@@ -63,7 +63,7 @@ class Tree(nx.DiGraph):
         # need to override networkx.DiGraph.__str__
         return ('Abstract syntax tree as graph with edges:\n' +
                 str([(str(u), str(v))
-                    for u, v, d in self.edges_iter(data=True)]))
+                    for u, v, k in self.edges_iter(keys=True)]))
 
     @property
     def variables(self):
@@ -71,7 +71,7 @@ class Tree(nx.DiGraph):
 
         @rtype: C{set} of L{Var}
         """
-        return {u for u in self if isinstance(u, nodes.Var)}
+        return {u for u in self if u.type == 'var'}
 
     @classmethod
     def from_recursive_ast(cls, u):
@@ -81,31 +81,30 @@ class Tree(nx.DiGraph):
         return tree
 
     def _recurse(self, u):
-        if isinstance(u, nodes.Terminal):
+        if hasattr(u, 'value'):
             # necessary this terminal is the root
             self.add_node(u)
-        elif isinstance(u, nodes.Operator):
+        elif hasattr(u, 'operator'):
             for i, v in enumerate(u.operands):
-                self.add_edge(u, v, pos=i)
+                self.add_edge(u, v, key=i)
                 self._recurse(v)
         else:
-            raise Exception('unknown node type')
+            raise Exception('unknown node type: {u}'.format(u=u))
         return u
 
     def to_recursive_ast(self, u=None):
         if u is None:
             u = self.root
-        v = copy.copy(u)
-        s = self.succ[u]
-        if not s:
-            assert isinstance(u, nodes.Terminal)
+        w = copy.copy(u)
+        if not self.succ.get(u):
+            assert hasattr(u, 'value')
         else:
-            v.operands = [self.to_recursive_ast(x)
-                          for _, x, d in sorted(
-                              self.out_edges_iter(u, data=True),
-                              key=lambda y: y[2]['pos'])]
-            assert len(u.operands) == len(v.operands)
-        return v
+            w.operands = [self.to_recursive_ast(v)
+                          for _, v, _ in sorted(
+                              self.edges_iter(u, keys=True),
+                              key=lambda x: x[2])]
+            assert len(u.operands) == len(w.operands)
+        return w
 
     def add_subtree(self, leaf, tree):
         """Add the C{tree} at node C{nd}.
@@ -115,15 +114,15 @@ class Tree(nx.DiGraph):
         @param tree: to be added, w/o copying AST nodes.
         @type tree: L{Tree}
         """
-        assert not self.successors(leaf)
-        for u, v, d in tree.edges_iter(data=True):
-            self.add_edge(u, v, pos=d['pos'])
+        assert not self.succ.get(leaf)
+        for u, v, k in tree.edges_iter(keys=True):
+            self.add_edge(u, v, key=k)
         # replace old leaf with subtree root
-        ine = self.in_edges(leaf, data=True)
+        ine = self.in_edges(leaf, keys=True)
         if ine:
             assert len(ine) == 1
-            ((parent, _, d), ) = ine
-            self.add_edge(parent, tree.root, **d)
+            ((parent, _, k), ) = ine
+            self.add_edge(parent, tree.root, key=k)
         else:
             self.root = tree.root
         self.remove_node(leaf)
@@ -155,9 +154,9 @@ def ast_to_labeled_graph(tree, detailed):
     """
     g = nx.DiGraph()
     for u in tree:
-        if isinstance(u, nodes.Operator):
+        if hasattr(u, 'operator'):
             label = u.operator
-        elif isinstance(u, nodes.Terminal):
+        elif hasattr(u, 'value'):
             label = u.value
         else:
             raise TypeError(
@@ -168,8 +167,8 @@ def ast_to_labeled_graph(tree, detailed):
         if detailed:
             label += '\n' + str(type(u).__name__)
         g.add_node(id(u), label=label)
-    for u, v, d in tree.edges_iter(data=True):
-        g.add_edge(id(u), id(v), label=d['pos'])
+    for u, v, k in tree.edges_iter(keys=True):
+        g.add_edge(id(u), id(v), label=k)
     return g
 
 
@@ -182,7 +181,7 @@ def check_for_undefined_identifiers(tree, domains):
       - binary operator between variable and
         invalid value for that variable.
 
-    @type tree: L{LTL_AST}
+    @type tree: L{Tree}
 
     @param domains: variable definitions:
 
@@ -192,45 +191,49 @@ def check_for_undefined_identifiers(tree, domains):
     @type domains: C{dict}
     """
     for u in tree:
-        if isinstance(u, nodes.Var) and u.value not in domains:
+        if u.type == 'var' and u.value not in domains:
             var = u.value
-            raise ValueError('undefined variable: ' + str(var) +
-                             ', in subformula:\n\t' + str(tree))
+            raise ValueError(
+                ('Undefined variable "{var}" missing from '
+                 'symbol table:\n\t{doms}\n'
+                 'in subformula:\n\t{f}').format(
+                     var=var, f=tree.to_recursive_ast(), doms=domains))
 
-        if not isinstance(u, (nodes.Str, nodes.Num)):
+        if u.type not in {'str', 'num'}:
             continue
 
         # is a Const or Num
         var, c = pair_node_to_var(tree, u)
 
-        if isinstance(c, nodes.Str):
+        if c.type == 'str':
             dom = domains[var]
 
             if not isinstance(dom, list):
                 raise Exception(
-                    'String constant: ' + str(c) +
-                    ', assigned to non-string variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom))
+                    ('String constant "{c}" assigned to non-string '
+                     'variable "{var}" with domain:\n\t{dom}').format(
+                         var=var, c=c, dom=dom))
 
             if c.value not in domains[var.value]:
                 raise ValueError(
-                    'String constant: ' + str(c) +
-                    ', is not in the domain of variable: ' + str(var))
+                    ('String constant "{c}" is not in the domain '
+                     'of variable "{var}"').format(var=var, c=c))
 
-        if isinstance(c, nodes.Num):
+        if c.type == 'num':
             dom = domains[var]
 
             if not isinstance(dom, tuple):
                 raise Exception(
-                    'Number: ' + str(c) +
-                    ', assigned to non-integer variable: ' +
-                    str(var) + ', whose domain is:\n\t' + str(dom))
+                    ('Number: {c}, assigned to non-integer ' + str(c) +
+                     'variable "{var}" with domain:\n\t{dom}').format(
+                         var=var, c=c, dom=dom))
 
             if not dom[0] <= c.value <= dom[1]:
                 raise Exception(
-                    'Integer variable: ' + str(var) +
-                    ', is assigned the value: ' + str(c) +
-                    ', that is out of its range: %d ... %d ' % dom)
+                    ('Integer variable "{var}", is assigned the '
+                     'value: {c}, that is out of its domain:'
+                     '{dom[0]} ... {dom[1]}').format(
+                         var=var, c=c, dom=dom))
 
 
 def sub_values(tree, var_values):
@@ -245,7 +248,7 @@ def sub_values(tree, var_values):
     """
     old2new = dict()
     for u in tree.nodes_iter():
-        if not isinstance(u, nodes.Var):
+        if u.type != 'var':
             continue
         val = var_values[u.value]
         # instantiate appropriate value type
@@ -272,7 +275,7 @@ def sub_constants(tree, var_str2int):
     # logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
     for u in tree.nodes_iter():
-        if not isinstance(u, nodes.Str):
+        if u.type != 'str':
             continue
         var, op = pair_node_to_var(tree, u)
         # now: c, is the operator and: v, the variable
@@ -298,7 +301,7 @@ def sub_bool_with_subtree(tree, bool2subtree):
     @type bool2form: C{dict} from C{str} to L{Tree}
     """
     for u in tree.nodes():
-        if isinstance(u, nodes.Var) and u.value in bool2subtree:
+        if u.type == 'var' and u.value in bool2subtree:
             # tree.write(str(id(tree)) + '_before.png')
             tree.add_subtree(u, bool2subtree[u.value])
             # tree.write(str(id(tree)) + '_after.png')
@@ -325,17 +328,18 @@ def pair_node_to_var(tree, c):
     # find parent Binary operator
     while True:
         old = c
-        c = next(iter(tree.predecessors(c)))
-        if isinstance(c, nodes.Binary):
-            break
-    succ = tree.successors(c)
-    v = succ[0] if succ[1] == old else succ[1]
-    # go down until var found
+        c = next(iter(tree.predecessors_iter(c)))
+        if c.type == 'operator':
+            if len(c.operands) == 2:
+                break
+    p, q = tree.successors_iter(c)
+    v = p if q == old else q
+    # go down until terminal found
     # assuming correct syntax for gr1c
     while True:
-        if isinstance(v, nodes.Var):
+        if not tree.succ.get(v):
             break
-        v = next(iter(tree.successors(v)))
+        v = next(iter(tree.successors_iter(v)))
     # now: b, is the operator and: v, the variable
     return v, c
 
@@ -377,7 +381,7 @@ def infer_constants(formula, variables):
     tree = parser.parse(formula)
     old2new = dict()
     for u in tree:
-        if not isinstance(u, nodes.Var):
+        if u.type != 'var':
             continue
         if str(u) in variables:
             continue
@@ -401,7 +405,7 @@ def _check_var_conflicts(s, variables):
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
     if vars_redefined:
-        raise Exception('Variables redefined: ' + str(vars_redefined))
+        raise Exception('Variables redefined: {v}'.format(v=vars_redefined))
     # check conflicts with values of arbitrary finite data types
     for var, domain in variables.iteritems():
         # not arbitrary finite type ?
@@ -410,7 +414,8 @@ def _check_var_conflicts(s, variables):
         # var has arbitrary finite type
         conflicting_values = {x for x in s if x in domain}
         if conflicting_values:
-            raise Exception('Values redefined: ' + str(conflicting_values))
+            raise Exception(
+                'Values redefined: {v}'.format(v=conflicting_values))
 
 
 def check_var_name_conflict(f, varname):
@@ -418,8 +423,29 @@ def check_var_name_conflict(f, varname):
     g = Tree.from_recursive_ast(t)
     v = {x.value for x in g.variables}
     if varname in v:
-        raise ValueError('var name "' + varname + '" already used')
+        raise ValueError('var name "{v}" already used'.format(v=varname))
     return v
+
+
+def collect_primed_vars(t):
+    """Return `set` of variable identifiers in the context of a next operator.
+
+    @type t: recursive AST
+    """
+    g = Tree.from_recursive_ast(t)
+    # (node, context)
+    Q = [(t, False)]
+    primed = set()
+    while Q:
+        u, c = Q.pop()
+        if u.type == 'var' and c:
+            primed.add(u.value)
+        try:
+            c = (u.operator == 'X') or c
+        except AttributeError:
+            pass
+        Q.extend((v, c) for v in g.successors_iter(u))
+    return primed
 
 
 # defunct until further notice
@@ -433,7 +459,7 @@ def _flatten(tree, u, to_lang, **kw):
         return to_lang(u, **kw)
     elif len(s) == 2:
         l, r = s
-        if s[l]['pos'] == 'right':
+        if 1 in s[l]:
             l, r = r, l
         l = _flatten(tree, l, to_lang, **kw)
         r = _flatten(tree, r, to_lang, **kw)

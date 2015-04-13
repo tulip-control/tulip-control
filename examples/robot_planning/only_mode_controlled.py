@@ -34,7 +34,7 @@ from scipy import sparse as sp
 # Transitions should be interpreted as nondeterministic
 
 # Create a finite transition system
-env_sws = transys.FTS()
+env_sws = transys.AFTS()
 env_sws.owner = 'env'
 
 env_sws.sys_actions.add_from({'right','up','left','down'})
@@ -148,9 +148,9 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of JTLV.
+# methods.  Here we make use of gr1c.
 #
-ctrl = synth.synthesize('jtlv', specs, env=env_sws)
+ctrl = synth.synthesize('gr1c', specs, env=env_sws)
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('only_mode_controlled.png'):

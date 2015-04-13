@@ -209,7 +209,7 @@ def thermostat_with_hysteresis():
     m.add_inputs([('temperature', ) ])
 
 def traffic_light():
-    m = trs.Mealy()
+    m = trs.machines.MealyMachine()
     pure_signal = {'present', 'absent'}
     
     m.add_inputs([('tick', pure_signal) ])
@@ -277,11 +277,12 @@ def pedestrians():
 if __name__ == '__main__':
     saving = False
     
-    m1 = mealy_machine_example()
-    m2 = garage_counter()
-    m3 = garage_counter_with_state_vars()
-    m4 = pedestrians()
-    m5 = traffic_light()
+    # m1 = mealy_machine_example()
+    # m2 = garage_counter()
+    # m3 = garage_counter_with_state_vars()
+    # m4 = pedestrians()
+    # m5 = traffic_light()
+    m5=trs.machines.MealyMachine()
     
     m5.simulate('random', 4)
     #m6.simulate() for manual simulation

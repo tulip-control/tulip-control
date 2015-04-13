@@ -15,7 +15,11 @@ transition system.
 
 import logging
 logging.basicConfig(level=logging.INFO)
+<<<<<<< HEAD
+logging.getLogger('tulip.spec.plyparser').setLevel(logging.WARNING)
+=======
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
+>>>>>>> umich/aug_sys
 logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
 logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG - 3)
 
@@ -123,10 +127,10 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of JTLV.
+# methods.  Here we make use of gr1c.
 #
 # @synthesize@
-ctrl = synth.synthesize('jtlv', specs, sys=sys)
+ctrl = synth.synthesize('gr1c', specs, sys=sys)
 # @synthesize_end@
 
 #

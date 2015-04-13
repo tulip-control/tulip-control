@@ -1,10 +1,13 @@
 Specifications
 ==============
 
-Currently only specifications expressed as GR(1) formulae (which constitutes a
-sublanguage of LTL) can be used for synthesis in TuLiP.  Nonetheless a more
+Currently the best support available in TuLiP is for specifications expressed as
+GR(1) formulae, which constitutes a sublanguage of LTL.  Nonetheless, a more
 general LTL specification string is described in the below section
-:ref:`tulip-ltl-label`, and it is supported through the class ``tulip.spec.LTL``.
+:ref:`tulip-ltl-label`, and it is supported through the class
+``tulip.spec.LTL``. Consult :doc:`install` (specifically,
+:ref:`synt-tools-sec-label`) about alternative solvers if you are interested in
+languages that are not equivalent to GR(1).
 
 Getting started
 ---------------
@@ -33,11 +36,11 @@ The result of which should look similar to
 .. code-block:: none
 
   0  # Version
-  
+
   %%
   OUTPUT:
   p : boolean;
-  
+
   %%
   []<>(p)
 
@@ -75,36 +78,38 @@ The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E
          | expr '/' expr
          | expr '+' expr
          | expr '-' expr
-         
+         | expr '<<>>' NUMBER  # truncate
+
          | expr '=' expr | expr '==' expr
          | expr '!=' expr
          | expr '<=' expr
          | expr '>=' expr
-         
+
          | '!' expr
          | expr '&' expr | expr '&&' expr
          | expr '|' expr | expr '||' expr
          | expr '^' expr # xor
-         
+
          | expr '->' expr
          | expr '<->' expr
-         
-         | 'X' expr | 'next' expr
+         | '(' 'ite' expr ',' expr ',' expr ')'  # ternary conditional
+
+         | 'X' expr | 'next' expr | expr "'"
          | '[]' expr | 'G' expr
          | '<>' expr | 'F' expr
-         
+
          | expr 'U' expr
          | expr 'R' expr
-         
+
          | '(' expr ')'
-         
+
          | TRUE | FALSE
          | NUMBER
          | variable
          | string
 
   variable ::= NAME
-  
+
   string ::= '"' NAME '"'
 
 where:
@@ -116,18 +121,20 @@ where:
 
 The token precedence (lowest to highest) and associativity (r = right, l = left, n = none) is:
 
-- **U**, **R** (r)
-- **<->** (r)
-- **->** (r)
+- **<->** (l)
+- **->** (l)
 - **^** (l)
 - **|** (l)
 - **&** (l)
-- **[]**, **<>** (r)
-- **X** (r)
+- **[]**, **<>** (l)
+- **U**, **W**, **R** (l)
+- **=**, **!=** (l)
+- **<=**, **>=**, **>** (l)
+- **+**, **-** (l)
+- **\***, **/** (l)
 - **!** (r)
-- **=**, **<=**, **>=**, **>** (n)
-- **\***, **/** (n)
-- **+**, **-** (n)
+- **X** (r)
+- **'** (l)
 - TRUE, FALSE
 
 Expressions of the above form are successfully parsed.

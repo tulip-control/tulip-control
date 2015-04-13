@@ -37,11 +37,11 @@ from tulip.hybrid import generateFilter
 from cvxopt import matrix
 # @import_section_end@
 
-show = True
+show = False
 
 # @dynamics_section@
 # Problem parameters
-input_bound = 20.0
+input_bound = 6.0
 uncertainty = 0.001
 epsilon = 0.02
 filter_bound = 1 - uncertainty/epsilon

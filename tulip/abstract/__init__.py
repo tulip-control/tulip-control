@@ -1,4 +1,5 @@
 # Copyright (c) 2013-2014 by California Institute of Technology
+# and 2014-2015 The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,8 +13,8 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
+# 3. Neither the name of the copyright holder(s) nor the names of its 
+#    contributors may be used to endorse or promote products derived 
 #    products derived from this software without specific prior
 #    written permission.
 # 
@@ -37,7 +38,11 @@ from __future__ import absolute_import
 # avoid shadowing modules
 from .discretization import (
     discretize, discretize_switched,
-    multiproc_discretize_switched
+    multiproc_discretize_switched,
+    create_prog_map, 
+    discretize_modeonlyswitched,
+    multiproc_posttrans,
+    multiproc_postarea_transitions
 )
 from .feasible import is_feasible, solve_feasible, is_feasible_alternative
 
@@ -45,6 +50,7 @@ from .prop2partition import (
     prop2part, part2convex,
     pwa_partition, add_grid,
     pwa_shrunk_partition,
+    find_equilibria,
     PropPreservingPartition, PPP
 )
 
