@@ -172,8 +172,8 @@ ssd=hybrid.SwitchedSysDyn(disc_domain_size=(1,4),
 #print ssd;
 owner='env'
 
-abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=1.,
-                                visualize=False,eps=0.3, is_convex=True,
+abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=-1.,
+                                visualize=True,eps=0.3, is_convex=True,
                                 N=1,abs_tol=1e-7)
 #print abstMOS
 
