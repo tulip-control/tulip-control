@@ -71,64 +71,12 @@ discretize_modeonlyswitched to discretization.py
 -find_equilibria to prop2partition.py
 """
 
-def simulation(disc_dynamics,ctrl):
-    Tc = [1.3]
-    Th = [-1.]
-    P = [-1.3]
-
-    s0_part = find_discrete_state([Tc[0],Th[0],P[0]],disc_dynamics.ppp)
-    s0_loc = disc_dynamics.ppp2ts[s0_part]
-
-    mach = synth.determinize_machine_init(ctrl, {'loc':s0_loc})
-    sim_hor = 130
-
-    (s1, dum) = mach.reaction('Sinit', {'level': 1})
-    (s1, dum) = mach.reaction(s1, {'level': 1})
-    for sim_time in range(sim_hor):
-        for i in range(3):
-            if np.array([Tc[sim_time*N],Th[sim_time*N],P[sim_time*N]]) in cont_sys.list_subsys[i].domain:
-                sysnow=i
-        u = get_input(
-                np.array([Tc[sim_time*N],Th[sim_time*N],P[sim_time*N]]),
-                cont_sys.list_subsys[sysnow],
-                disc_dynamics,
-                s0_part,
-                disc_dynamics.ppp2ts.index(dum['loc']),
-                mid_weight=100.0,
-                test_result=True)
-    #u = get_input_helper_special(
-    #        np.array([Tc[sim_time*N],Th[sim_time*N],P[sim_time*N]]),
-    #        cont_sys.list_subsys[sysnow],
-    #        disc_dynamics.ppp[disc_dynamics.ppp2ts.index(s0_loc)][0],
-    #        disc_dynamics.ppp[disc_dynamics.ppp2ts.index(dum['loc'])][0],
-    #        N=N)
-    #u = u.reshape(N, 3)
-    for ind in range(N):
-        x = np.dot(
-                cont_sys.list_subsys[sysnow].A, [Tc[-1],Th[-1],P[-1]]
-                ) + np.dot(cont_sys.list_subsys[sysnow].B,u[ind]) + cont_sys.list_subsys[sysnow].K.flatten()
-        Tc.append(x[0])
-        Th.append(x[1])
-        P.append(x[2])
-
-    s0_part = find_discrete_state([Tc[-1],Th[-1],P[-1]],disc_dynamics.ppp)
-    s0_loc = disc_dynamics.ppp2ts[s0_part]
-    print s0_loc, dum['loc']
-    if pc.is_inside(disc_dynamics.ppp[disc_dynamics.ppp2ts.index(dum['loc'])],[Tc[-1],Th[-1],P[-1]]):
-        s0_part = disc_dynamics.ppp2ts.index(dum['loc'])
-    if sim_time <= 10:
-        (s1, dum) = mach.reaction(s1, {'level': 1})
-    elif sim_time <= 50:
-        (s1, dum) = mach.reaction(s1, {'level': 0})
-    else:
-        (s1, dum) = mach.reaction(s1, {'level': 2})
-
 
 abs_tol=1e-7
 
 A_off=np.array([[0.9998,0.],[0.,1.]])
 A_heat=np.array([[0.9998,0.0002],[0.,1.]])
-A_cool=np.array([[0.9998,-0.0002],[0.,1.]])
+A_cool=np.array([[0.9998,0.0002],[0.,1.]])
 A_on=np.array([[0.9998,0.0002],[0.,1.]])
 
 K_off=np.array([[0.0032],[0.]])
@@ -181,26 +129,12 @@ env_vars = set() #{'off','on','heat','cool'}
 env_init = set()                # empty set
 env_prog = set()
 env_safe = set()
-cnt=0;
-safe = ''
-# for m in env_vars:
-#     safe+='('+m
-#     for n in env_vars:
-#         if n != m:
-#             safe +=' && !'
-#             safe += n
-#     safe+=')'
-#     cnt=cnt+1
-#     if (cnt<4):
-#         safe+=' || '
-#     elif (cnt==4):
-#         safe+= ''
-env_safe = set()                # empty set
-# env_safe|={safe}
 
-prog={'(eqpnt_cool || sys_actions != "cool")','(!eqpnt_heat || sys_actions != "heat")',
-'(eqpnt_off || sys_actions != "off")','(!eqpnt_on || sys_actions != "on")'}
-prog=set()
+
+
+prog={'(eqpnt_cool || sys_actions != "cool")','(eqpnt_heat || sys_actions != "heat")',
+'(eqpnt_off || sys_actions != "off")','(eqpnt_on || sys_actions != "on")'}
+
 # for x in abstMOS.ts.sys_actions:
 #     sp='(eqpnt_'
 #     sp+=x
@@ -243,7 +177,7 @@ call env_open_fts2spec and then append equil pts. Allow self_trans and see what 
 Put !OUTSIDE inside env_spec. 
 """ 
 #jt_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts, ignore_env_init=True, rm_deadends=False)
-gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=False)
+gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=True)
 #print (gr_fts)
 if not gr_fts.save('gr_fts.eps'):
     print(gr_fts)
@@ -254,7 +188,7 @@ Tc = [18.0]
 Th = [16.0]
 
 s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
-mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
+#mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
 sim_hor = 130
 N=1 # N = number of steps between each sampled transition
 
