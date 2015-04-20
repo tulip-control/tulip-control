@@ -40,12 +40,12 @@ def version_test():
 
     ver = imp.load_module("version", *imp.find_module("version", [tul_path]))
     release_str = '.'.join([str(x) for x in ver.version_info])
-    assert ver.version == release_str+"-dev-"+SAMPLE_COMMIT_HASH.strip()
+    assert ver.version == release_str+".dev0+"+SAMPLE_COMMIT_HASH.strip()
 
     # Unknown dev
     os.remove(filename)
     ver = imp.load_module("version", *imp.find_module("version", [tul_path]))
-    assert ver.version == release_str+"-dev-unknown-commit"
+    assert ver.version == release_str+".dev0+Unknown"
 
     # Restore original, if present
     if commit_hash_backup is not None:

@@ -59,6 +59,6 @@ if os.path.exists(path_to_hashfile):
             break
 
     if len(commit_hash) > 0:
-        version += ".dev." + commit_hash
+        version += ".dev0+" + commit_hash
 else:
-    version += ".dev"
+    version += ".dev0+Unknown"
