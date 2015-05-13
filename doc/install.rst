@@ -10,7 +10,7 @@ use the core functionality of TuLiP:
 
 * `NumPy <http://numpy.org/>`_
 * `SciPy <http://www.scipy.org/>`_
-* `CVXOPT <http://abel.ee.ucla.edu/cvxopt/>`_
+* `CVXOPT <http://cvxopt.org/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
 * `PLY <http://www.dabeaz.com/ply/>`_
 * `polytope <https://pypi.python.org/pypi/polytope>`_
