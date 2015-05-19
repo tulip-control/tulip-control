@@ -291,11 +291,11 @@ if perform_setup:
         install_requires = [
             'ply >= 3.4',
             'networkx >= 1.6',
+            'numpy >= 1.7',
+            'scipy',
         ],
         extras_require={
-            'hybrid': ['numpy >= 1.7',
-                       'scipy',
-                       'cvxopt >= 1.1.7',
+            'hybrid': ['cvxopt >= 1.1.7',
                        'polytope >= 0.1.0']},
         tests_require=['nose'],
         packages = [
