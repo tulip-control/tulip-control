@@ -70,6 +70,13 @@ def check_pydot():
         return False
     return True
 
+def check_cvxopt():
+    try:
+        import cvxopt
+    except ImportError:
+        return False
+    return True
+
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
 # "install" is given, unless both "install" and "nocheck" are given
@@ -94,7 +101,7 @@ gr1c_msg = 'gr1c not found or of version prior to ' +\
 other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 
 glpk_msg = 'GLPK seems to be missing\n' +\
-    'and thus apparently not used by your installation of CVXOPT.\n' +\
+    'and thus apparently not used by CVXOPT if you have it.\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
 java_msg = (
     'java not found.\n'
@@ -109,6 +116,9 @@ pydot_msg = 'pydot not found.\n' +\
     'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
     'export routines will be unavailable unless you install\n' +\
     'pydot (http://code.google.com/p/pydot/).'
+cvxopt_msg = 'cvxopt not found.\n' +\
+    'For routines treating hybrid systems, you must install\n' +\
+    'CVXOPT (http://cvxopt.org/).'
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -117,7 +127,8 @@ pydot_msg = 'pydot not found.\n' +\
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
+             'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
              'java': [check_java, 'Java  found.', java_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
@@ -216,11 +227,6 @@ if check_deps:
             import networkx
         except:
             print('ERROR: NetworkX not found.')
-            raise
-        try:
-            import cvxopt
-        except:
-            print('ERROR: CVXOPT not found.')
             raise
 
     # Other dependencies
