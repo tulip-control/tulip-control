@@ -8,11 +8,11 @@ Installation
 
 In most cases, it suffices to::
 
-  python setup.py install
+  pip install .
 
-To avoid checking for optional dependencies, add the option "nocheck"::
+To check for required and optional dependencies without actually installing::
 
-  python setup.py install nocheck
+  python setup.py dry-check
 
 TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 

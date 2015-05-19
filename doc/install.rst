@@ -10,10 +10,8 @@ use the core functionality of TuLiP:
 
 * `NumPy <http://numpy.org/>`_
 * `SciPy <http://www.scipy.org/>`_
-* `CVXOPT <http://cvxopt.org/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
 * `PLY <http://www.dabeaz.com/ply/>`_
-* `polytope <https://pypi.python.org/pypi/polytope>`_
 
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
@@ -21,14 +19,6 @@ Newcomers to scientific computing with Python should read
 The default synthesis tool for GR(1) specifications is `gr1c
 <http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0 (the
 current release at time of writing).
-
-For computing discrete abstractions from hybrid system descriptions, it is
-highly recommended---but not required---that you install `GLPK
-<http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you
-need to install GLPK *before* installing CVXOPT and follow the instructions in
-CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
-`MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
-do this linking automatically.
 
 The following are optional Python packages, listed with a summary of dependent
 features:
@@ -41,18 +31,41 @@ features:
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code
 
+* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
+  plotting of convex polytopes
+
+* `CVXOPT <http://cvxopt.org/>`_ -- construction and manipulation of discrete
+  abstractions
+
+For computing discrete abstractions from hybrid system descriptions, it is
+highly recommended---but not required---that you install `GLPK
+<http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you
+need to install GLPK *before* installing CVXOPT and follow the instructions in
+CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
+`MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
+do this linking automatically.
+
 In previous versions of TuLiP, ``polytope`` was a subpackage of ``tulip``.  It
 is now a separate package, but for convenience, a copy is bundled with some
 releases of TuLiP.
 
-Once all of the above preparations are completed, you can install TuLiP.  As
-with most `Distutils <http://docs.python.org/install/index.html>`_-based
-packages, installation proceeds with::
+Once all of the above preparations are completed, you can install TuLiP::
 
-  $ python setup.py install
+  $ pip install .
 
-This script will also check for dependencies, i.e. look for NumPy, CVXOPT, etc.
-To only check for required and optional dependencies, but not install TuLiP, use ::
+To enforce dependencies that are required for using parts of TuLiP intended for
+hybrid systems, use ``pip install .[hybrid]``. (Your shell may try to parse
+``[`` and ``]``, causing the command to fail. If so, try ``pip install '.[hybrid]'``.)
+
+TuLiP may instead be installed `from PyPI <https://pypi.python.org/pypi/tulip>`_::
+
+  $ pip install tulip
+
+or, analogous to the above, ``pip install tulip[hybrid]``.
+
+The above commands include checking of dependencies and automatic installation
+of missing Python packages. (N.B., not all dependencies are Python packages.) To
+only check for required and optional dependencies, but not install TuLiP, use ::
 
   $ python setup.py dry-check
 
