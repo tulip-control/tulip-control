@@ -384,7 +384,7 @@ class GRSpec(LTL):
                 'env_init={ei}',
                 'sys_init={si}',
                 'env_safety={es}',
-                'sys_safety={ss},',
+                'sys_safety={ss}',
                 'env_prog={ep}',
                 'sys_prog={sp}']).format(
                 ev=repr(self.env_vars),
