@@ -162,8 +162,8 @@ def synthesize(
 
     Arguments are described in documentation for L{solve_game}.
 
-    @return: Return strategy as instance of L{MealyMachine}, or a list
-        of counter-examples as returned by L{get_counterexamples}.
+    @return: Return strategy as instance of C{networkx.DiGraph}, or a
+        list of counter-examples as returned by L{get_counterexamples}.
     """
     fSMV, fLTL, fAUT = create_files(spec)
 

@@ -157,7 +157,7 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
         return (elem.tag, di)
 
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
-    """Return L{GRSpec} and L{MealyMachine} constructed from output of gr1c.
+    """Return strategy constructed from output of gr1c.
 
     @param x: a string or an instance of
         xml.etree.ElementTree._ElementInterface
@@ -170,7 +170,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         string x.  If you are unsure what to do, try setting spec0 to
         whatever L{gr1cint.synthesize} was invoked with.
 
-    @rtype: L{GRSpec}
+    @return: if a strategy is given in the XML string, return it as
+        C{networkx.DiGraph}. Else, return (L{GRSpec}, C{None}), where
+        the first element is the specification as read from the XML string.
     """
     if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
         raise TypeError("tag to be parsed must be given " +
@@ -386,7 +388,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         <http://slivingston.github.io/gr1c/md_spc_format.html#initconditions>}
         for detailed descriptions.
 
-    @return: strategy as L{MealyMachine},
+    @return: strategy as C{networkx.DiGraph},
         or None if unrealizable or error occurs.
     """
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
