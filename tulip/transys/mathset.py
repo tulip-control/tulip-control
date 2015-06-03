@@ -762,6 +762,7 @@ class TypedDict(dict):
 
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
+        self.allowed_values = dict()
 
     def __setitem__(self, i, y):
         """Raise ValueError if value y not allowed for key i."""
