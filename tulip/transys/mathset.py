@@ -767,7 +767,7 @@ class TypedDict(dict):
     def __setitem__(self, i, y):
         """Raise ValueError if value y not allowed for key i."""
         valid_y = True
-        if i in self.allowed_values:
+        if hasattr(self, 'allowed_values') and i in self.allowed_values:
             valid_y = False
             if self.allowed_values[i] is None:
                 valid_y = True
