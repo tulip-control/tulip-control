@@ -1,0 +1,91 @@
+# Emacs, this is in -*- ruby -*-
+#
+# The directory one up from here is synced with /vagrant in the VM.
+# The intended usage is
+#
+#   cd /path/to/your/TuLiP-sources
+#   cd contrib
+#   vagrant up
+#   vagrant ssh
+#   cd /vagrant
+#
+# From there, it remains to install the polytope package and then link
+# to your local TuLiP sourcetree. E.g.,
+#
+#   sudo pip install polytope
+#   sudo pip install -e .
+
+install_dependencies = <<-SHELL
+#!/bin/sh -e
+sudo apt-get update
+sudo apt-get install -y python-pip python-nose
+sudo apt-get install -y python-numpy python-networkx python-scipy python-ply python-matplotlib
+sudo apt-get install -y python-pydot
+sudo apt-get install -y libglpk-dev
+sudo apt-get install -y bison flex
+
+if [ ! -f cvxopt-1.1.7.tar.gz ]
+then
+    curl -sL https://github.com/cvxopt/cvxopt/archive/1.1.7.tar.gz -o cvxopt-1.1.7.tar.gz
+fi
+FILECHECKSUM=`shasum -a 256 cvxopt-1.1.7.tar.gz|cut -d ' ' -f1`
+if [ $FILECHECKSUM != '11624199ba0064e4c384c9fe7ced6d425596fe1f1bbfafd6baaa18f0fe63fd9b' ]
+then
+    echo "Checksum for the cvxopt tarball does not have expected value."
+    false
+fi
+tar -xzf cvxopt-1.1.7.tar.gz
+cd cvxopt-1.1.7
+sed -i.orig '41s/BUILD_GLPK = 0/BUILD_GLPK = 1/' setup.py
+python setup.py build
+sudo pip install .
+cd ..
+
+gpg --keyserver pgp.mit.edu --recv-keys 03B40F63
+
+CUDDVERSION=2.5.0
+GR1CVERSION=0.9.0
+
+if [ ! -f gr1c-$GR1CVERSION.tar.gz -o ! -f gr1c-$GR1CVERSION.tar.gz.sig ]
+then
+    curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
+    curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz.sig
+fi
+gpg --verify gr1c-$GR1CVERSION.tar.gz.sig
+FILECHECKSUM=`shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1`
+if [ $FILECHECKSUM != '818782d3c304e963ab1ac4ce2e3beaede372152adcb593df1bd8245fd2b1c254' ]
+then
+    echo "Checksum for the gr1c tarball does not have expected value."
+    false
+fi
+tar -xzf gr1c-$GR1CVERSION.tar.gz
+cd gr1c-$GR1CVERSION
+
+mkdir -p extern
+cd extern
+if [ ! -f cudd-$CUDDVERSION.tar.gz ]
+then
+    curl -sO ftp://vlsi.colorado.edu/pub/cudd-$CUDDVERSION.tar.gz
+fi
+FILECHECKSUM=`shasum -a 256 cudd-$CUDDVERSION.tar.gz|cut -d ' ' -f1`
+if [ $FILECHECKSUM != '4f3bc49b35564af94b17135d8cb8c4063fb049cfaa442f80dc40ba73c6345a85' ]
+then
+    echo "Checksum for the CUDD tarball does not have expected value."
+    false
+fi
+tar -xzf cudd-$CUDDVERSION.tar.gz
+cd cudd-$CUDDVERSION
+make XCFLAGS='-mtune=native -DHAVE_IEEE_754 -DBSD -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8'
+cd ../..
+make all
+make check
+sudo make install
+
+
+SHELL
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.provision "shell", inline: install_dependencies
+  config.vm.synced_folder "..", "/vagrant"
+end
