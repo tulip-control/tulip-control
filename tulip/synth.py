@@ -1063,13 +1063,13 @@ def synthesize(
 
     @type sys: L{FTS}
 
-    @param ignore_sys_init: Ignore any initial state information
-        contained in env.
-    @type ignore_sys_init: bool
-
     @param ignore_env_init: Ignore any initial state information
-        contained in sys.
+        contained in env.
     @type ignore_env_init: bool
+
+    @param ignore_sys_init: Ignore any initial state information
+        contained in sys.
+    @type ignore_sys_init: bool
 
     @param bool_states: deprecated as inefficient
 
