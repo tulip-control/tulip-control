@@ -120,8 +120,8 @@ ssd=hybrid.SwitchedSysDyn(disc_domain_size=(1,4),
 #print ssd;
 owner='env'
 
-abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=1.,
-                                visualize=False,eps=0.3, is_convex=True,
+abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=0.3,
+                                visualize=False,eps=0.1, is_convex=True,
                                 N=1,abs_tol=1e-7)
 #print abstMOS
 
@@ -167,7 +167,8 @@ sys_vars=set()
 #     sys_vars |={s};
 
 sys_init = set()            
-sys_prog = {'LOW','HIGH'}
+#sys_prog = {'LOW','HIGH'}
+sys_prog = set()
 sys_safe = {'!OUTSIDE'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
@@ -177,7 +178,7 @@ call env_open_fts2spec and then append equil pts. Allow self_trans and see what 
 Put !OUTSIDE inside env_spec. 
 """ 
 #jt_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts, ignore_env_init=True, rm_deadends=False)
-gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=True)
+gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=True, ignore_env_init=True)
 #print (gr_fts)
 if not gr_fts.save('gr_fts.eps'):
     print(gr_fts)
