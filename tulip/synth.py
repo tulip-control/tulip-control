@@ -1191,9 +1191,9 @@ def _spec_plus_sys(
         if isinstance(env,transys.AugmentedFiniteTransitionSystem):
             prog_spec=set();
             for sys_act in env.sys_actions:
-                eq_spec='sys_actions="'
+                eq_spec='sys_actions !="'
                 eq_spec+=sys_act
-                eq_spec+='" &&  ('
+                eq_spec+='" ||  !('
                 if not env.env_actions:
                     for state in env.progress_map[sys_act]:
                         if state != env.progress_map[sys_act][0]:
