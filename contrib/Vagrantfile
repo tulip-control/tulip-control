@@ -17,12 +17,12 @@
 
 install_dependencies = <<-SHELL
 #!/bin/sh -e
-sudo apt-get update
-sudo apt-get install -y python-pip python-nose
-sudo apt-get install -y python-numpy python-networkx python-scipy python-ply python-matplotlib
-sudo apt-get install -y python-pydot
-sudo apt-get install -y libglpk-dev
-sudo apt-get install -y bison flex
+sudo apt-get -y update
+sudo apt-get -y install python-pip python-nose
+sudo apt-get -y install python-numpy python-networkx python-scipy python-ply python-matplotlib
+sudo apt-get -y install python-pydot
+sudo apt-get -y install libglpk-dev
+sudo apt-get -y install bison flex
 
 if [ ! -f cvxopt-1.1.7.tar.gz ]
 then
