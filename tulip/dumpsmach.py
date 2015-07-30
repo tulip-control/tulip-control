@@ -155,14 +155,14 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
             '{t2}return output\n'
             '\n'
             '{t}def _error(self, {input_args}):\n'
-            '{t2}raise ValueError("Unrecognized input:" + ('
+            '{t2}raise ValueError("Unrecognized input: " + ('
             '{inputs}).format({args}))\n').format(
                 t=tab,
                 t2=2*tab,
                 t3=3*tab,
                 input_args=input_args,
                 inputs=''.join(
-                    '\n{t}"{v} = {{{v}}};"'.format(v=v, t=3*tab)
+                    '\n{t}"{v} = {{{v}}}; "'.format(v=v, t=3*tab)
                     for v in M.inputs),
                 args=','.join('\n{t}{v}={v}'.format(v=v, t=4*tab)
                               for v in M.inputs))
