@@ -214,7 +214,7 @@ def iter2var(states, variables, statevar, bool_states, must):
     If the values are not mutually exclusive,
     then only Boolean variables can represent them.
 
-    Suppose N ossible values are defined.
+    Suppose N possible values are defined.
     The int variable is allowed to take N+1 values.
     The additional value corresponds to all, e.g., actions, being False.
 
@@ -238,7 +238,7 @@ def iter2var(states, variables, statevar, bool_states, must):
     @param variables: to be augmented with integer or string variable
         or Boolean variables.
 
-    @param statevar: name to use for integer or string valued variabe.
+    @param statevar: name to use for integer or string valued variable.
     @type statevar: C{str}
 
     @param bool_states: if True, then use bool variables.
