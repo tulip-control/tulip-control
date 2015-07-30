@@ -65,7 +65,9 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
     """
     tab = 4 * ' '
     node_to_int = dict([(s, i) for i, s in enumerate(M)])
-    input_args = ', '.join(M.inputs) if M.inputs else ''
+    input_vars = [input_var for input_var in M.inputs] if M.inputs else []
+    input_args = ', '.join(input_vars)
+    input_args_str = "'"+"', '".join(input_vars)+"'"
     code = (
         'class {classname}(object):\n'
         '{t}"""Mealy transducer.\n'
@@ -79,6 +81,7 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
         '{t}"""\n'
         '{t}def __init__(self):\n'
         '{t2}self.state = {sinit}\n'
+        '{t2}self.input_vars = [{input_args_str}]\n'
         '\n'
         '{t}def move(self, {input_args}):\n'
         '{t2}"""Given inputs, take move and return outputs.\n'
@@ -94,6 +97,7 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
             t2=2*tab,
             date=time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
             sinit=node_to_int['Sinit'],
+            input_args_str=input_args_str,
             input_args=input_args,
             outputs=[str(v) for v in M.outputs])
     # cached generator
