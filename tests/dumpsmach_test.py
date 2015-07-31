@@ -16,6 +16,11 @@ class basic_test:
                                     sys_prog=["y=0", "y=5"])
         self.dcounter_M = synth.synthesize("gr1c", self.dcounter)
 
+        self.enumf = spec.GRSpec(sys_vars={'y': ['a', 'b']}, sys_init=['y="a"'],
+                                 sys_safety=['y = "a" -> X(y = "b")',
+                                             'y = "b" -> X(y = "a")'])
+        self.enumf_M = synth.synthesize('gr1c', self.enumf)
+
     def tearDown(self):
         self.dcounter = None
         self.dcounter_M = None
@@ -26,6 +31,9 @@ class basic_test:
         # print(dumpsmach.python_case(self.dcounter_M))
         compile(dumpsmach.python_case(self.dcounter_M),
                 filename="<string>", mode="exec")
+        exec compile(dumpsmach.python_case(self.enumf_M)
+                     +'\nM = TulipStrategy(); M.move()',
+                     filename="<string>", mode="exec")
 
 
 def test_nx():

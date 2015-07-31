@@ -103,6 +103,8 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
     # cached generator
     ifs = lambda: chain(['if'], repeat('elif'))
     proj = lambda d, keys: ((k, d[k]) for k in d if k in keys)
+    proj = lambda d, keys: ((k, "'"+d[k]+"'" if isinstance(d[k], str) else d[k])
+                            for k in d if k in keys)
     # generate selection statements
     c = list()
     for u, ifu in zip(M, ifs()):
