@@ -96,7 +96,7 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
             t=tab,
             t2=2*tab,
             date=time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime()),
-            sinit=node_to_int['Sinit'],
+            sinit=node_to_int[start],
             input_args_str=input_args_str,
             input_args=input_args,
             outputs=[str(v) for v in M.outputs])
