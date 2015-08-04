@@ -67,6 +67,8 @@ from pprint import pformat
 from tulip.transys.labeled_graphs import LabeledDiGraph, str2singleton
 from tulip.abstract.plot import plot_partition
 
+
+sys.setrecursionlimit(10000)
 """
 Added:
 -create_prog_map,get_postarea,get_postarea_transitions, 
@@ -199,20 +201,55 @@ owner='env'
 
 #print prog_map
 
-abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=0.5,
-                                visualize=False,eps=0.3, is_convex=True,
-                                N=1,abs_tol=1e-7)
-print abstMOS
+#abstMOS=ds.discretize_modeonlyswitched(ssd=ssd,cont_props=cont_props, owner=owner, grid_size=0.5,
+#                                visualize=False,eps=0.3, is_convex=True,
+#                                N=1,abs_tol=1e-7)
+#print abstMOS
 
-env_vars = set() #{'off','on','heat','cool'}
-env_init = set()                # empty set
+
+import pickle as pl
+abstMOS=pl.load( open( "abstMOS.p", "rb" ) )
+
+env_vars ={}
+env_vars['level'] = (0,2)
+sys_vars ={'trackfl':(0,2)}
+
+env_init = {'level=1'}
 env_prog = set()
-env_safe = set()
-cnt=0;
-safe = ''
+env_safe = set() 
+tempGood = {'!OUTSIDE'}
+tempHot = {'!OUTSIDE', 'HIGH -> X HIGH'}
+tempCold = {'!OUTSIDE', 'LOW -> X LOW'}
+sys_init = {'trackfl=1'}
+sys_safe = {
+    '(trackfl=0) -> !OUTSIDE && HIGH -> X HIGH',
+    '(trackfl=1) -> !OUTSIDE',
+    '(trackfl=2) -> !OUTSIDE && LOW -> X LOW',
+    '(trackfl=0) -> X ((trackfl=0) || !(level=0))',
+    '(trackfl=1) -> X ((trackfl=1) || !(level=1))',
+    '(trackfl=2) -> X ((trackfl=2) || !(level=2))'
+}
 
-env_safe = set()
-prog=set()
+sys_prog = {
+    '(level=0) -> HIGH',
+    '(level=1) -> LOW && HIGH',
+    '(level=2) -> LOW',
+    '(trackfl=0) || !(level=0)',
+    '(trackfl=1) || !(level=1)',
+    '(trackfl=2) || !(level=2)'
+    }
+
+
+
+#env_vars = set() #{'off','on','heat','cool'}
+#env_init = set()                # empty set
+#env_prog = set()
+#env_safe = set()
+cnt=0;
+#safe = ''
+
+#env_safe = set()
+#prog=set()
 
 """ Creates a set of environment progress assumptions based on 
 !<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei). 
@@ -245,11 +282,11 @@ env_prog=prog
 
 """
 # System variables and requirements
-sys_vars=set()
+#sys_vars=set()
 
-sys_init = set()            
-sys_prog = {'LOW','HIGH'}
-sys_safe = {'!OUTSIDE'}
+#sys_init = set()            
+#sys_prog = {'LOW','HIGH'}
+#sys_safe = {'!OUTSIDE'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
@@ -262,29 +299,33 @@ specs = _spec_plus_sys(
         bool_states=False,
         bool_actions=False)
 
-strategy = jtlv.synthesize(specs)
+strategy = gr1c.synthesize(specs)
 
 
 
 
-#gr_fts = synth.synthesize('jtlv', specs, env=abstMOS.ts,rm_deadends=False)
-#print (gr_fts)
+#gr_fts = synth.synthesize('gr1c', specs, env=abstMOS.ts,rm_deadends=False)
+##print (gr_fts)
 
 #if not gr_fts.save('gr_fts.eps'):
 #    print(gr_fts)
 
 #disc_dynamics=abstMOS
 #ctrl=gr_fts
-#Tc = [18.0]
+#Tc = [16.0]
 #Th = [16.0]
 
 #s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
-##mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
-#sim_hor = 1
+#s0_loc = disc_dynamics.ppp2ts[s0_part]
+###mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
+#ctrl=synth.determinize_machine_init(ctrl)
+#sim_hor = 15000
 #N=1 # N = number of steps between each sampled transition
 
-#(s1, dum) = ctrl.reaction('Sinit', {'eloc': 's0'})
-##(s1, dum) = mach.reaction(s1, {'on': 1}) # - possible different way to give input?
+#(s1, dum) = ctrl.reaction('Sinit', {'eloc': s0_loc})
+##(s1, dum)= ctrl.reaction('Sinit' , {'eqpnt_cool': 0, 'eqpnt_off': 1, 'eqpnt_on': 1, 'env_actions': 'regular', 'HIGH': 0, 'OUTSIDE': 0, 'LOW': 0, 'eqpnt_heat': 0, 'sys_actions': 'heat', 'eloc': s0_loc})
+###(s1, dum) = mach.reaction(s1, {'on': 1}) # - possible different way to give input? 
+#s0_locprev=0
 #for sim_time in range(sim_hor):
 #    sysnow=('regular',dum['sys_actions'])
 
@@ -297,8 +338,10 @@ strategy = jtlv.synthesize(specs)
 
 #    s0_part = find_discrete_state([Tc[-1],Th[-1]],disc_dynamics.ppp)
 #    s0_loc = disc_dynamics.ppp2ts[s0_part]
-#    print s1, s0_loc, dum['sys_actions']
-#    (s1, dum) = ctrl.reaction(s1, {'env_actions': 'regular'})
+#    if s0_loc != s0_locprev:
+#    	print s1, s0_loc, dum['sys_actions']
+#    s0_locprev=s0_loc
+#    (s1, dum) = ctrl.reaction(s1, {'eloc': s0_loc})
 
 ###import pickle as pl
 #### pl.dump(specs,open("jtlv_specs.p","wb"))
