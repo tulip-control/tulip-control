@@ -53,6 +53,9 @@ def write_python_case(filename, *args, **kwargs):
 def python_case(M, classname="TulipStrategy", start='Sinit'):
     """Export MealyMachine as Python class based on flat if-else block.
 
+    Usage documentation for the generated code is included in the output.
+    Consult the docstrings of the class and move() method.
+
     @type M: L{MealyMachine}
     @type classname: C{str}
     @param start: initial node in C{M}

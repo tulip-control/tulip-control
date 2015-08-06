@@ -22,7 +22,18 @@ the machine by
 
 Calls to ``move`` cause the internal state to transition.  The machine can be
 reset to its initial state by manually calling the ``__init__`` method or
-effectively by creating a new instance.
+effectively by creating a new instance. Note that the internal state is entirely
+represented by the attribute ``state``. Thus it is possible to save a copy of
+the current state of the machine and return to it later. E.g., the output that
+would be obtained if some inputs were applied can be discovered by the following
+idiom.
+
+.. code-block:: python
+
+  import copy
+  saved_state = copy.copy(M.state)
+  sample_outputs = M.move(**sample_inputs)
+  M.state = saved_state
 
 The generated code does not depend on ``tulip``; that is, it can run without
 TuLiP being installed.  As such, we refer to it as being "standalone".
