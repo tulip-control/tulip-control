@@ -34,6 +34,7 @@ from __future__ import absolute_import
 import copy
 from pprint import pformat
 from random import choice
+import itertools
 from tulip.transys.labeled_graphs import LabeledDiGraph
 
 # inline imports:
@@ -521,8 +522,9 @@ class MealyMachine(Transducer):
         enabled_trans = [
             (i, j, d)
             for i, j, d in self.edges_iter([from_state], data=True)
-            for k in inputs.iteritems() if k in project_dict(d, self.inputs).items()] #MS added
-            # if project_dict(d, self.inputs) == inputs]
+	    for k in itertools.combinations(project_dict(d,self.inputs).iteritems(),len(inputs)) if k in itertools.permutations(inputs.iteritems(),len(inputs))] 
+#            for k in inputs.iteritems() if k in project_dict(d, self.inputs).items()] #MS added
+# if project_dict(d, self.inputs) == inputs]
         # must be deterministic
         try:
             ((_, next_state, attr_dict), ) = enabled_trans

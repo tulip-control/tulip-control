@@ -210,96 +210,88 @@ owner='env'
 import pickle as pl
 abstMOS=pl.load( open( "abstMOS.p", "rb" ) )
 
-env_vars ={}
-env_vars['level'] = (0,2)
-sys_vars ={'trackfl':(0,2)}
+#env_vars ={}
+#env_vars['level'] = (0,1)
+#sys_vars ={'trackfl':(0,2)}
 
-env_init = {'level=1'}
-env_prog = set()
-env_safe = set() 
-tempGood = {'!OUTSIDE'}
-tempHot = {'!OUTSIDE', 'HIGH -> X HIGH'}
-tempCold = {'!OUTSIDE', 'LOW -> X LOW'}
-sys_init = {'trackfl=1'}
-sys_safe = {
-    '(trackfl=0) -> !OUTSIDE && HIGH -> X HIGH',
-    '(trackfl=1) -> !OUTSIDE',
-    '(trackfl=2) -> !OUTSIDE && LOW -> X LOW',
-    '(trackfl=0) -> X ((trackfl=0) || !(level=0))',
-    '(trackfl=1) -> X ((trackfl=1) || !(level=1))',
-    '(trackfl=2) -> X ((trackfl=2) || !(level=2))'
-}
-
-sys_prog = {
-    '(level=0) -> HIGH',
-    '(level=1) -> LOW && HIGH',
-    '(level=2) -> LOW',
-    '(trackfl=0) || !(level=0)',
-    '(trackfl=1) || !(level=1)',
-    '(trackfl=2) || !(level=2)'
-    }
-
-
-
-#env_vars = set() #{'off','on','heat','cool'}
-#env_init = set()                # empty set
+#env_init = set()
 #env_prog = set()
-#env_safe = set()
-cnt=0;
-#safe = ''
+#env_safe = set() 
 
-#env_safe = set()
-#prog=set()
+#sys_init = set()
+#sys_safe = {'!OUTSIDE',
+#    'LOW -> (trackfl=0)',
+#    'HIGH -> (trackfl=1)',
+#    '(trackfl=0) -> X ((trackfl=0) || !(level=0))',
+#    '(trackfl=1) -> X ((trackfl=1) || !(level=1))'
+#}
 
-""" Creates a set of environment progress assumptions based on 
-!<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei). 
-
-Is that assumption right?
-Is eq_pnt still used?
-Is it required? - My guess - not yet.
-""" 
-# for x in abstMOS.ts.sys_actions:
-#     sp='(eqpnt_'
-#     sp+=x
-#     sp+=' && sys_actions = !"'
-#     sp+=x
-#     sp+='")'
-#     # sp+=x
-#     # for y in abstMOS.ts.progress_map[x]:
-#     #     for i,z in enumerate(y):
-#     #         sp+=z
-#     #         if i!=len(y)-1:
-#     #             sp+=' || '
-#     # sp+=') && '
-#     # sp+=x[1]
-#     # sp+=')'
-#     prog|={sp}
-env_prog=prog
-
-""" Assumption/prog - !<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei)
-# Are there stable & unstable eq pnts? - In this example - yes. Should there be? - Don't know.
-# The synth function should append the above assumption automatically on detecting AOFTS.
-
-"""
-# System variables and requirements
-#sys_vars=set()
-
-#sys_init = set()            
-#sys_prog = {'LOW','HIGH'}
-#sys_safe = {'!OUTSIDE'}
-specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
-                    env_safe, sys_safe, env_prog, sys_prog)
+#sys_prog = {
+#    'LOW || !(level=0)',
+#    'HIGH || !(level=1)'
+#    }
 
 
 
-specs = _spec_plus_sys(
-        specs, env=abstMOS.ts, sys=None,
-        ignore_env_init=False,
-        ignore_sys_init=False,
-        bool_states=False,
-        bool_actions=False)
+##env_vars = set() #{'off','on','heat','cool'}
+##env_init = set()                # empty set
+##env_prog = set()
+##env_safe = set()
+#cnt=0;
+##safe = ''
 
-strategy = gr1c.synthesize(specs)
+##env_safe = set()
+##prog=set()
+
+#""" Creates a set of environment progress assumptions based on 
+#!<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei). 
+
+#Is that assumption right?
+#Is eq_pnt still used?
+#Is it required? - My guess - not yet.
+#""" 
+## for x in abstMOS.ts.sys_actions:
+##     sp='(eqpnt_'
+##     sp+=x
+##     sp+=' && sys_actions = !"'
+##     sp+=x
+##     sp+='")'
+##     # sp+=x
+##     # for y in abstMOS.ts.progress_map[x]:
+##     #     for i,z in enumerate(y):
+##     #         sp+=z
+##     #         if i!=len(y)-1:
+##     #             sp+=' || '
+##     # sp+=') && '
+##     # sp+=x[1]
+##     # sp+=')'
+##     prog|={sp}
+##env_prog=prog
+
+#""" Assumption/prog - !<>[](~eq_pnti & modei) == []<>(eq_pnti or !modei)
+## Are there stable & unstable eq pnts? - In this example - yes. Should there be? - Don't know.
+## The synth function should append the above assumption automatically on detecting AOFTS.
+
+#"""
+## System variables and requirements
+##sys_vars=set()
+
+##sys_init = set()            
+##sys_prog = {'LOW'}
+##sys_safe = {'!OUTSIDE', 'LOW -> X LOW'}
+#specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
+#                    env_safe, sys_safe, env_prog, sys_prog)
+
+
+
+##specs = _spec_plus_sys(
+##        specs, env=abstMOS.ts, sys=None,
+##        ignore_env_init=False,
+##        ignore_sys_init=False,
+##        bool_states=False,
+##        bool_actions=False)
+
+##strategy = gr1c.synthesize(specs)
 
 
 
@@ -310,38 +302,44 @@ strategy = gr1c.synthesize(specs)
 #if not gr_fts.save('gr_fts.eps'):
 #    print(gr_fts)
 
-#disc_dynamics=abstMOS
-#ctrl=gr_fts
-#Tc = [16.0]
-#Th = [16.0]
 
-#s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
-#s0_loc = disc_dynamics.ppp2ts[s0_part]
-###mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
-#ctrl=synth.determinize_machine_init(ctrl)
-#sim_hor = 15000
-#N=1 # N = number of steps between each sampled transition
+gr_fts=pl.load( open( "gr_fts.p", "rb" ) )
+disc_dynamics=abstMOS
+ctrl=gr_fts
+Tc = [16.0]
+Th = [16.0]
 
-#(s1, dum) = ctrl.reaction('Sinit', {'eloc': s0_loc})
-##(s1, dum)= ctrl.reaction('Sinit' , {'eqpnt_cool': 0, 'eqpnt_off': 1, 'eqpnt_on': 1, 'env_actions': 'regular', 'HIGH': 0, 'OUTSIDE': 0, 'LOW': 0, 'eqpnt_heat': 0, 'sys_actions': 'heat', 'eloc': s0_loc})
-###(s1, dum) = mach.reaction(s1, {'on': 1}) # - possible different way to give input? 
-#s0_locprev=0
-#for sim_time in range(sim_hor):
-#    sysnow=('regular',dum['sys_actions'])
+s0_part = find_discrete_state([Tc[0],Th[0]],disc_dynamics.ppp)
+s0_loc = disc_dynamics.ppp2ts[s0_part]
+##mach = synth.determinize_machine_init(ctrl,{'sys_actions':'on'}) # - to be used if we want a certain mode only
+ctrl=synth.determinize_machine_init(ctrl)
+sim_hor = 15000
+N=1 # N = number of steps between each sampled transition
 
-#    for ind in range(N):
-#        x = np.dot(
-#                ssd.dynamics[sysnow].list_subsys[0].A, [Tc[-1],Th[-1]]
-#                ) + ssd.dynamics[sysnow].list_subsys[0].K.flatten()
-#        Tc.append(x[0])
-#        Th.append(x[1])
+(s1, dum) = ctrl.reaction('Sinit', {'level': 1, 'eloc': s0_loc})
+#inputs= {'eloc': s0_loc, 'level': 0}
+#import itertools
+#for k in itertools.permutations(inputs.iteritems(),2):
+#	print k
+#(s1, dum)= ctrl.reaction('Sinit' , {'eqpnt_cool': 0, 'eqpnt_off': 1, 'eqpnt_on': 1, 'env_actions': 'regular', 'HIGH': 0, 'OUTSIDE': 0, 'LOW': 0, 'eqpnt_heat': 0, 'sys_actions': 'heat', 'eloc': s0_loc})
+##(s1, dum) = mach.reaction(s1, {'on': 1}) # - possible different way to give input? 
+s0_locprev=0
+for sim_time in range(sim_hor):
+    sysnow=('regular',dum['sys_actions'])
 
-#    s0_part = find_discrete_state([Tc[-1],Th[-1]],disc_dynamics.ppp)
-#    s0_loc = disc_dynamics.ppp2ts[s0_part]
-#    if s0_loc != s0_locprev:
-#    	print s1, s0_loc, dum['sys_actions']
-#    s0_locprev=s0_loc
-#    (s1, dum) = ctrl.reaction(s1, {'eloc': s0_loc})
+    for ind in range(N):
+        x = np.dot(
+                ssd.dynamics[sysnow].list_subsys[0].A, [Tc[-1],Th[-1]]
+                ) + ssd.dynamics[sysnow].list_subsys[0].K.flatten()
+        Tc.append(x[0])
+        Th.append(x[1])
+
+    s0_part = find_discrete_state([Tc[-1],Th[-1]],disc_dynamics.ppp)
+    s0_loc = disc_dynamics.ppp2ts[s0_part]
+    if s0_loc != s0_locprev:
+    	print s1, s0_loc, dum['sys_actions']
+    s0_locprev=s0_loc
+    (s1, dum) = ctrl.reaction(s1, {'level': 1, 'eloc': s0_loc})
 
 ###import pickle as pl
 #### pl.dump(specs,open("jtlv_specs.p","wb"))
