@@ -1,0 +1,10159 @@
+----------------------------------------
+Mealy Machine: 
+----------------------------------------
+State Variables:
+	(name : type)
+
+States & State Var Values:
+	0 :
+
+	1 :
+
+	2 :
+
+	3 :
+
+	4 :
+
+	5 :
+
+	6 :
+
+	7 :
+
+	8 :
+
+	9 :
+
+	10 :
+
+	11 :
+
+	12 :
+
+	13 :
+
+	14 :
+
+	15 :
+
+	16 :
+
+	17 :
+
+	18 :
+
+	19 :
+
+	20 :
+
+	21 :
+
+	22 :
+
+	23 :
+
+	24 :
+
+	25 :
+
+	26 :
+
+	27 :
+
+	28 :
+
+	29 :
+
+	30 :
+
+	31 :
+
+	32 :
+
+	33 :
+
+	34 :
+
+	35 :
+
+	36 :
+
+	37 :
+
+	38 :
+
+	39 :
+
+	40 :
+
+	41 :
+
+	42 :
+
+	43 :
+
+	44 :
+
+	45 :
+
+	46 :
+
+	47 :
+
+	48 :
+
+	49 :
+
+	50 :
+
+	51 :
+
+	52 :
+
+	53 :
+
+	54 :
+
+	55 :
+
+	56 :
+
+	57 :
+
+	58 :
+
+	59 :
+
+	60 :
+
+	61 :
+
+	62 :
+
+	63 :
+
+	64 :
+
+	65 :
+
+	66 :
+
+	67 :
+
+	68 :
+
+	69 :
+
+	70 :
+
+	71 :
+
+	72 :
+
+	73 :
+
+	74 :
+
+	75 :
+
+	76 :
+
+	77 :
+
+	78 :
+
+	79 :
+
+	80 :
+
+	81 :
+
+	82 :
+
+	83 :
+
+	84 :
+
+	85 :
+
+	86 :
+
+	87 :
+
+	88 :
+
+	89 :
+
+	90 :
+
+	91 :
+
+	92 :
+
+	93 :
+
+	94 :
+
+	95 :
+
+	96 :
+
+	97 :
+
+	98 :
+
+	99 :
+
+	100 :
+
+	101 :
+
+	102 :
+
+	103 :
+
+	104 :
+
+	105 :
+
+	106 :
+
+	107 :
+
+	108 :
+
+	109 :
+
+	110 :
+
+	111 :
+
+	112 :
+
+	113 :
+
+	114 :
+
+	115 :
+
+	116 :
+
+	117 :
+
+	118 :
+
+	119 :
+
+	120 :
+
+	121 :
+
+	122 :
+
+	123 :
+
+	124 :
+
+	125 :
+
+	126 :
+
+	127 :
+
+	128 :
+
+	129 :
+
+	130 :
+
+	131 :
+
+	132 :
+
+	133 :
+
+	134 :
+
+	135 :
+
+	136 :
+
+	137 :
+
+	138 :
+
+	139 :
+
+	140 :
+
+	141 :
+
+	142 :
+
+	143 :
+
+	144 :
+
+	145 :
+
+	146 :
+
+	147 :
+
+	148 :
+
+	149 :
+
+	150 :
+
+	151 :
+
+	152 :
+
+	153 :
+
+	154 :
+
+	155 :
+
+	156 :
+
+	157 :
+
+	158 :
+
+	159 :
+
+	160 :
+
+	161 :
+
+	162 :
+
+	163 :
+
+	164 :
+
+	165 :
+
+	166 :
+
+	167 :
+
+	168 :
+
+	169 :
+
+	170 :
+
+	171 :
+
+	172 :
+
+	Sinit :
+
+Initial States:
+SubSet(['Sinit'])
+
+Input Ports:
+	(name : type)
+	eqpnt_cool : set([0, 1])
+	eqpnt_off : set([0, 1])
+	eqpnt_on : set([0, 1])
+	env_actions : set(['regular'])
+	HIGH : set([0, 1])
+	OUTSIDE : set([0, 1])
+	LOW : set([0, 1])
+	eqpnt_heat : set([0, 1])
+	eloc : set(['s0',
+     's1',
+     's10',
+     's100',
+     's101',
+     's102',
+     's103',
+     's104',
+     's105',
+     's106',
+     's107',
+     's108',
+     's109',
+     's11',
+     's110',
+     's111',
+     's112',
+     's113',
+     's114',
+     's115',
+     's116',
+     's117',
+     's118',
+     's119',
+     's12',
+     's120',
+     's121',
+     's122',
+     's123',
+     's124',
+     's125',
+     's126',
+     's127',
+     's128',
+     's129',
+     's13',
+     's130',
+     's131',
+     's132',
+     's133',
+     's134',
+     's135',
+     's136',
+     's137',
+     's138',
+     's139',
+     's14',
+     's140',
+     's141',
+     's142',
+     's143',
+     's144',
+     's145',
+     's146',
+     's147',
+     's148',
+     's149',
+     's15',
+     's150',
+     's151',
+     's152',
+     's153',
+     's154',
+     's155',
+     's156',
+     's157',
+     's158',
+     's159',
+     's16',
+     's160',
+     's161',
+     's162',
+     's163',
+     's164',
+     's165',
+     's166',
+     's167',
+     's168',
+     's169',
+     's17',
+     's170',
+     's171',
+     's172',
+     's173',
+     's174',
+     's175',
+     's176',
+     's177',
+     's178',
+     's179',
+     's18',
+     's180',
+     's181',
+     's182',
+     's183',
+     's184',
+     's185',
+     's186',
+     's187',
+     's188',
+     's189',
+     's19',
+     's190',
+     's191',
+     's192',
+     's193',
+     's194',
+     's195',
+     's196',
+     's197',
+     's198',
+     's199',
+     's2',
+     's20',
+     's200',
+     's201',
+     's202',
+     's203',
+     's204',
+     's205',
+     's206',
+     's207',
+     's208',
+     's209',
+     's21',
+     's210',
+     's211',
+     's212',
+     's213',
+     's214',
+     's215',
+     's216',
+     's217',
+     's218',
+     's219',
+     's22',
+     's220',
+     's221',
+     's222',
+     's223',
+     's224',
+     's225',
+     's226',
+     's227',
+     's228',
+     's229',
+     's23',
+     's230',
+     's231',
+     's232',
+     's233',
+     's234',
+     's235',
+     's236',
+     's237',
+     's238',
+     's239',
+     's24',
+     's240',
+     's241',
+     's242',
+     's243',
+     's244',
+     's245',
+     's246',
+     's247',
+     's248',
+     's249',
+     's25',
+     's250',
+     's251',
+     's252',
+     's253',
+     's254',
+     's255',
+     's256',
+     's257',
+     's258',
+     's259',
+     's26',
+     's260',
+     's261',
+     's262',
+     's263',
+     's264',
+     's265',
+     's266',
+     's267',
+     's268',
+     's269',
+     's27',
+     's270',
+     's271',
+     's272',
+     's273',
+     's274',
+     's275',
+     's276',
+     's277',
+     's278',
+     's279',
+     's28',
+     's280',
+     's281',
+     's282',
+     's283',
+     's284',
+     's285',
+     's286',
+     's287',
+     's288',
+     's289',
+     's29',
+     's290',
+     's291',
+     's292',
+     's293',
+     's294',
+     's295',
+     's296',
+     's297',
+     's298',
+     's299',
+     's3',
+     's30',
+     's300',
+     's301',
+     's302',
+     's303',
+     's304',
+     's305',
+     's306',
+     's307',
+     's308',
+     's309',
+     's31',
+     's310',
+     's311',
+     's312',
+     's313',
+     's314',
+     's315',
+     's316',
+     's317',
+     's318',
+     's319',
+     's32',
+     's320',
+     's321',
+     's322',
+     's323',
+     's324',
+     's325',
+     's326',
+     's327',
+     's328',
+     's329',
+     's33',
+     's330',
+     's331',
+     's332',
+     's333',
+     's334',
+     's335',
+     's336',
+     's337',
+     's338',
+     's339',
+     's34',
+     's340',
+     's341',
+     's342',
+     's343',
+     's344',
+     's345',
+     's346',
+     's347',
+     's348',
+     's349',
+     's35',
+     's350',
+     's351',
+     's352',
+     's353',
+     's354',
+     's355',
+     's356',
+     's357',
+     's358',
+     's359',
+     's36',
+     's360',
+     's361',
+     's362',
+     's363',
+     's364',
+     's365',
+     's366',
+     's367',
+     's368',
+     's369',
+     's37',
+     's370',
+     's371',
+     's372',
+     's373',
+     's374',
+     's375',
+     's376',
+     's377',
+     's378',
+     's379',
+     's38',
+     's380',
+     's381',
+     's382',
+     's383',
+     's384',
+     's385',
+     's386',
+     's387',
+     's388',
+     's389',
+     's39',
+     's390',
+     's391',
+     's392',
+     's393',
+     's394',
+     's395',
+     's396',
+     's397',
+     's398',
+     's399',
+     's4',
+     's40',
+     's400',
+     's401',
+     's402',
+     's403',
+     's404',
+     's405',
+     's406',
+     's407',
+     's408',
+     's409',
+     's41',
+     's410',
+     's411',
+     's412',
+     's413',
+     's414',
+     's415',
+     's416',
+     's417',
+     's418',
+     's419',
+     's42',
+     's420',
+     's421',
+     's422',
+     's423',
+     's424',
+     's425',
+     's426',
+     's427',
+     's428',
+     's429',
+     's43',
+     's430',
+     's431',
+     's432',
+     's433',
+     's44',
+     's45',
+     's46',
+     's47',
+     's48',
+     's49',
+     's5',
+     's50',
+     's51',
+     's52',
+     's53',
+     's54',
+     's55',
+     's56',
+     's57',
+     's58',
+     's59',
+     's6',
+     's60',
+     's61',
+     's62',
+     's63',
+     's64',
+     's65',
+     's66',
+     's67',
+     's68',
+     's69',
+     's7',
+     's70',
+     's71',
+     's72',
+     's73',
+     's74',
+     's75',
+     's76',
+     's77',
+     's78',
+     's79',
+     's8',
+     's80',
+     's81',
+     's82',
+     's83',
+     's84',
+     's85',
+     's86',
+     's87',
+     's88',
+     's89',
+     's9',
+     's90',
+     's91',
+     's92',
+     's93',
+     's94',
+     's95',
+     's96',
+     's97',
+     's98',
+     's99',
+     'sOut'])
+
+Output Ports:
+	(name : type)
+	sys_actions : set(['cool', 'heat', 'off', 'on'])
+
+Transitions & Labels: (from --> to : label)
+	0 ---> 0 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s16
+
+	0 ---> 12 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s54
+
+	1 ---> 0 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s16
+
+	1 ---> 1 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s15
+
+	1 ---> 12 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s54
+
+	1 ---> 13 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s52
+
+	2 ---> 1 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s15
+
+	2 ---> 2 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s14
+
+	2 ---> 13 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s52
+
+	2 ---> 14 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s50
+
+	3 ---> 2 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s14
+
+	3 ---> 3 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s13
+
+	3 ---> 14 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s50
+
+	3 ---> 15 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s48
+
+	4 ---> 16 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s46
+
+	4 ---> 3 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s13
+
+	4 ---> 4 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s12
+
+	4 ---> 15 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s48
+
+	5 ---> 16 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s46
+
+	5 ---> 17 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s44
+
+	5 ---> 4 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s12
+
+	5 ---> 5 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s11
+
+	6 ---> 17 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s44
+
+	6 ---> 18 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s42
+
+	6 ---> 5 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s11
+
+	6 ---> 6 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s10
+
+	7 ---> 18 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s42
+
+	7 ---> 19 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s40
+
+	7 ---> 6 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s10
+
+	7 ---> 7 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s9
+
+	8 ---> 8 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s8
+
+	8 ---> 19 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s40
+
+	8 ---> 20 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s38
+
+	8 ---> 7 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s9
+
+	9 ---> 8 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s8
+
+	9 ---> 9 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s7
+
+	9 ---> 20 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s38
+
+	9 ---> 21 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s36
+
+	10 ---> 9 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s7
+
+	10 ---> 10 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s6
+
+	10 ---> 21 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s36
+
+	10 ---> 22 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s34
+
+	11 ---> 10 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s6
+
+	11 ---> 11 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s5
+
+	11 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	11 ---> 22 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s34
+
+	12 ---> 12 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s54
+
+	12 ---> 23 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s53
+
+	13 ---> 24 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s51
+
+	13 ---> 12 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s54
+
+	13 ---> 13 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s52
+
+	13 ---> 23 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s53
+
+	14 ---> 24 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s51
+
+	14 ---> 25 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s49
+
+	14 ---> 13 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s52
+
+	14 ---> 14 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s50
+
+	15 ---> 25 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s49
+
+	15 ---> 26 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s47
+
+	15 ---> 14 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s50
+
+	15 ---> 15 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s48
+
+	16 ---> 16 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s46
+
+	16 ---> 26 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s47
+
+	16 ---> 27 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s45
+
+	16 ---> 15 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s48
+
+	17 ---> 16 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s46
+
+	17 ---> 17 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s44
+
+	17 ---> 27 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s45
+
+	17 ---> 28 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s43
+
+	18 ---> 17 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s44
+
+	18 ---> 18 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s42
+
+	18 ---> 28 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s43
+
+	18 ---> 29 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s41
+
+	19 ---> 18 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s42
+
+	19 ---> 19 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s40
+
+	19 ---> 29 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s41
+
+	19 ---> 30 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s39
+
+	20 ---> 19 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s40
+
+	20 ---> 20 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s38
+
+	20 ---> 30 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s39
+
+	20 ---> 31 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s37
+
+	21 ---> 32 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s35
+
+	21 ---> 20 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s38
+
+	21 ---> 21 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s36
+
+	21 ---> 31 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s37
+
+	22 ---> 32 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s35
+
+	22 ---> 33 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s33
+
+	22 ---> 21 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s36
+
+	22 ---> 22 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s34
+
+	23 ---> 53 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s95
+
+	23 ---> 23 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s53
+
+	24 ---> 24 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s51
+
+	24 ---> 53 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s95
+
+	24 ---> 54 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s93
+
+	24 ---> 23 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s53
+
+	25 ---> 24 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s51
+
+	25 ---> 25 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s49
+
+	25 ---> 54 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s93
+
+	25 ---> 55 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s91
+
+	26 ---> 56 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s89
+
+	26 ---> 25 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s49
+
+	26 ---> 26 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s47
+
+	26 ---> 55 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s91
+
+	27 ---> 56 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s89
+
+	27 ---> 57 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s87
+
+	27 ---> 26 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s47
+
+	27 ---> 27 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s45
+
+	28 ---> 57 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s87
+
+	28 ---> 58 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s85
+
+	28 ---> 27 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s45
+
+	28 ---> 28 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s43
+
+	29 ---> 58 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s85
+
+	29 ---> 59 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s83
+
+	29 ---> 28 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s43
+
+	29 ---> 29 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s41
+
+	30 ---> 59 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s83
+
+	30 ---> 60 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s81
+
+	30 ---> 29 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s41
+
+	30 ---> 30 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s39
+
+	31 ---> 60 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s81
+
+	31 ---> 61 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s79
+
+	31 ---> 30 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s39
+
+	31 ---> 31 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s37
+
+	32 ---> 32 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s35
+
+	32 ---> 61 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s79
+
+	32 ---> 62 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s77
+
+	32 ---> 31 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s37
+
+	33 ---> 32 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s35
+
+	33 ---> 33 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s33
+
+	33 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	33 ---> 62 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s77
+
+	34 ---> 105 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s316
+
+	35 ---> 107 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s318
+
+	35 ---> 34 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s316
+
+	35 ---> 35 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s296
+
+	35 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	36 ---> 36 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s293
+
+	36 ---> 91 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s295
+
+	36 ---> 35 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s296
+
+	36 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	37 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	37 ---> 91 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s295
+
+	37 ---> 36 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s293
+
+	37 ---> 37 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s273
+
+	38 ---> 84 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s272
+
+	38 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	38 ---> 37 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s273
+
+	38 ---> 38 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s270
+
+	39 ---> 84 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s272
+
+	39 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	39 ---> 38 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s270
+
+	39 ---> 39 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s250
+
+	40 ---> 40 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s247
+
+	40 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	40 ---> 78 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s249
+
+	40 ---> 39 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s250
+
+	41 ---> 40 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s247
+
+	41 ---> 41 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s227
+
+	41 ---> 78 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s249
+
+	41 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	42 ---> 73 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s226
+
+	42 ---> 42 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s224
+
+	42 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	42 ---> 41 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s227
+
+	43 ---> 73 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s226
+
+	43 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	43 ---> 43 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s204
+
+	43 ---> 42 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s224
+
+	44 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	44 ---> 43 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s204
+
+	44 ---> 44 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s201
+
+	44 ---> 69 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s203
+
+	45 ---> 44 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s201
+
+	45 ---> 69 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s203
+
+	45 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	45 ---> 45 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s181
+
+	46 ---> 66 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s180
+
+	46 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	46 ---> 45 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s181
+
+	46 ---> 46 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s178
+
+	47 ---> 66 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s180
+
+	47 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	47 ---> 46 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s178
+
+	47 ---> 47 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s158
+
+	48 ---> 64 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s157
+
+	48 ---> 48 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s155
+
+	48 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	48 ---> 47 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s158
+
+	49 ---> 64 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s157
+
+	49 ---> 48 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s155
+
+	49 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	49 ---> 49 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s135
+
+	50 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	50 ---> 50 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s132
+
+	50 ---> 63 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s134
+
+	50 ---> 49 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s135
+
+	51 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	51 ---> 50 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s132
+
+	51 ---> 51 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s112
+
+	51 ---> 63 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s134
+
+	52 ---> 152 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s111
+
+	52 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	52 ---> 51 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s112
+
+	52 ---> 52 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s109
+
+	53 ---> 133 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s96
+
+	53 ---> 53 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s95
+
+	54 ---> 135 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s94
+
+	54 ---> 53 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s95
+
+	54 ---> 54 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s93
+
+	54 ---> 133 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s96
+
+	55 ---> 137 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s92
+
+	55 ---> 55 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s91
+
+	55 ---> 54 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s93
+
+	55 ---> 135 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s94
+
+	56 ---> 56 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s89
+
+	56 ---> 137 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s92
+
+	56 ---> 139 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s90
+
+	56 ---> 55 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s91
+
+	57 ---> 56 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s89
+
+	57 ---> 57 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s87
+
+	57 ---> 139 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s90
+
+	57 ---> 141 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s88
+
+	58 ---> 57 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s87
+
+	58 ---> 58 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s85
+
+	58 ---> 141 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s88
+
+	58 ---> 143 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s86
+
+	59 ---> 145 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s84
+
+	59 ---> 58 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s85
+
+	59 ---> 59 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s83
+
+	59 ---> 143 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s86
+
+	60 ---> 145 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s84
+
+	60 ---> 59 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s83
+
+	60 ---> 60 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s81
+
+	60 ---> 147 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s82
+
+	61 ---> 147 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s82
+
+	61 ---> 60 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s81
+
+	61 ---> 149 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s80
+
+	61 ---> 61 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s79
+
+	62 ---> 151 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s78
+
+	62 ---> 61 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s79
+
+	62 ---> 62 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s77
+
+	62 ---> 149 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s80
+
+	63 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	63 ---> 63 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s134
+
+	64 ---> 64 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s157
+
+	64 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	65 ---> 64 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s157
+
+	65 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	65 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	65 ---> 68 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s137
+
+	66 ---> 66 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s180
+
+	66 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	67 ---> 66 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s180
+
+	67 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	67 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	67 ---> 71 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s160
+
+	68 ---> 72 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s138
+
+	68 ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	68 ---> 68 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s137
+
+	68 ---> 71 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s160
+
+	69 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	69 ---> 69 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s203
+
+	70 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	70 ---> 75 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s183
+
+	70 ---> 69 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s203
+
+	70 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	71 ---> 75 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s183
+
+	71 ---> 76 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s161
+
+	71 ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	71 ---> 71 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s160
+
+	72 ---> 72 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s138
+
+	72 ---> 76 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s161
+
+	72 ---> 77 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s139
+
+	72 ---> 71 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s160
+
+	73 ---> 73 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s226
+
+	73 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	74 ---> 80 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s206
+
+	74 ---> 73 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s226
+
+	74 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	74 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	75 ---> 80 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s206
+
+	75 ---> 81 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s184
+
+	75 ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	75 ---> 75 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s183
+
+	76 ---> 81 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s184
+
+	76 ---> 82 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s162
+
+	76 ---> 75 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s183
+
+	76 ---> 76 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s161
+
+	77 ---> 82 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s162
+
+	77 ---> 83 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s140
+
+	77 ---> 76 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s161
+
+	77 ---> 77 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s139
+
+	78 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	78 ---> 78 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s249
+
+	79 ---> 78 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s249
+
+	79 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	79 ---> 86 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s229
+
+	79 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	80 ---> 80 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s206
+
+	80 ---> 87 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s207
+
+	80 ---> 86 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s229
+
+	80 ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	81 ---> 80 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s206
+
+	81 ---> 81 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s184
+
+	81 ---> 88 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s185
+
+	81 ---> 87 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s207
+
+	82 ---> 88 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s185
+
+	82 ---> 81 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s184
+
+	82 ---> 82 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s162
+
+	82 ---> 89 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s163
+
+	83 ---> 89 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s163
+
+	83 ---> 82 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s162
+
+	83 ---> 83 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s140
+
+	83 ---> 90 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s141
+
+	84 ---> 84 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s272
+
+	84 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	85 ---> 84 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s272
+
+	85 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	85 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	85 ---> 93 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s252
+
+	86 ---> 94 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s230
+
+	86 ---> 93 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s252
+
+	86 ---> 86 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s229
+
+	86 ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	87 ---> 87 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s207
+
+	87 ---> 94 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s230
+
+	87 ---> 86 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s229
+
+	87 ---> 95 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s208
+
+	88 ---> 88 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s185
+
+	88 ---> 96 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s186
+
+	88 ---> 87 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s207
+
+	88 ---> 95 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s208
+
+	89 ---> 88 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s185
+
+	89 ---> 97 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s164
+
+	89 ---> 96 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s186
+
+	89 ---> 89 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s163
+
+	90 ---> 97 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s164
+
+	90 ---> 90 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s141
+
+	90 ---> 98 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s142
+
+	90 ---> 89 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s163
+
+	91 ---> 91 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s295
+
+	91 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	92 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	92 ---> 91 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s295
+
+	92 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	92 ---> 109 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s275
+
+	93 ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	93 ---> 109 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s275
+
+	93 ---> 110 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s253
+
+	93 ---> 93 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s252
+
+	94 ---> 94 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s230
+
+	94 ---> 93 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s252
+
+	94 ---> 110 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s253
+
+	94 ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	95 ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	95 ---> 95 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s208
+
+	95 ---> 94 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s230
+
+	95 ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	96 ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	96 ---> 96 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s186
+
+	96 ---> 95 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s208
+
+	96 ---> 113 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s187
+
+	97 ---> 96 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s186
+
+	97 ---> 97 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s164
+
+	97 ---> 114 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s165
+
+	97 ---> 113 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s187
+
+	98 ---> 97 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s164
+
+	98 ---> 114 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s165
+
+	98 ---> 115 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s143
+
+	98 ---> 98 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s142
+
+	99 ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	99 ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	100 ---> 99 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s209
+
+	100 ---> 100 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s231
+
+	101 ---> 100 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s231
+
+	101 ---> 101 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s253
+
+	102 ---> 101 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s253
+
+	102 ---> 102 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s275
+
+	103 ---> 104 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s297
+
+	103 ---> 103 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s296
+
+	104 ---> 104 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s297
+
+	104 ---> 102 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s275
+
+	105 ---> 104 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s297
+
+	105 ---> 105 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s316
+
+	105 ---> 106 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s318
+
+	105 ---> 103 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s296
+
+	106 ---> 104 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s297
+
+	106 ---> 106 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s318
+
+	107 ---> 105 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s316
+
+	107 ---> 106 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s318
+
+	108 ---> 124 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s320
+
+	108 ---> 107 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s318
+
+	108 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	108 ---> 125 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s298
+
+	109 ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	109 ---> 109 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s275
+
+	109 ---> 126 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s276
+
+	109 ---> 125 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s298
+
+	110 ---> 126 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s276
+
+	110 ---> 109 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s275
+
+	110 ---> 110 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s253
+
+	110 ---> 127 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s254
+
+	111 ---> 128 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s232
+
+	111 ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	111 ---> 110 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s253
+
+	111 ---> 127 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s254
+
+	112 ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	112 ---> 128 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s232
+
+	112 ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	112 ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	113 ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	113 ---> 113 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s187
+
+	113 ---> 130 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s188
+
+	113 ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	114 ---> 113 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s187
+
+	114 ---> 114 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s165
+
+	114 ---> 131 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s166
+
+	114 ---> 130 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s188
+
+	115 ---> 132 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s144
+
+	115 ---> 114 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s165
+
+	115 ---> 115 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s143
+
+	115 ---> 131 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s166
+
+	116 ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	116 ---> 116 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s232
+
+	117 ---> 116 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s232
+
+	117 ---> 117 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s254
+
+	118 ---> 117 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s254
+
+	118 ---> 118 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s276
+
+	119 ---> 118 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s276
+
+	119 ---> 119 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s298
+
+	120 ---> 120 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s339
+
+	120 ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	120 ---> 122 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s319
+
+	120 ---> 123 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s341
+
+	121 ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	121 ---> 119 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s298
+
+	122 ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	122 ---> 122 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s319
+
+	123 ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	123 ---> 123 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s341
+
+	124 ---> 120 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s339
+
+	124 ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	124 ---> 122 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s319
+
+	124 ---> 123 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s341
+
+	125 ---> 124 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s320
+
+	125 ---> 125 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s298
+
+	126 ---> 125 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s298
+
+	126 ---> 126 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s276
+
+	127 ---> 126 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s276
+
+	127 ---> 127 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s254
+
+	128 ---> 128 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s232
+
+	128 ---> 127 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s254
+
+	129 ---> 128 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s232
+
+	129 ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	130 ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	130 ---> 130 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s188
+
+	131 ---> 130 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s188
+
+	131 ---> 131 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s166
+
+	132 ---> 131 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s166
+
+	132 ---> 132 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s144
+
+	133 ---> 133 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s96
+
+	133 ---> 134 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s122
+
+	134 ---> 132 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s144
+
+	134 ---> 134 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s122
+
+	135 ---> 136 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s121
+
+	135 ---> 133 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s96
+
+	135 ---> 134 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s122
+
+	135 ---> 135 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s94
+
+	136 ---> 136 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s121
+
+	136 ---> 115 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s143
+
+	136 ---> 132 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s144
+
+	136 ---> 134 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s122
+
+	137 ---> 136 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s121
+
+	137 ---> 137 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s92
+
+	137 ---> 138 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s120
+
+	137 ---> 135 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s94
+
+	138 ---> 136 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s121
+
+	138 ---> 138 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s120
+
+	138 ---> 115 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s143
+
+	138 ---> 98 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s142
+
+	139 ---> 137 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s92
+
+	139 ---> 138 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s120
+
+	139 ---> 139 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s90
+
+	139 ---> 140 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s119
+
+	140 ---> 138 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s120
+
+	140 ---> 90 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s141
+
+	140 ---> 140 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s119
+
+	140 ---> 98 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s142
+
+	141 ---> 139 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s90
+
+	141 ---> 140 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s119
+
+	141 ---> 141 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s88
+
+	141 ---> 142 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s118
+
+	142 ---> 90 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s141
+
+	142 ---> 83 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s140
+
+	142 ---> 140 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s119
+
+	142 ---> 142 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s118
+
+	143 ---> 144 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s117
+
+	143 ---> 141 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s88
+
+	143 ---> 142 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s118
+
+	143 ---> 143 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s86
+
+	144 ---> 144 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s117
+
+	144 ---> 83 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s140
+
+	144 ---> 77 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s139
+
+	144 ---> 142 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s118
+
+	145 ---> 144 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s117
+
+	145 ---> 145 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s84
+
+	145 ---> 146 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s116
+
+	145 ---> 143 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s86
+
+	146 ---> 144 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s117
+
+	146 ---> 72 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s138
+
+	146 ---> 146 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s116
+
+	146 ---> 77 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s139
+
+	147 ---> 145 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s84
+
+	147 ---> 146 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s116
+
+	147 ---> 147 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s82
+
+	147 ---> 148 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s115
+
+	148 ---> 72 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s138
+
+	148 ---> 148 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s115
+
+	148 ---> 146 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s116
+
+	148 ---> 68 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s137
+
+	149 ---> 147 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s82
+
+	149 ---> 148 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s115
+
+	149 ---> 149 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s80
+
+	149 ---> 150 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s114
+
+	150 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	150 ---> 148 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s115
+
+	150 ---> 68 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s137
+
+	150 ---> 150 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s114
+
+	151 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	151 ---> 149 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s80
+
+	151 ---> 150 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s114
+
+	151 ---> 151 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s78
+
+	152 ---> 152 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s111
+
+	152 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	153 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	153 ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	153 ---> 150 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s114
+
+	153 ---> 63 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s134
+
+	154 ---> 152 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s111
+
+	154 ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	154 ---> 154 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s76
+
+	154 ---> 151 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s78
+
+	155 ---> 154 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s76
+
+	155 ---> 155 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s73
+
+	155 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	155 ---> 158 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s74
+
+	156 ---> 154 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s76
+
+	156 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	156 ---> 62 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s77
+
+	156 ---> 151 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s78
+
+	157 ---> 157 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s70
+
+	157 ---> 158 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s74
+
+	157 ---> 159 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s69
+
+	158 ---> 152 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s111
+
+	158 ---> 154 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s76
+
+	158 ---> 52 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s109
+
+	158 ---> 158 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s74
+
+	159 ---> 160 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s71
+
+	159 ---> 155 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s73
+
+	159 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	159 ---> 157 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s70
+
+	159 ---> 158 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s74
+
+	159 ---> 159 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s69
+
+	160 ---> 160 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s71
+
+	160 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	161 ---> 160 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s71
+
+	161 ---> 161 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s31
+
+	161 ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	161 ---> 33 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s33
+
+	162 ---> 162 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s25
+
+	162 ---> 163 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s29
+
+	162 ---> 166 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s26
+
+	163 ---> 160 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s71
+
+	163 ---> 161 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s31
+
+	163 ---> 163 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s29
+
+	163 ---> 159 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s69
+
+	164 ---> 161 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s31
+
+	164 ---> 163 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s29
+
+	164 ---> 164 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s30
+
+	164 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	165 ---> 161 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s31
+
+	165 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	165 ---> 22 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s34
+
+	165 ---> 33 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s33
+
+	166 ---> 162 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s25
+
+	166 ---> 163 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s29
+
+	166 ---> 164 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s30
+
+	166 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	166 ---> 166 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s26
+
+	166 ---> 167 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s28
+
+	167 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	167 ---> 167 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s28
+
+	168 ---> 168 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s3
+
+	168 ---> 169 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s4
+
+	168 ---> 166 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s26
+
+	168 ---> 167 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s28
+
+	169 ---> 169 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s4
+
+	169 ---> 11 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s5
+
+	169 ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	169 ---> 167 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s28
+
+	170 ---> 169 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s4
+
+	170 ---> 170 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s2
+
+	171 ---> 168 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s3
+
+	171 ---> 169 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s4
+
+	171 ---> 170 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s2
+
+	171 ---> 171 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s0
+
+	172 ---> 171 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s0
+
+	Sinit ---> 0 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s16
+
+	Sinit ---> 1 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s15
+
+	Sinit ---> 2 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s14
+
+	Sinit ---> 3 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s13
+
+	Sinit ---> 4 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s12
+
+	Sinit ---> 5 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s11
+
+	Sinit ---> 6 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s10
+
+	Sinit ---> 7 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s9
+
+	Sinit ---> 8 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s8
+
+	Sinit ---> 9 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s7
+
+	Sinit ---> 10 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s6
+
+	Sinit ---> 11 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s5
+
+	Sinit ---> 12 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s54
+
+	Sinit ---> 13 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s52
+
+	Sinit ---> 14 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s50
+
+	Sinit ---> 15 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s48
+
+	Sinit ---> 16 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s46
+
+	Sinit ---> 17 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s44
+
+	Sinit ---> 18 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s42
+
+	Sinit ---> 19 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s40
+
+	Sinit ---> 20 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s38
+
+	Sinit ---> 21 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s36
+
+	Sinit ---> 22 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s34
+
+	Sinit ---> 23 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s53
+
+	Sinit ---> 24 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s51
+
+	Sinit ---> 25 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s49
+
+	Sinit ---> 26 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s47
+
+	Sinit ---> 27 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s45
+
+	Sinit ---> 28 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s43
+
+	Sinit ---> 29 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s41
+
+	Sinit ---> 30 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s39
+
+	Sinit ---> 31 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s37
+
+	Sinit ---> 32 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s35
+
+	Sinit ---> 33 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s33
+
+	Sinit ---> 34 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s316
+
+	Sinit ---> 35 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s296
+
+	Sinit ---> 36 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s293
+
+	Sinit ---> 37 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s273
+
+	Sinit ---> 38 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s270
+
+	Sinit ---> 39 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s250
+
+	Sinit ---> 40 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s247
+
+	Sinit ---> 41 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s227
+
+	Sinit ---> 42 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s224
+
+	Sinit ---> 43 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s204
+
+	Sinit ---> 44 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s201
+
+	Sinit ---> 45 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s181
+
+	Sinit ---> 46 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s178
+
+	Sinit ---> 47 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s158
+
+	Sinit ---> 48 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s155
+
+	Sinit ---> 49 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s135
+
+	Sinit ---> 50 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s132
+
+	Sinit ---> 51 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s112
+
+	Sinit ---> 52 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s109
+
+	Sinit ---> 53 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s95
+
+	Sinit ---> 54 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s93
+
+	Sinit ---> 55 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s91
+
+	Sinit ---> 56 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s89
+
+	Sinit ---> 57 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s87
+
+	Sinit ---> 58 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s85
+
+	Sinit ---> 59 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s83
+
+	Sinit ---> 60 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s81
+
+	Sinit ---> 61 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s79
+
+	Sinit ---> 62 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s77
+
+	Sinit ---> 63 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s134
+
+	Sinit ---> 64 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s157
+
+	Sinit ---> 65 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s136
+
+	Sinit ---> 66 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s180
+
+	Sinit ---> 67 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s159
+
+	Sinit ---> 68 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s137
+
+	Sinit ---> 69 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s203
+
+	Sinit ---> 70 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s182
+
+	Sinit ---> 71 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s160
+
+	Sinit ---> 72 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s138
+
+	Sinit ---> 73 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s226
+
+	Sinit ---> 74 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s205
+
+	Sinit ---> 75 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s183
+
+	Sinit ---> 76 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s161
+
+	Sinit ---> 77 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s139
+
+	Sinit ---> 78 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s249
+
+	Sinit ---> 79 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s228
+
+	Sinit ---> 80 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s206
+
+	Sinit ---> 81 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s184
+
+	Sinit ---> 82 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s162
+
+	Sinit ---> 83 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s140
+
+	Sinit ---> 84 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s272
+
+	Sinit ---> 85 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s251
+
+	Sinit ---> 86 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s229
+
+	Sinit ---> 87 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s207
+
+	Sinit ---> 88 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s185
+
+	Sinit ---> 89 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s163
+
+	Sinit ---> 90 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s141
+
+	Sinit ---> 91 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s295
+
+	Sinit ---> 92 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s274
+
+	Sinit ---> 93 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s252
+
+	Sinit ---> 94 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s230
+
+	Sinit ---> 95 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s208
+
+	Sinit ---> 96 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s186
+
+	Sinit ---> 97 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s164
+
+	Sinit ---> 98 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s142
+
+	Sinit ---> 99 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s209
+
+	Sinit ---> 100 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s231
+
+	Sinit ---> 101 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s253
+
+	Sinit ---> 102 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s275
+
+	Sinit ---> 103 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s296
+
+	Sinit ---> 104 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s297
+
+	Sinit ---> 105 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s316
+
+	Sinit ---> 106 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s318
+
+	Sinit ---> 107 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s318
+
+	Sinit ---> 108 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s297
+
+	Sinit ---> 109 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s275
+
+	Sinit ---> 110 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s253
+
+	Sinit ---> 111 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s231
+
+	Sinit ---> 112 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s209
+
+	Sinit ---> 113 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s187
+
+	Sinit ---> 114 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s165
+
+	Sinit ---> 115 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s143
+
+	Sinit ---> 116 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s232
+
+	Sinit ---> 117 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s254
+
+	Sinit ---> 118 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s276
+
+	Sinit ---> 119 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s298
+
+	Sinit ---> 120 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s339
+
+	Sinit ---> 121 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s320
+
+	Sinit ---> 122 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s319
+
+	Sinit ---> 123 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : off
+		eloc : s341
+
+	Sinit ---> 124 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 1
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s320
+
+	Sinit ---> 125 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s298
+
+	Sinit ---> 126 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s276
+
+	Sinit ---> 127 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s254
+
+	Sinit ---> 128 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s232
+
+	Sinit ---> 129 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s210
+
+	Sinit ---> 130 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s188
+
+	Sinit ---> 131 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s166
+
+	Sinit ---> 132 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 1
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s144
+
+	Sinit ---> 133 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s96
+
+	Sinit ---> 134 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s122
+
+	Sinit ---> 135 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s94
+
+	Sinit ---> 136 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s121
+
+	Sinit ---> 137 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s92
+
+	Sinit ---> 138 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s120
+
+	Sinit ---> 139 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s90
+
+	Sinit ---> 140 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s119
+
+	Sinit ---> 141 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s88
+
+	Sinit ---> 142 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s118
+
+	Sinit ---> 143 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s86
+
+	Sinit ---> 144 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s117
+
+	Sinit ---> 145 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s84
+
+	Sinit ---> 146 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s116
+
+	Sinit ---> 147 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s82
+
+	Sinit ---> 148 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s115
+
+	Sinit ---> 149 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s80
+
+	Sinit ---> 150 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s114
+
+	Sinit ---> 151 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s78
+
+	Sinit ---> 152 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s111
+
+	Sinit ---> 153 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s113
+
+	Sinit ---> 154 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s76
+
+	Sinit ---> 155 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s73
+
+	Sinit ---> 156 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s75
+
+	Sinit ---> 157 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s70
+
+	Sinit ---> 158 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s74
+
+	Sinit ---> 159 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s69
+
+	Sinit ---> 160 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s71
+
+	Sinit ---> 161 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s31
+
+	Sinit ---> 162 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s25
+
+	Sinit ---> 163 :
+		eqpnt_cool : 0
+		eqpnt_off : 1
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s29
+
+	Sinit ---> 164 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s30
+
+	Sinit ---> 165 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s32
+
+	Sinit ---> 166 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s26
+
+	Sinit ---> 167 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s28
+
+	Sinit ---> 168 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s3
+
+	Sinit ---> 169 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s4
+
+	Sinit ---> 170 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 0
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s2
+
+	Sinit ---> 171 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : heat
+		eloc : s0
+
+	Sinit ---> 172 :
+		eqpnt_cool : 0
+		eqpnt_off : 0
+		eqpnt_on : 1
+		env_actions : regular
+		HIGH : 0
+		OUTSIDE : 0
+		LOW : 0
+		eqpnt_heat : 0
+		sys_actions : on
+		eloc : s0
+
+----------------------------------------
+

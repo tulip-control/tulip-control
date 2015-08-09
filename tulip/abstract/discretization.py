@@ -42,7 +42,7 @@ from __future__ import absolute_import
 
 import logging
 logger = logging.getLogger(__name__)
-
+import math
 import os
 import warnings
 import pprint
@@ -1805,7 +1805,8 @@ def get_postarea_transitions(ppp, sys_dyn, N=1, abs_tol=1e-7):
             post_area=get_postarea(ppp.regions[i],sys_dyn,list_extp_d)
             for k in range(0,len(ppp.regions)):
                 inters_region=pc.intersect(post_area,ppp.regions[k])
-                if (pc.is_empty(inters_region)== False and i!=k):
+                if (pc.is_empty(inters_region)== False):
+# and i!=k):
                     trans=1
                 else:
                     trans=0
@@ -1922,14 +1923,20 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
         ref_grid=cont_part
     else:
         ref_grid=p2p.add_grid(ppp=cont_part, grid_size=grid_size)
+	print "ADD GRID DONE"
     plot_partition(ref_grid, show=visualize)
-    
-    prog_map=create_prog_map(ssd.modes,ref_grid)
+    print "PLOT PARTITION DONE"
 
+    prog_map=create_prog_map(ssd.modes,ref_grid)
+    print "PROG MAP DONE"
+    modes= ssd.modes
     for mode in ssd.modes:
         cont_dyn = ssd.dynamics[mode].list_subsys[0]
-        trans[mode] = get_postarea_transitions(ref_grid,cont_dyn)
-    
+#    cont_dyn = ssd.dynamics
+    	trans[mode] = get_postarea_transitions(ref_grid,cont_dyn)
+#    trans= multiproc_postarea_transitions(modes,ref_grid,cont_dyn,N=1,abs_tol=1e-7)
+
+    print "POSTAREA DONE"
     afts=create_afts(owner=owner,ssd=ssd,cont_props=cont_props,ref_grid=ref_grid,
         prog_map=prog_map, trans=trans)
 
@@ -1937,6 +1944,7 @@ def discretize_modeonlyswitched(ssd, cont_props, owner, grid_size=-1.,
     if visualize:
         plot_mode_partitions(abstMOS, show_ts=True, only_adjacent=False)
     return abstMOS
+    
 
 def multiproc_posttrans(q,mode,i,ref_grid,cont_dyn,N=1,abs_tol=1e-7):
     """Accessorry function 2 to enable parallelization of posttrans
