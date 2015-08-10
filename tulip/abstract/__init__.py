@@ -44,11 +44,12 @@ from .discretization import (
     multiproc_posttrans,
     multiproc_postarea_transitions
 )
-from .feasible import is_feasible, solve_feasible
+from .feasible import is_feasible, solve_feasible, is_feasible_alternative
 
 from .prop2partition import (
     prop2part, part2convex,
     pwa_partition, add_grid,
+    pwa_shrunk_partition,
     find_equilibria,
     PropPreservingPartition, PPP
 )

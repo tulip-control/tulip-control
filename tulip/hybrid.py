@@ -1,4 +1,5 @@
 # Copyright (c) 2011-2014 by California Institute of Technology
+# 2014 by The Regents of the University of Michigan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -12,23 +13,22 @@
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
 # 
-# 3. Neither the name of the California Institute of Technology nor
-#    the names of its contributors may be used to endorse or promote
-#    products derived from this software without specific prior
-#    written permission.
+# 3. Neither the names of copyright holders nor the names of its 
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH
-# OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-# OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE 
+# COPYRIGHT HOLDER(S) OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
 #
 """
 Classes representing hybrid dynamical systems.
@@ -216,6 +216,198 @@ class LtiSysDyn(object):
         quiver(x, v, ax, **kwargs)
         
         return ax
+
+class LtiOutSysDyn(LtiSysDyn):
+    """Represent discrete-time continuous-state dynamics with non-perfect state information::
+    
+        s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
+    	y[t] = C*s[t]
+    subject to the constraints::
+    
+        u[t] \in Uset
+        d[t] \in Wset
+        s[t] \in domain
+	y[t] \in C(domain)
+    
+    where:
+        - u[t] the control input
+        - d[t] the disturbance input
+        - s[t] the system state
+	- y[t] the output state
+    
+    A LtiOutSysDyn object contains the fields:
+    
+        - A, B, C, E, K, (matrices)
+        - Uset, Wset, (each a C{polytope.Polytope})
+        - domain (C{polytope.Polytope} or C{polytope.Region})
+        - time_semantics: 'discrete' (if system is originally a discrete-time
+          system) or 'sampled' (if system is sampled from a continuous-time
+          system)
+        - timestep: A positive real number containing the timestep (for sampled
+          system)
+    
+    as defined above.
+    
+    Note
+    ====
+    For state-dependent bounds on the input,::
+        [u[t]; s[t]] \in Uset
+    can be used.
+    
+    See Also
+    ========
+    L{LtiSysDyn}, L{PwaSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
+    """
+    def __init__(self, A=None, B=None, C=None, E=None, K=None,
+                 Uset=None,Wset=None, domain=None, time_semantics=None,
+                 timestep=None):
+        
+        if Uset is None:
+            warn('Uset not given to LtiOutSysDyn()')
+        elif not isinstance(Uset, pc.Polytope):
+            raise Exception('`Uset` has to be a Polytope')
+        if domain is None:
+            warn("Domain not given to LtiOutSysDyn()")
+        if ((domain is not None) and
+            (not (isinstance(domain, pc.Polytope) or
+                isinstance(domain, pc.Region))
+            )
+        ):
+            raise Exception('`domain` has to be a Polytope or Region')
+        
+        # check dimensions agree
+        try:
+            nA, mA = A.shape
+        except:
+            raise TypeError('A matrix must be 2d array')
+        if nA != mA:
+            raise ValueError('A must be square')
+        if domain is not None:
+            if domain.dim != mA:
+                raise Exception('domain.dim != A.size[1]')
+        
+        if B is not None:
+            try:
+                nB, mB = B.shape
+            except:
+                raise TypeError('B matrix must be 2d array')
+            if nA != nB:
+                raise ValueError('A and B must have same number of rows')
+            if Uset is not None:
+                if (Uset.dim != mB) and (Uset.dim != mB + nA):
+                    msg = 'Uset.dim != B.size[1]'
+                    msg += ' and != B.size[1] + A.size[1]'
+                    raise Exception(msg)
+
+        if C is not None:
+            try:
+                nC, mC = C.shape
+            except:
+                raise TypeError('C matrix must be 2d array')
+            if mA != mC:
+                raise ValueError('A and C must have same number of columns')
+        
+        if E is not None:
+            try:
+                nE, mE = E.shape
+            except:
+                raise TypeError('E matrix must be 2d array')
+            if nA != nE:
+                raise ValueError('A and E must have same number of rows')
+            if Wset is not None:
+                if Wset.dim != mE:
+                    raise Exception('Wset.dim != E.size[1]')
+        
+        if K is not None:
+            try:
+                nK, mK = K.shape
+            except:
+                raise TypeError('K column vector must be 2d array')
+            
+            if nA != nK:
+                raise ValueError('A and K must have same number of rows')
+            if mK != 1:
+                raise ValueError('K must be a column vector')
+        
+        self.A = A
+        self.B = B
+	self.C = C
+        
+        if K is None:
+            if len(A) != 0:
+                self.K = np.zeros([mA, 1])
+            else:
+                self.K = K
+        else:
+            self.K = K.reshape(K.size,1)
+
+        if E is None and (len(A) != 0):
+            self.E = np.zeros([mA, 1])
+            self.Wset = pc.Polytope()
+        else:
+            self.E = E
+            self.Wset = Wset
+        
+        self.Uset = Uset
+        self.domain = domain
+
+        # Check that timestep and semantics are valid.
+        _check_time_data(time_semantics, timestep)
+        self.time_semantics = time_semantics
+        self.timestep = timestep
+
+
+    def __str__(self):
+        n = 3
+        output = 'A =\n' + _indent(str(self.A), n)
+        output += '\nB =\n' + _indent(str(self.B), n)
+        output += '\nC =\n' + _indent(str(self.C), n)
+        output += '\nE =\n' + _indent(str(self.E), n)
+        output += '\nK =\n' + _indent(str(self.K), n)
+        output += '\nUset =\n' + _indent(str(self.Uset), n)
+        output += '\nWset =\n' + _indent(str(self.Wset), n)
+        return output
+    
+    def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
+             res=(5, 5), **kwargs):
+        try:
+            from tulip.graphics import newax, quiver
+        except:
+            logger.error('failed to import graphics')
+            warn('pyvectorized not found. No plotting.')
+            return
+        
+        (x, res) = pc.grid_region(self.domain, res=res)
+        n = self.A.shape[0]
+        DA = self.A - np.eye(n)
+        v = DA.dot(x) + self.K
+        
+        if ax is None:
+            ax, fig = newax()
+        
+        if show_domain:
+            self.domain.plot(ax, color)
+        
+        quiver(x, v, ax, **kwargs)
+        
+        return ax
+
+    def generateObservedDynamics(self, L, epsilon):
+	"""Generates the dynamics of the linear observer::
+	\hat{s}[t+1] = (A-LC)\hat{s}[t] + Bu[t] + K + Ly[t]
+
+	where L is an observer chosen so as to guarantee that
+	|A-LC| <= 1-max(E\delta)/epsilon.
+	"""
+	n = self.A.shape[0]
+	xbounds = [-epsilon, epsilon]
+	for i in range(n-1):
+		xbounds = np.vstack((xbounds, [-epsilon, epsilon]))
+	Wset = pc.box2poly(xbounds)
+	return LtiSysDyn(A=self.A, B=self.B, E=np.dot(L, self.C), K = self.K,\
+			 Uset=self.Uset, Wset=Wset, domain=self.domain, \
+			 time_semantics=self.time_semantics, timestep=self.timestep)
+
 
 class PwaSysDyn(object):
     """PwaSysDyn class for specifying a polytopic piecewise affine system.
@@ -533,6 +725,126 @@ class SwitchedSysDyn(object):
                                      Uset, Wset, domain)
         return cls((1,1), {(0,0):pwa_sys}, domain)
 
+
+def generateFilter(Ain, Cin, bound, use_mosek = True, opt_dist=False, opt_dist_weight=1.):
+	"""Generates a linear filter L that minimizes a certain infinity norm.
+	Inputs:
+	'Ain' - A-matrix in state space representation
+	'Cin' - C-matrix
+	'bound' - guarantee that |A-LC| <= bound
+	'use_mosek' - mosek will be used as solver if true
+	'opt_dist' - if true, the filter will minimize |A-LC| + opt_dist_weight*|LC|
+		   if false, the filter will minimize |A-LC|
+	"""
+	try:
+		from cvxopt import matrix, solvers
+	except:
+		raise Exception("cvxopt not found; aborting generateFilter.generateFilter")
+	if not type(Ain) == type(matrix([1,1])):
+		A = matrix(Ain)
+	else:
+		A = Ain
+	if not type(Cin) == type(matrix([1,1])):
+		C = matrix(Cin)
+	else:
+		C = Cin
+	#Auxiliary vector
+	B = C.T
+	# Cost vector
+	c = matrix(0., (1,B.size[1]))
+	c = np.hstack([c, matrix(1., (1,B.size[0]))])
+	if opt_dist:
+		c = np.hstack([c, matrix(opt_dist_weight, (1,B.size[0]))])
+	c = matrix(c)
+	c = matrix(c).T
+
+	# Matrices to give the constraint Gx <= b,
+	# with x = (L[i,1], L[i,2], ..., L[i, C.size[0]], z1, ..., zB.size[0], y1, ..., yB.size[0]), for i=1,..., A.size[0].
+	# Here, zi are variables representing the elements in |A-LC| and yi the elements in |LC|, where these absolute values
+	# are to be interpreted element-wise.
+	for i in range(A.size[0]):
+		a = A[i,:].T
+		b = []
+		## Building b
+		# These constraints represent zi, yi as the above absolute values.
+		for index in range(B.size[0]):
+			b.append(-a[index])
+		for index in range(B.size[0]):
+			b.append(a[index])
+		if opt_dist:
+			for index in range(2*B.size[0]):
+				b.append(0)
+		# This constraint ensures that |A-LC| <= bound.
+		b.append(bound)
+		b = matrix(b) #b done!
+		## Building matrix
+		for index in range(B.size[0]):
+			# These constraints represent zi as the above absolute values.
+			result = -B[index,:]
+			result = np.hstack([result, matrix(0., (1,index))])
+			result = np.hstack([result, matrix(-1., (1,1))])
+			result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
+			if opt_dist:
+			# These constraints represent yi as the above absolute values.
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+			if index == 0:
+				G = result
+			else:
+				G = np.vstack([G, result])
+		for index in range(B.size[0]):
+			# These constraints represent zi as the above absolute values.
+			result = B[index,:]
+			result = np.hstack([result, matrix(0., (1,index))])
+			result = np.hstack([result, matrix(-1., (1,1))])
+			result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
+			if opt_dist:
+			# These constraints represent yi as the above absolute values.
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+			G = np.vstack([G, result])
+		if opt_dist:
+		# These constraints represent yi as the above absolute values.
+			for index in range(B.size[0]):
+				result = -B[index,:]
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+				result = np.hstack([result, matrix(0., (1,index))])
+				result = np.hstack([result, matrix(-1., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
+				G = np.vstack([G, result])
+			for index in range(B.size[0]):
+				result = B[index,:]
+				result = np.hstack([result, matrix(0., (1,B.size[0]))])
+				result = np.hstack([result, matrix(0., (1,index))])
+				result = np.hstack([result, matrix(-1., (1,1))])
+				result = np.hstack([result, matrix(0., (1,B.size[0]-index-1))])
+				G = np.vstack([G, result])
+		# This constraint ensures that |A-LC| <= bound.
+		result = matrix(0., (1,B.size[1]))
+		result = np.hstack([result, matrix(1., (1,B.size[0]))])
+		if opt_dist:
+			result = np.hstack([result, matrix(0., (1,B.size[0]))])
+		G = np.vstack([G, result])
+		G = matrix(G) #G done!
+		b = matrix(b)
+		c = matrix(c)
+		if use_mosek:
+			try:
+				sol = solvers.lp(c,G,b, solver='mosek')
+			except:
+				raise Exception("No optimal solution found in generateFilter.generateFilter when using mosek")
+		else:
+			try:
+				sol = solvers.lp(c,G,b)
+			except:
+				raise Exception("No optimal solution found in generateFilter.generateFilter when using default solver")
+		try:
+			x = sol['x']
+			if i == 0:
+				L = x[0:B.size[1]].T
+			else:
+				L = np.vstack([L, x[0:B.size[1]].T])
+		except:
+			raise Exception("No optimal solution found in generateFilter.generateFilter")
+	return L	# L done!
 
 def _push_time_data(system_list, time_semantics, timestep):
     """Overwrite the time data in system list. Throws warnings if overwriting
