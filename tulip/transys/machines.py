@@ -34,7 +34,9 @@ from __future__ import absolute_import
 import copy
 from pprint import pformat
 from random import choice
+import itertools
 from tulip.transys.labeled_graphs import LabeledDiGraph
+
 
 # inline imports:
 #
@@ -496,6 +498,7 @@ class MealyMachine(Transducer):
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
 
+
     def reaction(self, from_state, inputs):
         """Return next state and output, when reacting to given inputs.
 
@@ -518,18 +521,97 @@ class MealyMachine(Transducer):
           where C{outputs}: C{{'port_name':port_value, ...}}
         """
         # match only inputs (explicit valuations, not symbolic)
-        enabled_trans = [
-            (i, j, d)
-            for i, j, d in self.edges_iter([from_state], data=True)
-            if project_dict(d, self.inputs) == inputs]
-        # must be deterministic
+	enabled_trans=[]	
+	trythese = []
+	tryshort = []
+
+        for i, j, d in self.edges_iter([from_state], data=True):
+		trythese.append(d)                     #possible input(to be used in error message for 'invalid input')
+ 	    	if project_dict(d, self.inputs) == inputs:
+				enabled_trans.append([i, j, d])
+        tryshort = trythese[:5]       #only takes the first 5 options for display
+
+
+	# must be deterministic
+	
         try:
             ((_, next_state, attr_dict), ) = enabled_trans
         except ValueError:
-            raise Exception(
-                'must be input-deterministic, '
-                'found enabled transitions: '
-                '{t}'.format(t=enabled_trans))
+            if enabled_trans == [] :      #if there are no enabled transitions, the input was not valid, so this will display 5 possible valid inputs with the keys matching the user input. 
+		raise Exception(
+			'not a valid input, '
+			'some possible inputs include: '
+			'{y}'.format(y=tryshort))
+ 	    else:
+            	raise Exception(
+                	'must be input-deterministic, '
+                	'found enabled transitions: '
+                	'{t}'.format(t=enabled_trans))
+        outputs = project_dict(attr_dict, self.outputs)
+        return (next_state, outputs)
+    
+    def reactionpart(self, from_state, inputs):
+	"""Return next state and output, when reacting to given inputs.
+
+	The machine must be deterministic.
+	(for each state and input at most a single transition enabled,
+	this notion does not coincide with output-determinism)
+
+	Not exactly a wrapper of L{Transitions.find},
+	because it matches only that part of an edge label
+	that corresponds to the inputs.
+
+	@param from_state: transition starts from this state.
+	@type from_state: element of C{self.states}
+
+	@param inputs: C{dict} assigning a valid value to each input port.
+	@type inputs: {'port_name':port_value, ...}
+
+	@return: output values and next state.
+	@rtype: (outputs, next_state)
+	where C{outputs}: C{{'port_name':port_value, ...}}"""
+        # match only inputs (explicit valuations, not symbolic)
+        enabled_trans = []
+	inputkey = []
+	trythese = []
+	tryshort = []
+	templist=[]
+	for h, j in inputs.iteritems():                           #These 2 lines identify the keys in the user's input
+		inputkey.append(h)
+	for i, j, d in self.edges_iter([from_state], data=True):
+		possible_inputs= itertools.combinations(project_dict(d,self.inputs).iteritems(),len(inputs))    #from the current state, these are all possible valid inputs that match the length of the user input.
+		for k in possible_inputs:
+	        	if k in itertools.permutations(inputs.iteritems(),len(inputs)):    #this if statment will see if there is a match between user inputs and possible inputs. Permutations accounts for any mismatches in list order. 
+				enabled_trans.append([i, j, d])
+#				enabled_trans = []                  #uncomment this to see the effect of the 
+			for r in range(len(inputs)):                #the next 9 lines identify all possible inputs that have the same keys as the user input, but not necessarily the same values. This will be used in the 'invalid input' exception below.
+				c = k[r]
+				templist.append(c[0])
+			templist = tuple(templist)
+			for e in itertools.permutations(inputkey,len(inputkey)):
+				if e == templist:
+					trythese.append(k)		
+			templist=[]
+	tryshort = trythese[:5]
+
+#            (i, j, d)
+#            for i, j, d in self.edges_iter([from_state], data=True)
+# 	     if project_dict(d, self.inputs) == inputs]
+        # must be deterministic
+
+        try:
+            ((_, next_state, attr_dict), ) = enabled_trans
+        except ValueError:
+            if enabled_trans == [] :      #if there are no enabled transitions, the input was not valid, so this will display 5 possible valid inputs with the keys matching the user input. 
+		raise Exception(
+			'not a valid input, '
+			'some possible inputs include: '
+			'{y}'.format(y=tryshort))
+ 	    else:
+            	raise Exception(
+                	'must be input-deterministic, '
+                	'found enabled transitions: '
+                	'{t}'.format(t=enabled_trans))
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
 
