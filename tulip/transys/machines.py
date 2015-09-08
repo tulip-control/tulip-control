@@ -531,14 +531,32 @@ class MealyMachine(Transducer):
             (i, j, d)
             for i, j, d in self.edges_iter([from_state], data=True)
             if project_dict(d, restricted_inputs) == inputs]
+
+        if len(enabled_trans) == 0:
+            some_possibilities = []
+            for i, j, d in self.edges_iter([from_state], data=True):
+                # The number of possible inputs to suggest here is
+                # arbitrary. Consider making it a function parameter.
+                if len(some_possibilities) >= 5:
+                    break
+                possible_inputs = project_dict(d, restricted_inputs)
+                if possible_inputs not in some_possibilities:
+                    some_possibilities.append(possible_inputs)
+
         # must be deterministic
         try:
             ((_, next_state, attr_dict), ) = enabled_trans
         except ValueError:
-            raise Exception(
-                'must be input-deterministic, '
-                'found enabled transitions: '
-                '{t}'.format(t=enabled_trans))
+            if len(enabled_trans) == 0:
+                raise Exception(
+                    'not a valid input, '
+                    'some possible inputs include: '
+                    '{t}'.format(t=some_possibilities))
+            else:
+                raise Exception(
+                    'must be input-deterministic, '
+                    'found enabled transitions: '
+                    '{t}'.format(t=enabled_trans))
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
 
