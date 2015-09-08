@@ -1206,10 +1206,7 @@ def strategy2mealy(A, spec):
 
     @type spec: L{GRSpec}
 
-    @return: tuple of the form (L{GRSpec}, L{MealyMachine}).  Either
-        or both can be None if the corresponding part is missing.
-        Note that the returned GRSpec instance depends only on what is
-        in the given tulipcon XML string x, not on the argument spec0.
+    @rtype: L{MealyMachine}
     """
     logger.info('converting strategy (compact) to Mealy machine')
     env_vars = spec.env_vars
