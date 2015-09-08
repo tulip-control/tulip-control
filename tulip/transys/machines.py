@@ -496,7 +496,7 @@ class MealyMachine(Transducer):
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
 
-    def reaction(self, from_state, inputs):
+    def reaction(self, from_state, inputs, lazy=False):
         """Return next state and output, when reacting to given inputs.
 
         The machine must be deterministic.
@@ -513,15 +513,24 @@ class MealyMachine(Transducer):
         @param inputs: C{dict} assigning a valid value to each input port.
         @type inputs: {'port_name':port_value, ...}
 
+        @param lazy: Lazy evaluation of inputs? If lazy=True, then
+            allow an incomplete specification of input if there is
+            precisely one enabled transition.
+        @type lazy: bool
+
         @return: output values and next state.
         @rtype: (outputs, next_state)
           where C{outputs}: C{{'port_name':port_value, ...}}
         """
+        if lazy:
+            restricted_inputs = set(self.inputs).intersection(inputs.keys())
+        else:
+            restricted_inputs = self.inputs
         # match only inputs (explicit valuations, not symbolic)
         enabled_trans = [
             (i, j, d)
             for i, j, d in self.edges_iter([from_state], data=True)
-            if project_dict(d, self.inputs) == inputs]
+            if project_dict(d, restricted_inputs) == inputs]
         # must be deterministic
         try:
             ((_, next_state, attr_dict), ) = enabled_trans
@@ -532,6 +541,11 @@ class MealyMachine(Transducer):
                 '{t}'.format(t=enabled_trans))
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
+
+    def reactionpart(self, from_state, inputs):
+        """Wraps reaction() with lazy=True
+        """
+        return self.reaction(from_state, inputs, lazy=True)
 
     def run(self, from_state=None, input_sequences=None):
         """Guided or interactive run.
