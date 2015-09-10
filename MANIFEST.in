@@ -1,6 +1,5 @@
 recursive-include examples *.py README
 include tulip/commit_hash.txt
-include tulip/interfaces/jtlv_grgame.jar
 include tulip/transys/export/d3.v3.min.js
 include run_tests.py
 include tests/*.py

@@ -35,6 +35,9 @@ def check_gr1c():
         return False
     return True
 
+def check_jtlv():
+    return os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar'))
+
 def check_java():
     try:
         subprocess.check_output(['java', '-help'], stderr=subprocess.STDOUT)
@@ -105,8 +108,8 @@ glpk_msg = 'GLPK seems to be missing\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
 java_msg = (
     'java not found.\n'
-    "The jtlv synthesis tool included in the TuLiP distribution\n"
-    'will not be able to run. It is an optional alternative to gr1c,\n'
+    'The jtlv synthesis tool will not be able to run.\n'
+    'It is an optional alternative to gr1c,\n'
     'the default GR(1) solver of TuLiP.'
 )
 mpl_msg = 'matplotlib not found.\n' +\
@@ -203,6 +206,12 @@ try:
 except ValueError:
     pass
 
+package_data = {
+    'tulip': ['commit_hash.txt'],
+    'tulip.transys.export' : ['d3.v3.min.js'],
+    'tulip.spec' : ['parsetab.py']
+}
+
 if check_deps:
     if not perform_setup:
         print('Checking for required dependencies...')
@@ -245,6 +254,17 @@ if check_deps:
             print("\t"+opt_val[1] )
         else:
             print("\t"+opt_val[2] )
+
+    # Optional stuff for which the installation configuration will
+    # change depending on the availability of each.
+    if check_jtlv():
+        print('Found optional JTLV-based solver.')
+        package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
+    else:
+        print('The jtlv synthesis tool was not found. '
+              'Try extern/get-jtlv.sh to get it.\n'
+              'It is an optional alternative to gr1c, '
+              'the default GR(1) solver of TuLiP.')
 
 
 if perform_setup:
@@ -310,12 +330,7 @@ if perform_setup:
             'tulip.interfaces'
         ],
         package_dir = {'tulip' : 'tulip'},
-        package_data={
-            'tulip': ['commit_hash.txt'],
-            'tulip.interfaces': ['jtlv_grgame.jar'],
-            'tulip.transys.export' : ['d3.v3.min.js'],
-            'tulip.spec' : ['parsetab.py']
-        },
+        package_data=package_data
     )
 
     if plytable_build_failed:
