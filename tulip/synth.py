@@ -1105,20 +1105,24 @@ def synthesize(
         strategy = slugs.synthesize(specs)
     elif option == 'jtlv':
         strategy = jtlv.synthesize(specs)
+        if isinstance(strategy, list):
+            # Discard counter-examples, because here we only care that
+            # it is not realizable.
+            strategy = None
     else:
         raise Exception('Undefined synthesis option. ' +
                         'Current options are "jtlv", "gr1c", and "slugs"')
-    ctrl = strategy2mealy(strategy, specs)
-    try:
-        logger.debug('Mealy machine has: n = ' +
-                     str(len(ctrl.states)) + ' states.')
-    except:
-        logger.debug('No Mealy machine returned.')
-    # no controller found ?
-    # exploring unrealizability with counterexamples or other means
-    # can be done by calling a dedicated other function, not this
-    if not isinstance(ctrl, transys.MealyMachine):
+
+    # While the return values of the solver interfaces vary, we expect
+    # here that strategy is either None to indicate unrealizable or a
+    # networkx.DiGraph ready to be passed to strategy2mealy().
+    if strategy is None:
         return None
+
+    ctrl = strategy2mealy(strategy, specs)
+    logger.debug('Mealy machine has: n = ' +
+                 str(len(ctrl.states)) + ' states.')
+
     if rm_deadends:
         ctrl.remove_deadends()
     return ctrl

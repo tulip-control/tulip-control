@@ -617,6 +617,7 @@ def test_determinize_machine_init():
 class synthesize_test:
     def setUp(self):
         self.f_triv = spec.GRSpec(sys_vars="y")
+        self.trivial_unreachable = spec.GRSpec(sys_vars="y", sys_prog="False")
 
     def tearDown(self):
         self.f_triv = None
@@ -624,3 +625,6 @@ class synthesize_test:
     def test_gr1c_basic(self):
         assert isinstance(synth.synthesize("gr1c", self.f_triv),
                           transys.MealyMachine)
+
+    def test_unrealizable(self):
+        assert synth.synthesize("gr1c", self.trivial_unreachable) is None
