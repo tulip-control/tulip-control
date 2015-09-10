@@ -548,10 +548,16 @@ class MealyMachine(Transducer):
             ((_, next_state, attr_dict), ) = enabled_trans
         except ValueError:
             if len(enabled_trans) == 0:
-                raise Exception(
-                    'not a valid input, '
-                    'some possible inputs include: '
-                    '{t}'.format(t=some_possibilities))
+                if len(some_possibilities) == 0:
+                    raise Exception(
+                        'state {from_state} is a dead-end. '
+                        'There are no possible inputs from '
+                        'it.'.format(from_state=from_state))
+                else:
+                    raise Exception(
+                        'not a valid input, '
+                        'some possible inputs include: '
+                        '{t}'.format(t=some_possibilities))
             else:
                 raise Exception(
                     'must be input-deterministic, '
