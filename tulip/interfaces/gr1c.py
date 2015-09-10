@@ -57,6 +57,28 @@ _hl = 60 * '-'
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
 
 
+def get_version():
+    """Get version of gr1c as detected by TuLiP.
+
+    Failure to find the gr1c program or errors in parsing the received
+    version string will cause an exception.
+
+    @return: (major, minor, micro), a tuple of int
+    """
+    try:
+        v_str = subprocess.check_output(["gr1c", "-V"])
+    except OSError:
+        raise OSError('gr1c not found')
+    v_str = v_str.split()[1]
+    try:
+        major, minor, micro = v_str.split(".")
+        major = int(major)
+        minor = int(minor)
+        micro = int(micro)
+    except ValueError:
+        raise ValueError('gr1c version string is not recognized: '+str(v_str))
+    return (major, minor, micro)
+
 def _untaglist(x, cast_f=float,
                namespace=DEFAULT_NAMESPACE):
     """Extract list from given tulipcon XML tag (string).
