@@ -46,9 +46,6 @@ import networkx as nx
 from tulip.spec import translation
 
 
-JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
-JTLV_EXE = 'jtlv_grgame.jar'
-
 DEBUG_SMV_FILE = 'smv.txt'
 DEBUG_LTL_FILE = 'ltl.txt'
 DEBUG_AUT_FILE = 'aut.txt'
@@ -254,6 +251,8 @@ def get_priority(priority_kind):
 
 def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
     """Subprocess calls to JTLV."""
+    JTLV_PATH = os.path.abspath(os.path.dirname(__file__))
+    JTLV_EXE = 'jtlv_grgame.jar'
     logger.info(
         ('Calling jtlv with arguments:\n'
          '  heap size: {heap}\n'
@@ -264,45 +263,26 @@ def call_jtlv(heap_size, fSMV, fLTL, fAUT, priority_kind, init_option):
             priority=priority_kind
         )
     )
-
-    if JTLV_EXE:
-        jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
-
-        cmd = ['java', heap_size, '-jar', jtlv_grgame, fSMV, fLTL, fAUT,
-               str(priority_kind), str(init_option)]
-
-        # debugging log
-        if logger.getEffectiveLevel() <= logging.DEBUG:
-            logger.debug(jtlv_grgame)
-            logger.debug(' '.join(cmd))
-
-            # besides dumping to debug logging stream,
-            # also copy files to ease manual debugging
-            import shutil
-
-            shutil.copyfile(fSMV, DEBUG_SMV_FILE)
-            shutil.copyfile(fLTL, DEBUG_LTL_FILE)
-            shutil.copyfile(fAUT, DEBUG_AUT_FILE)
-
-        try:
-            subprocess.call(cmd)
-        except OSError as e:
-            if e.errno == os.errno.ENOENT:
-                raise Exception('Java not found in path: cannot run jtlv.')
-            else:
-                raise
-    else:
-        # For debugging purposes
-        classpath = '{a}:{b}'.format(
-            a=os.path.join(JTLV_PATH, 'JTLV'),
-            b=os.path.join(JTLV_PATH, "JTLV", 'jtlv-prompt1.4.1.jar')
-        )
-
-        cmd = ['java', heap_size, '-cp', classpath, 'GRMain',
-               fSMV, fLTL, fAUT, priority_kind, init_option]
-
+    jtlv_grgame = os.path.join(JTLV_PATH, JTLV_EXE)
+    cmd = ['java', heap_size, '-jar', jtlv_grgame, fSMV, fLTL, fAUT,
+           str(priority_kind), str(init_option)]
+    # debugging log
+    if logger.getEffectiveLevel() <= logging.DEBUG:
+        logger.debug('Expected: ' + jtlv_grgame)
         logger.debug(' '.join(cmd))
+        # besides dumping to debug logging stream,
+        # also copy files to ease manual debugging
+        import shutil
+        shutil.copyfile(fSMV, DEBUG_SMV_FILE)
+        shutil.copyfile(fLTL, DEBUG_LTL_FILE)
+        shutil.copyfile(fAUT, DEBUG_AUT_FILE)
+    try:
         subprocess.call(cmd)
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            raise Exception('Java not found in path: cannot run jtlv.')
+        else:
+            raise
 
 
 def canon_to_jtlv_domain(dom):
