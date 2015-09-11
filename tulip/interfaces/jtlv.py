@@ -36,7 +36,6 @@ Relevant links:
   - U{JTLV<http://jtlv.ysaar.net/>}
 """
 import logging
-logger = logging.getLogger(__name__)
 import os
 import re
 import subprocess
@@ -46,6 +45,7 @@ import networkx as nx
 from tulip.spec import translation
 
 
+logger = logging.getLogger(__name__)
 DEBUG_SMV_FILE = 'smv.txt'
 DEBUG_LTL_FILE = 'ltl.txt'
 DEBUG_AUT_FILE = 'aut.txt'
