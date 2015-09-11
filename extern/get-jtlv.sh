@@ -20,6 +20,7 @@ elif hash shasum >/dev/null 2>&1; then
         FILECHECKSUM=`shasum -a 256 jtlv_grgame.jar| sed 's/ .*//'`
 else
 	echo "neither `sha256sum` nor `shasum` found in the PATH."
+        rm jtlv_grgame.jar
 	exit 1
 fi
 
