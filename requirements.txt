@@ -1,0 +1,20 @@
+# usage: `pip install -r requirements.txt`
+pip>=7.1.2
+
+ply==3.4
+networkx==1.6
+numpy==1.7
+scipy
+
+# easy extras
+pyparsing==2.0.3
+http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
+
+# extras (uncomment as needed)
+# cvxopt==1.1.7
+# polytope==0.1.0
+# matplotlib
+
+# tests
+nose
+
