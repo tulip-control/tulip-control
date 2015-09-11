@@ -17,8 +17,7 @@ Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
 
 The default synthesis tool for GR(1) specifications is `gr1c
-<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0 (the
-current release at time of writing).
+<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0.
 
 The following are optional Python packages, listed with a summary of dependent
 features:
