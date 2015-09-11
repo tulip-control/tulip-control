@@ -15,9 +15,11 @@ curl -L -O https://github.com/tulip-control/tulip-control/raw/f2c2d7203e795cbabc
 SHA256CHECKSUM=718d417a866096609fa220475c3b259f98f97ccb7e3e18a46aca61dc1b657ae6
 
 if hash sha256sum >/dev/null 2>&1; then
-	FILECHECKSUM=`sha256sum jtlv_grgame.jar| sed 's/ .*//'`
+        FILECHECKSUM=`sha256sum jtlv_grgame.jar| sed 's/ .*//'`
+elif hash shasum >/dev/null 2>&1; then
+        FILECHECKSUM=`shasum -a 256 jtlv_grgame.jar| sed 's/ .*//'`
 else
-	echo "sha256sum not found in the PATH."
+	echo "neither `sha256sum` nor `shasum` found in the PATH."
 	exit 1
 fi
 
