@@ -453,7 +453,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         p = subprocess.Popen(
             [GR1C_BIN_PREFIX + "gr1c",
              "-n", init_option,
-             "-t", "tulip"],
+             "-t", "json"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
@@ -487,23 +487,34 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     if p.returncode == 0:
         logger.debug(msg)
-        strategy = load_aut_xml(stdoutdata)
+        strategy = load_aut_json(stdoutdata)
         return strategy
     else:
         print(msg)
         return None
 
-def load_mealy(filename):
-    """Load C{gr1c} strategy from C{xml} file.
+def load_mealy(filename, fformat='tulipxml'):
+    """Load C{gr1c} strategy from file.
 
-    @param filename: xml file name
+    @param filename: file name
     @type filename: C{str}
+
+    @param fformat: file format; can be one of "tulipxml" (default),
+        "json". Not case sensitive.
+
+    @type fformat: C{str}
 
     @return: loaded strategy as an annotated graph.
     @rtype: C{networkx.Digraph}
     """
     s = open(filename, 'r').read()
-    strategy = load_aut_xml(s)
+    if fformat.lower() == 'tulipxml':
+        strategy = load_aut_xml(s)
+    elif fformat.lower() == 'json':
+        strategy = load_aut_json(s)
+    else:
+        ValueError('gr1c.load_mealy() : Unrecognized file format, "'
+                   +str(fformat)+'"')
 
     logger.debug(
         'Loaded strategy with nodes: \n' + str(strategy.nodes()) +
