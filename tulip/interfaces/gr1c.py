@@ -47,6 +47,7 @@ import copy
 import os
 import subprocess
 import tempfile
+import json
 import xml.etree.ElementTree as ET
 import networkx as nx
 from tulip.spec import GRSpec, translate
@@ -318,6 +319,37 @@ def _parse_vars(variables, vardict):
         for i, v in enumerate(variables)
     ])
     return variables
+
+def load_aut_json(x):
+    """Return strategy constructed from output of gr1c
+
+    @param x: string or file-like object
+
+    @return: strategy as C{networkx.DiGraph}, like the return value of
+        L{load_aut_xml}
+    """
+    if isinstance(x, str):
+        autjs = json.loads(x)
+    else:
+        autjs = json.load(x)
+    if autjs['version'] != 1:
+        raise ValueError('Only gr1c JSON format version 1 is supported.')
+
+    A = nx.DiGraph()
+    symtab = autjs['ENV']+autjs['SYS']
+    A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
+    A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
+    for node_ID in autjs['nodes'].iterkeys():
+        node_label = dict([(k, autjs['nodes'][node_ID][k])
+                           for k in ('mode', 'rgrad')])
+        node_label['state'] = dict([(symtab[i].keys()[0],
+                                     autjs['nodes'][node_ID]['state'][i])
+                                    for i in range(len(symtab))])
+        A.add_node(node_ID, node_label)
+    for node_ID in autjs['nodes'].iterkeys():
+        for to_node in autjs['nodes'][node_ID]['trans']:
+            A.add_edge(node_ID, to_node)
+    return A
 
 def check_syntax(spec_str):
     """Check whether given string has correct gr1c specification syntax.

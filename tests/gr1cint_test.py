@@ -50,6 +50,37 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
 </tulipcon>
 """
 
+REFERENCE_AUTJSON_smallbool = """
+{"version": 1,
+ "gr1c": "0.10.2",
+ "date": "2015-10-10 16:56:17",
+ "extra": "",
+
+ "ENV": [{"x": "boolean"}],
+ "SYS": [{"y": "boolean"}],
+
+ "nodes": {
+"0x1E8FA40": {
+    "state": [0, 0],
+    "mode": 0,
+    "rgrad": 1,
+    "initial": false,
+    "trans": ["0x1E8FA00"] },
+"0x1E8FA00": {
+    "state": [1, 1],
+    "mode": 1,
+    "rgrad": 1,
+    "initial": false,
+    "trans": ["0x1E8FA40"] },
+"0x1E8F990": {
+    "state": [0, 1],
+    "mode": 0,
+    "rgrad": 1,
+    "initial": true,
+    "trans": ["0x1E8FA00"] }
+}}
+"""
+
 
 class basic_test:
     def setUp(self):
@@ -173,6 +204,13 @@ class GR1CSession_test:
 
 def test_aut_xml2mealy():
     g = gr1c.load_aut_xml(REFERENCE_AUTXML)
+    assert g.env_vars == {"x": "boolean"}
+    assert g.sys_vars == {"y": "boolean"}
+    print(g.nodes())
+    assert len(g) == 3
+
+def test_load_aut_json():
+    g = gr1c.load_aut_json(REFERENCE_AUTJSON_smallbool)
     assert g.env_vars == {"x": "boolean"}
     assert g.sys_vars == {"y": "boolean"}
     print(g.nodes())
