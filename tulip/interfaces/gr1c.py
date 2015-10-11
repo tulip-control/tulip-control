@@ -340,8 +340,8 @@ def load_aut_json(x):
     A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
     A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
     for node_ID in autjs['nodes'].iterkeys():
-        node_label = dict([(k, autjs['nodes'][node_ID][k])
-                           for k in ('mode', 'rgrad')])
+        node_label = dict([(k, v) for (k,v) in autjs['nodes'][node_ID].items()
+                           if k not in ('state', 'trans')])
         node_label['state'] = dict([(symtab[i].keys()[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
