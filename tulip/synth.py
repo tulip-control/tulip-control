@@ -32,7 +32,6 @@
 """Interface to library of synthesis tools, e.g., JTLV, gr1c"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import warnings
 from tulip import transys
@@ -51,6 +50,8 @@ try:
 except ImportError:
     gr1py = None
 
+
+logger = logging.getLogger(__name__)
 _hl = '\n' + 60 * '-'
 
 

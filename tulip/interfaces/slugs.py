@@ -29,8 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Interface to the slugs implementation of GR(1) synthesis.
+"""Interface to the slugs implementation of GR(1) synthesis.
 
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
