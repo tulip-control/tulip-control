@@ -37,6 +37,7 @@ import warnings
 from tulip import transys
 from tulip.spec import GRSpec
 from tulip.interfaces import jtlv, gr1c
+from tulip.interfaces import omega as omega_int
 # optional dependencies
 try:
     from tulip.interfaces import slugs
@@ -1050,6 +1051,9 @@ def synthesize(
           - C{"gr1py"}: use gr1py via L{interfaces.gr1py}.
             Python, enumerative
 
+          - C{"omega"}: use omega via L{interfaces.omega}.
+            Python using C{dd} or Cython using CUDD, symbolic
+
           - C{"slugs"}: use slugs via L{interfaces.slugs}.
             C++ using CUDD, symbolic
 
@@ -1124,6 +1128,8 @@ def synthesize(
             raise ValueError('Import of gr1py interface failed. ' +
                              'Please verify installation of "gr1py".')
         strategy = gr1py.synthesize(specs)
+    elif option == 'omega':
+        strategy = omega_int.synthesize_enumerated_streett(specs)
     elif option == 'jtlv':
         strategy = jtlv.synthesize(specs)
         if isinstance(strategy, list):
@@ -1133,7 +1139,7 @@ def synthesize(
     else:
         raise Exception('Undefined synthesis option. ' +
                         'Current options are "gr1c", ' +
-                        '"slugs", "gr1py", and "jtlv".')
+                        '"slugs", "gr1py", "omega", and "jtlv".')
 
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
