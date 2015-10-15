@@ -37,14 +37,11 @@ import warnings
 from tulip import transys
 from tulip.spec import GRSpec
 from tulip.interfaces import jtlv, gr1c
-
-# slugs is an optional dependency, so fail cleanly if it is missing.
+# optional dependencies
 try:
     from tulip.interfaces import slugs
 except ImportError:
     slugs = None
-
-# gr1py is an optional dependency, so fail cleanly if it is missing.
 try:
     from tulip.interfaces import gr1py
 except ImportError:
@@ -1045,10 +1042,21 @@ def synthesize(
     @param option: Magic string that declares what tool to invoke,
         what method to use, etc.  Currently recognized forms:
 
-          - C{"gr1c"}: use gr1c for GR(1) synthesis via L{interfaces.gr1c}.
-          - C{"slugs"}: use slugs for GR(1) synthesis via L{interfaces.slugs}.
-          - C{"gr1py"}: use JTLV for GR(1) synthesis via L{interfaces.gr1py}.
-          - C{"jtlv"}: use JTLV for GR(1) synthesis via L{interfaces.jtlv}.
+        For GR(1) synthesis:
+
+          - C{"gr1c"}: use gr1c via L{interfaces.gr1c}.
+            written in C using CUDD, symbolic
+
+          - C{"gr1py"}: use gr1py via L{interfaces.gr1py}.
+            Python, enumerative
+
+          - C{"slugs"}: use slugs via L{interfaces.slugs}.
+            C++ using CUDD, symbolic
+
+          - C{"jtlv"}: use JTLV via L{interfaces.jtlv}.
+            Java, symbolic
+            (deprecated)
+
     @type specs: L{spec.GRSpec}
 
     @param env: A transition system describing the environment:
@@ -1124,8 +1132,8 @@ def synthesize(
             strategy = None
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv", "gr1c", ' +
-                        '"slugs", and "gr1py"')
+                        'Current options are "gr1c", ' +
+                        '"slugs", "gr1py", and "jtlv".')
 
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
