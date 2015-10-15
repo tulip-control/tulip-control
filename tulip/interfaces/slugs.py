@@ -42,8 +42,7 @@ import subprocess
 import tempfile
 import networkx as nx
 from tulip.spec import GRSpec, translate
-# inline:
-#   import slugs
+import slugs
 
 
 BDD_FILE = 'strategy_bdd.txt'
@@ -57,7 +56,6 @@ def check_realizable(spec):
 
     @return: True if realizable, False if not, or an error occurs.
     """
-    import slugs
     if isinstance(spec, GRSpec):
         struct = translate(spec, 'slugs')
     else:
