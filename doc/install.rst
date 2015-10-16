@@ -167,8 +167,8 @@ To install the python package dependencies, try::
 
   $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-ply
 
-Optionally packages can be obtained by appending ``python-matplotlib`` etc. to
-the above command.
+Optional packages can be obtained by appending ``python-matplotlib`` etc. to the
+above command.
 
 Mac OS X
 ````````
