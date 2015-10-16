@@ -1,5 +1,5 @@
 """
-Aerial refueling double tank balancing example. 
+Aerial refueling double tank balancing example.
 
 The system consists of two fuel tanks, T1 and T2.
 Fuel is drawn at a constant rate from T2.
@@ -16,6 +16,15 @@ the tanks close to each other.
 
 CODE KEY:
 - ## : beginning of major step; e.g., dynamics definition
+
+For a smaller example, consider adjusting the script to use instead
+the following parameters:
+tank_capacity = 5
+input_ub = 10
+max_vol_diff = 1
+max_refuel_level = 3
+init_lower = 1
+init_upper = 3
 
 reference
 =========
