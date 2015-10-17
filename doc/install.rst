@@ -231,7 +231,7 @@ Installing other Python dependencies
 The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
 get `PLY <http://www.dabeaz.com/ply/>`_, try::
 
-  $ easy_install ply
+  $ pip install ply
 
 .. _venv-pydoc-sec-label:
 
