@@ -95,7 +95,8 @@ GR(1)
 * a JTLV-based solver that has historically been included as part of the TuLiP
   package itself. It was originally implemented by Yaniv Sa'ar `[BJPPS12]
   <bibliography.html#bjpps12>`_.  To use it, you must have Java version 1.6 (or
-  later) installed.
+  later) installed. This tool can be obtained using the script
+  extern/get-jtlv.sh that is included in releases of TuLiP.
 
 LTL
 ```
