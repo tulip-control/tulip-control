@@ -372,14 +372,6 @@ class States(object):
         """
         return not bool(self.graph.successors(state))
 
-    def is_blocking(self, state):
-        """Check if state has outgoing transitions for each label.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-
 
 class Transitions(object):
     """Methods for handling labeled transitions.
