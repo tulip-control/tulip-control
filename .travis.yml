@@ -1,0 +1,19 @@
+language: python
+python:
+  - "2.7"
+
+before_install:
+  - export GR1CVERSION=0.10.1
+  - curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
+  - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1` = 73699369ee55b95aeb3742504e27676491b6d23db176e7e84c266e1a4845c6a3
+  - tar -xzf gr1c-$GR1CVERSION.tar.gz && cd gr1c-$GR1CVERSION && ./get-deps.sh
+  - make cudd && make all && make check
+  - mkdir -p ~/opt/bin && make install prefix=~/opt
+
+install:
+  - pip install .
+
+script: ./run_tests.py
+
+notifications:
+  email: false
