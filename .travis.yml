@@ -7,6 +7,12 @@ python:
 addons:
   apt:
     packages:
+    - gfortran
+    - libatlas-dev
+    - libatlas-base-dev
+    - liblapack-dev
+    - libgmp-dev
+    - libmpfr-dev
     - python-numpy
     - python-scipy
 
