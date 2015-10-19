@@ -470,24 +470,6 @@ class DRA(RabinAutomaton):
         self.automaton_type = 'Deterministic Rabin Automaton'
 
 
-class StreettAutomaton(OmegaAutomaton):
-    """Omega-automaton with Streett acceptance condition."""
-
-    pass
-
-
-class MullerAutomaton(OmegaAutomaton):
-    """Omega-automaton with Muller acceptance condition."""
-
-    pass
-
-
-class ParityAutomaton(OmegaAutomaton):
-    """Omega-automaton with Parity acceptance condition."""
-
-    pass
-
-
 class ParityGame(GameGraph):
     """GameGraph equipped with coloring.
 
