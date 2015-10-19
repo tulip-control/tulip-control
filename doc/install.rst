@@ -109,13 +109,17 @@ Testing your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TuLiP is distributed with tests for itself that, like those for NumPy, provide a
-way to check that TuLiP is behaving as expected.  To perform basic tests from the
-command-line, try ::
+way to check that TuLiP is behaving as expected.  To perform basic tests that
+should pass on any TuLiP installation, from the command-line try ::
 
   $ ./run_tests.py
 
-Use the flag "-h" to get a description of driver script options.  More details
-about testing TuLiP oriented for developers are provided in the :doc:`dev_guide`.
+There is an extensive test suite that includes tests involving optional
+dependencies. To perform it, ``./run_tests.py full``. It is important to note
+that some tests may fail because an **optional** dependency is missing, not
+because the TuLiP installation itself is flawed. Use the flag "-h" to get a
+description of driver script options.  More details about testing TuLiP oriented
+for developers are provided in the :doc:`dev_guide`.
 
 
 .. _newbie-scipy-sec-label:
