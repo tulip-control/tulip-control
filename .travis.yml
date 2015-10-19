@@ -20,7 +20,7 @@ before_install:
   - curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
   - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1` = 73699369ee55b95aeb3742504e27676491b6d23db176e7e84c266e1a4845c6a3
   - tar -xzf gr1c-$GR1CVERSION.tar.gz && cd gr1c-$GR1CVERSION && ./get-deps.sh
-  - make cudd && make all && make check
+  - make -j2 cudd && make -j2 all && make check
   - export PATH=`pwd`:$PATH
   - cd ..
   - pip install scipy
