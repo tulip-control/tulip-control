@@ -32,7 +32,6 @@
 """Base classes for labeled directed graphs"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import os
 import copy
 from pprint import pformat
@@ -40,12 +39,14 @@ from collections import Iterable
 import warnings
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
-
 # inline imports:
 #
 # from tulip.transys.export import graph2dot
 # from tulip.transys.export import save_d3
 # from tulip.transys.export import graph2dot
+
+
+logger = logging.getLogger(__name__)
 
 
 def label_is_desired(attr_dict, desired_dict):

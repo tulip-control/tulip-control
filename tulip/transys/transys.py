@@ -32,7 +32,6 @@
 """Transition System Module"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 from collections import Iterable
 from pprint import pformat
 from tulip.transys.labeled_graphs import (
@@ -43,6 +42,7 @@ from tulip.transys.mathset import PowerSet, MathSet
 # from tulip.transys.export import graph2promela
 
 
+logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
