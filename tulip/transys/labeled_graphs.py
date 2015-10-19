@@ -166,23 +166,37 @@ class States(object):
         return states
 
     def add(self, new_state, attr_dict=None, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_node}."""
+        """Wraps L{LabeledDiGraph.add_node},
+
+        which wraps C{networkx.MultiDiGraph.add_node}.
+        """
         self._warn_if_state_exists(new_state)
         logger.debug('Adding new id: ' + str(new_state))
         self.graph.add_node(new_state, attr_dict, check, **attr)
 
     def add_from(self, new_states, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_nodes_from}."""
+        """Wraps L{LabeledDiGraph.add_nodes_from},
+
+        which wraps C{networkx.MultiDiGraph.add_nodes_from}.
+        """
         self.graph.add_nodes_from(new_states, check, **attr)
 
     def remove(self, state):
-        """Remove single state."""
+        """Remove C{state} from states (including initial).
+
+        Wraps C{networkx.MultiDiGraph.remove_node}.
+        """
         if state in self.initial:
             self.initial.remove(state)
         self.graph.remove_node(state)
 
     def remove_from(self, states):
-        """Remove a list of states."""
+        """Remove a list of states.
+
+        Iterates C{States.remove} to imitate
+        C{networkx.MultiDiGraph.remove_nodes_from},
+        handling also initial states.
+        """
         for state in states:
             self.remove(state)
 
@@ -381,7 +395,7 @@ class Transitions(object):
     """
 
     def __init__(self, graph, deterministic=False):
-        """
+        """Initialize C{Transitions}.
 
         @type graph: L{LabeledDiGraph}
         """
@@ -421,13 +435,19 @@ class Transitions(object):
             raise Exception(msg)
 
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edge}."""
+        """Wrapper of L{LabeledDiGraph.add_edge},
+
+        which wraps C{networkx.MultiDiGraph.add_edge}.
+        """
         # self._breaks_determinism(from_state, labels)
         self.graph.add_edge(from_state, to_state,
                             attr_dict=attr_dict, check=check, **attr)
 
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edges_from}."""
+        """Wrapper of L{LabeledDiGraph.add_edges_from},
+
+        which wraps C{networkx.MultiDiGraph.add_edges_from}.
+        """
         self.graph.add_edges_from(transitions, attr_dict=attr_dict,
                                   check=check, **attr)
 
@@ -861,8 +881,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_node(self, n, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
 
-        Log warning if node already exists.
+        Overrides C{networkx.MultiDiGraph.add_node},
+        see that for details.
 
+        Log warning if node already exists.
         All other functionality remains the same.
 
         @param check: if True and untyped keys are passed,
@@ -887,8 +909,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_nodes_from(self, nodes, check=True, **attr):
         """Create or label multiple nodes.
 
-        For details see L{add_node} and
-        C{networkx.MultiDiGraph.add_nodes_from}
+        Overrides C{networkx.MultiDiGraph.add_nodes_from},
+        for details see that and L{LabeledDiGraph.add_node}.
         """
         for n in nodes:
             try:
@@ -903,6 +925,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
+
+        Overrides C{networkx.MultiDiGraph.add_edge},
+        see that for details.
 
           - Raise ValueError if C{u} or C{v} are not already nodes.
           - Raise Exception if edge (u, v, {}) exists.
@@ -919,8 +944,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - find the edge key, then use subscript notation:
 
                 C{G[i][j][key]['attr_name'] = attr_value}
-
-        For more details see C{networkx.MultiDiGraph.add_edge}.
 
         Notes
         =====
@@ -1004,7 +1027,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
 
-        For details see C{networkx.MultiDiGraph.add_edges_from}.
+        Overrides C{networkx.MultiDiGraph.add_edges_from},
+        see that for details.
+
         Only difference is that only 2 and 3-tuple edges allowed.
         Keys cannot be specified, because a bijection is maintained.
 
