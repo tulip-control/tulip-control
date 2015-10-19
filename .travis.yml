@@ -14,7 +14,6 @@ addons:
     - libgmp-dev
     - libmpfr-dev
     - python-numpy
-    - python-scipy
 
 before_install:
   - export GR1CVERSION=0.10.1
@@ -24,6 +23,7 @@ before_install:
   - make cudd && make all && make check
   - export PATH=`pwd`:$PATH
   - cd ..
+  - pip install scipy
 
 install:
   - pip install .
