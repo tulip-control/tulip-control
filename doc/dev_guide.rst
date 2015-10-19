@@ -55,9 +55,10 @@ be followed:
     U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
 
 - A script for running tests is ``run_test.py`` in the root of the source tree.
-  It searches under the directory ``tests/`` for files with names ending in
-  "_test.py", and passes these to `nose <http://readthedocs.org/docs/nose/>`_.
-  Use the flag "-h" to see driver script options.  Extra details about options:
+  Provided the ``-f`` or ``--testfiles`` switch, it searches under the directory
+  ``tests/`` for files with names ending in "_test.py", and passes these to
+  `nose <http://readthedocs.org/docs/nose/>`_.  Use the flag "-h" to see driver
+  script options.  Extra details about options:
 
   * The flag "--cover" to generate a coverage report, which will likely be
     placed under ``tests/cover/``.  It uses `Ned Batchelder's coverage module

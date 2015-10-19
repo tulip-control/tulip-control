@@ -128,13 +128,13 @@ Testing your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TuLiP is distributed with tests for itself that, like those for NumPy, provide a
-way to check that TuLiP is behaving as expected.  To perform all tests from the
+way to check that TuLiP is behaving as expected.  To perform basic tests from the
 command-line, try ::
 
   $ ./run_tests.py
 
-Use the flag "-h" to see driver script options.  More details about testing
-TuLiP oriented for developers are provided in the :doc:`dev_guide`.
+Use the flag "-h" to get a description of driver script options.  More details
+about testing TuLiP oriented for developers are provided in the :doc:`dev_guide`.
 
 .. _troubleshoot-sec-label:
 
