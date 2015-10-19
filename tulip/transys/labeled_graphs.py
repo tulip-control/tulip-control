@@ -1229,8 +1229,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if not self.states:
             print(
                 60 * '!' +
-                "\nThe system doesn't have any states to plot.\n"
-                + 60 * '!')
+                "\nThe system doesn't have any states to plot.\n" +
+                60 * '!')
             return
         if prog is None:
             prog = self.default_layout
