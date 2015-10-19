@@ -105,6 +105,19 @@ LTL
   which is based on `Wring <http://vlsi.colorado.edu/~rbloem/wring.html>`_.
 
 
+Testing your installation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TuLiP is distributed with tests for itself that, like those for NumPy, provide a
+way to check that TuLiP is behaving as expected.  To perform basic tests from the
+command-line, try ::
+
+  $ ./run_tests.py
+
+Use the flag "-h" to get a description of driver script options.  More details
+about testing TuLiP oriented for developers are provided in the :doc:`dev_guide`.
+
+
 .. _newbie-scipy-sec-label:
 
 New to Python?
@@ -123,18 +136,6 @@ Alternatives to Enthought are listed on the `SciPy installation webpage
 
 EPD seems to work fine on most platforms but if you cannot get it to work, more
 alternative packages for Mac OS X and Microsoft Windows are mentioned below.
-
-Testing your installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TuLiP is distributed with tests for itself that, like those for NumPy, provide a
-way to check that TuLiP is behaving as expected.  To perform basic tests from the
-command-line, try ::
-
-  $ ./run_tests.py
-
-Use the flag "-h" to get a description of driver script options.  More details
-about testing TuLiP oriented for developers are provided in the :doc:`dev_guide`.
 
 .. _troubleshoot-sec-label:
 
