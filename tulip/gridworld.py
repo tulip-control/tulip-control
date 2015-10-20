@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2013 by California Institute of Technology
+# Copyright (c) 2012, 2013, 2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,18 +35,19 @@ Routines for working with gridworlds.
 Note (24 June 2012): Several pieces of source code are taken or
 derived from btsynth; see http://scottman.net/2012/btsynth
 """
-
+from __future__ import print_function
 import itertools
 import random
 import numpy as np
 from numpy.random import random_integers as rnd
-import matplotlib.pyplot as plt
-import matplotlib.animation as anim
-import matplotlib.cm as mpl_cm
 
-from polytope import Polytope, Region
-from abstract.prop2part import prop2part, PropPreservingPartition
-from spec import GRSpec
+from spec.form import GRSpec
+
+# inline:
+#
+# import polytope
+# import abstract.prop2part
+# import matplotlib
 
 
 class GridWorld:
@@ -175,6 +176,13 @@ class GridWorld:
 
         @param font_pt: size (in points) for rendering text in the figure.
         """
+        try:
+            import matplotlib.pyplot as plt
+            import matplotlib.cm as mpl_cm
+        except ImportError:
+            print('matplotlib not available, so skipping GridWorld.plot()')
+            return
+
         if 1 in self.W:
             W = self.W.copy()
             W = np.ones(shape=W.shape) - W
@@ -432,6 +440,18 @@ class GridWorld:
 
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
+        try:
+            from polytope import Polytope, Region
+        except ImportError:
+            raise ImportError('GridWorld.dumpPPartition() requires '
+                              'the Python package polytope.')
+        try:
+            from abstract import prop2partition
+        except ImportError:
+            raise ImportError('GridWorld.dumpPPartition() requires '
+                              'tulip.abstract, which may not be available '
+                              'because optional dependencies are missing.')
+
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
         domain = Polytope(A=np.array([[0,-1],
@@ -457,7 +477,7 @@ class GridWorld:
                                             -offset[0]-j*side_lengths[0],
                                             offset[0]+(j+1)*side_lengths[0]],
                                           dtype=np.float64))
-        part = prop2part(domain, cells)
+        part = prop2partition.prop2part(domain, cells)
 
         adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
         for this_ind in range(len(part.list_region)):
@@ -499,8 +519,15 @@ class GridWorld:
         
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
-        disc_dynamics = PropPreservingPartition(list_region=[],
-                            list_prop_symbol=[], trans=[])
+        try:
+            from abstract import prop2partition
+        except ImportError:
+            raise ImportError('GridWorld.discreteTransitionSystem() requires '
+                              'tulip.abstract, which may not be available '
+                              'because optional dependencies are missing.')
+        disc_dynamics = prop2partition.PropPreservingPartition(list_region=[],
+                                                               list_prop_symbol=[],
+                                                               trans=[])
         num_cells = self.W.shape[0] * self.W.shape[1]
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
@@ -548,10 +575,6 @@ class GridWorld:
         who interact in a shared space; with an offset, we can make
         "sub-gridworlds" and enforce rules like mutual exclusion.
 
-        Syntax is that of gr1c; in particular, "next" variables are
-        primed. For example, x' refers to the variable x at the next
-        time step.
-
         Variables are named according to prefix_R_C, where prefix is
         given (attribute of this GridWorld object), R is the row, and
         column the cell (0-indexed).
@@ -586,22 +609,22 @@ class GridWorld:
                     continue  # Cannot start from an occupied cell.
                 spec_trans.append(self[i,j]+" -> (")
                 # Normal transitions:
-                spec_trans[-1] += self[i,j]+"'"
+                spec_trans[-1] += "X "+self[i,j]
                 if i > row_low and self.W[i-1][j] == 0:
-                    spec_trans[-1] += " | " + self[i-1,j]+"'"
+                    spec_trans[-1] += " || X " + self[i-1,j]
                 if j > col_low and self.W[i][j-1] == 0:
-                    spec_trans[-1] += " | " + self[i,j-1]+"'"
+                    spec_trans[-1] += " || X " + self[i,j-1]
                 if i < row_high-1 and self.W[i+1][j] == 0:
-                    spec_trans[-1] += " | " + self[i+1,j]+"'"
+                    spec_trans[-1] += " || X " + self[i+1,j]
                 if j < col_high-1 and self.W[i][j+1] == 0:
-                    spec_trans[-1] += " | " + self[i,j+1]+"'"
+                    spec_trans[-1] += " || X " + self[i,j+1]
                 spec_trans[-1] += ")"
 
         # Safety, static
         for i in range(row_low, row_high):
             for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
-                    spec_trans.append("!(" + self[i,j]+"'" + ")")
+                    spec_trans.append("!(X " + self[i,j] + ")")
 
         # Safety, mutex
         pos_indices = [k for k in itertools.product(range(row_low, row_high), range(col_low, col_high))]
@@ -613,17 +636,17 @@ class GridWorld:
             if outer_ind == (-1, -1):
                 conj.append(self.prefix+"_n_n'")
             else:
-                conj.append(self[outer_ind[0], outer_ind[1]]+"'")
+                conj.append("X "+self[outer_ind[0], outer_ind[1]])
             for inner_ind in pos_indices:
                 if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
                     or outer_ind == inner_ind):
                     continue
                 if inner_ind == (-1, -1):
-                    conj.append("(!" + self.prefix+"_n_n')")
+                    conj.append("(!X " + self.prefix+"_n_n)")
                 else:
-                    conj.append("(!" + self[inner_ind[0], inner_ind[1]]+"')")
-            disj.append("(" + " & ".join(conj) + ")")
-        spec_trans.append("\n| ".join(disj))
+                    conj.append("(!X " + self[inner_ind[0], inner_ind[1]]+")")
+            disj.append("(" + " && ".join(conj) + ")")
+        spec_trans.append("\n|| ".join(disj))
 
         sys_vars = []
         for i in range(row_low, row_high):
@@ -634,18 +657,13 @@ class GridWorld:
         for loc in self.init_list:
             mutex = [self[loc[0],loc[1]]]
             mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self[loc]])
-            initspec.append("(" + " & ".join(mutex) + ")")
-        init_str = " | ".join(initspec)
+            initspec.append("(" + " && ".join(mutex) + ")")
+        init_str = " || ".join(initspec)
 
         spec_goal = []
         for loc in self.goal_list:
             spec_goal.append(self[loc])
         
-        #oldspec = self.spec_old(offset, controlled_dyn)
-        #assert(spec_trans == oldspec.sys_safety)
-        #assert(sys_vars == oldspec.sys_vars)
-        #assert(init_str == oldspec.sys_init[0])
-        #assert(spec_goal == oldspec.sys_prog)
         self.offset = (0, 0)
         if controlled_dyn:
             return GRSpec(sys_vars=sys_vars, sys_init=init_str,
@@ -654,118 +672,6 @@ class GridWorld:
             return GRSpec(env_vars=sys_vars, env_init=init_str,
                           env_safety=spec_trans, env_prog=spec_goal)
                       
-    def spec_old(self, offset=(0, 0), controlled_dyn=True):
-        """Return GRSpec instance describing this gridworld.
-
-        The offset argument is motivated by the use-case of multiple
-        agents whose moves are governed by separate "gridworlds" but
-        who interact in a shared space; with an offset, we can make
-        "sub-gridworlds" and enforce rules like mutual exclusion.
-
-        Syntax is that of gr1c; in particular, "next" variables are
-        primed. For example, x' refers to the variable x at the next
-        time step.
-
-        Variables are named according to prefix_R_C, where prefix is
-        given (attribute of this GridWorld object), R is the row, and
-        column the cell (0-indexed).
-
-        For incorporating this gridworld into an existing
-        specification (e.g., respecting external references to cell
-        variable names), see the method L{GRSpec.importGridWorld}.
-
-        @param offset: index offset to apply when generating the
-                       specification; e.g., given prefix of "Y",
-                       offset=(2,1) would cause the variable for the
-                       cell at (0,3) to be named Y_2_4.
-
-        @param controlled_dyn: whether to treat this gridworld as
-                               describing controlled ("system") or
-                               uncontrolled ("environment") variables.
-
-        @rtype: L{GRSpec}
-        """
-        if self.W is None:
-            raise ValueError("Gridworld does not exist.")
-        row_low = 0
-        row_high = self.W.shape[0]-1
-        col_low = 0
-        col_high = self.W.shape[1]-1
-        spec_trans = []
-        # Safety, transitions
-        for i in range(row_low, row_high+1):
-            for j in range(col_low, col_high+1):
-                if self.W[i][j] == 1:
-                    continue  # Cannot start from an occupied cell.
-                spec_trans.append(self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+" -> (")
-                # Normal transitions:
-                spec_trans[-1] += self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+"'"
-                if i > row_low and self.W[i-1][j] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i-1+offset[0])+"_"+str(j+offset[1])+"'"
-                if j > col_low and self.W[i][j-1] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+offset[0])+"_"+str(j-1+offset[1])+"'"
-                if i < row_high and self.W[i+1][j] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+1+offset[0])+"_"+str(j+offset[1])+"'"
-                if j < col_high and self.W[i][j+1] == 0:
-                    spec_trans[-1] += " | " + self.prefix+"_"+str(i+offset[0])+"_"+str(j+1+offset[1])+"'"
-                spec_trans[-1] += ")"
-
-        # Safety, static
-        for i in range(row_low, row_high+1):
-            for j in range(col_low, col_high+1):
-                if self.W[i][j] == 1:
-                    spec_trans.append("!(" + self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])+"'" + ")")
-
-        # Safety, mutex
-        first_subformula = True
-        spec_trans.append("")
-        pos_indices = [k for k in itertools.product(range(row_low, row_high+1), range(col_low, col_high+1))]
-        for outer_ind in pos_indices:
-            if outer_ind != (-1, -1) and self.W[outer_ind[0]][outer_ind[1]] == 1:
-                continue
-            if not first_subformula:
-                spec_trans[-1] += "\n| "
-            if outer_ind == (-1, -1):
-                spec_trans[-1] += "(" + self.prefix+"_n_n'"
-            else:
-                spec_trans[-1] += "(" + self.prefix+"_"+str(outer_ind[0]+offset[0])+"_"+str(outer_ind[1]+offset[1])+"'"
-            for inner_ind in pos_indices:
-                if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
-                    or outer_ind == inner_ind):
-                    continue
-                if inner_ind == (-1, -1):
-                    spec_trans[-1] += " & (!" + self.prefix+"_n_n')"
-                else:
-                    spec_trans[-1] += " & (!" + self.prefix+"_"+str(inner_ind[0]+offset[0])+"_"+str(inner_ind[1]+offset[1])+"'" + ")"
-            spec_trans[-1] += ")"
-            first_subformula = False
-
-        pvars = []
-        for i in range(self.W.shape[0]):
-            for j in range(self.W.shape[1]):
-                pvars.append(self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1]))
-
-        init_str = ""
-        for loc in self.init_list:
-            if len(init_str) > 0:
-                init_str += " | "
-            init_str += "(" + self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1])
-            init_str_mutex = " & ".join(["!"+ovar for ovar in pvars if ovar != self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1])])
-            if len(init_str_mutex) > 0:
-                init_str += " & " + init_str_mutex
-            init_str += ")"
-
-        spec_goal = []
-        for loc in self.goal_list:
-            spec_goal.append(self.prefix+"_"+str(loc[0]+offset[0])+"_"+str(loc[1]+offset[1]))
-
-        if controlled_dyn:
-            return GRSpec(sys_vars=pvars, sys_init=init_str,
-                          sys_safety=spec_trans, sys_prog=spec_goal)
-        else:
-            return GRSpec(env_vars=pvars, env_init=init_str,
-                          env_safety=spec_trans, env_prog=spec_goal)
-    
     def scale(self, xf=1, yf=1):
         """Return a new gridworld equivalent to this but scaled by integer
         factor (xf, yf). In the new world, obstacles are increased in size but
@@ -952,7 +858,7 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     if ptop is None:
         ptop = np.random.randint(0, size[0]-passage_width)
     passage = range(ptop, ptop+passage_width)
-    print passage, ptop
+    print((passage, ptop))
     for y in range(0, size[0]):
         if y not in passage:
             for x in range(izone, gzone):
@@ -1175,6 +1081,13 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
                         series of images "<save_prefix>nnn.png" which can be 
                         compiled into an animated GIF.
     """
+    try:
+        import matplotlib.pyplot as plt
+        import matplotlib.animation
+    except ImportError:
+        print('matplotlib not available, so skipping gridworld.animate_paths()')
+        return
+
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -1198,11 +1111,13 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         lines.append((l, l_trail))
     
     if not save_prefix:
-        ani = anim.FuncAnimation(fig, update_line, len(paths[0]), fargs=(data,lines),
-            interval=500)
+        ani = matplotlib.animation.FuncAnimation(fig, update_line,
+                                                 len(paths[0]),
+                                                 fargs=(data,lines),
+                                                 interval=500)
         plt.show()
     else:
-        print "Writing %s000.png - %s%03d.png" % (save_prefix, save_prefix, len(paths[0]))
+        print("Writing %s000.png - %s%03d.png" % (save_prefix, save_prefix, len(paths[0])))
         for n in range(len(paths[0])):
             update_line(n, data, lines)
     
