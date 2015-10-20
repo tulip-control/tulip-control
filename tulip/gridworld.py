@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2013, 2015 by California Institute of Technology
+# Copyright (c) 2012-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ derived from btsynth; see http://scottman.net/2012/btsynth
 """
 from __future__ import print_function
 import itertools
+import copy
 import random
 import numpy as np
 from numpy.random import random_integers as rnd
@@ -77,6 +78,8 @@ class GridWorld:
             return True
         if self.W is None or other.W is None:
             return False  # Only one of the two is undefined.
+        if self.size() != other.size():
+            return False
         if np.all(self.W != other.W):
             return False
         if self.goal_list != other.goal_list:
@@ -91,7 +94,7 @@ class GridWorld:
     def __str__(self):
         return self.pretty(show_grid=True)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key, use_next=False, nonbool=True):
         """Return variable name corresponding to this cell.
 
         Supports negative wrapping, e.g., if Y is an instance of
@@ -99,6 +102,10 @@ class GridWorld:
         cell in the bottom-right corner, Y[0,-1] the name of the
         top-right corner cell, etc.  As usual in Python, you can only
         wrap around once.
+
+        @param next: Use the primed (i.e., state at next time step)
+                 form of the variable.
+        @param nonbool: If True, then use variables with integer domains.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
@@ -110,10 +117,27 @@ class GridWorld:
             key = (self.W.shape[0]+key[0], key[1])
         if key[1] < 0:
             key = (key[0], self.W.shape[1]+key[1])
-        return str(self.prefix)+"_"+str(key[0] + self.offset[0])+"_"+str(key[1] + self.offset[1])
+        if nonbool:
+            if use_next:
+                return "((X ("+str(self.prefix)+"_r = "+str(key[0] + self.offset[0])+")) && (X ("+str(self.prefix)+"_c = "+str(key[1] + self.offset[1])+")))"
+            else:
+                return "(("+str(self.prefix)+"_r = "+str(key[0] + self.offset[0])+") && ("+str(self.prefix)+"_c = "+str(key[1] + self.offset[1])+"))"
+        else:
+            if use_next:
+                out = 'X '
+            else:
+                out = ''
+            out += str(self.prefix)+"_"+str(key[0] + self.offset[0])+"_"+str(key[1] + self.offset[1])
+            return out
+
+    def __copy__(self):
+        return GridWorld(self.dumps(), prefix=self.prefix)
+
+    def copy(self):
+        return self.__copy__()
 
 
-    def state(self, key, offset=(0, 0)):
+    def state(self, key, offset=(0, 0), nonbool=True):
         """Return dictionary form of state with keys of variable names.
 
         Supports negative indices for key, e.g., as in __getitem__.
@@ -122,6 +146,8 @@ class GridWorld:
         agents whose moves are governed by separate "gridworlds" but
         who interact in a shared space; with an offset, we can make
         "sub-gridworlds" and enforce rules like mutual exclusion.
+
+        @param nonbool: If True, then use variables with integer domains.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
@@ -134,22 +160,32 @@ class GridWorld:
         if key[1] < 0:
             key = (key[0], self.W.shape[1]+key[1])
         output = dict()
-        for i in range(self.W.shape[0]):
-            for j in range(self.W.shape[1]):
-                output[self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])] = 0
-        output[self.prefix+"_"+str(key[0]+offset[0])+"_"+str(key[1]+offset[1])] = 1
+        if nonbool:
+            output[self.prefix+"_r"] = key[0]+offset[0]
+            output[self.prefix+"_c"] = key[1]+offset[1]
+        else:
+            for i in range(self.W.shape[0]):
+                for j in range(self.W.shape[1]):
+                    output[self.prefix+"_"+str(i+offset[0])+"_"+str(j+offset[1])] = 0
+            output[self.prefix+"_"+str(key[0]+offset[0])+"_"+str(key[1]+offset[1])] = 1
         return output
 
 
-    def isEmpty(self, coord):
+    def isEmpty(self, coord, extend=False):
         """Is cell at coord empty?
 
         @param coord: (row, column) pair; supports negative indices.
+        @param extend: If True, then do not wrap indices and treat any
+                 cell outside the grid as being occupied.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         if len(coord) != len(self.W.shape):
             raise ValueError("malformed gridworld coord.")
+        if extend and (coord[0] < 0 or coord[1] < 0
+                       or coord[0] > self.W.shape[0]-1
+                       or coord[1] > self.W.shape[1]-1):
+            return False
         if self.W[coord[0]][coord[1]] == 0:
             return True
         else:
@@ -166,6 +202,58 @@ class GridWorld:
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 0
+
+    def isReachable(self, start, stop):
+        """Decide whether there is a path from start cell to stop.
+
+        Assume the gridworld is 4-connected.
+
+        @param start: (row, column) pair; supports negative indices.
+        @param stop: same as start argument.
+
+        @return: True if there is a path, False otherwise.
+        """
+        # Check input values and handle negative coordinates
+        if self.W is None:
+            raise ValueError("Gridworld is empty; no names available.")
+
+        if len(start) != len(self.W.shape):
+            raise ValueError("malformed gridworld start coordinate.")
+        if start[0] < -self.W.shape[0] or start[1] < -self.W.shape[1] or start[0] >= self.W.shape[0] or start[1] >= self.W.shape[1]:
+            raise ValueError("gridworld start coordinate is out of bounds.")
+        if start[0] < 0:
+            start = (self.W.shape[0]+start[0], start[1])
+        if start[1] < 0:
+            start = (start[0], self.W.shape[1]+start[1])
+
+        if len(stop) != len(self.W.shape):
+            raise ValueError("malformed gridworld stop coordinate.")
+        if stop[0] < -self.W.shape[0] or stop[1] < -self.W.shape[1] or stop[0] >= self.W.shape[0] or stop[1] >= self.W.shape[1]:
+            raise ValueError("gridworld stop coordinate is out of bounds.")
+        if stop[0] < 0:
+            stop = (self.W.shape[0]+stop[0], stop[1])
+        if stop[1] < 0:
+            stop = (stop[0], self.W.shape[1]+stop[1])
+
+        # Quick sanity check
+        if not (self.isEmpty(start) and self.isEmpty(stop)):
+            return False
+
+        # Similar to depth-first search
+        OPEN = [start]
+        CLOSED = []
+        while len(OPEN) > 0:
+            current = OPEN.pop()
+            if current == stop:
+                return True
+            for (i,j) in [(1,0), (-1,0), (0,1), (0,-1)]:
+                if (current[0]+i < 0 or current[0]+i >= self.W.shape[0]
+                    or current[1]+j < 0 or current[1]+j >= self.W.shape[1]):
+                    continue
+                if self.isEmpty((current[0]+i, current[1]+j)) and (current[0]+i, current[1]+j) not in CLOSED and (current[0]+i, current[1]+j) not in OPEN:
+                    OPEN.append((current[0]+i, current[1]+j))
+            CLOSED.append(current)
+        return False
 
     def plot(self, font_pt=18, show_grid=False, grid_width=2):
         """Draw figure depicting this gridworld.
@@ -398,45 +486,61 @@ class GridWorld:
         return out_str
 
 
-    def dumpsubworld(self, size, offset=(0, 0), prefix="Y"):
+    def dumpsubworld(self, size, offset=(0, 0), prefix="Y", extend=False):
         """Generate new GridWorld instance from part of current one.
 
         Does not perform automatic truncation (to make desired
         subworld fit); instead a ValueError exception is raised.
+        However, the "extend" argument can be used to achieve
+        something similar.
+
         Possible initial positions and goals are not included in the
         returned GridWorld instance.
 
         @param size: (height, width)
         @param prefix: String to be used as prefix for naming
-                       subgridworld cell variables.
+                 subgridworld cell variables.
+        @param extend: If True, then any size and offset is permitted,
+                 where any positions outside the actual gridworld are
+                 assumed to be occupied.
+
         @rtype: L{GridWorld}
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
         if len(size) != len(self.W.shape) or len(offset) != len(self.W.shape):
             raise ValueError("malformed size or offset.")
-        if offset[0] < 0 or offset[0] >= self.W.shape[0] or offset[1] < 0 or offset[1] >= self.W.shape[1]:
-            raise ValueError("offset is out of bounds.")
-        if size[0] < 1 or size[1] < 1 or offset[0]+size[0] > self.W.shape[0] or offset[1]+size[1] > self.W.shape[1]:
-            raise ValueError("unworkable subworld size, given offset.")
-        sub = GridWorld(prefix=prefix)
-        sub.W = self.W[offset[0]:(offset[0]+size[0]), offset[1]:(offset[1]+size[1])].copy()
+        if not extend:
+            if offset[0] < 0 or offset[0] >= self.W.shape[0] or offset[1] < 0 or offset[1] >= self.W.shape[1]:
+                raise ValueError("offset is out of bounds.")
+            if size[0] < 1 or size[1] < 1 or offset[0]+size[0] > self.W.shape[0] or offset[1]+size[1] > self.W.shape[1]:
+                raise ValueError("unworkable subworld size, given offset.")
+            sub = GridWorld(prefix=prefix)
+            sub.W = self.W[offset[0]:(offset[0]+size[0]), offset[1]:(offset[1]+size[1])].copy()
+        else:
+            sub = GridWorld(prefix=prefix)
+            sub.W = np.ones(size)
+            self_offset = (max(offset[0],0), max(offset[1],0))
+            self_offset = (min(self_offset[0],self.W.shape[0]-1), min(self_offset[1],self.W.shape[1]-1))
+            sub_offset = (max(-offset[0],0), max(-offset[1],0))
+            sub_offset = (min(sub_offset[0], sub.W.shape[0]-1), min(sub_offset[1], sub.W.shape[1]-1))
+            actual_size = (min(size[0], self.W.shape[0]-self_offset[0], sub.W.shape[0]-sub_offset[0]),
+                           min(size[1], self.W.shape[1]-self_offset[1], sub.W.shape[1]-sub_offset[1]))
+            sub.W[sub_offset[0]:(sub_offset[0]+actual_size[0]), sub_offset[1]:(sub_offset[1]+actual_size[1])] = self.W[self_offset[0]:(self_offset[0]+actual_size[0]), self_offset[1]:(self_offset[1]+actual_size[1])]
         return sub
 
 
-    def dumpPPartition(self, side_lengths=(1., 1.), offset=(0., 0.)):
+    def dumpPPartition(self, side_lengths=(1., 1.), offset=(0., 0.), nonbool=True):
         """Return proposition-preserving partition from this gridworld.
 
         In setting the initial transition matrix, we assume the
         gridworld is 4-connected.
 
         @param side_lengths: pair (W, H) giving width and height of
-                             each cell, assumed to be the same across
-                             the grid.
+                 each cell, assumed to be the same across the grid.
         @param offset: 2-dimensional coordinate declaring where the
-                       bottom-left corner of the gridworld should be
-                       placed in the continuous space; default places
-                       it at the origin.
+                 bottom-left corner of the gridworld should be placed
+                 in the continuous space; default places it at the origin.
 
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
@@ -466,8 +570,12 @@ class GridWorld:
         cells = {}
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
+                if nonbool:
+                    cell_var = self.__getitem__((i,j))
+                else:
+                    cell_var = self.prefix+"_"+str(i)+"_"+str(j)
                 #adjacency[i]
-                cells[self.prefix+"_"+str(i)+"_"+str(j)] \
+                cells[cell_var] \
                     = Polytope(A=np.array([[0,-1],
                                            [0,1],
                                            [-1,0],
@@ -481,41 +589,41 @@ class GridWorld:
 
         adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
         for this_ind in range(len(part.list_region)):
-            (prefix, i, j) = extract_coord(part.list_prop_symbol[part.list_region[this_ind].list_prop.index(1)])
+            (prefix, i, j) = extract_coord(part.list_prop_symbol[part.list_region[this_ind].list_prop.index(1)], nonbool=nonbool)
             if self.W[i][j] != 0:
                 continue  # Static obstacle cells are not traversable
             adjacency[this_ind, this_ind] = 1
             if i > 0 and self.W[i-1][j] == 0:
-                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i-1)+"_"+str(j))
-                ind = 0
-                while part.list_region[ind].list_prop[symbol_ind] == 0:
-                    ind += 1
-                adjacency[ind, this_ind] = 1
+                row_index = i-1
+                col_index = j
             if j > 0 and self.W[i][j-1] == 0:
-                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j-1))
-                ind = 0
-                while part.list_region[ind].list_prop[symbol_ind] == 0:
-                    ind += 1
-                adjacency[ind, this_ind] = 1
+                row_index = i
+                col_index = j-1
             if i < self.W.shape[0]-1 and self.W[i+1][j] == 0:
-                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i+1)+"_"+str(j))
-                ind = 0
-                while part.list_region[ind].list_prop[symbol_ind] == 0:
-                    ind += 1
-                adjacency[ind, this_ind] = 1
+                row_index = i+1
+                col_index = j
             if j < self.W.shape[1]-1 and self.W[i][j+1] == 0:
-                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(i)+"_"+str(j+1))
-                ind = 0
-                while part.list_region[ind].list_prop[symbol_ind] == 0:
-                    ind += 1
-                adjacency[ind, this_ind] = 1
+                row_index = i
+                col_index = j+1
+            if nonbool:
+                symbol_ind = part.list_prop_symbol.index(self.__getitem__((row_index, col_index)))
+            else:
+                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(row_index)+"_"+str(col_index))
+            ind = 0
+            while part.list_region[ind].list_prop[symbol_ind] == 0:
+                ind += 1
+            adjacency[ind, this_ind] = 1
         part.adj = adjacency
         return part
     
-    def discreteTransitionSystem(self):
-        """ Write a discrete transition system suitable for synthesis.
+    def discreteTransitionSystem(self, nonbool=True):
+        """Write a discrete transition system suitable for synthesis.
         Unlike dumpPPartition, this does not create polytopes; it is 
         nonetheless useful and computationally less expensive.
+
+        @param nonbool: If True, then use variables with integer domains.
+                 In particular this affects region naming, as achieved
+                 with L{__getitem__}.
         
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
@@ -525,20 +633,19 @@ class GridWorld:
             raise ImportError('GridWorld.discreteTransitionSystem() requires '
                               'tulip.abstract, which may not be available '
                               'because optional dependencies are missing.')
-        disc_dynamics = prop2partition.PropPreservingPartition(list_region=[],
-                                                               list_prop_symbol=[],
-                                                               trans=[])
+        disc_dynamics = PropPreservingPartition(list_region=[],
+                            list_prop_symbol=[], trans=[])
         num_cells = self.W.shape[0] * self.W.shape[1]
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
                 flat = lambda x, y: x*self.W.shape[1] + y
                 # Proposition
-                prop = self[i,j]
+                prop = self.__getitem__((i,j), nonbool=nonbool)
                 disc_dynamics.list_prop_symbol.append(prop)
                 # Region
                 r = [ 0 for x in range(0, num_cells) ]
                 r[flat(i,j)] = 1
-                disc_dynamics.list_region.append(Region("R_" + prop, r))
+                disc_dynamics.list_region.append(pc.Region("R_" + prop, r))
                 # Transitions
                 # trans[p][q] if q -> p
                 t = [ 0 for x in range(0, num_cells) ]
@@ -566,8 +673,8 @@ class GridWorld:
                     t[flat(*path[(n-1)%len(path)])] = 1
                 trans.append(t)
         return trans
-        
-    def spec(self, offset=(0, 0), controlled_dyn=True):
+
+    def spec(self, offset=(0, 0), controlled_dyn=True, nonbool=True):
         """Return GRSpec instance describing this gridworld.
 
         The offset argument is motivated by the use-case of multiple
@@ -575,22 +682,31 @@ class GridWorld:
         who interact in a shared space; with an offset, we can make
         "sub-gridworlds" and enforce rules like mutual exclusion.
 
-        Variables are named according to prefix_R_C, where prefix is
-        given (attribute of this GridWorld object), R is the row, and
-        column the cell (0-indexed).
+        If nonbool is False, then variables are named according to
+        prefix_R_C, where prefix is given (attribute of this GridWorld
+        object), R is the row, and C is the column of the cell
+        (0-indexed).  If nonbool is True (default), cells are
+        identified with subformulae of the form::
+
+          ((prefix_r = R) & (prefix_c = C))
+
+        L{GridWorld.__getitem__} and L{extract_coord} provide
+        reference implementations.
 
         For incorporating this gridworld into an existing
         specification (e.g., respecting external references to cell
         variable names), see the method L{GRSpec.importGridWorld}.
 
         @param offset: index offset to apply when generating the
-                       specification; e.g., given prefix of "Y",
-                       offset=(2,1) would cause the variable for the
-                       cell at (0,3) to be named Y_2_4.
+                 specification; e.g., given prefix of "Y",
+                 offset=(2,1) would cause the variable for the cell at
+                 (0,3) to be named Y_2_4.
 
         @param controlled_dyn: whether to treat this gridworld as
-                               describing controlled ("system") or
-                               uncontrolled ("environment") variables.
+                 describing controlled ("system") or uncontrolled
+                 ("environment") variables.
+
+        @param nonbool: If True, then use variables with integer domains.
 
         @rtype: L{GRSpec}
         """
@@ -601,76 +717,88 @@ class GridWorld:
         col_low = 0
         col_high = self.W.shape[1]
         spec_trans = []
-        self.offset = offset
+        orig_offset = copy.copy(self.offset)
+        if nonbool:
+            self.offset = (0,0)
+        else:
+            self.offset = offset
         # Safety, transitions
         for i in range(row_low, row_high):
             for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
                     continue  # Cannot start from an occupied cell.
-                spec_trans.append(self[i,j]+" -> (")
+                spec_trans.append(self.__getitem__((i,j), nonbool=nonbool)+" -> (")
                 # Normal transitions:
-                spec_trans[-1] += "X "+self[i,j]
+                spec_trans[-1] += self.__getitem__((i,j), use_next=True, nonbool=nonbool)
                 if i > row_low and self.W[i-1][j] == 0:
-                    spec_trans[-1] += " || X " + self[i-1,j]
+                    spec_trans[-1] += " || " + self.__getitem__((i-1,j), use_next=True, nonbool=nonbool)
                 if j > col_low and self.W[i][j-1] == 0:
-                    spec_trans[-1] += " || X " + self[i,j-1]
+                    spec_trans[-1] += " || " + self.__getitem__((i,j-1), use_next=True, nonbool=nonbool)
                 if i < row_high-1 and self.W[i+1][j] == 0:
-                    spec_trans[-1] += " || X " + self[i+1,j]
+                    spec_trans[-1] += " || " + self.__getitem__((i+1,j), use_next=True, nonbool=nonbool)
                 if j < col_high-1 and self.W[i][j+1] == 0:
-                    spec_trans[-1] += " || X " + self[i,j+1]
+                    spec_trans[-1] += " || " + self.__getitem__((i,j+1), use_next=True, nonbool=nonbool)
                 spec_trans[-1] += ")"
 
         # Safety, static
         for i in range(row_low, row_high):
             for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
-                    spec_trans.append("!(X " + self[i,j] + ")")
+                    spec_trans.append("!(" + self.__getitem__((i,j), use_next=True, nonbool=nonbool) + ")")
 
-        # Safety, mutex
-        pos_indices = [k for k in itertools.product(range(row_low, row_high), range(col_low, col_high))]
-        disj = []
-        for outer_ind in pos_indices:
-            conj = []
-            if outer_ind != (-1, -1) and self.W[outer_ind[0]][outer_ind[1]] == 1:
-                continue
-            if outer_ind == (-1, -1):
-                conj.append(self.prefix+"_n_n'")
-            else:
-                conj.append("X "+self[outer_ind[0], outer_ind[1]])
-            for inner_ind in pos_indices:
-                if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
-                    or outer_ind == inner_ind):
+        # Safety, mutex; only needed when using boolean variables for cells
+        if not nonbool:
+            pos_indices = [k for k in itertools.product(range(row_low, row_high), range(col_low, col_high))]
+            disj = []
+            for outer_ind in pos_indices:
+                conj = []
+                if outer_ind != (-1, -1) and self.W[outer_ind[0]][outer_ind[1]] == 1:
                     continue
-                if inner_ind == (-1, -1):
-                    conj.append("(!X " + self.prefix+"_n_n)")
+                if outer_ind == (-1, -1):
+                    conj.append(self.prefix+"_n_n'")
                 else:
-                    conj.append("(!X " + self[inner_ind[0], inner_ind[1]]+")")
-            disj.append("(" + " && ".join(conj) + ")")
-        spec_trans.append("\n|| ".join(disj))
+                    conj.append(self.__getitem__((outer_ind[0], outer_ind[1]), use_next=True, nonbool=nonbool))
+                for inner_ind in pos_indices:
+                    if ((inner_ind != (-1, -1) and self.W[inner_ind[0]][inner_ind[1]] == 1)
+                        or outer_ind == inner_ind):
+                        continue
+                    if inner_ind == (-1, -1):
+                        conj.append("(!X " + self.prefix+"_n_n)")
+                    else:
+                        conj.append("(!" + self.__getitem__((inner_ind[0], inner_ind[1]), use_next=True, nonbool=nonbool)+")")
+                disj.append("(" + " && ".join(conj) + ")")
+            spec_trans.append("\n|| ".join(disj))
 
-        sys_vars = []
-        for i in range(row_low, row_high):
-            for j in range(col_low, col_high):
-                sys_vars.append(self[i,j])
+        if nonbool:
+            sys_vars = {self.prefix+"_r": (0, self.W.shape[0]-1),
+                        self.prefix+"_c": (0, self.W.shape[1]-1)}
+        else:
+            sys_vars = set()
+            for i in range(row_low, row_high):
+                for j in range(col_low, col_high):
+                    sys_vars.add(self.__getitem__((i,j), nonbool=nonbool))
 
-        initspec = []
-        for loc in self.init_list:
-            mutex = [self[loc[0],loc[1]]]
-            mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self[loc]])
-            initspec.append("(" + " && ".join(mutex) + ")")
+        if nonbool:
+            initspec = [self.__getitem__(loc, nonbool=nonbool) for loc in self.init_list]
+        else:
+            initspec = []
+            for loc in self.init_list:
+                mutex = [self.__getitem__((loc[0],loc[1]), nonbool=nonbool)]
+                mutex.extend(["!"+ovar for ovar in sys_vars if ovar != self.__getitem__(loc, nonbool=nonbool)])
+                initspec.append("(" + " && ".join(mutex) + ")")
         init_str = " || ".join(initspec)
 
         spec_goal = []
         for loc in self.goal_list:
-            spec_goal.append(self[loc])
+            spec_goal.append(self.__getitem__(loc, nonbool=nonbool))
         
-        self.offset = (0, 0)
+        self.offset = orig_offset
         if controlled_dyn:
-            return GRSpec(sys_vars=sys_vars, sys_init=init_str,
-                          sys_safety=spec_trans, sys_prog=spec_goal)
+            return GRSpec(sys_vars=sys_vars,
+                          sys_init=init_str, sys_safety=spec_trans, sys_prog=spec_goal)
         else:
-            return GRSpec(env_vars=sys_vars, env_init=init_str,
-                          env_safety=spec_trans, env_prog=spec_goal)
+            return GRSpec(env_vars=sys_vars,
+                          env_init=init_str, env_safety=spec_trans, env_prog=spec_goal)
                       
     def scale(self, xf=1, yf=1):
         """Return a new gridworld equivalent to this but scaled by integer
@@ -724,8 +852,10 @@ def world_from_1D(W, size, goal_list, init_list, prefix="Y"):
     gw.init_list = init_list
     return gw
 
+
 def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
-        obstacle_size=(1,1)):
+                 ensure_feasible=False, timeout=None,
+                 num_trolls=0):
     """Generate random gridworld of given size.
 
     While an instance of GridWorld is returned, other views of the
@@ -737,45 +867,89 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     @param num_init: number of possible initial positions.
     @param num_goals: number of positions to be visited infinitely often.
     @param prefix: string to be used as prefix for naming gridworld
-                   cell variables.
+             cell variables.
 
-    @rtype: L{GridWorld}
+    @param num_trolls: number of random trolls to generate, each
+             occupies an area of radius 1.  If nonzero, then an
+             instance of MGridWorld will be returned.
+
+    @param ensure_feasible: guarantee that all goals and initial
+             positions are mutually reachable, assuming a 4-connected
+             grid. This method may not be complete, i.e., may fail to
+             return a feasible random gridworld with the given
+             parameters.  Note that "feasibility" does not account for
+             nondeterminism (in particular, nonzero num_trolls
+             argument has no effect.)
+
+    @param timeout: if ensure_feasible, then quit if no correct random
+             world is found before timeout seconds.  If timeout is
+             None (default), then do not impose time constraints.
+
+    @rtype: L{GridWorld}, or None if timeout occurs.
     """
+    if ensure_feasible and timeout is not None:
+        st = time.time()
     num_cells = size[0]*size[1]
-    obstacle_area = obstacle_size[0]*obstacle_size[1]
     goal_list = []
     init_list = []
+    troll_list = []
     W = np.zeros(num_cells, dtype=np.int32)
-    num_blocks = int(np.ceil(wall_density*num_cells/obstacle_area))
-    row_col = lambda k: (k/size[1], k%size[1])
-    try:
-        for i in range(num_blocks):
-            avail_inds = list(np.array(range(num_cells))[W==0])
-            filled = False
-            while not filled:
-                coord = avail_inds[np.random.randint(low=0, high=len(avail_inds))]
-                if row_col(coord)[0] + obstacle_size[0] > size[0] \
-                    or row_col(coord)[1] + obstacle_size[1] > size[1]:
-                        avail_inds.remove(coord)
-                        continue
-                cells = [ coord + y*size[1] + x
-                    for y in range(obstacle_size[0])
-                    for x in range(obstacle_size[1])]
-                try:
-                    if all([W[c] == 0 for c in cells]):
-                        for c in cells:
-                            W[c] = 1
-                        filled = True
-                    else:
-                        avail_inds.remove(coord)
-                except IndexError:
-                    avail_inds.remove(coord)
-        goal_list = place_features(W, num_goals)
-        init_list = place_features(W, num_init)
-    except ValueError:
-        # We've run out of available indices, so cannot produce a world
-        raise ValueError("World too small for number of features")
-    return world_from_1D(W, size, goal_list, init_list, prefix)
+    num_blocks = int(np.round(wall_density*num_cells))
+    for i in range(num_goals):
+        avail_inds = np.array(range(num_cells))[W==0]
+        avail_inds = [k for k in avail_inds if k not in goal_list]
+        goal_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+    for i in range(num_init):
+        avail_inds = np.array(range(num_cells))[W==0]
+        avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list]
+        init_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+    for i in range(num_trolls):
+        avail_inds = np.array(range(num_cells))[W==0]
+        avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list and k not in troll_list]
+        troll_list.append(avail_inds[np.random.randint(low=0, high=len(avail_inds))])
+    bcounter = 0
+    while bcounter < num_blocks:  # Add blocks (or "wall cells")
+        avail_inds = np.array(range(num_cells))[W==0]
+        avail_inds = [k for k in avail_inds if k not in goal_list and k not in init_list and k not in troll_list]
+        changed_index = np.random.randint(low=0, high=len(avail_inds))
+        W[avail_inds[changed_index]] = 1
+        bcounter += 1
+        if ensure_feasible:
+            if (timeout is not None) and (time.time()-st > timeout):
+                return None
+            # If feasibility must be guaranteed, then check whether
+            # the newly unreachable cell is permissible.
+            W_tmp = W.reshape(size)
+            goal_list_tmp = [(k/size[1], k%size[1]) for k in goal_list]
+            init_list_tmp = [(k/size[1], k%size[1]) for k in init_list]
+            troll_list_tmp = [(k/size[1], k%size[1]) for k in troll_list]
+            world = GridWorld(prefix=prefix)
+            world.W = W_tmp
+            chain_of_points = init_list_tmp[:]
+            chain_of_points.extend(goal_list_tmp)
+            is_feasible = True
+            for i in range(len(chain_of_points)):
+                if not world.isReachable(chain_of_points[i], chain_of_points[(i+1)%len(chain_of_points)]):
+                    is_feasible = False
+                    break
+            if not is_feasible:
+                W[avail_inds[changed_index]] = 0
+                bcounter -= 1
+    # Reshape the gridworld to final form; build and return the result.
+    W = W.reshape(size)
+    goal_list = [(k/size[1], k%size[1]) for k in goal_list]
+    init_list = [(k/size[1], k%size[1]) for k in init_list]
+    troll_list = [((k/size[1], k%size[1]), 1) for k in troll_list]
+    world = GridWorld(prefix=prefix)
+    world.W = W
+    world.goal_list = goal_list
+    world.init_list = init_list
+    if num_trolls > 0:
+        world = MGridWorld(world)
+        world.troll_list = troll_list
+
+    return world
+
 
 # From http://en.wikipedia.org/wiki/Maze_generation_algorithm#Python_code_example
 # (08/21/2012)
@@ -881,34 +1055,46 @@ def unoccupied(size, prefix="Y"):
         raise TypeError("invalid gridworld size.")
     return GridWorld(str(size[0])+" "+str(size[1]), prefix="Y")
 
-def add_trolls(Y, troll_list, prefix="X"):
+def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
+               get_moves_lists=True):
     """Create GR(1) specification with troll-like obstacles.
 
     Trolls are introduced into the specification with names derived
-    from the given prefix and a number (matching the order in troll_list).
+    from the given prefix and a number (matching the order in
+    troll_list).  Note that mutual exclusion is only between the
+    controlled "Y gridworld" position and each troll, but not
+    between trolls.
 
     @type Y: L{GridWorld}
     @param Y: The controlled gridworld, describing in particular
-              static obstacles that must be respected by the trolls.
+             static obstacles that must be respected by the trolls.
 
     @param troll_list: List of pairs of center position, to which the
-                       troll must always eventually return, and radius
-                       defining the extent of the trollspace.  The
-                       radius is measured using infinity-norm.
+             troll must always eventually return, and radius defining
+             the extent of the trollspace.  The radius is measured
+             using infinity-norm.
+    @param start_anywhere: If True, then initial troll position can be
+             anywhere in its trollspace.  Else (default), the troll is
+             assumed to begin each game at its center position.
+    @param nonbool: If True, then use variables with integer domains.
+    @param get_moves_lists: Consult returned value description below.
     
     @rtype: (L{GRSpec}, list)
 
-    @return: Returns (spec, moves_N) where spec is the specification
-             incorporating all of the trolls, and moves_N is a list of
-             lists of states (where "state" is given as a dictionary
-             with keys of variable names), where the length of moves_N
-             is equal to the number of trolls, and each element of
-             moves_N is a list of possible states of that the
-             corresponding troll (dynamic obstacle).
+    @return: If get_moves_lists is True, then returns (spec, moves_N)
+             where spec is the specification incorporating all of the
+             trolls, and moves_N is a list of lists of states (where
+             "state" is given as a dictionary with keys of variable
+             names), where the length of moves_N is equal to the
+             number of trolls, and each element of moves_N is a list
+             of possible states of that the corresponding troll
+             (dynamic obstacle).  If get_moves_lists is False, then
+             moves_N is not returned and not computed.
     """
     X = []
     X_ID = -1
-    moves_N = []
+    if get_moves_lists:
+        moves_N = []
     (num_rows, num_cols) = Y.size()
     for (center, radius) in troll_list:
         if center[0] >= num_rows or center[0] < 0 or center[1] >= num_cols or center[1] < 0:
@@ -923,25 +1109,39 @@ def add_trolls(Y, troll_list, prefix="X"):
         X_ID += 1
         X.append((t_offset, Y.dumpsubworld(t_size, offset=t_offset, prefix=prefix+"_"+str(X_ID))))
         X[-1][1].goal_list = [(center[0]-t_offset[0], center[1]-t_offset[1])]
-        X[-1][1].init_list = [(center[0]-t_offset[0], center[1]-t_offset[1])]
-        moves_N.append([])
-        for i in range(t_size[0]):
-            for j in range(t_size[1]):
-                moves_N[-1].append(X[-1][1].state((i,j), offset=t_offset))
+        if start_anywhere:
+            X[-1][1].init_list = []
+            for i in range(X[-1][1].size()[0]):
+                for j in range(X[-1][1].size()[1]):
+                    if X[-1][1].isEmpty((i,j)):
+                        X[-1][1].init_list.append((i,j))
+        else:
+            X[-1][1].init_list = [(center[0]-t_offset[0], center[1]-t_offset[1])]
+        if get_moves_lists:
+            moves_N.append([])
+            for i in range(t_size[0]):
+                for j in range(t_size[1]):
+                    moves_N[-1].append(X[-1][1].state((i,j), offset=t_offset, nonbool=nonbool))
 
     spec = GRSpec()
-    spec.importGridWorld(Y, controlled_dyn=True)
+    spec.importGridWorld(Y, controlled_dyn=True, nonbool=nonbool)
     for Xi in X:
-        spec.importGridWorld(Xi[1], offset=Xi[0], controlled_dyn=False)
+        spec.importGridWorld(Xi[1], offset=(-Xi[0][0], -Xi[0][1]), controlled_dyn=False, nonbool=nonbool)
 
     # Mutual exclusion
     for i in range(Y.size()[0]):
         for j in range(Y.size()[1]):
             for Xi in X:
                 if i >= Xi[0][0] and i < Xi[0][0]+Xi[1].size()[0] and j >= Xi[0][1] and j < Xi[0][1]+Xi[1].size()[1]:
-                    spec.sys_safety.append("!("+Y[i,j]+"' & "+Xi[1].prefix+"_"+str(i)+"_"+str(j)+"')")
+                    if nonbool:
+                        Xivar = "((X "+Xi[1].prefix+"_r = "+str(i-Xi[0][0])+") & (X "+Xi[1].prefix+"_c = "+str(j-Xi[0][1])+"))"
+                    else:
+                        Xivar = "X "+Xi[1].prefix+"_"+str(i)+"_"+str(j)
+                    spec.sys_safety.append("!("+Y.__getitem__((i,j), nonbool=nonbool, use_next=True)+" && "+Xivar+")")
 
-    return (spec, moves_N)
+    if get_moves_lists:
+        return (spec, moves_N)
+    return spec
 
 
 def unoccupied(size, prefix="Y"):
