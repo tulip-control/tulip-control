@@ -16,6 +16,7 @@ Contents:
    tutorial
    specifications
    codegen
+   gridworlds
    benchmarks
    formulations
    dev_guide
