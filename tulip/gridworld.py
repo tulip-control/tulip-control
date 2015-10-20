@@ -255,14 +255,18 @@ class GridWorld:
             CLOSED.append(current)
         return False
 
-    def plot(self, font_pt=18, show_grid=False, grid_width=2):
+    def plot(self, font_pt=18, show_grid=False, grid_width=2, troll_list=[]):
         """Draw figure depicting this gridworld.
 
-        Figure legend:
-          - "I" : possible initial position,
-          - "G" : goal.
+        Figure legend (symbolic form in parenthesis):
+          - "I" ('m+') : possible initial position;
+          - "G" ('r*') : goal;
+          - "E" ('gx') : goal of a troll; its extent is indicated by gray cells
 
-        @param font_pt: size (in points) for rendering text in the figure.
+        @param font_pt: size (in points) for rendering text in the
+                 figure.  If 0, then use symbols instead (see legend above).
+        @param troll_list: ...same as the argument with the same name
+                 given to L{add_trolls}.
         """
         try:
             import matplotlib.pyplot as plt
@@ -271,25 +275,50 @@ class GridWorld:
             print('matplotlib not available, so skipping GridWorld.plot()')
             return
 
-        if 1 in self.W:
-            W = self.W.copy()
-            W = np.ones(shape=W.shape) - W
-            plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest",
-                zorder=-2)
-        plt.axis([-1, self.W.shape[1], self.W.shape[0], -1])
+        W = self.W.copy()
+        W = np.ones(shape=W.shape) - W
+        fig = plt.figure()
+        ax = plt.subplot(111)
+        plt.imshow(W, cmap=mpl_cm.gray, aspect="equal", interpolation="nearest",
+                   vmin=0., vmax=1.)
+        xmin, xmax, ymin, ymax = plt.axis()
+        x_steps = np.linspace(xmin, xmax, W.shape[1]+1)
+        y_steps = np.linspace(ymin, ymax, W.shape[0]+1)
         if show_grid:
-            xmin, xmax, ymin, ymax = plt.axis()
-            x_steps = np.linspace(-0.5, self.W.shape[1]-0.5, self.W.shape[1]+1)
-            y_steps = np.linspace(-0.5, self.W.shape[0]-0.5, self.W.shape[0]+1)
             for k in x_steps:
                 plt.plot([k, k], [ymin, ymax], 'k-', linewidth=grid_width)
             for k in y_steps:
                 plt.plot([xmin, xmax], [k, k], 'k-', linewidth=grid_width)
             plt.axis([xmin, xmax, ymin, ymax])
         for p in self.init_list:
-            plt.text(p[1], p[0], "I", size=font_pt, ha="center", va="center", zorder=-1)
-        for n,p in enumerate(self.goal_list):
-            plt.text(p[1], p[0], "G" + str(n), size=font_pt, ha="center", va="center", zorder=-1)
+            if font_pt > 0:
+                plt.text(p[1], p[0], "I", size=font_pt)
+            else:
+                plt.plot(p[1], p[0], 'm+')
+        for p in self.goal_list:
+            if font_pt > 0:
+                plt.text(p[1], p[0], "G", size=font_pt)
+            else:
+                plt.plot(p[1], p[0], 'r*')
+        for (center, radius) in troll_list:
+            if font_pt > 0:
+                plt.text(center[1], center[0], "E", size=font_pt)
+            else:
+                plt.plot(center[1], center[0], 'gx')
+            if center[0] >= W.shape[0] or center[0] < 0 or center[1] >= W.shape[1] or center[1] < 0:
+                raise ValueError("troll center is outside of gridworld")
+            t_offset = (max(0, center[0]-radius), max(0, center[1]-radius))
+            t_size = [center[0]-t_offset[0]+radius+1, center[1]-t_offset[1]+radius+1]
+            if t_offset[0]+t_size[0] >= W.shape[0]:
+                t_size[0] = W.shape[0]-t_offset[0]
+            if t_offset[1]+t_size[1] >= W.shape[1]:
+                t_size[1] = W.shape[1]-t_offset[1]
+            t_size = (t_size[0], t_size[1])
+            for i in range(t_size[0]):
+                for j in range(t_size[1]):
+                    if self.W[i+t_offset[0]][j+t_offset[1]] == 0:
+                        ax.add_patch(mpl_patches.Rectangle((x_steps[j+t_offset[1]], y_steps[W.shape[0]-(i+t_offset[0])]),1,1, color=(.8,.8,.8)))
+        plt.axis([xmin, xmax, ymin, ymax])
         
     def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
         """Return pretty-for-printing string.
