@@ -1,11 +1,10 @@
-#!/usr/bin/env python
 """
-SCL; 5 July 2012.
+Tests for the tulip.gridworld
 """
 
 import numpy as np
 import tulip.gridworld as gw
-from tulip.gr1cint import check_realizable
+from tulip.synth import is_realizable
 
 
 REFERENCE_GWFILE = """
@@ -56,7 +55,7 @@ class GridWorld_test:
         assert self.X == gw.GridWorld(self.X.dumps())
 
     def test_spec_realizable(self):
-        assert check_realizable(self.X.spec(), verbose=1)
+        assert is_realizable('gr1c', self.X.spec())
 
     def test_isEmpty(self):
         assert not self.X.isEmpty((0, 0))
