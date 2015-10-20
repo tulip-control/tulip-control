@@ -31,12 +31,14 @@
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets"""
 import logging
-logger = logging.getLogger(__name__)
 import warnings
 from itertools import chain, combinations
 from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
+
+
+logger = logging.getLogger(__name__)
 
 
 def compare_lists(list1, list2):

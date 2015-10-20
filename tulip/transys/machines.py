@@ -35,13 +35,12 @@ import copy
 from pprint import pformat
 from random import choice
 from tulip.transys.labeled_graphs import LabeledDiGraph
-
 # inline imports:
 #
 # from tulip.transys.export import machine2scxml
 
-_hl = 40 * '-'
 
+_hl = 40 * '-'
 # port type
 pure = {'present', 'absent'}
 

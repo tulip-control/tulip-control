@@ -17,7 +17,9 @@ Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
 
 The default synthesis tool for GR(1) specifications is `gr1c
-<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0.
+<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0. If you
+do not already have it, the introduction of `the manual of gr1c
+<http://slivingston.github.io/gr1c/>`_ is a good place to begin.
 
 The following are optional Python packages, listed with a summary of dependent
 features:
@@ -93,13 +95,31 @@ GR(1)
 * a JTLV-based solver that has historically been included as part of the TuLiP
   package itself. It was originally implemented by Yaniv Sa'ar `[BJPPS12]
   <bibliography.html#bjpps12>`_.  To use it, you must have Java version 1.6 (or
-  later) installed.
+  later) installed. This tool can be obtained using the script
+  extern/get-jtlv.sh that is included in releases of TuLiP.
 
 LTL
 ```
 
 * `Lily <http://www.iaik.tugraz.at/content/research/design_verification/lily/>`_,
   which is based on `Wring <http://vlsi.colorado.edu/~rbloem/wring.html>`_.
+
+
+Testing your installation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TuLiP is distributed with tests for itself that, like those for NumPy, provide a
+way to check that TuLiP is behaving as expected.  To perform basic tests that
+should pass on any TuLiP installation, from the command-line try ::
+
+  $ ./run_tests.py
+
+There is an extensive test suite that includes tests involving optional
+dependencies. To perform it, ``./run_tests.py full``. It is important to note
+that some tests may fail because an **optional** dependency is missing, not
+because the TuLiP installation itself is flawed. Use the flag "-h" to get a
+description of driver script options.  More details about testing TuLiP oriented
+for developers are provided in the :doc:`dev_guide`.
 
 
 .. _newbie-scipy-sec-label:
@@ -120,18 +140,6 @@ Alternatives to Enthought are listed on the `SciPy installation webpage
 
 EPD seems to work fine on most platforms but if you cannot get it to work, more
 alternative packages for Mac OS X and Microsoft Windows are mentioned below.
-
-Testing your installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TuLiP is distributed with tests for itself that, like those for NumPy, provide a
-way to check that TuLiP is behaving as expected.  To perform all tests from the
-command-line, try ::
-
-  $ ./run_tests.py
-
-Use the flag "-h" to see driver script options.  More details about testing
-TuLiP oriented for developers are provided in the :doc:`dev_guide`.
 
 .. _troubleshoot-sec-label:
 
@@ -167,8 +175,8 @@ To install the python package dependencies, try::
 
   $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-ply
 
-Optionally packages can be obtained by appending ``python-matplotlib`` etc. to
-the above command.
+Optional packages can be obtained by appending ``python-matplotlib`` etc. to the
+above command.
 
 Mac OS X
 ````````
@@ -231,7 +239,7 @@ Installing other Python dependencies
 The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
 get `PLY <http://www.dabeaz.com/ply/>`_, try::
 
-  $ easy_install ply
+  $ pip install ply
 
 .. _venv-pydoc-sec-label:
 

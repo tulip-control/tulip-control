@@ -321,8 +321,7 @@ state space and discretize the continuous state space based on the dynamics.
 
 The rest is the same as in the previous example.  We specify the
 environment, create a GR(1) system specification, and synthesize a
-controller.  Here we use the JTLV synthesis tool, which returns a counter
-example if no controller can be found:
+controller.
 
 .. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @synthesize_section@

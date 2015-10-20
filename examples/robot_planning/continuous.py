@@ -78,11 +78,11 @@ disc_dynamics = discretize(
 )
 # @discretize_section_end@
 
-"""Visualize transitions in continuous domain (optional)"""
+# Visualize transitions in continuous domain (optional)
 plot_partition(disc_dynamics.ppp, disc_dynamics.ts,
                disc_dynamics.ppp2ts) if show else None
 
-"""Specifications"""
+# Specifications
 # Environment variables and assumptions
 env_vars = {'park'}
 env_init = set()                # empty set
@@ -101,7 +101,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
 # @synthesize_section@
-"""Synthesize"""
+# Synthesize
 ctrl = synth.synthesize('gr1c', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 

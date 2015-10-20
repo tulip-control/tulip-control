@@ -2,7 +2,7 @@
 """
 Driver script for testing TuLiP.  Try calling it with "-h" flag.
 """
-
+from __future__ import print_function
 import imp
 import sys
 import os.path
@@ -16,6 +16,25 @@ class ArgParser(argparse.ArgumentParser):
         sys.stderr.write('error: %s\n' % message)
         self.print_help()
         sys.exit(1)
+
+testfamilies_help = (
+"""
+name of a family of tests. If the `-f` or `--testfiles`
+switch is not used, then at most one of the following
+can be requested (not case sensitive):
+
+* "base": (default) tests that should pass on a
+  basic TuLiP installation with required dependencies.
+
+* "hybrid": tests that should pass given dependencies
+  implied by the "hybrid" extras: cvxopt and polytope.
+
+* "full": all tests. Every optional dependency or
+  external tool is potentially used.
+
+If the `-f` or `--testfiles` switch is used, then
+TEST [TEST ...] are interpreted as described below."""
+)
 
 testfiles_help = (
 """
@@ -43,9 +62,10 @@ Besides what is below, OPTIONS... are passed on to nose."""
 if __name__ == "__main__":
     parser = ArgParser(formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('testfiles', nargs='*', default=None,
+    parser.add_argument('testfamily', metavar='TEST', nargs='*', default=['base'],
+                        help=testfamilies_help)
+    parser.add_argument('-f,--testfiles', dest='testfiles', action='store_true',
                         help=testfiles_help)
-
     parser.add_argument('--fast', action='store_true',
                         help='exclude tests that are marked as slow')
     parser.add_argument('--cover', action='store_true',
@@ -59,7 +79,15 @@ if __name__ == "__main__":
 
     args, unknown_args = parser.parse_known_args()
 
-    basenames = args.testfiles
+    if (not args.testfiles) and len(args.testfamily) > 1:
+        print('At most one family of tests can be requested.')
+        sys.exit(1)
+
+    if args.testfiles:
+        basenames = args.testfamily
+    else:
+        basenames = None
+        args.testfamily = args.testfamily[0]
     skip_slow = args.fast
     measure_coverage = args.cover
     require_nonlocaldir_tulip = args.outofsource
@@ -102,41 +130,59 @@ if __name__ == "__main__":
 
     testfiles = []
     excludefiles = []
-    for basename in basenames:
-        if basename[0] == '-':
-            matchstart = lambda f, bname: f.startswith(bname[1:])
-        else:
-            matchstart = lambda f, bname: f.startswith(bname)
-        match = [f for f in available
-                 if matchstart(f, basename) and f.endswith('.py')]
 
-        if len(match) > 1:
-            raise Exception('ambiguous base name: %s, matches: %s' %
-                            (basename, match))
-        elif len(match) == 1 and match[0].endswith('_test.py'):
+    if args.testfiles:
+        for basename in basenames:
             if basename[0] == '-':
-                excludefiles.append(match[0])
+                matchstart = lambda f, bname: f.startswith(bname[1:])
             else:
-                testfiles.append(match[0])
-            continue
+                matchstart = lambda f, bname: f.startswith(bname)
+            match = [f for f in available
+                     if matchstart(f, basename) and f.endswith('.py')]
 
-        if os.path.exists(os.path.join(tests_dir, basename + '_test.py')):
-            testfiles.append(basename + '_test.py')
-        elif basename[0] == '-':
-            if os.path.exists(os.path.join(tests_dir, basename[1:] + "_test.py")):
-                excludefiles.append(basename[1:] + "_test.py")
+            if len(match) > 1:
+                raise Exception('ambiguous base name: %s, matches: %s' %
+                                (basename, match))
+            elif len(match) == 1 and match[0].endswith('_test.py'):
+                if basename[0] == '-':
+                    excludefiles.append(match[0])
+                else:
+                    testfiles.append(match[0])
+                continue
+
+            if os.path.exists(os.path.join(tests_dir, basename + '_test.py')):
+                testfiles.append(basename + '_test.py')
+            elif basename[0] == '-':
+                if os.path.exists(os.path.join(tests_dir, basename[1:] + "_test.py")):
+                    excludefiles.append(basename[1:] + "_test.py")
+                else:
+                    argv.append(basename)
             else:
                 argv.append(basename)
+
+        if testfiles and excludefiles:
+            print("You can specify files to exclude or include, but not both.")
+            print("Try calling it with \"-h\" flag.")
+            exit(1)
+
+        if excludefiles:
+            argv.append("--exclude=" + "|".join(excludefiles))
+
+    else:
+        base = ['dumpsmach_test', 'form_test', 'gr1cint_test', 'gr1_test',
+                'spec_test', 'synth_test', 'transform_test', 'translation_test',
+                'transys_automata_test', 'transys_labeled_graphs_test',
+                'transys_machines_test', 'transys_mathset_test',
+                'transys_ts_test', 'version_test']
+        if args.testfamily.lower() == 'base':
+            testfiles = base
+        elif args.testfamily.lower() == 'hybrid':
+            testfiles = base + ['abstract_test', 'hybrid_test', 'prop2part_test']
+        elif args.testfamily.lower() == 'full':
+            pass
         else:
-            argv.append(basename)
-
-    if testfiles and excludefiles:
-        print("You can specify files to exclude or include, but not both.")
-        print("Try calling it with \"-h\" flag.")
-        exit(1)
-
-    if excludefiles:
-        argv.append("--exclude=" + "|".join(excludefiles))
+            print('Unrecognized test family: "'+args.testfamily+'"')
+            sys.exit(1)
 
     argv.extend(testfiles)
     argv += ["--where=" + tests_dir]

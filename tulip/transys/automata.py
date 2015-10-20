@@ -32,7 +32,6 @@
 """Automata Module"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import copy
 from collections import Iterable
 from pprint import pformat
@@ -42,6 +41,7 @@ from tulip.transys.mathset import SubSet, PowerSet
 from tulip.transys.transys import GameGraph
 
 
+logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
