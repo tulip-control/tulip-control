@@ -192,15 +192,6 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 
-def nfa2dfa():
-    """Determinize NFA using Rabin-Scott subset construction.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
-
-
 def dfa2nfa(dfa):
     """Copy DFA to an NFA, so remove determinism restriction."""
     nfa = copy.deepcopy(dfa)
@@ -232,24 +223,6 @@ class BA(BuchiAutomaton):
 
     def __init__(self, **args):
         super(BA, self).__init__(**args)
-
-
-def ba2dra():
-    """Buchi to Deterministic Rabin Automaton converter.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
-
-
-def ba2ltl():
-    """Buchi Automaton to Linear Temporal Logic formula converter.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
 
 
 def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
@@ -495,24 +468,6 @@ class DRA(RabinAutomaton):
             deterministic=True,
             atomic_proposition_based=atomic_proposition_based)
         self.automaton_type = 'Deterministic Rabin Automaton'
-
-
-class StreettAutomaton(OmegaAutomaton):
-    """Omega-automaton with Streett acceptance condition."""
-
-    pass
-
-
-class MullerAutomaton(OmegaAutomaton):
-    """Omega-automaton with Muller acceptance condition."""
-
-    pass
-
-
-class ParityAutomaton(OmegaAutomaton):
-    """Omega-automaton with Parity acceptance condition."""
-
-    pass
 
 
 class ParityGame(GameGraph):

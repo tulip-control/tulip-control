@@ -15,6 +15,7 @@ Contents:
    install
    tutorial
    specifications
+   transys
    codegen
    benchmarks
    formulations
