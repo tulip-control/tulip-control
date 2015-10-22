@@ -67,4 +67,5 @@ License
 
 This is free software released under the terms of [the BSD 3-Clause License]
 (http://opensource.org/licenses/BSD-3-Clause).  There is no warranty; not even
-for merchantability or fitness for a particular purpose.
+for merchantability or fitness for a particular purpose.  Consult LICENSE for
+copying conditions.
