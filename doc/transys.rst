@@ -17,9 +17,9 @@ saving graphs in various formats, mainly formatting for layout by GraphViz.
 
 The entry point for a user comprises of the ``transys`` modules:
 
-  - ``transys``
-  - ``automata``
-  - ``machines``
+- ``transys``
+- ``automata``
+- ``machines``
 
 The mathematical objects representable with classes from these modules
 can all be described uniformly and elegantly in the same mathematical language.
@@ -197,10 +197,10 @@ A method ``LabeledDiGraph.states.find`` is available too.
 The method ``LabeledDiGraph.transitions.find`` is intended as a tool
 to slice the transition relation:
 
-  - find all edges from a given state
-  - find all edges to a given state
-  - find all edges with given label
-  - any combination of the above
+- find all edges from a given state
+- find all edges to a given state
+- find all edges with given label
+- any combination of the above
 
 
 To add or label multiple nodes with one call,
