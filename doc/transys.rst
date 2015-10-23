@@ -253,7 +253,108 @@ This might look cumbersome, but it becomes convenient for setting multiple label
 Automata
 --------
 
+There is no real difference between a "transition system" and an "automaton".
+Both are ways of describing a set of sequences.
+The only difference is that some parts of an automaton are omitted when
+talking about a transition system, because they are trivial.
+
+Currently, the automata in `transys` are "existential".
+This means that a sequence belongs to the set described by an automaton,
+if, and only if, there exists at least one satisfactory path through the
+graph that represents the automaton.
+
+What makes a path "satisfactory" doesn't have a fixed meaning: it depends.
+To distinguish satisfactory from other paths, an *acceptance condition* is
+made part of an automaton description.
+It is common to call "accepting" a path that satisfies a given condition.
+
+Traditionally, types of acceptance conditions have been associated with
+names of people: Buchi, Rabin, Streett, Muller ("parity" is an exception).
+Rabin and Streett correspond to the disjunctive and conjunctive
+normal forms of a temporal logic formula.
+
+In the ``tulip.transys.automata`` module you will find subclasses of
+``LabeledDiGraph`` that are geared towards describing sets in the style
+just mentioned. For example, the following code creates a Buchi automaton:
+
+
+.. code-block:: python
+
+  from tulip.transys import automata
+
+  g = automata.BA()
+  g.atomic_propositions.add_from(['a', 'b', 'c'])
+  g.add_nodes_from(xrange(3))
+  g.states.initial.add(2)
+  g.states.accepting.add_from([1, 2])
+  g.add_edge(2, 2, letter={'a'})
+  g.add_edge(2, 0, letter={'b'})
+  g.add_edge(0, 1, letter={'a'})
+  g.add_edge(1, 1, letter={'a'})
+
+
+A difference between transition systems and automata is
+that the former usually have labeling on nodes, the latter on edges.
+Historically, this is due to how algorithms for
+enumerated model checking evolved. It is only a matter of
+representation, not a feature of the sets that
+these data structures describe.
 
 
 Transducers (Machines)
 ----------------------
+
+A transducer represents a function from finite sequences of input
+(say symbols typed on a keyboard), to the next output (say screen color).
+So, a transducer is an *implementation*, described in a way that is
+executable (step-by-step). It differs from the above mainly programmatically.
+
+If the design intent is described with a specification that is not
+itself the implementation, then (automated) synthesis can construct
+an implementation. Some forms of synthesis are available via ``tulip.synth``.
+By convention, the constructed implementation is represented by ``machines.MealyMachine``.
+
+The Mealy machine for producing a sequence of alternating 0s and 1s has the form:
+
+
+.. code-block:: python
+
+  from tulip.transys import machines
+
+  g = machines.MealyMachine()
+  g.add_inputs(dict(increment_index={1}))
+  g.add_outputs(dict(sequence_element={0, 1}))
+  g.add_nodes_from([0, 1])
+  g.states.initial.add(0)
+  g.add_edge(0, 1, increment_index=1, sequence_element=0)
+  g.add_edge(1, 0, increment_index=1, sequence_element=1)
+
+
+This Mealy machine is supposed to be "executed" as follows.
+It starts at node ``0``. It reads an element from the input sequence.
+The element is an assignment of values to identifiers.
+Here, the only input identifier ("port") is ``'increment_index'``.
+Then, the machine picks an edge labeled with the given input assignment.
+The only such edge is ``(0, 1)``. The next node is ``1``.
+
+The machine produces the next element of the output sequence.
+This element is an assignment to output identifiers.
+In our example, the assignment of value ``0`` to identifier ``'sequence_element'``.
+Since we just started running the machine ``g``, this output assignment is
+the first element in the output sequence.
+
+You can get all this done with:
+
+
+.. code-block:: python
+
+  v, d = g.reaction(0, dict(increment_index=1))
+
+
+which returns ``v = 1`` and ``d = dict(sequence_element=0)``.
+
+
+The class ``machines.MooreMachine`` differs from a Mealy machine,
+in that it imposes that element ``k`` of the output sequence
+can depend only on elements *before* element ``k`` of the input sequence.
+Use ``machines.MealyMachine``, because it is less restrictive.
