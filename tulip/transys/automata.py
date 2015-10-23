@@ -46,44 +46,27 @@ _hl = 40 * '-'
 
 
 class FiniteStateAutomaton(LabeledDiGraph):
-    """Generic automaton.
+    """Set of sequences described with a graph and a condition.
 
     It has:
         - states
         - states.initial
-        - states.accepting (type depends on automaton flavor)
-        - alphabet = set of input letters (labeling edges)
-          (possibly based on atomic propositions (AP),
-          meaning it is the powerset of some AP set)
-        - is_accepted, for testing input words
+        - states.accepting (types have names, and classes)
+        - alphabet = set of symbols that label edges.
 
-    subclasses implement C{is_accepted}, C{simulate}
 
     Note
     ====
-    Automata represent languages in a way suitable for
-    testing if a given trace is a member of the language.
-    So an automaton operates in acceptor mode,
-    i.e., testing input words.
+    If all paths in the graph belong to the set you
+    want to describe, then just use L{FiniteTransitionSystem}.
 
-    The represented language is not readily accessible,
-    because its generation requires solving a search problem.
-    This search problem is the usual model checking, assuming
-    a transition system with a complete digraph.
+    To describe an input-output function (which is a set too),
+    it is more convenient to use L{FiniteStateMachine}.
 
-    For constructively representing a language,
-    use a L{FiniteTransitionSystem}.
-    A transition system operates only in generator mode,
-    producing a language (possibly non-deterministically).
-
-    For controllers, use a L{FiniteStateMachine},
-    because it maps input words (input port valuations) to
-    outputs (output port valuations).
 
     See Also
     ========
-    L{NFA}, L{DFA}, L{BA}, L{RabinAutomaton}, L{DRA}, L{StreettAutomaton},
-    L{MullerAutomaton}, L{ParityAutomaton}
+    L{BA}, L{RabinAutomaton}.
     """
 
     def __init__(
