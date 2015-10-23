@@ -87,8 +87,9 @@ def solve_feasible(
         handles disturbances better.
     @type closed_loop: bool
     
-    @param use_all_horizon: Used for closed loop algorithm.
-        If true, then allow reachability also in less than N steps.
+    @param use_all_horizon: Used for closed loop algorithm.  If true
+        (STILL UNDER DEVELOPMENT, CURRENTLY UNAVAILABLE), then allow
+        reachability also in less than N steps.
     @type use_all_horizon: bool
     
     @param trans_set: If specified,
@@ -98,6 +99,10 @@ def solve_feasible(
     @return: the subset S0 of P1 from which P2 is reachable
     @rtype: C{Polytope} or C{Region}
     """
+    if use_all_horizon:
+        raise ValueError('solve_feasible() with use_all_horizon=True is still '
+                         'under development\nand currently unavailable.')
+
     if closed_loop:
         return solve_closed_loop(
             P1, P2, ssys, N,
@@ -136,6 +141,11 @@ def solve_closed_loop(
         
         Otherwise, P1 is used.
     """
+    if use_all_horizon:
+        raise ValueError('solve_closed_loop() with use_all_horizon=True '
+                         'is still under development\nand currently '
+                         'unavailable.')
+
     p1 = P1.copy() # Initial set
     p2 = P2.copy() # Terminal set
     

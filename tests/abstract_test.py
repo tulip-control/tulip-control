@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 #logging.getLogger('tulip').setLevel(logging.ERROR)
 logger.setLevel(logging.DEBUG)
 
+from nose.tools import assert_raises
+
 import matplotlib
 # to avoid the need for using: ssh -X when running tests remotely
 matplotlib.use('Agg')
@@ -153,8 +155,12 @@ def test_transient_regions():
     ppp = cont_predicates()
     sys = drifting_dynamics()
     logger.info(sys)
+
+    with assert_raises(ValueError):
+        ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
+                                 trans_length=1)
     
-    ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
+    ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=False,
                              trans_length=1)
     
     logger.debug(ab.ts)
