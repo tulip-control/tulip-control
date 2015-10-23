@@ -87,6 +87,14 @@ This is the motivation for implementing typing.
 Untyped keys are allowed for any additional annotation that
 one may need to solve a particular problem.
 
+Arguably, a most handy method is ``save``:
+
+
+.. code-block:: python
+
+  g.save('awesome.pdf')
+
+
 ``LabeledDiGraph`` is not intended to be instantiated itself,
 but subclassed. The following sections consider the subclasses
 present in the three main modules of ``transys``.
@@ -114,7 +122,12 @@ Each edge is labeled with:
 
 If there is no environment, then the transition system describes
 a "closed system" (only existentially quantified), with only
-system actions. Otherwise, 
+system actions. Otherwise, the transition system describes the
+interaction between two players, an "open system", or game.
+
+Viewing it as a game is an informal way of referring to
+the existential and universal quantifiers that are later applied to
+system and environment variables, respectively.
 
 
 .. code-block:: python
@@ -124,10 +137,10 @@ system actions. Otherwise,
   g = transys.FTS()
   g.atomic_propositions |= {'a', 'b'}
   g.add_node('s0', ap={'a'})
-  
+  #
   # 2 ways to change a label
   g.add_node('s0', ap={'b'})
-  
+  #
   # or
   g.node['s0']['ap'] = {'b'}
 
@@ -178,9 +191,16 @@ To avoid this issue altogether, labels can be modified as follows
 
 
 .. code-block:: python
+  
+  from tulip.transys import transys
 
+  g = transys.FTS()
+  g.atomic_propositions |= {'a', 'b', 'c'}
+  g.add_node('s0', ap={'a'})
+  #
   # this does trigger type checking
   g.node['s0']['ap'] = g.node['s0']['ap'].union({'b', 'c'})
+  #
   # equivalently
   r = g.node['s0']['ap']
   r = r.union({'b', 'c'})
