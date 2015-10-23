@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# WARNING: This example may not yet be working.  Please check again in
-#          the upcoming release.
-#
 """
 This example is an extension of robot_discrete.py by including continuous
 dynamics with disturbances.

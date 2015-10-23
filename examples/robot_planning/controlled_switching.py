@@ -1,6 +1,3 @@
-# WARNING: This example may not yet be working.  Please check again in
-#          the upcoming release.
-#
 # This is an example to demonstrate how the output of abstracting a switched
 # system, where the dynamics are controlled through switching and
 # if multiple transitions are possible from a state in some mode,
