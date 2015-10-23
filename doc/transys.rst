@@ -222,6 +222,18 @@ to slice the transition relation:
 - find all edges with given label
 - any combination of the above
 
+For example, to find from state ``'s0'`` with ``sys_action = 'jump'`` all
+possible post states,
+
+.. code-block:: python
+
+  set([e[1] for e in g.transitions.find('s0', with_attr_dict={'sys_action':'jump'})])
+
+Alternatively ``find()`` may be bypassed in favor of the ``networkx`` method `edges_iter <https://networkx.github.io/documentation/latest/reference/generated/networkx.MultiDiGraph.edges_iter.html?highlight=edges_iter#networkx.MultiDiGraph.edges_iter>`_, as in
+
+.. code-block:: python
+
+  [u for u, d in g.edges_iter('s0', data=True) if d['sys_action'] == 'jump']
 
 To add or label multiple nodes with one call,
 call ``LabeledDiGraph.add_nodes_from``, as described `here
