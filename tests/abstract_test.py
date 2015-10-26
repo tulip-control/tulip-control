@@ -203,6 +203,7 @@ def define_dynamics(dom):
     return sys
 
 def test_abstract_the_dynamics():
+    """test_abstract_the_dynamics (known to fail without GLPK)"""
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
     ppp = define_partition(dom)
     sys = define_dynamics(dom)
