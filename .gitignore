@@ -19,6 +19,7 @@ tulip/interfaces/jtlv_grgame.jar
 *.PNG
 *.pdf
 *.PDF
+*.svg
 *.dot
 *.swp
 /build/
