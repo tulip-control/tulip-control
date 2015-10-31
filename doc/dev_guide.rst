@@ -98,6 +98,25 @@ want.
 None of these version numbers go in individual files, but
 the version number is a label for the entire package.
 
+Making releases
+---------------
+
+#. Collect list of major changes.
+#. Update the changelog.
+#. Tag with message of the form "REL: version 1.2.0".
+#. Create source release, ``python setup.py sdist``.
+#. Post it to PyPI and SourceForge.net.
+#. Build and post User's Guide and API manual. Under the directory doc/, run ::
+
+     ./rsync-web.sh USERNAME
+     ./rsync-docs.sh USERNAME
+
+   where ``USERNAME`` is your SourceForge.net handle.
+#. Make announcement on `tulip-control-announce mailing list
+   <https://lists.sourceforge.net/lists/listinfo/tulip-control-announce>`_,
+   providing major website links and the summary of changes.
+#. Bump version in the repository, in preparation for next release.
+
 
 Advice
 ------

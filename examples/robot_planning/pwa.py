@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# WARNING: This example may not yet be working.  Please check again in
-#          the upcoming release.
-#
 """
 This example is an extension of the robot_continuous.py
 code by Petter Nilsson and Nok Wongpiromsarn.

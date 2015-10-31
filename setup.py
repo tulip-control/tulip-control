@@ -333,7 +333,7 @@ if perform_setup:
         ],
         extras_require={
             'hybrid': ['cvxopt >= 1.1.7',
-                       'polytope >= 0.1.0']},
+                       'polytope >= 0.1.1']},
         tests_require=['nose'],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',
