@@ -271,6 +271,7 @@ class GridWorld:
         try:
             import matplotlib.pyplot as plt
             import matplotlib.cm as mpl_cm
+            import matplotlib.patches
         except ImportError:
             print('matplotlib not available, so skipping GridWorld.plot()')
             return
@@ -317,7 +318,7 @@ class GridWorld:
             for i in range(t_size[0]):
                 for j in range(t_size[1]):
                     if self.W[i+t_offset[0]][j+t_offset[1]] == 0:
-                        ax.add_patch(mpl_patches.Rectangle((x_steps[j+t_offset[1]], y_steps[W.shape[0]-(i+t_offset[0])]),1,1, color=(.8,.8,.8)))
+                        ax.add_patch(matplotlib.patches.Rectangle((x_steps[j+t_offset[1]], y_steps[W.shape[0]-(i+t_offset[0])]),1,1, color=(.8,.8,.8)))
         plt.axis([xmin, xmax, ymin, ymax])
         
     def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
@@ -692,10 +693,6 @@ class GridWorld:
         L{GridWorld.__getitem__} and L{extract_coord} provide
         reference implementations.
 
-        For incorporating this gridworld into an existing
-        specification (e.g., respecting external references to cell
-        variable names), see the method L{GRSpec.importGridWorld}.
-
         @param offset: index offset to apply when generating the
                  specification; e.g., given prefix of "Y",
                  offset=(2,1) would cause the variable for the cell at
@@ -869,8 +866,8 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
              cell variables.
 
     @param num_trolls: number of random trolls to generate, each
-             occupies an area of radius 1.  If nonzero, then an
-             instance of MGridWorld will be returned.
+             occupies an area of radius 1.  If nonzero, then a list
+             specifying the trolls will also be returned.
 
     @param ensure_feasible: guarantee that all goals and initial
              positions are mutually reachable, assuming a 4-connected
@@ -885,6 +882,7 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
              None (default), then do not impose time constraints.
 
     @rtype: L{GridWorld}, or None if timeout occurs.
+
     """
     if ensure_feasible and timeout is not None:
         st = time.time()
@@ -943,11 +941,11 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     world.W = W
     world.goal_list = goal_list
     world.init_list = init_list
-    if num_trolls > 0:
-        world = MGridWorld(world)
-        world.troll_list = troll_list
 
-    return world
+    if num_trolls > 0:
+        return world, troll_list
+    else:
+        return world
 
 
 # From http://en.wikipedia.org/wiki/Maze_generation_algorithm#Python_code_example
@@ -1122,10 +1120,9 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
                 for j in range(t_size[1]):
                     moves_N[-1].append(X[-1][1].state((i,j), offset=t_offset, nonbool=nonbool))
 
-    spec = GRSpec()
-    spec.importGridWorld(Y, controlled_dyn=True, nonbool=nonbool)
+    spec = Y.spec(controlled_dyn=True, nonbool=nonbool)
     for Xi in X:
-        spec.importGridWorld(Xi[1], offset=(-Xi[0][0], -Xi[0][1]), controlled_dyn=False, nonbool=nonbool)
+        spec |= Xi[1].spec(offset=(-Xi[0][0], -Xi[0][1]), controlled_dyn=False, nonbool=nonbool)
 
     # Mutual exclusion
     for i in range(Y.size()[0]):
