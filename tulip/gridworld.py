@@ -562,8 +562,7 @@ class GridWorld:
     def dumpPPartition(self, side_lengths=(1., 1.), offset=(0., 0.), nonbool=True):
         """Return proposition-preserving partition from this gridworld.
 
-        In setting the initial transition matrix, we assume the
-        gridworld is 4-connected.
+        Adjacency of cells is as returned by prop2partition.prop2part().
 
         @param side_lengths: pair (W, H) giving width and height of
                  each cell, assumed to be the same across the grid.
@@ -614,36 +613,7 @@ class GridWorld:
                                             -offset[0]-j*side_lengths[0],
                                             offset[0]+(j+1)*side_lengths[0]],
                                           dtype=np.float64))
-        part = prop2partition.prop2part(domain, cells)
-
-        adjacency = np.zeros((self.W.shape[0]*self.W.shape[1], self.W.shape[0]*self.W.shape[1]), dtype=np.int8)
-        for this_ind in range(len(part.list_region)):
-            (prefix, i, j) = extract_coord(part.list_prop_symbol[part.list_region[this_ind].list_prop.index(1)], nonbool=nonbool)
-            if self.W[i][j] != 0:
-                continue  # Static obstacle cells are not traversable
-            adjacency[this_ind, this_ind] = 1
-            if i > 0 and self.W[i-1][j] == 0:
-                row_index = i-1
-                col_index = j
-            if j > 0 and self.W[i][j-1] == 0:
-                row_index = i
-                col_index = j-1
-            if i < self.W.shape[0]-1 and self.W[i+1][j] == 0:
-                row_index = i+1
-                col_index = j
-            if j < self.W.shape[1]-1 and self.W[i][j+1] == 0:
-                row_index = i
-                col_index = j+1
-            if nonbool:
-                symbol_ind = part.list_prop_symbol.index(self.__getitem__((row_index, col_index)))
-            else:
-                symbol_ind = part.list_prop_symbol.index(prefix+"_"+str(row_index)+"_"+str(col_index))
-            ind = 0
-            while part.list_region[ind].list_prop[symbol_ind] == 0:
-                ind += 1
-            adjacency[ind, this_ind] = 1
-        part.adj = adjacency
-        return part
+        return prop2partition.prop2part(domain, cells)
     
     def discreteTransitionSystem(self, nonbool=True):
         """Write a discrete transition system suitable for synthesis.
