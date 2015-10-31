@@ -108,9 +108,10 @@ we use mostly default argument values to minimize clutter.
 ::
 
   import numpy as np
-  from tulip.discretize import CtsSysDyn, discretize
-  from tulip.polytope import Polytope
-  from tulip.polytope.plot import plot_partition
+  from tulip.abstract import discretize
+  from tulip.hybrid import LtiSysDyn
+  from polytope import Polytope
+  from polytope.plot import plot_partition
 
   # Trivial dynamics
   A = np.eye(2)
@@ -120,12 +121,12 @@ we use mostly default argument values to minimize clutter.
 	       np.array([[1.],[1.],[1.],[1.]]))
   W = Polytope(np.array([[1.,0.],[-1.,0.],[0.,1.],[0.,-1.]]),
 	       0.01*np.array([1., 1., 1., 1.]))
-  sys_dyn = CtsSysDyn(A,B,E,[],U,W)
+  sys_dyn = LtiSysDyn(A,B,E, Uset=U, Wset=W)
 
   # Generate random gridworld, dump it and discretize based on dynamics
   Y = gw.random_world((5, 10), num_init=0, num_goals=0)
   disc_dynamics = discretize(Y.dumpPPartition(), sys_dyn)
 
   # Pretty print abstraction to terminal, and depict partition reachability
-  print Y
-  plot_partition(disc_dynamics, plot_transitions=True)
+  print(Y)
+  plot_partition(disc_dynamics.ppp, trans=True)
