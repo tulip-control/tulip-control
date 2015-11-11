@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,11 +32,12 @@
 """Products between automata and transition systems"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import warnings
 from tulip.transys import transys
 from tulip.transys import automata
 
+
+logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 

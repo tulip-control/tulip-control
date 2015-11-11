@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2014 by California Institute of Technology
+# Copyright (c) 2011-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -480,7 +480,9 @@ def discretize(
     @param max_num_poly: maximum number of polytopes in a region to use in 
         reachability analysis.
     @param use_all_horizon: in closed loop algorithm: if we should look
-        for reach- ability also in less than N steps.
+        for reachability also in less than N steps. The case of
+        use_all_horizon=True is still under development and currently
+        unavailable.
     @param trans_length: the number of polytopes allowed to cross in a
         transition.  a value of 1 checks transitions
         only between neighbors, a value of 2 checks
@@ -503,6 +505,10 @@ def discretize(
     
     @rtype: L{AbstractPwa}
     """
+    if use_all_horizon:
+        raise ValueError('discretize() with use_all_horizon=True is still '
+                         'under development\nand currently unavailable.')
+
     start_time = os.times()[0]
     
     orig_ppp = part

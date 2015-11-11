@@ -1,4 +1,4 @@
-# Copyright (c) 2014 by California Institute of Technology
+# Copyright (c) 2014, 2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 """
 tulip package version
 """
-version_info = (1, 2, 0)
+version_info = (1, 2, 1)
 
 version = '.'.join([str(x) for x in version_info])
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # and 2014 The Regents of the University of Michigan
 # All rights reserved.
 #
@@ -32,7 +32,6 @@
 """Base classes for labeled directed graphs"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import os
 import copy
 from pprint import pformat
@@ -40,12 +39,14 @@ from collections import Iterable
 import warnings
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
-
 # inline imports:
 #
 # from tulip.transys.export import graph2dot
 # from tulip.transys.export import save_d3
 # from tulip.transys.export import graph2dot
+
+
+logger = logging.getLogger(__name__)
 
 
 def label_is_desired(attr_dict, desired_dict):
@@ -102,7 +103,7 @@ class States(object):
     """Methods to manage states and initial states."""
 
     def __init__(self, graph):
-        """
+        """Initialize C{States}.
 
         @type graph: L{LabeledDiGraph}
         """
@@ -165,23 +166,37 @@ class States(object):
         return states
 
     def add(self, new_state, attr_dict=None, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_node}."""
+        """Wraps L{LabeledDiGraph.add_node},
+
+        which wraps C{networkx.MultiDiGraph.add_node}.
+        """
         self._warn_if_state_exists(new_state)
         logger.debug('Adding new id: ' + str(new_state))
         self.graph.add_node(new_state, attr_dict, check, **attr)
 
     def add_from(self, new_states, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_nodes_from}."""
+        """Wraps L{LabeledDiGraph.add_nodes_from},
+
+        which wraps C{networkx.MultiDiGraph.add_nodes_from}.
+        """
         self.graph.add_nodes_from(new_states, check, **attr)
 
     def remove(self, state):
-        """Remove single state."""
+        """Remove C{state} from states (including initial).
+
+        Wraps C{networkx.MultiDiGraph.remove_node}.
+        """
         if state in self.initial:
             self.initial.remove(state)
         self.graph.remove_node(state)
 
     def remove_from(self, states):
-        """Remove a list of states."""
+        """Remove a list of states.
+
+        Iterates C{States.remove} to imitate
+        C{networkx.MultiDiGraph.remove_nodes_from},
+        handling also initial states.
+        """
         for state in states:
             self.remove(state)
 
@@ -371,14 +386,6 @@ class States(object):
         """
         return not bool(self.graph.successors(state))
 
-    def is_blocking(self, state):
-        """Check if state has outgoing transitions for each label.
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
-
 
 class Transitions(object):
     """Methods for handling labeled transitions.
@@ -388,7 +395,7 @@ class Transitions(object):
     """
 
     def __init__(self, graph, deterministic=False):
-        """
+        """Initialize C{Transitions}.
 
         @type graph: L{LabeledDiGraph}
         """
@@ -428,13 +435,19 @@ class Transitions(object):
             raise Exception(msg)
 
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edge}."""
+        """Wrapper of L{LabeledDiGraph.add_edge},
+
+        which wraps C{networkx.MultiDiGraph.add_edge}.
+        """
         # self._breaks_determinism(from_state, labels)
         self.graph.add_edge(from_state, to_state,
                             attr_dict=attr_dict, check=check, **attr)
 
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edges_from}."""
+        """Wrapper of L{LabeledDiGraph.add_edges_from},
+
+        which wraps C{networkx.MultiDiGraph.add_edges_from}.
+        """
         self.graph.add_edges_from(transitions, attr_dict=attr_dict,
                                   check=check, **attr)
 
@@ -627,8 +640,114 @@ class LabeledDiGraph(nx.MultiDiGraph):
     but mixing labeled with unlabeled edges for the same
     edge is not allowed, to simplify and avoid confusion.
 
+
+    Label types by example
+    ======================
+
+    Use a C{dict} for each label type you want to define,
+    like this:
+
+      >>> types = [
+              {'name': 'drink',
+               'values': {'tea', 'coffee'},
+               'setter': True,
+               'default': 'tea'}]
+
+    This will create a label type named C{'drink'} that can
+    take the values C{'tea'} and C{'coffee'}.
+
+    Assuming this label type applies to nodes,
+    you can now label a new node as:
+
+      >>> g = LabeledDiGraph(types)
+      >>> g.add_node(1, drink='coffee')
+
+    If you omit the label when adding a new node,
+    it gets the default value:
+
+      >>> g.add_node(2)
+      >>> g.node[2]
+      {'drink': 'tea'}
+
+    The main difference with vanilla C{networkx} is
+    that the dict above includes type checking:
+
+      >>> type(g.node[2])
+      tulip.transys.mathset.TypedDict
+
+    The C{'setter'} key with value C{True}
+    creates also a field C{g.drink}.
+    Be careful to avoid name conflicts with existing
+    networkx C{MultiDiGraph} attributes.
+
+    This allows us to add more values after creating
+    the graph:
+
+      >>> g.drink
+      {'coffee', 'tea'}
+      >>> g.drink.add('water')
+      {'coffee', 'tea', 'water'}
+
+    Finally, the graph will prevent us from
+    accidentally using an untyped label name,
+    by raising an C{AttributeError}:
+
+      >>> g.add_node(3, day='Jan')
+      AttributeError: ...
+
+    To add untyped labels, do so explicitly:
+
+      >>> g.add_node(3, day='Jan', check=False)
+      >>> g.node[3]
+      {'day': 'Jan', 'drink': 'tea'}
+
+
+    Details on label types
+    ======================
+
+    Each label type is defined by a C{dict} that
+    must have the keys C{'name'} and C{'values'}:
+
+      - C{'name'}: with C{str} value
+
+      - C{'values' : B} implements C{__contains__}
+        used to check label validity.
+
+        If you want the codomain C{B} to be
+        extensible even after initialization,
+        it must implement method C{add}.
+
+    and optionally the keys:
+
+      - C{'setter': C} with 3 possibilities:
+
+        - if absent,
+          then no C{setter} attribute is created
+
+        - otherwise an attribute C{self.A}
+          is created, pointing at:
+
+            - the given co-domain C{B}
+              if C{C is True}
+
+            - C{C}, otherwise.
+
+      - C{'default': d} is a value in C{B}
+        to be returned for node and edge labels
+        not yet explicitly specified by the user.
+
+    @param node_label_types: applies to nodes, as described above.
+    @type node_label_types: C{list} of C{dict}
+
+    @param edge_label_types: applies to edges, as described above.
+    @type node_label_types: C{list} of C{dict}
+
+    @param deterministic: if True, then edge-label-deterministic
+
+
     Deprecated dot export
     =====================
+
     BEWARE: the dot interface will be separated from
     the class itself. Some basic style definitions as
     below may remain, but masking selected labels and
@@ -645,121 +764,19 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     Note: this interface will be improved in the future.
 
+
     Credits
     =======
-    Some code in overridden methods of networkx.MultiDiGraph
-    is adapted from networkx, which is distributed under the BSD license.
+
+    Some code in overridden methods of C{networkx.MultiDiGraph}
+    is adapted from C{networkx}, which is distributed under a BSD license.
     """
 
     def __init__(
-        self,
-        node_label_types=None,
-        edge_label_types=None,
-        deterministic=False
-    ):
-        """Initialize the types of labelings on states and edges.
-
-        Label types by example
-        ======================
-        Use a C{dict} for each label type you want to define,
-        like this:
-
-          >>> types = [
-                  {'name': 'drink',
-                   'values': {'tea', 'coffee'},
-                   'setter': True,
-                   'default': 'tea'},
-              ]
-
-        This will create a label type named C{'drink'} that can
-        take the values C{'tea'} and C{'coffee'}.
-
-        Assuming this label type applies to nodes,
-        you can now label a new node as:
-
-          >>> g = LabeledDiGraph(types)
-          >>> g.add_node(1, drink='coffee')
-
-        If you omit the label when adding a new node,
-        it gets the default value:
-
-          >>> g.add_node(2)
-          >>> g.node[2]
-          {'drink': 'tea'}
-
-        The main difference with vanilla C{networkx} is
-        that the dict above includes type checking:
-
-          >>> type(g.node[2])
-          tulip.transys.mathset.TypedDict
-
-        The C{'setter'} key with value C{True}
-        creates also a field C{g.drink}.
-        Be careful to avoid name conflicts with existing
-        networkx C{MultiDiGraph} attributes.
-
-        This allows us to add more values after creating
-        the graph:
-
-          >>> g.drink
-          {'coffee', 'tea'}
-          >>> g.drink.add('water')
-          {'coffee', 'tea', 'water'}
-
-        Finally, the graph will prevent us from
-        accidentally using an untyped label name,
-        by raising an C{AttributeError}:
-
-          >>> g.add_node(3, day='Jan')
-          AttributeError: ...
-
-        To add untyped labels, do so explicitly:
-
-          >>> g.add_node(3, day='Jan', check=False)
-          >>> g.node[3]
-          {'day': 'Jan', 'drink': 'tea'}
-
-        Details on label types
-        ======================
-        Each label type is defined by a C{dict} that
-        must have the keys C{'name'} and C{'values'}:
-
-          - C{'name'}: with C{str} value
-
-          - C{'values' : B} implements C{__contains__}
-            used to check label validity.
-
-            If you want the codomain C{B} to be
-            extensible even after initialization,
-            it must implement method C{add}.
-
-        and optionally the keys:
-
-          - C{'setter': C} with 3 possibilities:
-
-            - if absent,
-              then no C{setter} attribute is created
-
-            - otherwise an attribute C{self.A}
-              is created, pointing at:
-
-                - the given co-domain C{B}
-                  if C{C is True}
-
-                - C{C}, otherwise.
-
-          - C{'default': d} is a value in C{B}
-            to be returned for node and edge labels
-            not yet explicitly specified by the user.
-
-        @param node_label_types: applies to nodes, as described above.
-        @type node_label_types: C{list} of C{dict}
-
-        @param edge_label_types: applies to edges, as described above.
-        @type node_label_types: C{list} of C{dict}
-
-        @param deterministic: if True, then edge-label-deterministic
-        """
+            self,
+            node_label_types=None,
+            edge_label_types=None,
+            deterministic=False):
         node_labeling, node_defaults = self._init_labeling(node_label_types)
         edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
 
@@ -785,7 +802,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.default_layout = 'dot'
 
     def _init_labeling(self, label_types):
-        """
+        """Initialize labeling.
+
         Note
         ====
         'state' will be renamed to 'node' in the future
@@ -868,8 +886,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_node(self, n, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
 
-        Log warning if node already exists.
+        Overrides C{networkx.MultiDiGraph.add_node},
+        see that for details.
 
+        Log warning if node already exists.
         All other functionality remains the same.
 
         @param check: if True and untyped keys are passed,
@@ -894,8 +914,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_nodes_from(self, nodes, check=True, **attr):
         """Create or label multiple nodes.
 
-        For details see L{add_node} and
-        C{networkx.MultiDiGraph.add_nodes_from}
+        Overrides C{networkx.MultiDiGraph.add_nodes_from},
+        for details see that and L{LabeledDiGraph.add_node}.
         """
         for n in nodes:
             try:
@@ -910,6 +930,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
         """Use a L{TypedDict} as attribute dict.
+
+        Overrides C{networkx.MultiDiGraph.add_edge},
+        see that for details.
 
           - Raise ValueError if C{u} or C{v} are not already nodes.
           - Raise Exception if edge (u, v, {}) exists.
@@ -926,8 +949,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - find the edge key, then use subscript notation:
 
                 C{G[i][j][key]['attr_name'] = attr_value}
-
-        For more details see C{networkx.MultiDiGraph.add_edge}.
 
         Notes
         =====
@@ -1011,7 +1032,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
 
-        For details see C{networkx.MultiDiGraph.add_edges_from}.
+        Overrides C{networkx.MultiDiGraph.add_edges_from},
+        see that for details.
+
         Only difference is that only 2 and 3-tuple edges allowed.
         Keys cannot be specified, because a bijection is maintained.
 
@@ -1236,8 +1259,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if not self.states:
             print(
                 60 * '!' +
-                "\nThe system doesn't have any states to plot.\n"
-                + 60 * '!')
+                "\nThe system doesn't have any states to plot.\n" +
+                60 * '!')
             return
         if prog is None:
             prog = self.default_layout

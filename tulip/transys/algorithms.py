@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -211,24 +211,6 @@ def cartesian_product(self, other, prod_sys=None):
     return prod_sys
 
 
-def strong_product(self, other):
-    """Return strong product with given graph.
-
-    Reference
-    =========
-      - U{http://en.wikipedia.org/wiki/Strong_product_of_graphs}
-      - networkx.algorithms.operators.product.strong_product
-
-    UNDER DEVELOPMENT; function signature may change without
-    notice.  Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
-    # An issue here is that transitions are possible both
-    # in sequence and simultaneously. So the actions set
-    # is the product of the factor ones and an empty action
-    # should also be introduced
-
-
 def ts_sync_prod(ts1, ts2):
     """Synchronous (tensor) product with other FTS.
 
@@ -406,12 +388,3 @@ def async_prod(self, ts):
     prod_ts = super(FiniteTransitionSystem, self).cartesian_product(
         ts, prod_sys=prod_ts)
     return prod_ts
-
-
-def load_spin2fts():
-    """
-
-    UNDER DEVELOPMENT; function signature may change without
-    notice.  Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError

@@ -45,7 +45,7 @@ cd ..
 gpg --keyserver pgp.mit.edu --recv-keys 03B40F63
 
 CUDDVERSION=2.5.0
-GR1CVERSION=0.9.0
+GR1CVERSION=0.10.1
 
 if [ ! -f gr1c-$GR1CVERSION.tar.gz -o ! -f gr1c-$GR1CVERSION.tar.gz.sig ]
 then
@@ -54,30 +54,15 @@ then
 fi
 gpg --verify gr1c-$GR1CVERSION.tar.gz.sig
 FILECHECKSUM=`shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1`
-if [ $FILECHECKSUM != '818782d3c304e963ab1ac4ce2e3beaede372152adcb593df1bd8245fd2b1c254' ]
+if [ $FILECHECKSUM != '73699369ee55b95aeb3742504e27676491b6d23db176e7e84c266e1a4845c6a3' ]
 then
     echo "Checksum for the gr1c tarball does not have expected value."
     false
 fi
 tar -xzf gr1c-$GR1CVERSION.tar.gz
 cd gr1c-$GR1CVERSION
-
-mkdir -p extern
-cd extern
-if [ ! -f cudd-$CUDDVERSION.tar.gz ]
-then
-    curl -sO ftp://vlsi.colorado.edu/pub/cudd-$CUDDVERSION.tar.gz
-fi
-FILECHECKSUM=`shasum -a 256 cudd-$CUDDVERSION.tar.gz|cut -d ' ' -f1`
-if [ $FILECHECKSUM != '4f3bc49b35564af94b17135d8cb8c4063fb049cfaa442f80dc40ba73c6345a85' ]
-then
-    echo "Checksum for the CUDD tarball does not have expected value."
-    false
-fi
-tar -xzf cudd-$CUDDVERSION.tar.gz
-cd cudd-$CUDDVERSION
-make XCFLAGS='-mtune=native -DHAVE_IEEE_754 -DBSD -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8'
-cd ../..
+./get-deps.sh
+make cudd
 make all
 make check
 sudo make install
