@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -143,22 +143,6 @@ class MathSet(object):
         s = MathSet(self)
         s.add_from(other)
         return s
-
-    def cartesian(self, other):
-        """Return Cartesian product with other C{MathSet},
-
-        as CartesianProduct instance.
-        This representation is internally more efficient,
-        because it is implicit (product not explicitly stored).
-
-        See Also
-        ========
-        L{CartesianProduct}, L{__mul__}
-
-        UNDER DEVELOPMENT; function signature may change without
-        notice.  Calling will result in NotImplementedError.
-        """
-        raise NotImplementedError
 
     def __mul__(self, other):
         """Return the Cartesian product with another C{MathSet}.

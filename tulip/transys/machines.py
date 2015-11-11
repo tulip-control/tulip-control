@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -583,95 +583,6 @@ class MealyMachine(Transducer):
         else:
             return guided_run(self, from_state=from_state,
                               input_sequences=input_sequences)
-
-
-# note on non-determinism and simulation:
-# =====
-#
-# Transducers here have deterministic semantics,
-# even if the exist non-deterministic choices of
-# After all, this turns out to be the essentialy distinction
-# between a non-deterministic game graph (generator) and
-# a machine (transducer).
-# (Modulo some graph and labeling transformations.)
-#
-# A Game Graph (or a transition system if only one player exists,
-# so no partition on the states accompanies the labeled directed graph)
-# is a generator, which takes "all possible transitions".
-# Same for acceptors, in which case the resulting language is filtered
-# by the accepting condition, to yield the language
-# represented by the acceptor.
-#
-# In other words: syntactically they are more or less the same,
-# but semantically they are different.
-# Therefore the methods or functions that manipulate them differ,
-# because they involve their semantics.
-#
-# A possible alternative in the future would be to
-#   - raise an exception in case of non-determinism
-#   - unless the user explicitly allows non-determinism
-# In the latter case, machine non-determinism is resolved
-# arbitrarily during simulation.
-# I think this would correspond to what happens to random simulation
-# in SPIN also.
-
-# note on impossibility to simulate non-deterministic machine
-# =====
-#
-# It is currently impossible to simulate a non-deterministic machine.
-# A non-deterministic machine represents a set of transducers that
-# are all valid solutions to the synthesis problem.
-#
-# But because the semantics of real-world execution require that only
-# a single trace be produced (so resolve the non-determinism in an
-# arbitrary way), this use is discouraged.
-#
-# In the future, such an option could be added.
-# However, it may be a bad design approach.
-# Instead, since a non-deterministic machine is a set of satisfying models
-# (= solutions), a better approach would be to first fix one deterministic
-# alternative as the desired solution, then simulate it.
-#
-# Finally there also exists the issue of initial condition interpretation.
-# Formally, if the initial condition of sys is interpreted as an env var,
-# then after we learn the initial system state of the particular instance
-# that will be simulated, a deterministic transducer should be obtained
-# with only that state as initial, then simulated.
-#
-# A possible alternative in the future would be to
-# allow for initial system state
-# non-determinism, but require that the initial system state be passed as
-# an argument in this case.
-
-
-# note on dict of lists vs list of dicts
-# =====
-#
-# Typically there are few ports but many time indices
-# so checking for equal len of all input sequences is cheaper
-# than checking no port is missing for each dict in a list of dicts over time.
-#
-# Also less memory is needed (one dict of a few lists of 1000 items each,
-#   not 1000 dicts with the same keys of a few items each)
-#
-# Absent inputs at certain times can still be represented,
-# by explicictly assigning them the value None.
-# This avoids mistakes (explicit better than inplicit, cf Zen of Python)
-# and ensures uniformity in the data structure (no absent terms)
-#
-# Also, the dict of lists representation is friendly for adding/removing
-# ports. This may prove convenient if working with a network of machines.
-# For example splitting many output sequences
-# to become inputs for other machines.
-
-# note on terminology
-# =====
-#
-# The term "simulation" is ambiguous and not used any more:
-#
-# 1. it is too general
-# 2. it is dangerous, because it has also another meaning in this context
-# 3. "run" is also wrongly used here (i.e., more than the sequence )
 
 
 def guided_run(mealy, from_state=None, input_sequences=None):
