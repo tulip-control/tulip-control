@@ -55,9 +55,7 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
-    s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-    tsys, exprtab = gr1py.cli.loads(s)
+    tsys, exprtab = _spec_to_gr1py(spec)
     return gr1py.solve.check_realizable(tsys, exprtab)
 
 def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
@@ -65,11 +63,16 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     cf. L{tulip.interfaces.gr1c.synthesize}
     """
-    s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-    tsys, exprtab = gr1py.cli.loads(s)
+    tsys, exprtab = _spec_to_gr1py(spec)
     strategy = gr1py.solve.synthesize(tsys, exprtab)
     if strategy is None:
         return None
     else:
         return load_aut_json(gr1py.output.dump_json(tsys.symtab, strategy))
+
+
+def _spec_to_gr1py(spec):
+    s = translate(spec, 'gr1c')
+    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
+    tsys, exprtab = gr1py.cli.loads(s)
+    return tsys, exprtab
