@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 by California Institute of Technology
+# Copyright (c) 2013-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 """Automata Module"""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 import copy
 from collections import Iterable
 from pprint import pformat
@@ -42,48 +41,32 @@ from tulip.transys.mathset import SubSet, PowerSet
 from tulip.transys.transys import GameGraph
 
 
+logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
 class FiniteStateAutomaton(LabeledDiGraph):
-    """Generic automaton.
+    """Set of sequences described with a graph and a condition.
 
     It has:
         - states
         - states.initial
-        - states.accepting (type depends on automaton flavor)
-        - alphabet = set of input letters (labeling edges)
-          (possibly based on atomic propositions (AP),
-          meaning it is the powerset of some AP set)
-        - is_accepted, for testing input words
+        - states.accepting (types have names, and classes)
+        - alphabet = set of symbols that label edges.
 
-    subclasses implement C{is_accepted}, C{simulate}
 
     Note
     ====
-    Automata represent languages in a way suitable for
-    testing if a given trace is a member of the language.
-    So an automaton operates in acceptor mode,
-    i.e., testing input words.
+    If all paths in the graph belong to the set you
+    want to describe, then just use L{FiniteTransitionSystem}.
 
-    The represented language is not readily accessible,
-    because its generation requires solving a search problem.
-    This search problem is the usual model checking, assuming
-    a transition system with a complete digraph.
+    To describe an input-output function (which is a set too),
+    it is more convenient to use L{FiniteStateMachine}.
 
-    For constructively representing a language,
-    use a L{FiniteTransitionSystem}.
-    A transition system operates only in generator mode,
-    producing a language (possibly non-deterministically).
-
-    For controllers, use a L{FiniteStateMachine},
-    because it maps input words (input port valuations) to
-    outputs (output port valuations).
 
     See Also
     ========
-    L{NFA}, L{DFA}, L{BA}, L{RabinAutomaton}, L{DRA}, L{StreettAutomaton},
-    L{MullerAutomaton}, L{ParityAutomaton}
+    L{BA}, L{RabinAutomaton}.
     """
 
     def __init__(
@@ -192,15 +175,6 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 
-def nfa2dfa():
-    """Determinize NFA using Rabin-Scott subset construction.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
-
-
 def dfa2nfa(dfa):
     """Copy DFA to an NFA, so remove determinism restriction."""
     nfa = copy.deepcopy(dfa)
@@ -232,24 +206,6 @@ class BA(BuchiAutomaton):
 
     def __init__(self, **args):
         super(BA, self).__init__(**args)
-
-
-def ba2dra():
-    """Buchi to Deterministic Rabin Automaton converter.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
-
-
-def ba2ltl():
-    """Buchi Automaton to Linear Temporal Logic formula converter.
-
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
-    """
-    raise NotImplementedError
 
 
 def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
@@ -495,24 +451,6 @@ class DRA(RabinAutomaton):
             deterministic=True,
             atomic_proposition_based=atomic_proposition_based)
         self.automaton_type = 'Deterministic Rabin Automaton'
-
-
-class StreettAutomaton(OmegaAutomaton):
-    """Omega-automaton with Streett acceptance condition."""
-
-    pass
-
-
-class MullerAutomaton(OmegaAutomaton):
-    """Omega-automaton with Muller acceptance condition."""
-
-    pass
-
-
-class ParityAutomaton(OmegaAutomaton):
-    """Omega-automaton with Parity acceptance condition."""
-
-    pass
 
 
 class ParityGame(GameGraph):

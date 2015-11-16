@@ -29,22 +29,23 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Interface to gr1py
+"""Interface to C{gr1py}.
 
 U{https://pypi.python.org/pypi/gr1py}
 U{https://github.com/slivingston/gr1py}
 """
 from __future__ import absolute_import
-
 import logging
-logger = logging.getLogger(__name__)
-import gr1py
-import gr1py.cli
-from tulip.spec import GRSpec, translate
+from tulip.spec import translate
 from tulip.interfaces.gr1c import load_aut_json
+try:
+    import gr1py
+    import gr1py.cli
+except ImportError:
+    gr1py = None
 
 
+logger = logging.getLogger(__name__)
 _hl = 60 * '-'
 
 
@@ -55,9 +56,7 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
-    s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-    tsys, exprtab = gr1py.cli.loads(s)
+    tsys, exprtab = _spec_to_gr1py(spec)
     return gr1py.solve.check_realizable(tsys, exprtab)
 
 def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
@@ -65,11 +64,19 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     cf. L{tulip.interfaces.gr1c.synthesize}
     """
-    s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-    tsys, exprtab = gr1py.cli.loads(s)
+    tsys, exprtab = _spec_to_gr1py(spec)
     strategy = gr1py.solve.synthesize(tsys, exprtab)
     if strategy is None:
         return None
-    else:
-        return load_aut_json(gr1py.output.dump_json(tsys.symtab, strategy))
+    s = gr1py.output.dump_json(tsys.symtab, strategy)
+    return load_aut_json(s)
+
+
+def _spec_to_gr1py(spec):
+    if gr1py is None:
+        raise ValueError('Import of gr1py interface failed.\n'
+                         'Please verify installation of "gr1py".')
+    s = translate(spec, 'gr1c')
+    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
+    tsys, exprtab = gr1py.cli.loads(s)
+    return tsys, exprtab

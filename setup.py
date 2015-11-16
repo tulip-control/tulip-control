@@ -8,6 +8,18 @@ import subprocess
 import sys
 import os
 
+
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Topic :: Scientific/Engineering']
+
+
 ###########################################
 # Dependency or optional-checking functions
 ###########################################
@@ -80,6 +92,13 @@ def check_cvxopt():
         return False
     return True
 
+def check_polytope():
+    try:
+        import polytope
+    except ImportError:
+        return False
+    return True
+
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
 # "install" is given, unless both "install" and "nocheck" are given
@@ -122,6 +141,9 @@ pydot_msg = 'pydot not found.\n' +\
 cvxopt_msg = 'cvxopt not found.\n' +\
     'For routines treating hybrid systems, you must install\n' +\
     'CVXOPT (http://cvxopt.org/).'
+polytope_msg = 'polytope not found.\n' +\
+    'For routines treating hybrid systems, you must install\n' +\
+    'the Python package polytope (https://pypi.python.org/pypi/polytope).'
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -131,6 +153,7 @@ cvxopt_msg = 'cvxopt not found.\n' +\
 #           found); we interpret the return value True to be success,
 #           and False failure.
 optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
+             'polytope' : [check_polytope, 'polytope found.', polytope_msg],
              'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
              'java': [check_java, 'Java  found.', java_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
@@ -314,6 +337,7 @@ if perform_setup:
         url = 'http://tulip-control.org',
         bugtrack_url='http://github.com/tulip-control/tulip-control/issues',
         license = 'BSD',
+        classifiers=classifiers,
         install_requires = [
             'ply >= 3.4',
             'networkx >= 1.6',
@@ -322,7 +346,7 @@ if perform_setup:
         ],
         extras_require={
             'hybrid': ['cvxopt >= 1.1.7',
-                       'polytope >= 0.1.0']},
+                       'polytope >= 0.1.1']},
         tests_require=['nose'],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',

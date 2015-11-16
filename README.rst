@@ -58,4 +58,14 @@ root of the source tree (i.e., where setup.py is located), ::
 
   ./run_tests.py
 
-to run all available tests.  For a summary of usage, ``./run_tests.py -h``
+to perform basic tests.  To try all available tests, ``./run_tests.py full``.
+For alternatives and a summary of usage, ``./run_tests.py -h``
+
+
+License
+-------
+
+This is free software released under the terms of `the BSD 3-Clause License
+<http://opensource.org/licenses/BSD-3-Clause>`_.  There is no warranty; not even
+for merchantability or fitness for a particular purpose.  Consult LICENSE for
+copying conditions.

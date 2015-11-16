@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2014 by California Institute of Technology
+# Copyright (c) 2012-2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,17 +36,12 @@ import copy
 import warnings
 from tulip import transys
 from tulip.spec import GRSpec
-from tulip.interfaces import jtlv, gr1c
+from tulip.interfaces import jtlv, gr1c, gr1py
 from tulip.interfaces import omega as omega_int
-# optional dependencies
 try:
     from tulip.interfaces import slugs
 except ImportError:
     slugs = None
-try:
-    from tulip.interfaces import gr1py
-except ImportError:
-    gr1py = None
 
 
 logger = logging.getLogger(__name__)
@@ -1124,9 +1119,6 @@ def synthesize(
                              'Please verify installation of "slugs".')
         strategy = slugs.synthesize(specs)
     elif option == 'gr1py':
-        if gr1py is None:
-            raise ValueError('Import of gr1py interface failed. ' +
-                             'Please verify installation of "gr1py".')
         strategy = gr1py.synthesize(specs)
     elif option == 'omega':
         strategy = omega_int.synthesize_enumerated_streett(specs)
@@ -1178,9 +1170,6 @@ def is_realizable(
                              'Please verify installation of "slugs".')
         r = slugs.check_realizable(specs)
     elif option == 'gr1py':
-        if gr1py is None:
-            raise ValueError('Import of gr1py interface failed. ' +
-                             'Please verify installation of "gr1py".')
         r = gr1py.check_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)

@@ -8,12 +8,13 @@ scipy
 
 # easy extras
 omega>=0.0.4
+gr1py>=0.1.0
 pyparsing==2.0.3
 http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 
 # extras (uncomment as needed)
 # cvxopt==1.1.7
-# polytope==0.1.0
+# polytope==0.1.1
 # matplotlib
 
 # tests

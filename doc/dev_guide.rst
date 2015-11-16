@@ -54,18 +54,30 @@ be followed:
 
     U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
 
-- A script for running tests is ``run_test.py`` in the root of the source tree.
-  It searches under the directory ``tests/`` for files with names ending in
-  "_test.py", and passes these to `nose <http://readthedocs.org/docs/nose/>`_.
-  Use the flag "-h" to see driver script options.  Extra details about options:
+Testing
+-------
 
-  * The flag "--cover" to generate a coverage report, which will likely be
-    placed under ``tests/cover/``.  It uses `Ned Batchelder's coverage module
-    <http://www.nedbatchelder.com/code/modules/coverage.html>`_.
+A script for running tests is ``run_test.py`` in the root of the source
+tree. Without the ``-f`` or ``--testfiles`` switch, ``run_tests.py`` expects the
+user to request a family of tests to perform. The default is "base", which
+corresponds to tests that should pass when the required dependencies of TuLiP
+are satisfied. The other extreme is "full", which performs all tests. In
+between, other families are defined, e.g., "hybrid", which involves all "base"
+tests and any tests that should pass given a successful ``pip install tulip[hybrid]``,
+namely, when the optional packages ``cvxopt`` and ``polytope`` are present.
 
-  * The flag "--outofsource" will cause ``tulip`` to be imported from outside
-    the current directory.  This is useful for testing against the installed
-    form of TuLiP.
+Provided the ``-f`` or ``--testfiles`` switch, it searches under the directory
+``tests/`` for files with names ending in "_test.py", and passes these to `nose
+<http://readthedocs.org/docs/nose/>`_.  Use the flag "-h" to see driver script
+options.  Extra details about options:
+
+* The flag "--cover" to generate a coverage report, which will likely be placed
+  under ``tests/cover/``.  It uses `Ned Batchelder's coverage module
+  <http://www.nedbatchelder.com/code/modules/coverage.html>`_.
+
+* The flag "--outofsource" will cause ``tulip`` to be imported from outside the
+  current directory.  This is useful for testing against the installed form of
+  TuLiP.
 
 Version naming
 --------------
@@ -85,6 +97,25 @@ want.
 
 None of these version numbers go in individual files, but
 the version number is a label for the entire package.
+
+Making releases
+---------------
+
+#. Collect list of major changes.
+#. Update the changelog.
+#. Tag with message of the form "REL: version 1.2.0".
+#. Create source release, ``python setup.py sdist``.
+#. Post it to PyPI and SourceForge.net.
+#. Build and post User's Guide and API manual. Under the directory doc/, run ::
+
+     ./rsync-web.sh USERNAME
+     ./rsync-docs.sh USERNAME
+
+   where ``USERNAME`` is your SourceForge.net handle.
+#. Make announcement on `tulip-control-announce mailing list
+   <https://lists.sourceforge.net/lists/listinfo/tulip-control-announce>`_,
+   providing major website links and the summary of changes.
+#. Bump version in the repository, in preparation for next release.
 
 
 Advice
