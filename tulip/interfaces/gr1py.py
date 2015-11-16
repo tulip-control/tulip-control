@@ -29,16 +29,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Interface to gr1py
+"""Interface to C{gr1py}.
 
 U{https://pypi.python.org/pypi/gr1py}
 U{https://github.com/slivingston/gr1py}
 """
 from __future__ import absolute_import
-
 import logging
-logger = logging.getLogger(__name__)
 from tulip.spec import GRSpec, translate
 from tulip.interfaces.gr1c import load_aut_json
 try:
@@ -48,6 +45,7 @@ except ImportError:
     gr1py = None
 
 
+logger = logging.getLogger(__name__)
 _hl = 60 * '-'
 
 
