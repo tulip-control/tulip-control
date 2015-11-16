@@ -328,9 +328,9 @@ def load_aut_json(x):
     @return: strategy as C{networkx.DiGraph}, like the return value of
         L{load_aut_xml}
     """
-    if isinstance(x, str):
+    try:
         autjs = json.loads(x)
-    else:
+    except TypeError:
         autjs = json.load(x)
     if autjs['version'] != 1:
         raise ValueError('Only gr1c JSON format version 1 is supported.')
