@@ -328,26 +328,26 @@ def load_aut_json(x):
     @return: strategy as C{networkx.DiGraph}, like the return value of
         L{load_aut_xml}
     """
-    if isinstance(x, str):
+    try:
         autjs = json.loads(x)
-    else:
+    except TypeError:
         autjs = json.load(x)
     if autjs['version'] != 1:
         raise ValueError('Only gr1c JSON format version 1 is supported.')
-
+    # convert to nx
     A = nx.DiGraph()
-    symtab = autjs['ENV']+autjs['SYS']
+    symtab = autjs['ENV'] + autjs['SYS']
     A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
     A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
-    for node_ID in autjs['nodes'].iterkeys():
+    for node_ID in autjs['nodes']:
         node_label = dict([(k, v) for (k,v) in autjs['nodes'][node_ID].items()
                            if k not in ('state', 'trans')])
         node_label['state'] = dict([(symtab[i].keys()[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
         A.add_node(node_ID, node_label)
-    for node_ID in autjs['nodes'].iterkeys():
-        for to_node in autjs['nodes'][node_ID]['trans']:
+    for node_ID, d in autjs['nodes'].iteritems():
+        for to_node in d['trans']:
             A.add_edge(node_ID, to_node)
     return A
 
