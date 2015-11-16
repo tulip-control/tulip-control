@@ -8,6 +8,18 @@ import subprocess
 import sys
 import os
 
+
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Topic :: Scientific/Engineering']
+
+
 ###########################################
 # Dependency or optional-checking functions
 ###########################################
@@ -325,6 +337,7 @@ if perform_setup:
         url = 'http://tulip-control.org',
         bugtrack_url='http://github.com/tulip-control/tulip-control/issues',
         license = 'BSD',
+        classifiers=classifiers,
         install_requires = [
             'ply >= 3.4',
             'networkx >= 1.6',
