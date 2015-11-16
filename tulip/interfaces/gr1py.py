@@ -39,10 +39,13 @@ from __future__ import absolute_import
 
 import logging
 logger = logging.getLogger(__name__)
-import gr1py
-import gr1py.cli
 from tulip.spec import GRSpec, translate
 from tulip.interfaces.gr1c import load_aut_json
+try:
+    import gr1py
+    import gr1py.cli
+except ImportError:
+    gr1py = None
 
 
 _hl = 60 * '-'
@@ -72,6 +75,9 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
 
 def _spec_to_gr1py(spec):
+    if gr1py is None:
+        raise ValueError('Import of gr1py interface failed.\n'
+                         'Please verify installation of "gr1py".')
     s = translate(spec, 'gr1c')
     logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
     tsys, exprtab = gr1py.cli.loads(s)

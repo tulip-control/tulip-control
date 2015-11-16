@@ -37,19 +37,13 @@ import copy
 import warnings
 from tulip import transys
 from tulip.spec import GRSpec
-from tulip.interfaces import jtlv, gr1c
-
+from tulip.interfaces import jtlv, gr1c, gr1py
 # slugs is an optional dependency, so fail cleanly if it is missing.
 try:
     from tulip.interfaces import slugs
 except ImportError:
     slugs = None
 
-# gr1py is an optional dependency, so fail cleanly if it is missing.
-try:
-    from tulip.interfaces import gr1py
-except ImportError:
-    gr1py = None
 
 _hl = '\n' + 60 * '-'
 
@@ -1111,9 +1105,6 @@ def synthesize(
                              'Please verify installation of "slugs".')
         strategy = slugs.synthesize(specs)
     elif option == 'gr1py':
-        if gr1py is None:
-            raise ValueError('Import of gr1py interface failed. ' +
-                             'Please verify installation of "gr1py".')
         strategy = gr1py.synthesize(specs)
     elif option == 'jtlv':
         strategy = jtlv.synthesize(specs)
@@ -1163,9 +1154,6 @@ def is_realizable(
                              'Please verify installation of "slugs".')
         r = slugs.check_realizable(specs)
     elif option == 'gr1py':
-        if gr1py is None:
-            raise ValueError('Import of gr1py interface failed. ' +
-                             'Please verify installation of "gr1py".')
         r = gr1py.check_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
