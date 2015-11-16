@@ -7,6 +7,7 @@ numpy==1.7
 scipy
 
 # easy extras
+omega>=0.0.4
 pyparsing==2.0.3
 http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 
