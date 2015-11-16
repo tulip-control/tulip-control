@@ -334,9 +334,9 @@ def load_aut_json(x):
         autjs = json.load(x)
     if autjs['version'] != 1:
         raise ValueError('Only gr1c JSON format version 1 is supported.')
-
+    # convert to nx
     A = nx.DiGraph()
-    symtab = autjs['ENV']+autjs['SYS']
+    symtab = autjs['ENV'] + autjs['SYS']
     A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
     A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
     for node_ID in autjs['nodes'].iterkeys():
