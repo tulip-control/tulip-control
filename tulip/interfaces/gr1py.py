@@ -68,8 +68,8 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     strategy = gr1py.solve.synthesize(tsys, exprtab)
     if strategy is None:
         return None
-    else:
-        return load_aut_json(gr1py.output.dump_json(tsys.symtab, strategy))
+    s = gr1py.output.dump_json(tsys.symtab, strategy)
+    return load_aut_json(s)
 
 
 def _spec_to_gr1py(spec):
