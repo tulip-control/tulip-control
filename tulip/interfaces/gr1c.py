@@ -341,7 +341,7 @@ def load_aut_json(x):
     A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
     for node_ID in autjs['nodes']:
         node_label = dict([(k, autjs['nodes'][node_ID][k])
-                           for k in ('mode', 'rgrad')])
+                           for k in ('mode', 'rgrad', 'initial')])
         node_label['state'] = dict([(symtab[i].keys()[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
