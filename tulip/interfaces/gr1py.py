@@ -36,7 +36,7 @@ U{https://github.com/slivingston/gr1py}
 """
 from __future__ import absolute_import
 import logging
-from tulip.spec import GRSpec, translate
+from tulip.spec import translate
 from tulip.interfaces.gr1c import load_aut_json
 try:
     import gr1py
