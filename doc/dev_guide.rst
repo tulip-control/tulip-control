@@ -12,6 +12,8 @@ Organization and Rules
 We begin with important organizational notes and **rules** that should
 be followed:
 
+- `PEP 20 <https://www.python.org/dev/peps/pep-0020/>`_.
+
 - `PEP 8 <http://python.org/dev/peps/pep-0008/>`_.  Especially, you should
 
   - use 4-space indentation;
@@ -151,6 +153,11 @@ entirely ignored.
 .. advice for emacs users ?
 
 - Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.
+
+- Commit changes before you go to sleep.
+  You can always `rebase <https://help.github.com/articles/using-git-rebase/>`_ later multiple times, until you are happy with the history.
+  This ensures that history won't have been forgotten by the time you return to that workspace.
+
 
 Further reading, of general interest:
 
