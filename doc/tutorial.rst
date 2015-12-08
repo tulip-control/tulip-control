@@ -301,8 +301,8 @@ as in the previous example.
 
 Next, we specify the continuous dynamics.  This includes specifying the
 continuous state space, propositions on continuous variables, and the
-dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x, \dot{y}
-= u_y.`
+dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x + 5d_x, 
+\dot{y} = u_y + 5d_y,` discretized with a sampling time of 0.2.
 
 .. literalinclude:: ../examples/robot_planning/continuous.py
    :start-after: @dynamics_section@
