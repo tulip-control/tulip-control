@@ -158,6 +158,10 @@ entirely ignored.
     You can always `rebase <https://help.github.com/articles/using-git-rebase/>`_ later multiple times, until you are happy with the history.
     This ensures that history won't have been forgotten by the time you return to that workspace.
 
+- Prefix commits to classify the changes.
+  The `NumPy development workflow <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_ contains a summary of common abbreviations.
+  You may prefer to use "MAI:" instead of "MAINT:", and "REF:" for refactoring.
+
 
 Further reading, of general interest:
 
