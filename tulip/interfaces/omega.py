@@ -20,7 +20,11 @@ except ImportError:
 
 
 def synthesize_enumerated_streett(spec):
-    """Return transducer enumerated as a graph."""
+    """Return transducer enumerated as a graph.
+
+    @type spec: `tulip.spec.form.GRSpec`
+    @rtype: `networkx.DiGraph`
+    """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
     a = aut.build()
@@ -39,7 +43,11 @@ def synthesize_enumerated_streett(spec):
 
 
 def is_circular(spec):
-    """Return `True` if trivial winning set non-empty."""
+    """Return `True` if trivial winning set non-empty.
+
+    @type spec: `tulip.spec.form.GRSpec`
+    @rtype: `bool`
+    """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
     triv, t = gr1.trivial_winning_set(aut)
@@ -47,7 +55,12 @@ def is_circular(spec):
 
 
 def _int_bounds(aut):
-    """Create care set for enumeration."""
+    """Create care set for enumeration.
+
+    @type aut: `omega.symbolic.symbolic.Automaton`
+    @return: node in a `dd.bdd.BDD`
+    @rtype: `int`
+    """
     int_types = {'int', 'saturating', 'modwrap'}
     bdd = aut.bdd
     u = bdd.true
@@ -66,7 +79,12 @@ def _int_bounds(aut):
 
 
 def _strategy_to_state_annotated(g, aut):
-    """Move annotation to `dict` as value of `'state'` key."""
+    """Move annotation to `dict` as value of `'state'` key.
+
+    @type g: `nx.DiGraph`
+    @type: aut: `omega.symbolic.symbolic.Automaton`
+    @rtype: `nx.DiGraph`
+    """
     h = nx.DiGraph()
     for u, d in g.nodes_iter(data=True):
         dvars = {k: d[k] for k in d if k in aut.vars}
