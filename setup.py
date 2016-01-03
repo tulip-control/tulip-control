@@ -205,31 +205,6 @@ package_data = {
 }
 
 if check_deps:
-    if not perform_setup:
-        print('Checking for required dependencies...')
-
-        # Python package dependencies
-        try:
-            import numpy
-        except:
-            print('ERROR: NumPy not found.')
-            raise
-        try:
-            import scipy
-        except:
-            print('ERROR: SciPy not found.')
-            raise
-        try:
-            import ply
-        except:
-            print('ERROR: PLY not found.')
-            raise
-        try:
-            import networkx
-        except:
-            print('ERROR: NetworkX not found.')
-            raise
-
     # Other dependencies
     for (dep_key, dep_val) in other_depends.items():
         print('Probing for required dependency:' + dep_key + '...')
