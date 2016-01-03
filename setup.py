@@ -150,3 +150,7 @@ def run_setup():
         print("!"*65)
         print("    Failed to build PLY table.  Please run setup.py again.")
         print("!"*65)
+
+
+if __name__ == '__main__':
+    run_setup()
