@@ -47,19 +47,6 @@ def check_gr1c():
         return False
     return True
 
-def check_jtlv():
-    return os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar'))
-
-def check_java():
-    try:
-        subprocess.check_output(['java', '-help'], stderr=subprocess.STDOUT)
-    except OSError as e:
-        if e.errno == os.errno.ENOENT:
-            return False
-        else:
-            raise
-    return True
-
 def check_glpk():
     try:
         import cvxopt.glpk
@@ -125,12 +112,6 @@ other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 glpk_msg = 'GLPK seems to be missing\n' +\
     'and thus apparently not used by CVXOPT if you have it.\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
-java_msg = (
-    'java not found.\n'
-    'The jtlv synthesis tool will not be able to run.\n'
-    'It is an optional alternative to gr1c,\n'
-    'the default GR(1) solver of TuLiP.'
-)
 mpl_msg = 'matplotlib not found.\n' +\
     'For many graphics drawing features in TuLiP, you must install\n' +\
     'matplotlib (http://matplotlib.org/).'
@@ -155,7 +136,6 @@ polytope_msg = 'polytope not found.\n' +\
 optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
              'polytope' : [check_polytope, 'polytope found.', polytope_msg],
              'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
-             'java': [check_java, 'Java  found.', java_msg],
              'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
@@ -280,7 +260,7 @@ if check_deps:
 
     # Optional stuff for which the installation configuration will
     # change depending on the availability of each.
-    if check_jtlv():
+    if os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')):
         print('Found optional JTLV-based solver.')
         package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
     else:
