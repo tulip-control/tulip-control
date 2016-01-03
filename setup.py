@@ -2,7 +2,6 @@
 import logging
 from setuptools import setup
 import subprocess
-import sys
 import os
 
 
