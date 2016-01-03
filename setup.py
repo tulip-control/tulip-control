@@ -65,12 +65,6 @@ def check_pydot():
         return False
     return True
 
-def check_cvxopt():
-    try:
-        import cvxopt
-    except ImportError:
-        return False
-    return True
 
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
@@ -102,9 +96,7 @@ pydot_msg = 'pydot not found.\n' +\
     'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
     'export routines will be unavailable unless you install\n' +\
     'pydot (http://code.google.com/p/pydot/).'
-cvxopt_msg = 'cvxopt not found.\n' +\
-    'For routines treating hybrid systems, you must install\n' +\
-    'CVXOPT (http://cvxopt.org/).'
+
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -113,8 +105,7 @@ cvxopt_msg = 'cvxopt not found.\n' +\
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
-             'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
+optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 def retrieve_git_info():
