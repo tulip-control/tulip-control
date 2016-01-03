@@ -54,13 +54,6 @@ def check_glpk():
         return False
     return True
 
-def check_mpl():
-    try:
-        import matplotlib
-    except ImportError:
-        return False
-    return True
-
 def check_pydot():
     try:
         import pydot
@@ -112,9 +105,6 @@ other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 glpk_msg = 'GLPK seems to be missing\n' +\
     'and thus apparently not used by CVXOPT if you have it.\n' +\
     'If you\'re interested, see http://www.gnu.org/s/glpk/'
-mpl_msg = 'matplotlib not found.\n' +\
-    'For many graphics drawing features in TuLiP, you must install\n' +\
-    'matplotlib (http://matplotlib.org/).'
 pydot_msg = 'pydot not found.\n' +\
     'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
     'export routines will be unavailable unless you install\n' +\
@@ -136,7 +126,6 @@ polytope_msg = 'polytope not found.\n' +\
 optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
              'polytope' : [check_polytope, 'polytope found.', polytope_msg],
              'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
-             'matplotlib' : [check_mpl, 'matplotlib found.', mpl_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 def retrieve_git_info():
