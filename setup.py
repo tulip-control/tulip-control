@@ -47,12 +47,6 @@ def check_gr1c():
         return False
     return True
 
-def check_glpk():
-    try:
-        import cvxopt.glpk
-    except ImportError:
-        return False
-    return True
 
 def check_pydot():
     try:
@@ -89,9 +83,6 @@ gr1c_msg = 'gr1c not found or of version prior to ' +\
 #           True to be success, and False failure.
 other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
 
-glpk_msg = 'GLPK seems to be missing\n' +\
-    'and thus apparently not used by CVXOPT if you have it.\n' +\
-    'If you\'re interested, see http://www.gnu.org/s/glpk/'
 pydot_msg = 'pydot not found.\n' +\
     'Several graph image file creation and dot (http://www.graphviz.org/)\n' +\
     'export routines will be unavailable unless you install\n' +\
@@ -105,8 +96,7 @@ pydot_msg = 'pydot not found.\n' +\
 #           success, second printed on failure (i.e. package not
 #           found); we interpret the return value True to be success,
 #           and False failure.
-optionals = {'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
-             'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
+optionals = {'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 
 def retrieve_git_info():
     """Return commit hash of HEAD, or "release", or None if failure.
