@@ -327,7 +327,9 @@ if perform_setup:
         extras_require={
             'hybrid': ['cvxopt >= 1.1.7',
                        'polytope >= 0.1.1']},
-        tests_require=['nose'],
+        tests_require=[
+            'nose',
+            'matplotlib'],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
