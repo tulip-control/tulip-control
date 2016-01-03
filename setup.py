@@ -16,6 +16,10 @@ classifiers = [
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 2.7',
     'Topic :: Scientific/Engineering']
+package_data = {
+    'tulip': ['commit_hash.txt'],
+    'tulip.transys.export': ['d3.v3.min.js'],
+    'tulip.spec': ['parsetab.py']}
 
 
 def retrieve_git_info():
@@ -60,12 +64,6 @@ def retrieve_git_info():
     sha1 = p.stdout.read()
     logger.debug('SHA1: ' + sha1)
     return sha1
-
-
-package_data = {
-    'tulip': ['commit_hash.txt'],
-    'tulip.transys.export': ['d3.v3.min.js'],
-    'tulip.spec': ['parsetab.py']}
 
 
 def package_jtlv():
