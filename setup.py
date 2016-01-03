@@ -72,13 +72,6 @@ def check_cvxopt():
         return False
     return True
 
-def check_polytope():
-    try:
-        import polytope
-    except ImportError:
-        return False
-    return True
-
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
 # "install" is given, unless both "install" and "nocheck" are given
@@ -112,9 +105,6 @@ pydot_msg = 'pydot not found.\n' +\
 cvxopt_msg = 'cvxopt not found.\n' +\
     'For routines treating hybrid systems, you must install\n' +\
     'CVXOPT (http://cvxopt.org/).'
-polytope_msg = 'polytope not found.\n' +\
-    'For routines treating hybrid systems, you must install\n' +\
-    'the Python package polytope (https://pypi.python.org/pypi/polytope).'
 
 # These are nice to have but not necessary. Each item is of the form
 #
@@ -124,7 +114,6 @@ polytope_msg = 'polytope not found.\n' +\
 #           found); we interpret the return value True to be success,
 #           and False failure.
 optionals = {'cvxopt' : [check_cvxopt, 'cvxopt found.', cvxopt_msg],
-             'polytope' : [check_polytope, 'polytope found.', polytope_msg],
              'glpk' : [check_glpk, 'GLPK found.', glpk_msg],
              'pydot' : [check_pydot, 'pydot found.', pydot_msg]}
 

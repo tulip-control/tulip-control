@@ -14,7 +14,7 @@ http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 
 # extras (uncomment as needed)
 # cvxopt==1.1.7
-# polytope==0.1.1
+# polytope==0.1.1  # required for algorithms on hybrid systems
 # matplotlib
 
 # tests
