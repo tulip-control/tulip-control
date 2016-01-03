@@ -48,18 +48,6 @@ def check_gr1c():
     return True
 
 
-def check_pydot():
-    try:
-        import pydot
-        from distutils.version import StrictVersion
-        if StrictVersion(pydot.__version__) < StrictVersion('1.0.28'):
-            print('Pydot version >= 1.0.28 required.' +
-                'found: ' +pydot.__version__)
-    except ImportError:
-        return False
-    return True
-
-
 # Handle "dry-check" argument to check for dependencies without
 # installing the tulip package; checking occurs by default if
 # "install" is given, unless both "install" and "nocheck" are given
@@ -263,7 +251,8 @@ if perform_setup:
                        'polytope >= 0.1.1']},
         tests_require=[
             'nose',
-            'matplotlib'],
+            'matplotlib',
+            'pydot >= 1.0.28'],
         packages = [
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
