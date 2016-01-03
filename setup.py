@@ -25,27 +25,6 @@ classifiers = [
 ###########################################
 # (see notes below.)
 
-GR1C_MIN_VERSION = (0,9,0)
-def check_gr1c():
-    try:
-        v_str = subprocess.check_output(["gr1c", "-V"])
-    except OSError:
-        return False
-    try:
-        v_str = v_str.split()[1]
-        major, minor, micro = v_str.split(".")
-        major = int(major)
-        minor = int(minor)
-        micro = int(micro)
-        if not (major > GR1C_MIN_VERSION[0]
-                or (major == GR1C_MIN_VERSION[0]
-                    and (minor > GR1C_MIN_VERSION[1]
-                         or (minor == GR1C_MIN_VERSION[1]
-                             and micro >= GR1C_MIN_VERSION[2])))):
-            return False
-    except:
-        return False
-    return True
 
 
 # Handle "dry-check" argument to check for dependencies without
@@ -53,13 +32,7 @@ def check_gr1c():
 # "install" is given, unless both "install" and "nocheck" are given
 # (but typical users do not need "nocheck").
 
-gr1c_msg = 'gr1c not found or of version prior to ' +\
-    ".".join([str(vs) for vs in GR1C_MIN_VERSION]) +\
-    '.\n' +\
-    'Unless you have some alternative synthesis tool installed,\n' +\
-    'it will not be possible to realize GR(1) specifications.\n' +\
-    'Consult installation instructions for gr1c at http://scottman.net/2012/gr1c\n' +\
-    'or the TuLiP User\'s Guide about alternatives.'
+
 
 # You *must* have these to run TuLiP.  Each item in other_depends must
 # be treated specially; thus other_depends is a dictionary with
@@ -69,7 +42,7 @@ gr1c_msg = 'gr1c not found or of version prior to ' +\
 #   values : list of callable and string, which is printed on failure
 #           (i.e. package not found); we interpret the return value
 #           True to be success, and False failure.
-other_depends = {'gr1c' : [check_gr1c, 'gr1c found.', gr1c_msg]}
+other_depends = dict()
 
 
 

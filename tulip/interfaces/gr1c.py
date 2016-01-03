@@ -41,8 +41,8 @@ interacting with the gr1c executable.
 
 Use the logging module to throttle verbosity.
 """
+from distutils.version import StrictVersion
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import os
 import subprocess
@@ -53,9 +53,29 @@ import networkx as nx
 from tulip.spec import GRSpec, translate
 
 
+GR1C_MIN_VERSION = '0.9.0'
 GR1C_BIN_PREFIX = ""
-_hl = 60 * '-'
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
+_hl = 60 * '-'
+logger = logging.getLogger(__name__)
+
+
+def check_gr1c():
+    """Raise `Exception` if `gr1c` not in PATH."""
+    try:
+        v = subprocess.check_output(["gr1c", "-V"])
+    except OSError:
+        return False
+    v = v.split()[1]
+    if StrictVersion(v) >= StrictVersion(GR1C_MIN_VERSION):
+        return
+    raise Exception(
+        '`gr1c >= {v}` not found in the PATH.\n'.format(v=v) +
+        'Unless an alternative synthesis tool is installed,\n'
+        'it will not be possible to realize GR(1) specifications.\n'
+        'Consult installation instructions for gr1c at:\n'
+        '\t http://scottman.net/2012/gr1c\n'
+        'or the TuLiP User\'s Guide about alternatives.')
 
 
 def get_version():
@@ -356,6 +376,7 @@ def check_syntax(spec_str):
 
     Return True if syntax check passed, False on error.
     """
+    check_gr1c()
     f = tempfile.TemporaryFile()
     f.write(spec_str)
     f.seek(0)
@@ -381,6 +402,7 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    check_gr1c()
     logger.info('checking realizability...')
 
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
@@ -445,6 +467,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     @return: strategy as C{networkx.DiGraph},
         or None if unrealizable or error occurs.
     """
+    check_gr1c()
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
