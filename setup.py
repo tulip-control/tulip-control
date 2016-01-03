@@ -115,6 +115,8 @@ def run_setup():
     version = imp.load_module("version",
                               *imp.find_module("version", ["tulip"]))
     tulip_version = version.version
+    # setup
+    package_jtlv()
     setup(
         name='tulip',
         version=tulip_version,
