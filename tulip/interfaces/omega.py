@@ -29,11 +29,10 @@ def synthesize_enumerated_streett(spec):
     sym.fill_blanks(aut)
     a = aut.build()
     z, yij, xijk = gr1.solve_streett_game(a)
-    try:
-        t = gr1.make_streett_transducer(z, yij, xijk, a)
-    except AssertionError as e:
-        print(e)
+    # unrealizable ?
+    if z == a.bdd.false:
         return None
+    t = gr1.make_streett_transducer(z, yij, xijk, a)
     (u,) = t.action['sys']
     care = _int_bounds(t)
     g = enum.relation_to_graph(u, t, care_source=care,
