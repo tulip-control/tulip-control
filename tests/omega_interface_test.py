@@ -90,6 +90,22 @@ def test_is_circular_false():
     assert not triv, triv
 
 
+def test_synthesis_cudd():
+    sp = grspec_1()
+    h = omega_int.synthesize_enumerated_streett(sp, use_cudd=True)
+    n = len(h)
+    assert n == 25, n
+
+
+def test_is_circular_cudd():
+    f = form.GRSpec()
+    f.sys_vars['y'] = 'bool'
+    f.env_prog = ['y']
+    f.sys_prog = ['y']
+    triv = omega_int.is_circular(f, use_cudd=True)
+    assert triv, triv
+
+
 def grspec_0():
     sp = form.GRSpec()
     sp.env_vars = dict(x='boolean')
@@ -106,3 +122,7 @@ def grspec_1():
     sp.sys_vars = dict(y=(0, 4))
     sp.sys_safety = ["x' = y'"]
     return sp
+
+
+if __name__ == '__main__':
+    test_synthesis_cudd()

@@ -17,40 +17,57 @@ try:
     from omega.symbolic import enumeration as enum
 except ImportError:
     omega = None
+try:
+    from dd import cudd
+except ImportError:
+    cudd = None
 
 
-def synthesize_enumerated_streett(spec):
+def synthesize_enumerated_streett(spec, use_cudd=False):
     """Return transducer enumerated as a graph.
 
     @type spec: `tulip.spec.form.GRSpec`
+    @param use_cudd: efficient BDD computations with `dd.cudd`
     @rtype: `networkx.DiGraph`
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    a = aut.build()
+    bdd = _cudd_bdd() if use_cudd else None
+    a = aut.build(bdd=bdd)
     z, yij, xijk = gr1.solve_streett_game(a)
     # unrealizable ?
     if z == a.bdd.false:
         return None
-    t = gr1.make_streett_transducer(z, yij, xijk, a)
+    t = gr1.make_streett_transducer(z, yij, xijk, a, bdd=a.bdd)
     (u,) = t.action['sys']
     care = _int_bounds(t)
     g = enum.relation_to_graph(u, t, care_source=care,
                                care_target=care)
     h = _strategy_to_state_annotated(g, a)
+    del u, yij, xijk, care
     return h
 
 
-def is_circular(spec):
+def is_circular(spec, use_cudd=False):
     """Return `True` if trivial winning set non-empty.
 
     @type spec: `tulip.spec.form.GRSpec`
+    @param use_cudd: efficient BDD computations with `dd.cudd`
     @rtype: `bool`
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    triv, t = gr1.trivial_winning_set(aut)
+    bdd = _cudd_bdd() if use_cudd else None
+    triv, t = gr1.trivial_winning_set(aut, bdd=bdd)
     return triv != t.bdd.false
+
+
+def _cudd_bdd():
+    if cudd is None:
+        raise ImportError(
+            'Failed to import module `dd.cudd`.\n'
+            'Compile the Cython bindings of `dd` to CUDD.')
+    return cudd.BDD()
 
 
 def _int_bounds(aut):
