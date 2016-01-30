@@ -42,6 +42,9 @@ be followed:
   characters in length, and if elaboration is necessary, then first skip a line
   (i.e., leave one blank) before beginning with details.
 
+- A copyright notice and pointer to the ``LICENSE`` file of ``tulip`` shall be placed
+  as comments at the top of each source file (unless no copyright applies).
+
 - When referring to publications, check for a corresponding entry in
   ``doc/bib.txt`` and create one if needed. The syntax is described in
   ``genbib.py``. References in the Sphinx-built documentation are achieved by
