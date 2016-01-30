@@ -1,3 +1,6 @@
+# Copyright by California Institute of Technology
+# All rights reserved. See LICENSE file at:
+# https://github.com/tulip-control/tulip-control
 """Interface to `omega` package.
 
 `omega` constructs symbolic transducers,
