@@ -20,6 +20,7 @@ try:
     from omega.symbolic import enumeration as enum
 except ImportError:
     omega = None
+from dd import bdd as _bdd
 try:
     from dd import cudd
 except ImportError:
@@ -35,13 +36,14 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    bdd = _cudd_bdd() if use_cudd else None
-    a = aut.build(bdd=bdd)
+    bdd = _cudd_bdd() if use_cudd else _bdd.BDD()
+    aut.bdd = bdd
+    a = aut.build()
     z, yij, xijk = gr1.solve_streett_game(a)
     # unrealizable ?
     if z == a.bdd.false:
         return None
-    t = gr1.make_streett_transducer(z, yij, xijk, a, bdd=a.bdd)
+    t = gr1.make_streett_transducer(z, yij, xijk, a)
     (u,) = t.action['sys']
     care = _int_bounds(t)
     g = enum.relation_to_graph(u, t, care_source=care,
@@ -60,8 +62,9 @@ def is_circular(spec, use_cudd=False):
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    bdd = _cudd_bdd() if use_cudd else None
-    triv, t = gr1.trivial_winning_set(aut, bdd=bdd)
+    bdd = _cudd_bdd() if use_cudd else _bdd.BDD()
+    aut.bdd = bdd
+    triv, t = gr1.trivial_winning_set(aut)
     return triv != t.bdd.false
 
 
