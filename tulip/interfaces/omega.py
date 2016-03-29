@@ -11,7 +11,9 @@ to return enumerated transducers.
 U{https://pypi.python.org/pypi/omega}
 """
 from __future__ import absolute_import
+import logging
 import networkx as nx
+import time
 try:
     import omega
     from omega.logic import bitvector as bv
@@ -27,6 +29,9 @@ except ImportError:
     cudd = None
 
 
+log = logging.getLogger(__name__)
+
+
 def synthesize_enumerated_streett(spec, use_cudd=False):
     """Return transducer enumerated as a graph.
 
@@ -39,17 +44,28 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     bdd = _cudd_bdd() if use_cudd else _bdd.BDD()
     aut.bdd = bdd
     a = aut.build()
+    t0 = time.time()
     z, yij, xijk = gr1.solve_streett_game(a)
+    t1 = time.time()
     # unrealizable ?
     if z == a.bdd.false:
         return None
     t = gr1.make_streett_transducer(z, yij, xijk, a)
+    t2 = time.time()
     (u,) = t.action['sys']
     care = _int_bounds(t)
     g = enum.relation_to_graph(u, t, care_source=care,
                                care_target=care)
     h = _strategy_to_state_annotated(g, a)
     del u, yij, xijk, care
+    t3 = time.time()
+    log.info((
+        'Winning set computed in {win} sec.\n'
+        'Symbolic strategy computed in {sym} sec.\n'
+        'Strategy enumerated in {enu} sec.').format(
+            win=t1 - t0,
+            sym=t2 - t1,
+            enu=t3 - t2))
     return h
 
 
