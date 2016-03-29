@@ -80,7 +80,7 @@ def run_setup():
                      debug=True, debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
-        logger.debug('Failed to build PLY tables: {e}'.format(e=e))
+        print('Failed to build PLY tables: {e}'.format(e=e))
         plytable_build_failed = True
     # version
     try:
