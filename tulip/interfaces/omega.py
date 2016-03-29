@@ -129,14 +129,27 @@ def _grspec_to_automaton(g):
     d = dict(g.env_vars)
     d.update(g.sys_vars)
     for k, v in d.iteritems():
-        if v == 'boolean':
-            v = 'bool'
-        d[k] = v
+        if v in ('boolean', 'bool'):
+            r = 'bool'
+        elif isinstance(v, list):
+            # string var -> integer var
+            r = (0, len(v) - 1)
+        elif isinstance(v, tuple):
+            r = v
+        else:
+            raise ValueError(
+                'unknown variable type: {v}'.format(v=v))
+        d[k] = r
+    g.str_to_int()
+    # reverse mapping by `synth.strategy2mealy`
     a.vars = bv.make_table(d, env_vars=g.env_vars)
-    a.init['env'] = list(g.env_init)
-    a.init['sys'] = list(g.sys_init)
-    a.action['env'] = list(g.env_safety)
-    a.action['sys'] = list(g.sys_safety)
-    a.win['<>[]'] = ['!({s})'.format(s=s) for s in g.env_prog]
-    a.win['[]<>'] = list(g.sys_prog)
+    f = g._bool_int.__getitem__
+    a.init['env'] = map(f, g.env_init)
+    a.init['sys'] = map(f, g.sys_init)
+    a.action['env'] = map(f, g.env_safety)
+    a.action['sys'] = map(f, g.sys_safety)
+    a.win['<>[]'] = [
+        '!({s})'.format(s=s)
+        for s in map(f, g.env_prog)]
+    a.win['[]<>'] = map(f, g.sys_prog)
     return a

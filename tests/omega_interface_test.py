@@ -18,11 +18,11 @@ def test_grspec_to_automaton():
     r = a.action['env']
     assert r == list(), r
     r = a.action['sys']
-    assert r == ["x' -> y'"], r
+    assert r == ['( ( X x ) -> ( X y ) )'], r
     r = a.win['<>[]']
-    assert r == ['!(!x)'], r
+    assert r == ['!(( ! x ))'], r
     r = a.win['[]<>']
-    assert r == ['!y'], r
+    assert r == ['( ! y )'], r
 
 
 def test_synthesis_bool():
@@ -63,6 +63,31 @@ def test_synthesis_fol():
     dom = g.outputs['y']
     dom_ = set(xrange(5))
     assert dom == dom_, (dom, dom_)
+
+
+def test_synthesis_strings():
+    sp = grspec_2()
+    h = omega_int.synthesize_enumerated_streett(sp)
+    g = synth.strategy2mealy(h, sp)
+    assert g is not None
+    # outputs
+    assert len(g.outputs) == 1, g.outputs
+    assert 'y' in g.outputs, g.outputs
+    dom = g.outputs['y']
+    dom_ = {'a', 'b'}
+    assert dom == dom_, (dom, dom_)
+    # check simulation
+    n = len(g)
+    assert n == 4, n
+    u = 'Sinit'
+    u, r = g.reaction(u, dict(x=0))
+    assert r == dict(y='a'), r
+    u, r = g.reaction(u, dict(x=2))
+    assert r == dict(y='b'), r
+    u, r = g.reaction(u, dict(x=1))
+    assert r == dict(y='b'), r
+    u, r = g.reaction(u, dict(x=0))
+    assert r == dict(y='a'), r
 
 
 def test_synthesis_unrealizable():
@@ -121,6 +146,16 @@ def grspec_1():
     sp.env_vars = dict(x=(0, 4))
     sp.sys_vars = dict(y=(0, 4))
     sp.sys_safety = ["x' = y'"]
+    return sp
+
+
+def grspec_2():
+    sp = form.GRSpec()
+    sp.env_vars = dict(x=(0, 2))
+    sp.sys_vars = dict(y=['a', 'b'])
+    sp.sys_safety = [
+        '(x = 0) -> (y = "a")',
+        '(x > 0) -> (y = "b")']
     return sp
 
 
