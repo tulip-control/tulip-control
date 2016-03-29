@@ -31,7 +31,7 @@ def test_synthesis_bool():
     g = synth.strategy2mealy(h, sp)
     # fname = 'mealy.pdf'
     # g.save(fname)
-    # pd = nx.to_pydot(g)
+    # pd = nx.drawing.nx_pydot.to_pydot(g)
     # pd.write_pdf(fname)
     assert g is not None
     assert len(g.inputs) == 1, g.inputs

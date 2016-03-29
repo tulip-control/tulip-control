@@ -134,7 +134,7 @@ class Tree(nx.MultiDiGraph):
         @rtype: str
         """
         g = ast_to_labeled_graph(self, detailed)
-        return nx.to_pydot(g)
+        return nx.drawing.nx_pydot.to_pydot(g)
 
     def write(self, filename, detailed=False):
         """Layout AST and save result in PDF file."""

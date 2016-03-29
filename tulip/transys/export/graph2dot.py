@@ -445,7 +445,7 @@ def _graph2pydot(graph, wrap=10, tikz=False,
                     rankdir=rankdir)
     _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
     
-    pydot_graph = nx.to_pydot(dummy_nx_graph)
+    pydot_graph = nx.drawing.nx_pydot.to_pydot(dummy_nx_graph)
     _place_initial_states(graph, pydot_graph, tikz)
     
     pydot_graph.set_overlap('false')
@@ -526,7 +526,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
         pydot_graph = _graph2pydot(graph, wrap=wrap)
     except:
         if isinstance(graph, nx.Graph):
-            pydot_graph = nx.to_pydot(graph)
+            pydot_graph = nx.drawing.nx_pydot.to_pydot(graph)
         else:
             raise TypeError('graph not networkx or pydot class.' +
                 'Got instead: ' +str(type(graph) ) )
