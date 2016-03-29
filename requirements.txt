@@ -20,3 +20,6 @@ http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
 # tests
 nose
 
+# dev
+gitpython
+
