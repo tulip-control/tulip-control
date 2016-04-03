@@ -15,6 +15,14 @@ import logging
 import networkx as nx
 import time
 try:
+    import dd.bdd as _bdd
+except ImportError:
+    _bdd = None
+try:
+    from dd import cudd
+except ImportError:
+    cudd = None
+try:
     import omega
     from omega.logic import bitvector as bv
     from omega.games import gr1
@@ -22,11 +30,6 @@ try:
     from omega.symbolic import enumeration as enum
 except ImportError:
     omega = None
-from dd import bdd as _bdd
-try:
-    from dd import cudd
-except ImportError:
-    cudd = None
 
 
 log = logging.getLogger(__name__)
@@ -41,7 +44,7 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    bdd = _cudd_bdd() if use_cudd else _bdd.BDD()
+    bdd = _init_bdd(use_cudd)
     aut.bdd = bdd
     a = aut.build()
     t0 = time.time()
@@ -78,13 +81,19 @@ def is_circular(spec, use_cudd=False):
     """
     aut = _grspec_to_automaton(spec)
     sym.fill_blanks(aut)
-    bdd = _cudd_bdd() if use_cudd else _bdd.BDD()
+    bdd = _init_bdd(use_cudd)
     aut.bdd = bdd
     triv, t = gr1.trivial_winning_set(aut)
     return triv != t.bdd.false
 
 
-def _cudd_bdd():
+def _init_bdd(use_cudd):
+    if _bdd is None:
+        raise ImportError(
+            'Failed to import `dd.bdd`.\n'
+            'Install package `dd`.')
+    if not use_cudd:
+        return _bdd.BDD()
     if cudd is None:
         raise ImportError(
             'Failed to import module `dd.cudd`.\n'
