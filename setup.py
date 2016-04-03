@@ -67,8 +67,6 @@ def retrieve_git_info():
 
 
 def package_jtlv():
-    # Optional stuff for which the installation configuration will
-    # change depending on the availability of each.
     if os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')):
         print('Found optional JTLV-based solver.')
         package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
