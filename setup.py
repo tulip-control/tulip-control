@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Installation script."""
 import logging
-import os
 from setuptools import setup
 # inline:
 # import git
@@ -30,19 +29,6 @@ classifiers = [
     'Topic :: Scientific/Engineering']
 package_data = {
     'tulip.spec': ['parsetab.py']}
-
-
-def package_jtlv():
-    """Detect `jtlv`, or note its absence."""
-    path = os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')
-    if os.path.exists(path):
-        print('Found optional JTLV-based solver.')
-        package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
-    else:
-        print('The jtlv synthesis tool was not found. '
-              'Try extern/get-jtlv.sh to get it.\n'
-              'It is an optional alternative to `omega`, '
-              'the default GR(1) solver of TuLiP.')
 
 
 def git_version(version):
@@ -94,7 +80,6 @@ def run_setup():
     with open(VERSION_FILE, 'w') as f:
         f.write(s)
     # setup
-    package_jtlv()
     setup(
         name=NAME,
         version=version,
