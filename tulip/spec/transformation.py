@@ -32,13 +32,15 @@
 #
 """Syntactic manipulation of trees."""
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import os
 import warnings
 import networkx as nx
 from tulip.spec.ast import nodes
 from tulip.spec import parser
+
+
+logger = logging.getLogger(__name__)
 
 
 class Tree(nx.MultiDiGraph):
