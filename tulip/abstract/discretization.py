@@ -461,7 +461,12 @@ def discretize(
 ):
     """Refine the partition and establish transitions
     based on reachability analysis.
-    
+
+    Reference
+    =========
+    U{[NOTM12]
+    <http://tulip-control.sourceforge.net/doc/bibliography.html#notm12>}
+
     See Also
     ========
     L{prop2partition.pwa_partition}, L{prop2partition.part2convex}
