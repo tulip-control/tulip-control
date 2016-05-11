@@ -84,7 +84,7 @@ on Windows.
 7. Downgrade `pyparsing` and install `pydot` and `networkx`:
 
 		pip uninstall pyparsing
-		pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
+		pip install pyparsing==1.5.7
 		easy_install pydot (do not use pip)
 		pip install networkx
 

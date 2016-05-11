@@ -177,7 +177,7 @@ else
 	echo "pydot to be installed locally"
 	cd $DOWNLOAD_LOC
 	
-	pip install pyparsing
+	pip install pyparsing==1.5.7
 
 	# install latest pydot version
 	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
