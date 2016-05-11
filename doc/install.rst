@@ -21,7 +21,7 @@ The default synthesis tool for GR(1) specifications is `gr1c
 do not already have it, the introduction of `the manual of gr1c
 <http://slivingston.github.io/gr1c/>`_ is a good place to begin.
 
-The following are optional Python packages, listed with a summary of dependent
+The following are optional dependencies, listed with a summary of dependent
 features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
