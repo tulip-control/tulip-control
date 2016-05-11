@@ -168,21 +168,7 @@ pip install numpy
 pip install scipy
 pip install ply
 pip install networkx
-
-#------------------------------------------------------------
-# optional python installs
-if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
-	echo "correct pydot version installed locally: skip"
-else
-	echo "pydot to be installed locally"
-	cd $DOWNLOAD_LOC
-	
-	pip install pyparsing==1.5.7
-
-	# install latest pydot version
-	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
-fi
-
+# optional
 pip install matplotlib
 pip install ipython
 
@@ -358,3 +344,4 @@ else
 	python setup.py install
 fi
 python run_tests.py --fast
+

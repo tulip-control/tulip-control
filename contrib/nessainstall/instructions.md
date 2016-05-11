@@ -74,18 +74,12 @@ on Windows.
 		python get-pip.py
 		source ~/.tcshrc
 
-6. Install `numpy`, `scipy`, `matplotlib`, and `ply`:
+6. Install Python packages:
 
 		pip install numpy
 		pip install scipy
 		pip install matplotlib
 		pip install ply
-
-7. Downgrade `pyparsing` and install `pydot` and `networkx`:
-
-		pip uninstall pyparsing
-		pip install pyparsing==1.5.7
-		easy_install pydot (do not use pip)
 		pip install networkx
 
    See [this page](http://stackoverflow.com/questions/15951748/pydot-and-graphviz-error-couldnt-import-dot-parser-loading-of-dot-files-will) for more details.

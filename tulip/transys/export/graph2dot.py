@@ -38,30 +38,16 @@ import re
 from collections import Iterable
 from textwrap import fill
 from cStringIO import StringIO
-import warnings
 import numpy as np
 import networkx as nx
 from networkx.utils import make_str
+import pydot
 # inline:
 #
-# import pydot
 # import webcolors
 
 
 logger = logging.getLogger(__name__)
-
-
-def import_pydot():
-    try:
-        import pydot
-    except ImportError:
-        logger.error('failed to import pydot')
-        return None
-    from distutils.version import StrictVersion
-    if StrictVersion(pydot.__version__) < StrictVersion('1.0.28'):
-        warnings.warn('pydot not v1.0.28')
-        return None
-    return pydot
 
 
 def _states2dot_str(graph, to_pydot_graph, wrap=10,
@@ -249,10 +235,6 @@ def _format_color(color, prog='tikz'):
 
 
 def _place_initial_states(trs_graph, pd_graph, tikz):
-    pydot = import_pydot()
-    if pydot is None:
-        return
-
     init_subg = pydot.Subgraph('initial')
     init_subg.set_rank('source')
 
@@ -438,10 +420,6 @@ def _graph2pydot(graph, wrap=10, tikz=False,
 
     @rtype: str
     """
-    pydot = import_pydot()
-    if pydot is None:
-        return None
-
     dummy_nx_graph = nx.MultiDiGraph()
 
     _states2dot_str(graph, dummy_nx_graph, wrap=wrap, tikz=tikz,
@@ -524,10 +502,6 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
 
     @param ax: axes
     """
-    pydot = import_pydot()
-    if pydot is None:
-        return
-
     try:
         pydot_graph = _graph2pydot(graph, wrap=wrap)
     except:

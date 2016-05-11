@@ -26,9 +26,6 @@ features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
 
-* `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz
-  dot <http://www.graphviz.org/>`_ export routines
-
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code
 
