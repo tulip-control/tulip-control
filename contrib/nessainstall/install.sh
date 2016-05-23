@@ -170,7 +170,6 @@ pip install numpy
 pip install scipy
 # optional
 pip install matplotlib
-pip install ipython
 
 # skip virtualenvwrapper: fragile to install
 #pip install virtualenvwrapper
