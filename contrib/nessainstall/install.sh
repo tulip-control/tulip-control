@@ -25,6 +25,7 @@
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
 CFG_FILE=~/.bash_profile
+PYTHON_VERSION=2.7.8
 
 # location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
@@ -126,9 +127,10 @@ else
 	echo "Python not found locally: install"
 	cd $DOWNLOAD_LOC
 
-	curl -LO http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
-	tar xzf Python-2.7.8.tgz
-	cd Python-2.7.8
+	curl -LO http://www.python.org/ftp/python/\
+	$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+	tar xzf Python-$PYTHON_VERSION.tgz
+	cd Python-$PYTHON_VERSION
 	./configure --prefix=$TMPLIB --enable-shared
 	make
 	make install
