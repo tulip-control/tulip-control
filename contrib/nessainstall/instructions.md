@@ -1,5 +1,4 @@
-Installs Tulip on Nessa. Hopefully, this is still easier than installing Tulip
-on Windows.
+The script `install.sh` installs Tulip on a `*nix` system.
 
 
 
