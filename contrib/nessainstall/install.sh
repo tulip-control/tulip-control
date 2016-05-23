@@ -22,9 +22,9 @@
 #   libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev \
 #   libbz2-dev libatlas-base-dev libatlas-dev gfortran libpng-dev
 
-# e.g.: ~/.bash_profile if using bash,
+# e.g.: ~/.bashrc if using bash,
 # or:   ~/.tcshrc if using csh
-CFG_FILE=~/.bash_profile
+CFG_FILE=~/.bashrc
 PYTHON_VERSION=2.7.11
 
 # location to create directory "libraries"
