@@ -7,7 +7,7 @@
 #   - $CFG_FILE: your shell sources this at startup
 #   - $INSTALL_LOC: installation will be there
 #
-# on ubuntu you must install dependencies required by python 2.7.8
+# on ubuntu you must install dependencies required by python
 # with apt-get as outlined here:
 #	http://askubuntu.com/questions/101591/how-do-i-install-python-2-7-2-on-ubuntu
 #
@@ -25,7 +25,7 @@
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
 CFG_FILE=~/.bash_profile
-PYTHON_VERSION=2.7.8
+PYTHON_VERSION=2.7.11
 
 # location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
