@@ -87,8 +87,11 @@ else
 	echo "# auto-created by tulip installation script" >> $CFG_FILE
 fi
 
-sed -i '$ a export PATH='"$TMPBIN"':$PATH' $CFG_FILE
-sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
+# export before non-interactive shell exists
+# remove the pattern search if not needed
+sed -i '/# If not running interactively,/i \
+export PATH='"$TMPBIN"':$PATH \
+export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 source $CFG_FILE
 
 #------------------------------------------------------------
