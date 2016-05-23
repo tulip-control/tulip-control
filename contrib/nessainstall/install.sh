@@ -168,8 +168,6 @@ fi
 # install python packages
 pip install numpy
 pip install scipy
-pip install ply
-pip install networkx
 # optional
 pip install matplotlib
 pip install ipython
