@@ -24,7 +24,7 @@
 
 # e.g.: ~/.bash_profile if using bash,
 # or:   ~/.tcshrc if using csh
-export CFG_FILE=~/.bash_profile
+CFG_FILE=~/.bash_profile
 
 # location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
@@ -37,9 +37,9 @@ tulip_develop=true # if 1, then tulip installed in develop mode
 
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
-export DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
-export TMPLIB=$INSTALL_LOC/libraries
-export TMPBIN=$TMPLIB/bin
+DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
+TMPLIB=$INSTALL_LOC/libraries
+TMPBIN=$TMPLIB/bin
 
 # exit at first error
 set -e
@@ -94,10 +94,10 @@ source $CFG_FILE
 # install ATLAS with LAPACK
 if [ "$install_atlas" = "true" ]; then
 	cd $DOWNLOAD_LOC
-	
+
 	curl -LO http://sourceforge.net/projects/math-atlas/files/Stable/3.10.1/atlas3.10.1.tar.bz2
 	curl -LO http://www.netlib.org/lapack/lapack-3.5.0.tgz
-	
+
 	tar xjf atlas3.10.1.tar.bz2 # unpack only ATLAS
 	cd ATLAS
 	if [ -d "LinuxBuild" ]; then
@@ -125,14 +125,14 @@ if [ -f "$TMPBIN/python" ]; then
 else
 	echo "Python not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	curl -LO http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
 	tar xzf Python-2.7.8.tgz
 	cd Python-2.7.8
 	./configure --prefix=$TMPLIB --enable-shared
 	make
 	make install
-	
+
 	hash python
 fi
 
@@ -149,7 +149,7 @@ if [ -f "$TMPBIN/pip" ]; then
 else
 	echo "Pip not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	curl -LO https://bootstrap.pypa.io/get-pip.py
 	python get-pip.py
 
@@ -186,13 +186,13 @@ if [ "$install_graphviz" = "true" ]; then
 	else
 		echo "GraphViz not found locally: install"
 		cd $DOWNLOAD_LOC
-		
+
 		# cvxopt is incompatible with newer versions
 		git clone https://github.com/ellson/graphviz.git
 		cd graphviz
 		./autogen.sh
 		./configure --prefix=$TMPLIB
-		
+
 		make
 		make check
 		make install
@@ -207,7 +207,7 @@ if [ "$install_glpk" = "true" ]; then
 	else
 		echo "GLPK not found locally: install"
 		cd $DOWNLOAD_LOC
-		
+
 		# cvxopt is incompatible with newer versions
 		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
 		tar xzf glpk-4.48.tar.gz
@@ -216,7 +216,7 @@ if [ "$install_glpk" = "true" ]; then
 		make
 		make check # should return no errors
 		make install
-		
+
 		# make sure this glpsol is used by bash later
 		hash glpsol
 	fi
@@ -228,7 +228,7 @@ fi
 # env vars for building cvxopt
 if [ "$install_atlas" = "true" ]; then
 	echo "config CVXOPT for local ATLAS in Mac"
-	
+
 	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
 	export CVXOPT_BLAS_LIB="satlas,tatlas,atlas"
 	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
@@ -237,7 +237,7 @@ if [ "$install_atlas" = "true" ]; then
 else
 	if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 		echo "config CVXOPT for global ATLAS in Linux"
-		
+
 		export CVXOPT_BLAS_LIB="f77blas,cblas,atlas,gfortran"
 		export CVXOPT_BLAS_LIB_DIR="/usr/lib"
 		#export CVXOPT_BLAS_EXTRA_LINK_ARGS="[]"
@@ -247,7 +247,7 @@ fi
 
 if [ "$install_glpk" = "true" ]; then
 	echo "config CVXOPT to build GLPK extension"
-	
+
 	export CVXOPT_BUILD_GLPK=1
 	export CVXOPT_GLPK_LIB_DIR=$TMPLIB/lib
 	export CVXOPT_GLPK_INC_DIR=$TMPLIB/include
@@ -259,7 +259,7 @@ if $(python -c "import cvxopt.glpk" &> /dev/null); then
 else
 	echo "CVXOPT not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	if [ -d "cvxopt" ]; then
 		echo "cvxopt already cloned"
 	else
@@ -267,7 +267,7 @@ else
 		git clone https://github.com/cvxopt/cvxopt.git
 	fi
 	cd cvxopt
-	
+
 	python setup.py install
 fi
 #------------------------------------------------------------
@@ -280,7 +280,7 @@ if [ -f "$TMPBIN/gr1c" ]; then
 else
 	echo "GR1C not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	if [ -d "gr1c" ]; then
 		echo "gr1c already cloned"
 	else
@@ -288,7 +288,7 @@ else
 		git clone https://github.com/slivingston/gr1c.git
 	fi
 	cd gr1c
-	
+
 	# install CUDD
 	if [ -d "extern" ]; then
 		echo "directory 'extern' already exists"
@@ -300,13 +300,13 @@ else
 	tar -xzf cudd-2.5.0.tar.gz
 	cd cudd-2.5.0
 	make
-	
+
 	# build and install gr1c
 	cd ../..
 	make all
 	make check
 	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
-	
+
 	hash gr1c
 fi
 
@@ -344,4 +344,3 @@ else
 	python setup.py install
 fi
 python run_tests.py --fast
-
