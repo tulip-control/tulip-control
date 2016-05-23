@@ -120,6 +120,90 @@ else
 fi
 
 #------------------------------------------------------------
+# install glpk
+if [ "$install_glpk" = "true" ]; then
+	if [ -f "$TMPBIN/glpsol" ]; then
+		echo "GLPK already installed locally: skip"
+	else
+		echo "GLPK not found locally: install"
+		cd $DOWNLOAD_LOC
+
+		# cvxopt is incompatible with newer versions
+		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
+		tar xzf glpk-4.48.tar.gz
+		cd glpk-4.48
+		./configure --prefix=$TMPLIB
+		make
+		make check # should return no errors
+		make install
+
+		# make sure this glpsol is used by bash later
+		hash glpsol
+	fi
+fi
+
+#------------------------------------------------------------
+# install graphviz dot (needed by pydot)
+if [ "$install_graphviz" = "true" ]; then
+	if [ -f "$TMPBIN/dot" ]; then
+		echo "GraphViz already installed locally: skip"
+	else
+		echo "GraphViz not found locally: install"
+		cd $DOWNLOAD_LOC
+
+		# cvxopt is incompatible with newer versions
+		git clone https://github.com/ellson/graphviz.git
+		cd graphviz
+		./autogen.sh
+		./configure --prefix=$TMPLIB
+
+		make
+		make check
+		make install
+	fi
+fi
+
+#------------------------------------------------------------
+# install gr1c
+#
+# http://slivingston.github.io/gr1c/md_installation.html
+
+if [ -f "$TMPBIN/gr1c" ]; then
+	echo "GR1C already installed locally: skip"
+else
+	echo "GR1C not found locally: install"
+	cd $DOWNLOAD_LOC
+
+	if [ -d "gr1c" ]; then
+		echo "gr1c already cloned"
+	else
+		echo "cloning gr1c"
+		git clone https://github.com/slivingston/gr1c.git
+	fi
+	cd gr1c
+
+	# install CUDD
+	if [ -d "extern" ]; then
+		echo "directory 'extern' already exists"
+	else
+		mkdir extern
+	fi
+	cd extern
+	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
+	tar -xzf cudd-2.5.0.tar.gz
+	cd cudd-2.5.0
+	make
+
+	# build and install gr1c
+	cd ../..
+	make all
+	make check
+	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
+
+	hash gr1c
+fi
+
+#------------------------------------------------------------
 # install python
 if [ -f "$TMPBIN/python" ]; then
 	echo "Python already installed locally: skip"
@@ -168,58 +252,6 @@ fi
 # install python packages
 pip install numpy
 pip install scipy
-# optional
-pip install matplotlib
-
-# skip virtualenvwrapper: fragile to install
-#pip install virtualenvwrapper
-#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
-#sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
-#source $CFG_FILE
-
-#------------------------------------------------------------
-# install graphviz dot (needed by pydot)
-if [ "$install_graphviz" = "true" ]; then
-	if [ -f "$TMPBIN/dot" ]; then
-		echo "GraphViz already installed locally: skip"
-	else
-		echo "GraphViz not found locally: install"
-		cd $DOWNLOAD_LOC
-
-		# cvxopt is incompatible with newer versions
-		git clone https://github.com/ellson/graphviz.git
-		cd graphviz
-		./autogen.sh
-		./configure --prefix=$TMPLIB
-
-		make
-		make check
-		make install
-	fi
-fi
-
-#------------------------------------------------------------
-# install glpk
-if [ "$install_glpk" = "true" ]; then
-	if [ -f "$TMPBIN/glpsol" ]; then
-		echo "GLPK already installed locally: skip"
-	else
-		echo "GLPK not found locally: install"
-		cd $DOWNLOAD_LOC
-
-		# cvxopt is incompatible with newer versions
-		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
-		tar xzf glpk-4.48.tar.gz
-		cd glpk-4.48
-		./configure --prefix=$TMPLIB
-		make
-		make check # should return no errors
-		make install
-
-		# make sure this glpsol is used by bash later
-		hash glpsol
-	fi
-fi
 
 #------------------------------------------------------------
 # install cvxopt
@@ -269,45 +301,6 @@ else
 
 	python setup.py install
 fi
-#------------------------------------------------------------
-# install gr1c
-#
-# http://slivingston.github.io/gr1c/md_installation.html
-
-if [ -f "$TMPBIN/gr1c" ]; then
-	echo "GR1C already installed locally: skip"
-else
-	echo "GR1C not found locally: install"
-	cd $DOWNLOAD_LOC
-
-	if [ -d "gr1c" ]; then
-		echo "gr1c already cloned"
-	else
-		echo "cloning gr1c"
-		git clone https://github.com/slivingston/gr1c.git
-	fi
-	cd gr1c
-
-	# install CUDD
-	if [ -d "extern" ]; then
-		echo "directory 'extern' already exists"
-	else
-		mkdir extern
-	fi
-	cd extern
-	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
-	tar -xzf cudd-2.5.0.tar.gz
-	cd cudd-2.5.0
-	make
-
-	# build and install gr1c
-	cd ../..
-	make all
-	make check
-	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
-
-	hash gr1c
-fi
 
 #------------------------------------------------------------
 # install polytope
@@ -343,3 +336,13 @@ else
 	python setup.py install
 fi
 python run_tests.py --fast
+
+#------------------------------------------------------------
+# optional
+pip install matplotlib
+
+# skip virtualenvwrapper: fragile to install
+#pip install virtualenvwrapper
+#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
+#sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
+#source $CFG_FILE
