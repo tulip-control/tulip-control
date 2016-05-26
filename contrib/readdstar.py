@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013, 2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ FILE to read from stdin.
   !q holds).
 
 
-SCL; 1 Sep 2013.
+SCL; 2013, 2015.
 """
 
 import sys
