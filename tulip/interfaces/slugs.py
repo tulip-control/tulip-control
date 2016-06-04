@@ -29,8 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Interface to the slugs implementation of GR(1) synthesis.
+"""Interface to the slugs implementation of GR(1) synthesis.
 
 Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
@@ -43,8 +42,7 @@ import subprocess
 import tempfile
 import networkx as nx
 from tulip.spec import GRSpec, translate
-# inline:
-#   import slugs
+import slugs
 
 
 BDD_FILE = 'strategy_bdd.txt'
@@ -58,7 +56,6 @@ def check_realizable(spec):
 
     @return: True if realizable, False if not, or an error occurs.
     """
-    import slugs
     if isinstance(spec, GRSpec):
         struct = translate(spec, 'slugs')
     else:

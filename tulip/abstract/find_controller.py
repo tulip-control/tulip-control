@@ -46,13 +46,24 @@ L{discretize}
 """
 from __future__ import absolute_import
 
+import logging
 import numpy as np
 from cvxopt import matrix, solvers
-solvers.options['msg_lev'] = 'GLP_MSG_OFF'
 
 import polytope as pc
 
 from .feasible import solve_feasible, createLM, _block_diag2
+
+
+logger = logging.getLogger(__name__)
+try:
+    import cvxopt.glpk
+except ImportError:
+    logger.warn(
+        '`tulip` failed to import `cvxopt.glpk`.\n'
+        'Will use Python solver of `cvxopt`.')
+solvers.options['msg_lev'] = 'GLP_MSG_OFF'
+
 
 def get_input(
     x0, ssys, abstraction,
@@ -184,7 +195,7 @@ def get_input(
     if len(R) == 0:
         R = np.zeros([N*x0.size, N*x0.size])
     if len(Q) == 0:
-        Q = np.zeros([N*ssys.B.shape[1], N*ssys.B.shape[1]])    
+        Q = np.eye(N*ssys.B.shape[1])    
     if len(r) == 0:
         r = np.zeros([N*x0.size,1])
     
@@ -196,8 +207,8 @@ def get_input(
         raise Exception("get_input: "
             "Q must be square and have side N * dim(input space)")
     if ofts is not None:
-        start_state = 's' +str(start)
-        end_state = 's' +str(end)
+        start_state = start
+        end_state = end
         
         if end_state not in ofts.states.post(start_state):
             raise Exception('get_input: '

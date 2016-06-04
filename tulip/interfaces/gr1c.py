@@ -41,20 +41,41 @@ interacting with the gr1c executable.
 
 Use the logging module to throttle verbosity.
 """
+from distutils.version import StrictVersion
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import os
 import subprocess
 import tempfile
+import json
 import xml.etree.ElementTree as ET
 import networkx as nx
 from tulip.spec import GRSpec, translate
 
 
+GR1C_MIN_VERSION = '0.9.0'
 GR1C_BIN_PREFIX = ""
-_hl = 60 * '-'
 DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
+_hl = 60 * '-'
+logger = logging.getLogger(__name__)
+
+
+def check_gr1c():
+    """Raise `Exception` if `gr1c` not in PATH."""
+    try:
+        v = subprocess.check_output(["gr1c", "-V"])
+    except OSError:
+        return False
+    v = v.split()[1]
+    if StrictVersion(v) >= StrictVersion(GR1C_MIN_VERSION):
+        return
+    raise Exception(
+        '`gr1c >= {v}` not found in the PATH.\n'.format(v=v) +
+        'Unless an alternative synthesis tool is installed,\n'
+        'it will not be possible to realize GR(1) specifications.\n'
+        'Consult installation instructions for gr1c at:\n'
+        '\t http://scottman.net/2012/gr1c\n'
+        'or the TuLiP User\'s Guide about alternatives.')
 
 
 def get_version():
@@ -319,11 +340,43 @@ def _parse_vars(variables, vardict):
     ])
     return variables
 
+def load_aut_json(x):
+    """Return strategy constructed from output of gr1c
+
+    @param x: string or file-like object
+
+    @return: strategy as C{networkx.DiGraph}, like the return value of
+        L{load_aut_xml}
+    """
+    try:
+        autjs = json.loads(x)
+    except TypeError:
+        autjs = json.load(x)
+    if autjs['version'] != 1:
+        raise ValueError('Only gr1c JSON format version 1 is supported.')
+    # convert to nx
+    A = nx.DiGraph()
+    symtab = autjs['ENV'] + autjs['SYS']
+    A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
+    A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
+    omit = {'state', 'trans'}
+    for node_ID, d in autjs['nodes'].iteritems():
+        node_label = {k: d[k] for k in d if k not in omit}
+        node_label['state'] = dict([(symtab[i].keys()[0],
+                                     autjs['nodes'][node_ID]['state'][i])
+                                    for i in range(len(symtab))])
+        A.add_node(node_ID, node_label)
+    for node_ID, d in autjs['nodes'].iteritems():
+        for to_node in d['trans']:
+            A.add_edge(node_ID, to_node)
+    return A
+
 def check_syntax(spec_str):
     """Check whether given string has correct gr1c specification syntax.
 
     Return True if syntax check passed, False on error.
     """
+    check_gr1c()
     f = tempfile.TemporaryFile()
     f.write(spec_str)
     f.seek(0)
@@ -349,6 +402,7 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    check_gr1c()
     logger.info('checking realizability...')
 
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
@@ -413,6 +467,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     @return: strategy as C{networkx.DiGraph},
         or None if unrealizable or error occurs.
     """
+    check_gr1c()
     if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
                            "ALL_INIT", "ONE_SIDE_INIT"):
         raise ValueError("Unrecognized initial condition" +
@@ -421,7 +476,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         p = subprocess.Popen(
             [GR1C_BIN_PREFIX + "gr1c",
              "-n", init_option,
-             "-t", "tulip"],
+             "-t", "json"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
@@ -455,23 +510,34 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     if p.returncode == 0:
         logger.debug(msg)
-        strategy = load_aut_xml(stdoutdata)
+        strategy = load_aut_json(stdoutdata)
         return strategy
     else:
         print(msg)
         return None
 
-def load_mealy(filename):
-    """Load C{gr1c} strategy from C{xml} file.
+def load_mealy(filename, fformat='tulipxml'):
+    """Load C{gr1c} strategy from file.
 
-    @param filename: xml file name
+    @param filename: file name
     @type filename: C{str}
+
+    @param fformat: file format; can be one of "tulipxml" (default),
+        "json". Not case sensitive.
+
+    @type fformat: C{str}
 
     @return: loaded strategy as an annotated graph.
     @rtype: C{networkx.Digraph}
     """
     s = open(filename, 'r').read()
-    strategy = load_aut_xml(s)
+    if fformat.lower() == 'tulipxml':
+        strategy = load_aut_xml(s)
+    elif fformat.lower() == 'json':
+        strategy = load_aut_json(s)
+    else:
+        ValueError('gr1c.load_mealy() : Unrecognized file format, "'
+                   +str(fformat)+'"')
 
     logger.debug(
         'Loaded strategy with nodes: \n' + str(strategy.nodes()) +

@@ -21,13 +21,10 @@ The default synthesis tool for GR(1) specifications is `gr1c
 do not already have it, the introduction of `the manual of gr1c
 <http://slivingston.github.io/gr1c/>`_ is a good place to begin.
 
-The following are optional Python packages, listed with a summary of dependent
+The following are optional dependencies, listed with a summary of dependent
 features:
 
 * `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
-
-* `pydot <http://code.google.com/p/pydot/>`_ -- graph image file and `Graphviz
-  dot <http://www.graphviz.org/>`_ export routines
 
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code

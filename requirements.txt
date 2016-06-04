@@ -7,12 +7,12 @@ numpy==1.7
 scipy
 
 # easy extras
-pyparsing==2.0.3
-http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
+omega==0.0.8
+gr1py>=0.1.0
 
 # extras (uncomment as needed)
 # cvxopt==1.1.7
-# polytope==0.1.1
+# polytope==0.1.1  # required for algorithms on hybrid systems
 # matplotlib
 
 # tests

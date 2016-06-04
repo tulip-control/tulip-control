@@ -7,7 +7,7 @@
 #   - $CFG_FILE: your shell sources this at startup
 #   - $INSTALL_LOC: installation will be there
 #
-# on ubuntu you must install dependencies required by python 2.7.8
+# on ubuntu you must install dependencies required by python
 # with apt-get as outlined here:
 #	http://askubuntu.com/questions/101591/how-do-i-install-python-2-7-2-on-ubuntu
 #
@@ -22,9 +22,10 @@
 #   libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev \
 #   libbz2-dev libatlas-base-dev libatlas-dev gfortran libpng-dev
 
-# e.g.: ~/.bash_profile if using bash,
+# e.g.: ~/.bashrc if using bash,
 # or:   ~/.tcshrc if using csh
-export CFG_FILE=~/.bash_profile
+CFG_FILE=~/.bashrc
+PYTHON_VERSION=2.7.11
 
 # location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
@@ -37,9 +38,9 @@ tulip_develop=true # if 1, then tulip installed in develop mode
 
 #------------------------------------------------------------
 # do not edit below unless you know what you are doing
-export DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
-export TMPLIB=$INSTALL_LOC/libraries
-export TMPBIN=$TMPLIB/bin
+DOWNLOAD_LOC=$INSTALL_LOC/temp_downloads
+TMPLIB=$INSTALL_LOC/libraries
+TMPBIN=$TMPLIB/bin
 
 # exit at first error
 set -e
@@ -86,18 +87,21 @@ else
 	echo "# auto-created by tulip installation script" >> $CFG_FILE
 fi
 
-sed -i '$ a export PATH='"$TMPBIN"':$PATH' $CFG_FILE
-sed -i '$ a export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
+# export before non-interactive shell exists
+# remove the pattern search if not needed
+sed -i '/# If not running interactively,/i \
+export PATH='"$TMPBIN"':$PATH \
+export LD_LIBRARY_PATH='"$TMPLIB"'/lib' $CFG_FILE
 source $CFG_FILE
 
 #------------------------------------------------------------
 # install ATLAS with LAPACK
 if [ "$install_atlas" = "true" ]; then
 	cd $DOWNLOAD_LOC
-	
+
 	curl -LO http://sourceforge.net/projects/math-atlas/files/Stable/3.10.1/atlas3.10.1.tar.bz2
 	curl -LO http://www.netlib.org/lapack/lapack-3.5.0.tgz
-	
+
 	tar xjf atlas3.10.1.tar.bz2 # unpack only ATLAS
 	cd ATLAS
 	if [ -d "LinuxBuild" ]; then
@@ -119,20 +123,105 @@ else
 fi
 
 #------------------------------------------------------------
+# install glpk
+if [ "$install_glpk" = "true" ]; then
+	if [ -f "$TMPBIN/glpsol" ]; then
+		echo "GLPK already installed locally: skip"
+	else
+		echo "GLPK not found locally: install"
+		cd $DOWNLOAD_LOC
+
+		# cvxopt is incompatible with newer versions
+		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
+		tar xzf glpk-4.48.tar.gz
+		cd glpk-4.48
+		./configure --prefix=$TMPLIB
+		make
+		make check # should return no errors
+		make install
+
+		# make sure this glpsol is used by bash later
+		hash glpsol
+	fi
+fi
+
+#------------------------------------------------------------
+# install graphviz dot (needed by pydot)
+if [ "$install_graphviz" = "true" ]; then
+	if [ -f "$TMPBIN/dot" ]; then
+		echo "GraphViz already installed locally: skip"
+	else
+		echo "GraphViz not found locally: install"
+		cd $DOWNLOAD_LOC
+
+		# cvxopt is incompatible with newer versions
+		git clone https://github.com/ellson/graphviz.git
+		cd graphviz
+		./autogen.sh
+		./configure --prefix=$TMPLIB
+
+		make
+		make check
+		make install
+	fi
+fi
+
+#------------------------------------------------------------
+# install gr1c
+#
+# http://slivingston.github.io/gr1c/md_installation.html
+
+if [ -f "$TMPBIN/gr1c" ]; then
+	echo "GR1C already installed locally: skip"
+else
+	echo "GR1C not found locally: install"
+	cd $DOWNLOAD_LOC
+
+	if [ -d "gr1c" ]; then
+		echo "gr1c already cloned"
+	else
+		echo "cloning gr1c"
+		git clone https://github.com/slivingston/gr1c.git
+	fi
+	cd gr1c
+
+	# install CUDD
+	if [ -d "extern" ]; then
+		echo "directory 'extern' already exists"
+	else
+		mkdir extern
+	fi
+	cd extern
+	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
+	tar -xzf cudd-2.5.0.tar.gz
+	cd cudd-2.5.0
+	make
+
+	# build and install gr1c
+	cd ../..
+	make all
+	make check
+	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
+
+	hash gr1c
+fi
+
+#------------------------------------------------------------
 # install python
 if [ -f "$TMPBIN/python" ]; then
 	echo "Python already installed locally: skip"
 else
 	echo "Python not found locally: install"
 	cd $DOWNLOAD_LOC
-	
-	curl -LO http://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz
-	tar xzf Python-2.7.8.tgz
-	cd Python-2.7.8
+
+	curl -LO http://www.python.org/ftp/python/\
+	$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+	tar xzf Python-$PYTHON_VERSION.tgz
+	cd Python-$PYTHON_VERSION
 	./configure --prefix=$TMPLIB --enable-shared
 	make
 	make install
-	
+
 	hash python
 fi
 
@@ -149,7 +238,7 @@ if [ -f "$TMPBIN/pip" ]; then
 else
 	echo "Pip not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	curl -LO https://bootstrap.pypa.io/get-pip.py
 	python get-pip.py
 
@@ -166,75 +255,6 @@ fi
 # install python packages
 pip install numpy
 pip install scipy
-pip install ply
-pip install networkx
-
-#------------------------------------------------------------
-# optional python installs
-if [ "$(python -c "import pydot; print(pydot.__version__)")" = "1.0.28" ]; then
-	echo "correct pydot version installed locally: skip"
-else
-	echo "pydot to be installed locally"
-	cd $DOWNLOAD_LOC
-	
-	pip install pyparsing
-
-	# install latest pydot version
-	pip install http://pydot.googlecode.com/files/pydot-1.0.28.tar.gz
-fi
-
-pip install matplotlib
-pip install ipython
-
-# skip virtualenvwrapper: fragile to install
-#pip install virtualenvwrapper
-#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
-#sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
-#source $CFG_FILE
-
-#------------------------------------------------------------
-# install graphviz dot (needed by pydot)
-if [ "$install_graphviz" = "true" ]; then
-	if [ -f "$TMPBIN/dot" ]; then
-		echo "GraphViz already installed locally: skip"
-	else
-		echo "GraphViz not found locally: install"
-		cd $DOWNLOAD_LOC
-		
-		# cvxopt is incompatible with newer versions
-		git clone https://github.com/ellson/graphviz.git
-		cd graphviz
-		./autogen.sh
-		./configure --prefix=$TMPLIB
-		
-		make
-		make check
-		make install
-	fi
-fi
-
-#------------------------------------------------------------
-# install glpk
-if [ "$install_glpk" = "true" ]; then
-	if [ -f "$TMPBIN/glpsol" ]; then
-		echo "GLPK already installed locally: skip"
-	else
-		echo "GLPK not found locally: install"
-		cd $DOWNLOAD_LOC
-		
-		# cvxopt is incompatible with newer versions
-		curl -LO http://ftp.gnu.org/gnu/glpk/glpk-4.48.tar.gz
-		tar xzf glpk-4.48.tar.gz
-		cd glpk-4.48
-		./configure --prefix=$TMPLIB
-		make
-		make check # should return no errors
-		make install
-		
-		# make sure this glpsol is used by bash later
-		hash glpsol
-	fi
-fi
 
 #------------------------------------------------------------
 # install cvxopt
@@ -242,7 +262,7 @@ fi
 # env vars for building cvxopt
 if [ "$install_atlas" = "true" ]; then
 	echo "config CVXOPT for local ATLAS in Mac"
-	
+
 	# https://github.com/cvxopt/cvxopt/blob/master/setup.py#L60
 	export CVXOPT_BLAS_LIB="satlas,tatlas,atlas"
 	export CVXOPT_BLAS_LIB_DIR=$TMPLIB/lib
@@ -251,7 +271,7 @@ if [ "$install_atlas" = "true" ]; then
 else
 	if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 		echo "config CVXOPT for global ATLAS in Linux"
-		
+
 		export CVXOPT_BLAS_LIB="f77blas,cblas,atlas,gfortran"
 		export CVXOPT_BLAS_LIB_DIR="/usr/lib"
 		#export CVXOPT_BLAS_EXTRA_LINK_ARGS="[]"
@@ -261,7 +281,7 @@ fi
 
 if [ "$install_glpk" = "true" ]; then
 	echo "config CVXOPT to build GLPK extension"
-	
+
 	export CVXOPT_BUILD_GLPK=1
 	export CVXOPT_GLPK_LIB_DIR=$TMPLIB/lib
 	export CVXOPT_GLPK_INC_DIR=$TMPLIB/include
@@ -273,7 +293,7 @@ if $(python -c "import cvxopt.glpk" &> /dev/null); then
 else
 	echo "CVXOPT not found locally: install"
 	cd $DOWNLOAD_LOC
-	
+
 	if [ -d "cvxopt" ]; then
 		echo "cvxopt already cloned"
 	else
@@ -281,47 +301,8 @@ else
 		git clone https://github.com/cvxopt/cvxopt.git
 	fi
 	cd cvxopt
-	
-	python setup.py install
-fi
-#------------------------------------------------------------
-# install gr1c
-#
-# http://slivingston.github.io/gr1c/md_installation.html
 
-if [ -f "$TMPBIN/gr1c" ]; then
-	echo "GR1C already installed locally: skip"
-else
-	echo "GR1C not found locally: install"
-	cd $DOWNLOAD_LOC
-	
-	if [ -d "gr1c" ]; then
-		echo "gr1c already cloned"
-	else
-		echo "cloning gr1c"
-		git clone https://github.com/slivingston/gr1c.git
-	fi
-	cd gr1c
-	
-	# install CUDD
-	if [ -d "extern" ]; then
-		echo "directory 'extern' already exists"
-	else
-		mkdir extern
-	fi
-	cd extern
-	curl -LO ftp://vlsi.colorado.edu/pub/cudd-2.5.0.tar.gz
-	tar -xzf cudd-2.5.0.tar.gz
-	cd cudd-2.5.0
-	make
-	
-	# build and install gr1c
-	cd ../..
-	make all
-	make check
-	make install prefix=$TMPBIN # doesn't include: grpatch, grjit
-	
-	hash gr1c
+	python setup.py install
 fi
 
 #------------------------------------------------------------
@@ -358,3 +339,13 @@ else
 	python setup.py install
 fi
 python run_tests.py --fast
+
+#------------------------------------------------------------
+# optional
+pip install matplotlib
+
+# skip virtualenvwrapper: fragile to install
+#pip install virtualenvwrapper
+#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
+#sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
+#source $CFG_FILE

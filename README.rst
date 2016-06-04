@@ -69,3 +69,7 @@ This is free software released under the terms of `the BSD 3-Clause License
 <http://opensource.org/licenses/BSD-3-Clause>`_.  There is no warranty; not even
 for merchantability or fitness for a particular purpose.  Consult LICENSE for
 copying conditions.
+
+When code is modified or re-distributed, the LICENSE file should accompany the code or any subset of it, however small.
+As an alternative, the LICENSE text can be copied within files, if so desired.
+

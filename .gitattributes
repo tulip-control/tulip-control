@@ -1,4 +1,15 @@
 # replace CRLF by LF when writing these files to the database
 # keep LF when checking out of the repository
-*.py crlf=input
+*.py eol=lf
+*.c eol=lf
+*.h eol=lf
+*.m eol=lf
+*.rst eol=lf
+*.md eol=lf
+*.txt eol=lf
+*.sh eol=lf
+*.yml eol=lf
+
+*.jpg binary
+*.png binary
 

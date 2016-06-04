@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2013 by California Institute of Technology
+# Copyright (c) 2013, 2015 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ FILE to read from stdin.
   !q holds).
 
 
-SCL; 1 Sep 2013.
+SCL; 2013, 2015.
 """
 
 import sys
@@ -116,7 +116,7 @@ def gen_apformula(AP, intrep):
     >>> gen_apformula(AP=("p", "q"), intrep=2)
     '!p & q'
     """
-    return " & ".join([AP[i] if (intrep >> i) != 0 else "!"+AP[i] for i in range(len(AP))])
+    return " & ".join([AP[i] if ((intrep >> i) & 1) != 0 else "!"+AP[i] for i in range(len(AP))])
 
 def gen_apsubset(AP, intrep):
     """Generate set of atomic propositions corresponding to integer
@@ -124,7 +124,7 @@ def gen_apsubset(AP, intrep):
     >>> gen_apsubset(AP=("p", "q"), intrep=2)
     set(['q'])
     """
-    return set([AP[i] for i in range(len(AP)) if (intrep >> i) != 0])
+    return set([AP[i] for i in range(len(AP)) if ((intrep >> i) & 1) != 0])
 
 
 def readdstar(getline):

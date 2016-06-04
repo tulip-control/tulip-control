@@ -32,13 +32,15 @@
 #
 """Syntactic manipulation of trees."""
 import logging
-logger = logging.getLogger(__name__)
 import copy
 import os
 import warnings
 import networkx as nx
 from tulip.spec.ast import nodes
 from tulip.spec import parser
+
+
+logger = logging.getLogger(__name__)
 
 
 class Tree(nx.MultiDiGraph):
@@ -134,7 +136,7 @@ class Tree(nx.MultiDiGraph):
         @rtype: str
         """
         g = ast_to_labeled_graph(self, detailed)
-        return nx.to_pydot(g)
+        return nx.drawing.nx_pydot.to_pydot(g)
 
     def write(self, filename, detailed=False):
         """Layout AST and save result in PDF file."""

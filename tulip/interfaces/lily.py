@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-""" 
+"""
 Interface to Lily that solves LTL games.
 
 Requires pydot for networkx to load the Moore strategy graph.
@@ -38,12 +38,9 @@ Relevant links:
   - U{Lily<http://www.ist.tugraz.at/staff/jobstmann/lily/>}
 """
 import logging
-logger = logging.getLogger(__name__)
-
 import os
 import re
 import subprocess
-
 import networkx as nx
 from tulip.spec.translation import translate, translate_ast
 from tulip.spec.parser import parse
@@ -51,6 +48,7 @@ from tulip.spec.form import LTL, GRSpec
 from tulip.transys import MooreMachine
 
 
+logger = logging.getLogger(__name__)
 LILY = 'lily.pl'
 IO_PARTITION_FILE = 'io_partition.txt'
 DOTFILE = 'ltl2vl-synthesis.dot'
@@ -173,7 +171,7 @@ def lily_strategy2moore(g, env_vars, sys_vars):
         assert(u_ is u)
         d = _parse_label(attr['label'])
         m.add_node(u, **d)
-        
+
         # input doesn't matter for this reaction ?
         if v in m:
             m.add_edge(u, v)

@@ -5,6 +5,7 @@ Tests for the interface with gr1c.
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
+import networkx as nx
 from nose.tools import raises
 import os
 from tulip.spec import GRSpec, translate
@@ -48,6 +49,37 @@ REFERENCE_AUTXML = """<?xml version="1.0" encoding="UTF-8"?>
   </aut>
   <extra></extra>
 </tulipcon>
+"""
+
+REFERENCE_AUTJSON_smallbool = """
+{"version": 1,
+ "gr1c": "0.10.2",
+ "date": "2015-10-10 16:56:17",
+ "extra": "",
+
+ "ENV": [{"x": "boolean"}],
+ "SYS": [{"y": "boolean"}],
+
+ "nodes": {
+"0x1E8FA40": {
+    "state": [0, 0],
+    "mode": 0,
+    "rgrad": 1,
+    "initial": false,
+    "trans": ["0x1E8FA00"] },
+"0x1E8FA00": {
+    "state": [1, 1],
+    "mode": 1,
+    "rgrad": 1,
+    "initial": false,
+    "trans": ["0x1E8FA40"] },
+"0x1E8F990": {
+    "state": [0, 1],
+    "mode": 0,
+    "rgrad": 1,
+    "initial": true,
+    "trans": ["0x1E8FA00"] }
+}}
 """
 
 
@@ -177,6 +209,34 @@ def test_aut_xml2mealy():
     assert g.sys_vars == {"y": "boolean"}
     print(g.nodes())
     assert len(g) == 3
+
+def test_load_aut_json():
+    g = gr1c.load_aut_json(REFERENCE_AUTJSON_smallbool)
+    assert g.env_vars == dict(x='boolean'), (g.env_vars)
+    assert g.sys_vars == dict(y='boolean'), (g.sys_vars)
+    # `REFERENCE_AUTJSON_smallbool` defined above
+    h = nx.DiGraph()
+    nodes = {0: '0x1E8FA40', 1: '0x1E8FA00', 2: '0x1E8F990'}
+    h.add_node(nodes[0], state=dict(x=0, y=0),
+               mode=0, rgrad=1, initial=False)
+    h.add_node(nodes[1], state=dict(x=1, y=1),
+               mode=1, rgrad=1, initial=False)
+    h.add_node(nodes[2], state=dict(x=0, y=1),
+               mode=0, rgrad=1, initial=True)
+    edges = [(nodes[0], nodes[1]),
+             (nodes[1], nodes[0]),
+             (nodes[2], nodes[1])]
+    h.add_edges_from(edges)
+    # compare
+    for u, d in h.nodes_iter(data=True):
+        assert u in g, (u, g.nodes())
+        d_ = g.node[u]
+        for k, v in d.iteritems():
+            v_ = d_.get(k)
+            assert v_ == v, (k, v, v_, d, d_)
+    h_edges = set(h.edges_iter())
+    g_edges = set(g.edges_iter())
+    assert h_edges == g_edges, (h_edges, g_edges)
 
 
 @raises(ValueError)
