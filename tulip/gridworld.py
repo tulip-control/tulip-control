@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -320,7 +320,7 @@ class GridWorld:
                     if self.W[i+t_offset[0]][j+t_offset[1]] == 0:
                         ax.add_patch(matplotlib.patches.Rectangle((x_steps[j+t_offset[1]], y_steps[W.shape[0]-(i+t_offset[0])]),1,1, color=(.8,.8,.8)))
         plt.axis([xmin, xmax, ymin, ymax])
-        
+
     def pretty(self, show_grid=False, line_prefix="", path=[], goal_order=False):
         """Return pretty-for-printing string.
 
@@ -332,7 +332,7 @@ class GridWorld:
         # See comments in code for the method loads regarding values in W
         if self.W is None:
             return ""
-        
+
         # LEGEND:
         #  * - wall (as used in original world matrix definition);
         #  G - goal location;
@@ -406,7 +406,7 @@ class GridWorld:
 
     def loads(self, gw_desc):
         """Reincarnate using given gridworld description string.
-        
+
         @param gw_desc: String containing a gridworld description.
 
         In a gridworld description, any line beginning with # is
@@ -615,7 +615,7 @@ class GridWorld:
                                             offset[0]+(j+1)*side_lengths[0]],
                                           dtype=np.float64))
         return prop2partition.prop2part(domain, cells)
-    
+
     def discreteTransitionSystem(self, nonbool=True):
         """Write a discrete transition system suitable for synthesis.
         Unlike dumpPPartition, this does not create polytopes; it is 
@@ -624,7 +624,7 @@ class GridWorld:
         @param nonbool: If True, then use variables with integer domains.
                  In particular this affects region naming, as achieved
                  with L{__getitem__}.
-        
+
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
         try:
@@ -659,7 +659,7 @@ class GridWorld:
         disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
         return disc_dynamics
-    
+
     def deterministicMovingObstacle(self, path):
         trans = []
         num_cells = self.W.shape[0] * self.W.shape[1]
@@ -787,7 +787,7 @@ class GridWorld:
         spec_goal = []
         for loc in self.goal_list:
             spec_goal.append(self.__getitem__(loc, nonbool=nonbool))
-        
+
         self.offset = orig_offset
         if controlled_dyn:
             return GRSpec(sys_vars=sys_vars,
@@ -795,16 +795,16 @@ class GridWorld:
         else:
             return GRSpec(env_vars=sys_vars,
                           env_init=init_str, env_safety=spec_trans, env_prog=spec_goal)
-                      
+
     def scale(self, xf=1, yf=1):
         """Return a new gridworld equivalent to this but scaled by integer
         factor (xf, yf). In the new world, obstacles are increased in size but
         initials and goals change their position only. If this world is of size
         (h, w) then the returned world will be of size (h*yf, w*xf).
-        
+
         @param xf: integer scaling factor for rows
         @param yf: integer scaling factor for columns
-        
+
         @rtype: L{GridWorld}
         """
         shape_scaled = (self.W.shape[0]*yf, self.W.shape[1]*xf)
@@ -827,7 +827,7 @@ class GridWorld:
         scale_gw.goal_list = scale_goal
         scale_gw.init_list = scale_init
         return scale_gw
-        
+
 def place_features(W, n):
     """Place n features randomly in 1D array W"""
     try:
@@ -836,7 +836,7 @@ def place_features(W, n):
         return avail_inds[:n]
     except IndexError:
         raise ValueError("Unable to place features: no empty space left")
-        
+
 def world_from_1D(W, size, goal_list, init_list, prefix="Y"):
     W = W.reshape(size)
     row_col = lambda k: (k/size[1], k%size[1])
@@ -982,7 +982,7 @@ def maze(width, height, complexity=.75, density =.75):
 def maze_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         complexity=.75):
     """Generate a random maze gridworld.
-    
+
     @param size: a pair, indicating number of rows and columns.
     @param wall_density: the ratio of walls to total number of cells.
     @param num_init: number of possible initial positions.
@@ -997,12 +997,12 @@ def maze_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     goal_list = place_features(W, num_goals)
     init_list = place_features(W, num_init)
     return world_from_1D(W, size, goal_list, init_list, prefix)
-    
+
 def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
             passage_length=0.4, ptop=None, prefix="Y"):
-    """Generate a narrow-passage world: this is a world containing 
+    """Generate a narrow-passage world: this is a world containing
     two zones (initial, final) with a tube connecting them.
-    
+
     @param size: a pair, indicating number of rows and columns.
     @param passage_width: the width of the connecting passage in cells.
     @param passage_length: the length of the passage as a proportion of the
@@ -1012,10 +1012,10 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     @param ptop: row number of top of passage, default (None) is random
     @param prefix: string to be used as prefix for naming gridworld
                    cell variables.
-                   
+
     @rtype: L{GridWorld}
     """
-                   
+
     (w, h) = size
     if w < 3 or h < 3:
         raise ValueError("Gridworld too small: minimum dimension 3")
@@ -1042,7 +1042,7 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
 
 def unoccupied(size, prefix="Y"):
     """Generate entirely unoccupied gridworld of given size.
-    
+
     @param size: a pair, indicating number of rows and columns.
     @param prefix: String to be used as prefix for naming gridworld
                    cell variables.
@@ -1075,7 +1075,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
              assumed to begin each game at its center position.
     @param nonbool: If True, then use variables with integer domains.
     @param get_moves_lists: Consult returned value description below.
-    
+
     @rtype: (L{GRSpec}, list)
 
     @return: If get_moves_lists is True, then returns (spec, moves_N)
@@ -1142,7 +1142,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
 
 def unoccupied(size, prefix="Y"):
     """Generate entirely unoccupied gridworld of given size.
-    
+
     @param size: a pair, indicating number of rows and columns.
     @param prefix: String to be used as prefix for naming gridworld
                    cell variables.
@@ -1186,7 +1186,7 @@ def prefix_filt(d, prefix):
             if k.startswith(prefix):
                 match_list.append(k)
     return dict([(k, d[k]) for k in match_list])
-    
+
 def extract_path(aut, prefix=None):
     """Extract a path from a gridworld automaton"""
     s = aut.getAutState(0)
@@ -1228,7 +1228,7 @@ def extract_path(aut, prefix=None):
         else:
             break
     return path
-    
+
 def verify_path(W, path, seq=False):
     goals = W.goal_list[:]
     if seq:
@@ -1253,7 +1253,7 @@ def verify_path(W, path, seq=False):
             assert_message = "Path intersects obstacle at " + str(p)
             return False
     return True
-    
+
 def verify_mutex(paths):
     # sanity check - all paths same length
     if not all(len(p) == len(paths[0]) for p in paths):
@@ -1265,16 +1265,16 @@ def verify_mutex(paths):
             assert_message = "Non-unique coordinates in tuple " + str(t)
             return False
     return True
-    
+
 def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     """Animate a list of paths simultaneously in world Z using matplotlib.
-    
+
     @param Z: Gridworld for which paths were generated.
     @param paths: List of paths to animate (one per robot).
     @param jitter: Random jitter added to each coordinate value in animation.
                    Makes the robot's path more visible by avoiding overlap.
-    @param save_prefix: If not None, do not show an animation but produce a 
-                        series of images "<save_prefix>nnn.png" which can be 
+    @param save_prefix: If not None, do not show an animation but produce a
+                        series of images "<save_prefix>nnn.png" which can be
                         compiled into an animated GIF.
     """
     try:
@@ -1305,7 +1305,7 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         l, = ax.plot([], [], 'o', color=colors[n], markersize=10.0, zorder=2)
         l_trail, = ax.plot([], [], '-', color=colors[n], zorder=1)
         lines.append((l, l_trail))
-    
+
     if not save_prefix:
         ani = matplotlib.animation.FuncAnimation(fig, update_line,
                                                  len(paths[0]),
@@ -1316,17 +1316,17 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         print("Writing %s000.png - %s%03d.png" % (save_prefix, save_prefix, len(paths[0])))
         for n in range(len(paths[0])):
             update_line(n, data, lines)
-    
+
 def compress_paths(paths):
     """Remove insignificant path-element tuples from a path list
-    
+
     Given a list of paths [[p11, p12, ..., p1n], [p21, p22, ..., p2n], ...]
     a path-element tuple (p1k, p2k, ...) is insignificant if p1k = p1(k+1),
     p2k = p2(k+1), ...; (p1n, p2n, ...) is always significant.
-    
+
     @param paths: A list of paths, where each path is a list of tuples, each
                   representing a coordinate in the world.
-    
+
     @rtype: list of lists of (x,y) tuples
     """
     pzip = zip(*paths)
