@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2015 by California Institute of Technology
+# Copyright (c) 2012-2016 by California Institute of Technology
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
