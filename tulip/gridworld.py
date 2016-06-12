@@ -693,7 +693,7 @@ class GridWorld:
 
     def discreteTransitionSystem(self, nonbool=True):
         """Write a discrete transition system suitable for synthesis.
-        Unlike dumpPPartition, this does not create polytopes; it is 
+        Unlike dumpPPartition, this does not create polytopes; it is
         nonetheless useful and computationally less expensive.
 
         @param nonbool: If True, then use variables with integer domains.
