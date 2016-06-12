@@ -1354,7 +1354,7 @@ def prefix_filt(d, prefix):
 
 
 def extract_path(aut, prefix=None):
-    """Extract a path from a gridworld automaton"""
+    """Extract a path from a gridworld automaton."""
     s = aut.getAutState(0)
     last = None
     path = []
@@ -1492,7 +1492,7 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
 
 
 def compress_paths(paths):
-    """Remove insignificant path-element tuples from a path list
+    """Remove insignificant path-element tuples from a path list.
 
     Given a list of paths [[p11, p12, ..., p1n], [p21, p22, ..., p2n], ...]
     a path-element tuple (p1k, p2k, ...) is insignificant if p1k = p1(k+1),
