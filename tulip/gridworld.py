@@ -642,7 +642,7 @@ class GridWorld(object):
         @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
         """
         try:
-            from polytope import Polytope, Region
+            from polytope import Polytope
         except ImportError:
             raise ImportError('GridWorld.dumpPPartition() requires '
                               'the Python package polytope.')
