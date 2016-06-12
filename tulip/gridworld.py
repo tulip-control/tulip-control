@@ -35,8 +35,8 @@ Note (24 June 2012): Several pieces of source code are taken or
 derived from btsynth; see http://scottman.net/2012/btsynth
 """
 from __future__ import print_function
-import itertools
 import copy
+import itertools
 import random
 
 import numpy as np
@@ -302,9 +302,9 @@ class GridWorld(object):
                  given to L{add_trolls}.
         """
         try:
-            import matplotlib.pyplot as plt
             import matplotlib.cm as mpl_cm
             import matplotlib.patches
+            import matplotlib.pyplot as plt
         except ImportError:
             print('matplotlib not available, so skipping GridWorld.plot()')
             return
@@ -1449,8 +1449,8 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
                         compiled into an animated GIF.
     """
     try:
-        import matplotlib.pyplot as plt
         import matplotlib.animation
+        import matplotlib.pyplot as plt
     except ImportError:
         print('matplotlib not available, '
               'so skipping gridworld.animate_paths()')
