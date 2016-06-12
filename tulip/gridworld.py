@@ -38,6 +38,7 @@ from __future__ import print_function
 import itertools
 import copy
 import random
+
 import numpy as np
 from numpy.random import random_integers as rnd
 
