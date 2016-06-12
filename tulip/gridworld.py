@@ -51,7 +51,7 @@ from spec.form import GRSpec
 # import matplotlib
 
 
-class GridWorld:
+class GridWorld(object):
 
     def __init__(self, gw_desc=None, prefix="Y"):
         """Load gridworld described in given string, or make empty instance.
