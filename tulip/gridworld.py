@@ -29,8 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Routines for working with gridworlds.
+"""Routines for working with gridworlds.
 
 Note (24 June 2012): Several pieces of source code are taken or
 derived from btsynth; see http://scottman.net/2012/btsynth
