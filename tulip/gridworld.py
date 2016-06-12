@@ -665,7 +665,7 @@ class GridWorld:
                                       -offset[0],
                                       offset[0] +
                                       self.W.shape[1] * side_lengths[0]],
-                                      dtype=np.float64))
+                                     dtype=np.float64))
         cells = {}
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
@@ -688,7 +688,7 @@ class GridWorld:
                              (self.W.shape[0] - i) * side_lengths[1],
                              -offset[0] - j * side_lengths[0],
                              offset[0] + (j + 1) * side_lengths[0]],
-                             dtype=np.float64))
+                            dtype=np.float64))
         return prop2partition.prop2part(domain, cells)
 
     def discreteTransitionSystem(self, nonbool=True):
@@ -806,7 +806,8 @@ class GridWorld:
                     (i, j), nonbool=nonbool) + " -> (")
                 # Normal transitions:
                 spec_trans[-1] += self.__getitem__((i, j),
-                                                   use_next=True, nonbool=nonbool)
+                                                   use_next=True,
+                                                   nonbool=nonbool)
                 if i > row_low and self.W[i - 1][j] == 0:
                     spec_trans[-1] += " || " + \
                         self.__getitem__(
