@@ -1370,7 +1370,7 @@ def extract_path(aut, prefix=None):
                         path.append(c[1:])
                         last = c[1:]
                         updated = True
-                except:
+                except Exception:
                     pass
         if not updated:
             # Robot has not moved, even out path lengths
