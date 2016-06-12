@@ -38,6 +38,7 @@ from __future__ import print_function
 import copy
 import itertools
 import random
+import time
 
 import numpy as np
 from numpy.random import random_integers as rnd
@@ -704,12 +705,13 @@ class GridWorld(object):
         """
         try:
             from abstract import prop2partition
+            from polytope import Region
         except ImportError:
             raise ImportError('GridWorld.discreteTransitionSystem() requires '
                               'tulip.abstract, which may not be available '
                               'because optional dependencies are missing.')
-        disc_dynamics = PropPreservingPartition(list_region=[],
-                                                list_prop_symbol=[], trans=[])
+        disc_dynamics = prop2partition.PropPreservingPartition(
+            list_region=[], list_prop_symbol=[], trans=[])
         num_cells = self.W.shape[0] * self.W.shape[1]
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
@@ -720,7 +722,7 @@ class GridWorld(object):
                 # Region
                 r = [0 for x in range(0, num_cells)]
                 r[flat(i, j)] = 1
-                disc_dynamics.list_region.append(pc.Region("R_" + prop, r))
+                disc_dynamics.list_region.append(Region("R_" + prop, r))
                 # Transitions
                 # trans[p][q] if q -> p
                 t = [0 for x in range(0, num_cells)]
