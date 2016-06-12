@@ -1413,7 +1413,7 @@ def verify_path(W, path, seq=False):
     else:
         # Check if path visits all goals
         for g in goals:
-            if not g in path:
+            if g not in path:
                 assert_message = "Path does not visit goal " + str(g)
                 return False
     # Ensure that path does not intersect an obstacle
