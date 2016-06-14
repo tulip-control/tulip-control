@@ -53,6 +53,8 @@ from spec.form import GRSpec
 
 
 class GridWorld(object):
+    """4-connected grids with primitives like obstacles and goals
+    """
 
     def __init__(self, gw_desc=None, prefix="Y"):
         """Load gridworld described in given string, or make empty instance.
@@ -150,6 +152,10 @@ class GridWorld(object):
         return GridWorld(self.dumps(), prefix=self.prefix)
 
     def copy(self):
+        """Deep-copy GridWorld instance.
+
+        The copy has no dependence on the original.
+        """
         return self.__copy__()
 
     def state(self, key, offset=(0, 0), nonbool=True):
