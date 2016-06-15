@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Installation script."""
 import logging
 from setuptools import setup
 import os
@@ -34,6 +35,7 @@ package_data = {
 
 
 def package_jtlv():
+    """Detect `jtlv`, or note its absence."""
     if os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')):
         print('Found optional JTLV-based solver.')
         package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
@@ -67,6 +69,7 @@ def git_version(version):
 
 
 def run_setup():
+    """Build parser, get version from `git`, install."""
     # Build PLY table, to be installed as tulip package data
     try:
         import tulip.spec.lexyacc
