@@ -29,7 +29,6 @@ classifiers = [
     'Programming Language :: Python :: 2.7',
     'Topic :: Scientific/Engineering']
 package_data = {
-    'tulip': ['commit_hash.txt'],
     'tulip.transys.export': ['d3.v3.min.js'],
     'tulip.spec': ['parsetab.py']}
 
