@@ -89,7 +89,7 @@ def run_setup():
         version = git_version(VERSION)
     except AssertionError:
         raise
-    except:
+    except Exception:
         print('No git info: Assume release.')
         version = VERSION
     s = VERSION_TEXT.format(version=version)
