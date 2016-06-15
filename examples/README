@@ -3,6 +3,7 @@ Organization is by topic matter or relevant part of the API; summaries of
 subdirectories are given below.
 
 * robot_planning/ - simple motion planning examples
+* gridworlds/ - planning on grids to reach goals while avoiding obstacles
 
 * developer/ - various examples used during development, unstable directory
 * developer/transys/ - examples focusing on the tulip.transys subpackage
