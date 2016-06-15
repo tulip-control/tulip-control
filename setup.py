@@ -34,8 +34,6 @@ package_data = {
 
 
 def package_jtlv():
-    # Optional stuff for which the installation configuration will
-    # change depending on the availability of each.
     if os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')):
         print('Found optional JTLV-based solver.')
         package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
@@ -109,14 +107,14 @@ def run_setup():
             'ply >= 3.4',
             'networkx >= 1.6',
             'numpy >= 1.7',
+            'pydot >= 1.0.28',
             'scipy'],
         extras_require={
             'hybrid': ['cvxopt >= 1.1.7',
                        'polytope >= 0.1.1']},
         tests_require=[
             'nose',
-            'matplotlib',
-            'pydot >= 1.0.28'],
+            'matplotlib'],
         packages=[
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
