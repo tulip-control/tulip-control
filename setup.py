@@ -36,7 +36,8 @@ package_data = {
 
 def package_jtlv():
     """Detect `jtlv`, or note its absence."""
-    if os.path.exists(os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')):
+    path = os.path.join('tulip', 'interfaces', 'jtlv_grgame.jar')
+    if os.path.exists(path):
         print('Found optional JTLV-based solver.')
         package_data['tulip.interfaces'] = ['jtlv_grgame.jar']
     else:
@@ -103,7 +104,8 @@ def run_setup():
         author='Caltech Control and Dynamical Systems',
         author_email='tulip@tulip-control.org',
         url='http://tulip-control.org',
-        bugtrack_url='http://github.com/tulip-control/tulip-control/issues',
+        bugtrack_url=('http://github.com/tulip-control/'
+                      'tulip-control/issues'),
         license='BSD',
         classifiers=classifiers,
         install_requires=[
@@ -126,9 +128,10 @@ def run_setup():
         package_data=package_data)
     # ply failed ?
     if plytable_build_failed:
-        print("!"*65)
-        print("    Failed to build PLY table.  Please run setup.py again.")
-        print("!"*65)
+        print('!' * 65 +
+              '    Failed to build PLY table.  ' +
+              'Please run setup.py again.' +
+              '!' * 65)
 
 
 if __name__ == '__main__':
