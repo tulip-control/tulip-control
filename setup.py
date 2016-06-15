@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Installation script."""
 import logging
-from setuptools import setup
 import os
+from setuptools import setup
 # inline:
 # import git
 
