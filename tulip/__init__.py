@@ -48,5 +48,5 @@ of Model Checking" by Baier and Katoen (2008).
 
 try:
     from ._version import version as __version__
-except:
+except ImportError:
     __version__ = None
