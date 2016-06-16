@@ -39,7 +39,7 @@ install:
 before_script:
   - pip install gitpython
 
-script: ./run_tests.py
+script: ./run_tests.py --outofsource
 
 notifications:
   email: false
