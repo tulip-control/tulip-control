@@ -63,7 +63,7 @@ def git_version(version):
     except git.GitCommandError:
         return '{v}.dev0+{sha}'.format(
             v=version, sha=sha)
-    assert tag[1:] == version, (tag, version)
+    assert tag == 'v' + version, (tag, version)
     return version
 
 
