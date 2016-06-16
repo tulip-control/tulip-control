@@ -114,7 +114,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         # used before label value
         self._transition_dot_label_format = {'letter': '',
                                              'type?label': '',
-                                             'separator': '\n'}
+                                             'separator': r'\\n'}
         self._transition_dot_mask = dict()
 
         self.dot_node_shape = {'normal': 'circle',

@@ -76,15 +76,15 @@ class KripkeStructure(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap': '',
             'type?label': '',
-            'separator': '\n'}
+            'separator': r'\\n'}
         self.dot_node_shape = {'normal': 'rectangle'}
         self._state_dot_label_format = {
             'ap': '',
             'type?label': '',
-            'separator': '\n'}
+            'separator': r'\\n'}
         self._transition_dot_label_format = {
             'type?label': ':',
-            'separator': '\n'}
+            'separator': r'\\n'}
         self._transition_dot_mask = dict()
 
     def __str__(self):
@@ -372,12 +372,12 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self._state_dot_label_format = {
             'ap': '',
             'type?label': '',
-            'separator': '\n'}
+            'separator': r'\\n'}
         self._transition_dot_label_format = {
             'sys_actions': 'sys',  # todo: '' if no env
             'env_actions': 'env',
             'type?label': ':',  # todo: '' if no env
-            'separator': '\n'}
+            'separator': r'\\n'}
         self._transition_dot_mask = dict()
         self.dot_node_shape = {'normal': 'box'}  # todo: rectangle if no env
         self.default_export_fname = 'fts'
@@ -784,5 +784,5 @@ class LabeledGameGraph(GameGraph):
         self._state_dot_label_format = {
             'ap': '',
             'type?label': '',
-            'separator': '\n'}
+            'separator': r'\\n'}
         self.dot_node_shape = {'normal': 'rectangle'}
