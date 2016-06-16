@@ -10,6 +10,14 @@ from os import walk
 import argparse
 
 import nose
+from nose.plugins.base import Plugin
+
+
+class ShowFunctions(Plugin):
+    name = 'showfunctions'
+    def describeTest(self, test):
+        return str(test)
+
 
 class ArgParser(argparse.ArgumentParser):
     def error(self, message):
@@ -190,7 +198,11 @@ def main():
     argv.extend(unknown_args)
 
     print('calling nose')
-    nose.main(argv=argv + ["--verbosity=3", "--exe"])
+    argv.extend(["--verbosity=3",
+                 "--exe",
+                 "--with-showfunctions"])
+    nose.main(argv=argv,
+              addplugins=[ShowFunctions()])
 
 
 if __name__ == "__main__":
