@@ -108,7 +108,7 @@ def run_setup():
         classifiers=classifiers,
         install_requires=[
             'ply >= 3.4',
-            'networkx >= 1.6',
+            'networkx >= 1.6, <= 1.10',
             'numpy >= 1.7',
             'pydot >= 1.0.28',
             'scipy'],
