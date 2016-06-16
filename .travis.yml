@@ -14,6 +14,7 @@ addons:
     - liblapack-dev
     - libgmp-dev
     - libmpfr-dev
+    - graphviz
 
 before_install:
   - export GR1CVERSION=0.10.2
