@@ -17,6 +17,7 @@ gr1py>=0.1.0
 
 # tests
 nose
+mock
 
 # dev
 gitpython

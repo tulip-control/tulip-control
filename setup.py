@@ -117,7 +117,8 @@ def run_setup():
                        'polytope >= 0.1.1']},
         tests_require=[
             'nose',
-            'matplotlib'],
+            'matplotlib',
+            'mock'],
         packages=[
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
