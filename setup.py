@@ -110,7 +110,7 @@ def run_setup():
             'ply >= 3.4',
             'networkx >= 1.6, <= 1.10',
             'numpy >= 1.7',
-            'pydot >= 1.0.28',
+            'pydot >= 1.1.0',
             'scipy'],
         extras_require={
             'hybrid': ['cvxopt >= 1.1.7',
