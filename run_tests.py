@@ -59,7 +59,8 @@ Use the pseudoargument -- in this case. E.g.,
 Besides what is below, OPTIONS... are passed on to nose."""
 )
 
-if __name__ == "__main__":
+
+def main():
     parser = ArgParser(formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('testfamily', metavar='TEST', nargs='*', default=['base'],
@@ -190,3 +191,7 @@ if __name__ == "__main__":
 
     print('calling nose')
     nose.main(argv=argv + ["--verbosity=3", "--exe"])
+
+
+if __name__ == "__main__":
+    main()
