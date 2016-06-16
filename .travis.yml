@@ -33,7 +33,7 @@ before_install:
   - pip install mock
 
 install:
-  - pip install .
+  - pip install . -vvv
 
 before_script:
   - pip install gitpython
