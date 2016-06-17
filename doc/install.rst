@@ -62,10 +62,7 @@ TuLiP may instead be installed `from PyPI <https://pypi.python.org/pypi/tulip>`_
 or, analogous to the above, ``pip install tulip[hybrid]``.
 
 The above commands include checking of dependencies and automatic installation
-of missing Python packages. (N.B., not all dependencies are Python packages.) To
-only check for required and optional dependencies, but not install TuLiP, use ::
-
-  $ python setup.py dry-check
+of missing Python packages. (N.B., not all dependencies are Python packages.)
 
 
 .. _synt-tools-sec-label:
