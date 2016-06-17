@@ -601,6 +601,8 @@ def discretize(
         except:
             logger.error('failed to import matplotlib')
             plt = None
+    else:
+    	plt = None
         
     iter_count = 0
     
