@@ -948,28 +948,6 @@ class GridWorld(object):
         return scale_gw
 
 
-def place_features(W, n):
-    """Place n features randomly in 1D array W"""
-    try:
-        avail_inds = np.arange(W.size)[W == 0]
-        np.random.shuffle(avail_inds)
-        return avail_inds[:n]
-    except IndexError:
-        raise ValueError("Unable to place features: no empty space left")
-
-
-def world_from_1D(W, size, goal_list, init_list, prefix="Y"):
-    W = W.reshape(size)
-    row_col = lambda k: (k / size[1], k % size[1])
-    goal_list = [row_col(k) for k in goal_list]
-    init_list = [row_col(k) for k in init_list]
-    gw = GridWorld(prefix=prefix)
-    gw.W = W
-    gw.goal_list = goal_list
-    gw.init_list = init_list
-    return gw
-
-
 def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
                  ensure_feasible=False, timeout=None,
                  num_trolls=0):
