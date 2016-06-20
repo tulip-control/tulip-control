@@ -1352,16 +1352,6 @@ def extract_coord(var_name):
     return ("_".join(name_frags[:-2]), row, col)
 
 
-def prefix_filt(d, prefix):
-    """Return all items in dictionary d with key with given prefix."""
-    match_list = []
-    for k in d.keys():
-        if isinstance(k, str):
-            if k.startswith(prefix):
-                match_list.append(k)
-    return dict([(k, d[k]) for k in match_list])
-
-
 def extract_path(aut, prefix=None):
     """Extract a path from a gridworld automaton."""
     s = aut.getAutState(0)

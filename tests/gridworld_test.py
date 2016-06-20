@@ -200,6 +200,3 @@ def extract_coord_test():
     assert gw.extract_coord("test_3_0") == ("test", 3, 0)
     assert gw.extract_coord("obstacle_5_4_11") == ("obstacle_5", 4, 11)
     assert gw.extract_coord("test3_0") is None
-
-def prefix_filt_test():
-    assert gw.prefix_filt({"Y_0_0": 0, "Y_0_1": 1, "X_0_1_0": 1}, "Y") == {"Y_0_0": 0, "Y_0_1": 1}
