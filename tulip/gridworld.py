@@ -41,7 +41,6 @@ import random
 import time
 
 import numpy as np
-from numpy.random import random_integers as rnd
 
 from spec.form import GRSpec
 
@@ -1084,63 +1083,6 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         return world, troll_list
     else:
         return world
-
-
-# From (http://en.wikipedia.org/wiki/
-#       Maze_generation_algorithm#Python_code_example)
-# (08/21/2012)
-def maze(width, height, complexity=.75, density=.75):
-    # Only odd shapes
-    shape = ((height // 2) * 2 + 1, (width // 2) * 2 + 1)
-    # Adjust complexity and density relative to maze size
-    complexity = int(complexity * (5 * (shape[0] + shape[1])))
-    density = int(density * (shape[0] // 2 * shape[1] // 2))
-    # Build actual maze
-    Z = np.zeros(shape, dtype=bool)
-    # Fill borders
-    Z[0, :] = Z[-1, :] = 1
-    Z[:, 0] = Z[:, -1] = 1
-    # Make isles
-    for i in range(density):
-        x, y = rnd(0, shape[1] // 2) * 2, rnd(0, shape[0] // 2) * 2
-        Z[y, x] = 1
-        for j in range(complexity):
-            neighbours = []
-            if x > 1:
-                neighbours.append((y, x - 2))
-            if x < shape[1] - 2:
-                neighbours.append((y, x + 2))
-            if y > 1:
-                neighbours.append((y - 2, x))
-            if y < shape[0] - 2:
-                neighbours.append((y + 2, x))
-            if len(neighbours):
-                y_, x_ = neighbours[rnd(0, len(neighbours) - 1)]
-                if Z[y_, x_] == 0:
-                    Z[y_, x_] = 1
-                    Z[y_ + (y - y_) // 2, x_ + (x - x_) // 2] = 1
-                    x, y = x_, y_
-    return Z
-
-
-def maze_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
-               complexity=.75):
-    """Generate a random maze gridworld.
-
-    @param size: a pair, indicating number of rows and columns.
-    @param wall_density: the ratio of walls to total number of cells.
-    @param num_init: number of possible initial positions.
-    @param num_goals: number of positions to be visited infinitely often.
-    @param prefix: string to be used as prefix for naming gridworld
-                   cell variables.
-    @param complexity: value in [0,1] determining the complexity of the maze.
-    """
-    W = maze(size[1], size[0], complexity, wall_density)
-    size = W.shape
-    W = W.reshape(-1)
-    goal_list = place_features(W, num_goals)
-    init_list = place_features(W, num_init)
-    return world_from_1D(W, size, goal_list, init_list, prefix)
 
 
 def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
