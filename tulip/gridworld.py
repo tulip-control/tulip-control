@@ -1094,7 +1094,6 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     if ptop is None:
         ptop = np.random.randint(0, size[0] - passage_width)
     passage = range(ptop, ptop + passage_width)
-    print((passage, ptop))
     for y in range(0, size[0]):
         if y not in passage:
             for x in range(izone, gzone):
