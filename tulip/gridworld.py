@@ -1232,19 +1232,6 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
     return spec
 
 
-def unoccupied(size, prefix="Y"):
-    """Generate entirely unoccupied gridworld of given size.
-
-    @param size: a pair, indicating number of rows and columns.
-    @param prefix: String to be used as prefix for naming gridworld
-                   cell variables.
-    @rtype: L{GridWorld}
-    """
-    if len(size) < 2:
-        raise TypeError("invalid gridworld size.")
-    return GridWorld(str(size[0]) + " " + str(size[1]), prefix="Y")
-
-
 def extract_coord(var_name):
     """Assuming prefix_R_C format, return (prefix,row,column) tuple.
 
