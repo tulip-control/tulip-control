@@ -81,11 +81,6 @@ class GridWorld_test:
         Y = gw.GridWorld(TRIVIAL_GWFILE)
         assert self.X != Y
 
-        # Avoid bug due to careless NumPy broadcasting
-        Z3x5 = gw.unoccupied((3,5))
-        Z1x1 = gw.unoccupied((1,1))
-        assert Z3x5 != Z1x1
-
 
     def test_dumploadloop(self):
         assert self.X == gw.GridWorld(self.X.dumps())
@@ -227,5 +222,6 @@ def eq_GridWorld_test():
                              (empty, trivial_nonempty, False),
                              (trivial_nonempty_2goals, trivial_nonempty, False),
                              (trivial_nonempty_2init, trivial_nonempty, False),
-                             (trivial_nonempty, trivial_diff, False)]:
+                             (trivial_nonempty, trivial_diff, False),
+                             (gw.unoccupied((3, 5)), gw.unoccupied((1, 1)), False)]:
         yield eq_GridWorld_check, G, H, is_equal
