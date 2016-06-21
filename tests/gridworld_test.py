@@ -196,7 +196,11 @@ class RandomWorld_test():
 RandomWorld_test.slow = True
 
 
+def extract_coord_check(label, expected_coord):
+    assert gw.extract_coord(label) == expected_coord
+
 def extract_coord_test():
-    assert gw.extract_coord("test_3_0") == ("test", 3, 0)
-    assert gw.extract_coord("obstacle_5_4_11") == ("obstacle_5", 4, 11)
-    assert gw.extract_coord("test3_0") is None
+    for (label, expected_coord) in [("test_3_0", ("test", 3, 0)),
+                                    ("obstacle_5_4_11", ("obstacle_5", 4, 11)),
+                                    ("test3_0", None)]:
+        yield extract_coord_check, label, expected_coord
