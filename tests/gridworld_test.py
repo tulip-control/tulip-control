@@ -204,3 +204,28 @@ def extract_coord_test():
                                     ("obstacle_5_4_11", ("obstacle_5", 4, 11)),
                                     ("test3_0", None)]:
         yield extract_coord_check, label, expected_coord
+
+def eq_GridWorld_check(G, H, eq):
+    if eq:
+        G == H
+    else:
+        not (G == H)
+
+def eq_GridWorld_test():
+    empty = gw.GridWorld()
+    trivial_nonempty = gw.GridWorld(TRIVIAL_GWFILE)
+    trivial_diff = gw.GridWorld(TRIVIAL_GWFILE)
+    if trivial_diff.isEmpty((0, 0)):
+        trivial_diff.setOccupied((0, 0))
+    else:
+        trivial_diff.setEmpty((0, 0))
+    trivial_nonempty_2goals = gw.GridWorld(TRIVIAL_GWFILE)
+    trivial_nonempty_2goals.goal_list = [(0, 0), (1, 1)]
+    trivial_nonempty_2init = gw.GridWorld(TRIVIAL_GWFILE)
+    trivial_nonempty_2init.init_list = [(0, 0), (1, 1)]
+    for (G, H, is_equal) in [(gw.GridWorld(), gw.GridWorld(), True),
+                             (empty, trivial_nonempty, False),
+                             (trivial_nonempty_2goals, trivial_nonempty, False),
+                             (trivial_nonempty_2init, trivial_nonempty, False),
+                             (trivial_nonempty, trivial_diff, False)]:
+        yield eq_GridWorld_check, G, H, is_equal
