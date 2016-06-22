@@ -225,3 +225,7 @@ def eq_GridWorld_test():
                              (trivial_nonempty, trivial_diff, False),
                              (gw.unoccupied((3, 5)), gw.unoccupied((1, 1)), False)]:
         yield eq_GridWorld_check, G, H, is_equal
+
+def narrow_passage_test():
+    G = gw.narrow_passage((5, 10), num_init=1, num_goals=1)
+    assert G.isReachable(G.init_list[0], G.goal_list[0])
