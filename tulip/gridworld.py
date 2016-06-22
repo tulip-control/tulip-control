@@ -1080,7 +1080,6 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
 
     @rtype: L{GridWorld}
     """
-
     (w, h) = size
     if w < 3 or h < 3:
         raise ValueError("Gridworld too small: minimum dimension 3")
