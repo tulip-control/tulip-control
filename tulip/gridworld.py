@@ -921,8 +921,8 @@ class GridWorld(object):
         initials and goals change their position only. If this world is of size
         (h, w) then the returned world will be of size (h*yf, w*xf).
 
-        @param xf: integer scaling factor for rows
-        @param yf: integer scaling factor for columns
+        @param xf: integer scaling factor for columns
+        @param yf: integer scaling factor for rows
 
         @rtype: L{GridWorld}
         """
