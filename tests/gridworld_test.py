@@ -229,3 +229,12 @@ def eq_GridWorld_test():
 def narrow_passage_test():
     G = gw.narrow_passage((5, 10), num_init=1, num_goals=1)
     assert G.isReachable(G.init_list[0], G.goal_list[0])
+
+def scale_GridWorld_test():
+    G = gw.unoccupied((1, 2))
+    assert G.size() == (1, 2)
+    assert G.scale().size() == G.size()
+    assert G.scale(xf=1, yf=1).size() == G.size()
+    assert G.scale(xf=2).size() == (1, 4)
+    assert G.scale(yf=2).size() == (2, 2)
+    assert G.scale(xf=3, yf=4).size() == (4, 6)
