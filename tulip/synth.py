@@ -33,6 +33,7 @@
 from __future__ import absolute_import
 import logging
 import copy
+import pprint
 import warnings
 from tulip import transys
 from tulip.spec import GRSpec
@@ -1305,7 +1306,6 @@ def strategy2mealy(A, spec):
     m = len(mach)
     assert m == n + 1, (n, m)
     if not mach.successors('Sinit'):
-        import pprint
         raise Exception(
             'The machine obtained from the strategy '
             'does not have any initial states !\n'
