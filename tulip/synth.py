@@ -1235,6 +1235,7 @@ def strategy2mealy(A, spec):
 
     @rtype: L{MealyMachine}
     """
+    assert len(A) > 0
     logger.info('converting strategy (compact) to Mealy machine')
     env_vars = spec.env_vars
     sys_vars = spec.sys_vars
@@ -1300,6 +1301,9 @@ def strategy2mealy(A, spec):
             logger.debug('found initial state: {u}'.format(u=u))
         logger.debug('machine vertex: {u}, has var values: {v}'.format(
                      u=u, v=var_values))
+    n = len(A)
+    m = len(mach)
+    assert m == n + 1, (n, m)
     if not mach.successors('Sinit'):
         import pprint
         raise Exception(
