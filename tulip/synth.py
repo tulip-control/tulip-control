@@ -1270,7 +1270,7 @@ def strategy2mealy(A, spec):
     try:
         u = next(iter(A))
         keys = A.node[u]['state'].keys()
-    except:
+    except Exception:
         logger.warn('strategy has no states.')
     # to store tuples of dict values for fast search
     isinit = spec.compile_init(no_str=True)
