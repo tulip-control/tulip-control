@@ -1138,6 +1138,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         m = len(self)
         assert n == 0 or m > 0, 'removed all {n} nodes!'.format(n=n)
         assert n >= 0, 'added {n} nodes'.format(n=n)
+        print('removed {r} nodes from '
+              '{n} total'.format(r=n - m, n=n))
 
     def dot_str(self, wrap=10, **kwargs):
         """Return dot string.
