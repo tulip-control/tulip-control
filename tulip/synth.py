@@ -31,18 +31,21 @@
 # SUCH DAMAGE.
 """Interface to library of synthesis tools, e.g., JTLV, gr1c"""
 from __future__ import absolute_import
-import logging
 import copy
+import logging
 import pprint
 import warnings
-from tulip import transys
-from tulip.spec import GRSpec
-from tulip.interfaces import jtlv, gr1c, gr1py
+
+from tulip.interfaces import gr1c
+from tulip.interfaces import gr1py
+from tulip.interfaces import jtlv
 from tulip.interfaces import omega as omega_int
 try:
     from tulip.interfaces import slugs
 except ImportError:
     slugs = None
+from tulip.spec import GRSpec
+from tulip import transys
 
 
 logger = logging.getLogger(__name__)
