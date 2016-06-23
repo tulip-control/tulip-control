@@ -18,7 +18,7 @@ flag "-p" is given, then pretty-print the gridworld into the comments.
 
 Use the flag -b to use a representation where there is one boolean
 variable in the specification per grid cell.  Otherwise (default),
-support for nonboolean domains by gr1c is used.
+support for nonboolean domains is used.
 
 
 SCL; 2013, 2015
