@@ -1130,10 +1130,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     def remove_deadends(self):
         """Recursively delete nodes with no outgoing transitions."""
+        n = len(self)
         s = {1}
         while s:
             s = {n for n in self if not self.succ[n]}
             self.states.remove_from(s)
+        m = len(self)
+        assert n == 0 or m > 0, 'removed all {n} nodes!'.format(n=n)
+        assert n >= 0, 'added {n} nodes'.format(n=n)
 
     def dot_str(self, wrap=10, **kwargs):
         """Return dot string.

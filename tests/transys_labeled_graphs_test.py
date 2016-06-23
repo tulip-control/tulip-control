@@ -322,8 +322,9 @@ def test_remove_deadends():
     g.remove_deadends()
     assert(len(g) == n)
 
-    # line
+    # line + self-loop
     g.remove_edge(4, 0)
+    g.add_edge(0, 0)
 
     g.remove_deadends()
-    assert(len(g) == 0)
+    assert(len(g) == 1)
