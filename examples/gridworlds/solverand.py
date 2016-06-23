@@ -8,9 +8,6 @@ SVG file named "ctrl-solverand.svg" that depicts the controller, which
 is a Mealy machine.  Example usage for 3 by 5 size is
 
   $ ./solverand.py 3 5
-
-
-SCL; 2013, 2015
 """
 from __future__ import print_function
 

@@ -12,9 +12,6 @@ If the flag "-p" is given, then generate a plot of the grid.  If the -i
 flag is given in addition to -p, then save the plot to a PDF FILE.  If the
 flag -b is given, instead of integer-valued variables, use representation
 where there is one boolean variable in the specification per grid cell.
-
-
-SCL; 2013, 2015
 """
 from __future__ import print_function
 
