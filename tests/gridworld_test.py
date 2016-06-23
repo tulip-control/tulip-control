@@ -238,3 +238,10 @@ def scale_GridWorld_test():
     assert G.scale(xf=2).size() == (1, 4)
     assert G.scale(yf=2).size() == (2, 2)
     assert G.scale(xf=3, yf=4).size() == (4, 6)
+
+def add_trolls_test():
+    G = gw.unoccupied((3, 5))
+    G.init_list = [(0, 0)]
+    G.goal_list = [(0, 4)]
+    spc = gw.add_trolls(G, [((2, 2), 1)], get_moves_lists=False)
+    assert is_realizable('gr1c', spc)
