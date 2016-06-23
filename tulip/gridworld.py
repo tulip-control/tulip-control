@@ -746,20 +746,6 @@ class GridWorld(object):
         disc_dynamics.num_regions = len(disc_dynamics.list_region)
         return disc_dynamics
 
-    def deterministicMovingObstacle(self, path):
-        trans = []
-        num_cells = self.W.shape[0] * self.W.shape[1]
-        for i in range(self.W.shape[0]):
-            for j in range(self.W.shape[1]):
-                flat = lambda x, y: x * self.W.shape[1] + y
-                t = [0 for x in range(0, num_cells)]
-                if (i, j) in path:
-                    n = path.index((i, j))
-                    # path[n-1] -> path[n], path[L-1] -> path[0]
-                    t[flat(*path[(n - 1) % len(path)])] = 1
-                trans.append(t)
-        return trans
-
     def spec(self, offset=(0, 0), controlled_dyn=True, nonbool=True):
         """Return GRSpec instance describing this gridworld.
 
