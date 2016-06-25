@@ -1,8 +1,24 @@
 This directory contains some examples of the use of the TuLiP toolbox.
-Organization is by topic matter or relevant part of the API; summaries of
-subdirectories are given below.
+Organization is by topic matter or relevant part of the API;
+summaries of files and subdirectories are given below.
 
-* robot_planning/ - simple motion planning examples
+discrete.py - discrete transition model
+gr1.py - alternative system description directly using GRSpec
+gr1_set.py - how to use an integer variable in gr1
+
+mode switching (discrete state space):
+    controlled_switching.py - both transitions and modes controlled
+    environment_switching.py - env controls modes, sys controls transitions
+    only_mode_controlled.py - sys controls modes, env controls transitions
+    hybrid.py - (env, sys) control modes, sys controls transitions
+
+continuous state space (discrete-time dynamics):
+    continuous.py - continuous dynamics (with abstraction)
+    pwa.py - modification to include pwa dynamics
+
+In each of the examples, the task involves repeatedly visiting a cell,
+responding to a parking signal, and avoiding an environmental obstacle.
+
 
 * developer/ - various examples used during development, unstable directory
 * developer/transys/ - examples focusing on the tulip.transys subpackage
