@@ -294,7 +294,7 @@ class GridWorld(object):
             CLOSED.append(current)
         return False
 
-    def plot(self, font_pt=18, show_grid=False, grid_width=2, troll_list=[]):
+    def plot(self, font_pt=18, show_grid=False, grid_width=2, troll_list=[], axes=None):
         """Draw figure depicting this gridworld.
 
         Figure legend (symbolic form in parenthesis):
@@ -306,6 +306,10 @@ class GridWorld(object):
                  figure.  If 0, then use symbols instead (see legend above).
         @param troll_list: ...same as the argument with the same name
                  given to L{add_trolls}.
+
+        @param axes: Instance of matplotlib.axes._subplots.AxesSubplot
+                 on which to draw, or None, in which case a new figure
+                 is created.
         """
         try:
             import matplotlib.cm as mpl_cm
@@ -317,35 +321,38 @@ class GridWorld(object):
 
         W = self.W.copy()
         W = np.ones(shape=W.shape) - W
-        fig = plt.figure()
-        ax = plt.subplot(111)
-        plt.imshow(W, cmap=mpl_cm.gray,
-                   aspect="equal", interpolation="nearest",
-                   vmin=0., vmax=1.)
+        if axes is None:
+            fig = plt.figure()
+            ax = plt.subplot(111)
+        else:
+            ax = axes
+        ax.imshow(W, cmap=mpl_cm.gray,
+                  aspect="equal", interpolation="nearest",
+                  vmin=0., vmax=1.)
         xmin, xmax, ymin, ymax = plt.axis()
         x_steps = np.linspace(xmin, xmax, W.shape[1] + 1)
         y_steps = np.linspace(ymin, ymax, W.shape[0] + 1)
         if show_grid:
             for k in x_steps:
-                plt.plot([k, k], [ymin, ymax], 'k-', linewidth=grid_width)
+                ax.plot([k, k], [ymin, ymax], 'k-', linewidth=grid_width)
             for k in y_steps:
-                plt.plot([xmin, xmax], [k, k], 'k-', linewidth=grid_width)
-            plt.axis([xmin, xmax, ymin, ymax])
+                ax.plot([xmin, xmax], [k, k], 'k-', linewidth=grid_width)
+            ax.axis([xmin, xmax, ymin, ymax])
         for p in self.init_list:
             if font_pt > 0:
-                plt.text(p[1], p[0], "I", size=font_pt)
+                ax.text(p[1], p[0], "I", size=font_pt)
             else:
-                plt.plot(p[1], p[0], 'm+')
+                ax.plot(p[1], p[0], 'm+')
         for p in self.goal_list:
             if font_pt > 0:
-                plt.text(p[1], p[0], "G", size=font_pt)
+                ax.text(p[1], p[0], "G", size=font_pt)
             else:
-                plt.plot(p[1], p[0], 'r*')
+                ax.plot(p[1], p[0], 'r*')
         for (center, radius) in troll_list:
             if font_pt > 0:
-                plt.text(center[1], center[0], "E", size=font_pt)
+                ax.text(center[1], center[0], "E", size=font_pt)
             else:
-                plt.plot(center[1], center[0], 'gx')
+                ax.plot(center[1], center[0], 'gx')
             if (
                     center[0] >= W.shape[0] or
                     center[0] < 0 or
@@ -369,7 +376,7 @@ class GridWorld(object):
                                     j + t_offset[1]],
                                     y_steps[W.shape[0] - (i + t_offset[0])]),
                                 1, 1, color=(.8, .8, .8)))
-        plt.axis([xmin, xmax, ymin, ymax])
+        ax.axis([xmin, xmax, ymin, ymax])
 
     def pretty(self, show_grid=False, line_prefix="",
                path=[], goal_order=False):
