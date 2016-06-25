@@ -27,7 +27,7 @@ try:
     from omega.logic import bitvector as bv
     from omega.games import gr1
     from omega.symbolic import symbolic as sym
-    from omega.symbolic import enumeration as enum
+    from omega.games import enumeration as enum
 except ImportError:
     omega = None
 
@@ -47,20 +47,21 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     bdd = _init_bdd(use_cudd)
     aut.bdd = bdd
     a = aut.build()
+    assert a.action['sys'][0] != bdd.false
     t0 = time.time()
     z, yij, xijk = gr1.solve_streett_game(a)
     t1 = time.time()
     # unrealizable ?
-    if z == a.bdd.false:
+    if not gr1.is_realizable(z, a):
+        print('WARNING: unrealizable')
         return None
     t = gr1.make_streett_transducer(z, yij, xijk, a)
     t2 = time.time()
     (u,) = t.action['sys']
-    care = _int_bounds(t)
-    g = enum.relation_to_graph(u, t, care_source=care,
-                               care_target=care)
+    assert u != bdd.false
+    g = enum.action_to_steps(t, qinit=spec.qinit)
     h = _strategy_to_state_annotated(g, a)
-    del u, yij, xijk, care
+    del u, yij, xijk
     t3 = time.time()
     log.info((
         'Winning set computed in {win} sec.\n'
