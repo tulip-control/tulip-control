@@ -1272,7 +1272,7 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    Z.plot(font_pt=min(288 / Z.W.shape[1], 48), show_grid=True)
+    Z.plot(font_pt=min(288 / Z.W.shape[1], 48), show_grid=True, axes=ax)
 
     def update_line(num, dlist, lines):
         for (p, t), d in zip(lines, dlist):
