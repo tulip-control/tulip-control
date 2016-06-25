@@ -1254,7 +1254,12 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     """Animate a list of paths simultaneously in world Z using matplotlib.
 
     @param Z: Gridworld for which paths were generated.
-    @param paths: List of paths to animate (one per robot).
+
+    @param paths: List of paths to animate (one per robot). Each path
+             is a list of pairs of gridworld cells, i.e., of the form
+             [(r0, c0), (r1, c1), ...], where the first position is
+             row r0 and column c0, etc.
+
     @param jitter: Random jitter added to each coordinate value in animation.
                    Makes the robot's path more visible by avoiding overlap.
     @param save_prefix: If not None, do not show an animation but produce a
