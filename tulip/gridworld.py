@@ -1300,6 +1300,6 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         plt.show()
     else:
         print("Writing %s000.png - %s%03d.png" %
-              (save_prefix, save_prefix, len(paths[0])))
+              (save_prefix, save_prefix, len(paths[0])-1))
         for n in range(len(paths[0])):
             update_line(n, data, lines)
