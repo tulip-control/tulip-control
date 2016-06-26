@@ -49,10 +49,10 @@ class GridWorld_test:
 
     def test_reachability(self):
         # Reachability is assumed to be bidirectional
-        assert not self.Y_testpaths.isReachable((3,0), (0,2))
-        assert not self.Y_testpaths.isReachable((0,2), (3,0))
-        assert self.Y_testpaths.isReachable((1,1), (2,3))
-        assert self.Y_testpaths.isReachable((2,3), (1,1))
+        assert not self.Y_testpaths.is_reachable((3,0), (0,2))
+        assert not self.Y_testpaths.is_reachable((0,2), (3,0))
+        assert self.Y_testpaths.is_reachable((1,1), (2,3))
+        assert self.Y_testpaths.is_reachable((2,3), (1,1))
 
     def test_size(self):
         assert self.X.size() == (6, 10)
@@ -91,64 +91,64 @@ class GridWorld_test:
     def test_spec_realizable(self):
         assert is_realizable('gr1c', self.X.spec())
 
-    def check_isEmpty(self, coord, expected):
-        assert self.X.isEmpty(coord) == expected
+    def check_is_empty(self, coord, expected):
+        assert self.X.is_empty(coord) == expected
 
-    def test_isEmpty(self):
+    def test_is_empty(self):
         for coord, expected in [((0, 0), False), ((0, 1), True),
                                 ((-1, 0), False), ((0, -1), True)]:
-            yield self.check_isEmpty, coord, expected
+            yield self.check_is_empty, coord, expected
 
-    def check_isEmpty_extend(self, coord, expected):
-        assert self.X.isEmpty(coord, extend=True) == expected
+    def check_is_empty_extend(self, coord, expected):
+        assert self.X.is_empty(coord, extend=True) == expected
 
-    def test_isEmpty_extend(self):
+    def test_is_empty_extend(self):
         for coord, expected in [((0, 0), False), ((0, 1), True),
                                 ((-1, 0), False), ((0, -1), False)]:
-            yield self.check_isEmpty_extend, coord, expected
+            yield self.check_is_empty_extend, coord, expected
 
-    def test_dumpsubworld(self):
+    def test_dump_subworld(self):
         # No offset
-        X_local = self.X.dumpsubworld((2,4), prefix="X")
+        X_local = self.X.dump_subworld((2,4), prefix="X")
         assert X_local.size() == (2, 4)
         assert X_local.__getitem__((0,0), nonbool=False) == "X_0_0"
-        assert not X_local.isEmpty((0,0))
-        assert X_local.isEmpty((0,1))
+        assert not X_local.is_empty((0,0))
+        assert X_local.is_empty((0,1))
 
         # Offset
-        X_local = self.X.dumpsubworld((2,4), offset=(1,0), prefix="Xoff")
+        X_local = self.X.dump_subworld((2,4), offset=(1,0), prefix="Xoff")
         assert X_local.size() == (2, 4)
         assert X_local.__getitem__((0,0), nonbool=False) == "Xoff_0_0"
-        assert X_local.isEmpty((0,0))
-        assert X_local.isEmpty((0,1))
-        assert not X_local.isEmpty((0,3))
+        assert X_local.is_empty((0,0))
+        assert X_local.is_empty((0,1))
+        assert not X_local.is_empty((0,3))
 
-    def test_dumpsubworld_extend(self):
+    def test_dump_subworld_extend(self):
         # No offset
         Xsize = self.X.size()
-        X_local = self.X.dumpsubworld((Xsize[0]+1, Xsize[1]), prefix="X",
+        X_local = self.X.dump_subworld((Xsize[0]+1, Xsize[1]), prefix="X",
                                       extend=True)
         X_local.goal_list = self.X.goal_list[:]
         X_local.init_list = self.X.init_list[:]
         assert X_local.size() == (7, 10)
         assert X_local.__getitem__((0,0), nonbool=False) == "X_0_0"
-        assert not X_local.isEmpty((0,0))
-        assert X_local.isEmpty((0,1))
+        assert not X_local.is_empty((0,0))
+        assert X_local.is_empty((0,1))
         # Equal except for the last row, which should be all occupied in X_local
         X_local_s = X_local.dumps().splitlines()
         assert np.all(X_local_s[1:-1] == self.X.dumps().splitlines()[1:])
-        assert not X_local.isEmpty((6,1))
+        assert not X_local.is_empty((6,1))
         assert X_local_s[-1] == "*"*10
 
         # Offset
-        X_local = self.X.dumpsubworld((3,4), offset=(-1,0), prefix="Xoff",
+        X_local = self.X.dump_subworld((3,4), offset=(-1,0), prefix="Xoff",
                                       extend=True)
         assert X_local.size() == (3, 4)
         assert X_local.__getitem__((0,0), nonbool=False) == "Xoff_0_0"
-        assert not X_local.isEmpty((0,0))
-        assert not X_local.isEmpty((0,1))
-        assert not X_local.isEmpty((0,3))
-        assert X_local.isEmpty((1,1))
+        assert not X_local.is_empty((0,0))
+        assert not X_local.is_empty((0,1))
+        assert not X_local.is_empty((0,3))
+        assert X_local.is_empty((1,1))
 
 
 class RandomWorld_test():
@@ -165,10 +165,10 @@ class RandomWorld_test():
         for r in range(len(self.rworlds_ensuredfeasible)):
             print "test \"ensured feasible\" world index", r
             print self.rworlds_ensuredfeasible[r]
-            assert self.rworlds_ensuredfeasible[r].isReachable(self.rworlds_ensuredfeasible[r].init_list[0], self.rworlds_ensuredfeasible[r].init_list[1])
-            assert self.rworlds_ensuredfeasible[r].isReachable(self.rworlds_ensuredfeasible[r].init_list[1], self.rworlds_ensuredfeasible[r].goal_list[0])
-            assert self.rworlds_ensuredfeasible[r].isReachable(self.rworlds_ensuredfeasible[r].goal_list[0], self.rworlds_ensuredfeasible[r].goal_list[1])
-            assert self.rworlds_ensuredfeasible[r].isReachable(self.rworlds_ensuredfeasible[r].goal_list[1], self.rworlds_ensuredfeasible[r].init_list[0])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].init_list[0], self.rworlds_ensuredfeasible[r].init_list[1])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].init_list[1], self.rworlds_ensuredfeasible[r].goal_list[0])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].goal_list[0], self.rworlds_ensuredfeasible[r].goal_list[1])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].goal_list[1], self.rworlds_ensuredfeasible[r].init_list[0])
 
     def test_size(self):
         for r in range(len(self.rworlds)):
@@ -184,7 +184,7 @@ class RandomWorld_test():
             num_occupied = 0
             for i in range(num_rows):
                 for j in range(num_cols):
-                    if not self.rworlds[r].isEmpty((i,j)):
+                    if not self.rworlds[r].is_empty((i,j)):
                         num_occupied += 1
             assert float(num_occupied)/(num_rows*num_cols) == self.wall_densities[r]
 
@@ -210,10 +210,10 @@ def eq_GridWorld_test():
     empty = gw.GridWorld()
     trivial_nonempty = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_diff = gw.GridWorld(TRIVIAL_GWFILE)
-    if trivial_diff.isEmpty((0, 0)):
-        trivial_diff.setOccupied((0, 0))
+    if trivial_diff.is_empty((0, 0)):
+        trivial_diff.mark_occupied((0, 0))
     else:
-        trivial_diff.setEmpty((0, 0))
+        trivial_diff.mark_empty((0, 0))
     trivial_nonempty_2goals = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_nonempty_2goals.goal_list = [(0, 0), (1, 1)]
     trivial_nonempty_2init = gw.GridWorld(TRIVIAL_GWFILE)
@@ -228,7 +228,7 @@ def eq_GridWorld_test():
 
 def narrow_passage_test():
     G = gw.narrow_passage((5, 10), num_init=1, num_goals=1)
-    assert G.isReachable(G.init_list[0], G.goal_list[0])
+    assert G.is_reachable(G.init_list[0], G.goal_list[0])
 
 def scale_GridWorld_test():
     G = gw.unoccupied((1, 2))

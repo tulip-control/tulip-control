@@ -196,7 +196,7 @@ class GridWorld(object):
                    str(key[0] + offset[0]) + "_" + str(key[1] + offset[1])] = 1
         return output
 
-    def isEmpty(self, coord, extend=False):
+    def is_empty(self, coord, extend=False):
         """Is cell at coord empty?
 
         @param coord: (row, column) pair; supports negative indices.
@@ -216,19 +216,19 @@ class GridWorld(object):
         else:
             return False
 
-    def setOccupied(self, coord):
+    def mark_occupied(self, coord):
         """Mark cell at coord as statically (permanently) occupied."""
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 1
 
-    def setEmpty(self, coord):
+    def mark_empty(self, coord):
         """Mark cell at coord as empty."""
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 0
 
-    def isReachable(self, start, stop):
+    def is_reachable(self, start, stop):
         """Decide whether there is a path from start cell to stop.
 
         Assume the gridworld is 4-connected.
@@ -269,7 +269,7 @@ class GridWorld(object):
             stop = (stop[0], self.W.shape[1] + stop[1])
 
         # Quick sanity check
-        if not (self.isEmpty(start) and self.isEmpty(stop)):
+        if not (self.is_empty(start) and self.is_empty(stop)):
             return False
 
         # Similar to depth-first search
@@ -287,7 +287,7 @@ class GridWorld(object):
                         current[1] + j >= self.W.shape[1]):
                     continue
                 if (
-                        self.isEmpty((current[0] + i, current[1] + j)) and
+                        self.is_empty((current[0] + i, current[1] + j)) and
                         (current[0] + i, current[1] + j) not in CLOSED and
                         (current[0] + i, current[1] + j) not in OPEN):
                     OPEN.append((current[0] + i, current[1] + j))
@@ -578,7 +578,7 @@ class GridWorld(object):
             out_str += "\n"
         return out_str
 
-    def dumpsubworld(self, size, offset=(0, 0), prefix="Y", extend=False):
+    def dump_subworld(self, size, offset=(0, 0), prefix="Y", extend=False):
         """Generate new GridWorld instance from part of current one.
 
         Does not perform automatic truncation (to make desired
@@ -640,8 +640,8 @@ class GridWorld(object):
                 self_offset[1]:(self_offset[1] + actual_size[1])]
         return sub
 
-    def dumpPPartition(self, side_lengths=(1., 1.),
-                       offset=(0., 0.), nonbool=True):
+    def dump_ppartition(self, side_lengths=(1., 1.),
+                        offset=(0., 0.), nonbool=True):
         """Return proposition-preserving partition from this gridworld.
 
         Adjacency of cells is as returned by prop2partition.prop2part().
@@ -657,12 +657,12 @@ class GridWorld(object):
         try:
             from polytope import Polytope
         except ImportError:
-            raise ImportError('GridWorld.dumpPPartition() requires '
+            raise ImportError('GridWorld.dump_ppartition() requires '
                               'the Python package polytope.')
         try:
             from abstract import prop2partition
         except ImportError:
-            raise ImportError('GridWorld.dumpPPartition() requires '
+            raise ImportError('GridWorld.dump_ppartition() requires '
                               'tulip.abstract, which may not be available '
                               'because optional dependencies are missing.')
 
@@ -983,7 +983,7 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
             chain_of_points.extend(goal_list_tmp)
             is_feasible = True
             for i in range(len(chain_of_points)):
-                if not world.isReachable(
+                if not world.is_reachable(
                         chain_of_points[i],
                         chain_of_points[(i + 1) % len(chain_of_points)]):
                     is_feasible = False
@@ -1119,7 +1119,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
             t_size[1] = num_cols - t_offset[1]
         t_size = (t_size[0], t_size[1])
         X_ID += 1
-        X.append((t_offset, Y.dumpsubworld(
+        X.append((t_offset, Y.dump_subworld(
             t_size, offset=t_offset, prefix=prefix + "_" + str(X_ID))))
         X[-1][1].goal_list = [(center[0] - t_offset[0],
                                center[1] - t_offset[1])]
@@ -1127,7 +1127,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
             X[-1][1].init_list = []
             for i in range(X[-1][1].size()[0]):
                 for j in range(X[-1][1].size()[1]):
-                    if X[-1][1].isEmpty((i, j)):
+                    if X[-1][1].is_empty((i, j)):
                         X[-1][1].init_list.append((i, j))
         else:
             X[-1][1].init_list = [(center[0] - t_offset[0],

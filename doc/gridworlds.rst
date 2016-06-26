@@ -97,7 +97,7 @@ Generating continuous-space partitions
 
 Given a ``GridWorld`` object ``Y``, you can create a
 ``PropPreservingPartition`` object describing the grid in a continuous
-state space with the method ``dumpPPartition``.
+state space with the method ``dump_ppartition``.
 An example is to generate a random gridworld, generate an initial
 proposition-preserving partition, and then refine it based on
 continuous state space dynamics, as shown in the code below. Note that
@@ -124,7 +124,7 @@ we use mostly default argument values to minimize clutter.
 
   # Generate random gridworld, dump it and discretize based on dynamics
   Y = gw.random_world((5, 10), num_init=0, num_goals=0)
-  disc_dynamics = discretize(Y.dumpPPartition(), sys_dyn)
+  disc_dynamics = discretize(Y.dump_ppartition(), sys_dyn)
 
   # Pretty print abstraction to terminal, and depict partition reachability
   print(Y)
