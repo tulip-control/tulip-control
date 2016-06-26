@@ -704,55 +704,6 @@ class GridWorld(object):
                             dtype=np.float64))
         return prop2partition.prop2part(domain, cells)
 
-    def discreteTransitionSystem(self, nonbool=True):
-        """Write a discrete transition system suitable for synthesis.
-        Unlike dumpPPartition, this does not create polytopes; it is
-        nonetheless useful and computationally less expensive.
-
-        @param nonbool: If True, then use variables with integer domains.
-                 In particular this affects region naming, as achieved
-                 with L{__getitem__}.
-
-        @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
-        """
-        try:
-            from abstract import prop2partition
-            from polytope import Region
-        except ImportError:
-            raise ImportError('GridWorld.discreteTransitionSystem() requires '
-                              'tulip.abstract, which may not be available '
-                              'because optional dependencies are missing.')
-        disc_dynamics = prop2partition.PropPreservingPartition(
-            list_region=[], list_prop_symbol=[], trans=[])
-        num_cells = self.W.shape[0] * self.W.shape[1]
-        for i in range(self.W.shape[0]):
-            for j in range(self.W.shape[1]):
-                flat = lambda x, y: x * self.W.shape[1] + y
-                # Proposition
-                prop = self.__getitem__((i, j), nonbool=nonbool)
-                disc_dynamics.list_prop_symbol.append(prop)
-                # Region
-                r = [0 for x in range(0, num_cells)]
-                r[flat(i, j)] = 1
-                disc_dynamics.list_region.append(Region("R_" + prop, r))
-                # Transitions
-                # trans[p][q] if q -> p
-                t = [0 for x in range(0, num_cells)]
-                t[flat(i, j)] = 1
-                if self.W[i][j] == 0:
-                    if i > 0:
-                        t[flat(i - 1, j)] = 1
-                    if j > 0:
-                        t[flat(i, j - 1)] = 1
-                    if i < self.W.shape[0] - 1:
-                        t[flat(i + 1, j)] = 1
-                    if j < self.W.shape[1] - 1:
-                        t[flat(i, j + 1)] = 1
-                disc_dynamics.trans.append(t)
-        disc_dynamics.num_prop = len(disc_dynamics.list_prop_symbol)
-        disc_dynamics.num_regions = len(disc_dynamics.list_region)
-        return disc_dynamics
-
     def spec(self, offset=(0, 0), controlled_dyn=True, nonbool=True):
         """Return GRSpec instance describing this gridworld.
 
