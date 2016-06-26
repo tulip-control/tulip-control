@@ -97,9 +97,8 @@ Generating continuous-space partitions
 
 Given a ``GridWorld`` object ``Y``, you can create a
 ``PropPreservingPartition`` object describing the grid in a continuous
-state space with the method ``dumpPPartition``.  A nontrivial example
-demonstrating its usage and relevant routines is ``smallsurvey.py``.
-Another example is to generate a random gridworld, generate an initial
+state space with the method ``dumpPPartition``.
+An example is to generate a random gridworld, generate an initial
 proposition-preserving partition, and then refine it based on
 continuous state space dynamics, as shown in the code below. Note that
 we use mostly default argument values to minimize clutter.
