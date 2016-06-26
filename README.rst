@@ -10,10 +10,6 @@ In most cases, it suffices to::
 
   pip install .
 
-To check for required and optional dependencies without actually installing::
-
-  python setup.py dry-check
-
 TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   pip install tulip

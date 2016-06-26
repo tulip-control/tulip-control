@@ -10,6 +10,14 @@ from os import walk
 import argparse
 
 import nose
+from nose.plugins.base import Plugin
+
+
+class ShowFunctions(Plugin):
+    name = 'showfunctions'
+    def describeTest(self, test):
+        return str(test)
+
 
 class ArgParser(argparse.ArgumentParser):
     def error(self, message):
@@ -59,7 +67,8 @@ Use the pseudoargument -- in this case. E.g.,
 Besides what is below, OPTIONS... are passed on to nose."""
 )
 
-if __name__ == "__main__":
+
+def main():
     parser = ArgParser(formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('testfamily', metavar='TEST', nargs='*', default=['base'],
@@ -189,4 +198,12 @@ if __name__ == "__main__":
     argv.extend(unknown_args)
 
     print('calling nose')
-    nose.main(argv=argv + ["--verbosity=3", "--exe"])
+    argv.extend(["--verbosity=3",
+                 "--exe",
+                 "--with-showfunctions"])
+    nose.main(argv=argv,
+              addplugins=[ShowFunctions()])
+
+
+if __name__ == "__main__":
+    main()

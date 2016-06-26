@@ -1288,6 +1288,14 @@ def strategy2mealy(A, spec):
             mach.transitions.add(initial_state, u, **label)
             # remember variable values to avoid
             # spurious non-determinism wrt the machine's memory
+            #
+            # in other words,
+            # "state" omits the strategy's memory
+            # hidden (existentially quantified)
+            # so multiple nodes can be labeled with the same state
+            #
+            # non-uniqueness here would be equivalent to
+            # multiple choices for initializing the hidden memory.
             init_valuations.add(vals)
             logger.debug('found initial state: {u}'.format(u=u))
         logger.debug('machine vertex: {u}, has var values: {v}'.format(

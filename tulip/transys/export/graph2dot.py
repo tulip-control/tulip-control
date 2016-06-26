@@ -64,7 +64,7 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
     if hasattr(graph, '_state_dot_label_format'):
         label_format = graph._state_dot_label_format
     else:
-        label_format = {'type?label': '', 'separator': '\n'}
+        label_format = {'type?label': '', 'separator': r'\\n'}
 
     for u, d in graph.nodes_iter(data=True):
         # initial state ?
@@ -281,7 +281,7 @@ def _form_node_label(state, state_data, label_def,
 
     # newline between state name and label, only if state is labeled
     if len(state_data) != 0:
-        node_dot_label += r'\n'
+        node_dot_label += r'\\n'
 
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
@@ -311,7 +311,7 @@ def _form_node_label(state, state_data, label_def,
 
     if tikz:
         # replace LF by latex newline
-        node_dot_label = node_dot_label.replace(r'\n', r'\\\\ ')
+        node_dot_label = node_dot_label.replace(r'\\n', r'\\\\ ')
 
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = (
@@ -385,7 +385,7 @@ def _form_edge_label(edge_data, label_def,
             sep_type_value = label_format['type?label']
         else:
             type_name = ':'
-            sep_type_value = r',\n'
+            sep_type_value = r',\\n'
 
         # format iterable containers using
         # mathematical set notation: {...}
@@ -473,7 +473,6 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, tikz=False):
     # turn off graphviz warnings caused by tikz labels
     if tikz:
         prog = [prog, '-q 1']
-
     pydot_graph.write(path, format=fileformat, prog=prog)
     return True
 

@@ -1,4 +1,5 @@
 tulip/interfaces/jtlv_grgame.jar
+tulip/_version.py
 *~
 *.log
 *.out
@@ -24,7 +25,6 @@ tulip/interfaces/jtlv_grgame.jar
 *.swp
 /build/
 /dist/
-/tulip/commit_hash.txt
 /MANIFEST
 /.coverage
 /tests/cover/
