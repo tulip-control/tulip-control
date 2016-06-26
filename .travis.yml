@@ -31,7 +31,7 @@ before_install:
   - conda install -q -y nomkl
   - conda install -q -y numpy scipy
   - conda info -a
-  - pip install --upgrade pip setuptools
+  - pip install --ignore-installed --upgrade pip setuptools
   - pip install nose
   - pip install mock
 
