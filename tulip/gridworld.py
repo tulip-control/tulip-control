@@ -485,10 +485,10 @@ class GridWorld(object):
         particular trailing whitespace is allowed) and can include the
         following symbols:
 
-          - C{ } : an empty cell,
-          - C{*} : a statically occupied cell,
-          - C{I} : possible initial cell,
-          - C{G} : goal cell (must be visited infinitely often).
+          - ' ' : an empty cell,
+          - '*' : a statically occupied cell,
+          - 'I' : possible initial cell,
+          - 'G' : goal cell (must be visited infinitely often).
 
         If the end of file is reached before all rows have been
         constructed, then the remaining rows are assumed to be empty.
