@@ -6,7 +6,7 @@ Gridworlds
 
 The ``gridworld`` module provides routines for working with
 2-dimensional, 4-connected rectangular grids. Examples are given in
-the directory `examples/gridworlds`.  The primary source of detailed
+the directory ``examples/gridworlds``.  The primary source of detailed
 documentation is in `docstrings
 <http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring>`_ found
 in the source code itself. There are several ways to get at this;
