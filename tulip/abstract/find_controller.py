@@ -239,7 +239,7 @@ def get_input(
                 # Take convex hull
                 vert = pc.extreme(P_start[0])
                 for i in range(1, len(P_start)):
-                    vert = np.hstack([
+                    vert = np.vstack([
                         vert,
                         pc.extreme(P_start[i])
                     ])
