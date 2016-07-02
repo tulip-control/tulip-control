@@ -36,7 +36,8 @@ before_install:
   - pip install mock
 
 install:
-  - pip install . -vvv
+  - python setup.py sdist
+  - pip install dist/tulip-*.tar.gz
 
 before_script:
   - pip install gitpython
