@@ -19,12 +19,15 @@ addons:
 before_install:
   - export GR1CVERSION=0.10.2
   - curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
-  - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1` = 12762f7fcebca12ce9d36f20ea26d644872a2d6ae616a34d922f23c66bfed1ca
+  - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1`
+    = 12762f7fcebca12ce9d36f20ea26d644872a2d6ae616a34d922f23c66bfed1ca
   - tar -xzf gr1c-$GR1CVERSION.tar.gz && cd gr1c-$GR1CVERSION && ./get-deps.sh
   - make -j2 cudd && make -j2 all && make check
   - export PATH=`pwd`:$PATH
   - cd ..
-  - curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh' | shasum -a 256 -c -
+  - curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
+    && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh'
+    | shasum -a 256 -c -
   - bash Miniconda2-4.0.5-Linux-x86_64.sh -b -p ${HOME}/miniconda
   - source ${HOME}/miniconda/bin/activate root
   - conda update -q -y --all
