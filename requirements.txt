@@ -11,8 +11,8 @@ omega==0.0.8
 gr1py>=0.1.0
 
 # extras (uncomment as needed)
-# cvxopt==1.1.7
-# matplotlib
+# cvxopt==1.1.7  # for faster polytopic operations
+# matplotlib  # for plots
 
 # tests
 nose
@@ -20,4 +20,3 @@ mock
 
 # dev
 gitpython
-
