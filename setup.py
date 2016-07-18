@@ -110,6 +110,7 @@ def run_setup():
             'networkx >= 1.6, <= 1.10',
             'numpy >= 1.7',
             'ply >= 3.4',
+            'polytope >= 0.1.2',
             'pydot >= 1.1.0',
             'scipy'],
         extras_require={

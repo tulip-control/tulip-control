@@ -12,6 +12,8 @@ use the core functionality of TuLiP:
 * `SciPy <http://www.scipy.org/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
 * `PLY <http://www.dabeaz.com/ply/>`_
+* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
+  plotting of convex polytopes
 
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
@@ -28,9 +30,6 @@ features:
 
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code
-
-* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
-  plotting of convex polytopes
 
 * `CVXOPT <http://cvxopt.org/>`_ -- construction and manipulation of discrete
   abstractions

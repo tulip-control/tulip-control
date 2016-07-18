@@ -12,7 +12,6 @@ gr1py>=0.1.0
 
 # extras (uncomment as needed)
 # cvxopt==1.1.7
-# polytope==0.1.1  # required for algorithms on hybrid systems
 # matplotlib
 
 # tests
