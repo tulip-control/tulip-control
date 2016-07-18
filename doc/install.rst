@@ -43,10 +43,6 @@ CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
 `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
 do this linking automatically.
 
-In previous versions of TuLiP, ``polytope`` was a subpackage of ``tulip``.  It
-is now a separate package, but for convenience, a copy is bundled with some
-releases of TuLiP.
-
 Once all of the above preparations are completed, you can install TuLiP::
 
   $ pip install .
