@@ -74,6 +74,10 @@ installed, but certain functionality is only available when they are.
 GR(1)
 `````
 
+* `gr1py <https://github.com/slivingston/gr1py>`_
+
+* `omega <https://github.com/johnyf/omega>`_
+
 * `slugs <https://github.com/LTLMoP/slugs>`_
 
 * a JTLV-based solver that has historically been included as part of the TuLiP
