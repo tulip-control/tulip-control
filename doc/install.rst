@@ -6,7 +6,8 @@ The latest release of TuLiP can be downloaded from `SourceForge
 
 TuLiP is designed to work with Python version 2.7, though it should also support
 Python version 3.2+.  The following additional Python packages are required to
-use the core functionality of TuLiP:
+use the core functionality of TuLiP, and are installed automatically
+from PyPI when installing with ``pip install tulip``:
 
 * `NumPy <http://numpy.org/>`_
 * `SciPy <http://www.scipy.org/>`_
