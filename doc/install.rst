@@ -50,15 +50,9 @@ Once all of the above preparations are completed, you can install TuLiP::
 
   $ pip install .
 
-To enforce dependencies that are required for using parts of TuLiP intended for
-hybrid systems, use ``pip install .[hybrid]``. (Your shell may try to parse
-``[`` and ``]``, causing the command to fail. If so, try ``pip install '.[hybrid]'``.)
-
 TuLiP may instead be installed `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   $ pip install tulip
-
-or, analogous to the above, ``pip install tulip[hybrid]``.
 
 The above commands include checking of dependencies and automatic installation
 of missing Python packages. (N.B., not all dependencies are Python packages.)

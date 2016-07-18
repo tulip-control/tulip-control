@@ -113,9 +113,6 @@ def run_setup():
             'polytope >= 0.1.2',
             'pydot >= 1.1.0',
             'scipy'],
-        extras_require={
-            'hybrid': ['cvxopt >= 1.1.7',
-                       'polytope >= 0.1.1']},
         tests_require=[
             'nose',
             'matplotlib',
