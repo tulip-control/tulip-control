@@ -32,7 +32,7 @@
 #
 """AST subclasses to translate to each syntax of:
 
-  - gr1c: http://slivingston.github.io/gr1c/md_spc_format.html
+  - gr1c: https://tulip-control.github.io/gr1c/md_spc_format.html
   - JTLV
   - SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
   - SPIN: http://spinroot.com/spin/Man/ltl.html

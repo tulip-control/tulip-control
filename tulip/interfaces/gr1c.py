@@ -33,7 +33,7 @@
 Interface to gr1c
 
   - U{http://scottman.net/2012/gr1c}
-  - release documentation at U{http://slivingston.github.io/gr1c/}
+  - release documentation at U{https://tulip-control.github.io/gr1c/}
 
 In general, functions defined here will raise CalledProcessError (from
 the subprocess module) or OSError if an exception occurs while
@@ -461,7 +461,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
               satisfying it.
 
         Consult the U{documentation of gr1c
-        <http://slivingston.github.io/gr1c/md_spc_format.html#initconditions>}
+        <https://tulip-control.github.io/gr1c/md_spc_format.html#initconditions>}
         for detailed descriptions.
 
     @return: strategy as C{networkx.DiGraph},
