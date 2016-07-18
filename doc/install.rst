@@ -11,6 +11,7 @@ use the core functionality of TuLiP:
 * `NumPy <http://numpy.org/>`_
 * `SciPy <http://www.scipy.org/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
+* `pydot <https://github.com/erocarrera/pydot>`_
 * `PLY <http://www.dabeaz.com/ply/>`_
 * `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
   plotting of convex polytopes
