@@ -409,13 +409,9 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
-    _assert_gr1c()
     logger.info('checking realizability...')
-
-    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
-                           "ALL_INIT", "ONE_SIDE_INIT"):
-        raise ValueError("Unrecognized initial condition" +
-                         "interpretation (init_option)")
+    _assert_gr1c()
+    init_option = select_options(spec)
     s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
     f.write(s)
@@ -475,10 +471,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
         or None if unrealizable or error occurs.
     """
     _assert_gr1c()
-    if init_option not in ("ALL_ENV_EXIST_SYS_INIT",
-                           "ALL_INIT", "ONE_SIDE_INIT"):
-        raise ValueError("Unrecognized initial condition" +
-                         "interpretation (init_option)")
+    init_option = select_options(spec)
     try:
         p = subprocess.Popen(
             [GR1C_BIN_PREFIX + "gr1c",
@@ -522,6 +515,30 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
     else:
         print(msg)
         return None
+
+
+def select_options(spec):
+    """Return `gr1c` initial option based on `GRSpec` inits."""
+    assert not spec.moore
+    assert not spec.plus_one
+    if spec.qinit == '\A \E':
+        init_option = 'ALL_ENV_EXIST_SYS_INIT'
+    elif spec.qinit == '\E \A':
+        raise ValueError(
+            '`qinit = "\E \A"` not supported by `gr1c`. '
+            'Use `qinit = "\A \E"`.')
+    elif spec.qinit == '\A \A':
+        assert not spec.sys_init, spec.sys_init
+        init_option = 'ONE_SIDE_INIT'
+    elif spec.qinit == '\E \E':
+        assert not spec.env_init, spec.env_init
+        init_option = 'ONE_SIDE_INIT'
+    else:
+        raise ValueError(
+            'unknown option `qinit = {qinit}`.'.format(
+                qinit=spec.qinit))
+    return init_option
+
 
 def load_mealy(filename, fformat='tulipxml'):
     """Load C{gr1c} strategy from file.

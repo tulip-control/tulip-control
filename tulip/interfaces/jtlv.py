@@ -57,6 +57,8 @@ def check_realizable(spec, heap_size='-Xmx128m', priority_kind=-1,
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    assert not spec.moore
+    assert not spec.plus_one
     fSMV, fLTL, fAUT = create_files(spec)
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,
                             priority_kind, init_option)
@@ -162,6 +164,8 @@ def synthesize(
     @return: Return strategy as instance of C{networkx.DiGraph}, or a
         list of counter-examples as returned by L{get_counterexamples}.
     """
+    assert not spec.moore
+    assert not spec.plus_one
     fSMV, fLTL, fAUT = create_files(spec)
 
     realizable = solve_game(spec, fSMV, fLTL, fAUT, heap_size,

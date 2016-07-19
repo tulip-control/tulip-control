@@ -38,6 +38,7 @@ from __future__ import absolute_import
 import logging
 from tulip.spec import translate
 from tulip.interfaces.gr1c import load_aut_json
+from tulip.interfaces.gr1c import select_options
 try:
     import gr1py
     import gr1py.cli
@@ -56,6 +57,7 @@ def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     return gr1py.solve.check_realizable(tsys, exprtab)
 
@@ -64,6 +66,7 @@ def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
 
     cf. L{tulip.interfaces.gr1c.synthesize}
     """
+    init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     strategy = gr1py.solve.synthesize(tsys, exprtab)
     if strategy is None:
