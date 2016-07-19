@@ -178,4 +178,7 @@ def _grspec_to_automaton(g):
         '!({s})'.format(s=s)
         for s in map(f, g.env_prog)]
     a.win['[]<>'] = map(f, g.sys_prog)
+    a.moore = g.moore
+    a.plus_one = g.plus_one
+    a.qinit = g.qinit
     return a
