@@ -258,7 +258,7 @@ class LTL(object):
 
 
 class GRSpec(LTL):
-    """GR(1) specification
+    r"""GR(1) specification.
 
     The basic form is::
 
@@ -267,8 +267,30 @@ class GRSpec(LTL):
 
     A GRSpec object contains the following attributes:
 
+      - C{moore}: select whether a strategy can see primed
+        environment variables.
+
+      - C{plus_one}: select causal implication between
+        assumptions and guarantees.
+
+      - C{qinit}: select quantification of initial values for variables:
+
+        - C{'\A \A'}: forall env forall sys
+          assume C{env_init}
+          C{sys_init} must be empty
+
+        - C{'\A \E'}: forall env exist sys (usually not Moore)
+          assume C{env_init} and require C{sys_init}
+
+        - C{'\E \A'}: exist sys forall env
+          assume C{env_init} and require C{sys_init}
+
+        - C{'\E \E'}: exist env exist sys
+          require C{sys_init}
+          C{env_init} must be empty
+
       - C{env_vars}: alias for C{input_variables} of L{LTL},
-        concerning variables that are determined by the environment
+        concerning variables that are determined by the environment.
 
       - C{env_init}: a list of string that specifies the assumption
         about the initial state of the environment.
@@ -304,6 +326,8 @@ class GRSpec(LTL):
                  env_init='', sys_init='',
                  env_safety='', sys_safety='',
                  env_prog='', sys_prog='',
+                 moore=True, plus_one=True,
+                 qinit=r'\A \A',
                  parser=parser):
         """Instantiate a GRSpec object.
 
@@ -324,6 +348,10 @@ class GRSpec(LTL):
             A string or iterable of strings.  An empty string is
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. L{GRSpec}.
+
+        @type moore: bool
+        @type plus_one: bool
+        @param qinit: see class docstring
         """
         self.parser = parser
         self._ast = dict()
@@ -339,6 +367,9 @@ class GRSpec(LTL):
             for x in {'env_', 'sys_'}
             for y in {'init', 'safety', 'prog'}
         }
+        self.moore = moore
+        self.plus_one = plus_one
+        self.qinit = qinit
 
         if env_vars is None:
             env_vars = dict()
@@ -516,7 +547,8 @@ class GRSpec(LTL):
                     ' found in {name}: {f}'.format(f=f, name=name))
 
     def copy(self):
-        return GRSpec(
+        """Return a copy of `self`."""
+        r = GRSpec(
             env_vars=dict(self.env_vars),
             sys_vars=dict(self.sys_vars),
             env_init=copy.copy(self.env_init),
@@ -524,8 +556,11 @@ class GRSpec(LTL):
             env_prog=copy.copy(self.env_prog),
             sys_init=copy.copy(self.sys_init),
             sys_safety=copy.copy(self.sys_safety),
-            sys_prog=copy.copy(self.sys_prog)
-        )
+            sys_prog=copy.copy(self.sys_prog))
+        r.moore = self.moore
+        r.plus_one = self.plus_one
+        r.qinit = self.qinit
+        return r
 
     def __or__(self, other):
         """Create union of two specifications."""
@@ -534,6 +569,12 @@ class GRSpec(LTL):
         if not isinstance(other, GRSpec):
             raise TypeError('type(other) must be GRSpec')
 
+        assert self.moore == other.moore, (
+            self.moore, other.moore)
+        assert self.plus_one == other.plus_one, (
+            self.plus_one, other.plus_one)
+        assert self.qinit == other.qinit, (
+            self.qinit, other.qinit)
         # common vars have same types ?
         for varname in set(other.env_vars) & set(result.env_vars):
             if other.env_vars[varname] != result.env_vars[varname]:
