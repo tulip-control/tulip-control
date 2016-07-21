@@ -510,9 +510,9 @@ def discretize(
     
     @rtype: L{AbstractPwa}
     """
-    if use_all_horizon:
-        raise ValueError('discretize() with use_all_horizon=True is still '
-                         'under development\nand currently unavailable.')
+    # if use_all_horizon:
+    #    raise ValueError('discretize() with use_all_horizon=True is still '
+    #                     'under development\nand currently unavailable.')
 
     start_time = os.times()[0]
     
