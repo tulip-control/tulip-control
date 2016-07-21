@@ -107,14 +107,12 @@ def run_setup():
         license='BSD',
         classifiers=classifiers,
         install_requires=[
-            'ply >= 3.4',
             'networkx >= 1.6, <= 1.10',
             'numpy >= 1.7',
+            'ply >= 3.4',
+            'polytope >= 0.1.2',
             'pydot >= 1.1.0',
             'scipy'],
-        extras_require={
-            'hybrid': ['cvxopt >= 1.1.7',
-                       'polytope >= 0.1.1']},
         tests_require=[
             'nose',
             'matplotlib',

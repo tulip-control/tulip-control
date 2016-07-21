@@ -169,7 +169,7 @@ fi
 #------------------------------------------------------------
 # install gr1c
 #
-# http://slivingston.github.io/gr1c/md_installation.html
+# https://tulip-control.github.io/gr1c/md_installation.html
 
 if [ -f "$TMPBIN/gr1c" ]; then
 	echo "GR1C already installed locally: skip"
@@ -181,7 +181,7 @@ else
 		echo "gr1c already cloned"
 	else
 		echo "cloning gr1c"
-		git clone https://github.com/slivingston/gr1c.git
+		git clone https://github.com/tulip-control/gr1c.git
 	fi
 	cd gr1c
 

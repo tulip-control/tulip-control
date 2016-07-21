@@ -6,12 +6,16 @@ The latest release of TuLiP can be downloaded from `SourceForge
 
 TuLiP is designed to work with Python version 2.7, though it should also support
 Python version 3.2+.  The following additional Python packages are required to
-use the core functionality of TuLiP:
+use the core functionality of TuLiP, and are installed automatically
+from PyPI when installing with ``pip install tulip``:
 
 * `NumPy <http://numpy.org/>`_
 * `SciPy <http://www.scipy.org/>`_
 * `NetworkX <http://networkx.lanl.gov/>`_
+* `pydot <https://github.com/erocarrera/pydot>`_
 * `PLY <http://www.dabeaz.com/ply/>`_
+* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
+  plotting of convex polytopes
 
 Newcomers to scientific computing with Python should read
 :ref:`newbie-scipy-sec-label`.
@@ -19,7 +23,7 @@ Newcomers to scientific computing with Python should read
 The default synthesis tool for GR(1) specifications is `gr1c
 <http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0. If you
 do not already have it, the introduction of `the manual of gr1c
-<http://slivingston.github.io/gr1c/>`_ is a good place to begin.
+<https://tulip-control.github.io/gr1c/>`_ is a good place to begin.
 
 The following are optional dependencies, listed with a summary of dependent
 features:
@@ -28,9 +32,6 @@ features:
 
 * `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
   files) from dot code
-
-* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
-  plotting of convex polytopes
 
 * `CVXOPT <http://cvxopt.org/>`_ -- construction and manipulation of discrete
   abstractions
@@ -43,23 +44,13 @@ CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
 `MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
 do this linking automatically.
 
-In previous versions of TuLiP, ``polytope`` was a subpackage of ``tulip``.  It
-is now a separate package, but for convenience, a copy is bundled with some
-releases of TuLiP.
-
 Once all of the above preparations are completed, you can install TuLiP::
 
   $ pip install .
 
-To enforce dependencies that are required for using parts of TuLiP intended for
-hybrid systems, use ``pip install .[hybrid]``. (Your shell may try to parse
-``[`` and ``]``, causing the command to fail. If so, try ``pip install '.[hybrid]'``.)
-
 TuLiP may instead be installed `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   $ pip install tulip
-
-or, analogous to the above, ``pip install tulip[hybrid]``.
 
 The above commands include checking of dependencies and automatic installation
 of missing Python packages. (N.B., not all dependencies are Python packages.)
@@ -84,13 +75,17 @@ installed, but certain functionality is only available when they are.
 GR(1)
 `````
 
+* `gr1py <https://github.com/slivingston/gr1py>`_
+
+* `omega <https://github.com/johnyf/omega>`_
+
 * `slugs <https://github.com/LTLMoP/slugs>`_
 
 * a JTLV-based solver that has historically been included as part of the TuLiP
   package itself. It was originally implemented by Yaniv Sa'ar `[BJPPS12]
   <bibliography.html#bjpps12>`_.  To use it, you must have Java version 1.6 (or
   later) installed. This tool can be obtained using the script
-  extern/get-jtlv.sh that is included in releases of TuLiP.
+  ``extern/get-jtlv.sh`` that is included in releases of TuLiP.
 
 LTL
 ```
