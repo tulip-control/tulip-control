@@ -7,6 +7,9 @@ R. Bloem, B. Jobstmann, N. Piterman, A. Pnueli, and Y. Sa'ar (2012). `Synthesis 
 [E10]
 R. Ehlers (2010). `Generalised Rabin(1) synthesis <http://arxiv.org/abs/1003.1684>`_, *CoRR*, abs/1003.1684
 
+[FDLOM16]
+I. Filippidis, S. Dathathri, S.C. Livingston, N. Ozay, and R.M. Murray (2016). Control design for hybrid systems with TuLiP: The temporal logic planning toolbox. In *Proc. of IEEE Multi-Conference on Systems and Control*.
+
 [LS11]
 E.A. Lee and S.A. Seshia. *Introduction to Embedded Systems - A Cyber-Physical Systems Approach*. `LeeSeshia.org <http://LeeSeshia.org>`_, 2011.
 
