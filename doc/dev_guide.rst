@@ -178,4 +178,4 @@ Further reading, of general interest:
 
 - `The Power of 10: Rules for Developing Safety-Critical Code <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
 
-- Chapter 1: "Style", `The Practice of Programming <http://cm.bell-labs.com/cm/cs/tpop/>`_
+- Chapter 1: "Style", `The Practice of Programming <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
