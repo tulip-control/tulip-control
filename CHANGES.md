@@ -1,6 +1,40 @@
 # tulip changelog
 
 
+## 1.2.1
+2016-07-25
+
+Version 1.2.1 of TuLiP is available on the Python Package Index (PyPI) at
+https://pypi.python.org/pypi/tulip/1.2.1
+
+Summary of changes for this release:
+
+- add support for `gr1py`, an enumerative GR(1) solver in pure Python
+
+- add support for `omega`,
+  a symbolic GR(1) and Rabin(1) solver in pure Python,
+  with optional Cython bindings to the C library CUDD
+
+- modernize `setup.py`
+
+- ease fully functional installation, as in `pip install tulip`
+
+- modify `git` versioning, use `gitpython`
+
+- relocate examples (shallower, no `robot_planning`)
+
+- all core tests running on Travis CI
+
+- require `pydot >= 1.1.0`, now available on PyPI
+
+- remove `d3` support (experimental) from `transys`
+
+- require `polytope >= 0.1.2`, its slower variant depends only on `scipy`
+
+There were also several corrections (bug fixes).
+
+
+
 ## 1.2.0
 2015-10-25
 
