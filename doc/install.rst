@@ -157,16 +157,6 @@ to "/home/frodo/work", use::
 You may need to tweak the export statement depending on your terminal
 shell.  All of my examples are tested with zsh (the Z shell).
 
-Ubuntu (or Debian) GNU/Linux
-````````````````````````````
-
-To install the python package dependencies, try::
-
-  $ sudo apt-get install python-numpy python-scipy python-cvxopt python-networkx python-ply
-
-Optional packages can be obtained by appending ``python-matplotlib`` etc. to the
-above command.
-
 Mac OS X
 ````````
 
