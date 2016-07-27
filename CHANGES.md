@@ -1,4 +1,8 @@
---- Version 0.1a released ----
+# tulip changelog
+
+
+## 0.1a
+2012-08-22
 
 2011-04-19  Richard Murray  <murray@malabar.local>
 
