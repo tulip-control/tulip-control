@@ -23,8 +23,8 @@ the problem we are interested in consists of
   - (discrete) environment state, and
   - specification.
 
-Here, `discrete` state refer to the state that can take only a finite number
-of possible values while `continuous` state refer to the state that can take
+Here, `discrete` state refers to the state that can take only a finite number
+of possible values while `continuous` state refers to the state that can take
 an infinite number of possible values, e.g., the position of the car.  The
 `environment` state is related to factors over which the system does not
 have control such as the position of an obstacle and the outside
@@ -166,7 +166,7 @@ The resulting output is a finite state machine (Mealy machine):
 
 Example 1: Discrete State Robot Motion Planning
 ```````````````````````````````````````````````
-This example is provided in examples/robot_planning/discrete.py.
+This example is provided in examples/discrete.py.
 It illustrates the use of the gr1c module in synthesizing a planner
 for a robot that only needs to make discrete decision.
 
@@ -193,7 +193,7 @@ necessary modules:
 
 .. highlight:: python
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @import_section@
    :end-before: @import_section_end@
 
@@ -203,13 +203,13 @@ Transitions between adjacent cells are allowed, which we model as a
 transition system in this example (it would also be possible to do this via
 a formula):
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @system_dynamics_section@
    :end-before: @system_dynamics_section_end@
 
 To create the specification, we label some of the states with names:
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @system_labels_section@
    :end-before: @system_labels_section_end@
 
@@ -221,7 +221,7 @@ by moving to the lower left corner of the grid.  We assume that
 the park signal is turned off infinitely often.  We describe this using the
 following code:
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @environ_section@
    :end-before: @environ_section_end@
 
@@ -250,7 +250,7 @@ variable X0reach that is initialized to True and the specification
 
 The python code to implement this logic is given by:
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @specs_setup_section@
    :end-before: @specs_setup_section_end@
 
@@ -265,21 +265,21 @@ Finally, we construct the full specification for the system and environment
 by creating a GR(1) specification consisting of the various pieces we have
 constructed:
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @specs_create_section@
    :end-before: @specs_create_section_end@
 
 To synthesize the controller, we call the :literal:`synth.synthesize()`
 function. 
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @synthesize@
    :end-before: @synthesize_end@
 
 The controller can now be saved in graphical form, or printed if pydot package
 is not available:
 
-.. literalinclude:: ../examples/robot_planning/discrete.py
+.. literalinclude:: ../examples/discrete.py
    :start-after: @plot_print@
    :end-before: @plot_print_end@
 
@@ -287,7 +287,7 @@ is not available:
 
 Example 2: Continuous State Robot Motion Planning
 `````````````````````````````````````````````````
-This example is provided in examples/robot_planning/continuous.py.
+This example is provided in examples/continuous.py.
 It is an extension of the previous example by including continuous dynamics.
 
 First, we import the necessary modules, 
@@ -295,7 +295,7 @@ specify the smv file, spc file and aut file,
 and specify the environment and the discrete system variables
 as in the previous example.
 
-.. literalinclude:: ../examples/robot_planning/continuous.py
+.. literalinclude:: ../examples/continuous.py
    :start-after: @import_section@
    :end-before: @import_section_end@
 
@@ -304,18 +304,18 @@ continuous state space, propositions on continuous variables, and the
 dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x + 5d_x, 
 \dot{y} = u_y + 5d_y,` discretized with a sampling time of 0.2.
 
-.. literalinclude:: ../examples/robot_planning/continuous.py
+.. literalinclude:: ../examples/continuous.py
    :start-after: @dynamics_section@
    :end-before: @dynamics_section_end@
 
 Now, we can construct the proposition preserving partition of the continuous
 state space and discretize the continuous state space based on the dynamics.
 
-.. literalinclude:: ../examples/robot_planning/continuous.py
+.. literalinclude:: ../examples/continuous.py
    :start-after: @partition_section@
    :end-before: @partition_section_end@
 
-.. literalinclude:: ../examples/robot_planning/continuous.py
+.. literalinclude:: ../examples/continuous.py
    :start-after: @discretize_section@
    :end-before: @discretize_section_end@
 
@@ -323,7 +323,7 @@ The rest is the same as in the previous example.  We specify the
 environment, create a GR(1) system specification, and synthesize a
 controller.
 
-.. literalinclude:: ../examples/robot_planning/continuous.py
+.. literalinclude:: ../examples/continuous.py
    :start-after: @synthesize_section@
    :end-before: @synthesize_section_end@
 
@@ -365,7 +365,7 @@ is represented by PwaSysDyn class.
 Example 3: Robot Motion Planning with Piecewise Affine Dynamics
 ```````````````````````````````````````````````````````````````
 
-This example is provided in examples/robot_planning/pwa.py.
+This example is provided in examples/pwa.py.
 It is an extension of the previous examples including a robot model
 with piecewise affine dynamics.
 
@@ -376,20 +376,20 @@ dynamics in different parts of the surface can be modeled as a piecewise
 affine system. When :math:`s[t] \in[0, 3]\times[0.5, 2]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_planning/pwa.py
+.. literalinclude:: ../examples/pwa.py
    :start-after: @subsystem0@
    :end-before: @subsystem0_end@
 
 When :math:`s[t] \in[0, 3]\times[0, 0.5]`, the following dynamics
 are active:
 
-.. literalinclude:: ../examples/robot_planning/pwa.py
+.. literalinclude:: ../examples/pwa.py
    :start-after: @subsystem1@
    :end-before: @subsystem1_end@
 
 Piecewise affine system can be formed from the dynamics of its subsystems.
 
-.. literalinclude:: ../examples/robot_planning/pwa.py
+.. literalinclude:: ../examples/pwa.py
    :start-after: @pwasystem@
    :end-before: @pwasystem_end@
 
