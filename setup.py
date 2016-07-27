@@ -10,8 +10,8 @@ from setuptools import setup
 NAME = 'tulip'
 VERSION_FILE = '{name}/_version.py'.format(name=NAME)
 MAJOR = 1
-MINOR = 2
-MICRO = 1
+MINOR = 3
+MICRO = 0
 VERSION = '{major}.{minor}.{micro}'.format(
     major=MAJOR, minor=MINOR, micro=MICRO)
 VERSION_TEXT = (
