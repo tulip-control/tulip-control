@@ -1,6 +1,39 @@
 # tulip changelog
 
 
+## 1.2.0
+2015-10-25
+
+TuLiP is listed on the Python Package Index (PyPI) at
+https://pypi.python.org/pypi/tulip
+
+There have been many changes since the previous release, including:
+
+- improvements to documentation;
+
+- `cvxopt` and polytope are now optional dependencies;
+
+- organization of tests into families to facilitate testing according to
+optional dependencies that may be installed;
+- `gr1c` is the default GR(1) solver;
+
+- the `jtlv`-based GR(1) solver is not included by default, but a script
+is provided to get it for users who want it.
+
+- the addition of interfaces for new synthesis tools, such as slugs and
+lily;
+
+- (following previous item) the ability to synthesize for LTL
+specifications;
+
+- routines for converting several templates of formulae, including those
+commonly referred to as "stability", "response", "eventuality", to GR(1).
+
+Thanks to Ioannis Filippidis, Necmiye Ozay, Vasumathi Raman, and Richard
+M. Murray for authoring and contributing to this release. Also thanks to
+others who have provided feedback.
+
+
 ## 1.1a
 2014-12-09
 
