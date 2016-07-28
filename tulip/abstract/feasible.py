@@ -165,10 +165,6 @@ def solve_closed_loop(
         if not pc.is_fulldim(p2):
             break
 
-        # overlaps initial set ?
-        if p1.intersect(p2):
-            s0 = s0.union(p2, check_convex=True)
-            s0 = pc.reduce(s0)
 
     if not pc.is_fulldim(s0):
         return pc.Polytope()
