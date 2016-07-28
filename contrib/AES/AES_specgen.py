@@ -16,7 +16,7 @@ import time
 #**************************************************************************************************************************************
 def write_envgen(genlist):
     """Declares generator environment variable
-    
+
     Parameters
     ----------
     genlist : list of all generators
@@ -28,7 +28,7 @@ def write_envgen(genlist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_envru(rulist):
     """Declares rectifier unit environment variable
-    
+
     Parameters
     ----------
     rulist : list of all rectifier units
@@ -40,13 +40,13 @@ def write_envru(rulist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_essbusspec(essbuslist,time):
     """Writes counter for essential buses
-    
+
     Parameters
     ----------
     essbuslist : list of buses with essential loads
 
     time: int
-       max time bus can be unpowered 
+       max time bus can be unpowered
 
     """
     for i in essbuslist:
@@ -59,7 +59,7 @@ def write_essbusspec(essbuslist,time):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_essbusdisc(essbuslist,time):
     """Declares bus counter system variable
-    
+
     Parameters
     ----------
     essbuslist : list of all essential buses
@@ -75,7 +75,7 @@ def write_essbusdisc(essbuslist,time):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_discbus(buslist):
     """Declares bus system variables
-    
+
     Parameters
     ----------
     buslist : list of all buses
@@ -87,7 +87,7 @@ def write_discbus(buslist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_discnull(nullist):
     """Declares null node system variables
-    
+
     Parameters
     ----------
     nullist : list of all null nodes
@@ -99,7 +99,7 @@ def write_discnull(nullist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_discdc_con(G,rulist,dcbuslist,nullist):
     """Declares contactors (removes contactors between rus and dcbuses)
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -130,7 +130,7 @@ def write_discdc_con(G,rulist,dcbuslist,nullist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_discac_con(G,nullist):
     """Declares contactors (removes contactors between rus and dcbuses)
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -154,7 +154,7 @@ def write_discac_con(G,nullist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def g_disconnect(G,genlist,buslist):
     """Writes specification disconnecting contactor if generator is unhealthy
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -176,7 +176,7 @@ def g_disconnect(G,genlist,buslist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def ru_disconnect(G,rulist,buslist):
     """Writes specification disconnecting contactor if rectifier is unhealthy
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -198,12 +198,12 @@ def ru_disconnect(G,rulist,buslist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def all_pairs(gens):
     """Returns list of all generator pairs (potential parallels).
-    
+
     Parameters
     ----------
     gens : list
        list of all generator nodes
-       
+
     """
     answer = []
     for i in range(len(gens)):
@@ -214,7 +214,7 @@ def all_pairs(gens):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def all_gens(list,G):
     """Finds all generator pairs that are connected through graph.
-    
+
     Parameters
     ----------
     G : NetworkX graph
@@ -231,7 +231,7 @@ def all_gens(list,G):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def ppaths(i,j,G):
     """Finds all contactors between two parallel sources. Converts to LTL.
-    
+
     Parameters
     ----------
     G : NetworkX graph
@@ -258,7 +258,7 @@ def ppaths(i,j,G):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def noparallel(G,list):
     """Writes non-paralleling specifications to file.
-    
+
     Parameters
     ----------
     G : NetworkX graph
@@ -276,7 +276,7 @@ def noparallel(G,list):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def faulttol(prob,allgens,genfail):
     """Finds all combinations of failures.
-    
+
     Parameters
     ----------
     prob: int
@@ -289,7 +289,7 @@ def faulttol(prob,allgens,genfail):
        probability of failure of single component
 
     """
-    tuples = int(prob/genfail) 
+    tuples = int(prob/genfail)
     fails = []
     temp = []
     if tuples <= 1:
@@ -300,10 +300,10 @@ def faulttol(prob,allgens,genfail):
             for temp in itertools.combinations(allgens,i):
                 fails.append(temp)
     return fails
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_genassump(genfail,genlist):
     """Writes generator environment assumption
-    
+
     Parameters
     ----------
     genfail : int
@@ -317,10 +317,10 @@ def write_genassump(genfail,genlist):
         f.write(' + g'+str(genlist[i]))
     f.write(') >= '+str(len(genlist)-genfail)+')'"'")
     f.write('\n')
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_ruassump(rufail,rulist):
     """Writes rectifier environment assumption
-    
+
     Parameters
     ----------
     rufail : int
@@ -354,10 +354,10 @@ def remove_rus(G,buslist,rulist):
                 pairs.append((i,j))
         H.remove_edges_from(pairs)
     return H
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def buspathnodes(G,busno,source):
     """Finds determines if path exists from bus to generator.
-    
+
     Parameters
     ----------
     busno: int
@@ -373,7 +373,7 @@ def buspathnodes(G,busno,source):
     if nx.has_path(G,busno,source):
             buspaths.append((busno,source))
     return buspaths
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def acbusprop(G,source,target):
     paths = []
     C = []
@@ -408,7 +408,7 @@ def acbusprop(G,source,target):
                     elif paths[p][j] in busac:
                         f.write(' & (b'+str(paths[p][j])+'=1)')
                     elif paths[p][j] in null:
-                        f.write(' & (b'+str(paths[p][j])+'=1)')   
+                        f.write(' & (b'+str(paths[p][j])+'=1)')
                     else:
                         pass
             for k in range(0,len(C)):
@@ -418,23 +418,23 @@ def acbusprop(G,source,target):
                     f.write(' & (c'+str(C[k][1])+str(C[k][0])+'=1)')
             f.write("'"'\n')
             C = []
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_acbusprop(G,buslist,genlist):
     """Writes dc bus properties
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
     for i in buslist:
         for j in genlist:
             acbusprop(G,i,j)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def acbusspec(G,busno,gen):
     temp = []
     edges = []
@@ -451,32 +451,32 @@ def acbusspec(G,busno,gen):
         paths.append(path)
     for j in range(0,len(paths)):
         f.write('guarantees += '"'"'&\\n\\t[]((B'+str(busno)+str(gen)+str(j)+') -> (b'+str(busno)+'=1))'"'"'\n')
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_acbusspec(G,buslist,genlist):
     """Writes dc bus specifications
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
     for i in buslist:
         for j in genlist:
             acbusspec(G,i,j)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_acbusspec2(G,buslist,genlist):
     """Writes specifications for dc bus unpowered conditions
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
@@ -502,7 +502,7 @@ def write_acbusspec2(G,buslist,genlist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_dcbusalways(buslist):
     """Writes dc bus specification must always be powered
-    
+
     Parameters
     ----------
     buslist : list of all dc buses
@@ -513,14 +513,14 @@ def write_dcbusalways(buslist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def dcbusprop(G,source,target):
     """Creates discrete properties for power status of dc buses
-    
+
     Parameters
     ----------
     G : networkX graph
 
     source : node
        dc bus
-       
+
     target : node
        generator
 
@@ -579,13 +579,13 @@ def dcbusprop(G,source,target):
 
 def write_dcbusprop(G,buslist,genlist):
     """Writes dc bus properties
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
@@ -595,14 +595,14 @@ def write_dcbusprop(G,buslist,genlist):
 
 def dcbusspec(G,busno,gen):
     """Creates specifications for when DC bus gets powered
-    
+
     Parameters
     ----------
     G : networkX graph
 
     busno : node
        dc bus
-       
+
     gen : node
        generator
 
@@ -619,16 +619,16 @@ def dcbusspec(G,busno,gen):
         paths.append(path)
     for j in range(0,len(paths)):
         f.write('guarantees += '"'"'&\\n\\t[]((B'+str(busno)+str(gen)+str(j)+') -> (b'+str(busno)+'=1))'"'"'\n')
-        
+
 def write_dcbusspec(G,buslist,genlist):
     """Writes dc bus specifications
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
@@ -636,16 +636,16 @@ def write_dcbusspec(G,buslist,genlist):
     for i in buslist:
         for j in genlist:
             dcbusspec(G,i,j)
-            
+
 def write_dcbusspec2(G,buslist,genlist):
     """Writes specifications for dc bus unpowered conditions
-    
+
     Parameters
     ----------
     G : networkX graph
 
     buslist : list of all dc buses
-       
+
     genlist : list of all generators
 
     """
@@ -669,7 +669,7 @@ def write_dcbusspec2(G,buslist,genlist):
 #************************************************************************************************
 def write_sat_bool(complist):
     """Defines boolean components (not including contactors)
-    
+
     Parameters
     ----------
     complist : list of all components
@@ -689,7 +689,7 @@ def write_sat_bool(complist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_con(G,rulist,dcbuslist,nullist):
     """Defines contactors (removes contactors between rus and dcbuses)
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -715,7 +715,7 @@ def write_sat_con(G,rulist,dcbuslist,nullist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_always(complist):
     """Asserts boolean components always on/powered
-    
+
     Parameters
     ----------
     complist : list of all components
@@ -729,7 +729,7 @@ def write_sat_always(complist):
             f.write('(assert (= b'+str(i)+' true))\n')
         elif i in null:
             f.write('(assert (= b'+str(i)+' true))\n')
-            
+
     remove2 = all_pairs(null)
     edges = G.edges()
     for j in range(0,len(remove2)):
@@ -738,7 +738,7 @@ def write_sat_always(complist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_disconnectgen(G,genlist):
     """Writes specification disconnecting contactor if generator is unhealthy
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -757,7 +757,7 @@ def write_sat_disconnectgen(G,genlist):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_disconnectru(G,rulist):
     """Writes specification disconnecting contactor if rectifier is unhealthy
-    
+
     Parameters
     ----------
     G : networkX graph
@@ -964,7 +964,7 @@ def write_sat_env(gfail,rfail):
             count = count+1
             f2.write('(check)\n')
             f2.close()
-            
+
 #************************************************************************************************
 start = time.time()
 file_name = 'test_spec'
@@ -1005,12 +1005,12 @@ print 'number of nodes ' + str(len(G.nodes()))
 if ('tulip' in sys.argv):
     file_name = file_name+'.py'
     f = open(file_name, "w")
-    
+
     # #environment variables
     print 'writing environment variables'
     write_envgen(gens)
     write_envru(rus)
-    
+
     #discrete system variables
     print 'writing discrete system variables: buses'
     write_discbus(busac)
@@ -1023,7 +1023,7 @@ if ('tulip' in sys.argv):
     print time.time()-start
     print 'writing discrete system variables: bus counters'
     write_essbusdisc(busess,nptime)
-    
+
     #acbus discrete properties
     print 'removing ru paths'
     H = remove_rus(G,busac,rus)
@@ -1070,7 +1070,7 @@ if ('tulip' in sys.argv):
     write_dcbusalways(busdc)
 
     f.close()
-    
+
     print 'It took', time.time()-start, 'seconds.'
 
 ################################################################
@@ -1107,6 +1107,6 @@ if ('yices' in sys.argv):
 
     #write_environment assumptions
     write_sat_env(genfail,rufail)
-    
+
     f.close()
     print 'It took', time.time()-start, 'seconds.'

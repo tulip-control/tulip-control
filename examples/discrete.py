@@ -137,4 +137,3 @@ ctrl = synth.synthesize('gr1c', specs, sys=sys)
 if not ctrl.save('discrete.png'):
     print(ctrl)
 # @plot_print_end@
-

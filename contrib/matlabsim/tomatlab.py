@@ -22,15 +22,15 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
     """
 
     # Check whether we're discrete or continuous
-    if ((system_dynamics is None) and (abstraction is None) and 
+    if ((system_dynamics is None) and (abstraction is None) and
         (disc_params is None)):
         is_continuous = False
-    elif ((system_dynamics is not None) and (abstraction is not None) and 
+    elif ((system_dynamics is not None) and (abstraction is not None) and
           (disc_params is not None)):
         is_continuous = True
     else:
-        raise StandardError('Cannot tell whether system is continuous or ' + 
-            'discrete. Please specify dynamics and abstraciton and ' + 
+        raise StandardError('Cannot tell whether system is continuous or ' +
+            'discrete. Please specify dynamics and abstraciton and ' +
             'discretization parameters or none at all.')
 
     output = {}
@@ -62,7 +62,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             state_dimension = numpy.shape(pwa_system.list_subsys[0].A)[1]
             input_dimension = numpy.shape(pwa_system.list_subsys[0].B)[1]
         else:
-            raise TypeError(str(type(system_dynamics)) + 
+            raise TypeError(str(type(system_dynamics)) +
                 ' is not a supported type of system dynamics.')
         output['system_dynamics'] = dynamics_output
 
@@ -99,7 +99,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             sim_params['closed_loop'] = True
         if 'conservative' in disc_params:
             if disc_params['conservative'] is True:
-                raise ValueError('MATLAB interface does not suport ' + 
+                raise ValueError('MATLAB interface does not suport ' +
                                  'conservative simulation')
         output['simulation_parameters'] = sim_params
 
@@ -155,7 +155,7 @@ def switched_export(switchedsys):
         system_dict['sys_act'] = label[1]
         system_dict['pwasys'] = pwa_export(system)
         dynamics.append(system_dict)
-    
+
     output['dynamics'] = dynamics
 
     return output
@@ -163,7 +163,7 @@ def switched_export(switchedsys):
 
 def poly_export(poly):
     """Saves parts of a polytope as a dictionary for export to MATLAB.
-    
+
     @param poly: L{Polytope} that will be exported.
     @return output: dictionary containing fields of poly
     """
@@ -191,7 +191,7 @@ def reg_export(reg):
 
 def export_locations(abstraction):
     """Exports an abstraction to a .mat file
-    
+
     @type abstraction: L{AbstractPwa} or L{AbstractSwitched}
     @rtype output: dictionary"""
 
@@ -203,7 +203,7 @@ def export_locations(abstraction):
         reg_dict = reg_export(region)
         location_dict['region'] = reg_dict
         location_dict['index'] = index
-        location_list.append(location_dict) 
+        location_list.append(location_dict)
 
     output['abstraction'] = location_list
 
@@ -278,7 +278,7 @@ def export_mealy(mealy_machine, is_continuous):
         transition_vals = transition_tuple[2]
         transition_inputs = { var: str(transition_vals[var])
                               for var in env_vars }
-        transition_outputs = { var: str(transition_vals[var]) 
+        transition_outputs = { var: str(transition_vals[var])
                                for var in sys_vars }
         transition_dict = {}
         transition_dict['start_state'] = transition_tuple[0]
@@ -286,7 +286,7 @@ def export_mealy(mealy_machine, is_continuous):
         transition_dict['inputs'] = transition_inputs
         transition_dict['outputs'] = transition_outputs
         transitions.append(transition_dict)
-    output['transitions'] = transitions 
+    output['transitions'] = transitions
 
 
     # Initial states are the states that have transitions from Sinit. Initial
@@ -303,7 +303,7 @@ def export_mealy(mealy_machine, is_continuous):
 
         trans_dict = {}
         trans_dict['state'] = init_transition[1]
-        trans_dict['inputs'] = { var: str(transition_vals[var]) 
+        trans_dict['inputs'] = { var: str(transition_vals[var])
                                  for var in env_vars }
         trans_dict['outputs'] = { var: str(transition_vals[var])
                                   for var in sys_vars }

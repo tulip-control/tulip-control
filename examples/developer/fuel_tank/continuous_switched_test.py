@@ -34,34 +34,34 @@ def subsys0(h):
     A = np.array([[1.1052, 0.], [ 0., 1.1052]])
     B = np.array([[1.1052, 0.], [ 0., 1.1052]])
     E = np.array([[1,0], [0,1]])
-    
+
     U = box2poly([[-1., 1.], [-1., 1.]])
     U.scale(input_bound)
-    
+
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
-    
+
     dom = box2poly([[0., 3.], [h, 2.]])
-    
+
     sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, dom)
-    
+
     return sys_dyn
 
 def subsys1(h):
     A = np.array([[0.9948, 0.], [0., 1.1052]])
     B = np.array([[-1.1052, 0.], [0., 1.1052]])
     E = np.array([[1, 0], [0, 1]])
-    
+
     U = box2poly([[-1., 1.], [-1., 1.]])
     U.scale(input_bound)
-    
+
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
-    
+
     dom = box2poly([[0., 3.], [0., h]])
-    
+
     sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, dom)
-    
+
     return sys_dyn
 
 for mode, h in zip(modes, allh):

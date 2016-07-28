@@ -1,8 +1,8 @@
 # This is an example to demonstrate how the output of a discretization algorithm
-# that abstracts a switched system, where the mode of the system depends on a 
-# combination of environment and system controlled variables, might look like. 
-# We assume within each mode the control authority is rich enough to establish 
-# deterministic reachability relations through the use of low-level continuous 
+# that abstracts a switched system, where the mode of the system depends on a
+# combination of environment and system controlled variables, might look like.
+# We assume within each mode the control authority is rich enough to establish
+# deterministic reachability relations through the use of low-level continuous
 # inputs.
 
 # NO, 26 Jul 2013.
@@ -110,13 +110,13 @@ env_init = set()                # empty set
 env_prog = {'!park'}
 env_safe = set()                # empty set
 
-# 
+#
 # System specification
 #
 # The system specification is that the robot should repeatedly revisit
 # the upper right corner of the grid while at the same time responding
 # to the park signal by visiting the lower left corner.  The LTL
-# specification is given by 
+# specification is given by
 #
 #     []<> home && [](park -> <>lot)
 #
@@ -131,11 +131,11 @@ env_safe = set()                # empty set
 #! TODO: create a function to convert this type of spec automatically
 
 # Define the specification
-#! NOTE: maybe "synthesize" should infer the atomic proposition from the 
+#! NOTE: maybe "synthesize" should infer the atomic proposition from the
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
-sys_init = {'X0reach'}          
+sys_init = {'X0reach'}
 sys_prog = {'home'}               # []<>home
 sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}

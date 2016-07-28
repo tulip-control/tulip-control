@@ -1,5 +1,5 @@
 """
-Aerial refueling double tank balancing example. 
+Aerial refueling double tank balancing example.
 
 The system consists of two fuel tanks, T1 and T2.
 Fuel is drawn at a constant rate from T2.

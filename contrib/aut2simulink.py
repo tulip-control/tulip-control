@@ -94,7 +94,7 @@ def load_file(aut_file):
     if isinstance(aut_file, str):
         f = open(aut_file, 'r')
     else:
-        f = aut_file  
+        f = aut_file
     stateid = -1
     for line in f:
         # parse states
@@ -110,7 +110,7 @@ def load_file(aut_file):
             queue.put(automaton)
             queue1.put(automaton)
             queue2.put(automaton)
-            
+
 def read_variables(smv_file):
     """Put the enviroment and system variables from smv_file in two different
     Queues called system and enviroment.
@@ -121,7 +121,7 @@ def read_variables(smv_file):
     if isinstance(smv_file, str):
         f = open(smv_file, 'r')
     else:
-        f = smv_file  
+        f = smv_file
     for line in f:
         if re.search('MODULE env',line):
             for line in f:
@@ -210,7 +210,7 @@ def write_case(enviroment,system,f,verbosem):
                     raise Exception
                 for l in range(system.qsize()):
                     temp1=system.get()
-                    if verbosem==1:        
+                    if verbosem==1:
                         f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+';\n')
                     elif verbosem==0:
                         f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+'\n')
@@ -224,7 +224,7 @@ def write_case(enviroment,system,f,verbosem):
         if not temp[2]:
             for l in range(system.qsize()):
                 temp1=system.get()
-                if verbosem==1:  
+                if verbosem==1:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+';\n')
                 elif verbosem==0:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+'\n')
@@ -251,7 +251,7 @@ def write_case(enviroment,system,f,verbosem):
     f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
         temp1=system.get()
-        if verbosem==1: 
+        if verbosem==1:
             f.write('\t\t'+temp1+' = 0;\n')
         elif verbosem==0:
             f.write('\t\t'+temp1+' = 0\n')
@@ -278,7 +278,7 @@ def write_case_no(enviroment,system,f,verbosem):
         q=queue.get()
         li.append(q[0])
         queue.put(q)
-        
+
     for i in range(queue.qsize()):
 
         #for each condition within each case
@@ -310,7 +310,7 @@ def write_case_no(enviroment,system,f,verbosem):
                     raise Exception
                 for l in range(system.qsize()):
                     temp1=system.get()
-                    if verbosem==1:        
+                    if verbosem==1:
                         f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+';\n')
                     elif verbosem==0:
                         f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+'\n')
@@ -324,7 +324,7 @@ def write_case_no(enviroment,system,f,verbosem):
         if not temp[2]:
             for l in range(system.qsize()):
                 temp1=system.get()
-                if verbosem==1:  
+                if verbosem==1:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+';\n')
                 elif verbosem==0:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+'\n')
@@ -351,7 +351,7 @@ def write_case_no(enviroment,system,f,verbosem):
     f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
         temp1=system.get()
-        if verbosem==1: 
+        if verbosem==1:
             f.write('\t\t'+temp1+' = 0;\n')
         elif verbosem==0:
             f.write('\t\t'+temp1+' = 0\n')
@@ -359,7 +359,7 @@ def write_case_no(enviroment,system,f,verbosem):
             raise Exception
         system.put(temp1)
     f.write('end')
-    
+
 queue=Queue.Queue()
 queue1=Queue.Queue()
 queue2=Queue.Queue()

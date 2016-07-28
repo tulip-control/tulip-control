@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -184,7 +184,7 @@ def _import_xml(node):
 
 	@rtype: L{Polytope}, L{Region}, L{PropPreservingPartition}, L{HybridSysDyn},
 		L{PwaSysDyn}, L{LtiSysDyn}, L{FiniteTransitionSystem},
-		L{OpenFiniteTransitionSystem} 
+		L{OpenFiniteTransitionSystem}
 	"""
 
 	# Get the type of data this is
@@ -250,7 +250,7 @@ def _import_adj(node):
 
 
 def _import_ppp(node):
-	
+
 	# Domain
 	domain_node = node.findall('domain')
 	if domain_node:
@@ -309,7 +309,7 @@ def _import_dictionary(node):
 
 
 def _import_region(node):
-	
+
 	# Get the polytope list and import the polytopes
 	polytope_list = node.findall(N_POLYLIST)[0]
 
@@ -369,7 +369,7 @@ def _import_pwasys(node):
 	# Get list of ltisys
 	ltilist = node.findall('ltilist')[0]
 	list_subsys = _import_xml(ltilist)
-	
+
 	return hybrid.PwaSysDyn(list_subsys=list_subsys, domain=domain)
 
 
@@ -403,14 +403,14 @@ def _export_xml(data, parent=None, tag=None, tag_list=[]):
 	function is called both internal
 
 	@param data: the data structure to be exported into an XML tree.
-	@type data: numpy.ndarray or L{Polytope} or L{Region} or 
+	@type data: numpy.ndarray or L{Polytope} or L{Region} or
 	    L{FiniteTransitionSystem} or L{PropPreservingPartition} or
 		L{AbstractSysDyn} or dict
-	@param parent: 
+	@param parent:
 	@type parent: None or xml.etree.ElementTree.Element or
 		xml.etree.ElementTree.SubElement
 	@type tag: None or string
-	
+
 	@return: None (if parent is None), or an xml tree
 	@rtype: None or xml.etree.ElementTree.Element or
 		xml.etree.ElementTree.SubElement
@@ -439,13 +439,13 @@ def _export_xml(data, parent=None, tag=None, tag_list=[]):
 			return _export_ltisys(data, parent, tag)
 		else:
 			_export_ltisys(data, parent, tag)
-	
+
 	elif isinstance(data, hybrid.PwaSysDyn):
 		if parent is None:
 			return _export_pwasys(data, parent, tag)
 		else:
 			_export_pwasys(data, parent, tag)
-	
+
 	elif isinstance(data, hybrid.SwitchedSysDyn):
 		if parent is None:
 			return _export_hybridsys(data, parent, tag)
@@ -457,7 +457,7 @@ def _export_xml(data, parent=None, tag=None, tag_list=[]):
 			return _export_fts(data, parent, tag, type_str=T_FTS)
 		else:
 			_export_fts(data, parent, tag, type_str=T_FTS)
-	
+
 	elif isinstance(data, transys.transys.OpenFTS):
 		if parent is None:
 			return _export_fts(data, parent, tag, type_str=T_OFTS)
@@ -498,7 +498,7 @@ def _export_xml(data, parent=None, tag=None, tag_list=[]):
 			tag = "numpyarray"
 		new_node = ET.SubElement(parent, tag, type=T_MATRIX)
 		new_node.text = str(data.tolist())
-	
+
 	elif isinstance(data, tuple):
 		#_export_tuple(data, parent, tag)
 		_export_list(data, parent, tag, type_str=T_TUPLE, tag_list=tag_list)
@@ -574,7 +574,7 @@ def _export_fts(fts, parent, tag, type_str=T_OFTS):
 			_export_xml(actions_dict['env_actions'], transition_node,
 				tag='env_action')
 
-		
+
 #	_export_list(fts.transitions.find(), tree, 'transitions')
 #	label_list = ['
 
@@ -611,7 +611,7 @@ def _export_ppp(ppp, parent, tag):
 
 	if parent is None:
 		return tree
-	
+
 
 def _export_ltisys(ltisys, parent, tag=None):
 	"""
@@ -661,7 +661,7 @@ def _export_pwasys(pwasys, parent, tag=None):
 	# Export domain
 	if pwasys.domain is not None:
 		_export_polytope(pwasys.domain, tree, 'domain')
-	
+
 	# Export lti list
 	_export_list(pwasys.list_subsys, tree, 'ltilist')
 
@@ -704,7 +704,7 @@ def _export_hybridsys(hybridsys, parent, tag=None):
 
 def _export_polytope(poly, parent, tag=None):
 	"""Builds an XML tree from a polytope
-	
+
 	@param poly: Polytope to export
 	@type poly: Polytope
 
@@ -777,7 +777,7 @@ def _export_region(reg, parent, tag=None):
 		tree = ET.Element(tag, type=T_REGION)
 	else:
 		tree = ET.SubElement(parent, tag, type=T_REGION)
-	
+
 	# Attach list of polytopes
 	_export_list(reg.list_poly, tree, N_POLYLIST)
 
@@ -813,7 +813,7 @@ def _export_region(reg, parent, tag=None):
 	# Propositions that hold in region (set of strings)
 	if reg.props:
 		_export_xml(reg.props, tree, N_PROPS)
-		
+
 	if parent is None:
 		return tree
 
@@ -825,7 +825,7 @@ def _export_adj(matrix, parent, tag=None):
 
 	@param matrix: Sparce adjacency matrix.
 	@type matrix: scipy.sparse.lil.lil_matrix
-	@type parent: None or xml.etree.ElementTree.Element or 
+	@type parent: None or xml.etree.ElementTree.Element or
 		xml.etree.ElementTree.SubElement
 	@type tag: string
 

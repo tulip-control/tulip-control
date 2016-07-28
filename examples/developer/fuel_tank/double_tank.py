@@ -304,10 +304,10 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 #         x = np.dot(cont_dyn_refuel.A,x).flatten() + \
 #             np.dot(cont_dyn_refuel.B,u).flatten() + \
 #             cont_dyn_refuel.K.flatten()
-    
+
 #     u_arr = np.hstack([u_arr, u.flatten()])
 #     x_arr = np.vstack([x_arr, x])
-    
+
 # data = {}
 # data['x'] = x_arr
 # data['u'] = u_arr[range(1,u_arr.shape[0]), :]

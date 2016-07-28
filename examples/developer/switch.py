@@ -53,7 +53,7 @@ env_safe = set()
 
 # (s0 & mem) & []<> home & [](park -> <>lot)
 sys_vars = {'mem'}
-sys_init = {'mem', 's0'}          
+sys_init = {'mem', 's0'}
 sys_prog = {'home'}               # []<>home
 sys_safe = {'next(mem) <-> lot || (mem && !park)'}
 sys_prog |= {'mem'}
@@ -61,7 +61,7 @@ sys_prog |= {'mem'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
-                    
+
 # Controller synthesis
 ctrl = synth.synthesize('gr1c', specs, sys=sys_swe,
                         ignore_sys_init=True, bool_actions=True)

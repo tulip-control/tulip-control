@@ -24,7 +24,7 @@ from scipy import sparse as sp
 # Switched system with 4 modes:
 ###############################
 
-# In this scenario we have limited actions "left, right, up, down" with 
+# In this scenario we have limited actions "left, right, up, down" with
 # certain (nondeterministic) outcomes
 
 # Create a finite transition system
@@ -55,7 +55,7 @@ transmat1 = np.array([[0,1,0,0,1,0],
 sys_sws.transitions.add_adj(
     sp.lil_matrix(transmat1), states, sys_actions='right'
 )
-                      
+
 # mode2 transitions
 transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,0,1,1],
@@ -66,7 +66,7 @@ transmat2 = np.array([[0,0,0,1,0,0],
 sys_sws.transitions.add_adj(
     sp.lil_matrix(transmat2), states, sys_actions='up'
 )
-                      
+
 # mode3 transitions
 transmat3 = np.array([[1,0,0,0,0,0],
                       [1,0,0,1,0,0],
@@ -77,7 +77,7 @@ transmat3 = np.array([[1,0,0,0,0,0],
 sys_sws.transitions.add_adj(
     sp.lil_matrix(transmat3), states, sys_actions='left'
 )
-                      
+
 # mode4 transitions
 transmat4 = np.array([[1,0,0,0,0,0],
                       [0,1,0,0,0,0],
@@ -104,13 +104,13 @@ env_init = set()                # empty set
 env_prog = {'!park'}
 env_safe = set()                # empty set
 
-# 
+#
 # System specification
 #
 # The system specification is that the robot should repeatedly revisit
 # the upper right corner of the grid while at the same time responding
 # to the park signal by visiting the lower left corner.  The LTL
-# specification is given by 
+# specification is given by
 #
 #     []<> home && [](park -> <>lot)
 #
@@ -125,7 +125,7 @@ env_safe = set()                # empty set
 #! TODO: create a function to convert this type of spec automatically
 
 # Define the specification
-#! NOTE: maybe "synthesize" should infer the atomic proposition from the 
+#! NOTE: maybe "synthesize" should infer the atomic proposition from the
 # transition system? Or, we can declare the mode variable, and the values
 # of the mode variable are read from the transition system.
 sys_vars = {'X0reach'}
@@ -137,7 +137,7 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
-                    
+
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available

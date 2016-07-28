@@ -42,18 +42,18 @@ def subsys0():
     A = np.array([[1.1052, 0.], [ 0., 1.1052]])
     B = np.array([[1.1052, 0.], [ 0., 1.1052]])
     E = np.array([[1,0], [0,1]])
-    
+
     U = box2poly([[-1., 1.], [-1., 1.]])
     U.scale(input_bound)
-    
+
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
-    
+
     dom = box2poly([[0., 3.], [0.5, 2.]])
-    
+
     sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
-    
+
     return sys_dyn
 # @subsystem0_end@
 
@@ -62,18 +62,18 @@ def subsys1():
     A = np.array([[0.9948, 0.], [0., 1.1052]])
     B = np.array([[-1.1052, 0.], [0., 1.1052]])
     E = np.array([[1, 0], [0, 1]])
-    
+
     U = box2poly([[-1., 1.], [-1., 1.]])
     U.scale(input_bound)
-    
+
     W = box2poly([[-1., 1.], [-1., 1.]])
     W.scale(uncertainty)
-    
+
     dom = box2poly([[0., 3.], [0., 0.5]])
-    
+
     sys_dyn = LtiSysDyn(A, B, E, None, U, W, dom)
     #sys_dyn.plot()
-    
+
     return sys_dyn
 # @subsystem1_end@
 

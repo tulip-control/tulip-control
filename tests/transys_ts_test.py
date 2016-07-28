@@ -56,15 +56,15 @@ def ba_test():
 
     ba.states.initial.add('q0')
     assert(set(ba.states.initial) == {'q0'})
-    
+
     ba.states.accepting.add('q1')
     assert(set(ba.states.accepting) == {'q1'})
-    
+
     ba.transitions.add('q0', 'q1', letter={'p'})
     ba.transitions.add('q1', 'q1', letter={'p'})
     ba.transitions.add('q1', 'q0', letter=set() )
     ba.transitions.add('q0', 'q0', letter=set() )
-    
+
     logger.debug(ba)
     ba.save('ba.pdf')
     return ba
@@ -93,23 +93,23 @@ def check_prodba(ba_ts):
     states = {('s0', 'q1'), ('s1', 'q0'),
               ('s2', 'q0'), ('s3', 'q0')}
     assert(set(ba_ts.states) == states)
-    
+
     assert(set(ba_ts.states.initial) == {('s0', 'q1'), ('s1', 'q0')})
-    
+
     assert(
 
         ba_ts.transitions.find(
             [('s0', 'q1')], [('s1', 'q0')]
         )[0][2]['letter'] == set()
     )
-    
+
     for si, sj in [('s1', 's2'), ('s2', 's3')]:
         assert(
             ba_ts.transitions.find(
                 [(si, 'q0')], [(sj, 'q0')]
             )[0][2]['letter'] == set()
         )
-    
+
     assert(
         ba_ts.transitions.find(
             [('s3', 'q0')], [('s0', 'q1')]
@@ -121,9 +121,8 @@ def on_the_fly_test():
     ts = ts_test()
     prodba = trs.OnTheFlyProductAutomaton(ba, ts)
     assert(set(prodba.states) == {('s0', 'q1'), ('s1', 'q0')})
-    
+
     prodba.save('prodba_initialized.pdf')
     prodba.add_all_states()
     check_prodba(prodba)
     prodba.save('prodba_full.pdf')
-

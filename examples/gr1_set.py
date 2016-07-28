@@ -56,7 +56,7 @@ env_prog = '!park'              # []<>(!park)
 #
 # The system specification describes how the system is allowed to move
 # and what the system is required to do in response to an environmental
-# action.  
+# action.
 #
 sys_vars = {}
 sys_vars['loc'] = (0, 5)
@@ -72,13 +72,13 @@ sys_safe = {
 }
 sys_prog = set()                # empty set
 
-# 
+#
 # System specification
 #
 # The system specification is that the robot should repeatedly revisit
 # the upper right corner of the grid while at the same time responding
 # to the park signal by visiting the lower left corner.  The LTL
-# specification is given by 
+# specification is given by
 #
 #     []<> X5 && [](park -> <>(loc=0))
 #

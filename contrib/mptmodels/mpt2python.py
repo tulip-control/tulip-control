@@ -16,7 +16,7 @@ def load(filename):
     ispwa = bool(data['ispwa'][0][0])
 
     if islti:
-        sys = load_lti(data['A'], data['B'], data['domainA'], 
+        sys = load_lti(data['A'], data['B'], data['domainA'],
                        data['domainB'], data['UsetA'], data['UsetB'])
 
     elif ispwa:

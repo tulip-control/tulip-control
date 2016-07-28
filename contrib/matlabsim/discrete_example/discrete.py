@@ -13,7 +13,7 @@ sys.path.append('../')
 import tomatlab
 
 # Create a finite transition system
-sys = transys.FTS()          
+sys = transys.FTS()
 
 # Define the states of the system
 sys.states.add_from(['X0', 'X1', 'X2', 'X3', 'X4', 'X5'])
@@ -40,10 +40,10 @@ env_safe = set()
 
 # System specification
 sys_vars = {'X0reach'}
-sys_init = {'X0reach'}          
+sys_init = {'X0reach'}
 sys_prog = {'home'}
 sys_safe = {'(X (X0reach) <-> lot) || (X0reach && !park)'}
-sys_prog |= {'X0reach'} 
+sys_prog |= {'X0reach'}
 
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,

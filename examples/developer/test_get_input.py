@@ -11,25 +11,25 @@ def integrate(sys_dyn, x0, u_seq):
     # is the continuous transition correct ?
     N = u_seq.shape[0]
     x = x0.reshape(x0.size, 1)
-    
+
     A = sys_dyn.A
     B = sys_dyn.B
-    
+
     if len(sys_dyn.K) == 0:
         K = np.zeros(x.shape)
     else:
         K = sys_dyn.K
-    
+
     print('started continuous transition')
     m = u_seq[0, :].size
     for i in xrange(N):
         u = u_seq[i, :].reshape(m, 1)
         x = A.dot(x) + B.dot(u) + K
-        
+
         print('Discrete time: k = ' +str(i) )
         print('\t u[' +str(i) +"]' = " +str(u.T) )
         print('\t x[' +str(i) +"]' = " +str(x.T) +'\n')
-       
+
     print('completed continuous transition iteration')
     return x
 

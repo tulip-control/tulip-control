@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -33,31 +33,31 @@
 Convert state graphs to promela
 """
 from time import strftime
-    
+
 def fts2promela(graph, procname=None):
     """Convert (possibly labeled) state graph to Promela str.
-    
+
     Creates a process which can be simulated as an independent
     thread in the SPIN model checker.
     If atomic propositions label states,
     then they are exported as bit variables.
-    
+
     The state graph is exported to Promela using goto statements.
     Goto statements avoid introducing additional states.
     Using structured constructs (if, do) can create
     extra states in certain cases.
-    
+
     The structured program theorem ensures that avoiding goto
     statements is always possible.
     But this yields an equivalent algorithm only,
     not an equivalent unfolding of the program graph.
-    
+
     Therefore verified properties can be affected,
     especially if intermediate states are introduced in
     one of multiple processes.
-    
-    @param graph: networkx 
-    
+
+    @param graph: networkx
+
     @param procname: Promela process name (after proctype)
     @type procname: str (default: system name)
     """
@@ -67,16 +67,16 @@ def fts2promela(graph, procname=None):
         for prop in ap_alphabet:
             if prop is True:
                 continue
-            
+
             if prop in ap_label:
                 s += '\t\t ' +str(prop) +' = 1;\n'
             else:
                 s += '\t\t ' +str(prop) +' = 0;\n'
-        
+
         s += '\t\t printf("State: ' +str(state) +'\\n");\n'
         s += '\t\n'
         return s
-    
+
     def trans2promela(transitions, graph, ap_alphabet):
         s = '\t if\n'
         for (from_state, to_state, sublabels_dict) in transitions:
@@ -87,41 +87,41 @@ def fts2promela(graph, procname=None):
             s += '\t }\n'
         s += '\t fi;\n\n'
         return s
-    
+
     def get_label_of(state, graph):
         state_label_pairs = graph.states.find([state] )
         (state_, ap_label) = state_label_pairs[0]
         print('state:\t' +str(state) )
         print('ap label:\t' +str(ap_label) )
         return ap_label['ap']
-    
+
     if procname is None:
         procname = graph.name
-    
+
     s = '/*\n * Promela file generated with TuLiP\n'
     s += ' * Date: '+str(strftime('%x %X %z') ) +'\n */\n\n'
     for ap in graph.atomic_propositions:
         # convention "!" means negation
         if ap not in {None, True}:
             s += 'bool ' +str(ap) +';\n'
-    
+
     s += '\nactive proctype ' +procname +'(){\n'
-    
+
     s += '\t if\n'
     for initial_state in graph.states.initial:
         s += '\t :: goto ' +str(initial_state) +'\n'
     s += '\t fi;\n'
-    
+
     ap_alphabet = graph.atomic_propositions
     for state in graph.states():
         out_transitions = graph.transitions.find(
             {state}, as_dict=True
         )
-        
+
         s += str(state).replace(' ', '_') +':'
         s += trans2promela(out_transitions, graph,
                            ap_alphabet)
-    
+
     s += '}\n'
     return s
 
