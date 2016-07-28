@@ -156,11 +156,13 @@ def solve_closed_loop(
         # first step from P1
         if i == 1:
             Pinit = p1
-
         p2 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
-        s0 = s0.union(p2, check_convex=True)
-        s0 = pc.reduce(s0)
-
+        if use_all_horizon:
+            s0 = s0.union(p2, check_convex=True)
+            s0 = pc.reduce(s0)
+        else:
+            p2 = pc.reduce(p2)
+            s0 = p2
         # empty target polytope ?
         if not pc.is_fulldim(p2):
             break
