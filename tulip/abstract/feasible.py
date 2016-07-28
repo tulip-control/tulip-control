@@ -100,11 +100,12 @@ def solve_feasible(
     @rtype: C{Polytope} or C{Region}
     """
     if closed_loop:
-        return solve_closed_loop(
-            P1, P2, ssys, N,
-            use_all_horizon=use_all_horizon,
-            trans_set=trans_set
-        )
+        if use_all_horizon:
+            return _solve_closed_loop_bounded_horizon(
+                P1, P2, ssys, N, trans_set=trans_set)
+        else:
+            return _solve_closed_loop_fixed_horizon(
+                P1, P2, ssys, N, trans_set=trans_set)
     else:
         if use_all_horizon:
             raise ValueError(
@@ -116,11 +117,13 @@ def solve_feasible(
             max_num_poly=max_num_poly
         )
 
-def solve_closed_loop(
-    P1, P2, ssys, N,
-    use_all_horizon=False, trans_set=None
-):
-    """Compute S0 \subseteq P1 from which P2 is closed-loop N-reachable.
+
+def _solve_closed_loop_fixed_horizon(
+        P1, P2, ssys, N, trans_set=None):
+    """Under-approximate states in P1 that can reach P2 in N > 0 steps.
+
+    If intermediate polytopes are convex,
+    then the result is exact and not an under-approximation.
 
     @type P1: C{Polytope} or C{Region}
     @type P2: C{Polytope} or C{Region}
@@ -130,49 +133,72 @@ def solve_closed_loop(
     @param N: horizon length
     @type N: int > 0
 
-    @param use_all_horizon:
-        - if True, then take union of S0 sets
-        - Otherwise, chain S0 sets (funnel-like)
-    @type use_all_horizon: bool
-
     @param trans_set: If provided,
         then intermediate steps are allowed
         to be in trans_set.
 
         Otherwise, P1 is used.
     """
-
-    p1 = P1.copy() # Initial set
-    p2 = P2.copy() # Terminal set
-
-    if trans_set is not None:
-        Pinit = trans_set
+    assert N > 0, N
+    p1 = P1.copy()  # initial set
+    p2 = P2.copy()  # terminal set
+    if trans_set is None:
+        pinit = p1
     else:
-        Pinit = p1
-
+        pinit = trans_set
     # backwards in time
-    s0 = pc.Region()
     for i in xrange(N, 0, -1):
         # first step from P1
         if i == 1:
-            Pinit = p1
-        p2 = solve_open_loop(Pinit, p2, ssys, 1, trans_set)
-        if use_all_horizon:
-            s0 = s0.union(p2, check_convex=True)
-            s0 = pc.reduce(s0)
-        else:
-            p2 = pc.reduce(p2)
-            s0 = p2
+            pinit = p1
+        p2 = solve_open_loop(pinit, p2, ssys, 1, trans_set)
+        p2 = pc.reduce(p2)
+        if not pc.is_fulldim(p2):
+            return pc.Polytope()
+    return p2
+
+
+def _solve_closed_loop_bounded_horizon(
+        P1, P2, ssys, N, trans_set=None):
+    """Under-approximate states in P1 that can reach P2 in <= N steps.
+
+    See docstring of function `_solve_closed_loop_fixed_horizon`
+    for details.
+    """
+    _print_horizon_warning()
+    p1 = P1.copy()  # initial set
+    p2 = P2.copy()  # terminal set
+    if trans_set is None:
+        pinit = p1
+    else:
+        pinit = trans_set
+    # backwards in time
+    s = pc.Region()
+    for i in xrange(N, 0, -1):
+        # first step from P1
+        if i == 1:
+            pinit = p1
+        p2 = solve_open_loop(pinit, p2, ssys, 1, trans_set)
+        p2 = pc.reduce(p2)
+        # running union
+        s = s.union(p2, check_convex=True)
+        s = pc.reduce(s)
         # empty target polytope ?
         if not pc.is_fulldim(p2):
             break
-
-
-    if not pc.is_fulldim(s0):
+    if not pc.is_fulldim(s):
         return pc.Polytope()
+    s = pc.reduce(s)
+    return s
 
-    s0 = pc.reduce(s0)
-    return s0
+
+def _print_horizon_warning():
+    print('WARNING: different timing semantics and assumptions '
+          'from the case of fixed horizon. '
+          'Also, depending on dynamics, disconnected polytopes '
+          'can arise, which may cause issues in '
+          'the `polytope` package.')
+
 
 def solve_open_loop(
     P1, P2, ssys, N,
