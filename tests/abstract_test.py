@@ -155,14 +155,8 @@ def test_transient_regions():
     ppp = cont_predicates()
     sys = drifting_dynamics()
     logger.info(sys)
-
-    with assert_raises(ValueError):
-        ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
-                                 trans_length=1)
-
-    ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=False,
+    ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
                              trans_length=1)
-
     logger.debug(ab.ts)
     self_loops = {i for i,j in ab.ts.transitions() if i==j}
     logger.debug('self loops at states: ' + str(self_loops))

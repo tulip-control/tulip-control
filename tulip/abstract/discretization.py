@@ -485,9 +485,7 @@ def discretize(
     @param max_num_poly: maximum number of polytopes in a region to use in
         reachability analysis.
     @param use_all_horizon: in closed loop algorithm: if we should look
-        for reachability also in less than N steps. The case of
-        use_all_horizon=True is still under development and currently
-        unavailable.
+        for reachability also in less than N steps.
     @param trans_length: the number of polytopes allowed to cross in a
         transition.  a value of 1 checks transitions
         only between neighbors, a value of 2 checks
@@ -510,10 +508,6 @@ def discretize(
 
     @rtype: L{AbstractPwa}
     """
-    if use_all_horizon:
-        raise ValueError('discretize() with use_all_horizon=True is still '
-                         'under development\nand currently unavailable.')
-
     start_time = os.times()[0]
 
     orig_ppp = part
