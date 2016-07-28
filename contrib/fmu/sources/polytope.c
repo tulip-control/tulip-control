@@ -62,8 +62,8 @@ Polytope* from_box(idxint l,pfloat* upper,pfloat* lower)
 	p->center = (pfloat*)malloc(sizeof(pfloat)*l);
 	for(i=0;i<l;i++)
 	{
-		*(p->A+i*k+2*i) = 1;	
-		*(p->A+i*k+2*i+1) = -1;	
+		*(p->A+i*k+2*i) = 1;
+		*(p->A+i*k+2*i+1) = -1;
 		*(p->b+2*i) = *(lower+i);
 		*(p->b+2*i+1) =-1*(*(upper+i));
 		*(p->center+i) = (*(upper+i) + *(lower+i))/2;

@@ -18,5 +18,3 @@ int main(void)
 	free_fsm(fsm);
 	return 0;
 }
-
-

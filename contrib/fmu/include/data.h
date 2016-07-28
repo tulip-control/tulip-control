@@ -30,4 +30,3 @@ void init_input_bound(void);
 
 void free_input_bound(void);
 #endif
-
