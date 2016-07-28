@@ -106,6 +106,10 @@ def solve_feasible(
             trans_set=trans_set
         )
     else:
+        if use_all_horizon:
+            raise ValueError(
+                '`use_all_horizon = True` has no effect if '
+                '`closed_loop = False`')
         return solve_open_loop(
             P1, P2, ssys, N,
             trans_set=trans_set,
