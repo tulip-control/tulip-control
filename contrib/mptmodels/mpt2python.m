@@ -18,14 +18,14 @@ function mpt2python(model, filename)
             'UsetB', 'ctsA', 'ctsB', 'islti', 'ispwa');
     end
 
-    
+
     function [A,B,K,domainA,domainB,UsetA,UsetB,ctsA,ctsB] = pwa2python(pwasys)
-        
+
         % Dynamics matrices already stored conveniently
         A = pwasys.A;
         B = pwasys.B;
         K = pwasys.f;
-        
+
         % Get domain matrices for each of the lti systems
         domainA = cell(1,pwasys.ndyn);
         domainB = cell(1,pwasys.ndyn);
@@ -41,7 +41,7 @@ function mpt2python(model, filename)
             UsetB{i} = uB;
             cts_ss{i} = Polyhedron(dA, dB);
         end
-        
+
         % Get domain of the whole state
         cts_ss = PolyUnion('Set', [cts_ss{:}]);
         cts_ss.merge;
@@ -51,22 +51,22 @@ function mpt2python(model, filename)
 
 
     function [A,B,K,domainA,domainB,UsetA,UsetB] = lti2python(ltisys)
-        
+
         % Make sure that the domain was set with 'xu' and not just 'x'
         if (ltisys.domain.Dim ~= (ltisys.nx + ltisys.nu))
             error('Domain of LTISystem must be set with xu option');
         end
-        
+
         % Dynamics matrices
         A = ltisys.A;
         B = ltisys.B;
         K = ltisys.f;
-        
+
         % State domain
         xdomain = projection(ltisys.domain, 1:1:ltisys.nx);
         domainA = xdomain.A;
         domainB = xdomain.b;
-       
+
         % Input domain - rearrange order of cols so that domain is
         % [u;x] instead of [x;u]
         UsetA = ltisys.domain.A;

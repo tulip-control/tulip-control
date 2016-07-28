@@ -1,6 +1,6 @@
 % Takes a continuous state and a list of Polyhedra and then returns the
 % index of the region that the continuous state is in. This gets us the
-% variable "loc" when working with a continuous system. 
+% variable "loc" when working with a continuous system.
 
 % Function throws an error if a point is outside the specified domain.
 

@@ -68,10 +68,10 @@ end
 
 
 
-% Takes a struct exported from Python and imports a 
+% Takes a struct exported from Python and imports a
 %
 % Notes:
-%   - Domains of LTI systems are in input-state space. 
+%   - Domains of LTI systems are in input-state space.
 %   - Forcing timestep to be an argument until time-semantics are
 %     implemented in Tulip
 function MPTsys = createMPTsys(system, timestep)
@@ -130,7 +130,7 @@ function MPTsys = createPWAsys(system, timestep)
 end
 
 
-% Nested function for importing LTIs. 
+% Nested function for importing LTIs.
 function [LtiSys, state_input_region] = createLTIsys(lti_struct, timestep)
 
     % Create LTI System object
@@ -164,12 +164,12 @@ end
 
 % Function that sets the state and input bounds of lti systems
 function ltisys = set_lti_bounds(ltisys, state_input_region, lti_struct)
-    
+
     % Set the domain of the system for big-M relaxation
     poly_state = Polyhedron('A', lti_struct.domain.A, 'b', lti_struct.domain.b);
     ltisys.x.min = min(poly_state.V);
     ltisys.x.max = max(poly_state.V);
-    
+
     % Domain of inputs
     state_dim = size(lti_struct.A, 2);
     ltisys.u.min = min(state_input_region.V(:,state_dim+1:end));

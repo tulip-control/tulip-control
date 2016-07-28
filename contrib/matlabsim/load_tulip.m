@@ -21,7 +21,7 @@ else
     is_switched = false;
 end
 
-bdclose(modelname); 
+bdclose(modelname);
 open_system(new_system(modelname))
 
 if ~is_continuous
@@ -60,19 +60,19 @@ end
 % this process
 for i = 1:num_inputs
     input_name = TS.inputs{i}.name;
-    
+
     % Skip if not dealing with strings
     if ~ischar(TS.inputs{i}.values{1}), continue; end
-    
+
     num_values = size(TS.inputs{i}.values, 1);
     input_value_map = containers.Map();
-    
+
     % Fill in hash table
     for j = 1:num_values
         input_value = TS.inputs{i}.values{j};
         input_value_map(input_value) = input_value;
     end
-    
+
     % Replace string values with numbers in hash
     new_values = -1*ones(1, num_values);
     for j = 1:num_values
@@ -88,7 +88,7 @@ for i = 1:num_inputs
             end
         end
     end
-    
+
     % Replace value in all transitions and initial transitions
     for j = 1:num_transitions
         env_input = eval(['TS.transitions{' num2str(j) '}.inputs.' ...
@@ -104,7 +104,7 @@ for i = 1:num_inputs
             '=' num2str(input_value_map(env_input)) ';'];
         eval(eval_str);
     end
-    
+
     % Replace value in MPTsys object
     num_modes = length(MPTsys);
     for j = 1:num_modes
@@ -114,19 +114,19 @@ end
 
 for i = 1:num_outputs
     output_name = TS.outputs{i}.name;
-    
+
     % Skip if not strings
     if ~ischar(TS.outputs{i}.values{1}), continue; end
-    
+
     num_values = size(TS.outputs{i}.values, 1);
     output_value_map = containers.Map();
-    
+
     % Fill in hash table
     for j = 1:num_values
         output_value = TS.outputs{i}.values{j};
         output_value_map(output_value) = output_value;
     end
-    
+
     % Replace string values with numbers in hash
     new_values = -1*ones(1, num_values);
     for j = 1:num_values
@@ -142,7 +142,7 @@ for i = 1:num_outputs
             end
         end
     end
-    
+
     % Replace value in all transitions and initial transitions
     for j = 1:num_transitions
         sys_output = eval(['TS.transitions{' num2str(j) '}.outputs.' ...
@@ -158,7 +158,7 @@ for i = 1:num_outputs
             '=' num2str(output_value_map(sys_output)) ';'];
         eval(eval_str);
     end
-    
+
     % Replace value in MPTsys object
     num_modes = length(MPTsys);
     for j = 1:num_modes
@@ -215,12 +215,12 @@ for ind = 1:num_outputs
     output_handles{ind} = Stateflow.Data(mealy_machine);
     output_handles{ind}.Name = strtrim(TS.outputs{ind}.name);
     output_handles{ind}.Scope = 'Output';
-    
+
     % Move location to first output port for consistency
     if (is_continuous && strcmp(output_handles{ind}.Name,'loc'))
         output_handles{ind}.Port = 1;
     end
-    
+
     % Move system action to second output port for consistency
     if (is_continuous && strcmp(output_handles{ind}.Name, 'sys_actions') && ...
             is_switched)
@@ -248,7 +248,7 @@ for ind = 1:num_transitions
     transition_handles{ind} = Stateflow.Transition(mealy_machine);
     transition_handles{ind}.Source = state_handles{start_state_index};
     transition_handles{ind}.Destination = state_handles{end_state_index};
-    
+
     % Label strings on transition
     label_string = '[';
     for jnd = 1:num_inputs
@@ -281,7 +281,7 @@ for ind = 1:num_init_transitions
     init_handles{ind}.MidPoint = ...
         [state_handles{init_state_index}.Position(1) - 15, ...
          state_handles{init_state_index}.Position(2) + 25];
-     
+
     % Label string on initial transitions
     label_string = '[';
     for jnd = 1:num_inputs
@@ -290,7 +290,7 @@ for ind = 1:num_init_transitions
         label_string = [label_string, '(', input_name '==' ...
                         num2str(input_value) ')', '&&'];
     end
-    
+
     % Add current location to inputs if system is continuous
     if is_continuous
         current_loc = num2str(double(TS.init_trans{ind}.start_loc));
@@ -298,7 +298,7 @@ for ind = 1:num_init_transitions
     else
         label_string = [label_string(1:end-2) ']{'];
     end
-    
+
     % Initial outputs
     for jnd = 1:num_outputs
         output_name = output_handles{jnd}.Name;
@@ -306,7 +306,7 @@ for ind = 1:num_init_transitions
         label_string = [label_string output_name '=' num2str(output_value) ';'];
     end
     label_string = [label_string '}'];
-    
+
     init_handles{ind}.LabelString = label_string;
 end
 
@@ -315,20 +315,20 @@ end
 % RHC blocks for continuous systems
 %-------------------------------------------------------------------------------
 if is_continuous
-    
+
     % Move this to a good position
     set_param(tulip_controller, 'Position', '[495 27 600 153]');
-    
+
     % Continuous state to discrete state
     c2d_block = add_block('built-in/MATLABFcn', [modelname '/Abstraction']);
     set_param(c2d_block, 'MATLABFcn', 'cont_to_disc');
     set_param(c2d_block, 'Position', '[330 34 420 86]');
-        
+
     % RHC Subsystem Container
     rhc_subsys = add_block('built-in/Subsystem', [modelname '/RHC']);
     set_param(rhc_subsys, 'Position', '[295 364 420 466]');
     set_param(rhc_subsys, 'Orientation', 'left');
-    rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']); 
+    rhc_output = add_block('built-in/Outport', [modelname '/RHC/u']);
     rhc_cont_input = add_block('built-in/Inport', ...
         [modelname '/RHC/Continuous Input']);
     rhc_loc_input = add_block('built-in/Inport', [modelname '/RHC/Location']);
@@ -347,19 +347,19 @@ if is_continuous
         set_param(rhc_loc_input, 'Position', '[40 110 60 130]');
         set_param(rhc_output, 'Position', '[820 50 840 70]');
     end
-                           
+
     % Horizon block (in RHC Subsystem)
     if simulation_parameters.closed_loop
         horizon_block = add_block('sflib/Chart', ...
                                   [modelname '/RHC/Control Horizon']);
         horizon_chart = simulink_model.find('-isa', 'Stateflow.Chart', ...
             '-and', 'Name', 'Control Horizon');
-        
+
         % Output variable
         horizon_output = Stateflow.Data(horizon_chart);
         horizon_output.Name = 'horizon';
         horizon_output.Scope = 'Output';
-        
+
         % Make states and transitions
         N = simulation_parameters.horizon;
         horizon_states = cell(1,N);
@@ -380,7 +380,7 @@ if is_continuous
         horizon_init.Destination = horizon_states{1};
         horizon_init.DestinationOClock = 9;
         horizon_init.LabelString = ['{horizon=' num2str(N) ';}'];
- 
+
         % Sample Time
         horizon_chart.ChartUpdate = 'DISCRETE';
         horizon_chart.SampleTime = num2str(timestep);
@@ -395,14 +395,14 @@ if is_continuous
     else
         set_param(horizon_block, 'Position', '[40 309 100 361]');
     end
-    
+
     % RHC Input
     rhc_block = add_block('built-in/MATLABFcn', [modelname '/RHC/RHC Input']);
     set_param(rhc_block, 'SampleTime', num2str(timestep));
     rhc_mux = add_block('built-in/Mux', [modelname '/RHC/RHC Mux']);
     set_param(rhc_mux, 'DisplayOption', 'Bar');
     if ~is_switched
-        set_param(rhc_block, 'MATLABFcn', 'get_input');  
+        set_param(rhc_block, 'MATLABFcn', 'get_input');
         input_dim = length(MPTsys.u.max);
         set_param(rhc_block, 'Position', '[460 27 545 93]');
         set_param(rhc_mux, 'Inputs', '3');
@@ -415,13 +415,13 @@ if is_continuous
         set_param(rhc_block, 'MATLABFcn', 'get_input_switched');
     end
     set_param(rhc_block, 'OutputDimensions', num2str(input_dim));
-    
+
     % The Plant Subsystem
     plant = add_block('built-in/Subsystem', [modelname '/Plant']);
     control_input = add_block('built-in/Inport', [modelname '/Plant/u']);
     cont_state = add_block('built-in/Outport', [modelname '/Plant/contstate']);
     set_param(plant, 'Position', '[120, 197, 240, 263]');
-    
+
     % Draw all Transitions
     add_line(modelname, 'Abstraction/1','TulipController/1', ...
         'autorouting','on');
@@ -436,7 +436,7 @@ if is_continuous
     add_line([modelname '/RHC'], 'Location/1', 'RHC Mux/2','autorouting',...
             'on');
     add_line([modelname '/RHC'], 'RHC Input/1', 'u/1', 'autorouting', 'on');
-    if ~is_switched     
+    if ~is_switched
         add_line([modelname '/RHC'], 'Control Horizon/1', 'RHC Mux/3', ...
             'autorouting', 'on');
     else
