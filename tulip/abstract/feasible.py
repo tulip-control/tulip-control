@@ -101,7 +101,7 @@ def solve_feasible(
     """
     if closed_loop:
         if use_all_horizon:
-            return _solve_closed_loop_bounded_horizon(
+            return _underapproximate_attractor(
                 P1, P2, ssys, N, trans_set=trans_set)
         else:
             return _solve_closed_loop_fixed_horizon(
@@ -190,6 +190,35 @@ def _solve_closed_loop_bounded_horizon(
         return pc.Polytope()
     s = pc.reduce(s)
     return s
+
+
+def _underapproximate_attractor(
+        P1, P2, ssys, N, trans_set=None):
+    """Under-approximate N-step attractor of polytope P2, with N > 0.
+
+    See docstring of function `_solve_closed_loop_fixed_horizon`
+    for details.
+    """
+    assert N > 0, N
+    _print_horizon_warning()
+    p1 = P1.copy()  # initial set
+    p2 = P2.copy()  # terminal set
+    if trans_set is None:
+        pinit = p1
+    else:
+        pinit = trans_set
+    # backwards in time
+    for i in xrange(N, 0, -1):
+        # first step from P1
+        if i == 1:
+            pinit = p1
+        r = solve_open_loop(pinit, p2, ssys, 1, trans_set)
+        p2 = p2.union(r, check_convex=True)
+        p2 = pc.reduce(p2)
+        # empty target polytope ?
+        if not pc.is_fulldim(p2):
+            return pc.Polytope()
+    return p2
 
 
 def _print_horizon_warning():
