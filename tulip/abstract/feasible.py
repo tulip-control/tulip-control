@@ -152,7 +152,6 @@ def solve_closed_loop(
 
     # backwards in time
     s0 = pc.Region()
-    reached = False
     for i in xrange(N, 0, -1):
         # first step from P1
         if i == 1:
@@ -166,20 +165,10 @@ def solve_closed_loop(
         if not pc.is_fulldim(p2):
             break
 
-        old_reached = reached
-
         # overlaps initial set ?
         if p1.intersect(p2):
             s0 = s0.union(p2, check_convex=True)
             s0 = pc.reduce(s0)
-
-        # we went past it -> don't continue
-        if old_reached is True and reached is False:
-            logger.info('stopped intersecting si')
-            #break
-
-        if reached is True:
-            break
 
     if not pc.is_fulldim(s0):
         return pc.Polytope()
