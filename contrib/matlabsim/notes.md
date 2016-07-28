@@ -45,7 +45,7 @@ Stateflow MealyMachine.
 
                   `A -> B` (^)
 
-  To work around this quirk, 
+  To work around this quirk,
 
     1. The initial location is an input into the Stateflow chart. The only
     transitions that depend on the initial location are transitions like (^).

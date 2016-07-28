@@ -1,13 +1,13 @@
 {
 	"version": 1,
 	"disable_existing_loggers": 0,
-	
+
 	"handlers": {
 		"console": {
 			"class": "logging.StreamHandler"
 		}
 	},
-	
+
 	"loggers": {
 		"tulip": {
 			"level": "WARNING",

@@ -29,7 +29,7 @@ long_description \
     control software.
 
 supported_archs         noarch
-                       
+
 homepage                tulip-control.org
 
 checksums               rmd160  8bfab3e26055095475a02f3cf0e24103bf1597e7 \

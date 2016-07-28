@@ -2,7 +2,7 @@ MATLAB Export
 Stephanie Tsuei, 2014
 
 This folder contains the files required to export controllers to Simulink
-blocks and a couple examples for reference. 
+blocks and a couple examples for reference.
 
 Required software (in addition to Tulip):
     - Matlab
@@ -47,7 +47,7 @@ EXAMPLES
     "load_discrete.m" opens up a Simulink model that contains the Tulip Mealy
     Machine, a random park signal generator, and output scopes.
 
-	
+
 2) Continuous Example:
 
     continuous.py is a modified version of
