@@ -1020,7 +1020,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False, bool_actions=False, rm_deadends=True
+    rm_deadends=True
 ):
     """Function to call the appropriate synthesis tool on the specification.
 
@@ -1090,17 +1090,6 @@ def synthesize(
         contained in sys.
     @type ignore_sys_init: bool
 
-    @param bool_states: deprecated as inefficient
-
-        if True,
-        then use one bool variable for each state.
-        Otherwise use a single integer variable for all states.
-    @type bool_states: bool
-
-    @param bool_actions: model actions using bool variables,
-        otherwise use integers.
-    @type bool_actions: bool
-
     @param rm_deadends: return a strategy that contains no terminal states.
     @type rm_deadends: bool
 
@@ -1112,9 +1101,7 @@ def synthesize(
     specs = _spec_plus_sys(
         specs, env, sys,
         ignore_env_init,
-        ignore_sys_init,
-        bool_states,
-        bool_actions)
+        ignore_sys_init)
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
     elif option == 'slugs':
@@ -1154,9 +1141,7 @@ def synthesize(
 
 def is_realizable(
     option, specs, env=None, sys=None,
-    ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False,
-    bool_actions=False
+    ignore_env_init=False, ignore_sys_init=False
 ):
     """Check realizability.
 
@@ -1164,8 +1149,7 @@ def is_realizable(
     """
     specs = _spec_plus_sys(
         specs, env, sys,
-        ignore_env_init, ignore_sys_init,
-        bool_states, bool_actions)
+        ignore_env_init, ignore_sys_init)
     if option == 'gr1c':
         r = gr1c.check_realizable(specs)
     elif option == 'slugs':
@@ -1190,8 +1174,7 @@ def is_realizable(
 
 def _spec_plus_sys(
     specs, env, sys,
-    ignore_env_init, ignore_sys_init,
-    bool_states, bool_actions
+    ignore_env_init, ignore_sys_init
 ):
     if sys is not None:
         if hasattr(sys, 'state_varname'):
@@ -1202,8 +1185,8 @@ def _spec_plus_sys(
             statevar = 'loc'
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
-            bool_states=bool_states,
-            bool_actions=bool_actions,
+            bool_states=False,
+            bool_actions=False,
             statevar=statevar)
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
@@ -1216,8 +1199,8 @@ def _spec_plus_sys(
             statevar = 'eloc'
         env_formula = env_to_spec(
             env, ignore_env_init,
-            bool_states=bool_states,
-            bool_actions=bool_actions,
+            bool_states=False,
+            bool_actions=False,
             statevar=statevar)
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
