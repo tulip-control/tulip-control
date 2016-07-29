@@ -145,7 +145,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
 ctrl = synth.synthesize('gr1c', specs, env=env_sws)
 
