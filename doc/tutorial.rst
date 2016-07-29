@@ -165,8 +165,9 @@ continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
 
 Putting everything together, we now obtain a specification of the form in
 :eq:`spec` (see also :doc:`specifications`).  We can then use the GR(1) game
-implementation in `JTLV <http://jtlv.ysaar.net/>`_ or `gr1c
-<http://scottman.net/2012/gr1c>`_ to automatically synthesize a planner that
+implementation in `omega <https://github.com/johnyf/omega>`_ or
+`gr1c <http://scottman.net/2012/gr1c>`_
+to automatically synthesize a strategy that
 ensures the satisfaction of the specification, taking into account all the
 possible behaviors of the environment.  This is done using the
 :literal:`synth.synthesize` function:
@@ -184,7 +185,7 @@ The resulting output is a finite state machine (Mealy machine):
 Example 1: Discrete State Robot Motion Planning
 ```````````````````````````````````````````````
 This example is provided in examples/discrete.py.
-It illustrates the use of the gr1c module in synthesizing a planner
+It illustrates the use of the ``omega`` module in synthesizing a planner
 for a robot that only needs to make discrete decision.
 
 .. image:: robot_simple.*
