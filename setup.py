@@ -41,7 +41,7 @@ def package_jtlv():
     else:
         print('The jtlv synthesis tool was not found. '
               'Try extern/get-jtlv.sh to get it.\n'
-              'It is an optional alternative to gr1c, '
+              'It is an optional alternative to `omega`, '
               'the default GR(1) solver of TuLiP.')
 
 
