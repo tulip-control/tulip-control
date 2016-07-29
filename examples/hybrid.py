@@ -157,7 +157,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller using one of the available
 # methods.
 #
-ctrl = synth.synthesize('gr1c', specs, sys=sys_hyb, ignore_sys_init=True)
+ctrl = synth.synthesize('omega', specs, sys=sys_hyb, ignore_sys_init=True)
 
 if not ctrl.save('hybrid.png'):
     print(ctrl)

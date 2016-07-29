@@ -106,7 +106,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 
-ctrl = synth.synthesize('gr1c', specs)
+ctrl = synth.synthesize('omega', specs)
 
 
 # Generate a graphical representation of the controller for viewing

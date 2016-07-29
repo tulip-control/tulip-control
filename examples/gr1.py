@@ -108,7 +108,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller
 # using one of the available methods.
 #
-mealy_controller = synth.synthesize('gr1c', specs)
+mealy_controller = synth.synthesize('omega', specs)
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.

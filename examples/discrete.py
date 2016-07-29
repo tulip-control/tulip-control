@@ -126,7 +126,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 # @synthesize@
-ctrl = synth.synthesize('gr1c', specs, sys=sys)
+ctrl = synth.synthesize('omega', specs, sys=sys)
 # @synthesize_end@
 
 #
