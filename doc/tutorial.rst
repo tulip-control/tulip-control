@@ -44,9 +44,9 @@ for :math:`t \in \{0,1,2,...\}`
    u[t] \in U,\, d[t] \in D,\, s[0] \in S,
    :label: dynamics
 
-where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous 
-component of the system, 
-:math:`U \subseteq \mathbb{R}^m` is the set of admissible control inputs, 
+where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous
+component of the system,
+:math:`U \subseteq \mathbb{R}^m` is the set of admissible control inputs,
 :math:`D \subseteq \mathbb{R}^p` is the set of exogenous disturbances and
 :math:`s[t], u[t], d[t]` are the continuous state, the control signal and
 the exogenous disturbance, respectively, at time :math:`t`.
@@ -64,16 +64,16 @@ We consider the specification of the form
 
 Here, the assumption :math:`\varphi_{init}` on the initial condition of the system
 is a propositional formula built from :math:`\Pi.`
-The assumption :math:`\varphi_e` on the environment and the desired behavior 
+The assumption :math:`\varphi_e` on the environment and the desired behavior
 :math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
 
-As described in the :doc:`intro`, our approach to this reactive control 
+As described in the :doc:`intro`, our approach to this reactive control
 system synthesis consists of the following main steps:
 
    1. :ref:`Generate a proposition preserving partition of the continuous
-      state space. <ssec:prop-part>` 
+      state space. <ssec:prop-part>`
    2. :ref:`Discretize the continuous state space based on the evolution of
-      the continuous state. <ssec:disc>` 
+      the continuous state. <ssec:disc>`
    3. :ref:`Digital design synthesis. <ssec:syn>`
 
 .. _ssec:prop-part:
@@ -103,7 +103,7 @@ Continuous State Space Discretization
 Given a proposition preserving partition of the continuous state space and
 the evolution of the continuous state as in :eq:`dynamics`,
 we refine the partition based on the reachability relation between cells
-and obtain a finite state abstraction of the evolution of the continuous state, 
+and obtain a finite state abstraction of the evolution of the continuous state,
 represented by a finite transition system.
 
 The LtiSysDyn class is used to define continuous dynamics.
@@ -236,7 +236,7 @@ more of these variables to the empty set.
 The system specification is that the robot should repeatedly revisit
 the upper right corner of the grid while at the same time responding
 to the park signal by visiting the lower left corner.  The LTL
-specification is given by 
+specification is given by
 
 .. math::
    \square\diamond home \wedge \square (park \implies \diamond lot)
@@ -259,7 +259,7 @@ of the environmental specification, the system specification consists of
 four parts that provide additional discrete system variables
 (:literal:`sys_vars`), initial conditions (:literal:`sys_init`), progress
 conditions (:literal:`sys_prog`) and safety conditions
-(:literal:`sys_safe`). 
+(:literal:`sys_safe`).
 
 Finally, we construct the full specification for the system and environment
 by creating a GR(1) specification consisting of the various pieces we have
@@ -270,7 +270,7 @@ constructed:
    :end-before: @specs_create_section_end@
 
 To synthesize the controller, we call the :literal:`synth.synthesize()`
-function. 
+function.
 
 .. literalinclude:: ../examples/discrete.py
    :start-after: @synthesize@
@@ -290,7 +290,7 @@ Example 2: Continuous State Robot Motion Planning
 This example is provided in examples/continuous.py.
 It is an extension of the previous example by including continuous dynamics.
 
-First, we import the necessary modules, 
+First, we import the necessary modules,
 specify the smv file, spc file and aut file,
 and specify the environment and the discrete system variables
 as in the previous example.
@@ -301,7 +301,7 @@ as in the previous example.
 
 Next, we specify the continuous dynamics.  This includes specifying the
 continuous state space, propositions on continuous variables, and the
-dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x + 5d_x, 
+dynamics.  The robot dynamics in this case is :math:`\dot{x} = u_x + 5d_x,
 \dot{y} = u_y + 5d_y,` discretized with a sampling time of 0.2.
 
 .. literalinclude:: ../examples/continuous.py
@@ -330,7 +330,7 @@ controller.
 
 Working with Systems with Piecewise Affine Dynamics
 ---------------------------------------------------
-TuLiP can also handle piecewise affine dynamics of the form: 
+TuLiP can also handle piecewise affine dynamics of the form:
 
 for :math:`t \in \{0,1,2,...\}`
 
@@ -369,10 +369,10 @@ This example is provided in examples/pwa.py.
 It is an extension of the previous examples including a robot model
 with piecewise affine dynamics.
 
-Assume our robot is traveling on a nonhomogenous surface (x-y plane), 
-resulting in different dynamics at different parts of the plane. 
+Assume our robot is traveling on a nonhomogenous surface (x-y plane),
+resulting in different dynamics at different parts of the plane.
 Since the continuous state space in this example is just x-y position, different
-dynamics in different parts of the surface can be modeled as a piecewise 
+dynamics in different parts of the surface can be modeled as a piecewise
 affine system. When :math:`s[t] \in[0, 3]\times[0.5, 2]`, the following dynamics
 are active:
 
@@ -394,6 +394,3 @@ Piecewise affine system can be formed from the dynamics of its subsystems.
    :end-before: @pwasystem_end@
 
 Discretization and synthesis follow exactly as before.
-
-
-
