@@ -410,7 +410,8 @@ def multiple_env_actions_test():
         qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert r
-
+    r = synth.is_realizable('omega', specs, sys=sys)
+    assert r
     # slightly relax assumption
     specs = spec.GRSpec(
         sys_prog=sys_prog,
@@ -418,6 +419,8 @@ def multiple_env_actions_test():
         plus_one=False,
         qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
+    assert not r
+    r = synth.is_realizable('omega', specs, sys=sys)
     assert not r
 
 
