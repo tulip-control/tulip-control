@@ -118,30 +118,26 @@ class basic_test:
         assert gr1c.check_syntax(translate(self.dcounter, 'gr1c'))
 
     def test_check_realizable(self):
-        assert not gr1c.check_realizable(self.f_un,
-                                         init_option="ALL_ENV_EXIST_SYS_INIT")
+        assert not gr1c.check_realizable(self.f_un)
         self.f_un.sys_safety = []
-        assert gr1c.check_realizable(self.f_un,
-                                     init_option="ALL_ENV_EXIST_SYS_INIT")
-        assert gr1c.check_realizable(self.f_un,
-                                     init_option="ALL_INIT")
-
-        assert gr1c.check_realizable(self.dcounter,
-                                     init_option="ALL_ENV_EXIST_SYS_INIT")
-        self.dcounter.sys_init = []
-        assert gr1c.check_realizable(self.dcounter,
-                                     init_option="ALL_INIT")
+        assert gr1c.check_realizable(self.f_un)
+        self.f_un.qinit = '\A \A'
+        self.f_un.env_init = ['x', 'y = 0', 'y = 5']
+        self.f_un.sys_init = list()
+        assert gr1c.check_realizable(self.f_un)
+        assert gr1c.check_realizable(self.dcounter)
+        self.dcounter.qinit = '\A \A'
+        self.dcounter.sys_init = list()
+        assert gr1c.check_realizable(self.dcounter)
 
     def test_synthesize(self):
-        self.f_un.sys_safety = []  # Make it realizable
-        g = gr1c.synthesize(self.f_un,
-                            init_option="ALL_ENV_EXIST_SYS_INIT")
+        self.f_un.sys_safety = list()  # Make it realizable
+        g = gr1c.synthesize(self.f_un)
         assert g is not None
         assert len(g.env_vars) == 1 and 'x' in g.env_vars
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
 
-        g = gr1c.synthesize(self.dcounter,
-                            init_option="ALL_ENV_EXIST_SYS_INIT")
+        g = gr1c.synthesize(self.dcounter)
         assert g is not None
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
@@ -149,14 +145,14 @@ class basic_test:
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
-        self.dcounter.sys_init = []
-        g = gr1c.synthesize(self.dcounter,
-                            init_option="ALL_INIT")
+        self.dcounter.qinit = '\A \A'
+        self.dcounter.sys_init = list()
+        g = gr1c.synthesize(self.dcounter)
         assert g is not None
         print g
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
-        assert len(g) == 6
+        assert len(g) == 6, len(g)
 
 
 class GR1CSession_test:
@@ -253,8 +249,8 @@ def test_load_aut_json():
 
 @raises(ValueError)
 def synth_init_illegal_check(init_option):
-    spc = GRSpec()
-    gr1c.synthesize(spc, init_option=init_option)
+    spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
+    gr1c.synthesize(spc)
 
 
 def synth_init_illegal_test():
@@ -264,8 +260,8 @@ def synth_init_illegal_test():
 
 @raises(ValueError)
 def realiz_init_illegal_check(init_option):
-    spc = GRSpec()
-    gr1c.check_realizable(spc, init_option=init_option)
+    spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
+    gr1c.check_realizable(spc)
 
 
 def realiz_init_illegal_test():
