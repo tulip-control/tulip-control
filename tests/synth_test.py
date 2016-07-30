@@ -401,14 +401,21 @@ def multiple_env_actions_test():
                  '(env_bob = "bright") )')}
     sys_prog = {'loc = "s1"', 'loc = "s2"'}
 
-    specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
-
+    specs = spec.GRSpec(
+        env_safety=env_safe,
+        sys_prog=sys_prog,
+        moore=False,
+        plus_one=False,
+        qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert r
 
     # slightly relax assumption
-    specs = spec.GRSpec(sys_prog=sys_prog)
-
+    specs = spec.GRSpec(
+        sys_prog=sys_prog,
+        moore=False,
+        plus_one=False,
+        qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert not r
 
@@ -616,8 +623,15 @@ def test_determinize_machine_init():
 
 class synthesize_test:
     def setUp(self):
-        self.f_triv = spec.GRSpec(sys_vars="y")
-        self.trivial_unreachable = spec.GRSpec(sys_vars="y", sys_prog="False")
+        self.f_triv = spec.GRSpec(
+            sys_vars="y",
+            moore=False,
+            plus_one=False)
+        self.trivial_unreachable = spec.GRSpec(
+            sys_vars="y",
+            sys_prog="False",
+            moore=False,
+            plus_one=False)
 
     def tearDown(self):
         self.f_triv = None

@@ -67,11 +67,18 @@ def test_stability():
     assert 'a' in s.sys_vars
     assert 'p' in s.sys_vars
 
+    s.moore = False
+    s.plus_one = False
+    s.qinit = '\A \E'
+
     # p && X[]!p
     s0 = spec.GRSpec(
         sys_vars={'p'}, sys_init={'p'},
         sys_safety={'p -> X !p',
-                    '!p -> X !p'}
+                    '!p -> X !p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s0)
 
@@ -79,14 +86,20 @@ def test_stability():
     s1 = spec.GRSpec(
         sys_vars={'p'}, sys_init={'!p'},
         sys_safety={'!p -> X p',
-                    'p -> X p'}
+                    'p -> X p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s1)
 
     # []<>p && []<>!p
     s2 = spec.GRSpec(
         sys_vars={'p'},
-        sys_prog={'p', '!p'}
+        sys_prog={'p', '!p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s2)
 
@@ -99,7 +112,10 @@ def test_stability():
         env_vars={'b'}, env_init={'b'},
         env_prog={'!b'},
         sys_vars={'p'}, sys_init={'!p'},
-        sys_safety={'(b && !p) -> X !p'})
+        sys_safety={'(b && !p) -> X !p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E')
 
     assert synth.is_realizable('gr1c', s | s3)
 
@@ -119,33 +135,52 @@ def test_response():
     assert 'p' in s.sys_vars
     assert 'q' in s.sys_vars
 
+    s.moore = False
+    s.plus_one = False
+    s.qinit = '\A \E'
+
     # p && []!q
     s0 = spec.GRSpec(
-        sys_vars={'p', 'q'}, sys_init={'p'},
-        sys_safety={'!q'}
+        sys_vars={'p', 'q'},
+        sys_init={'p'},
+        sys_safety={'!q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s0)
 
     # []!p && []!q
     s1 = spec.GRSpec(
-        sys_vars={'p', 'q'}, sys_safety={'!p && !q'}
+        sys_vars={'p', 'q'},
+        sys_safety={'!p && !q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s1)
 
     # p && q
     s2 = spec.GRSpec(
-        sys_vars={'p', 'q'}, sys_init={'p && q'},
+        sys_vars={'p', 'q'},
+        sys_init={'p && q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s2)
 
     # alternating p, alternating q
     s3 = spec.GRSpec(
-        sys_vars={'p', 'q'}, sys_safety={
+        sys_vars={'p', 'q'},
+        sys_safety={
             'p -> X !p',
             '!p -> X p',
             'p -> X q',
-            'q -> X ! q'
-        }
+            'q -> X ! q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s3)
     # print((s | s2).pretty() )
@@ -159,16 +194,28 @@ def test_eventually():
     assert 'c' in s.sys_vars
     assert 'p' in s.sys_vars
 
+    s.moore = False
+    s.plus_one = False
+    s.qinit = '\A \E'
+
     # []!p
     s0 = spec.GRSpec(
-        sys_vars={'p'}, sys_safety={'!p'}
+        sys_vars={'p'},
+        sys_safety={'!p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s0)
 
     # !p && []<>p && []<>!p
     s1 = spec.GRSpec(
-        sys_vars={'p'}, sys_init={'!p'},
-        sys_prog={'!p', 'p'}
+        sys_vars={'p'},
+        sys_init={'!p'},
+        sys_prog={'!p', 'p'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s1)
 
@@ -187,24 +234,40 @@ def test_until():
     assert 'p' in s.sys_vars
     assert 'q' in s.sys_vars
 
+    s.moore = False
+    s.plus_one = False
+    s.qinit = '\A \E'
+
     # []!q
     s0 = spec.GRSpec(
-        sys_vars={'q'}, sys_safety={'!q'}
+        sys_vars={'q'},
+        sys_safety={'!q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s0)
 
     # !q && <>q
     s1 = spec.GRSpec(
-        sys_vars={'q'}, sys_init={'!q'},
-        sys_prog={'q'}
+        sys_vars={'q'},
+        sys_init={'!q'},
+        sys_prog={'q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert synth.is_realizable('gr1c', s | s1)
 
     # !q && []!p && <>q
     s1 = spec.GRSpec(
-        sys_vars={'q'}, sys_init={'!q'},
+        sys_vars={'q'},
+        sys_init={'!q'},
         sys_safety={'!p'},
-        sys_prog={'q'}
+        sys_prog={'q'},
+        moore=False,
+        plus_one=False,
+        qinit='\A \E'
     )
     assert not synth.is_realizable('gr1c', s | s1)
 
