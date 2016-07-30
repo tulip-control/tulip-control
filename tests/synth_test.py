@@ -4,6 +4,7 @@ Tests for the tulip.synth module.
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG)
+logging.getLogger('omega').setLevel(logging.WARNING)
 from nose.tools import assert_raises
 import numpy as np
 from scipy import sparse as sp
@@ -362,7 +363,7 @@ def test_only_mode_control():
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
 
-    r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
+    r = synth.is_realizable('omega', specs, env=env_sws, ignore_env_init=True)
     assert not r
 
 
