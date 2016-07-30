@@ -66,6 +66,19 @@ script:
   - export CVXOPT_BUILD_GLPK=1
   - pip install cvxopt==1.1.7
   - python -c "import cvxopt.glpk"
+  # optional python packages
+  - pip install gr1py
+  # lily
+  - ./extern/get-lily.sh
+  - which perl
+  - perl --version
+  - pwd
+  - export PERL5LIB=`pwd`/Lily-1.0.2
+  - export PATH=`pwd`/Lily-1.0.2:$PATH
+  - echo $PATH
+  - which lily.pl
+  # jtlv
+  - ./extern/get-jtlv.sh
   # slow hybrid tests
   - ./run_tests.py --outofsource hybrid
 
