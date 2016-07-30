@@ -62,6 +62,7 @@ def test_synthesis_bool():
 def test_synthesis_fol():
     sp = grspec_1()
     h = omega_int.synthesize_enumerated_streett(sp)
+    assert h is not None
     g = synth.strategy2mealy(h, sp)
     assert g is not None
     assert len(g.inputs) == 1, g.inputs
@@ -152,6 +153,7 @@ def test_is_circular_false():
 def test_synthesis_cudd():
     sp = grspec_1()
     h = omega_int.synthesize_enumerated_streett(sp, use_cudd=True)
+    assert h is not None
     n = len(h)
     assert n == 25, n
 
