@@ -41,6 +41,19 @@ before_install:
   - pip install --ignore-installed --upgrade pip setuptools
   - pip install nose
   - pip install mock
+  # optional python packages
+  - pip install gr1py
+  # lily
+  - ./extern/get-lily.sh
+  - which perl
+  - perl --version
+  - pwd
+  - export PERL5LIB=`pwd`/Lily-1.0.2
+  - export PATH=`pwd`/Lily-1.0.2:$PATH
+  - echo $PATH
+  - which lily.pl
+  # jtlv
+  - ./extern/get-jtlv.sh
 
 install:
   - python setup.py sdist
