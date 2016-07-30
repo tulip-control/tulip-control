@@ -35,6 +35,22 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
+def is_realizable(spec, use_cudd=False):
+    """Return `True` if, and only if, realizable.
+
+    See `synthesize_enumerated_streett` for more details.
+    """
+    aut = _grspec_to_automaton(spec)
+    sym.fill_blanks(aut)
+    bdd = _init_bdd(use_cudd)
+    aut.bdd = bdd
+    a = aut.build()
+    t0 = time.time()
+    z, _, _ = gr1.solve_streett_game(a)
+    t1 = time.time()
+    return gr1.is_realizable(z, a)
+
+
 def synthesize_enumerated_streett(spec, use_cudd=False):
     """Return transducer enumerated as a graph.
 

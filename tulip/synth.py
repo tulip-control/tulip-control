@@ -1159,6 +1159,8 @@ def is_realizable(
         r = slugs.check_realizable(specs)
     elif option == 'gr1py':
         r = gr1py.check_realizable(specs)
+    elif option == 'omega':
+        r = omega_int.is_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
     else:
