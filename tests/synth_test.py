@@ -373,7 +373,7 @@ def multiple_env_actions_test():
     next combination of actions by env players.
     """
     # 1 <---> 2
-    #    ---> 3
+    # 1  ---> 3
 
     env_actions = [
         {
@@ -391,9 +391,9 @@ def multiple_env_actions_test():
     sys.states.initial.add_from({'s1'})
 
     sys.add_edge('s1', 's2', env_alice='left', env_bob='bright')
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
     # at state 3 sys loses
     sys.add_edge('s1', 's3', env_alice='right', env_bob='bleft')
-    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
 
     logging.debug(sys)
 
@@ -623,8 +623,12 @@ class synthesize_test:
         self.f_triv = None
 
     def test_gr1c_basic(self):
-        assert isinstance(synth.synthesize("gr1c", self.f_triv),
-                          transys.MealyMachine)
+        g = synth.synthesize("gr1c", self.f_triv)
+        assert isinstance(g, transys.MealyMachine)
 
     def test_unrealizable(self):
         assert synth.synthesize("gr1c", self.trivial_unreachable) is None
+
+
+if __name__ == '__main__':
+    multiple_env_actions_test()
