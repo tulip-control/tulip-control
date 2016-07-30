@@ -1188,6 +1188,16 @@ def _spec_plus_sys(
             bool_states=False,
             bool_actions=False,
             statevar=statevar)
+        # consider sys just a formula,
+        # not a synthesis problem
+        # so overwrite settings
+        if hasattr(sys, 'moore'):
+            cp = sys
+        else:
+            cp = specs
+        sys_formula.moore = cp.moore
+        sys_formula.plus_one = cp.plus_one
+        sys_formula.qinit = cp.qinit
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
     if env is not None:
@@ -1202,6 +1212,13 @@ def _spec_plus_sys(
             bool_states=False,
             bool_actions=False,
             statevar=statevar)
+        if hasattr(env, 'moore'):
+            cp = env
+        else:
+            cp = specs
+        env_formula.moore = cp.moore
+        env_formula.plus_one = cp.plus_one
+        env_formula.qinit = cp.qinit
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
     logger.info('Overall Spec:\n' + str(specs.pretty()) + _hl)
