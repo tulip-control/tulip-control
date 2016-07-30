@@ -6,7 +6,10 @@ from tulip import synth
 
 
 logging.getLogger('astutils').setLevel('ERROR')
-logging.getLogger('omega.logic').setLevel('ERROR')
+logging.getLogger('omega').setLevel('ERROR')
+log = logging.getLogger('omega.games')
+log.setLevel('WARNING')
+log.addHandler(logging.StreamHandler())
 
 
 def test_grspec_to_automaton():
