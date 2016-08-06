@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-"""
-This example is an extension of robot_discrete.py by including continuous
-dynamics with disturbances.
+"""Controller synthesis for system with continuous (linear) dynamics.
 
-Petter Nilsson (pettni@kth.se)
-August 14, 2011
-
-NO, system and cont. prop definitions based on TuLiP 1.x
-2 Jul, 2013
-NO, TuLiP 1.x discretization
-17 Jul, 2013
+This example is an extension of `robot_discrete.py`,
+by including continuous dynamics with disturbances.
+The dynamics is linear over a bounded set that is a polytope.
 """
-#
+# Petter Nilsson (pettni@kth.se)
+# August 14, 2011
+# NO, system and cont. prop definitions based on TuLiP 1.x
+# 2 Jul, 2013
+# NO, TuLiP 1.x discretization
+# 17 Jul, 2013
+
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-# gr1.py - example of direct GR(1) specification,
-#          using only boolean variables.
-#
-# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
-"""
+"""Example of direct GR(1) specification, using only boolean variables.
+
 This example illustrates the use of TuLiP to synthesize a reactive
 controller for a GR(1) specification.  We code the specification
 directly in GR(1) form and then use TuLiP to synthesize a reactive
@@ -34,6 +31,7 @@ We must convert this specification into GR(1) form:
   env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
+# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 import logging
 logging.basicConfig(level=logging.DEBUG)
 

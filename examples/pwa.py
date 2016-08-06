@@ -1,13 +1,8 @@
 #!/usr/bin/env python
-"""
-This example is an extension of the robot_continuous.py
-code by Petter Nilsson and Nok Wongpiromsarn.
-
-It demonstrates  the use of TuLiP for systems with
-piecewise affine dynamics.
-
-Necmiye Ozay, August 26, 2012
-"""
+"""Controller synthesis for system with piecewise-affine continuous dynamics."""
+# This example is an extension of `robot_continuous.py`
+# by Petter Nilsson and Nok Wongpiromsarn.
+# Necmiye Ozay, August 26, 2012
 import numpy as np
 
 from tulip import spec, synth

@@ -1,22 +1,24 @@
-# This is an example to demonstrate how the output of a discretization algorithm
-# that abstracts a switched system, where the mode of the system depends on a
-# combination of environment and system controlled variables, might look like.
-# We assume within each mode the control authority is rich enough to establish
-# deterministic reachability relations through the use of low-level continuous
-# inputs.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction with mixed switching.
 
+This is an example to demonstrate how the output of a discretization algorithm
+that abstracts a switched system might look like,
+where the mode of the system depends on a combination of
+environment and system controlled variables.
+
+We assume within each mode that the control authority is rich enough to
+establish deterministic reachability relations,
+through the use of low-level continuous inputs.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
 import logging
 logging.basicConfig(level=logging.INFO)
 logging.getLogger('tulip.spec').setLevel(logging.ERROR)

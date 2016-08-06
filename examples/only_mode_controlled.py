@@ -1,19 +1,19 @@
-# This is an example to demonstrate how the output of abstracting a switched
-# system, where the only control over the dynamics is through mode switching
-# might look like.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction of switched dynamics.
 
+This is an example to demonstrate how the output of abstracting a switched
+system, where the only control over the dynamics is through mode switching,
+might look like.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp

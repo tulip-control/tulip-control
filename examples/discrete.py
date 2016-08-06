@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# discrete.py - example using transition system dynamics
-#
-# RMM, 20 Jul 2013
-"""
+"""Example using transition system dynamics.
+
 This example illustrates the use of TuLiP to synthesize a reactive
 controller for system whose dynamics are described by a discrete
 transition system.
 """
+# RMM, 20 Jul 2013
 #
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing

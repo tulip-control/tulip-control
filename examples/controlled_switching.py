@@ -1,20 +1,20 @@
-# This is an example to demonstrate how the output of abstracting a switched
-# system, where the dynamics are controlled through switching and
-# if multiple transitions are possible from a state in some mode,
-# then the system controls which one is taken.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction of controlled switched dynamics.
 
+This is an example to demonstrate how the output of abstracting a switched
+system, where the dynamics are controlled through switching and
+if multiple transitions are possible from a state in some mode,
+then the system controls which one is taken.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
