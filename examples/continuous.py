@@ -17,7 +17,6 @@ The dynamics is linear over a bounded set that is a polytope.
 # strings of the form @label@ are used for this purpose.
 
 import logging
-logging.basicConfig(level=logging.INFO)
 
 # @import_section@
 import numpy as np
@@ -28,6 +27,8 @@ from tulip.abstract import prop2part, discretize
 from tulip.abstract.plot import plot_partition
 # @import_section_end@
 
+
+logging.basicConfig(level=logging.WARNING)
 show = False
 
 # @dynamics_section@

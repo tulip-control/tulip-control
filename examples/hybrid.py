@@ -20,13 +20,15 @@ We will assume, we have the 6 cell robot example.
 """
 # NO, 26 Jul 2013.
 import logging
-logging.basicConfig(level=logging.INFO)
-logging.getLogger('tulip.spec').setLevel(logging.ERROR)
-logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
 
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+
+
+logging.basicConfig(level=logging.WARNING)
+logging.getLogger('tulip.spec').setLevel(logging.WARNING)
+logging.getLogger('tulip.synth').setLevel(logging.WARNING)
 
 
 ###########################################

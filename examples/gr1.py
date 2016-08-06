@@ -33,11 +33,14 @@ We must convert this specification into GR(1) form:
 """
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 # Import the packages that we need
 from tulip import spec, synth
 from tulip.transys import machines
+
+
+logging.basicConfig(level=logging.WARNING)
+
 
 #
 # Environment specification
