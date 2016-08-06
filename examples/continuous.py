@@ -16,11 +16,10 @@ The dynamics is linear over a bounded set that is a polytope.
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
 
+# @import_section@
 import logging
 
-# @import_section@
 import numpy as np
-
 from tulip import spec, synth, hybrid
 from polytope import box2poly
 from tulip.abstract import prop2part, discretize

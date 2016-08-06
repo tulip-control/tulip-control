@@ -4,12 +4,15 @@
 # by Petter Nilsson and Nok Wongpiromsarn.
 # Necmiye Ozay, August 26, 2012
 import numpy as np
-
-from tulip import spec, synth
-from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from polytope import box2poly
-from tulip.abstract import prop2part, discretize
+from tulip.abstract import discretize
+from tulip.abstract import prop2part
 from tulip.abstract.plot import plot_strategy
+from tulip.hybrid import LtiSysDyn
+from tulip.hybrid import PwaSysDyn
+from tulip import spec
+from tulip import synth
+
 
 plotting = True
 

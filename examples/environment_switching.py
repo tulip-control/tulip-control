@@ -14,9 +14,12 @@ We will assume, we have the 6 cell robot example.
      +---+---+---+
 """
 # NO, 26 Jul 2013.
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+from tulip import spec
+from tulip import synth
+from tulip import transys
+
 
 ###########################################
 # Environment switched system with 2 modes:

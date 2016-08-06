@@ -12,8 +12,8 @@ U{https://pypi.python.org/pypi/omega}
 """
 from __future__ import absolute_import
 import logging
-import networkx as nx
 import time
+
 try:
     import dd.bdd as _bdd
 except ImportError:
@@ -30,6 +30,7 @@ try:
     from omega.games import enumeration as enum
 except ImportError:
     omega = None
+import networkx as nx
 
 
 log = logging.getLogger(__name__)

@@ -10,12 +10,10 @@ transition system.
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
-#
-
-import logging
 
 # @import_section@
 # Import the packages that we need
+import logging
 from tulip import transys, spec, synth
 # @import_section_end@
 

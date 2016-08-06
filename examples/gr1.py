@@ -32,10 +32,11 @@ We must convert this specification into GR(1) form:
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
+# Import the packages that we need
 import logging
 
-# Import the packages that we need
-from tulip import spec, synth
+from tulip import spec
+from tulip import synth
 from tulip.transys import machines
 
 
