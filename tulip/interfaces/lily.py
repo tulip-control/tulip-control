@@ -41,11 +41,15 @@ import logging
 import os
 import re
 import subprocess
+
 import networkx as nx
-from tulip.spec.translation import translate, translate_ast
+
 from tulip.spec.parser import parse
-from tulip.spec.form import LTL, GRSpec
+from tulip.spec.translation import translate
+from tulip.spec.translation import translate_ast
 from tulip.transys import MooreMachine
+from tulip.spec.form import GRSpec
+from tulip.spec.form import LTL
 
 
 logger = logging.getLogger(__name__)
