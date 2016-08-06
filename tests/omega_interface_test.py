@@ -113,8 +113,8 @@ def test_synthesis_moore():
 
 def test_synthesis_mealy_all_init():
     sp = grspec_3()
-    with nt.assert_raises(AssertionError):
-        omega_int.synthesize_enumerated_streett(sp)
+    h = omega_int.synthesize_enumerated_streett(sp)
+    assert h is None, 'should be unrealizable'
     sp.env_init = ['y = x']
     h = omega_int.synthesize_enumerated_streett(sp)
     g = synth.strategy2mealy(h, sp)
@@ -179,6 +179,7 @@ def grspec_0():
 def grspec_1():
     sp = form.GRSpec()
     sp.moore = False
+    sp.plus_one = False
     sp.env_vars = dict(x=(0, 4))
     sp.sys_vars = dict(y=(0, 4))
     sp.env_init = ['(0 <= y) & (y <= 4)']
