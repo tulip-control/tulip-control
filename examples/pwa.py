@@ -80,8 +80,9 @@ subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
 sys_dyn = PwaSysDyn(subsystems, cont_state_space)
-ax = sys_dyn.plot()
-ax.figure.savefig('pwa_sys_dyn.pdf')
+if plotting:
+    ax = sys_dyn.plot()
+    ax.figure.savefig('pwa_sys_dyn.pdf')
 # @pwasystem_end@
 
 # Continuous proposition
@@ -92,19 +93,19 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 # Compute the proposition preserving partition
 # of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
-ax = cont_partition.plot()
-cont_partition.plot_props(ax=ax)
-ax.figure.savefig('spec_ppp.pdf')
+if plotting:
+    ax = cont_partition.plot()
+    cont_partition.plot_props(ax=ax)
+    ax.figure.savefig('spec_ppp.pdf')
 
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
     N=8, min_cell_volume=0.1, plotit=plotting, save_img=True,
-    cont_props=cont_props
-)
-ax = disc_dynamics.plot(show_ts=True)
-ax.figure.savefig('abs_pwa.pdf')
-
-disc_dynamics.ts.save('ts.pdf')
+    cont_props=cont_props)
+if plotting:
+    ax = disc_dynamics.plot(show_ts=True)
+    ax.figure.savefig('abs_pwa.pdf')
+    disc_dynamics.ts.save('ts.pdf')
 
 # Specifications
 
