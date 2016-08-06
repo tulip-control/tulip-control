@@ -48,7 +48,10 @@ from __future__ import absolute_import
 
 import logging
 import numpy as np
-from cvxopt import matrix, solvers
+try:
+    from cvxopt import matrix, solvers
+except ImportError:
+    solvers = None
 
 import polytope as pc
 
@@ -58,11 +61,19 @@ from .feasible import solve_feasible, createLM, _block_diag2
 logger = logging.getLogger(__name__)
 try:
     import cvxopt.glpk
+    solvers.options['msg_lev'] = 'GLP_MSG_OFF'
 except ImportError:
     logger.warn(
         '`tulip` failed to import `cvxopt.glpk`.\n'
         'Will use Python solver of `cvxopt`.')
-solvers.options['msg_lev'] = 'GLP_MSG_OFF'
+
+
+def assert_cvxopt():
+    """Raise `ImportError` if `cvxopt.solvers` failed to import."""
+    if solvers is None:
+        raise ImportError(
+            'Failed to import `cvxopt.solvers`.'
+            'Unable to solve quadratic programming problems.')
 
 
 def get_input(
@@ -320,6 +331,7 @@ def get_input_helper(
 
     and minimizes x'Rx + 2*r'x + u'Qu
     """
+    assert_cvxopt()
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
 
