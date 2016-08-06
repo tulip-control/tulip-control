@@ -154,9 +154,16 @@ sys_safe |= {'(sys_actions = "gear1" && env_actions = "slippery") -> ' +
 # to use int actions:
 # sys_safe |= {'((act = gear1) && (eact = slippery)) -> X (act = gear1)'}
 
-# Create the specification
+
+# Create the specification formulae
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+# Mealy controller (can decide based on `env_vars'`)
+specs.moore = False
+# Pick initial values for system variables that
+# work for all assumed environment initial conditions.
+specs.qinit = '\E \A'
+
 
 # Controller synthesis
 #

@@ -107,6 +107,16 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # Controller synthesis
 #
+# The controller decides based on current variable values only,
+# without knowing yet the next values that environment variables take.
+# A controller with this information flow is known as Moore.
+specs.moore = True
+# Ask the synthesizer to find initial values for system variables
+# that, for each initial values that environment variables can
+# take and satisfy `env_init`, the initial state satisfies
+# `env_init /\ sys_init`.
+specs.qinit = '\E \A'  # i.e., "there exist sys_vars: forall sys_vars"
+
 # At this point we can synthesize the controller
 # using one of the available methods.
 strategy = synth.synthesize('omega', specs)

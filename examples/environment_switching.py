@@ -119,6 +119,11 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+# controller decides based on current values `env_vars, sys_vars`
+# and next values `env_vars'`. A controller with this
+# information flow is known as Mealy.
+specs.moore = False
+specs.qinit = '\A \E'
 
 # Controller synthesis
 #

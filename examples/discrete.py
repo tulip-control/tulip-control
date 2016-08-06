@@ -14,6 +14,7 @@ transition system.
 # @import_section@
 # Import the packages that we need
 import logging
+
 from tulip import transys, spec, synth
 # @import_section_end@
 
@@ -126,6 +127,13 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 # @synthesize@
+# Moore machines
+# controller reads `env_vars, sys_vars`, but not next `env_vars` values
+specs.moore = True
+# synthesizer should find initial system values that satisfy
+# `env_init /\ sys_init` and work, for every environment variable
+# initial values that satisfy `env_init`.
+specs.qinit = '\E \A'
 ctrl = synth.synthesize('omega', specs, sys=sys)
 assert ctrl is not None, 'unrealizable'
 # @synthesize_end@

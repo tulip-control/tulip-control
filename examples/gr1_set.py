@@ -97,6 +97,7 @@ sys_prog |= {'X0reach', 'loc=5'}
 # Create a GR(1) specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.qinit = '\E \A'  # Moore initial condition synthesized too
 
 #
 # Controller synthesis
