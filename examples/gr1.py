@@ -109,14 +109,14 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # At this point we can synthesize the controller
 # using one of the available methods.
+strategy = synth.synthesize('omega', specs)
 #
-mealy_controller = synth.synthesize('omega', specs)
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-if not mealy_controller.save('gr1.png'):
-    print(mealy_controller)
+if not strategy.save('gr1.png'):
+    print(strategy)
 
 # simulate
-print(mealy_controller)
-machines.random_run(mealy_controller, N=10)
+print(strategy)
+machines.random_run(strategy, N=10)
