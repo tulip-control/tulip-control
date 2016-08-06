@@ -14,7 +14,8 @@ from tulip import spec
 from tulip import synth
 
 
-plotting = True
+# set to `True` if `matplotlib.pyplot` is available
+plotting = False
 
 # Problem parameters
 input_bound = 0.4
