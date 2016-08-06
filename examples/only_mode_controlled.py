@@ -149,6 +149,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 ctrl = synth.synthesize('omega', specs, env=env_sws)
+assert ctrl is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('only_mode_controlled.png'):

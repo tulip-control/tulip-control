@@ -164,6 +164,6 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 ctrl = synth.synthesize('omega', specs, sys=sys_hyb, ignore_sys_init=True)
-
+assert ctrl is not None, 'unrealizable'
 if not ctrl.save('hybrid.png'):
     print(ctrl)

@@ -106,6 +106,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 
 ctrl = synth.synthesize('omega', specs)
+assert ctrl is not None, 'unrealizable'
 
 
 # Generate a graphical representation of the controller for viewing

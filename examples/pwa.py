@@ -132,6 +132,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Synthesize
 ctrl = synth.synthesize('omega', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
 if plotting:
     ax = plot_strategy(disc_dynamics, ctrl)
     ax.figure.savefig('pwa_proj_mealy.pdf')

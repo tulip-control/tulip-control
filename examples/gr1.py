@@ -110,7 +110,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # At this point we can synthesize the controller
 # using one of the available methods.
 strategy = synth.synthesize('omega', specs)
-#
+assert strategy is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.

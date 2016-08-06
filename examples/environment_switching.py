@@ -126,6 +126,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # methods.
 #
 ctrl = synth.synthesize('omega', specs, sys=sys_swe, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
 
 # @plot_print@
 if not ctrl.save('environment_switching.png'):

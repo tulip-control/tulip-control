@@ -127,6 +127,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # @synthesize@
 ctrl = synth.synthesize('omega', specs, sys=sys)
+assert ctrl is not None, 'unrealizable'
 # @synthesize_end@
 
 #
