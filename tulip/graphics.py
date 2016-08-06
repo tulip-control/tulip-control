@@ -50,6 +50,7 @@ try:
     from matplotlib import pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
 except Exception as e:
+    plt = None
     logger.error(e)
 
 # from mayavi import mlab
@@ -97,6 +98,7 @@ def newax(subplots=(1, 1), fig=None,
     @rtype: list or list of lists,
         depending on C{mode} above
     """
+    assert_pyplot()
     # layout or number of axes ?
     try:
         subplot_layout = tuple(subplots)
@@ -211,6 +213,7 @@ def quiver(x, v, ax=None, **kwargs):
 
     @return: handle to plotted object(s)
     """
+    assert_pyplot()
     # multiple axes ?
     try:
         fields = [quiver(x, v, i, **kwargs) for i in ax]
@@ -250,3 +253,8 @@ def _grouper(n, iterable, fillvalue=None):
     """
     args = [iter(iterable)] * n
     return izip_longest(fillvalue=fillvalue, *args)
+
+
+def assert_pyplot():
+    if plt is None:
+        raise ImportError('Failed to import `matplotlib.pyplot`')
