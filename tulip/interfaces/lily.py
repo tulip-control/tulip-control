@@ -43,6 +43,7 @@ import re
 import subprocess
 
 import networkx as nx
+import pydot
 
 from tulip.spec.parser import parse
 from tulip.spec.translation import translate
@@ -127,7 +128,9 @@ def synthesize(formula, env_vars=None, sys_vars=None):
     if dotf.read(len(fail_msg)) == fail_msg:
         return None
     dotf.seek(0)
-    g = nx.read_dot(dotf)
+    data = dotf.read()
+    (pd,) = pydot.graph_from_dot_data(data)
+    g = nx.drawing.nx_pydot.from_pydot(pd)
     dotf.close()
     moore = lily_strategy2moore(g, env_vars, sys_vars)
     return moore
