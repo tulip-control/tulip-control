@@ -111,7 +111,7 @@ def run_setup():
             'numpy >= 1.7',
             'ply >= 3.4',
             'polytope >= 0.1.2',
-            'pydot >= 1.1.0',
+            'pydot >= 1.2.0',
             'scipy'],
         tests_require=[
             'nose',
