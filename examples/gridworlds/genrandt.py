@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import tulip.gridworld as gw
 
 
-TROLL_RADIUS=1
+TROLL_RADIUS = 1
 
 if len(sys.argv) > 11 or "-h" in sys.argv:
     print("Usage: genrandt.py [-p] [-i FILE] [-t N] [-g G] [-b] [H W]")

@@ -52,8 +52,7 @@ from spec.form import GRSpec
 
 
 class GridWorld(object):
-    """4-connected grids with primitives like obstacles and goals
-    """
+    """4-connected grids with primitives like obstacles and goals."""
 
     def __init__(self, gw_desc=None, prefix="Y"):
         """Load gridworld described in given string, or make empty instance.

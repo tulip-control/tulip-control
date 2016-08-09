@@ -1,7 +1,4 @@
-"""
-Tests for the tulip.gridworld
-"""
-
+"""Tests for the tulip.gridworld."""
 import numpy as np
 import tulip.gridworld as gw
 from tulip.synth import is_realizable
@@ -41,7 +38,8 @@ class GridWorld_test:
     def setUp(self):
         self.prefix = "testworld"
         self.X = gw.GridWorld(REFERENCE_GWFILE, prefix=self.prefix)
-        self.Y_testpaths = gw.GridWorld(UNREACHABLE_GOAL_GWFILE, prefix=self.prefix)
+        self.Y_testpaths = gw.GridWorld(UNREACHABLE_GOAL_GWFILE,
+                                        prefix=self.prefix)
 
     def tearDown(self):
         self.X = None
@@ -64,15 +62,77 @@ class GridWorld_test:
         assert Z == self.X
 
     def test_getitem(self):
-        assert self.X.__getitem__((0,0), nonbool=False) == self.prefix+"_"+str(0)+"_"+str(0)
-        assert self.X.__getitem__((-1,0), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(0)
-        assert self.X.__getitem__((-1,-2), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(8)
+        assert self.X.__getitem__(
+            (0,0), nonbool=False) == self.prefix+"_"+str(0)+"_"+str(0)
+        assert self.X.__getitem__(
+            (-1,0), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(0)
+        assert self.X.__getitem__(
+            (-1,-2), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(8)
 
     def test_state(self):
-        assert self.X.state((2,3), nonbool=False) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 1, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
-        assert self.X.state((-1,0), nonbool=False) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 1, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
-        assert self.X.state((-1,-1), nonbool=False) == {'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0, 'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0, 'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0, 'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0, 'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0, 'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0, 'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0, 'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0, 'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0, 'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0, 'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0, 'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0, 'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0, 'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0, 'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0, 'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0, 'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 1, 'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0, 'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0, 'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
-
+        assert self.X.state((2,3), nonbool=False) == {
+            'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0,
+            'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0,
+            'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0,
+            'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0,
+            'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0,
+            'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0,
+            'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0,
+            'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0,
+            'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0,
+            'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0,
+            'testworld_2_3': 1, 'testworld_2_2': 0, 'testworld_2_1': 0,
+            'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0,
+            'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0,
+            'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0,
+            'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0,
+            'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0,
+            'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0,
+            'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0,
+            'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0,
+            'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
+        assert self.X.state((-1,0), nonbool=False) == {
+            'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0,
+            'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0,
+            'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0,
+            'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0,
+            'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0,
+            'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0,
+            'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0,
+            'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0,
+            'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0,
+            'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0,
+            'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0,
+            'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0,
+            'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0,
+            'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0,
+            'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0,
+            'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0,
+            'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 0,
+            'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0,
+            'testworld_5_5': 0, 'testworld_5_0': 1, 'testworld_5_4': 0,
+            'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
+        assert self.X.state((-1,-1), nonbool=False) == {
+            'testworld_3_9': 0, 'testworld_1_8': 0, 'testworld_1_9': 0,
+            'testworld_1_4': 0, 'testworld_1_5': 0, 'testworld_1_6': 0,
+            'testworld_1_7': 0, 'testworld_1_0': 0, 'testworld_1_1': 0,
+            'testworld_1_2': 0, 'testworld_1_3': 0, 'testworld_0_5': 0,
+            'testworld_0_4': 0, 'testworld_0_7': 0, 'testworld_0_6': 0,
+            'testworld_0_1': 0, 'testworld_0_0': 0, 'testworld_0_3': 0,
+            'testworld_0_2': 0, 'testworld_5_7': 0, 'testworld_0_9': 0,
+            'testworld_0_8': 0, 'testworld_3_2': 0, 'testworld_3_3': 0,
+            'testworld_2_9': 0, 'testworld_2_8': 0, 'testworld_3_6': 0,
+            'testworld_3_7': 0, 'testworld_3_4': 0, 'testworld_3_5': 0,
+            'testworld_2_3': 0, 'testworld_2_2': 0, 'testworld_2_1': 0,
+            'testworld_2_0': 0, 'testworld_2_7': 0, 'testworld_2_6': 0,
+            'testworld_2_5': 0, 'testworld_2_4': 0, 'testworld_4_1': 0,
+            'testworld_4_0': 0, 'testworld_4_3': 0, 'testworld_4_2': 0,
+            'testworld_4_5': 0, 'testworld_4_4': 0, 'testworld_4_7': 0,
+            'testworld_4_6': 0, 'testworld_4_9': 0, 'testworld_4_8': 0,
+            'testworld_5_8': 0, 'testworld_5_2': 0, 'testworld_5_9': 1,
+            'testworld_3_0': 0, 'testworld_3_1': 0, 'testworld_5_3': 0,
+            'testworld_5_5': 0, 'testworld_5_0': 0, 'testworld_5_4': 0,
+            'testworld_5_1': 0, 'testworld_5_6': 0, 'testworld_3_8': 0}
 
     def test_equality(self):
         assert self.X == gw.GridWorld(REFERENCE_GWFILE)
@@ -80,7 +140,6 @@ class GridWorld_test:
         assert self.X != Y
         Y = gw.GridWorld(TRIVIAL_GWFILE)
         assert self.X != Y
-
 
     def test_dumploadloop(self):
         assert self.X == gw.GridWorld(self.X.dumps())
@@ -155,8 +214,15 @@ class RandomWorld_test():
     def setUp(self):
         self.wall_densities = [.2, .4, .6]
         self.sizes = [(4,5), (4,5), (10,20)]
-        self.rworlds = [gw.random_world(self.sizes[r], wall_density=self.wall_densities[r], prefix="Y") for r in range(len(self.sizes))]
-        self.rworlds_ensuredfeasible = [gw.random_world(self.sizes[r], self.wall_densities[r], num_init=2, num_goals=2, ensure_feasible=True) for r in range(len(self.sizes))]
+        self.rworlds = [
+            gw.random_world(
+                self.sizes[r], wall_density=self.wall_densities[r], prefix="Y")
+            for r in range(len(self.sizes))]
+        self.rworlds_ensuredfeasible = [
+            gw.random_world(
+                self.sizes[r], self.wall_densities[r], num_init=2,
+                num_goals=2, ensure_feasible=True)
+            for r in range(len(self.sizes))]
 
     def tearDown(self):
         self.rworlds = []
@@ -165,10 +231,18 @@ class RandomWorld_test():
         for r in range(len(self.rworlds_ensuredfeasible)):
             print "test \"ensured feasible\" world index", r
             print self.rworlds_ensuredfeasible[r]
-            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].init_list[0], self.rworlds_ensuredfeasible[r].init_list[1])
-            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].init_list[1], self.rworlds_ensuredfeasible[r].goal_list[0])
-            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].goal_list[0], self.rworlds_ensuredfeasible[r].goal_list[1])
-            assert self.rworlds_ensuredfeasible[r].is_reachable(self.rworlds_ensuredfeasible[r].goal_list[1], self.rworlds_ensuredfeasible[r].init_list[0])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(
+                self.rworlds_ensuredfeasible[r].init_list[0],
+                self.rworlds_ensuredfeasible[r].init_list[1])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(
+                self.rworlds_ensuredfeasible[r].init_list[1],
+                self.rworlds_ensuredfeasible[r].goal_list[0])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(
+                self.rworlds_ensuredfeasible[r].goal_list[0],
+                self.rworlds_ensuredfeasible[r].goal_list[1])
+            assert self.rworlds_ensuredfeasible[r].is_reachable(
+                self.rworlds_ensuredfeasible[r].goal_list[1],
+                self.rworlds_ensuredfeasible[r].init_list[0])
 
     def test_size(self):
         for r in range(len(self.rworlds)):
@@ -186,7 +260,9 @@ class RandomWorld_test():
                 for j in range(num_cols):
                     if not self.rworlds[r].is_empty((i,j)):
                         num_occupied += 1
-            assert float(num_occupied)/(num_rows*num_cols) == self.wall_densities[r]
+            assert (
+                float(num_occupied) / (num_rows*num_cols) ==
+                self.wall_densities[r])
 
 RandomWorld_test.slow = True
 
@@ -194,17 +270,21 @@ RandomWorld_test.slow = True
 def extract_coord_check(label, expected_coord):
     assert gw.extract_coord(label) == expected_coord
 
+
 def extract_coord_test():
-    for (label, expected_coord) in [("test_3_0", ("test", 3, 0)),
-                                    ("obstacle_5_4_11", ("obstacle_5", 4, 11)),
-                                    ("test3_0", None)]:
+    for (label, expected_coord) in [
+            ("test_3_0", ("test", 3, 0)),
+            ("obstacle_5_4_11", ("obstacle_5", 4, 11)),
+            ("test3_0", None)]:
         yield extract_coord_check, label, expected_coord
+
 
 def eq_GridWorld_check(G, H, eq):
     if eq:
         G == H
     else:
         not (G == H)
+
 
 def eq_GridWorld_test():
     empty = gw.GridWorld()
@@ -218,17 +298,20 @@ def eq_GridWorld_test():
     trivial_nonempty_2goals.goal_list = [(0, 0), (1, 1)]
     trivial_nonempty_2init = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_nonempty_2init.init_list = [(0, 0), (1, 1)]
-    for (G, H, is_equal) in [(gw.GridWorld(), gw.GridWorld(), True),
-                             (empty, trivial_nonempty, False),
-                             (trivial_nonempty_2goals, trivial_nonempty, False),
-                             (trivial_nonempty_2init, trivial_nonempty, False),
-                             (trivial_nonempty, trivial_diff, False),
-                             (gw.unoccupied((3, 5)), gw.unoccupied((1, 1)), False)]:
-        yield eq_GridWorld_check, G, H, is_equal
+    for (G, H, is_equal) in [
+            (gw.GridWorld(), gw.GridWorld(), True),
+            (empty, trivial_nonempty, False),
+            (trivial_nonempty_2goals, trivial_nonempty, False),
+            (trivial_nonempty_2init, trivial_nonempty, False),
+            (trivial_nonempty, trivial_diff, False),
+            (gw.unoccupied((3, 5)), gw.unoccupied((1, 1)), False)]:
+        yield eq_gridworld_check, G, H, is_equal
+
 
 def narrow_passage_test():
     G = gw.narrow_passage((5, 10), num_init=1, num_goals=1)
     assert G.is_reachable(G.init_list[0], G.goal_list[0])
+
 
 def scale_GridWorld_test():
     G = gw.unoccupied((1, 2))
@@ -238,6 +321,7 @@ def scale_GridWorld_test():
     assert G.scale(xf=2).size() == (1, 4)
     assert G.scale(yf=2).size() == (2, 2)
     assert G.scale(xf=3, yf=4).size() == (4, 6)
+
 
 def add_trolls_test():
     G = gw.unoccupied((3, 5))
