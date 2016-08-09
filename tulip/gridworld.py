@@ -47,7 +47,7 @@ from spec.form import GRSpec
 # inline:
 #
 # import polytope
-# import abstract.prop2part
+# import tulip.abstract.prop2part
 # import matplotlib
 
 
@@ -664,7 +664,7 @@ class GridWorld(object):
             raise ImportError('GridWorld.dump_ppartition() requires '
                               'the Python package polytope.')
         try:
-            from abstract import prop2partition
+            from tulip.abstract import prop2partition
         except ImportError:
             raise ImportError('GridWorld.dump_ppartition() requires '
                               'tulip.abstract, which may not be available '
