@@ -218,7 +218,7 @@ def _underapproximate_attractor(
         # empty target polytope ?
         if not pc.is_fulldim(p2):
             return pc.Polytope()
-    return p2
+    return r
 
 
 def _print_horizon_warning():
