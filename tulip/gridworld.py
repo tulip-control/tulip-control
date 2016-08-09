@@ -293,7 +293,8 @@ class GridWorld(object):
             CLOSED.append(current)
         return False
 
-    def plot(self, font_pt=18, show_grid=False, grid_width=2, troll_list=[], axes=None):
+    def plot(self, font_pt=18, show_grid=False, grid_width=2,
+             troll_list=None, axes=None):
         """Draw figure depicting this gridworld.
 
         Figure legend (symbolic form in parenthesis):
@@ -310,6 +311,8 @@ class GridWorld(object):
                  on which to draw, or None, in which case a new figure
                  is created.
         """
+        if troll_list is None:
+            troll_list = list()
         try:
             import matplotlib.cm as mpl_cm
             import matplotlib.patches
@@ -378,13 +381,15 @@ class GridWorld(object):
         ax.axis([xmin, xmax, ymin, ymax])
 
     def pretty(self, show_grid=False, line_prefix="",
-               path=[], goal_order=False):
+               path=None, goal_order=False):
         """Return pretty-for-printing string.
 
         @param show_grid: If True, then grid the pretty world and show
                           row and column labels along the outer edges.
         @param line_prefix: prefix each line with this string.
         """
+        if path is None:
+            path = list()
         compress = lambda p: [p[n]
                               for n in range(len(p) - 1) if p[n] != p[n + 1]]
         # See comments in code for the method loads regarding values in W
