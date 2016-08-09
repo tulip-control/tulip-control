@@ -279,14 +279,14 @@ def extract_coord_test():
         yield extract_coord_check, label, expected_coord
 
 
-def eq_GridWorld_check(G, H, eq):
+def eq_gridworld_check(G, H, eq):
     if eq:
         G == H
     else:
         not (G == H)
 
 
-def eq_GridWorld_test():
+def eq_gridworld_test():
     empty = gw.GridWorld()
     trivial_nonempty = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_diff = gw.GridWorld(TRIVIAL_GWFILE)
@@ -313,7 +313,7 @@ def narrow_passage_test():
     assert G.is_reachable(G.init_list[0], G.goal_list[0])
 
 
-def scale_GridWorld_test():
+def scale_gridworld_test():
     G = gw.unoccupied((1, 2))
     assert G.size() == (1, 2)
     assert G.scale().size() == G.size()
