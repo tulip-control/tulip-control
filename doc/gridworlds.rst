@@ -80,8 +80,8 @@ then you could load it using ::
 To prettily print the result, and then to print the variable name of
 the cell located at (0,0), you would then ::
 
-  print triv
-  print triv[0,0]
+  print(triv)
+  print(triv[0,0])
 
 See the method ``pretty`` for more formatting options (the first line
 above internally invokes ``pretty`` with sane defaults).  Notice that
