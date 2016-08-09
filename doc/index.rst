@@ -17,6 +17,7 @@ Contents:
    specifications
    transys
    codegen
+   gridworlds
    benchmarks
    formulations
    dev_guide

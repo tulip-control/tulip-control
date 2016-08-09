@@ -182,7 +182,7 @@ def main():
                 'spec_test', 'synth_test', 'transform_test', 'translation_test',
                 'transys_automata_test', 'transys_labeled_graphs_test',
                 'transys_machines_test', 'transys_mathset_test',
-                'transys_ts_test', 'version_test']
+                'transys_ts_test', 'version_test', 'gridworld_test']
         if args.testfamily.lower() == 'base':
             testfiles = base
         elif args.testfamily.lower() == 'hybrid':

@@ -20,6 +20,7 @@ In each of the examples, the task involves repeatedly visiting a cell,
 responding to a parking signal, and avoiding an environmental obstacle.
 
 
+* gridworlds/ - planning on grids to reach goals while avoiding obstacles
 * developer/ - various examples used during development, unstable directory
 * developer/transys/ - examples focusing on the tulip.transys subpackage
 * developer/interfaces/ - demonstrations of interfaces to tools outside Python

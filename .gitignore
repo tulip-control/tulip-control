@@ -20,6 +20,7 @@ tulip/_version.py
 *.PNG
 *.pdf
 *.PDF
+*.svg
 *.dot
 *.swp
 /build/
