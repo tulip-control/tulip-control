@@ -108,6 +108,7 @@ we use mostly default argument values to minimize clutter.
 
   import numpy as np
   from tulip.abstract import discretize
+  from tulip import gridworld as gw
   from tulip.hybrid import LtiSysDyn
   from polytope import Polytope
   from polytope.plot import plot_partition
