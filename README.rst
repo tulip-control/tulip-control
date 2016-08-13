@@ -17,6 +17,9 @@ TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 Detailed instructions, including notes about dependencies and troubleshooting,
 are available at http://tulip-control.sourceforge.net/doc/install.html
 
+What dependencies are currently installed and available can be
+probed by calling the function `tulip.interfaces.print_env()`.
+
 The next section describes how to build documentation.  A test suite is provided
 under ``tests/``.  Consult the section "Testing" below.
 
@@ -68,4 +71,3 @@ copying conditions.
 
 When code is modified or re-distributed, the LICENSE file should accompany the code or any subset of it, however small.
 As an alternative, the LICENSE text can be copied within files, if so desired.
-
