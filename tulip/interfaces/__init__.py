@@ -31,5 +31,5 @@
 # SUCH DAMAGE.
 """Minimal bindings to external entities."""
 from __future__ import absolute_import
-from . import gr1c as gr1cint
-from . import jtlv as jtlvint
+from tulip.interfaces import gr1c as gr1cint
+from tulip.interfaces import jtlv as jtlvint
