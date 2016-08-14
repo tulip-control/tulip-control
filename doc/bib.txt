@@ -35,8 +35,9 @@ Vol.34, No.5, pp. 1045 -- 1079, September, 1955.
 [M56]
 E.F. Moore.
 `Gedanken-experiments on Sequential Machines
-<http://dl.acm.org/citation.cfm?id=1096884>`_.
-*Annals of Mathematical Studies*, No. 34 (Automata Studies), pp 129 – 153,
+<https://web.archive.org/web/20120216141113/http://people.mokk.bme.hu/~kornai/termeszetes/moore_1956.pdf>`_.
+*Annals of Mathematical Studies*, `No. 34 (Automata Studies)
+<http://dl.acm.org/citation.cfm?id=1096884>`_, pp 129 – 153,
 Princeton University Press, Princeton, N. J., 1956,
 ISBN: 0691079161.
 
