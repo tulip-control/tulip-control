@@ -49,7 +49,9 @@ before_script:
   - pip install gitpython
   - dot -V
 
-script: ./run_tests.py --outofsource
+script:
+  - ./run_tests.py --outofsource base
+  - pip install matplotlib
 
 notifications:
   email: false
