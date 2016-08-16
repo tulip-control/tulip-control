@@ -15,7 +15,9 @@ matplotlib.use('Agg')
 
 import numpy as np
 
-from tulip import abstract, hybrid
+from tulip import abstract
+from tulip.abstract import feasible
+from tulip import hybrid
 import polytope as pc
 
 input_bound = 0.4
@@ -217,6 +219,31 @@ def test_abstract_the_dynamics():
     #print('self loops at states: ' + str(self_loops))
 
 test_abstract_the_dynamics.slow = True
+
+
+def test_is_feasible():
+    """Difference between attractor and fixed horizon."""
+    dom = pc.box2poly([[0.0, 4.0], [0.0, 3.0]])
+    sys = drifting_dynamics(dom)
+    p1 = pc.box2poly([[0.0, 1.0], [0.0, 1.0]])
+    p2 = pc.box2poly([[2.0, 3.0], [0.0, 1.0]])
+    n = 10
+    r = feasible.is_feasible(p1, p2, sys, n, use_all_horizon=False)
+    assert r is False, r
+    r = feasible.is_feasible(p1, p2, sys, n, use_all_horizon=True)
+    assert r is True, r
+
+
+def drifting_dynamics(dom):
+    A = np.array([[1.0, 0.0],
+                  [0.0, 1.0]])
+    B = np.array([[1.0],
+                  [0.0]])
+    U = pc.box2poly([[0.0, 1.0]])
+    K = np.array([[1.0],
+                  [0.0]])
+    sys = hybrid.LtiSysDyn(A, B, None, K, U, None, dom)
+    return sys
 
 
 if __name__ == '__main__':
