@@ -119,6 +119,23 @@ continuous state space discretization can be done using the following function c
 
 .. _ssec:syn:
 
+
+The option ``use_all_horizon`` changes both how reachability is computed
+during discretization, and also what assumption is made about when the
+discrete-valued environment variables are sampled:
+
+- With ``use_all_horizon = False``, a fixed sampling period is assumed,
+  and reachability problems are solved for a fixed (discrete-time) horizon
+  equal to `N` steps.
+
+- With ``use_all_horizon = True``, reachability considers trajectories
+  that take `1..N` steps. As a result, from different states, the same
+  discrete-strategy (see below) transition can take a different number
+  of time steps to be implemented in the continuous state space.
+  This requires the assumption that the system can sample the discrete-valued
+  environment variables at times that continuous transitions complete.
+
+
 Digital design synthesis
 ````````````````````````
 The continuous state space discretization generates a finite state
