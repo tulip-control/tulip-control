@@ -71,32 +71,52 @@ def solve_feasible(
     P1, P2, ssys, N=1, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-    """Compute S0 \subseteq P1 from which P2 is N-reachable.
+    r"""Compute S0 \subseteq trans_set from which P2 is N-reachable.
 
-    N-reachable = reachable in horizon n.
+    N-reachable = reachable in horizon C{N}.
     The system dynamics are C{ssys}.
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
 
+    Time semantics:
+
+    - C{use_all_horizon = False}: fixed sampling period of
+      discrete-valued environment variables.
+      Reachability in exactly C{N} steps.
+
+    - C{use_all_horizon = True}: sampling period that varies and
+      is chosen by the system, depending on how many steps are
+      taken during each trajectory from C{P1} to C{P2}.
+      Reachability in C{1..N} steps, with an under-approximation
+      of the attractor set.
+
+      If the system dynamics do not allow staying at the same state,
+      then disconnected polytopes can arise, possibly causing issues
+      in the computation. Consider decreasing the sampling period
+      used for discretizing the associated continuous-time dynamical system.
+
     @type P1: C{Polytope} or C{Region}
     @type P2: C{Polytope} or C{Region}
     @type ssys: L{LtiSysDyn}
-    @param N: The horizon length
-    @param closed_loop: If true, take 1 step at a time.
+    @param N: horizon length
+    @param closed_loop: If C{True}, then take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
     @type closed_loop: bool
 
     @param use_all_horizon: Used for closed loop algorithm.
-        If true, then allow
-        reachability also in less than N steps.
+
+        - If C{True}, then check for reachability in C{< N} steps,
+
+        - otherwise, in exactly C{N} steps.
+
     @type use_all_horizon: bool
 
     @param trans_set: If specified,
         then force transitions to be in this set.
         Otherwise, P1 is used.
 
-    @return: the subset S0 of P1 from which P2 is reachable
+    @return: states from which P2 is reachable
     @rtype: C{Polytope} or C{Region}
     """
     if closed_loop:
