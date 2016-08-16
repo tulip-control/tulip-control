@@ -17,6 +17,7 @@ addons:
     - graphviz
 
 before_install:
+  # gr1c
   - export GR1CVERSION=0.10.2
   - curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
   - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1`
@@ -25,6 +26,7 @@ before_install:
   - make -j2 cudd && make -j2 all && make check
   - export PATH=`pwd`:$PATH
   - cd ..
+  # miniconda
   - curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
     && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh'
     | shasum -a 256 -c -
@@ -32,6 +34,7 @@ before_install:
   - source ${HOME}/miniconda/bin/activate root
   - conda update -q -y --all
   - conda install -q -y nomkl
+  # python packages
   - conda install -q -y numpy scipy
   - conda info -a
   - pip install --ignore-installed --upgrade pip setuptools
