@@ -194,10 +194,14 @@ def main():
             'transys_ts_test',
             'version_test',
             'gridworld_test']
+        hybrid = [
+            'abstract_test',
+            'hybrid_test',
+            'prop2part_test']
         if args.testfamily.lower() == 'base':
             testfiles = base
         elif args.testfamily.lower() == 'hybrid':
-            testfiles = base + ['abstract_test', 'hybrid_test', 'prop2part_test']
+            testfiles = base + hybrid
         elif args.testfamily.lower() == 'full':
             pass
         else:
