@@ -52,6 +52,7 @@ before_script:
 script:
   - ./run_tests.py --outofsource base
   - pip install matplotlib
+  - ./run_tests.py --outofsource --fast hybrid
 
 notifications:
   email: false
