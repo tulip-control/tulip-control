@@ -190,8 +190,8 @@ state system indicates that from any continuous state :math:`s_0` that
 belongs to cell :math:`c_i`, there exists a sequence of control inputs
 :math:`u_0, u_1, \ldots, u_{N-1}` that takes the system to another
 continuous state :math:`s_{N}` in cell :math:`c_j`.  Hence, under the
-assumption that the specification is stutter invariant, we can describe the
-continuous dynamics by an LTL formula of the form
+assumption that the desired behavior is a stutter-invariant property,
+we can describe the continuous dynamics by an LTL formula of the form
 
 .. math::
    (v = c_i) \implies \big(\bigvee_{j \text{ s.t. } c_i \to c_j} v' = c_j\big),
@@ -208,9 +208,9 @@ continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
 \text{ s.t. } c_j \models X_i} v = c_j}`.
 
 Putting everything together, we now obtain a specification of the form in
-:eq:`spec` (see also :doc:`specifications`).  We can then use the GR(1) game
-implementation in `omega <https://github.com/johnyf/omega>`_ or
-`gr1c <http://scottman.net/2012/gr1c>`_
+:eq:`spec` (see also :doc:`specifications`).  We can then use a GR(1) game
+solver, as those available in `omega <https://github.com/johnyf/omega>`_
+and `gr1c <http://scottman.net/2012/gr1c>`_
 to automatically synthesize a strategy that
 ensures the satisfaction of the specification, taking into account all the
 possible behaviors of the environment.  This is done using the
