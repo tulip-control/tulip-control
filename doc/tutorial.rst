@@ -177,7 +177,7 @@ possible behaviors of the environment.  This is done using the
 
 The resulting output is a finite state machine (Mealy machine):
 
-    .. autofunction:: transys.FiniteStateMachine
+    .. autofunction:: transys.machines.Transducer
 	:noindex:
 
 .. _ssec:ex1:
