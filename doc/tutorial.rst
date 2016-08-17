@@ -194,7 +194,7 @@ assumption that the specification is stutter invariant, we can describe the
 continuous dynamics by an LTL formula of the form
 
 .. math::
-   (v = c_i) \implies next(\bigvee_{j \text{ s.t. } c_i \to c_j} v = c_j),
+   (v = c_i) \implies \big(\bigvee_{j \text{ s.t. } c_i \to c_j} v' = c_j\big),
 
 where :math:`v` is a new discrete variable that describes in which cell
 the continuous state is.
@@ -240,15 +240,17 @@ while receiving externally triggered park signal.
 The specification of the robot is
 
 .. math::
-   \varphi = \square \diamond(\neg park) \implies (\square \diamond(s \in C_5)
+   \varphi = \square \diamond(\neg park)
+   \overset{sr}{\rightarrow}
+   (\square \diamond(s \in C_5)
    \wedge \square(park \implies \diamond(s \in C_0))).
 
 We cannot, however, deal with this specification directly since it is not in
 the form of GR(1).  An equivalent GR(1) specification of the above
 specification can be obtained by introducing an auxiliary discrete system
 variable :math:`X0reach,` initialized to `True`. The transition relation of
-:math:`X0reach,` is given by :math:`\square(\text{next}(X0reach) = (s \in
-C_0 \vee (X0reach \wedge \neg park))).`
+:math:`X0reach,` is given by
+:math:`\square(X0reach' = (s \in C_0 \vee (X0reach \wedge \neg park))).`
 
 To automatically synthesize a planner for this robot, we first import the
 necessary modules:
@@ -308,7 +310,7 @@ variable X0reach that is initialized to True and the specification
 :math:`\square(park \implies \diamond lot)` becomes
 
 .. math::
-     \square( (next(X0reach) = lot) \vee (X0reach \wedge \neg park))
+     \square( (X0reach' = lot) \vee (X0reach \wedge \neg park))
 
 The python code to implement this logic is given by:
 
