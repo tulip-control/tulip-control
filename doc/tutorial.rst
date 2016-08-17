@@ -219,10 +219,42 @@ possible behaviors of the environment.  This is done using the
     .. autofunction:: synth.synthesize
 	:noindex:
 
-The resulting output is a finite state machine (Mealy machine):
+More details about how Moore/Mealy capability,
+the assume-guarantee form of specification, and
+quantification of initial variable values are selected is described
+in the class :literal:`spec.GRSpec`:
+
+    .. autofunction:: spec.GRSpec
+
+The resulting output is a controller function that decides what values
+the controlled (discrete-valued) variables should take next.
+
+A `Moore` controller function cannot read the next
+values of (discrete-valued) environment variables before taking this
+decision, whereas a `Mealy` controller function can.
+Moore controllers are more realistic, and less prone to modeling errors,
+thus recommended.
 
     .. autofunction:: transys.machines.Transducer
 	:noindex:
+
+It should be noted that a temporal logic formula / property should be
+notionally distinguished from a synthesis problem:
+
+- You may write a formula to describe how a variable can change over time.
+  You may write even an assume-guarantee formula to describe an open-system
+  specification (i.e., how a system should behave in a certain environment).
+
+- A synthesis problem includes a definition of what the controller can do,
+  and whether the synthesizer should satisfy all initial conditions we wrote,
+  or is allowed to pick some initial conditions (thus synthesize the initial
+  conditions too).
+
+You may encounter this distinction if you give to ``synthesize`` both
+a transition system and temporal logic formulae.
+You may choose to define strategy capabilities (Moore/Mealy) as
+attributes to both, but these choices will have to agree,
+because one controller will be synthesized, not two.
 
 .. _ssec:ex1:
 
