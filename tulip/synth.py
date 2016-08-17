@@ -1024,6 +1024,26 @@ def synthesize(
 ):
     """Function to call the appropriate synthesis tool on the specification.
 
+    There are three attributes of C{specs} that define what
+    kind of controller you are looking for:
+
+    1. C{moore}: What information the controller knows when deciding the next
+       values of controlled variables:
+        - Moore: can read current state,
+          but not next environment variable values, or
+        - Mealy: can read current state and next environment variable values.
+
+    2. C{qinit}: Quantification of initial variable values:
+        Whether all states that satisfy a predicate should be winning,
+        or the initial values of some (or all) the variables is
+        subject to the synthesizer's choice.
+
+    3. C{plus_one}: The form of assume-guarantee specification,
+        i.e., how the system guarantees relate to assumptions about the
+        environment.
+
+    For more details about these attributes, see L{GRSpec}.
+
     The states of the transition system can be either:
 
       - all integers, or
