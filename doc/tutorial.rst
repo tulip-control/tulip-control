@@ -12,69 +12,113 @@ simple discrete state controller for a robotic motion control system.
 
 Problem Formulation
 ```````````````````
-We consider a system that comprises the physical component, which we refer
-to as the plant, and the (potentially dynamic and not a priori known)
-environment in which the plant operates.  The system may contain both
-continuous (physical) and discrete (computational) components.  In summary,
-the problem we are interested in consists of
+We consider a physical system with given dynamics ("plant") and
+a controller that we are about to design ourselves.
+Both discrete-valued and continuous-valued variables may be used
+to describe the behavior of the system.
 
-  - discrete system state,
-  - continuous system state,
-  - (discrete) environment state, and
-  - specification.
+The environment can affect this system in two ways:
 
-Here, `discrete` state refers to the state that can take only a finite number
-of possible values while `continuous` state refers to the state that can take
-an infinite number of possible values, e.g., the position of the car.  The
-`environment` state is related to factors over which the system does not
-have control such as the position of an obstacle and the outside
+1. through discrete-valued variables
+2. through continuous-valued variables, understood as "disturbance" (noise).
+
+In summary, we study problems with the following elements:
+
+1. discrete-valued plant variables ("discrete state")
+2. continuous-valued plant variables ("continuous state")
+3. discrete-valued environment variables
+4. continuous-valued environment variables (disturbance)
+5. specification: formulae, including difference equations.
+
+Here, `discrete` state refers to variables that take only a finite number
+of possible values in the system behaviors that interest us,
+whereas `continuous` state refers to variables that can take
+an infinite number of possible values, e.g., the position of the car.
+
+The `environment` state is related to factors over which the controller
+has no authority, such as the position of an obstacle, or the outside
 temperature.  At any given time, the controller regulates the `system` (or
-`controlled`) state such that the specification is satisfied, given the
-current value of the environment variables and the previous system states.
-We say that the specification is `realizable` if for any possible behavior
-of the environment, such a controller exists, i.e., there exists a strategy
-for the system to satisfy the specification.
+`controlled`) state so as to satisfy the specification, given the
+current state of plant, environment, and the controller's "internal" state
+(memory -- think of a microprocessor's own memory).
+
+We say that a specification is `realizable` if there exists a controller
+exists that steers the plant in a way that, for all environment behaviors
+that we assume are possible to happen, the specification requirements
+on the plant are satisfied.
+
+We will use the following variables and functions of time to
+describe the continuous dynamics:
+
+1. :math:`t` a variable that represents discrete time
+2. :math:`s[t]` continuous state,
+3. :math:`u[t]` control input signal,
+4. :math:`d[t]` (uncontrolled) disturbance.
 
 Suppose the continuous state of the system evolves according to the
 following discrete-time linear time-invariant state space model:
-for :math:`t \in \{0,1,2,...\}`
+for :math:`t \in \{0, 1, 2, ...\}`
 
 .. math::
-   s[t+1]  =   As[t] + Bu[t] + Ed[t] + K \qquad
-   u[t] \in U,\, d[t] \in D,\, s[0] \in S,
+   s[t+1]  =   As[t] + Bu[t] + Ed[t] + K
    :label: dynamics
 
-where :math:`S \subseteq \mathbb{R}^n` is the state space of the continuous
-component of the system,
-:math:`U \subseteq \mathbb{R}^m` is the set of admissible control inputs,
-:math:`D \subseteq \mathbb{R}^p` is the set of exogenous disturbances and
-:math:`s[t], u[t], d[t]` are the continuous state, the control signal and
-the exogenous disturbance, respectively, at time :math:`t`.
+where:
+
+1. :math:`u[t] \in U`
+2. :math:`d[t] \in D`
+3. :math:`s[0] \in S`
+4. :math:`S \subseteq \mathbb{R}^n` are the continuous states
+    over which we study the system behavior,
+5. :math:`U \subseteq \mathbb{R}^m` is the set of admissible control inputs,
+6. :math:`D \subseteq \mathbb{R}^p` is the set of exogenous disturbances
+    that we assume are possible.
 
 We consider the case where the sets :math:`S, U, D` are bounded polytopes.
 
-Let :math:`\Pi` be a finite set of atomic propositions of system variables.
-Each of the atomic propositions in :math:`\Pi` essentially captures the
-states of interest.
-We consider the specification of the form
+
+The control design problem is solved in two phases.
+In the fist phase we abstract continuous-valued variables,
+replacing them with discrete-valued variables,
+with suitable constraints on their assumed and required behavior that
+faithfully represent what is going on at the continuous level.
+
+At the discrete level, a controller is synthesized from a specification
+expressed in temporal logic. The specification is written in what
+is known as an assume-guarantee form:
 
 .. math::
-   \varphi = \big(\varphi_{init} \wedge \varphi_e) \implies \varphi_s.
+   \varphi = \big(\varphi_{init} \wedge \varphi_e)
+   \overset{sr}{\rightarrow}
+   \varphi_s
    :label: spec
 
-Here, the assumption :math:`\varphi_{init}` on the initial condition of the system
-is a propositional formula built from :math:`\Pi.`
-The assumption :math:`\varphi_e` on the environment and the desired behavior
-:math:`\varphi_s` are LTL formulas built from :math:`\Pi.`
+where:
+
+1. :math:`\varphi_{init}` is an `assumption` on what initial states are possible
+2. :math:`\varphi_e` is an `assumption` about how the environment behaves,
+3. :math:`\varphi_s` is a `requirement` on the desired behavior we want,
+   and the physical constraints that have to be satisfied.
+
+These descriptions are not absolute. Some times, there are aspects of
+a problem that can be modeled in equivalent ways as either assumptions or
+requirements, using environment or system variables to represent them.
+This is a choice made during modeling of a problem with mathematics.
 
 As described in the :doc:`intro`, our approach to this reactive control
 system synthesis consists of the following main steps:
 
-   1. :ref:`Generate a proposition preserving partition of the continuous
-      state space. <ssec:prop-part>`
-   2. :ref:`Discretize the continuous state space based on the evolution of
-      the continuous state. <ssec:disc>`
-   3. :ref:`Digital design synthesis. <ssec:syn>`
+   1. Abstract the continuous-valued variables using discrete-valued
+      variables, by :ref:`generating a partition of the continuous states that
+      preserves the meaning of statements that appear in the specification.
+      <ssec:prop-part>`
+
+   2. Abstract the possible changes of continuous-valued variables,
+      by :ref:`discretizing the continuous dynamics,
+      based on solving reachability problems. <ssec:disc>`
+
+   3. :ref:`Digital design synthesis,<ssec:syn>`
+      by solving games of infinite duration.
 
 .. _ssec:prop-part:
 
