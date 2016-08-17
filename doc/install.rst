@@ -2,7 +2,8 @@ Installation
 ------------
 
 TuLiP works with Python version 2.7.
-Install it `from PyPI <https://pypi.python.org/pypi/tulip>`_ with::
+Install it with `pip <https://pip.pypa.io/en/stable/>`_
+from `PyPI <https://pypi.python.org/pypi/tulip>`_ with::
 
   $ pip install tulip
 
@@ -38,7 +39,7 @@ For computing discrete abstractions from hybrid system descriptions,
 it is highly recommended that you install both CVXOPT and GLPK.
 Note that you need to install GLPK *before* installing CVXOPT,
 and follow the `CVXOPT installation instructions
-<http://cvxopt.org/install/index.html>_`
+<http://cvxopt.org/install/index.html>`_
 to link CVXOPT to GLPK.
 (If you use
 `MacPorts <http://www.macports.org/>`_,
