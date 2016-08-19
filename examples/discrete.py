@@ -22,7 +22,7 @@ from tulip import transys, spec, synth
 logging.basicConfig(level=logging.WARNING)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
 logging.getLogger('tulip.synth').setLevel(logging.WARNING)
-logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.WARNING)
+logging.getLogger('tulip.interfaces.omega').setLevel(logging.WARNING)
 
 
 #
