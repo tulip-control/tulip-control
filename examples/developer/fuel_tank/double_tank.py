@@ -248,8 +248,10 @@ print("Starting synthesis")
 if os.name == "posix":
     start = os.times()[2]
 
+specs.moore = False
+specs.qinit = r'\A \E'
 ctrl = synth.synthesize(
-    'gr1c', specs, sys=sys_ts.ts, ignore_sys_init=True,
+    'omega', specs, sys=sys_ts.ts, ignore_sys_init=True,
     #action_vars=('u_in', 'act')
 )
 if os.name == "posix":

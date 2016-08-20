@@ -31,9 +31,12 @@ Z = gw.random_world((height, width),
                     num_goals=2)
 print(Z)
 
-if not synth.is_realizable('gr1c', Z.spec()):
+spc = Z.spec()
+spc.moore = False
+spc.qinit = r'\A \E'
+if not synth.is_realizable('omega', spc):
     print("Not realizable.")
 else:
-    ctrl = synth.synthesize('gr1c', Z.spec())
+    ctrl = synth.synthesize('omega', spc)
     if not ctrl.save('ctrl-solverand.svg'):
         print(ctrl)
