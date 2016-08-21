@@ -139,6 +139,8 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.moore = True
+specs.qinit = '\E \A'
 
 # Controller synthesis
 #
