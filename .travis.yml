@@ -80,7 +80,7 @@ script:
   - pip install cvxopt==1.1.7
   - python -c "import cvxopt.glpk"
   # slow hybrid tests
-  - ./run_tests.py --outofsource hybrid
+  - ./run_tests.py --outofsource full
 
 notifications:
   email: false
