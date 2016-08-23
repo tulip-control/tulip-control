@@ -80,7 +80,7 @@ script:
   # jtlv
   - ./extern/get-jtlv.sh
   # slow hybrid tests
-  - ./run_tests.py --outofsource hybrid
+  - ./run_tests.py --outofsource full
 
 notifications:
   email: false
