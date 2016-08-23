@@ -1020,9 +1020,29 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 def synthesize(
     option, specs, env=None, sys=None,
     ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False, bool_actions=False, rm_deadends=True
+    rm_deadends=True
 ):
     """Function to call the appropriate synthesis tool on the specification.
+
+    There are three attributes of C{specs} that define what
+    kind of controller you are looking for:
+
+    1. C{moore}: What information the controller knows when deciding the next
+       values of controlled variables:
+        - Moore: can read current state,
+          but not next environment variable values, or
+        - Mealy: can read current state and next environment variable values.
+
+    2. C{qinit}: Quantification of initial variable values:
+        Whether all states that satisfy a predicate should be winning,
+        or the initial values of some (or all) the variables is
+        subject to the synthesizer's choice.
+
+    3. C{plus_one}: The form of assume-guarantee specification,
+        i.e., how the system guarantees relate to assumptions about the
+        environment.
+
+    For more details about these attributes, see L{GRSpec}.
 
     The states of the transition system can be either:
 
@@ -1090,17 +1110,6 @@ def synthesize(
         contained in sys.
     @type ignore_sys_init: bool
 
-    @param bool_states: deprecated as inefficient
-
-        if True,
-        then use one bool variable for each state.
-        Otherwise use a single integer variable for all states.
-    @type bool_states: bool
-
-    @param bool_actions: model actions using bool variables,
-        otherwise use integers.
-    @type bool_actions: bool
-
     @param rm_deadends: return a strategy that contains no terminal states.
     @type rm_deadends: bool
 
@@ -1112,9 +1121,7 @@ def synthesize(
     specs = _spec_plus_sys(
         specs, env, sys,
         ignore_env_init,
-        ignore_sys_init,
-        bool_states,
-        bool_actions)
+        ignore_sys_init)
     if option == 'gr1c':
         strategy = gr1c.synthesize(specs)
     elif option == 'slugs':
@@ -1154,9 +1161,7 @@ def synthesize(
 
 def is_realizable(
     option, specs, env=None, sys=None,
-    ignore_env_init=False, ignore_sys_init=False,
-    bool_states=False,
-    bool_actions=False
+    ignore_env_init=False, ignore_sys_init=False
 ):
     """Check realizability.
 
@@ -1164,8 +1169,7 @@ def is_realizable(
     """
     specs = _spec_plus_sys(
         specs, env, sys,
-        ignore_env_init, ignore_sys_init,
-        bool_states, bool_actions)
+        ignore_env_init, ignore_sys_init)
     if option == 'gr1c':
         r = gr1c.check_realizable(specs)
     elif option == 'slugs':
@@ -1175,6 +1179,8 @@ def is_realizable(
         r = slugs.check_realizable(specs)
     elif option == 'gr1py':
         r = gr1py.check_realizable(specs)
+    elif option == 'omega':
+        r = omega_int.is_realizable(specs)
     elif option == 'jtlv':
         r = jtlv.check_realizable(specs)
     else:
@@ -1190,8 +1196,7 @@ def is_realizable(
 
 def _spec_plus_sys(
     specs, env, sys,
-    ignore_env_init, ignore_sys_init,
-    bool_states, bool_actions
+    ignore_env_init, ignore_sys_init
 ):
     if sys is not None:
         if hasattr(sys, 'state_varname'):
@@ -1202,9 +1207,19 @@ def _spec_plus_sys(
             statevar = 'loc'
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
-            bool_states=bool_states,
-            bool_actions=bool_actions,
+            bool_states=False,
+            bool_actions=False,
             statevar=statevar)
+        # consider sys just a formula,
+        # not a synthesis problem
+        # so overwrite settings
+        if hasattr(sys, 'moore'):
+            cp = sys
+        else:
+            cp = specs
+        sys_formula.moore = cp.moore
+        sys_formula.plus_one = cp.plus_one
+        sys_formula.qinit = cp.qinit
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
     if env is not None:
@@ -1216,9 +1231,16 @@ def _spec_plus_sys(
             statevar = 'eloc'
         env_formula = env_to_spec(
             env, ignore_env_init,
-            bool_states=bool_states,
-            bool_actions=bool_actions,
+            bool_states=False,
+            bool_actions=False,
             statevar=statevar)
+        if hasattr(env, 'moore'):
+            cp = env
+        else:
+            cp = specs
+        env_formula.moore = cp.moore
+        env_formula.plus_one = cp.plus_one
+        env_formula.qinit = cp.qinit
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
     logger.info('Overall Spec:\n' + str(specs.pretty()) + _hl)

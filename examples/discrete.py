@@ -1,28 +1,29 @@
 #!/usr/bin/env python
-# discrete.py - example using transition system dynamics
-#
-# RMM, 20 Jul 2013
-"""
+"""Example using transition system dynamics.
+
 This example illustrates the use of TuLiP to synthesize a reactive
 controller for system whose dynamics are described by a discrete
 transition system.
 """
+# RMM, 20 Jul 2013
 #
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
-#
-
-import logging
-logging.basicConfig(level=logging.INFO)
-logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
-logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
-logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG - 3)
 
 # @import_section@
 # Import the packages that we need
+import logging
+
 from tulip import transys, spec, synth
 # @import_section_end@
+
+
+logging.basicConfig(level=logging.WARNING)
+logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
+logging.getLogger('tulip.synth').setLevel(logging.WARNING)
+logging.getLogger('tulip.interfaces.omega').setLevel(logging.WARNING)
+
 
 #
 # System dynamics
@@ -123,10 +124,18 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
 # @synthesize@
-ctrl = synth.synthesize('gr1c', specs, sys=sys)
+# Moore machines
+# controller reads `env_vars, sys_vars`, but not next `env_vars` values
+specs.moore = True
+# synthesizer should find initial system values that satisfy
+# `env_init /\ sys_init` and work, for every environment variable
+# initial values that satisfy `env_init`.
+specs.qinit = '\E \A'
+ctrl = synth.synthesize('omega', specs, sys=sys)
+assert ctrl is not None, 'unrealizable'
 # @synthesize_end@
 
 #

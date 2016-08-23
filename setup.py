@@ -41,7 +41,7 @@ def package_jtlv():
     else:
         print('The jtlv synthesis tool was not found. '
               'Try extern/get-jtlv.sh to get it.\n'
-              'It is an optional alternative to gr1c, '
+              'It is an optional alternative to `omega`, '
               'the default GR(1) solver of TuLiP.')
 
 
@@ -109,6 +109,7 @@ def run_setup():
         install_requires=[
             'networkx >= 1.6, <= 1.10',
             'numpy >= 1.7',
+            'omega >= 0.0.9, < 0.1.0',
             'ply >= 3.4',
             'polytope >= 0.1.2',
             'pydot >= 1.2.0',

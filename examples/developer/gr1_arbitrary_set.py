@@ -1,5 +1,5 @@
 """
-Two examples for arbitrary finite domains with gr1c:
+Two examples for arbitrary finite domains:
 
     - one manually coded
     - one with arbitrary (unnumbered) sys TS states

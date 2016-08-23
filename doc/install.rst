@@ -1,59 +1,53 @@
 Installation
 ------------
 
-The latest release of TuLiP can be downloaded from `SourceForge
-<http://sourceforge.net/projects/tulip-control/files/>`_.
-
-TuLiP is designed to work with Python version 2.7, though it should also support
-Python version 3.2+.  The following additional Python packages are required to
-use the core functionality of TuLiP, and are installed automatically
-from PyPI when installing with ``pip install tulip``:
-
-* `NumPy <http://numpy.org/>`_
-* `SciPy <http://www.scipy.org/>`_
-* `NetworkX <http://networkx.lanl.gov/>`_
-* `pydot <https://github.com/erocarrera/pydot>`_
-* `PLY <http://www.dabeaz.com/ply/>`_
-* `polytope <https://pypi.python.org/pypi/polytope>`_ -- computations on and
-  plotting of convex polytopes
-
-Newcomers to scientific computing with Python should read
-:ref:`newbie-scipy-sec-label`.
-
-The default synthesis tool for GR(1) specifications is `gr1c
-<http://scottman.net/2012/gr1c>`_. Please install at least version 0.9.0. If you
-do not already have it, the introduction of `the manual of gr1c
-<https://tulip-control.github.io/gr1c/>`_ is a good place to begin.
-
-The following are optional dependencies, listed with a summary of dependent
-features:
-
-* `Matplotlib <http://matplotlib.org/>`_ -- many visualization features
-
-* `Graphviz <http://www.graphviz.org/>`_ -- generation of images (e.g., PNG
-  files) from dot code
-
-* `CVXOPT <http://cvxopt.org/>`_ -- construction and manipulation of discrete
-  abstractions
-
-For computing discrete abstractions from hybrid system descriptions, it is
-highly recommended---but not required---that you install `GLPK
-<http://www.gnu.org/s/glpk/>`_ (a fast linear programming solver). Note that you
-need to install GLPK *before* installing CVXOPT and follow the instructions in
-CVXOPT installation to ensure it recognizes GLPK as a solver. If you are a
-`MacPorts <http://www.macports.org/>`_ user, please note that MacPorts does not
-do this linking automatically.
-
-Once all of the above preparations are completed, you can install TuLiP::
-
-  $ pip install .
-
-TuLiP may instead be installed `from PyPI <https://pypi.python.org/pypi/tulip>`_::
+TuLiP works with Python version 2.7.
+Install it with `pip <https://pip.pypa.io/en/stable/>`_
+from `PyPI <https://pypi.python.org/pypi/tulip>`_ with::
 
   $ pip install tulip
 
-The above commands include checking of dependencies and automatic installation
-of missing Python packages. (N.B., not all dependencies are Python packages.)
+or from source::
+
+  $ pip install .
+
+``pip`` installs Python dependencies `automatically
+<https://pip.pypa.io/en/stable/reference/pip_install/#installation-order>`_.
+They are listed in ``install_requires`` within ``setup.py``.
+The only Python packages that you may want to install yourself,
+in order to link them properly are:
+
+* `NumPy <http://numpy.org/>`_
+* `SciPy <http://www.scipy.org/>`_
+
+The following are optional dependencies,
+listed with a summary of dependent features:
+
+* `Matplotlib <http://matplotlib.org/>`_ --
+  many visualization features
+
+* `Graphviz <http://www.graphviz.org/>`_ --
+  to plot graphs, for example discrete state machines
+
+* `CVXOPT <http://cvxopt.org/>`_ --
+  construction and manipulation of discrete abstractions
+
+* `GLPK <http://www.gnu.org/s/glpk/>`_ --
+  fast linear programming solver
+
+For computing discrete abstractions from hybrid system descriptions,
+it is highly recommended that you install both CVXOPT and GLPK.
+Note that you need to install GLPK *before* installing CVXOPT,
+and follow the `CVXOPT installation instructions
+<http://cvxopt.org/install/index.html>`_
+to link CVXOPT to GLPK.
+(If you use
+`MacPorts <http://www.macports.org/>`_,
+please note that MacPorts does not do this linking automatically.)
+
+The latest release of TuLiP can be downloaded also from
+`SourceForge
+<https://sourceforge.net/projects/tulip-control/files/>`_.
 
 
 .. _synt-tools-sec-label:
@@ -61,23 +55,34 @@ of missing Python packages. (N.B., not all dependencies are Python packages.)
 Alternative discrete synthesis tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While gr1c is required, as described in :doc:`install`, TuLiP can use other
-tools for formal synthesis. Those for which an interface is available are listed
-below. Also consult :doc:`specifications` concerning relevant syntax and
-summaries of the specification languages. Generally, direct interfaces are
-defined as modules in the subpackage ``tulip.interfaces``. However, these tools
-can be accessed indirectly by appropriately setting parameters for various
-functions in TuLiP, such as ``tulip.synth.synthesize()``.
+The default synthesis tool for GR(1) and Rabin(1) specifications is
+`omega <https://github.com/johnyf/omega>`_
+(installed by ``pip``).
+
+TuLiP can use other tools for formal synthesis.
+Those for which an interface is available are listed below.
+Also consult :doc:`specifications` concerning relevant syntax and
+summaries of the specification languages.
+Generally, direct interfaces are defined as modules in
+the subpackage ``tulip.interfaces``.
+However, these tools can be accessed indirectly,
+by appropriately setting parameters for various functions in TuLiP,
+such as ``tulip.synth.synthesize()``.
 
 These are *optional dependencies*. TuLiP is useful without having them
 installed, but certain functionality is only available when they are.
 
+
 GR(1)
 `````
 
-* `gr1py <https://github.com/slivingston/gr1py>`_
+* `gr1c <http://scottman.net/2012/gr1c>`_.
+  Please install at least version 0.9.0.
+  The introduction of
+  `the manual of gr1c <https://tulip-control.github.io/gr1c/>`_
+  is a good place to begin.
 
-* `omega <https://github.com/johnyf/omega>`_
+* `gr1py <https://github.com/slivingston/gr1py>`_
 
 * `slugs <https://github.com/LTLMoP/slugs>`_
 
@@ -116,6 +121,9 @@ for developers are provided in the :doc:`dev_guide`.
 New to Python?
 ~~~~~~~~~~~~~~
 
+Newcomers to scientific computing with Python should read
+:ref:`newbie-scipy-sec-label`.
+
 If you don't already use Python for scientific computing, consider using
 `Enthought Python Distribution (EPD) <http://enthought.com>`_ or `Enthought
 Canopy <https://www.enthought.com/products/canopy/>`_. This may make the
@@ -129,6 +137,7 @@ Alternatives to Enthought are listed on the `SciPy installation webpage
 
 EPD seems to work fine on most platforms but if you cannot get it to work, more
 alternative packages for Mac OS X and Microsoft Windows are mentioned below.
+
 
 .. _troubleshoot-sec-label:
 
@@ -212,13 +221,15 @@ NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying
 The package of gr1c for Windows still cannot be found. But without this package,
 you can also run most TuLiP functions.
 
+
 Installing other Python dependencies
 ````````````````````````````````````
 
-The command ``pip install ...`` or ``easy_install ...`` will usually suffice. To
+The command ``pip install ...`` will usually suffice. To
 get `PLY <http://www.dabeaz.com/ply/>`_, try::
 
   $ pip install ply
+
 
 .. _venv-pydoc-sec-label:
 
@@ -250,6 +261,7 @@ it, try looking at the transys subpackage by entering::
 .. [#f1] On Unix systems, in particular GNU/Linux and Mac OS X, the
          terminal shell treats ``~`` as a special symbol representing
          the home directory of the current user.
+
 
 remote server installation
 ``````````````````````````

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-# gr1.py - example of direct GR(1) specification,
-#          using only boolean variables.
-#
-# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
-"""
+"""Example of direct GR(1) specification, using only boolean variables.
+
 This example illustrates the use of TuLiP to synthesize a reactive
 controller for a GR(1) specification.  We code the specification
 directly in GR(1) form and then use TuLiP to synthesize a reactive
@@ -34,12 +31,17 @@ We must convert this specification into GR(1) form:
   env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
+# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 # Import the packages that we need
-from tulip import spec, synth
+import logging
+
+from tulip import spec
+from tulip import synth
 from tulip.transys import machines
+
+
+logging.basicConfig(level=logging.WARNING)
+
 
 #
 # Environment specification
@@ -105,17 +107,26 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 #
 # Controller synthesis
 #
+# The controller decides based on current variable values only,
+# without knowing yet the next values that environment variables take.
+# A controller with this information flow is known as Moore.
+specs.moore = True
+# Ask the synthesizer to find initial values for system variables
+# that, for each initial values that environment variables can
+# take and satisfy `env_init`, the initial state satisfies
+# `env_init /\ sys_init`.
+specs.qinit = '\E \A'  # i.e., "there exist sys_vars: forall sys_vars"
+
 # At this point we can synthesize the controller
 # using one of the available methods.
-# Here we make use of gr1c.
-#
-mealy_controller = synth.synthesize('gr1c', specs)
+strategy = synth.synthesize('omega', specs)
+assert strategy is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing,
 # or a textual representation if pydot is missing.
-if not mealy_controller.save('gr1.png'):
-    print(mealy_controller)
+if not strategy.save('gr1.png'):
+    print(strategy)
 
 # simulate
-print(mealy_controller)
-machines.random_run(mealy_controller, N=10)
+print(strategy)
+machines.random_run(strategy, N=10)

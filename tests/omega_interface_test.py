@@ -1,12 +1,22 @@
 """Tests for interface to `omega.games.gr1`."""
 import logging
+
+import networkx as nx
+
 from tulip.spec import form
 from tulip.interfaces import omega as omega_int
 from tulip import synth
 
 
+from nose import tools as nt
+
+
+logging.getLogger('tulip').setLevel('ERROR')
 logging.getLogger('astutils').setLevel('ERROR')
-logging.getLogger('omega.logic').setLevel('ERROR')
+logging.getLogger('omega').setLevel('ERROR')
+log = logging.getLogger('omega.games')
+log.setLevel('WARNING')
+log.addHandler(logging.StreamHandler())
 
 
 def test_grspec_to_automaton():
@@ -28,6 +38,7 @@ def test_grspec_to_automaton():
 def test_synthesis_bool():
     sp = grspec_0()
     h = omega_int.synthesize_enumerated_streett(sp)
+    assert h is not None, 'no winning states'
     g = synth.strategy2mealy(h, sp)
     # fname = 'mealy.pdf'
     # g.save(fname)
@@ -51,6 +62,7 @@ def test_synthesis_bool():
 def test_synthesis_fol():
     sp = grspec_1()
     h = omega_int.synthesize_enumerated_streett(sp)
+    assert h is not None
     g = synth.strategy2mealy(h, sp)
     assert g is not None
     assert len(g.inputs) == 1, g.inputs
@@ -66,7 +78,7 @@ def test_synthesis_fol():
 
 
 def test_synthesis_strings():
-    sp = grspec_2()
+    sp = grspec_4()
     h = omega_int.synthesize_enumerated_streett(sp)
     g = synth.strategy2mealy(h, sp)
     assert g is not None
@@ -88,6 +100,29 @@ def test_synthesis_strings():
     assert r == dict(y='b'), r
     u, r = g.reaction(u, dict(x=0))
     assert r == dict(y='a'), r
+
+
+def test_synthesis_moore():
+    sp = grspec_2()
+    h = omega_int.synthesize_enumerated_streett(sp)
+    g = synth.strategy2mealy(h, sp)
+    # g.save('moore.pdf')
+    assert g is not None
+    n = len(g)
+    assert n == 26, n
+
+
+def test_synthesis_mealy_all_init():
+    sp = grspec_3()
+    h = omega_int.synthesize_enumerated_streett(sp)
+    assert h is None, 'should be unrealizable'
+    sp.env_init = ['y = x']
+    h = omega_int.synthesize_enumerated_streett(sp)
+    g = synth.strategy2mealy(h, sp)
+    # g.save('moore.pdf')
+    assert g is not None
+    n = len(g)
+    assert n == 6, n
 
 
 def test_synthesis_unrealizable():
@@ -118,6 +153,7 @@ def test_is_circular_false():
 def test_synthesis_cudd():
     sp = grspec_1()
     h = omega_int.synthesize_enumerated_streett(sp, use_cudd=True)
+    assert h is not None
     n = len(h)
     assert n == 25, n
 
@@ -133,6 +169,7 @@ def test_is_circular_cudd():
 
 def grspec_0():
     sp = form.GRSpec()
+    sp.moore = False
     sp.env_vars = dict(x='boolean')
     sp.sys_vars = dict(y='boolean')
     sp.sys_safety = ["x' -> y'"]
@@ -143,14 +180,38 @@ def grspec_0():
 
 def grspec_1():
     sp = form.GRSpec()
+    sp.moore = False
+    sp.plus_one = False
     sp.env_vars = dict(x=(0, 4))
     sp.sys_vars = dict(y=(0, 4))
-    sp.sys_safety = ["x' = y'"]
+    sp.env_init = ['(0 <= y) & (y <= 4)']
+    sp.sys_safety = ["y' = x'"]
     return sp
 
 
 def grspec_2():
     sp = form.GRSpec()
+    sp.moore = True
+    sp.env_vars = dict(x=(0, 4))
+    sp.sys_vars = dict(y=(0, 4))
+    sp.env_init = ['(0 <= y) & (y <= 4)']
+    sp.sys_safety = ["y' = x"]
+    return sp
+
+def grspec_3():
+    sp = form.GRSpec()
+    sp.moore = False
+    sp.env_vars = dict(x=(0, 4))
+    sp.sys_vars = dict(y=(0, 4))
+    sp.env_init = ['(0 <= y) & (y <= 4)']
+    sp.sys_safety = ["y = x"]
+    return sp
+
+
+def grspec_4():
+    sp = form.GRSpec()
+    sp.moore = False
+    sp.env_init = ['(x = 0) & (y = "a")']
     sp.env_vars = dict(x=(0, 2))
     sp.sys_vars = dict(y=['a', 'b'])
     sp.sys_safety = [
@@ -160,4 +221,4 @@ def grspec_2():
 
 
 if __name__ == '__main__':
-    test_synthesis_cudd()
+    test_synthesis_bool()

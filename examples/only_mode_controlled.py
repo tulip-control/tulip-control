@@ -1,23 +1,24 @@
-# This is an example to demonstrate how the output of abstracting a switched
-# system, where the only control over the dynamics is through mode switching
-# might look like.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction of switched dynamics.
 
+This is an example to demonstrate how the output of abstracting a switched
+system, where the only control over the dynamics is through mode switching,
+might look like.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
-
+from tulip import spec
+from tulip import synth
+from tulip import transys
 
 ###############################
 # Switched system with 4 modes:
@@ -141,13 +142,15 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.qinit = '\E \A'
 
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
-ctrl = synth.synthesize('gr1c', specs, env=env_sws)
+ctrl = synth.synthesize('omega', specs, env=env_sws)
+assert ctrl is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('only_mode_controlled.png'):

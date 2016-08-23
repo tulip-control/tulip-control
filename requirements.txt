@@ -7,7 +7,6 @@ numpy==1.7
 scipy
 
 # easy extras
-omega==0.0.8
 gr1py>=0.1.0
 
 # extras (uncomment as needed)

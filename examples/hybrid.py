@@ -1,30 +1,36 @@
-# This is an example to demonstrate how the output of a discretization algorithm
-# that abstracts a switched system, where the mode of the system depends on a
-# combination of environment and system controlled variables, might look like.
-# We assume within each mode the control authority is rich enough to establish
-# deterministic reachability relations through the use of low-level continuous
-# inputs.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction with mixed switching.
 
+This is an example to demonstrate how the output of a discretization algorithm
+that abstracts a switched system might look like,
+where the mode of the system depends on a combination of
+environment and system controlled variables.
+
+We assume within each mode that the control authority is rich enough to
+establish deterministic reachability relations,
+through the use of low-level continuous inputs.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
 import logging
-logging.basicConfig(level=logging.INFO)
-logging.getLogger('tulip.spec').setLevel(logging.ERROR)
-logging.getLogger('tulip.synth').setLevel(logging.DEBUG)
 
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+from tulip import spec
+from tulip import synth
+from tulip import transys
+
+
+logging.basicConfig(level=logging.WARNING)
+logging.getLogger('tulip.spec').setLevel(logging.WARNING)
+logging.getLogger('tulip.synth').setLevel(logging.WARNING)
 
 
 ###########################################
@@ -148,16 +154,23 @@ sys_safe |= {'(sys_actions = "gear1" && env_actions = "slippery") -> ' +
 # to use int actions:
 # sys_safe |= {'((act = gear1) && (eact = slippery)) -> X (act = gear1)'}
 
-# Create the specification
+
+# Create the specification formulae
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+# Mealy controller (can decide based on `env_vars'`)
+specs.moore = False
+# Pick initial values for system variables that
+# work for all assumed environment initial conditions.
+specs.qinit = '\E \A'
+
 
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
-ctrl = synth.synthesize('gr1c', specs, sys=sys_hyb, ignore_sys_init=True)
-
+ctrl = synth.synthesize('omega', specs, sys=sys_hyb, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
 if not ctrl.save('hybrid.png'):
     print(ctrl)

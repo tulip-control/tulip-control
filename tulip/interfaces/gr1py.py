@@ -38,6 +38,7 @@ from __future__ import absolute_import
 import logging
 from tulip.spec import translate
 from tulip.interfaces.gr1c import load_aut_json
+from tulip.interfaces.gr1c import select_options
 try:
     import gr1py
     import gr1py.cli
@@ -49,23 +50,27 @@ logger = logging.getLogger(__name__)
 _hl = 60 * '-'
 
 
-def check_realizable(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
+def check_realizable(spec):
     """Decide realizability of specification.
 
     Consult the documentation of L{synthesize} about parameters.
 
     @return: True if realizable, False if not, or an error occurs.
     """
+    init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
-    return gr1py.solve.check_realizable(tsys, exprtab)
+    return gr1py.solve.check_realizable(
+        tsys, exprtab, init_flags=init_option)
 
-def synthesize(spec, init_option="ALL_ENV_EXIST_SYS_INIT"):
+def synthesize(spec):
     """Synthesize strategy realizing the given specification.
 
     cf. L{tulip.interfaces.gr1c.synthesize}
     """
+    init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
-    strategy = gr1py.solve.synthesize(tsys, exprtab)
+    strategy = gr1py.solve.synthesize(
+        tsys, exprtab, init_flags=init_option)
     if strategy is None:
         return None
     s = gr1py.output.dump_json(tsys.symtab, strategy)

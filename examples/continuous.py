@@ -1,33 +1,33 @@
 #!/usr/bin/env python
-"""
-This example is an extension of robot_discrete.py by including continuous
-dynamics with disturbances.
+"""Controller synthesis for system with continuous (linear) dynamics.
 
-Petter Nilsson (pettni@kth.se)
-August 14, 2011
-
-NO, system and cont. prop definitions based on TuLiP 1.x
-2 Jul, 2013
-NO, TuLiP 1.x discretization
-17 Jul, 2013
+This example is an extension of `robot_discrete.py`,
+by including continuous dynamics with disturbances.
+The dynamics is linear over a bounded set that is a polytope.
 """
-#
+# Petter Nilsson (pettni@kth.se)
+# August 14, 2011
+# NO, system and cont. prop definitions based on TuLiP 1.x
+# 2 Jul, 2013
+# NO, TuLiP 1.x discretization
+# 17 Jul, 2013
+
 # Note: This code is commented to allow components to be extracted into
 # the tutorial that is part of the users manual.  Comments containing
 # strings of the form @label@ are used for this purpose.
 
-import logging
-logging.basicConfig(level=logging.INFO)
-
 # @import_section@
-import numpy as np
+import logging
 
+import numpy as np
 from tulip import spec, synth, hybrid
 from polytope import box2poly
 from tulip.abstract import prop2part, discretize
 from tulip.abstract.plot import plot_partition
 # @import_section_end@
 
+
+logging.basicConfig(level=logging.WARNING)
 show = False
 
 # @dynamics_section@
@@ -95,11 +95,14 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.qinit = '\E \A'
 
 # @synthesize_section@
 # Synthesize
-ctrl = synth.synthesize('gr1c', specs,
+ctrl = synth.synthesize('omega', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
+
 
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('continuous.png'):

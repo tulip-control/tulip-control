@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-# gr1_set.py - example of direct GR(1) specification,
-#              using an integer-valued variable to model location.
-#
-# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
-"""
+"""Direct GR(1) specification, with integer-valued variable to model location.
+
 This example illustrates the use of TuLiP to synthesize a reactive
 controller for a GR(1) specification.  We code the specification
 directly in GR(1) form and then use TuLiP to synthesize a reactive
@@ -34,9 +31,11 @@ We must convert this specification into GR(1) form:
   env_init && []env_safe && []<>env_prog_1 && ... && []<>env_prog_m ->
       sys_init && []sys_safe && []<>sys_prog_1 && ... && []<>sys_prog_n
 """
+# 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 
 # Import the packages that we need
-from tulip import spec, synth
+from tulip import spec
+from tulip import synth
 
 
 #
@@ -98,15 +97,17 @@ sys_prog |= {'X0reach', 'loc=5'}
 # Create a GR(1) specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.qinit = '\E \A'  # Moore initial condition synthesized too
 
 #
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
 
-ctrl = synth.synthesize('gr1c', specs)
+ctrl = synth.synthesize('omega', specs)
+assert ctrl is not None, 'unrealizable'
 
 
 # Generate a graphical representation of the controller for viewing

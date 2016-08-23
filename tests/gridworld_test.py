@@ -145,10 +145,18 @@ class GridWorld_test(object):
         assert self.X == gw.GridWorld(self.X.dumps())
 
     def test_spec_realizable_bool(self):
-        assert is_realizable('gr1c', self.X.spec(nonbool=False))
+        spec = self.X.spec(nonbool=False)
+        spec.moore = False
+        spec.plus_one = False
+        spec.qinit = r'\A \E'
+        assert is_realizable('omega', spec)
 
     def test_spec_realizable(self):
-        assert is_realizable('gr1c', self.X.spec())
+        spec = self.X.spec()
+        spec.moore = False
+        spec.plus_one = False
+        spec.qinit = r'\A \E'
+        assert is_realizable('omega', spec)
 
     def check_is_empty(self, coord, expected):
         assert self.X.is_empty(coord) == expected
@@ -328,4 +336,7 @@ def add_trolls_test():
     G.init_list = [(0, 0)]
     G.goal_list = [(0, 4)]
     spc = gw.add_trolls(G, [((2, 2), 1)], get_moves_lists=False)
-    assert is_realizable('gr1c', spc)
+    spc.moore = False
+    spc.plus_one = False
+    spc.qinit = r'\A \E'
+    assert is_realizable('omega', spc)

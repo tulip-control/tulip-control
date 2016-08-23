@@ -54,6 +54,14 @@ before_install:
   - which lily.pl
   # jtlv
   - ./extern/get-jtlv.sh
+  ## install dd.cudd
+  - pip install dd
+  - pip download --no-dependencies dd>=0.4.0
+  - pip uninstall --yes dd
+  - tar xzf dd-*.tar.gz
+  - cd dd-*/
+  - python setup.py install --fetch --cudd
+  - cd ..
 
 install:
   - python setup.py sdist

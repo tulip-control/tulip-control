@@ -4,6 +4,7 @@ Tests for the tulip.synth module.
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG)
+logging.getLogger('omega').setLevel(logging.WARNING)
 from nose.tools import assert_raises
 import numpy as np
 from scipy import sparse as sp
@@ -362,7 +363,7 @@ def test_only_mode_control():
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
 
-    r = synth.is_realizable('gr1c', specs, env=env_sws, ignore_env_init=True)
+    r = synth.is_realizable('omega', specs, env=env_sws, ignore_env_init=True)
     assert not r
 
 
@@ -373,7 +374,7 @@ def multiple_env_actions_test():
     next combination of actions by env players.
     """
     # 1 <---> 2
-    #    ---> 3
+    # 1  ---> 3
 
     env_actions = [
         {
@@ -391,9 +392,9 @@ def multiple_env_actions_test():
     sys.states.initial.add_from({'s1'})
 
     sys.add_edge('s1', 's2', env_alice='left', env_bob='bright')
+    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
     # at state 3 sys loses
     sys.add_edge('s1', 's3', env_alice='right', env_bob='bleft')
-    sys.add_edge('s2', 's1', env_alice='left', env_bob='bright')
 
     logging.debug(sys)
 
@@ -401,15 +402,25 @@ def multiple_env_actions_test():
                  '(env_bob = "bright") )')}
     sys_prog = {'loc = "s1"', 'loc = "s2"'}
 
-    specs = spec.GRSpec(env_safety=env_safe, sys_prog=sys_prog)
-
+    specs = spec.GRSpec(
+        env_safety=env_safe,
+        sys_prog=sys_prog,
+        moore=False,
+        plus_one=False,
+        qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
     assert r
-
+    r = synth.is_realizable('omega', specs, sys=sys)
+    assert r
     # slightly relax assumption
-    specs = spec.GRSpec(sys_prog=sys_prog)
-
+    specs = spec.GRSpec(
+        sys_prog=sys_prog,
+        moore=False,
+        plus_one=False,
+        qinit='\A \E')
     r = synth.is_realizable('gr1c', specs, sys=sys)
+    assert not r
+    r = synth.is_realizable('omega', specs, sys=sys)
     assert not r
 
 
@@ -616,15 +627,26 @@ def test_determinize_machine_init():
 
 class synthesize_test:
     def setUp(self):
-        self.f_triv = spec.GRSpec(sys_vars="y")
-        self.trivial_unreachable = spec.GRSpec(sys_vars="y", sys_prog="False")
+        self.f_triv = spec.GRSpec(
+            sys_vars="y",
+            moore=False,
+            plus_one=False)
+        self.trivial_unreachable = spec.GRSpec(
+            sys_vars="y",
+            sys_prog="False",
+            moore=False,
+            plus_one=False)
 
     def tearDown(self):
         self.f_triv = None
 
     def test_gr1c_basic(self):
-        assert isinstance(synth.synthesize("gr1c", self.f_triv),
-                          transys.MealyMachine)
+        g = synth.synthesize("gr1c", self.f_triv)
+        assert isinstance(g, transys.MealyMachine)
 
     def test_unrealizable(self):
         assert synth.synthesize("gr1c", self.trivial_unreachable) is None
+
+
+if __name__ == '__main__':
+    multiple_env_actions_test()

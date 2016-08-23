@@ -12,8 +12,8 @@ U{https://pypi.python.org/pypi/omega}
 """
 from __future__ import absolute_import
 import logging
-import networkx as nx
 import time
+
 try:
     import dd.bdd as _bdd
 except ImportError:
@@ -27,12 +27,29 @@ try:
     from omega.logic import bitvector as bv
     from omega.games import gr1
     from omega.symbolic import symbolic as sym
-    from omega.symbolic import enumeration as enum
+    from omega.games import enumeration as enum
 except ImportError:
     omega = None
+import networkx as nx
 
 
 log = logging.getLogger(__name__)
+
+
+def is_realizable(spec, use_cudd=False):
+    """Return `True` if, and only if, realizable.
+
+    See `synthesize_enumerated_streett` for more details.
+    """
+    aut = _grspec_to_automaton(spec)
+    sym.fill_blanks(aut)
+    bdd = _init_bdd(use_cudd)
+    aut.bdd = bdd
+    a = aut.build()
+    t0 = time.time()
+    z, _, _ = gr1.solve_streett_game(a)
+    t1 = time.time()
+    return gr1.is_realizable(z, a)
 
 
 def synthesize_enumerated_streett(spec, use_cudd=False):
@@ -47,20 +64,21 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     bdd = _init_bdd(use_cudd)
     aut.bdd = bdd
     a = aut.build()
+    assert a.action['sys'][0] != bdd.false
     t0 = time.time()
     z, yij, xijk = gr1.solve_streett_game(a)
     t1 = time.time()
     # unrealizable ?
-    if z == a.bdd.false:
+    if not gr1.is_realizable(z, a):
+        print('WARNING: unrealizable')
         return None
     t = gr1.make_streett_transducer(z, yij, xijk, a)
     t2 = time.time()
     (u,) = t.action['sys']
-    care = _int_bounds(t)
-    g = enum.relation_to_graph(u, t, care_source=care,
-                               care_target=care)
+    assert u != bdd.false
+    g = enum.action_to_steps(t, qinit=spec.qinit)
     h = _strategy_to_state_annotated(g, a)
-    del u, yij, xijk, care
+    del u, yij, xijk
     t3 = time.time()
     log.info((
         'Winning set computed in {win} sec.\n'
@@ -177,4 +195,7 @@ def _grspec_to_automaton(g):
         '!({s})'.format(s=s)
         for s in map(f, g.env_prog)]
     a.win['[]<>'] = map(f, g.sys_prog)
+    a.moore = g.moore
+    a.plus_one = g.plus_one
+    a.qinit = g.qinit
     return a

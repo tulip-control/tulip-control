@@ -183,6 +183,7 @@ def main():
             'form_test',
             'gr1cint_test',
             'gr1_test',
+            'omega_interface_test',
             'spec_test',
             'synth_test',
             'transform_test',

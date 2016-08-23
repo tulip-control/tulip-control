@@ -57,6 +57,8 @@ def check_realizable(spec):
     @return: True if realizable, False if not, or an error occurs.
     """
     if isinstance(spec, GRSpec):
+        assert not spec.moore
+        assert not spec.plus_one
         struct = translate(spec, 'slugs')
     else:
         struct = spec
@@ -77,6 +79,8 @@ def synthesize(spec, symbolic=False):
     @rtype: C{networkx.DiGraph}
     """
     if isinstance(spec, GRSpec):
+        assert not spec.moore
+        assert not spec.plus_one
         struct = translate(spec, 'slugs')
     else:
         struct = spec

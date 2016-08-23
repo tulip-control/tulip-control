@@ -1,22 +1,21 @@
 #!/usr/bin/env python
-"""
-This example is an extension of the robot_continuous.py
-code by Petter Nilsson and Nok Wongpiromsarn.
-
-It demonstrates  the use of TuLiP for systems with
-piecewise affine dynamics.
-
-Necmiye Ozay, August 26, 2012
-"""
+"""Controller synthesis for system with piecewise-affine continuous dynamics."""
+# This example is an extension of `robot_continuous.py`
+# by Petter Nilsson and Nok Wongpiromsarn.
+# Necmiye Ozay, August 26, 2012
 import numpy as np
-
-from tulip import spec, synth
-from tulip.hybrid import LtiSysDyn, PwaSysDyn
 from polytope import box2poly
-from tulip.abstract import prop2part, discretize
+from tulip.abstract import discretize
+from tulip.abstract import prop2part
 from tulip.abstract.plot import plot_strategy
+from tulip.hybrid import LtiSysDyn
+from tulip.hybrid import PwaSysDyn
+from tulip import spec
+from tulip import synth
 
-plotting = True
+
+# set to `True` if `matplotlib.pyplot` is available
+plotting = False
 
 # Problem parameters
 input_bound = 0.4
@@ -82,8 +81,9 @@ subsystems = [subsys0(), subsys1()]
 
 # Build piecewise affine system from its subsystems
 sys_dyn = PwaSysDyn(subsystems, cont_state_space)
-ax = sys_dyn.plot()
-ax.figure.savefig('pwa_sys_dyn.pdf')
+if plotting:
+    ax = sys_dyn.plot()
+    ax.figure.savefig('pwa_sys_dyn.pdf')
 # @pwasystem_end@
 
 # Continuous proposition
@@ -94,19 +94,19 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 # Compute the proposition preserving partition
 # of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
-ax = cont_partition.plot()
-cont_partition.plot_props(ax=ax)
-ax.figure.savefig('spec_ppp.pdf')
+if plotting:
+    ax = cont_partition.plot()
+    cont_partition.plot_props(ax=ax)
+    ax.figure.savefig('spec_ppp.pdf')
 
 disc_dynamics = discretize(
     cont_partition, sys_dyn, closed_loop=True,
     N=8, min_cell_volume=0.1, plotit=plotting, save_img=True,
-    cont_props=cont_props
-)
-ax = disc_dynamics.plot(show_ts=True)
-ax.figure.savefig('abs_pwa.pdf')
-
-disc_dynamics.ts.save('ts.pdf')
+    cont_props=cont_props)
+if plotting:
+    ax = disc_dynamics.plot(show_ts=True)
+    ax.figure.savefig('abs_pwa.pdf')
+    disc_dynamics.ts.save('ts.pdf')
 
 # Specifications
 
@@ -130,10 +130,13 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+specs.moore = True
+specs.qinit = '\E \A'
 
 # Synthesize
-ctrl = synth.synthesize('gr1c', specs,
+ctrl = synth.synthesize('omega', specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
 if plotting:
     ax = plot_strategy(disc_dynamics, ctrl)
     ax.figure.savefig('pwa_proj_mealy.pdf')

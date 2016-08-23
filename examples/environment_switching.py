@@ -1,22 +1,25 @@
-# This is an example to demonstrate how the output of the TuLiP discretization
-# for a system with uncontrollable switching (i.e., modes are controlled by the
-# environment) might look like.
+#!/usr/bin/env python
+"""Discrete synthesis from a dummy abstraction with uncontrolled switching.
 
+This is an example to demonstrate how the output of the TuLiP discretization
+for a system with uncontrollable switching (i.e., modes are controlled by the
+environment) might look like.
+
+We will assume, we have the 6 cell robot example.
+
+     +---+---+---+
+     | 3 | 4 | 5 |
+     +---+---+---+
+     | 0 | 1 | 2 |
+     +---+---+---+
+"""
 # NO, 26 Jul 2013.
-
-# We will assume, we have the 6 cell robot example.
-
-#
-#     +---+---+---+
-#     | 3 | 4 | 5 |
-#     +---+---+---+
-#     | 0 | 1 | 2 |
-#     +---+---+---+
-#
-
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+from tulip import spec
+from tulip import synth
+from tulip import transys
+
 
 ###########################################
 # Environment switched system with 2 modes:
@@ -116,13 +119,19 @@ sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
+# controller decides based on current values `env_vars, sys_vars`
+# and next values `env_vars'`. A controller with this
+# information flow is known as Mealy.
+specs.moore = False
+specs.qinit = '\A \E'
 
 # Controller synthesis
 #
 # At this point we can synthesize the controller using one of the available
-# methods.  Here we make use of gr1c.
+# methods.
 #
-ctrl = synth.synthesize('gr1c', specs, sys=sys_swe, ignore_sys_init=True)
+ctrl = synth.synthesize('omega', specs, sys=sys_swe, ignore_sys_init=True)
+assert ctrl is not None, 'unrealizable'
 
 # @plot_print@
 if not ctrl.save('environment_switching.png'):
