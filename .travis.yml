@@ -85,7 +85,7 @@ script:
   - export CVXOPT_BUILD_GLPK=1
   - pip install cvxopt==1.1.7
   - python -c "import cvxopt.glpk"
-  # slow hybrid tests
+  # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 
 notifications:
