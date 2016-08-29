@@ -80,6 +80,10 @@ script:
   - which lily.pl
   # jtlv
   - ./extern/get-jtlv.sh
+  # slugs
+  - ./extern/get-slugs.sh
+  - export PATH=`pwd`/slugs-repo/src:$PATH
+  - which slugs
   # slow hybrid tests
   - ./run_tests.py --outofsource full
 
