@@ -368,6 +368,9 @@ def test_only_mode_control():
 
 
 def multiple_env_actions_test():
+    multiple_env_actions_check('omega')
+
+def multiple_env_actions_check(solver='omega'):
     """Two env players, 3 states controlled by sys.
 
     sys wins marginally, due to assumption on
@@ -408,7 +411,7 @@ def multiple_env_actions_test():
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable('omega', specs, sys=sys)
+    r = synth.is_realizable(solver, specs, sys=sys)
     assert r
     # slightly relax assumption
     specs = spec.GRSpec(
@@ -416,7 +419,7 @@ def multiple_env_actions_test():
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable('omega', specs, sys=sys)
+    r = synth.is_realizable(solver, specs, sys=sys)
     assert not r
 
 
