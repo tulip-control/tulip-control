@@ -55,6 +55,10 @@ before_install:
   - which lily.pl
   # jtlv
   - ./extern/get-jtlv.sh
+  # slugs
+  - ./extern/get-slugs.sh
+  - export PATH=`pwd`/slugs-repo/src:$PATH
+  - which slugs
   ## install dd.cudd
   - pip install dd
   - pip download --no-dependencies dd>=0.4.0
