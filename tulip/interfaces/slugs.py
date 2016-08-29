@@ -42,8 +42,11 @@ import subprocess
 import tempfile
 import networkx as nx
 from tulip.spec import GRSpec, translate
-import slugs
 
+
+# If this path begins with '/', then it is considered to be absolute.
+# Otherwise, it is relative to the path of the `slugs` executable.
+SLUGS_COMPILER_PATH = '../tools/StructuredSlugsParser/compiler.py'
 
 BDD_FILE = 'strategy_bdd.txt'
 logger = logging.getLogger(__name__)
@@ -62,11 +65,8 @@ def check_realizable(spec):
         struct = translate(spec, 'slugs')
     else:
         struct = spec
-    s = slugs.convert_to_slugsin(struct, True)
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(s)
-    logger.info('\n\n structured slugs:\n\n {struct}'.format(
-        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+        fin.write(struct)
     realizable, out = _call_slugs(fin.name, synth=False)
     return realizable
 
@@ -84,12 +84,8 @@ def synthesize(spec, symbolic=False):
         struct = translate(spec, 'slugs')
     else:
         struct = spec
-    import slugs
-    s = slugs.convert_to_slugsin(struct, True)
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(s)
-    logger.info('\n\n structured slugs:\n\n {struct}'.format(
-        struct=struct) + '\n\n slugs in:\n\n {s}\n'.format(s=s))
+        fin.write(struct)
     realizable, out = _call_slugs(fin.name, synth=True, symbolic=symbolic)
     if not realizable:
         return None
@@ -143,15 +139,55 @@ def _bitfields_to_ints(bit_state, vrs):
     return int_state
 
 
-def _call_slugs(filename, synth=True, symbolic=True):
-    options = ['slugs', filename]
+def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
+    """Call `slugs` and return results.
+
+    slugs_compiler_path is the path to the slugsin converter format.
+    If None (default), then use the path as in the module-level
+    identifier SLUGS_COMPILER_PATH.  If this path begins with '/',
+    then it is considered to be absolute.  Otherwise, it is relative
+    to the path of the `slugs` executable.
+    """
+    if slugs_compiler_path is None:
+        slugs_compiler_path = SLUGS_COMPILER_PATH
+
+    slugs_path = None
+    for exe_path in os.environ['PATH'].split(':'):
+        if os.path.exists(os.path.join(exe_path, 'slugs')):
+            slugs_path = os.path.join(exe_path, 'slugs')
+            break
+
+    if slugs_path is None:
+        raise Exception('slugs not found in path.')
+
+    if not os.path.isabs(slugs_compiler_path):
+        slugs_compiler_path = os.path.abspath(
+            os.path.join(os.path.dirname(slugs_path),
+                         slugs_compiler_path))
+
+    if not os.path.exists(slugs_compiler_path):
+        raise Exception('slugs/compiler.py not found.')
+
+    with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
+        subprocess.check_call([slugs_compiler_path, filename],
+                              stdout=slugs_infile,
+                              stderr=subprocess.STDOUT)
+
+    options = [slugs_path, slugs_infile.name]
     if synth:
         if symbolic:
             options.extend(['--symbolicStrategy', BDD_FILE])
         else:
+            options.append('--explicitStrategy')
             options.append('--jsonOutput')
     else:
-        options.append('--onlyRealizability')
+        # As of commit ad0cf12c14131fc6a20fe29edfe04d9aefd7c6d4
+        # (tip of master branch of
+        #  https://github.com/LTLMoP/slugs.git at the time of writing),
+        # Slugs seems to default to checking realizability. Trying to
+        # provide `--onlyRealizability` leads to error message from
+        # `slugs`: "Error: Parameter '--onlyRealizability' is unknown."
+        pass
     logger.debug('Calling: ' + ' '.join(options))
     try:
         p = subprocess.Popen(
