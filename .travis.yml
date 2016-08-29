@@ -85,7 +85,7 @@ script:
   - ./extern/get-slugs.sh
   - export PATH=`pwd`/slugs-repo/src:$PATH
   - which slugs
-  # slow hybrid tests
+  # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 
 notifications:
