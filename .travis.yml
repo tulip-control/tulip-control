@@ -16,6 +16,7 @@ addons:
     - libmpfr-dev
     - graphviz
     - libglpk-dev
+    - libboost-dev
 
 before_install:
   # gr1c
