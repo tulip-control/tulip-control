@@ -25,7 +25,7 @@ before_install:
   - expr `shasum -a 256 gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz|cut -d ' ' -f1`
     = 563cc531bb034687c1d184b5d0da95e9f2b5699958912453894b53383cd0a298
   - tar -xzf gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
-  - export PATH=`pwd`/gr1c-0.11.0-Linux_x86-64:$PATH
+  - export PATH=`pwd`/gr1c-${GR1CVERSION}-Linux_x86-64:$PATH
   # miniconda
   - curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
     && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh'
