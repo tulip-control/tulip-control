@@ -63,7 +63,7 @@ script:
   - ./run_tests.py --outofsource --fast hybrid
   # install cvxopt.glpk
   - export CVXOPT_BUILD_GLPK=1
-  - pip install cvxopt==1.1.7
+  - pip install cvxopt==1.1.8
   - python -c "import cvxopt.glpk"
   # optional python packages
   - pip install gr1py
