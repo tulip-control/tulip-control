@@ -31,8 +31,6 @@ before_install:
   - conda install -q -y numpy scipy
   - conda info -a
   - pip install --ignore-installed --upgrade pip setuptools
-  - pip install nose
-  - pip install mock
 
 install:
   - python setup.py sdist
@@ -40,6 +38,8 @@ install:
 
 before_script:
   - pip install gitpython
+  - pip install nose
+  - pip install mock
   - dot -V
 
 script:
