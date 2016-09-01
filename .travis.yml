@@ -33,14 +33,6 @@ before_install:
   - pip install --ignore-installed --upgrade pip setuptools
   - pip install nose
   - pip install mock
-  ## install dd.cudd
-  - pip install dd
-  - pip download --no-dependencies dd>=0.4.0
-  - pip uninstall --yes dd
-  - tar xzf dd-*.tar.gz
-  - cd dd-*/
-  - python setup.py install --fetch --cudd
-  - cd ..
 
 install:
   - python setup.py sdist
@@ -58,6 +50,13 @@ script:
   - export CVXOPT_BUILD_GLPK=1
   - pip install cvxopt==1.1.8
   - python -c "import cvxopt.glpk"
+  ## install dd.cudd
+  - pip uninstall --yes dd
+  - pip download --no-dependencies dd>=0.4.0
+  - tar xzf dd-*.tar.gz
+  - cd dd-*/
+  - python setup.py install --fetch --cudd
+  - cd ..
   # optional python packages
   - pip install gr1py
   # gr1c
