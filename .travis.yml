@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 dist: trusty
 
 language: python
@@ -16,17 +16,16 @@ addons:
     - libmpfr-dev
     - graphviz
     - libglpk-dev
+    - libboost-dev
 
 before_install:
   # gr1c
-  - export GR1CVERSION=0.10.2
-  - curl -sO http://vehicles.caltech.edu/snapshots/gr1c/gr1c-$GR1CVERSION.tar.gz
-  - expr `shasum -a 256 gr1c-$GR1CVERSION.tar.gz|cut -d ' ' -f1`
-    = 12762f7fcebca12ce9d36f20ea26d644872a2d6ae616a34d922f23c66bfed1ca
-  - tar -xzf gr1c-$GR1CVERSION.tar.gz && cd gr1c-$GR1CVERSION && ./get-deps.sh
-  - make -j2 cudd && make -j2 all && make check
-  - export PATH=`pwd`:$PATH
-  - cd ..
+  - export GR1CVERSION=0.11.0
+  - curl -sSLO https://dl.bintray.com/slivingston/generic/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
+  - expr `shasum -a 256 gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz|cut -d ' ' -f1`
+    = 563cc531bb034687c1d184b5d0da95e9f2b5699958912453894b53383cd0a298
+  - tar -xzf gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
+  - export PATH=`pwd`/gr1c-${GR1CVERSION}-Linux_x86-64:$PATH
   # miniconda
   - curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
     && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh'
@@ -41,6 +40,23 @@ before_install:
   - pip install --ignore-installed --upgrade pip setuptools
   - pip install nose
   - pip install mock
+  # optional python packages
+  - pip install gr1py
+  # lily
+  - ./extern/get-lily.sh
+  - which perl
+  - perl --version
+  - pwd
+  - export PERL5LIB=`pwd`/Lily-1.0.2
+  - export PATH=`pwd`/Lily-1.0.2:$PATH
+  - echo $PATH
+  - which lily.pl
+  # jtlv
+  - ./extern/get-jtlv.sh
+  # slugs
+  - ./extern/get-slugs.sh
+  - export PATH=`pwd`/slugs-repo/src:$PATH
+  - which slugs
   ## install dd.cudd
   - pip install dd
   - pip download --no-dependencies dd>=0.4.0
@@ -64,10 +80,10 @@ script:
   - ./run_tests.py --outofsource --fast hybrid
   # install cvxopt.glpk
   - export CVXOPT_BUILD_GLPK=1
-  - pip install cvxopt==1.1.7
+  - pip install cvxopt==1.1.8
   - python -c "import cvxopt.glpk"
-  # slow hybrid tests
-  - ./run_tests.py --outofsource hybrid
+  # all tests, including slow hybrid and alternative game solvers
+  - ./run_tests.py --outofsource full
 
 notifications:
   email: false

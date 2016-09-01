@@ -3,7 +3,7 @@ Tests for the tulip.synth module.
 """
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
-logging.getLogger('tulip.interfaces.gr1c').setLevel(logging.DEBUG)
+logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)
 logging.getLogger('omega').setLevel(logging.WARNING)
 from nose.tools import assert_raises
 import numpy as np
@@ -368,6 +368,9 @@ def test_only_mode_control():
 
 
 def multiple_env_actions_test():
+    multiple_env_actions_check('omega')
+
+def multiple_env_actions_check(solver='omega'):
     """Two env players, 3 states controlled by sys.
 
     sys wins marginally, due to assumption on
@@ -408,9 +411,7 @@ def multiple_env_actions_test():
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable('gr1c', specs, sys=sys)
-    assert r
-    r = synth.is_realizable('omega', specs, sys=sys)
+    r = synth.is_realizable(solver, specs, sys=sys)
     assert r
     # slightly relax assumption
     specs = spec.GRSpec(
@@ -418,9 +419,7 @@ def multiple_env_actions_test():
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable('gr1c', specs, sys=sys)
-    assert not r
-    r = synth.is_realizable('omega', specs, sys=sys)
+    r = synth.is_realizable(solver, specs, sys=sys)
     assert not r
 
 
@@ -641,11 +640,11 @@ class synthesize_test:
         self.f_triv = None
 
     def test_gr1c_basic(self):
-        g = synth.synthesize("gr1c", self.f_triv)
+        g = synth.synthesize("omega", self.f_triv)
         assert isinstance(g, transys.MealyMachine)
 
     def test_unrealizable(self):
-        assert synth.synthesize("gr1c", self.trivial_unreachable) is None
+        assert synth.synthesize("omega", self.trivial_unreachable) is None
 
 
 if __name__ == '__main__':
