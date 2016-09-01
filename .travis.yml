@@ -46,6 +46,12 @@ script:
   - ./run_tests.py --outofsource base
   - pip install matplotlib
   - ./run_tests.py --outofsource --fast hybrid
+  # jtlv
+  - ./extern/get-jtlv.sh
+  # reinstall tulip, to pickup jtlv
+  - pip uninstall --yes tulip
+  - python setup.py sdist
+  - pip install dist/tulip-*.tar.gz
   # install cvxopt.glpk
   - export CVXOPT_BUILD_GLPK=1
   - pip install cvxopt==1.1.8
@@ -75,8 +81,6 @@ script:
   - export PATH=`pwd`/Lily-1.0.2:$PATH
   - echo $PATH
   - which lily.pl
-  # jtlv
-  - ./extern/get-jtlv.sh
   # slugs
   - ./extern/get-slugs.sh
   - export PATH=`pwd`/slugs-repo/src:$PATH
