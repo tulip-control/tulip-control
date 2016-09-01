@@ -1,6 +1,6 @@
 """Extra tests for interface to `omega.games.gr1`.
 
-Compared to omega_interface_testw.py, tests here can depend on
+Compared to omega_interface_test.py, tests here can depend on
 configurations of `omega` or `dd` that involve configurations beyond
 the required dependencies of TuLiP. E.g., dd can be built with CUDD.
 """
