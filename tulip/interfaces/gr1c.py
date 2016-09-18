@@ -77,7 +77,7 @@ def _assert_gr1c():
     if check_gr1c():
         return
     raise Exception(
-        '`gr1c >= {v}` not found in the PATH.\n'.format(v=v) +
+        '`gr1c >= {v}` not found in the PATH.\n'.format(v=GR1C_MIN_VERSION) +
         'Unless an alternative synthesis tool is installed,\n'
         'it will not be possible to realize GR(1) specifications.\n'
         'Consult installation instructions for gr1c at:\n'
