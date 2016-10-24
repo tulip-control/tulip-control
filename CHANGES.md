@@ -1,6 +1,59 @@
 # tulip changelog
 
 
+## 1.3.0
+2016-11-18
+
+- support synthesis of:
+
+  - both Moore and Mealy strategies
+  - non-circular Klein-Pnueli-style specifications
+  - options to select quantification of initial values of variables
+
+- introduce alternatives for definition of synthesis, defined by
+  attributes of `tulip.spec.form.GRSpec`:
+
+  - `moore`: synthesize a Moore strategy
+  - `qinit`: select quantification of initial conditions
+    (existential or universal for environment or system variables)
+  - `plus_one`: non-circular specifications
+
+- use `omega.games.gr1` as default GR(1) game solver
+  This change allows a working basic installation in Python
+
+- `gr1c` is not required. Now it is optional.
+
+- update examples to demonstrate new synthesis options
+
+- re-introduce and improve the module `tulip.gridworlds`
+
+- implement feedback control with 1 and inf norms using `scipy`,
+  thus making `tulip` independent of `cvxopt`.
+
+- add function `interfaces.print_env` to help users
+  inspect their environment, for easier installation and maintenance
+
+- update user documentation, installation instructions
+
+- require `omega >= 0.0.9, <= 0.1.0`
+
+- bump requirement to `pydot >= 1.2.0`
+
+- run all tests on
+  [Travis CI](https://travis-ci.org/tulip-control/tulip-control/)
+
+- fix bug and change continuous reachability computation,
+  and effect of the option `use_all_horizon`
+
+- remove args `bool_states, bool_actions` to function `tulip.synth.synthesize`
+
+- remove option `init_option` from `interfaces.gr1c` and `gr1py`
+
+- enumerate strategy in `interfaces.omega` using search
+
+- add function `interfaces.omega.is_realizable`
+
+
 ## 1.2.1
 2016-07-25
 
