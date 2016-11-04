@@ -400,7 +400,7 @@ def get_input_helper_LP(
             str(sol['status'])
         )
     var = np.array(sol['x']).flatten()
-
+    u = var[-N*m:]
     cost = sol['fun']
     
     return u.reshape(N, m), cost
