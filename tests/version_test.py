@@ -40,7 +40,7 @@ def test_git_version(mock_repo):
     assert 'dirty' in v, v
     # not dirty, not tagged
     instance.is_dirty.return_value = False
-    instance.git.describe.side_effect = git.GitCommandError(0, 0)
+    instance.git.describe.side_effect = git.GitCommandError('0', 0)
     v = setup.git_version(version)
     assert_pep440(v)
     assert 'dev' in v, v
