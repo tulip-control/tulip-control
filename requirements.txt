@@ -18,4 +18,4 @@ nose
 mock
 
 # dev
-gitpython
+gitpython==2.1.0
