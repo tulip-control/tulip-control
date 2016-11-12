@@ -48,13 +48,13 @@ from __future__ import absolute_import
 
 import logging
 import numpy as np
-
 import polytope as pc
 
 from .feasible import solve_feasible, createLM, _block_diag2
 
 
 logger = logging.getLogger(__name__)
+
 
 def get_input(
     x0, ssys, abstraction,
@@ -319,7 +319,7 @@ def get_input_helper_LP(
       - x(k) \in P1 for k = 0,...N
       - x(N) \in P3
       - [u(k); x(k)] \in PU
-
+    
     and minimizes x'Rx + 2*r'x + u'Qu
     """
     n = ssys.A.shape[1]
