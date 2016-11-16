@@ -37,9 +37,7 @@ install:
   - pip install dist/tulip-*.tar.gz
 
 before_script:
-  - pip install gitpython
   - pip install nose
-  - pip install mock
   - dot -V
 
 script:
@@ -85,6 +83,9 @@ script:
   - ./extern/get-slugs.sh
   - export PATH=`pwd`/slugs-repo/src:$PATH
   - which slugs
+  # dev test requirements
+  - pip install gitpython
+  - pip install mock
   # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 
