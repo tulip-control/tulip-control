@@ -59,13 +59,10 @@ from .feasible import solve_feasible, createLM, _block_diag2
 
 
 logger = logging.getLogger(__name__)
-try:
-    import cvxopt.glpk
-    solvers.options['msg_lev'] = 'GLP_MSG_OFF'
-except ImportError:
+if solvers is None:
     logger.warn(
-        '`tulip` failed to import `cvxopt.glpk`.\n'
-        'Will use Python solver of `cvxopt`.')
+        '`tulip` failed to import `cvxopt`.\n'
+        'No quadratic cost for controller computation.')
 
 
 def assert_cvxopt():
