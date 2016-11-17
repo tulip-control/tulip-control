@@ -163,22 +163,6 @@ def get_input(
     @rtype: (N x m) numpy 2darray
     """
 
-    #@param N: horizon length
-    #@type N: int >= 1
-
-    #@param conservative:
-    #    if True,
-    #    then force plant to stay inside initial
-    #    state during execution.
-    #
-    #    Otherwise, plant is forced to stay inside
-    #    the original proposition preserving cell.
-    #@type conservative: bool
-
-    #@param closed_loop: should be True
-    #    if closed loop discretization has been used.
-    #@type closed_loop: bool
-
     part = abstraction.ppp
     regions = part.regions
 
@@ -187,7 +171,7 @@ def get_input(
     orig = abstraction._ppp2orig
 
     params = abstraction.disc_params
-    N = params['N']
+    N = params['N']  # horizon length
     conservative = params['conservative']
     closed_loop = params['closed_loop']
 
