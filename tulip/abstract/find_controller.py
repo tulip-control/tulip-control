@@ -158,7 +158,7 @@ def get_input(
 
     @return: array A where row k contains the
         control input: u(k)
-        for k = 0,1 ... N-1
+        for k = 0, 1 ... N-1
     @rtype: (N x m) numpy 2darray
     """
 
@@ -180,40 +180,40 @@ def get_input(
             r is None and
             mid_weight == 0):
         # Default behavior
-        Q = np.eye(N*ssys.B.shape[1])
-        R = np.zeros([N*x0.size, N*x0.size])
-        r = np.zeros([N*x0.size,1])
+        Q = np.eye(N * ssys.B.shape[1])
+        R = np.zeros([N * x0.size, N * x0.size])
+        r = np.zeros([N * x0.size, 1])
         mid_weight = 3
     if R is None:
-        R = np.zeros([N*x0.size, N*x0.size])
+        R = np.zeros([N * x0.size, N * x0.size])
     if Q is None:
-        Q = np.eye(N*ssys.B.shape[1])
+        Q = np.eye(N * ssys.B.shape[1])
     if r is None:
-        r = np.zeros([N*x0.size,1])
+        r = np.zeros([N * x0.size, 1])
 
-    if (R.shape[0] != R.shape[1]) or (R.shape[0] != N*x0.size):
+    if (R.shape[0] != R.shape[1]) or (R.shape[0] != N * x0.size):
         raise Exception("get_input: "
-            "R must be square and have side N * dim(state space)")
+                        "R must be square and have side N * dim(state space)")
 
-    if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N*ssys.B.shape[1]):
+    if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N * ssys.B.shape[1]):
         raise Exception("get_input: "
-            "Q must be square and have side N * dim(input space)")
+                        "Q must be square and have side N * dim(input space)")
     if ofts is not None:
         start_state = start
         end_state = end
 
         if end_state not in ofts.states.post(start_state):
             raise Exception('get_input: '
-                'no transition from state s' +str(start) +
-                ' to state s' +str(end)
-            )
+                            'no transition from state s' + str(start) +
+                            ' to state s' + str(end)
+                            )
     else:
         print("get_input: "
-            "Warning, no transition matrix found, assuming feasible")
+              "Warning, no transition matrix found, assuming feasible")
 
     if (not conservative) & (orig is None):
         print("List of original proposition preserving "
-            "partitions not given, reverting to conservative mode")
+              "partitions not given, reverting to conservative mode")
         conservative = True
 
     P_start = regions[start]
@@ -222,7 +222,7 @@ def get_input(
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
 
-    idx = range((N-1)*n, N*n)
+    idx = range((N - 1) * n, N * n)
 
     if conservative:
         # Take convex hull or P_start as constraint
@@ -246,7 +246,7 @@ def get_input(
 
     if len(P_end) > 0:
         low_cost = np.inf
-        low_u = np.zeros([N,m])
+        low_u = np.zeros([N, m])
 
         # for each polytope in target region
         for P3 in P_end:
@@ -254,10 +254,10 @@ def get_input(
                 rc, xc = pc.cheby_ball(P3)
                 R[
                     np.ix_(
-                        range(n*(N-1), n*N),
-                        range(n*(N-1), n*N)
+                        range(n * (N - 1), n * N),
+                        range(n * (N - 1), n * N)
                     )
-                ] += mid_weight*np.eye(n)
+                ] += mid_weight * np.eye(n)
 
                 r[idx, :] += -mid_weight*xc
 
@@ -283,16 +283,17 @@ def get_input(
             rc, xc = pc.cheby_ball(P3)
             R[
                 np.ix_(
-                    range(n*(N-1), n*N),
-                    range(n*(N-1), n*N)
+                    range(n * (N - 1), n * N),
+                    range(n * (N - 1), n * N)
                 )
-            ] += mid_weight*np.eye(n)
-            r[idx, :] += -mid_weight*xc
+            ] += mid_weight * np.eye(n)
+            r[idx, :] += -mid_weight * xc
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q,
             closed_loop=closed_loop
         )
     return low_u
+
 
 def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q,
@@ -315,64 +316,60 @@ def get_input_helper(
     if closed_loop:
         temp_part = P3
         list_P.append(P3)
-        for i in xrange(N-1,0,-1):
+        for i in xrange(N - 1, 0, -1):
             temp_part = solve_feasible(
                 P1, temp_part, ssys, N=1,
                 closed_loop=False, trans_set=P1
             )
             list_P.insert(0, temp_part)
-        list_P.insert(0,P1)
-        L,M = createLM(ssys, N, list_P, disturbance_ind=[1])
+        list_P.insert(0, P1)
+        L, M = createLM(ssys, N, list_P, disturbance_ind=[1])
     else:
         list_P.append(P1)
-        for i in xrange(N-1,0,-1):
+        for i in xrange(N - 1, 0, -1):
             list_P.append(P1)
         list_P.append(P3)
-        L,M = createLM(ssys, N, list_P)
+        L, M = createLM(ssys, N, list_P)
 
     # Remove first constraint on x(0)
-    L = L[range(list_P[0].A.shape[0], L.shape[0]),:]
-    M = M[range(list_P[0].A.shape[0], M.shape[0]),:]
+    L = L[range(list_P[0].A.shape[0], L.shape[0]), :]
+    M = M[range(list_P[0].A.shape[0], M.shape[0]), :]
 
     # Separate L matrix
-    Lx = L[:,range(n)]
-    Lu = L[:,range(n,L.shape[1])]
-
-    M = M - Lx.dot(x0).reshape(Lx.shape[0],1)
-
+    Lx = L[:, range(n)]
+    Lu = L[:, range(n, L.shape[1])]
+    M = M - Lx.dot(x0).reshape(Lx.shape[0], 1)
     # Constraints
     G = matrix(Lu)
     h = matrix(M)
 
     B_diag = ssys.B
-    for i in xrange(N-1):
-        B_diag = _block_diag2(B_diag,ssys.B)
-    K_hat = np.tile(ssys.K, (N,1))
-
+    for i in xrange(N - 1):
+        B_diag = _block_diag2(B_diag, ssys.B)
+    K_hat = np.tile(ssys.K, (N, 1))
     A_it = ssys.A.copy()
-    A_row = np.zeros([n, n*N])
-    A_K = np.zeros([n*N, n*N])
-    A_N = np.zeros([n*N, n])
+    A_row = np.zeros([n, n * N])
+    A_K = np.zeros([n * N, n * N])
+    A_N = np.zeros([n * N, n])
 
     for i in xrange(N):
         A_row = ssys.A.dot(A_row)
         A_row[np.ix_(
             range(n),
-            range(i*n, (i+1)*n)
+            range(i * n, (i + 1) * n)
         )] = np.eye(n)
 
         A_N[np.ix_(
-            range(i*n, (i+1)*n),
+            range(i * n, (i + 1) * n),
             range(n)
         )] = A_it
 
         A_K[np.ix_(
-            range(i*n,(i+1)*n),
+            range(i * n, (i + 1) * n),
             range(A_K.shape[1])
         )] = A_row
 
         A_it = ssys.A.dot(A_it)
-
     Ct = A_K.dot(B_diag)
     P = matrix(Q + Ct.T.dot(R).dot(Ct) )
     q = matrix(
@@ -394,6 +391,7 @@ def get_input_helper(
     cost = sol['primal objective']
 
     return u.reshape(N, m), cost
+
 
 def is_seq_inside(x0, u_seq, ssys, P0, P1):
     """Checks if the plant remains inside P0 for time t = 1, ... N-1
@@ -423,20 +421,21 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         K = ssys.K
 
     inside = True
-    for i in xrange(N-1):
-        u = u_seq[i,:].reshape(u_seq[i, :].size, 1)
+    for i in xrange(N - 1):
+        u = u_seq[i, :].reshape(u_seq[i, :].size, 1)
         x = A.dot(x) + B.dot(u) + K
 
         if not pc.is_inside(P0, x):
             inside = False
 
-    un_1 = u_seq[N-1,:].reshape(u_seq[N-1, :].size, 1)
+    un_1 = u_seq[N - 1, :].reshape(u_seq[N - 1, :].size, 1)
     xn = A.dot(x) + B.dot(un_1) + K
 
     if not pc.is_inside(P1, xn):
         inside = False
 
     return inside
+
 
 def find_discrete_state(x0, part):
     """Return index identifying the discrete state
@@ -464,5 +463,5 @@ def find_discrete_state(x0, part):
     """
     for (i, region) in enumerate(part):
         if pc.is_inside(region, x0):
-             return i
+            return i
     return None
