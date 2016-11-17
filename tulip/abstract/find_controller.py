@@ -78,7 +78,8 @@ def assert_cvxopt():
 def get_input(
     x0, ssys, abstraction,
     start, end,
-    R=None, r=None, Q=None, mid_weight=0.0,
+    R=None, r=None, Q=None,
+    ord=1, mid_weight=0.0
 ):
     """Compute continuous control input for discrete transition.
 
@@ -91,7 +92,8 @@ def get_input(
     These are states of the partition C{abstraction}.
     The computed control input is such that::
 
-        f(x, u) = x'Rx +r'x +u'Qu +mid_weight *|xc-x(0)|_2
+        f(x, u) = |Rx|_{ord} + |Qu|_{ord} + r'x +
+                  mid_weight * |xc - x(N)|_{ord}
 
     be minimal.
 
@@ -153,15 +155,18 @@ def get_input(
         If empty, identity matrix is used.
     @type Q: size (N*udim x N*udim)
 
-    @param mid_weight: cost weight for |x(N)-xc|_2
+    @param mid_weight: cost weight for |x(N)-xc|_{ord}
 
+    @param ord: norm used for cost function::
+        f(x, u) = |Rx|_{ord} + |Qu|_{ord} + r'x +
+              mid_weight *|xc - x(N)|_{ord}
+    @type ord: ord \in {1, 2, np.inf}
 
     @return: array A where row k contains the
         control input: u(k)
         for k = 0, 1 ... N-1
     @rtype: (N x m) numpy 2darray
     """
-
     part = abstraction.ppp
     regions = part.regions
 
@@ -243,6 +248,15 @@ def get_input(
     else:
         # Take original proposition preserving cell as constraint
         P1 = original_regions[orig[start]]
+        # must be single polytope (ensuring convex)
+        assert len(P1) > 0, P1
+        if len(P1) == 1:
+            P1 = P1[0]
+        else:
+            print(P1)
+            raise Exception(
+                '`conservative = False` arg requires '
+                'that original regions be convex')
 
     if len(P_end) > 0:
         low_cost = np.inf
@@ -259,17 +273,12 @@ def get_input(
                     )
                 ] += mid_weight * np.eye(n)
 
-                r[idx, :] += -mid_weight*xc
-
-            try:
+                r[idx, :] += -mid_weight * xc
                 u, cost = get_input_helper(
-                    x0, ssys, P1, P3, N, R, r, Q,
+                    x0, ssys, P1, P3, N, R, r, Q, ord,
                     closed_loop=closed_loop
                 )
-                r[idx, :] += mid_weight*xc
-            except:
-                r[idx, :] += mid_weight*xc
-                continue
+                r[idx, :] += mid_weight * xc
 
             if cost < low_cost:
                 low_u = u
@@ -289,26 +298,27 @@ def get_input(
             ] += mid_weight * np.eye(n)
             r[idx, :] += -mid_weight * xc
         low_u, cost = get_input_helper(
-            x0, ssys, P1, P3, N, R, r, Q,
+            x0, ssys, P1, P3, N, R, r, Q, ord,
             closed_loop=closed_loop
         )
     return low_u
 
 
 def get_input_helper(
-    x0, ssys, P1, P3, N, R, r, Q,
+    x0, ssys, P1, P3, N, R, r, Q, ord=1,
     closed_loop=True
 ):
-    """Calculates the sequence u_seq such that:
+    """Calculate the sequence u_seq such that:
 
       - x(t+1) = A x(t) + B u(t) + K
       - x(k) \in P1 for k = 0,...N
       - x(N) \in P3
       - [u(k); x(k)] \in PU
 
-    and minimizes x'Rx + 2*r'x + u'Qu
+    and minimize:
+        |Rx|_{ord} + |Qu|_{ord} + r'x +
+        mid_weight * |xc - x(N)|_{ord}
     """
-    assert_cvxopt()
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
 
@@ -339,9 +349,6 @@ def get_input_helper(
     Lx = L[:, range(n)]
     Lu = L[:, range(n, L.shape[1])]
     M = M - Lx.dot(x0).reshape(Lx.shape[0], 1)
-    # Constraints
-    G = matrix(Lu)
-    h = matrix(M)
 
     B_diag = ssys.B
     for i in xrange(N - 1):
@@ -371,25 +378,78 @@ def get_input_helper(
 
         A_it = ssys.A.dot(A_it)
     Ct = A_K.dot(B_diag)
-    P = matrix(Q + Ct.T.dot(R).dot(Ct) )
-    q = matrix(
-        np.dot(
-            np.dot(x0.reshape(1, x0.size), A_N.T) +
-            A_K.dot(K_hat).T, R.dot(Ct)
-        ) +
-        r.T.dot(Ct)
-    ).T
-
-    sol = solvers.qp(P, q, G, h)
-
-    if sol['status'] != "optimal":
-        raise Exception("getInputHelper: "
-            "QP solver finished with status " +
-            str(sol['status'])
-        )
-    u = np.array(sol['x']).flatten()
-    cost = sol['primal objective']
-
+    if ord == 1:
+        # f(\epsilon,u) = sum(\epsilon)
+        c_LP = np.hstack((np.ones((1, N * (n + m))), r.T.dot(Ct)))
+        # Constraints -\epsilon_r < R*x <= \epsilon_r
+        # Constraints -\epsilon_u < Q*u <= \epsilon_u
+        # x = A_N*x0 + Ct*u --> ignore the first constant part
+        # x  = Ct*u
+        G_LP = np.vstack((
+            np.hstack((- np.eye(N * n),
+                       np.zeros((N * n, N * m)),
+                       - R.dot(Ct))),
+            np.hstack((- np.eye(N * n),
+                       np.zeros((N * n, N * m)),
+                       R.dot(Ct))),
+            np.hstack((np.zeros((N * m, N * n)),
+                       - np.eye(N * m), -Q)),
+            np.hstack((np.zeros((N * m, N * n)),
+                       - np.eye(N * m), Q)),
+            np.hstack((np.zeros((Lu.shape[0], N * n + N * m)), Lu))
+        ))
+        h_LP = np.vstack((np.zeros((2 * N * (n + m), 1)), M))
+    elif ord == 2:
+        assert_cvxopt()
+        # symmetrize
+        Q2 = Q.T.dot(Q)
+        R2 = R.T.dot(R)
+        # constraints
+        G = matrix(Lu)
+        h = matrix(M)
+        P = matrix(Q2 + Ct.T.dot(R2).dot(Ct))
+        q = matrix(
+            np.dot(
+                np.dot(x0.reshape(1, x0.size), A_N.T) +
+                A_K.dot(K_hat).T,
+                R2.dot(Ct)
+            ) +
+            0.5 * r.T.dot(Ct)
+        ).T
+        sol = solvers.qp(P, q, G, h)
+        if sol['status'] != "optimal":
+            raise Exception(
+                "getInputHelper: "
+                "QP solver finished with status " +
+                str(sol['status']))
+        u = np.array(sol['x']).flatten()
+        cost = sol['primal objective']
+        return u.reshape(N, m), cost
+    elif ord == np.inf:
+        c_LP = np.hstack((np.ones((1, 2)), r.T.dot(Ct)))
+        G_LP = np.vstack((
+            np.hstack((-np.ones((N * n, 1)),
+                       np.zeros((N * n, 1)),
+                       -R.dot(Ct))),
+            np.hstack((-np.ones((N * n, 1)),
+                       np.zeros((N * n, 1)),
+                       R.dot(Ct))),
+            np.hstack((np.zeros((N * m, 1)),
+                       -np.ones((N * m, 1)), -Q)),
+            np.hstack((np.zeros((N * m, 1)),
+                       -np.ones((N * m, 1)), Q)),
+            np.hstack((np.zeros((Lu.shape[0], 2)), Lu))
+        ))
+        h_LP = np.vstack((np.zeros((2 * N * (n + m), 1)), M))
+    sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP)
+    if sol['status'] != 0:
+        raise Exception(
+            "getInputHelper: "
+            "LP solver finished with message " +
+            str(sol['message']))
+    var = np.array(sol['x']).flatten()
+    u = var[-N * m:]
+    cost = sol['fun']
     return u.reshape(N, m), cost
 
 
