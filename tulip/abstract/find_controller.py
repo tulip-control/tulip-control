@@ -45,15 +45,14 @@ See Also
 L{discretize}
 """
 from __future__ import absolute_import
-
 import logging
+
 import numpy as np
+import polytope as pc
 try:
     from cvxopt import matrix, solvers
 except ImportError:
     solvers = None
-
-import polytope as pc
 
 from tulip.abstract.feasible import (
     solve_feasible,
