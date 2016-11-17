@@ -80,7 +80,6 @@ def get_input(
     x0, ssys, abstraction,
     start, end,
     R=[], r=[], Q=[], mid_weight=0.0,
-    test_result=False
 ):
     """Compute continuous control input for discrete transition.
 
@@ -157,10 +156,6 @@ def get_input(
 
     @param mid_weight: cost weight for |x(N)-xc|_2
 
-    @param test_result: performs a simulation
-        (without disturbance) to make sure that
-        the calculated input sequence is safe.
-    @type test_result: bool
 
     @return: array A where row k contains the
         control input: u(k)
@@ -311,11 +306,6 @@ def get_input(
             x0, ssys, P1, P3, N, R, r, Q,
             closed_loop=closed_loop
         )
-
-    if test_result:
-        good = is_seq_inside(x0, low_u, ssys, P1, P3)
-        if not good:
-            print("Calculated sequence not good")
     return low_u
 
 def get_input_helper(
