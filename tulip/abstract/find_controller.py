@@ -78,7 +78,7 @@ def assert_cvxopt():
 def get_input(
     x0, ssys, abstraction,
     start, end,
-    R=[], r=[], Q=[], mid_weight=0.0,
+    R=None, r=None, Q=None, mid_weight=0.0,
 ):
     """Compute continuous control input for discrete transition.
 
@@ -174,18 +174,21 @@ def get_input(
     conservative = params['conservative']
     closed_loop = params['closed_loop']
 
-    if (len(R) == 0) and (len(Q) == 0) and \
-    (len(r) == 0) and (mid_weight == 0):
+    if (
+            R is None and
+            Q is None and
+            r is None and
+            mid_weight == 0):
         # Default behavior
         Q = np.eye(N*ssys.B.shape[1])
         R = np.zeros([N*x0.size, N*x0.size])
         r = np.zeros([N*x0.size,1])
         mid_weight = 3
-    if len(R) == 0:
+    if R is None:
         R = np.zeros([N*x0.size, N*x0.size])
-    if len(Q) == 0:
+    if Q is None:
         Q = np.eye(N*ssys.B.shape[1])
-    if len(r) == 0:
+    if r is None:
         r = np.zeros([N*x0.size,1])
 
     if (R.shape[0] != R.shape[1]) or (R.shape[0] != N*x0.size):
