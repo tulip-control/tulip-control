@@ -14,14 +14,15 @@ TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   pip install tulip
 
-Detailed instructions, including notes about dependencies and troubleshooting,
-are available at http://tulip-control.sourceforge.net/doc/install.html
+This will install the required dependencies.
+To find out what dependencies (including optional ones) are installed, call::
 
-What dependencies are currently installed and available can be
-probed by calling the function `tulip.interfaces.print_env()`.
+  tulip.interfaces.print_env()
 
-The next section describes how to build documentation.  A test suite is provided
-under ``tests/``.  Consult the section "Testing" below.
+For detailed instructions, including notes about dependencies and troubleshooting,
+consult http://tulip-control.sourceforge.net/doc/install.html
+The next section describes how to build documentation.
+A test suite is provided under ``tests/``.  Consult the section "Testing" below.
 
 
 Documentation
@@ -53,7 +54,7 @@ Testing
 -------
 
 Tests are performed using `nose <http://readthedocs.org/docs/nose/>`_.  From the
-root of the source tree (i.e., where setup.py is located), ::
+root of the source tree (i.e., where ``setup.py`` is located), ::
 
   ./run_tests.py
 
