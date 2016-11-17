@@ -55,7 +55,7 @@ except ImportError:
 
 import polytope as pc
 
-from .feasible import solve_feasible, createLM, _block_diag2
+from tulip.abstract.feasible import solve_feasible, createLM, _block_diag2
 
 
 logger = logging.getLogger(__name__)
