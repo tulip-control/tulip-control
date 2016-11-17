@@ -666,9 +666,8 @@ class GridWorld(object):
         try:
             from tulip.abstract import prop2partition
         except ImportError:
-            raise ImportError('GridWorld.dump_ppartition() requires '
-                              'tulip.abstract, which may not be available '
-                              'because optional dependencies are missing.')
+            raise ImportError('`GridWorld.dump_ppartition()` requires '
+                              'the module `tulip.abstract`.')
 
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
