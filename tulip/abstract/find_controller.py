@@ -7,16 +7,16 @@
 #
 # 1. Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
-#
+# 
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-#
+# 
 # 3. Neither the name of the California Institute of Technology nor
 #    the names of its contributors may be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.
-#
+# 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -30,12 +30,12 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
+""" 
 Algorithms related to controller synthesis for discretized dynamics.
 
 Primary functions:
     - L{get_input}
-
+    
 Helper functions:
     - L{get_input_helper}
     - L{is_seq_inside}
@@ -48,52 +48,32 @@ from __future__ import absolute_import
 
 import logging
 import numpy as np
-try:
-    from cvxopt import matrix, solvers
-except ImportError:
-    solvers = None
-
 import polytope as pc
 
 from .feasible import solve_feasible, createLM, _block_diag2
 
 
 logger = logging.getLogger(__name__)
-try:
-    import cvxopt.glpk
-    solvers.options['msg_lev'] = 'GLP_MSG_OFF'
-except ImportError:
-    logger.warn(
-        '`tulip` failed to import `cvxopt.glpk`.\n'
-        'Will use Python solver of `cvxopt`.')
-
-
-def assert_cvxopt():
-    """Raise `ImportError` if `cvxopt.solvers` failed to import."""
-    if solvers is None:
-        raise ImportError(
-            'Failed to import `cvxopt.solvers`.'
-            'Unable to solve quadratic programming problems.')
 
 
 def get_input(
     x0, ssys, abstraction,
     start, end,
     R=[], r=[], Q=[], mid_weight=0.0,
-    test_result=False
+    test_result=False,ord=1
 ):
     """Compute continuous control input for discrete transition.
 
     Computes a continuous control input sequence
     which takes the plant:
-
+        
         - from state C{start}
         - to state C{end}
 
     These are states of the partition C{abstraction}.
     The computed control input is such that::
-
-        f(x, u) = x'Rx +r'x +u'Qu +mid_weight *|xc-x(0)|_2
+        
+        f(x, u) = |Rx|_inf+|Qu|_inf+r'x+mid_weight *|xc-x(0)|_inf
 
     be minimal.
 
@@ -162,6 +142,10 @@ def get_input(
         the calculated input sequence is safe.
     @type test_result: bool
 
+    @param ord: norm used for cost function::
+	f(x, u) = |Rx|_{ord} + |Qu|_{ord} + r'x + mid_weight *|xc-x(0)|_{ord}
+    @type ord: ord \in {1,2,'inf'}
+
     @return: array A where row k contains the
         control input: u(k)
         for k = 0,1 ... N-1
@@ -175,7 +159,7 @@ def get_input(
     #    if True,
     #    then force plant to stay inside initial
     #    state during execution.
-    #
+    #    
     #    Otherwise, plant is forced to stay inside
     #    the original proposition preserving cell.
     #@type conservative: bool
@@ -206,7 +190,7 @@ def get_input(
     if len(R) == 0:
         R = np.zeros([N*x0.size, N*x0.size])
     if len(Q) == 0:
-        Q = np.eye(N*ssys.B.shape[1])
+        Q = np.eye(N*ssys.B.shape[1])    
     if len(r) == 0:
         r = np.zeros([N*x0.size,1])
 
@@ -262,6 +246,14 @@ def get_input(
     else:
         # Take original proposition preserving cell as constraint
         P1 = original_regions[orig[start]]
+        # must be convex (therefore single polytope?)
+        if len(P1) > 0:
+            if len(P1) == 1:
+                P1 = P1[0]
+            else:
+                print P1
+                raise Exception("conservative = False flag requires "
+                                "original regions to be convex")
 
     if len(P_end) > 0:
         low_cost = np.inf
@@ -279,17 +271,16 @@ def get_input(
                 ] += mid_weight*np.eye(n)
 
                 r[idx, :] += -mid_weight*xc
-
-            try:
-                u, cost = get_input_helper(
-                    x0, ssys, P1, P3, N, R, r, Q,
+            #try:
+                u, cost = get_input_helper_LP(
+                    x0, ssys, P1, P3, N, R, r, Q, ord,
                     closed_loop=closed_loop
                 )
                 r[idx, :] += mid_weight*xc
-            except:
-                r[idx, :] += mid_weight*xc
-                continue
-
+            #except:
+            #    r[idx, :] += mid_weight*xc
+            #    continue
+            
             if cost < low_cost:
                 low_u = u
                 low_cost = cost
@@ -307,8 +298,8 @@ def get_input(
                 )
             ] += mid_weight*np.eye(n)
             r[idx, :] += -mid_weight*xc
-        low_u, cost = get_input_helper(
-            x0, ssys, P1, P3, N, R, r, Q,
+        low_u, cost = get_input_helper_LP(
+            x0, ssys, P1, P3, N, R, r, Q, ord,
             closed_loop=closed_loop
         )
 
@@ -318,8 +309,8 @@ def get_input(
             print("Calculated sequence not good")
     return low_u
 
-def get_input_helper(
-    x0, ssys, P1, P3, N, R, r, Q,
+def get_input_helper_LP(
+    x0, ssys, P1, P3, N, R, r, Q, ord=1,
     closed_loop=True
 ):
     """Calculates the sequence u_seq such that:
@@ -328,10 +319,9 @@ def get_input_helper(
       - x(k) \in P1 for k = 0,...N
       - x(N) \in P3
       - [u(k); x(k)] \in PU
-
+    
     and minimizes x'Rx + 2*r'x + u'Qu
     """
-    assert_cvxopt()
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
 
@@ -339,7 +329,7 @@ def get_input_helper(
     if closed_loop:
         temp_part = P3
         list_P.append(P3)
-        for i in xrange(N-1,0,-1):
+        for i in xrange(N-1,0,-1): 
             temp_part = solve_feasible(
                 P1, temp_part, ssys, N=1,
                 closed_loop=False, trans_set=P1
@@ -360,19 +350,14 @@ def get_input_helper(
 
     # Separate L matrix
     Lx = L[:,range(n)]
-    Lu = L[:,range(n,L.shape[1])]
+    Lu = L[:,range(n,L.shape[1])] 
 
     M = M - Lx.dot(x0).reshape(Lx.shape[0],1)
-
-    # Constraints
-    G = matrix(Lu)
-    h = matrix(M)
 
     B_diag = ssys.B
     for i in xrange(N-1):
         B_diag = _block_diag2(B_diag,ssys.B)
     K_hat = np.tile(ssys.K, (N,1))
-
     A_it = ssys.A.copy()
     A_row = np.zeros([n, n*N])
     A_K = np.zeros([n*N, n*N])
@@ -396,26 +381,45 @@ def get_input_helper(
         )] = A_row
 
         A_it = ssys.A.dot(A_it)
-
     Ct = A_K.dot(B_diag)
-    P = matrix(Q + Ct.T.dot(R).dot(Ct) )
-    q = matrix(
-        np.dot(
-            np.dot(x0.reshape(1, x0.size), A_N.T) +
-            A_K.dot(K_hat).T, R.dot(Ct)
-        ) +
-        r.T.dot(Ct)
-    ).T
+    if ord == 1:
+        # f(\epsilon,u) = sum(\epsilon)
+        c_LP = np.hstack((np.ones((1,N*(n+m))),r.T.dot(Ct)))
+        # Constraints -\epsilon <= Q*u + R*x <= \epsilon
+        # x = A_N*x0 + Ct*u --> ignore the first constant part
+        # x  = Ct*u
+        G_LP = np.vstack((
+            np.hstack((-np.eye(N*n),np.zeros((N*n,N*m)),-R.dot(Ct))),
+            np.hstack((-np.eye(N*n),np.zeros((N*n,N*m)),R.dot(Ct))),
+            np.hstack((np.zeros((N*m,N*n)),-np.eye(N*m),-Q)),
+            np.hstack((np.zeros((N*m,N*n)),-np.eye(N*m),Q)),
+            np.hstack((np.zeros((Lu.shape[0],N*n+N*m)),Lu))
+        ))
+        h_LP = np.vstack((np.zeros((2*N*(n+m),1)),M))
+    elif ord == 2:
+        raise Exception("2-norm is Not Implemented")
+        return
+    elif ord == np.inf:
+        c_LP = np.hstack((np.ones((1,2)),r.T.dot(Ct)))
+        G_LP = np.vstack((
+            np.hstack((-np.ones((N*n,1)),np.zeros((N*n,1)),-R.dot(Ct))),
+            np.hstack((-np.ones((N*n,1)),np.zeros((N*n,1)),R.dot(Ct))),
+            np.hstack((np.zeros((N*m,1)),-np.ones((N*m,1)),-Q)),
+            np.hstack((np.zeros((N*m,1)),-np.ones((N*m,1)),Q)),
+            np.hstack((np.zeros((Lu.shape[0],2)),Lu))
+        ))
+        h_LP = np.vstack((np.zeros((2*N*(n+m),1)),M))
 
-    sol = solvers.qp(P, q, G, h)
+    sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP)
 
-    if sol['status'] != "optimal":
+    if sol['status'] != 0:
         raise Exception("getInputHelper: "
-            "QP solver finished with status " +
+            "LP solver finished with status " +
             str(sol['status'])
         )
-    u = np.array(sol['x']).flatten()
-    cost = sol['primal objective']
+    var = np.array(sol['x']).flatten()
+    u = var[-N*m:]
+    cost = sol['fun']
 
     return u.reshape(N, m), cost
 
@@ -434,7 +438,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     @param P0: C{Polytope} where we want x(k) to remain for k = 1, ... N-1
 
     @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
-        C{False} otherwise
+        C{False} otherwise  
     """
     N = u_seq.shape[0]
     x = x0.reshape(x0.size, 1)
