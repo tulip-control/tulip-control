@@ -35,7 +35,7 @@ can be requested (not case sensitive):
   basic TuLiP installation with required dependencies.
 
 * "hybrid": tests that should pass given dependencies
-  implied by the "hybrid" extras: cvxopt and polytope.
+  implied by the "hybrid" extras: polytope.
 
 * "full": all tests. Every optional dependency or
   external tool is potentially used.
