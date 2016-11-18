@@ -178,7 +178,10 @@ def get_input(
     N = params['N']  # horizon length
     conservative = params['conservative']
     closed_loop = params['closed_loop']
-
+    if closed_loop:
+        logger.warn(
+            '`closed_loop = True` for controller computation. '
+            'This option is under development: use with caution.')
     if (
             R is None and
             Q is None and
