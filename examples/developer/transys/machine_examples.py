@@ -100,18 +100,17 @@ def mealy_machine_example():
     # any disjunction is represented by 2 edges
 
     # input defs
-    inputs = [
-        ('speed', {'zero', 'low', 'high', 'crazy'} ),
-        ('seats', trs.PowerSet(range(5) ) ),
-        ('aperture', check_diaphragm() ),
-        ('camera', check_camera() )
-    ]
+    inputs = {
+        'speed': {'zero', 'low', 'high', 'crazy'},
+        'seats': trs.PowerSet(range(5) ),
+        'aperture': check_diaphragm(),
+        'camera': check_camera()}
 
     # outputs def
-    outputs = [('photo', {'capture', 'wait'} ) ]
+    outputs = {'photo': {'capture', 'wait'}}
 
     # state variables def
-    state_vars = [('light', {'on', 'off'} ) ]
+    state_vars = {'light': {'on', 'off'}}
 
     # define the machine itself
     m = trs.MealyMachine()
@@ -149,16 +148,13 @@ def garage_counter(ploting=True):
 
     no state variables in this Finite-State Machine
     """
-    m = trs.Mealy()
+    m = trs.MealyMachine()
 
-    m.add_inputs([
-        ['up', {'present', 'absent'}],
-        ['down', {'present', 'absent'}]
-    ])
+    m.add_inputs({
+        'up': {'present', 'absent'},
+        'down': {'present', 'absent'}})
 
-    m.add_outputs([
-        ('count', range(3) )
-    ])
+    m.add_outputs({'count': range(3)})
 
     m.states.add_from(range(3) )
     m.states.initial.add(0)
@@ -180,12 +176,12 @@ def garage_counter_with_state_vars():
     """
     m = garage_counter(ploting=False)
 
-    m.add_state_vars([('c', range(3)) ])
+    m.add_state_vars({'c': range(3)})
     m.states.add(0, c=0)
     m.states.add(1, c=1)
     m.states.add(2, c=2)
 
-    m.plot()
+    m.save()
 
     return m
 
@@ -204,16 +200,16 @@ def thermostat_with_hysteresis():
 
             return False
 
-    m = trs.Mealy()
+    m = trs.MealyMachine()
 
-    m.add_inputs([('temperature', ) ])
+    m.add_inputs({'temperature': set()})
 
 def traffic_light():
-    m = trs.Mealy()
+    m = trs.MealyMachine()
     pure_signal = {'present', 'absent'}
 
-    m.add_inputs([('tick', pure_signal) ])
-    m.add_outputs([('go', pure_signal), ('stop', pure_signal) ])
+    m.add_inputs({'tick': pure_signal})
+    m.add_outputs({'go': pure_signal, 'stop': pure_signal})
 
     m.states.add_from(['red', 'green', 'yellow'])
     m.states.initial.add('red')
@@ -225,23 +221,20 @@ def traffic_light():
     m.transitions.add('green', 'yellow', tick=p, go=a, stop=p)
     m.transitions.add('yellow', 'red', tick=p, go=a, stop=p)
 
-    m.plot()
+    m.save()
     return m
 
 def pedestrians():
     """Example 2.14, p.63 [LS11]
     """
-    m = trs.Mealy()
+    m = trs.MealyMachine()
 
-    m.add_inputs([
-        ('sigR', mc.pure),
-        ('sigG', mc.pure),
-        ('sigY', mc.pure)
-    ])
+    m.add_inputs({
+        'sigR': mc.pure,
+        'sigG': mc.pure,
+        'sigY': mc.pure})
 
-    m.add_outputs([
-        ('pedestrian', mc.pure)
-    ])
+    m.add_outputs({'pedestrian': mc.pure})
 
     m.states.add_from(['none', 'waiting', 'crossing'] )
     m.states.initial.add('crossing')
@@ -271,7 +264,7 @@ def pedestrians():
         sigR='absent', sigG='present', sigY='absent',
         pedestrian='absent'
     )
-    m.plot()
+    m.save()
     return m
 
 if __name__ == '__main__':
@@ -283,8 +276,7 @@ if __name__ == '__main__':
     m4 = pedestrians()
     m5 = traffic_light()
 
-    m5.simulate('random', 4)
-    #m6.simulate() for manual simulation
+    m5.run(4)
 
     # save animated javascript
     if saving:

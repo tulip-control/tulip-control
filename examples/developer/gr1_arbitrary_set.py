@@ -15,26 +15,27 @@ env_prog = '!park'
 sys_vars = {}
 sys_vars['loc'] = ['a', 'b', 'c', 'd', 'e', 'foo']
 
-sys_init = {'loc=a'}
+sys_init = {'loc= "a"'}
 sys_safe = {
-    'loc=a -> next(loc=b || loc=d)',
-    'loc=b -> next(loc=a || loc=e || loc=c)',
-    'loc=c -> next(loc=b || loc=foo)',
-    'loc=d -> next(loc=a || loc=e)',
-    'loc=e -> next(loc=d || loc=b || loc=foo)',
-    'loc=foo -> next(loc=e || loc=c)',
+    'loc="a" -> next(loc="b" || loc="d")',
+    'loc="b" -> next(loc="a" || loc="e" || loc="c")',
+    'loc="c" -> next(loc="b" || loc="foo")',
+    'loc="d" -> next(loc="a" || loc="e")',
+    'loc="e" -> next(loc="d" || loc="b" || loc="foo")',
+    'loc="foo" -> next(loc="e" || loc="c")',
 }
 
 sys_vars['mem'] = 'boolean'
 sys_init |= {'mem'}
-sys_safe |= {'next(mem) <-> (loc=a) || (mem && !park)'}
+sys_safe |= {'next(mem) <-> (loc="a") || (mem && !park)'}
 sys_prog = {'mem'}
 
 specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     sys_init=sys_init, sys_safety=sys_safe,
                     env_prog=env_prog, sys_prog=sys_prog)
-
-ctrl = synth.synthesize('gr1c', specs)
+specs.moore = False
+specs.qinit = '\A \E'
+ctrl = synth.synthesize('omega', specs)
 ctrl.save('gr1_arbitrary_set0.pdf')
 
 """
@@ -58,7 +59,7 @@ sys.transitions.add_from(
 sys.atomic_propositions |= {'cave'}
 sys.states.add('a', ap={'cave'})
 
-sys_vars = {'mem':'boolean'}
+sys_vars = {'mem': 'boolean'}
 sys_init = {'mem'}
 
 # if we don't want to use an extra AP to label a,
@@ -73,6 +74,7 @@ sys_safe = {'next(mem) <-> (cave) || (mem && !park)'}
 specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     sys_init=sys_init, sys_safety=sys_safe,
                     env_prog=env_prog, sys_prog=sys_prog)
-
-ctrl = synth.synthesize('gr1c', specs, sys=sys)
+specs.moore = False
+specs.qinit = '\A \E'
+ctrl = synth.synthesize('omega', specs, sys=sys)
 ctrl.save('gr1_arbitrary_set1.pdf')

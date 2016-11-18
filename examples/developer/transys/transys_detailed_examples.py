@@ -286,7 +286,7 @@ def fts_maximal_example():
     nodes = {'soda', 'beer'}
     labels = {'paid', 'drink'}
     for node, label in zip(nodes, labels):
-        fts.add_node(node, ap=label)
+        fts.add_node(node, ap={label})
     fts.states.add('select', ap={'paid'})
 
     fts.plot()
@@ -325,10 +325,10 @@ def ba_maximal_example():
     except:
         print('q10 not a state.')
 
-    ba.transitions.add('q0', 'q1', letter=None)
+    ba.transitions.add('q0', 'q1', letter=set())
     ba.transitions.add('q0', 'q1', letter={'paid'})
     ba.transitions.add('q1', 'q2', letter={'paid', 'drink'})
-    ba.transitions.add('q3', 'q0', letter=None)
+    ba.transitions.add('q3', 'q0', letter=set())
     ba.transitions.add('q1', 'q3', letter={'drink'})
     ba.plot()
 
@@ -406,7 +406,7 @@ def label_per_state():
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add('p')
     fts.states.add('s0', ap={'p'})
-    fts.states.add('s1', ap=None)
+    fts.states.add('s1', ap=set())
     fts.plot()
 
 if __name__ == '__main__':

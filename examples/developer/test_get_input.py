@@ -1,7 +1,11 @@
-"""
-abstract.get_input usage example
+"""Usage example for the function `abstract.get_input`.
 
-to be run after robot_continuous.py, in same session
+To be run after `continuous.py`, in same session.
+For example, within an `ipython` interactive session in
+this directory:
+
+run ../continuous.py
+run -i test_get_input.py
 """
 from tulip.abstract import get_input, find_discrete_state
 from polytope import is_inside
@@ -43,8 +47,8 @@ end_poly = disc_dynamics.ppp.regions[end]
 if not is_inside(start_poly, x0):
     raise Exception('x0 \\notin start_poly')
 
-start_state = 's' +str(start)
-end_state = 's' +str(end)
+start_state = start
+end_state = end
 
 post = disc_dynamics.ts.states.post(start_state)
 print(post)
@@ -59,7 +63,7 @@ print(u_seq)
 x = integrate(sys_dyn, x0, u_seq)
 
 # arrived at target ?
-if not is_inside(end_poly, xn):
+if not is_inside(end_poly, x):
     raise Exception('incorrect continuous transition')
 else:
     print('arrived at target Region/Polytope')

@@ -62,7 +62,7 @@ def ofts_minimal_example():
     msg = hl +'\nOpen FTS\n' +hl
     print(msg)
 
-    ofts = trs.OpenFiniteTransitionSystem()
+    ofts = trs.FiniteTransitionSystem()
 
     ofts.states.add_from(['s1', 's2', 's3'] )
     ofts.states.initial.add('s1')
@@ -166,7 +166,7 @@ def merge_example():
 
     L = n*['p']
     ts2 = trs.cycle_labeled_with(L)
-    ts2.states.add('s3', ap=None)
+    ts2.states.add('s3', ap=set())
 
     ts2.transitions.remove('s0', 's1')
     ts2.transitions.remove('s1', 's2')
@@ -177,12 +177,7 @@ def merge_example():
 
     ts2.plot()
 
-    ts3 = ts1 +ts2
-    ts3.transitions.add('s'+str(n-1), 's'+str(n) )
-    ts3.default_layout = 'circo'
-    ts3.plot('TB')
-
-    return ts3
+    return ts2
 
 if __name__ == '__main__':
     print('Intended to be run within IPython.\n'
@@ -192,14 +187,5 @@ if __name__ == '__main__':
     fts = fts_minimal_example()
     ofts = ofts_minimal_example()
     ba = ba_minimal_example()
-
-    (prod_fts, accepting_states_preimage) = fts *ba
-    prod_ba = ba *fts
-
-    if not prod_fts.plot() and save_fig:
-        prod_fts.save('prod.png', 'png')
-
-    if not prod_ba.plot() and save_fig:
-        prod_ba.save('prod.png', 'png')
 
     merger_ts = merge_example()
