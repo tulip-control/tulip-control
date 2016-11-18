@@ -325,7 +325,7 @@ class Parser(object):
     def p_error(self, p):
         s = list()
         while True:
-            tok = self.token()
+            tok = self.parser.token()
             if tok is None:
                 break
             s.append(tok.value)
