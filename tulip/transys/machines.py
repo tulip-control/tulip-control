@@ -694,7 +694,7 @@ def interactive_run(mealy, from_state=None):
         state = from_state
     while True:
         print('\n Current state: ' + str(state))
-        if _interactive_run_step(mealy) is None:
+        if _interactive_run_step(mealy, state) is None:
             break
 
 
