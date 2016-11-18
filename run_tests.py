@@ -5,7 +5,7 @@ Driver script for testing TuLiP.  Try calling it with "-h" flag.
 from __future__ import print_function
 import imp
 import sys
-import os.path
+import os
 from os import walk
 import argparse
 
@@ -104,7 +104,6 @@ def main():
 
     if require_nonlocaldir_tulip:
         # Scrub local directory from search path for modules
-        import os
         try:
             while True:
                 sys.path.remove('')
