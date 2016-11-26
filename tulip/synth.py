@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Interface to library of synthesis tools, e.g., JTLV, gr1c"""
+"""Interface to library of synthesis tools, e.g., gr1c, omega."""
 from __future__ import absolute_import
 import copy
 import logging
@@ -38,7 +38,6 @@ import warnings
 
 from tulip.interfaces import gr1c
 from tulip.interfaces import gr1py
-from tulip.interfaces import jtlv
 from tulip.interfaces import omega as omega_int
 try:
     from tulip.interfaces import slugs
@@ -977,7 +976,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     @type bool_actions: C{set} of keys from C{ts}
 
-    @param solver: 'gr1c' or 'slugs' or 'jtlv'
+    @param solver: 'gr1c' or 'slugs'
     @type solver: str
     """
     assert isinstance(ts, dict)
@@ -999,11 +998,9 @@ def synthesize_many(specs, ts=None, ignore_init=None,
             raise ValueError('Import of slugs interface failed. ' +
                              'Please verify installation of "slugs".')
         ctrl = slugs.synthesize(specs)
-    elif solver == 'jtlv':
-        ctrl = jtlv.synthesize(specs)
     else:
         raise Exception('Unknown solver: ' + str(solver) + '. '
-                        'Available solvers: "jtlv", "gr1c", and "slugs"')
+                        'Available solvers: "gr1c", and "slugs"')
     try:
         logger.debug('Mealy machine has: n = ' +
                      str(len(ctrl.states)) + ' states.')
@@ -1076,10 +1073,6 @@ def synthesize(
           - C{"slugs"}: use slugs via L{interfaces.slugs}.
             C++ using CUDD, symbolic
 
-          - C{"jtlv"}: use JTLV via L{interfaces.jtlv}.
-            Java, symbolic
-            (deprecated)
-
     @type specs: L{spec.GRSpec}
 
     @param env: A transition system describing the environment:
@@ -1133,16 +1126,10 @@ def synthesize(
         strategy = gr1py.synthesize(specs)
     elif option == 'omega':
         strategy = omega_int.synthesize_enumerated_streett(specs)
-    elif option == 'jtlv':
-        strategy = jtlv.synthesize(specs)
-        if isinstance(strategy, list):
-            # Discard counter-examples, because here we only care that
-            # it is not realizable.
-            strategy = None
     else:
         raise Exception('Undefined synthesis option. ' +
                         'Current options are "gr1c", ' +
-                        '"slugs", "gr1py", "omega", and "jtlv".')
+                        '"slugs", "gr1py", and "omega".')
 
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
@@ -1181,11 +1168,9 @@ def is_realizable(
         r = gr1py.check_realizable(specs)
     elif option == 'omega':
         r = omega_int.is_realizable(specs)
-    elif option == 'jtlv':
-        r = jtlv.check_realizable(specs)
     else:
         raise Exception('Undefined synthesis option. ' +
-                        'Current options are "jtlv", "gr1c", ' +
+                        'Current options are "gr1c", ' +
                         '"slugs", and "gr1py"')
     if r:
         logger.debug('is realizable')
