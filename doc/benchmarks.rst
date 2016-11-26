@@ -9,9 +9,9 @@ underlying algorithms' (i.e., solvers) capabilities to solve large scale
 problems. We provide computation times and memory requirements as a function of
 various (sometimes domain-specific) complexity measures.
 
-Current TuLiP compatible solvers are:
+TuLiP compatible solvers in version 0.4a were:
 
-* GR(1) game solvers: JTLV (default), gr1c
+* GR(1) game solvers: gr1c, JTLV
 * Model Checkers: NuSMV, SPIN
 * SMT solver: yices
 
@@ -38,7 +38,7 @@ measures.
 For the same robot motion planning example, the following graph shows that when
 reactiveness to the environment is not required (e.g., when the environment is
 static), using a model-checker for logic synthesis scales much better than a
-more general game solver such as JTLV or gr1c.
+more general game solver such as gr1c.
 
 .. image:: logic-synt-vs-game.png
 
@@ -98,7 +98,7 @@ generated, as well as the total computation time (in seconds), respectively.
 
 .. csv-table:: Table 3
    :header: "No. of Clocks", "Clock \"Ticks\"", "Aut. Size", "Time [sec]"
-   
+
    1, 1, 32, 1.5
    1, 3, 64, 1.7
    1, 5, 96, 1.7
