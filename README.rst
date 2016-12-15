@@ -20,7 +20,7 @@ To find out what dependencies (including optional ones) are installed, call::
   tulip.interfaces.print_env()
 
 For detailed instructions, including notes about dependencies and troubleshooting,
-consult http://tulip-control.sourceforge.net/doc/install.html
+consult https://tulip-control.sourceforge.io/doc/install.html
 The next section describes how to build documentation.
 A test suite is provided under ``tests/``.  Consult the section "Testing" below.
 
@@ -41,8 +41,8 @@ and can also be built from the ``doc`` directory, now by ::
 
 Built copies for the most recent release of TuLiP are available online at:
 
-* http://tulip-control.sourceforge.net/doc/
-* http://tulip-control.sourceforge.net/api-doc/
+* https://tulip-control.sourceforge.io/doc/
+* https://tulip-control.sourceforge.io/api-doc/
 
 Command summaries are provided by ``make help``.  Besides the above sources, you
 may also read API documentation using the standard pydoc tool.  E.g., ::

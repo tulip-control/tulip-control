@@ -297,7 +297,7 @@ class MooreMachine(Transducer):
     Reference
     =========
     U{[M56]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#m56>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#m56>}
     """
 
     def __init__(self):
@@ -360,7 +360,7 @@ class MealyMachine(Transducer):
     Examples
     ========
     Traffic Light: Fig. 3.14, p.72 U{[LS11]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
     >>> m = MealyMachine()
     >>> pure_signal = {'present', 'absent'}
@@ -412,7 +412,7 @@ class MealyMachine(Transducer):
     Reference
     =========
     U{[M55]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#m55>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#m55>}
     """
 
     def __init__(self):
@@ -757,7 +757,7 @@ def moore2mealy(moore):
     Reference
     =========
     U{[LS11]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
     @type moore: L{MooreMachine}
 
@@ -810,7 +810,7 @@ def mealy2moore(mealy):
     Reference
     =========
     U{[LS11]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#ls11>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
     @type mealy: L{MealyMachine}
 

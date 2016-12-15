@@ -212,7 +212,7 @@ class States(object):
         ========
           - L{pre}
           - Def. 2.3, p.23 U{[BK08]
-            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+            <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
         @param states:
           - None, so initial states returned
@@ -236,7 +236,7 @@ class States(object):
         ========
           - L{post}
           - Def. 2.3, p.23 U{[BK08]
-            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+            <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
         @rtype: set
         """
@@ -382,7 +382,7 @@ class States(object):
         See Also
         ========
         Def. 2.4, p.23 U{[BK08]
-        <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+        <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
         """
         return not bool(self.graph.successors(state))
 

@@ -57,7 +57,7 @@ be followed:
   using `Epydoc syntax <http://epydoc.sourceforge.net/manual-epytext.html>`_,
   e.g., ::
 
-    U{[WTOXM11] <http://tulip-control.sourceforge.net/doc/bibliography.html#wtoxm11>}
+    U{[WTOXM11] <https://tulip-control.sourceforge.io/doc/bibliography.html#wtoxm11>}
 
 Testing
 -------

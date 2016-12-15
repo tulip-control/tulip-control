@@ -248,7 +248,7 @@ def sync_prod(ts, ba):
 
             This definition of accepting set extends
             Def.4.8, p.156 U{[BK08]
-            <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+            <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
             to NBA.
 
     Synchronous product TS * BA or TS1 * TS2.
@@ -262,7 +262,7 @@ def sync_prod(ts, ba):
     Caution
     =======
     This method includes semantics for true\in\Sigma (p.916, U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}),
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}),
     so there is a slight overlap with logic grammar.  In other
     words, not completely isolated from logics.
 
@@ -280,9 +280,9 @@ def sync_prod(ts, ba):
     ========
     __mul__, async_prod, BuchiAutomaton.sync_prod, tensor_product
     Def. 2.42, pp. 75--76 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
     Def. 4.62, p.200 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
     @param ts_or_ba: system with which to take synchronous product
     @type ts_or_ba: L{FiniteTransitionSystem} or L{BuchiAutomaton}
@@ -371,7 +371,7 @@ def async_prod(self, ts):
     ========
     __or__, sync_prod, cartesian_product
     Def. 2.18, p.38 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
     """
     if not isinstance(ts, FiniteTransitionSystem):
         raise TypeError('ts must be a FiniteTransitionSystem.')

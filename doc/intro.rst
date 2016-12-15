@@ -71,8 +71,8 @@ the ``doc`` directory in the TuLiP sources::
 
 Built copies for the most recent release of TuLiP are available online at:
 
-* http://tulip-control.sourceforge.net/doc/
-* http://tulip-control.sourceforge.net/api-doc/
+* https://tulip-control.sourceforge.io/doc/
+* https://tulip-control.sourceforge.io/api-doc/
 
 Getting help
 ------------

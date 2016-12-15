@@ -465,7 +465,7 @@ def discretize(
     Reference
     =========
     U{[NOTM12]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#notm12>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#notm12>}
 
     See Also
     ========

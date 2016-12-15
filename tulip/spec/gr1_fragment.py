@@ -299,7 +299,7 @@ def stability_to_gr1(p, aux='aux'):
 
     Warning: This conversion is sound, but not complete.
     See p.2, U{[E10]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#e10>}
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#e10>}
 
     GR(1) form::
 

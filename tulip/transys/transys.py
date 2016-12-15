@@ -290,7 +290,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     Reference
     =========
     For closed systems this corresponds to Def. 2.1, p.20 U{[BK08]
-    <http://tulip-control.sourceforge.net/doc/bibliography.html#bk08>}:
+    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}:
         - states (instance of L{States}) = S
         - states.initial = S_0 \subseteq S
         - atomic_propositions = AP
