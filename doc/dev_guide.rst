@@ -193,8 +193,38 @@ entirely ignored.
   that workspace.
 
 - Prefix commits to classify the changes.
-  The `NumPy development workflow <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_ contains a summary of common abbreviations.
-  You may prefer to use "MAI:" instead of "MAINT:", and "REF:" for refactoring.
+  The `NumPy development workflow
+  <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_
+  contains a summary of common abbreviations.
+  Suggested abbreviations:
+
+  - API: backward incompatible change
+  - BIB: biliography (for BibTeX files)
+  - BIN: for generated files (usually those are binaries)
+  - BLD: related to building
+  - BUG: error correction
+  - DEP: deprecate something, or remove a deprecated object
+  - DEV: development utility
+  - DOC: documentation (docstrings too)
+  - DRAFT: to be rewritten / fixed up (to be rebased, never in master)
+  - ENH: enhancement
+  - EXP: experimental (to be rebased, never in master)
+  - IMG: changes to sources of images (for example, SVG files)
+  - MAI: maintenance
+  - PEP8: style convention
+  - PEP*: change related to PEP*
+  - REF: refactoring
+  - REL: release-related
+  - REV: revert an earlier commit
+  - STY: style correction
+  - TST: testing
+
+  Deciding which prefix from the above to use is not always straightforward,
+  but doing so is a good exercise. Choose the more severe prefix applicable
+  (usually API instead of MAI). For example, what distinguishes REF from MAI?
+  REF should be a refactoring that produces code that is
+  (for most practical purposes) equivalent, with the equivalence being
+  clearly evident.
 
 
 Further reading, of general interest:
