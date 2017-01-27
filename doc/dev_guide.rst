@@ -138,6 +138,18 @@ Making releases
    providing major website links and the summary of changes.
 #. Bump version in the repository, in preparation for next release.
 
+Contributions
+-------------
+
+Pull requests are expected to satisfy the following criteria:
+
+1. add tests for new code
+2. ensure all tests are passing
+3. document any additions
+4. adhere to PEP8 style conventions
+5. use informative commit messages
+6. tidy commit history
+
 
 Advice
 ------
