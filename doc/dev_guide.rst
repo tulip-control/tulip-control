@@ -2,7 +2,11 @@ Developer's Guide
 =================
 
 The purpose of this page is to provide guidelines for contributors to the TuLiP
-project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_ and the `tulip-control-discuss mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_ (members only).
+project.  Also consult the `Developers' Wiki
+<https://github.com/tulip-control/tulip-control/wiki>`_ and
+the `tulip-control-discuss mailing list
+<https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_
+(members only).
 
 .. _sec:code-style-guidelines:
 
@@ -31,12 +35,23 @@ be followed:
   leaving a blank line.
 - Be careful what you export, i.e., make sure that what is obtained when someone
   uses "from tulip.foo import \*" is what you intend.  Otherwise, hide names
-  using the `"_" prefix <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
-- API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.  Accordingly, docstrings should be marked up with `Epytext <http://epydoc.sourceforge.net/manual-epytext.html>`_.
+  using the `"_" prefix
+  <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
+- API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.
+  Accordingly, docstrings should be marked up with `Epytext
+  <http://epydoc.sourceforge.net/manual-epytext.html>`_.
 
-- The User's and Developer's Guides are built using `Sphinx <http://sphinx.pocoo.org/>`_.  It uses a small extension of `reStructuredText <http://docutils.sourceforge.net/rst.html>`_.  Consult the `reST quick reference <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
+- The User's and Developer's Guides are built using
+  `Sphinx <http://sphinx.pocoo.org/>`_.
+  It uses a small extension of `reStructuredText
+  <http://docutils.sourceforge.net/rst.html>`_.
+  Consult the `reST quick reference
+  <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
 
-- Besides the previous two sources, documentation can appear in plaintext files, notably in README files.  These should have line widths of at most 80 characters.  E.g., this can be achieved at the command-line using ``fold -s -w 80`` or in `Emacs <http://www.gnu.org/software/emacs>`_ by ``C-u 80 M-x set-fill-column``.
+- Besides the previous two sources, documentation can appear in plaintext files,
+notably in README files.  These should have line widths of at most 80 characters.
+E.g., this can be achieved at the command-line using ``fold -s -w 80`` or
+in `Emacs <http://www.gnu.org/software/emacs>`_ by ``C-u 80 M-x set-fill-column``.
 
 - When committing to the repository, you should write a summary line, at most 60
   characters in length, and if elaboration is necessary, then first skip a line
@@ -52,8 +67,9 @@ be followed:
 
     `[WTOXM11] <bibliography.html#wtoxm11>`_
 
-  which renders as `[WTOXM11] <bibliography.html#wtoxm11>`_.  References in docstrings (in the
-  code) should be to the URL of the corresponding entry on the TuLiP website,
+  which renders as `[WTOXM11] <bibliography.html#wtoxm11>`_.
+  References in docstrings (in the code)
+  should be to the URL of the corresponding entry on the TuLiP website,
   using `Epydoc syntax <http://epydoc.sourceforge.net/manual-epytext.html>`_,
   e.g., ::
 
@@ -132,34 +148,49 @@ committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
 entirely ignored.
 
 - Keep function length to a minimum.
-	As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_, `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_ included the rule that no function should be longer than 75 lines of code.
-	The Linux coding style guide is succinct
-	   "The answer to that is that if you need more than 3 levels of indentation,
-	   you're screwed anyway,
-	   and should fix your program."
-	For example, within any iteration, usually the iterated code block deserves its own function (or method).
-	This changes context, helping to focus at each level individually.
-	Things can also be named better, reusing names within the iteration w/o conflicts.
-	Incidentally it also saves from long lines.
-	Besides these, short functions are viewable w/o vertical scrolling.
-	When debugging after months, the shorter the function, the faster it is loaded to working memory.
+    As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_,
+    `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_
+    included the rule that no function should be longer than 75 lines of code.
+    The Linux coding style guide is succinct
+      "The answer to that is that if you need more than 3 levels of indentation,
+       you're screwed anyway,
+       and should fix your program."
+    For example, within any iteration, usually the iterated code block deserves
+    its own function (or method).
+    This changes context, helping to focus at each level individually.
+    Things can also be named better, reusing names within the iteration w/o conflicts.
+    Incidentally it also saves from long lines.
+    Besides these, short functions are viewable w/o vertical scrolling.
+    When debugging after months, the shorter the function,
+    the faster it is loaded to working memory.
 
 - Avoid complicated conditions for if statements and other expressions.
-	Break them down into simpler ones. When possible write them in sequence (not nested), so that they are checked in an obvious order.
-	This way a function returns when a condition is False, so the conjunction is implicit and easier to follow, one check at a time.
+    Break them down into simpler ones. When possible write them in sequence
+    (not nested), so that they are checked in an obvious order.
+    This way a function returns when a condition is False, so the conjunction is
+    implicit and easier to follow, one check at a time.
 
 - Name things to minimize comments.
-	Comments are useless if they attempt to explain what the code evidently does and can be harmful if they fail to do so and instead describe what it was intended to do, giving a false impression of correctness.
+    Comments are useless if they attempt to explain what the code evidently does
+    and can be harmful if they fail to do so and instead describe what it
+    was intended to do, giving a false impression of correctness.
 
 - Have (simple) static checking on.
-	e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis (pyflakes) checked).
+    e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with
+    `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled
+    (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis
+    (pyflakes) checked).
 .. advice for emacs users ?
 
-- Modules shouldn't become `God objects <http://en.wikipedia.org/wiki/God_object>`_. Keep them short (at most a few thousand lines) and well-organized.
+- Modules shouldn't become
+  `God objects <http://en.wikipedia.org/wiki/God_object>`_.
+  Keep them short (at most a few thousand lines) and well-organized.
 
 - Commit changes before you go to sleep.
-    You can always `rebase <https://help.github.com/articles/using-git-rebase/>`_ later multiple times, until you are happy with the history.
-    This ensures that history won't have been forgotten by the time you return to that workspace.
+  You can always `rebase <https://help.github.com/articles/using-git-rebase/>`_
+  later multiple times, until you are happy with the history.
+  This ensures that history won't have been forgotten by the time you return to
+  that workspace.
 
 - Prefix commits to classify the changes.
   The `NumPy development workflow <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_ contains a summary of common abbreviations.
@@ -174,8 +205,11 @@ Further reading, of general interest:
 
 - `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
 
-- Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide <https://www.kernel.org/doc/Documentation/CodingStyle>`_
+- Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
+  <https://www.kernel.org/doc/Documentation/CodingStyle>`_
 
-- `The Power of 10: Rules for Developing Safety-Critical Code <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
+- `The Power of 10: Rules for Developing Safety-Critical Code
+  <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
 
-- Chapter 1: "Style", `The Practice of Programming <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
+- Chapter 1: "Style", `The Practice of Programming
+  <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
