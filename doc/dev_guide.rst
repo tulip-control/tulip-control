@@ -245,6 +245,10 @@ Further reading, of general interest:
   <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
   Hutterer (28 Dec 2009).
 
+- "`Commit often, perfect later, publish once: Git best practices
+  <https://sethrobertson.github.io/GitBestPractices/>`_"
+  by Seth Robertson (2012)
+
 - `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
 
 - Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
