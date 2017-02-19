@@ -122,7 +122,7 @@ class basic_test:
         self.f_un.sys_safety = []
         assert gr1c.check_realizable(self.f_un)
         self.f_un.qinit = '\A \A'
-        self.f_un.env_init = ['x', 'y = 0', 'y = 5']
+        self.f_un.env_init = ['x', '!y']
         self.f_un.sys_init = list()
         assert gr1c.check_realizable(self.f_un)
         assert gr1c.check_realizable(self.dcounter)
