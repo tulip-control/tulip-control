@@ -33,7 +33,7 @@
 """AST subclasses to translate to each syntax of:
 
   - gr1c: https://tulip-control.github.io/gr1c/md_spc_format.html
-  - JTLV
+  - JTLV: http://jtlv.ysaar.net/
   - SMV: http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html
   - SPIN: http://spinroot.com/spin/Man/ltl.html
           http://spinroot.com/spin/Man/operators.html
