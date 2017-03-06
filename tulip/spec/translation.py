@@ -202,7 +202,7 @@ lang2nodes = {
 def _to_jtlv(d):
     """Return specification as list of two strings [assumption, guarantee].
 
-    Format is that of JTLV.  Cf. L{interfaces.jtlv}.
+    Format is that of JTLV.
     """
     logger.info('translate to jtlv...')
     f = _jtlv_str
