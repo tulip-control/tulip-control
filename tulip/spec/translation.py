@@ -313,8 +313,7 @@ def _to_wring(d):
     else:
         return 'G(1)'
 
-# currently also used in interfaces.jtlv
-# eliminate it from there
+
 def convert_domain(dom):
     """Return equivalent integer domain if C{dom} contais strings.
 
