@@ -37,6 +37,6 @@ spc.qinit = r'\A \E'
 if not synth.is_realizable('omega', spc):
     print("Not realizable.")
 else:
-    ctrl = synth.synthesize('omega', spc)
+    ctrl = synth.synthesize(spc, solver='omega')
     if not ctrl.save('ctrl-solverand.svg'):
         print(ctrl)
