@@ -640,11 +640,12 @@ class synthesize_test:
         self.f_triv = None
 
     def test_gr1c_basic(self):
-        g = synth.synthesize("omega", self.f_triv)
+        g = synth.synthesize(self.f_triv, solver='omega')
         assert isinstance(g, transys.MealyMachine)
 
     def test_unrealizable(self):
-        assert synth.synthesize("omega", self.trivial_unreachable) is None
+        assert synth.synthesize(
+            self.trivial_unreachable, solver='omega') is None
 
 
 if __name__ == '__main__':

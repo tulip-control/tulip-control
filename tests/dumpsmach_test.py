@@ -18,20 +18,23 @@ class basic_test:
         self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
                                 env_init="x & y", env_prog="x",
                                 sys_init="y", sys_prog="y && x")
-        self.triv_M = synth.synthesize('omega', self.triv)
+        self.triv_M = synth.synthesize(
+            self.triv, solver='omega')
 
         self.dcounter = spec.GRSpec(
             sys_vars={"y": (0, 5)},
             env_init=['y = 0'],
             sys_prog=["y=0", "y=5"])
-        self.dcounter_M = synth.synthesize('omega', self.dcounter)
+        self.dcounter_M = synth.synthesize(
+            self.dcounter, solver='omega')
 
         self.enumf = spec.GRSpec(
             sys_vars={'y': ['a', 'b']},
             env_init=['y="a"'],
             sys_safety=['y = "a" -> X(y = "b")',
                         'y = "b" -> X(y = "a")'])
-        self.enumf_M = synth.synthesize('omega', self.enumf)
+        self.enumf_M = synth.synthesize(
+            self.enumf, solver='omega')
 
     def tearDown(self):
         self.dcounter = None
