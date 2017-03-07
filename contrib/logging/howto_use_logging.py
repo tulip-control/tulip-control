@@ -33,4 +33,4 @@ sys.node[0]['ap'] = {'p'}
 
 specs = spec.GRSpec(sys_vars={'p'}, sys_prog={'p'})
 
-mealy = synth.synthesize('gr1c', specs, sys=sys)
+mealy = synth.synthesize(specs, sys=sys, solver='gr1c')

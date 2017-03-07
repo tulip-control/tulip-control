@@ -92,8 +92,8 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 
 # @synthesize_section@
 """Synthesize"""
-ctrl = synth.synthesize('gr1c', specs,
-                        sys=disc_dynamics.ts, ignore_sys_init=True)
+ctrl = synth.synthesize(
+    specs, sys=disc_dynamics.ts, ignore_sys_init=True, solver='gr1c')
 # Unrealizable spec ?
 if ctrl is None:
     sys.exit()

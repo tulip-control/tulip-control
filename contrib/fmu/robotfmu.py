@@ -83,8 +83,8 @@ else:
                         env_safe, sys_safe, env_prog, sys_prog)
 
     """Synthesize"""
-    ctrl = synth.synthesize('gr1c', specs,
-                            sys=pwa.ts, ignore_sys_init=True)
+    ctrl = synth.synthesize(
+        specs, sys=pwa.ts, ignore_sys_init=True, solver='gr1c')
     # end of the code in robot_planning/continuous.py
 
     # store the result for future use
