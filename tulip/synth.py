@@ -1015,10 +1015,13 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
 
 def synthesize(
-    option, specs, env=None, sys=None,
-    ignore_env_init=False, ignore_sys_init=False,
-    rm_deadends=True
-):
+        option,
+        specs,
+        env=None,
+        sys=None,
+        ignore_env_init=False,
+        ignore_sys_init=False,
+        rm_deadends=True):
     """Function to call the appropriate synthesis tool on the specification.
 
     There are three attributes of C{specs} that define what
@@ -1147,9 +1150,12 @@ def synthesize(
 
 
 def is_realizable(
-    option, specs, env=None, sys=None,
-    ignore_env_init=False, ignore_sys_init=False
-):
+        option,
+        specs,
+        env=None,
+        sys=None,
+        ignore_env_init=False,
+        ignore_sys_init=False):
     """Check realizability.
 
     For details see L{synthesize}.
