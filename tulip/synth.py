@@ -1019,13 +1019,13 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
 
 def synthesize(
-        option,
         specs,
         env=None,
         sys=None,
         ignore_env_init=False,
         ignore_sys_init=False,
-        rm_deadends=True):
+        rm_deadends=True,
+        solver='omega'):
     """Function to call the appropriate synthesis tool on the specification.
 
     There are three attributes of C{specs} that define what
@@ -1063,7 +1063,7 @@ def synthesize(
     arguments supported and types of objects returned may change
     without notice.
 
-    @param option: Magic string that declares what tool to invoke,
+    @param solver: Magic string that declares what tool to invoke,
         what method to use, etc.  Currently recognized forms:
 
         For GR(1) synthesis:
@@ -1122,22 +1122,22 @@ def synthesize(
         specs, env, sys,
         ignore_env_init,
         ignore_sys_init)
-    if option == 'gr1c':
+    if solver == 'gr1c':
         strategy = gr1c.synthesize(specs)
-    elif option == 'slugs':
+    elif solver == 'slugs':
         if slugs is None:
             raise ValueError(
                 'Import of slugs interface failed. '
                 'Please verify installation of "slugs".')
         strategy = slugs.synthesize(specs)
-    elif option == 'gr1py':
+    elif solver == 'gr1py':
         strategy = gr1py.synthesize(specs)
-    elif option == 'omega':
+    elif solver == 'omega':
         strategy = omega_int.synthesize_enumerated_streett(specs)
     else:
         raise Exception(
-            'Undefined synthesis option. '
-            'Current options are "gr1c", '
+            'Undefined synthesis `solver`. '
+            'Available options are "gr1c", '
             '"slugs", "gr1py", and "omega".')
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
@@ -1154,12 +1154,12 @@ def synthesize(
 
 
 def is_realizable(
-        option,
         specs,
         env=None,
         sys=None,
         ignore_env_init=False,
-        ignore_sys_init=False):
+        ignore_sys_init=False,
+        solver='omega'):
     """Check realizability.
 
     For details see L{synthesize}.
@@ -1167,22 +1167,22 @@ def is_realizable(
     specs = _spec_plus_sys(
         specs, env, sys,
         ignore_env_init, ignore_sys_init)
-    if option == 'gr1c':
+    if solver == 'gr1c':
         r = gr1c.check_realizable(specs)
-    elif option == 'slugs':
+    elif solver == 'slugs':
         if slugs is None:
             raise ValueError(
                 'Import of slugs interface failed. '
                 'Please verify installation of "slugs".')
         r = slugs.check_realizable(specs)
-    elif option == 'gr1py':
+    elif solver == 'gr1py':
         r = gr1py.check_realizable(specs)
-    elif option == 'omega':
+    elif solver == 'omega':
         r = omega_int.is_realizable(specs)
     else:
         raise Exception(
-            'Undefined synthesis option. '
-            'Current options are "gr1c", '
+            'Undefined synthesis solver. '
+            'Available options are "gr1c", '
             '"slugs", and "gr1py"')
     if r:
         logger.debug('is realizable')
