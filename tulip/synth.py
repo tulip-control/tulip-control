@@ -1063,23 +1063,6 @@ def synthesize(
     arguments supported and types of objects returned may change
     without notice.
 
-    @param solver: Magic string that declares what tool to invoke,
-        what method to use, etc.  Currently recognized forms:
-
-        For GR(1) synthesis:
-
-          - C{"gr1c"}: use gr1c via L{interfaces.gr1c}.
-            written in C using CUDD, symbolic
-
-          - C{"gr1py"}: use gr1py via L{interfaces.gr1py}.
-            Python, enumerative
-
-          - C{"omega"}: use omega via L{interfaces.omega}.
-            Python using C{dd} or Cython using CUDD, symbolic
-
-          - C{"slugs"}: use slugs via L{interfaces.slugs}.
-            C++ using CUDD, symbolic
-
     @type specs: L{spec.GRSpec}
 
     @param env: A transition system describing the environment:
@@ -1112,6 +1095,23 @@ def synthesize(
 
     @param rm_deadends: return a strategy that contains no terminal states.
     @type rm_deadends: bool
+
+    @param solver: Magic string that declares what tool to invoke,
+        what method to use, etc.  Currently recognized forms:
+
+        For GR(1) synthesis:
+
+          - C{"gr1c"}: use gr1c via L{interfaces.gr1c}.
+            written in C using CUDD, symbolic
+
+          - C{"gr1py"}: use gr1py via L{interfaces.gr1py}.
+            Python, enumerative
+
+          - C{"omega"}: use omega via L{interfaces.omega}.
+            Python using C{dd} or Cython using CUDD, symbolic
+
+          - C{"slugs"}: use slugs via L{interfaces.slugs}.
+            C++ using CUDD, symbolic
 
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
