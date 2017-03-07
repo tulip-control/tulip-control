@@ -995,15 +995,19 @@ def synthesize_many(specs, ts=None, ignore_init=None,
         ctrl = gr1c.synthesize(specs)
     elif solver == 'slugs':
         if slugs is None:
-            raise ValueError('Import of slugs interface failed. ' +
-                             'Please verify installation of "slugs".')
+            raise ValueError(
+                'Import of slugs interface failed. '
+                'Please verify installation of "slugs".')
         ctrl = slugs.synthesize(specs)
     else:
-        raise Exception('Unknown solver: ' + str(solver) + '. '
-                        'Available solvers: "gr1c", and "slugs"')
+        raise Exception((
+            'Unknown solver: "{solver}". '
+            'Available solvers: "gr1c", and "slugs"').format(
+                solver=solver))
     try:
-        logger.debug('Mealy machine has: n = ' +
-                     str(len(ctrl.states)) + ' states.')
+        logger.debug(
+            'Mealy machine has: n = {n} states.'.format(
+                n=len(ctrl.states)))
     except:
         logger.debug('No Mealy machine returned.')
     # no controller found ?
@@ -1122,28 +1126,28 @@ def synthesize(
         strategy = gr1c.synthesize(specs)
     elif option == 'slugs':
         if slugs is None:
-            raise ValueError('Import of slugs interface failed. ' +
-                             'Please verify installation of "slugs".')
+            raise ValueError(
+                'Import of slugs interface failed. '
+                'Please verify installation of "slugs".')
         strategy = slugs.synthesize(specs)
     elif option == 'gr1py':
         strategy = gr1py.synthesize(specs)
     elif option == 'omega':
         strategy = omega_int.synthesize_enumerated_streett(specs)
     else:
-        raise Exception('Undefined synthesis option. ' +
-                        'Current options are "gr1c", ' +
-                        '"slugs", "gr1py", and "omega".')
-
+        raise Exception(
+            'Undefined synthesis option. '
+            'Current options are "gr1c", '
+            '"slugs", "gr1py", and "omega".')
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
     # networkx.DiGraph ready to be passed to strategy2mealy().
     if strategy is None:
         return None
-
     ctrl = strategy2mealy(strategy, specs)
-    logger.debug('Mealy machine has: n = ' +
-                 str(len(ctrl.states)) + ' states.')
-
+    logger.debug(
+        'Mealy machine has: n = {n} states.'.format(
+            n=len(ctrl.states)))
     if rm_deadends:
         ctrl.remove_deadends()
     return ctrl
@@ -1167,17 +1171,19 @@ def is_realizable(
         r = gr1c.check_realizable(specs)
     elif option == 'slugs':
         if slugs is None:
-            raise ValueError('Import of slugs interface failed. ' +
-                             'Please verify installation of "slugs".')
+            raise ValueError(
+                'Import of slugs interface failed. '
+                'Please verify installation of "slugs".')
         r = slugs.check_realizable(specs)
     elif option == 'gr1py':
         r = gr1py.check_realizable(specs)
     elif option == 'omega':
         r = omega_int.is_realizable(specs)
     else:
-        raise Exception('Undefined synthesis option. ' +
-                        'Current options are "gr1c", ' +
-                        '"slugs", and "gr1py"')
+        raise Exception(
+            'Undefined synthesis option. '
+            'Current options are "gr1c", '
+            '"slugs", and "gr1py"')
     if r:
         logger.debug('is realizable')
     else:
