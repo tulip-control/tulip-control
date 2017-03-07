@@ -106,7 +106,7 @@ specs.qinit = '\E \A'  # Moore initial condition synthesized too
 # methods.
 #
 
-ctrl = synth.synthesize('omega', specs)
+ctrl = synth.synthesize(specs)
 assert ctrl is not None, 'unrealizable'
 
 

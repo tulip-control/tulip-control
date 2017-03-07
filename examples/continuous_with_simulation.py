@@ -74,7 +74,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 specs.qinit = '\E \A'
 #
 # Synthesize
-ctrl = synth.synthesize('omega', specs,
+ctrl = synth.synthesize(specs,
                         sys=disc_dynamics.ts,
                         ignore_sys_init=True)
 assert ctrl is not None, 'unrealizable'

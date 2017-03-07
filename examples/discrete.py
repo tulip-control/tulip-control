@@ -134,7 +134,7 @@ specs.moore = True
 # `env_init /\ sys_init` and work, for every environment variable
 # initial values that satisfy `env_init`.
 specs.qinit = '\E \A'
-ctrl = synth.synthesize('omega', specs, sys=sys)
+ctrl = synth.synthesize(specs, sys=sys)
 assert ctrl is not None, 'unrealizable'
 # @synthesize_end@
 

@@ -68,7 +68,7 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     env_prog=env_prog, sys_prog=sys_prog)
 specs.moore = False
 specs.qinit = '\A \E'
-ctrl = synth.synthesize('omega', specs, sys=sys, env=env0)
+ctrl = synth.synthesize(specs, sys=sys, env=env0)
 ctrl.save('sys_and_env_ts0.pdf')
 logger.info(ctrl)
 

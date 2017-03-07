@@ -99,7 +99,7 @@ specs.qinit = '\E \A'
 
 # @synthesize_section@
 # Synthesize
-ctrl = synth.synthesize('omega', specs,
+ctrl = synth.synthesize(specs,
                         sys=disc_dynamics.ts, ignore_sys_init=True)
 assert ctrl is not None, 'unrealizable'
 

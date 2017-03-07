@@ -170,7 +170,7 @@ specs.qinit = '\E \A'
 # At this point we can synthesize the controller using one of the available
 # methods.
 #
-ctrl = synth.synthesize('omega', specs, sys=sys_hyb, ignore_sys_init=True)
+ctrl = synth.synthesize(specs, sys=sys_hyb, ignore_sys_init=True)
 assert ctrl is not None, 'unrealizable'
 if not ctrl.save('hybrid.png'):
     print(ctrl)

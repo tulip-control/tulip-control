@@ -119,7 +119,7 @@ specs.qinit = '\E \A'  # i.e., "there exist sys_vars: forall sys_vars"
 
 # At this point we can synthesize the controller
 # using one of the available methods.
-strategy = synth.synthesize('omega', specs)
+strategy = synth.synthesize(specs)
 assert strategy is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing,

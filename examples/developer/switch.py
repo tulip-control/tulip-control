@@ -64,7 +64,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 specs.moore = False
 specs.qinit = '\A \E'
 # Controller synthesis
-ctrl = synth.synthesize('omega', specs, sys=sys_swe,
+ctrl = synth.synthesize(specs, sys=sys_swe,
                         ignore_sys_init=True)
 
 if not ctrl.save('switch.pdf'):

@@ -35,7 +35,7 @@ specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     env_prog=env_prog, sys_prog=sys_prog)
 specs.moore = False
 specs.qinit = '\A \E'
-ctrl = synth.synthesize('omega', specs)
+ctrl = synth.synthesize(specs)
 ctrl.save('gr1_arbitrary_set0.pdf')
 
 """
@@ -76,5 +76,5 @@ specs = spec.GRSpec(env_vars=env_vars, sys_vars=sys_vars,
                     env_prog=env_prog, sys_prog=sys_prog)
 specs.moore = False
 specs.qinit = '\A \E'
-ctrl = synth.synthesize('omega', specs, sys=sys)
+ctrl = synth.synthesize(specs, sys=sys, solver='omega')
 ctrl.save('gr1_arbitrary_set1.pdf')

@@ -130,7 +130,7 @@ specs.qinit = '\A \E'
 # At this point we can synthesize the controller using one of the available
 # methods.
 #
-ctrl = synth.synthesize('omega', specs, sys=sys_swe, ignore_sys_init=True)
+ctrl = synth.synthesize(specs, sys=sys_swe, ignore_sys_init=True)
 assert ctrl is not None, 'unrealizable'
 
 # @plot_print@

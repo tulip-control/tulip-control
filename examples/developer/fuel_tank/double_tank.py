@@ -251,7 +251,7 @@ if os.name == "posix":
 specs.moore = False
 specs.qinit = r'\A \E'
 ctrl = synth.synthesize(
-    'omega', specs, sys=sys_ts.ts, ignore_sys_init=True,
+    specs, sys=sys_ts.ts, ignore_sys_init=True,
     #action_vars=('u_in', 'act')
 )
 if os.name == "posix":

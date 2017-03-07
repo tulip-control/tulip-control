@@ -149,7 +149,7 @@ specs.qinit = '\E \A'
 # At this point we can synthesize the controller using one of the available
 # methods.
 #
-ctrl = synth.synthesize('omega', specs, env=env_sws)
+ctrl = synth.synthesize(specs, env=env_sws)
 assert ctrl is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing
