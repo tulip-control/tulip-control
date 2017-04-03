@@ -411,7 +411,7 @@ def multiple_env_actions_check(solver='omega'):
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable(solver, specs, sys=sys)
+    r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert r
     # slightly relax assumption
     specs = spec.GRSpec(
@@ -419,7 +419,7 @@ def multiple_env_actions_check(solver='omega'):
         moore=False,
         plus_one=False,
         qinit='\A \E')
-    r = synth.is_realizable(solver, specs, sys=sys)
+    r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert not r
 
 
