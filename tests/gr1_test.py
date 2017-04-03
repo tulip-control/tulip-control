@@ -82,7 +82,7 @@ def test_stability():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s0)
+    assert not synth.is_realizable(s | s0)
 
     # !p && X[]p
     s1 = spec.GRSpec(
@@ -93,7 +93,7 @@ def test_stability():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s1)
+    assert synth.is_realizable(s | s1)
 
     # []<>p && []<>!p
     s2 = spec.GRSpec(
@@ -103,7 +103,7 @@ def test_stability():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s2)
+    assert not synth.is_realizable(s | s2)
 
     # env b can prevent !p, but has tp <> become !b,
     # releasing sys to set p
@@ -119,10 +119,10 @@ def test_stability():
         plus_one=False,
         qinit='\A \E')
 
-    assert synth.is_realizable('omega', s | s3)
+    assert synth.is_realizable(s | s3)
 
     s3.env_prog = []
-    assert not synth.is_realizable('omega', s | s3)
+    assert not synth.is_realizable(s | s3)
 
     # s4 = s | s3
     # print(s4.pretty() )
@@ -150,7 +150,7 @@ def test_response():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s0)
+    assert not synth.is_realizable(s | s0)
 
     # []!p && []!q
     s1 = spec.GRSpec(
@@ -160,7 +160,7 @@ def test_response():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s1)
+    assert synth.is_realizable(s | s1)
 
     # p && q
     s2 = spec.GRSpec(
@@ -170,7 +170,7 @@ def test_response():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s2)
+    assert synth.is_realizable(s | s2)
 
     # alternating p, alternating q
     s3 = spec.GRSpec(
@@ -184,7 +184,7 @@ def test_response():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s3)
+    assert synth.is_realizable(s | s3)
     # print((s | s2).pretty() )
 
 
@@ -208,7 +208,7 @@ def test_eventually():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s0)
+    assert not synth.is_realizable(s | s0)
 
     # !p && []<>p && []<>!p
     s1 = spec.GRSpec(
@@ -219,7 +219,7 @@ def test_eventually():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s1)
+    assert synth.is_realizable(s | s1)
 
     # s2 = s | s1
     # print(s4.pretty() )
@@ -248,7 +248,7 @@ def test_until():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s0)
+    assert not synth.is_realizable(s | s0)
 
     # !q && <>q
     s1 = spec.GRSpec(
@@ -259,7 +259,7 @@ def test_until():
         plus_one=False,
         qinit='\A \E'
     )
-    assert synth.is_realizable('omega', s | s1)
+    assert synth.is_realizable(s | s1)
 
     # !q && []!p && <>q
     s1 = spec.GRSpec(
@@ -271,7 +271,7 @@ def test_until():
         plus_one=False,
         qinit='\A \E'
     )
-    assert not synth.is_realizable('omega', s | s1)
+    assert not synth.is_realizable(s | s1)
 
 
 if __name__ == '__main__':

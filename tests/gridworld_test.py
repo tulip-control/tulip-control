@@ -149,14 +149,14 @@ class GridWorld_test(object):
         spec.moore = False
         spec.plus_one = False
         spec.qinit = r'\A \E'
-        assert is_realizable('omega', spec)
+        assert is_realizable(spec)
 
     def test_spec_realizable(self):
         spec = self.X.spec()
         spec.moore = False
         spec.plus_one = False
         spec.qinit = r'\A \E'
-        assert is_realizable('omega', spec)
+        assert is_realizable(spec)
 
     def check_is_empty(self, coord, expected):
         assert self.X.is_empty(coord) == expected
@@ -339,4 +339,4 @@ def add_trolls_test():
     spc.moore = False
     spc.plus_one = False
     spc.qinit = r'\A \E'
-    assert is_realizable('omega', spc)
+    assert is_realizable(spc)
