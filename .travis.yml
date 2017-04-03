@@ -48,9 +48,10 @@ script:
   - export CVXOPT_BUILD_GLPK=1
   - pip install cvxopt==1.1.8
   - python -c "import cvxopt.glpk"
-  ## install dd.cudd
+  # install `dd.cudd`
   - pip uninstall --yes dd
-  - pip download --no-dependencies dd>=0.4.0
+  # `omega == 0.0.11` requires this version of `dd`
+  - pip download --no-dependencies dd==0.4.3
   - tar xzf dd-*.tar.gz
   - cd dd-*/
   - python setup.py install --fetch --cudd
