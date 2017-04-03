@@ -34,7 +34,7 @@ print(Z)
 spc = Z.spec()
 spc.moore = False
 spc.qinit = r'\A \E'
-if not synth.is_realizable('omega', spc):
+if not synth.is_realizable(spc, solver='omega'):
     print("Not realizable.")
 else:
     ctrl = synth.synthesize(spc, solver='omega')
