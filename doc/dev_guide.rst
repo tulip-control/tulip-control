@@ -215,6 +215,7 @@ entirely ignored.
   - BIN: for generated files (usually those are binaries)
   - BLD: related to building
   - BUG: error correction
+  - CI: related to continuous integration tests (usually ``.travis.yml``)
   - DEP: deprecate something, or remove a deprecated object
   - DEV: development utility
   - DOC: documentation (docstrings too)
