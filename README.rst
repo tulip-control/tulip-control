@@ -1,5 +1,9 @@
 TuLiP
 =====
+
+.. image:: https://badges.gitter.im/tulip-control/tulip.svg
+   :alt: Join the chat at https://gitter.im/tulip-control/tulip
+   :target: https://gitter.im/tulip-control/tulip?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 This is the source repository for TuLiP, the temporal logic planning toolbox.
 The project website is http://tulip-control.org
 
