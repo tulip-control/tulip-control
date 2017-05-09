@@ -239,8 +239,8 @@ class RandomWorld_test(object):
 
     def test_feasibility(self):
         for r in range(len(self.rworlds_ensuredfeasible)):
-            print "test \"ensured feasible\" world index", r
-            print self.rworlds_ensuredfeasible[r]
+            print("test \"ensured feasible\" world index", r)
+            print(self.rworlds_ensuredfeasible[r])
             assert self.rworlds_ensuredfeasible[r].is_reachable(
                 self.rworlds_ensuredfeasible[r].init_list[0],
                 self.rworlds_ensuredfeasible[r].init_list[1])
@@ -256,14 +256,14 @@ class RandomWorld_test(object):
 
     def test_size(self):
         for r in range(len(self.rworlds)):
-            print "test world index", r
-            print self.rworlds[r]
+            print("test world index", r)
+            print(self.rworlds[r])
             assert self.sizes[r] == self.rworlds[r].size()
 
     def test_density(self):
         for r in range(len(self.rworlds)):
-            print "test world index", r
-            print self.rworlds[r]
+            print("test world index", r)
+            print(self.rworlds[r])
             (num_rows, num_cols) = self.rworlds[r].size()
             num_occupied = 0
             for i in range(num_rows):

@@ -213,7 +213,7 @@ class States_labeling_test:
            ("state0", {"ap": set(['p'])}) in result
 
         result = self.S_ap.find(with_attr_dict={"ap": {'p'}})
-        print result
+        print(result)
         assert len(result) == 2 and \
            set([s for (s, l) in result]) == set(["state0", "state2"])
 

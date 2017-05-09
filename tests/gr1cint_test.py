@@ -151,7 +151,7 @@ class basic_test:
         self.dcounter.sys_init = list()
         g = gr1c.synthesize(self.dcounter)
         assert g is not None
-        print g
+        print(g)
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 6, len(g)

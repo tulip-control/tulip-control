@@ -119,7 +119,7 @@ class MathSet_operations_test:
 
 
 def unique_check(iterable, expected):
-    print unique(iterable)
+    print(unique(iterable))
     assert unique(iterable) == expected
 
 def unique_test():

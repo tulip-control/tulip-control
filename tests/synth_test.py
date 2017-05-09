@@ -197,7 +197,7 @@ def test_env_fts_int_actions():
     assert 'sys_actions' not in spec.env_vars
     assert 'env_actions' in spec.env_vars
 
-    print spec.env_vars['env_actions']
+    print(spec.env_vars['env_actions'])
     assert (set(spec.env_vars['env_actions']) ==
             {'park', 'go', 'stop', 'env_actionsnone'})
 
