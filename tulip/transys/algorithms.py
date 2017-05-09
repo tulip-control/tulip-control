@@ -101,7 +101,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
 
     def state_label_union(attr_dict):
         prod_attr_dict = dict()
-        for k, v in attr_dict.iteritems():
+        for k, v in attr_dict.items():
             prod_attr_dict[k] = label_union(v)
         return prod_attr_dict
 

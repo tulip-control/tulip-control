@@ -245,7 +245,7 @@ def _to_gr1c(d):
     """
     def _to_gr1c_print_vars(vardict):
         output = ''
-        for var, dom in vardict.iteritems():
+        for var, dom in vardict.items():
             if dom == 'boolean':
                 output += ' ' + var
             elif isinstance(dom, tuple) and len(dom) == 2:
@@ -362,7 +362,7 @@ def _slugs_str(r, name, sep='\n'):
 
 def _format_slugs_vars(vardict, name):
     a = []
-    for var, dom in vardict.iteritems():
+    for var, dom in vardict.items():
         if dom == 'boolean':
             a.append(var)
         elif isinstance(dom, tuple) and len(dom) == 2:

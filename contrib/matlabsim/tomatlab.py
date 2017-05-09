@@ -149,7 +149,7 @@ def switched_export(switchedsys):
     output['cts_ss'] = poly_export(switchedsys.cts_ss)
 
     dynamics = []
-    for label, system in switchedsys.dynamics.iteritems():
+    for label, system in switchedsys.dynamics.items():
         system_dict = {}
         system_dict['env_act'] = label[0]
         system_dict['sys_act'] = label[1]

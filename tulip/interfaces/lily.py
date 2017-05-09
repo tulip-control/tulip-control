@@ -91,7 +91,7 @@ def synthesize(formula, env_vars=None, sys_vars=None):
 
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
-    if not all(v == 'boolean' for v in all_vars.itervalues()):
+    if not all(v == 'boolean' for v in all_vars.values()):
         raise TypeError(
             'all variables should be Boolean:\n{v}'.format(v=all_vars))
 

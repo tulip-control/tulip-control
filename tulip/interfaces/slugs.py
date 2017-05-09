@@ -96,7 +96,7 @@ def synthesize(spec, symbolic=False):
     dout = json.loads(out)
     g = nx.DiGraph()
     dvars = dout['variables']
-    for stru, d in dout['nodes'].iteritems():
+    for stru, d in dout['nodes'].items():
         u = int(stru)
         state = dict(zip(dvars, d['state']))
         g.add_node(u, state=state)
@@ -124,7 +124,7 @@ def _bitfields_to_ints(bit_state, vrs):
     @type vrs: C{dict}
     """
     int_state = dict()
-    for var, dom in vrs.iteritems():
+    for var, dom in vrs.items():
         if dom == 'boolean':
             int_state[var] = bit_state[var]
             continue

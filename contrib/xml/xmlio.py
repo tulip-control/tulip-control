@@ -881,7 +881,7 @@ def _export_dict(dictionary, parent, tag=None):
 		tree = ET.SubElement(parent, tag, type=T_DICT)
 
 	# Make key value pairs
-	for key, value in dictionary.iteritems():
+	for key, value in dictionary.items():
 		pair_node = ET.SubElement(tree, N_KEYVALUEPAIR)
 		_export_xml(key, parent=pair_node, tag=N_KEY)
 		_export_xml(value, parent=pair_node, tag=N_VALUE)

@@ -181,7 +181,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
         return ''
     if solver_expr is not None:
         actions = [solver_expr[type_name][action_value]
-                   for type_name, action_value in actions_dict.iteritems()]
+                   for type_name, action_value in actions_dict.items()]
     else:
         actions = actions_dict
     logger.debug('after substitution: ' + str(actions))
@@ -459,7 +459,7 @@ def sys_to_spec(
     actions = ofts.actions
     sys_action_ids = dict()
     env_action_ids = dict()
-    for action_type, codomain in actions.iteritems():
+    for action_type, codomain in actions.items():
         msg = 'action_type:\n\t' + str(action_type) + '\n'
         msg += 'with codomain:\n\t' + str(codomain)
         logger.debug(msg)
@@ -539,7 +539,7 @@ def env_to_spec(
     actions = ofts.actions
     sys_action_ids = dict()
     env_action_ids = dict()
-    for action_type, codomain in actions.iteritems():
+    for action_type, codomain in actions.items():
         if 'sys' in action_type:
             action_ids, constraint = iter2var(
                 codomain, sys_vars, action_type,
@@ -677,19 +677,19 @@ def _sys_trans_from_ts(
             else:
                 previous = set()
             logger.debug('previous = ' + str(previous))
-            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
-            prev_env_act = {k: v for k, v in env_actions.iteritems()
+            env_actions = {k: v for k, v in label.items() if 'env' in k}
+            prev_env_act = {k: v for k, v in env_actions.items()
                             if k in previous}
-            next_env_act = {k: v for k, v in env_actions.iteritems()
+            next_env_act = {k: v for k, v in env_actions.items()
                             if k not in previous}
             postcond += [_conj_actions(prev_env_act, env_action_ids,
                                        nxt=False)]
             postcond += [_conj_actions(next_env_act, env_action_ids,
                                        nxt=True)]
-            sys_actions = {k: v for k, v in label.iteritems() if 'sys' in k}
-            prev_sys_act = {k: v for k, v in sys_actions.iteritems()
+            sys_actions = {k: v for k, v in label.items() if 'sys' in k}
+            prev_sys_act = {k: v for k, v in sys_actions.items()
                             if k in previous}
-            next_sys_act = {k: v for k, v in sys_actions.iteritems()
+            next_sys_act = {k: v for k, v in sys_actions.items()
                             if k not in previous}
             postcond += [_conj_actions(prev_sys_act, sys_action_ids,
                                        nxt=False)]
@@ -741,13 +741,13 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         # no successor states ?
         if not cur_trans:
             # nothing modeled for env, since sys has X(False) anyway
-            # for action_type, codomain_map in env_action_ids.iteritems():
+            # for action_type, codomain_map in env_action_ids.items():
             # env_trans += [precond + ' -> X(' + s + ')']
             continue
         # collect possible next env actions
         next_env_action_combs = set()
         for (from_state, to_state, label) in cur_trans:
-            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
+            env_actions = {k: v for k, v in label.items() if 'env' in k}
             if not env_actions:
                 continue
             logger.debug('env_actions: ' + str(env_actions))
@@ -797,10 +797,10 @@ def _env_trans_from_env_ts(
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
             postcond = ['X' + _pstr(to_state_id)]
-            env_actions = {k: v for k, v in label.iteritems() if 'env' in k}
+            env_actions = {k: v for k, v in label.items() if 'env' in k}
             postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
             # remember: this is an environment FTS, so no next for sys
-            sys_actions = {k: v for k, v in label.iteritems() if 'sys' in k}
+            sys_actions = {k: v for k, v in label.items() if 'sys' in k}
             postcond += [_conj_actions(sys_actions, sys_action_ids)]
             postcond += [_conj_action(label, 'actions', nxt=True,
                                       ids=action_ids)]
@@ -815,8 +815,8 @@ def _env_trans_from_env_ts(
             msg = 'no free env outgoing transition found\n' +\
                   'instead will take disjunction with negated sys actions'
             logger.debug(msg)
-            for action_type, codomain in sys_action_ids.iteritems():
-                conj = _conj_neg(codomain.itervalues())
+            for action_type, codomain in sys_action_ids.items():
+                conj = _conj_neg(codomain.values())
                 cur_list += [conj]
                 msg = (
                     'for action_type: ' + str(action_type) + '\n' +
@@ -904,7 +904,7 @@ def build_dependent_var_table(fts, statevar):
                              bool_states=False, must='xor')
     ap2states = map_ap_to_states(fts)
     return {k: _disj(state_ids[x] for x in v)
-            for k, v in ap2states.iteritems()}
+            for k, v in ap2states.items()}
 
 
 def map_ap_to_states(fts):
@@ -980,7 +980,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     @type solver: str
     """
     assert isinstance(ts, dict)
-    for name, t in ts.iteritems():
+    for name, t in ts.items():
         assert isinstance(t, transys.FiniteTransitionSystem)
         ignore = name in ignore_init
         bool_act = name in bool_actions
@@ -1268,10 +1268,10 @@ def strategy2mealy(A, spec):
     outputs = transys.machines.create_machine_ports(sys_vars)
     mach.add_outputs(outputs)
     str_vars = {
-        k: v for k, v in env_vars.iteritems()
+        k: v for k, v in env_vars.items()
         if isinstance(v, list)}
     str_vars.update({
-        k: v for k, v in sys_vars.iteritems()
+        k: v for k, v in sys_vars.items()
         if isinstance(v, list)})
     mach.states.add_from(A)
     # transitions labeled with I/O
@@ -1287,7 +1287,7 @@ def strategy2mealy(A, spec):
     mach.states.add(initial_state)
     mach.states.initial.add(initial_state)
     # fix an ordering for keys
-    # because tuple(dict.iteritems()) is not safe:
+    # because tuple(dict.items()) is not safe:
     # https://docs.python.org/2/library/stdtypes.html#dict.items
     try:
         u = next(iter(A))
@@ -1356,7 +1356,7 @@ def _int2str(label, str_vars):
     """
     label = dict(label)
     label.update({k: str_vars[k][int(v)]
-                 for k, v in label.iteritems()
+                 for k, v in label.items()
                  if k in str_vars})
     return label
 

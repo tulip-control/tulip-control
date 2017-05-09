@@ -463,7 +463,7 @@ class SwitchedSysDyn(object):
         s += _indent(str(self.cts_ss), 4) + '\n'
 
         s += 'Dynamics:\n'
-        for mode, pwa in self.dynamics.iteritems():
+        for mode, pwa in self.dynamics.items():
             s += 4*' ' + 'mode: ' + str(mode) + '\n'
             s += 4*' ' + 'dynamics:\n' + _indent(str(pwa), 8) +'\n\n'
         return s

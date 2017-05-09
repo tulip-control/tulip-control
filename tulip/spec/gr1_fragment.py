@@ -258,7 +258,7 @@ def split_gr1(f):
     ops = set(ops)
     ops.add('X')
     operators.update(init=ops, GF=ops)
-    for part, f in d.iteritems():
+    for part, f in d.items():
         ops = operators[part]
         for u in f:
             op = has_operator(u, g, ops)

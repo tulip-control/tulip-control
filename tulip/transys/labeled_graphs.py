@@ -67,7 +67,7 @@ def label_is_desired(attr_dict, desired_dict):
         return False
     # any labels have symbolic semantics ?
     label_def = attr_dict.allowed_values
-    for type_name, value in attr_dict.iteritems():
+    for type_name, value in attr_dict.items():
         logger.debug('Checking label type:\n\t' + str(type_name))
         type_def = label_def[type_name]
         desired_value = desired_dict[type_name]
@@ -826,7 +826,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     if 'default' in d}
         setters = {d['name']: d.get('setter') for d in label_types
                    if 'setter' in d}
-        for name, setter in setters.iteritems():
+        for name, setter in setters.items():
             # point to given values ?
             if setter is True:
                 setter = labeling[name]
@@ -1081,7 +1081,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if v not in self[u]:
             return
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
-        rm_keys = {key for key, data in self[u][v].iteritems()
+        rm_keys = {key for key, data in self[u][v].items()
                    if data == attr_dict}
         for key in rm_keys:
             self.remove_edge(u, v, key=key)

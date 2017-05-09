@@ -131,7 +131,7 @@ def _int_bounds(aut):
     int_types = {'int', 'saturating', 'modwrap'}
     bdd = aut.bdd
     u = bdd.true
-    for var, d in aut.vars.iteritems():
+    for var, d in aut.vars.items():
         t = d['type']
         if t == 'bool':
             continue
@@ -173,7 +173,7 @@ def _grspec_to_automaton(g):
     a = sym.Automaton()
     d = dict(g.env_vars)
     d.update(g.sys_vars)
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if v in ('boolean', 'bool'):
             r = 'bool'
         elif isinstance(v, list):

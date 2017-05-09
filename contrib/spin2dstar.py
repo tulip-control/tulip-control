@@ -100,7 +100,7 @@ def reverse_lookup(d, value):
 
     Raise ValueError exception if no matches found.
     """
-    for (k,v) in d.iteritems():
+    for (k,v) in d.items():
         if v == value:
             return k
 

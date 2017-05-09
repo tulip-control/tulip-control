@@ -117,7 +117,7 @@ class AbstractSwitched(object):
         s += str('common PPP:\n') + str(self.ppp)
         s += str('common ts:\n') + str(self.ts)
 
-        for mode, ab in self.modes.iteritems():
+        for mode, ab in self.modes.items():
             s += 'mode: ' + str(mode)
             s += ', with abstraction:\n' + str(ab)
 
@@ -183,7 +183,7 @@ class AbstractSwitched(object):
                 axs += [ax]
 
         # plot mode partitions
-        for mode, ab in self.modes.iteritems():
+        for mode, ab in self.modes.items():
             ax = ab.plot(show_ts, only_adjacent, color_seed)
             ax.set_title('Abstraction for mode: ' + str(mode))
             axs += [ax]
@@ -414,7 +414,7 @@ class AbstractPwa(object):
             trans_set, sys = self.ppp2trans(i)
 
             params = {'N', 'close_loop', 'use_all_horizon'}
-            disc_params = {k:v for k,v in self.disc_params.iteritems()
+            disc_params = {k:v for k,v in self.disc_params.items()
                            if k in params}
 
             s0 = solve_feasible(from_region, to_region, sys,
@@ -1133,7 +1133,7 @@ def multiproc_discretize_switched(
         mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
 
     jobs = [mp.Process(target=multiproc_discretize, args=args)
-            for args in mode_args.itervalues()]
+            for args in mode_args.values()]
     for job in jobs:
         job.start()
 
@@ -1160,7 +1160,7 @@ def multiproc_discretize_switched(
         mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
 
     jobs = [mp.Process(target=multiproc_get_transitions, args=args)
-            for args in mode_args.itervalues()]
+            for args in mode_args.values()]
 
     for job in jobs:
         job.start()
@@ -1447,8 +1447,8 @@ def merge_partitions(abstractions):
         return
 
     # consistency check
-    for ab1 in abstractions.itervalues():
-        for ab2 in abstractions.itervalues():
+    for ab1 in abstractions.values():
+        for ab2 in abstractions.values():
             p1 = ab1.ppp
             p2 = ab2.ppp
 

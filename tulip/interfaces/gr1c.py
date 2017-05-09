@@ -369,13 +369,13 @@ def load_aut_json(x):
     A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
     A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
     omit = {'state', 'trans'}
-    for node_ID, d in autjs['nodes'].iteritems():
+    for node_ID, d in autjs['nodes'].items():
         node_label = {k: d[k] for k in d if k not in omit}
         node_label['state'] = dict([(symtab[i].keys()[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
         A.add_node(node_ID, node_label)
-    for node_ID, d in autjs['nodes'].iteritems():
+    for node_ID, d in autjs['nodes'].items():
         for to_node in d['trans']:
             A.add_edge(node_ID, to_node)
     return A

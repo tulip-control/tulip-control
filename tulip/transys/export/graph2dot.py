@@ -215,21 +215,21 @@ def _format_color(color, prog='tikz'):
         raise Exception('color must be str or dict')
 
     if prog is 'tikz':
-        s = '!'.join([k + '!' + str(v) for k, v in color.iteritems()])
+        s = '!'.join([k + '!' + str(v) for k, v in color.items()])
     elif prog is 'dot':
-        t = sum(color.itervalues())
+        t = sum(color.values())
 
         try:
             import webcolors
 
             # mix them
             result = np.array((0.0, 0.0, 0.0))
-            for c, w in color.iteritems():
+            for c, w in color.items():
                 result += w/t * np.array(webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
             logger.warn('failed to import webcolors')
-            s = ':'.join([k + ';' + str(v/t) for k, v in color.iteritems()])
+            s = ':'.join([k + ';' + str(v/t) for k, v in color.items()])
     else:
         raise ValueError('Unknown program: ' + str(prog) + '. '
                          "Available options are: 'dot' or 'tikz'.")
@@ -288,7 +288,7 @@ def _form_node_label(state, state_data, label_def,
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
     pieces = list()
-    for (label_type, label_value) in state_data.iteritems():
+    for (label_type, label_value) in state_data.items():
         if label_type not in label_def:
             continue
 
@@ -370,7 +370,7 @@ def _form_edge_label(edge_data, label_def,
     label = ''  # dot label for edge
     sep_label_sets = label_format['separator']
 
-    for label_type, label_value in edge_data.iteritems():
+    for label_type, label_value in edge_data.items():
         if label_type not in label_def:
             continue
 

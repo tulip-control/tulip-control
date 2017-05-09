@@ -616,7 +616,7 @@ class PropPreservingPartition(pc.MetricPartition):
         ax.set_xlim(l[0,0], u[0,0])
         ax.set_ylim(l[1,0], u[1,0])
 
-        for (prop, poly) in self.prop_regions.iteritems():
+        for (prop, poly) in self.prop_regions.items():
             isect_poly = poly.intersect(self.domain)
 
             isect_poly.plot(ax, color='none', hatch='/')
