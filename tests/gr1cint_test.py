@@ -2,6 +2,8 @@
 """
 Tests for the interface with gr1c.
 """
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)

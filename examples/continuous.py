@@ -17,6 +17,8 @@ The dynamics is linear over a bounded set that is a polytope.
 # strings of the form @label@ are used for this purpose.
 
 # @import_section@
+from __future__ import print_function
+
 import logging
 
 import numpy as np

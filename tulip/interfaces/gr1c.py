@@ -41,6 +41,8 @@ interacting with the gr1c executable.
 
 Use the logging module to throttle verbosity.
 """
+from __future__ import print_function
+
 from distutils.version import StrictVersion
 import logging
 import copy

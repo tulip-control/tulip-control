@@ -2,6 +2,8 @@
 """
 Tests for transys.mathset (part of transys subpackage)
 """
+from __future__ import print_function
+
 from nose.tools import raises
 from collections import Iterable
 

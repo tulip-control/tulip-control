@@ -38,6 +38,7 @@ eventually be removed.  Their use in new applications is discouraged.
 They come from https://github.com/johnyf/pyvectorized
 """
 from __future__ import division
+from __future__ import print_function
 
 import logging
 logger = logging.getLogger(__name__)

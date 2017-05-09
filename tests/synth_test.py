@@ -1,6 +1,8 @@
 """
 Tests for the tulip.synth module.
 """
+from __future__ import print_function
+
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)

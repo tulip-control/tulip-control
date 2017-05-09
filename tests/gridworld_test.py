@@ -1,4 +1,6 @@
 """Tests for the tulip.gridworld."""
+from __future__ import print_function
+
 import numpy as np
 import tulip.gridworld as gw
 from tulip.synth import is_realizable

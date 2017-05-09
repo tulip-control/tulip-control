@@ -3,6 +3,7 @@
 Huan Xu (mumu@caltech.edu)
 October 30, 2012
 """
+from __future__ import print_function
 
 import sys, os
 import re, copy

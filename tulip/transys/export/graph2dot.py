@@ -33,6 +33,8 @@
 pydot and custom filtering
 """
 from __future__ import division
+from __future__ import print_function
+
 import logging
 import re
 from collections import Iterable

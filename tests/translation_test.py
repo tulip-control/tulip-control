@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.ltl_parser_log').setLevel(logging.ERROR)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Tests for the tulip.spec subpackage."""
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)

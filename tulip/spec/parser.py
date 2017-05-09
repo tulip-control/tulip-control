@@ -32,6 +32,7 @@
 #
 """LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
 from __future__ import absolute_import
+from __future__ import print_function
 import re
 from tulip.spec import ast, lexyacc
 

@@ -33,6 +33,8 @@ reference
      with an Application in Fuel Balancing
     2012 American Control Conference
 """
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Simulation example with continuous dynamics."""
+from __future__ import print_function
+
 import logging
 import random
 

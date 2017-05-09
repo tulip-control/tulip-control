@@ -31,6 +31,8 @@
 # SUCH DAMAGE.
 """Finite State Machines Module"""
 from __future__ import absolute_import
+from __future__ import print_function
+
 import copy
 from pprint import pformat
 from random import choice

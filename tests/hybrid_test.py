@@ -1,6 +1,8 @@
 """
 Tests for tulip.hybrid module
 """
+from __future__ import print_function
+
 import numpy as np
 
 from nose.tools import raises

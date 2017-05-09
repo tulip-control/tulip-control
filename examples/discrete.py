@@ -13,6 +13,8 @@ transition system.
 
 # @import_section@
 # Import the packages that we need
+from __future__ import print_function
+
 import logging
 
 from tulip import transys, spec, synth

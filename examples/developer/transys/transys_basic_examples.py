@@ -32,6 +32,7 @@
 """
 Transition System module usage small examples
 """
+from __future__ import print_function
 
 import tulip.transys as trs
 

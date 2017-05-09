@@ -73,6 +73,7 @@ FILE to read from stdin.
 
 SCL; 2013, 2015.
 """
+from __future__ import print_function
 
 import sys
 import networkx as nx
