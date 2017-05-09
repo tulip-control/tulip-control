@@ -28,7 +28,7 @@ def integrate(sys_dyn, x0, u_seq):
 
     print('started continuous transition')
     m = u_seq[0, :].size
-    for i in xrange(N):
+    for i in range(N):
         u = u_seq[i, :].reshape(m, 1)
         x = A.dot(x) + B.dot(u) + K
 

@@ -169,7 +169,7 @@ def _solve_closed_loop_fixed_horizon(
     else:
         pinit = trans_set
     # backwards in time
-    for i in xrange(N, 0, -1):
+    for i in range(N, 0, -1):
         # first step from P1
         if i == 1:
             pinit = p1
@@ -196,7 +196,7 @@ def _solve_closed_loop_bounded_horizon(
         pinit = trans_set
     # backwards in time
     s = pc.Region()
-    for i in xrange(N, 0, -1):
+    for i in range(N, 0, -1):
         # first step from P1
         if i == 1:
             pinit = p1
@@ -230,7 +230,7 @@ def _underapproximate_attractor(
     else:
         pinit = trans_set
     # backwards in time
-    for i in xrange(N, 0, -1):
+    for i in range(N, 0, -1):
         # first step from P1
         if i == 1:
             pinit = p1
@@ -308,7 +308,7 @@ def volumes_for_reachability(part, max_num_poly):
         return part
 
     vol_list = np.zeros(len(part) )
-    for i in xrange(len(part) ):
+    for i in range(len(part) ):
         vol_list[i] = part[i].volume
 
     ind = np.argsort(-vol_list)
@@ -396,7 +396,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
     B_diag = B
     E_diag = E
-    for i in xrange(N-1):
+    for i in range(N-1):
         B_diag = _block_diag2(B_diag, B)
         E_diag = _block_diag2(E_diag, E)
 
@@ -404,7 +404,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     A_k = np.zeros([n, n*N])
 
     sum_vert = 0
-    for i in xrange(N+1):
+    for i in range(N+1):
         Li = list_P[i]
 
         if not isinstance(Li, pc.Polytope):
@@ -522,10 +522,10 @@ def get_max_extreme(G,D,N):
     dim = D_extreme.shape[1]
     DN_extreme = np.zeros([dim*N, nv**N])
 
-    for i in xrange(nv**N):
+    for i in range(nv**N):
         # Last N digits are indices we want!
         ind = np.base_repr(i, base=nv, padding=N)
-        for j in xrange(N):
+        for j in range(N):
             DN_extreme[range(j*dim,(j+1)*dim),i] = D_extreme[int(ind[-j-1]),:]
 
     d_hat = np.amax(np.dot(G,DN_extreme), axis=1)

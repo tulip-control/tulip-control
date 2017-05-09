@@ -660,7 +660,7 @@ def random_run(mealy, from_state=None, N=10):
         state = from_state
     states_seq = []
     output_seqs = {k: list() for k in mealy.outputs}
-    for i in xrange(N):
+    for i in range(N):
         trans = mealy.transitions.find([state])
         # choose next transition
         selected_trans = choice(list(trans))

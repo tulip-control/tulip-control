@@ -19,7 +19,7 @@ sys_swe.env_actions.add_from({'sun', 'rain'})
 
 # Environment actions are mutually exclusive.
 n = 2
-states = ['s' + str(i) for i in xrange(n) ]
+states = ['s' + str(i) for i in range(n) ]
 sys_swe.states.add_from(states)
 sys_swe.states.initial |= ['s0']
 

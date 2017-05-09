@@ -951,7 +951,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     For example:
 
-      >>> ts.states.add_from(xrange(4))
+      >>> ts.states.add_from(range(4))
       >>> ts['door'].owner = 'env'
 
     will result in a logic formula with

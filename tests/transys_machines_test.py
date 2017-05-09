@@ -14,7 +14,7 @@ def test_strip_ports():
     mealy.add_outputs({'led':{'on', 'off'},
                        'window':{'open', 'closed'}})
 
-    mealy.add_nodes_from(xrange(10))
+    mealy.add_nodes_from(range(10))
     mealy.states.initial.add(0)
 
     mealy.add_edge(0, 1, door='open', window='open', led='on')

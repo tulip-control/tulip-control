@@ -68,12 +68,12 @@ def test_synthesis_fol():
     assert len(g.inputs) == 1, g.inputs
     assert 'x' in g.inputs, g.inputs
     dom = g.inputs['x']
-    dom_ = set(xrange(5))
+    dom_ = set(range(5))
     assert dom == dom_, (dom, dom_)
     assert len(g.outputs) == 1, g.outputs
     assert 'y' in g.outputs, g.outputs
     dom = g.outputs['y']
-    dom_ = set(xrange(5))
+    dom_ = set(range(5))
     assert dom == dom_, (dom, dom_)
 
 

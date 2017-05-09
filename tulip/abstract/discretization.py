@@ -745,7 +745,7 @@ def discretize(
                 if ispwa:
                     subsys_list.append(subsys_list[i])
             n_cells = len(sol)
-            new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
+            new_idx = range(n_cells-1, n_cells-num_new-1, -1)
 
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
@@ -763,7 +763,7 @@ def discretize(
                 transitions[j, i] = 1
 
                 # sol[j] is reachable from each piece os S0 \cap sol[i]
-                #for k in xrange(n_cells-n_isect-2, n_cells):
+                #for k in range(n_cells-n_isect-2, n_cells):
                 #    transitions[j, k] = 1
 
             """Update adjacency matrix"""
@@ -1585,8 +1585,8 @@ def merge_partition_pair(
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
 
-    for i in xrange(len(old_regions)):
-        for j in xrange(len(part2)):
+    for i in range(len(old_regions)):
+        for j in range(len(part2)):
             isect = pc.intersect(old_regions[i],
                                  part2[j])
             rc, xc = pc.cheby_ball(isect)

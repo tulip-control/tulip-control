@@ -30,7 +30,7 @@ def bitfields_to_ints_test():
     assert n == {'a': 22}
 
     # range
-    for n in xrange(30):
+    for n in range(30):
         bits = list(bin(n).lstrip('0b').zfill(6))
         bits.reverse()  # little-endian
         d = {'a@{i}'.format(i=i): v for i, v in enumerate(bits)}

@@ -129,7 +129,7 @@ def _bitfields_to_ints(bit_state, vrs):
             int_state[var] = bit_state[var]
             continue
         bitnames = ['{var}@{i}'.format(var=var, i=i)
-                    for i in xrange(dom[1].bit_length())]
+                    for i in range(dom[1].bit_length())]
         bitnames[0] = '{var}@0.{min}.{max}'.format(
             var=var, min=dom[0], max=dom[1])
         bitvalues = [bit_state[b] for b in bitnames]

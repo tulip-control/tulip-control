@@ -331,7 +331,7 @@ def get_input_helper(
     if closed_loop:
         temp_part = P3
         list_P.append(P3)
-        for i in xrange(N - 1, 0, -1):
+        for i in range(N - 1, 0, -1):
             temp_part = solve_feasible(
                 P1, temp_part, ssys, N=1,
                 closed_loop=False, trans_set=P1
@@ -341,7 +341,7 @@ def get_input_helper(
         L, M = createLM(ssys, N, list_P, disturbance_ind=[1])
     else:
         list_P.append(P1)
-        for i in xrange(N - 1, 0, -1):
+        for i in range(N - 1, 0, -1):
             list_P.append(P1)
         list_P.append(P3)
         L, M = createLM(ssys, N, list_P)
@@ -356,7 +356,7 @@ def get_input_helper(
     M = M - Lx.dot(x0).reshape(Lx.shape[0], 1)
 
     B_diag = ssys.B
-    for i in xrange(N - 1):
+    for i in range(N - 1):
         B_diag = _block_diag2(B_diag, ssys.B)
     K_hat = np.tile(ssys.K, (N, 1))
     A_it = ssys.A.copy()
@@ -364,7 +364,7 @@ def get_input_helper(
     A_K = np.zeros([n * N, n * N])
     A_N = np.zeros([n * N, n])
 
-    for i in xrange(N):
+    for i in range(N):
         A_row = ssys.A.dot(A_row)
         A_row[np.ix_(
             range(n),
@@ -486,7 +486,7 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         K = ssys.K
 
     inside = True
-    for i in xrange(N - 1):
+    for i in range(N - 1):
         u = u_seq[i, :].reshape(u_seq[i, :].size, 1)
         x = A.dot(x) + B.dot(u) + K
 

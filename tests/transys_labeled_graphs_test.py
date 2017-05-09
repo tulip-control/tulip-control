@@ -317,7 +317,7 @@ def test_remove_deadends():
 
     # line + cycle
     g.add_nodes_from(range(n, 2*n))
-    for i in xrange(n, 2*n-1):
+    for i in range(n, 2*n-1):
         g.add_edge(i, i+1)
     assert(len(g) == 2*n)
 

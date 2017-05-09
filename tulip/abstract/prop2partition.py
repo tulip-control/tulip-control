@@ -85,7 +85,7 @@ def prop2part(state_space, cont_props_dict):
         num_reg = len(regions)
         prop_holds_reg = []
 
-        for i in xrange(num_reg): #i region counter
+        for i in range(num_reg): #i region counter
             region_now = regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
@@ -131,7 +131,7 @@ def prop2part(state_space, cont_props_dict):
                 regions.pop()
 
         count = 0
-        for hold_count in xrange(len(prop_holds_reg)):
+        for hold_count in range(len(prop_holds_reg)):
             if prop_holds_reg[hold_count]==0:
                 regions.pop(hold_count-count)
                 count+=1
@@ -162,12 +162,12 @@ def part2convex(ppp):
         prop_regions=copy.deepcopy(ppp.prop_regions)
     )
     new2old = []
-    for i in xrange(len(ppp.regions)):
+    for i in range(len(ppp.regions)):
         simplified_reg = pc.union(ppp.regions[i],
                                   ppp.regions[i],
                                   check_convex=True)
 
-        for j in xrange(len(simplified_reg)):
+        for j in range(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg[j]],
                 ppp.regions[i].props
@@ -313,7 +313,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                     "add_grid: grid_size isn't given in a correct format."
                 )
         elif isinstance( grid_size, float ):
-            for i in xrange(dim):
+            for i in range(dim):
                 size_list.append(grid_size)
         else:
             raise Exception("add_grid: "
@@ -321,7 +321,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     else:
         if isinstance( num_grid_pnts, list ):
             if len(num_grid_pnts) == dim:
-                for i in xrange(dim):
+                for i in range(dim):
                     if isinstance( num_grid_pnts[i], int ):
                         grid_size=(
                                 float(domain_bb[1][i]) -float(domain_bb[0][i])
@@ -334,7 +334,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 raise Exception("add_grid: "
                     "num_grid_pnts isn't given in a correct format.")
         elif isinstance( num_grid_pnts, int ):
-            for i in xrange(dim):
+            for i in range(dim):
                 grid_size=(
                         float(domain_bb[1][i])-float(domain_bb[0][i])
                     ) /num_grid_pnts
@@ -363,13 +363,13 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
 
     new_list = []
     parent = []
-    for i in xrange(len(re_list)):
+    for i in range(len(re_list)):
         temp_list=list()
         j=0
         while j<dim*2:
             temp_list.append([re_list[i][j],re_list[i][j+1]])
             j=j+2
-        for j in xrange(len(ppp.regions)):
+        for j in range(len(ppp.regions)):
             tmp = pc.box2poly(temp_list)
             isect = tmp.intersect(ppp.regions[j], abs_tol)
 
@@ -387,9 +387,9 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 parent.append(j)
 
     adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
-    for i in xrange(len(new_list)):
+    for i in range(len(new_list)):
         adj[i,i] = 1
-        for j in xrange(i+1, len(new_list)):
+        for j in range(i+1, len(new_list)):
             if (ppp.adj[parent[i], parent[j]] == 1) or \
                     (parent[i] == parent[j]):
                 if pc.is_adjacent(new_list[i], new_list[j]):
@@ -422,7 +422,7 @@ def product_interval(list1, list2):
     """Helper implementing combination of all intervals for any two interval lists.
     """
     new_list=list()
-    for m in xrange(len(list1)):
+    for m in range(len(list1)):
         for n in range(len(list2)):
             new_list.append(list1[m]+list2[n])
     return new_list

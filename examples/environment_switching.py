@@ -39,7 +39,7 @@ sys_swe.env_actions.add_from({'slippery','normal'})
 # Discretization builds a transition matrix (invisible to the end user)
 
 n = 6
-states = ['s'+str(i) for i in xrange(n) ]
+states = ['s'+str(i) for i in range(n) ]
 
 sys_swe.atomic_propositions.add_from(['home','lot'])
 state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
