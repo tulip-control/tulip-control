@@ -57,7 +57,7 @@ def switched_system_test():
     assert(hyb.cts_ss == domain)
 
 
-class time_semantics_test:
+class time_semantics_test(object):
     """Test out time semantics for hybrid systems module."""
     def setUp(self):
         self.A1 = np.eye(2)
@@ -208,7 +208,7 @@ class time_semantics_test:
                                time_semantics='sampled', timestep='.1')
 
 
-class SwitchedSysDyn_test:
+class SwitchedSysDyn_test(object):
     def setUp(self):
         self.A1 = np.eye(2)
         self.A2 = np.array([[0, 1], [0, 0]])

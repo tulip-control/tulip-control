@@ -46,7 +46,7 @@ save_fig = False
 def mealy_machine_example():
     import numpy as np
 
-    class check_diaphragm():
+    class check_diaphragm(object):
         """camera f-number."""
         def is_valid_value(x):
             if x <= 0.7 or x > 256:
@@ -72,7 +72,7 @@ def mealy_machine_example():
                                 'A guard is a predicate, '
                                 'so it can take only boolean values.')
 
-    class check_camera():
+    class check_camera(object):
         """is it looking upwards ?"""
         def is_valid_value(self, x):
             if x.shape != (3,):
@@ -188,7 +188,7 @@ def garage_counter_with_state_vars():
 def thermostat_with_hysteresis():
     """Example 3.5, p.50 [LS11]
     """
-    class temperature_type():
+    class temperature_type(object):
         def is_valid_value(x):
             if not isinstance(x, [float, int]):
                 raise TypeError('Input temperature must be float.')

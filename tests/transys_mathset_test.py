@@ -61,7 +61,7 @@ def mathset_test():
     assert(a._set == set() )
     assert(a._list == [{'a':1} ] )
 
-class MathSet_operations_test:
+class MathSet_operations_test(object):
     def setUp(self):
         self.x = MathSet(['a', 1, [1, 2], {'a', 'b', '8'} ] )
         self.y = MathSet(['b', -2, [3.5, 2.25], {'/', '_'} ] )
@@ -195,7 +195,7 @@ def powerset_test():
 
     return s
 
-class PowerSet_operations_test:
+class PowerSet_operations_test(object):
     def setUp(self):
         self.p = PowerSet({1, 2, 3})
         self.q_unhashable = PowerSet(MathSet([[1,2], ["a", "b"]]))
@@ -223,7 +223,7 @@ class PowerSet_operations_test:
         assert set(self.singleton) == set([(), (1,)])
         assert set(self.empty) == set([()])
 
-class TypedDict_test():
+class TypedDict_test(object):
     def setUp(self):
         d = TypedDict()
         d.set_types({'animal':{'dog', 'cat'} })

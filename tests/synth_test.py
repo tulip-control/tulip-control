@@ -626,7 +626,7 @@ def test_determinize_machine_init():
         assert d['b'] == 1
 
 
-class synthesize_test:
+class synthesize_test(object):
     def setUp(self):
         self.f_triv = spec.GRSpec(
             sys_vars="y",

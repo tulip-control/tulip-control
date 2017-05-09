@@ -25,7 +25,7 @@ def prepend_with_test():
         yield prepend_with_check, states, prepend_str, expected
 
 
-class States_test():
+class States_test(object):
     def setUp(self):
         self.S = labeled_graphs.States(labeled_graphs.LabeledDiGraph())
 
@@ -95,7 +95,7 @@ class States_test():
         assert self.S.is_terminal(1)
 
 
-class Transitions_test:
+class Transitions_test(object):
     def setUp(self):
         G = labeled_graphs.LabeledDiGraph()
         self.T = labeled_graphs.Transitions(G)
@@ -148,7 +148,7 @@ class Transitions_test:
         assert set([t for t in self.T()]) == set([(1, 3)])
 
 
-class States_labeling_test:
+class States_labeling_test(object):
     def setUp(self):
         node_label_def = [{
             'name': 'ap',
@@ -221,7 +221,7 @@ class States_labeling_test:
         assert(same_result == result)
 
 
-class LabeledDiGraph_test():
+class LabeledDiGraph_test(object):
     def setUp(self):
         p = PowerSet({1, 2})
         node_labeling = [

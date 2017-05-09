@@ -85,7 +85,7 @@ REFERENCE_AUTJSON_smallbool = """
 """
 
 
-class basic_test:
+class basic_test(object):
     def setUp(self):
         self.f_un = GRSpec(
             env_vars="x",
@@ -157,7 +157,7 @@ class basic_test:
         assert len(g) == 6, len(g)
 
 
-class GR1CSession_test:
+class GR1CSession_test(object):
     def setUp(self):
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:

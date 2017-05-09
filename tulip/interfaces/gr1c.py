@@ -544,7 +544,7 @@ def load_mealy(filename, fformat='tulipxml'):
     )
     return strategy
 
-class GR1CSession:
+class GR1CSession(object):
     """Manage interactive session with gr1c.
 
     Given lists of environment and system variable names determine the

@@ -15,7 +15,7 @@ logging.getLogger('astutils').setLevel('ERROR')
 logging.getLogger('omega').setLevel('ERROR')
 
 
-class basic_test:
+class basic_test(object):
     def setUp(self):
         self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
                                 env_init="x & y", env_prog="x",
