@@ -189,14 +189,14 @@ def _grspec_to_automaton(g):
     # reverse mapping by `synth.strategy2mealy`
     a.vars = bv.make_table(d, env_vars=g.env_vars)
     f = g._bool_int.__getitem__
-    a.init['env'] = map(f, g.env_init)
-    a.init['sys'] = map(f, g.sys_init)
-    a.action['env'] = map(f, g.env_safety)
-    a.action['sys'] = map(f, g.sys_safety)
+    a.init['env'] = [f(ei) for ei in g.env_init]
+    a.init['sys'] = [f(si) for si in g.sys_init]
+    a.action['env'] = [f(es) for es in g.env_safety]
+    a.action['sys'] = [f(ss) for ss in g.sys_safety]
     a.win['<>[]'] = [
         '!({s})'.format(s=s)
         for s in map(f, g.env_prog)]
-    a.win['[]<>'] = map(f, g.sys_prog)
+    a.win['[]<>'] = [f(sp) for sp in g.sys_prog]
     a.moore = g.moore
     a.plus_one = g.plus_one
     a.qinit = g.qinit

@@ -154,9 +154,9 @@ def garage_counter(ploting=True):
         'up': {'present', 'absent'},
         'down': {'present', 'absent'}})
 
-    m.add_outputs({'count': range(3)})
+    m.add_outputs({'count': list(range(3))})
 
-    m.states.add_from(range(3) )
+    m.states.add_from(list(range(3)) )
     m.states.initial.add(0)
 
     m.transitions.add(0, 1, up='present', down='absent', count=1)

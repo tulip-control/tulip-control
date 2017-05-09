@@ -366,12 +366,12 @@ def load_aut_json(x):
     # convert to nx
     A = nx.DiGraph()
     symtab = autjs['ENV'] + autjs['SYS']
-    A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
-    A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
+    A.env_vars = dict([list(v.items())[0] for v in autjs['ENV']])
+    A.sys_vars = dict([list(v.items())[0] for v in autjs['SYS']])
     omit = {'state', 'trans'}
     for node_ID, d in autjs['nodes'].items():
         node_label = {k: d[k] for k in d if k not in omit}
-        node_label['state'] = dict([(symtab[i].keys()[0],
+        node_label['state'] = dict([(list(symtab[i].keys())[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
         A.add_node(node_ID, node_label)
@@ -585,7 +585,7 @@ class GR1CSession(object):
         (strings) and values of the value taken by that variable in
         this state, e.g., as in nodes of the Automaton class.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -602,7 +602,7 @@ class GR1CSession(object):
     def getindex(self, state, goal_mode):
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError("Invalid goal mode requested: "+str(goal_mode))
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -623,7 +623,7 @@ class GR1CSession(object):
 
         Format of given state is same as for iswinning method.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -653,7 +653,7 @@ class GR1CSession(object):
         """
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError("Invalid goal mode requested: "+str(goal_mode))
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -686,7 +686,7 @@ class GR1CSession(object):
         Format of given state and env_move is same as for iswinning
         method.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):

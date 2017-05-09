@@ -477,7 +477,7 @@ class ParityGame(GameGraph):
     def __init__(self, c=2):
         node_label_types = [{
             'name': 'color',
-            'values': range(c),
+            'values': list(range(c)),
             'default': 0}]
         super(ParityGame, self).__init__(node_label_types, [])
 

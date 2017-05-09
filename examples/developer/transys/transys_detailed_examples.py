@@ -270,7 +270,7 @@ def fts_maximal_example():
 
     fts.plot()
 
-    print('Types of actions: ' +str(fts._transition_label_def.keys() ) )
+    print('Types of actions: ' +str(list(fts._transition_label_def.keys()) ) )
     print('Number of actions: ' +str(len(fts.sys_actions) ) )
     print('Actions: ' +str(fts.sys_actions ) )
     print('Labeled transitions: ' +str(fts.transitions() ) )
@@ -360,7 +360,7 @@ def scipy_sparse_labeled_adj():
 
     A = lil_matrix((n, n) )
     A[0, :3] = rand(3)
-    adj2states = range(n)
+    adj2states = list(range(n))
 
     print(A)
 

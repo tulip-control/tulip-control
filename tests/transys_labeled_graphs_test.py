@@ -64,7 +64,7 @@ class States_test(object):
         assert set([s for s in self.S]) == set(range(3))
         self.S.add_from(["Cal", "tech"])
         assert len(self.S) == 5
-        assert set([s for s in self.S]) == set(range(3)+["Cal", "tech"])
+        assert set([s for s in self.S]) == set(list(range(3))+["Cal", "tech"])
 
     def test_remove(self):
         # This also tests remove_from

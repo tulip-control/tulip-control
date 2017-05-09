@@ -546,7 +546,7 @@ def discretize(
             else:
                 raise Exception("discretize: "
                     "problem in convexification")
-        orig = range(len(orig_list))
+        orig = list(range(len(orig_list)))
 
     # Cheby radius of disturbance set
     # (defined within the loop for pwa systems)
@@ -1465,7 +1465,7 @@ def merge_partitions(abstractions):
             if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info('original partitions happen to be equal')
 
-    init_mode = abstractions.keys()[0]
+    init_mode = list(abstractions.keys())[0]
     all_modes = set(abstractions)
     remaining_modes = all_modes.difference(set([init_mode]))
 
@@ -1479,7 +1479,7 @@ def merge_partitions(abstractions):
    	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
-    parents = {init_mode:range(len(regions) )}
+    parents = {init_mode:list(range(len(regions) ))}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
     for cur_mode in remaining_modes:
         ab2 = abstractions[cur_mode]

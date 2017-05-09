@@ -118,14 +118,14 @@ def _state2dot(graph, to_pydot_graph, state,
         if isinstance(lc, basestring):
             fillcolor = lc
         elif isinstance(lc, dict):
-            fillcolor = lc.keys()[0]
+            fillcolor = list(lc.keys())[0]
         else:
             raise TypeError('left_color must be str or dict.')
 
         if isinstance(rc, basestring):
             fillcolor += ':' + rc
         elif isinstance(rc, dict):
-            fillcolor += ':' + rc.keys()[0]
+            fillcolor += ':' + list(rc.keys())[0]
         else:
             raise TypeError('right_color must be str or dict.')
     else:
