@@ -1122,7 +1122,7 @@ def multiproc_discretize_switched(
     """
     logger.info('parallel discretize_switched started')
 
-    modes = hybrid_sys.modes
+    modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
 
     q = mp.Queue()
@@ -1208,7 +1208,7 @@ def discretize_switched(
 
     logger.info('discretizing hybrid system')
 
-    modes = hybrid_sys.modes
+    modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
 
     # discretize each abstraction separately
