@@ -559,7 +559,7 @@ def _check_time_data(semantics, timestep):
 
     @type semantics: string
     @param timestep: any positive number
-    @type timestep: int or float or long
+    @type timestep: int or float
 
     @rtype: None
     """
@@ -575,7 +575,7 @@ def _check_time_data(semantics, timestep):
         error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:
             raise ValueError(error_string)
-        if not isinstance(timestep, (int, float, long)):
+        if not isinstance(timestep, (int, float)):
             raise TypeError(error_string)
 
 
