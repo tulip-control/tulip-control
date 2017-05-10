@@ -578,6 +578,7 @@ class GR1CSession(object):
                                       stdin=subprocess.PIPE,
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.STDOUT,
+                                      bufsize=0,
                                       universal_newlines=True)
         else:
             self.p = None
@@ -760,6 +761,7 @@ class GR1CSession(object):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
+                bufsize=0,
                 universal_newlines=True
             )
         else:
