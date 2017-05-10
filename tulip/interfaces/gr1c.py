@@ -657,7 +657,7 @@ class GR1CSession(object):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        emove_vector = range(len(env_move))
+        emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnext "+" ".join(
@@ -690,7 +690,7 @@ class GR1CSession(object):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        emove_vector = range(len(env_move))
+        emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnexta "+" ".join(

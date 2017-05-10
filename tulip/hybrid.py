@@ -443,7 +443,7 @@ class SwitchedSysDyn(object):
         if overwrite_time:
             _push_time_data(self.dynamics.values(), time_semantics, timestep)
         else:
-            _check_time_consistency(dynamics.values(), time_semantics, timestep)
+            _check_time_consistency(list(dynamics.values()), time_semantics, timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
 
