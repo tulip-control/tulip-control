@@ -62,8 +62,9 @@ def test_nx():
     g.add_edge(0, 1, a=0, b=1, c=0, d=1)
     g.add_edge(1, 2, a=1, b=0, c=1, d=1)
     print(dumpsmach.python_case(g, classname='Machine', start='Sinit'))
-    exec(dumpsmach.python_case(g, classname='Machine', start='Sinit'))
-    m = Machine()  # previous line creates the class `Machine`
+    exe_globals = dict()
+    exec(dumpsmach.python_case(g, classname='Machine', start='Sinit'), exe_globals)
+    m = exe_globals['Machine']()  # previous line creates the class `Machine`
     # Sinit -> 0
     out = m.move(a=0, b=0)
     assert out == dict(c=0, d=0)
