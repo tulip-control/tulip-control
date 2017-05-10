@@ -44,7 +44,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 from warnings import warn
-from itertools import izip_longest
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest
 
 import numpy as np
 try:
