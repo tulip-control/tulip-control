@@ -115,14 +115,14 @@ def _state2dot(graph, to_pydot_graph, state,
         lc = d.get('left_color', d['top_color'])
         rc = d.get('right_color', d['bottom_color'])
 
-        if isinstance(lc, basestring):
+        if isinstance(lc, str):
             fillcolor = lc
         elif isinstance(lc, dict):
             fillcolor = list(lc.keys())[0]
         else:
             raise TypeError('left_color must be str or dict.')
 
-        if isinstance(rc, basestring):
+        if isinstance(rc, str):
             fillcolor += ':' + rc
         elif isinstance(rc, dict):
             fillcolor += ':' + list(rc.keys())[0]
@@ -208,7 +208,7 @@ def _format_color(color, prog='tikz'):
 
     @type prog: 'tikz' or 'dot'
     """
-    if isinstance(color, basestring):
+    if isinstance(color, str):
         return color
 
     if not isinstance(color, dict):
@@ -391,7 +391,7 @@ def _form_edge_label(edge_data, label_def,
 
         # format iterable containers using
         # mathematical set notation: {...}
-        if isinstance(label_value, basestring):
+        if isinstance(label_value, str):
             # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
