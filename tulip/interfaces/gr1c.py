@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 def check_gr1c():
     """Return `True` if `gr1c >= require_version` found in PATH."""
     try:
-        v = subprocess.check_output(["gr1c", "-V"])
+        v = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
     except OSError:
         return False
     v = v.split()[1]
@@ -96,7 +96,7 @@ def get_version():
     @return: (major, minor, micro), a tuple of int
     """
     try:
-        v_str = subprocess.check_output(["gr1c", "-V"])
+        v_str = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
     except OSError:
         raise OSError('gr1c not found')
     v_str = v_str.split()[1]
@@ -392,7 +392,8 @@ def check_syntax(spec_str):
 
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
                          stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         universal_newlines=True)
     p.wait()
 
     logger.debug('gr1c returncode: ' + str(p.returncode) )
@@ -421,7 +422,8 @@ def check_realizable(spec):
     logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         universal_newlines=True)
     p.wait()
 
     logger.info('gr1c input:\n' + s +_hl)
@@ -453,7 +455,8 @@ def synthesize(spec):
              "-n", init_option,
              "-t", "json"],
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True
         )
     except OSError as e:
         if e.errno == os.errno.ENOENT:
@@ -574,7 +577,8 @@ class GR1CSession(object):
                                        "-i", self.spec_filename],
                                       stdin=subprocess.PIPE,
                                       stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT)
+                                      stderr=subprocess.STDOUT,
+                                      universal_newlines=True)
         else:
             self.p = None
 
@@ -755,7 +759,8 @@ class GR1CSession(object):
                 "-i", self.spec_filename],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
+                stderr=subprocess.STDOUT,
+                universal_newlines=True
             )
         else:
             self.p = None

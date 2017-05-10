@@ -171,7 +171,8 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
     with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
         subprocess.check_call([slugs_compiler_path, filename],
                               stdout=slugs_infile,
-                              stderr=subprocess.STDOUT)
+                              stderr=subprocess.STDOUT,
+                              universal_newlines=True)
 
     options = [slugs_path, slugs_infile.name]
     if synth:
@@ -194,7 +195,8 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
             options,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+            universal_newlines=True)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             raise Exception('slugs not found in path.')
