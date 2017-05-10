@@ -375,7 +375,10 @@ def check_syntax(spec_str):
     """
     _assert_gr1c()
     f = tempfile.TemporaryFile()
-    f.write(spec_str)
+    try:
+        f.write(bytes(spec_str, 'utf-8'))
+    except TypeError:  # Try to be compatible with Python 2.7
+        f.write(bytes(spec_str))
     f.seek(0)
 
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
@@ -405,7 +408,10 @@ def check_realizable(spec):
     init_option = select_options(spec)
     s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
-    f.write(s)
+    try:
+        f.write(bytes(s, 'utf-8'))
+    except TypeError:  # Try to be compatible with Python 2.7
+        f.write(bytes(s))
     f.seek(0)
     logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
