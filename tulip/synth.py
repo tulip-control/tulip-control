@@ -473,7 +473,7 @@ def sys_to_spec(
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             logger.debug('Found env action')
-            action_ids, constrait = iter2var(
+            action_ids, constraint = iter2var(
                 codomain, env_vars,
                 action_type, bool_actions, ofts.env_actions_must)
             _add_actions(constraint, env_init, env_trans)
