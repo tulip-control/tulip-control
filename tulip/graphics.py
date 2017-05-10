@@ -175,8 +175,8 @@ def dom2vec(domain, resolution):
     See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
     """
     domain = _grouper(2, domain)
-    lambda_linspace = lambda (dom, res): np.linspace(dom[0], dom[1], res)
-    axis_grids = map(lambda_linspace, zip(domain, resolution))
+    lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
+    axis_grids = map(lambda_linspace, domain, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(map(np.ravel, pnt_coor))
 
