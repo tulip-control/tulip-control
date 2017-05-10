@@ -625,7 +625,7 @@ def guided_run(mealy, from_state=None, input_sequences=None):
         state = next(iter(mealy.states.initial))
     else:
         state = from_state
-    n = len(next(seqs.values()))
+    n = len(next(iter(seqs.values())))
     states_seq = []
     output_seqs = {k: list() for k in mealy.outputs}
     for i in range(n):
