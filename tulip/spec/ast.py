@@ -82,15 +82,6 @@ def make_nodes(opmap=None):
 
     class Node(object):
         """Base class for AST nodes."""
-
-        # Caution
-        # =======
-        # Do **NOT** implement C{__hash__}, because you
-        # will unintendently identify different AST nodes !
-        # Only leaf nodes can be safely identified.
-        #
-        # The default for user-defined classes is
-        # C{__hash__ == _}
         __metaclass__ = ABCMeta
         opmap = None
 
@@ -134,6 +125,9 @@ def make_nodes(opmap=None):
         def __repr__(self):
             return '{t}({v})'.format(t=type(self).__name__,
                                      v=repr(self.value))
+
+        def __hash__(self):
+            return id(self)
 
         def __str__(self, *arg, **kw):
             # *arg accommodates "depth" arg of Operator.__str__
