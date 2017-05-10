@@ -39,6 +39,7 @@ from random import choice
 from tulip.transys.labeled_graphs import LabeledDiGraph
 # inline imports:
 #
+# import sys
 # from tulip.transys.export import machine2scxml
 
 
@@ -747,7 +748,9 @@ def _select_transition(mealy, trans):
         'by giving its integer,\n' +
         'Press "Enter" to stop the simulation:\n' +
         '\t int = ')
-    id_selected = raw_input(msg)
+    import sys
+    print(msg)
+    id_selected = sys.stdin.readline().rstrip('\r\n')
     if not id_selected:
         return None
     return trans[int(id_selected)]
