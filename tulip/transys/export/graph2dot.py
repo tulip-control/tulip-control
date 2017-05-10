@@ -39,7 +39,7 @@ import logging
 import re
 from collections import Iterable
 from textwrap import fill
-from cStringIO import StringIO
+from io import StringIO
 import numpy as np
 import networkx as nx
 from networkx.utils import make_str
