@@ -118,18 +118,14 @@ def _untaglist(x, cast_f=float,
     "integer").  If cast_f is set to None, then items are left as
     extracted, i.e. as strings.
 
-    The argument x can also be an instance of
-    xml.etree.ElementTree._ElementInterface ; this is mainly for
-    internal use, e.g. by the function untagpolytope and some
-    load/dumpXML methods elsewhere.
+    The argument x can also have the type of the return value of
+    xml.etree.ElementTree.fromstring(). This is mainly for internal
+    use, e.g. by the function untagpolytope and some load/dumpXML
+    methods elsewhere.
 
     Return result as 2-tuple, containing name of the tag (as a string)
     and the list obtained from it.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given as" +
-            " a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
@@ -165,20 +161,16 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     "floating-point numbers"), while leaving cast_f_keys=None to
     indicate dictionary keys are strings.
 
-    The argument x can also be an instance of
-    xml.etree.ElementTree._ElementInterface ; this is mainly for
-    internal use, e.g. by the function untagpolytope and some
-    load/dumpXML methods elsewhere.
+    The argument x can also have the type of the return value of
+    xml.etree.ElementTree.fromstring(). This is mainly for internal
+    use, e.g. by the function untagpolytope and some load/dumpXML
+    methods elsewhere.
 
     Return result as 2-tuple, containing name of the tag (as a string)
     and the dictionary obtained from it.  If get_order is True, then
     return a triple, where the first two elements are as usual and the
     third is the list of keys in the order they were found.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given " +
-            "as a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
@@ -212,7 +204,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return strategy constructed from output of gr1c.
 
     @param x: a string or an instance of
-        xml.etree.ElementTree._ElementInterface
+        xml.etree.ElementTree.fromstring()
 
     @type spec0: L{GRSpec}
     @param spec0: GR(1) specification with which to interpret the
@@ -226,10 +218,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         C{networkx.DiGraph}. Else, return (L{GRSpec}, C{None}), where
         the first element is the specification as read from the XML string.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given " +
-            "as a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
