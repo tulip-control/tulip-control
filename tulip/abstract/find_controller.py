@@ -278,12 +278,12 @@ def get_input(
                     )
                 ] += mid_weight * np.eye(n)
 
-                r[idx, :] += -mid_weight * xc
+                r[idx, 0] += -mid_weight * xc
                 u, cost = get_input_helper(
                     x0, ssys, P1, P3, N, R, r, Q, ord,
                     closed_loop=closed_loop
                 )
-                r[idx, :] += mid_weight * xc
+                r[idx, 0] += mid_weight * xc
 
             if cost < low_cost:
                 low_u = u
@@ -301,7 +301,7 @@ def get_input(
                     range(n * (N - 1), n * N)
                 )
             ] += mid_weight * np.eye(n)
-            r[idx, :] += -mid_weight * xc
+            r[idx, 0] += -mid_weight * xc
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q, ord,
             closed_loop=closed_loop
