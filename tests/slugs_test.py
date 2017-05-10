@@ -83,8 +83,8 @@ class basic_test(object):
         # non-None (i.e., realizability, which is tested elsewhere).
         assert g is not None
 
-        # assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
-        # assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
+        # assert len(g.env_vars) == 1 and 'x' in g.env_vars
+        # assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         print(g.nodes())
         assert len(g) == 5
         assert set(g.edges()) == set([(0, 1), (0, 2), (1, 3), (1, 4),

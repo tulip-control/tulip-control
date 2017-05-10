@@ -143,12 +143,12 @@ def make_wring_nodes():
 
     class Var(nodes.Var):
         def flatten(self, *arg, **kw):
-            if kw.has_key('env_vars') or kw.has_key('sys_vars'):
+            if ('env_vars' in kw) or ('sys_vars' in kw):
                 env_vars = kw['env_vars']
                 sys_vars = kw['sys_vars']
-                if env_vars.has_key(self.value):
+                if self.value in env_vars:
                     this_type = env_vars[self.value]
-                elif sys_vars.has_key(self.value):
+                elif self.value in sys_vars:
                     this_type = sys_vars[self.value]
                 else:
                     raise TypeError(

@@ -26,7 +26,7 @@ from os import environ as os_environ
 import sys
 import tulip.gridworld as gw
 
-if os_environ.has_key("TULIP_REGRESS"):
+if "TULIP_REGRESS" in os_environ:
     import numpy
     numpy.random.seed(0)
 
