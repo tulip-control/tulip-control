@@ -296,7 +296,7 @@ just mentioned. For example, the following code creates a Buchi automaton:
 
   g = automata.BA()
   g.atomic_propositions.add_from(['a', 'b', 'c'])
-  g.add_nodes_from(xrange(3))
+  g.add_nodes_from(range(3))
   g.states.initial.add(2)
   g.states.accepting.add_from([1, 2])
   g.add_edge(2, 2, letter={'a'})
