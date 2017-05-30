@@ -701,7 +701,189 @@ def _dumps_states(g):
         a.append(s)
     return ''.join(a)
 
+    
+def coarsest_possible_ppp(ts):
+    """Return coarsest possibel proposition preserving partition.
+    This function is part of the bi-simulation algorithm.
+    It will return a list, where each entry of the list is a subset
+    of states set of ts. States in the same entry have the same 
+    atomic proposition. States in different entries have different 
+    atomic propositions.
+    @param ts: transys system
+    @type ts: FTS
+            
+    @return: list of states
+    @rtype: list
+    """
+    d1 = dict()
+    for states in ts.states():
+        ap = ts.states.find(states)
+        (key, value) = ap[0]
+        ap_list = repr(value['ap'])
+        if ap_list not in d1:
+            d1[ap_list] = []
+        d1[ap_list].append(states)
+    c_list = list()
+    for key in d1:
+        c_list.append(d1[key])
+    return c_list
 
+
+def list_to_fts(c_list, ts):
+    """Transfer a list of states to a transys system
+    This function is part of the bi-simulation algorithm.
+    It uses the coarsest possibel proposition preserving partition
+    we got from L{coarsest_possible_ppp} and the original transys
+    system to build the label of the new transys system.
+    See Also
+    ========
+    L{coarsest_possible_ppp}
+    Note
+    ====
+    The attributes atomic_propositions remain same for ts and new_ts.
+    If a state s in new_ts is originated from multiple states in ts, 
+    the environment action and system action of s is set to one of the 
+    state from which it is originated.
+    @param ts: transys system
+    @type ts: FTS
+    @param c_list: list of states
+    @type ts: list
+    @return: L{FTS} with:
+        - states ['s0', ..., 'sN'], where N = len(L) -1
+        - state labels defined by L, so s0 is labeled with L[0], etc.
+        - each state in L is originated from a set of states in ts.
+    """
+    new_ts = trs.FTS()
+    new_ts.name = ts.name
+    for state in c_list:
+        a = ts.states.find([state[0]])
+        (s0_, label) = a[0]
+        new_ts.states.add(''.join(state))
+        for ap in label['ap']:
+            new_ts.atomic_propositions.add(ap)
+        new_ts.states[''.join(state)]['ap'] = label['ap']
+    for sys_actions in ts.sys_actions:
+        new_ts.sys_actions.add(sys_actions)
+    for env_actions in ts.env_actions:
+        new_ts.env_actions.add(env_actions)
+    for ini_state in ts.states.initial:
+        if ini_state in new_ts.states:
+            new_ts.states.initial.add(ini_state)
+        else:
+            for state in new_ts.states:
+                if ini_state in state:
+                    new_ts.states.initial.add(state)
+                    break
+    for tran in ts.transitions(data=True):
+        s1 = ''
+        s2 = ''
+        if tran[0] in new_ts.states:
+            s1 = tran[0]
+        else:
+            for state in new_ts.states:
+                if tran[0] in state:
+                    s1 = state
+                    break
+        if tran[1] in new_ts.states:
+            s2 = tran[1]
+        else:
+            for state in new_ts.states:
+                if tran[1] in state:
+                    s2 = state
+                    break
+        flag = False
+        for tmp in new_ts.transitions():
+            if s1 == tmp[0] and s2 == tmp[1]:
+                flag = True
+                break
+        if flag:
+            continue
+        sys_act = ''
+        env_act = ''
+        if 'sys_actions' in tran[2]:
+            sys_act = tran[2]['sys_actions']
+        if 'env_actions' in tran[2]:
+            env_act = tran[2]['env_actions']
+        new_ts.transitions.add(
+            s1, s2
+        )
+    return new_ts
+	
+	
+def bisimulation_algorithm(ts):
+    """This is the implementation of Original bisimulation algorithm in
+    http://web.eecs.umich.edu/~necmiye/pubs/WagenmakerO_allerton16.pdf
+    See Also
+    ========
+    L{coarsest_possible_ppp}, L{list_to_fts}
+    References
+    ==========
+    1. Andrew J.W.; Necmiye O.
+      A Bisimulation-like Algorithm for Abstracting Control Systems
+      2016 54th Annual Allerton Conference
+    @param ts: transys system
+    @type ts: FTS
+    @return: L{FTS} with:
+        - states ['s0', ..., 'sN'], where N = len(L) -1
+        - state labels defined by L, so s0 is labeled with L[0], etc.
+        - each state in L is originated from a set of states in ts.
+    """
+    c_list = coarsest_possible_ppp(ts)
+    flag = True
+    while flag:
+        flag = False
+        for si in c_list:
+            if flag == True:
+                break
+            for sj in c_list:
+                pre_sj = list(ts.states.pre(si))
+                tmp = [val for val in si if val in pre_sj]
+                if len(tmp) != 0 and tmp != si:
+                    flag = True
+                    c_list.remove(si)
+                    c_list.append(tmp)
+                    c_list.append(list(set(si).difference(set(pre_sj))))
+                    break
+    new_ts = list_to_fts(c_list, ts)
+    return new_ts
+	
+
+def dual_simulation_algorithm(ts):
+    """This is the implementation of dual-simulation algorithm in
+    http://web.eecs.umich.edu/~necmiye/pubs/WagenmakerO_allerton16.pdf
+    See Also
+    ========
+    L{coarsest_possible_ppp}, L{list_to_fts}
+    References
+    ==========
+    1. Andrew J.W.; Necmiye O.
+      A Bisimulation-like Algorithm for Abstracting Control Systems
+      2016 54th Annual Allerton Conference
+    @param ts: transys system
+    @type ts: FTS
+    @return: L{FTS} with:
+        - states ['s0', ..., 'sN'], where N = len(L) -1
+        - state labels defined by L, so s0 is labeled with L[0], etc.
+        - each state in L is originated from a set of states in ts.
+    """
+    c_list = coarsest_possible_ppp(ts)
+    flag = True
+    while flag:
+        flag = False
+        for si in c_list:
+            if flag == True:
+                break
+            for sj in c_list:
+                pre_sj = list(ts.states.pre(si))
+                tmp = [val for val in si if val in pre_sj]
+                if len(tmp) != 0 and tmp not in c_list:
+                    flag = True
+                    c_list.append(tmp)
+                    break
+    new_ts = list_to_fts(c_list, ts)
+    return new_ts
+    
+    
 class GameGraph(LabeledDiGraph):
     """Store a game graph.
 
