@@ -408,7 +408,74 @@ def label_per_state():
     fts.states.add('s0', ap={'p'})
     fts.states.add('s1', ap=set())
     fts.plot()
+    
+def bisimulation_not_reduced_example():
+    ofts = trs.FiniteTransitionSystem()
+    ofts.states.add_from(['s1', 's2', 's3', 's4'] )
+    ofts.states.initial.add('s1')
+    ofts.atomic_propositions |= ['p1','p2']
+    apset = set()
+    apset.add('p1')
+    apset.add('p2')
+    ofts.states['s1']['ap'] = apset
+    ofts.states.add('s2', ap={'p1'} )
+    ofts.states.add('s3', ap={'p2'})
+    ofts.states.add('s4', ap={'p1', 'p2'})
+    ofts.transitions.add('s1', 's4') # unlabeled
+    ofts.sys_actions.add('try')
+    ofts.sys_actions.add_from({'start', 'stop'} )
+    ofts.env_actions.add_from({'block', 'wait'} )
+    ofts.transitions.add(
+        's2', 's1',
+        sys_actions='try', env_actions='block'
+    )
+    ofts.transitions.add(
+        's3', 's2',
+        sys_actions='start', env_actions='wait'
+    )
+    ofts.transitions.add(
+        's4', 's3',
+        sys_actions='stop', env_actions='block'
+    )
+    print ofts
+    fts1 = dual_simulation_algorithm(ofts)
+    print fts1
+    fts2 = bisimulation_algorithm(ofts)
+    print fts2
 
+def bisimulation_reduced_example():
+    ofts = trs.FiniteTransitionSystem()
+    ofts.states.add_from(['s1', 's2', 's3', 's4'] )
+    ofts.states.initial.add('s1')
+    ofts.atomic_propositions |= ['p1','p2']
+    apset = set()
+    apset.add('p1')
+    apset.add('p2')
+    ofts.states['s1']['ap'] = apset
+    ofts.states.add('s2', ap={'p1'} )
+    ofts.states.add('s3', ap={'p2'})
+    ofts.states.add('s4', ap={'p1', 'p2'})
+    ofts.sys_actions.add('try')
+    ofts.sys_actions.add_from({'start', 'stop'} )
+    ofts.env_actions.add_from({'block', 'wait'} )
+    ofts.transitions.add(
+        's2', 's1',
+        sys_actions='try', env_actions='block'
+    )
+    ofts.transitions.add(
+        's3', 's2',
+        sys_actions='start', env_actions='wait'
+    )
+    ofts.transitions.add(
+        's4', 's3',
+        sys_actions='stop', env_actions='block'
+    )
+    print ofts
+    fts1 = dual_simulation_algorithm(ofts)
+    print fts1
+    fts2 = bisimulation_algorithm(ofts)
+    print fts2
+    
 if __name__ == '__main__':
     #sims_demo()
     fts_maximal_example()
@@ -417,3 +484,5 @@ if __name__ == '__main__':
 
     ofts = scipy_sparse_labeled_adj()
     label_per_state()
+    bisimulation_reduced_example()
+    bisimulation_not_reduced_example()
