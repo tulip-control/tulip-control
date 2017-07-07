@@ -115,7 +115,9 @@ def make_nodes(opmap=None):
         """
 
         def __init__(self, value):
-            if not isinstance(value, str):
+            try:
+                value + 'a'
+            except TypeError:
                 raise TypeError(
                     'value must be a string, got: {v}'.format(
                         v=value))
@@ -253,7 +255,9 @@ def make_fol_nodes(opmap=None):
         """A 0-ary connective."""
 
         def __init__(self, value):
-            if not isinstance(value, str):
+            try:
+                value + 'a'
+            except TypeError:
                 raise TypeError(
                     'value must be string, got: {v}'.format(v=value))
             if value.lower() not in {'true', 'false'}:
