@@ -1417,6 +1417,7 @@ def get_transitions(
         logger.debug(msg)
     logger.info('Checked: ' + str(n_checked))
     logger.info('Found: ' + str(n_found))
+    assert n_checked != 0, 'would divide '
     logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
 
     return transitions
