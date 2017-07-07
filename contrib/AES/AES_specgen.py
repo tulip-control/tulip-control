@@ -3,6 +3,7 @@
 Huan Xu (mumu@caltech.edu)
 October 30, 2012
 """
+from __future__ import division
 from __future__ import print_function
 
 import sys, os
@@ -290,7 +291,7 @@ def faulttol(prob,allgens,genfail):
        probability of failure of single component
 
     """
-    tuples = int(prob/genfail)
+    tuples = int(prob / genfail)
     fails = []
     temp = []
     if tuples <= 1:
