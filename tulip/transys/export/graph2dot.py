@@ -225,11 +225,11 @@ def _format_color(color, prog='tikz'):
             # mix them
             result = np.array((0.0, 0.0, 0.0))
             for c, w in color.items():
-                result += w/t * np.array(webcolors.name_to_rgb(c))
+                result += w / t * np.array(webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
             logger.warn('failed to import webcolors')
-            s = ':'.join([k + ';' + str(v/t) for k, v in color.items()])
+            s = ':'.join([k + ';' + str(v / t) for k, v in color.items()])
     else:
         raise ValueError('Unknown program: ' + str(prog) + '. '
                          "Available options are: 'dot' or 'tikz'.")

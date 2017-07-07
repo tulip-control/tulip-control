@@ -325,7 +325,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                     if isinstance( num_grid_pnts[i], int ):
                         grid_size=(
                                 float(domain_bb[1][i]) -float(domain_bb[0][i])
-                            ) /num_grid_pnts[i]
+                            ) / num_grid_pnts[i]
                         size_list.append(grid_size)
                     else:
                         raise Exception("add_grid: "
@@ -337,7 +337,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             for i in range(dim):
                 grid_size=(
                         float(domain_bb[1][i])-float(domain_bb[0][i])
-                    ) /num_grid_pnts
+                    ) / num_grid_pnts
                 size_list.append(grid_size)
         else:
             raise Exception("add_grid: "
@@ -375,7 +375,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
 
             #if pc.is_fulldim(isect):
             rc, xc = pc.cheby_ball(isect)
-            if rc > abs_tol/2:
+            if rc > abs_tol / 2:
                 if rc < abs_tol:
                     print("Warning: "
                         "One of the regions in the refined PPP is too small"
