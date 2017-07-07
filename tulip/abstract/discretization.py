@@ -699,10 +699,10 @@ def discretize(
         #     assert(False)
 
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), ' +
+            logger.warning('\t too small: si \cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning('\t discarded non-empty intersection: ' +
+            logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
             logger.warning('\t too small: si \ Pre(sj), so not reached it')
