@@ -51,53 +51,46 @@ def subsys1():
     return sys_dyn
 
 def transition_directions_test():
-    """
-    unit test for correctness of abstracted transition directions, with:
+    """Unit test for correctness of abstracted transition directions, with:
 
       - uni-directional control authority
       - no disturbance
     """
-    modes = []
+    modes = list()
     modes.append(('normal', 'fly'))
     modes.append(('refuel', 'fly'))
     env_modes, sys_modes = zip(*modes)
-
-    cont_state_space = pc.box2poly([[0., 3.], [0., 2.]])
+    # dynamics
+    cont_state_space = pc.box2poly([[0.0, 3.0], [0.0, 2.0]])
     pwa_sys = dict()
     pwa_sys[('normal', 'fly')] = hybrid.PwaSysDyn(
-        [subsys0()], cont_state_space
-    )
+        [subsys0()], cont_state_space)
     pwa_sys[('refuel', 'fly')] = hybrid.PwaSysDyn(
-        [subsys1()], cont_state_space
-    )
-
+        [subsys1()], cont_state_space)
     switched_dynamics = hybrid.SwitchedSysDyn(
         disc_domain_size=(len(env_modes), len(sys_modes)),
         dynamics=pwa_sys,
         env_labels=env_modes,
         disc_sys_labels=sys_modes,
-        cts_ss=cont_state_space
-    )
-
-    cont_props = {}
-    cont_props['home'] = pc.box2poly([[0., 1.], [0., 1.]])
-    cont_props['lot'] = pc.box2poly([[2., 3.], [1., 2.]])
-
+        cts_ss=cont_state_space)
+    # propositions
+    cont_props = dict()
+    cont_props['home'] = pc.box2poly([[0.0, 1.0], [0.0, 1.0]])
+    cont_props['lot'] = pc.box2poly([[2.0, 3.0], [1.0, 2.0]])
+    # partition
     ppp = abstract.prop2part(cont_state_space, cont_props)
     ppp, new2old = abstract.part2convex(ppp)
-
+    # configure discretization
     N = 8
     trans_len=1
-
-    disc_params = {}
+    disc_params = dict()
     for mode in modes:
-        disc_params[mode] = {'N':N, 'trans_length':trans_len}
-
+        disc_params[mode] = dict(N=N, trans_length=trans_len)
+    # discretize
     swab = abstract.discretize_switched(
         ppp, switched_dynamics, disc_params,
-        plot=True, show_ts=True, only_adjacent=False
-    )
-
+        plot=True, show_ts=True, only_adjacent=False)
+    # assertions
     ts = swab.modes[('normal', 'fly')].ts
     edges = {(0, 0), (1, 1), (2, 2), (3, 3),
              (4, 4), (5, 5),
@@ -106,16 +99,13 @@ def transition_directions_test():
              (3, 0),
              (4, 5),
              (5, 0)}
-
-    logger.debug(set(ts.edges() ).symmetric_difference(edges) )
-    assert(set(ts.edges() ) == edges)
-
+    logger.debug(set(ts.edges()).symmetric_difference(edges))
+    assert set(ts.edges()) == edges
     ts = swab.ts
-
-    assert(set(ts.edges() ) == edges)
+    assert set(ts.edges()) == edges
     for i, j in edges:
-        assert(ts[i][j][0]['env_actions'] == 'normal')
-        assert(ts[i][j][0]['sys_actions'] == 'fly')
+        assert ts[i][j][0]['env_actions'] == 'normal'
+        assert ts[i][j][0]['sys_actions'] == 'fly'
 
 transition_directions_test.slow = True
 
