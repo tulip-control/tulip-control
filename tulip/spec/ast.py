@@ -37,7 +37,6 @@ http://spot.lip6.fr/wiki/LtlSyntax
 """
 import logging
 logger = logging.getLogger(__name__)
-from abc import ABCMeta, abstractmethod
 
 
 # prototype for flattening to a "canonical" string
@@ -82,18 +81,14 @@ def make_nodes(opmap=None):
 
     class Node(object):
         """Base class for AST nodes."""
-        __metaclass__ = ABCMeta
         opmap = None
 
-        @abstractmethod
         def __init__(self):
             pass
 
-        @abstractmethod
         def __repr__(self):
             pass
 
-        @abstractmethod
         def flatten(self):
             pass
 
