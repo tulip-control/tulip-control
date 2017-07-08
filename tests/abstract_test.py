@@ -13,6 +13,7 @@ import matplotlib
 # to avoid the need for using: ssh -X when running tests remotely
 matplotlib.use('Agg')
 
+import networkx as nx
 import numpy as np
 
 from tulip import abstract
@@ -99,13 +100,14 @@ def transition_directions_test():
              (3, 0),
              (4, 5),
              (5, 0)}
-    logger.debug(set(ts.edges()).symmetric_difference(edges))
-    assert set(ts.edges()) == edges
+    h = nx.MultiDiGraph()
+    h.add_edges_from(edges)
+    assert nx.is_isomorphic(ts, h)
     ts = swab.ts
-    assert set(ts.edges()) == edges
-    for i, j in edges:
-        assert ts[i][j][0]['env_actions'] == 'normal'
-        assert ts[i][j][0]['sys_actions'] == 'fly'
+    assert nx.is_isomorphic(ts, h)
+    for _, _, d in ts.edges_iter(data=True):
+        assert d['env_actions'] == 'normal'
+        assert d['sys_actions'] == 'fly'
 
 transition_directions_test.slow = True
 
