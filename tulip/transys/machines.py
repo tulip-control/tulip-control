@@ -31,12 +31,15 @@
 # SUCH DAMAGE.
 """Finite State Machines Module"""
 from __future__ import absolute_import
+from __future__ import print_function
+
 import copy
 from pprint import pformat
 from random import choice
 from tulip.transys.labeled_graphs import LabeledDiGraph
 # inline imports:
 #
+# import sys
 # from tulip.transys.export import machine2scxml
 
 
@@ -46,7 +49,7 @@ pure = {'present', 'absent'}
 
 
 def is_valuation(ports, valuations):
-    for name, port_type in ports.iteritems():
+    for name, port_type in ports.items():
         curvaluation = valuations[name]
         # functional set membership description ?
         if callable(port_type):
@@ -66,7 +69,7 @@ def create_machine_ports(spc_vars):
         These are as originally defined by the user or synth.
     """
     ports = dict()
-    for env_var, var_type in spc_vars.iteritems():
+    for env_var, var_type in spc_vars.items():
         if var_type == 'boolean':
             domain = {0, 1}
         elif isinstance(var_type, tuple):
@@ -251,7 +254,7 @@ class Transducer(LabeledDiGraph):
         @type masks: C{dict} of functions C{{port_name : mask_function}}
             each C{mask_function} returns bool
         """
-        for port_name, port_type in new_inputs.iteritems():
+        for port_name, port_type in new_inputs.items():
             # append
             self._transition_label_def[port_name] = port_type
             # inform inputs
@@ -265,7 +268,7 @@ class Transducer(LabeledDiGraph):
                 self._transition_dot_mask[port_name] = mask_func
 
     def add_state_vars(self, new_state_vars):
-        for var_name, var_type in new_state_vars.iteritems():
+        for var_name, var_type in new_state_vars.items():
             # append
             self._state_label_def[var_name] = var_type
             # inform state vars
@@ -320,9 +323,9 @@ class MooreMachine(Transducer):
         for state, label_dict in self.states(data=True):
             s += '\t' + str(state) + ' :\n'
             # split into vars and outputs
-            var_values = {k: v for k, v in label_dict.iteritems()
+            var_values = {k: v for k, v in label_dict.items()
                           if k in self.state_vars}
-            output_values = {k: v for k, v in label_dict.iteritems()
+            output_values = {k: v for k, v in label_dict.items()
                              if k in self.outputs}
             s += (_print_label(var_values) + ' : ' +
                   _print_label(output_values))
@@ -339,7 +342,7 @@ class MooreMachine(Transducer):
         return s
 
     def add_outputs(self, new_outputs, masks=None):
-        for port_name, port_type in new_outputs.iteritems():
+        for port_name, port_type in new_outputs.items():
             # append
             self._state_label_def[port_name] = port_type
             # inform state vars
@@ -480,7 +483,7 @@ class MealyMachine(Transducer):
             keys are port_names (see arg: new_outputs)
             each function returns bool
         """
-        for port_name, port_type in new_outputs.iteritems():
+        for port_name, port_type in new_outputs.items():
             # append
             self._transition_label_def[port_name] = port_type
             # inform state vars
@@ -610,11 +613,11 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     if missing_ports:
         raise ValueError('missing input port(s): ' + missing_ports)
     # dict of lists ?
-    non_lists = {k: v for k, v in seqs.iteritems() if not isinstance(v, list)}
+    non_lists = {k: v for k, v in seqs.items() if not isinstance(v, list)}
     if non_lists:
         raise TypeError('Values must be lists, for: ' + str(non_lists))
     # uniform list len ?
-    if len(set(len(x) for x in seqs.itervalues())) > 1:
+    if len(set(len(x) for x in seqs.values())) > 1:
         raise ValueError('All input sequences must be of equal length.')
     # note: initial sys state non-determinism not checked
     # initial sys edge non-determinism checked instead (more restrictive)
@@ -622,11 +625,11 @@ def guided_run(mealy, from_state=None, input_sequences=None):
         state = next(iter(mealy.states.initial))
     else:
         state = from_state
-    n = len(next(seqs.itervalues()))
+    n = len(next(iter(seqs.values())))
     states_seq = []
     output_seqs = {k: list() for k in mealy.outputs}
     for i in range(n):
-        inputs = {k: v[i] for k, v in seqs.iteritems()}
+        inputs = {k: v[i] for k, v in seqs.items()}
         state, outputs = mealy.reaction(state, inputs)
         states_seq.append(state)
         for k in output_seqs:
@@ -658,7 +661,7 @@ def random_run(mealy, from_state=None, N=10):
         state = from_state
     states_seq = []
     output_seqs = {k: list() for k in mealy.outputs}
-    for i in xrange(N):
+    for i in range(N):
         trans = mealy.transitions.find([state])
         # choose next transition
         selected_trans = choice(list(trans))
@@ -745,7 +748,9 @@ def _select_transition(mealy, trans):
         'by giving its integer,\n' +
         'Press "Enter" to stop the simulation:\n' +
         '\t int = ')
-    id_selected = raw_input(msg)
+    import sys
+    print(msg)
+    id_selected = sys.stdin.readline().rstrip('\r\n')
     if not id_selected:
         return None
     return trans[int(id_selected)]
@@ -767,7 +772,7 @@ def moore2mealy(moore):
         raise TypeError('moore must be a MooreMachine')
     mealy = MealyMachine()
     # cp inputs
-    for port_name, port_type in moore.inputs.iteritems():
+    for port_name, port_type in moore.inputs.items():
         mask_func = moore._transition_dot_mask.get(port_name)
         if mask_func is None:
             masks = None
@@ -775,7 +780,7 @@ def moore2mealy(moore):
             masks = {port_name: mask_func}
         mealy.add_inputs({port_name: port_type}, masks=masks)
     # cp outputs
-    for port_name, port_type in moore.outputs.iteritems():
+    for port_name, port_type in moore.outputs.items():
         mask_func = moore._state_dot_mask.get(port_name)
         if mask_func is None:
             masks = None
@@ -788,7 +793,7 @@ def moore2mealy(moore):
     # cp transitions
     for si in moore:
         output_values = {
-            k: v for k, v in moore.states[si].iteritems()
+            k: v for k, v in moore.states[si].items()
             if k in moore.outputs}
         output_values = copy.deepcopy(output_values)
         for si_, sj, attr_dict in moore.transitions.find(si):
@@ -821,7 +826,7 @@ def mealy2moore(mealy):
         raise TypeError('moore must be a MealyMachine')
     moore = MooreMachine()
     # cp inputs
-    for port_name, port_type in mealy.inputs.iteritems():
+    for port_name, port_type in mealy.inputs.items():
         mask_func = mealy._transition_dot_mask.get(port_name)
         if mask_func is None:
             masks = None
@@ -829,7 +834,7 @@ def mealy2moore(mealy):
             masks = {port_name: mask_func}
         moore.add_inputs({port_name: port_type}, masks=masks)
     # cp outputs
-    for port_name, port_type in mealy.outputs.iteritems():
+    for port_name, port_type in mealy.outputs.items():
         mask_func = mealy._transition_dot_mask.get(port_name)
         if mask_func is None:
             masks = None
@@ -837,7 +842,7 @@ def mealy2moore(mealy):
             masks = {port_name: mask_func}
         moore.add_outputs({port_name: port_type}, masks=masks)
     # initial state with arbitrary label
-    out = {k: list(v)[0] for k, v in mealy.outputs.iteritems()}
+    out = {k: list(v)[0] for k, v in mealy.outputs.items()}
     s0 = list(mealy.states.initial)[0]
     # create maps between Moore and Mealy states
     moore2mealy_states = dict()  # {qj : si} (function)
@@ -869,7 +874,7 @@ def mealy2moore(mealy):
 
 def _print_ports(port_dict):
     s = ''
-    for port_name, port_type in port_dict.iteritems():
+    for port_name, port_type in port_dict.items():
         s += '\t' + str(port_name) + ' : '
         s += pformat(port_type) + '\n'
     s += '\n'
@@ -878,7 +883,7 @@ def _print_ports(port_dict):
 
 def _print_label(label_dict):
     s = ''
-    for name, value in label_dict.iteritems():
+    for name, value in label_dict.items():
         s += '\t\t' + str(name) + ' : ' + str(value) + '\n'
     s += '\n'
     return s
@@ -903,9 +908,9 @@ def _create_state_str(mealy_state, output, moore,
 
 def _split_io(attr_dict, machine):
     """Split into inputs and outputs."""
-    input_values = {k: v for k, v in attr_dict.iteritems()
+    input_values = {k: v for k, v in attr_dict.items()
                     if k in machine.inputs}
-    output_values = {k: v for k, v in attr_dict.iteritems()
+    output_values = {k: v for k, v in attr_dict.items()
                      if k in machine.outputs}
     return input_values, output_values
 

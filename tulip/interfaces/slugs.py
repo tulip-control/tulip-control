@@ -66,7 +66,11 @@ def check_realizable(spec):
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(struct)
+        try:
+            fin.write(bytes(struct, 'utf-8'))
+        except TypeError:  # Try to be compatible with Python 2.7
+            fin.write(bytes(struct))
+        
     realizable, out = _call_slugs(fin.name, synth=False)
     return realizable
 
@@ -85,7 +89,10 @@ def synthesize(spec, symbolic=False):
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(struct)
+        try:
+            fin.write(bytes(struct, 'utf-8'))
+        except TypeError:  # Try to be compatible with Python 2.7
+            fin.write(bytes(struct))
     realizable, out = _call_slugs(fin.name, synth=True, symbolic=symbolic)
     if not realizable:
         return None
@@ -96,7 +103,7 @@ def synthesize(spec, symbolic=False):
     dout = json.loads(out)
     g = nx.DiGraph()
     dvars = dout['variables']
-    for stru, d in dout['nodes'].iteritems():
+    for stru, d in dout['nodes'].items():
         u = int(stru)
         state = dict(zip(dvars, d['state']))
         g.add_node(u, state=state)
@@ -124,12 +131,12 @@ def _bitfields_to_ints(bit_state, vrs):
     @type vrs: C{dict}
     """
     int_state = dict()
-    for var, dom in vrs.iteritems():
+    for var, dom in vrs.items():
         if dom == 'boolean':
             int_state[var] = bit_state[var]
             continue
         bitnames = ['{var}@{i}'.format(var=var, i=i)
-                    for i in xrange(dom[1].bit_length())]
+                    for i in range(dom[1].bit_length())]
         bitnames[0] = '{var}@0.{min}.{max}'.format(
             var=var, min=dom[0], max=dom[1])
         bitvalues = [bit_state[b] for b in bitnames]
@@ -171,7 +178,8 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
     with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
         subprocess.check_call([slugs_compiler_path, filename],
                               stdout=slugs_infile,
-                              stderr=subprocess.STDOUT)
+                              stderr=subprocess.STDOUT,
+                              universal_newlines=True)
 
     options = [slugs_path, slugs_infile.name]
     if synth:
@@ -194,7 +202,8 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
             options,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+            universal_newlines=True)
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             raise Exception('slugs not found in path.')

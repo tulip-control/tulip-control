@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Tests for transys.labeled_graphs (part of transys subpackage)"""
+from __future__ import print_function
+
 from nose.tools import raises, assert_raises
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
@@ -23,7 +25,7 @@ def prepend_with_test():
         yield prepend_with_check, states, prepend_str, expected
 
 
-class States_test():
+class States_test(object):
     def setUp(self):
         self.S = labeled_graphs.States(labeled_graphs.LabeledDiGraph())
 
@@ -62,7 +64,7 @@ class States_test():
         assert set([s for s in self.S]) == set(range(3))
         self.S.add_from(["Cal", "tech"])
         assert len(self.S) == 5
-        assert set([s for s in self.S]) == set(range(3)+["Cal", "tech"])
+        assert set([s for s in self.S]) == set(list(range(3))+["Cal", "tech"])
 
     def test_remove(self):
         # This also tests remove_from
@@ -93,7 +95,7 @@ class States_test():
         assert self.S.is_terminal(1)
 
 
-class Transitions_test:
+class Transitions_test(object):
     def setUp(self):
         G = labeled_graphs.LabeledDiGraph()
         self.T = labeled_graphs.Transitions(G)
@@ -146,7 +148,7 @@ class Transitions_test:
         assert set([t for t in self.T()]) == set([(1, 3)])
 
 
-class States_labeling_test:
+class States_labeling_test(object):
     def setUp(self):
         node_label_def = [{
             'name': 'ap',
@@ -211,7 +213,7 @@ class States_labeling_test:
            ("state0", {"ap": set(['p'])}) in result
 
         result = self.S_ap.find(with_attr_dict={"ap": {'p'}})
-        print result
+        print(result)
         assert len(result) == 2 and \
            set([s for (s, l) in result]) == set(["state0", "state2"])
 
@@ -219,7 +221,7 @@ class States_labeling_test:
         assert(same_result == result)
 
 
-class LabeledDiGraph_test():
+class LabeledDiGraph_test(object):
     def setUp(self):
         p = PowerSet({1, 2})
         node_labeling = [
@@ -315,7 +317,7 @@ def test_remove_deadends():
 
     # line + cycle
     g.add_nodes_from(range(n, 2*n))
-    for i in xrange(n, 2*n-1):
+    for i in range(n, 2*n-1):
         g.add_edge(i, i+1)
     assert(len(g) == 2*n)
 

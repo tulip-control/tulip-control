@@ -45,6 +45,7 @@ reference
    http://doi.org/10.4204/EPTCS.50.3
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 import logging
 logger = logging.getLogger(__name__)
@@ -257,7 +258,7 @@ def split_gr1(f):
     ops = set(ops)
     ops.add('X')
     operators.update(init=ops, GF=ops)
-    for part, f in d.iteritems():
+    for part, f in d.items():
         ops = operators[part]
         for u in f:
             op = has_operator(u, g, ops)

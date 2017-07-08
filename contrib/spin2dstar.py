@@ -40,6 +40,7 @@ Example usage:
 
 SCL; 3 Sep 2013
 """
+from __future__ import print_function
 
 import sys
 from pyparsing import * #Literal, Forward, Word, alphanums, alphas
@@ -99,7 +100,7 @@ def reverse_lookup(d, value):
 
     Raise ValueError exception if no matches found.
     """
-    for (k,v) in d.iteritems():
+    for (k,v) in d.items():
         if v == value:
             return k
 

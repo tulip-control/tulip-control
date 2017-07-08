@@ -2,6 +2,7 @@
 """
 Tests for transys.automata (part of transys subpackage)
 """
+from __future__ import print_function
 
 from tulip import transys as trs
 

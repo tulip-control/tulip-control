@@ -1,6 +1,8 @@
 """
 Tests for the tulip.synth module.
 """
+from __future__ import print_function
+
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)
@@ -195,7 +197,7 @@ def test_env_fts_int_actions():
     assert 'sys_actions' not in spec.env_vars
     assert 'env_actions' in spec.env_vars
 
-    print spec.env_vars['env_actions']
+    print(spec.env_vars['env_actions'])
     assert (set(spec.env_vars['env_actions']) ==
             {'park', 'go', 'stop', 'env_actionsnone'})
 
@@ -624,7 +626,7 @@ def test_determinize_machine_init():
         assert d['b'] == 1
 
 
-class synthesize_test:
+class synthesize_test(object):
     def setUp(self):
         self.f_triv = spec.GRSpec(
             sys_vars="y",

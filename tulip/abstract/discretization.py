@@ -20,14 +20,14 @@
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE 
-# COPYRIGHT HOLDERS OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
-# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
-# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+# COPYRIGHT HOLDERS OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
 """
@@ -38,6 +38,8 @@ See Also
 L{find_controller}
 """
 from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import logging
 logger = logging.getLogger(__name__)
@@ -115,7 +117,7 @@ class AbstractSwitched(object):
         s += str('common PPP:\n') + str(self.ppp)
         s += str('common ts:\n') + str(self.ts)
 
-        for mode, ab in self.modes.iteritems():
+        for mode, ab in self.modes.items():
             s += 'mode: ' + str(mode)
             s += ', with abstraction:\n' + str(ab)
 
@@ -181,7 +183,7 @@ class AbstractSwitched(object):
                 axs += [ax]
 
         # plot mode partitions
-        for mode, ab in self.modes.iteritems():
+        for mode, ab in self.modes.items():
             ax = ab.plot(show_ts, only_adjacent, color_seed)
             ax.set_title('Abstraction for mode: ' + str(mode))
             axs += [ax]
@@ -412,7 +414,7 @@ class AbstractPwa(object):
             trans_set, sys = self.ppp2trans(i)
 
             params = {'N', 'close_loop', 'use_all_horizon'}
-            disc_params = {k:v for k,v in self.disc_params.iteritems()
+            disc_params = {k:v for k,v in self.disc_params.items()
                            if k in params}
 
             s0 = solve_feasible(from_region, to_region, sys,
@@ -544,7 +546,7 @@ def discretize(
             else:
                 raise Exception("discretize: "
                     "problem in convexification")
-        orig = range(len(orig_list))
+        orig = list(range(len(orig_list)))
 
     # Cheby radius of disturbance set
     # (defined within the loop for pwa systems)
@@ -697,10 +699,10 @@ def discretize(
         #     assert(False)
 
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), ' +
+            logger.warning('\t too small: si \cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning('\t discarded non-empty intersection: ' +
+            logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
             logger.warning('\t too small: si \ Pre(sj), so not reached it')
@@ -743,7 +745,7 @@ def discretize(
                 if ispwa:
                     subsys_list.append(subsys_list[i])
             n_cells = len(sol)
-            new_idx = xrange(n_cells-1, n_cells-num_new-1, -1)
+            new_idx = range(n_cells-1, n_cells-num_new-1, -1)
 
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
@@ -761,7 +763,7 @@ def discretize(
                 transitions[j, i] = 1
 
                 # sol[j] is reachable from each piece os S0 \cap sol[i]
-                #for k in xrange(n_cells-n_isect-2, n_cells):
+                #for k in range(n_cells-n_isect-2, n_cells):
                 #    transitions[j, k] = 1
 
             """Update adjacency matrix"""
@@ -1120,7 +1122,7 @@ def multiproc_discretize_switched(
     """
     logger.info('parallel discretize_switched started')
 
-    modes = hybrid_sys.modes
+    modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
 
     q = mp.Queue()
@@ -1131,7 +1133,7 @@ def multiproc_discretize_switched(
         mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
 
     jobs = [mp.Process(target=multiproc_discretize, args=args)
-            for args in mode_args.itervalues()]
+            for args in mode_args.values()]
     for job in jobs:
         job.start()
 
@@ -1158,7 +1160,7 @@ def multiproc_discretize_switched(
         mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
 
     jobs = [mp.Process(target=multiproc_get_transitions, args=args)
-            for args in mode_args.itervalues()]
+            for args in mode_args.values()]
 
     for job in jobs:
         job.start()
@@ -1206,7 +1208,7 @@ def discretize_switched(
 
     logger.info('discretizing hybrid system')
 
-    modes = hybrid_sys.modes
+    modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
 
     # discretize each abstraction separately
@@ -1415,6 +1417,7 @@ def get_transitions(
         logger.debug(msg)
     logger.info('Checked: ' + str(n_checked))
     logger.info('Found: ' + str(n_found))
+    assert n_checked != 0, 'would divide '
     logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
 
     return transitions
@@ -1445,8 +1448,8 @@ def merge_partitions(abstractions):
         return
 
     # consistency check
-    for ab1 in abstractions.itervalues():
-        for ab2 in abstractions.itervalues():
+    for ab1 in abstractions.values():
+        for ab2 in abstractions.values():
             p1 = ab1.ppp
             p2 = ab2.ppp
 
@@ -1463,7 +1466,7 @@ def merge_partitions(abstractions):
             if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info('original partitions happen to be equal')
 
-    init_mode = abstractions.keys()[0]
+    init_mode = list(abstractions.keys())[0]
     all_modes = set(abstractions)
     remaining_modes = all_modes.difference(set([init_mode]))
 
@@ -1477,7 +1480,7 @@ def merge_partitions(abstractions):
    	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
-    parents = {init_mode:range(len(regions) )}
+    parents = {init_mode:list(range(len(regions) ))}
     ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
     for cur_mode in remaining_modes:
         ab2 = abstractions[cur_mode]
@@ -1583,8 +1586,8 @@ def merge_partition_pair(
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
 
-    for i in xrange(len(old_regions)):
-        for j in xrange(len(part2)):
+    for i in range(len(old_regions)):
+        for j in range(len(part2)):
             isect = pc.intersect(old_regions[i],
                                  part2[j])
             rc, xc = pc.cheby_ball(isect)

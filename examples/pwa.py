@@ -3,6 +3,8 @@
 # This example is an extension of `robot_continuous.py`
 # by Petter Nilsson and Nok Wongpiromsarn.
 # Necmiye Ozay, August 26, 2012
+from __future__ import print_function
+
 import numpy as np
 from polytope import box2poly
 from tulip.abstract import discretize

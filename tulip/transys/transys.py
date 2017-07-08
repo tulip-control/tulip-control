@@ -400,7 +400,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n')
 
-        for action_type, codomain in self.actions.iteritems():
+        for action_type, codomain in self.actions.items():
             if 'sys' in action_type:
                 s += (
                     'System Action Type: ' + str(action_type) +
@@ -696,7 +696,7 @@ def _dumps_states(g):
         s = '\t State: {u}, AP: {ap}\n'.format(
             u=u, ap=g.node[u]['ap']) + ', '.join([
                 '{k}: {v}'.format(k=k, v=v)
-                for k, v in g.node[u].iteritems()
+                for k, v in g.node[u].items()
                 if k is not 'ap'])
         a.append(s)
     return ''.join(a)

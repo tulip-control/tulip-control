@@ -409,7 +409,7 @@ def _check_var_conflicts(s, variables):
     if vars_redefined:
         raise Exception('Variables redefined: {v}'.format(v=vars_redefined))
     # check conflicts with values of arbitrary finite data types
-    for var, domain in variables.iteritems():
+    for var, domain in variables.items():
         # not arbitrary finite type ?
         if not isinstance(domain, list):
             continue

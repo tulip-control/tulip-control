@@ -7,6 +7,8 @@ this directory:
 run ../continuous.py
 run -i test_get_input.py
 """
+from __future__ import print_function
+
 from tulip.abstract import get_input, find_discrete_state
 from polytope import is_inside
 import numpy as np
@@ -26,7 +28,7 @@ def integrate(sys_dyn, x0, u_seq):
 
     print('started continuous transition')
     m = u_seq[0, :].size
-    for i in xrange(N):
+    for i in range(N):
         u = u_seq[i, :].reshape(m, 1)
         x = A.dot(x) + B.dot(u) + K
 

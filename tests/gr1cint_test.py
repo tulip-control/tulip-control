@@ -2,6 +2,8 @@
 """
 Tests for the interface with gr1c.
 """
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
@@ -83,7 +85,7 @@ REFERENCE_AUTJSON_smallbool = """
 """
 
 
-class basic_test:
+class basic_test(object):
     def setUp(self):
         self.f_un = GRSpec(
             env_vars="x",
@@ -149,13 +151,13 @@ class basic_test:
         self.dcounter.sys_init = list()
         g = gr1c.synthesize(self.dcounter)
         assert g is not None
-        print g
+        print(g)
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 6, len(g)
 
 
-class GR1CSession_test:
+class GR1CSession_test(object):
     def setUp(self):
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
@@ -239,7 +241,7 @@ def test_load_aut_json():
     for u, d in h.nodes_iter(data=True):
         assert u in g, (u, g.nodes())
         d_ = g.node[u]
-        for k, v in d.iteritems():
+        for k, v in d.items():
             v_ = d_.get(k)
             assert v_ == v, (k, v, v_, d, d_)
     h_edges = set(h.edges_iter())

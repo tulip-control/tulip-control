@@ -34,6 +34,8 @@
 Note (24 June 2012): Several pieces of source code are taken or
 derived from btsynth; see http://scottman.net/2012/btsynth
 """
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 import copy
 import itertools
@@ -42,7 +44,7 @@ import time
 
 import numpy as np
 
-from spec.form import GRSpec
+from .spec.form import GRSpec
 
 # inline:
 #
@@ -879,7 +881,7 @@ class GridWorld(object):
         scale_init = []
         for row in range(shape_scaled[0]):
             for col in range(shape_scaled[1]):
-                (y, x) = (row / yf, col / xf)
+                (y, x) = (row // yf, col // xf)
                 (yr, xr) = (row % yf, col % xf)
                 if self.W[y, x] == 1:
                     scaleW[row, col] = 1
@@ -977,9 +979,9 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
             # If feasibility must be guaranteed, then check whether
             # the newly unreachable cell is permissible.
             W_tmp = W.reshape(size)
-            goal_list_tmp = [(k / size[1], k % size[1]) for k in goal_list]
-            init_list_tmp = [(k / size[1], k % size[1]) for k in init_list]
-            troll_list_tmp = [(k / size[1], k % size[1]) for k in troll_list]
+            goal_list_tmp = [(k // size[1], k % size[1]) for k in goal_list]
+            init_list_tmp = [(k // size[1], k % size[1]) for k in init_list]
+            troll_list_tmp = [(k // size[1], k % size[1]) for k in troll_list]
             world = GridWorld(prefix=prefix)
             world.W = W_tmp
             chain_of_points = init_list_tmp[:]
@@ -996,9 +998,9 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
                 bcounter -= 1
     # Reshape the gridworld to final form; build and return the result.
     W = W.reshape(size)
-    goal_list = [(k / size[1], k % size[1]) for k in goal_list]
-    init_list = [(k / size[1], k % size[1]) for k in init_list]
-    troll_list = [((k / size[1], k % size[1]), 1) for k in troll_list]
+    goal_list = [(k // size[1], k % size[1]) for k in goal_list]
+    init_list = [(k // size[1], k % size[1]) for k in init_list]
+    troll_list = [((k // size[1], k % size[1]), 1) for k in troll_list]
     world = GridWorld(prefix=prefix)
     world.W = W
     world.goal_list = goal_list
@@ -1233,7 +1235,7 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    Z.plot(font_pt=min(288 / Z.W.shape[1], 48), show_grid=True, axes=ax)
+    Z.plot(font_pt=min(288 // Z.W.shape[1], 48), show_grid=True, axes=ax)
 
     def update_line(num, dlist, lines):
         for (p, t), d in zip(lines, dlist):

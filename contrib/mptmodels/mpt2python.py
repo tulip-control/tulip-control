@@ -23,7 +23,7 @@ def load(filename):
         nlti = len(data['A'][0])
         lti_systems = []
 
-        for i in xrange(nlti):
+        for i in range(nlti):
             A = data['A'][0][i]
             B = data['B'][0][i]
             K = data['K'][0][i]

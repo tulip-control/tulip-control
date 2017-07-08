@@ -41,6 +41,8 @@ interacting with the gr1c executable.
 
 Use the logging module to throttle verbosity.
 """
+from __future__ import print_function
+
 from distutils.version import StrictVersion
 import logging
 import copy
@@ -63,7 +65,7 @@ logger = logging.getLogger(__name__)
 def check_gr1c():
     """Return `True` if `gr1c >= require_version` found in PATH."""
     try:
-        v = subprocess.check_output(["gr1c", "-V"])
+        v = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
     except OSError:
         return False
     v = v.split()[1]
@@ -94,7 +96,7 @@ def get_version():
     @return: (major, minor, micro), a tuple of int
     """
     try:
-        v_str = subprocess.check_output(["gr1c", "-V"])
+        v_str = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
     except OSError:
         raise OSError('gr1c not found')
     v_str = v_str.split()[1]
@@ -116,18 +118,14 @@ def _untaglist(x, cast_f=float,
     "integer").  If cast_f is set to None, then items are left as
     extracted, i.e. as strings.
 
-    The argument x can also be an instance of
-    xml.etree.ElementTree._ElementInterface ; this is mainly for
-    internal use, e.g. by the function untagpolytope and some
-    load/dumpXML methods elsewhere.
+    The argument x can also have the type of the return value of
+    xml.etree.ElementTree.fromstring(). This is mainly for internal
+    use, e.g. by the function untagpolytope and some load/dumpXML
+    methods elsewhere.
 
     Return result as 2-tuple, containing name of the tag (as a string)
     and the list obtained from it.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given as" +
-            " a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
@@ -163,20 +161,16 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
     "floating-point numbers"), while leaving cast_f_keys=None to
     indicate dictionary keys are strings.
 
-    The argument x can also be an instance of
-    xml.etree.ElementTree._ElementInterface ; this is mainly for
-    internal use, e.g. by the function untagpolytope and some
-    load/dumpXML methods elsewhere.
+    The argument x can also have the type of the return value of
+    xml.etree.ElementTree.fromstring(). This is mainly for internal
+    use, e.g. by the function untagpolytope and some load/dumpXML
+    methods elsewhere.
 
     Return result as 2-tuple, containing name of the tag (as a string)
     and the dictionary obtained from it.  If get_order is True, then
     return a triple, where the first two elements are as usual and the
     third is the list of keys in the order they were found.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given " +
-            "as a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
@@ -210,7 +204,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return strategy constructed from output of gr1c.
 
     @param x: a string or an instance of
-        xml.etree.ElementTree._ElementInterface
+        xml.etree.ElementTree.fromstring()
 
     @type spec0: L{GRSpec}
     @param spec0: GR(1) specification with which to interpret the
@@ -224,10 +218,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         C{networkx.DiGraph}. Else, return (L{GRSpec}, C{None}), where
         the first element is the specification as read from the XML string.
     """
-    if not isinstance(x, str) and not isinstance(x, ET._ElementInterface):
-        raise TypeError("tag to be parsed must be given " +
-            "as a string or ElementTree._ElementInterface.")
-
     if isinstance(x, str):
         elem = ET.fromstring(x)
     else:
@@ -364,16 +354,16 @@ def load_aut_json(x):
     # convert to nx
     A = nx.DiGraph()
     symtab = autjs['ENV'] + autjs['SYS']
-    A.env_vars = dict([v.items()[0] for v in autjs['ENV']])
-    A.sys_vars = dict([v.items()[0] for v in autjs['SYS']])
+    A.env_vars = dict([list(v.items())[0] for v in autjs['ENV']])
+    A.sys_vars = dict([list(v.items())[0] for v in autjs['SYS']])
     omit = {'state', 'trans'}
-    for node_ID, d in autjs['nodes'].iteritems():
+    for node_ID, d in autjs['nodes'].items():
         node_label = {k: d[k] for k in d if k not in omit}
-        node_label['state'] = dict([(symtab[i].keys()[0],
+        node_label['state'] = dict([(list(symtab[i].keys())[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
         A.add_node(node_ID, node_label)
-    for node_ID, d in autjs['nodes'].iteritems():
+    for node_ID, d in autjs['nodes'].items():
         for to_node in d['trans']:
             A.add_edge(node_ID, to_node)
     return A
@@ -385,12 +375,16 @@ def check_syntax(spec_str):
     """
     _assert_gr1c()
     f = tempfile.TemporaryFile()
-    f.write(spec_str)
+    try:
+        f.write(bytes(spec_str, 'utf-8'))
+    except TypeError:  # Try to be compatible with Python 2.7
+        f.write(bytes(spec_str))
     f.seek(0)
 
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
                          stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         universal_newlines=True)
     p.wait()
 
     logger.debug('gr1c returncode: ' + str(p.returncode) )
@@ -414,12 +408,16 @@ def check_realizable(spec):
     init_option = select_options(spec)
     s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
-    f.write(s)
+    try:
+        f.write(bytes(s, 'utf-8'))
+    except TypeError:  # Try to be compatible with Python 2.7
+        f.write(bytes(s))
     f.seek(0)
     logger.info('starting realizability check')
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
                          stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         universal_newlines=True)
     p.wait()
 
     logger.info('gr1c input:\n' + s +_hl)
@@ -451,7 +449,8 @@ def synthesize(spec):
              "-n", init_option,
              "-t", "json"],
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True
         )
     except OSError as e:
         if e.errno == os.errno.ENOENT:
@@ -542,7 +541,7 @@ def load_mealy(filename, fformat='tulipxml'):
     )
     return strategy
 
-class GR1CSession:
+class GR1CSession(object):
     """Manage interactive session with gr1c.
 
     Given lists of environment and system variable names determine the
@@ -572,7 +571,9 @@ class GR1CSession:
                                        "-i", self.spec_filename],
                                       stdin=subprocess.PIPE,
                                       stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT)
+                                      stderr=subprocess.STDOUT,
+                                      bufsize=0,
+                                      universal_newlines=True)
         else:
             self.p = None
 
@@ -583,7 +584,7 @@ class GR1CSession:
         (strings) and values of the value taken by that variable in
         this state, e.g., as in nodes of the Automaton class.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -600,7 +601,7 @@ class GR1CSession:
     def getindex(self, state, goal_mode):
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError("Invalid goal mode requested: "+str(goal_mode))
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -621,7 +622,7 @@ class GR1CSession:
 
         Format of given state is same as for iswinning method.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
@@ -651,12 +652,12 @@ class GR1CSession:
         """
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError("Invalid goal mode requested: "+str(goal_mode))
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        emove_vector = range(len(env_move))
+        emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnext "+" ".join(
@@ -684,12 +685,12 @@ class GR1CSession:
         Format of given state and env_move is same as for iswinning
         method.
         """
-        state_vector = range(len(state))
+        state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        emove_vector = range(len(env_move))
+        emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnexta "+" ".join(
@@ -753,7 +754,9 @@ class GR1CSession:
                 "-i", self.spec_filename],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
+                stderr=subprocess.STDOUT,
+                bufsize=0,
+                universal_newlines=True
             )
         else:
             self.p = None

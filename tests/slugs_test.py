@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Tests for the interface with slugs."""
+from __future__ import print_function
+
 import logging
 
 import networkx as nx
@@ -28,7 +30,7 @@ def bitfields_to_ints_test():
     assert n == {'a': 22}
 
     # range
-    for n in xrange(30):
+    for n in range(30):
         bits = list(bin(n).lstrip('0b').zfill(6))
         bits.reverse()  # little-endian
         d = {'a@{i}'.format(i=i): v for i, v in enumerate(bits)}
@@ -81,8 +83,8 @@ class basic_test(object):
         # non-None (i.e., realizability, which is tested elsewhere).
         assert g is not None
 
-        # assert len(g.env_vars) == 1 and g.env_vars.has_key('x')
-        # assert len(g.sys_vars) == 1 and g.sys_vars.has_key('y')
+        # assert len(g.env_vars) == 1 and 'x' in g.env_vars
+        # assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         print(g.nodes())
         assert len(g) == 5
         assert set(g.edges()) == set([(0, 1), (0, 2), (1, 3), (1, 4),

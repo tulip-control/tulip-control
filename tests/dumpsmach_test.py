@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Tests for the export mechanisms of tulip.dumpsmach."""
+from __future__ import print_function
+
 import logging
 
 import networkx as nx
@@ -13,7 +15,7 @@ logging.getLogger('astutils').setLevel('ERROR')
 logging.getLogger('omega').setLevel('ERROR')
 
 
-class basic_test:
+class basic_test(object):
     def setUp(self):
         self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
                                 env_init="x & y", env_prog="x",
@@ -46,9 +48,9 @@ class basic_test:
         # print(dumpsmach.python_case(self.dcounter_M))
         compile(dumpsmach.python_case(self.dcounter_M),
                 filename="<string>", mode="exec")
-        exec compile(dumpsmach.python_case(self.enumf_M)
+        exec(compile(dumpsmach.python_case(self.enumf_M)
                      +'\nM = TulipStrategy(); M.move()',
-                     filename="<string>", mode="exec")
+                     filename="<string>", mode="exec"))
 
 
 def test_nx():
@@ -60,8 +62,9 @@ def test_nx():
     g.add_edge(0, 1, a=0, b=1, c=0, d=1)
     g.add_edge(1, 2, a=1, b=0, c=1, d=1)
     print(dumpsmach.python_case(g, classname='Machine', start='Sinit'))
-    exec dumpsmach.python_case(g, classname='Machine', start='Sinit')
-    m = Machine()  # previous line creates the class `Machine`
+    exe_globals = dict()
+    exec(dumpsmach.python_case(g, classname='Machine', start='Sinit'), exe_globals)
+    m = exe_globals['Machine']()  # previous line creates the class `Machine`
     # Sinit -> 0
     out = m.move(a=0, b=0)
     assert out == dict(c=0, d=0)

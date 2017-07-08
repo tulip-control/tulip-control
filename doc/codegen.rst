@@ -66,7 +66,7 @@ implements ``ctrl``, as demonstrated by the following script.
 
   M = ExampleCtrl()
   print('In order, the input variables: '+', '.join(M.input_vars))
-  for i in xrange(10):
+  for i in range(10):
       input_values = {"park": 0}
       print(M.move(**input_values))
 

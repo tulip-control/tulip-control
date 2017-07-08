@@ -34,6 +34,8 @@
 using AST classes from spec.ast
 """
 from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 logger = logging.getLogger(__name__)
 import warnings

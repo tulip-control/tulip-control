@@ -38,12 +38,16 @@ eventually be removed.  Their use in new applications is discouraged.
 They come from https://github.com/johnyf/pyvectorized
 """
 from __future__ import division
+from __future__ import print_function
 
 import logging
 logger = logging.getLogger(__name__)
 
 from warnings import warn
-from itertools import izip_longest
+try:
+    from itertools import zip_longest as izip_longest
+except ImportError:
+    from itertools import izip_longest
 
 import numpy as np
 try:
@@ -171,8 +175,8 @@ def dom2vec(domain, resolution):
     See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
     """
     domain = _grouper(2, domain)
-    lambda_linspace = lambda (dom, res): np.linspace(dom[0], dom[1], res)
-    axis_grids = map(lambda_linspace, zip(domain, resolution))
+    lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
+    axis_grids = map(lambda_linspace, domain, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(map(np.ravel, pnt_coor))
 

@@ -91,7 +91,7 @@ def synthesize(formula, env_vars=None, sys_vars=None):
 
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
-    if not all(v == 'boolean' for v in all_vars.itervalues()):
+    if not all(v == 'boolean' for v in all_vars.values()):
         raise TypeError(
             'all variables should be Boolean:\n{v}'.format(v=all_vars))
 
@@ -113,7 +113,8 @@ def synthesize(formula, env_vars=None, sys_vars=None):
     # call lily
     try:
         p = subprocess.Popen([LILY, '-f', f, '-syn', IO_PARTITION_FILE],
-                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             universal_newlines=True)
         out = p.stdout.read()
     except OSError as e:
         if e.errno == os.errno.ENOENT:

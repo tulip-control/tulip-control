@@ -39,6 +39,8 @@ This module knows about program structure,
 namely the sections of a specification file.
 """
 from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 logger = logging.getLogger(__name__)
 import pprint
@@ -458,14 +460,14 @@ class GRSpec(LTL):
 
         output = 'ENVIRONMENT VARIABLES:\n'
         if self.env_vars:
-            for k, v in self.env_vars.iteritems():
+            for k, v in self.env_vars.items():
                 output += '\t' + str(k) + '\t' + str(v) + '\n'
         else:
             output += '\t(none)\n'
 
         output += '\nSYSTEM VARIABLES:\n'
         if self.sys_vars:
-            for k, v in self.sys_vars.iteritems():
+            for k, v in self.sys_vars.items():
                 output += '\t' + str(k) + '\t' + str(v) + '\n'
         else:
             output += '\t(none)\n'
@@ -645,7 +647,7 @@ class GRSpec(LTL):
         """
         logger.info('substitute values for variables...')
         a = copy.deepcopy(self._ast)
-        for formula, tree in a.iteritems():
+        for formula, tree in a.items():
             g = tx.Tree.from_recursive_ast(tree)
             tx.sub_values(g, var_values)
             a[formula] = g.to_recursive_ast()
@@ -676,7 +678,7 @@ class GRSpec(LTL):
         self.str_to_int()
         init = {'env': self.env_init, 'sys': self.sys_init}
         pyinit = dict()
-        for side, clauses in init.iteritems():
+        for side, clauses in init.items():
             if no_str:
                 clauses = [self._bool_int[x] for x in clauses]
             logger.info('clauses to compile: ' + str(clauses))
@@ -702,7 +704,7 @@ class GRSpec(LTL):
         logger.info('convert string variables to integers...')
         vars_dict = dict(self.env_vars)
         vars_dict.update(self.sys_vars)
-        fvars = {v: d for v, d in vars_dict.iteritems() if isinstance(d, list)}
+        fvars = {v: d for v, d in vars_dict.items() if isinstance(d, list)}
         # replace symbols by ints
         for p in self._parts:
             for x in getattr(self, p):
@@ -792,7 +794,7 @@ def replace_dependent_vars(spec, bool2form):
     vs.update(spec.sys_vars)
     logger.debug('variables:\n\t' + str(vs))
     bool2subtree = dict()
-    for boolvar, formula in bool2form.iteritems():
+    for boolvar, formula in bool2form.items():
         logger.debug('checking var: ' + str(boolvar))
         if boolvar in vs:
             assert vs[boolvar] == 'boolean'

@@ -11,6 +11,8 @@ to return enumerated transducers.
 U{https://pypi.python.org/pypi/omega}
 """
 from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 import time
 
@@ -129,7 +131,7 @@ def _int_bounds(aut):
     int_types = {'int', 'saturating', 'modwrap'}
     bdd = aut.bdd
     u = bdd.true
-    for var, d in aut.vars.iteritems():
+    for var, d in aut.vars.items():
         t = d['type']
         if t == 'bool':
             continue
@@ -171,7 +173,7 @@ def _grspec_to_automaton(g):
     a = sym.Automaton()
     d = dict(g.env_vars)
     d.update(g.sys_vars)
-    for k, v in d.iteritems():
+    for k, v in d.items():
         if v in ('boolean', 'bool'):
             r = 'bool'
         elif isinstance(v, list):
@@ -187,14 +189,14 @@ def _grspec_to_automaton(g):
     # reverse mapping by `synth.strategy2mealy`
     a.vars = bv.make_table(d, env_vars=g.env_vars)
     f = g._bool_int.__getitem__
-    a.init['env'] = map(f, g.env_init)
-    a.init['sys'] = map(f, g.sys_init)
-    a.action['env'] = map(f, g.env_safety)
-    a.action['sys'] = map(f, g.sys_safety)
+    a.init['env'] = [f(ei) for ei in g.env_init]
+    a.init['sys'] = [f(si) for si in g.sys_init]
+    a.action['env'] = [f(es) for es in g.env_safety]
+    a.action['sys'] = [f(ss) for ss in g.sys_safety]
     a.win['<>[]'] = [
         '!({s})'.format(s=s)
         for s in map(f, g.env_prog)]
-    a.win['[]<>'] = map(f, g.sys_prog)
+    a.win['[]<>'] = [f(sp) for sp in g.sys_prog]
     a.moore = g.moore
     a.plus_one = g.plus_one
     a.qinit = g.qinit

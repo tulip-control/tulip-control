@@ -2,6 +2,7 @@
 """
 Tests for abstract.prop2partition
 """
+from __future__ import print_function
 
 from tulip.abstract import prop2part
 import polytope as pc

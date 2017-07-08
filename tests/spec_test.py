@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Tests for the tulip.spec subpackage."""
+from __future__ import print_function
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
@@ -32,7 +34,7 @@ def full_name_operators_test():
         ('( ( ( p & q ) U ( q | ( ( p -> w ) & '
          '( ! ( z -> b ) ) ) ) ) & ( G ( X g ) ) )')}
 
-    for f, correct in formulas.iteritems():
+    for f, correct in formulas.items():
         tree = parse(f, full_operators=True)
         # g.write('hehe.png')
         assert tree.flatten() == correct, tree.flatten()

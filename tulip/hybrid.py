@@ -443,7 +443,7 @@ class SwitchedSysDyn(object):
         if overwrite_time:
             _push_time_data(self.dynamics.values(), time_semantics, timestep)
         else:
-            _check_time_consistency(dynamics.values(), time_semantics, timestep)
+            _check_time_consistency(list(dynamics.values()), time_semantics, timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
 
@@ -463,7 +463,7 @@ class SwitchedSysDyn(object):
         s += _indent(str(self.cts_ss), 4) + '\n'
 
         s += 'Dynamics:\n'
-        for mode, pwa in self.dynamics.iteritems():
+        for mode, pwa in self.dynamics.items():
             s += 4*' ' + 'mode: ' + str(mode) + '\n'
             s += 4*' ' + 'dynamics:\n' + _indent(str(pwa), 8) +'\n\n'
         return s
@@ -559,7 +559,7 @@ def _check_time_data(semantics, timestep):
 
     @type semantics: string
     @param timestep: any positive number
-    @type timestep: int or float or long
+    @type timestep: int or float
 
     @rtype: None
     """
@@ -575,7 +575,7 @@ def _check_time_data(semantics, timestep):
         error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:
             raise ValueError(error_string)
-        if not isinstance(timestep, (int, float, long)):
+        if not isinstance(timestep, (int, float)):
             raise TypeError(error_string)
 
 

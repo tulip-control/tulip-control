@@ -46,7 +46,7 @@ import re, copy, os, sys
 import Queue
 
 
-class AutomatonState:
+class AutomatonState(object):
     """AutomatonState class for representing a state in a finite state
     automaton.  An AutomatonState object contains the following
     fields:

@@ -3,6 +3,8 @@
 Huan Xu (mumu@caltech.edu)
 October 30, 2012
 """
+from __future__ import division
+from __future__ import print_function
 
 import sys, os
 import re, copy
@@ -120,10 +122,10 @@ def write_discdc_con(G,rulist,dcbuslist,nullist):
     remove2 = all_pairs(nullist)
     L.remove_edges_from(remove2)
     edges = L.edges()
-    # print edges
+    # print(edges)
     for i in range(0,len(edges)):
-        # print edges[i][0]
-        # print edges[i][1]
+        # print(edges[i][0])
+        # print(edges[i][1])
         f.write('disc_sys_vars['"'"'c'+str(edges[i][0])+str(edges[i][1])+"'"'] = [0,1]\n')
     for j in range(0,len(remove2)):
         f.write('disc_sys_vars['"'"'c'+str(remove2[j][0])+str(remove2[j][1])+"'"'] = [1]\n')
@@ -289,7 +291,7 @@ def faulttol(prob,allgens,genfail):
        probability of failure of single component
 
     """
-    tuples = int(prob/genfail)
+    tuples = int(prob / genfail)
     fails = []
     temp = []
     if tuples <= 1:
@@ -993,8 +995,8 @@ nptime = 0
 
 #Create networkx graph from adjacency matrix
 G=nx.from_numpy_matrix(A)
-print 'number of edges ' + str(len(G.edges()))
-print 'number of nodes ' + str(len(G.nodes()))
+print('number of edges ' + str(len(G.edges())))
+print('number of nodes ' + str(len(G.nodes())))
 
 #sets of failure states
 # fails = faulttol(10,gens,genfail)
@@ -1007,71 +1009,71 @@ if ('tulip' in sys.argv):
     f = open(file_name, "w")
 
     # #environment variables
-    print 'writing environment variables'
+    print('writing environment variables')
     write_envgen(gens)
     write_envru(rus)
 
     #discrete system variables
-    print 'writing discrete system variables: buses'
+    print('writing discrete system variables: buses')
     write_discbus(busac)
     write_discbus(busdc)
     write_discnull(null)
-    print time.time()-start
-    print 'writing discrete system variables: contactors'
+    print(time.time()-start)
+    print('writing discrete system variables: contactors')
     # write_discac_con(G,null) #only use this when there are NO DC components
     write_discdc_con(G,rus,busdc,null)
-    print time.time()-start
-    print 'writing discrete system variables: bus counters'
+    print(time.time()-start)
+    print('writing discrete system variables: bus counters')
     write_essbusdisc(busess,nptime)
 
     #acbus discrete properties
-    print 'removing ru paths'
+    print('removing ru paths')
     H = remove_rus(G,busac,rus)
-    print time.time()-start
-    print 'writing discrete bus properties: AC'
+    print(time.time()-start)
+    print('writing discrete bus properties: AC')
     write_acbusprop(H,busac,gens)
-    print time.time()-start
-    print 'writing discrete bus properties: DC'
+    print(time.time()-start)
+    print('writing discrete bus properties: DC')
     write_dcbusprop(G,busdc,gens)
-    print time.time()-start
+    print(time.time()-start)
 
     #Environment assumptions
-    print 'writing environment assumptions'
+    print('writing environment assumptions')
     write_genassump(genfail,gens)
     write_ruassump(rufail,rus)
-    print time.time()-start
+    print(time.time()-start)
 
     #acbus power guarantees
-    print 'writing bus power specifications: AC'
+    print('writing bus power specifications: AC')
     write_acbusspec(H,busac,gens)
     write_acbusspec2(H,busac,gens)
     write_essbusspec(busess,nptime)
-    print time.time()-start
+    print(time.time()-start)
 
     #disconnect unhealthy guarantees
-    print 'disconnecting unhealthy generators'
+    print('disconnecting unhealthy generators')
     g_disconnect(G,gens,busac)
     g_disconnect(G,gens,null)
-    print time.time()-start
-    print 'disconnecting unhealthy rus'
+    print(time.time()-start)
+    print('disconnecting unhealthy rus')
     ru_disconnect(G,rus,busac)
     ru_disconnect(G,rus,null)
-    print time.time()-start
+    print(time.time()-start)
 
     ##non-parallel guarantees
-    print 'writing no paralleling specs'
+    print('writing no paralleling specs')
     noparallel(G,gens)
-    print time.time()-start
+    print(time.time()-start)
 
     #dc bus power specifications
-    print 'writing bus power specifications: DC'
+    print('writing bus power specifications: DC')
     write_dcbusspec(G,busdc,gens)
     write_dcbusspec2(G,busdc,gens)
     write_dcbusalways(busdc)
 
     f.close()
 
-    print 'It took', time.time()-start, 'seconds.'
+    print('It took', time.time()-start, 'seconds.')
 
 ################################################################
 # Synthesize
@@ -1109,4 +1111,4 @@ if ('yices' in sys.argv):
     write_sat_env(genfail,rufail)
 
     f.close()
-    print 'It took', time.time()-start, 'seconds.'
+    print('It took', time.time()-start, 'seconds.')

@@ -8,6 +8,8 @@ Simple example with uncontrolled switching, for debugging
      | 0 | 1 | 2 |
      +---+---+---+
 """
+from __future__ import print_function
+
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
@@ -17,7 +19,7 @@ sys_swe.env_actions.add_from({'sun', 'rain'})
 
 # Environment actions are mutually exclusive.
 n = 2
-states = ['s' + str(i) for i in xrange(n) ]
+states = ['s' + str(i) for i in range(n) ]
 sys_swe.states.add_from(states)
 sys_swe.states.initial |= ['s0']
 

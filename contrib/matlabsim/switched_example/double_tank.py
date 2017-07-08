@@ -21,6 +21,7 @@ reference
      with an Application in Fuel Balancing
     2012 American Control Conference
 """
+from __future__ import print_function
 
 import os
 import pickle

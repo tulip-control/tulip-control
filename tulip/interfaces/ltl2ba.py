@@ -270,7 +270,8 @@ def call_ltl2ba(formula, prefix=''):
     p = subprocess.Popen(
         [prefix + 'ltl2ba', '-f', '"{f}"'.format(f=formula)],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
+        stderr=subprocess.STDOUT,
+        universal_newlines=True)
     p.wait()
     ltl2ba_output = p.stdout.read()
     logger.info('ltl2ba output:\n\n{s}\n'.format(s=ltl2ba_output))

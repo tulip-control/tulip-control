@@ -19,6 +19,8 @@ We will assume, we have the 6 cell robot example.
      +---+---+---+
 """
 # NO, 26 Jul 2013.
+from __future__ import print_function
+
 import logging
 
 import numpy as np
@@ -48,7 +50,7 @@ sys_hyb.env_actions.add_from({'slippery','normal'})
 
 # str states
 n = 6
-states = ['s'+str(i) for i in xrange(n) ]
+states = ['s'+str(i) for i in range(n) ]
 
 sys_hyb.atomic_propositions.add_from(['home','lot'])
 state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]

@@ -31,6 +31,8 @@
 # SUCH DAMAGE.
 """Algorithms on Kripke structures and Automata"""
 from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 import copy
 from tulip.transys.transys import FiniteTransitionSystem
@@ -99,7 +101,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
 
     def state_label_union(attr_dict):
         prod_attr_dict = dict()
-        for k, v in attr_dict.iteritems():
+        for k, v in attr_dict.items():
             prod_attr_dict[k] = label_union(v)
         return prod_attr_dict
 

@@ -33,12 +33,14 @@ reference
      with an Application in Fuel Balancing
     2012 American Control Conference
 """
+from __future__ import print_function
+
 import logging
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logging.getLogger('tulip').setLevel(logging.ERROR)
-logging.getLogger('tulip.synth').setLevel(logging.ERROR)
+logging.getLogger('omega').setLevel(logging.WARNING)
 
 log = logging.getLogger('multiprocessing')
 #log.setLevel(logging.ERROR)

@@ -37,7 +37,6 @@ http://spot.lip6.fr/wiki/LtlSyntax
 """
 import logging
 logger = logging.getLogger(__name__)
-from abc import ABCMeta, abstractmethod
 
 
 # prototype for flattening to a "canonical" string
@@ -82,27 +81,14 @@ def make_nodes(opmap=None):
 
     class Node(object):
         """Base class for AST nodes."""
-
-        # Caution
-        # =======
-        # Do **NOT** implement C{__hash__}, because you
-        # will unintendently identify different AST nodes !
-        # Only leaf nodes can be safely identified.
-        #
-        # The default for user-defined classes is
-        # C{__hash__ == _}
-        __metaclass__ = ABCMeta
         opmap = None
 
-        @abstractmethod
         def __init__(self):
             pass
 
-        @abstractmethod
         def __repr__(self):
             pass
 
-        @abstractmethod
         def flatten(self):
             pass
 
@@ -124,7 +110,9 @@ def make_nodes(opmap=None):
         """
 
         def __init__(self, value):
-            if not isinstance(value, basestring):
+            try:
+                value + 'a'
+            except TypeError:
                 raise TypeError(
                     'value must be a string, got: {v}'.format(
                         v=value))
@@ -134,6 +122,9 @@ def make_nodes(opmap=None):
         def __repr__(self):
             return '{t}({v})'.format(t=type(self).__name__,
                                      v=repr(self.value))
+
+        def __hash__(self):
+            return id(self)
 
         def __str__(self, *arg, **kw):
             # *arg accommodates "depth" arg of Operator.__str__
@@ -259,7 +250,9 @@ def make_fol_nodes(opmap=None):
         """A 0-ary connective."""
 
         def __init__(self, value):
-            if not isinstance(value, basestring):
+            try:
+                value + 'a'
+            except TypeError:
                 raise TypeError(
                     'value must be string, got: {v}'.format(v=value))
             if value.lower() not in {'true', 'false'}:

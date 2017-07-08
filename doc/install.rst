@@ -148,7 +148,7 @@ If you think the necessary packages are installed, but are unsure how
 to debug Python, then consider the following tips.  To see the python
 path, execute::
 
-  $ python -c 'import sys; print "\n".join(sys.path)'
+  $ python -c 'import sys; print("\n".join(sys.path))'
 
 Each path searched is listed on a new line. You can augment this list
 by appending locations (separated by ":") to the environment variable

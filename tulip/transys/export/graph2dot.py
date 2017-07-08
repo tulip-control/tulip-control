@@ -33,11 +33,13 @@
 pydot and custom filtering
 """
 from __future__ import division
+from __future__ import print_function
+
 import logging
 import re
 from collections import Iterable
 from textwrap import fill
-from cStringIO import StringIO
+from io import StringIO
 import numpy as np
 import networkx as nx
 from networkx.utils import make_str
@@ -113,17 +115,17 @@ def _state2dot(graph, to_pydot_graph, state,
         lc = d.get('left_color', d['top_color'])
         rc = d.get('right_color', d['bottom_color'])
 
-        if isinstance(lc, basestring):
+        if isinstance(lc, str):
             fillcolor = lc
         elif isinstance(lc, dict):
-            fillcolor = lc.keys()[0]
+            fillcolor = list(lc.keys())[0]
         else:
             raise TypeError('left_color must be str or dict.')
 
-        if isinstance(rc, basestring):
+        if isinstance(rc, str):
             fillcolor += ':' + rc
         elif isinstance(rc, dict):
-            fillcolor += ':' + rc.keys()[0]
+            fillcolor += ':' + list(rc.keys())[0]
         else:
             raise TypeError('right_color must be str or dict.')
     else:
@@ -206,28 +208,28 @@ def _format_color(color, prog='tikz'):
 
     @type prog: 'tikz' or 'dot'
     """
-    if isinstance(color, basestring):
+    if isinstance(color, str):
         return color
 
     if not isinstance(color, dict):
         raise Exception('color must be str or dict')
 
     if prog is 'tikz':
-        s = '!'.join([k + '!' + str(v) for k, v in color.iteritems()])
+        s = '!'.join([k + '!' + str(v) for k, v in color.items()])
     elif prog is 'dot':
-        t = sum(color.itervalues())
+        t = sum(color.values())
 
         try:
             import webcolors
 
             # mix them
             result = np.array((0.0, 0.0, 0.0))
-            for c, w in color.iteritems():
-                result += w/t * np.array(webcolors.name_to_rgb(c))
+            for c, w in color.items():
+                result += w / t * np.array(webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
             logger.warn('failed to import webcolors')
-            s = ':'.join([k + ';' + str(v/t) for k, v in color.iteritems()])
+            s = ':'.join([k + ';' + str(v / t) for k, v in color.items()])
     else:
         raise ValueError('Unknown program: ' + str(prog) + '. '
                          "Available options are: 'dot' or 'tikz'.")
@@ -286,7 +288,7 @@ def _form_node_label(state, state_data, label_def,
     # add node annotations from action, AP sets etc
     # other key,values in state attr_dict ignored
     pieces = list()
-    for (label_type, label_value) in state_data.iteritems():
+    for (label_type, label_value) in state_data.items():
         if label_type not in label_def:
             continue
 
@@ -368,7 +370,7 @@ def _form_edge_label(edge_data, label_def,
     label = ''  # dot label for edge
     sep_label_sets = label_format['separator']
 
-    for label_type, label_value in edge_data.iteritems():
+    for label_type, label_value in edge_data.items():
         if label_type not in label_def:
             continue
 
@@ -389,7 +391,7 @@ def _form_edge_label(edge_data, label_def,
 
         # format iterable containers using
         # mathematical set notation: {...}
-        if isinstance(label_value, basestring):
+        if isinstance(label_value, str):
             # str is Iterable: avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, Iterable):
