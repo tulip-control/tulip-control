@@ -76,8 +76,8 @@ class LTL(object):
     examples, are:
 
       - boolean (C{str}); this domain is specified by C{"boolean"};
-      - finite_set (C{set}); e.g., C{{1,3,5}};
-      - range (C{tuple} of length 2); e.g., C{(0,15)}.
+      - finite_set (C{set}); e.g., C{{1, 3, 5}};
+      - range (C{tuple} of length 2); e.g., C{(0, 15)}.
 
     As with the C{formula} attribute, type-checking is only performed
     if requested by the user.  E.g., any iterable can act as a
