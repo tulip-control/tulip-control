@@ -410,6 +410,45 @@ class GRSpec(LTL):
                      input_variables=self.env_vars,
                      output_variables=self.sys_vars)
 
+    def declare(self, *arg, **kw):
+        """Declare flexible variables.
+
+        Positional arguments are names of Boolean-valued variables.
+        Keyword arguments are names of integer or string valued
+        variables, declared by a pair of integers, or a sequence of
+        strings respectively.
+
+        By default declare as system variables.
+        If `env=True` then declare as environment variables.
+        To declare a variable named `env`, use the constructor
+        or modify directly the attributes `env_vars`, `sys_vars`.
+
+        If already declared, the given type hints should
+        match existing ones.
+        """
+        env = kw.pop('env', False)
+        assert isinstance(env, bool), env  # "env" not a var name
+        d = dict()
+        for k, v in kw.items():
+            is_int = len(v) == 2 and all(
+                isinstance(q, int) for q in v)
+            if is_int:
+                d[k] = tuple(v)
+                continue
+            # duck check by appending ''
+            d[k] = list(s + '' for s in v)
+        d.update((v, 'boolean') for v in arg)
+        # `LTL.*_variables` equal these (see `self.__init__`)
+        target, other = self.sys_vars, self.env_vars
+        if env:
+            target, other = other, target
+        # redeclarations must match
+        for k, v in d.items():
+            assert k not in other, (k, other)
+            if k in target:
+                assert target[k] == v, (target[k], v)
+        target.update(d)
+
     def __repr__(self):
         args = (',\n\n'.join([
                 'env_vars={ev}',
