@@ -24,6 +24,10 @@ consult https://tulip-control.sourceforge.io/doc/install.html
 The next section describes how to build documentation.
 A test suite is provided under ``tests/``.  Consult the section "Testing" below.
 
+Pip can install the latest development version too::
+
+  pip install https://github.com/tulip-control/tulip-control/archive/master.zip
+
 
 Documentation
 -------------
