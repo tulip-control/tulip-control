@@ -114,7 +114,8 @@ class GRSpec_test(object):
                 self.f.sys_vars["y"] == "boolean")
 
 
-def test_declare():
+def test_declare_boolean_vars():
+    # declaring Boolean-valued variables
     g = GRSpec()
     g.declare('a')
     assert g.sys_vars == dict(a='boolean'), g.sys_vars
@@ -128,6 +129,10 @@ def test_declare():
     # attempt to redeclare "c" as sys var
     with nt.assert_raises(AssertionError):
         g.declare('c')
+
+
+def test_declare_int_vars():
+    # declaring integer-valued variables
     g = GRSpec()
     g.declare(i=[0, 10])
     assert g.sys_vars == dict(i=(0, 10)), g.sys_vars
@@ -138,6 +143,10 @@ def test_declare():
     # attempt to redeclare "i" as env var
     with nt.assert_raises(AssertionError):
         g.declare(i=(0, 10), env=True)
+
+
+def test_declare_str_vars():
+    # declaring string-valued variables
     g = GRSpec()
     # neither int nor str values
     with nt.assert_raises(TypeError):
