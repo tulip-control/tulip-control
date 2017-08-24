@@ -14,7 +14,7 @@ TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   pip install tulip
 
-This will install the required dependencies.
+This will install the latest release, together with required dependencies.
 To find out what dependencies (including optional ones) are installed, call::
 
   tulip.interfaces.print_env()
@@ -24,9 +24,12 @@ consult https://tulip-control.sourceforge.io/doc/install.html
 The next section describes how to build documentation.
 A test suite is provided under ``tests/``.  Consult the section "Testing" below.
 
-Pip can install the latest development version too::
+Pip can install the latest *development* snapshot too::
 
   pip install https://github.com/tulip-control/tulip-control/archive/master.zip
+
+Code under development can be unstable so trying `pip install tulip` first
+is recommended.
 
 
 Documentation
