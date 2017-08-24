@@ -114,6 +114,49 @@ class GRSpec_test(object):
                 self.f.sys_vars["y"] == "boolean")
 
 
+def test_declare_boolean_vars():
+    # declaring Boolean-valued variables
+    g = GRSpec()
+    g.declare('a')
+    assert g.sys_vars == dict(a='boolean'), g.sys_vars
+    assert g.env_vars == dict(), g.env_vars
+    g.declare('a', 'b')
+    assert g.sys_vars == dict(a='boolean', b='boolean'), g.sys_vars
+    assert g.env_vars == dict(), g.env_vars
+    g.declare('c', env=True)
+    assert g.sys_vars == dict(a='boolean', b='boolean'), g.sys_vars
+    assert g.env_vars == dict(c='boolean'), g.env_vars
+    # attempt to redeclare "c" as sys var
+    with nt.assert_raises(AssertionError):
+        g.declare('c')
+
+
+def test_declare_int_vars():
+    # declaring integer-valued variables
+    g = GRSpec()
+    g.declare(i=[0, 10])
+    assert g.sys_vars == dict(i=(0, 10)), g.sys_vars
+    assert g.env_vars == dict(), g.env_vars
+    g.declare(j=(-5, 14), env=True)
+    assert g.sys_vars == dict(i=(0, 10)), g.sys_vars
+    assert g.env_vars == dict(j=(-5, 14)), g.env_vars
+    # attempt to redeclare "i" as env var
+    with nt.assert_raises(AssertionError):
+        g.declare(i=(0, 10), env=True)
+
+
+def test_declare_str_vars():
+    # declaring string-valued variables
+    g = GRSpec()
+    # neither int nor str values
+    with nt.assert_raises(TypeError):
+        g.declare(i=(0, 10, 'wrong'))
+    d = dict(name=['a', 'b', 'c', 'w'])
+    g.declare(**d)
+    assert g.sys_vars == d, g.sys_vars
+    assert g.env_vars == dict(), g.env_vars
+
+
 def test_str_to_int():
     x = "a' = \"hehe\""
     s = GRSpec(sys_vars={'a': ['hehe', 'haha']},
