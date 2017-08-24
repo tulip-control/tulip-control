@@ -22,28 +22,8 @@ addons:
     - libboost-dev
 
 before_install:
-  # miniconda
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      curl -sO https://repo.continuum.io/miniconda/Miniconda2-4.0.5-Linux-x86_64.sh
-      && echo 'ada5b7942e519829bc5e8e638d525e009676a7a598cf3dd80f041f6d5e39ddbb  Miniconda2-4.0.5-Linux-x86_64.sh'
-      | shasum -a 256 -c -;
-    else
-      curl -sO https://repo.continuum.io/miniconda/Miniconda3-4.3.11-Linux-x86_64.sh
-      && echo 'b9fe70ce7b6fa8df05abfb56995959b897d0365299f5046063bc236843474fb8  Miniconda3-4.3.11-Linux-x86_64.sh'
-      | shasum -a 256 -c -;
-    fi
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      bash Miniconda2-4.0.5-Linux-x86_64.sh -b -p ${HOME}/miniconda;
-    else
-      bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p ${HOME}/miniconda;
-    fi
-  - source ${HOME}/miniconda/bin/activate root
-  - conda update -q -y --all
-  - conda install -q -y nomkl
-  # python packages
-  - conda install -q -y numpy scipy
-  - conda info -a
-  - pip install --ignore-installed --upgrade pip setuptools
+  - pip install --ignore-installed --upgrade pip setuptools wheel
+  - pip install --only-binary=numpy,scipy numpy scipy
 
 install:
   - python setup.py sdist
