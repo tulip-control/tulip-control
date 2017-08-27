@@ -105,7 +105,7 @@ def run_setup():
             'scipy'],
         tests_require=[
             'nose',
-            'matplotlib',
+            'matplotlib >= 2.0.0',
             'mock'],
         packages=[
             'tulip', 'tulip.transys', 'tulip.transys.export',
