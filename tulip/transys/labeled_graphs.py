@@ -389,7 +389,7 @@ class States(object):
         Def. 2.4, p.23 U{[BK08]
         <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
         """
-        return not bool(list(self.graph.successors(state)))
+        return self.graph.out_degree(state) == 0
 
 
 class Transitions(object):
@@ -1126,8 +1126,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Edge labels are not taken into account.
         """
-        for n in self:
-            if not self.succ[n]:
+        for _, d in self.out_degree():
+            if d == 0:
                 return True
         return False
 
@@ -1136,7 +1136,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         n = len(self)
         s = {1}
         while s:
-            s = {n for n in self if not self.succ[n]}
+            s = {u for u, d in self.out_degree()
+                 if d == 0}
             self.states.remove_from(s)
         m = len(self)
         assert n == 0 or m > 0, 'removed all {n} nodes!'.format(n=n)
