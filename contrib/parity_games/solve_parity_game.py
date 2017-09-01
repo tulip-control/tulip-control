@@ -79,7 +79,7 @@ def ctrl_next(W, pg, player):
     """
     cnext = set()
     for node in W:
-        for pred in pg.predecessors_iter(node):
+        for pred in pg.predecessors(node):
             if pg.node[pred]['player'] == player:
                 print('controlled by player, good')
             elif len(pg.succ[pred]) == 1:
