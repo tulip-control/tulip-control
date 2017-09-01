@@ -1002,7 +1002,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # the only change from nx in this clause is using TypedDict
         logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
         if v in self._succ[u]:
-            keydict = self.adj[u][v]
+            keydict = self._adj[u][v]
             # find a unique integer key
             if key is None:
                 key = len(keydict)
