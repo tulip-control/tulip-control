@@ -180,24 +180,30 @@ class States_labeling_test(object):
         assert nodes == set([1, 2])
 
     def test_add_from(self):
-        self.S_ap.add_from([(0, {'ap':{'p'}}), (1, {'ap':{'q'} })])
+        self.S_ap.add_from(
+            [(0, {'ap':{'p'}}),
+             (1, {'ap':{'q'} })])
         assert len(self.S_ap) == 2
-        current_labels = [l["ap"] for (s,l) in self.S_ap(data=True)]
-
-        assert len(current_labels) == 2 and \
-            MathSet(current_labels) == MathSet([{'p'}, {'q'}])
-
-        self.S_ap.add_from([(10, {'ap':{'r'} }),
-                                      (11, {'ap':{'x'} })],
-                                      check=False)
+        current_labels = [l["ap"] for (s, l) in self.S_ap(data=True)]
+        assert len(current_labels) == 2
+        assert MathSet(current_labels) == MathSet([{'p'}, {'q'}])
+        self.S_ap.add_from(
+            [(10, {'ap': {'r'}}),
+             (11, {'ap': {'x'}})],
+            check=False)
         assert len(self.S_ap) == 4
-        self.S_ap.add_from([(10, {'ap':{'a'} }),
-                                      (11, {'ap':{'b'} })])
+        self.S_ap.add_from(
+            [(10, {'ap': {'a'}}),
+             (11, {'ap': {'b'}})])
         assert len(self.S_ap) == 4
-        current_labels = [l["ap"] for (s,l) in self.S_ap(data=True)]
-        assert len(current_labels) == 4 and \
-            MathSet(current_labels)== MathSet([{'p'}, {'q'}, {'a'}, {'b'}])
-        assert MathSet([l["ap"] for (s,l) in self.S_ap(data=True)]) == MathSet(current_labels)
+        current_labels = [l["ap"] for (s, l) in self.S_ap(data=True)]
+        assert len(current_labels) == 4
+        a = MathSet(current_labels)
+        b = MathSet([{'p'}, {'q'}, {'a'}, {'b'}])
+        assert a == b, (a, b)
+        a = MathSet([l["ap"] for (s, l) in self.S_ap(data=True)])
+        b = MathSet(current_labels)
+        assert a == b, (a, b)
 
     def test_find(self):
         state_list = ["state"+str(i) for i in range(4)]
