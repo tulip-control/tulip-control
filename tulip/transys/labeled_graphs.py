@@ -152,10 +152,6 @@ class States(object):
         s |= states
         self._initial = s
 
-    def _warn_if_state_exists(self, state):
-        if state in self:
-            logger.debug('State already exists.')
-
     def _single_state2singleton(self, state):
         """Convert to a singleton list, if argument is a single state.
 
@@ -172,8 +168,6 @@ class States(object):
 
         which wraps C{networkx.MultiDiGraph.add_node}.
         """
-        self._warn_if_state_exists(new_state)
-        logger.debug('Adding new id: ' + str(new_state))
         self.graph.add_node(new_state, attr_dict, check, **attr)
 
     def add_from(self, new_states, check=True, **attr):
@@ -903,9 +897,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param check: if True and untyped keys are passed,
             then raise C{AttributeError}.
         """
-        # avoid multiple additions
-        if n in self:
-            logger.debug('Graph already has node: ' + str(n))
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         # define typed dict
         typed_attr = TypedDict()
@@ -913,7 +904,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.update(copy.deepcopy(self._node_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        logger.debug('node typed_attr: ' + str(typed_attr))
         self._check_for_untyped_keys(typed_attr,
                                      self._node_label_types,
                                      check)
@@ -986,8 +976,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.update(copy.deepcopy(self._edge_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        logger.debug('Given: attr_dict = ' + str(attr_dict))
-        logger.debug('Stored in: typed_attr = ' + str(typed_attr))
         existing_u_v = self.get_edge_data(u, v, default={})
         if dict() in existing_u_v.values():
             msg = (
@@ -1014,9 +1002,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # the only change from nx in this clause is using TypedDict
         logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
         if v in self._succ[u]:
-            msg = 'there already exist directed edges with ' +\
-                  'same end-points'
-            logger.debug(msg)
             keydict = self.adj[u][v]
             # find a unique integer key
             if key is None:
@@ -1027,7 +1012,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             datadict.update(typed_attr)
             nx.MultiDiGraph.add_edge(self, u, v, key, **datadict)
         else:
-            logger.debug('first directed edge between these nodes')
             # selfloops work this way without special treatment
             nx.MultiDiGraph.add_edge(self, u, v, **typed_attr)
 
