@@ -174,7 +174,7 @@ def lily_strategy2moore(g, env_vars, sys_vars):
 
     # label vertices with output values
     for u in m:
-        oute = h.out_edges(u, data=True)
+        oute = list(h.out_edges(u, data=True))
         assert len(oute) == 1, oute
         u_, v, attr = oute[0]
         assert u_ is u
