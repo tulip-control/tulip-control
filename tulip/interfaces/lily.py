@@ -175,9 +175,9 @@ def lily_strategy2moore(g, env_vars, sys_vars):
     # label vertices with output values
     for u in m:
         oute = h.out_edges(u, data=True)
-        assert(len(oute) == 1)
+        assert len(oute) == 1, oute
         u_, v, attr = oute[0]
-        assert(u_ is u)
+        assert u_ is u
         d = _parse_label(attr['label'])
         m.add_node(u, **d)
 
@@ -188,8 +188,8 @@ def lily_strategy2moore(g, env_vars, sys_vars):
 
         # label edges with input values that matter
         for v_, w, attr in h.out_edges(v, data=True):
-            assert(v_ is v)
-            assert(w in m)
+            assert v is v_, (v, v_)
+            assert w in m, w
             d = _parse_label(attr['label'])
             m.add_edge(u, w, **d)
     return m
