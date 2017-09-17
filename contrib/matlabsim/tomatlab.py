@@ -57,7 +57,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
 
             # getting state and input dimension by looking at size of the A and
             # B matrices of one of the PWA subsystems
-            pwa_systems = system_dynamics.dynamics.values()
+            pwa_systems = list(system_dynamics.dynamics.values())
             pwa_system = pwa_systems[0]
             state_dimension = numpy.shape(pwa_system.list_subsys[0].A)[1]
             input_dimension = numpy.shape(pwa_system.list_subsys[0].B)[1]
@@ -257,9 +257,9 @@ def export_mealy(mealy_machine, is_continuous):
 
     # Get list of environment and system variables
     env_vars = mealy_machine.inputs.keys()
-    env_values = mealy_machine.inputs.values()
+    env_values = list(mealy_machine.inputs.values())
     sys_vars = mealy_machine.outputs.keys()
-    sys_values = mealy_machine.outputs.values()
+    sys_values = list(mealy_machine.outputs.values())
     #output['inputs'] = env_vars
     #output['outputs'] = sys_vars
     output['inputs'] = export_mealy_io(env_vars, env_values)
