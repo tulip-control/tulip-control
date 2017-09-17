@@ -2,10 +2,11 @@
 
 Only supports closed-loop and non-conservative simulation.
 """
-from tulip import hybrid, abstract
+import numpy
 import polytope
 import scipy.io
-import numpy
+from tulip import abstract
+from tulip import hybrid
 
 
 def export(
