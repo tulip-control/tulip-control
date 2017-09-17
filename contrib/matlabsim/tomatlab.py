@@ -33,7 +33,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
             'discrete. Please specify dynamics and abstraciton and ' +
             'discretization parameters or none at all.')
 
-    output = {}
+    output = dict()
     output['is_continuous'] = is_continuous
 
     # Only export dynamics and abstraction and control weights if the system is
@@ -84,7 +84,7 @@ def export(filename, mealy_machine, system_dynamics=None, abstraction=None,
         output['control_weights'] = control_weights
 
         # Simulation parameters; insert default discretization values if needed
-        sim_params = {}
+        sim_params = dict()
         try:
             sim_params['horizon'] = disc_params['N']
         except KeyError:
@@ -132,9 +132,9 @@ def lti_export(ltisys):
 
 def pwa_export(pwasys):
 
-    output = {}
+    output = dict()
     output['domain'] = poly_export(pwasys.domain)
-    ltisystems = []
+    ltisystems = list()
     for subsystem in pwasys.list_subsys:
         ltisystems.append(lti_export(subsystem))
     output['subsystems'] = ltisystems
@@ -144,13 +144,13 @@ def pwa_export(pwasys):
 
 def switched_export(switchedsys):
 
-    output = {}
+    output = dict()
     output['disc_domain_size'] = list(switchedsys.disc_domain_size)
     output['cts_ss'] = poly_export(switchedsys.cts_ss)
 
-    dynamics = []
+    dynamics = list()
     for label, system in switchedsys.dynamics.items():
-        system_dict = {}
+        system_dict = dict()
         system_dict['env_act'] = label[0]
         system_dict['sys_act'] = label[1]
         system_dict['pwasys'] = pwa_export(system)
@@ -168,7 +168,7 @@ def poly_export(poly):
     @return output: dictionary containing fields of poly
     """
 
-    output = {}
+    output = dict()
     if poly is not None:
         output['A'] = poly.A
         output['b'] = poly.b
@@ -181,8 +181,8 @@ def reg_export(reg):
     @type reg: L{Region}
     @return output: a dictionary containing a list of polytopes.
     """
-    output = {}
-    poly_list = []
+    output = dict()
+    poly_list = list()
     for poly in reg.list_poly:
         poly_list.append(poly_export(poly))
     output['list_poly'] = poly_list
@@ -195,11 +195,11 @@ def export_locations(abstraction):
     @type abstraction: L{AbstractPwa} or L{AbstractSwitched}
     @rtype output: dictionary"""
 
-    output = {}
 
-    location_list = []
+    output = dict()
+    location_list = list()
     for index, region in enumerate(abstraction.ppp.regions):
-        location_dict = {}
+        location_dict = dict()
         reg_dict = reg_export(region)
         location_dict['region'] = reg_dict
         location_dict['index'] = index
@@ -215,9 +215,9 @@ def export_mealy_io(variables, values):
     @rtype: list of dict
     """
 
-    var_list = []
+    var_list = list()
     for ind, variable in enumerate(variables):
-        var_dict = {}
+        var_dict = dict()
         var_dict['name'] = variable
         var_dict['values'] = list(values[ind])
         var_list.append(var_dict)
@@ -235,17 +235,17 @@ def export_mealy(mealy_machine, is_continuous):
     @rtype: dict
     """
 
-    output = {}
 
+    output = dict()
     # States will be exported as a list of dictionaries
-    state_list = []
+    state_list = list()
     for state_tuple in mealy_machine.states.find():
 
         # Do not export Sinit state
         if state_tuple[0] == 'Sinit':
             continue
 
-        state_dict = {}
+        state_dict = dict()
         state_dict['name'] = state_tuple[0]
 
         # For a continuous system, export the 'loc' variable
@@ -268,9 +268,8 @@ def export_mealy(mealy_machine, is_continuous):
     # Transitions will be exported as a 2D list of dictionaries. The only
     # purpose of this block here is to separate the inputs from the outputs to
     # make the MATLAB code easier to write
-    transitions = []
+    transitions = list()
     for transition_tuple in mealy_machine.transitions.find():
-
         # Ignore transitions from Sinit
         if transition_tuple[0] == 'Sinit':
             continue
@@ -280,7 +279,7 @@ def export_mealy(mealy_machine, is_continuous):
                               for var in env_vars }
         transition_outputs = { var: str(transition_vals[var])
                                for var in sys_vars }
-        transition_dict = {}
+        transition_dict = dict()
         transition_dict['start_state'] = transition_tuple[0]
         transition_dict['end_state'] = transition_tuple[1]
         transition_dict['inputs'] = transition_inputs
@@ -298,12 +297,12 @@ def export_mealy(mealy_machine, is_continuous):
         initial_states[u] = label['loc']
     initial_transitions = mealy_machine.transitions.find(
         from_states=initial_states)
-    initial_trans = []
+    initial_trans = list()
     for init_transition in initial_transitions:
 
         transition_vals = init_transition[2]
 
-        trans_dict = {}
+        trans_dict = dict()
         trans_dict['state'] = init_transition[1]
         trans_dict['inputs'] = { var: str(transition_vals[var])
                                  for var in env_vars }
