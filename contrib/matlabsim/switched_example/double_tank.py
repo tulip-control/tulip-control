@@ -175,6 +175,9 @@ specs = spec.GRSpec(env_vars, sys_disc_vars,
                     env_init, sys_init,
                     env_safe, sys_safe,
                     env_prog, sys_prog)
+specs.moore = False
+specs.qinit = '\A \E'
+specs.plus_one = False
 print(specs.pretty())
 
 """Synthesis"""
