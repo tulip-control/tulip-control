@@ -1,4 +1,5 @@
-"""
+"""Export hybrid controller to Matlab.
+
 Only supports closed-loop and non-conservative simulation.
 """
 from tulip import hybrid, abstract
@@ -117,6 +118,7 @@ def lti_export(ltisys):
 
 
 def pwa_export(pwasys):
+    """Return piecewise-affine system as Matlab struct."""
     output = dict()
     output['domain'] = poly_export(pwasys.domain)
     ltisystems = list()
@@ -127,6 +129,7 @@ def pwa_export(pwasys):
 
 
 def switched_export(switchedsys):
+    """Return switched system as Matlab struct."""
     output = dict()
     output['disc_domain_size'] = list(switchedsys.disc_domain_size)
     output['cts_ss'] = poly_export(switchedsys.cts_ss)
@@ -186,7 +189,7 @@ def export_locations(abstraction):
 
 
 def export_mealy_io(variables, values):
-    """
+    """Return declarations of variable types.
 
     @rtype: list of dict
     """
