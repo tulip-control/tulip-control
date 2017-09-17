@@ -72,11 +72,11 @@ def export(
             Q = numpy.eye(input_dimension)
         if mid_weight is None:
             mid_weight = 3
-        control_weights = {}
-        control_weights['state_weight'] = R
-        control_weights['input_weight'] = Q
-        control_weights['linear_weight'] = r
-        control_weights['mid_weight'] = mid_weight
+        control_weights = dict(
+            state_weight=R,
+            input_weight=Q,
+            linear_weight=r,
+            mid_weight=mid_weight)
         output['control_weights'] = control_weights
         # Simulation parameters; insert default discretization values if needed
         sim_params = dict()
@@ -107,14 +107,14 @@ def export(
 
 def lti_export(ltisys):
     """Saves a LtiSysDyn as a Matlab struct."""
-    output = {}
-    output['A'] = ltisys.A
-    output['B'] = ltisys.B
-    output['E'] = ltisys.E
-    output['K'] = ltisys.K
-    output['domain'] = poly_export(ltisys.domain)
-    output['Uset'] = poly_export(ltisys.Uset)
-    output['Wset'] = poly_export(ltisys.Wset)
+    output = dict(
+        A=ltisys.A,
+        B=ltisys.B,
+        E=ltisys.E,
+        K=ltisys.K,
+        domain=poly_export(ltisys.domain),
+        Uset=poly_export(ltisys.Uset),
+        Wset=poly_export(ltisys.Wset))
     return output
 
 
