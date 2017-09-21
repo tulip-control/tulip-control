@@ -213,18 +213,22 @@ def export_mealy(mealy_machine, is_continuous):
 
     @rtype: dict
     """
+    SINIT = 'Sinit'
     output = dict()
-    # States will be exported as a list of dictionaries
+    # map from Mealy nodes to value of variable "loc"
+    node_to_loc = dict()
+    for _, v, label in mealy_machine.edges(data=True):
+        node_to_loc[v] = label['loc']
+    # Export states as a list of dictionaries
     state_list = list()
-    for state_tuple in mealy_machine.states.find():
-        # Do not export Sinit state
-        if state_tuple[0] == 'Sinit':
+    for u in mealy_machine.nodes():
+        if u == SINIT:
+            print('Skipping state "{s}".'.format(s=SINIT))
             continue
-        state_dict = dict()
-        state_dict['name'] = state_tuple[0]
+        state_dict = dict(name=u)
         # For a continuous system, export the 'loc' variable
         if is_continuous:
-            state_dict['loc'] = state_tuple[1]['loc']
+            state_dict.update(loc=node_to_loc[u])
         state_list.append(state_dict)
     output['states'] = state_list
     # Get list of environment and system variables
