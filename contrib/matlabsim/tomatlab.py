@@ -236,8 +236,6 @@ def export_mealy(mealy_machine, is_continuous):
     env_values = list(mealy_machine.inputs.values())
     sys_vars = mealy_machine.outputs.keys()
     sys_values = list(mealy_machine.outputs.values())
-    #output['inputs'] = env_vars
-    #output['outputs'] = sys_vars
     output['inputs'] = export_mealy_io(env_vars, env_values)
     output['outputs'] = export_mealy_io(sys_vars, sys_values)
     # Transitions will be exported as a 2D list of dictionaries. The only
