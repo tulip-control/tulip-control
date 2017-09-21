@@ -58,7 +58,7 @@ cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 
 # Compute the proposition preserving partition of the continuous state space
 cont_partition = prop2part(cont_state_space, cont_props)
-plot_partition(cont_partition, show=visualize)
+plot_partition(cont_partition)
 # @partition_section_end@
 
 # @discretize_section@
@@ -70,7 +70,7 @@ disc_dynamics = discretize(cont_partition, sys_dyn, **disc_params)
 
 """Visualize transitions in continuous domain (optional)"""
 plot_partition(disc_dynamics.ppp, disc_dynamics.ts,
-               disc_dynamics.ppp2ts, show=visualize)
+               disc_dynamics.ppp2ts)
 
 """Specifications"""
 # Environment variables and assumptions
