@@ -214,11 +214,14 @@ def export_mealy(mealy_machine, is_continuous):
     @rtype: dict
     """
     SINIT = 'Sinit'
-    output = dict()
     # map from Mealy nodes to value of variable "loc"
     node_to_loc = dict()
     for _, v, label in mealy_machine.edges(data=True):
         node_to_loc[v] = label['loc']
+    # all nodes must have incoming edges, except SINIT
+    n = len(node_to_loc)
+    n_ = len(mealy_machine)
+    assert n + 1 == n_, (n, n_)  # some root node != SINIT
     # Export states as a list of dictionaries
     state_list = list()
     for u in mealy_machine.nodes():
@@ -230,7 +233,7 @@ def export_mealy(mealy_machine, is_continuous):
         if is_continuous:
             state_dict.update(loc=node_to_loc[u])
         state_list.append(state_dict)
-    output['states'] = state_list
+    output = dict(states=state_list)
     # Get list of environment and system variables
     env_vars = mealy_machine.inputs.keys()
     env_values = list(mealy_machine.inputs.values())
@@ -242,44 +245,33 @@ def export_mealy(mealy_machine, is_continuous):
     # purpose of this block here is to separate the inputs from the outputs to
     # make the MATLAB code easier to write
     transitions = list()
-    for transition_tuple in mealy_machine.transitions.find():
-        # Ignore transitions from Sinit
-        if transition_tuple[0] == 'Sinit':
+    for u, v, label in mealy_machine.edges(data=True):
+        if u == SINIT:
             continue
-        transition_vals = transition_tuple[2]
-        transition_inputs = {var: str(transition_vals[var])
-                             for var in env_vars}
-        transition_outputs = {var: str(transition_vals[var])
-                              for var in sys_vars}
-        transition_dict = dict()
-        transition_dict['start_state'] = transition_tuple[0]
-        transition_dict['end_state'] = transition_tuple[1]
-        transition_dict['inputs'] = transition_inputs
-        transition_dict['outputs'] = transition_outputs
+        assert v != SINIT, v
+        evals = {var: str(label[var]) for var in env_vars}
+        svals = {var: str(label[var]) for var in sys_vars}
+        transition_dict = dict(
+            start_state=u,
+            end_state=v,
+            inputs=evals,
+            outputs=svals)
         transitions.append(transition_dict)
     output['transitions'] = transitions
-    # Initial states are the states that have transitions from Sinit. Initial
+    # Initial states are the states that have transitions from SINIT. Initial
     # transitions (for the purposes of execution in Stateflow), are the
-    # transitions coming from the states that transition from Sinit.
-    Sinit_transitions = mealy_machine.transitions.find(from_states=['Sinit'])
-    initial_states = dict()
-    for _, u, label in Sinit_transitions:
-        initial_states[u] = label['loc']
-    initial_transitions = mealy_machine.transitions.find(
-        from_states=initial_states)
-    initial_trans = list()
-    for init_transition in initial_transitions:
-        transition_vals = init_transition[2]
-        trans_dict = dict()
-        trans_dict['state'] = init_transition[1]
-        trans_dict['inputs'] = {var: str(transition_vals[var])
-                                for var in env_vars}
-        trans_dict['outputs'] = {var: str(transition_vals[var])
-                                 for var in sys_vars}
-        orig_state = init_transition[0]
-        orig_loc = initial_states[orig_state]
-        trans_dict['start_loc'] =  orig_loc
-        initial_trans.append(trans_dict)
-    output['init_trans'] = initial_trans
-
+    # transitions coming from the states that transition from SINIT.
+    init_nodes = mealy_machine.successors(SINIT)
+    assert init_nodes, init_nodes
+    init_trans = list()
+    for u, v, label in mealy_machine.edges(init_nodes, data=True):
+        assert u != SINIT, u
+        assert v != SINIT, v
+        trans_dict = dict(
+            state=v,
+            inputs={var: str(label[var]) for var in env_vars},
+            outputs={var: str(label[var]) for var in sys_vars},
+            start_loc=node_to_loc[u])
+        init_trans.append(trans_dict)
+    output['init_trans'] = init_trans
     return output
