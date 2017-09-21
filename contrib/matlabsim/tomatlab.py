@@ -24,11 +24,15 @@ def export(
     @rtype: None
     """
     # Check whether we're discrete or continuous
-    if ((system_dynamics is None) and (abstraction is None) and
-        (disc_params is None)):
+    if (
+            (system_dynamics is None) and
+            (abstraction is None) and
+            (disc_params is None)):
         is_continuous = False
-    elif ((system_dynamics is not None) and (abstraction is not None) and
-          (disc_params is not None)):
+    elif (
+            (system_dynamics is not None) and
+            (abstraction is not None) and
+            (disc_params is not None)):
         is_continuous = True
     else:
         raise StandardError('Cannot tell whether system is continuous or ' +
@@ -120,29 +124,26 @@ def lti_export(ltisys):
 
 def pwa_export(pwasys):
     """Return piecewise-affine system as Matlab struct."""
-    output = dict()
-    output['domain'] = poly_export(pwasys.domain)
-    ltisystems = list()
-    for subsystem in pwasys.list_subsys:
-        ltisystems.append(lti_export(subsystem))
-    output['subsystems'] = ltisystems
-    return output
+    ltisystems = [lti_export(sub) for sub in pwasys.list_subsys]
+    return dict(
+        domain=poly_export(pwasys.domain),
+        subsystems=ltisystems)
 
 
 def switched_export(switchedsys):
     """Return switched system as Matlab struct."""
-    output = dict()
-    output['disc_domain_size'] = list(switchedsys.disc_domain_size)
-    output['cts_ss'] = poly_export(switchedsys.cts_ss)
     dynamics = list()
     for label, system in switchedsys.dynamics.items():
-        system_dict = dict()
-        system_dict['env_act'] = label[0]
-        system_dict['sys_act'] = label[1]
-        system_dict['pwasys'] = pwa_export(system)
+        env_act, sys_act = label
+        system_dict = dict(
+            env_act=env_act,
+            sys_act=sys_act,
+            pwasys=pwa_export(system))
         dynamics.append(system_dict)
-    output['dynamics'] = dynamics
-    return output
+    return dict(
+        disc_domain_size=list(switchedsys.disc_domain_size),
+        cts_ss=poly_export(switchedsys.cts_ss),
+        dynamics=dynamics)
 
 
 def poly_export(poly):
@@ -151,11 +152,9 @@ def poly_export(poly):
     @param poly: L{Polytope} that will be exported.
     @return output: dictionary containing fields of poly
     """
-    output = dict()
-    if poly is not None:
-        output['A'] = poly.A
-        output['b'] = poly.b
-    return output
+    if poly is None:
+        return dict()
+    return dict(A=poly.A, b=poly.b)
 
 
 def reg_export(reg):
@@ -164,12 +163,7 @@ def reg_export(reg):
     @type reg: L{Region}
     @return output: a dictionary containing a list of polytopes.
     """
-    output = dict()
-    poly_list = list()
-    for poly in reg.list_poly:
-        poly_list.append(poly_export(poly))
-    output['list_poly'] = poly_list
-    return output
+    return dict(list_poly=[poly_export(p) for p in reg.list_poly])
 
 
 def export_locations(abstraction):
@@ -177,16 +171,13 @@ def export_locations(abstraction):
 
     @type abstraction: L{AbstractPwa} or L{AbstractSwitched}
     @rtype output: dictionary"""
-    output = dict()
     location_list = list()
-    for index, region in enumerate(abstraction.ppp.regions):
-        location_dict = dict()
-        reg_dict = reg_export(region)
-        location_dict['region'] = reg_dict
-        location_dict['index'] = index
-        location_list.append(location_dict)
-    output['abstraction'] = location_list
-    return output
+    for i, region in enumerate(abstraction.ppp.regions):
+        d = dict(
+            region=reg_export(region),
+            index=i)
+        location_list.append(d)
+    return dict(abstraction=location_list)
 
 
 def export_mealy_io(variables, values):
@@ -194,13 +185,13 @@ def export_mealy_io(variables, values):
 
     @rtype: list of dict
     """
-    var_list = list()
-    for ind, variable in enumerate(variables):
-        var_dict = dict()
-        var_dict['name'] = variable
-        var_dict['values'] = list(values[ind])
-        var_list.append(var_dict)
-    return var_list
+    vrs = list()
+    for i, var in enumerate(variables):
+        d = dict(
+            name=var,
+            values=list(values[i]))
+        vrs.append(d)
+    return vrs
 
 
 def export_mealy(mealy_machine, is_continuous):
