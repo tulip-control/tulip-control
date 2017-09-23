@@ -35,6 +35,9 @@ listed with a summary of dependent features:
 * `GLPK <http://www.gnu.org/s/glpk/>`_ --
   fast linear programming solver
 
+.. image:: tulip_dependencies.svg
+   :align: center
+
 For computing discrete abstractions from hybrid system descriptions,
 it is highly recommended that you install both CVXOPT and GLPK.
 Note that you need to install GLPK *before* installing CVXOPT,
