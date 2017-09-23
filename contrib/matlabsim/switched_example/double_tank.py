@@ -158,13 +158,13 @@ sys_ts = abstract.discretize_switched(
 env_vars = set()
 sys_disc_vars = set()
 
-env_init = {'env_actions = normal'}
+env_init = {'env_actions = "normal"'}
 
-env_safe = {'no_refuel -> X(env_actions = normal)',
-            '(critical & (env_actions = normal)) -> X(env_actions = refuel)',
-            '(!critical & env_actions = normal) -> X(env_actions = normal)',
-            '(!no_refuel & env_actions = refuel) -> X(env_actions = refuel)'}
-env_prog = {'env_actions = refuel'}
+env_safe = {'no_refuel -> X(env_actions = "normal")',
+            '(critical & (env_actions = "normal")) -> X(env_actions = "refuel")',
+            '(!critical & env_actions = "normal") -> X(env_actions = "normal")',
+            '(!no_refuel & env_actions = "refuel") -> X(env_actions = "refuel")'}
+env_prog = {'env_actions = "refuel"'}
 
 # relate switching actions to u_in (env_actions)
 sys_init = {'initial'}
