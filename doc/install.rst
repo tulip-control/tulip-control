@@ -1,9 +1,9 @@
 Installation
 ------------
 
-TuLiP works with Python version 2.7.
-Install it with `pip <https://pip.pypa.io/en/stable/>`_
-from `PyPI <https://pypi.python.org/pypi/tulip>`_ with::
+TuLiP works with both Python versions 3.4, 3.5, 3.6 and 2.7.
+To install with `pip <https://pip.pypa.io/en/stable/>`_
+from `PyPI <https://pypi.python.org/pypi/tulip>`_::
 
   $ pip install tulip
 
