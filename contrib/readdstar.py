@@ -80,6 +80,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
+
 class AcceptancePair(object):
     def __init__(self, L=None, U=None):
         if L is None:
@@ -204,7 +210,7 @@ if __name__ == "__main__":
         exit(1)
 
     if sys.argv[1] == "-":  # Read from stdin
-        getline = raw_input
+        getline = input
     else:
         f = open(sys.argv[1], "r")
         getline = f.readline
