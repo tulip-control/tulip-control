@@ -45,8 +45,7 @@ FILE to read from stdin.
 * The Automaton class is a very light derivative of networkx.DiGraph;
   in other words, if you prefer to only work with a DiGraph, it is
   easy to modify the existing code to do so.  Expect the name to
-  change later, especially if (when) it becomes integrated into TuLiP
-  and nTLP.
+  change later, especially if (when) it becomes integrated into TuLiP.
 
 * readdstar.py is a commandline utility.  It expects to be given the
   name of file from which to read (previously recorded) output of
