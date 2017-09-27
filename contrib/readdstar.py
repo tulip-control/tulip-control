@@ -76,7 +76,6 @@ from __future__ import print_function
 
 import sys
 import networkx as nx
-import matplotlib.pyplot as plt
 
 
 try:
