@@ -21,7 +21,7 @@ from tulip.abstract import prop2part, discretize
 from exportFMU import exportFMU
 
 
-BUILDDIR="build/"
+BUILDDIR = "build/"
 
 
 def specify_discretize_synthesize():
@@ -59,8 +59,7 @@ def specify_discretize_synthesize():
 
     pwa = discretize(
         cont_partition, sys_dyn, closed_loop=True,
-        N=8, min_cell_volume=0.1, plotit=False
-    )
+        N=8, min_cell_volume=0.1, plotit=False)
 
     """Specifications"""
     # Environment variables and assumptions
@@ -72,7 +71,7 @@ def specify_discretize_synthesize():
     # System variables and requirements
     sys_vars = {'X0reach'}
     sys_init = {'X0reach'}
-    sys_prog = {'home'}               # []<>home
+    sys_prog = {'home'}  # []<>home
     sys_safe = {'(X(X0reach) <-> lot) || (X0reach && !park)'}
     sys_prog |= {'X0reach'}
 
@@ -90,8 +89,8 @@ def specify_discretize_synthesize():
     # store the result for future use
     if len(BUILDDIR) > 0 and not os.path.exists(BUILDDIR):
         os.mkdir(BUILDDIR)
-    pickle.dump(ctrl, open(BUILDDIR+'FSM.p', 'wb'))
-    pickle.dump(pwa, open(BUILDDIR+'AbstractPwa.p', 'wb'))
+    pickle.dump(ctrl, open(BUILDDIR + 'FSM.p', 'wb'))
+    pickle.dump(pwa, open(BUILDDIR + 'AbstractPwa.p', 'wb'))
     return pwa, ctrl
 
 
