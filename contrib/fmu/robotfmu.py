@@ -23,10 +23,9 @@ from exportFMU import exportFMU
 
 BUILDDIR="build/"
 
-if os.path.isfile(BUILDDIR+'AbstractPwa.p') and os.path.isfile(BUILDDIR+'FSM.p'):
-    pwa = pickle.load(open(BUILDDIR+"AbstractPwa.p", "rb"))
-    ctrl = pickle.load(open(BUILDDIR+"FSM.p", "rb"))
-else:
+
+def specify_discretize_synthesize():
+    """Return PWA partition and controller, dump them to pickle files."""
     # Problem parameters
     input_bound = 1.0
     uncertainty = 0.01
@@ -93,9 +92,22 @@ else:
         os.mkdir(BUILDDIR)
     pickle.dump(ctrl, open(BUILDDIR+'FSM.p', 'wb'))
     pickle.dump(pwa, open(BUILDDIR+'AbstractPwa.p', 'wb'))
+    return pwa, ctrl
 
-x0 = np.array([1.5, 1.5])
-d0 = 18
 
-exportFMU(ctrl, pwa, x0, d0)
-os.system("make test_controller")
+def pickle_files_exist():
+    return (
+        os.path.isfile(BUILDDIR + 'AbstractPwa.p') and
+        os.path.isfile(BUILDDIR + 'FSM.p'))
+
+
+if __name__ == '__main__':
+    if pickle_files_exist():
+        pwa = pickle.load(open(BUILDDIR + "AbstractPwa.p", "rb"))
+        ctrl = pickle.load(open(BUILDDIR + "FSM.p", "rb"))
+    else:
+        pwa, ctrl = specify_discretize_synthesize()
+    x0 = np.array([1.5, 1.5])
+    d0 = 18
+    exportFMU(ctrl, pwa, x0, d0)
+    os.system("make test_controller")
