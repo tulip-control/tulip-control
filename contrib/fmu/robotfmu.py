@@ -64,9 +64,9 @@ def specify_discretize_synthesize():
     """Specifications"""
     # Environment variables and assumptions
     env_vars = {'park'}
-    env_init = set()                # empty set
+    env_init = set()
     env_prog = '!park'
-    env_safe = set()                # empty set
+    env_safe = set()
 
     # System variables and requirements
     sys_vars = {'X0reach'}
