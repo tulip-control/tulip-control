@@ -64,7 +64,7 @@ from tulip.abstract.feasible import (
 
 logger = logging.getLogger(__name__)
 if solvers is None:
-    logger.warn(
+    logger.warning(
         '`tulip` failed to import `cvxopt`.\n'
         'No quadratic cost for controller computation.')
 
@@ -181,7 +181,7 @@ def get_input(
     conservative = params['conservative']
     closed_loop = params['closed_loop']
     if closed_loop:
-        logger.warn(
+        logger.warning(
             '`closed_loop = True` for controller computation. '
             'This option is under development: use with caution.')
     if (

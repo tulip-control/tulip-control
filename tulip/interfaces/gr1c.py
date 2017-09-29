@@ -298,7 +298,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             raise ValueError("failure of consistency check " +
                 "while processing aut XML string.")
         if this_id in id_list:
-            logger.warn("duplicate nodes found: "+str(this_id)+"; ignoring...")
+            logger.warning("duplicate nodes found: "+str(this_id)+"; ignoring...")
             continue
         id_list.append(this_id)
 

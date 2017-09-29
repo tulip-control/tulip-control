@@ -275,7 +275,7 @@ class MathSet(object):
         if item not in self._list:
             self._list.append(item)
         else:
-            logger.warn('item already in MathSet.')
+            logger.warning('item already in MathSet.')
 
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.

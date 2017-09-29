@@ -819,7 +819,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             logger.debug('no label types passed')
             return labeling, defaults
         if not label_types:
-            logger.warn('empty label types: %s' % str(label_types))
+            logger.warning('empty label types: %s' % str(label_types))
         # define the labeling
         labeling = {d['name']: d['values'] for d in label_types}
         defaults = {d['name']: d.get('default') for d in label_types

@@ -228,7 +228,7 @@ def _format_color(color, prog='tikz'):
                 result += w / t * np.array(webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
-            logger.warn('failed to import webcolors')
+            logger.warning('failed to import webcolors')
             s = ':'.join([k + ';' + str(v / t) for k, v in color.items()])
     else:
         raise ValueError('Unknown program: ' + str(prog) + '. '
@@ -539,7 +539,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
         except:
             print('IPython installed, but not called from it.')
     except ImportError:
-        logger.warn('IPython not found.\nSo loaded dot images not inline.')
+        logger.warning('IPython not found.\nSo loaded dot images not inline.')
 
     # not called from IPython QtConsole, try Matplotlib...
 
@@ -549,7 +549,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
         import matplotlib.image as mpimg
     except:
         logger.debug('Matplotlib not installed.')
-        logger.warn('Neither IPython QtConsole nor Matplotlib available.')
+        logger.warning('Neither IPython QtConsole nor Matplotlib available.')
         return None
 
     logger.debug('Matplotlib installed.')

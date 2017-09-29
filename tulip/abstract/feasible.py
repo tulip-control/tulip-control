@@ -408,7 +408,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
         Li = list_P[i]
 
         if not isinstance(Li, pc.Polytope):
-            logger.warn('createLM: Li of type: ' +str(type(Li) ) )
+            logger.warning('createLM: Li of type: ' +str(type(Li) ) )
 
         ######### FOR M #########
         idx = range(sum_vert, sum_vert + Li.A.shape[0])

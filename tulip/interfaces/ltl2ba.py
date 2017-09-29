@@ -101,7 +101,7 @@ class Lexer(object):
         t.lexer.lineno += t.value.count("\n")
 
     def t_error(self, t):
-        logger.warn("Illegal character '%s'" % t.value[0])
+        logger.warning("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
     def t_name(self, t):
