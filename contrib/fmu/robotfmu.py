@@ -27,7 +27,6 @@ if os.path.isfile(BUILDDIR+'AbstractPwa.p') and os.path.isfile(BUILDDIR+'FSM.p')
     pwa = pickle.load(open(BUILDDIR+"AbstractPwa.p", "rb"))
     ctrl = pickle.load(open(BUILDDIR+"FSM.p", "rb"))
 else:
-    # the code in robot_planning/continuous.py
     # Problem parameters
     input_bound = 1.0
     uncertainty = 0.01
@@ -88,7 +87,6 @@ else:
     """Synthesize"""
     ctrl = synth.synthesize(
         specs, sys=pwa.ts, ignore_sys_init=True, solver='gr1c')
-    # end of the code in robot_planning/continuous.py
 
     # store the result for future use
     if len(BUILDDIR) > 0 and not os.path.exists(BUILDDIR):
