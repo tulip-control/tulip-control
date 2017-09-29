@@ -1000,7 +1000,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 '\t from_state = ' + str(u) + '\n'
                 '\t to_state = ' + str(v) + '\n'
                 '\t label = ' + str(typed_attr) + '\n')
-            warnings.warn(msg)
             logger.warning(msg)
             return
         # self._breaks_determinism(from_state, labels)

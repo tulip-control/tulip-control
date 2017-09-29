@@ -515,7 +515,6 @@ class PropPreservingPartition(pc.MetricPartition):
         if self.prop_regions is None:
             msg = 'No continuous propositions defined.'
             logging.warning(msg)
-            warnings.warn(msg)
             return
 
         for region in self.regions:
