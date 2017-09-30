@@ -37,6 +37,10 @@ N.B., this script requires `sudo` capabilities. It should run
 without interruption if `sudo` escalation can occur with asking for
 a password on the terminal, e.g., as typical in virtual machines.
 
+However, you can remove explicit use of `sudo` by providing the switch
+--no-sudo. One motivating use-case is Docker containers where the user
+is `root` and `sudo` is not available.
+
 N.B., this script installs for Python 3. If you want to instead use
 Python 2.7, then change the `-p` switch that is given to `virtualenv`
 in the corresponding call of subprocess.check_call() below.
@@ -59,8 +63,14 @@ import yaml
 
 
 if '-h' in sys.argv or '--help' in sys.argv:
-    print('Usage: tulip-in-a-box.py [PATH_TO_.travis.yml]')
+    print('Usage: tulip-in-a-box.py [PATH_TO_.travis.yml] [--no-sudo]')
     sys.exit()
+
+if '--no-sudo' in sys.argv[1:]:
+    sys.argv.remove('--no-sudo')
+    sudo_prefix = ''
+else:
+    sudo_prefix = 'sudo '
 
 if len(sys.argv) == 2:
     travis_yml_path = sys.argv[1]
@@ -71,9 +81,9 @@ with open(travis_yml_path) as fp:
     travis_config = yaml.load(fp.read())
 
 # Arrange base environment
-subprocess.check_call('sudo apt-get -y install python-pip libpython-dev libpython3-dev python-virtualenv'.split())
-subprocess.check_call('sudo pip install -I -U pip'.split())
-subprocess.check_call(('sudo apt-get -y install ' + ' '.join(travis_config['addons']['apt']['packages'])).split())
+subprocess.check_call((sudo_prefix + 'apt-get -y install python-pip libpython-dev libpython3-dev python-virtualenv').split())
+subprocess.check_call((sudo_prefix + 'pip install -I -U pip').split())
+subprocess.check_call((sudo_prefix + 'apt-get -y install ' + ' '.join(travis_config['addons']['apt']['packages'])).split())
 subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
 
 # Main script
