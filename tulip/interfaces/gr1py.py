@@ -73,7 +73,7 @@ def synthesize(spec):
         tsys, exprtab, init_flags=init_option)
     if strategy is None:
         return None
-    s = gr1py.output.dump_json(tsys.symtab, strategy)
+    s = gr1py.output.dumps_json(tsys.symtab, strategy)
     return load_aut_json(s)
 
 
