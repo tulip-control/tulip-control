@@ -34,7 +34,7 @@
 """Bootstrap into a TuLiP installation using Travis CI configuration.
 
 N.B., this script requires `sudo` capabilities. It should run
-without interruption if `sudo` escalation can occur with asking for
+without interruption if `sudo` escalation can occur without asking for
 a password on the terminal, e.g., as typical in virtual machines.
 
 However, you can remove explicit use of `sudo` by providing the switch
