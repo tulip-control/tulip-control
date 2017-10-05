@@ -65,37 +65,66 @@ import tempfile
 import yaml
 
 
+def _main():
+    sudo_prefix, travis_yml_path = _parse_args()
+    with open(travis_yml_path) as fp:
+        travis_config = yaml.load(fp.read())
+    _arrange_base_env(sudo_prefix, travis_config)
+    _run_travis_commands(travis_config)
 
-with open(travis_yml_path) as fp:
-    travis_config = yaml.load(fp.read())
 
-# Arrange base environment
-subprocess.check_call(
-    (sudo_prefix +
-     'apt-get -y install python-pip libpython-dev ' +
-     'libpython3-dev python-virtualenv'
-     ).split())
-subprocess.check_call((sudo_prefix + 'pip install -I -U pip').split())
-subprocess.check_call(
-    (sudo_prefix + 'apt-get -y install ' +
-     ' '.join(travis_config['addons']['apt']['packages'])
-     ).split())
-subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
+def _arrange_base_env(
+        sudo_prefix:
+            str,
+        travis_config:
+            dict
+        ) -> None:
+    subprocess.check_call(
+        (sudo_prefix +
+         'apt-get -y install python-pip libpython-dev ' +
+         'libpython3-dev python-virtualenv'
+         ).split())
+    subprocess.check_call(
+        (sudo_prefix + 'pip install -I -U pip').split())
+    subprocess.check_call(
+        (sudo_prefix + 'apt-get -y install ' +
+         ' '.join(travis_config['addons']['apt']['packages'])
+         ).split())
+    subprocess.check_call(
+        ['virtualenv', '-p', 'python3', 'PYt'])
 
-# Main script
-fd, path = tempfile.mkstemp()
-with os.fdopen(fd, 'w') as fp:
-    fp.write('source PYt/bin/activate\n')
-    for section in ['before_install', 'install', 'before_script', 'script']:
-        fp.write('\n'.join(travis_config[section]))
-        fp.write('\n')
-subprocess.check_call(['/bin/bash', '-e', path])
-def parse_args():
+
+def _run_travis_commands(
+        travis_config:
+            dict
+        ) -> None:
+    section_names = [
+        'before_install',
+        'install',
+        'before_script',
+        'script']
+    fd, path = tempfile.mkstemp()
+    with os.fdopen(fd, 'w') as fp:
+        fp.write('source PYt/bin/activate\n')
+        for section in section_names:
+            fp.write('\n'.join(travis_config[section]))
+            fp.write('\n')
+    subprocess.check_call(
+        ['/bin/bash', '-e', path])
+
+
+def _parse_args() -> tuple[
+        str,
+        str]:
     p = argparse.ArgumentParser()
-    p.add_argument('--no-sudo', action='store_true',
-                   help='do not use `sudo`')
-    p.add_argument('travis_yml_path', type=str,
-                   help='path to `.travis.yml` file')
+    p.add_argument(
+        '--no-sudo',
+        action='store_true',
+        help='do not use `sudo`')
+    p.add_argument(
+        'travis_yml_path',
+        type=str,
+        help='path to `.travis.yml` file')
     args = p.parse_args()
     if args.no_sudo:
         sudo_prefix = ''
@@ -106,3 +135,7 @@ def parse_args():
     else:
         travis_yml_path = args.travis_yml_path
     return sudo_prefix, travis_yml_path
+
+
+if __name__ == '__main__':
+    _main()
