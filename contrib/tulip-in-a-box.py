@@ -43,10 +43,10 @@ is `root` and `sudo` is not available.
 
 N.B., this script installs for Python 3. If you want to instead use
 Python 2.7, then change the `-p` switch that is given to `virtualenv`
-in the corresponding call of subprocess.check_call() below.
+in the corresponding call of `subprocess.check_call()` below.
 
 This script should be run from the root of the sourcetree. E.g., you
-can run vm-bootstrap.sh from within a virtual machine (VM), or
+can run `vm-bootstrap.sh` from within a virtual machine (VM), or
 instead you can manually enter the following:
 
     sudo apt-get -y install git
