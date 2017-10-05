@@ -54,9 +54,9 @@ instead you can manually enter the following:
     cd tulip-control
     python contrib/tulip-in-a-box.py
 """
-import sys
 import os
 import subprocess
+import sys
 import tempfile
 
 import yaml
