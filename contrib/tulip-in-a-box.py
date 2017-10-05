@@ -81,9 +81,16 @@ with open(travis_yml_path) as fp:
     travis_config = yaml.load(fp.read())
 
 # Arrange base environment
-subprocess.check_call((sudo_prefix + 'apt-get -y install python-pip libpython-dev libpython3-dev python-virtualenv').split())
+subprocess.check_call(
+    (sudo_prefix +
+    'apt-get -y install python-pip libpython-dev ' +
+    'libpython3-dev python-virtualenv'
+    ).split())
 subprocess.check_call((sudo_prefix + 'pip install -I -U pip').split())
-subprocess.check_call((sudo_prefix + 'apt-get -y install ' + ' '.join(travis_config['addons']['apt']['packages'])).split())
+subprocess.check_call(
+    (sudo_prefix + 'apt-get -y install ' +
+    ' '.join(travis_config['addons']['apt']['packages'])
+    ).split())
 subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
 
 # Main script
