@@ -56,6 +56,7 @@ instead you can manually enter the following:
     cd tulip-control
     python contrib/tulip-in-a-box.py
 """
+import argparse
 import os
 import subprocess
 import sys
@@ -64,20 +65,6 @@ import tempfile
 import yaml
 
 
-if '-h' in sys.argv or '--help' in sys.argv:
-    print('Usage: tulip-in-a-box.py [PATH_TO_.travis.yml] [--no-sudo]')
-    sys.exit()
-
-if '--no-sudo' in sys.argv[1:]:
-    sys.argv.remove('--no-sudo')
-    sudo_prefix = ''
-else:
-    sudo_prefix = 'sudo '
-
-if len(sys.argv) == 2:
-    travis_yml_path = sys.argv[1]
-else:
-    travis_yml_path = '.travis.yml'
 
 with open(travis_yml_path) as fp:
     travis_config = yaml.load(fp.read())
@@ -103,3 +90,19 @@ with os.fdopen(fd, 'w') as fp:
         fp.write('\n'.join(travis_config[section]))
         fp.write('\n')
 subprocess.check_call(['/bin/bash', '-e', path])
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument('--no-sudo', action='store_true',
+                   help='do not use `sudo`')
+    p.add_argument('travis_yml_path', type=str,
+                   help='path to `.travis.yml` file')
+    args = p.parse_args()
+    if args.no_sudo:
+        sudo_prefix = ''
+    else:
+        sudo_prefix = 'sudo '
+    if args.travis_yml_path is None:
+        travis_yml_path = '.travis.yml'
+    else:
+        travis_yml_path = args.travis_yml_path
+    return sudo_prefix, travis_yml_path
