@@ -65,31 +65,39 @@ import tempfile
 import yaml
 
 
+def main():
+    sudo_prefix, travis_yml_path = parse_args()
+    with open(travis_yml_path) as fp:
+        travis_config = yaml.load(fp.read())
+    arrange_base_env(sudo_prefix, travis_config)
+    run_travis_commands(travis_config)
 
-with open(travis_yml_path) as fp:
-    travis_config = yaml.load(fp.read())
 
-# Arrange base environment
-subprocess.check_call(
-    (sudo_prefix +
-     'apt-get -y install python-pip libpython-dev ' +
-     'libpython3-dev python-virtualenv'
-     ).split())
-subprocess.check_call((sudo_prefix + 'pip install -I -U pip').split())
-subprocess.check_call(
-    (sudo_prefix + 'apt-get -y install ' +
-     ' '.join(travis_config['addons']['apt']['packages'])
-     ).split())
-subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
+def arrange_base_env():
+    subprocess.check_call(
+        (sudo_prefix +
+         'apt-get -y install python-pip libpython-dev ' +
+         'libpython3-dev python-virtualenv'
+         ).split())
+    subprocess.check_call((sudo_prefix + 'pip install -I -U pip').split())
+    subprocess.check_call(
+        (sudo_prefix + 'apt-get -y install ' +
+         ' '.join(travis_config['addons']['apt']['packages'])
+         ).split())
+    subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
 
-# Main script
-fd, path = tempfile.mkstemp()
-with os.fdopen(fd, 'w') as fp:
-    fp.write('source PYt/bin/activate\n')
-    for section in ['before_install', 'install', 'before_script', 'script']:
-        fp.write('\n'.join(travis_config[section]))
-        fp.write('\n')
-subprocess.check_call(['/bin/bash', '-e', path])
+
+def run_travis_commands(travis_config):
+    section_names = ['before_install', 'install', 'before_script', 'script']
+    fd, path = tempfile.mkstemp()
+    with os.fdopen(fd, 'w') as fp:
+        fp.write('source PYt/bin/activate\n')
+        for section in section_names:
+            fp.write('\n'.join(travis_config[section]))
+            fp.write('\n')
+    subprocess.check_call(['/bin/bash', '-e', path])
+
+
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument('--no-sudo', action='store_true',
@@ -106,3 +114,7 @@ def parse_args():
     else:
         travis_yml_path = args.travis_yml_path
     return sudo_prefix, travis_yml_path
+
+
+if __name__ == '__main__':
+    main()
