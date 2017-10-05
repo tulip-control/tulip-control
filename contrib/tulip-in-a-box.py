@@ -65,6 +65,9 @@ import tempfile
 import yaml
 
 
+TRAVIS_PATH = '.travis.yml'
+
+
 def main():
     sudo_prefix, travis_yml_path = parse_args()
     with open(travis_yml_path) as fp:
@@ -110,7 +113,7 @@ def parse_args():
     else:
         sudo_prefix = 'sudo '
     if args.travis_yml_path is None:
-        travis_yml_path = '.travis.yml'
+        travis_yml_path = TRAVIS_PATH
     else:
         travis_yml_path = args.travis_yml_path
     return sudo_prefix, travis_yml_path
