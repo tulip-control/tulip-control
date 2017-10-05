@@ -10,7 +10,7 @@
 # After the image is built, it can be used interactively, e.g.,
 #
 #   docker run -i -t tulip:latest
-#   source tulip-control/PYt/bin/activate
+#   source PYt/bin/activate
 #   python -c 'import tulip; print(tulip.__version__)'
 FROM debian:stable
 
