@@ -95,10 +95,9 @@ subprocess.check_call(['virtualenv', '-p', 'python3', 'PYt'])
 
 # Main script
 fd, path = tempfile.mkstemp()
-fp = os.fdopen(fd, 'w')
-fp.write('source PYt/bin/activate\n')
-for section in ['before_install', 'install', 'before_script', 'script']:
-    fp.write('\n'.join(travis_config[section]))
-    fp.write('\n')
-fp.close()
+with os.fdopen(fd, 'w') as fp:
+    fp.write('source PYt/bin/activate\n')
+    for section in ['before_install', 'install', 'before_script', 'script']:
+        fp.write('\n'.join(travis_config[section]))
+        fp.write('\n')
 subprocess.check_call(['/bin/bash', '-e', path])
