@@ -33,6 +33,8 @@
 # SUCH DAMAGE.
 """Bootstrap into a TuLiP installation using Travis CI configuration.
 
+Requirements: `pyyaml`
+
 N.B., this script requires `sudo` capabilities. It should run
 without interruption if `sudo` escalation can occur without asking for
 a password on the terminal, e.g., as typical in virtual machines.
