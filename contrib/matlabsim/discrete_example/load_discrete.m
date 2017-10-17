@@ -2,6 +2,7 @@
 matfile = 'robot_discrete.mat';
 timestep = 1;
 modelname = 'Robot_Discrete';
+systype = 'is_discrete';
 
 % Load the model
 load_tulip;
