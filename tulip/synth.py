@@ -980,8 +980,8 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     assert isinstance(ts, dict)
     for name, t in ts.items():
         assert isinstance(t, transys.FiniteTransitionSystem)
-        ignore = name in ignore_init
-        bool_act = name in bool_actions
+        ignore = ignore_init.get(name) 
+        bool_act = bool_actions.get(name)
         statevar = name
         if t.owner == 'sys':
             sys_spec = sys_to_spec(t, ignore, statevar,
