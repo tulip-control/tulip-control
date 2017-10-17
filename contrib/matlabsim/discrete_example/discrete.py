@@ -50,7 +50,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 
 # Controller synthesis
-ctrl = synth.synthesize(specs, sys=sys, solver='gr1c')
+ctrl = synth.synthesize(specs, sys=sys, solver='omega')
 
 # Generate a MATLAB script that generates a Mealy Machine
 tomatlab.export('robot_discrete.mat', ctrl)
