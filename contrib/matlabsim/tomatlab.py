@@ -209,16 +209,13 @@ def export_mealy(mealy_machine, is_continuous):
     node_to_loc = dict()
     for _, v, label in mealy_machine.edges(data=True):
         node_to_loc[v] = label['loc']
+    node_to_loc[SINIT] = SINIT
     # all nodes must have incoming edges, except SINIT
     n = len(node_to_loc)
     n_ = len(mealy_machine)
-    assert n + 1 == n_, (n, n_)  # some root node != SINIT
     # Export states as a list of dictionaries
     state_list = list()
     for u in mealy_machine.nodes():
-        if u == SINIT:
-            print('Skipping state "{s}".'.format(s=SINIT))
-            continue
         state_dict = dict(name=u)
         # For a continuous system, export the 'loc' variable
         if is_continuous:
@@ -252,11 +249,8 @@ def export_mealy(mealy_machine, is_continuous):
     # Initial states are the states that have transitions from SINIT. Initial
     # transitions (for the purposes of execution in Stateflow), are the
     # transitions coming from the states that transition from SINIT.
-    init_nodes = mealy_machine.successors(SINIT)
-    assert init_nodes, init_nodes
     init_trans = list()
-    for u, v, label in mealy_machine.edges(init_nodes, data=True):
-        assert u != SINIT, u
+    for u, v, label in mealy_machine.edges(SINIT, data=True):
         assert v != SINIT, v
         trans_dict = dict(
             state=v,
