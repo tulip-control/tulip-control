@@ -984,11 +984,15 @@ def synthesize_many(specs, ts=None, ignore_init=None,
         bool_act = name in bool_actions
         statevar = name
         if t.owner == 'sys':
-            specs |= sys_to_spec(t, ignore, statevar,
+            sys_spec = sys_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            _copy_options_from_ts(sys_spec, t, specs)
+            specs |= sys_spec
         elif t.owner == 'env':
-            specs |= env_to_spec(t, ignore, statevar,
+            env_spec = env_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            _copy_options_from_ts(env_spec, t, specs)
+            specs |= env_spec
     if solver == 'gr1c':
         ctrl = gr1c.synthesize(specs)
     elif solver == 'slugs':
