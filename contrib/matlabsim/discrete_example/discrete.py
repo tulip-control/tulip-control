@@ -46,6 +46,7 @@ specs.moore = False
 specs.qinit = r'\A \E'
 specs.plus_one = False
 # Controller synthesis
-ctrl = synth.synthesize(specs, sys=sys, solver='gr1c')
+ctrl = synth.synthesize(specs, sys=sys, solver='omega')
+
 # Generate a MATLAB script that generates a Mealy Machine
 tomatlab.export('robot_discrete.mat', ctrl)
