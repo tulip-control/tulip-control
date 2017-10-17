@@ -984,11 +984,19 @@ def synthesize_many(specs, ts=None, ignore_init=None,
         bool_act = name in bool_actions
         statevar = name
         if t.owner == 'sys':
-            specs |= sys_to_spec(t, ignore, statevar,
+            sys_spec = sys_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            sys_spec.qinit = specs.qinit 
+            sys_spec.moore = specs.moore 
+            sys_spec.plus_one = specs.plus_one 
+            specs |= sys_spec
         elif t.owner == 'env':
-            specs |= env_to_spec(t, ignore, statevar,
+            env_spec = env_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            env_spec.qinit = specs.qinit 
+            env_spec.moore = specs.moore 
+            env_spec.plus_one = specs.plus_one 
+            specs |= env_spec
     if solver == 'gr1c':
         ctrl = gr1c.synthesize(specs)
     elif solver == 'slugs':
