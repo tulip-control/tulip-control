@@ -980,28 +980,42 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     assert isinstance(ts, dict)
     for name, t in ts.items():
         assert isinstance(t, transys.FiniteTransitionSystem)
-        ignore = name in ignore_init
-        bool_act = name in bool_actions
+        ignore = ignore_init.get(name) 
+        bool_act = bool_actions.get(name)
         statevar = name
         if t.owner == 'sys':
-            specs |= sys_to_spec(t, ignore, statevar,
+            sys_spec = sys_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            sys_spec.qinit = specs.qinit 
+            sys_spec.moore = specs.moore 
+            sys_spec.plus_one = specs.plus_one 
+            specs |= sys_spec
         elif t.owner == 'env':
-            specs |= env_to_spec(t, ignore, statevar,
+            env_spec = env_to_spec(t, ignore, statevar,
                                  bool_actions=bool_act)
+            env_spec.qinit = specs.qinit 
+            env_spec.moore = specs.moore 
+            env_spec.plus_one = specs.plus_one 
+            specs |= env_spec
     if solver == 'gr1c':
-        ctrl = gr1c.synthesize(specs)
+        strategy = gr1c.synthesize(specs)
     elif solver == 'slugs':
         if slugs is None:
             raise ValueError(
                 'Import of slugs interface failed. '
                 'Please verify installation of "slugs".')
-        ctrl = slugs.synthesize(specs)
+        strategy = slugs.synthesize(specs)
     else:
         raise Exception((
             'Unknown solver: "{solver}". '
             'Available solvers: "gr1c", and "slugs"').format(
                 solver=solver))
+    # While the return values of the solver interfaces vary, we expect
+    # here that strategy is either None to indicate unrealizable or a
+    # networkx.DiGraph ready to be passed to strategy2mealy().
+    if strategy is None:
+        return None
+    ctrl = strategy2mealy(strategy, specs)
     try:
         logger.debug(
             'Mealy machine has: n = {n} states.'.format(
