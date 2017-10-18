@@ -998,18 +998,24 @@ def synthesize_many(specs, ts=None, ignore_init=None,
             env_spec.plus_one = specs.plus_one 
             specs |= env_spec
     if solver == 'gr1c':
-        ctrl = gr1c.synthesize(specs)
+        strategy = gr1c.synthesize(specs)
     elif solver == 'slugs':
         if slugs is None:
             raise ValueError(
                 'Import of slugs interface failed. '
                 'Please verify installation of "slugs".')
-        ctrl = slugs.synthesize(specs)
+        strategy = slugs.synthesize(specs)
     else:
         raise Exception((
             'Unknown solver: "{solver}". '
             'Available solvers: "gr1c", and "slugs"').format(
                 solver=solver))
+    # While the return values of the solver interfaces vary, we expect
+    # here that strategy is either None to indicate unrealizable or a
+    # networkx.DiGraph ready to be passed to strategy2mealy().
+    if strategy is None:
+        return None
+    ctrl = strategy2mealy(strategy, specs)
     try:
         logger.debug(
             'Mealy machine has: n = {n} states.'.format(
