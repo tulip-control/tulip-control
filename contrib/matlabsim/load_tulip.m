@@ -106,9 +106,11 @@ for i = 1:num_inputs
     end
 
     % Replace value in MPTsys object
-    num_modes = length(MPTsys);
-    for j = 1:num_modes
-        MPTsys(j).env_act = input_value_map(MPTsys(j).env_act);
+    if is_switched
+        num_modes = length(MPTsys);
+        for j = 1:num_modes
+            MPTsys(j).env_act = input_value_map(MPTsys(j).env_act);
+        end
     end
 end
 
@@ -160,9 +162,11 @@ for i = 1:num_outputs
     end
 
     % Replace value in MPTsys object
-    num_modes = length(MPTsys);
-    for j = 1:num_modes
-        MPTsys(j).sys_act = output_value_map(MPTsys(j).sys_act);
+    if is_switched
+        num_modes = length(MPTsys);
+        for j = 1:num_modes
+            MPTsys(j).sys_act = output_value_map(MPTsys(j).sys_act);
+        end
     end
 end
 
@@ -243,9 +247,25 @@ end
 num_transitions = length(TS.transitions);
 transition_handles = cell(1, num_transitions);
 for ind = 1:num_transitions
-    start_state_index = double(TS.transitions{ind}.start_state) + 1;
-    end_state_index = double(TS.transitions{ind}.end_state) + 1;
+    start_state_index = double(TS.transitions{ind}.start_state);
+    end_state_index = double(TS.transitions{ind}.end_state);
     transition_handles{ind} = Stateflow.Transition(mealy_machine);
+    
+    % Look for the start state by name
+    for i = 1:num_states
+        if(~isempty(find(TS.states{i}.name == start_state_index)))
+            start_state_index = i;
+            break;
+        end;
+    end;
+    % Look for the end state by name
+    for i = 1:num_states
+        if(~isempty(find(TS.states{i}.name == end_state_index)))
+            end_state_index   = i;
+            break;
+        end;
+    end;
+    
     transition_handles{ind}.Source = state_handles{start_state_index};
     transition_handles{ind}.Destination = state_handles{end_state_index};
 
@@ -254,6 +274,15 @@ for ind = 1:num_transitions
     for jnd = 1:num_inputs
         input_name = input_handles{jnd}.Name;
         input_value = eval(['TS.transitions{ind}.inputs.' input_name]);
+        
+        % Change values to integers
+        if(strcmp(input_value,'False'))
+            input_value = 0;
+        elseif(strcmp(input_value,'True'))
+            input_value = 1;
+        else
+        end;
+        
         label_string = [label_string, '(', input_name '==' ...
             num2str(input_value) ')', '&&'];
     end
@@ -261,6 +290,15 @@ for ind = 1:num_transitions
     for jnd = 1:num_outputs
         output_name = output_handles{jnd}.Name;
         output_value = eval(['TS.transitions{ind}.outputs.' output_name]);
+        
+        % Change values to integers
+        if(strcmp(output_value,'False'))
+            output_value = 0;
+        elseif(strcmp(output_value,'True'))
+            output_value = 1;
+        else
+        end;
+        
         label_string = [label_string output_name '=' num2str(output_value) ';'];
     end
     label_string = [label_string '}'];
@@ -271,29 +309,41 @@ end
 num_init_transitions = length(TS.init_trans);
 init_handles = cell(1, num_init_transitions);
 for ind = 1:num_init_transitions
-    init_state_index = double(TS.init_trans{ind}.state) + 1;
+    init_state_index = double(TS.init_trans{ind}.state);
     init_handles{ind} = Stateflow.Transition(mealy_machine);
+    
+    % Look for the initial state by name
+    for i = 1:num_states
+        if(~isempty(find(TS.states{i}.name == init_state_index)))
+            init_state_index = i;
+            break;
+        end;
+    end;
+    
     init_handles{ind}.Destination = state_handles{init_state_index};
-    init_handles{ind}.DestinationOClock = 9;
-    init_handles{ind}.SourceEndPoint = ...
-        [state_handles{init_state_index}.Position(1) - 30, ...
-         state_handles{init_state_index}.Position(2) + 25];
-    init_handles{ind}.MidPoint = ...
-        [state_handles{init_state_index}.Position(1) - 15, ...
-         state_handles{init_state_index}.Position(2) + 25];
+    init_handles{ind}.Source = state_handles{length(state_handles)};
 
     % Label string on initial transitions
     label_string = '[';
     for jnd = 1:num_inputs
         input_name = input_handles{jnd}.Name;
         input_value = eval(['TS.init_trans{ind}.inputs.' input_name]);
+        
+        % Change values to integers
+        if(strcmp(input_value,'False'))
+            input_value = 0;
+        elseif(strcmp(input_value,'True'))
+            input_value = 1;
+        else
+        end;
+        
         label_string = [label_string, '(', input_name '==' ...
                         num2str(input_value) ')', '&&'];
     end
 
     % Add current location to inputs if system is continuous
     if is_continuous
-        current_loc = num2str(double(TS.init_trans{ind}.start_loc));
+        current_loc = num2str(double(0));
         label_string = [label_string '(current_loc==' current_loc ')]{'];
     else
         label_string = [label_string(1:end-2) ']{'];
@@ -303,6 +353,15 @@ for ind = 1:num_init_transitions
     for jnd = 1:num_outputs
         output_name = output_handles{jnd}.Name;
         output_value = eval(['TS.init_trans{ind}.outputs.' output_name]);
+        
+        % Change values to integers
+        if(strcmp(output_value,'False'))
+            output_value = 0;
+        elseif(strcmp(output_value,'True'))
+            output_value = 1;
+        else
+        end;
+        
         label_string = [label_string output_name '=' num2str(output_value) ';'];
     end
     label_string = [label_string '}'];
@@ -310,7 +369,38 @@ for ind = 1:num_init_transitions
     init_handles{ind}.LabelString = label_string;
 end
 
+% Add unconditional transition to initial state
+%-------------------------------------------------------------------------------
+UnCond_handles = cell(1, 1);
+UnCond_handles = Stateflow.Transition(mealy_machine);
 
+UnCond_handles.Destination = state_handles{length(state_handles)};
+UnCond_handles.DestinationOClock = 9;
+UnCond_handles.SourceEndPoint = ...
+    [state_handles{length(state_handles)}.Position(1) - 30, ...
+     state_handles{length(state_handles)}.Position(2) + 25];
+UnCond_handles.MidPoint = ...
+    [state_handles{length(state_handles)}.Position(1) - 15, ...
+     state_handles{length(state_handles)}.Position(2) + 25];
+
+% Label string on initial transitions
+label_string = '[]{';
+
+% Initial outputs
+for jnd = 1:num_outputs
+    output_name = output_handles{jnd}.Name;
+    output_value = eval(['TS.init_trans{1}.outputs.' output_name]);
+    if(strcmp(output_value,'False'))
+        output_value = 0;
+    elseif(strcmp(output_value,'True'))
+        output_value = 1;
+    else
+    end;
+    label_string = [label_string output_name '=' num2str(output_value) ';'];
+end
+label_string = [label_string '}'];
+
+UnCond_handles.LabelString = label_string;
 
 % RHC blocks for continuous systems
 %-------------------------------------------------------------------------------
