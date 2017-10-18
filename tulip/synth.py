@@ -1138,6 +1138,17 @@ def synthesize(
             'Undefined synthesis `solver`. '
             'Available options are "gr1c", '
             '"slugs", "gr1py", and "omega".')
+    return _trim_strategy(strategy, specs, rm_deadends=rm_deadends)
+
+
+def _trim_strategy(strategy, specs, rm_deadends):
+    """Return C{MealyMachine} without deadends, or C{None}.
+
+    If C{strategy is None}, then return C{None}.
+
+    @param rm_deadends: if C{True}, then remove deadends
+        from the Mealy machine
+    """
     # While the return values of the solver interfaces vary, we expect
     # here that strategy is either None to indicate unrealizable or a
     # networkx.DiGraph ready to be passed to strategy2mealy().
