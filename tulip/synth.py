@@ -978,9 +978,9 @@ def synthesize_many(specs, ts=None, ignore_init=None,
         available options.
     @type solver: str
     """
-    assert isinstance(ts, dict)
+    assert isinstance(ts, dict), ts
     for name, t in ts.items():
-        assert isinstance(t, transys.FiniteTransitionSystem)
+        assert isinstance(t, transys.FiniteTransitionSystem), t
         ignore = name in ignore_init
         statevar = name
         if t.owner == 'sys':
