@@ -923,7 +923,7 @@ def map_ap_to_states(fts):
 
 
 def synthesize_many(specs, ts=None, ignore_init=None,
-                    solver='gr1c'):
+                    solver='omega'):
     """Synthesize from logic specs and multiple transition systems.
 
     The transition systems are composed synchronously, i.e.,
