@@ -1205,16 +1205,7 @@ def _spec_plus_sys(
             bool_states=False,
             bool_actions=False,
             statevar=statevar)
-        # consider sys just a formula,
-        # not a synthesis problem
-        # so overwrite settings
-        if hasattr(sys, 'moore'):
-            cp = sys
-        else:
-            cp = specs
-        sys_formula.moore = cp.moore
-        sys_formula.plus_one = cp.plus_one
-        sys_formula.qinit = cp.qinit
+        _copy_options_from_ts(sys_formula, sys, specs)
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
     if env is not None:
@@ -1229,17 +1220,25 @@ def _spec_plus_sys(
             bool_states=False,
             bool_actions=False,
             statevar=statevar)
-        if hasattr(env, 'moore'):
-            cp = env
-        else:
-            cp = specs
-        env_formula.moore = cp.moore
-        env_formula.plus_one = cp.plus_one
-        env_formula.qinit = cp.qinit
+        _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
     logger.info('Overall Spec:\n' + str(specs.pretty()) + _hl)
     return specs
+
+
+def _copy_options_from_ts(ts_spec, ts, specs):
+    """Copy `moore, qinit, plus_one` from `ts`, if set.
+
+    Otherwise copy the values of those attributes from `specs`.
+    """
+    if hasattr(ts, 'moore'):
+        cp = ts
+    else:
+        cp = specs
+    ts_spec.moore = cp.moore
+    ts_spec.plus_one = cp.plus_one
+    ts_spec.qinit = cp.qinit
 
 
 def strategy2mealy(A, spec):
