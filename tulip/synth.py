@@ -974,7 +974,8 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     @type ignore_init: C{set} of keys from C{ts}
 
-    @param solver: 'gr1c' or 'slugs'
+    @param solver: See function `synthesize` for
+        available options.
     @type solver: str
     """
     assert isinstance(ts, dict)
@@ -990,20 +991,7 @@ def synthesize_many(specs, ts=None, ignore_init=None,
             env_spec = env_to_spec(t, ignore, statevar)
             _copy_options_from_ts(env_spec, t, specs)
             specs |= env_spec
-    if solver == 'gr1c':
-        strategy = gr1c.synthesize(specs)
-    elif solver == 'slugs':
-        if slugs is None:
-            raise ValueError(
-                'Import of slugs interface failed. '
-                'Please verify installation of "slugs".')
-        strategy = slugs.synthesize(specs)
-    else:
-        raise Exception((
-            'Unknown solver: "{solver}". '
-            'Available solvers: "gr1c", and "slugs"').format(
-                solver=solver))
-    return _trim_strategy(strategy, rm_deadends=True)
+    return _synthesize(specs, solver, rm_deadends=True)
 
 
 def synthesize(
@@ -1133,10 +1121,11 @@ def _synthesize(specs, solver, rm_deadends):
     elif solver == 'omega':
         strategy = omega_int.synthesize_enumerated_streett(specs)
     else:
-        raise Exception(
-            'Undefined synthesis `solver`. '
-            'Available options are "gr1c", '
-            '"slugs", "gr1py", and "omega".')
+        options = {'gr1c', 'gr1py', 'omega', 'slugs'}
+        raise Exception((
+            'Unknown solver: "{solver}". '
+            'Available options are: {options}').format(
+                solver=solver, options=options))
     return _trim_strategy(strategy, specs, rm_deadends=rm_deadends)
 
 
