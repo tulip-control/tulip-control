@@ -991,30 +991,19 @@ def synthesize_many(specs, ts=None, ignore_init=None,
             _copy_options_from_ts(env_spec, t, specs)
             specs |= env_spec
     if solver == 'gr1c':
-        ctrl = gr1c.synthesize(specs)
+        strategy = gr1c.synthesize(specs)
     elif solver == 'slugs':
         if slugs is None:
             raise ValueError(
                 'Import of slugs interface failed. '
                 'Please verify installation of "slugs".')
-        ctrl = slugs.synthesize(specs)
+        strategy = slugs.synthesize(specs)
     else:
         raise Exception((
             'Unknown solver: "{solver}". '
             'Available solvers: "gr1c", and "slugs"').format(
                 solver=solver))
-    try:
-        logger.debug(
-            'Mealy machine has: n = {n} states.'.format(
-                n=len(ctrl.states)))
-    except:
-        logger.debug('No Mealy machine returned.')
-    # no controller found ?
-    # counterstrategy not constructed by synthesize
-    if not isinstance(ctrl, transys.MealyMachine):
-        return None
-    ctrl.remove_deadends()
-    return ctrl
+    return _trim_strategy(strategy, rm_deadends=True)
 
 
 def synthesize(
