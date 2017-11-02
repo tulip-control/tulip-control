@@ -1190,9 +1190,8 @@ def is_realizable(
 
 
 def _spec_plus_sys(
-    specs, env, sys,
-    ignore_env_init, ignore_sys_init
-):
+        specs, env, sys,
+        ignore_env_init, ignore_sys_init):
     if sys is not None:
         if hasattr(sys, 'state_varname'):
             statevar = sys.state_varname
