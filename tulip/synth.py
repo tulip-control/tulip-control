@@ -921,7 +921,7 @@ def map_ap_to_states(fts):
 
 
 def synthesize_many(specs, ts=None, ignore_init=None,
-                    bool_actions=None, solver='gr1c'):
+                    solver='gr1c'):
     """Synthesize from logic specs and multiple transition systems.
 
     The transition systems are composed synchronously, i.e.,
@@ -972,8 +972,6 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
     @type ignore_init: C{set} of keys from C{ts}
 
-    @type bool_actions: C{set} of keys from C{ts}
-
     @param solver: 'gr1c' or 'slugs'
     @type solver: str
     """
@@ -981,16 +979,13 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     for name, t in ts.items():
         assert isinstance(t, transys.FiniteTransitionSystem)
         ignore = name in ignore_init
-        bool_act = name in bool_actions
         statevar = name
         if t.owner == 'sys':
-            sys_spec = sys_to_spec(t, ignore, statevar,
-                                 bool_actions=bool_act)
+            sys_spec = sys_to_spec(t, ignore, statevar)
             _copy_options_from_ts(sys_spec, t, specs)
             specs |= sys_spec
         elif t.owner == 'env':
-            env_spec = env_to_spec(t, ignore, statevar,
-                                 bool_actions=bool_act)
+            env_spec = env_to_spec(t, ignore, statevar)
             _copy_options_from_ts(env_spec, t, specs)
             specs |= env_spec
     if solver == 'gr1c':
