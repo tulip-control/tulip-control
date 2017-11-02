@@ -423,9 +423,11 @@ def sys_to_spec(
     @param bool_states: deprecated as inefficient
 
         if C{True}, then use one Boolean variable
-        to represent each state in GR(1).
+        to represent each state (one-hot encoding).
         Otherwise use a single integer variable,
-        different values of which correspond to states of C{ofts}.
+        different values of which correspond to states of
+        C{ofts} (binary encoding).
+
     @type bool_states: bool
 
     @param bool_actions: Similar to C{bool_states}.
