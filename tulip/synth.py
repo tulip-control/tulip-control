@@ -1110,6 +1110,16 @@ def synthesize(
         specs, env, sys,
         ignore_env_init,
         ignore_sys_init)
+    return _synthesize(specs, solver, rm_deadends)
+
+
+def _synthesize(specs, solver, rm_deadends):
+    """Return `MealyMachine` or `None` that implements `specs`.
+
+    @type specs: L{spec.GRSpec}
+    @type rm_deadends: C{bool}
+    @rtype: L{MealyMachine} or C{None}
+    """
     if solver == 'gr1c':
         strategy = gr1c.synthesize(specs)
     elif solver == 'slugs':
