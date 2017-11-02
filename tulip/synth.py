@@ -1206,8 +1206,6 @@ def _spec_plus_sys(
             statevar = 'loc'
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
-            bool_states=False,
-            bool_actions=False,
             statevar=statevar)
         _copy_options_from_ts(sys_formula, sys, specs)
         specs = specs | sys_formula
@@ -1221,8 +1219,6 @@ def _spec_plus_sys(
             statevar = 'eloc'
         env_formula = env_to_spec(
             env, ignore_env_init,
-            bool_states=False,
-            bool_actions=False,
             statevar=statevar)
         _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
