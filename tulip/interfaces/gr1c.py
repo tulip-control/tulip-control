@@ -491,24 +491,35 @@ def synthesize(spec):
 
 def select_options(spec):
     """Return `gr1c` initial option based on `GRSpec` inits."""
+    # Let x denote environment variables,
+    # and y component variables.
     assert not spec.moore
     assert not spec.plus_one
     if spec.qinit == '\A \E':
+        # \A x:  \E y:  EnvInit(x) => SysInit(y)
         init_option = 'ALL_ENV_EXIST_SYS_INIT'
     elif spec.qinit == '\E \A':
         raise ValueError(
             '`qinit = "\E \A"` not supported by `gr1c`. '
             'Use `qinit = "\A \E"`.')
     elif spec.qinit == '\A \A':
+        # \A x, y:  EnvInit(x, y)
+        # undefined SysInit
         assert not spec.sys_init, spec.sys_init
         init_option = 'ONE_SIDE_INIT'
     elif spec.qinit == '\E \E':
+        # \E x, y:  SysInit(x, y)
+        # undefined EnvInit
         assert not spec.env_init, spec.env_init
         init_option = 'ONE_SIDE_INIT'
     else:
         raise ValueError(
             'unknown option `qinit = {qinit}`.'.format(
                 qinit=spec.qinit))
+    # The option `ALL_INIT` corresponds to:
+    #   \A x, y:  EnvInit(x, y) /\ SysInit(x, y)
+    # `ONE_SIDE_INIT` is used above for this case
+    # (the difference is the presence of conjunction).
     return init_option
 
 
