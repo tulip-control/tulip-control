@@ -43,7 +43,7 @@ Use the logging module to throttle verbosity.
 """
 from __future__ import print_function
 
-from distutils.version import StrictVersion
+from pkg_resources import parse_version
 import logging
 import copy
 import os
@@ -69,7 +69,7 @@ def check_gr1c():
     except OSError:
         return False
     v = v.split()[1]
-    if StrictVersion(v) >= StrictVersion(GR1C_MIN_VERSION):
+    if parse_version(v) >= parse_version(GR1C_MIN_VERSION):
         return True
     return False
 
