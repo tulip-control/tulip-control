@@ -37,6 +37,8 @@ from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
+from networkx import MultiDiGraph
+import numpy as np
 # inline imports
 #
 # from tulip.transys.export import graph2promela
@@ -786,3 +788,164 @@ class LabeledGameGraph(GameGraph):
             'type?label': '',
             'separator': r'\\n'}
         self.dot_node_shape = {'normal': 'rectangle'}
+
+
+def _pre(graph, list_n):
+    """Find union of predecessors of nodes in graph defined by C{MultiDiGraph}.
+
+    @param graph: a graph structure corresponding to a FTS.
+    @type graph: C{networkx.MultiDiGraph}
+    @param list_n: list of nodes whose predecessors need to be returned
+    @type list_n: list of nodes in C{graph}
+    @return: set of predecessors of C{list_n}
+    @rtype: C{set}
+    """
+    pre_set = set()
+    for n in list_n:
+        pre_set = pre_set.union(graph.predecessors(n))
+    return pre_set
+
+
+def _output_fts(ts, transitions, sol):
+    """Convert the Part from C{nx.MultiDiGraph} to FTS.
+
+    The returned FTS does not contain any edge attribute in the original FTS.
+    All the transitions are assumed to be controllable.
+
+    @param ts: the input finite transition system
+    @type ts: L{FTS}
+    @param Part: the final partition
+    @type Part: C{networkx.MultiDiGraph}
+
+    @return: the bi/dual simulation abstraction, and the
+        partition of states in input ts
+    @rtype: L{FTS}, and C{dict} with keys C{ts2simu} and C{simu2ts}.
+        C{ts2simu} maps nodes from input FTS to output FTS and C{simu2ts}
+        maps the nodes of two FTS in the other direction.
+    """
+    env_actions = [
+        dict(name='env_actions',
+             values=ts.env_actions,
+             setter=True)]
+    sys_actions = [
+        dict(name='sys_actions',
+             values=ts.sys_actions,
+             setter=True)]
+    ts_simu = FTS(env_actions, sys_actions)
+    ts2simu = dict()
+    simu2ts = dict()
+    Part_hash = dict(ts2simu=ts2simu, simu2ts=simu2ts)
+    n_cells = len(sol)
+    for i in range(n_cells):
+        simu2ts[i] = sol[i]
+        for j in sol[i]:
+            if j in ts2simu:
+                ts2simu[j].append(i)
+            else:
+                ts2simu[j] = [i]
+    S = range(n_cells)
+    S0 = set()
+    for i in ts.states.initial:
+        [S0.add(j) for j in ts2simu[i]]
+    ts_simu.states.add_from(S)
+    ts_simu.states.initial.add_from(S0)
+    AP = ts.aps
+    ts_simu.atomic_propositions.add_from(AP)
+    for i in range(n_cells):
+        ts_simu.states.add(i, ap=ts.node[next(iter(sol[i]))]['ap'])
+    for i in range(n_cells):
+        for j in range(n_cells):
+            if transitions[j, i]:
+                ts_simu.transitions.add(i, j)
+    return ts_simu, Part_hash
+
+
+def simu_abstract(ts, simu_type):
+    """Create a bi/dual-simulation abstraction for a Finite Transition System.
+
+    @param ts: input finite transition system, the one you want to get
+                    its bi/dual-simulation abstraction.
+    @type ts: L{FTS}
+    @param simu_type: string 'bi'/'dual', flag used to switch b.w.
+                      bisimulation algorithm and dual-simulation algorithm.
+    @return: the bi/dual simulation, and the corresponding partition.
+    @rtype: L{FTS}, C{dict}
+
+
+    References
+    ==========
+
+    1. Wagenmaker, A. J.; Ozay, N.
+       "A Bisimulation-like Algorithm for Abstracting Control Systems."
+       54th Annual Allerton Conference on CCC 2016
+    """
+    # create MultiDiGraph instance from the input FTS
+    G = MultiDiGraph(ts)
+    # build coarsest partition
+    S0 = dict()
+    Part = MultiDiGraph()  # a graph associated with the new partition
+    n_cells = 0
+    hash_ap = dict()  # map ap to cells in Part
+    for node in G:
+        ap = repr(G.node[node]['ap'])
+        if ap not in S0:
+            S0[ap] = set()
+            hash_ap[ap] = set()
+            Part.add_node(n_cells, ap=ap, cov=S0[ap])  # hash table S0--->G
+            n_cells += 1
+        S0[ap].add(node)
+
+    sol = []
+    for ap in S0:
+        sol.append(S0[ap])
+
+    IJ = np.ones([n_cells, n_cells])
+    transitions = np.zeros([n_cells, n_cells])
+    while np.sum(IJ) > 0:
+        # get i,j from IJ matrix, i--->j
+        ind = np.nonzero(IJ)
+        i = ind[1][0]
+        j = ind[0][0]
+        IJ[j, i] = 0
+        si = sol[i]
+        sj = sol[j]
+        pre_j = _pre(G, sj)
+        if si.issubset(pre_j):
+            transitions[j, i] = 1
+        else:
+            isect = si.intersection(pre_j)
+            if isect == set():
+                continue
+            else:
+                # check if the isect has existed
+                check_isect = False
+                if simu_type == 'dual':
+                    assert len(sol) == n_cells
+                    for k in range(n_cells):
+                        if sol[k] == isect:
+                            check_isect = True
+                            break
+                if not check_isect:
+                    # assume that i != j
+                    sol.append(isect)
+                    # update transition matrix
+                    transitions = np.pad(transitions, (0, 1), 'constant')
+                    transitions[n_cells, :] = 0
+                    transitions[:, n_cells] = transitions[:, i]
+                    transitions[j, n_cells] = 1
+                    if simu_type == 'bi':
+                        sol[i] = sol[i].difference(sol[n_cells])
+                        transitions[i, :] = 0
+                        if i == j:
+                            transitions[j, n_cells] = 0
+                    # update IJ matrix
+                    IJ = np.pad(IJ, (0, 1), 'constant', constant_values=1)
+                    if simu_type == 'bi':
+                        IJ[i, :] = 1
+                        IJ[:, i] = 1
+                    n_cells += 1
+                else:
+                    transitions[j, k] = 1
+        IJ = ((IJ - transitions) > 0).astype(int)
+    [ts_simu, part_hash] = _output_fts(ts, transitions, sol)
+    return ts_simu, part_hash

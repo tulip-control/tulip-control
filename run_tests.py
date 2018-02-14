@@ -195,7 +195,8 @@ def main():
         hybrid = [
             'abstract_test',
             'hybrid_test',
-            'prop2part_test']
+            'prop2part_test',
+            'transys_simu_abstract_test']
         if args.testfamily.lower() == 'base':
             testfiles = base
         elif args.testfamily.lower() == 'hybrid':
