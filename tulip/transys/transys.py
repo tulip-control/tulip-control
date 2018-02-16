@@ -795,7 +795,8 @@ def simu_abstract(ts,simu_type):
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
     
     @param ts: L{FTS}
-    @param simu_type: string 'bi'/'dual', flag used to switch b.w. bisimu and dual-simu
+    @param simu_type: string 'bi'/'dual', flag used to switch b.w. bisimu and 
+                      dual-simu
     @return: the bi/dual simulation FTS L{FTS}, and the corresponding partition
     
     References
@@ -811,18 +812,25 @@ def simu_abstract(ts,simu_type):
         @param list_n: list of nodes
         @return: set of predecessors of C{list_n}
         """
-        #The simplest pre is implemented. Modify this fun to ContPre if necessary.
+        # The simplest pre is implemented. Modify this fun to ContPre if
+        #  necessary.
         pre_set = set()
         for n in list_n:
             pre_set = pre_set.union(graph.predecessors(n))
         return pre_set
     def output_FTS(ts,Part):
-        """ Convert the Part from nx.MultiDiGraph to FTS
+        """ Convert the Part from nx.MultiDiGraph to FTS.
         
-        @param ts: original FTS L{FTS}
+        The returned FTS doesn't contain any edge attribute in original FTS. 
+        All the transitions are assumed to be controllable.
+        
+        @param ts: input FTS L{FTS}
         @param Part: the final partition
         
-        @return:  the bi/dual simulation FTS L{FTS}, and the corresponding partition
+        @return:  the bi/dual simulation abstraction L{FTS}, and the 
+        partition, saved as a C{dict} with two keys: C{ts2simu} and C{simu2ts}.
+        C{ts2simu} maps nodes in input FTS to output FTS and C{simu2ts} maps
+        the other direction.
         """
         env_actions = [
             {'name': 'env_actions',
@@ -855,7 +863,7 @@ def simu_abstract(ts,simu_type):
             L.append((i,eval(Part.node[i]['ap'])))
     
         Act = None
-s
+        
         trans=[]
         
         for i,j in Part.edges_iter():
@@ -863,12 +871,13 @@ s
             
         ts_simu = tuple2fts(S,S0,AP,L,Act,trans,name=simu_type,prepend_str='')
         return ts_simu, Part_hash
+    
     # recover the FTS to MultiDiGraph
     G = MultiDiGraph(ts)
     
     # build coarsest partition (graph + hash table)
     S0 = dict()
-    Part = nx.MultiDiGraph() # a graph associated with the new partition
+    Part = MultiDiGraph() # a graph associated with the new partition
     num_cell = 0
     
     for node in G:
@@ -928,6 +937,6 @@ s
 #        print 'num of cell is', num_cell
                     
     # construct new FTS
-    [ts_simu, Part_hash] =output_FTS(ts,Part)
+    [ts_simu, part_hash] =output_FTS(ts,Part)
     
-    return ts_simu, Part_hash
+    return ts_simu, part_hash
