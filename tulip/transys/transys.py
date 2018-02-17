@@ -803,7 +803,7 @@ def simu_abstract(ts,simu_type):
     ==========
     1. Wagenmaker, A. J.; Ozay, N.
     A Bisimulation-like Algorithm for Abstracting Control Systems. 
-    54th Annual Allerton Conference on CCC 2016, 569–576.
+    54th Annual Allerton Conference on CCC 2016
     """
     def pre(graph,list_n):
         """Predecessor of a set of node in original FTS
@@ -854,22 +854,24 @@ def simu_abstract(ts,simu_type):
         
         S = Part.nodes()
         S0 = set()
+        
         for i in ts.states.initial:
             [S0.add(j) for j in ts2simu[i]]
+        
+        ts_simu.states.add_from(S)
+        ts_simu.states.initial.add_from(S0)
+        
         AP = ts.aps
         
-        L = []
-        for i in Part:
-            L.append((i,eval(Part.node[i]['ap'])))
-    
-        Act = None
+        ts_simu.atomic_propositions.add_from(AP)
         
-        trans=[]
+        for i in Part:
+            ts_simu.states.add(i,ap=eval(Part.node[i]['ap']))
         
         for i,j in Part.edges_iter():
-            trans.append((i,j))    
-            
-        ts_simu = tuple2fts(S,S0,AP,L,Act,trans,name=simu_type,prepend_str='')
+            ts_simu.transitions.add(i,j)
+        
+        #ts_simu = tuple2fts(S,S0,AP,L,Act,trans,name=simu_type,prepend_str='')
         return ts_simu, Part_hash
     
     # recover the FTS to MultiDiGraph
