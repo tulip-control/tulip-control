@@ -41,6 +41,7 @@ uncertainty = 0.01
 cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
 # Continuous dynamics
+# (continuous-state, discrete-time)
 A = np.array([[1.0, 0.], [ 0., 1.0]])
 B = np.array([[0.1, 0.], [ 0., 0.1]])
 E = np.array([[1,0], [0,1]])
