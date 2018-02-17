@@ -794,10 +794,13 @@ class LabeledGameGraph(GameGraph):
 def simu_abstract(ts,simu_type):
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
     
-    @param ts: L{FTS}
-    @param simu_type: string 'bi'/'dual', flag used to switch b.w. bisimu and 
-                      dual-simu
-    @return: the bi/dual simulation FTS L{FTS}, and the corresponding partition
+    @param ts: input finite transition system, the one you want to get 
+                    its bi/dual-simulation abstraction.
+    @type ts: L{FTS}
+    @param simu_type: string 'bi'/'dual', flag used to switch b.w. 
+                      bisimulation algorithm and dual-simulation algorithm.
+    @return: the bi/dual simulation, and the corresponding partition.
+    @rtype: L{FTS}, C{dict}
     
     References
     ==========
@@ -806,11 +809,14 @@ def simu_abstract(ts,simu_type):
     54th Annual Allerton Conference on CCC 2016
     """
     def pre(graph,list_n):
-        """Predecessor of a set of node in original FTS
+        """Find union of predecessors of nodes in a graph or FTS.
         
-        @param graph: graph defined in C{MultiDiGraph}
-        @param list_n: list of nodes
+        @param graph: a graph structure corresponding to a FTS.
+        @type graph: C{networkx.MultiDiGraph}
+        @param list_n: list of nodes whose pre's need to be returned
+        @type list_n: list of nodes in C{graph}
         @return: set of predecessors of C{list_n}
+        @rtype: C{set}
         """
         # The simplest pre is implemented. Modify this fun to ContPre if
         #  necessary.
@@ -824,13 +830,16 @@ def simu_abstract(ts,simu_type):
         The returned FTS doesn't contain any edge attribute in original FTS. 
         All the transitions are assumed to be controllable.
         
-        @param ts: input FTS L{FTS}
+        @param ts: the input finite transition system
+        @type ts: L{FTS}
         @param Part: the final partition
+        @type Part: C{networkx.MultiDiGraph}
         
-        @return:  the bi/dual simulation abstraction L{FTS}, and the 
-        partition, saved as a C{dict} with two keys: C{ts2simu} and C{simu2ts}.
-        C{ts2simu} maps nodes in input FTS to output FTS and C{simu2ts} maps
-        the other direction.
+        @return:  the bi/dual simulation abstraction, and the 
+        partition of states in input ts
+        @rtype: L{FTS}, and C{dict} with keys C{ts2simu} and C{simu2ts}.
+        C{ts2simu} maps nodes from input FTS to output FTS and C{simu2ts} maps
+        the nodes of two FTS in the other direction.
         """
         env_actions = [
             {'name': 'env_actions',
