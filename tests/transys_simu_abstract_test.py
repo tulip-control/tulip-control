@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 from tulip.transys.transys import FTS, simu_abstract
 
-def build_test_FTS():
+def build_FTS():
     # build test FTS
     ts = FTS()
     ts.atomic_propositions.add_from({'a','b','c','d'})
@@ -64,7 +64,7 @@ def check_simulation(ts1,ts2,L12,L21):
 
 def simu_abstract_test():
   
-    ts = build_test_FTS()
+    ts = build_FTS()
     [bi_simu,bi_part] = simu_abstract(ts,'bi')
     [dual_simu,dual_part] = simu_abstract(ts,'dual')
     
