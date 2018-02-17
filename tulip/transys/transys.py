@@ -883,7 +883,7 @@ def simu_abstract(ts,simu_type):
         #ts_simu = tuple2fts(S,S0,AP,L,Act,trans,name=simu_type,prepend_str='')
         return ts_simu, Part_hash
     
-    # recover the FTS to MultiDiGraph
+    # create MultiDiGraph instance from the input FTS
     G = MultiDiGraph(ts)
     
     # build coarsest partition (graph + hash table)
