@@ -934,7 +934,13 @@ def simu_abstract(ts,simu_type):
                     Part.add_node(num_cell,ap=Part.node[j]['ap'],cov=cov_j)
                 elif (simu_type=='bi'):
                     Part.add_node(num_cell,ap=Part.node[j]['ap'],cov=cov_j.difference(pre_i))
-                                  
+                
+                # if j--->j exists, then num_cell--->num_cell exists, except
+                # the case that i == j, which shows that num_cell--->num_cell 
+                # is a fake transition.
+                if Part.has_successor(j,j) and (j != i):
+                    Part.add_edge(num_cell,num_cell) 
+                    
                 [Part.add_edge(k,num_cell) for k in Part.predecessors_iter(j)]
                 [Part.add_edge(num_cell,k) for k in Part.successors_iter(j)]
 #                Part.add_edges_from([(j,num_cell),(num_cell,j)])  
