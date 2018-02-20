@@ -38,7 +38,10 @@ from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
 from networkx import MultiDiGraph
-from Queue import Queue
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue  # Python 2
 
 # inline imports
 #
