@@ -842,7 +842,7 @@ def _output_fts(ts,Part):
     for i in Part:
         simu2ts[i] = Part.node[i]['cov']
         for j in Part.node[i]['cov']:
-            if(ts2simu.has_key(j)):
+            if j in ts2simu:
                 ts2simu[j].append(i)
             else:
                 ts2simu[j]=[i]
@@ -897,7 +897,7 @@ def simu_abstract(ts,simu_type):
     
     for node in G:
         ap = repr(G.node[node]['ap'])
-        if not S0.has_key(ap):
+        if ap not in S0:
             S0[ap]=set()
             Part.add_node(num_cell,ap=ap,cov=S0[ap]) # hash table S0--->G
             num_cell += 1
