@@ -38,8 +38,10 @@ from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
 from networkx import MultiDiGraph
-from Queue import Queue
-
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 # inline imports
 #
 # from tulip.transys.export import graph2promela
@@ -839,7 +841,7 @@ def _output_fts(ts,Part):
     for i in Part:
         simu2ts[i] = Part.node[i]['cov']
         for j in Part.node[i]['cov']:
-            if(ts2simu.has_key(j)):
+            if(j in ts2simu.keys()):
                 ts2simu[j].append(i)
             else:
                 ts2simu[j]=[i]
@@ -894,7 +896,7 @@ def simu_abstract(ts,simu_type):
     
     for node in G:
         ap = repr(G.node[node]['ap'])
-        if not S0.has_key(ap):
+        if not (ap in S0.keys()):
             S0[ap]=set()
             Part.add_node(num_cell,ap=ap,cov=S0[ap]) # hash table S0--->G
             num_cell += 1
@@ -903,6 +905,7 @@ def simu_abstract(ts,simu_type):
     
     # build a queue of node, used for the while loop
     queue = Queue()
+    lookup = {}
     # add edges in the coarsest partition, and add nodes in the queue
     for i in Part:
         pre_i = _pre(G,Part.node[i]['cov'])    
@@ -912,11 +915,13 @@ def simu_abstract(ts,simu_type):
                 Part.add_edge(j,i)
                 
         queue.put(i)
-           
+        lookup[i]=True
+        
     # bisimulation while loop
     while not queue.empty():# queue is empty
         # pop a node from the queue
         i = queue.get()
+        lookup[i] = False
         # calculuate its pre in G
         pre_i = _pre(G,Part.node[i]['cov'])
         # intersect the pre of node with states of other nodes
@@ -946,8 +951,12 @@ def simu_abstract(ts,simu_type):
 #                Part.add_edges_from([(j,num_cell),(num_cell,j)])  
                 Part.remove_edge(num_cell,i) # remove wrong edge in coarser part
                 # add effected cells into the queue
-                queue.put(j)
+                if(not lookup[j]):
+                    queue.put(j)
+                    lookup[j] = True
+                    
                 queue.put(num_cell)
+                lookup[num_cell] = True
                 num_cell += 1
                 if(i==j):
                     break
