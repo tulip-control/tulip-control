@@ -795,7 +795,7 @@ class LabeledGameGraph(GameGraph):
 
 def _pre(graph,list_n):
     """Find union of predecessors of nodes in a graph defined by c{MultiDiGraph}.
-    
+
     @param graph: a graph structure corresponding to a FTS.
     @type graph: C{networkx.MultiDiGraph}
     @param list_n: list of nodes whose pre's need to be returned
@@ -812,16 +812,16 @@ def _pre(graph,list_n):
 
 def _output_fts(ts,Part):
     """ Convert the Part from nx.MultiDiGraph to FTS.
-    
-    The returned FTS doesn't contain any edge attribute in original FTS. 
+
+    The returned FTS doesn't contain any edge attribute in original FTS.
     All the transitions are assumed to be controllable.
-    
+
     @param ts: the input finite transition system
     @type ts: L{FTS}
     @param Part: the final partition
     @type Part: C{networkx.MultiDiGraph}
-    
-    @return:  the bi/dual simulation abstraction, and the 
+
+    @return:  the bi/dual simulation abstraction, and the
     partition of states in input ts
     @rtype: L{FTS}, and C{dict} with keys C{ts2simu} and C{simu2ts}.
     C{ts2simu} maps nodes from input FTS to output FTS and C{simu2ts} maps
@@ -846,76 +846,76 @@ def _output_fts(ts,Part):
                 ts2simu[j].append(i)
             else:
                 ts2simu[j]=[i]
-    
+
     S = Part.nodes()
     S0 = set()
-    
+
     for i in ts.states.initial:
         [S0.add(j) for j in ts2simu[i]]
-    
+
     ts_simu.states.add_from(S)
     ts_simu.states.initial.add_from(S0)
-    
+
     AP = ts.aps
-    
+
     ts_simu.atomic_propositions.add_from(AP)
-    
+
     for i in Part:
         ts_simu.states.add(i,ap=eval(Part.node[i]['ap']))
-    
+
     for i,j in Part.edges_iter():
         ts_simu.transitions.add(i,j)
-    
+
     #ts_simu = tuple2fts(S,S0,AP,L,Act,trans,name=simu_type,prepend_str='')
     return ts_simu, Part_hash
-    
+
 def simu_abstract(ts,simu_type):
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
-    
-    @param ts: input finite transition system, the one you want to get 
+
+    @param ts: input finite transition system, the one you want to get
                     its bi/dual-simulation abstraction.
     @type ts: L{FTS}
-    @param simu_type: string 'bi'/'dual', flag used to switch b.w. 
+    @param simu_type: string 'bi'/'dual', flag used to switch b.w.
                       bisimulation algorithm and dual-simulation algorithm.
     @return: the bi/dual simulation, and the corresponding partition.
     @rtype: L{FTS}, C{dict}
-    
+
     References
     ==========
     1. Wagenmaker, A. J.; Ozay, N.
-    A Bisimulation-like Algorithm for Abstracting Control Systems. 
+    A Bisimulation-like Algorithm for Abstracting Control Systems.
     54th Annual Allerton Conference on CCC 2016
     """
-    
+
     # create MultiDiGraph instance from the input FTS
     G = MultiDiGraph(ts)
-    
+
     # build coarsest partition (graph + hash table)
     S0 = dict()
     Part = MultiDiGraph() # a graph associated with the new partition
     num_cell = 0
-    
+
     for node in G:
         ap = repr(G.node[node]['ap'])
         if ap not in S0:
             S0[ap]=set()
             Part.add_node(num_cell,ap=ap,cov=S0[ap]) # hash table S0--->G
             num_cell += 1
-            
+
         S0[ap].add(node)
-    
+
     # build a queue of node, used for the while loop
     queue = Queue()
     # add edges in the coarsest partition, and add nodes in the queue
     for i in Part:
-        pre_i = _pre(G,Part.node[i]['cov'])    
+        pre_i = _pre(G,Part.node[i]['cov'])
         for j in Part:
             cov_j = Part.node[j]['cov']
             if pre_i.intersection(cov_j)!=set():
                 Part.add_edge(j,i)
-                
+
         queue.put(i)
-           
+
     # bisimulation while loop
     while not queue.empty():# queue is empty
         # pop a node from the queue
@@ -925,28 +925,28 @@ def simu_abstract(ts,simu_type):
         # intersect the pre of node with states of other nodes
         for j in Part.predecessors(i):
             cov_j = Part.node[j]['cov']
-            
+
             if pre_i.intersection(cov_j)==set():
                 Part.remove_edge(j,i)
                 continue
-            
+
             if not cov_j.issubset(pre_i):
-                #  add new node and update the graph 
+                #  add new node and update the graph
                 Part.node[j]['cov'] = cov_j.intersection(pre_i)
                 if(simu_type=='dual'):
                     Part.add_node(num_cell,ap=Part.node[j]['ap'],cov=cov_j)
                 elif (simu_type=='bi'):
                     Part.add_node(num_cell,ap=Part.node[j]['ap'],cov=cov_j.difference(pre_i))
-                
+
                 # if j--->j exists, then num_cell--->num_cell exists, except
-                # the case that i == j, which shows that num_cell--->num_cell 
+                # the case that i == j, which shows that num_cell--->num_cell
                 # is a fake transition.
                 if Part.has_successor(j,j) and (j != i):
-                    Part.add_edge(num_cell,num_cell) 
-                    
+                    Part.add_edge(num_cell,num_cell)
+
                 [Part.add_edge(k,num_cell) for k in Part.predecessors_iter(j)]
                 [Part.add_edge(num_cell,k) for k in Part.successors_iter(j)]
-#                Part.add_edges_from([(j,num_cell),(num_cell,j)])  
+#                Part.add_edges_from([(j,num_cell),(num_cell,j)])
                 Part.remove_edge(num_cell,i) # remove wrong edge in coarser part
                 # add effected cells into the queue
                 queue.put(j)
@@ -956,8 +956,8 @@ def simu_abstract(ts,simu_type):
                     break
 #        print 'the queue size is', queue.qsize()
 #        print 'num of cell is', num_cell
-                    
+
     # construct new FTS
     [ts_simu, part_hash] = _output_fts(ts,Part)
-    
+
     return ts_simu, part_hash
