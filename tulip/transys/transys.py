@@ -895,6 +895,7 @@ def simu_abstract(ts, simu_type):
         S0[ap].add(node)
     # build a queue of node, used for the while loop
     queue = Queue()
+    lookup = dict()
     # add edges in the coarsest partition, and add nodes in the queue
     for i in Part:
         pre_i = _pre(G, Part.node[i]['cov'])
@@ -903,10 +904,12 @@ def simu_abstract(ts, simu_type):
             if pre_i.intersection(cov_j) != set():
                 Part.add_edge(j, i)
         queue.put(i)
+        lookup[i] = True
     # bisimulation loop
     while not queue.empty():
         # pop a node from the queue
         i = queue.get()
+        lookup[i] = False
         # calculuate its pre in G
         pre_i = _pre(G, Part.node[i]['cov'])
         # intersect the pre of node with states of other nodes
@@ -934,9 +937,13 @@ def simu_abstract(ts, simu_type):
                 [Part.add_edge(num_cell, k) for k in Part.successors_iter(j)]
                 # remove wrong edge in coarser part
                 Part.remove_edge(num_cell, i)
-                # add effected cells into the queue
+                # add affected cells into the queue
+                if not lookup[j]:
+                    queue.put(j)
+                    lookup[j] = True
                 queue.put(j)
                 queue.put(num_cell)
+                lookup[num_cell] = True
                 num_cell += 1
                 if i == j:
                     break
